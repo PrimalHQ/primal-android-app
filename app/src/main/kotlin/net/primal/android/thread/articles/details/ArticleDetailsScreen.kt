@@ -122,10 +122,8 @@ import net.primal.domain.nostr.utils.takeAsNoteHexIdOrNull
 @Composable
 fun ArticleDetailsScreen(
     viewModel: ArticleDetailsViewModel,
-    onClose: () -> Unit,
-    onArticleHashtagClick: (hashtag: String) -> Unit,
+    callbacks: ArticleDetailsContract.ScreenCallbacks,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
 ) {
     val detailsState by viewModel.state.collectAsState()
     DisposableLifecycleObserverEffect(viewModel) {
@@ -141,7 +139,7 @@ fun ArticleDetailsScreen(
     LaunchedEffect(articleViewModel, articleViewModel.effects) {
         articleViewModel.effects.collect {
             when (it) {
-                ArticleContract.SideEffect.ArticleDeleted -> onClose()
+                ArticleContract.SideEffect.ArticleDeleted -> callbacks.onClose()
             }
         }
     }
@@ -171,10 +169,10 @@ fun ArticleDetailsScreen(
         articleState = articleState,
         detailsEventPublisher = viewModel::setEvent,
         articleEventPublisher = articleViewModel::setEvent,
-        onClose = onClose,
-        onArticleHashtagClick = onArticleHashtagClick,
+        onClose = callbacks.onClose,
+        onArticleHashtagClick = callbacks.onArticleHashtagClick,
         noteCallbacks = noteCallbacks,
-        onGoToWallet = onGoToWallet,
+        onGoToWallet = callbacks.onGoToWallet,
     )
 }
 

@@ -36,11 +36,7 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun WelcomeScreen(
-    onSignInClick: () -> Unit,
-    onCreateAccountClick: () -> Unit,
-    onRedeemCodeClick: () -> Unit,
-) {
+fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
     ColumnWithBackground(
         modifier = Modifier.semantics { testTagsAsResourceId = true },
         backgroundPainter = painterResource(id = R.drawable.onboarding_spot1),
@@ -86,21 +82,21 @@ fun WelcomeScreen(
             OnboardingButton(
                 modifier = Modifier.testTag("welcomeSignInButton"),
                 text = stringResource(id = R.string.welcome_sign_in_button_title),
-                onClick = onSignInClick,
+                onClick = callbacks.onSignInClick,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             OnboardingButton(
                 text = stringResource(id = R.string.welcome_create_account_button_title),
-                onClick = onCreateAccountClick,
+                onClick = callbacks.onCreateAccountClick,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             OnboardingButton(
                 text = stringResource(id = R.string.welcome_redeem_code_button_title),
-                onClick = onRedeemCodeClick,
+                onClick = callbacks.onRedeemCodeClick,
             )
 
             ToSAndPrivacyPolicyText(
@@ -124,9 +120,11 @@ fun PreviewWelcomeScreen() {
         primalTheme = PrimalTheme.Sunset,
     ) {
         WelcomeScreen(
-            onSignInClick = {},
-            onCreateAccountClick = {},
-            onRedeemCodeClick = {},
+            callbacks = WelcomeContract.ScreenCallbacks(
+                onSignInClick = {},
+                onCreateAccountClick = {},
+                onRedeemCodeClick = {},
+            ),
         )
     }
 }

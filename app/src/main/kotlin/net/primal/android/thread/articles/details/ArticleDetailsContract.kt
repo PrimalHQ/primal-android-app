@@ -65,4 +65,10 @@ interface ArticleDetailsContract {
             val isCommentRequested: Boolean = false,
         ) : SideEffect()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onArticleHashtagClick: (hashtag: String) -> Unit,
+        val onGoToWallet: () -> Unit,
+    )
 }

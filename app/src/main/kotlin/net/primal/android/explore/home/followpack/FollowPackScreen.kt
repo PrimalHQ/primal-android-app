@@ -64,19 +64,12 @@ import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.links.CdnImage
 
 @Composable
-fun FollowPackScreen(
-    onClose: () -> Unit,
-    onShowFeedClick: (feed: String, title: String, description: String) -> Unit,
-    onProfileClick: (String) -> Unit,
-    viewModel: FollowPackViewModel,
-) {
+fun FollowPackScreen(viewModel: FollowPackViewModel, callbacks: FollowPackContract.ScreenCallbacks) {
     val uiState = viewModel.state.collectAsState()
 
     FollowPackScreen(
-        onClose = onClose,
         state = uiState.value,
-        onShowFeedClick = onShowFeedClick,
-        onProfileClick = onProfileClick,
+        callbacks = callbacks,
         eventPublisher = viewModel::setEvent,
     )
 }
@@ -84,10 +77,8 @@ fun FollowPackScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun FollowPackScreen(
-    onClose: () -> Unit,
-    onShowFeedClick: (feed: String, title: String, description: String) -> Unit,
-    onProfileClick: (String) -> Unit,
     state: FollowPackContract.UiState,
+    callbacks: FollowPackContract.ScreenCallbacks,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
@@ -117,7 +108,7 @@ private fun FollowPackScreen(
             FollowPackTopAppBar(
                 isTitleVisible = !isTitleVisible.value,
                 title = state.followPack?.title ?: "",
-                onClose = onClose,
+                onClose = callbacks.onClose,
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -127,11 +118,11 @@ private fun FollowPackScreen(
                 state = lazyListState,
                 modifier = Modifier.padding(paddingValues),
             ) {
-                followPackInfo(followPack = state.followPack, onProfileClick = onProfileClick)
+                followPackInfo(followPack = state.followPack, onProfileClick = callbacks.onProfileClick)
                 actionButtonsRow(
                     onShowFeedClick = {
                         ifNotNull(state.feedSpec, state.feedDescription) { feedSpec, description ->
-                            onShowFeedClick(feedSpec, state.followPack.title, description)
+                            callbacks.onShowFeedClick(feedSpec, state.followPack.title, description)
                         }
                     },
                     isFollowAllEnabled = state.followPack.profiles.any { !state.following.contains(it.profileId) },
@@ -140,7 +131,7 @@ private fun FollowPackScreen(
                     },
                 )
                 followPackProfiles(
-                    onProfileClick = onProfileClick,
+                    onProfileClick = callbacks.onProfileClick,
                     profiles = state.followPack.profiles,
                     onFollowUnfollowClick = { profileId, following ->
                         if (following) {
@@ -395,10 +386,6 @@ private fun LazyListScope.followPackTitleDescription(
 private fun FollowPackScreenPreview() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         FollowPackScreen(
-            eventPublisher = {},
-            onShowFeedClick = { _, _, _ -> },
-            onProfileClick = {},
-            onClose = {},
             state = FollowPackContract.UiState(
                 loading = false,
                 followPack =
@@ -465,6 +452,12 @@ private fun FollowPackScreenPreview() {
                     updatedAt = Instant.now(),
                     authorId = "profileId",
                 ),
+            ),
+            eventPublisher = {},
+            callbacks = FollowPackContract.ScreenCallbacks(
+                onClose = {},
+                onShowFeedClick = { _, _, _ -> },
+                onProfileClick = {},
             ),
         )
     }

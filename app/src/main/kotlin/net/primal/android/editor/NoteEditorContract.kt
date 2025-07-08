@@ -95,4 +95,8 @@ interface NoteEditorContract {
             override val data: String,
         ) : ReferencedUri<String>
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+    )
 }

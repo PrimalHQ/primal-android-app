@@ -42,26 +42,19 @@ import net.primal.android.profile.qr.ProfileQrCodeContract
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.scanner.QrCodeScanner
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.domain.DraftTx
+import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun ProfileQrCodeViewerScreen(
-    viewModel: ProfileQrCodeViewModel,
-    onClose: () -> Unit,
-    onProfileScan: (profileId: String) -> Unit,
-    onNoteScan: (noteId: String) -> Unit,
-    onDraftTxScan: (draftTx: DraftTx) -> Unit,
-    onPromoCodeScan: (promoCode: String) -> Unit,
-) {
+fun ProfileQrCodeViewerScreen(viewModel: ProfileQrCodeViewModel, callbacks: ProfileQrCodeContract.ScreenCallbacks) {
     val uiState = viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel, onProfileScan) {
+    LaunchedEffect(viewModel, callbacks) {
         viewModel.effects.collect {
             when (it) {
-                is ProfileQrCodeContract.SideEffect.NostrProfileDetected -> onProfileScan(it.profileId)
-                is ProfileQrCodeContract.SideEffect.NostrNoteDetected -> onNoteScan(it.noteId)
-                is ProfileQrCodeContract.SideEffect.WalletTxDetected -> onDraftTxScan(it.draftTx)
-                is ProfileQrCodeContract.SideEffect.PromoCodeDetected -> onPromoCodeScan(it.promoCode)
+                is ProfileQrCodeContract.SideEffect.NostrProfileDetected -> callbacks.onProfileScan(it.profileId)
+                is ProfileQrCodeContract.SideEffect.NostrNoteDetected -> callbacks.onNoteScan(it.noteId)
+                is ProfileQrCodeContract.SideEffect.WalletTxDetected -> callbacks.onDraftTxScan(it.draftTx)
+                is ProfileQrCodeContract.SideEffect.PromoCodeDetected -> callbacks.onPromoCodeScan(it.promoCode)
             }
         }
     }
@@ -69,7 +62,7 @@ fun ProfileQrCodeViewerScreen(
     ProfileQrCodeViewerScreen(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
-        onClose = onClose,
+        callbacks = callbacks,
     )
 }
 
@@ -78,12 +71,12 @@ fun ProfileQrCodeViewerScreen(
 private fun ProfileQrCodeViewerScreen(
     state: ProfileQrCodeContract.UiState,
     eventPublisher: (ProfileQrCodeContract.UiEvent) -> Unit,
-    onClose: () -> Unit,
+    callbacks: ProfileQrCodeContract.ScreenCallbacks,
 ) {
     var isClosing by remember { mutableStateOf(false) }
     BackHandler {
         isClosing = true
-        onClose()
+        callbacks.onClose()
     }
     var qrCodeMode by remember { mutableStateOf(QrCodeMode.Viewer) }
     ColumnWithBackground(backgroundPainter = painterResource(id = R.drawable.profile_qrcode_background)) {
@@ -97,7 +90,7 @@ private fun ProfileQrCodeViewerScreen(
                     navigationIconTintColor = Color.White,
                     onNavigationIconClick = {
                         isClosing = true
-                        onClose()
+                        callbacks.onClose()
                     },
                     showDivider = false,
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
@@ -217,7 +210,13 @@ private fun PreviewProfileQrCodeViewerScreen() {
                     ),
                 ),
                 eventPublisher = {},
-                onClose = {},
+                callbacks = ProfileQrCodeContract.ScreenCallbacks(
+                    onClose = {},
+                    onProfileScan = {},
+                    onNoteScan = {},
+                    onDraftTxScan = {},
+                    onPromoCodeScan = {},
+                ),
             )
         }
     }

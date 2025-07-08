@@ -62,4 +62,8 @@ interface LegendContributeContract {
         OnChainBitcoin,
         BitcoinLightning,
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+    )
 }

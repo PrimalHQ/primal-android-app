@@ -65,14 +65,11 @@ import net.primal.android.wallet.zaps.canZap
 @Composable
 fun NotificationsScreen(
     viewModel: NotificationsViewModel,
-    onSearchClick: () -> Unit,
-    onGoToWallet: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
-    onNewPostClick: () -> Unit,
+    callbacks: NotificationsContract.ScreenCallbacks,
 ) {
     val noteViewModel = hiltViewModel<NoteViewModel, NoteViewModel.Factory> { it.create() }
 
@@ -84,7 +81,6 @@ fun NotificationsScreen(
             Lifecycle.Event.ON_STOP -> viewModel.setEvent(
                 NotificationsContract.UiEvent.NotificationsSeen,
             )
-
             else -> Unit
         }
     }
@@ -92,15 +88,12 @@ fun NotificationsScreen(
     NotificationsScreen(
         state = uiState.value,
         noteState = noteState.value,
-        onSearchClick = onSearchClick,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
-        onGoToWallet = onGoToWallet,
         noteCallbacks = noteCallbacks,
         noteEventPublisher = noteViewModel::setEvent,
         accountSwitcherCallbacks = accountSwitcherCallbacks,
-        onNewPostClick = onNewPostClick,
+        callbacks = callbacks,
     )
 }
 
@@ -110,14 +103,11 @@ fun NotificationsScreen(
     state: NotificationsContract.UiState,
     noteState: NoteContract.UiState,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
-    onSearchClick: () -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
     noteEventPublisher: (NoteContract.UiEvent) -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
-    onNewPostClick: () -> Unit,
+    callbacks: NotificationsContract.ScreenCallbacks,
 ) {
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
@@ -166,7 +156,7 @@ fun NotificationsScreen(
         accountSwitcherCallbacks = accountSwitcherCallbacks,
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
+        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topAppBar = {
@@ -183,7 +173,7 @@ fun NotificationsScreen(
                 actions = {
                     AppBarIcon(
                         icon = PrimalIcons.Search,
-                        onClick = onSearchClick,
+                        onClick = callbacks.onSearchClick,
                         appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
                     )
                 },
@@ -199,7 +189,7 @@ fun NotificationsScreen(
                 seenPagingItems = seenNotificationsPagingItems,
                 paddingValues = paddingValues,
                 listState = notificationsListState,
-                onGoToWallet = onGoToWallet,
+                onGoToWallet = callbacks.onGoToWallet,
                 onPostLikeClick = {
                     noteEventPublisher(
                         NoteContract.UiEvent.PostLikeAction(
@@ -239,7 +229,7 @@ fun NotificationsScreen(
             )
         },
         floatingActionButton = {
-            NewPostFloatingActionButton(onNewPostClick = onNewPostClick)
+            NewPostFloatingActionButton(onNewPostClick = callbacks.onNewPostClick)
         },
     )
 }

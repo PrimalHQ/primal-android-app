@@ -24,17 +24,12 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun OnboardingScreen(
-    viewModel: OnboardingViewModel,
-    onClose: () -> Unit,
-    onOnboarded: () -> Unit,
-    onActivateWallet: () -> Unit,
-) {
+fun OnboardingScreen(viewModel: OnboardingViewModel, callbacks: OnboardingContract.ScreenCallbacks) {
     val uiState = viewModel.state.collectAsState()
 
     fun handleBackEvent() {
         when (uiState.value.currentStep) {
-            OnboardingStep.Details -> onClose()
+            OnboardingStep.Details -> callbacks.onClose()
             else -> viewModel.setEvent(OnboardingContract.UiEvent.RequestPreviousStep)
         }
     }
@@ -45,8 +40,8 @@ fun OnboardingScreen(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
         onBack = { handleBackEvent() },
-        onOnboarded = onOnboarded,
-        onActivateWallet = onActivateWallet,
+        onOnboarded = callbacks.onOnboarded,
+        onActivateWallet = callbacks.onActivateWallet,
     )
 }
 

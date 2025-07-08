@@ -33,27 +33,22 @@ import net.primal.android.redeem.ui.RedeemEnterCodeStage
 import net.primal.android.redeem.ui.RedeemScanCodeStage
 
 @Composable
-fun RedeemCodeScreen(
-    onClose: () -> Unit,
-    navigateToOnboarding: (String) -> Unit,
-    navigateToWalletOnboarding: (String) -> Unit,
-    viewModel: RedeemCodeViewModel,
-) {
+fun RedeemCodeScreen(viewModel: RedeemCodeViewModel, callbacks: RedeemCodeContract.ScreenCallbacks) {
     val uiState = viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect {
             when (it) {
-                RedeemCodeContract.SideEffect.PromoCodeApplied -> onClose()
+                RedeemCodeContract.SideEffect.PromoCodeApplied -> callbacks.onClose()
             }
         }
     }
 
     RedeemCodeScreen(
-        onClose = onClose,
+        onClose = callbacks.onClose,
         state = uiState.value,
-        navigateToOnboarding = navigateToOnboarding,
-        navigateToWalletOnboarding = navigateToWalletOnboarding,
+        navigateToOnboarding = callbacks.navigateToOnboarding,
+        navigateToWalletOnboarding = callbacks.navigateToWalletOnboarding,
         eventPublisher = viewModel::setEvent,
     )
 }

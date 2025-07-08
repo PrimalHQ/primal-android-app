@@ -19,4 +19,10 @@ interface PremiumManageContract {
         data object LegendaryProfileCustomization : ManageDestination()
         data object BecomeALegend : ManageDestination()
     }
+
+    data class ScreenCallbacks(
+        val onFAQClick: () -> Unit,
+        val onDestination: (ManageDestination) -> Unit,
+        val onClose: () -> Unit,
+    )
 }

@@ -43,18 +43,14 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun LegendLeaderboardScreen(
     viewModel: LegendLeaderboardViewModel,
-    onClose: () -> Unit,
-    onProfileClick: (String) -> Unit,
-    onAboutLegendsClick: () -> Unit,
+    callbacks: LegendLeaderboardContract.ScreenCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
     LegendLeaderboardScreen(
         state = uiState.value,
         eventPublisher = viewModel::setEvent,
-        onClose = onClose,
-        onProfileClick = onProfileClick,
-        onAboutLegendsClick = onAboutLegendsClick,
+        callbacks = callbacks,
     )
 }
 
@@ -63,9 +59,7 @@ fun LegendLeaderboardScreen(
 private fun LegendLeaderboardScreen(
     state: LegendLeaderboardContract.UiState,
     eventPublisher: (LegendLeaderboardContract.UiEvent) -> Unit,
-    onClose: () -> Unit,
-    onAboutLegendsClick: () -> Unit,
-    onProfileClick: (String) -> Unit,
+    callbacks: LegendLeaderboardContract.ScreenCallbacks,
 ) {
     val pagerState = rememberPagerState { PAGE_COUNT }
     LaunchedEffect(pagerState) {
@@ -77,10 +71,10 @@ private fun LegendLeaderboardScreen(
     Scaffold(
         topBar = {
             LeaderboardTopAppBar(
-                onBackClick = onClose,
+                onBackClick = callbacks.onClose,
                 pagerState = pagerState,
                 isActiveAccountLegend = state.isActiveAccountLegend,
-                onAboutLegendsClick = onAboutLegendsClick,
+                onAboutLegendsClick = callbacks.onAboutLegendsClick,
             )
         },
     ) { paddingValues ->
@@ -100,7 +94,7 @@ private fun LegendLeaderboardScreen(
                     },
                 )
             } else {
-                LeaderboardList(entries = entries, onProfileClick = onProfileClick)
+                LeaderboardList(entries = entries, onProfileClick = callbacks.onProfileClick)
             }
         }
     }

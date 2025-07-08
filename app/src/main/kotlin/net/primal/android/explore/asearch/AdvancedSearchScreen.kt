@@ -60,26 +60,20 @@ import net.primal.android.explore.asearch.ui.FilterPicker
 import net.primal.android.explore.asearch.ui.MultipleUserPicker
 import net.primal.android.explore.asearch.ui.SingleChoicePicker
 import net.primal.android.explore.asearch.ui.TimeModifierPicker
-import net.primal.android.explore.feed.ExploreFeedContract
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun AdvancedSearchScreen(
-    viewModel: AdvancedSearchViewModel,
-    onClose: () -> Unit,
-    onNavigateToExploreNoteFeed: (feedSpec: String, renderType: ExploreFeedContract.RenderType) -> Unit,
-    onNavigateToExploreArticleFeed: (feedSpec: String) -> Unit,
-) {
+fun AdvancedSearchScreen(viewModel: AdvancedSearchViewModel, callbacks: AdvancedSearchContract.ScreenCallbacks) {
     val state = viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel) {
+    LaunchedEffect(viewModel, callbacks) {
         viewModel.effects.collect {
             when (it) {
                 is AdvancedSearchContract.SideEffect.NavigateToExploreNoteFeed ->
-                    onNavigateToExploreNoteFeed(it.feedSpec, it.renderType)
+                    callbacks.onNavigateToExploreNoteFeed(it.feedSpec, it.renderType)
 
                 is AdvancedSearchContract.SideEffect.NavigateToExploreArticleFeed ->
-                    onNavigateToExploreArticleFeed(it.feedSpec)
+                    callbacks.onNavigateToExploreArticleFeed(it.feedSpec)
             }
         }
     }
@@ -87,7 +81,7 @@ fun AdvancedSearchScreen(
     AdvancedSearchScreen(
         state = state.value,
         eventPublisher = viewModel::setEvent,
-        onClose = onClose,
+        callbacks = callbacks,
     )
 }
 
@@ -96,14 +90,14 @@ fun AdvancedSearchScreen(
 private fun AdvancedSearchScreen(
     state: UiState,
     eventPublisher: (UiEvent) -> Unit,
-    onClose: () -> Unit,
+    callbacks: AdvancedSearchContract.ScreenCallbacks,
 ) {
     Scaffold(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.asearch_top_app_bar_title),
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
+                onNavigationIconClick = callbacks.onClose,
                 showDivider = false,
             )
         },

@@ -52,24 +52,14 @@ import net.primal.domain.nostr.utils.takeAsProfileHexIdOrNull
 fun SearchScreen(
     viewModel: SearchViewModel,
     searchScope: SearchScope,
-    onClose: () -> Unit,
-    onAdvancedSearchClick: (query: String) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
-    onNaddrClick: (String) -> Unit,
-    onSearchContent: (scope: SearchScope, query: String) -> Unit,
+    callbacks: SearchContract.ScreenCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
     SearchScreen(
         state = uiState.value,
         searchScope = searchScope,
         eventPublisher = { viewModel.setEvent(it) },
-        onClose = onClose,
-        onAdvancedSearchClick = onAdvancedSearchClick,
-        onProfileClick = onProfileClick,
-        onNoteClick = onNoteClick,
-        onNaddrClick = onNaddrClick,
-        onSearchContent = onSearchContent,
+        callbacks = callbacks,
     )
 }
 
@@ -79,12 +69,7 @@ fun SearchScreen(
     state: SearchContract.UiState,
     searchScope: SearchScope,
     eventPublisher: (SearchContract.UiEvent) -> Unit,
-    onClose: () -> Unit,
-    onAdvancedSearchClick: (query: String) -> Unit,
-    onProfileClick: (String) -> Unit,
-    onNoteClick: (String) -> Unit,
-    onNaddrClick: (String) -> Unit,
-    onSearchContent: (scope: SearchScope, query: String) -> Unit,
+    callbacks: SearchContract.ScreenCallbacks,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val scope = rememberCoroutineScope()
@@ -95,7 +80,7 @@ fun SearchScreen(
                 navigationIcon = {
                     AppBarIcon(
                         icon = PrimalIcons.ArrowBack,
-                        onClick = onClose,
+                        onClick = callbacks.onClose,
                         appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                     )
                 },
@@ -108,7 +93,7 @@ fun SearchScreen(
                         onSearch = {
                             keyboardController?.hide()
                             scope.launch {
-                                onSearchContent(searchScope, state.searchQuery)
+                                callbacks.onSearchContent(searchScope, state.searchQuery)
                             }
                         },
                     )
@@ -116,7 +101,7 @@ fun SearchScreen(
                 actions = {
                     AppBarIcon(
                         icon = PrimalIcons.AdvancedSearch,
-                        onClick = { onAdvancedSearchClick(state.searchQuery) },
+                        onClick = { callbacks.onAdvancedSearchClick(state.searchQuery) },
                         appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
                     )
                 },
@@ -144,11 +129,11 @@ fun SearchScreen(
                                 when {
                                     noteId != null -> {
                                         delay(KEYBOARD_HIDE_DELAY)
-                                        onNoteClick(noteId)
+                                        callbacks.onNoteClick(noteId)
                                     }
-                                    profileId != null -> onProfileClick(profileId)
-                                    naddr != null -> onNaddrClick(naddr)
-                                    else -> onSearchContent(searchScope, query)
+                                    profileId != null -> callbacks.onProfileClick(profileId)
+                                    naddr != null -> callbacks.onNaddrClick(naddr)
+                                    else -> callbacks.onSearchContent(searchScope, query)
                                 }
                             }
                         },
@@ -170,7 +155,7 @@ fun SearchScreen(
                 ) {
                     UserProfileListItem(
                         data = it,
-                        onClick = { item -> onProfileClick(item.profileId) },
+                        onClick = { item -> callbacks.onProfileClick(item.profileId) },
                     )
                 }
             }

@@ -20,4 +20,12 @@ interface ProfileQrCodeContract {
         data class WalletTxDetected(val draftTx: DraftTx) : SideEffect()
         data class PromoCodeDetected(val promoCode: String) : SideEffect()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onProfileScan: (profileId: String) -> Unit,
+        val onNoteScan: (noteId: String) -> Unit,
+        val onDraftTxScan: (draftTx: DraftTx) -> Unit,
+        val onPromoCodeScan: (promoCode: String) -> Unit,
+    )
 }

@@ -24,4 +24,8 @@ interface LegendaryProfileCustomizationContract {
             val editedShoutout: String? = null,
         ) : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+    )
 }

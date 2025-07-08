@@ -34,36 +34,24 @@ import net.primal.android.premium.manage.PremiumManageContract.ManageDestination
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun PremiumManageScreen(
-    viewModel: PremiumManageViewModel,
-    onFAQClick: () -> Unit,
-    onDestination: (ManageDestination) -> Unit,
-    onClose: () -> Unit,
-) {
+fun PremiumManageScreen(viewModel: PremiumManageViewModel, callbacks: PremiumManageContract.ScreenCallbacks) {
     val state = viewModel.state.collectAsState()
 
     PremiumManageScreen(
         state = state.value,
-        onFAQClick = onFAQClick,
-        onDestination = onDestination,
-        onClose = onClose,
+        callbacks = callbacks,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PremiumManageScreen(
-    state: PremiumManageContract.UiState,
-    onFAQClick: () -> Unit,
-    onDestination: (ManageDestination) -> Unit,
-    onClose: () -> Unit,
-) {
+fun PremiumManageScreen(state: PremiumManageContract.UiState, callbacks: PremiumManageContract.ScreenCallbacks) {
     Scaffold(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.premium_manage_title),
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
+                onNavigationIconClick = callbacks.onClose,
             )
         },
     ) { paddingValues ->
@@ -82,7 +70,7 @@ fun PremiumManageScreen(
                     ManageDestination.ContactListBackup,
                     ManageDestination.ContentBackup,
                 ),
-                onDestination = onDestination,
+                onDestination = callbacks.onDestination,
             )
 
             ManageDestinationTable(
@@ -101,10 +89,10 @@ fun PremiumManageScreen(
                         ManageDestination.BecomeALegend
                     },
                 ),
-                onDestination = onDestination,
+                onDestination = callbacks.onDestination,
             )
 
-            FAQNoticeRow(onFAQClick = onFAQClick)
+            FAQNoticeRow(onFAQClick = callbacks.onFAQClick)
         }
     }
 }

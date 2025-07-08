@@ -31,4 +31,9 @@ interface ExploreFeedContract {
         fun isList() = this == List
         fun isGrid() = this == Grid
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onGoToWallet: () -> Unit,
+    )
 }

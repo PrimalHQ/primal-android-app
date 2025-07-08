@@ -102,23 +102,16 @@ private const val AVATAR_START_ROTATION = -45f
 private const val AVATAR_END_ROTATION = 0f
 
 @Composable
-fun PremiumCardScreen(
-    viewModel: PremiumCardViewModel,
-    onClose: () -> Unit,
-    onLegendSettingsClick: () -> Unit,
-    onSeeOtherLegendsClick: () -> Unit,
-    onSeeOtherPrimalOGsClick: () -> Unit,
-    onBecomeLegendClick: () -> Unit,
-) {
+fun PremiumCardScreen(viewModel: PremiumCardViewModel, callbacks: PremiumCardContract.ScreenCallbacks) {
     val uiState = viewModel.state.collectAsState()
 
     PremiumCardScreen(
         state = uiState.value,
-        onClose = onClose,
-        onLegendSettingsClick = onLegendSettingsClick,
-        onSeeOtherLegendsClick = onSeeOtherLegendsClick,
-        onSeeOtherPrimalOGsClick = onSeeOtherPrimalOGsClick,
-        onBecomeLegendClick = onBecomeLegendClick,
+        onClose = callbacks.onClose,
+        onLegendSettingsClick = callbacks.onLegendSettingsClick,
+        onSeeOtherLegendsClick = callbacks.onSeeOtherLegendsClick,
+        onSeeOtherPrimalOGsClick = callbacks.onSeeOtherPrimalOGsClick,
+        onBecomeLegendClick = callbacks.onBecomeLegendClick,
     )
 }
 

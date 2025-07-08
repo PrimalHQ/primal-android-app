@@ -49,4 +49,10 @@ interface RedeemCodeContract {
         data class PrimalPremium(val durationInMonths: Int) : PromoCodeBenefit()
         data class WalletBalance(val sats: Double) : PromoCodeBenefit()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val navigateToOnboarding: (String?) -> Unit,
+        val navigateToWalletOnboarding: (String?) -> Unit,
+    )
 }

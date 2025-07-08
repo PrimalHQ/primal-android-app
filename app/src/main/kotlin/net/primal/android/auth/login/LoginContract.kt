@@ -30,4 +30,9 @@ interface LoginContract {
     sealed class SideEffect {
         data object LoginSuccess : SideEffect()
     }
+
+    data class ScreenCallbacks(
+        val onLoginSuccess: () -> Unit,
+        val onClose: () -> Unit,
+    )
 }

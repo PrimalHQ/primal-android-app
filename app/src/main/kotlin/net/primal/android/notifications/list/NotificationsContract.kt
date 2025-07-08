@@ -21,4 +21,11 @@ interface NotificationsContract {
     sealed class UiEvent {
         data object NotificationsSeen : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onSearchClick: () -> Unit,
+        val onGoToWallet: () -> Unit,
+        val onDrawerQrCodeClick: () -> Unit,
+        val onNewPostClick: () -> Unit,
+    )
 }

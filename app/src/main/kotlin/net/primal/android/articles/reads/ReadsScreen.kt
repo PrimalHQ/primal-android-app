@@ -61,11 +61,8 @@ fun ReadsScreen(
     viewModel: ReadsViewModel,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
-    onSearchClick: () -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onGetPremiumClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
+    callbacks: ReadsScreenContract.ScreenCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -73,12 +70,9 @@ fun ReadsScreen(
         state = uiState.value,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
-        onSearchClick = onSearchClick,
-        onArticleClick = onArticleClick,
-        onGetPremiumClick = onGetPremiumClick,
         eventPublisher = viewModel::setEvent,
         accountSwitcherCallbacks = accountSwitcherCallbacks,
+        callbacks = callbacks,
     )
 }
 
@@ -88,12 +82,9 @@ private fun ReadsScreen(
     state: ReadsScreenContract.UiState,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
-    onSearchClick: () -> Unit,
-    onArticleClick: (naddr: String) -> Unit,
-    onGetPremiumClick: () -> Unit,
     eventPublisher: (ReadsScreenContract.UiEvent) -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
+    callbacks: ReadsScreenContract.ScreenCallbacks,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -127,7 +118,7 @@ private fun ReadsScreen(
         accountSwitcherCallbacks = accountSwitcherCallbacks,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
+        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topAppBar = { scrollBehavior ->
@@ -138,7 +129,7 @@ private fun ReadsScreen(
                 avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
                 avatarBlossoms = state.activeAccountBlossoms,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
-                onSearchClick = onSearchClick,
+                onSearchClick = callbacks.onSearchClick,
                 onFeedChanged = { feed ->
                     val pageIndex = state.feeds.indexOf(feed)
                     uiScope.launch { pagerState.scrollToPage(page = pageIndex) }
@@ -160,8 +151,8 @@ private fun ReadsScreen(
                         feedSpec = state.feeds[index].spec,
                         contentPadding = paddingValues,
                         shouldAnimateScrollToTop = shouldAnimateScrollToTop,
-                        onArticleClick = onArticleClick,
-                        onGetPremiumClick = onGetPremiumClick,
+                        onArticleClick = callbacks.onArticleClick,
+                        onGetPremiumClick = callbacks.onGetPremiumClick,
                         onUiError = { uiError: UiError ->
                             uiScope.launch {
                                 snackbarHostState.showSnackbar(

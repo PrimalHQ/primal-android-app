@@ -28,8 +28,7 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun PremiumBecomeLegendScreen(
     viewModel: PremiumBecomeLegendViewModel,
-    onClose: () -> Unit,
-    onLegendPurchased: () -> Unit,
+    callbacks: PremiumBecomeLegendContract.ScreenCallbacks,
 ) {
     val state = viewModel.state.collectAsState()
 
@@ -44,8 +43,8 @@ fun PremiumBecomeLegendScreen(
     PremiumBecomeLegendScreen(
         state = state.value,
         eventPublisher = viewModel::setEvent,
-        onClose = onClose,
-        onLegendPurchased = onLegendPurchased,
+        onClose = callbacks.onClose,
+        onLegendPurchased = callbacks.onLegendPurchased,
     )
 }
 

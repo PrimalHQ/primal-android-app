@@ -26,4 +26,9 @@ interface ProfileFollowsContract {
         data object DismissError : UiEvent()
         data object ReloadData : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onProfileClick: (String) -> Unit,
+        val onClose: () -> Unit,
+    )
 }

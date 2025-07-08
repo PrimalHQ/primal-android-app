@@ -35,7 +35,10 @@ const val MORE_INFO_FAQ_TAB_INDEX = 3
 private val tabsRange = MORE_INFO_WHY_PREMIUM_TAB_INDEX..MORE_INFO_FAQ_TAB_INDEX
 
 @Composable
-fun PremiumMoreInfoScreen(initialTabIndex: Int = MORE_INFO_WHY_PREMIUM_TAB_INDEX, onClose: () -> Unit) {
+fun PremiumMoreInfoScreen(
+    initialTabIndex: Int = MORE_INFO_WHY_PREMIUM_TAB_INDEX,
+    callbacks: PremiumMoreInfoContract.ScreenCallbacks,
+) {
     val pagerState = rememberPagerState(
         initialPage = if (initialTabIndex in tabsRange) initialTabIndex else MORE_INFO_WHY_PREMIUM_TAB_INDEX,
         pageCount = { MORE_INFO_TAB_COUNT },
@@ -45,7 +48,7 @@ fun PremiumMoreInfoScreen(initialTabIndex: Int = MORE_INFO_WHY_PREMIUM_TAB_INDEX
         topBar = {
             MoreInfoTopAppBar(
                 pagerState = pagerState,
-                onClose = onClose,
+                onClose = callbacks.onClose,
             )
         },
     ) { paddingValues ->

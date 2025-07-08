@@ -42,18 +42,16 @@ import net.primal.domain.feeds.FeedSpecKind
 @Composable
 fun BookmarksScreen(
     viewModel: BookmarksViewModel,
-    onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
+    callbacks: BookmarksContract.ScreenCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
     BookmarksScreen(
         state = uiState.value,
         eventPublisher = viewModel::setEvent,
-        onClose = onClose,
         noteCallbacks = noteCallbacks,
-        onGoToWallet = onGoToWallet,
+        callbacks = callbacks,
     )
 }
 
@@ -61,9 +59,8 @@ fun BookmarksScreen(
 private fun BookmarksScreen(
     state: BookmarksContract.UiState,
     eventPublisher: (BookmarksContract.UiEvent) -> Unit,
-    onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
+    callbacks: BookmarksContract.ScreenCallbacks,
 ) {
     val uiScope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -76,7 +73,7 @@ private fun BookmarksScreen(
                 onFeedSpecKindChanged = {
                     eventPublisher(BookmarksContract.UiEvent.ChangeFeedSpecKind(it))
                 },
-                onClose = onClose,
+                onClose = callbacks.onClose,
             )
         },
         snackbarHost = {
@@ -110,7 +107,7 @@ private fun BookmarksScreen(
                     contentPadding = paddingValues,
                     feedSpec = state.feedSpec,
                     noteCallbacks = noteCallbacks,
-                    onGoToWallet = onGoToWallet,
+                    onGoToWallet = callbacks.onGoToWallet,
                     pollingEnabled = false,
                     pullToRefreshEnabled = false,
                     showTopZaps = true,

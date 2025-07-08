@@ -56,17 +56,15 @@ import net.primal.domain.feeds.isSearchFeedSpec
 @Composable
 fun ExploreFeedScreen(
     viewModel: ExploreFeedViewModel,
-    onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
+    callbacks: ExploreFeedContract.ScreenCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
     ExploreFeedScreen(
         state = uiState.value,
-        onClose = onClose,
         noteCallbacks = noteCallbacks,
-        onGoToWallet = onGoToWallet,
+        callbacks = callbacks,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -75,9 +73,8 @@ fun ExploreFeedScreen(
 @Composable
 fun ExploreFeedScreen(
     state: ExploreFeedContract.UiState,
-    onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
+    callbacks: ExploreFeedContract.ScreenCallbacks,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
@@ -133,7 +130,7 @@ fun ExploreFeedScreen(
             ExploreFeedTopAppBar(
                 title = feedTitle,
                 existsInUserFeeds = state.existsInUserFeeds,
-                onClose = onClose,
+                onClose = callbacks.onClose,
                 onRemoveFromUserFeedsClick = {
                     eventPublisher(RemoveFromUserFeeds)
                     uiScope.launch {
@@ -161,7 +158,7 @@ fun ExploreFeedScreen(
                     renderType = state.renderType,
                     noteCallbacks = noteCallbacks,
                     contentPadding = paddingValues,
-                    onGoToWallet = onGoToWallet,
+                    onGoToWallet = callbacks.onGoToWallet,
                     onUiError = { uiError ->
                         uiScope.launch {
                             snackbarHostState.showSnackbar(

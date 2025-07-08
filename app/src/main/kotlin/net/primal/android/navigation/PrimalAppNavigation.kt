@@ -30,15 +30,21 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
 import net.primal.android.articles.reads.ReadsScreen
+import net.primal.android.articles.reads.ReadsScreenContract
 import net.primal.android.articles.reads.ReadsViewModel
+import net.primal.android.auth.login.LoginContract
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
+import net.primal.android.auth.logout.LogoutContract
 import net.primal.android.auth.logout.LogoutScreen
 import net.primal.android.auth.logout.LogoutViewModel
+import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingViewModel
 import net.primal.android.auth.onboarding.account.ui.OnboardingScreen
 import net.primal.android.auth.onboarding.wallet.OnboardingWalletActivation
+import net.primal.android.auth.welcome.WelcomeContract
 import net.primal.android.auth.welcome.WelcomeScreen
+import net.primal.android.bookmarks.list.BookmarksContract
 import net.primal.android.bookmarks.list.BookmarksScreen
 import net.primal.android.bookmarks.list.BookmarksViewModel
 import net.primal.android.core.compose.ApplyEdgeToEdge
@@ -46,12 +52,14 @@ import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
+import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.NoteEditorScreen
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.jsonAsNoteEditorArgs
 import net.primal.android.events.gallery.EventMediaGalleryScreen
 import net.primal.android.events.gallery.EventMediaGalleryViewModel
+import net.primal.android.events.reactions.ReactionsContract
 import net.primal.android.events.reactions.ReactionsViewModel
 import net.primal.android.events.reactions.ui.ReactionsScreen
 import net.primal.android.explore.asearch.AdvancedSearchContract
@@ -60,10 +68,13 @@ import net.primal.android.explore.asearch.AdvancedSearchViewModel
 import net.primal.android.explore.feed.ExploreFeedContract
 import net.primal.android.explore.feed.ExploreFeedScreen
 import net.primal.android.explore.feed.ExploreFeedViewModel
+import net.primal.android.explore.home.ExploreHomeContract
 import net.primal.android.explore.home.ExploreHomeScreen
 import net.primal.android.explore.home.ExploreHomeViewModel
+import net.primal.android.explore.home.followpack.FollowPackContract
 import net.primal.android.explore.home.followpack.FollowPackScreen
 import net.primal.android.explore.home.followpack.FollowPackViewModel
+import net.primal.android.explore.search.SearchContract
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.explore.search.ui.SearchScreen
@@ -71,31 +82,43 @@ import net.primal.android.media.MediaItemScreen
 import net.primal.android.media.MediaItemViewModel
 import net.primal.android.messages.chat.ChatScreen
 import net.primal.android.messages.chat.ChatViewModel
+import net.primal.android.messages.conversation.MessageConversationListContract
 import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
+import net.primal.android.messages.conversation.create.NewConversationContract
 import net.primal.android.messages.conversation.create.NewConversationScreen
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.notes.home.HomeFeedContract
 import net.primal.android.notes.home.HomeFeedScreen
 import net.primal.android.notes.home.HomeFeedViewModel
+import net.primal.android.notifications.list.NotificationsContract
 import net.primal.android.notifications.list.NotificationsScreen
 import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.premium.buying.PremiumBuyingContract
 import net.primal.android.premium.buying.PremiumBuyingScreen
 import net.primal.android.premium.buying.PremiumBuyingViewModel
+import net.primal.android.premium.card.PremiumCardContract
 import net.primal.android.premium.card.PremiumCardScreen
 import net.primal.android.premium.card.PremiumCardViewModel
+import net.primal.android.premium.home.PremiumHomeContract
 import net.primal.android.premium.home.PremiumHomeScreen
 import net.primal.android.premium.home.PremiumHomeViewModel
 import net.primal.android.premium.info.MORE_INFO_FAQ_TAB_INDEX
+import net.primal.android.premium.info.PremiumMoreInfoContract
 import net.primal.android.premium.info.PremiumMoreInfoScreen
+import net.primal.android.premium.leaderboard.legend.LegendLeaderboardContract
 import net.primal.android.premium.leaderboard.legend.LegendLeaderboardScreen
 import net.primal.android.premium.leaderboard.legend.LegendLeaderboardViewModel
+import net.primal.android.premium.leaderboard.ogs.OGLeaderboardContract
 import net.primal.android.premium.leaderboard.ogs.OGLeaderboardScreen
 import net.primal.android.premium.leaderboard.ogs.OGLeaderboardViewModel
+import net.primal.android.premium.legend.become.PremiumBecomeLegendContract
 import net.primal.android.premium.legend.become.PremiumBecomeLegendScreen
 import net.primal.android.premium.legend.become.PremiumBecomeLegendViewModel
+import net.primal.android.premium.legend.contribute.LegendContributeContract
 import net.primal.android.premium.legend.contribute.LegendContributeScreen
 import net.primal.android.premium.legend.contribute.LegendContributeViewModel
+import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationContract
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationScreen
 import net.primal.android.premium.legend.customization.LegendaryProfileCustomizationViewModel
 import net.primal.android.premium.manage.PremiumManageContract
@@ -109,6 +132,7 @@ import net.primal.android.premium.manage.media.PremiumMediaManagementScreen
 import net.primal.android.premium.manage.media.PremiumMediaManagementViewModel
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameScreen
 import net.primal.android.premium.manage.nameChange.PremiumChangePrimalNameViewModel
+import net.primal.android.premium.manage.order.PremiumOrderHistoryContract
 import net.primal.android.premium.manage.order.PremiumOrderHistoryScreen
 import net.primal.android.premium.manage.order.PremiumOrderHistoryViewModel
 import net.primal.android.premium.manage.relay.PremiumRelayScreen
@@ -122,21 +146,28 @@ import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ProfileDetailsScreen
 import net.primal.android.profile.details.ProfileDetailsViewModel
 import net.primal.android.profile.domain.ProfileFollowsType
+import net.primal.android.profile.editor.ProfileEditorContract
 import net.primal.android.profile.editor.ProfileEditorViewModel
 import net.primal.android.profile.editor.ui.ProfileEditorScreen
+import net.primal.android.profile.follows.ProfileFollowsContract
 import net.primal.android.profile.follows.ProfileFollowsScreen
 import net.primal.android.profile.follows.ProfileFollowsViewModel
+import net.primal.android.profile.qr.ProfileQrCodeContract
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
+import net.primal.android.redeem.RedeemCodeContract
 import net.primal.android.redeem.RedeemCodeScreen
 import net.primal.android.redeem.RedeemCodeViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.thread.articles.details.ArticleDetailsContract
 import net.primal.android.thread.articles.details.ArticleDetailsScreen
 import net.primal.android.thread.articles.details.ArticleDetailsViewModel
+import net.primal.android.thread.notes.ThreadContract
 import net.primal.android.thread.notes.ThreadScreen
 import net.primal.android.thread.notes.ThreadViewModel
+import net.primal.android.wallet.activation.WalletActivationContract
 import net.primal.android.wallet.activation.WalletActivationViewModel
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.feeds.buildAdvancedSearchNotesFeedSpec
@@ -998,9 +1029,11 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
         PrimalTheme(PrimalTheme.Sunset) {
             ApplyEdgeToEdge(isDarkTheme = true)
             WelcomeScreen(
-                onSignInClick = { navController.navigateToLogin() },
-                onCreateAccountClick = { navController.navigateToOnboarding() },
-                onRedeemCodeClick = { navController.navigateToRedeemCode() },
+                callbacks = WelcomeContract.ScreenCallbacks(
+                    onSignInClick = { navController.navigateToLogin() },
+                    onCreateAccountClick = { navController.navigateToOnboarding() },
+                    onRedeemCodeClick = { navController.navigateToRedeemCode() },
+                ),
             )
         }
     }
@@ -1027,8 +1060,10 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
             ApplyEdgeToEdge(isDarkTheme = true)
             LoginScreen(
                 viewModel = viewModel,
-                onLoginSuccess = { navController.navigateToHome() },
-                onClose = { navController.popBackStack() },
+                callbacks = LoginContract.ScreenCallbacks(
+                    onLoginSuccess = { navController.navigateToHome() },
+                    onClose = { navController.popBackStack() },
+                ),
             )
         }
     }
@@ -1071,9 +1106,11 @@ private fun NavGraphBuilder.onboarding(
         ApplyEdgeToEdge(isDarkTheme = true)
         OnboardingScreen(
             viewModel = viewModel,
-            onClose = { navController.popBackStack() },
-            onOnboarded = { navController.navigateToHome() },
-            onActivateWallet = { navController.navigateToWalletOnboarding(promoCode = promoCode) },
+            callbacks = OnboardingContract.ScreenCallbacks(
+                onClose = { navController.popBackStack() },
+                onOnboarded = { navController.navigateToHome() },
+                onActivateWallet = { navController.navigateToWalletOnboarding(promoCode = promoCode) },
+            ),
         )
     }
 }
@@ -1088,7 +1125,9 @@ private fun NavGraphBuilder.onboardingWalletActivation(
         ApplyEdgeToEdge(isDarkTheme = true)
         OnboardingWalletActivation(
             viewModel = viewModel,
-            onDoneOrDismiss = { navController.navigateToHome() },
+            callbacks = WalletActivationContract.ScreenCallbacks(
+                onDoneOrDismiss = { navController.navigateToHome() },
+            ),
         )
     }
 }
@@ -1132,9 +1171,11 @@ private fun NavGraphBuilder.redeemCode(
         ApplyEdgeToEdge(isDarkTheme = true)
         RedeemCodeScreen(
             viewModel = viewModel,
-            onClose = navController::navigateUp,
-            navigateToOnboarding = { navController.navigateToOnboarding(it) },
-            navigateToWalletOnboarding = { navController.navigateToWalletOnboarding(it) },
+            callbacks = RedeemCodeContract.ScreenCallbacks(
+                onClose = navController::navigateUp,
+                navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
+                navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },
+            ),
         )
     }
 }
@@ -1175,12 +1216,14 @@ private fun NavGraphBuilder.home(
         viewModel = viewModel,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
         noteCallbacks = noteCallbacksHandler(navController),
-        onGoToWallet = { navController.navigateToWallet() },
-        onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
-        onNewPostClick = { navController.navigateToNoteEditor(null) },
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
+        callbacks = HomeFeedContract.ScreenCallbacks(
+            onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+            onGoToWallet = { navController.navigateToWallet() },
+            onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
+            onNewPostClick = { navController.navigateToNoteEditor(null) },
+        ),
     )
 }
 
@@ -1220,11 +1263,13 @@ private fun NavGraphBuilder.reads(
         viewModel = viewModel,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Reads) },
-        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
-        onGetPremiumClick = { navController.navigateToPremiumBuying() },
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
+        callbacks = ReadsScreenContract.ScreenCallbacks(
+            onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+            onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Reads) },
+            onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
+            onGetPremiumClick = { navController.navigateToPremiumBuying() },
+        ),
     )
 }
 
@@ -1253,10 +1298,12 @@ private fun NavGraphBuilder.noteEditor(
     LockToOrientationPortrait()
     NoteEditorScreen(
         viewModel = viewModel,
-        onClose = {
-            activity?.intent?.removeExtra(Intent.EXTRA_STREAM)
-            navController.navigateUp()
-        },
+        callbacks = NoteEditorContract.ScreenCallbacks(
+            onClose = {
+                activity?.intent?.removeExtra(Intent.EXTRA_STREAM)
+                navController.navigateUp()
+            },
+        ),
     )
 }
 
@@ -1296,14 +1343,16 @@ private fun NavGraphBuilder.explore(
         viewModel = viewModel,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
-        onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
         noteCallbacks = noteCallbacksHandler(navController),
-        onFollowPackClick = { profileId, identifier -> navController.navigateToFollowPack(profileId, identifier) },
-        onGoToWallet = { navController.navigateToWallet() },
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
-        onNewPostClick = { navController.navigateToNoteEditor(null) },
+        callbacks = ExploreHomeContract.ScreenCallbacks(
+            onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+            onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
+            onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
+            onFollowPackClick = { profileId, identifier -> navController.navigateToFollowPack(profileId, identifier) },
+            onGoToWallet = { navController.navigateToWallet() },
+            onNewPostClick = { navController.navigateToNoteEditor(null) },
+        ),
     )
 }
 
@@ -1323,16 +1372,18 @@ private fun NavGraphBuilder.followPack(
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
     FollowPackScreen(
-        onShowFeedClick = { feed, title, description ->
-            navController.navigateToExploreFeed(
-                feedSpec = feed,
-                feedTitle = title,
-                feedDescription = description,
-            )
-        },
-        onProfileClick = { navController.navigateToProfile(profileId = it) },
-        onClose = { navController.navigateUp() },
         viewModel = viewModel,
+        callbacks = FollowPackContract.ScreenCallbacks(
+            onShowFeedClick = { feed, title, description ->
+                navController.navigateToExploreFeed(
+                    feedSpec = feed,
+                    feedTitle = title,
+                    feedDescription = description,
+                )
+            },
+            onProfileClick = { navController.navigateToProfile(profileId = it) },
+            onClose = { navController.navigateUp() },
+        ),
     )
 }
 
@@ -1355,9 +1406,11 @@ private fun NavGraphBuilder.exploreFeed(
     LockToOrientationPortrait()
     ExploreFeedScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
         noteCallbacks = noteCallbacksHandler(navController),
-        onGoToWallet = { navController.navigateToWallet() },
+        callbacks = ExploreFeedContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onGoToWallet = { navController.navigateToWallet() },
+        ),
     )
 }
 
@@ -1380,36 +1433,36 @@ private fun NavGraphBuilder.search(
     SearchScreen(
         viewModel = viewModel,
         searchScope = searchScope,
-        onClose = { navController.navigateUp() },
-        onAdvancedSearchClick = { query ->
-            navController.popBackStack()
-            when (searchScope) {
-                SearchScope.Notes -> navController.navigateToAdvancedSearch(
-                    initialQuery = query,
-                )
-
-                SearchScope.Reads -> navController.navigateToAdvancedSearch(
-                    initialQuery = query,
-                    initialSearchKind = AdvancedSearchContract.SearchKind.Reads,
-                )
-
-                SearchScope.MyNotifications -> navController.navigateToAdvancedSearch(
-                    initialQuery = query,
-                    initialSearchScope = AdvancedSearchContract.SearchScope.MyNotifications,
-                )
-            }
-        },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onNoteClick = { noteId -> navController.navigateToThread(noteId) },
-        onNaddrClick = { naddr -> navController.navigateToArticleDetails(naddr) },
-        onSearchContent = { scope, query ->
-            val feedSpec = when (scope) {
-                SearchScope.Notes -> buildAdvancedSearchNotesFeedSpec(query = query)
-                SearchScope.Reads -> buildAdvancedSearchReadsFeedSpec(query = query)
-                SearchScope.MyNotifications -> buildAdvancedSearchNotificationsFeedSpec(query = query)
-            }
-            navController.navigateToExploreFeed(feedSpec = feedSpec)
-        },
+        callbacks = SearchContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onAdvancedSearchClick = { query ->
+                navController.popBackStack()
+                when (searchScope) {
+                    SearchScope.Notes -> navController.navigateToAdvancedSearch(
+                        initialQuery = query,
+                    )
+                    SearchScope.Reads -> navController.navigateToAdvancedSearch(
+                        initialQuery = query,
+                        initialSearchKind = AdvancedSearchContract.SearchKind.Reads,
+                    )
+                    SearchScope.MyNotifications -> navController.navigateToAdvancedSearch(
+                        initialQuery = query,
+                        initialSearchScope = AdvancedSearchContract.SearchScope.MyNotifications,
+                    )
+                }
+            },
+            onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+            onNoteClick = { noteId -> navController.navigateToThread(noteId) },
+            onNaddrClick = { naddr -> navController.navigateToArticleDetails(naddr) },
+            onSearchContent = { scope, query ->
+                val feedSpec = when (scope) {
+                    SearchScope.Notes -> buildAdvancedSearchNotesFeedSpec(query = query)
+                    SearchScope.Reads -> buildAdvancedSearchReadsFeedSpec(query = query)
+                    SearchScope.MyNotifications -> buildAdvancedSearchNotificationsFeedSpec(query = query)
+                }
+                navController.navigateToExploreFeed(feedSpec = feedSpec)
+            },
+        ),
     )
 }
 
@@ -1432,11 +1485,15 @@ private fun NavGraphBuilder.advancedSearch(
 
     AdvancedSearchScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        onNavigateToExploreNoteFeed = { feedSpec, renderType ->
-            navController.navigateToExploreFeed(feedSpec, renderType)
-        },
-        onNavigateToExploreArticleFeed = { feedSpec -> navController.navigateToExploreFeed(feedSpec) },
+        callbacks = AdvancedSearchContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onNavigateToExploreNoteFeed = { feedSpec, renderType ->
+                navController.navigateToExploreFeed(feedSpec, renderType)
+            },
+            onNavigateToExploreArticleFeed = { feedSpec ->
+                navController.navigateToExploreFeed(feedSpec)
+            },
+        ),
     )
 }
 
@@ -1487,13 +1544,15 @@ private fun NavGraphBuilder.premiumHome(route: String, navController: NavControl
 
         PremiumHomeScreen(
             viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onRenewSubscription = { navController.navigateToPremiumExtendSubscription(primalName = it) },
-            onManagePremium = { navController.navigateToPremiumManage() },
-            onLegendCardClick = { navController.navigateToPremiumCard(profileId = it) },
-            onSupportPrimal = { navController.navigateToPremiumSupportPrimal() },
-            onUpgradeToProClick = { navController.navigateToUpgradeToPrimalPro() },
-            onContributePrimal = { navController.navigateToLegendContributePrimal() },
+            callbacks = PremiumHomeContract.ScreenCallbacks(
+                onClose = { navController.navigateUp() },
+                onRenewSubscription = { navController.navigateToPremiumExtendSubscription(primalName = it) },
+                onManagePremium = { navController.navigateToPremiumManage() },
+                onLegendCardClick = { navController.navigateToPremiumCard(profileId = it) },
+                onSupportPrimal = { navController.navigateToPremiumSupportPrimal() },
+                onUpgradeToProClick = { navController.navigateToUpgradeToPrimalPro() },
+                onContributePrimal = { navController.navigateToLegendContributePrimal() },
+            ),
         )
     }
 
@@ -1531,7 +1590,9 @@ private fun NavGraphBuilder.premiumLegendContribution(route: String, navControll
         LockToOrientationPortrait()
         LegendContributeScreen(
             viewModel = viewModel,
-            onClose = { navController.navigateUp() },
+            callbacks = LegendContributeContract.ScreenCallbacks(
+                onClose = { navController.navigateUp() },
+            ),
         )
     }
 
@@ -1553,7 +1614,9 @@ private fun NavGraphBuilder.premiumMoreInfo(
 
     PremiumMoreInfoScreen(
         initialTabIndex = initialTabIndex ?: 0,
-        onClose = { navController.navigateUp() },
+        callbacks = PremiumMoreInfoContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+        ),
     )
 }
 
@@ -1575,15 +1638,17 @@ private fun NavGraphBuilder.premiumBuyPrimalLegend(
 
     PremiumBecomeLegendScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        onLegendPurchased = {
-            navController.navigateUp()
-            if (it.buyingPremiumFromOrigin == FROM_ORIGIN_PREMIUM_BADGE) {
-                navController.navigateToPremiumHome()
-            } else {
-                navController.popBackStack()
-            }
-        },
+        callbacks = PremiumBecomeLegendContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onLegendPurchased = {
+                navController.navigateUp()
+                if (it.buyingPremiumFromOrigin == FROM_ORIGIN_PREMIUM_BADGE) {
+                    navController.navigateToPremiumHome()
+                } else {
+                    navController.popBackStack()
+                }
+            },
+        ),
     )
 }
 
@@ -1601,7 +1666,9 @@ private fun NavGraphBuilder.premiumLegendaryProfile(route: String, navController
 
         LegendaryProfileCustomizationScreen(
             viewModel = viewModel,
-            onClose = { navController.navigateUp() },
+            callbacks = LegendaryProfileCustomizationContract.ScreenCallbacks(
+                onClose = { navController.navigateUp() },
+            ),
         )
     }
 
@@ -1621,13 +1688,15 @@ private fun NavGraphBuilder.premiumCard(
 
     PremiumCardScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        onSeeOtherLegendsClick = { navController.navigateToPremiumLegendLeaderboard() },
-        onSeeOtherPrimalOGsClick = { navController.navigateToPremiumOGsLeaderboard() },
-        onBecomeLegendClick = {
-            navController.navigateToPremiumBuyPrimalLegend(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
-        },
-        onLegendSettingsClick = { navController.navigateToPremiumLegendaryProfile() },
+        callbacks = PremiumCardContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onSeeOtherLegendsClick = { navController.navigateToPremiumLegendLeaderboard() },
+            onSeeOtherPrimalOGsClick = { navController.navigateToPremiumOGsLeaderboard() },
+            onBecomeLegendClick = {
+                navController.navigateToPremiumBuyPrimalLegend(fromOrigin = FROM_ORIGIN_PREMIUM_BADGE)
+            },
+            onLegendSettingsClick = { navController.navigateToPremiumLegendaryProfile() },
+        ),
     )
 }
 
@@ -1650,9 +1719,11 @@ private fun NavGraphBuilder.premiumLegendLeaderboard(
 
     LegendLeaderboardScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        onProfileClick = { navController.navigateToProfile(profileId = it) },
-        onAboutLegendsClick = { navController.navigateToPremiumBuyPrimalLegend() },
+        callbacks = LegendLeaderboardContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onProfileClick = { navController.navigateToProfile(profileId = it) },
+            onAboutLegendsClick = { navController.navigateToPremiumBuyPrimalLegend() },
+        ),
     )
 }
 
@@ -1671,9 +1742,11 @@ private fun NavGraphBuilder.premiumOGsLeaderboard(route: String, navController: 
 
         OGLeaderboardScreen(
             viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onProfileClick = { navController.navigateToProfile(profileId = it) },
-            onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
+            callbacks = OGLeaderboardContract.ScreenCallbacks(
+                onClose = { navController.navigateUp() },
+                onProfileClick = { navController.navigateToProfile(profileId = it) },
+                onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
+            ),
         )
     }
 
@@ -1692,38 +1765,32 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
 
         PremiumManageScreen(
             viewModel = viewModel,
-            onFAQClick = { navController.navigateToPremiumMoreInfo(tabIndex = MORE_INFO_FAQ_TAB_INDEX) },
-            onClose = { navController.navigateUp() },
-            onDestination = {
-                when (it) {
-                    PremiumManageContract.ManageDestination.MediaManagement ->
-                        navController.navigateToPremiumMediaManagement()
-
-                    PremiumManageContract.ManageDestination.PremiumRelay ->
-                        navController.navigateToPremiumRelay()
-
-                    PremiumManageContract.ManageDestination.ContactListBackup ->
-                        navController.navigateToPremiumContactList()
-
-                    PremiumManageContract.ManageDestination.ContentBackup ->
-                        navController.navigateToPremiumContentBackup()
-
-                    PremiumManageContract.ManageDestination.ManageSubscription ->
-                        navController.navigateToPremiumOrderHistory()
-
-                    PremiumManageContract.ManageDestination.ChangePrimalName ->
-                        navController.navigateToPremiumChangePrimalName()
-
-                    is PremiumManageContract.ManageDestination.ExtendSubscription ->
-                        navController.navigateToPremiumExtendSubscription(primalName = it.primalName)
-
-                    PremiumManageContract.ManageDestination.LegendaryProfileCustomization ->
-                        navController.navigateToPremiumLegendaryProfile()
-
-                    PremiumManageContract.ManageDestination.BecomeALegend ->
-                        navController.navigateToPremiumBuyPrimalLegend()
-                }
-            },
+            callbacks = PremiumManageContract.ScreenCallbacks(
+                onFAQClick = { navController.navigateToPremiumMoreInfo(tabIndex = MORE_INFO_FAQ_TAB_INDEX) },
+                onClose = { navController.navigateUp() },
+                onDestination = {
+                    when (it) {
+                        PremiumManageContract.ManageDestination.MediaManagement ->
+                            navController.navigateToPremiumMediaManagement()
+                        PremiumManageContract.ManageDestination.PremiumRelay ->
+                            navController.navigateToPremiumRelay()
+                        PremiumManageContract.ManageDestination.ContactListBackup ->
+                            navController.navigateToPremiumContactList()
+                        PremiumManageContract.ManageDestination.ContentBackup ->
+                            navController.navigateToPremiumContentBackup()
+                        PremiumManageContract.ManageDestination.ManageSubscription ->
+                            navController.navigateToPremiumOrderHistory()
+                        PremiumManageContract.ManageDestination.ChangePrimalName ->
+                            navController.navigateToPremiumChangePrimalName()
+                        is PremiumManageContract.ManageDestination.ExtendSubscription ->
+                            navController.navigateToPremiumExtendSubscription(primalName = it.primalName)
+                        PremiumManageContract.ManageDestination.LegendaryProfileCustomization ->
+                            navController.navigateToPremiumLegendaryProfile()
+                        PremiumManageContract.ManageDestination.BecomeALegend ->
+                            navController.navigateToPremiumBuyPrimalLegend()
+                    }
+                },
+            ),
         )
     }
 
@@ -1813,8 +1880,10 @@ private fun NavGraphBuilder.premiumOrderHistory(route: String, navController: Na
 
         PremiumOrderHistoryScreen(
             viewModel = viewModel,
-            onExtendSubscription = { navController.navigateToPremiumExtendSubscription(primalName = it) },
-            onClose = { navController.navigateUp() },
+            callbacks = PremiumOrderHistoryContract.ScreenCallbacks(
+                onExtendSubscription = { navController.navigateToPremiumExtendSubscription(primalName = it) },
+                onClose = { navController.navigateUp() },
+            ),
         )
     }
 
@@ -1854,10 +1923,12 @@ private fun NavGraphBuilder.messages(
     LockToOrientationPortrait()
     MessageListScreen(
         viewModel = viewModel,
-        onConversationClick = { profileId -> navController.navigateToChat(profileId) },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onNewMessageClick = { navController.navigateToNewMessage() },
-        onClose = { navController.navigateUp() },
+        callbacks = MessageConversationListContract.ScreenCallbacks(
+            onConversationClick = { profileId -> navController.navigateToChat(profileId) },
+            onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+            onNewMessageClick = { navController.navigateToNewMessage() },
+            onClose = { navController.navigateUp() },
+        ),
     )
 }
 
@@ -1877,12 +1948,13 @@ private fun NavGraphBuilder.bookmarks(
     ApplyEdgeToEdge()
     BookmarksScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
         noteCallbacks = noteCallbacksHandler(navController),
-        onGoToWallet = { navController.navigateToWallet() },
+        callbacks = BookmarksContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onGoToWallet = { navController.navigateToWallet() },
+        ),
     )
 }
-
 private fun NavGraphBuilder.chat(
     route: String,
     arguments: List<NamedNavArgument>,
@@ -1918,11 +1990,13 @@ private fun NavGraphBuilder.newMessage(route: String, navController: NavControll
         LockToOrientationPortrait()
         NewConversationScreen(
             viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onProfileClick = { profileId ->
-                navController.popBackStack()
-                navController.navigateToChat(profileId)
-            },
+            callbacks = NewConversationContract.ScreenCallbacks(
+                onClose = { navController.navigateUp() },
+                onProfileClick = { profileId ->
+                    navController.popBackStack()
+                    navController.navigateToChat(profileId)
+                },
+            ),
         )
     }
 
@@ -1960,14 +2034,16 @@ private fun NavGraphBuilder.notifications(
     LockToOrientationPortrait()
     NotificationsScreen(
         viewModel = viewModel,
-        onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.MyNotifications) },
-        onGoToWallet = { navController.navigateToWallet() },
-        noteCallbacks = noteCallbacksHandler(navController),
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+        noteCallbacks = noteCallbacksHandler(navController),
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
-        onNewPostClick = { navController.navigateToNoteEditor(null) },
+        callbacks = NotificationsContract.ScreenCallbacks(
+            onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.MyNotifications) },
+            onGoToWallet = { navController.navigateToWallet() },
+            onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+            onNewPostClick = { navController.navigateToNoteEditor(null) },
+        ),
     )
 }
 
@@ -1990,10 +2066,12 @@ private fun NavGraphBuilder.thread(
     LockToOrientationPortrait()
     ThreadScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
+        callbacks = ThreadContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onGoToWallet = { navController.navigateToWallet() },
+            onExpandReply = { args -> navController.navigateToNoteEditor(args) },
+        ),
         noteCallbacks = noteCallbacksHandler(navController),
-        onGoToWallet = { navController.navigateToWallet() },
-        onExpandReply = { args -> navController.navigateToNoteEditor(args) },
     )
 }
 
@@ -2016,12 +2094,14 @@ private fun NavGraphBuilder.articleDetails(
     LockToOrientationPortrait()
     ArticleDetailsScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        onArticleHashtagClick = { hashtag ->
-            navController.navigateToExploreFeed(feedSpec = buildReadsTopicFeedSpec(hashtag = hashtag))
-        },
+        callbacks = ArticleDetailsContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onArticleHashtagClick = { hashtag ->
+                navController.navigateToExploreFeed(feedSpec = buildReadsTopicFeedSpec(hashtag = hashtag))
+            },
+            onGoToWallet = { navController.navigateToWallet() },
+        ),
         noteCallbacks = noteCallbacksHandler(navController),
-        onGoToWallet = { navController.navigateToWallet() },
     )
 }
 
@@ -2042,8 +2122,10 @@ private fun NavGraphBuilder.reactions(
     LockToOrientationPortrait()
     ReactionsScreen(
         viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        callbacks = ReactionsContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+        ),
     )
 }
 
@@ -2148,8 +2230,10 @@ private fun NavGraphBuilder.profileEditor(route: String, navController: NavContr
         LockToOrientationPortrait()
         ProfileEditorScreen(
             viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onNavigateToPremiumBuying = { navController.navigateToPremiumBuying() },
+            callbacks = ProfileEditorContract.ScreenCallbacks(
+                onClose = { navController.navigateUp() },
+                onNavigateToPremiumBuying = { navController.navigateToPremiumBuying() },
+            ),
         )
     }
 
@@ -2170,8 +2254,10 @@ private fun NavGraphBuilder.profileFollows(
     LockToOrientationPortrait()
     ProfileFollowsScreen(
         viewModel = viewModel,
-        onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
-        onClose = { navController.navigateUp() },
+        callbacks = ProfileFollowsContract.ScreenCallbacks(
+            onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
+            onClose = { navController.navigateUp() },
+        ),
     )
 }
 
@@ -2193,23 +2279,25 @@ private fun NavGraphBuilder.profileQrCodeViewer(
         ApplyEdgeToEdge(isDarkTheme = true)
         ProfileQrCodeViewerScreen(
             viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onProfileScan = { profileId ->
-                navController.popBackStack()
-                navController.navigateToProfile(profileId)
-            },
-            onNoteScan = { noteId ->
-                navController.popBackStack()
-                navController.navigateToThread(noteId)
-            },
-            onDraftTxScan = { draftTx ->
-                navController.popBackStack()
-                navController.navigateToWalletCreateTransaction(draftTx)
-            },
-            onPromoCodeScan = {
-                navController.popBackStack()
-                navController.navigateToRedeemCode(it)
-            },
+            callbacks = ProfileQrCodeContract.ScreenCallbacks(
+                onClose = { navController.navigateUp() },
+                onProfileScan = { profileId ->
+                    navController.popBackStack()
+                    navController.navigateToProfile(profileId)
+                },
+                onNoteScan = { noteId ->
+                    navController.popBackStack()
+                    navController.navigateToThread(noteId)
+                },
+                onDraftTxScan = { draftTx ->
+                    navController.popBackStack()
+                    navController.navigateToWalletCreateTransaction(draftTx)
+                },
+                onPromoCodeScan = {
+                    navController.popBackStack()
+                    navController.navigateToRedeemCode(it)
+                },
+            ),
         )
     }
 }
@@ -2226,8 +2314,10 @@ private fun NavGraphBuilder.logout(
     LockToOrientationPortrait()
     LogoutScreen(
         viewModel = viewModel,
-        onClose = { navController.popBackStack() },
-        navigateToHome = { navController.navigateToHome() },
-        navigateToWelcome = { navController.navigateToWelcome() },
+        callbacks = LogoutContract.ScreenCallbacks(
+            onClose = { navController.popBackStack() },
+            navigateToHome = { navController.navigateToHome() },
+            navigateToWelcome = { navController.navigateToWelcome() },
+        ),
     )
 }

@@ -44,4 +44,10 @@ interface OnboardingContract {
         data object RequestPreviousStep : UiEvent()
         data object DismissError : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onOnboarded: () -> Unit,
+        val onActivateWallet: () -> Unit,
+    )
 }

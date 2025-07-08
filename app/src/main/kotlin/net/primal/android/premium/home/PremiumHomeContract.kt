@@ -24,4 +24,14 @@ interface PremiumHomeContract {
         data object ApplyPrimalLightningAddress : UiEvent()
         data object RequestMembershipUpdate : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onRenewSubscription: (primalName: String) -> Unit,
+        val onManagePremium: () -> Unit,
+        val onLegendCardClick: (String) -> Unit,
+        val onSupportPrimal: () -> Unit,
+        val onUpgradeToProClick: () -> Unit,
+        val onContributePrimal: () -> Unit,
+    )
 }

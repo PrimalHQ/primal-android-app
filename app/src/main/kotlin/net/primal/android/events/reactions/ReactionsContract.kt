@@ -13,4 +13,9 @@ interface ReactionsContract {
         val reposts: List<EventActionUi> = emptyList(),
         val initialReactionType: ReactionType = ReactionType.ZAPS,
     )
+
+    data class ScreenCallbacks(
+        val onProfileClick: (profileId: String) -> Unit,
+        val onClose: () -> Unit,
+    )
 }

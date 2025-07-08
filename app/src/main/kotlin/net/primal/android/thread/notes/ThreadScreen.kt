@@ -110,10 +110,8 @@ import net.primal.domain.nostr.ReactionType
 @Composable
 fun ThreadScreen(
     viewModel: ThreadViewModel,
-    onClose: () -> Unit,
+    callbacks: ThreadContract.ScreenCallbacks,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
-    onExpandReply: (args: NoteEditorArgs) -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
 
@@ -129,10 +127,10 @@ fun ThreadScreen(
 
     ThreadScreen(
         state = uiState,
-        onClose = onClose,
+        onClose = callbacks.onClose,
         noteCallbacks = noteCallbacks,
-        onGoToWallet = onGoToWallet,
-        onExpandReply = onExpandReply,
+        onGoToWallet = callbacks.onGoToWallet,
+        onExpandReply = callbacks.onExpandReply,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }

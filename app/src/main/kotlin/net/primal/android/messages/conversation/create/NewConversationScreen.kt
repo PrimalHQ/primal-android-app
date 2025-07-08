@@ -24,16 +24,11 @@ import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.UserProfileListItem
 
 @Composable
-fun NewConversationScreen(
-    viewModel: SearchViewModel,
-    onClose: () -> Unit,
-    onProfileClick: (String) -> Unit,
-) {
+fun NewConversationScreen(viewModel: SearchViewModel, callbacks: NewConversationContract.ScreenCallbacks) {
     val state = viewModel.state.collectAsState()
     NewConversationScreen(
         state = state.value,
-        onClose = onClose,
-        onProfileClick = onProfileClick,
+        callbacks = callbacks,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -42,8 +37,7 @@ fun NewConversationScreen(
 @Composable
 fun NewConversationScreen(
     state: SearchContract.UiState,
-    onClose: () -> Unit,
-    onProfileClick: (String) -> Unit,
+    callbacks: NewConversationContract.ScreenCallbacks,
     eventPublisher: (SearchContract.UiEvent) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -54,7 +48,7 @@ fun NewConversationScreen(
             PrimalTopAppBar(
                 title = stringResource(id = R.string.new_message_title),
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
+                onNavigationIconClick = callbacks.onClose,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 footer = {
                     PrimalIconTextField(
@@ -92,7 +86,7 @@ fun NewConversationScreen(
                         data = it,
                         onClick = { item ->
                             keyboardController?.hide()
-                            onProfileClick(item.profileId)
+                            callbacks.onProfileClick(item.profileId)
                         },
                     )
                 }
