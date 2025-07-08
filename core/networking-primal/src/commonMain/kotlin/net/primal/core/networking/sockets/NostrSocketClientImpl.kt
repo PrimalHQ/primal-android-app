@@ -3,20 +3,23 @@ package net.primal.core.networking.sockets
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
-import io.ktor.client.plugins.websocket.webSocket
+import io.ktor.client.plugins.websocket.webSocketSession
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.WebSocketSession
 import io.ktor.websocket.close
 import io.ktor.websocket.readReason
 import io.ktor.websocket.readText
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.Uuid
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -39,10 +42,11 @@ internal class NostrSocketClientImpl(
     private val onSocketConnectionClosed: SocketConnectionClosedCallback? = null,
 ) : NostrSocketClient {
 
-    private val scope = CoroutineScope(dispatcherProvider.io())
+    private val scope = CoroutineScope(SupervisorJob() + dispatcherProvider.io())
 
-    private val webSocketMutex = Mutex()
-    private var webSocket: DefaultClientWebSocketSession? = null
+    private val wsMutex = Mutex()
+    private var wsSession: DefaultClientWebSocketSession? = null
+    private var wsReceiverJob: Job? = null
 
     private val _incomingMessages = MutableSharedFlow<NostrIncomingMessage>()
     override val incomingMessages = _incomingMessages.asSharedFlow()
@@ -50,37 +54,40 @@ internal class NostrSocketClientImpl(
     override val socketUrl = wssUrl.cleanWebSocketUrl()
 
     override suspend fun ensureSocketConnectionOrThrow() {
-        if (webSocket != null) return
+        if (wsSession != null && wsSession?.isActive == true) return
 
-        webSocketMutex.withLock {
-            if (webSocket == null) {
-                openWebSocketConnection(url = socketUrl)
-                if (incomingCompressionEnabled) {
-                    val id = Uuid.random().toPrimalSubscriptionId()
-                    sendMessage("""["REQ","$id",{"cache":["set_primal_protocol",{"compression":"zlib"}]}]""")
-                }
+        wsMutex.withLock {
+            if (wsSession == null || wsSession?.isActive == false) {
+                acquireWebSocketSession(url = socketUrl)
             }
         }
     }
 
-    private suspend fun openWebSocketConnection(url: String) {
-        val connectionAcquired = CompletableDeferred<Boolean>()
-        scope.launch {
-            try {
-                httpClient.webSocket(urlString = url) {
-                    webSocket = this
-                    onSocketConnectionOpened?.invoke(url)
-                    connectionAcquired.complete(true)
-                    receiveSocketMessages()
-                }
-            } catch (error: Exception) {
-                Napier.w("NostrSocketClient::openWebSocketConnection($socketUrl) failed.", error)
-                this@NostrSocketClientImpl.webSocket = null
-                onSocketConnectionClosed?.invoke(socketUrl, error)
-                connectionAcquired.completeExceptionally(NetworkException(cause = error))
+    private suspend fun acquireWebSocketSession(url: String) {
+        try {
+            wsSession = httpClient.webSocketSession(urlString = url)
+            launchWebSocketReceiver()
+            onSocketConnectionOpened?.invoke(url)
+            if (incomingCompressionEnabled) {
+                val id = Uuid.random().toPrimalSubscriptionId()
+                sendMessage(
+                    text = """["REQ","$id",{"cache":["set_primal_protocol",{"compression":"zlib"}]}]""",
+                    ensureSessionBeforeSend = false,
+                )
             }
+        } catch (error: Exception) {
+            Napier.w("NostrSocketClient::openWebSocketConnection($socketUrl) failed.", error)
+            close()
+            onSocketConnectionClosed?.invoke(socketUrl, error)
+            throw NetworkException(cause = error)
         }
-        connectionAcquired.await()
+    }
+
+    private fun launchWebSocketReceiver() {
+        wsReceiverJob?.cancel()
+        wsReceiverJob = scope.launch {
+            wsSession?.receiveSocketMessages()
+        }
     }
 
     private suspend fun WebSocketSession.receiveSocketMessages() {
@@ -104,27 +111,33 @@ internal class NostrSocketClientImpl(
                         Napier.w {
                             "WS $socketUrl closed with code=${closeReason?.code} and reason=${closeReason?.message}"
                         }
-                        this@NostrSocketClientImpl.webSocket = null
+                        wsSession = null
                         onSocketConnectionClosed?.invoke(socketUrl, null)
                     }
 
                     else -> Unit
                 }
             }
+        } catch (error: CancellationException) {
+            Napier.w("NostrSocketClient::receiveSocketMessages() on $socketUrl cancelled.")
+            throw error
         } catch (error: Exception) {
             Napier.w("NostrSocketClient::receiveSocketMessages() on $socketUrl failed.", error)
-            this@NostrSocketClientImpl.webSocket = null
+            wsSession = null
             onSocketConnectionClosed?.invoke(socketUrl, error)
         }
     }
 
     override suspend fun close() {
-        webSocket?.close(
+        wsReceiverJob?.cancel()
+        wsReceiverJob = null
+        wsSession?.close(
             reason = CloseReason(
                 code = CloseReason.Codes.NORMAL,
                 message = "Closed by client.",
             ),
         )
+        wsSession = null
     }
 
     private fun processIncomingMessage(text: String) {
@@ -138,9 +151,12 @@ internal class NostrSocketClientImpl(
         }
     }
 
-    private suspend fun sendMessage(text: String) {
+    private suspend fun sendMessage(text: String, ensureSessionBeforeSend: Boolean = true) {
+        if (ensureSessionBeforeSend) {
+            ensureSocketConnectionOrThrow()
+        }
         logLargeText(text = text, url = socketUrl, incoming = false)
-        webSocket?.send(Frame.Text(text = text))
+        wsSession?.send(Frame.Text(text = text))
     }
 
     override suspend fun sendREQ(subscriptionId: String, data: JsonObject) {
