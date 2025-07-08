@@ -2,7 +2,6 @@ package net.primal.core.networking.sockets
 
 import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
-import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
 import io.ktor.client.plugins.websocket.webSocketSession
 import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
@@ -45,7 +44,7 @@ internal class NostrSocketClientImpl(
     private val scope = CoroutineScope(SupervisorJob() + dispatcherProvider.io())
 
     private val wsMutex = Mutex()
-    private var wsSession: DefaultClientWebSocketSession? = null
+    private var wsSession: WebSocketSession? = null
     private var wsReceiverJob: Job? = null
 
     private val _incomingMessages = MutableSharedFlow<NostrIncomingMessage>()
@@ -58,35 +57,36 @@ internal class NostrSocketClientImpl(
 
         wsMutex.withLock {
             if (wsSession == null || wsSession?.isActive == false) {
-                acquireWebSocketSession(url = socketUrl)
+                wsSession = acquireWebSocketSession(url = socketUrl)
             }
         }
     }
 
-    private suspend fun acquireWebSocketSession(url: String) {
-        try {
-            wsSession = httpClient.webSocketSession(urlString = url)
-            launchWebSocketReceiver()
-            onSocketConnectionOpened?.invoke(url)
-            if (incomingCompressionEnabled) {
-                val id = Uuid.random().toPrimalSubscriptionId()
-                sendMessage(
-                    text = """["REQ","$id",{"cache":["set_primal_protocol",{"compression":"zlib"}]}]""",
-                    ensureSessionBeforeSend = false,
-                )
+    private suspend fun acquireWebSocketSession(url: String): WebSocketSession {
+        return try {
+            httpClient.webSocketSession(urlString = url).apply {
+                launchWebSocketReceiver()
+                onSocketConnectionOpened?.invoke(url)
+                if (incomingCompressionEnabled) {
+                    val id = Uuid.random().toPrimalSubscriptionId()
+                    sendMessage(
+                        text = """["REQ","$id",{"cache":["set_primal_protocol",{"compression":"zlib"}]}]""",
+                        ensureSessionBeforeSend = false,
+                    )
+                }
             }
         } catch (error: Exception) {
-            Napier.w("NostrSocketClient::openWebSocketConnection($socketUrl) failed.", error)
+            Napier.w("NostrSocketClient::acquireWebSocketSession($socketUrl) failed.", error)
             close()
             onSocketConnectionClosed?.invoke(socketUrl, error)
             throw NetworkException(cause = error)
         }
     }
 
-    private fun launchWebSocketReceiver() {
+    private fun WebSocketSession.launchWebSocketReceiver() {
         wsReceiverJob?.cancel()
         wsReceiverJob = scope.launch {
-            wsSession?.receiveSocketMessages()
+            receiveSocketMessages()
         }
     }
 
@@ -108,10 +108,8 @@ internal class NostrSocketClientImpl(
 
                     is Frame.Close -> {
                         val closeReason = frame.readReason()
-                        Napier.w {
-                            "WS $socketUrl closed with code=${closeReason?.code} and reason=${closeReason?.message}"
-                        }
-                        wsSession = null
+                        Napier.w { "WS $socketUrl closed. [${closeReason?.code}, ${closeReason?.message}]" }
+                        close()
                         onSocketConnectionClosed?.invoke(socketUrl, null)
                     }
 
@@ -123,7 +121,7 @@ internal class NostrSocketClientImpl(
             throw error
         } catch (error: Exception) {
             Napier.w("NostrSocketClient::receiveSocketMessages() on $socketUrl failed.", error)
-            wsSession = null
+            close()
             onSocketConnectionClosed?.invoke(socketUrl, error)
         }
     }
