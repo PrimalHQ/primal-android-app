@@ -17,6 +17,7 @@ import net.primal.domain.nostr.hasReplyMarker
 import net.primal.domain.nostr.hasRootMarker
 import net.primal.domain.nostr.isEventIdTag
 import net.primal.domain.nostr.isIMetaTag
+import net.primal.domain.nostr.isQuoteTag
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.parseHashtags
 import net.primal.domain.nostr.utils.parseNostrUris
@@ -70,15 +71,21 @@ private fun NostrEvent.shortTextNoteAsPost(
     referencedArticlesMap: Map<String, ArticleData>,
     referencedHighlightsMap: Map<String, HighlightData>,
 ): PostData {
-    val replyToPostId = this.tags.find { it.hasReplyMarker() }?.getTagValueOrNull()
+    val isQuote = this.tags.any { it.isQuoteTag() }
+    val isReply = !isQuote && (
+        this.tags.any { it.hasReplyMarker() } || this.tags.any { it.hasRootMarker() } ||
+            this.tags.any { it.isEventIdTag() && !it.hasMentionMarker() }
+        )
+
+    val referencedNoteId = this.tags.find { it.hasReplyMarker() }?.getTagValueOrNull()
         ?: this.tags.find { it.hasRootMarker() }?.getTagValueOrNull()
         ?: this.tags.filterNot { it.hasMentionMarker() }.lastOrNull { it.isEventIdTag() }?.getTagValueOrNull()
 
-    val replyToAuthorId = this.tags.find { it.hasReplyMarker() }?.getPubkeyFromReplyOrRootTag()
+    val referencedNoteAuthorId = this.tags.find { it.hasReplyMarker() }?.getPubkeyFromReplyOrRootTag()
         ?: this.tags.find { it.hasRootMarker() }?.getPubkeyFromReplyOrRootTag()
-        ?: referencedPostsMap[replyToPostId]?.authorId
-        ?: referencedArticlesMap[replyToPostId]?.authorId
-        ?: referencedHighlightsMap[replyToPostId]?.authorId
+        ?: referencedPostsMap[referencedNoteId]?.authorId
+        ?: referencedArticlesMap[referencedNoteId]?.authorId
+        ?: referencedHighlightsMap[referencedNoteId]?.authorId
 
     return PostData(
         postId = this.id,
@@ -90,8 +97,8 @@ private fun NostrEvent.shortTextNoteAsPost(
         hashtags = this.parseHashtags(),
         sig = this.sig,
         raw = this.toNostrJsonObject().encodeToJsonString(),
-        replyToPostId = replyToPostId,
-        replyToAuthorId = replyToAuthorId,
+        replyToPostId = if (isReply) referencedNoteId else null,
+        replyToAuthorId = if (isReply) referencedNoteAuthorId else null,
     )
 }
 

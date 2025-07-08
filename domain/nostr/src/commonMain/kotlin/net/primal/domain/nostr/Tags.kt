@@ -74,6 +74,8 @@ fun JsonArray.isIdentifierTag() = getOrNull(0)?.jsonPrimitive?.content == "d"
 
 fun JsonArray.isATag() = getOrNull(0)?.jsonPrimitive?.content == "a"
 
+fun JsonArray.isQuoteTag() = getOrNull(0)?.jsonPrimitive?.content == "q"
+
 fun JsonArray.isTitleTag() = getOrNull(0)?.jsonPrimitive?.content == "title"
 
 fun JsonArray.isSummaryTag() = getOrNull(0)?.jsonPrimitive?.content == "summary"
