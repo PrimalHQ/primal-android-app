@@ -1,6 +1,5 @@
 package net.primal.data.repository.mappers.remote
 
-import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.core.utils.detectUrls
 import net.primal.core.utils.serialization.encodeToJsonString
@@ -18,6 +17,7 @@ import net.primal.domain.nostr.hasReplyMarker
 import net.primal.domain.nostr.hasRootMarker
 import net.primal.domain.nostr.isEventIdTag
 import net.primal.domain.nostr.isIMetaTag
+import net.primal.domain.nostr.isQuoteTag
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.parseHashtags
 import net.primal.domain.nostr.utils.parseNostrUris
@@ -119,8 +119,4 @@ private fun NostrEvent.pictureNoteAsPost(): PostData {
         replyToPostId = null,
         replyToAuthorId = null,
     )
-}
-
-private fun JsonArray.isQuoteTag(): Boolean {
-    return this.getOrNull(0)?.jsonPrimitive?.content == "q" && this.getOrNull(1) != null
 }
