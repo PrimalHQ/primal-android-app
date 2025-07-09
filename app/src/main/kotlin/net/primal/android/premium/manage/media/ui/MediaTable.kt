@@ -26,10 +26,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import java.time.format.FormatStyle
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalImage
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.CopyAlt
 import net.primal.android.core.compose.icons.primaliconpack.Delete
@@ -58,14 +58,13 @@ fun MediaListItem(
             modifier = Modifier.weight(weight = 2.70f),
             contentAlignment = Alignment.CenterStart,
         ) {
-            SubcomposeAsyncImage(
+            PrimalImage(
                 modifier = Modifier
                     .size(width = 64.dp, height = 48.dp)
                     .clip(AppTheme.shapes.extraSmall),
                 model = ImageRequest.Builder(context)
                     .data(item.thumbnailUrl ?: item.mediaUrl)
                     .build(),
-                contentDescription = null,
                 contentScale = ContentScale.Crop,
                 loading = { PlaceholderIcon(type = item.type) },
                 error = { PlaceholderIcon(type = item.type) },
@@ -76,7 +75,9 @@ fun MediaListItem(
             item = item,
         )
         ActionIcon(
-            modifier = Modifier.weight(2f).padding(end = 8.dp),
+            modifier = Modifier
+                .weight(2f)
+                .padding(end = 8.dp),
             imageVector = PrimalIcons.CopyAlt,
             onClick = onCopyClick,
             tint = AppTheme.colorScheme.onPrimary,

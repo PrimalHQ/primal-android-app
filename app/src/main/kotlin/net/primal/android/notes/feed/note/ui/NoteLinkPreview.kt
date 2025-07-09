@@ -26,7 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.SubcomposeAsyncImage
+import net.primal.android.core.compose.PrimalImage
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.GenericLinkIcon
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -54,7 +54,7 @@ fun NoteLinkPreview(
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
     ) {
         if (thumbnailUrl != null) {
-            SubcomposeAsyncImage(
+            PrimalImage(
                 model = thumbnailUrl,
                 modifier = Modifier
                     .clip(
@@ -65,7 +65,6 @@ fun NoteLinkPreview(
                     )
                     .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
                     .size(width = ThumbnailWidth, height = ThumbnailHeight),
-                contentDescription = null,
                 contentScale = ContentScale.Crop,
                 loading = {
                     NoteImageLoadingPlaceholder()

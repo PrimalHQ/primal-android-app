@@ -21,9 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.SubcomposeAsyncImage
+import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
 import net.primal.android.notes.feed.note.ui.attachment.PlayButton
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -91,7 +90,7 @@ private fun VideoThumbnailImage(
     Box(
         contentAlignment = Alignment.Center,
     ) {
-        SubcomposeAsyncImage(
+        PrimalAsyncImage(
             model = thumbnailUrl,
             modifier = Modifier
                 .clip(
@@ -102,9 +101,7 @@ private fun VideoThumbnailImage(
                 )
                 .width(thumbnailImageSize.width)
                 .height(thumbnailImageSize.height),
-            contentDescription = null,
             contentScale = ContentScale.FillHeight,
-            loading = { NoteImageLoadingPlaceholder() },
         )
 
         PlayButton(
