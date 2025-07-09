@@ -8,6 +8,7 @@ import androidx.paging.PagingSource
 import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -54,6 +55,7 @@ internal class FeedRepositoryImpl(
                 ).feedQuery(),
             )
         }.flow.map { it.map { feedPostPO -> feedPostPO.mapAsFeedPostDO() } }
+            .flowOn(dispatcherProvider.io())
     }
 
     override suspend fun findNewestPosts(

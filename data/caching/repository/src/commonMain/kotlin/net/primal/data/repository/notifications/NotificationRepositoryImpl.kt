@@ -7,6 +7,7 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
@@ -48,6 +49,7 @@ class NotificationRepositoryImpl(
         return createPager(userId = userId) {
             database.notifications().allSeenNotificationsPaged(ownerId = userId)
         }.flow.map { it.map { it.asNotificationDO() } }
+            .flowOn(dispatcherProvider.io())
     }
 
     private fun constructRemoteMediator(userId: String) =

@@ -7,6 +7,7 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.asMapByKey
@@ -109,6 +110,7 @@ class EventRepositoryImpl(
         return createPager(userId = userId, eventId = eventId) {
             database.eventZaps().pagedEventZaps(eventId = articleATag ?: eventId)
         }.flow.map { it.map { it.asEventZapDO() } }
+            .flowOn(dispatcherProvider.io())
     }
 
     @OptIn(ExperimentalPagingApi::class)
