@@ -107,23 +107,12 @@ fun PremiumCardScreen(viewModel: PremiumCardViewModel, callbacks: PremiumCardCon
 
     PremiumCardScreen(
         state = uiState.value,
-        onClose = callbacks.onClose,
-        onLegendSettingsClick = callbacks.onLegendSettingsClick,
-        onSeeOtherLegendsClick = callbacks.onSeeOtherLegendsClick,
-        onSeeOtherPrimalOGsClick = callbacks.onSeeOtherPrimalOGsClick,
-        onBecomeLegendClick = callbacks.onBecomeLegendClick,
+        callbacks = callbacks,
     )
 }
 
 @Composable
-private fun PremiumCardScreen(
-    state: PremiumCardContract.UiState,
-    onClose: () -> Unit,
-    onSeeOtherPrimalOGsClick: () -> Unit,
-    onLegendSettingsClick: () -> Unit,
-    onSeeOtherLegendsClick: () -> Unit,
-    onBecomeLegendClick: () -> Unit,
-) {
+private fun PremiumCardScreen(state: PremiumCardContract.UiState, callbacks: PremiumCardContract.ScreenCallbacks) {
     val animationProgress = remember { AnimationState(initialValue = 0f) }
     val glowProgress = remember { AnimationState(initialValue = 0f) }
     LaunchedEffect(Unit) {
@@ -151,18 +140,14 @@ private fun PremiumCardScreen(
             state.isPrimalLegend -> {
                 LegendCardLayout(
                     state = state,
-                    onClose = onClose,
-                    onLegendSettingsClick = onLegendSettingsClick,
-                    onSeeOtherLegendsClick = onSeeOtherLegendsClick,
-                    onBecomeLegendClick = onBecomeLegendClick,
+                    callbacks = callbacks,
                 )
             }
 
             else -> {
                 PrimalOGLayout(
                     state = state,
-                    onClose = onClose,
-                    onSeeOtherPrimalOGsClick = onSeeOtherPrimalOGsClick,
+                    callbacks = callbacks,
                 )
             }
         }
@@ -170,11 +155,7 @@ private fun PremiumCardScreen(
 }
 
 @Composable
-private fun PrimalOGLayout(
-    onClose: () -> Unit,
-    onSeeOtherPrimalOGsClick: () -> Unit,
-    state: PremiumCardContract.UiState,
-) {
+private fun PrimalOGLayout(state: PremiumCardContract.UiState, callbacks: PremiumCardContract.ScreenCallbacks) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -184,7 +165,7 @@ private fun PrimalOGLayout(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(48.dp, Alignment.CenterVertically),
         ) {
-            CloseButtonRow(onDismissRequest = onClose)
+            CloseButtonRow(onDismissRequest = callbacks.onClose)
 
             state.profile?.let { profile ->
                 ProfileSummary(profile = profile)
@@ -193,20 +174,14 @@ private fun PrimalOGLayout(
         }
         AnimatedButtonsColumn(
             primaryButtonText = stringResource(id = R.string.premium_card_button_see_other_ogs),
-            onPrimaryButtonClick = onSeeOtherPrimalOGsClick,
+            onPrimaryButtonClick = callbacks.onSeeOtherPrimalOGsClick,
             isSecondaryButtonVisible = false,
         )
     }
 }
 
 @Composable
-private fun LegendCardLayout(
-    state: PremiumCardContract.UiState,
-    onClose: () -> Unit,
-    onLegendSettingsClick: () -> Unit,
-    onSeeOtherLegendsClick: () -> Unit,
-    onBecomeLegendClick: () -> Unit,
-) {
+private fun LegendCardLayout(state: PremiumCardContract.UiState, callbacks: PremiumCardContract.ScreenCallbacks) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -214,11 +189,11 @@ private fun LegendCardLayout(
     ) {
         if (state.isActiveAccountCard) {
             OptionsDropdownMenu(
-                onBackClick = onClose,
-                onLegendSettingsClick = onLegendSettingsClick,
+                onBackClick = callbacks.onClose,
+                onLegendSettingsClick = callbacks.onLegendSettingsClick,
             )
         } else {
-            CloseButtonRow(onDismissRequest = onClose)
+            CloseButtonRow(onDismissRequest = callbacks.onClose)
         }
 
         state.profile?.let { profile ->
@@ -232,9 +207,9 @@ private fun LegendCardLayout(
         state.profile?.premiumDetails?.legendaryCustomization?.let { legendaryCustomization ->
             AnimatedButtonsColumn(
                 primaryButtonText = stringResource(id = R.string.premium_card_button_see_other_legends),
-                onPrimaryButtonClick = onSeeOtherLegendsClick,
+                onPrimaryButtonClick = callbacks.onSeeOtherLegendsClick,
                 secondaryButtonText = stringResource(id = R.string.premium_card_button_become_a_legend),
-                onSecondaryButtonClick = onBecomeLegendClick,
+                onSecondaryButtonClick = callbacks.onBecomeLegendClick,
                 isSecondaryButtonVisible = !state.isActiveAccountLegend,
                 legendaryCustomization = legendaryCustomization,
             )

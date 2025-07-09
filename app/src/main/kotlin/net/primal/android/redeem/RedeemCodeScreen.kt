@@ -36,7 +36,7 @@ import net.primal.android.redeem.ui.RedeemScanCodeStage
 fun RedeemCodeScreen(viewModel: RedeemCodeViewModel, callbacks: RedeemCodeContract.ScreenCallbacks) {
     val uiState = viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel) {
+    LaunchedEffect(viewModel, callbacks) {
         viewModel.effects.collect {
             when (it) {
                 RedeemCodeContract.SideEffect.PromoCodeApplied -> callbacks.onClose()
@@ -45,10 +45,8 @@ fun RedeemCodeScreen(viewModel: RedeemCodeViewModel, callbacks: RedeemCodeContra
     }
 
     RedeemCodeScreen(
-        onClose = callbacks.onClose,
         state = uiState.value,
-        navigateToOnboarding = callbacks.navigateToOnboarding,
-        navigateToWalletOnboarding = callbacks.navigateToWalletOnboarding,
+        callbacks = callbacks,
         eventPublisher = viewModel::setEvent,
     )
 }
@@ -56,10 +54,8 @@ fun RedeemCodeScreen(viewModel: RedeemCodeViewModel, callbacks: RedeemCodeContra
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RedeemCodeScreen(
-    onClose: () -> Unit,
     state: RedeemCodeContract.UiState,
-    navigateToOnboarding: (String) -> Unit,
-    navigateToWalletOnboarding: (String) -> Unit,
+    callbacks: RedeemCodeContract.ScreenCallbacks,
     eventPublisher: (RedeemCodeContract.UiEvent) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -87,7 +83,7 @@ fun RedeemCodeScreen(
                         if (state.stageStack.size > 1) {
                             eventPublisher(UiEvent.PreviousStage)
                         } else {
-                            onClose()
+                            callbacks.onClose()
                         }
                     },
                 )
@@ -134,8 +130,20 @@ fun RedeemCodeScreen(
                                 onApplyCodeClick = {
                                     state.promoCode?.let { eventPublisher(UiEvent.ApplyCode(it)) }
                                 },
-                                onOnboardToPrimalClick = { state.promoCode?.let { navigateToOnboarding(it) } },
-                                onActivateWalletClick = { state.promoCode?.let { navigateToWalletOnboarding(it) } },
+                                onOnboardToPrimalClick = {
+                                    state.promoCode?.let {
+                                        callbacks.navigateToOnboarding(
+                                            it,
+                                        )
+                                    }
+                                },
+                                onActivateWalletClick = {
+                                    state.promoCode?.let {
+                                        callbacks.navigateToWalletOnboarding(
+                                            it,
+                                        )
+                                    }
+                                },
                             )
                         }
                     }

@@ -40,8 +40,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, callbacks: OnboardingContra
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
         onBack = { handleBackEvent() },
-        onOnboarded = callbacks.onOnboarded,
-        onActivateWallet = callbacks.onActivateWallet,
+        callbacks = callbacks,
     )
 }
 
@@ -51,8 +50,7 @@ private fun OnboardingScreen(
     state: OnboardingContract.UiState,
     eventPublisher: (OnboardingContract.UiEvent) -> Unit,
     onBack: () -> Unit,
-    onOnboarded: () -> Unit,
-    onActivateWallet: () -> Unit,
+    callbacks: OnboardingContract.ScreenCallbacks,
 ) {
     AnimatedContent(
         targetState = state.currentStep,
@@ -91,8 +89,8 @@ private fun OnboardingScreen(
                     state = state,
                     eventPublisher = eventPublisher,
                     onBack = onBack,
-                    onOnboarded = onOnboarded,
-                    onActivateWallet = onActivateWallet,
+                    onOnboarded = callbacks.onOnboarded,
+                    onActivateWallet = callbacks.onActivateWallet,
                 )
             }
         }
@@ -159,8 +157,11 @@ private fun PreviewOnboarding(
             state = uiState,
             eventPublisher = {},
             onBack = {},
-            onOnboarded = {},
-            onActivateWallet = {},
+            callbacks = OnboardingContract.ScreenCallbacks(
+                onClose = {},
+                onOnboarded = {},
+                onActivateWallet = {},
+            ),
         )
     }
 }
