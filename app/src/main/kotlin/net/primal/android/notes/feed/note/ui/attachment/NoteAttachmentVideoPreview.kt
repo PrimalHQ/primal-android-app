@@ -45,16 +45,18 @@ fun NoteAttachmentVideoPreview(
     eventUri: EventUriUi,
     onVideoClick: (positionMs: Long) -> Unit,
     allowAutoPlay: Boolean,
+    couldAutoPlay: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val userPrefersAutoPlay = LocalContentDisplaySettings.current.autoPlayVideos ==
-        ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
+    val userPrefersAutoPlay =
+        LocalContentDisplaySettings.current.autoPlayVideos == ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
 
     val shouldAutoPlay = userPrefersAutoPlay && allowAutoPlay
 
     if (shouldAutoPlay) {
         AutoPlayVideo(
             eventUri = eventUri,
+            playing = couldAutoPlay,
             onVideoClick = onVideoClick,
             modifier = modifier,
         )
@@ -71,6 +73,7 @@ fun NoteAttachmentVideoPreview(
 @Composable
 private fun AutoPlayVideo(
     eventUri: EventUriUi,
+    playing: Boolean,
     onVideoClick: (positionMs: Long) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -98,6 +101,14 @@ private fun AutoPlayVideo(
         onDispose {
             exoPlayer.removeListener(listener)
             exoPlayer.release()
+        }
+    }
+
+    LaunchedEffect(playing) {
+        if (playing) {
+            exoPlayer.play()
+        } else {
+            exoPlayer.pause()
         }
     }
 

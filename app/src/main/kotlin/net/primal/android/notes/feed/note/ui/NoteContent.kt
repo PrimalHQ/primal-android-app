@@ -168,6 +168,7 @@ fun NoteContent(
     enableTweetsMode: Boolean = false,
     textSelectable: Boolean = false,
     referencedEventsHaveBorder: Boolean = false,
+    couldAutoPlay: Boolean = false,
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,
     referencedEventsContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
@@ -282,6 +283,7 @@ fun NoteContent(
                 eventUris = filteredEventUris,
                 blossoms = data.blossoms,
                 expanded = expanded,
+                couldAutoPlay = couldAutoPlay,
                 onUrlClick = { url ->
                     when {
                         url.isPrimalLegendsUrl() -> noteCallbacks.onPrimalLegendsLeaderboardClick?.invoke()

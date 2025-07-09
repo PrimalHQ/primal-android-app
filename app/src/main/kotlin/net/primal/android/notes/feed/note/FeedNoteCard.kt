@@ -103,6 +103,7 @@ fun FeedNoteCard(
     showReplyTo: Boolean = true,
     noteOptionsMenuEnabled: Boolean = true,
     showNoteStatCounts: Boolean = true,
+    couldAutoPlay: Boolean = false,
     noteCallbacks: NoteCallbacks = NoteCallbacks(),
     onNoteDeleted: (() -> Unit)? = null,
     onGoToWallet: (() -> Unit)? = null,
@@ -148,6 +149,7 @@ fun FeedNoteCard(
         showReplyTo = showReplyTo,
         showNoteStatCounts = showNoteStatCounts,
         noteOptionsMenuEnabled = noteOptionsMenuEnabled,
+        couldAutoPlay = couldAutoPlay,
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         contentFooter = contentFooter,
@@ -176,6 +178,7 @@ private fun FeedNoteCard(
     showReplyTo: Boolean = true,
     noteOptionsMenuEnabled: Boolean = true,
     showNoteStatCounts: Boolean = true,
+    couldAutoPlay: Boolean = false,
     noteCallbacks: NoteCallbacks = NoteCallbacks(),
     onGoToWallet: (() -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
@@ -400,6 +403,7 @@ private fun FeedNoteCard(
                         expanded = expanded,
                         textSelectable = textSelectable,
                         showNoteStatCounts = showNoteStatCounts,
+                        couldAutoPlay = couldAutoPlay,
                         noteCallbacks = noteCallbacks,
                         onPostAction = { postAction ->
                             when (postAction) {
@@ -524,6 +528,7 @@ private fun FeedNote(
     expanded: Boolean,
     textSelectable: Boolean,
     showNoteStatCounts: Boolean,
+    couldAutoPlay: Boolean,
     noteCallbacks: NoteCallbacks,
     nestingCutOffLimit: Int = Int.MAX_VALUE,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
@@ -603,6 +608,7 @@ private fun FeedNote(
                     null
                 },
                 onUrlClick = { localUriHandler.openUriSafely(it) },
+                couldAutoPlay = couldAutoPlay,
                 noteCallbacks = noteCallbacks,
             )
 

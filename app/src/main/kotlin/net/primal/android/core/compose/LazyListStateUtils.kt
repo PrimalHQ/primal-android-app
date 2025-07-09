@@ -2,9 +2,15 @@ package net.primal.android.core.compose
 
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 
 /**
  * Remembers a derived [State] that indicates whether an item with the specified [key] is currently
@@ -32,4 +38,27 @@ fun LazyListState.rememberIsItemVisible(key: Any?, fallback: Boolean): State<Boo
             }
         }
     }
+}
+
+@Composable
+fun rememberFirstVisibleItemIndex(listState: LazyListState): MutableState<Int?> {
+    val currentlyFirstVisibleIndex = remember { mutableStateOf<Int?>(null) }
+    LaunchedEffect(listState) {
+        snapshotFlow { listState.layoutInfo }
+            .map { layoutInfo ->
+                val fullyVisibleItems = layoutInfo.visibleItemsInfo
+                    .filter {
+                        val itemTop = it.offset
+                        val itemBottom = it.offset + it.size
+                        itemTop >= layoutInfo.viewportStartOffset && itemBottom <= layoutInfo.viewportEndOffset
+                    }
+                fullyVisibleItems.firstOrNull()?.index
+            }
+            .distinctUntilChanged()
+            .collect { visibleIndex ->
+                currentlyFirstVisibleIndex.value = visibleIndex
+            }
+    }
+
+    return currentlyFirstVisibleIndex
 }
