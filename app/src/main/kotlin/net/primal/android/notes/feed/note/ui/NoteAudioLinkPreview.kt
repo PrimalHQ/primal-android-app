@@ -27,13 +27,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.SubcomposeAsyncImage
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Play
-import net.primal.android.notes.feed.note.ui.attachment.NoteImageErrorImage
-import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.EventUriType
 
@@ -60,7 +58,7 @@ fun NoteAudioLinkPreview(
             ),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        SubcomposeAsyncImage(
+        PrimalAsyncImage(
             model = thumbnailUrl,
             modifier = Modifier
                 .size(previewHeight)
@@ -70,10 +68,8 @@ fun NoteAudioLinkPreview(
                         bottomEnd = CornerSize(0.dp),
                     ),
                 ),
-            contentDescription = null,
             contentScale = ContentScale.FillHeight,
-            loading = { NoteImageLoadingPlaceholder() },
-            error = { NoteImageErrorImage() },
+            errorColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
         )
 
         AudioInfoColumn(

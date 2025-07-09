@@ -25,7 +25,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil3.compose.SubcomposeAsyncImage
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -57,7 +56,7 @@ fun UniversalAvatarThumbnail(
         legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION
 
     val borderBrush = if (hasLegendBorder) {
-        legendaryCustomization?.legendaryStyle?.primaryBrush
+        legendaryCustomization.legendaryStyle?.primaryBrush
     } else {
         null
     }
@@ -148,17 +147,18 @@ private fun AvatarThumbnailListItemImage(
     }
 
     if (currentUrl != null) {
-        SubcomposeAsyncImage(
+        PrimalAsyncImage(
             model = currentUrl,
             imageLoader = imageLoader,
             modifier = sharedModifier,
             contentDescription = stringResource(id = R.string.accessibility_profile_image),
             contentScale = ContentScale.Crop,
-            loading = { AvatarLoadingBox(backgroundColor) },
-            error = { currentUrlIndex += 1 },
+            placeholderColor = backgroundColor,
+            placeHolderHighlight = null,
+            onError = { currentUrlIndex += 1 },
         )
     } else {
-        SubcomposeAsyncImage(
+        PrimalImage(
             modifier = sharedModifier,
             model = sourceUrl,
             imageLoader = imageLoader,

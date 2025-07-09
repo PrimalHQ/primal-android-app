@@ -28,8 +28,8 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.PlayerView
-import coil3.compose.SubcomposeAsyncImage
 import net.primal.android.LocalContentDisplaySettings
+import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -179,13 +179,11 @@ private fun VideoThumbnailImagePreview(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        SubcomposeAsyncImage(
+        PrimalAsyncImage(
             model = eventUri.thumbnailUrl,
             modifier = Modifier.fillMaxSize(),
-            contentDescription = null,
             contentScale = ContentScale.Crop,
-            loading = { PrimalLoadingSpinner(size = 48.dp) },
-            error = { NoteVideoThumbnailErrorImage() },
+            errorColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
         )
 
         PlayButton(onClick = onClick)
@@ -217,13 +215,4 @@ fun PlayButton(loading: Boolean = false, onClick: (() -> Unit)? = null) {
             )
         }
     }
-}
-
-@Composable
-fun NoteVideoThumbnailErrorImage() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt3),
-    )
 }

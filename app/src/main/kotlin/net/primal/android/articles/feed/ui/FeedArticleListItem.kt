@@ -40,10 +40,10 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.SubcomposeAsyncImage
 import java.time.Instant
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.PrimalImage
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.asBeforeNowFormat
@@ -223,7 +223,7 @@ private fun ListItemContent(data: FeedArticleUi, modifier: Modifier = Modifier) 
         )
 
         val imageSource = data.resolveImageUrl()
-        SubcomposeAsyncImage(
+        PrimalImage(
             model = imageSource,
             modifier = Modifier
                 .padding(vertical = 4.dp)
@@ -234,7 +234,6 @@ private fun ListItemContent(data: FeedArticleUi, modifier: Modifier = Modifier) 
                     shape = AppTheme.shapes.extraSmall,
                 )
                 .clip(AppTheme.shapes.extraSmall),
-            contentDescription = null,
             contentScale = ContentScale.Crop,
             alignment = Alignment.TopCenter,
             loading = { ArticleImagePlaceholder() },
