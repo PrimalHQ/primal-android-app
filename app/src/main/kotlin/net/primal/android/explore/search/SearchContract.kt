@@ -1,6 +1,7 @@
 package net.primal.android.explore.search
 
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
+import net.primal.android.explore.search.ui.SearchScope
 
 interface SearchContract {
 
@@ -19,4 +20,13 @@ interface SearchContract {
         data class ProfileSelected(val profileId: String) : UiEvent()
         data object ResetSearchQuery : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onAdvancedSearchClick: (query: String) -> Unit,
+        val onProfileClick: (String) -> Unit,
+        val onNoteClick: (String) -> Unit,
+        val onNaddrClick: (String) -> Unit,
+        val onSearchContent: (scope: SearchScope, query: String) -> Unit,
+    )
 }

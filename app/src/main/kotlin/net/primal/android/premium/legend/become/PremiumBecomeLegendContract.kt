@@ -51,4 +51,9 @@ class PremiumBecomeLegendContract {
     companion object {
         const val LEGEND_THRESHOLD_IN_USD = 1_000
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onLegendPurchased: () -> Unit,
+    )
 }

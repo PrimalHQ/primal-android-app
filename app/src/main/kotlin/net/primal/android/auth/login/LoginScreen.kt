@@ -81,16 +81,11 @@ import net.primal.domain.nostr.utils.isValidNostrPrivateKey
 import net.primal.domain.nostr.utils.isValidNostrPublicKey
 
 @Composable
-fun LoginScreen(
-    viewModel: LoginViewModel,
-    onClose: () -> Unit,
-    onLoginSuccess: () -> Unit,
-) {
-    val keyboardController = LocalSoftwareKeyboardController.current
-    LaunchedEffect(viewModel, onLoginSuccess) {
+fun LoginScreen(viewModel: LoginViewModel, callbacks: LoginContract.ScreenCallbacks) {
+    LaunchedEffect(viewModel, callbacks) {
         viewModel.effect.collect {
             when (it) {
-                is LoginContract.SideEffect.LoginSuccess -> onLoginSuccess()
+                is LoginContract.SideEffect.LoginSuccess -> callbacks.onLoginSuccess()
             }
         }
     }
@@ -101,10 +96,7 @@ fun LoginScreen(
     LoginScreen(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
-        onClose = {
-            keyboardController?.hide()
-            onClose()
-        },
+        callbacks = callbacks,
     )
 }
 
@@ -113,8 +105,14 @@ fun LoginScreen(
 fun LoginScreen(
     state: LoginContract.UiState,
     eventPublisher: (LoginContract.UiEvent) -> Unit,
-    onClose: () -> Unit,
+    callbacks: LoginContract.ScreenCallbacks,
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val onClose = {
+        keyboardController?.hide()
+        callbacks.onClose()
+    }
+
     val signLauncher = rememberAmberSignerLauncher(
         onFailure = { eventPublisher(LoginContract.UiEvent.ResetLoginState) },
     ) { nostrEvent ->
@@ -508,7 +506,10 @@ fun PreviewLoginScreen() {
         LoginScreen(
             state = LoginContract.UiState(loading = false),
             eventPublisher = {},
-            onClose = {},
+            callbacks = LoginContract.ScreenCallbacks(
+                onLoginSuccess = {},
+                onClose = {},
+            ),
         )
     }
 }

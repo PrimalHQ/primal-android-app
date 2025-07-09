@@ -20,4 +20,9 @@ interface PremiumOrderHistoryContract {
     sealed class UiEvent {
         data object CancelSubscription : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onExtendSubscription: (primalName: String) -> Unit,
+        val onClose: () -> Unit,
+    )
 }

@@ -69,12 +69,9 @@ fun HomeFeedScreen(
     viewModel: HomeFeedViewModel,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
-    onSearchClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
-    onNewPostClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
+    callbacks: HomeFeedContract.ScreenCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -83,7 +80,6 @@ fun HomeFeedScreen(
             Lifecycle.Event.ON_START -> {
                 viewModel.setEvent(UiEvent.RequestUserDataUpdate)
             }
-
             else -> Unit
         }
     }
@@ -92,13 +88,10 @@ fun HomeFeedScreen(
         state = uiState.value,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
-        onSearchClick = onSearchClick,
         noteCallbacks = noteCallbacks,
-        onGoToWallet = onGoToWallet,
-        onNewPostClick = onNewPostClick,
         eventPublisher = viewModel::setEvent,
         accountSwitcherCallbacks = accountSwitcherCallbacks,
+        callbacks = callbacks,
     )
 }
 
@@ -108,13 +101,10 @@ fun HomeFeedScreen(
     state: HomeFeedContract.UiState,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
-    onSearchClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
-    onNewPostClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
+    callbacks: HomeFeedContract.ScreenCallbacks,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -159,7 +149,7 @@ fun HomeFeedScreen(
         accountSwitcherCallbacks = accountSwitcherCallbacks,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
+        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topAppBarState = topAppBarState,
@@ -171,13 +161,13 @@ fun HomeFeedScreen(
                 avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
                 avatarBlossoms = state.activeAccountBlossoms,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
-                onSearchClick = onSearchClick,
+                onSearchClick = callbacks.onSearchClick,
                 onFeedChanged = { feed ->
                     val pageIndex = state.feeds.indexOf(feed)
                     uiScope.launch { pagerState.scrollToPage(page = pageIndex) }
                 },
                 scrollBehavior = scrollBehavior,
-                onGoToWallet = onGoToWallet,
+                onGoToWallet = callbacks.onGoToWallet,
             )
         },
         content = { paddingValues ->
@@ -197,7 +187,7 @@ fun HomeFeedScreen(
                         noteCallbacks = noteCallbacks,
                         showTopZaps = true,
                         newNotesNoticeAlpha = (1 - topAppBarState.collapsedFraction) * 1.0f,
-                        onGoToWallet = onGoToWallet,
+                        onGoToWallet = callbacks.onGoToWallet,
                         contentPadding = paddingValues,
                         shouldAnimateScrollToTop = shouldAnimateScrollToTop,
                         onUiError = { uiError ->
@@ -226,7 +216,7 @@ fun HomeFeedScreen(
             }
         },
         floatingActionButton = {
-            NewPostFloatingActionButton(onNewPostClick = onNewPostClick)
+            NewPostFloatingActionButton(onNewPostClick = callbacks.onNewPostClick)
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)

@@ -11,4 +11,10 @@ interface OGLeaderboardContract {
         val error: Throwable? = null,
         val isActiveAccountPremium: Boolean = false,
     )
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onProfileClick: (String) -> Unit,
+        val onGetPrimalPremiumClick: () -> Unit,
+    )
 }

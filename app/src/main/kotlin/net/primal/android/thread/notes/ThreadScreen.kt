@@ -110,10 +110,8 @@ import net.primal.domain.nostr.ReactionType
 @Composable
 fun ThreadScreen(
     viewModel: ThreadViewModel,
-    onClose: () -> Unit,
+    callbacks: ThreadContract.ScreenCallbacks,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
-    onExpandReply: (args: NoteEditorArgs) -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
 
@@ -122,17 +120,14 @@ fun ThreadScreen(
             Lifecycle.Event.ON_START -> viewModel.setEvent(
                 ThreadContract.UiEvent.UpdateConversation,
             )
-
             else -> Unit
         }
     }
 
     ThreadScreen(
         state = uiState,
-        onClose = onClose,
+        callbacks = callbacks,
         noteCallbacks = noteCallbacks,
-        onGoToWallet = onGoToWallet,
-        onExpandReply = onExpandReply,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -141,10 +136,8 @@ fun ThreadScreen(
 @Composable
 fun ThreadScreen(
     state: ThreadContract.UiState,
-    onClose: () -> Unit,
+    callbacks: ThreadContract.ScreenCallbacks,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
-    onExpandReply: (args: NoteEditorArgs) -> Unit,
     eventPublisher: (ThreadContract.UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
@@ -182,7 +175,7 @@ fun ThreadScreen(
                 title = stringResource(id = R.string.thread_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
-                onNavigationIconClick = onClose,
+                onNavigationIconClick = callbacks.onClose,
                 showDivider = true,
             )
         },
@@ -195,9 +188,9 @@ fun ThreadScreen(
                     paddingValues = paddingValues,
                     state = state,
                     noteCallbacks = noteCallbacks,
-                    onGoToWallet = onGoToWallet,
+                    onGoToWallet = callbacks.onGoToWallet,
                     eventPublisher = eventPublisher,
-                    onRootPostDeleted = onClose,
+                    onRootPostDeleted = callbacks.onClose,
                     onUiError = { uiError ->
                         uiScope.launch {
                             snackbarHostState.showSnackbar(
@@ -258,7 +251,7 @@ fun ThreadScreen(
                     replyState = replyState,
                     replyToPost = replyToPost,
                     onExpandReply = { mediaUris ->
-                        onExpandReply(
+                        callbacks.onExpandReply(
                             NoteEditorArgs(
                                 referencedNoteNevent = state.highlightNote?.asNeventString(),
                                 mediaUris = mediaUris.map { it.toString() },
@@ -713,10 +706,12 @@ fun ThreadScreenPreview() {
                     ),
                 ),
             ),
-            onClose = {},
+            callbacks = ThreadContract.ScreenCallbacks(
+                onClose = {},
+                onGoToWallet = {},
+                onExpandReply = {},
+            ),
             noteCallbacks = NoteCallbacks(),
-            onGoToWallet = {},
-            onExpandReply = {},
             eventPublisher = {},
         )
     }

@@ -19,4 +19,11 @@ interface ReadsScreenContract {
         data object RestoreDefaultFeeds : UiEvent()
         data object RefreshReadsFeeds : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onDrawerQrCodeClick: () -> Unit,
+        val onSearchClick: () -> Unit,
+        val onArticleClick: (String) -> Unit,
+        val onGetPremiumClick: () -> Unit,
+    )
 }

@@ -11,4 +11,10 @@ interface LogoutContract {
         data object NavigateToWelcome : SideEffect()
         data object NavigateToHome : SideEffect()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val navigateToHome: () -> Unit,
+        val navigateToWelcome: () -> Unit,
+    )
 }

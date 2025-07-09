@@ -107,4 +107,10 @@ interface AdvancedSearchContract {
         SatsZapped,
         Interactions,
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onNavigateToExploreNoteFeed: (feedSpec: String, renderType: ExploreFeedContract.RenderType) -> Unit,
+        val onNavigateToExploreArticleFeed: (feedSpec: String) -> Unit,
+    )
 }

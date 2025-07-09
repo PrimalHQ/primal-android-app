@@ -29,4 +29,8 @@ interface WalletActivationContract {
         data object DismissSnackbarError : UiEvent()
         data object RequestBackToDataInput : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onDoneOrDismiss: () -> Unit,
+    )
 }

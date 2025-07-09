@@ -21,4 +21,11 @@ interface HomeFeedContract {
         data object RefreshNoteFeeds : UiEvent()
         data object RestoreDefaultNoteFeeds : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onDrawerQrCodeClick: () -> Unit,
+        val onGoToWallet: () -> Unit,
+        val onSearchClick: () -> Unit,
+        val onNewPostClick: () -> Unit,
+    )
 }

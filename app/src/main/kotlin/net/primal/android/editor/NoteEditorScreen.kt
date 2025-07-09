@@ -106,20 +106,20 @@ import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.asATagValue
 
 @Composable
-fun NoteEditorScreen(viewModel: NoteEditorViewModel, onClose: () -> Unit) {
+fun NoteEditorScreen(viewModel: NoteEditorViewModel, callbacks: NoteEditorContract.ScreenCallbacks) {
     val uiState = viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel, onClose) {
+    LaunchedEffect(viewModel, callbacks) {
         viewModel.effect.collect {
             when (it) {
-                NoteEditorContract.SideEffect.PostPublished -> onClose()
+                NoteEditorContract.SideEffect.PostPublished -> callbacks.onClose()
             }
         }
     }
 
     NoteEditorScreen(
         state = uiState.value,
-        onClose = onClose,
+        callbacks = callbacks,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -128,7 +128,7 @@ fun NoteEditorScreen(viewModel: NoteEditorViewModel, onClose: () -> Unit) {
 @Composable
 fun NoteEditorScreen(
     state: NoteEditorContract.UiState,
-    onClose: () -> Unit,
+    callbacks: NoteEditorContract.ScreenCallbacks,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -146,7 +146,7 @@ fun NoteEditorScreen(
             PrimalTopAppBar(
                 title = "",
                 navigationIcon = Icons.Outlined.Close,
-                onNavigationIconClick = onClose,
+                onNavigationIconClick = callbacks.onClose,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_close),
                 showDivider = true,
                 actions = {

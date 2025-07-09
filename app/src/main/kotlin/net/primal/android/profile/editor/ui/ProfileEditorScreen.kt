@@ -48,15 +48,11 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
-fun ProfileEditorScreen(
-    viewModel: ProfileEditorViewModel,
-    onClose: () -> Unit,
-    onNavigateToPremiumBuying: () -> Unit,
-) {
-    LaunchedEffect(viewModel, onClose) {
+fun ProfileEditorScreen(viewModel: ProfileEditorViewModel, callbacks: ProfileEditorContract.ScreenCallbacks) {
+    LaunchedEffect(viewModel, callbacks) {
         viewModel.effect.collect {
             when (it) {
-                is ProfileEditorContract.SideEffect.AccountSuccessfulyEdited -> onClose()
+                is ProfileEditorContract.SideEffect.AccountSuccessfulyEdited -> callbacks.onClose()
             }
         }
     }
@@ -65,8 +61,7 @@ fun ProfileEditorScreen(
     ProfileEditorScreen(
         state = state.value,
         eventPublisher = { viewModel.setEvent(it) },
-        onClose = onClose,
-        onNavigateToPremiumBuying = onNavigateToPremiumBuying,
+        callbacks = callbacks,
     )
 }
 
@@ -75,8 +70,7 @@ fun ProfileEditorScreen(
 fun ProfileEditorScreen(
     state: ProfileEditorContract.UiState,
     eventPublisher: (ProfileEditorContract.UiEvent) -> Unit,
-    onClose: () -> Unit,
-    onNavigateToPremiumBuying: () -> Unit,
+    callbacks: ProfileEditorContract.ScreenCallbacks,
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -88,7 +82,7 @@ fun ProfileEditorScreen(
             },
             onConfirmClick = {
                 eventPublisher(ProfileEditorContract.UiEvent.DismissPremiumPaywallDialog)
-                onNavigateToPremiumBuying()
+                callbacks.onNavigateToPremiumBuying()
             },
         )
     }
@@ -136,7 +130,7 @@ fun ProfileEditorScreen(
                 navigationIcon = PrimalIcons.ArrowBack,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = {
-                    onClose()
+                    callbacks.onClose()
                 },
             )
         },
@@ -333,8 +327,10 @@ fun PreviewEditProfileScreen() {
                 nip05Identifier = "tralala@getalby.com",
             ),
             eventPublisher = {},
-            onClose = {},
-            onNavigateToPremiumBuying = {},
+            callbacks = ProfileEditorContract.ScreenCallbacks(
+                onClose = {},
+                onNavigateToPremiumBuying = {},
+            ),
         )
     }
 }

@@ -43,19 +43,12 @@ import net.primal.domain.premium.OGLeaderboardEntry
 import timber.log.Timber
 
 @Composable
-fun OGLeaderboardScreen(
-    viewModel: OGLeaderboardViewModel,
-    onClose: () -> Unit,
-    onProfileClick: (String) -> Unit,
-    onGetPrimalPremiumClick: () -> Unit,
-) {
+fun OGLeaderboardScreen(viewModel: OGLeaderboardViewModel, callbacks: OGLeaderboardContract.ScreenCallbacks) {
     val uiState = viewModel.state.collectAsState()
 
     OGLeaderboardScreen(
         state = uiState.value,
-        onClose = onClose,
-        onProfileClick = onProfileClick,
-        onGetPrimalPremiumClick = onGetPrimalPremiumClick,
+        callbacks = callbacks,
     )
 }
 
@@ -63,19 +56,17 @@ fun OGLeaderboardScreen(
 @Composable
 private fun OGLeaderboardScreen(
     state: OGLeaderboardContract.UiState,
-    onClose: () -> Unit,
-    onGetPrimalPremiumClick: () -> Unit,
-    onProfileClick: (String) -> Unit,
+    callbacks: OGLeaderboardContract.ScreenCallbacks,
 ) {
     val pagerState = rememberPagerState { PAGE_COUNT }
 
     Scaffold(
         topBar = {
             LeaderboardTopAppBar(
-                onBackClick = onClose,
+                onBackClick = callbacks.onClose,
                 isActiveAccountPremium = state.isActiveAccountPremium,
                 pagerState = pagerState,
-                onGetPrimalPremiumClick = onGetPrimalPremiumClick,
+                onGetPrimalPremiumClick = callbacks.onGetPrimalPremiumClick,
             )
         },
     ) { paddingValues ->
@@ -114,7 +105,7 @@ private fun OGLeaderboardScreen(
                 LeaderboardList(
                     lazyListState = lazyListState,
                     entries = pagingItems,
-                    onProfileClick = onProfileClick,
+                    onProfileClick = callbacks.onProfileClick,
                 )
             }
         }

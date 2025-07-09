@@ -24,7 +24,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.repository.isValidExchangeRate
 
 @Composable
-fun LegendContributeScreen(viewModel: LegendContributeViewModel, onClose: () -> Unit) {
+fun LegendContributeScreen(viewModel: LegendContributeViewModel, callbacks: LegendContributeContract.ScreenCallbacks) {
     val state = viewModel.state.collectAsState()
 
     DisposableLifecycleObserverEffect(viewModel) {
@@ -38,7 +38,7 @@ fun LegendContributeScreen(viewModel: LegendContributeViewModel, onClose: () -> 
     LegendContributeScreen(
         state = state.value,
         eventPublisher = viewModel::setEvent,
-        onClose = onClose,
+        callbacks = callbacks,
     )
 }
 
@@ -47,12 +47,12 @@ fun LegendContributeScreen(viewModel: LegendContributeViewModel, onClose: () -> 
 private fun LegendContributeScreen(
     state: UiState,
     eventPublisher: (UiEvent) -> Unit,
-    onClose: () -> Unit,
+    callbacks: LegendContributeContract.ScreenCallbacks,
 ) {
     LegendContributeBackHandler(
         stage = state.stage,
         eventPublisher = eventPublisher,
-        onClose = onClose,
+        onClose = callbacks.onClose,
     )
 
     AnimatedContent(
@@ -67,7 +67,7 @@ private fun LegendContributeScreen(
             LegendContributeState.Intro -> {
                 LegendContributeIntroStage(
                     modifier = Modifier.fillMaxSize(),
-                    onClose = onClose,
+                    onClose = callbacks.onClose,
                     onNext = { eventPublisher(UiEvent.ShowAmountEditor(it)) },
                 )
             }
@@ -106,7 +106,7 @@ private fun LegendContributeScreen(
             LegendContributeState.Success -> {
                 LegendContributePaymentSuccessStage(
                     modifier = Modifier.fillMaxSize(),
-                    onBack = onClose,
+                    onBack = callbacks.onClose,
                 )
             }
         }

@@ -11,4 +11,9 @@ interface BookmarksContract {
     sealed class UiEvent {
         data class ChangeFeedSpecKind(val feedSpecKind: FeedSpecKind) : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onGoToWallet: () -> Unit,
+    )
 }

@@ -32,17 +32,12 @@ import net.primal.android.explore.search.ui.UserProfileListItem
 import net.primal.android.profile.domain.ProfileFollowsType
 
 @Composable
-fun ProfileFollowsScreen(
-    viewModel: ProfileFollowsViewModel,
-    onProfileClick: (String) -> Unit,
-    onClose: () -> Unit,
-) {
+fun ProfileFollowsScreen(viewModel: ProfileFollowsViewModel, callbacks: ProfileFollowsContract.ScreenCallbacks) {
     val uiState = viewModel.state.collectAsState()
 
     ProfileFollowsScreen(
         state = uiState.value,
-        onProfileClick = onProfileClick,
-        onClose = onClose,
+        callbacks = callbacks,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -51,8 +46,7 @@ fun ProfileFollowsScreen(
 @Composable
 private fun ProfileFollowsScreen(
     state: ProfileFollowsContract.UiState,
-    onProfileClick: (String) -> Unit,
-    onClose: () -> Unit,
+    callbacks: ProfileFollowsContract.ScreenCallbacks,
     eventPublisher: (ProfileFollowsContract.UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
@@ -76,7 +70,7 @@ private fun ProfileFollowsScreen(
                     }
                 } ?: "",
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
+                onNavigationIconClick = callbacks.onClose,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
             )
         },
@@ -85,7 +79,7 @@ private fun ProfileFollowsScreen(
                 state = state,
                 eventPublisher = eventPublisher,
                 paddingValues = paddingValues,
-                onProfileClick = onProfileClick,
+                onProfileClick = callbacks.onProfileClick,
             )
         },
         snackbarHost = {

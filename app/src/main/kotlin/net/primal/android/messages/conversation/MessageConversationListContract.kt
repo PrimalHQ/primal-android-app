@@ -18,4 +18,11 @@ interface MessageConversationListContract {
         data object ConversationsSeen : UiEvent()
         data object RefreshConversations : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onConversationClick: (String) -> Unit,
+        val onProfileClick: (String) -> Unit,
+        val onNewMessageClick: () -> Unit,
+        val onClose: () -> Unit,
+    )
 }

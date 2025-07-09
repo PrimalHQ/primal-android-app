@@ -88,14 +88,9 @@ fun ExploreHomeScreen(
     viewModel: ExploreHomeViewModel,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
-    onSearchClick: () -> Unit,
-    onAdvancedSearchClick: () -> Unit,
-    onGoToWallet: (() -> Unit)? = null,
     noteCallbacks: NoteCallbacks,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
-    onFollowPackClick: (profileId: String, identifier: String) -> Unit,
-    onNewPostClick: () -> Unit,
+    callbacks: ExploreHomeContract.ScreenCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -103,14 +98,9 @@ fun ExploreHomeScreen(
         state = uiState.value,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
-        onSearchClick = onSearchClick,
-        onAdvancedSearchClick = onAdvancedSearchClick,
-        onFollowPackClick = onFollowPackClick,
         noteCallbacks = noteCallbacks,
-        onGoToWallet = onGoToWallet,
         accountSwitcherCallbacks = accountSwitcherCallbacks,
-        onNewPostClick = onNewPostClick,
+        callbacks = callbacks,
     )
 }
 
@@ -120,14 +110,9 @@ private fun ExploreHomeScreen(
     state: ExploreHomeContract.UiState,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
-    onDrawerQrCodeClick: () -> Unit,
-    onSearchClick: () -> Unit,
-    onAdvancedSearchClick: () -> Unit,
-    onFollowPackClick: (profileId: String, identifier: String) -> Unit,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: (() -> Unit)? = null,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
-    onNewPostClick: () -> Unit,
+    callbacks: ExploreHomeContract.ScreenCallbacks,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -143,7 +128,7 @@ private fun ExploreHomeScreen(
         activeDestination = PrimalTopLevelDestination.Explore,
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
-        onDrawerQrCodeClick = onDrawerQrCodeClick,
+        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topAppBarState = topAppBarState,
@@ -159,8 +144,8 @@ private fun ExploreHomeScreen(
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }
                 },
-                onSearchClick = onSearchClick,
-                onActionIconClick = onAdvancedSearchClick,
+                onSearchClick = callbacks.onSearchClick,
+                onActionIconClick = callbacks.onAdvancedSearchClick,
                 scrollBehavior = topAppBarScrollBehavior,
             )
         },
@@ -174,7 +159,7 @@ private fun ExploreHomeScreen(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
                             onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
-                            onFollowPackClick = onFollowPackClick,
+                            onFollowPackClick = callbacks.onFollowPackClick,
                         )
                     }
 
@@ -182,7 +167,7 @@ private fun ExploreHomeScreen(
                         ExploreFeeds(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
-                            onGoToWallet = onGoToWallet,
+                            onGoToWallet = callbacks.onGoToWallet,
                             onUiError = { uiError: UiError ->
                                 uiScope.launch {
                                     snackbarHostState.showSnackbar(
@@ -225,7 +210,7 @@ private fun ExploreHomeScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         floatingActionButton = {
-            NewPostFloatingActionButton(onNewPostClick = onNewPostClick)
+            NewPostFloatingActionButton(onNewPostClick = callbacks.onNewPostClick)
         },
     )
 }

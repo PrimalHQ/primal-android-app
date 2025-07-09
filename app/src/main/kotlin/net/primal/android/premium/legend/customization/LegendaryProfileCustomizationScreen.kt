@@ -71,13 +71,16 @@ import net.primal.domain.links.CdnImage
 private const val SHOUTOUT_CHAR_LIMIT = 140
 
 @Composable
-fun LegendaryProfileCustomizationScreen(viewModel: LegendaryProfileCustomizationViewModel, onClose: () -> Unit) {
+fun LegendaryProfileCustomizationScreen(
+    viewModel: LegendaryProfileCustomizationViewModel,
+    callbacks: LegendaryProfileCustomizationContract.ScreenCallbacks,
+) {
     val uiState by viewModel.state.collectAsState()
 
     LegendaryProfileCustomizationScreen(
         state = uiState,
         eventPublisher = viewModel::setEvent,
-        onClose = onClose,
+        callbacks = callbacks,
     )
 }
 
@@ -86,7 +89,7 @@ fun LegendaryProfileCustomizationScreen(viewModel: LegendaryProfileCustomization
 private fun LegendaryProfileCustomizationScreen(
     state: LegendaryProfileCustomizationContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
-    onClose: () -> Unit,
+    callbacks: LegendaryProfileCustomizationContract.ScreenCallbacks,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     var shoutout by remember(state.membership?.editedShoutout, state.avatarLegendaryCustomization.currentShoutout) {
@@ -122,7 +125,7 @@ private fun LegendaryProfileCustomizationScreen(
             PrimalTopAppBar(
                 title = stringResource(id = R.string.premium_legend_profile_customization),
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
+                onNavigationIconClick = callbacks.onClose,
             )
         },
         bottomBar = {

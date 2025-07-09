@@ -9,4 +9,12 @@ interface PremiumCardContract {
         val isActiveAccountLegend: Boolean = false,
         val isPrimalLegend: Boolean = false,
     )
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onSeeOtherLegendsClick: () -> Unit,
+        val onSeeOtherPrimalOGsClick: () -> Unit,
+        val onBecomeLegendClick: () -> Unit,
+        val onLegendSettingsClick: () -> Unit,
+    )
 }

@@ -15,4 +15,10 @@ interface LegendLeaderboardContract {
         data class FetchLeaderboardByOrder(val orderBy: LegendLeaderboardOrderBy) : UiEvent()
         data class RetryFetch(val orderBy: LegendLeaderboardOrderBy) : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onProfileClick: (String) -> Unit,
+        val onAboutLegendsClick: () -> Unit,
+    )
 }

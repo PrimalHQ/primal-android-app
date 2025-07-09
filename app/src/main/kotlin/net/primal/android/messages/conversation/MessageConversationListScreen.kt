@@ -87,10 +87,7 @@ import net.primal.domain.messages.ConversationRelation
 @Composable
 fun MessageListScreen(
     viewModel: MessageConversationListViewModel,
-    onConversationClick: (String) -> Unit,
-    onNewMessageClick: () -> Unit,
-    onProfileClick: (profileId: String) -> Unit,
-    onClose: () -> Unit,
+    callbacks: MessageConversationListContract.ScreenCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -99,7 +96,6 @@ fun MessageListScreen(
             Lifecycle.Event.ON_START -> {
                 viewModel.setEvent(UiEvent.ConversationsSeen)
             }
-
             else -> Unit
         }
     }
@@ -107,10 +103,7 @@ fun MessageListScreen(
     MessageListScreen(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
-        onConversationClick = onConversationClick,
-        onNewMessageClick = onNewMessageClick,
-        onProfileClick = onProfileClick,
-        onClose = onClose,
+        callbacks = callbacks,
     )
 }
 
@@ -119,10 +112,7 @@ fun MessageListScreen(
 fun MessageListScreen(
     state: MessageConversationListContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
-    onConversationClick: (String) -> Unit,
-    onNewMessageClick: () -> Unit,
-    onProfileClick: (profileId: String) -> Unit,
-    onClose: () -> Unit,
+    callbacks: MessageConversationListContract.ScreenCallbacks,
 ) {
     val conversations = state.conversations.collectAsLazyPagingItems()
     val listState = conversations.rememberLazyListStatePagingWorkaround()
@@ -139,7 +129,7 @@ fun MessageListScreen(
             PrimalTopAppBar(
                 title = stringResource(id = R.string.messages_title),
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
+                onNavigationIconClick = callbacks.onClose,
                 footer = {
                     MessagesTabs(
                         relation = state.activeRelation,
@@ -165,14 +155,14 @@ fun MessageListScreen(
                     .fillMaxSize(),
                 state = listState,
                 contentPadding = paddingValues,
-                onConversationClick = onConversationClick,
-                onProfileClick = onProfileClick,
+                onConversationClick = callbacks.onConversationClick,
+                onProfileClick = callbacks.onProfileClick,
                 onRefreshClick = { eventPublisher(UiEvent.RefreshConversations) },
             )
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onNewMessageClick,
+                onClick = callbacks.onNewMessageClick,
                 modifier = Modifier
                     .size(64.dp)
                     .clip(CircleShape)

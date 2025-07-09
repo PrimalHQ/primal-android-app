@@ -25,4 +25,10 @@ interface FollowPackContract {
         data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
         data object DismissError : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onShowFeedClick: (feed: String, title: String, description: String) -> Unit,
+        val onProfileClick: (String) -> Unit,
+    )
 }

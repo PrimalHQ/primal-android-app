@@ -57,16 +57,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
 
 @Composable
-fun PremiumHomeScreen(
-    viewModel: PremiumHomeViewModel,
-    onClose: () -> Unit,
-    onRenewSubscription: (primalName: String) -> Unit,
-    onManagePremium: () -> Unit,
-    onSupportPrimal: () -> Unit,
-    onUpgradeToProClick: () -> Unit,
-    onLegendCardClick: (String) -> Unit,
-    onContributePrimal: () -> Unit,
-) {
+fun PremiumHomeScreen(viewModel: PremiumHomeViewModel, callbacks: PremiumHomeContract.ScreenCallbacks) {
     val uiState = viewModel.state.collectAsState()
 
     DisposableLifecycleObserverEffect(viewModel) {
@@ -78,13 +69,7 @@ fun PremiumHomeScreen(
 
     PremiumHomeScreen(
         state = uiState.value,
-        onClose = onClose,
-        onRenewSubscription = onRenewSubscription,
-        onManagePremium = onManagePremium,
-        onSupportPrimal = onSupportPrimal,
-        onUpgradeToProClick = onUpgradeToProClick,
-        onLegendCardClick = onLegendCardClick,
-        onContributePrimal = onContributePrimal,
+        callbacks = callbacks,
         eventPublisher = viewModel::setEvent,
     )
 }
@@ -93,13 +78,7 @@ fun PremiumHomeScreen(
 @Composable
 private fun PremiumHomeScreen(
     state: PremiumHomeContract.UiState,
-    onClose: () -> Unit,
-    onRenewSubscription: (primalName: String) -> Unit,
-    onManagePremium: () -> Unit,
-    onSupportPrimal: () -> Unit,
-    onUpgradeToProClick: () -> Unit,
-    onLegendCardClick: (String) -> Unit,
-    onContributePrimal: () -> Unit,
+    callbacks: PremiumHomeContract.ScreenCallbacks,
     eventPublisher: (PremiumHomeContract.UiEvent) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
@@ -121,7 +100,7 @@ private fun PremiumHomeScreen(
                     stringResource(id = R.string.premium_home_member_premium_title)
                 },
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
+                onNavigationIconClick = callbacks.onClose,
                 showDivider = false,
             )
         },
@@ -131,7 +110,7 @@ private fun PremiumHomeScreen(
                     text = stringResource(id = R.string.premium_home_renew_subscription),
                     legendaryCustomization = state.avatarLegendaryCustomization,
                     onClick = {
-                        onRenewSubscription(state.membership.premiumName)
+                        callbacks.onRenewSubscription(state.membership.premiumName)
                     },
                 )
             } else {
@@ -142,7 +121,7 @@ private fun PremiumHomeScreen(
                         stringResource(id = R.string.premium_home_premium_button)
                     },
                     legendaryCustomization = state.avatarLegendaryCustomization,
-                    onClick = onManagePremium,
+                    onClick = callbacks.onManagePremium,
                 )
             }
         },
@@ -158,10 +137,10 @@ private fun PremiumHomeScreen(
                 .navigationBarsPadding(),
             state = state,
             eventPublisher = eventPublisher,
-            onLegendCardClick = onLegendCardClick,
-            onContributePrimal = onContributePrimal,
-            onSupportPrimal = onSupportPrimal,
-            onUpgradeToProClick = onUpgradeToProClick,
+            onLegendCardClick = callbacks.onLegendCardClick,
+            onContributePrimal = callbacks.onContributePrimal,
+            onSupportPrimal = callbacks.onSupportPrimal,
+            onUpgradeToProClick = callbacks.onUpgradeToProClick,
         )
     }
 }

@@ -12,4 +12,13 @@ interface ExploreHomeContract {
         val activeAccountPubkey: String? = null,
         val badges: Badges = Badges(),
     )
+
+    data class ScreenCallbacks(
+        val onDrawerQrCodeClick: () -> Unit,
+        val onSearchClick: () -> Unit,
+        val onAdvancedSearchClick: () -> Unit,
+        val onFollowPackClick: (profileId: String, identifier: String) -> Unit,
+        val onGoToWallet: () -> Unit,
+        val onNewPostClick: () -> Unit,
+    )
 }

@@ -28,8 +28,7 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun PremiumBecomeLegendScreen(
     viewModel: PremiumBecomeLegendViewModel,
-    onClose: () -> Unit,
-    onLegendPurchased: () -> Unit,
+    callbacks: PremiumBecomeLegendContract.ScreenCallbacks,
 ) {
     val state = viewModel.state.collectAsState()
 
@@ -44,8 +43,7 @@ fun PremiumBecomeLegendScreen(
     PremiumBecomeLegendScreen(
         state = state.value,
         eventPublisher = viewModel::setEvent,
-        onClose = onClose,
-        onLegendPurchased = onLegendPurchased,
+        callbacks = callbacks,
     )
 }
 
@@ -54,14 +52,13 @@ fun PremiumBecomeLegendScreen(
 private fun PremiumBecomeLegendScreen(
     state: UiState,
     eventPublisher: (PremiumBecomeLegendContract.UiEvent) -> Unit,
-    onClose: () -> Unit,
-    onLegendPurchased: () -> Unit,
+    callbacks: PremiumBecomeLegendContract.ScreenCallbacks,
 ) {
     BecomeLegendBackHandler(
         stage = state.stage,
         eventPublisher = eventPublisher,
-        onClose = onClose,
-        onLegendPurchased = onLegendPurchased,
+        onClose = callbacks.onClose,
+        onLegendPurchased = callbacks.onLegendPurchased,
         isPremiumUser = state.isPremiumUser,
     )
 
@@ -78,7 +75,7 @@ private fun PremiumBecomeLegendScreen(
                 BecomeLegendIntroStage(
                     modifier = Modifier.fillMaxSize(),
                     isPremiumBadgeOrigin = state.isPremiumBadgeOrigin,
-                    onClose = onClose,
+                    onClose = callbacks.onClose,
                     onNext = {
                         if (state.isPremiumUser) {
                             eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor)
@@ -128,7 +125,7 @@ private fun PremiumBecomeLegendScreen(
             BecomeLegendStage.Success -> {
                 BecomeLegendSuccessStage(
                     modifier = Modifier.fillMaxSize(),
-                    onDoneClick = onLegendPurchased,
+                    onDoneClick = callbacks.onLegendPurchased,
                 )
             }
         }
@@ -146,9 +143,7 @@ private fun BecomeLegendBackHandler(
     BackHandler {
         when (stage) {
             BecomeLegendStage.Intro -> onClose()
-
             BecomeLegendStage.PickPrimalName -> eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro)
-
             BecomeLegendStage.PickAmount -> {
                 if (isPremiumUser) {
                     eventPublisher(PremiumBecomeLegendContract.UiEvent.GoBackToIntro)
@@ -156,9 +151,7 @@ private fun BecomeLegendBackHandler(
                     eventPublisher(PremiumBecomeLegendContract.UiEvent.GoToFindPrimalNameStage)
                 }
             }
-
             BecomeLegendStage.Payment -> eventPublisher(PremiumBecomeLegendContract.UiEvent.ShowAmountEditor)
-
             BecomeLegendStage.Success -> onLegendPurchased()
         }
     }

@@ -71,12 +71,15 @@ import net.primal.android.wallet.activation.ui.isOtpCodeValid
 import net.primal.android.wallet.walletSuccessContentColor
 
 @Composable
-fun OnboardingWalletActivation(viewModel: WalletActivationViewModel, onDoneOrDismiss: () -> Unit) {
+fun OnboardingWalletActivation(
+    viewModel: WalletActivationViewModel,
+    callbacks: WalletActivationContract.ScreenCallbacks,
+) {
     val uiState = viewModel.uiState.collectAsState()
     OnboardingWalletActivation(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
-        onDoneOrDismiss = onDoneOrDismiss,
+        callbacks = callbacks,
     )
 }
 
@@ -85,7 +88,7 @@ fun OnboardingWalletActivation(viewModel: WalletActivationViewModel, onDoneOrDis
 fun OnboardingWalletActivation(
     state: WalletActivationContract.UiState,
     eventPublisher: (WalletActivationContract.UiEvent) -> Unit,
-    onDoneOrDismiss: () -> Unit,
+    callbacks: WalletActivationContract.ScreenCallbacks,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -158,7 +161,7 @@ fun OnboardingWalletActivation(
                     },
                     footerVisible = state.status != WalletActivationStatus.ActivationSuccess,
                     eventPublisher = eventPublisher,
-                    onDoneOrDismiss = onDoneOrDismiss,
+                    onDoneOrDismiss = callbacks.onDoneOrDismiss,
                 )
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -365,7 +368,9 @@ private fun PreviewPendingDataScreen(
         OnboardingWalletActivation(
             state = uiState,
             eventPublisher = {},
-            onDoneOrDismiss = {},
+            callbacks = WalletActivationContract.ScreenCallbacks(
+                onDoneOrDismiss = {},
+            ),
         )
     }
 }

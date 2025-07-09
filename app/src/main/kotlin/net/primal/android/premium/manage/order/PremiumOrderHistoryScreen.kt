@@ -51,15 +51,13 @@ import net.primal.core.utils.CurrencyConversionUtils.toSats
 @Composable
 fun PremiumOrderHistoryScreen(
     viewModel: PremiumOrderHistoryViewModel,
-    onExtendSubscription: (primalName: String) -> Unit,
-    onClose: () -> Unit,
+    callbacks: PremiumOrderHistoryContract.ScreenCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
     PremiumOrderHistoryScreen(
         state = uiState.value,
-        onClose = onClose,
-        onExtendSubscription = onExtendSubscription,
+        callbacks = callbacks,
         eventPublisher = viewModel::setEvent,
     )
 }
@@ -73,15 +71,14 @@ private const val AmountWeight = 0.3f
 private fun PremiumOrderHistoryScreen(
     state: PremiumOrderHistoryContract.UiState,
     eventPublisher: (PremiumOrderHistoryContract.UiEvent) -> Unit,
-    onExtendSubscription: (primalName: String) -> Unit,
-    onClose: () -> Unit,
+    callbacks: PremiumOrderHistoryContract.ScreenCallbacks,
 ) {
     Scaffold(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.premium_order_history_title),
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
+                onNavigationIconClick = callbacks.onClose,
             )
         },
     ) { paddingValues ->
@@ -103,7 +100,7 @@ private fun PremiumOrderHistoryScreen(
                         )
                         .padding(top = 18.dp, bottom = 6.dp),
                     state = state,
-                    onExtendSubscription = onExtendSubscription,
+                    onExtendSubscription = callbacks.onExtendSubscription,
                     onCancelSubscription = {
                         eventPublisher(PremiumOrderHistoryContract.UiEvent.CancelSubscription)
                     },

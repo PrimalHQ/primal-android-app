@@ -44,4 +44,9 @@ interface ProfileEditorContract {
     sealed class SideEffect {
         data object AccountSuccessfulyEdited : SideEffect()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onNavigateToPremiumBuying: () -> Unit,
+    )
 }

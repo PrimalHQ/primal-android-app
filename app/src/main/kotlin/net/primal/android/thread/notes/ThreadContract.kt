@@ -2,6 +2,7 @@ package net.primal.android.thread.notes
 
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.core.errors.UiError
+import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.notes.feed.model.FeedPostUi
 
 interface ThreadContract {
@@ -21,4 +22,10 @@ interface ThreadContract {
         data object UpdateConversation : UiEvent()
         data object DismissError : UiEvent()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onGoToWallet: () -> Unit,
+        val onExpandReply: (args: NoteEditorArgs) -> Unit,
+    )
 }

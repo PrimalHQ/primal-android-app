@@ -37,27 +37,18 @@ private const val LIKES_TAB_INDEX = 1
 private const val REPOSTS_TAB_INDEX = 2
 
 @Composable
-fun ReactionsScreen(
-    viewModel: ReactionsViewModel,
-    onClose: () -> Unit,
-    onProfileClick: (profileId: String) -> Unit,
-) {
+fun ReactionsScreen(viewModel: ReactionsViewModel, callbacks: ReactionsContract.ScreenCallbacks) {
     val state = viewModel.state.collectAsState()
 
     ReactionsScreen(
         state = state.value,
-        onClose = onClose,
-        onProfileClick = onProfileClick,
+        callbacks = callbacks,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ReactionsScreen(
-    state: ReactionsContract.UiState,
-    onClose: () -> Unit,
-    onProfileClick: (profileId: String) -> Unit,
-) {
+private fun ReactionsScreen(state: ReactionsContract.UiState, callbacks: ReactionsContract.ScreenCallbacks) {
     val uiScope = rememberCoroutineScope()
     val pagerState = rememberPagerState(
         initialPage = when (state.initialReactionType) {
@@ -73,7 +64,7 @@ private fun ReactionsScreen(
             PrimalTopAppBar(
                 title = stringResource(id = R.string.reactions_title),
                 navigationIcon = PrimalIcons.ArrowBack,
-                onNavigationIconClick = onClose,
+                onNavigationIconClick = callbacks.onClose,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 showDivider = true,
                 footer = {
@@ -116,7 +107,7 @@ private fun ReactionsScreen(
                                 .fillMaxSize()
                                 .padding(paddingValues),
                             state = state,
-                            onProfileClick = onProfileClick,
+                            onProfileClick = callbacks.onProfileClick,
                         )
                     }
 
@@ -129,7 +120,7 @@ private fun ReactionsScreen(
                             reactionIcon = PrimalIcons.FeedLikes,
                             loading = state.loading,
                             noContentText = stringResource(R.string.reactions_likes_no_content),
-                            onProfileClick = onProfileClick,
+                            onProfileClick = callbacks.onProfileClick,
                         )
                     }
 
@@ -142,7 +133,7 @@ private fun ReactionsScreen(
                             reactionIcon = PrimalIcons.FeedReposts,
                             loading = state.loading,
                             noContentText = stringResource(R.string.reactions_reposts_no_content),
-                            onProfileClick = onProfileClick,
+                            onProfileClick = callbacks.onProfileClick,
                         )
                     }
                 }

@@ -122,10 +122,8 @@ import net.primal.domain.nostr.utils.takeAsNoteHexIdOrNull
 @Composable
 fun ArticleDetailsScreen(
     viewModel: ArticleDetailsViewModel,
-    onClose: () -> Unit,
-    onArticleHashtagClick: (hashtag: String) -> Unit,
+    callbacks: ArticleDetailsContract.ScreenCallbacks,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
 ) {
     val detailsState by viewModel.state.collectAsState()
     DisposableLifecycleObserverEffect(viewModel) {
@@ -138,10 +136,10 @@ fun ArticleDetailsScreen(
     val articleViewModel = hiltViewModel<ArticleViewModel>()
     val articleState by articleViewModel.state.collectAsState()
 
-    LaunchedEffect(articleViewModel, articleViewModel.effects) {
+    LaunchedEffect(articleViewModel, articleViewModel.effects, callbacks) {
         articleViewModel.effects.collect {
             when (it) {
-                ArticleContract.SideEffect.ArticleDeleted -> onClose()
+                ArticleContract.SideEffect.ArticleDeleted -> callbacks.onClose()
             }
         }
     }
@@ -169,12 +167,10 @@ fun ArticleDetailsScreen(
     ArticleDetailsScreen(
         detailsState = detailsState,
         articleState = articleState,
+        callbacks = callbacks,
         detailsEventPublisher = viewModel::setEvent,
         articleEventPublisher = articleViewModel::setEvent,
-        onClose = onClose,
-        onArticleHashtagClick = onArticleHashtagClick,
         noteCallbacks = noteCallbacks,
-        onGoToWallet = onGoToWallet,
     )
 }
 
@@ -183,12 +179,10 @@ fun ArticleDetailsScreen(
 private fun ArticleDetailsScreen(
     detailsState: ArticleDetailsContract.UiState,
     articleState: ArticleContract.UiState,
+    callbacks: ArticleDetailsContract.ScreenCallbacks,
     detailsEventPublisher: (UiEvent) -> Unit,
     articleEventPublisher: (ArticleContract.UiEvent) -> Unit,
-    onArticleHashtagClick: (hashtag: String) -> Unit,
     noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
-    onClose: () -> Unit,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -212,7 +206,7 @@ private fun ArticleDetailsScreen(
         UnableToZapBottomSheet(
             zappingState = detailsState.zappingState,
             onDismissRequest = { showCantZapWarning = false },
-            onGoToWallet = onGoToWallet,
+            onGoToWallet = callbacks.onGoToWallet,
         )
     }
 
@@ -305,7 +299,7 @@ private fun ArticleDetailsScreen(
             ArticleDetailsTopAppBar(
                 state = detailsState,
                 scrolledToTop = scrolledToTop,
-                onClose = onClose,
+                onClose = callbacks.onClose,
                 onToggleHighlightsClick = { detailsEventPublisher(UiEvent.ToggleHighlights) },
                 onBookmarkClick = {
                     if (detailsState.article != null) {
@@ -366,13 +360,13 @@ private fun ArticleDetailsScreen(
                     onArticleCommentClick = {
                         detailsState.naddr?.toNaddrString()?.let { noteCallbacks.onArticleReplyClick?.invoke(it) }
                     },
-                    onArticleHashtagClick = onArticleHashtagClick,
+                    onArticleHashtagClick = callbacks.onArticleHashtagClick,
                     onHighlightClick = {
                         detailsEventPublisher(UiEvent.SelectHighlight(it))
                         isHighlightActivityBottomSheetVisible = true
                     },
                     onZapOptionsClick = { invokeZapOptionsOrShowWarning() },
-                    onGoToWallet = onGoToWallet,
+                    onGoToWallet = callbacks.onGoToWallet,
                     noteCallbacks = noteCallbacks,
                     onPostAction = { action ->
                         when (action) {
