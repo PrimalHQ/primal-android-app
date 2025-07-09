@@ -12,13 +12,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import coil3.compose.SubcomposeAsyncImage
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.InfiniteLottieAnimation
+import net.primal.android.core.compose.PrimalImage
 import net.primal.android.core.compose.attachment.model.isMediaUri
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.MediaGalleryFilled
@@ -45,14 +45,13 @@ fun MediaGridItem(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.TopEnd,
     ) {
-        SubcomposeAsyncImage(
+        PrimalImage(
             modifier = Modifier.fillMaxSize(),
             model = ImageRequest.Builder(LocalContext.current)
                 .data(cdnResource?.mediaUrl ?: firstAttachment?.thumbnailUrl ?: firstAttachment?.url)
                 .crossfade(true)
                 .memoryCachePolicy(CachePolicy.ENABLED)
                 .build(),
-            contentDescription = null,
             contentScale = ContentScale.Crop,
             loading = {
                 InfiniteLottieAnimation(resId = animationRawResId)

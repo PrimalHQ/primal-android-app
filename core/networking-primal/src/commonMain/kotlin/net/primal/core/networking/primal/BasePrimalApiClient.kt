@@ -1,6 +1,7 @@
 package net.primal.core.networking.primal
 
 import io.github.aakira.napier.Napier
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -27,12 +28,13 @@ internal class BasePrimalApiClient(
     suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
         return try {
             coroutineScope {
-                socketClient.ensureSocketConnectionOrThrow()
                 val subscriptionId = Uuid.random().toPrimalSubscriptionId()
                 val deferredQueryResult = async { collectQueryResult(subscriptionId) }
                 sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
                 deferredQueryResult.await()
             }
+        } catch (error: CancellationException) {
+            throw error
         } catch (error: Exception) {
             throw error.takeAsNetworkException(verb = message.primalVerb)
         }
@@ -41,6 +43,8 @@ internal class BasePrimalApiClient(
     private suspend fun sendMessageOrThrow(subscriptionId: String, data: JsonObject) {
         try {
             socketClient.sendREQ(subscriptionId = subscriptionId, data = data)
+        } catch (error: CancellationException) {
+            throw error
         } catch (error: Exception) {
             throw SocketSendMessageException(message = error.message)
         }
@@ -60,8 +64,9 @@ internal class BasePrimalApiClient(
 
     suspend fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
         try {
-            socketClient.ensureSocketConnectionOrThrow()
             sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
+        } catch (error: CancellationException) {
+            throw error
         } catch (error: Exception) {
             Napier.w(error) { "Unable to subscribe." }
             throw NetworkException(message = "Api unreachable at the moment.", cause = error)
@@ -71,9 +76,10 @@ internal class BasePrimalApiClient(
 
     suspend fun closeSubscription(subscriptionId: String): Boolean {
         return try {
-            socketClient.ensureSocketConnectionOrThrow()
             socketClient.sendCLOSE(subscriptionId = subscriptionId)
             true
+        } catch (error: CancellationException) {
+            throw error
         } catch (_: Exception) {
             false
         }

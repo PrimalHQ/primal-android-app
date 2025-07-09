@@ -10,11 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import coil3.compose.SubcomposeAsyncImage
-import coil3.imageLoader
+import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
@@ -26,7 +24,6 @@ fun FollowPackCoverImage(
     modifier: Modifier = Modifier,
     clipShape: Shape? = null,
 ) {
-    val imageLoader = LocalContext.current.imageLoader
     BoxWithConstraints(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.TopCenter,
@@ -38,7 +35,7 @@ fun FollowPackCoverImage(
         )
         val imageSource = variant?.mediaUrl ?: coverImage?.sourceUrl
 
-        SubcomposeAsyncImage(
+        PrimalAsyncImage(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(height)
@@ -51,8 +48,9 @@ fun FollowPackCoverImage(
                 }
                 .background(color = AppTheme.colorScheme.outline),
             model = imageSource,
-            imageLoader = imageLoader,
-            contentDescription = null,
+            placeholderColor = AppTheme.colorScheme.outline,
+            errorColor = AppTheme.colorScheme.outline,
+            placeHolderHighlight = null,
             contentScale = ContentScale.Crop,
         )
     }

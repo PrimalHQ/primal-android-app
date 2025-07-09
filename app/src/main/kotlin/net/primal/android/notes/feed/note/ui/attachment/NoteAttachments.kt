@@ -26,6 +26,7 @@ fun NoteAttachments(
     eventUris: List<EventUriUi>,
     blossoms: List<String>,
     expanded: Boolean,
+    couldAutoPlay: Boolean,
     onUrlClick: ((mediaUrl: String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
 ) {
@@ -35,6 +36,7 @@ fun NoteAttachments(
             modifier = modifier,
             mediaEventUris = mediaAttachments,
             blossoms = blossoms,
+            couldAutoPlay = couldAutoPlay,
             onMediaClick = {
                 when (it.eventUriType) {
                     EventUriType.Image, EventUriType.Video -> onMediaClick?.invoke(it)
@@ -52,6 +54,7 @@ fun NoteAttachments(
                 EventUriType.YouTube, EventUriType.Rumble, EventUriType.Spotify -> {
                     it.title != null || it.thumbnailUrl != null
                 }
+
                 else -> true
             }
         }

@@ -19,8 +19,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import coil3.compose.SubcomposeAsyncImage
-import net.primal.android.notes.feed.note.ui.attachment.NoteImageLoadingPlaceholder
+import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.extractTLD
 
@@ -49,7 +48,7 @@ fun NoteLinkLargePreview(
             .clip(AppTheme.shapes.small),
     ) {
         if (thumbnailUrl != null) {
-            SubcomposeAsyncImage(
+            PrimalAsyncImage(
                 model = thumbnailUrl,
                 modifier = Modifier
                     .clip(
@@ -60,9 +59,7 @@ fun NoteLinkLargePreview(
                     )
                     .width(thumbnailImageSize.width)
                     .height(thumbnailImageSize.height),
-                contentDescription = null,
                 contentScale = ContentScale.FillHeight,
-                loading = { NoteImageLoadingPlaceholder() },
             )
         }
 

@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
@@ -30,6 +32,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
+import net.primal.android.core.compose.rememberFirstVisibleItemIndex
 import net.primal.android.core.compose.zaps.FeedNoteTopZapsSection
 import net.primal.android.core.errors.UiError
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -62,6 +65,8 @@ fun NoteFeedLazyColumn(
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
+    var firstVisibleIndex by rememberFirstVisibleItemIndex(listState = listState)
+
     LazyColumn(
         modifier = modifier,
         contentPadding = contentPadding,
@@ -112,6 +117,7 @@ fun NoteFeedLazyColumn(
                         enableTweetsMode = true,
                         nestingCutOffLimit = FEED_NESTED_NOTES_CUT_OFF_LIMIT,
                         showReplyTo = showReplyTo,
+                        couldAutoPlay = index == firstVisibleIndex,
                         noteCallbacks = noteCallbacks,
                         onGoToWallet = onGoToWallet,
                         onUiError = onUiError,

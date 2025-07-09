@@ -17,9 +17,9 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import coil3.compose.SubcomposeAsyncImage
 import java.util.*
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.theme.AppTheme
 
@@ -33,13 +33,12 @@ fun NoteAttachmentPreview(
     val shape = AppTheme.shapes.medium
 
     Box(contentAlignment = Alignment.Center) {
-        SubcomposeAsyncImage(
+        PrimalAsyncImage(
             model = attachment.localUri,
             modifier = Modifier
                 .fillMaxHeight()
                 .widthIn(max = maxWidth)
                 .clip(shape),
-            contentDescription = null,
             contentScale = ContentScale.FillHeight,
         )
 
