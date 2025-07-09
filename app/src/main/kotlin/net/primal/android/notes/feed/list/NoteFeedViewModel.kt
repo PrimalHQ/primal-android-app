@@ -28,6 +28,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.mapAsProfileDataDO
 import net.primal.android.premium.utils.hasPremiumMembership
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
@@ -52,6 +53,7 @@ class NoteFeedViewModel @AssistedInject constructor(
     private val feedRepository: FeedRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val mutedItemRepository: MutedItemRepository,
+    private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -121,7 +123,7 @@ class NoteFeedViewModel @AssistedInject constructor(
 
     private fun startPollingIfSupported() {
         if (feedSpec.supportsUpwardsNotesPagination()) {
-            pollingJob = viewModelScope.launch {
+            pollingJob = viewModelScope.launch(dispatcherProvider.io()) {
                 try {
                     while (isActive) {
                         fetchLatestNotes()

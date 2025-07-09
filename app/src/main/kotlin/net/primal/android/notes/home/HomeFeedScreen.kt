@@ -21,6 +21,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -123,6 +124,14 @@ fun HomeFeedScreen(
         )
     }
 
+    val pollingStates by remember(activeFeed, state.feeds) {
+        derivedStateOf {
+            state.feeds.associateWith { feed ->
+                activeFeed?.spec == feed.spec
+            }
+        }
+    }
+
     LaunchedEffect(pagerState, state.feeds) {
         snapshotFlow { pagerState.currentPage }
             .collect { index ->
@@ -180,10 +189,10 @@ fun HomeFeedScreen(
                         orientation = Orientation.Horizontal,
                     ),
                 ) { index ->
-                    val spec = state.feeds[index].spec
+                    val feedUi = state.feeds[index]
                     NoteFeedList(
-                        feedSpec = spec,
-                        pollingEnabled = activeFeed?.spec == spec,
+                        feedSpec = feedUi.spec,
+                        pollingEnabled = pollingStates[feedUi] ?: false,
                         noteCallbacks = noteCallbacks,
                         showTopZaps = true,
                         newNotesNoticeAlpha = (1 - topAppBarState.collapsedFraction) * 1.0f,
