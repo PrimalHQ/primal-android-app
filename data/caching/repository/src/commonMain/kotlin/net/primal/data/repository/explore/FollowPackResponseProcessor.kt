@@ -58,7 +58,7 @@ internal suspend fun FollowListsResponse.processAndPersistFollowLists(database: 
         database.followPacks().upsertCrossRefs(refs = followPacks.buildFollowPackProfileCrossRefs())
         userFollowCount?.forEach { (profileId, followers) ->
             if (profileId.isNotEmpty()) {
-                database.profileStats().updateFollowersCount(
+                database.profileStats().upsertFollowers(
                     profileId = profileId,
                     followers = followers,
                 )

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -15,14 +16,14 @@ interface ProfileStatsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(data: List<ProfileStats>)
 
-    @Query(
-        """
-        INSERT OR REPLACE INTO ProfileStats(profileId, followers) VALUES (:profileId, :followers) 
-        ON CONFLICT(profileId) DO UPDATE
-            SET followers = :followers
-        """,
-    )
-    suspend fun updateFollowersCount(profileId: String, followers: Int)
+    @Query("UPDATE ProfileStats SET followers = :followers WHERE profileId = :profileId")
+    suspend fun updateFollowers(profileId: String, followers: Int)
+
+    @Transaction
+    suspend fun upsertFollowers(profileId: String, followers: Int) {
+        insertOrIgnore(listOf(ProfileStats(profileId = profileId)))
+        updateFollowers(profileId = profileId, followers = followers)
+    }
 
     @Query("SELECT * FROM ProfileStats WHERE profileId = :profileId")
     fun observeProfileStats(profileId: String): Flow<ProfileStats?>
