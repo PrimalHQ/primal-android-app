@@ -79,7 +79,7 @@ fun LegendContributeAmountStage(
 
             PrimalNumericPad(
                 modifier = Modifier.fillMaxWidth(),
-                amountInSats = if (state.currencyMode == CurrencyMode.SATS) {
+                displayedAmount = if (state.currencyMode == CurrencyMode.SATS) {
                     state.amountInSats
                 } else {
                     state.amountInUsd

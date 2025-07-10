@@ -225,7 +225,7 @@ private fun TransactionMainContent(
             ) {
                 PrimalNumericPad(
                     modifier = Modifier.fillMaxWidth(),
-                    amountInSats = if (state.currencyMode == CurrencyMode.SATS) {
+                    displayedAmount = if (state.currencyMode == CurrencyMode.SATS) {
                         state.transaction.amountSats
                     } else {
                         state.amountInUsd
