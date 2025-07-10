@@ -93,7 +93,7 @@ fun String.isNAddrUri() = lowercase().startsWith(NOSTR + NADDR)
 
 fun String.nostrUriToNoteId() = nostrUriToBytes()?.toHex()
 
-fun String.nostrUriToPubkey() = nostrUriToBytes()?.toHex()
+fun String.npubToPubkey() = nostrUriToBytes()?.toHex()
 
 private fun String.nostrUriToIdAndRelay(): Pair<String?, String?> {
     val bytes = nostrUriToBytes() ?: return null to null

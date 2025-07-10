@@ -14,13 +14,13 @@ class NostrUriUtilsTest {
     fun nostrUriToPubkey_returnsCorrectPubkeyHexValue() {
         val input = "nostr:npub1w0rthyjyp2f5gful0gm2500pwyxfrx93a85289xdz0sd6hyef33sh2cu4x"
         val expected = "73c6bb92440a9344279f7a36aa3de1710c9198b1e9e8a394cd13e0dd5c994c63"
-        val actual = input.nostrUriToPubkey()
+        val actual = input.npubToPubkey()
         actual shouldBe expected
     }
 
     @Test
     fun nostrUriToPubkey_returnsNullForInvalidNpubNostrUri() {
-        val actual = "invalidNostrUri".nostrUriToPubkey()
+        val actual = "invalidNostrUri".npubToPubkey()
         actual.shouldBeNull()
     }
 
