@@ -54,11 +54,11 @@ fun String.splitMarkdownByNostrUris(): List<String> {
 }
 
 /**
-* Uses a regular expression to detect image patterns:
-* - `!\[([^\]]*)\]`        → captures alt text inside square brackets (Group 1)
-* - `\((\S+?)`             → lazily captures the URL (Group 2)
-* - `(?:\s+"[^"]*")?\)`    → optionally matches a quoted image title
-*
+ * Uses a regular expression to detect image patterns:
+ * - `!\[([^\]]*)\]`        → captures alt text inside square brackets (Group 1)
+ * - `\((\S+?)`             → lazily captures the URL (Group 2)
+ * - `(?:\s+"[^"]*")?\)`    → optionally matches a quoted image title
+ *
  * Example:
  * ```
  * Input:
@@ -67,7 +67,7 @@ fun String.splitMarkdownByNostrUris(): List<String> {
  * Output:
  *   ["Hello ", "https://img.com/a.jpg", " world"]
  * ```
-*/
+ */
 fun String.splitMarkdownByInlineImages(): List<String> {
     val regex = Regex("""!\[([^\]]*)\]\((\S+?)(?:\s+"[^"]*")?\)""")
     val result = mutableListOf<String>()
