@@ -49,7 +49,7 @@ fun PrimalAsyncImage(
     clipToBounds: Boolean = true,
     onError: () -> Unit = {},
 ) {
-    var state by remember(model) { mutableStateOf<AsyncImagePainter.State>(AsyncImagePainter.State.Empty) }
+    var state by remember(model) { mutableStateOf<AsyncImagePainter.State?>(null) }
 
     AsyncImage(
         model = model,
