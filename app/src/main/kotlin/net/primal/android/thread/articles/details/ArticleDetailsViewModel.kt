@@ -46,12 +46,14 @@ import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.nostr.utils.extractProfileId
+import net.primal.domain.nostr.utils.isNProfile
+import net.primal.domain.nostr.utils.isNProfileUri
 import net.primal.domain.nostr.utils.isNPub
 import net.primal.domain.nostr.utils.isNPubUri
 import net.primal.domain.nostr.utils.isNote
 import net.primal.domain.nostr.utils.isNoteUri
 import net.primal.domain.nostr.utils.nostrUriToNoteId
-import net.primal.domain.nostr.utils.nostrUriToPubkey
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
@@ -181,11 +183,13 @@ class ArticleDetailsViewModel @Inject constructor(
                         }
                     }
 
-                    val nostrProfileUris = article.uris.filter { it.isNPubUri() || it.isNPub() }.toSet()
+                    val nostrProfileUris = article.uris
+                        .filter { it.isNPubUri() || it.isNPub() || it.isNProfileUri() || it.isNProfile() }
+                        .toSet()
                     if (nostrProfileUris != referencedProfileUris) {
                         referencedProfileUris = nostrProfileUris
                         val referencedProfiles = profileRepository.findProfileData(
-                            profileIds = nostrProfileUris.mapNotNull { it.nostrUriToPubkey() },
+                            profileIds = nostrProfileUris.mapNotNull { it.extractProfileId() },
                         )
                         setState {
                             copy(
