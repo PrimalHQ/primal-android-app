@@ -17,8 +17,8 @@ import net.primal.domain.nostr.utils.isNPubUri
 import net.primal.domain.nostr.utils.isNote
 import net.primal.domain.nostr.utils.isNoteUri
 import net.primal.domain.nostr.utils.nostrUriToNoteId
-import net.primal.domain.nostr.utils.nostrUriToPubkey
 import net.primal.domain.nostr.utils.nostrUriToPubkeyAndRelay
+import net.primal.domain.nostr.utils.npubToPubkey
 import net.primal.domain.nostr.utils.parseHashtags
 import net.primal.domain.nostr.utils.parseNostrUris
 
@@ -234,7 +234,7 @@ fun String.parsePubkeyTags(marker: String? = null): Set<JsonArray> =
             }
 
             it.isNPubUri() || it.isNPub() ->
-                it.nostrUriToPubkey()?.asPubkeyTag(optional = marker)
+                it.npubToPubkey()?.asPubkeyTag(optional = marker)
 
             else -> null
         }
