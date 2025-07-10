@@ -71,6 +71,7 @@ import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.toBitmap
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
+import com.github.panpf.zoomimage.rememberCoilZoomState
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -559,7 +560,11 @@ private fun ImageScreen(
         onImageBitmapLoaded(loadedBitmap)
     }
 
+    val zoomState = rememberCoilZoomState()
+    zoomState.zoomable.keepTransformWhenSameAspectRatioContentSizeChanged = true
+
     CoilZoomAsyncImage(
+        zoomState = zoomState,
         imageLoader = imageLoader,
         modifier = modifier,
         onTap = { toggleImmersiveMode() },
