@@ -627,7 +627,7 @@ private fun ReceivePaymentEditor(
             ) {
                 PrimalNumericPad(
                     modifier = Modifier.fillMaxWidth(),
-                    amountInSats = if (currentCurrencyMode == CurrencyMode.SATS) {
+                    displayedAmount = if (currentCurrencyMode == CurrencyMode.SATS) {
                         amountInBtc.toSats().toString()
                     } else {
                         amountInUsd

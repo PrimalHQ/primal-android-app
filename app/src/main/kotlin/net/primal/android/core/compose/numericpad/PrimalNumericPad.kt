@@ -38,7 +38,7 @@ private val PadButtonMargin = 16.dp
 @Composable
 fun PrimalNumericPad(
     modifier: Modifier = Modifier,
-    amountInSats: String,
+    displayedAmount: String,
     onAmountInSatsChanged: (String) -> Unit,
     currencyMode: CurrencyMode,
     maximumUsdAmount: BigDecimal? = null,
@@ -46,8 +46,8 @@ fun PrimalNumericPad(
     val haptic = LocalHapticFeedback.current
     val viewModel = viewModel<PrimalNumericPadViewModel>()
 
-    LaunchedEffect(amountInSats) {
-        viewModel.setEvent(PrimalNumericPadContract.UiEvent.SetAmount(valueInSats = amountInSats))
+    LaunchedEffect(displayedAmount) {
+        viewModel.setEvent(PrimalNumericPadContract.UiEvent.SetAmount(valueInSats = displayedAmount))
     }
 
     LaunchedEffect(viewModel) {
@@ -60,13 +60,17 @@ fun PrimalNumericPad(
 
     val onNumberClick: (Int) -> Unit = {
         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-        val newAmount = (amountInSats + it.toString()).toBigDecimal()
+        val newAmount = if (displayedAmount == "0.00") {
+            it.toString()
+        } else {
+            (displayedAmount + it.toString())
+        }.toBigDecimal()
+
         when (currencyMode) {
             CurrencyMode.FIAT -> {
                 if (maximumUsdAmount == null || newAmount <= maximumUsdAmount) {
-                    val decimalPart = amountInSats.split(".")
-                    val isDecimalValid = decimalPart.size != 2 || decimalPart[1].length < 2
-
+                    val decimalPart = displayedAmount.split(".")
+                    val isDecimalValid = decimalPart.size != 2 || decimalPart[1].length < 2 || displayedAmount == "0.00"
                     if (isDecimalValid) {
                         viewModel.setEvent(NumericInputEvent.DigitInputEvent(it))
                     }
@@ -281,7 +285,7 @@ fun PreviewPrimalNumericPad() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             PrimalNumericPad(
-                amountInSats = "0",
+                displayedAmount = "0",
                 onAmountInSatsChanged = {},
                 currencyMode = CurrencyMode.SATS,
                 maximumUsdAmount = BigDecimal.fromInt(94_000),
