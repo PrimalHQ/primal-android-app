@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,6 +65,7 @@ class ExploreZapsViewModel @Inject constructor(
             }
         }
 
+    @OptIn(ExperimentalTime::class)
     private fun List<ExploreZapNoteData>.mapAsUiModel() =
         map { zapData ->
             ExploreZapNoteUi(

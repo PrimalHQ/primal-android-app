@@ -6,11 +6,12 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notifications.Notification as NotificationPO
 import net.primal.data.local.db.PrimalDatabase
@@ -32,6 +33,7 @@ class NotificationRepositoryImpl(
         database.notifications().allUnseenNotifications(ownerId = ownerId)
             .map { it.map { it.asNotificationDO() } }
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun markAllNotificationsAsSeen(authorization: NostrEvent) {
         withContext(dispatcherProvider.io()) {
             val seenAt = Clock.System.now()

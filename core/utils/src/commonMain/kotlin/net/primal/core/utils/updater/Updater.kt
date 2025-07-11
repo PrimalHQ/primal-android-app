@@ -1,10 +1,12 @@
 package net.primal.core.utils.updater
 
+import kotlin.time.Clock
 import kotlin.time.Duration
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import net.primal.core.utils.Result
 
+@OptIn(ExperimentalTime::class)
 abstract class Updater {
 
     private var lastTimeFetched: Instant = Instant.DISTANT_PAST

@@ -5,8 +5,9 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import io.github.aakira.napier.Napier
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.messages.DirectMessage
 import net.primal.data.local.db.PrimalDatabase
@@ -27,6 +28,7 @@ internal class MessagesRemoteMediator(
 
     private val lastRequests: MutableMap<LoadType, MessagesRequestBody> = mutableMapOf()
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun load(loadType: LoadType, state: PagingState<Int, DirectMessage>): MediatorResult {
         val timestamp: Long? = when (loadType) {
             LoadType.REFRESH -> null

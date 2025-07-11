@@ -5,9 +5,10 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import io.github.aakira.napier.Napier
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notifications.Notification
 import net.primal.data.local.dao.notifications.NotificationData
@@ -23,6 +24,7 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.shared.data.local.db.withTransaction
 
 @ExperimentalPagingApi
+@OptIn(ExperimentalTime::class)
 class NotificationsRemoteMediator(
     private val userId: String,
     private val dispatcherProvider: DispatcherProvider,

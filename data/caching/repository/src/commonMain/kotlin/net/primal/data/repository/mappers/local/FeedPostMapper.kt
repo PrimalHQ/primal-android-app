@@ -1,6 +1,7 @@
 package net.primal.data.repository.mappers.local
 
-import kotlinx.datetime.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import net.primal.data.local.dao.events.EventStats
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
 import net.primal.data.local.dao.notes.FeedPostUserStats
@@ -16,6 +17,7 @@ import net.primal.domain.posts.FeedPostAuthor
 import net.primal.domain.posts.FeedPostRepostInfo
 import net.primal.domain.posts.FeedPostStats
 
+@OptIn(ExperimentalTime::class)
 internal fun PostData.mapAsFeedPostDO(): FeedPost {
     return FeedPost(
         eventId = this.postId,
@@ -39,6 +41,7 @@ internal fun PostData.mapAsFeedPostDO(): FeedPost {
     )
 }
 
+@OptIn(ExperimentalTime::class)
 internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
     return FeedPostDO(
         eventId = this.data.postId,

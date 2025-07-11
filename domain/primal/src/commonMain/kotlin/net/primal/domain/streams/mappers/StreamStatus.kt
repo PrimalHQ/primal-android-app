@@ -1,11 +1,13 @@
 package net.primal.domain.streams.mappers
 
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
-import kotlinx.datetime.Clock
+import kotlin.time.ExperimentalTime
 import net.primal.domain.streams.StreamStatus
 
 private val LIVE_STREAM_STALE_THRESHOLD = 1.hours
 
+@OptIn(ExperimentalTime::class)
 fun resolveStreamStatus(
     status: StreamStatus,
     streamingUrl: String?,

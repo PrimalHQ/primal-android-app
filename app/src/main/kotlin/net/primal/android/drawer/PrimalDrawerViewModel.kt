@@ -5,15 +5,16 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.theme.active.ActiveThemeStore
@@ -108,6 +109,7 @@ class PrimalDrawerViewModel @Inject constructor(
             }
         }
 
+    @OptIn(ExperimentalTime::class)
     private suspend fun invertTheme(event: PrimalDrawerContract.UiEvent.ThemeSwitchClick) {
         val activeTheme = activeThemeStore.userThemeState.firstOrNull()
         val newThemeName = activeTheme?.inverseThemeName

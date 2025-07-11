@@ -3,10 +3,11 @@ package net.primal.android.user.repository
 import androidx.room.withTransaction
 import java.time.Instant
 import javax.inject.Inject
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.serialization.json.JsonArray
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.usernameUiFriendly
@@ -264,6 +265,7 @@ class UserRepository @Inject constructor(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     suspend fun updateUpgradeDotTimestamp(userId: String) {
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(lastBuyPremiumTimestampInMillis = Clock.System.now().toEpochMilliseconds())

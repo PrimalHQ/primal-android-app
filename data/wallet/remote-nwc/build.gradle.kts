@@ -10,6 +10,8 @@ plugins {
 private val xcfName = "PrimalDataWalletRemoteNwc"
 
 kotlin {
+
+    jvmToolchain(17)
     // Android target
     androidLibrary {
         namespace = "net.primal"
@@ -56,12 +58,14 @@ kotlin {
         androidMain {
             dependencies {
                 // Kotlin
+//                implementation(libs.napier)
                 implementation(libs.kotlinx.coroutines.android)
             }
         }
 
         iosMain {
             dependencies {
+//                implementation(libs.napier)
             }
         }
 
@@ -73,10 +77,6 @@ kotlin {
                 implementation(libs.kotlinx.coroutines.test)
                 implementation(libs.ktor.client.mock)
             }
-        }
-
-        val desktopMain by getting
-        desktopMain.dependencies {
         }
     }
 

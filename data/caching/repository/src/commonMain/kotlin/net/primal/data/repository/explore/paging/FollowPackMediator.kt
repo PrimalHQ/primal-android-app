@@ -5,10 +5,11 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import io.github.aakira.napier.Napier
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -26,6 +27,7 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.shared.data.local.db.withTransaction
 
 @ExperimentalPagingApi
+@OptIn(ExperimentalTime::class)
 internal class FollowPackMediator(
     private val exploreApi: ExploreApi,
     private val database: PrimalDatabase,

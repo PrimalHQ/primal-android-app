@@ -1,6 +1,7 @@
 package net.primal.data.repository.feed.processors
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.data.local.dao.notes.FeedPostDataCrossRef
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
@@ -47,6 +48,7 @@ internal class FeedProcessor(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     private suspend fun List<NostrEvent>.processRemoteKeys(userId: String, pagingEvent: ContentPrimalPaging?) {
         val sinceId = pagingEvent?.sinceId
         val untilId = pagingEvent?.untilId

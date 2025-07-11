@@ -11,6 +11,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -203,6 +204,7 @@ class NoteFeedViewModel @AssistedInject constructor(
         )
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun FeedPageSnapshot.processSyncCount(newestLocalNote: FeedPost? = null) {
         val allReferencedNotes = this.referencedEvents.mapNotNull {
             it.content.decodeFromJsonStringOrNull<NostrEvent>()

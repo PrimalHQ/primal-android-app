@@ -1,6 +1,7 @@
 package net.primal.data.remote.api.notifications
 
-import kotlinx.datetime.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.encodeToJsonString
@@ -12,6 +13,7 @@ import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 
+@OptIn(ExperimentalTime::class)
 class NotificationsApiImpl(
     private val primalApiClient: PrimalApiClient,
 ) : NotificationsApi {

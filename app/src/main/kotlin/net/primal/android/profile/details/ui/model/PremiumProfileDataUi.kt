@@ -1,6 +1,7 @@
 package net.primal.android.profile.details.ui.model
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.premium.utils.isPremiumTier
@@ -17,6 +18,7 @@ data class PremiumProfileDataUi(
     val legendaryCustomization: LegendaryCustomization? = null,
 )
 
+@OptIn(ExperimentalTime::class)
 fun PremiumProfileDataUi.shouldShowPremiumBadge(): Boolean {
     val legendaryStyle = legendaryCustomization?.legendaryStyle
 

@@ -1,6 +1,7 @@
 package net.primal.android.notes.feed.model
 
 import java.time.Instant
+import kotlin.time.ExperimentalTime
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.utils.formatNip05Identifier
@@ -46,6 +47,7 @@ data class FeedPostUi(
     val isAuthorLiveStreamingNow: Boolean = false,
 )
 
+@OptIn(ExperimentalTime::class)
 fun FeedPost.asFeedPostUi(): FeedPostUi {
     val repost = this.reposts.firstOrNull()
     return FeedPostUi(

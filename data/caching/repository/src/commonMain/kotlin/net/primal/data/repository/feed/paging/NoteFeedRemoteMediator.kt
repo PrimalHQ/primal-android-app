@@ -5,12 +5,13 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import io.github.aakira.napier.Napier
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.io.IOException
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.utils.retryNetworkCall
@@ -29,6 +30,7 @@ import net.primal.domain.feeds.isProfileAuthoredNotesFeedSpec
 import net.primal.domain.feeds.supportsUpwardsNotesPagination
 
 @ExperimentalPagingApi
+@OptIn(ExperimentalTime::class)
 internal class NoteFeedRemoteMediator(
     private val dispatcherProvider: DispatcherProvider,
     private val feedSpec: String,

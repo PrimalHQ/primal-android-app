@@ -1,6 +1,7 @@
 package net.primal.android.premium.domain
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -22,5 +23,6 @@ data class PremiumMembership(
     val editedShoutout: String? = null,
     val donatedBtc: String? = null,
 ) {
+    @OptIn(ExperimentalTime::class)
     fun isExpired() = expiresOn != null && Clock.System.now().epochSeconds > expiresOn
 }

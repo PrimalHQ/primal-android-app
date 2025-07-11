@@ -7,10 +7,11 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.asMapByKey
@@ -58,6 +59,7 @@ class ExploreRepositoryImpl(
     private val database: PrimalDatabase,
 ) : ExploreRepository {
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun fetchTrendingZaps(userId: String): List<ExploreZapNoteData> =
         withContext(dispatcherProvider.io()) {
             val response = retryNetworkCall {

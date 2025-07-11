@@ -1,6 +1,7 @@
 package net.primal.data.repository.events
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.data.local.dao.events.EventStats
 import net.primal.data.local.dao.events.EventUserStats
@@ -8,6 +9,7 @@ import net.primal.data.local.dao.events.EventZap
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.shared.data.local.db.withTransaction
 
+@OptIn(ExperimentalTime::class)
 internal class EventStatsUpdater(
     val eventId: String,
     val userId: String,

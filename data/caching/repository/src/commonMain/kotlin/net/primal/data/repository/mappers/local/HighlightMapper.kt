@@ -1,6 +1,7 @@
 package net.primal.data.repository.mappers.local
 
-import kotlinx.datetime.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import net.primal.data.local.dao.reads.Highlight as HighlightPO
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.posts.FeedPost
@@ -8,6 +9,7 @@ import net.primal.domain.posts.FeedPostAuthor
 import net.primal.domain.reads.Highlight as HighlightDO
 import net.primal.domain.reads.HighlightData
 
+@OptIn(ExperimentalTime::class)
 fun HighlightPO.asHighlightDO(): HighlightDO {
     return HighlightDO(
         data = HighlightData(
