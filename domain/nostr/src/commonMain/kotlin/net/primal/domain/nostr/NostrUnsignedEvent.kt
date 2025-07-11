@@ -1,10 +1,12 @@
 package net.primal.domain.nostr
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonArray
 
+@OptIn(ExperimentalTime::class)
 @Serializable
 data class NostrUnsignedEvent(
     @SerialName("pubkey") val pubKey: String,

@@ -1,6 +1,7 @@
 package net.primal.domain.posts
 
-import kotlinx.datetime.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlinx.serialization.json.JsonArray
 import net.primal.domain.bookmarks.PublicBookmark
 import net.primal.domain.events.EventRelayHints
@@ -8,6 +9,7 @@ import net.primal.domain.events.EventZap
 import net.primal.domain.links.EventLink
 import net.primal.domain.links.EventUriNostrReference
 
+@OptIn(ExperimentalTime::class)
 data class FeedPost(
     val eventId: String,
     val author: FeedPostAuthor,
