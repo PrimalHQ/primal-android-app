@@ -253,11 +253,12 @@ fun LaunchedErrorHandler(viewModel: InAppPurchaseBuyViewModel) {
             .filter { it.error != null }
             .map { it.error }
             .filterNotNull()
-            .collect {
+            .collect { error ->
                 uiScope.launch {
+                    val message = error.message ?: genericMessage
                     Toast.makeText(
                         context,
-                        genericMessage,
+                        message,
                         Toast.LENGTH_SHORT,
                     ).show()
                 }
