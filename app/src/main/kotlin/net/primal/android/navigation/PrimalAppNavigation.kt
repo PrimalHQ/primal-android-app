@@ -13,6 +13,8 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -87,6 +89,10 @@ import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationContract
 import net.primal.android.messages.conversation.create.NewConversationScreen
+import net.primal.android.navigation.interactions.ArticleInteractionCallbacks
+import net.primal.android.navigation.interactions.ContentInteractionCallbacks
+import net.primal.android.navigation.interactions.NoteInteractionCallbacks
+import net.primal.android.navigation.interactions.PrimalSubscriptionsInteractionCallbacks
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract
 import net.primal.android.notes.home.HomeFeedScreen
@@ -438,540 +444,621 @@ fun noteCallbacksHandler(navController: NavController) =
 fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
     val navController = rememberNavController()
 
-    val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
-        when (it) {
-            PrimalTopLevelDestination.Home -> navController.popBackStack()
-            PrimalTopLevelDestination.Reads -> navController.navigateToReads()
-            PrimalTopLevelDestination.Wallet -> navController.navigateToWallet()
-            PrimalTopLevelDestination.Notifications -> navController.navigateToNotifications()
-            PrimalTopLevelDestination.Explore -> navController.navigateToExplore()
-        }
+    val navigationManager = remember(navController) {
+        val noteInteractions = NoteInteractionCallbacks(
+            onNoteClick = { noteId -> navController.navigateToThread(noteId = noteId) },
+            onNoteReplyClick = { referencedNoteEvent ->
+                navController.navigateToNoteEditor(NoteEditorArgs(referencedNoteNevent = referencedNoteEvent))
+            },
+            onNoteQuoteClick = { noteNevent ->
+                navController.navigateToNoteEditor(
+                    args = NoteEditorArgs(referencedNoteNevent = noteNevent, isQuoting = true),
+                )
+            },
+            onMediaClick = {
+                navController.navigateToMediaGallery(
+                    noteId = it.noteId,
+                    mediaUrl = it.mediaUrl,
+                    mediaPositionMs = it.positionMs,
+                )
+            },
+            onEventReactionsClick = { eventId, initialTab, articleATag ->
+                navController.navigateToReactions(
+                    eventId = eventId,
+                    initialTab = initialTab,
+                    articleATag = articleATag,
+                )
+            },
+            onPayInvoiceClick = {
+                navController.navigateToWalletCreateTransaction(lnbc = it.lnbc)
+            },
+        )
+
+        val articleInteractions = ArticleInteractionCallbacks(
+            onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr = naddr) },
+            onArticleReplyClick = { naddr ->
+                navController.navigateToNoteEditor(NoteEditorArgs(referencedArticleNaddr = naddr))
+            },
+            onArticleQuoteClick = { naddr ->
+                navController.navigateToNoteEditor(
+                    args = NoteEditorArgs(referencedArticleNaddr = naddr, isQuoting = true),
+                )
+            },
+            onHighlightReplyClick = { highlightNevent, articleNaddr ->
+                navController.navigateToNoteEditor(
+                    args = NoteEditorArgs(
+                        referencedHighlightNevent = highlightNevent,
+                        referencedArticleNaddr = articleNaddr,
+                    ),
+                )
+            },
+            onHighlightQuoteClick = { nevent, naddr ->
+                navController.navigateToNoteEditor(
+                    args = NoteEditorArgs(
+                        referencedArticleNaddr = naddr,
+                        referencedHighlightNevent = nevent,
+                        isQuoting = true,
+                    ),
+                )
+            },
+        )
+
+        val contentInteractions = ContentInteractionCallbacks(
+            onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
+            onHashtagClick = { hashtag ->
+                navController.navigateToExploreFeed(feedSpec = buildAdvancedSearchNotesFeedSpec(query = hashtag))
+            },
+        )
+
+        val subscriptionInteractions = PrimalSubscriptionsInteractionCallbacks(
+            onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
+            onPrimalLegendsLeaderboardClick = { navController.navigateToPremiumLegendLeaderboard() },
+        )
+
+        NavigationManager(
+            noteCallbacks = noteInteractions,
+            articleCallbacks = articleInteractions,
+            contentCallbacks = contentInteractions,
+            subscriptionCallbacks = subscriptionInteractions,
+        )
     }
 
-    val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
-        when (it) {
-            is DrawerScreenDestination.Profile -> navController.navigateToProfile(profileId = it.userId)
-            is DrawerScreenDestination.Premium -> if (it.hasPremium) {
-                navController.navigateToPremiumHome()
-            } else {
-                navController.navigateToPremiumBuying()
+    CompositionLocalProvider(LocalNavigationManager provides navigationManager) {
+        val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
+            when (it) {
+                PrimalTopLevelDestination.Home -> navController.popBackStack()
+                PrimalTopLevelDestination.Reads -> navController.navigateToReads()
+                PrimalTopLevelDestination.Wallet -> navController.navigateToWallet()
+                PrimalTopLevelDestination.Notifications -> navController.navigateToNotifications()
+                PrimalTopLevelDestination.Explore -> navController.navigateToExplore()
             }
-
-            DrawerScreenDestination.Messages -> navController.navigateToMessages()
-            is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
-            DrawerScreenDestination.RedeemCode -> navController.navigateToRedeemCode()
-            DrawerScreenDestination.Settings -> navController.navigateToSettings()
-            is DrawerScreenDestination.SignOut -> navController.navigateToLogout(profileId = it.userId)
         }
-    }
 
-    NavHost(
-        modifier = Modifier.background(AppTheme.colorScheme.background),
-        navController = navController,
-        startDestination = startDestination,
-    ) {
-        welcome(route = "welcome", navController = navController)
+        val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
+            when (it) {
+                is DrawerScreenDestination.Profile -> navController.navigateToProfile(profileId = it.userId)
+                is DrawerScreenDestination.Premium -> if (it.hasPremium) {
+                    navController.navigateToPremiumHome()
+                } else {
+                    navController.navigateToPremiumBuying()
+                }
 
-        login(route = "login", navController = navController)
+                DrawerScreenDestination.Messages -> navController.navigateToMessages()
+                is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
+                DrawerScreenDestination.RedeemCode -> navController.navigateToRedeemCode()
+                DrawerScreenDestination.Settings -> navController.navigateToSettings()
+                is DrawerScreenDestination.SignOut -> navController.navigateToLogout(profileId = it.userId)
+            }
+        }
 
-        onboarding(
-            route = "onboarding?$PROMO_CODE={$PROMO_CODE}",
-            arguments = listOf(
-                navArgument(PROMO_CODE) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
+        NavHost(
+            modifier = Modifier.background(AppTheme.colorScheme.background),
             navController = navController,
-        )
+            startDestination = startDestination,
+        ) {
+            welcome(route = "welcome", navController = navController)
 
-        onboardingWalletActivation(
-            route = "onboardingWallet?$PROMO_CODE={$PROMO_CODE}",
-            arguments = listOf(
-                navArgument(PROMO_CODE) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            navController = navController,
-        )
+            login(route = "login", navController = navController)
 
-        redeemCode(
-            route = "redeemCode?$PROMO_CODE={$PROMO_CODE}",
-            arguments = listOf(
-                navArgument(PROMO_CODE) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/rc/{$PROMO_CODE}"
-                },
-            ),
-            navController = navController,
-        )
+            onboarding(
+                route = "onboarding?$PROMO_CODE={$PROMO_CODE}",
+                arguments = listOf(
+                    navArgument(PROMO_CODE) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
+                navController = navController,
+            )
 
-        logout(
-            route = "logout?$PROFILE_ID={$PROFILE_ID}",
-            arguments = listOf(
-                navArgument(PROFILE_ID) {
-                    type = NavType.StringType
-                    nullable = false
-                },
-            ),
-            navController = navController,
-        )
+            onboardingWalletActivation(
+                route = "onboardingWallet?$PROMO_CODE={$PROMO_CODE}",
+                arguments = listOf(
+                    navArgument(PROMO_CODE) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
+                navController = navController,
+            )
 
-        home(
-            route = "home",
-            navController = navController,
-            onTopLevelDestinationChanged = topLevelDestinationHandler,
-            onDrawerScreenClick = drawerDestinationHandler,
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net"
-                },
-                navDeepLink {
-                    uriPattern = "https://primal.net/home"
-                },
-            ),
-        )
+            redeemCode(
+                route = "redeemCode?$PROMO_CODE={$PROMO_CODE}",
+                arguments = listOf(
+                    navArgument(PROMO_CODE) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net/rc/{$PROMO_CODE}"
+                    },
+                ),
+                navController = navController,
+            )
 
-        reads(
-            route = "reads",
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/reads"
-                },
-            ),
-            navController = navController,
-            onTopLevelDestinationChanged = topLevelDestinationHandler,
-            onDrawerScreenClick = drawerDestinationHandler,
-        )
+            logout(
+                route = "logout?$PROFILE_ID={$PROFILE_ID}",
+                arguments = listOf(
+                    navArgument(PROFILE_ID) {
+                        type = NavType.StringType
+                        nullable = false
+                    },
+                ),
+                navController = navController,
+            )
 
-        explore(
-            route = "explore",
-            navController = navController,
-            onTopLevelDestinationChanged = topLevelDestinationHandler,
-            onDrawerScreenClick = drawerDestinationHandler,
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/explore"
-                },
-            ),
-        )
+            home(
+                route = "home",
+                navController = navController,
+                onTopLevelDestinationChanged = topLevelDestinationHandler,
+                onDrawerScreenClick = drawerDestinationHandler,
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net"
+                    },
+                    navDeepLink {
+                        uriPattern = "https://primal.net/home"
+                    },
+                ),
+            )
 
-        followPack(
-            route = "explore/followPack/{$PROFILE_ID}/{$FOLLOW_PACK_ID}",
-            navController = navController,
-            arguments = listOf(
-                navArgument(PROFILE_ID) {
-                    type = NavType.StringType
-                    nullable = false
-                },
-                navArgument(FOLLOW_PACK_ID) {
-                    type = NavType.StringType
-                    nullable = false
-                },
-            ),
-        )
+            reads(
+                route = "reads",
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net/reads"
+                    },
+                ),
+                navController = navController,
+                onTopLevelDestinationChanged = topLevelDestinationHandler,
+                onDrawerScreenClick = drawerDestinationHandler,
+            )
 
-        bookmarks(
-            route = "bookmarks",
-            navController = navController,
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/bookmarks"
-                },
-            ),
-        )
+            explore(
+                route = "explore",
+                navController = navController,
+                onTopLevelDestinationChanged = topLevelDestinationHandler,
+                onDrawerScreenClick = drawerDestinationHandler,
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net/explore"
+                    },
+                ),
+            )
 
-        exploreFeed(
-            route = "explore/note?" +
-                "$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}&" +
-                "$ADVANCED_SEARCH_FEED_SPEC={$ADVANCED_SEARCH_FEED_SPEC}&" +
-                "$EXPLORE_FEED_TITLE={$EXPLORE_FEED_TITLE}&" +
-                "$EXPLORE_FEED_DESCRIPTION={$EXPLORE_FEED_DESCRIPTION}&" +
-                "$RENDER_TYPE={$RENDER_TYPE}",
-            arguments = listOf(
-                navArgument(EXPLORE_FEED_SPEC) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(ADVANCED_SEARCH_FEED_SPEC) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(EXPLORE_FEED_TITLE) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(EXPLORE_FEED_DESCRIPTION) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(RENDER_TYPE) {
-                    type = NavType.StringType
-                    nullable = false
-                    defaultValue = ExploreFeedContract.RenderType.List.toString()
-                },
-            ),
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/search/{$ADVANCED_SEARCH_FEED_SPEC}"
-                },
-            ),
-            navController = navController,
-        )
+            followPack(
+                route = "explore/followPack/{$PROFILE_ID}/{$FOLLOW_PACK_ID}",
+                navController = navController,
+                arguments = listOf(
+                    navArgument(PROFILE_ID) {
+                        type = NavType.StringType
+                        nullable = false
+                    },
+                    navArgument(FOLLOW_PACK_ID) {
+                        type = NavType.StringType
+                        nullable = false
+                    },
+                ),
+            )
 
-        search(
-            route = "search?$SEARCH_SCOPE={$SEARCH_SCOPE}",
-            arguments = listOf(
-                navArgument(SEARCH_SCOPE) {
-                    type = NavType.StringType
-                },
-            ),
-            navController = navController,
-        )
+            bookmarks(
+                route = "bookmarks",
+                navController = navController,
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net/bookmarks"
+                    },
+                ),
+            )
 
-        advancedSearch(
-            route = "asearch" +
-                "?$INITIAL_QUERY={$INITIAL_QUERY}" +
-                "&$POSTED_BY={$POSTED_BY}" +
-                "&$SEARCH_KIND={$SEARCH_KIND}" +
-                "&$ADV_SEARCH_SCOPE={$ADV_SEARCH_SCOPE}",
-            navController = navController,
-            arguments = listOf(
-                navArgument(INITIAL_QUERY) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(POSTED_BY) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(SEARCH_KIND) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(ADV_SEARCH_SCOPE) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-        )
+            exploreFeed(
+                route = "explore/note?" +
+                    "$EXPLORE_FEED_SPEC={$EXPLORE_FEED_SPEC}&" +
+                    "$ADVANCED_SEARCH_FEED_SPEC={$ADVANCED_SEARCH_FEED_SPEC}&" +
+                    "$EXPLORE_FEED_TITLE={$EXPLORE_FEED_TITLE}&" +
+                    "$EXPLORE_FEED_DESCRIPTION={$EXPLORE_FEED_DESCRIPTION}&" +
+                    "$RENDER_TYPE={$RENDER_TYPE}",
+                arguments = listOf(
+                    navArgument(EXPLORE_FEED_SPEC) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(ADVANCED_SEARCH_FEED_SPEC) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(EXPLORE_FEED_TITLE) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(EXPLORE_FEED_DESCRIPTION) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(RENDER_TYPE) {
+                        type = NavType.StringType
+                        nullable = false
+                        defaultValue = ExploreFeedContract.RenderType.List.toString()
+                    },
+                ),
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net/search/{$ADVANCED_SEARCH_FEED_SPEC}"
+                    },
+                ),
+                navController = navController,
+            )
 
-        premiumBuying(
-            route = "premium/buying" +
-                "?$EXTEND_EXISTING_PREMIUM_NAME={$EXTEND_EXISTING_PREMIUM_NAME}" +
-                "&$UPGRADE_TO_PRIMAL_PRO={$UPGRADE_TO_PRIMAL_PRO}" +
-                "&$FROM_ORIGIN={$FROM_ORIGIN}",
-            arguments = listOf(
-                navArgument(EXTEND_EXISTING_PREMIUM_NAME) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(UPGRADE_TO_PRIMAL_PRO) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(FROM_ORIGIN) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            navController = navController,
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/premium"
-                },
-            ),
-        )
+            search(
+                route = "search?$SEARCH_SCOPE={$SEARCH_SCOPE}",
+                arguments = listOf(
+                    navArgument(SEARCH_SCOPE) {
+                        type = NavType.StringType
+                    },
+                ),
+                navController = navController,
+            )
 
-        premiumHome(
-            route = "premium/home",
-            navController = navController,
-        )
+            advancedSearch(
+                route = "asearch" +
+                    "?$INITIAL_QUERY={$INITIAL_QUERY}" +
+                    "&$POSTED_BY={$POSTED_BY}" +
+                    "&$SEARCH_KIND={$SEARCH_KIND}" +
+                    "&$ADV_SEARCH_SCOPE={$ADV_SEARCH_SCOPE}",
+                navController = navController,
+                arguments = listOf(
+                    navArgument(INITIAL_QUERY) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(POSTED_BY) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(SEARCH_KIND) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(ADV_SEARCH_SCOPE) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
+            )
 
-        premiumSupportPrimal(route = "premium/supportPrimal", navController = navController)
+            premiumBuying(
+                route = "premium/buying" +
+                    "?$EXTEND_EXISTING_PREMIUM_NAME={$EXTEND_EXISTING_PREMIUM_NAME}" +
+                    "&$UPGRADE_TO_PRIMAL_PRO={$UPGRADE_TO_PRIMAL_PRO}" +
+                    "&$FROM_ORIGIN={$FROM_ORIGIN}",
+                arguments = listOf(
+                    navArgument(EXTEND_EXISTING_PREMIUM_NAME) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(UPGRADE_TO_PRIMAL_PRO) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(FROM_ORIGIN) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
+                navController = navController,
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net/premium"
+                    },
+                ),
+            )
 
-        premiumLegendContribution(route = "premium/legend/contribution", navController = navController)
+            premiumHome(
+                route = "premium/home",
+                navController = navController,
+            )
 
-        premiumMoreInfo(
-            route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX={$PREMIUM_MORE_INFO_TAB_INDEX}",
-            arguments = listOf(
-                navArgument(PREMIUM_MORE_INFO_TAB_INDEX) {
-                    type = NavType.IntType
-                    defaultValue = 0
-                },
-            ),
-            navController = navController,
-        )
+            premiumSupportPrimal(route = "premium/supportPrimal", navController = navController)
 
-        premiumBuyPrimalLegend(
-            route = "premium/legend/buy?$FROM_ORIGIN={$FROM_ORIGIN}",
-            arguments = listOf(
-                navArgument(FROM_ORIGIN) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            navController = navController,
-        )
+            premiumLegendContribution(route = "premium/legend/contribution", navController = navController)
 
-        premiumLegendaryProfile(route = "premium/legend/profile", navController = navController)
+            premiumMoreInfo(
+                route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX={$PREMIUM_MORE_INFO_TAB_INDEX}",
+                arguments = listOf(
+                    navArgument(PREMIUM_MORE_INFO_TAB_INDEX) {
+                        type = NavType.IntType
+                        defaultValue = 0
+                    },
+                ),
+                navController = navController,
+            )
 
-        premiumCard(
-            route = "premium/card/{$PROFILE_ID}",
-            arguments = listOf(
-                navArgument(PROFILE_ID) {
-                    type = NavType.StringType
-                },
-            ),
-            navController = navController,
-        )
+            premiumBuyPrimalLegend(
+                route = "premium/legend/buy?$FROM_ORIGIN={$FROM_ORIGIN}",
+                arguments = listOf(
+                    navArgument(FROM_ORIGIN) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
+                navController = navController,
+            )
 
-        premiumLegendLeaderboard(
-            route = "premium/legend/leaderboard",
-            navController = navController,
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/legends"
-                },
-            ),
-        )
-        premiumOGsLeaderboard(route = "premium/ogs/leaderboard", navController = navController)
+            premiumLegendaryProfile(route = "premium/legend/profile", navController = navController)
 
-        premiumManage(route = "premium/manage", navController = navController)
+            premiumCard(
+                route = "premium/card/{$PROFILE_ID}",
+                arguments = listOf(
+                    navArgument(PROFILE_ID) {
+                        type = NavType.StringType
+                    },
+                ),
+                navController = navController,
+            )
 
-        premiumContactList(route = "premium/manage/contacts", navController = navController)
+            premiumLegendLeaderboard(
+                route = "premium/legend/leaderboard",
+                navController = navController,
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net/legends"
+                    },
+                ),
+            )
+            premiumOGsLeaderboard(route = "premium/ogs/leaderboard", navController = navController)
 
-        premiumContentBackup(route = "premium/manage/content", navController = navController)
+            premiumManage(route = "premium/manage", navController = navController)
 
-        premiumMediaManagement(route = "premium/manage/media", navController = navController)
+            premiumContactList(route = "premium/manage/contacts", navController = navController)
 
-        premiumChangePrimalName(route = "premium/manage/changePrimalName", navController = navController)
+            premiumContentBackup(route = "premium/manage/content", navController = navController)
 
-        premiumOrderHistory(route = "premium/manage/order", navController = navController)
+            premiumMediaManagement(route = "premium/manage/media", navController = navController)
 
-        premiumRelay(route = "premium/manage/relay", navController = navController)
+            premiumChangePrimalName(route = "premium/manage/changePrimalName", navController = navController)
 
-        messages(
-            route = "messages",
-            navController = navController,
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/dms"
-                },
-            ),
-        )
+            premiumOrderHistory(route = "premium/manage/order", navController = navController)
 
-        chat(
-            route = "messages/{$PROFILE_ID}",
-            arguments = listOf(
-                navArgument(PROFILE_ID) {
-                    type = NavType.StringType
-                },
-            ),
-            navController = navController,
-        )
+            premiumRelay(route = "premium/manage/relay", navController = navController)
 
-        newMessage(route = "messages/new", navController = navController)
+            messages(
+                route = "messages",
+                navController = navController,
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net/dms"
+                    },
+                ),
+            )
 
-        notifications(
-            route = "notifications",
-            navController = navController,
-            onTopLevelDestinationChanged = topLevelDestinationHandler,
-            onDrawerScreenClick = drawerDestinationHandler,
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/notifications"
-                },
-            ),
-        )
+            chat(
+                route = "messages/{$PROFILE_ID}",
+                arguments = listOf(
+                    navArgument(PROFILE_ID) {
+                        type = NavType.StringType
+                    },
+                ),
+                navController = navController,
+            )
 
-        noteEditor(
-            route = "noteEditor?$NOTE_EDITOR_ARGS={$NOTE_EDITOR_ARGS}",
-            arguments = listOf(
-                navArgument(NOTE_EDITOR_ARGS) {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                },
-            ),
-            deepLinks = listOf(
-                navDeepLink {
-                    action = "ACTION_SEND"
-                    mimeType = "image/*"
-                },
-                navDeepLink {
-                    action = "ACTION_SEND_MULTIPLE"
-                    mimeType = "image/*"
-                },
-                navDeepLink {
-                    action = "ACTION_SEND"
-                    mimeType = "video/*"
-                },
-                navDeepLink {
-                    action = "ACTION_SEND_MULTIPLE"
-                    mimeType = "video/*"
-                },
-            ),
-            navController = navController,
-        )
+            newMessage(route = "messages/new", navController = navController)
 
-        thread(
-            route = "thread/{$NOTE_ID}",
-            arguments = listOf(
-                navArgument(NOTE_ID) {
-                    type = NavType.StringType
-                },
-            ),
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/e/{$NOTE_ID}"
-                },
-            ),
-            navController = navController,
-        )
+            notifications(
+                route = "notifications",
+                navController = navController,
+                onTopLevelDestinationChanged = topLevelDestinationHandler,
+                onDrawerScreenClick = drawerDestinationHandler,
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net/notifications"
+                    },
+                ),
+            )
 
-        articleDetails(
-            route = "article?$NADDR={$NADDR}&$PRIMAL_NAME={$PRIMAL_NAME}&$ARTICLE_ID={$ARTICLE_ID}",
-            arguments = listOf(
-                navArgument(NADDR) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(PRIMAL_NAME) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(ARTICLE_ID) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/a/{$NADDR}"
-                },
-                navDeepLink {
-                    uriPattern = "https://primal.net/{$PRIMAL_NAME}/{$ARTICLE_ID}"
-                },
-            ),
-            navController = navController,
-        )
+            noteEditor(
+                route = "noteEditor?$NOTE_EDITOR_ARGS={$NOTE_EDITOR_ARGS}",
+                arguments = listOf(
+                    navArgument(NOTE_EDITOR_ARGS) {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    },
+                ),
+                deepLinks = listOf(
+                    navDeepLink {
+                        action = "ACTION_SEND"
+                        mimeType = "image/*"
+                    },
+                    navDeepLink {
+                        action = "ACTION_SEND_MULTIPLE"
+                        mimeType = "image/*"
+                    },
+                    navDeepLink {
+                        action = "ACTION_SEND"
+                        mimeType = "video/*"
+                    },
+                    navDeepLink {
+                        action = "ACTION_SEND_MULTIPLE"
+                        mimeType = "video/*"
+                    },
+                ),
+                navController = navController,
+            )
 
-        reactions(
-            route = "reactions/{$EVENT_ID}" +
-                "?$INITIAL_REACTION_TYPE={$INITIAL_REACTION_TYPE}&$ARTICLE_A_TAG={$ARTICLE_A_TAG}",
-            arguments = listOf(
-                navArgument(EVENT_ID) { type = NavType.StringType },
-                navArgument(INITIAL_REACTION_TYPE) {
-                    type = NavType.StringType
-                    defaultValue = ReactionType.ZAPS.name
-                },
-                navArgument(ARTICLE_A_TAG) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            navController = navController,
-        )
+            thread(
+                route = "thread/{$NOTE_ID}",
+                arguments = listOf(
+                    navArgument(NOTE_ID) {
+                        type = NavType.StringType
+                    },
+                ),
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net/e/{$NOTE_ID}"
+                    },
+                ),
+                navController = navController,
+            )
 
-        media(
-            route = "media/{$NOTE_ID}" +
-                "?$MEDIA_URL={$MEDIA_URL}" +
-                "&$MEDIA_POSITION_MS={$MEDIA_POSITION_MS}",
-            arguments = listOf(
-                navArgument(NOTE_ID) {
-                    type = NavType.StringType
-                },
-                navArgument(MEDIA_URL) {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = null
-                },
-                navArgument(MEDIA_POSITION_MS) {
-                    type = NavType.LongType
-                    nullable = false
-                    defaultValue = 0
-                },
-            ),
-            navController = navController,
-        )
+            articleDetails(
+                route = "article?$NADDR={$NADDR}&$PRIMAL_NAME={$PRIMAL_NAME}&$ARTICLE_ID={$ARTICLE_ID}",
+                arguments = listOf(
+                    navArgument(NADDR) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(PRIMAL_NAME) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(ARTICLE_ID) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net/a/{$NADDR}"
+                    },
+                    navDeepLink {
+                        uriPattern = "https://primal.net/{$PRIMAL_NAME}/{$ARTICLE_ID}"
+                    },
+                ),
+                navController = navController,
+            )
 
-        mediaItem(
-            route = "mediaItem?$MEDIA_URL={$MEDIA_URL}",
-            arguments = listOf(
-                navArgument(MEDIA_URL) {
-                    type = NavType.StringType
-                    nullable = false
-                },
-            ),
-            navController = navController,
-        )
+            reactions(
+                route = "reactions/{$EVENT_ID}" +
+                    "?$INITIAL_REACTION_TYPE={$INITIAL_REACTION_TYPE}&$ARTICLE_A_TAG={$ARTICLE_A_TAG}",
+                arguments = listOf(
+                    navArgument(EVENT_ID) { type = NavType.StringType },
+                    navArgument(INITIAL_REACTION_TYPE) {
+                        type = NavType.StringType
+                        defaultValue = ReactionType.ZAPS.name
+                    },
+                    navArgument(ARTICLE_A_TAG) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
+                navController = navController,
+            )
 
-        profile(
-            route = "profile?$PROFILE_ID={$PROFILE_ID}&$PRIMAL_NAME={$PRIMAL_NAME}",
-            arguments = listOf(
-                navArgument(PROFILE_ID) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(PRIMAL_NAME) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/p/{$PROFILE_ID}"
-                },
-                navDeepLink {
-                    uriPattern = "https://primal.net/{$PRIMAL_NAME}"
-                },
-            ),
-            navController = navController,
-        )
+            media(
+                route = "media/{$NOTE_ID}" +
+                    "?$MEDIA_URL={$MEDIA_URL}" +
+                    "&$MEDIA_POSITION_MS={$MEDIA_POSITION_MS}",
+                arguments = listOf(
+                    navArgument(NOTE_ID) {
+                        type = NavType.StringType
+                    },
+                    navArgument(MEDIA_URL) {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = null
+                    },
+                    navArgument(MEDIA_POSITION_MS) {
+                        type = NavType.LongType
+                        nullable = false
+                        defaultValue = 0
+                    },
+                ),
+                navController = navController,
+            )
 
-        profileFollows(
-            route = "profile/{$PROFILE_ID}/follows?$FOLLOWS_TYPE={$FOLLOWS_TYPE}",
-            arguments = listOf(
-                navArgument(PROFILE_ID) {
-                    type = NavType.StringType
-                },
-                navArgument(FOLLOWS_TYPE) {
-                    type = NavType.StringType
-                    nullable = true
-                    defaultValue = ProfileFollowsType.Following.name
-                },
-            ),
-            navController = navController,
-        )
+            mediaItem(
+                route = "mediaItem?$MEDIA_URL={$MEDIA_URL}",
+                arguments = listOf(
+                    navArgument(MEDIA_URL) {
+                        type = NavType.StringType
+                        nullable = false
+                    },
+                ),
+                navController = navController,
+            )
 
-        profileEditor(route = "profileEditor", navController = navController)
+            profile(
+                route = "profile?$PROFILE_ID={$PROFILE_ID}&$PRIMAL_NAME={$PRIMAL_NAME}",
+                arguments = listOf(
+                    navArgument(PROFILE_ID) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                    navArgument(PRIMAL_NAME) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
+                deepLinks = listOf(
+                    navDeepLink {
+                        uriPattern = "https://primal.net/p/{$PROFILE_ID}"
+                    },
+                    navDeepLink {
+                        uriPattern = "https://primal.net/{$PRIMAL_NAME}"
+                    },
+                ),
+                navController = navController,
+            )
 
-        profileQrCodeViewer(
-            route = "profileQrCodeViewer?$PROFILE_ID={$PROFILE_ID}",
-            arguments = listOf(
-                navArgument(PROFILE_ID) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            navController = navController,
-        )
+            profileFollows(
+                route = "profile/{$PROFILE_ID}/follows?$FOLLOWS_TYPE={$FOLLOWS_TYPE}",
+                arguments = listOf(
+                    navArgument(PROFILE_ID) {
+                        type = NavType.StringType
+                    },
+                    navArgument(FOLLOWS_TYPE) {
+                        type = NavType.StringType
+                        nullable = true
+                        defaultValue = ProfileFollowsType.Following.name
+                    },
+                ),
+                navController = navController,
+            )
 
-        settingsNavigation(route = "settings", navController = navController)
+            profileEditor(route = "profileEditor", navController = navController)
 
-        walletNavigation(
-            route = "wallet",
-            navController = navController,
-            onTopLevelDestinationChanged = topLevelDestinationHandler,
-            onDrawerScreenClick = drawerDestinationHandler,
-        )
+            profileQrCodeViewer(
+                route = "profileQrCodeViewer?$PROFILE_ID={$PROFILE_ID}",
+                arguments = listOf(
+                    navArgument(PROFILE_ID) {
+                        type = NavType.StringType
+                        nullable = true
+                    },
+                ),
+                navController = navController,
+            )
+
+            settingsNavigation(route = "settings", navController = navController)
+
+            walletNavigation(
+                route = "wallet",
+                navController = navController,
+                onTopLevelDestinationChanged = topLevelDestinationHandler,
+                onDrawerScreenClick = drawerDestinationHandler,
+            )
+        }
     }
 }
 
