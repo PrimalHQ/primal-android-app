@@ -23,10 +23,10 @@ import net.primal.android.user.domain.LoginType
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.cryptography.utils.extractKeyPairFromPrivateKeyOrThrow
 import net.primal.domain.nostr.utils.isValidNostrPrivateKey
 import net.primal.domain.nostr.utils.isValidNostrPublicKey
+import net.primal.domain.nostr.utils.takeAsProfileHexIdOrNull
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
@@ -132,11 +132,12 @@ class LoginViewModel @Inject constructor(
     private fun fetchProfileDetails(npub: String) =
         viewModelScope.launch {
             setState { copy(fetchingProfileDetails = true) }
-            val userId = npub.bech32ToHexOrThrow()
             val profile = withContext(dispatcherProvider.io()) {
                 try {
-                    profileRepository.fetchProfile(profileId = userId)
-                    profileRepository.findProfileDataOrNull(profileId = userId)
+                    npub.takeAsProfileHexIdOrNull()?.let { userId ->
+                        profileRepository.fetchProfile(profileId = userId)
+                        profileRepository.findProfileDataOrNull(profileId = userId)
+                    }
                 } catch (error: NetworkException) {
                     Timber.w(error)
                     null
