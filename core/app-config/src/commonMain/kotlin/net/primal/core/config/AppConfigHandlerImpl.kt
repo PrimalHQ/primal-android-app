@@ -1,17 +1,19 @@
 package net.primal.core.config
 
 import io.github.aakira.napier.Napier
+import kotlin.time.Clock
 import kotlin.time.Duration
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import net.primal.core.config.api.ApiConfigResponse
 import net.primal.core.config.api.WellKnownApi
 import net.primal.core.config.store.AppConfigDataStore
 import net.primal.core.utils.coroutines.DispatcherProvider
 
+@OptIn(ExperimentalTime::class)
 internal class AppConfigHandlerImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val appConfigStore: AppConfigDataStore,
