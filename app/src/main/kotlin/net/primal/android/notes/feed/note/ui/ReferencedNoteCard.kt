@@ -16,10 +16,11 @@ import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlin.time.Duration.Companion.minutes
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.navigation.navigator.NoOpNavigator
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.links.CdnImage
@@ -28,7 +29,7 @@ import net.primal.domain.nostr.NostrEventKind
 @Composable
 fun ReferencedNoteCard(
     data: FeedPostUi,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     modifier: Modifier = Modifier,
     nestingLevel: Int = 0,
     nestingCutOffLimit: Int = Int.MAX_VALUE,
@@ -39,8 +40,8 @@ fun ReferencedNoteCard(
         modifier = modifier
             .wrapContentHeight()
             .clickable(
-                enabled = noteCallbacks.onNoteClick != null && data.rawKind == NostrEventKind.ShortTextNote.value,
-                onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
+                enabled = data.rawKind == NostrEventKind.ShortTextNote.value,
+                onClick = { navigator.onNoteClick(data.postId) },
             ),
         colors = colors,
         border = if (hasBorder) {
@@ -61,7 +62,7 @@ fun ReferencedNoteCard(
             authorLegendaryCustomization = data.authorLegendaryCustomization,
             authorInternetIdentifier = data.authorInternetIdentifier,
             authorBlossoms = data.authorBlossoms,
-            onAuthorAvatarClick = { noteCallbacks.onProfileClick?.invoke(data.authorId) },
+            onAuthorAvatarClick = { navigator.onProfileClick(data.authorId) },
         )
 
         NoteContent(
@@ -73,9 +74,9 @@ fun ReferencedNoteCard(
             referencedEventsHaveBorder = true,
             nestingLevel = nestingLevel + 1,
             nestingCutOffLimit = nestingCutOffLimit,
-            onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
-            onUrlClick = { _ -> noteCallbacks.onNoteClick?.invoke(data.postId) },
-            noteCallbacks = noteCallbacks,
+            onClick = { navigator.onNoteClick(data.postId) },
+            onUrlClick = { _ -> navigator.onNoteClick(data.postId) },
+            navigator = navigator,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -124,7 +125,7 @@ fun PreviewReferencedPostListItemLight() {
                 rawNostrEventJson = "",
                 replyToAuthorHandle = "alex",
             ),
-            noteCallbacks = NoteCallbacks(),
+            navigator = NoOpNavigator,
         )
     }
 }
@@ -165,7 +166,7 @@ fun PreviewReferencedPostListItemDark() {
                 rawNostrEventJson = "",
                 replyToAuthorHandle = null,
             ),
-            noteCallbacks = NoteCallbacks(),
+            navigator = NoOpNavigator,
         )
     }
 }

@@ -35,9 +35,9 @@ import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.rememberFirstVisibleItemIndex
 import net.primal.android.core.compose.zaps.FeedNoteTopZapsSection
 import net.primal.android.core.errors.UiError
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.domain.nostr.ReactionType
 import timber.log.Timber
 
@@ -51,7 +51,7 @@ fun NoteFeedLazyColumn(
     pagingItems: LazyPagingItems<FeedPostUi>,
     listState: LazyListState,
     showPaywall: Boolean,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     onGoToWallet: () -> Unit,
     showTopZaps: Boolean = false,
     shouldShowLoadingState: Boolean = true,
@@ -118,7 +118,7 @@ fun NoteFeedLazyColumn(
                         nestingCutOffLimit = FEED_NESTED_NOTES_CUT_OFF_LIMIT,
                         showReplyTo = showReplyTo,
                         couldAutoPlay = index == firstVisibleIndex,
-                        noteCallbacks = noteCallbacks,
+                        navigator = navigator,
                         onGoToWallet = onGoToWallet,
                         onUiError = onUiError,
                         contentFooter = {
@@ -129,13 +129,8 @@ fun NoteFeedLazyColumn(
                                         .padding(horizontal = 8.dp)
                                         .padding(top = 4.dp, end = 2.dp),
                                     zaps = item.eventZaps,
-                                    onClick = if (noteCallbacks.onEventReactionsClick != null) {
-                                        {
-                                            noteCallbacks.onEventReactionsClick
-                                                .invoke(item.postId, ReactionType.ZAPS, null)
-                                        }
-                                    } else {
-                                        null
+                                    onClick = {
+                                        navigator.onEventReactionsClick(item.postId, ReactionType.ZAPS, null)
                                     },
                                 )
                             }
@@ -212,7 +207,7 @@ fun NoteFeedLazyColumn(
             item(contentType = "Paywall") {
                 PremiumFeedPaywall(
                     onClick = {
-                        noteCallbacks.onGetPrimalPremiumClick?.invoke()
+                        navigator.onGetPrimalPremiumClick()
                     },
                 )
             }

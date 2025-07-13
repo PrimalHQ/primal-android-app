@@ -97,6 +97,7 @@ import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
+import net.primal.android.navigation.navigator.NoOpNavigator
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asNeventString
@@ -409,13 +410,14 @@ private fun ThreadLazyColumn(
                     drawLineBelowAvatar = isConnectedForward(index, state.highlightPostIndex),
                     showReplyTo = false,
                     showNoteStatCounts = index != state.highlightPostIndex,
-                    noteCallbacks = noteCallbacks.copy(
-                        onNoteClick = { noteId ->
-                            if (state.highlightPostId != noteId) {
-                                noteCallbacks.onNoteClick?.invoke(noteId)
-                            }
-                        },
-                    ),
+                    navigator = NoOpNavigator,
+//                    noteCallbacks = noteCallbacks.copy(
+//                        onNoteClick = { noteId ->
+//                            if (state.highlightPostId != noteId) {
+//                                noteCallbacks.onNoteClick?.invoke(noteId)
+//                            }
+//                        },
+//                    ),
                     onNoteDeleted = {
                         if (!isReply) {
                             onRootPostDeleted()

@@ -36,12 +36,13 @@ import net.primal.android.core.compose.zaps.ReferencedNoteZap
 import net.primal.android.core.compose.zaps.ReferencedZap
 import net.primal.android.core.utils.TextMatch
 import net.primal.android.core.utils.TextMatcher
+import net.primal.android.navigation.navigator.NoOpNavigator
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
 import net.primal.android.notes.feed.note.ui.attachment.NoteAttachments
 import net.primal.android.notes.feed.note.ui.events.InvoicePayClickEvent
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -160,7 +161,7 @@ fun NoteContent(
     modifier: Modifier = Modifier,
     data: NoteContentUi,
     expanded: Boolean,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     nestingLevel: Int = 0,
     nestingCutOffLimit: Int = Int.MAX_VALUE,
     maxLines: Int = Int.MAX_VALUE,
@@ -219,17 +220,17 @@ fun NoteContent(
                     ).firstOrNull()
 
                     annotation?.handleAnnotationClick(
-                        onProfileClick = noteCallbacks.onProfileClick,
+                        onProfileClick = { navigator.onProfileClick(it) },
                         onUrlClick = {
                             if (it.isPrimalLegendsUrl()) {
-                                noteCallbacks.onPrimalLegendsLeaderboardClick?.invoke()
+                                navigator.onPrimalLegendsLeaderboardClick()
                             } else {
                                 onUrlClick?.invoke(it)
                             }
                         },
-                        onPostClick = noteCallbacks.onNoteClick,
-                        onHashtagClick = noteCallbacks.onHashtagClick,
-                        onArticleClick = noteCallbacks.onArticleClick,
+                        onPostClick = { navigator.onNoteClick(it) },
+                        onHashtagClick = { navigator.onHashtagClick(it) },
+                        onArticleClick = { navigator.onArticleClick(it) },
                     ) ?: onClick?.invoke(offset)
                 },
             )
@@ -243,7 +244,7 @@ fun NoteContent(
                     ReferencedHighlight(
                         highlight = highlight,
                         isDarkTheme = isDarkTheme,
-                        onClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
+                        onClick = { naddr -> navigator.onArticleClick(naddr) },
                     )
 
                     if (index < referencedHighlights.size - 1) {
@@ -256,7 +257,7 @@ fun NoteContent(
             NoteLightningInvoice(
                 modifier = Modifier.padding(top = if (contentText.isEmpty()) 4.dp else 6.dp),
                 invoice = data.invoices.first(),
-                onPayClick = { lnbc -> noteCallbacks.onPayInvoiceClick?.invoke(InvoicePayClickEvent(lnbc = lnbc)) },
+                onPayClick = { lnbc -> navigator.onPayInvoiceClick(InvoicePayClickEvent(lnbc = lnbc)) },
             )
         }
 
@@ -286,11 +287,11 @@ fun NoteContent(
                 couldAutoPlay = couldAutoPlay,
                 onUrlClick = { url ->
                     when {
-                        url.isPrimalLegendsUrl() -> noteCallbacks.onPrimalLegendsLeaderboardClick?.invoke()
+                        url.isPrimalLegendsUrl() -> navigator.onPrimalLegendsLeaderboardClick()
                         else -> onUrlClick?.invoke(url)
                     }
                 },
-                onMediaClick = noteCallbacks.onMediaClick,
+                onMediaClick = { navigator.onMediaClick(it) },
             )
         }
 
@@ -303,7 +304,7 @@ fun NoteContent(
                 postResources = referencedPostResources,
                 expanded = expanded,
                 containerColor = referencedEventsContainerColor,
-                noteCallbacks = noteCallbacks,
+                navigator = navigator,
                 hasBorder = referencedEventsHaveBorder,
             )
         }
@@ -315,7 +316,7 @@ fun NoteContent(
                 articleResources = referencedArticleResources,
                 expanded = expanded,
                 containerColor = referencedEventsContainerColor,
-                noteCallbacks = noteCallbacks,
+                articleInteractionCallbacks = navigator,
                 hasBorder = referencedEventsHaveBorder,
             )
         }
@@ -338,7 +339,7 @@ fun NoteContent(
                         ),
                         amountInSats = zap.amountInSats.toULong(),
                         createdAt = Instant.ofEpochSecond(zap.createdAt),
-                        noteCallbacks = noteCallbacks,
+                        navigator = navigator,
                         message = zap.message,
                         senderAvatarCdnImage = zap.senderAvatarCdnImage,
                         senderLegendaryCustomization = zap.senderPrimalLegendProfile?.asLegendaryCustomization(),
@@ -357,7 +358,7 @@ fun NoteContent(
                         receiverPrimalLegendProfile = zap.receiverPrimalLegendProfile,
                         amountInSats = zap.amountInSats,
                         message = zap.message,
-                        noteCallbacks = noteCallbacks,
+                        contentInteractionCallbacks = navigator,
                     )
                 }
             }
@@ -644,7 +645,7 @@ fun PreviewPostContent() {
                 enableTweetsMode = false,
                 onClick = {},
                 onUrlClick = {},
-                noteCallbacks = NoteCallbacks(),
+                navigator = NoOpNavigator,
             )
         }
     }
@@ -679,7 +680,7 @@ fun PreviewPostUnknownReferencedEventWithAlt() {
                 enableTweetsMode = false,
                 onClick = {},
                 onUrlClick = {},
-                noteCallbacks = NoteCallbacks(),
+                navigator = NoOpNavigator,
             )
         }
     }
@@ -714,7 +715,7 @@ fun PreviewPostUnknownReferencedEventWithoutAlt() {
                 enableTweetsMode = false,
                 onClick = {},
                 onUrlClick = {},
-                noteCallbacks = NoteCallbacks(),
+                navigator = NoOpNavigator,
             )
         }
     }
@@ -802,7 +803,7 @@ fun PreviewPostContentWithReferencedPost() {
                 enableTweetsMode = false,
                 onClick = {},
                 onUrlClick = {},
-                noteCallbacks = NoteCallbacks(),
+                navigator = NoOpNavigator,
             )
         }
     }
@@ -823,7 +824,7 @@ fun PreviewPostContentWithTweet() {
                 enableTweetsMode = true,
                 onClick = {},
                 onUrlClick = {},
-                noteCallbacks = NoteCallbacks(),
+                navigator = NoOpNavigator,
             )
         }
     }

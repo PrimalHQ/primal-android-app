@@ -61,6 +61,8 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.navigation.navigator.NoOpNavigator
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
@@ -74,7 +76,6 @@ import net.primal.android.notes.feed.note.ui.NoteContent
 import net.primal.android.notes.feed.note.ui.NoteDropdownMenuIcon
 import net.primal.android.notes.feed.note.ui.NoteSurfaceCard
 import net.primal.android.notes.feed.note.ui.RepostedNotice
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.profile.report.ReportUserDialog
@@ -104,7 +105,7 @@ fun FeedNoteCard(
     noteOptionsMenuEnabled: Boolean = true,
     showNoteStatCounts: Boolean = true,
     couldAutoPlay: Boolean = false,
-    noteCallbacks: NoteCallbacks = NoteCallbacks(),
+    navigator: PrimalNavigator,
     onNoteDeleted: (() -> Unit)? = null,
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
@@ -150,7 +151,7 @@ fun FeedNoteCard(
         showNoteStatCounts = showNoteStatCounts,
         noteOptionsMenuEnabled = noteOptionsMenuEnabled,
         couldAutoPlay = couldAutoPlay,
-        noteCallbacks = noteCallbacks,
+        navigator = navigator,
         onGoToWallet = onGoToWallet,
         contentFooter = contentFooter,
     )
@@ -179,7 +180,7 @@ private fun FeedNoteCard(
     noteOptionsMenuEnabled: Boolean = true,
     showNoteStatCounts: Boolean = true,
     couldAutoPlay: Boolean = false,
-    noteCallbacks: NoteCallbacks = NoteCallbacks(),
+    navigator: PrimalNavigator,
     onGoToWallet: (() -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
 ) {
@@ -263,7 +264,7 @@ private fun FeedNoteCard(
                 )
             },
             onPostQuoteClick = {
-                noteCallbacks.onNoteQuoteClick?.invoke(
+                navigator.onNoteQuoteClick(
                     data.asNeventString(),
                 )
             },
@@ -299,10 +300,9 @@ private fun FeedNoteCard(
             .wrapContentHeight()
             .padding(cardPadding)
             .clickable(
-                enabled = noteCallbacks.onNoteClick != null,
                 interactionSource = interactionSource,
                 indication = ripple(),
-                onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
+                onClick = { navigator.onNoteClick(data.postId) },
             ),
         shape = shape,
         colors = colors,
@@ -362,8 +362,8 @@ private fun FeedNoteCard(
                             .padding(horizontal = avatarPaddingDp)
                             .padding(top = notePaddingDp * 2),
                         repostedByAuthor = data.repostAuthorName,
-                        onRepostAuthorClick = if (data.repostAuthorId != null && noteCallbacks.onProfileClick != null) {
-                            { noteCallbacks.onProfileClick.invoke(data.repostAuthorId) }
+                        onRepostAuthorClick = if (data.repostAuthorId != null) {
+                            { navigator.onProfileClick(data.repostAuthorId) }
                         } else {
                             null
                         },
@@ -404,11 +404,11 @@ private fun FeedNoteCard(
                         textSelectable = textSelectable,
                         showNoteStatCounts = showNoteStatCounts,
                         couldAutoPlay = couldAutoPlay,
-                        noteCallbacks = noteCallbacks,
+                        navigator = navigator,
                         onPostAction = { postAction ->
                             when (postAction) {
                                 FeedPostAction.Reply -> {
-                                    noteCallbacks.onNoteReplyClick?.invoke(
+                                    navigator.onNoteReplyClick(
                                         data.asNeventString(),
                                     )
                                 }
@@ -529,7 +529,7 @@ private fun FeedNote(
     textSelectable: Boolean,
     showNoteStatCounts: Boolean,
     couldAutoPlay: Boolean,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     nestingCutOffLimit: Int = Int.MAX_VALUE,
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
@@ -547,11 +547,7 @@ private fun FeedNote(
                 avatarCdnImage = data.authorAvatarCdnImage,
                 legendaryCustomization = data.authorLegendaryCustomization,
                 avatarBlossoms = data.authorBlossoms,
-                onClick = if (noteCallbacks.onProfileClick != null) {
-                    { noteCallbacks.onProfileClick.invoke(data.authorId) }
-                } else {
-                    null
-                },
+                onClick = { navigator.onProfileClick(data.authorId) },
             )
         }
 
@@ -573,11 +569,7 @@ private fun FeedNote(
                 authorLegendaryCustomization = data.authorLegendaryCustomization,
                 authorBlossoms = data.authorBlossoms,
                 replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
-                onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
-                    { noteCallbacks.onProfileClick.invoke(data.authorId) }
-                } else {
-                    null
-                },
+                onAuthorAvatarClick = { navigator.onProfileClick(data.authorId) },
             )
 
             val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
@@ -599,17 +591,13 @@ private fun FeedNote(
                 enableTweetsMode = enableTweetsMode,
                 textSelectable = textSelectable,
                 nestingCutOffLimit = nestingCutOffLimit,
-                onClick = if (noteCallbacks.onNoteClick != null) {
-                    {
-                        launchRippleEffect(it)
-                        noteCallbacks.onNoteClick.invoke(data.postId)
-                    }
-                } else {
-                    null
+                onClick = {
+                    launchRippleEffect(it)
+                    navigator.onNoteClick(data.postId)
                 },
                 onUrlClick = { localUriHandler.openUriSafely(it) },
                 couldAutoPlay = couldAutoPlay,
-                noteCallbacks = noteCallbacks,
+                navigator = navigator,
             )
 
             contentFooter()
@@ -734,6 +722,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeader(
             eventPublisher = {},
             headerSingleLine = false,
             fullWidthContent = false,
+            navigator = NoOpNavigator,
         )
     }
 }
@@ -752,6 +741,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
             eventPublisher = {},
             headerSingleLine = false,
             fullWidthContent = true,
+            navigator = NoOpNavigator,
         )
     }
 }
@@ -770,6 +760,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeader(
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = false,
+            navigator = NoOpNavigator,
         )
     }
 }
@@ -788,6 +779,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
             eventPublisher = {},
             headerSingleLine = true,
             fullWidthContent = true,
+            navigator = NoOpNavigator,
         )
     }
 }
@@ -808,6 +800,7 @@ fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
             fullWidthContent = true,
             forceContentIndent = true,
             drawLineBelowAvatar = true,
+            navigator = NoOpNavigator,
         )
     }
 }
@@ -828,6 +821,7 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
             fullWidthContent = false,
             forceContentIndent = true,
             drawLineBelowAvatar = true,
+            navigator = NoOpNavigator,
         )
     }
 }

@@ -42,6 +42,7 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.isOnlyEmoji
 import net.primal.android.core.utils.shortened
+import net.primal.android.navigation.navigator.NoOpNavigator
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -210,7 +211,7 @@ private fun NotificationContent(
                 expanded = false,
                 onClick = { noteCallbacks.onNoteClick?.invoke(actionPost.postId) },
                 onUrlClick = { localUriHandler.openUriSafely(it) },
-                noteCallbacks = noteCallbacks,
+                navigator = NoOpNavigator,
             )
 
             FeedNoteActionsRow(

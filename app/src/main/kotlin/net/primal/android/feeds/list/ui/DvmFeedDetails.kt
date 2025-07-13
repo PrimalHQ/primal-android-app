@@ -20,6 +20,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.feeds.dvm.ui.DvmHeaderAndFeedList
 import net.primal.android.feeds.list.ui.model.FeedUi
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -31,6 +32,7 @@ fun DvmFeedDetails(
     onGoToWallet: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     onAddOrRemoveFeed: (() -> Unit)? = null,
+    navigator: PrimalNavigator,
 ) {
     Scaffold(
         modifier = modifier,
@@ -56,6 +58,7 @@ fun DvmFeedDetails(
                     modifier = Modifier.padding(paddingValues),
                     dvmFeed = dvmFeed,
                     onGoToWallet = onGoToWallet,
+                    navigator = navigator,
                 )
             }
         },

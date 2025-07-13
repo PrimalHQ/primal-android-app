@@ -91,6 +91,7 @@ import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.ui.NoteAttachmentPreview
 import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.nostr.mappers.toReferencedHighlight
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
@@ -101,14 +102,16 @@ import net.primal.android.notes.feed.note.ui.NoteUnknownEvent
 import net.primal.android.notes.feed.note.ui.ReferencedArticleCard
 import net.primal.android.notes.feed.note.ui.ReferencedHighlight
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.asATagValue
 
 @Composable
-fun NoteEditorScreen(viewModel: NoteEditorViewModel, callbacks: NoteEditorContract.ScreenCallbacks) {
+fun NoteEditorScreen(
+    viewModel: NoteEditorViewModel,
+    callbacks: NoteEditorContract.ScreenCallbacks,
+    navigator: PrimalNavigator,
+) {
     val uiState = viewModel.state.collectAsState()
-
     LaunchedEffect(viewModel, callbacks) {
         viewModel.effect.collect {
             when (it) {
@@ -121,6 +124,7 @@ fun NoteEditorScreen(viewModel: NoteEditorViewModel, callbacks: NoteEditorContra
         state = uiState.value,
         callbacks = callbacks,
         eventPublisher = { viewModel.setEvent(it) },
+        navigator = navigator,
     )
 }
 
@@ -130,6 +134,7 @@ fun NoteEditorScreen(
     state: NoteEditorContract.UiState,
     callbacks: NoteEditorContract.ScreenCallbacks,
     eventPublisher: (UiEvent) -> Unit,
+    navigator: PrimalNavigator,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -146,7 +151,7 @@ fun NoteEditorScreen(
             PrimalTopAppBar(
                 title = "",
                 navigationIcon = Icons.Outlined.Close,
-                onNavigationIconClick = callbacks.onClose,
+                onNavigationIconClick = { callbacks.onClose() },
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_close),
                 showDivider = true,
                 actions = {
@@ -178,7 +183,7 @@ fun NoteEditorScreen(
                 state = state,
                 eventPublisher = eventPublisher,
                 contentPadding = paddingValues,
-                noteCallbacks = NoteCallbacks(),
+                navigator = navigator,
             )
         },
     )
@@ -213,7 +218,7 @@ private fun NoteEditorBox(
     eventPublisher: (UiEvent) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
 ) {
     val editorListState = rememberLazyListState()
     var noteEditorMaxHeightPx by remember { mutableIntStateOf(0) }
@@ -253,6 +258,7 @@ private fun NoteEditorBox(
                     referencedHighlight = state.replyToHighlight,
                     referencedArticle = state.replyToArticle,
                     conversation = state.replyToConversation,
+                    navigator = navigator,
                 )
             }
 
@@ -269,7 +275,7 @@ private fun NoteEditorBox(
 
             nostrUris(
                 nostrUris = state.referencedNostrUris,
-                noteCallbacks = noteCallbacks,
+                navigator = navigator,
                 onRetryUriClick = { eventPublisher(UiEvent.RefreshUri(it.uri)) },
                 onRemoveUriClick = { eventPublisher(UiEvent.RemoveUri(it)) },
                 onRemoveHighlight = { eventPublisher(UiEvent.RemoveHighlightByArticle(it)) },
@@ -322,6 +328,7 @@ private fun LazyListScope.referencedEventsAndConversationAsReplyTo(
     referencedArticle: FeedArticleUi?,
     referencedHighlight: HighlightUi?,
     conversation: List<FeedPostUi> = emptyList(),
+    navigator: PrimalNavigator,
 ) {
     if (referencedHighlight != null) {
         item(
@@ -361,6 +368,7 @@ private fun LazyListScope.referencedEventsAndConversationAsReplyTo(
             ReplyToNote(
                 replyToNote = it,
                 connectionLineColor = AppTheme.colorScheme.outline,
+                navigator = navigator,
             )
         }
     }
@@ -374,7 +382,7 @@ fun LazyListScope.nostrUris(
     onRemoveUriClick: (Int) -> Unit,
     onRemoveHighlight: (String) -> Unit,
     nostrUris: List<NoteEditorContract.ReferencedUri<*>>,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
 ) {
     items(
         count = nostrUris.size,
@@ -403,7 +411,7 @@ fun LazyListScope.nostrUris(
                         uri.data?.let { note ->
                             ReferencedNoteCard(
                                 data = note,
-                                noteCallbacks = noteCallbacks,
+                                navigator = navigator,
                             )
                         }
                     }
@@ -651,7 +659,11 @@ private fun NoteAttachmentsLazyRow(
 }
 
 @Composable
-private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
+private fun ReplyToNote(
+    replyToNote: FeedPostUi,
+    connectionLineColor: Color,
+    navigator: PrimalNavigator,
+) {
     Column(
         modifier = Modifier.drawWithCache {
             onDrawBehind {
@@ -697,7 +709,7 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
             expanded = true,
             onClick = {},
             onUrlClick = {},
-            noteCallbacks = NoteCallbacks(),
+            navigator = navigator,
         )
     }
 }

@@ -52,6 +52,7 @@ import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.feeds.list.FeedsBottomSheet
 import net.primal.android.feeds.list.ui.model.FeedUi
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.links.CdnImage
@@ -63,6 +64,7 @@ fun ReadsScreen(
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
     callbacks: ReadsScreenContract.ScreenCallbacks,
+    navigator: PrimalNavigator,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -73,6 +75,7 @@ fun ReadsScreen(
         eventPublisher = viewModel::setEvent,
         accountSwitcherCallbacks = accountSwitcherCallbacks,
         callbacks = callbacks,
+        navigator = navigator,
     )
 }
 
@@ -85,6 +88,7 @@ private fun ReadsScreen(
     eventPublisher: (ReadsScreenContract.UiEvent) -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
     callbacks: ReadsScreenContract.ScreenCallbacks,
+    navigator: PrimalNavigator,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -118,7 +122,7 @@ private fun ReadsScreen(
         accountSwitcherCallbacks = accountSwitcherCallbacks,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
+        onDrawerQrCodeClick = { callbacks.onDrawerQrCodeClick() },
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topAppBar = { scrollBehavior ->
@@ -129,12 +133,13 @@ private fun ReadsScreen(
                 avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
                 avatarBlossoms = state.activeAccountBlossoms,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
-                onSearchClick = callbacks.onSearchClick,
+                onSearchClick = { callbacks.onSearchClick() },
                 onFeedChanged = { feed ->
                     val pageIndex = state.feeds.indexOf(feed)
                     uiScope.launch { pagerState.scrollToPage(page = pageIndex) }
                 },
                 scrollBehavior = scrollBehavior,
+                navigator = navigator,
             )
         },
         content = { paddingValues ->
@@ -151,8 +156,8 @@ private fun ReadsScreen(
                         feedSpec = state.feeds[index].spec,
                         contentPadding = paddingValues,
                         shouldAnimateScrollToTop = shouldAnimateScrollToTop,
-                        onArticleClick = callbacks.onArticleClick,
-                        onGetPremiumClick = callbacks.onGetPremiumClick,
+                        onArticleClick = { callbacks.onArticleClick(it) },
+                        onGetPremiumClick = { callbacks.onGetPremiumClick() },
                         onUiError = { uiError: UiError ->
                             uiScope.launch {
                                 snackbarHostState.showSnackbar(
@@ -196,6 +201,7 @@ private fun ArticleFeedTopAppBar(
     avatarLegendaryCustomization: LegendaryCustomization? = null,
     avatarBlossoms: List<String> = emptyList(),
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    navigator: PrimalNavigator,
 ) {
     var feedPickerVisible by rememberSaveable { mutableStateOf(false) }
 
@@ -209,6 +215,7 @@ private fun ArticleFeedTopAppBar(
             },
             onDismissRequest = { feedPickerVisible = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            navigator = navigator,
         )
     }
 

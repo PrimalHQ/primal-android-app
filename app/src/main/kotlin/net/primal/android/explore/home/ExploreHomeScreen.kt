@@ -75,8 +75,8 @@ import net.primal.android.explore.home.ui.PEOPLE_INDEX
 import net.primal.android.explore.home.ui.TOPICS_INDEX
 import net.primal.android.explore.home.ui.ZAPS_INDEX
 import net.primal.android.explore.home.zaps.ExploreZaps
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.notes.feed.grid.MediaFeedGrid
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -88,9 +88,9 @@ fun ExploreHomeScreen(
     viewModel: ExploreHomeViewModel,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-    noteCallbacks: NoteCallbacks,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
     callbacks: ExploreHomeContract.ScreenCallbacks,
+    navigator: PrimalNavigator,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -98,9 +98,9 @@ fun ExploreHomeScreen(
         state = uiState.value,
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerScreenClick,
-        noteCallbacks = noteCallbacks,
         accountSwitcherCallbacks = accountSwitcherCallbacks,
         callbacks = callbacks,
+        navigator = navigator,
     )
 }
 
@@ -110,9 +110,9 @@ private fun ExploreHomeScreen(
     state: ExploreHomeContract.UiState,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
-    noteCallbacks: NoteCallbacks,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
     callbacks: ExploreHomeContract.ScreenCallbacks,
+    navigator: PrimalNavigator,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -128,7 +128,7 @@ private fun ExploreHomeScreen(
         activeDestination = PrimalTopLevelDestination.Explore,
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
-        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
+        onDrawerQrCodeClick = { callbacks.onDrawerQrCodeClick() },
         badges = state.badges,
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topAppBarState = topAppBarState,
@@ -144,8 +144,8 @@ private fun ExploreHomeScreen(
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }
                 },
-                onSearchClick = callbacks.onSearchClick,
-                onActionIconClick = callbacks.onAdvancedSearchClick,
+                onSearchClick = { callbacks.onSearchClick() },
+                onActionIconClick = { callbacks.onAdvancedSearchClick() },
                 scrollBehavior = topAppBarScrollBehavior,
             )
         },
@@ -158,8 +158,10 @@ private fun ExploreHomeScreen(
                         ExplorePeople(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
-                            onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
-                            onFollowPackClick = callbacks.onFollowPackClick,
+                            onProfileClick = { navigator.onProfileClick(it) },
+                            onFollowPackClick = { profileId, identifier ->
+                                callbacks.onFollowPackClick(profileId, identifier)
+                            },
                         )
                     }
 
@@ -167,7 +169,7 @@ private fun ExploreHomeScreen(
                         ExploreFeeds(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
-                            onGoToWallet = callbacks.onGoToWallet,
+                            onGoToWallet = { callbacks.onGoToWallet() },
                             onUiError = { uiError: UiError ->
                                 uiScope.launch {
                                     snackbarHostState.showSnackbar(
@@ -176,6 +178,7 @@ private fun ExploreHomeScreen(
                                     )
                                 }
                             },
+                            navigator = navigator,
                         )
                     }
 
@@ -183,7 +186,7 @@ private fun ExploreHomeScreen(
                         ExploreZaps(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
-                            noteCallbacks = noteCallbacks,
+                            navigator = navigator,
                         )
                     }
 
@@ -191,8 +194,8 @@ private fun ExploreHomeScreen(
                         MediaFeedGrid(
                             feedSpec = exploreMediaFeedSpec,
                             contentPadding = paddingValues,
-                            onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
-                            onGetPrimalPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
+                            onNoteClick = { navigator.onNoteClick(it) },
+                            onGetPrimalPremiumClick = { navigator.onGetPrimalPremiumClick() },
                         )
                     }
 
@@ -200,7 +203,7 @@ private fun ExploreHomeScreen(
                         ExploreTopics(
                             modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
                             paddingValues = paddingValues,
-                            onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
+                            onHashtagClick = { navigator.onHashtagClick(it) },
                         )
                     }
                 }
@@ -210,7 +213,7 @@ private fun ExploreHomeScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
         floatingActionButton = {
-            NewPostFloatingActionButton(onNewPostClick = callbacks.onNewPostClick)
+            NewPostFloatingActionButton(onNewPostClick = { callbacks.onNewPostClick() })
         },
     )
 }
