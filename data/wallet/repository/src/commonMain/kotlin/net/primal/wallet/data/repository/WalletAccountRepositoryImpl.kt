@@ -16,6 +16,7 @@ import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.wallet.WalletKycLevel
 import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.db.withTransaction
+import net.primal.wallet.data.local.dao.PrimalWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
@@ -51,18 +52,21 @@ class WalletAccountRepositoryImpl(
         val kycLevel = WalletKycLevel.Companion.valueOf(accountInfoResponse.kycLevel) ?: return
         val lightningAddress = accountInfoResponse.lightningAddress
         walletDatabase.withTransaction {
-            val existingPrimalWallet = walletDatabase.wallet().findWalletInfo(userId = userId, type = WalletType.PRIMAL)
-            val updatedInfo = existingPrimalWallet?.copy(
-                userId = userId,
-                kycLevel = kycLevel,
-                lightningAddress = lightningAddress,
-            ) ?: WalletInfo(
-                userId = userId,
-                kycLevel = kycLevel,
-                lightningAddress = lightningAddress,
-                type = WalletType.PRIMAL,
+            walletDatabase.wallet().upsertWalletInfo(
+                info = WalletInfo(
+                    walletId = userId,
+                    userId = userId,
+                    lightningAddress = lightningAddress,
+                    type = WalletType.PRIMAL,
+                ),
             )
-            walletDatabase.wallet().upsertWalletInfo(updatedInfo)
+
+            walletDatabase.wallet().upsertPrimalWalletData(
+                data = PrimalWalletData(
+                    walletId = userId,
+                    kycLevel = kycLevel,
+                ),
+            )
         }
     }
 

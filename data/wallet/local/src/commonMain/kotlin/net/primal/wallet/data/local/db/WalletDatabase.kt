@@ -4,7 +4,11 @@ import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
-import net.primal.wallet.data.local.dao.WalletBalance
+import androidx.room.TypeConverters
+import net.primal.shared.data.local.serialization.ListsTypeConverters
+import net.primal.wallet.data.local.dao.ActiveWalletData
+import net.primal.wallet.data.local.dao.NostrWalletData
+import net.primal.wallet.data.local.dao.PrimalWalletData
 import net.primal.wallet.data.local.dao.WalletDao
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
@@ -15,13 +19,16 @@ import net.primal.wallet.data.local.dao.WalletTransactionData
 @Database(
     entities = [
         WalletInfo::class,
-        WalletBalance::class,
+        NostrWalletData::class,
+        PrimalWalletData::class,
+        ActiveWalletData::class,
         WalletTransactionData::class,
         WalletSettings::class,
     ],
     version = 1,
     exportSchema = true,
 )
+@TypeConverters(ListsTypeConverters::class)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class WalletDatabase : RoomDatabase() {
     abstract fun wallet(): WalletDao
