@@ -2,10 +2,11 @@ package net.primal.wallet.data.local.dao
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import net.primal.domain.wallet.WalletKycLevel
 
 @Entity
-data class WalletSettings(
+data class PrimalWalletData(
     @PrimaryKey
     val walletId: String,
-    val spamThresholdAmountInSats: Long = 1,
+    val kycLevel: WalletKycLevel,
 )

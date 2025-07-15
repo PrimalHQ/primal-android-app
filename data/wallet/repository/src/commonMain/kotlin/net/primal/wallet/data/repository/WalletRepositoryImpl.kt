@@ -9,7 +9,6 @@ import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.wallet.LnInvoiceCreateResult
@@ -21,9 +20,7 @@ import net.primal.domain.wallet.SubWallet
 import net.primal.domain.wallet.TransactionWithProfile
 import net.primal.domain.wallet.WalletPayParams
 import net.primal.domain.wallet.WalletRepository
-import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.db.withTransaction
-import net.primal.wallet.data.local.dao.WalletBalance
 import net.primal.wallet.data.local.dao.WalletTransactionData
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
@@ -112,16 +109,10 @@ internal class WalletRepositoryImpl(
         withContext(dispatcherProvider.io()) {
             val response = primalWalletApi.getBalance(userId = userId)
             walletDatabase.withTransaction {
-                val walletInfo = walletDatabase.wallet().findWalletInfo(userId = userId, type = WalletType.PRIMAL)
-                    ?: error("Trying to fetch balance, but wallet was not created.")
-
-                walletDatabase.wallet().upsertWalletBalance(
-                    WalletBalance(
-                        walletId = walletInfo.localId,
-                        lastUpdatedAt = Clock.System.now().epochSeconds,
-                        balanceInBtc = response.amount,
-                        maxBalanceInBtc = response.maxAmount,
-                    ),
+                walletDatabase.wallet().updateWalletBalance(
+                    walletId = userId,
+                    balanceInBtc = response.amount.toDouble(),
+                    maxBalanceInBtc = response.maxAmount?.toDouble(),
                 )
             }
         }

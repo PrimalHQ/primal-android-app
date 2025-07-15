@@ -4,8 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class WalletSettings(
+data class NostrWalletData(
     @PrimaryKey
     val walletId: String,
-    val spamThresholdAmountInSats: Long = 1,
+    val relays: List<String>,
+    val walletPubkey: String,
+    val walletPrivateKey: String,
 )

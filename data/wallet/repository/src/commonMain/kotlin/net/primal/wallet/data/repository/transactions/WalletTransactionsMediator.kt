@@ -13,7 +13,6 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.wallet.SubWallet
-import net.primal.domain.wallet.WalletType
 import net.primal.wallet.data.local.dao.WalletTransactionData
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
@@ -32,7 +31,7 @@ class WalletTransactionsMediator(
     private val lastRequests: MutableMap<LoadType, TransactionsRequestBody> = mutableMapOf()
 
     override suspend fun load(loadType: LoadType, state: PagingState<Int, WalletTransactionData>): MediatorResult {
-        val primalWallet = walletDatabase.wallet().findWalletInfo(userId = userId, type = WalletType.PRIMAL)
+        val primalWallet = walletDatabase.wallet().findWalletInfo(walletId = userId)
         val walletLightningAddress = primalWallet?.lightningAddress
             ?: return MediatorResult.Success(endOfPaginationReached = true)
 
@@ -59,7 +58,7 @@ class WalletTransactionsMediator(
             return MediatorResult.Error(IllegalStateException("Remote key not found."))
         }
 
-        val walletSettings = walletDatabase.walletSettings().findWalletSettings(walletId = primalWallet.localId)
+        val walletSettings = walletDatabase.walletSettings().findWalletSettings(walletId = primalWallet.walletId)
         val initialRequestBody = TransactionsRequestBody(
             subWallet = SubWallet.Open,
             limit = state.config.pageSize,

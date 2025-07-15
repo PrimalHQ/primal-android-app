@@ -12,5 +12,5 @@ interface WalletSettingsDao {
     suspend fun upsertWalletSettings(settings: WalletSettings)
 
     @Query("SELECT * FROM WalletSettings WHERE walletId = :walletId")
-    suspend fun findWalletSettings(walletId: Long): WalletSettings?
+    suspend fun findWalletSettings(walletId: String): WalletSettings?
 }
