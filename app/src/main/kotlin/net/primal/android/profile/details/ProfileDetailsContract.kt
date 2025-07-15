@@ -8,9 +8,9 @@ import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.user.handler.ProfileFollowsHandler
-import net.primal.android.wallet.domain.DraftTx
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.utils.asEllipsizedNpub
+import net.primal.domain.wallet.DraftTx
 
 interface ProfileDetailsContract {
     data class UiState(
