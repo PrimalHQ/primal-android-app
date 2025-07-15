@@ -46,13 +46,28 @@ fun rememberFirstVisibleItemIndex(listState: LazyListState): MutableState<Int?> 
     LaunchedEffect(listState) {
         snapshotFlow { listState.layoutInfo }
             .map { layoutInfo ->
-                val fullyVisibleItems = layoutInfo.visibleItemsInfo
-                    .filter {
-                        val itemTop = it.offset
-                        val itemBottom = it.offset + it.size
-                        itemTop >= layoutInfo.viewportStartOffset && itemBottom <= layoutInfo.viewportEndOffset
+                layoutInfo.visibleItemsInfo
+                    .asSequence()
+                    .map { item ->
+                        val itemStart = item.offset
+                        val itemEnd = item.offset + item.size
+                        val viewportStart = layoutInfo.viewportStartOffset
+                        val viewportEnd = layoutInfo.viewportEndOffset
+                        val visiblePartStart = maxOf(itemStart, viewportStart)
+                        val visiblePartEnd = minOf(itemEnd, viewportEnd)
+                        val visibleHeight = (visiblePartEnd - visiblePartStart).toFloat()
+
+                        val visibilityRatio = if (item.size > 0) {
+                            (visibleHeight / item.size).coerceIn(0f, 1f)
+                        } else {
+                            0f
+                        }
+
+                        Triple(item.index, visibleHeight, visibilityRatio)
                     }
-                fullyVisibleItems.firstOrNull()?.index
+                    .filter { (_, _, ratio) -> ratio >= VISIBILITY_THRESHOLD }
+                    .maxByOrNull { (_, visibleHeight, _) -> visibleHeight }
+                    ?.first
             }
             .distinctUntilChanged()
             .collect { visibleIndex ->
@@ -62,3 +77,5 @@ fun rememberFirstVisibleItemIndex(listState: LazyListState): MutableState<Int?> 
 
     return currentlyFirstVisibleIndex
 }
+
+private const val VISIBILITY_THRESHOLD = 0.3F
