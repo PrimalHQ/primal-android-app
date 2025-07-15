@@ -56,7 +56,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -626,20 +625,11 @@ fun VideoScreen(
         }
     }
 
-    LifecycleResumeEffect(exoPlayer, isPageVisible) {
-        if (isPageVisible) exoPlayer.play()
-        onPauseOrDispose {
-            exoPlayer.pause()
-        }
-    }
-
     var playerView by remember { mutableStateOf<PlayerView?>(null) }
 
-    LaunchedEffect(exoPlayer, isPageVisible) {
+    LaunchedEffect(playerView, isPageVisible) {
         if (isPageVisible) {
             playerView?.player = exoPlayer
-        } else {
-            playerView?.player = null
         }
     }
 
@@ -650,12 +640,14 @@ fun VideoScreen(
                 PlayerView(context).apply {
                     useController = true
                     controllerShowTimeoutMs = 1.seconds.inWholeMilliseconds.toInt()
-//                    setShutterBackgroundColor(Color.Black.toArgb())
                     setShowNextButton(false)
                     setShowPreviousButton(false)
                 }.also {
                     playerView = it
                 }
+            },
+            onRelease = { view ->
+                view.player = null
             },
         )
 
