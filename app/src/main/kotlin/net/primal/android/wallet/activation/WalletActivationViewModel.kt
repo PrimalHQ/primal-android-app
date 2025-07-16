@@ -18,8 +18,8 @@ import kotlinx.coroutines.withContext
 import net.primal.android.core.errors.UiError
 import net.primal.android.navigation.promoCode
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.settings.wallet.domain.WalletPreference
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.activation.WalletActivationContract.UiEvent
 import net.primal.android.wallet.activation.WalletActivationContract.UiState

@@ -48,11 +48,11 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEven
 import net.primal.android.settings.wallet.settings.ui.ConnectedAppsSettings
 import net.primal.android.settings.wallet.settings.ui.ExternalWalletSettings
 import net.primal.android.settings.wallet.settings.ui.PrimalWalletSettings
+import net.primal.android.settings.wallet.utils.isActivePrimalWallet
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.user.domain.WalletPreference
-import net.primal.core.networking.nwc.model.NostrWalletConnect
-import net.primal.core.networking.nwc.model.NostrWalletKeypair
+import net.primal.domain.wallet.NostrWalletKeypair
+import net.primal.domain.wallet.Wallet
 
 @Composable
 fun WalletSettingsScreen(
@@ -91,7 +91,6 @@ fun WalletSettingsScreen(
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    val primalWalletPreferred = state.walletPreference != WalletPreference.NostrWalletConnect
 
     Scaffold(
         modifier = Modifier,
@@ -116,21 +115,13 @@ fun WalletSettingsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 ExternalWalletListItem(
-                    preferPrimalWallet = primalWalletPreferred,
-                    onExternalWalletSwitchChanged = { enabled ->
-                        eventPublisher(
-                            UiEvent.UpdateWalletPreference(
-                                walletPreference = if (enabled) {
-                                    WalletPreference.PrimalWallet
-                                } else {
-                                    WalletPreference.NostrWalletConnect
-                                },
-                            ),
-                        )
+                    preferPrimalWallet = state.preferPrimalWallet == true,
+                    onExternalWalletSwitchChanged = { value ->
+                        eventPublisher(UiEvent.UpdatePreferPrimalWallet(value))
                     },
                 )
 
-                AnimatedContent(targetState = primalWalletPreferred, label = "WalletSettingsContent") {
+                AnimatedContent(targetState = state.preferPrimalWallet == true, label = "WalletSettingsContent") {
                     when (it) {
                         true -> {
                             PrimalWalletSettings(
@@ -157,7 +148,7 @@ fun WalletSettingsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 NostrProfileLightingAddressSection(
-                    lightningAddress = state.userLightningAddress,
+                    lightningAddress = state.wallet?.lightningAddress,
                     onEditProfileClick = onEditProfileClick,
                 )
 
@@ -169,7 +160,7 @@ fun WalletSettingsScreen(
                     onCreateNewWalletConnection = onCreateNewWalletConnection,
                     connectionsState = state.connectionsState,
                     onRetryFetchingConnections = { eventPublisher(UiEvent.RequestFetchWalletConnections) },
-                    isPrimalWalletActivated = state.isPrimalWalletActivated,
+                    isPrimalWalletActivated = state.wallet?.isActivePrimalWallet() == true,
                 )
             }
         },
@@ -262,26 +253,24 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletSettingsContract.Ui
         get() = sequenceOf(
             WalletSettingsContract.UiState(
                 wallet = null,
-                walletPreference = WalletPreference.PrimalWallet,
-                userLightningAddress = "alex@primal.net",
             ),
             WalletSettingsContract.UiState(
                 wallet = null,
-                walletPreference = WalletPreference.NostrWalletConnect,
-                userLightningAddress = "alex@primal.net",
             ),
             WalletSettingsContract.UiState(
-                wallet = NostrWalletConnect(
+                wallet = Wallet.NWC(
                     relays = listOf("wss://relay.getalby.com/v1"),
                     lightningAddress = "miljan@getalby.com",
-                    pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
+                    walletId = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
+                    spamThresholdAmountInSats = 1L,
+                    balanceInBtc = 0.0,
+                    maxBalanceInBtc = 0.0,
+                    lastUpdatedAt = null,
                     keypair = NostrWalletKeypair(
                         privateKey = "7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd",
-                        pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
+                        pubKey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
                     ),
                 ),
-                walletPreference = WalletPreference.NostrWalletConnect,
-                userLightningAddress = "alex@primal.net",
             ),
         )
 }
