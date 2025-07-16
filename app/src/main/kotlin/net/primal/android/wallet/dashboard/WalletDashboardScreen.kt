@@ -30,7 +30,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -38,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlinx.coroutines.launch
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
@@ -56,8 +56,8 @@ import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
+import net.primal.android.settings.wallet.utils.isActivePrimalWallet
 import net.primal.android.theme.AppTheme
-import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState.DashboardError
 import net.primal.android.wallet.dashboard.ui.WalletAction
@@ -67,6 +67,7 @@ import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
 import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
 import net.primal.domain.wallet.CurrencyMode
+import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletKycLevel
 
 @Composable
@@ -149,7 +150,7 @@ fun WalletDashboardScreen(
         onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
     )
 
-    LaunchedEffect(state.lastWalletUpdatedAt) {
+    LaunchedEffect(state.wallet?.lastUpdatedAt) {
         pagingItems.refresh()
     }
 
@@ -208,63 +209,54 @@ fun WalletDashboardScreen(
                 scrollBehavior = scrollBehaviour,
                 showDivider = !LocalPrimalTheme.current.isDarkTheme,
                 footer = {
-                    if (state.walletPreference != WalletPreference.NostrWalletConnect) {
-                        AnimatedContent(
-                            modifier = Modifier.onSizeChanged { topBarFooterHeight = it.height },
-                            targetState = dashboardExpanded,
-                            label = "DashboardAnimation",
-                        ) { expanded ->
-                            when (expanded) {
-                                true -> WalletDashboard(
-                                    modifier = Modifier
-                                        .wrapContentSize(align = Alignment.Center)
-                                        .padding(horizontal = 32.dp)
-                                        .padding(top = 16.dp, bottom = 24.dp)
-                                        .animateContentSize()
-                                        .then(
-                                            if (state.primalWallet?.kycLevel == WalletKycLevel.None) {
-                                                Modifier.graphicsLayer { alpha = DISABLED_WALLET_ALPHA }
-                                            } else {
-                                                Modifier
-                                            },
-                                        ),
-                                    walletBalance = state.walletBalance,
-                                    enabled = state.primalWallet?.kycLevel != WalletKycLevel.None && !state.isNpubLogin,
-                                    actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
-                                    onWalletAction = { action ->
-                                        when (action) {
-                                            WalletAction.Send -> onSendClick()
-                                            WalletAction.Scan -> onScanClick()
-                                            WalletAction.Receive -> onReceiveClick()
-                                        }
-                                    },
-                                    currencyMode = currencyMode,
-                                    onSwitchCurrencyMode = { currencyMode = it },
-                                    exchangeBtcUsdRate = state.exchangeBtcUsdRate,
-                                )
+                    AnimatedContent(
+                        modifier = Modifier.onSizeChanged { topBarFooterHeight = it.height },
+                        targetState = dashboardExpanded,
+                        label = "DashboardAnimation",
+                    ) { expanded ->
+                        when (expanded) {
+                            true -> WalletDashboard(
+                                modifier = Modifier
+                                    .wrapContentSize(align = Alignment.Center)
+                                    .padding(horizontal = 32.dp)
+                                    .padding(top = 16.dp, bottom = 24.dp)
+                                    .animateContentSize(),
+                                walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
+                                enabled = state.wallet?.isActivePrimalWallet() == true && !state.isNpubLogin,
+                                actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                                onWalletAction = { action ->
+                                    when (action) {
+                                        WalletAction.Send -> onSendClick()
+                                        WalletAction.Scan -> onScanClick()
+                                        WalletAction.Receive -> onReceiveClick()
+                                    }
+                                },
+                                currencyMode = currencyMode,
+                                onSwitchCurrencyMode = { currencyMode = it },
+                                exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                            )
 
-                                false -> WalletDashboardLite(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(dashboardLiteHeightDp)
-                                        .background(color = AppTheme.colorScheme.surface)
-                                        .padding(horizontal = 10.dp, vertical = 16.dp)
-                                        .animateContentSize(),
-                                    walletBalance = state.walletBalance,
-                                    actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
-                                    onWalletAction = { action ->
-                                        when (action) {
-                                            WalletAction.Send -> onSendClick()
-                                            WalletAction.Scan -> onScanClick()
-                                            WalletAction.Receive -> onReceiveClick()
-                                        }
-                                    },
-                                    currencyMode = currencyMode,
-                                    enabled = !state.isNpubLogin,
-                                    onSwitchCurrencyMode = { currencyMode = it },
-                                    exchangeBtcUsdRate = state.exchangeBtcUsdRate,
-                                )
-                            }
+                            false -> WalletDashboardLite(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(dashboardLiteHeightDp)
+                                    .background(color = AppTheme.colorScheme.surface)
+                                    .padding(horizontal = 10.dp, vertical = 16.dp)
+                                    .animateContentSize(),
+                                walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
+                                actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                                onWalletAction = { action ->
+                                    when (action) {
+                                        WalletAction.Send -> onSendClick()
+                                        WalletAction.Scan -> onScanClick()
+                                        WalletAction.Receive -> onReceiveClick()
+                                    }
+                                },
+                                currencyMode = currencyMode,
+                                enabled = state.wallet?.isActivePrimalWallet() == true && !state.isNpubLogin,
+                                onSwitchCurrencyMode = { currencyMode = it },
+                                exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                            )
                         }
                     }
                 },
@@ -272,7 +264,7 @@ fun WalletDashboardScreen(
         },
         content = { paddingValues ->
             when {
-                state.walletPreference == WalletPreference.NostrWalletConnect -> {
+                state.wallet == null -> {
                     WalletCallToActionBox(
                         modifier = Modifier
                             .fillMaxSize()
@@ -280,13 +272,12 @@ fun WalletDashboardScreen(
                             .padding(horizontal = 32.dp)
                             .padding(bottom = 32.dp)
                             .navigationBarsPadding(),
-                        message = stringResource(id = R.string.wallet_dashboard_enable_wallet_notice_hint),
                         actionLabel = stringResource(id = R.string.wallet_dashboard_enable_wallet_button),
                         onActionClick = { eventPublisher(UiEvent.EnablePrimalWallet) },
                     )
                 }
 
-                state.primalWallet != null && state.primalWallet.kycLevel == WalletKycLevel.None -> {
+                state.wallet is Wallet.Primal && state.wallet.kycLevel == WalletKycLevel.None -> {
                     WalletCallToActionBox(
                         modifier = Modifier
                             .fillMaxSize()
