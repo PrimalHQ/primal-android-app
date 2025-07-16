@@ -65,8 +65,18 @@ fun NoteFeedLazyColumn(
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
-    var firstVisibleIndex by rememberFirstVisibleItemIndex(listState = listState)
-
+    var firstVisibleIndex by rememberFirstVisibleItemIndex(
+        listState = listState,
+        isVideo = { index ->
+            if (index < 0 || index >= pagingItems.itemCount) {
+                false
+            } else {
+                pagingItems.peek(index)?.uris?.any {
+                    it.mimeType?.startsWith("video") == true
+                } == true
+            }
+        },
+    )
     LazyColumn(
         modifier = modifier,
         contentPadding = contentPadding,

@@ -41,9 +41,12 @@ fun LazyListState.rememberIsItemVisible(key: Any?, fallback: Boolean): State<Boo
 }
 
 @Composable
-fun rememberFirstVisibleItemIndex(listState: LazyListState): MutableState<Int?> {
+fun rememberFirstVisibleItemIndex(
+    listState: LazyListState,
+    isVideo: (index: Int) -> Boolean = { false },
+): MutableState<Int?> {
     val currentlyFirstVisibleIndex = remember { mutableStateOf<Int?>(null) }
-    LaunchedEffect(listState) {
+    LaunchedEffect(listState, isVideo) {
         snapshotFlow { listState.layoutInfo }
             .map { layoutInfo ->
                 layoutInfo.visibleItemsInfo
@@ -62,11 +65,11 @@ fun rememberFirstVisibleItemIndex(listState: LazyListState): MutableState<Int?> 
                         } else {
                             0f
                         }
-
-                        Triple(item.index, visibleHeight, visibilityRatio)
+                        Triple(item.index, visibilityRatio, isVideo(item.index))
                     }
-                    .filter { (_, _, ratio) -> ratio >= VISIBILITY_THRESHOLD }
-                    .maxByOrNull { (_, visibleHeight, _) -> visibleHeight }
+                    .filter { (_, ratio, _) -> ratio >= VISIBILITY_THRESHOLD }
+                    .filter { (_, _, isVideo) -> isVideo }
+                    .firstOrNull()
                     ?.first
             }
             .distinctUntilChanged()
