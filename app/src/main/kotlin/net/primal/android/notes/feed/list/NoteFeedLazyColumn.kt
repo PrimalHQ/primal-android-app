@@ -32,7 +32,6 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
-import net.primal.android.core.compose.rememberFirstVisibleItemIndex
 import net.primal.android.core.compose.zaps.FeedNoteTopZapsSection
 import net.primal.android.core.errors.UiError
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -65,9 +64,9 @@ fun NoteFeedLazyColumn(
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
-    var firstVisibleIndex by rememberFirstVisibleItemIndex(
+    var firstVisibleVideoPlayingIndex by rememberFirstVisibleVideoPlayingItemIndex(
         listState = listState,
-        isVideo = { index ->
+        hasVideo = { index ->
             if (index < 0 || index >= pagingItems.itemCount) {
                 false
             } else {
@@ -127,7 +126,7 @@ fun NoteFeedLazyColumn(
                         enableTweetsMode = true,
                         nestingCutOffLimit = FEED_NESTED_NOTES_CUT_OFF_LIMIT,
                         showReplyTo = showReplyTo,
-                        couldAutoPlay = index == firstVisibleIndex,
+                        couldAutoPlay = index == firstVisibleVideoPlayingIndex,
                         noteCallbacks = noteCallbacks,
                         onGoToWallet = onGoToWallet,
                         onUiError = onUiError,
