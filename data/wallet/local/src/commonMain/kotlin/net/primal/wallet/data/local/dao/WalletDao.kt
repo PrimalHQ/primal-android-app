@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import net.primal.domain.wallet.WalletType
 
 @Dao
 interface WalletDao {
@@ -51,4 +52,13 @@ interface WalletDao {
 
     @Query("SELECT * FROM WalletInfo WHERE walletId = :walletId")
     suspend fun findWallet(walletId: String): Wallet?
+
+    @Query(
+        """
+        SELECT * FROM WalletInfo
+        WHERE userId = :userId AND type = :type
+        ORDER BY lastUpdatedAt DESC LIMIT 1
+        """,
+    )
+    suspend fun findLastUsedWalletByType(userId: String, type: WalletType): Wallet?
 }
