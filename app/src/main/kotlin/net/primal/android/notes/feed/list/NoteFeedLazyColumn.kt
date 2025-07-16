@@ -70,9 +70,7 @@ fun NoteFeedLazyColumn(
             if (index < 0 || index >= pagingItems.itemCount) {
                 false
             } else {
-                pagingItems.peek(index)?.uris?.any {
-                    it.mimeType?.startsWith("video") == true
-                } == true
+                feedPostHasVideo(pagingItems.peek(index))
             }
         },
     )
@@ -231,6 +229,20 @@ fun NoteFeedLazyColumn(
             item(contentType = "Footer") {
                 Spacer(modifier = Modifier.height(64.dp))
             }
+        }
+    }
+}
+
+private fun feedPostHasVideo(post: FeedPostUi?): Boolean {
+    return if (post == null) {
+        false
+    } else {
+        val hasVideoInPost = post.uris.any { it.mimeType?.startsWith("video") == true }
+
+        hasVideoInPost || post.nostrUris.any { noteNostrUri ->
+            noteNostrUri.referencedNote?.attachments?.any { attachment ->
+                attachment.mimeType?.startsWith("video") == true
+            } == true
         }
     }
 }

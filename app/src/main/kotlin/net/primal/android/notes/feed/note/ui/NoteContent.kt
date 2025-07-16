@@ -305,6 +305,7 @@ fun NoteContent(
                 containerColor = referencedEventsContainerColor,
                 noteCallbacks = noteCallbacks,
                 hasBorder = referencedEventsHaveBorder,
+                couldAutoPlay = couldAutoPlay,
             )
         }
 

@@ -34,6 +34,7 @@ fun ReferencedNoteCard(
     nestingCutOffLimit: Int = Int.MAX_VALUE,
     hasBorder: Boolean = false,
     colors: CardColors = referencedNoteCardColors(),
+    couldAutoPlay: Boolean = false,
 ) {
     NoteSurfaceCard(
         modifier = modifier
@@ -76,6 +77,7 @@ fun ReferencedNoteCard(
             onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
             onUrlClick = { _ -> noteCallbacks.onNoteClick?.invoke(data.postId) },
             noteCallbacks = noteCallbacks,
+            couldAutoPlay = couldAutoPlay,
         )
 
         Spacer(modifier = Modifier.height(12.dp))
