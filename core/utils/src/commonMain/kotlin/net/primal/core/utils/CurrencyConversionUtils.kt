@@ -6,8 +6,11 @@ import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 @Suppress("TooManyFunctions")
 object CurrencyConversionUtils {
     private const val BTC_IN_SATS = 100_000_000L
+    private const val BTC_IN_MSATS = 100_000_000_000L
 
     fun ULong.toBtc() = this.toDouble() / BTC_IN_SATS
+
+    fun Long.msatsToBtc() = this.toDouble() / BTC_IN_MSATS
 
     fun Int.toBtc() = this.toULong().toBtc()
 
