@@ -1,9 +1,9 @@
 package net.primal.android.user.zaps
 
 import javax.inject.Inject
+import net.primal.android.settings.wallet.domain.WalletPreference
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.PrimalWallet
-import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.repository.WalletNostrZapper
 import net.primal.core.networking.nwc.NwcClientFactory
 import net.primal.core.networking.nwc.model.NostrWalletConnect

@@ -1,0 +1,6 @@
+package net.primal.android.settings.wallet.utils
+
+import net.primal.domain.wallet.Wallet
+import net.primal.domain.wallet.WalletKycLevel
+
+fun Wallet.isActivePrimalWallet() = this is Wallet.Primal && this.kycLevel != WalletKycLevel.None
