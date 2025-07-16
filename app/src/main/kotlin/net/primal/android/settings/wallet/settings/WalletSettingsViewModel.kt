@@ -16,14 +16,14 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEven
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.NWCParseException
-import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.user.domain.parseNWCUrl
-import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.NwcWalletRepository
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.wallet.WalletKycLevel
+import net.primal.domain.wallet.NostrWalletKeypair
+import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.remote.model.PrimalNwcConnectionInfo
 import timber.log.Timber
@@ -32,8 +32,8 @@ import timber.log.Timber
 class WalletSettingsViewModel @AssistedInject constructor(
     @Assisted private val nwcConnectionUrl: String?,
     private val activeAccountStore: ActiveAccountStore,
-    private val userRepository: UserRepository,
     private val walletRepository: WalletRepository,
+    private val walletAccountRepository: WalletAccountRepository,
     private val nwcWalletRepository: NwcWalletRepository,
 ) : ViewModel() {
 
@@ -53,20 +53,11 @@ class WalletSettingsViewModel @AssistedInject constructor(
         if (nwcConnectionUrl != null) {
             connectWallet(nwcUrl = nwcConnectionUrl)
         } else {
-            observeUserAccount()
+            observeActiveWallet()
         }
 
         observeEvents()
-        observeActiveUserAccount()
     }
-
-    private fun observeActiveUserAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                val isWalletActivated = it.primalWallet != null && it.primalWallet.kycLevel != WalletKycLevel.None
-                setState { copy(isPrimalWalletActivated = isWalletActivated) }
-            }
-        }
 
     private fun fetchWalletConnections() =
         viewModelScope.launch {
@@ -92,8 +83,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
             events.collect {
                 when (it) {
                     is UiEvent.DisconnectWallet -> disconnectWallet()
-                    is UiEvent.UpdateWalletPreference -> {
-                        updateWalletPreference(walletPreference = it.walletPreference)
+                    is UiEvent.UpdatePreferPrimalWallet -> {
+                        updatePreferPrimalWallet(preferPrimalWallet = it.value)
                     }
 
                     is UiEvent.UpdateMinTransactionAmount -> {
@@ -128,19 +119,10 @@ class WalletSettingsViewModel @AssistedInject constructor(
             }
         }
 
-    private fun observeUserAccount() =
+    private fun observeActiveWallet() =
         viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                setState {
-                    copy(
-                        wallet = it.nostrWallet,
-                        walletPreference = it.walletPreference,
-                        userLightningAddress = it.lightningAddress,
-                        maxWalletBalanceInBtc = it.primalWalletSettings.maxBalanceInBtc,
-                        spamThresholdAmountInSats = it.primalWalletSettings.spamThresholdAmountInSats,
-                    )
-                }
-            }
+            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
+                .collect { setState { copy(wallet = it, preferPrimalWallet = it is Wallet.Primal) } }
         }
 
     private fun connectWallet(nwcUrl: String) =
@@ -149,45 +131,53 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 val nostrWalletConnect = nwcUrl.parseNWCUrl()
                 val lightningAddress = activeAccountStore.activeUserAccount().lightningAddress
 
-                userRepository.connectNostrWallet(
+                walletRepository.upsertNostrWallet(
                     userId = activeAccountStore.activeUserId(),
-                    nostrWalletConnect = nostrWalletConnect,
+                    wallet = Wallet.NWC(
+                        walletId = nostrWalletConnect.pubkey,
+                        lightningAddress = lightningAddress,
+                        balanceInBtc = null,
+                        maxBalanceInBtc = null,
+                        spamThresholdAmountInSats = 1L,
+                        lastUpdatedAt = null,
+                        relays = nostrWalletConnect.relays,
+                        keypair = NostrWalletKeypair(
+                            privateKey = nostrWalletConnect.keypair.privateKey,
+                            pubKey = nostrWalletConnect.keypair.pubkey,
+                        ),
+                    ),
                 )
 
-                setState {
-                    copy(
-                        wallet = nostrWalletConnect,
-                        userLightningAddress = lightningAddress,
-                        walletPreference = WalletPreference.NostrWalletConnect,
-                    )
-                }
+                walletAccountRepository.setActiveWallet(
+                    userId = activeAccountStore.activeUserId(),
+                    walletId = nostrWalletConnect.pubkey,
+                )
+                setState { copy(preferPrimalWallet = false) }
             } catch (error: NWCParseException) {
                 Timber.w(error)
             }
         }
 
     private suspend fun disconnectWallet() {
-        userRepository.disconnectNostrWallet(userId = activeAccountStore.activeUserId())
-        setState {
-            copy(
-                wallet = null,
-                userLightningAddress = null,
-            )
-        }
+        walletAccountRepository.clearActiveWallet(userId = activeAccountStore.activeUserId())
     }
 
-    private fun updateWalletPreference(walletPreference: WalletPreference) =
+    private fun updatePreferPrimalWallet(preferPrimalWallet: Boolean) =
         viewModelScope.launch {
-            val activeUserId = activeAccountStore.activeUserId()
-            userRepository.updateWalletPreference(userId = activeUserId, walletPreference = walletPreference)
-            setState { copy(walletPreference = walletPreference) }
+            val userId = activeAccountStore.activeUserId()
+            if (preferPrimalWallet) {
+                walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
+            } else {
+                walletAccountRepository.clearActiveWallet(userId = userId)
+            }
         }
 
     private fun updateSpamThresholdAmount(amountInSats: Long) =
         viewModelScope.launch {
-            userRepository.updatePrimalWalletSettings(userId = activeAccountStore.activeUserId()) {
-                this.copy(spamThresholdAmountInSats = amountInSats)
-            }
+            walletRepository.upsertWalletSettings(
+                walletId = state.value.wallet?.walletId ?: activeAccountStore.activeUserId(),
+                spamThresholdAmountInSats = amountInSats,
+            )
             walletRepository.deleteAllTransactions(userId = activeAccountStore.activeUserId())
         }
 

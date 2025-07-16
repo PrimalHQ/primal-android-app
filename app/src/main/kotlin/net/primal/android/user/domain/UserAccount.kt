@@ -3,6 +3,7 @@ package net.primal.android.user.domain
 import java.time.Instant
 import kotlinx.serialization.Serializable
 import net.primal.android.premium.domain.PremiumMembership
+import net.primal.android.settings.wallet.domain.WalletPreference
 import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.domain.global.ContentAppSettings
 import net.primal.domain.links.CdnImage

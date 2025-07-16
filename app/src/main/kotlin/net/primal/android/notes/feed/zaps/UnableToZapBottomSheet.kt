@@ -18,8 +18,8 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.notes.feed.model.ZappingState
+import net.primal.android.settings.wallet.domain.WalletPreference
 import net.primal.android.theme.AppTheme
-import net.primal.android.user.domain.WalletPreference
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

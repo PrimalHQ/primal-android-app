@@ -36,11 +36,11 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract
 import net.primal.android.settings.wallet.settings.WalletUiStateProvider
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.core.networking.nwc.model.NostrWalletConnect
+import net.primal.domain.wallet.Wallet
 
 @Composable
 fun ExternalWalletSettings(
-    nwcWallet: NostrWalletConnect?,
+    nwcWallet: Wallet?,
     onExternalWalletDisconnect: () -> Unit,
     onPasteNwcClick: () -> Unit,
     onScanNwcClick: () -> Unit,
@@ -63,7 +63,7 @@ fun ExternalWalletSettings(
 
 @Composable
 private fun ExternalWalletSection(
-    nwcWallet: NostrWalletConnect?,
+    nwcWallet: Wallet?,
     onExternalWalletDisconnect: () -> Unit,
     onPasteNwcClick: () -> Unit,
     onScanNwcClick: () -> Unit,
@@ -88,7 +88,7 @@ private fun ExternalWalletSection(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    if (nwcWallet != null) {
+    if (nwcWallet != null && nwcWallet is Wallet.NWC) {
         ExternalWalletConnected(
             modifier = Modifier
                 .fillMaxSize()

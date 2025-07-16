@@ -1,6 +1,6 @@
 package net.primal.android.notes.feed.model
 
-import net.primal.android.user.domain.WalletPreference
+import net.primal.android.settings.wallet.domain.WalletPreference
 import net.primal.domain.notifications.ContentZapConfigItem
 import net.primal.domain.notifications.ContentZapDefault
 import net.primal.domain.notifications.DEFAULT_ZAP_CONFIG

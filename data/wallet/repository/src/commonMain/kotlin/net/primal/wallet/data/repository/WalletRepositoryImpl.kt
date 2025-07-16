@@ -7,6 +7,7 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -18,14 +19,21 @@ import net.primal.domain.wallet.Network
 import net.primal.domain.wallet.OnChainAddressResult
 import net.primal.domain.wallet.SubWallet
 import net.primal.domain.wallet.TransactionWithProfile
+import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletPayParams
 import net.primal.domain.wallet.WalletRepository
+import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.db.withTransaction
+import net.primal.wallet.data.local.dao.ActiveWalletData
+import net.primal.wallet.data.local.dao.NostrWalletData
+import net.primal.wallet.data.local.dao.WalletInfo
+import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletTransactionData
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.DepositRequestBody
 import net.primal.wallet.data.repository.mappers.local.asWalletTransactionDO
+import net.primal.wallet.data.repository.mappers.local.toDomain
 import net.primal.wallet.data.repository.mappers.local.toWithdrawRequestDTO
 import net.primal.wallet.data.repository.mappers.remote.asLightingInvoiceResultDO
 import net.primal.wallet.data.repository.transactions.WalletTransactionsMediator
@@ -37,6 +45,42 @@ internal class WalletRepositoryImpl(
     private val walletDatabase: WalletDatabase,
     private val profileRepository: ProfileRepository,
 ) : WalletRepository {
+
+    override suspend fun upsertWalletSettings(walletId: String, spamThresholdAmountInSats: Long) =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.walletSettings().upsertWalletSettings(
+                WalletSettings(
+                    walletId = walletId,
+                    spamThresholdAmountInSats = spamThresholdAmountInSats,
+                ),
+            )
+        }
+
+    override suspend fun upsertNostrWallet(userId: String, wallet: Wallet.NWC) =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.withTransaction {
+                walletDatabase.wallet().upsertWalletInfo(
+                    info = WalletInfo(
+                        walletId = wallet.walletId,
+                        userId = userId,
+                        lightningAddress = wallet.lightningAddress,
+                        type = WalletType.NWC,
+                        balanceInBtc = wallet.balanceInBtc,
+                        maxBalanceInBtc = wallet.maxBalanceInBtc,
+                        lastUpdatedAt = wallet.lastUpdatedAt,
+                    ),
+                )
+
+                walletDatabase.wallet().upsertNostrWalletData(
+                    data = NostrWalletData(
+                        walletId = wallet.walletId,
+                        relays = wallet.relays,
+                        walletPubkey = wallet.keypair.pubKey,
+                        walletPrivateKey = wallet.keypair.privateKey,
+                    ),
+                )
+            }
+        }
 
     override fun latestTransactions(userId: String): Flow<PagingData<TransactionWithProfile>> {
         return createTransactionsPager(userId) {

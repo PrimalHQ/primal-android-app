@@ -1,4 +1,4 @@
-package net.primal.android.user.domain
+package net.primal.android.settings.wallet.domain
 
 enum class WalletPreference {
     NostrWalletConnect,

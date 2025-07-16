@@ -39,26 +39,10 @@ import net.primal.core.utils.CurrencyConversionUtils.toSats
 fun PrimalWalletSettings(state: WalletSettingsContract.UiState, eventPublisher: (UiEvent) -> Unit) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     Column {
-//        Spacer(modifier = Modifier.height(8.dp))
-//
-//        SettingsItem(
-//            headlineText = stringResource(id = R.string.settings_wallet_start_in_wallet),
-//            supportText = stringResource(id = R.string.settings_wallet_start_in_wallet_hint),
-//            trailingContent = {
-//                PrimalSwitch(
-//                    checked = false,
-//                    onCheckedChange = {
-//                    },
-//                )
-//            },
-//            onClick = {
-//            },
-//        )
-
         Spacer(modifier = Modifier.height(8.dp))
 
         var spamThresholdAmountEditorDialog by remember { mutableStateOf(false) }
-        val spamThresholdAmountInSats = state.spamThresholdAmountInSats?.let {
+        val spamThresholdAmountInSats = state.wallet?.spamThresholdAmountInSats?.let {
             numberFormat.format(it)
         } ?: "1"
         SettingsItem(
@@ -82,7 +66,7 @@ fun PrimalWalletSettings(state: WalletSettingsContract.UiState, eventPublisher: 
 
         var maxWalletBalanceShown by remember { mutableStateOf(false) }
         val maxBalanceInSats =
-            numberFormat.format((state.maxWalletBalanceInBtc ?: "0.01").toSats().toLong())
+            numberFormat.format((state.wallet?.maxBalanceInBtc ?: 0.01).toSats().toLong())
         SettingsItem(
             headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
             supportText = "$maxBalanceInSats sats",

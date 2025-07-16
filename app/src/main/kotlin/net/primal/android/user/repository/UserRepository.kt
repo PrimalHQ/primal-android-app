@@ -14,6 +14,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.premium.repository.asProfileDataDO
 import net.primal.android.profile.domain.ProfileMetadata
+import net.primal.android.settings.wallet.domain.WalletPreference
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.copyFollowListIfNotNull
@@ -25,7 +26,6 @@ import net.primal.android.user.db.UsersDatabase
 import net.primal.android.user.domain.ContentDisplaySettings
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
-import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
@@ -45,7 +45,6 @@ import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.user.UserDataCleanupRepository
 import net.primal.domain.wallet.WalletRepository
-import net.primal.domain.wallet.WalletSettings
 
 class UserRepository @Inject constructor(
     private val usersDatabase: UsersDatabase,
@@ -143,15 +142,6 @@ class UserRepository @Inject constructor(
             )
             accountsStore.getAndUpdateAccount(userId = userId) {
                 copy(nostrWallet = nostrWalletConnect)
-            }
-        }
-    }
-
-    suspend fun disconnectNostrWallet(userId: String) {
-        withContext(dispatchers.io()) {
-            usersDatabase.relays().deleteAll(userId = userId, kind = RelayKind.NwcRelay)
-            accountsStore.getAndUpdateAccount(userId = userId) {
-                copy(nostrWallet = null)
             }
         }
     }
@@ -282,12 +272,6 @@ class UserRepository @Inject constructor(
     suspend fun updatePrimalWalletLastUpdatedAt(userId: String, lastUpdatedAt: Long) {
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(primalWalletState = this.primalWalletState.copy(lastUpdatedAt = lastUpdatedAt))
-        }
-    }
-
-    suspend fun updatePrimalWalletSettings(userId: String, reducer: WalletSettings.() -> WalletSettings) {
-        accountsStore.getAndUpdateAccount(userId = userId) {
-            copy(primalWalletSettings = this.primalWalletSettings.reducer())
         }
     }
 
