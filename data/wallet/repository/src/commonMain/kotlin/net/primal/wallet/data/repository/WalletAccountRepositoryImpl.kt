@@ -1,5 +1,7 @@
 package net.primal.wallet.data.repository
 
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.createAppBuildHelper
@@ -16,11 +18,13 @@ import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.wallet.WalletKycLevel
 import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.db.withTransaction
+import net.primal.wallet.data.local.dao.ActiveWalletData
 import net.primal.wallet.data.local.dao.PrimalWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.PromoCodeRequestBody
+import net.primal.wallet.data.repository.mappers.local.toDomain
 import net.primal.wallet.data.repository.mappers.local.toWalletActivationRequestDTO
 import net.primal.wallet.data.repository.mappers.remote.toPromoCodeDetailsDO
 
@@ -32,6 +36,21 @@ class WalletAccountRepositoryImpl(
 ) : WalletAccountRepository {
 
     private val appBuildHelper = createAppBuildHelper()
+
+    override suspend fun setActiveWallet(userId: String, walletId: String) =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet().upsertActiveWallet(data = ActiveWalletData(userId = userId, walletId = walletId))
+        }
+
+    override suspend fun clearActiveWallet(userId: String) =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet().clearActiveWallet(userId = userId)
+        }
+
+    override fun observeActiveWallet(userId: String) =
+        walletDatabase.wallet().observeActiveWallet(userId = userId)
+            .distinctUntilChanged()
+            .map { it?.toDomain() }
 
     override suspend fun activateWallet(userId: String, code: String): WalletActivationResult {
         val response = primalWalletApi.activateWallet(userId, code)
