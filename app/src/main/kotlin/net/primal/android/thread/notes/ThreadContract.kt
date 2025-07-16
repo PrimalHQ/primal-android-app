@@ -1,5 +1,6 @@
 package net.primal.android.thread.notes
 
+import androidx.compose.foundation.lazy.LazyListState
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.editor.domain.NoteEditorArgs
@@ -16,6 +17,7 @@ interface ThreadContract {
         val fetching: Boolean = false,
         val replyToArticle: FeedArticleUi? = null,
         val error: UiError? = null,
+        val listState: LazyListState = LazyListState(),
     )
 
     sealed class UiEvent {
