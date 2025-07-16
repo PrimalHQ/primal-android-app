@@ -15,6 +15,7 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
+import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletKycLevel
 import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.db.withTransaction
@@ -51,6 +52,12 @@ class WalletAccountRepositoryImpl(
         walletDatabase.wallet().observeActiveWallet(userId = userId)
             .distinctUntilChanged()
             .map { it?.toDomain() }
+
+    override suspend fun findLastUsedNostrWallet(userId: String): Wallet? =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet().findLastUsedWalletByType(userId = userId, type = WalletType.NWC)
+                ?.toDomain()
+        }
 
     override suspend fun activateWallet(userId: String, code: String): WalletActivationResult {
         val response = primalWalletApi.activateWallet(userId, code)
