@@ -2,14 +2,16 @@ package net.primal.domain.wallet
 
 import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
+import net.primal.domain.common.exception.NetworkException
 
 interface WalletRepository {
-
-    suspend fun fetchWalletBalance(userId: String)
 
     suspend fun upsertNostrWallet(userId: String, wallet: Wallet.NWC)
 
     suspend fun upsertWalletSettings(walletId: String, spamThresholdAmountInSats: Long)
+
+    @Throws(NetworkException::class, kotlin.coroutines.cancellation.CancellationException::class)
+    suspend fun fetchWalletBalance(walletId: String)
 
     fun latestTransactions(userId: String): Flow<PagingData<TransactionWithProfile>>
 

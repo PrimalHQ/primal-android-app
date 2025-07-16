@@ -1,14 +1,12 @@
 package net.primal.android.wallet.dashboard
 
 import androidx.paging.PagingData
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlinx.coroutines.flow.Flow
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.user.domain.Badges
-import net.primal.android.user.domain.PrimalWallet
-import net.primal.android.user.domain.WalletPreference
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
 import net.primal.domain.links.CdnImage
+import net.primal.domain.wallet.Wallet
 
 interface WalletDashboardContract {
     data class UiState(
@@ -18,11 +16,8 @@ interface WalletDashboardContract {
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
         val activeAccountBlossoms: List<String> = emptyList(),
         val badges: Badges = Badges(),
-        val primalWallet: PrimalWallet? = null,
-        val walletPreference: WalletPreference = WalletPreference.Undefined,
-        val walletBalance: BigDecimal? = null,
+        val wallet: Wallet? = null,
         val exchangeBtcUsdRate: Double? = null,
-        val lastWalletUpdatedAt: Long? = null,
         val lowBalance: Boolean = false,
         val error: DashboardError? = null,
     ) {
