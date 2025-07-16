@@ -16,6 +16,7 @@ import net.primal.wallet.data.repository.ExchangeRateRepositoryImpl
 import net.primal.wallet.data.repository.TransactionFeeRepositoryImpl
 import net.primal.wallet.data.repository.WalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletRepositoryImpl
+import net.primal.wallet.data.service.factory.WalletServiceFactory
 
 abstract class RepositoryFactory {
 
@@ -36,6 +37,11 @@ abstract class RepositoryFactory {
                 nostrEventSignatureHandler = nostrEventSignatureHandler,
             ),
             profileRepository = profileRepository,
+            primalWalletService = WalletServiceFactory.createPrimalWalletService(
+                primalWalletApiClient = primalWalletApiClient,
+                nostrEventSignatureHandler = nostrEventSignatureHandler,
+            ),
+            nostrWalletService = WalletServiceFactory.createNostrWalletService(),
         )
     }
 
