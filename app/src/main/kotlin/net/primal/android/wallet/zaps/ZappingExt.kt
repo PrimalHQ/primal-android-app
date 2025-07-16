@@ -1,8 +1,8 @@
 package net.primal.android.wallet.zaps
 
 import net.primal.android.notes.feed.model.ZappingState
+import net.primal.android.settings.wallet.domain.WalletPreference
 import net.primal.android.user.domain.UserAccount
-import net.primal.android.user.domain.WalletPreference
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.wallet.WalletKycLevel
 

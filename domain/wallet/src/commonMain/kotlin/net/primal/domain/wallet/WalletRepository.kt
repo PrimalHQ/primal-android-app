@@ -7,6 +7,10 @@ interface WalletRepository {
 
     suspend fun fetchWalletBalance(userId: String)
 
+    suspend fun upsertNostrWallet(userId: String, wallet: Wallet.NWC)
+
+    suspend fun upsertWalletSettings(walletId: String, spamThresholdAmountInSats: Long)
+
     fun latestTransactions(userId: String): Flow<PagingData<TransactionWithProfile>>
 
     suspend fun findTransactionByIdOrNull(txId: String): TransactionWithProfile?
