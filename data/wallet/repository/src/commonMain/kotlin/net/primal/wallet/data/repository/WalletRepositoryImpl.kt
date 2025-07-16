@@ -7,7 +7,6 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -22,9 +21,9 @@ import net.primal.domain.wallet.TransactionWithProfile
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletPayParams
 import net.primal.domain.wallet.WalletRepository
+import net.primal.domain.wallet.WalletService
 import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.db.withTransaction
-import net.primal.wallet.data.local.dao.ActiveWalletData
 import net.primal.wallet.data.local.dao.NostrWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
@@ -41,6 +40,8 @@ import net.primal.wallet.data.repository.transactions.WalletTransactionsMediator
 @OptIn(ExperimentalPagingApi::class)
 internal class WalletRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
+    private val primalWalletService: WalletService,
+    private val nostrWalletService: WalletService,
     private val primalWalletApi: PrimalWalletApi,
     private val walletDatabase: WalletDatabase,
     private val profileRepository: ProfileRepository,
@@ -149,16 +150,21 @@ internal class WalletRepositoryImpl(
         }
     }
 
-    override suspend fun fetchWalletBalance(userId: String) {
+    override suspend fun fetchWalletBalance(walletId: String) {
         withContext(dispatcherProvider.io()) {
-            val response = primalWalletApi.getBalance(userId = userId)
-            walletDatabase.withTransaction {
-                walletDatabase.wallet().updateWalletBalance(
-                    walletId = userId,
-                    balanceInBtc = response.amount.toDouble(),
-                    maxBalanceInBtc = response.maxAmount?.toDouble(),
-                )
+            val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
+                ?: return@withContext
+
+            val response = when (wallet.info.type) {
+                WalletType.PRIMAL -> primalWalletService.fetchWalletBalance(wallet = wallet.toDomain())
+                WalletType.NWC -> nostrWalletService.fetchWalletBalance(wallet = wallet.toDomain())
             }
+
+            walletDatabase.wallet().updateWalletBalance(
+                walletId = walletId,
+                balanceInBtc = response.balanceInBtc,
+                maxBalanceInBtc = response.maxBalanceInBtc,
+            )
         }
     }
 

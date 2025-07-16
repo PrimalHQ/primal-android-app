@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.domain.WalletPreference
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
@@ -29,6 +28,7 @@ import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -38,9 +38,10 @@ import timber.log.Timber
 
 @HiltViewModel
 class WalletDashboardViewModel @Inject constructor(
+    userRepository: UserRepository,
     private val activeAccountStore: ActiveAccountStore,
+    private val walletAccountRepository: WalletAccountRepository,
     private val walletRepository: WalletRepository,
-    private val userRepository: UserRepository,
     private val primalBillingClient: PrimalBillingClient,
     private val billingRepository: BillingRepository,
     private val subscriptionsManager: SubscriptionsManager,
@@ -64,9 +65,9 @@ class WalletDashboardViewModel @Inject constructor(
     fun setEvents(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
-        fetchWalletBalance()
         observeUsdExchangeRate()
         subscribeToEvents()
+        subscribeToActiveWallet()
         subscribeToActiveAccount()
         subscribeToPurchases()
         subscribeToBadgesUpdates()
@@ -82,6 +83,15 @@ class WalletDashboardViewModel @Inject constructor(
             }
         }
 
+    private fun subscribeToActiveWallet() =
+        viewModelScope.launch {
+            walletAccountRepository.observeActiveWallet(userId = activeUserId)
+                .collect { wallet ->
+                    wallet?.let { fetchWalletBalance(walletId = it.walletId) }
+                    setState { copy(wallet = wallet, lowBalance = wallet?.balanceInBtc == 0.0) }
+                }
+        }
+
     private fun subscribeToActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
@@ -90,11 +100,6 @@ class WalletDashboardViewModel @Inject constructor(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
                         activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
                         activeAccountBlossoms = it.blossomServers,
-                        primalWallet = it.primalWallet,
-                        walletPreference = it.walletPreference,
-                        walletBalance = it.primalWalletState.balanceInBtc?.toBigDecimal(),
-                        lastWalletUpdatedAt = it.primalWalletState.lastUpdatedAt,
-                        lowBalance = it.primalWalletState.balanceInBtc?.toSats()?.toLong() == 0L,
                     )
                 }
             }
@@ -116,10 +121,10 @@ class WalletDashboardViewModel @Inject constructor(
             }
         }
 
-    private fun fetchWalletBalance() =
+    private fun fetchWalletBalance(walletId: String) =
         viewModelScope.launch {
             try {
-                walletRepository.fetchWalletBalance(userId = activeUserId)
+                walletRepository.fetchWalletBalance(walletId = walletId)
             } catch (error: SignatureException) {
                 Timber.w(error)
             } catch (error: NetworkException) {
@@ -145,10 +150,12 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun enablePrimalWallet() =
         viewModelScope.launch {
-            userRepository.updateWalletPreference(
-                userId = activeUserId,
-                walletPreference = WalletPreference.PrimalWallet,
-            )
+            try {
+                walletAccountRepository.fetchWalletAccountInfo(userId = activeUserId)
+                walletAccountRepository.setActiveWallet(userId = activeUserId, walletId = activeUserId)
+            } catch (error: NetworkException) {
+                Timber.w(error)
+            }
         }
 
     private fun confirmPurchase(purchase: SatsPurchase) =

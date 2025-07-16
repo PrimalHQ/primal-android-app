@@ -18,7 +18,7 @@ import net.primal.android.theme.AppTheme
 @Composable
 fun WalletCallToActionBox(
     modifier: Modifier,
-    message: String,
+    message: String? = null,
     actionLabel: String? = null,
     onActionClick: (() -> Unit)? = null,
 ) {
@@ -31,13 +31,15 @@ fun WalletCallToActionBox(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
-                text = message,
-                textAlign = TextAlign.Center,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                style = AppTheme.typography.bodyMedium,
-            )
+            message?.let {
+                Text(
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
+                    text = message,
+                    textAlign = TextAlign.Center,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    style = AppTheme.typography.bodyMedium,
+                )
+            }
 
             if (actionLabel != null) {
                 PrimalFilledButton(
