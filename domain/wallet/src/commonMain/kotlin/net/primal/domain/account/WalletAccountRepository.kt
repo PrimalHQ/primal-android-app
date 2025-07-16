@@ -1,10 +1,17 @@
 package net.primal.domain.account
 
 import kotlin.coroutines.cancellation.CancellationException
+import kotlinx.coroutines.flow.Flow
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.wallet.Wallet
 
 interface WalletAccountRepository {
+    suspend fun setActiveWallet(userId: String, walletId: String)
+
+    suspend fun clearActiveWallet(userId: String)
+
+    fun observeActiveWallet(userId: String): Flow<Wallet?>
 
     @Throws(
         NetworkException::class,
