@@ -34,15 +34,15 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.notes.feed.list.NoteFeedList
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.domain.feeds.FeedSpecKind
 
 @Composable
 fun BookmarksScreen(
     viewModel: BookmarksViewModel,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     callbacks: BookmarksContract.ScreenCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -50,7 +50,7 @@ fun BookmarksScreen(
     BookmarksScreen(
         state = uiState.value,
         eventPublisher = viewModel::setEvent,
-        noteCallbacks = noteCallbacks,
+        navigator = navigator,
         callbacks = callbacks,
     )
 }
@@ -59,7 +59,7 @@ fun BookmarksScreen(
 private fun BookmarksScreen(
     state: BookmarksContract.UiState,
     eventPublisher: (BookmarksContract.UiEvent) -> Unit,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     callbacks: BookmarksContract.ScreenCallbacks,
 ) {
     val uiScope = rememberCoroutineScope()
@@ -87,10 +87,10 @@ private fun BookmarksScreen(
                 ArticleFeedList(
                     contentPadding = paddingValues,
                     feedSpec = state.feedSpec,
-                    onArticleClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
+                    onArticleClick = { naddr -> navigator.onArticleClick(naddr) },
                     pullToRefreshEnabled = false,
                     noContentText = stringResource(R.string.bookmarks_no_content),
-                    onGetPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
+                    onGetPremiumClick = { navigator.onGetPrimalPremiumClick() },
                     onUiError = { uiError: UiError ->
                         uiScope.launch {
                             snackbarHostState.showSnackbar(
@@ -106,7 +106,7 @@ private fun BookmarksScreen(
                 NoteFeedList(
                     contentPadding = paddingValues,
                     feedSpec = state.feedSpec,
-                    noteCallbacks = noteCallbacks,
+                    navigator = navigator,
                     onGoToWallet = callbacks.onGoToWallet,
                     pollingEnabled = false,
                     pullToRefreshEnabled = false,

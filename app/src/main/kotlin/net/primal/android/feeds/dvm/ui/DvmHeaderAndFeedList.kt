@@ -6,8 +6,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import net.primal.android.articles.feed.ArticleFeedList
 import net.primal.android.core.errors.UiError
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.notes.feed.list.NoteFeedList
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.buildSpec
@@ -21,6 +21,7 @@ fun DvmHeaderAndFeedList(
     clipShape: Shape? = AppTheme.shapes.small,
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
+    navigator: PrimalNavigator,
 ) {
     Column(modifier = modifier) {
         val feedSpecKind = dvmFeed.data.kind
@@ -49,7 +50,7 @@ fun DvmHeaderAndFeedList(
             FeedSpecKind.Notes -> {
                 NoteFeedList(
                     feedSpec = dvmFeed.data.buildSpec(specKind = feedSpecKind),
-                    noteCallbacks = NoteCallbacks(),
+                    navigator = navigator,
                     previewMode = true,
                     pullToRefreshEnabled = false,
                     pollingEnabled = false,

@@ -52,12 +52,14 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.feeds.list.FeedsBottomSheet
 import net.primal.android.feeds.list.ui.model.FeedUi
+import net.primal.android.navigation.navigator.NoOpNavigator
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
@@ -192,14 +194,14 @@ fun HomeFeedScreen(
                     val feedUi = state.feeds[index]
                     NoteFeedList(
                         feedSpec = feedUi.spec,
+                        navigator = NoOpNavigator,
                         pollingEnabled = pollingStates[feedUi] ?: false,
-                        noteCallbacks = noteCallbacks,
                         showTopZaps = true,
                         newNotesNoticeAlpha = (1 - topAppBarState.collapsedFraction) * 1.0f,
                         onGoToWallet = callbacks.onGoToWallet,
                         contentPadding = paddingValues,
                         shouldAnimateScrollToTop = shouldAnimateScrollToTop,
-                        onUiError = { uiError ->
+                        onUiError = { uiError: UiError ->
                             uiScope.launch {
                                 snackbarHostState.showSnackbar(
                                     message = uiError.resolveUiErrorMessage(context),
@@ -253,6 +255,7 @@ private fun NoteFeedTopAppBar(
         FeedsBottomSheet(
             activeFeed = activeFeed,
             feedSpecKind = FeedSpecKind.Notes,
+            navigator = NoOpNavigator,
             onFeedClick = { feed ->
                 feedPickerVisible = false
                 onFeedChanged(feed)

@@ -13,6 +13,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -20,7 +21,6 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,7 +28,6 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
-import androidx.navigation.navOptions
 import net.primal.android.articles.reads.ReadsScreen
 import net.primal.android.articles.reads.ReadsScreenContract
 import net.primal.android.articles.reads.ReadsViewModel
@@ -87,6 +86,7 @@ import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationContract
 import net.primal.android.messages.conversation.create.NewConversationScreen
+import net.primal.android.navigation.navigator.PrimalAppRouter
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract
 import net.primal.android.notes.home.HomeFeedScreen
@@ -169,196 +169,11 @@ import net.primal.android.thread.notes.ThreadScreen
 import net.primal.android.thread.notes.ThreadViewModel
 import net.primal.android.wallet.activation.WalletActivationContract
 import net.primal.android.wallet.activation.WalletActivationViewModel
-import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.feeds.buildAdvancedSearchNotesFeedSpec
 import net.primal.domain.feeds.buildAdvancedSearchNotificationsFeedSpec
 import net.primal.domain.feeds.buildAdvancedSearchReadsFeedSpec
 import net.primal.domain.feeds.buildReadsTopicFeedSpec
 import net.primal.domain.nostr.ReactionType
-
-private fun NavController.navigateToWelcome() =
-    navigate(
-        route = "welcome",
-        navOptions = navOptions { clearBackStack() },
-    )
-
-private fun NavController.navigateToLogin() = navigate(route = "login")
-
-private fun NavController.navigateToOnboarding(promoCode: String? = null) =
-    navigate(route = "onboarding?$PROMO_CODE=$promoCode")
-
-private fun NavController.navigateToWalletOnboarding(promoCode: String?) =
-    navigate(route = "onboardingWallet?$PROMO_CODE=$promoCode")
-
-private fun NavController.navigateToLogout(profileId: String) = navigate(route = "logout?$PROFILE_ID=$profileId")
-
-private fun NavController.navigateToSearch(searchScope: SearchScope) =
-    navigate(route = "search?$SEARCH_SCOPE=$searchScope")
-
-private fun NavController.navigateToAdvancedSearch(
-    initialQuery: String? = null,
-    initialPostedBy: List<String>? = null,
-    initialSearchKind: AdvancedSearchContract.SearchKind? = null,
-    initialSearchScope: AdvancedSearchContract.SearchScope? = null,
-) = navigate(
-    route = "asearch" +
-        "?$INITIAL_QUERY=$initialQuery" +
-        "&$POSTED_BY=${initialPostedBy.encodeToJsonString()}" +
-        "&$SEARCH_KIND=$initialSearchKind" +
-        "&$ADV_SEARCH_SCOPE=$initialSearchScope",
-)
-
-private fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
-    navigate(route = "noteEditor?$NOTE_EDITOR_ARGS=${args?.toJson()?.asBase64Encoded()}")
-}
-
-private val NavController.topLevelNavOptions: NavOptions
-    @SuppressWarnings("RestrictedApi")
-    get() {
-        val feedDestination = currentBackStack.value.find {
-            it.destination.route?.contains("home") == true
-        }
-        return navOptions {
-            popUpTo(id = feedDestination?.destination?.id ?: 0)
-        }
-    }
-
-fun NavController.navigateToHome() =
-    navigate(
-        route = "home",
-        navOptions = navOptions { clearBackStack() },
-    )
-
-fun NavController.navigateToReads() =
-    navigate(
-        route = "reads",
-        navOptions = topLevelNavOptions,
-    )
-
-fun NavController.navigateToWallet() =
-    navigate(
-        route = "wallet",
-        navOptions = topLevelNavOptions,
-    )
-
-private fun NavController.navigateToNotifications() =
-    navigate(
-        route = "notifications",
-        navOptions = topLevelNavOptions,
-    )
-
-fun NavController.navigateToExplore() =
-    navigate(
-        route = "explore",
-        navOptions = topLevelNavOptions,
-    )
-
-fun NavController.navigateToFollowPack(profileId: String, followPackId: String) =
-    navigate(route = "explore/followPack/$profileId/$followPackId")
-
-fun NavController.navigateToRedeemCode(promoCode: String? = null) =
-    navigate(route = "redeemCode?$PROMO_CODE=$promoCode")
-
-private fun NavController.navigateToMessages() = navigate(route = "messages")
-
-private fun NavController.navigateToChat(profileId: String) = navigate(route = "messages/$profileId")
-
-private fun NavController.navigateToNewMessage() = navigate(route = "messages/new")
-
-fun NavController.navigateToProfile(profileId: String) = navigate(route = "profile?$PROFILE_ID=$profileId")
-
-fun NavController.navigateToProfileQrCodeViewer(profileId: String? = null) =
-    when {
-        profileId != null -> navigate(route = "profileQrCodeViewer?$PROFILE_ID=$profileId")
-        else -> navigate(route = "profileQrCodeViewer")
-    }
-
-fun NavController.navigateToProfileFollows(profileId: String, followsType: ProfileFollowsType) =
-    navigate(route = "profile/$profileId/follows?$FOLLOWS_TYPE=$followsType")
-
-fun NavController.navigateToProfileEditor() = navigate(route = "profileEditor")
-
-private fun NavController.navigateToSettings() = navigate(route = "settings")
-
-fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
-
-fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$NADDR=$naddr")
-
-fun NavController.navigateToReactions(
-    eventId: String,
-    initialTab: ReactionType = ReactionType.ZAPS,
-    articleATag: String?,
-) = navigate("reactions/$eventId?$INITIAL_REACTION_TYPE=${initialTab.name}&$ARTICLE_A_TAG=$articleATag")
-
-fun NavController.navigateToMediaGallery(
-    noteId: String,
-    mediaUrl: String,
-    mediaPositionMs: Long = 0,
-) = navigate(
-    route = "media/$noteId" +
-        "?$MEDIA_URL=$mediaUrl" +
-        "&$MEDIA_POSITION_MS=$mediaPositionMs",
-)
-
-fun NavController.navigateToMediaItem(mediaUrl: String) {
-    val encodedUrl = mediaUrl.asUrlEncoded()
-    navigate(route = "mediaItem?$MEDIA_URL=$encodedUrl")
-}
-
-fun NavController.navigateToExploreFeed(
-    feedSpec: String,
-    renderType: ExploreFeedContract.RenderType = ExploreFeedContract.RenderType.List,
-    feedTitle: String? = null,
-    feedDescription: String? = null,
-) = navigate(
-    route = "explore/note?$EXPLORE_FEED_SPEC=${feedSpec.asBase64Encoded()}" +
-        "&$EXPLORE_FEED_TITLE=${feedTitle?.asBase64Encoded()}" +
-        "&$EXPLORE_FEED_DESCRIPTION=${feedDescription?.asBase64Encoded()}" +
-        "&$RENDER_TYPE=$renderType",
-)
-
-private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
-
-fun NavController.navigateToPremiumBuying(fromOrigin: String? = null) {
-    if (fromOrigin?.isNotEmpty() == true) {
-        navigate(route = "premium/buying?$FROM_ORIGIN=$fromOrigin")
-    } else {
-        navigate(route = "premium/buying")
-    }
-}
-
-private fun NavController.navigateToUpgradeToPrimalPro() =
-    navigate(route = "premium/buying?$UPGRADE_TO_PRIMAL_PRO=true")
-
-private fun NavController.navigateToPremiumExtendSubscription(primalName: String) =
-    navigate(route = "premium/buying?$EXTEND_EXISTING_PREMIUM_NAME=$primalName")
-
-private fun NavController.navigateToPremiumHome() = navigate(route = "premium/home")
-private fun NavController.navigateToPremiumSupportPrimal() = navigate(route = "premium/supportPrimal")
-private fun NavController.navigateToLegendContributePrimal() = navigate(route = "premium/legend/contribution")
-private fun NavController.navigateToPremiumMoreInfo(tabIndex: Int = 0) =
-    navigate(route = "premium/info?$PREMIUM_MORE_INFO_TAB_INDEX=$tabIndex")
-
-private fun NavController.navigateToPremiumBuyPrimalLegend(fromOrigin: String? = null) {
-    if (fromOrigin?.isNotEmpty() == true) {
-        navigate(route = "premium/legend/buy?$FROM_ORIGIN=$fromOrigin")
-    } else {
-        navigate(route = "premium/legend/buy")
-    }
-}
-
-private fun NavController.navigateToPremiumLegendaryProfile() = navigate(route = "premium/legend/profile")
-private fun NavController.navigateToPremiumCard(profileId: String) = navigate(route = "premium/card/$profileId")
-private fun NavController.navigateToPremiumLegendLeaderboard() = navigate(route = "premium/legend/leaderboard")
-private fun NavController.navigateToPremiumOGsLeaderboard() = navigate(route = "premium/ogs/leaderboard")
-
-private fun NavController.navigateToPremiumManage() = navigate(route = "premium/manage")
-private fun NavController.navigateToPremiumMediaManagement() = navigate(route = "premium/manage/media")
-private fun NavController.navigateToPremiumContactList() = navigate(route = "premium/manage/contacts")
-private fun NavController.navigateToPremiumContentBackup() = navigate(route = "premium/manage/content")
-private fun NavController.navigateToPremiumChangePrimalName() = navigate(route = "premium/manage/changePrimalName")
-private fun NavController.navigateToPremiumOrderHistory() = navigate(route = "premium/manage/order")
-private fun NavController.navigateToPremiumRelay() = navigate(route = "premium/manage/relay")
 
 fun accountSwitcherCallbacksHandler(navController: NavController) =
     AccountSwitcherCallbacks(
@@ -437,6 +252,10 @@ fun noteCallbacksHandler(navController: NavController) =
 @Composable
 fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
     val navController = rememberNavController()
+
+    val primalAppRouter = remember(navController) {
+        PrimalAppRouter(navController)
+    }
 
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
         when (it) {
@@ -546,11 +365,13 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
                 },
             ),
             navController = navController,
+            primalAppRouter = primalAppRouter,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
         )
 
         explore(
+            primalAppRouter = primalAppRouter,
             route = "explore",
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
@@ -585,6 +406,7 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
                     uriPattern = "https://primal.net/bookmarks"
                 },
             ),
+            primalAppRouter = primalAppRouter,
         )
 
         exploreFeed(
@@ -623,6 +445,7 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
                 },
             ),
             navController = navController,
+            primalAppRouter = primalAppRouter,
         )
 
         search(
@@ -775,6 +598,7 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
                 },
             ),
             navController = navController,
+            primalAppRouter = primalAppRouter,
         )
 
         newMessage(route = "messages/new", navController = navController)
@@ -792,6 +616,7 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
         )
 
         noteEditor(
+            primalAppRouter = primalAppRouter,
             route = "noteEditor?$NOTE_EDITOR_ARGS={$NOTE_EDITOR_ARGS}",
             arguments = listOf(
                 navArgument(NOTE_EDITOR_ARGS) {
@@ -1231,6 +1056,7 @@ private fun NavGraphBuilder.reads(
     route: String,
     deepLinks: List<NavDeepLink>,
     navController: NavController,
+    primalAppRouter: PrimalAppRouter,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) = composable(
@@ -1257,6 +1083,7 @@ private fun NavGraphBuilder.reads(
     },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<ReadsViewModel>(navBackEntry)
+
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
     ReadsScreen(
@@ -1267,9 +1094,10 @@ private fun NavGraphBuilder.reads(
         callbacks = ReadsScreenContract.ScreenCallbacks(
             onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
             onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Reads) },
-            onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
+            onArticleClick = { navController.navigateToArticleDetails(it) },
             onGetPremiumClick = { navController.navigateToPremiumBuying() },
         ),
+        navigator = primalAppRouter,
     )
 }
 
@@ -1278,6 +1106,7 @@ private fun NavGraphBuilder.noteEditor(
     deepLinks: List<NavDeepLink>,
     arguments: List<NamedNavArgument>,
     navController: NavController,
+    primalAppRouter: PrimalAppRouter,
 ) = composable(
     route = route,
     deepLinks = deepLinks,
@@ -1304,6 +1133,7 @@ private fun NavGraphBuilder.noteEditor(
                 navController.navigateUp()
             },
         ),
+        navigator = primalAppRouter,
     )
 }
 
@@ -1313,6 +1143,7 @@ private fun NavGraphBuilder.explore(
     navController: NavController,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
+    primalAppRouter: PrimalAppRouter,
 ) = composable(
     route = route,
     deepLinks = deepLinks,
@@ -1339,20 +1170,23 @@ private fun NavGraphBuilder.explore(
     val viewModel = hiltViewModel<ExploreHomeViewModel>(it)
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
+
     ExploreHomeScreen(
         viewModel = viewModel,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
-        noteCallbacks = noteCallbacksHandler(navController),
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
         callbacks = ExploreHomeContract.ScreenCallbacks(
             onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
             onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
             onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
-            onFollowPackClick = { profileId, identifier -> navController.navigateToFollowPack(profileId, identifier) },
+            onFollowPackClick = { profileId, identifier ->
+                navController.navigateToFollowPack(profileId, identifier)
+            },
             onGoToWallet = { navController.navigateToWallet() },
-            onNewPostClick = { navController.navigateToNoteEditor(null) },
+            onNewPostClick = { navController.navigateToNoteEditor() },
         ),
+        navigator = primalAppRouter,
     )
 }
 
@@ -1392,6 +1226,7 @@ private fun NavGraphBuilder.exploreFeed(
     deepLinks: List<NavDeepLink>,
     arguments: List<NamedNavArgument>,
     navController: NavController,
+    primalAppRouter: PrimalAppRouter,
 ) = composable(
     route = route,
     deepLinks = deepLinks,
@@ -1406,7 +1241,7 @@ private fun NavGraphBuilder.exploreFeed(
     LockToOrientationPortrait()
     ExploreFeedScreen(
         viewModel = viewModel,
-        noteCallbacks = noteCallbacksHandler(navController),
+        navigator = primalAppRouter,
         callbacks = ExploreFeedContract.ScreenCallbacks(
             onClose = { navController.navigateUp() },
             onGoToWallet = { navController.navigateToWallet() },
@@ -1936,6 +1771,7 @@ private fun NavGraphBuilder.bookmarks(
     route: String,
     deepLinks: List<NavDeepLink>,
     navController: NavController,
+    primalAppRouter: PrimalAppRouter,
 ) = composable(
     route = route,
     deepLinks = deepLinks,
@@ -1948,7 +1784,7 @@ private fun NavGraphBuilder.bookmarks(
     ApplyEdgeToEdge()
     BookmarksScreen(
         viewModel = viewModel,
-        noteCallbacks = noteCallbacksHandler(navController),
+        navigator = primalAppRouter,
         callbacks = BookmarksContract.ScreenCallbacks(
             onClose = { navController.navigateUp() },
             onGoToWallet = { navController.navigateToWallet() },
@@ -1959,6 +1795,7 @@ private fun NavGraphBuilder.chat(
     route: String,
     arguments: List<NamedNavArgument>,
     navController: NavController,
+    primalAppRouter: PrimalAppRouter,
 ) = composable(
     route = route,
     arguments = arguments,
@@ -1973,7 +1810,7 @@ private fun NavGraphBuilder.chat(
     ChatScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        noteCallbacks = noteCallbacksHandler(navController),
+        navigator = primalAppRouter,
     )
 }
 

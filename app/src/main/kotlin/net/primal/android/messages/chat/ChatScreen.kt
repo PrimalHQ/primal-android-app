@@ -1,5 +1,6 @@
 package net.primal.android.messages.chat
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -70,9 +71,9 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.messages.chat.model.ChatMessageUi
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.NoteContent
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 
@@ -80,7 +81,7 @@ import net.primal.domain.nostr.utils.asEllipsizedNpub
 fun ChatScreen(
     viewModel: ChatViewModel,
     onClose: () -> Unit,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
 ) {
     val state = viewModel.state.collectAsState()
 
@@ -97,7 +98,7 @@ fun ChatScreen(
     ChatScreen(
         state = state.value,
         onClose = onClose,
-        noteCallbacks = noteCallbacks,
+        navigator = navigator,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -107,7 +108,7 @@ fun ChatScreen(
 fun ChatScreen(
     state: ChatContract.UiState,
     onClose: () -> Unit,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     eventPublisher: (ChatContract.UiEvent) -> Unit,
 ) {
     val messagesPagingItems = state.messages.collectAsLazyPagingItems()
@@ -144,7 +145,7 @@ fun ChatScreen(
                             avatarCdnImage = state.participantProfile?.avatarCdnImage,
                             avatarSize = 32.dp,
                             avatarBlossoms = state.participantProfile?.profileBlossoms ?: emptyList(),
-                            onClick = { noteCallbacks.onProfileClick?.invoke(state.participantId) },
+                            onClick = { navigator.onProfileClick(state.participantId) },
                             legendaryCustomization = state.participantProfile?.premiumDetails?.legendaryCustomization,
                         )
                     }
@@ -159,7 +160,7 @@ fun ChatScreen(
                 state = listState,
                 contentPadding = contentPadding,
                 messages = messagesPagingItems,
-                noteCallbacks = noteCallbacks,
+                navigator = navigator,
             )
         },
         bottomBar = {
@@ -193,7 +194,7 @@ fun ChatScreen(
 @Composable
 private fun ChatList(
     messages: LazyPagingItems<ChatMessageUi>,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     modifier: Modifier = Modifier,
     state: LazyListState = rememberLazyListState(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
@@ -241,7 +242,7 @@ private fun ChatList(
                         previousMessage = previousMessage,
                         nextMessage = nextMessage,
                         onUrlClick = { localUriHandler.openUriSafely(it) },
-                        noteCallbacks = noteCallbacks,
+                        navigator = navigator,
                     )
                 }
 
@@ -292,13 +293,14 @@ private fun ChatList(
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 private fun ChatMessageListItem(
     chatMessage: ChatMessageUi,
     previousMessage: ChatMessageUi? = null,
     nextMessage: ChatMessageUi? = null,
     onUrlClick: (String) -> Unit,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
 ) {
     val timeDiffBetweenThisAndNextMessage = (nextMessage?.timestamp ?: Instant.MAX).epochSecond -
         chatMessage.timestamp.epochSecond
@@ -372,7 +374,7 @@ private fun ChatMessageListItem(
                 data = chatMessage.toNoteContentUi(),
                 expanded = true,
                 onClick = { },
-                noteCallbacks = noteCallbacks,
+                navigator = navigator,
                 onUrlClick = onUrlClick,
                 contentColor = if (chatMessage.isUserMessage) {
                     Color.White

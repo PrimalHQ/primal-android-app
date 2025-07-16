@@ -8,16 +8,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.nostr.mappers.asFeedPostUi
 import net.primal.android.notes.feed.model.NoteNostrUriUi
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 
 @Composable
 fun ReferencedNotesColumn(
     postResources: List<NoteNostrUriUi>,
     expanded: Boolean,
     containerColor: Color,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     nestingLevel: Int,
     nestingCutOffLimit: Int,
     modifier: Modifier = Modifier,
@@ -42,7 +42,7 @@ fun ReferencedNotesColumn(
                 nestingLevel = nestingLevel,
                 nestingCutOffLimit = nestingCutOffLimit,
                 colors = CardDefaults.cardColors(containerColor = containerColor),
-                noteCallbacks = noteCallbacks,
+                navigator = navigator,
             )
         }
     }

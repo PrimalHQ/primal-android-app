@@ -18,14 +18,14 @@ import net.primal.android.R
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.zaps.ReferencedNoteZap
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun ExploreZaps(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
 ) {
     val viewModel: ExploreZapsViewModel = hiltViewModel()
     val uiState = viewModel.state.collectAsState()
@@ -34,8 +34,8 @@ fun ExploreZaps(
         modifier = modifier,
         state = uiState.value,
         paddingValues = paddingValues,
-        noteCallbacks = noteCallbacks,
         eventPublisher = viewModel::setEvent,
+        navigator = navigator,
     )
 }
 
@@ -43,7 +43,7 @@ fun ExploreZaps(
 private fun ExploreZaps(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     state: ExploreZapsContract.UiState,
     eventPublisher: (ExploreZapsContract.UiEvent) -> Unit,
 ) {
@@ -86,7 +86,7 @@ private fun ExploreZaps(
                         receiverDisplayName = item.receiver?.authorDisplayName,
                         receiverAvatarCdnImage = item.receiver?.avatarCdnImage,
                         receiverLegendaryCustomization = item.receiver?.premiumDetails?.legendaryCustomization,
-                        noteCallbacks = noteCallbacks,
+                        navigator = navigator,
                     )
                 }
                 item { Spacer(modifier = Modifier.height(4.dp)) }

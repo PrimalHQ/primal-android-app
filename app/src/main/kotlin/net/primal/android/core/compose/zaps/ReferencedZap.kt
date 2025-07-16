@@ -25,7 +25,7 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.navigation.interactions.ContentInteractionCallbacks
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -35,7 +35,6 @@ import net.primal.domain.premium.PrimalLegendProfile
 @Composable
 fun ReferencedZap(
     modifier: Modifier = Modifier,
-    noteCallbacks: NoteCallbacks,
     senderId: String,
     receiverId: String,
     amountInSats: Double,
@@ -45,6 +44,7 @@ fun ReferencedZap(
     receiverDisplayName: String?,
     receiverAvatarCdnImage: CdnImage? = null,
     receiverPrimalLegendProfile: PrimalLegendProfile? = null,
+    contentInteractionCallbacks: ContentInteractionCallbacks,
 ) {
     Row(
         modifier = modifier
@@ -67,7 +67,7 @@ fun ReferencedZap(
                 avatarSize = 36.dp,
                 avatarCdnImage = senderAvatarCdnImage,
                 legendaryCustomization = senderPrimalLegendProfile?.asLegendaryCustomization(),
-                onClick = { noteCallbacks.onProfileClick?.invoke(senderId) },
+                onClick = { contentInteractionCallbacks.onProfileClick(senderId) },
             )
 
             ZapAmountAndMessageColumn(
@@ -79,7 +79,7 @@ fun ReferencedZap(
                 avatarSize = 36.dp,
                 avatarCdnImage = receiverAvatarCdnImage,
                 legendaryCustomization = receiverPrimalLegendProfile?.asLegendaryCustomization(),
-                onClick = { noteCallbacks.onProfileClick?.invoke(receiverId) },
+                onClick = { contentInteractionCallbacks.onProfileClick(receiverId) },
             )
         }
 
@@ -141,7 +141,10 @@ fun PreviewMessageAndDisplayName() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         ReferencedZap(
             modifier = Modifier.width(300.dp),
-            noteCallbacks = NoteCallbacks(),
+            contentInteractionCallbacks = object : ContentInteractionCallbacks {
+                override fun onProfileClick(profileId: String) = Unit
+                override fun onHashtagClick(hashtag: String) = Unit
+            },
             senderId = "",
             senderAvatarCdnImage = null,
             senderPrimalLegendProfile = null,
@@ -161,7 +164,10 @@ fun PreviewNoMessageAndDisplayName() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         ReferencedZap(
             modifier = Modifier.width(300.dp),
-            noteCallbacks = NoteCallbacks(),
+            contentInteractionCallbacks = object : ContentInteractionCallbacks {
+                override fun onProfileClick(profileId: String) = Unit
+                override fun onHashtagClick(hashtag: String) = Unit
+            },
             senderId = "",
             senderAvatarCdnImage = null,
             senderPrimalLegendProfile = null,
@@ -181,7 +187,10 @@ fun PreviewNoMessageAndNoDisplayName() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         ReferencedZap(
             modifier = Modifier.width(300.dp),
-            noteCallbacks = NoteCallbacks(),
+            contentInteractionCallbacks = object : ContentInteractionCallbacks {
+                override fun onProfileClick(profileId: String) = Unit
+                override fun onHashtagClick(hashtag: String) = Unit
+            },
             senderId = "",
             senderAvatarCdnImage = null,
             senderPrimalLegendProfile = null,
@@ -201,7 +210,10 @@ fun PreviewMessageAndNoDisplayName() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         ReferencedZap(
             modifier = Modifier.width(300.dp),
-            noteCallbacks = NoteCallbacks(),
+            contentInteractionCallbacks = object : ContentInteractionCallbacks {
+                override fun onProfileClick(profileId: String) = Unit
+                override fun onHashtagClick(hashtag: String) = Unit
+            },
             senderId = "",
             senderAvatarCdnImage = null,
             senderPrimalLegendProfile = null,

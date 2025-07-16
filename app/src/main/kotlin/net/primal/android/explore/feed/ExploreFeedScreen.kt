@@ -45,9 +45,9 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiEvent.RemoveFromUse
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.feeds.resolveDefaultDescription
 import net.primal.android.feeds.resolveDefaultTitle
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.list.NoteFeedList
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.extractTopicFromFeedSpec
@@ -56,14 +56,14 @@ import net.primal.domain.feeds.isSearchFeedSpec
 @Composable
 fun ExploreFeedScreen(
     viewModel: ExploreFeedViewModel,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     callbacks: ExploreFeedContract.ScreenCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
 
     ExploreFeedScreen(
         state = uiState.value,
-        noteCallbacks = noteCallbacks,
+        navigator = navigator,
         callbacks = callbacks,
         eventPublisher = { viewModel.setEvent(it) },
     )
@@ -73,7 +73,7 @@ fun ExploreFeedScreen(
 @Composable
 fun ExploreFeedScreen(
     state: ExploreFeedContract.UiState,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     callbacks: ExploreFeedContract.ScreenCallbacks,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
 ) {
@@ -148,15 +148,15 @@ fun ExploreFeedScreen(
             when (state.feedSpecKind) {
                 FeedSpecKind.Reads -> ExploreArticleFeed(
                     feedSpec = state.feedSpec,
-                    onArticleClick = { noteCallbacks.onArticleClick?.invoke(it) },
-                    onGetPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
+                    onArticleClick = { navigator.onArticleClick(it) },
+                    onGetPremiumClick = { navigator.onGetPrimalPremiumClick() },
                     contentPadding = paddingValues,
                 )
 
                 else -> ExploreNoteFeed(
                     feedSpec = state.feedSpec,
                     renderType = state.renderType,
-                    noteCallbacks = noteCallbacks,
+                    navigator = navigator,
                     contentPadding = paddingValues,
                     onGoToWallet = callbacks.onGoToWallet,
                     onUiError = { uiError ->
@@ -209,7 +209,7 @@ private fun ExploreNoteFeed(
     feedSpec: String,
     renderType: ExploreFeedContract.RenderType,
     contentPadding: PaddingValues,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     onGoToWallet: () -> Unit,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
@@ -217,7 +217,7 @@ private fun ExploreNoteFeed(
         ExploreFeedContract.RenderType.List -> {
             NoteFeedList(
                 feedSpec = feedSpec,
-                noteCallbacks = noteCallbacks,
+                navigator = navigator,
                 onGoToWallet = onGoToWallet,
                 contentPadding = contentPadding,
                 onUiError = onUiError,
@@ -229,8 +229,8 @@ private fun ExploreNoteFeed(
             MediaFeedGrid(
                 feedSpec = feedSpec,
                 contentPadding = contentPadding,
-                onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
-                onGetPrimalPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
+                onNoteClick = { navigator.onNoteClick(it) },
+                onGetPrimalPremiumClick = { navigator.onGetPrimalPremiumClick() },
             )
         }
     }

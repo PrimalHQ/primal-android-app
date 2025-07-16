@@ -27,9 +27,9 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.note.ui.NoteContent
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
@@ -41,7 +41,7 @@ fun ReferencedNoteZap(
     noteContentUi: NoteContentUi,
     amountInSats: ULong,
     createdAt: Instant,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     message: String?,
     receiverDisplayName: String?,
     modifier: Modifier = Modifier,
@@ -56,7 +56,7 @@ fun ReferencedNoteZap(
             .clickable(
                 interactionSource = null,
                 indication = null,
-                onClick = { noteCallbacks.onNoteClick?.invoke(noteContentUi.noteId) },
+                onClick = { navigator.onNoteClick(noteContentUi.noteId) },
             )
             .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
             .padding(all = 8.dp),
@@ -64,7 +64,7 @@ fun ReferencedNoteZap(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         ZapHeader(
-            onSenderAvatarClick = { senderId?.let { noteCallbacks.onProfileClick?.invoke(senderId) } },
+            onSenderAvatarClick = { senderId?.let { navigator.onProfileClick(senderId) } },
             senderCdnImage = senderAvatarCdnImage,
             amountSats = amountInSats,
             message = message,
@@ -73,11 +73,11 @@ fun ReferencedNoteZap(
         NoteSummary(
             noteContent = noteContentUi,
             noteTimestamp = createdAt,
-            noteCallbacks = noteCallbacks,
-            onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
+            navigator = navigator,
+            onNoteClick = { navigator.onNoteClick(it) },
             receiverCdnResource = receiverAvatarCdnImage,
             receiverDisplayName = receiverDisplayName,
-            onReceiverAvatarClick = { receiverId?.let { noteCallbacks.onProfileClick?.invoke(receiverId) } },
+            onReceiverAvatarClick = { receiverId?.let { navigator.onProfileClick(receiverId) } },
             receiverLegendaryCustomization = receiverLegendaryCustomization,
         )
     }
@@ -90,7 +90,7 @@ private fun NoteSummary(
     receiverCdnResource: CdnImage?,
     receiverLegendaryCustomization: LegendaryCustomization?,
     noteTimestamp: Instant,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     onReceiverAvatarClick: () -> Unit,
     onNoteClick: (String) -> Unit,
 ) {
@@ -133,9 +133,7 @@ private fun NoteSummary(
             }
             NoteContent(
                 expanded = false,
-                noteCallbacks = noteCallbacks.copy(
-                    onProfileClick = null,
-                ),
+                navigator = navigator,
                 data = noteContent,
                 contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                 highlightColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,

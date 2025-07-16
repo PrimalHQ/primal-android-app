@@ -101,6 +101,7 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.formatToDefaultDateTimeFormat
+import net.primal.android.navigation.navigator.NoOpNavigator
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
@@ -274,7 +275,8 @@ private fun NotePost(
         data = data,
         modifier = Modifier.padding(horizontal = 12.dp),
         colors = transactionCardColors(),
-        noteCallbacks = noteCallbacks,
+        navigator = NoOpNavigator,
+//        noteCallbacks = noteCallbacks,
         onUiError = { uiError ->
             uiScope.launch {
                 snackbarHostState.showSnackbar(

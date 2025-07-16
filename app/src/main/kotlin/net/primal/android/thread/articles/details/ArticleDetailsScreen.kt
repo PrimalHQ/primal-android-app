@@ -77,6 +77,7 @@ import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.navigation.navigator.NoOpNavigator
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
@@ -661,7 +662,7 @@ private fun ArticleContentWithComments(
                         ReferencedNoteCard(
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                             data = part.note,
-                            noteCallbacks = noteCallbacks,
+                            navigator = NoOpNavigator,
                         )
                     }
                 }
@@ -836,7 +837,7 @@ private fun ArticleContentWithComments(
                     cardPadding = PaddingValues(vertical = 4.dp),
                     headerSingleLine = true,
                     showReplyTo = false,
-                    noteCallbacks = noteCallbacks,
+                    navigator = NoOpNavigator,
                     onGoToWallet = onGoToWallet,
                     onUiError = onUiError,
                 )

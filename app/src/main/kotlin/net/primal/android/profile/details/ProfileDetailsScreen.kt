@@ -69,6 +69,7 @@ import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.navigation.navigator.NoOpNavigator
 import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -443,7 +444,7 @@ private fun ProfileDetailsHorizontalPager(
             (pageIndex == NOTES_TAB_INDEX || pageIndex == REPLIES_TAB_INDEX) && state.profileId != null -> {
                 NoteFeedList(
                     feedSpec = state.profileFeedSpecs[pageIndex].buildSpec(profileId = state.profileId),
-                    noteCallbacks = noteCallbacks,
+                    navigator = NoOpNavigator,
                     onGoToWallet = callbacks.onGoToWallet,
                     pollingEnabled = pageIndex == NOTES_TAB_INDEX,
                     pullToRefreshEnabled = false,

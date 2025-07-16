@@ -23,7 +23,7 @@ interface ReadsScreenContract {
     data class ScreenCallbacks(
         val onDrawerQrCodeClick: () -> Unit,
         val onSearchClick: () -> Unit,
-        val onArticleClick: (String) -> Unit,
+        val onArticleClick: (article: String) -> Unit,
         val onGetPremiumClick: () -> Unit,
     )
 }

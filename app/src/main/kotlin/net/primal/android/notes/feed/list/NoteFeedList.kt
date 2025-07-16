@@ -62,16 +62,16 @@ import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.FloatingNewDataHostTopPadding
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun NoteFeedList(
     feedSpec: String,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     onGoToWallet: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     newNotesNoticeAlpha: Float = 1.00f,
@@ -121,7 +121,7 @@ fun NoteFeedList(
 
     NoteFeedList(
         state = uiState.value,
-        noteCallbacks = noteCallbacks,
+        navigator = navigator,
         onGoToWallet = onGoToWallet,
         newNotesNoticeAlpha = newNotesNoticeAlpha,
         showTopZaps = showTopZaps,
@@ -141,7 +141,7 @@ fun NoteFeedList(
 @Composable
 private fun NoteFeedList(
     state: NoteFeedContract.UiState,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     onGoToWallet: () -> Unit,
     newNotesNoticeAlpha: Float = 1.00f,
     showTopZaps: Boolean = false,
@@ -197,7 +197,7 @@ private fun NoteFeedList(
             feedListState = listState,
             showPaywall = state.paywall,
             showTopZaps = showTopZaps,
-            noteCallbacks = noteCallbacks,
+            navigator = navigator,
             onGoToWallet = onGoToWallet,
             paddingValues = contentPadding,
             onScrolledToTop = { eventPublisher(UiEvent.FeedScrolledToTop) },
@@ -246,7 +246,7 @@ fun NoteFeedList(
     feedListState: LazyListState,
     pagingItems: LazyPagingItems<FeedPostUi>,
     showPaywall: Boolean,
-    noteCallbacks: NoteCallbacks,
+    navigator: PrimalNavigator,
     onGoToWallet: () -> Unit,
     showTopZaps: Boolean = false,
     pullToRefreshEnabled: Boolean = true,
@@ -317,7 +317,7 @@ fun NoteFeedList(
             pagingItems = pagingItems,
             listState = feedListState,
             showPaywall = showPaywall,
-            noteCallbacks = noteCallbacks,
+            navigator = navigator,
             onGoToWallet = onGoToWallet,
             showTopZaps = showTopZaps,
             noContentText = noContentText,

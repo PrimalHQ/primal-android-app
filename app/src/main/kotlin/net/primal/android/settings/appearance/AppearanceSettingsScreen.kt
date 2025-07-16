@@ -70,6 +70,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.FontSize
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.settings.SettingsItem
+import net.primal.android.navigation.navigator.NoOpNavigator
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
@@ -505,6 +506,7 @@ private fun NotePreviewSection(modifier: Modifier) {
             colors = CardDefaults.cardColors(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
             ),
+            navigator = NoOpNavigator,
         )
     }
 }

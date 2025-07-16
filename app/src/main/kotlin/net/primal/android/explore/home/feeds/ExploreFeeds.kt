@@ -44,6 +44,7 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.dvm.ui.DvmFeedListItem
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.feeds.dvm.ui.DvmHeaderAndFeedList
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.theme.AppTheme
 import net.primal.domain.feeds.buildSpec
 
@@ -53,6 +54,7 @@ fun ExploreFeeds(
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
+    navigator: PrimalNavigator,
 ) {
     val viewModel: ExploreFeedsViewModel = hiltViewModel<ExploreFeedsViewModel>()
     val uiState = viewModel.state.collectAsState()
@@ -64,6 +66,7 @@ fun ExploreFeeds(
         eventPublisher = viewModel::setEvent,
         onGoToWallet = onGoToWallet,
         onUiError = onUiError,
+        navigator = navigator,
     )
 }
 
@@ -75,6 +78,7 @@ fun ExploreFeeds(
     eventPublisher: (ExploreFeedsContract.UiEvent) -> Unit,
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
+    navigator: PrimalNavigator,
 ) {
     var dvmFeedToShow by remember { mutableStateOf<DvmFeedUi?>(null) }
 
@@ -96,6 +100,7 @@ fun ExploreFeeds(
             removeFromUserFeeds = { eventPublisher(ExploreFeedsContract.UiEvent.RemoveFromUserFeeds(it)) },
             onGoToWallet = onGoToWallet,
             onUiError = onUiError,
+            navigator = navigator,
         )
     }
 
@@ -152,6 +157,7 @@ private fun DvmFeedDetailsBottomSheet(
     addedToFeed: Boolean,
     addToUserFeeds: (DvmFeedUi) -> Unit,
     removeFromUserFeeds: (DvmFeedUi) -> Unit,
+    navigator: PrimalNavigator,
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -212,6 +218,7 @@ private fun DvmFeedDetailsBottomSheet(
                 showFollowsActionsAvatarRow = true,
                 clipShape = null,
                 onUiError = onUiError,
+                navigator = navigator,
             )
         }
     }

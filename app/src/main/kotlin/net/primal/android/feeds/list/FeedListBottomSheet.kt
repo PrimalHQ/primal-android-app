@@ -28,6 +28,7 @@ import net.primal.android.feeds.list.ui.DvmFeedDetails
 import net.primal.android.feeds.list.ui.DvmFeedMarketplace
 import net.primal.android.feeds.list.ui.FeedList
 import net.primal.android.feeds.list.ui.model.FeedUi
+import net.primal.android.navigation.navigator.PrimalNavigator
 import net.primal.android.theme.AppTheme
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.buildSpec
@@ -41,6 +42,7 @@ fun FeedsBottomSheet(
     onGoToWallet: (() -> Unit)? = null,
     onDismissRequest: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(),
+    navigator: PrimalNavigator,
 ) {
     val viewModel = hiltViewModel<FeedListViewModel, FeedListViewModel.Factory>(
         key = activeFeed.spec,
@@ -55,6 +57,7 @@ fun FeedsBottomSheet(
         sheetState = sheetState,
         eventPublisher = viewModel::setEvent,
         onGoToWallet = onGoToWallet,
+        navigator = navigator,
     )
 }
 
@@ -67,6 +70,7 @@ private fun FeedsBottomSheet(
     sheetState: SheetState = rememberModalBottomSheetState(),
     eventPublisher: (FeedListContract.UiEvent) -> Unit,
     onGoToWallet: (() -> Unit)? = null,
+    navigator: PrimalNavigator,
 ) {
     ModalBottomSheet(
         modifier = Modifier.statusBarsPadding(),
@@ -185,6 +189,7 @@ private fun FeedsBottomSheet(
                                 }
                             }
                         },
+                        navigator = navigator,
                     )
                 }
             }
