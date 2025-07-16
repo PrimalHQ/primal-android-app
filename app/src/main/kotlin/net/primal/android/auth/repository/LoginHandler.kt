@@ -8,6 +8,7 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
@@ -20,6 +21,7 @@ class LoginHandler @Inject constructor(
     private val userRepository: UserRepository,
     private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
+    private val walletAccountRepository: WalletAccountRepository,
     private val dispatchers: DispatcherProvider,
     private val credentialsStore: CredentialsStore,
     private val nostrNotary: NostrNotary,
@@ -42,6 +44,8 @@ class LoginHandler @Inject constructor(
             ).getOrNull()
 
             userRepository.fetchAndUpdateUserAccount(userId = userId)
+            walletAccountRepository.fetchWalletAccountInfo(userId = userId)
+            walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
             bookmarksRepository.fetchAndPersistBookmarks(userId = userId)
             authorizationEvent?.let {
                 settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
