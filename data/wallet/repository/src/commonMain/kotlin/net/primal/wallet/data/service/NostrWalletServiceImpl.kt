@@ -2,7 +2,6 @@ package net.primal.wallet.data.service
 
 import net.primal.core.networking.nwc.NwcClientFactory
 import net.primal.core.networking.nwc.model.NostrWalletConnect
-import net.primal.core.networking.nwc.utils.getOrThrow
 import net.primal.core.utils.CurrencyConversionUtils.msatsToBtc
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletService
