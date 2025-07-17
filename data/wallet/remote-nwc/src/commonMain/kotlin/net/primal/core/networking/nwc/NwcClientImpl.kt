@@ -33,6 +33,7 @@ import net.primal.core.networking.sockets.NostrSocketClientFactory
 import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.utils.MSATS_IN_SATS
+import net.primal.core.utils.Result
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
@@ -64,7 +65,7 @@ internal class NwcClientImpl(
     private suspend inline fun <reified T : Any, reified R : Any> sendNwcRequest(
         method: String,
         params: T,
-    ): NwcResult<R> {
+    ): Result<R> {
         return try {
             val requestEvent = signNwcRequestNostrEvent(
                 nwc = nwcData,
@@ -114,14 +115,14 @@ internal class NwcClientImpl(
                 )
                 val parsed = CommonJson.decodeFromString<NwcResponseContent<R>>(decrypted)
                 parsed.result?.let {
-                    NwcResult.Success(it)
-                } ?: NwcResult.Failure(NetworkException("NWC Error: ${parsed.error?.message}"))
+                    Result.success(it)
+                } ?: Result.failure(NetworkException("NWC Error: ${parsed.error?.message}"))
             } else {
-                NwcResult.Failure(NetworkException("No response event received."))
+                Result.failure(NetworkException("No response event received."))
             }
         } catch (e: Exception) {
             Napier.e(e) { "NWC request failed: $method" }
-            NwcResult.Failure(NetworkException("Failed to execute NWC request: $method", e))
+            Result.failure(NetworkException("Failed to execute NWC request: $method", e))
         }
     }
 
@@ -165,31 +166,31 @@ internal class NwcClientImpl(
         return ZapResult.Success
     }
 
-    override suspend fun getBalance(): NwcResult<GetBalanceResponsePayload> =
+    override suspend fun getBalance(): Result<GetBalanceResponsePayload> =
         sendNwcRequest(method = NwcMethod.GetBalance.value, params = buildJsonObject {})
 
-    override suspend fun listTransactions(params: ListTransactionsParams): NwcResult<ListTransactionsResponsePayload> =
+    override suspend fun listTransactions(params: ListTransactionsParams): Result<ListTransactionsResponsePayload> =
         sendNwcRequest(method = NwcMethod.ListTransactions.value, params = params)
 
-    override suspend fun makeInvoice(params: MakeInvoiceParams): NwcResult<MakeInvoiceResponsePayload> =
+    override suspend fun makeInvoice(params: MakeInvoiceParams): Result<MakeInvoiceResponsePayload> =
         sendNwcRequest(method = NwcMethod.MakeInvoice.value, params = params)
 
-    override suspend fun lookupInvoice(params: LookupInvoiceParams): NwcResult<LookupInvoiceResponsePayload> =
+    override suspend fun lookupInvoice(params: LookupInvoiceParams): Result<LookupInvoiceResponsePayload> =
         sendNwcRequest(method = NwcMethod.LookupInvoice.value, params = params)
 
-    override suspend fun getInfo(): NwcResult<GetInfoResponsePayload> =
+    override suspend fun getInfo(): Result<GetInfoResponsePayload> =
         sendNwcRequest(method = NwcMethod.GetInfo.value, params = buildJsonObject {})
 
-    override suspend fun payInvoice(params: PayInvoiceParams): NwcResult<PayInvoiceResponsePayload> =
+    override suspend fun payInvoice(params: PayInvoiceParams): Result<PayInvoiceResponsePayload> =
         sendNwcRequest(method = NwcMethod.PayInvoice.value, params = params)
 
-    override suspend fun payKeysend(params: PayKeysendParams): NwcResult<PayKeysendResponsePayload> =
+    override suspend fun payKeysend(params: PayKeysendParams): Result<PayKeysendResponsePayload> =
         sendNwcRequest(method = NwcMethod.PayKeysend.value, params = params)
 
-    override suspend fun multiPayInvoice(params: List<PayInvoiceParams>): NwcResult<List<PayInvoiceResponsePayload>> =
+    override suspend fun multiPayInvoice(params: List<PayInvoiceParams>): Result<List<PayInvoiceResponsePayload>> =
         sendNwcRequest(method = NwcMethod.MultiPayInvoice.value, params = params)
 
-    override suspend fun multiPayKeysend(params: List<PayKeysendParams>): NwcResult<List<PayKeysendResponsePayload>> =
+    override suspend fun multiPayKeysend(params: List<PayKeysendParams>): Result<List<PayKeysendResponsePayload>> =
         sendNwcRequest(method = NwcMethod.MultiPayKeysend.value, params = params)
 
     override suspend fun publishNostrEvent(nostrEvent: NostrEvent, outboxRelays: List<String>) {
