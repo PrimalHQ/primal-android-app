@@ -28,6 +28,7 @@ import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.onFailure
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.common.exception.NetworkException
@@ -123,13 +124,8 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun fetchWalletBalance(walletId: String) =
         viewModelScope.launch {
-            try {
-                walletRepository.fetchWalletBalance(walletId = walletId)
-            } catch (error: SignatureException) {
-                Timber.w(error)
-            } catch (error: NetworkException) {
-                Timber.w(error)
-            }
+            walletRepository.fetchWalletBalance(walletId = walletId)
+                .onFailure { Timber.w(it) }
         }
 
     private fun observeUsdExchangeRate() {
