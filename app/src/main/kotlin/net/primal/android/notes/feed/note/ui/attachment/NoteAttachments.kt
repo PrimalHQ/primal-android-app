@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -30,41 +31,51 @@ fun NoteAttachments(
     onUrlClick: ((mediaUrl: String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
 ) {
-    val mediaAttachments = eventUris.filter { it.isMediaUri() }
+    val mediaAttachments = remember(eventUris) {
+        eventUris.filter { it.isMediaUri() }
+    }
+
+    val linkAttachments = remember(eventUris) {
+        eventUris
+            .filterNot { it.isMediaUri() }
+            .take(n = if (!expanded) 2 else Int.MAX_VALUE)
+            .filter {
+                when (it.type) {
+                    EventUriType.YouTube, EventUriType.Rumble, EventUriType.Spotify -> {
+                        it.title != null || it.thumbnailUrl != null
+                    }
+
+                    else -> true
+                }
+            }
+    }
+
+    val mediaClickHandler = remember(onMediaClick, onUrlClick) {
+        { event: MediaClickEvent ->
+            when (event.eventUriType) {
+                EventUriType.Image, EventUriType.Video -> onMediaClick?.invoke(event)
+                else -> onUrlClick?.invoke(event.mediaUrl)
+            } ?: Unit
+        }
+    }
+
     if (mediaAttachments.isNotEmpty()) {
         NoteMediaAttachmentsHorizontalPager(
             modifier = modifier,
             mediaEventUris = mediaAttachments,
             blossoms = blossoms,
             couldAutoPlay = couldAutoPlay,
-            onMediaClick = {
-                when (it.eventUriType) {
-                    EventUriType.Image, EventUriType.Video -> onMediaClick?.invoke(it)
-                    else -> onUrlClick?.invoke(it.mediaUrl)
-                }
-            },
+            onMediaClick = mediaClickHandler,
         )
     }
 
-    eventUris
-        .filterNot { it.isMediaUri() }
-        .take(n = if (!expanded) 2 else Int.MAX_VALUE)
-        .filter {
-            when (it.type) {
-                EventUriType.YouTube, EventUriType.Rumble, EventUriType.Spotify -> {
-                    it.title != null || it.thumbnailUrl != null
-                }
-
-                else -> true
-            }
-        }
-        .forEach { attachment ->
-            NoteLinkAttachment(
-                modifier = modifier,
-                eventUri = attachment,
-                onUrlClick = onUrlClick,
-            )
-        }
+    linkAttachments.forEach { attachment ->
+        NoteLinkAttachment(
+            modifier = modifier,
+            eventUri = attachment,
+            onUrlClick = onUrlClick,
+        )
+    }
 }
 
 @Composable

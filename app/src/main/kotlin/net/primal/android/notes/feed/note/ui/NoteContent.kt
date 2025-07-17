@@ -193,6 +193,29 @@ fun NoteContent(
                 contentText.length <= TWEET_MODE_THRESHOLD &&
                 contentText.count { it == '\n' } < MAX_LINE_BREAKS_IN_TWEET
 
+            val clickHandler = remember(contentText, noteCallbacks, onUrlClick, onClick) {
+                { position: Int, offset: Offset ->
+                    val annotation = contentText.getStringAnnotations(
+                        start = position,
+                        end = position,
+                    ).firstOrNull()
+
+                    annotation?.handleAnnotationClick(
+                        onProfileClick = noteCallbacks.onProfileClick,
+                        onUrlClick = {
+                            if (it.isPrimalLegendsUrl()) {
+                                noteCallbacks.onPrimalLegendsLeaderboardClick?.invoke()
+                            } else {
+                                onUrlClick?.invoke(it)
+                            }
+                        },
+                        onPostClick = noteCallbacks.onNoteClick,
+                        onHashtagClick = noteCallbacks.onHashtagClick,
+                        onArticleClick = noteCallbacks.onArticleClick,
+                    ) ?: onClick?.invoke(offset) ?: Unit
+                }
+            }
+
             PrimalClickableText(
                 modifier = Modifier.padding(bottom = 4.dp),
                 style = AppTheme.typography.bodyMedium.copy(
@@ -212,44 +235,27 @@ fun NoteContent(
                 maxLines = maxLines,
                 overflow = overflow,
                 textSelectable = textSelectable,
-                onClick = { position, offset ->
-                    val annotation = contentText.getStringAnnotations(
-                        start = position,
-                        end = position,
-                    ).firstOrNull()
-
-                    annotation?.handleAnnotationClick(
-                        onProfileClick = noteCallbacks.onProfileClick,
-                        onUrlClick = {
-                            if (it.isPrimalLegendsUrl()) {
-                                noteCallbacks.onPrimalLegendsLeaderboardClick?.invoke()
-                            } else {
-                                onUrlClick?.invoke(it)
-                            }
-                        },
-                        onPostClick = noteCallbacks.onNoteClick,
-                        onHashtagClick = noteCallbacks.onHashtagClick,
-                        onArticleClick = noteCallbacks.onArticleClick,
-                    ) ?: onClick?.invoke(offset)
-                },
+                onClick = clickHandler,
             )
         }
 
-        val referencedHighlights = data.nostrUris.filter(type = EventUriNostrType.Highlight)
-        if (referencedHighlights.isNotEmpty()) {
-            referencedHighlights
+        val referencedHighlights = remember(data.nostrUris) {
+            data.nostrUris
+                .filter(type = EventUriNostrType.Highlight)
                 .mapNotNull { it.referencedHighlight }
-                .forEachIndexed { index, highlight ->
-                    ReferencedHighlight(
-                        highlight = highlight,
-                        isDarkTheme = isDarkTheme,
-                        onClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
-                    )
+        }
+        if (referencedHighlights.isNotEmpty()) {
+            referencedHighlights.forEachIndexed { index, highlight ->
+                ReferencedHighlight(
+                    highlight = highlight,
+                    isDarkTheme = isDarkTheme,
+                    onClick = { naddr -> noteCallbacks.onArticleClick?.invoke(naddr) },
+                )
 
-                    if (index < referencedHighlights.size - 1) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                    }
+                if (index < referencedHighlights.size - 1) {
+                    Spacer(modifier = Modifier.height(4.dp))
                 }
+            }
         }
 
         if (data.invoices.isNotEmpty()) {
@@ -294,7 +300,9 @@ fun NoteContent(
             )
         }
 
-        val referencedPostResources = data.nostrUris.filter(type = EventUriNostrType.Note)
+        val referencedPostResources = remember(data.nostrUris) {
+            data.nostrUris.filter(type = EventUriNostrType.Note)
+        }
         if (referencedPostResources.isNotEmpty() && (nestingLevel < nestingCutOffLimit || expanded)) {
             ReferencedNotesColumn(
                 modifier = Modifier.padding(top = 4.dp),
@@ -309,7 +317,9 @@ fun NoteContent(
             )
         }
 
-        val referencedArticleResources = data.nostrUris.filter(type = EventUriNostrType.Article)
+        val referencedArticleResources = remember(data.nostrUris) {
+            data.nostrUris.filter(type = EventUriNostrType.Article)
+        }
         if (referencedArticleResources.isNotEmpty()) {
             ReferencedArticlesColumn(
                 modifier = Modifier.padding(top = 4.dp),
@@ -321,49 +331,53 @@ fun NoteContent(
             )
         }
 
-        val referencedZaps = data.nostrUris.filter(type = EventUriNostrType.Zap)
-        referencedZaps
-            .mapNotNull { it.referencedZap }
-            .forEach { zap ->
-                val zappedEventId = zap.zappedEventId
-                val zappedEventContent = zap.zappedEventContent
-                if (zappedEventId != null && zappedEventContent?.isNotEmpty() == true) {
-                    ReferencedNoteZap(
-                        senderId = zap.senderId,
-                        receiverId = zap.receiverId,
-                        noteContentUi = NoteContentUi(
-                            noteId = zappedEventId,
-                            content = zappedEventContent,
-                            nostrUris = zap.zappedEventNostrUris.map { it.asNoteNostrUriUi() },
-                            hashtags = zap.zappedEventHashtags,
-                        ),
-                        amountInSats = zap.amountInSats.toULong(),
-                        createdAt = Instant.ofEpochSecond(zap.createdAt),
-                        noteCallbacks = noteCallbacks,
-                        message = zap.message,
-                        senderAvatarCdnImage = zap.senderAvatarCdnImage,
-                        senderLegendaryCustomization = zap.senderPrimalLegendProfile?.asLegendaryCustomization(),
-                        receiverDisplayName = zap.receiverDisplayName,
-                        receiverAvatarCdnImage = zap.receiverAvatarCdnImage,
-                        receiverLegendaryCustomization = zap.senderPrimalLegendProfile?.asLegendaryCustomization(),
-                    )
-                } else {
-                    ReferencedZap(
-                        senderId = zap.senderId,
-                        senderAvatarCdnImage = zap.senderAvatarCdnImage,
-                        senderPrimalLegendProfile = zap.senderPrimalLegendProfile,
-                        receiverId = zap.receiverId,
-                        receiverDisplayName = zap.receiverDisplayName,
-                        receiverAvatarCdnImage = zap.receiverAvatarCdnImage,
-                        receiverPrimalLegendProfile = zap.receiverPrimalLegendProfile,
-                        amountInSats = zap.amountInSats,
-                        message = zap.message,
-                        noteCallbacks = noteCallbacks,
-                    )
-                }
+        val referencedZaps = remember(data.nostrUris) {
+            data.nostrUris
+                .filter(type = EventUriNostrType.Zap)
+                .mapNotNull { it.referencedZap }
+        }
+        referencedZaps.forEach { zap ->
+            val zappedEventId = zap.zappedEventId
+            val zappedEventContent = zap.zappedEventContent
+            if (zappedEventId != null && zappedEventContent?.isNotEmpty() == true) {
+                ReferencedNoteZap(
+                    senderId = zap.senderId,
+                    receiverId = zap.receiverId,
+                    noteContentUi = NoteContentUi(
+                        noteId = zappedEventId,
+                        content = zappedEventContent,
+                        nostrUris = zap.zappedEventNostrUris.map { it.asNoteNostrUriUi() },
+                        hashtags = zap.zappedEventHashtags,
+                    ),
+                    amountInSats = zap.amountInSats.toULong(),
+                    createdAt = Instant.ofEpochSecond(zap.createdAt),
+                    noteCallbacks = noteCallbacks,
+                    message = zap.message,
+                    senderAvatarCdnImage = zap.senderAvatarCdnImage,
+                    senderLegendaryCustomization = zap.senderPrimalLegendProfile?.asLegendaryCustomization(),
+                    receiverDisplayName = zap.receiverDisplayName,
+                    receiverAvatarCdnImage = zap.receiverAvatarCdnImage,
+                    receiverLegendaryCustomization = zap.senderPrimalLegendProfile?.asLegendaryCustomization(),
+                )
+            } else {
+                ReferencedZap(
+                    senderId = zap.senderId,
+                    senderAvatarCdnImage = zap.senderAvatarCdnImage,
+                    senderPrimalLegendProfile = zap.senderPrimalLegendProfile,
+                    receiverId = zap.receiverId,
+                    receiverDisplayName = zap.receiverDisplayName,
+                    receiverAvatarCdnImage = zap.receiverAvatarCdnImage,
+                    receiverPrimalLegendProfile = zap.receiverPrimalLegendProfile,
+                    amountInSats = zap.amountInSats,
+                    message = zap.message,
+                    noteCallbacks = noteCallbacks,
+                )
             }
+        }
 
-        val genericEvents = data.nostrUris.filter(type = EventUriNostrType.Unsupported)
+        val genericEvents = remember(data.nostrUris) {
+            data.nostrUris.filter(type = EventUriNostrType.Unsupported)
+        }
         if (genericEvents.isNotEmpty() && (nestingLevel < NOT_FOUND_NOTICE_CUT_OFF_LEVEL)) {
             genericEvents.forEachIndexed { index, nostrUriUi ->
                 NoteUnknownEvent(
