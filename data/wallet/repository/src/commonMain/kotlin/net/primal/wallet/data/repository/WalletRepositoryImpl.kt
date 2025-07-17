@@ -9,7 +9,9 @@ import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.map
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.LnInvoiceParseResult
@@ -150,23 +152,24 @@ internal class WalletRepositoryImpl(
         }
     }
 
-    override suspend fun fetchWalletBalance(walletId: String) {
+    override suspend fun fetchWalletBalance(walletId: String): Result<Unit> =
         withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
-                ?: return@withContext
+                ?: return@withContext Result.failure(
+                    exception = IllegalArgumentException("Couldn't find wallet with the given walletId."),
+                )
 
-            val response = when (wallet.info.type) {
+            when (wallet.info.type) {
                 WalletType.PRIMAL -> primalWalletService.fetchWalletBalance(wallet = wallet.toDomain())
                 WalletType.NWC -> nostrWalletService.fetchWalletBalance(wallet = wallet.toDomain())
+            }.map { response ->
+                walletDatabase.wallet().updateWalletBalance(
+                    walletId = walletId,
+                    balanceInBtc = response.balanceInBtc,
+                    maxBalanceInBtc = response.maxBalanceInBtc,
+                )
             }
-
-            walletDatabase.wallet().updateWalletBalance(
-                walletId = walletId,
-                balanceInBtc = response.balanceInBtc,
-                maxBalanceInBtc = response.maxBalanceInBtc,
-            )
         }
-    }
 
     override suspend fun parseLnUrl(userId: String, lnurl: String): LnUrlParseResult {
         return withContext(dispatcherProvider.io()) {
