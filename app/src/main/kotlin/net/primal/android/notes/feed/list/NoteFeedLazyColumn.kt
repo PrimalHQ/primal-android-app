@@ -71,7 +71,7 @@ fun NoteFeedLazyColumn(
             if (index < 0 || index >= pagingItems.itemCount) {
                 false
             } else {
-                feedPostHasVideo(pagingItems.peek(index))
+                hasAutoPlayVideo(pagingItems.peek(index))
             }
         },
     )
@@ -234,22 +234,29 @@ fun NoteFeedLazyColumn(
     }
 }
 
-private fun feedPostHasVideo(post: FeedPostUi?): Boolean {
-    if (post == null) return false
-    return hasVideoRecursive(post, visitedIds = mutableSetOf())
-}
+private fun hasAutoPlayVideo(post: FeedPostUi?): Boolean =
+    post != null && hasAutoPlayVideoRecursive(post, mutableSetOf())
 
-private fun hasVideoRecursive(post: FeedPostUi, visitedIds: MutableSet<String>): Boolean {
-    return if (visitedIds.contains(post.postId)) {
-        false
-    } else {
-        visitedIds.add(post.postId)
-        val hasVideoLocally = post.uris.any { it.mimeType?.startsWith("video") == true }
+private fun hasAutoPlayVideoRecursive(post: FeedPostUi, visitedIds: MutableSet<String>): Boolean {
+    var hasVideo = false
 
-        hasVideoLocally || post.nostrUris.any { noteNostrUri ->
-            noteNostrUri.referencedNote?.let { referencedNote ->
-                hasVideoRecursive(referencedNote.asFeedPostUi(), visitedIds)
-            } == true
+    if (visitedIds.add(post.postId)) {
+        val attachmentCount = post.uris.count { uri ->
+            uri.mimeType?.let { it.startsWith("video") || it.startsWith("image") } == true
+        }
+        if (attachmentCount <= 1) {
+            hasVideo = post.uris.any { it.mimeType?.startsWith("video") == true }
+
+            if (!hasVideo) {
+                hasVideo = post.nostrUris.any { nostrUri ->
+                    nostrUri.referencedNote
+                        ?.asFeedPostUi()
+                        ?.let { hasAutoPlayVideoRecursive(it, visitedIds) }
+                        ?: false
+                }
+            }
         }
     }
+
+    return hasVideo
 }
