@@ -22,6 +22,7 @@ fun ReferencedNotesColumn(
     nestingCutOffLimit: Int,
     modifier: Modifier = Modifier,
     hasBorder: Boolean = false,
+    couldAutoPlay: Boolean = false,
 ) {
     val displayableNotes = if (postResources.isNotEmpty()) {
         if (expanded) postResources else postResources.subList(0, 1)
@@ -43,6 +44,7 @@ fun ReferencedNotesColumn(
                 nestingCutOffLimit = nestingCutOffLimit,
                 colors = CardDefaults.cardColors(containerColor = containerColor),
                 noteCallbacks = noteCallbacks,
+                couldAutoPlay = couldAutoPlay,
             )
         }
     }

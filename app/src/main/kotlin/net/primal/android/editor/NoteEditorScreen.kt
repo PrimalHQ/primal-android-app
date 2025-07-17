@@ -404,6 +404,7 @@ fun LazyListScope.nostrUris(
                             ReferencedNoteCard(
                                 data = note,
                                 noteCallbacks = noteCallbacks,
+                                couldAutoPlay = true,
                             )
                         }
                     }

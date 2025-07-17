@@ -34,6 +34,7 @@ import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.zaps.FeedNoteTopZapsSection
 import net.primal.android.core.errors.UiError
+import net.primal.android.nostr.mappers.asFeedPostUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -70,9 +71,7 @@ fun NoteFeedLazyColumn(
             if (index < 0 || index >= pagingItems.itemCount) {
                 false
             } else {
-                pagingItems.peek(index)?.uris?.any {
-                    it.mimeType?.startsWith("video") == true
-                } == true
+                feedPostHasVideo(pagingItems.peek(index))
             }
         },
     )
@@ -231,6 +230,26 @@ fun NoteFeedLazyColumn(
             item(contentType = "Footer") {
                 Spacer(modifier = Modifier.height(64.dp))
             }
+        }
+    }
+}
+
+private fun feedPostHasVideo(post: FeedPostUi?): Boolean {
+    if (post == null) return false
+    return hasVideoRecursive(post, visitedIds = mutableSetOf())
+}
+
+private fun hasVideoRecursive(post: FeedPostUi, visitedIds: MutableSet<String>): Boolean {
+    return if (visitedIds.contains(post.postId)) {
+        false
+    } else {
+        visitedIds.add(post.postId)
+        val hasVideoLocally = post.uris.any { it.mimeType?.startsWith("video") == true }
+
+        hasVideoLocally || post.nostrUris.any { noteNostrUri ->
+            noteNostrUri.referencedNote?.let { referencedNote ->
+                hasVideoRecursive(referencedNote.asFeedPostUi(), visitedIds)
+            } == true
         }
     }
 }
