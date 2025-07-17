@@ -12,26 +12,27 @@ import net.primal.core.networking.nwc.nip47.PayInvoiceParams
 import net.primal.core.networking.nwc.nip47.PayInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.PayKeysendParams
 import net.primal.core.networking.nwc.nip47.PayKeysendResponsePayload
+import net.primal.core.utils.Result
 
 interface NwcApi {
 
-    suspend fun getBalance(): NwcResult<GetBalanceResponsePayload>
+    suspend fun getBalance(): Result<GetBalanceResponsePayload>
 
     suspend fun listTransactions(
         params: ListTransactionsParams = ListTransactionsParams(),
-    ): NwcResult<ListTransactionsResponsePayload>
+    ): Result<ListTransactionsResponsePayload>
 
-    suspend fun makeInvoice(params: MakeInvoiceParams): NwcResult<MakeInvoiceResponsePayload>
+    suspend fun makeInvoice(params: MakeInvoiceParams): Result<MakeInvoiceResponsePayload>
 
-    suspend fun lookupInvoice(params: LookupInvoiceParams): NwcResult<LookupInvoiceResponsePayload>
+    suspend fun lookupInvoice(params: LookupInvoiceParams): Result<LookupInvoiceResponsePayload>
 
-    suspend fun getInfo(): NwcResult<GetInfoResponsePayload>
+    suspend fun getInfo(): Result<GetInfoResponsePayload>
 
-    suspend fun payInvoice(params: PayInvoiceParams): NwcResult<PayInvoiceResponsePayload>
+    suspend fun payInvoice(params: PayInvoiceParams): Result<PayInvoiceResponsePayload>
 
-    suspend fun payKeysend(params: PayKeysendParams): NwcResult<PayKeysendResponsePayload>
+    suspend fun payKeysend(params: PayKeysendParams): Result<PayKeysendResponsePayload>
 
-    suspend fun multiPayInvoice(params: List<PayInvoiceParams>): NwcResult<List<PayInvoiceResponsePayload>>
+    suspend fun multiPayInvoice(params: List<PayInvoiceParams>): Result<List<PayInvoiceResponsePayload>>
 
-    suspend fun multiPayKeysend(params: List<PayKeysendParams>): NwcResult<List<PayKeysendResponsePayload>>
+    suspend fun multiPayKeysend(params: List<PayKeysendParams>): Result<List<PayKeysendResponsePayload>>
 }
