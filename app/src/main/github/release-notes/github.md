@@ -11,3 +11,4 @@
 - Fixed socket connections stopped working after some time (#534)
 - Fixed false positive "replying to" indicator in notes (#533)
 - Fixed crash on login screen if npub could not be decoded
+- Fixed missing thumbnail when uploading videos
