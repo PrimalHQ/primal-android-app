@@ -34,7 +34,7 @@ import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.wallet.TransactionWithProfile
+import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.WalletRepository
 import timber.log.Timber
 
@@ -53,12 +53,7 @@ class WalletDashboardViewModel @Inject constructor(
     private val activeUserId = activeAccountStore.activeUserId()
 
     private val _state = MutableStateFlow(
-        value = UiState(
-            transactions = walletRepository
-                .latestTransactions(userId = activeUserId)
-                .mapAsPagingDataOfTransactionUi(),
-            isNpubLogin = userRepository.isNpubLogin(userId = activeUserId),
-        ),
+        value = UiState(isNpubLogin = userRepository.isNpubLogin(userId = activeUserId)),
     )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
@@ -92,6 +87,13 @@ class WalletDashboardViewModel @Inject constructor(
                 .filterNotNull()
                 .collect { walletId ->
                     fetchWalletBalance(walletId = walletId)
+                    setState {
+                        copy(
+                            transactions = walletRepository
+                                .latestTransactions(walletId = walletId)
+                                .mapAsPagingDataOfTransactionUi(),
+                        )
+                    }
                 }
         }
 
@@ -189,26 +191,42 @@ class WalletDashboardViewModel @Inject constructor(
         setState { copy(error = error) }
     }
 
-    private fun Flow<PagingData<TransactionWithProfile>>.mapAsPagingDataOfTransactionUi() =
+    private fun Flow<PagingData<Transaction>>.mapAsPagingDataOfTransactionUi() =
         map { pagingData -> pagingData.map { it.mapAsTransactionDataUi() } }
 
-    private fun TransactionWithProfile.mapAsTransactionDataUi() =
-        TransactionListItemDataUi(
-            txId = this.transaction.id,
-            txType = this.transaction.type,
-            txState = this.transaction.state,
-            txAmountInSats = this.transaction.amountInBtc.toBigDecimal().abs().toSats(),
-            txCreatedAt = Instant.ofEpochSecond(this.transaction.createdAt),
-            txUpdatedAt = Instant.ofEpochSecond(this.transaction.updatedAt),
-            txCompletedAt = this.transaction.completedAt?.let { Instant.ofEpochSecond(it) },
-            txNote = this.transaction.note,
-            otherUserId = this.transaction.otherUserId,
-            otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
-            otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
-            otherUserLegendaryCustomization = this.otherProfileData?.primalPremiumInfo
-                ?.legendProfile?.asLegendaryCustomization(),
-            isZap = this.transaction.isZap,
-            isStorePurchase = this.transaction.isStorePurchase,
-            isOnChainPayment = this.transaction.onChainAddress != null,
-        )
+    private fun Transaction.mapAsTransactionDataUi() =
+        when (this) {
+            is Transaction.Primal -> TransactionListItemDataUi(
+                txId = this.transactionId,
+                txType = this.type,
+                txState = this.state,
+                txAmountInSats = this.amountInBtc.toBigDecimal().abs().toSats(),
+                txCreatedAt = Instant.ofEpochSecond(this.createdAt),
+                txUpdatedAt = Instant.ofEpochSecond(this.updatedAt),
+                txCompletedAt = this.completedAt?.let { Instant.ofEpochSecond(it) },
+                txNote = this.note,
+                otherUserId = this.otherUserId,
+                otherUserAvatarCdnImage = this.otherUserProfile?.avatarCdnImage,
+                otherUserDisplayName = this.otherUserProfile?.authorNameUiFriendly(),
+                otherUserLegendaryCustomization = this.otherUserProfile?.primalPremiumInfo
+                    ?.legendProfile?.asLegendaryCustomization(),
+                isZap = this.isZap,
+                isStorePurchase = this.isStorePurchase,
+                isOnChainPayment = this.onChainAddress != null,
+            )
+
+            is Transaction.NWC -> TransactionListItemDataUi(
+                txId = this.transactionId,
+                txType = this.type,
+                txState = this.state,
+                txAmountInSats = this.amountInBtc.toBigDecimal().abs().toSats(),
+                txCreatedAt = Instant.ofEpochSecond(this.createdAt),
+                txUpdatedAt = Instant.ofEpochSecond(this.updatedAt),
+                txCompletedAt = this.completedAt?.let { Instant.ofEpochSecond(it) },
+                txNote = this.note,
+                isZap = false,
+                isStorePurchase = false,
+                isOnChainPayment = false,
+            )
+        }
 }
