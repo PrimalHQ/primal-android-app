@@ -4,39 +4,50 @@ import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.nostr.findFirstProfileId
-import net.primal.wallet.data.local.dao.WalletTransactionData
+import net.primal.domain.wallet.WalletType
+import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.remote.nostr.ContentWalletTransaction
 
-fun List<ContentWalletTransaction>.mapAsWalletTransactionPO(walletAddress: String) =
-    map { it.asWalletTransactionPO(walletAddress) }
+internal fun List<ContentWalletTransaction>.mapAsPrimalTransactions(
+    walletId: String,
+    userId: String,
+    walletAddress: String?,
+) = map { it.asPrimalTransactionDO(walletId, userId, walletAddress) }
 
-fun ContentWalletTransaction.asWalletTransactionPO(walletAddress: String): WalletTransactionData {
+internal fun ContentWalletTransaction.asPrimalTransactionDO(
+    walletId: String,
+    userId: String,
+    walletAddress: String?,
+): Transaction {
     val zapEvent = this.zapRequestRawJson.decodeFromJsonStringOrNull<NostrEvent>()
-    return WalletTransactionData(
-        id = this.id,
-        walletLightningAddress = walletAddress,
+    return Transaction.Primal(
+        transactionId = this.id,
+        walletId = walletId,
+        walletType = WalletType.PRIMAL,
         type = this.type,
         state = this.state,
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
         completedAt = this.completedAt,
-        amountInBtc = this.amountInBtc,
-        amountInUsd = this.amountInUsd,
-        userId = this.selfPubkey,
-        userSubWallet = this.selfSubWallet,
-        userLightningAddress = this.selfLud16,
-        otherUserId = this.otherPubkey,
-        otherLightningAddress = this.otherLud16,
+        userId = userId,
         note = this.note,
+        invoice = this.invoice,
+        amountInBtc = this.amountInBtc,
+        totalFeeInBtc = this.totalFeeInBtc,
+        walletLightningAddress = walletAddress ?: "",
+        amountInUsd = this.amountInUsd,
         isZap = this.isZap,
         isStorePurchase = this.isInAppPurchase,
-        zapNoteId = zapEvent?.tags?.findFirstEventId(),
-        zapNoteAuthorId = zapEvent?.tags?.findFirstProfileId(),
-        zappedByUserId = zapEvent?.pubKey,
-        invoice = this.invoice,
-        totalFeeInBtc = this.totalFeeInBtc,
+        userSubWallet = this.selfSubWallet,
+        userLightningAddress = walletAddress,
+        otherUserId = this.otherPubkey,
+        otherLightningAddress = this.otherLud16,
         exchangeRate = this.exchangeRate,
         onChainAddress = this.onChainAddress,
         onChainTxId = this.onChainTxId,
+        zapNoteId = zapEvent?.tags?.findFirstEventId(),
+        zapNoteAuthorId = zapEvent?.tags?.findFirstProfileId(),
+        zappedByUserId = zapEvent?.pubKey,
+        otherUserProfile = null,
     )
 }

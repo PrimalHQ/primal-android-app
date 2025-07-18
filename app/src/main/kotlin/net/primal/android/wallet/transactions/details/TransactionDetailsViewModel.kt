@@ -24,10 +24,11 @@ import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.getIfTypeOrNull
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.reads.ArticleRepository
-import net.primal.domain.wallet.TransactionWithProfile
+import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.WalletRepository
 import timber.log.Timber
 
@@ -58,11 +59,13 @@ class TransactionDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             val tx = walletRepository.findTransactionByIdOrNull(txId = transactionId)
             setState { copy(loading = false, txData = tx?.mapAsTransactionDataUi()) }
-            tx?.transaction?.zapNoteId?.let {
-                observeZappedNote(it)
-                fetchZappedNote(it)
-                observeZappedArticle(articleId = it, articleAuthorId = tx.transaction.zapNoteAuthorId)
-                fetchZappedArticle(articleId = it, articleAuthorId = tx.transaction.zapNoteAuthorId)
+            if (tx is Transaction.Zap) {
+                tx.zapNoteId?.let {
+                    observeZappedNote(it)
+                    fetchZappedNote(it)
+                    observeZappedArticle(articleId = it, articleAuthorId = tx.zapNoteAuthorId)
+                    fetchZappedArticle(articleId = it, articleAuthorId = tx.zapNoteAuthorId)
+                }
             }
         }
 
@@ -134,28 +137,36 @@ class TransactionDetailsViewModel @Inject constructor(
             )
         }
 
-    private fun TransactionWithProfile.mapAsTransactionDataUi() =
+    private fun Transaction.mapAsTransactionDataUi() =
         TransactionDetailDataUi(
-            txId = this.transaction.id,
-            txType = this.transaction.type,
-            txState = this.transaction.state,
-            txAmountInSats = this.transaction.amountInBtc.toBigDecimal().abs().toSats(),
-            txAmountInUsd = this.transaction.amountInUsd,
-            txInstant = Instant.ofEpochSecond(this.transaction.completedAt ?: this.transaction.createdAt),
-            txNote = this.transaction.note,
-            invoice = this.transaction.invoice,
-            totalFeeInSats = this.transaction.totalFeeInBtc?.toBigDecimal()?.abs()?.toSats(),
-            exchangeRate = this.transaction.exchangeRate,
-            onChainAddress = this.transaction.onChainAddress,
-            onChainTxId = this.transaction.onChainTxId,
-            otherUserId = this.transaction.otherUserId,
-            otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
-            otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
-            otherUserInternetIdentifier = this.otherProfileData?.internetIdentifier,
-            otherUserLegendaryCustomization = this.otherProfileData?.primalPremiumInfo
-                ?.legendProfile?.asLegendaryCustomization(),
-            otherUserLightningAddress = this.transaction.otherLightningAddress,
-            isZap = this.transaction.isZap,
-            isStorePurchase = this.transaction.isStorePurchase,
+            txId = this.transactionId,
+            txType = this.type,
+            txState = this.state,
+            txAmountInSats = this.amountInBtc.toBigDecimal().abs().toSats(),
+            txAmountInUsd = this.amountInUsd,
+            txInstant = Instant.ofEpochSecond(this.completedAt ?: this.createdAt),
+            txNote = this.note,
+            invoice = this.invoice,
+            totalFeeInSats = this.totalFeeInBtc?.toBigDecimal()?.abs()?.toSats(),
+            exchangeRate = this.exchangeRate,
+            onChainAddress = this.getIfTypeOrNull(Transaction.OnChain::onChainAddress),
+            onChainTxId = this.getIfTypeOrNull(Transaction.OnChain::onChainTxId),
+            otherUserId = this.getIfTypeOrNull(Transaction.Zap::otherUserId),
+            otherUserAvatarCdnImage = this.getIfTypeOrNull(Transaction.Zap::otherUserProfile)?.avatarCdnImage
+                ?: this.getIfTypeOrNull(Transaction.Lightning::otherUserProfile)?.avatarCdnImage,
+            otherUserDisplayName = this.getIfTypeOrNull(Transaction.Zap::otherUserProfile)
+                ?.authorNameUiFriendly()
+                ?: this.getIfTypeOrNull(Transaction.Lightning::otherUserProfile)?.authorNameUiFriendly(),
+            otherUserInternetIdentifier = this.getIfTypeOrNull(Transaction.Zap::otherUserProfile)
+                ?.internetIdentifier
+                ?: this.getIfTypeOrNull(Transaction.Lightning::otherUserProfile)?.internetIdentifier,
+            otherUserLegendaryCustomization = this.getIfTypeOrNull(Transaction.Zap::otherUserProfile)
+                ?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization()
+                ?: this.getIfTypeOrNull(Transaction.Lightning::otherUserProfile)
+                    ?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+            otherUserLightningAddress = this.getIfTypeOrNull(Transaction.Zap::otherLightningAddress)
+                ?: this.getIfTypeOrNull(Transaction.Lightning::otherLightningAddress),
+            isZap = this is Transaction.Zap,
+            isStorePurchase = this is Transaction.StorePurchase,
         )
 }
