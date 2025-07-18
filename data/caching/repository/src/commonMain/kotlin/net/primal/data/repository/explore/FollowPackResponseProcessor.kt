@@ -1,5 +1,6 @@
 package net.primal.data.repository.explore
 
+import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.core.utils.asMapByKey
 import net.primal.data.local.dao.explore.FollowPackData
 import net.primal.data.local.dao.explore.FollowPackProfileCrossRef
@@ -9,7 +10,6 @@ import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.data.repository.mappers.local.asFollowPackDO
 import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
-import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
