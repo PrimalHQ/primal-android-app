@@ -15,6 +15,8 @@ interface WalletAccountRepository {
 
     fun observeActiveWallet(userId: String): Flow<Wallet?>
 
+    fun observeActiveWalletId(userId: String): Flow<String?>
+
     @Throws(
         NetworkException::class,
         CancellationException::class,
