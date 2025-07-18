@@ -27,7 +27,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.reads.ArticleRepository
-import net.primal.domain.wallet.TransactionWithProfile
+import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.WalletRepository
 import timber.log.Timber
 
@@ -58,11 +58,13 @@ class TransactionDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             val tx = walletRepository.findTransactionByIdOrNull(txId = transactionId)
             setState { copy(loading = false, txData = tx?.mapAsTransactionDataUi()) }
-            tx?.transaction?.zapNoteId?.let {
-                observeZappedNote(it)
-                fetchZappedNote(it)
-                observeZappedArticle(articleId = it, articleAuthorId = tx.transaction.zapNoteAuthorId)
-                fetchZappedArticle(articleId = it, articleAuthorId = tx.transaction.zapNoteAuthorId)
+            if (tx is Transaction.Primal) {
+                tx.zapNoteId?.let {
+                    observeZappedNote(it)
+                    fetchZappedNote(it)
+                    observeZappedArticle(articleId = it, articleAuthorId = tx.zapNoteAuthorId)
+                    fetchZappedArticle(articleId = it, articleAuthorId = tx.zapNoteAuthorId)
+                }
             }
         }
 
@@ -134,28 +136,49 @@ class TransactionDetailsViewModel @Inject constructor(
             )
         }
 
-    private fun TransactionWithProfile.mapAsTransactionDataUi() =
-        TransactionDetailDataUi(
-            txId = this.transaction.id,
-            txType = this.transaction.type,
-            txState = this.transaction.state,
-            txAmountInSats = this.transaction.amountInBtc.toBigDecimal().abs().toSats(),
-            txAmountInUsd = this.transaction.amountInUsd,
-            txInstant = Instant.ofEpochSecond(this.transaction.completedAt ?: this.transaction.createdAt),
-            txNote = this.transaction.note,
-            invoice = this.transaction.invoice,
-            totalFeeInSats = this.transaction.totalFeeInBtc?.toBigDecimal()?.abs()?.toSats(),
-            exchangeRate = this.transaction.exchangeRate,
-            onChainAddress = this.transaction.onChainAddress,
-            onChainTxId = this.transaction.onChainTxId,
-            otherUserId = this.transaction.otherUserId,
-            otherUserAvatarCdnImage = this.otherProfileData?.avatarCdnImage,
-            otherUserDisplayName = this.otherProfileData?.authorNameUiFriendly(),
-            otherUserInternetIdentifier = this.otherProfileData?.internetIdentifier,
-            otherUserLegendaryCustomization = this.otherProfileData?.primalPremiumInfo
-                ?.legendProfile?.asLegendaryCustomization(),
-            otherUserLightningAddress = this.transaction.otherLightningAddress,
-            isZap = this.transaction.isZap,
-            isStorePurchase = this.transaction.isStorePurchase,
-        )
+    private fun Transaction.mapAsTransactionDataUi() =
+        when (this) {
+            is Transaction.NWC ->
+                TransactionDetailDataUi(
+                    txId = this.transactionId,
+                    txType = this.type,
+                    txState = this.state,
+                    txAmountInSats = this.amountInBtc.toBigDecimal().abs().toSats(),
+                    txAmountInUsd = null,
+                    txInstant = Instant.ofEpochSecond(this.completedAt ?: this.createdAt),
+                    txNote = this.note,
+                    invoice = this.invoice,
+                    totalFeeInSats = this.totalFeeInBtc?.toBigDecimal()?.abs()?.toSats(),
+                    exchangeRate = null,
+                    onChainAddress = null,
+                    onChainTxId = null,
+                    isZap = false,
+                    isStorePurchase = false,
+                )
+
+            is Transaction.Primal ->
+                TransactionDetailDataUi(
+                    txId = this.transactionId,
+                    txType = this.type,
+                    txState = this.state,
+                    txAmountInSats = this.amountInBtc.toBigDecimal().abs().toSats(),
+                    txAmountInUsd = this.amountInUsd,
+                    txInstant = Instant.ofEpochSecond(this.completedAt ?: this.createdAt),
+                    txNote = this.note,
+                    invoice = this.invoice,
+                    totalFeeInSats = this.totalFeeInBtc?.toBigDecimal()?.abs()?.toSats(),
+                    exchangeRate = this.exchangeRate,
+                    onChainAddress = this.onChainAddress,
+                    onChainTxId = this.onChainTxId,
+                    otherUserId = this.otherUserId,
+                    otherUserAvatarCdnImage = this.otherUserProfile?.avatarCdnImage,
+                    otherUserDisplayName = this.otherUserProfile?.authorNameUiFriendly(),
+                    otherUserInternetIdentifier = this.otherUserProfile?.internetIdentifier,
+                    otherUserLegendaryCustomization = this.otherUserProfile?.primalPremiumInfo
+                        ?.legendProfile?.asLegendaryCustomization(),
+                    otherUserLightningAddress = this.otherLightningAddress,
+                    isZap = this.isZap,
+                    isStorePurchase = this.isStorePurchase,
+                )
+        }
 }

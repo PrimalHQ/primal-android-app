@@ -40,6 +40,7 @@ kotlin {
                 implementation(project(":core:networking-http"))
                 implementation(project(":core:networking-primal"))
                 implementation(project(":domain:nostr"))
+                implementation(project(":domain:wallet"))
 
                 implementation(libs.kotlinx.coroutines.core)
                 implementation(libs.kotlinx.datetime)

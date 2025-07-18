@@ -135,6 +135,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     userId = activeAccountStore.activeUserId(),
                     wallet = Wallet.NWC(
                         walletId = nostrWalletConnect.pubkey,
+                        userId = activeAccountStore.activeUserId(),
                         lightningAddress = lightningAddress,
                         balanceInBtc = null,
                         maxBalanceInBtc = null,
