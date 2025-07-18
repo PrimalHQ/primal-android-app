@@ -6,7 +6,7 @@ import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.service.concrete.NostrWalletServiceImpl
 import net.primal.wallet.data.service.concrete.PrimalWalletServiceImpl
 
-object WalletServiceFactory {
+internal object WalletServiceFactory {
 
     fun createPrimalWalletService(
         primalWalletApiClient: PrimalApiClient,
