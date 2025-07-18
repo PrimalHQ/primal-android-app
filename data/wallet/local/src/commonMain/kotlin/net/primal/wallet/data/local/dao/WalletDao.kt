@@ -24,6 +24,9 @@ interface WalletDao {
     @Query("SELECT * FROM ActiveWalletData WHERE userId = :userId")
     fun observeActiveWallet(userId: String): Flow<ActiveWallet?>
 
+    @Query("SELECT walletId FROM ActiveWalletData WHERE userId = :userId")
+    fun observeActiveWalletId(userId: String): Flow<String?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertWalletInfo(info: WalletInfo)
 
