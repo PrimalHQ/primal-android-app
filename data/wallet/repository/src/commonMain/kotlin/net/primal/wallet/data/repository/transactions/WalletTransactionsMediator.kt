@@ -10,96 +10,105 @@ import kotlinx.datetime.Clock
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.profile.ProfileRepository
+import net.primal.core.utils.fold
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
 import net.primal.domain.wallet.SubWallet
-import net.primal.wallet.data.local.dao.WalletTransactionData
+import net.primal.domain.wallet.WalletType
+import net.primal.wallet.data.handler.TransactionsHandler
+import net.primal.wallet.data.local.dao.WalletTransaction
 import net.primal.wallet.data.local.db.WalletDatabase
-import net.primal.wallet.data.remote.api.PrimalWalletApi
-import net.primal.wallet.data.remote.model.TransactionsRequestBody
-import net.primal.wallet.data.repository.mappers.remote.mapAsWalletTransactionPO
+import net.primal.wallet.data.model.TransactionsRequest
+import net.primal.wallet.data.repository.mappers.local.toDomain
 
 @ExperimentalPagingApi
-class WalletTransactionsMediator(
-    private val userId: String,
+class WalletTransactionsMediator internal constructor(
+    private val walletId: String,
     private val dispatcherProvider: DispatcherProvider,
+    private val transactionsHandler: TransactionsHandler,
     private val walletDatabase: WalletDatabase,
-    private val primalWalletApi: PrimalWalletApi,
-    private val profileRepository: ProfileRepository,
-) : RemoteMediator<Int, WalletTransactionData>() {
+) : RemoteMediator<Int, WalletTransaction>() {
 
-    private val lastRequests: MutableMap<LoadType, TransactionsRequestBody> = mutableMapOf()
+    private val lastRequests: MutableMap<LoadType, TransactionsRequest> = mutableMapOf()
 
-    override suspend fun load(loadType: LoadType, state: PagingState<Int, WalletTransactionData>): MediatorResult {
-        val primalWallet = walletDatabase.wallet().findWalletInfo(walletId = userId)
-        val walletLightningAddress = primalWallet?.lightningAddress
-            ?: return MediatorResult.Success(endOfPaginationReached = true)
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, WalletTransaction>): MediatorResult {
+        val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
+            ?: run {
+                Napier.d { "No wallet found. Exiting." }
+                return MediatorResult.Success(endOfPaginationReached = true)
+            }
 
         val timestamp: Long? = when (loadType) {
             LoadType.REFRESH -> null
             LoadType.PREPEND -> {
-                state.firstItemOrNull()?.updatedAt
+                state.firstItemOrNull()?.info?.updatedAt
                     ?: withContext(dispatcherProvider.io()) {
-                        walletDatabase.walletTransactions().firstByUserId(userId = userId)?.updatedAt
+                        walletDatabase.walletTransactions().firstByWalletId(walletId = wallet.info.walletId)?.updatedAt
                     }
-                    ?: return MediatorResult.Success(endOfPaginationReached = true)
+                    ?: run {
+                        Napier.d { "Couldn't find first tx. Exiting." }
+                        return MediatorResult.Success(endOfPaginationReached = true)
+                    }
             }
 
             LoadType.APPEND -> {
-                state.lastItemOrNull()?.updatedAt
+                state.lastItemOrNull()?.info?.updatedAt
                     ?: withContext(dispatcherProvider.io()) {
-                        walletDatabase.walletTransactions().lastByUserId(userId = userId)?.updatedAt
+                        walletDatabase.walletTransactions().lastByWalletId(walletId = wallet.info.walletId)?.updatedAt
                     }
-                    ?: return MediatorResult.Success(endOfPaginationReached = true)
+                    ?: run {
+                        Napier.d { "Couldn't find last tx. Exiting." }
+                        return MediatorResult.Success(endOfPaginationReached = true)
+                    }
             }
         }
 
         if (timestamp == null && loadType != LoadType.REFRESH) {
+            Napier.d { "Remote key not found. Exiting with Error." }
             return MediatorResult.Error(IllegalStateException("Remote key not found."))
         }
 
-        val walletSettings = walletDatabase.walletSettings().findWalletSettings(walletId = primalWallet.walletId)
-        val initialRequestBody = TransactionsRequestBody(
-            subWallet = SubWallet.Open,
-            limit = state.config.pageSize,
-            minAmountInBtc = walletSettings?.spamThresholdAmountInSats?.toBtc()?.formatAsString(),
-        )
+        val walletSettings = walletDatabase.walletSettings().findWalletSettings(walletId = wallet.info.walletId)
 
-        val requestBody = when (loadType) {
-            LoadType.REFRESH -> initialRequestBody
-            LoadType.PREPEND -> initialRequestBody.copy(since = timestamp, until = Clock.System.now().epochSeconds)
-            LoadType.APPEND -> initialRequestBody.copy(until = timestamp)
+        val timestamps = when (loadType) {
+            LoadType.REFRESH -> null to null
+            LoadType.PREPEND -> timestamp to Clock.System.now().epochSeconds
+            LoadType.APPEND -> null to timestamp
         }
 
-        if (loadType != LoadType.REFRESH && lastRequests[loadType] == requestBody) {
+        val request = when (wallet.info.type) {
+            WalletType.PRIMAL -> TransactionsRequest.Primal(
+                subWallet = SubWallet.Open,
+                minAmountInBtc = walletSettings?.spamThresholdAmountInSats?.toBtc()?.formatAsString(),
+                limit = state.config.pageSize,
+                since = timestamps.first,
+                until = timestamps.second,
+            )
+
+            WalletType.NWC -> TransactionsRequest.NWC(
+                limit = state.config.pageSize,
+                since = timestamps.first,
+                until = timestamps.second,
+            )
+        }
+
+        Napier.d { "Fetching $loadType with request: $request" }
+        if (loadType != LoadType.REFRESH && lastRequests[loadType] == request) {
+            Napier.d { "Repeat request detected. Reached end. Exiting." }
             return MediatorResult.Success(endOfPaginationReached = true)
         }
 
-        val response = try {
-            withContext(dispatcherProvider.io()) {
-                primalWalletApi.getTransactions(userId = userId, body = requestBody)
-            }
-        } catch (error: NetworkException) {
-            Napier.w(error) { "Failed to fetch transactions" }
-            return MediatorResult.Error(error)
-        }
-
-        lastRequests[loadType] = requestBody
-
-        val transactions = response.transactions
-            .mapAsWalletTransactionPO(walletAddress = walletLightningAddress)
-
-        withContext(dispatcherProvider.io()) {
-            walletDatabase.walletTransactions().upsertAll(data = transactions)
-        }
-
-        val mentionedUserIds = transactions.mapNotNull { it.otherUserId }
-        if (mentionedUserIds.isNotEmpty()) {
-            runCatching {
-                profileRepository.fetchProfiles(profileIds = mentionedUserIds)
-            }
-        }
-
-        return MediatorResult.Success(endOfPaginationReached = false)
+        return transactionsHandler.fetchAndPersistLatestTransactions(
+            wallet = wallet.toDomain(),
+            request = request,
+        ).onSuccess {
+            Napier.d { "Transactions fetched and persisted. Continuing." }
+            lastRequests[loadType] = request
+        }.onFailure {
+            Napier.d { "Error occurred while fetching transactions. Exiting with Error." }
+        }.fold(
+            onSuccess = { MediatorResult.Success(endOfPaginationReached = false) },
+            onFailure = { MediatorResult.Error(it) },
+        )
     }
 }
