@@ -1,5 +1,6 @@
 package net.primal.wallet.data.repository
 
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -52,6 +53,10 @@ class WalletAccountRepositoryImpl(
         walletDatabase.wallet().observeActiveWallet(userId = userId)
             .distinctUntilChanged()
             .map { it?.toDomain() }
+
+    override fun observeActiveWalletId(userId: String): Flow<String?> =
+        walletDatabase.wallet().observeActiveWalletId(userId = userId)
+            .distinctUntilChanged()
 
     override suspend fun findLastUsedNostrWallet(userId: String): Wallet? =
         withContext(dispatcherProvider.io()) {
