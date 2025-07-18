@@ -1,6 +1,7 @@
 package net.primal.core.networking.nwc.nip47
 
 import kotlinx.serialization.Serializable
+import net.primal.domain.nostr.InvoiceType
 
 @Serializable
 data class ListTransactionsParams(
@@ -9,7 +10,7 @@ data class ListTransactionsParams(
     val limit: Int? = null,
     val offset: Int? = null,
     val unpaid: Boolean? = null,
-    val type: String? = null,
+    val type: InvoiceType? = null,
 )
 
 @Serializable
