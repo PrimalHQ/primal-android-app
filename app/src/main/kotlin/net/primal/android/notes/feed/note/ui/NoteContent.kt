@@ -174,6 +174,7 @@ fun NoteContent(
     referencedEventsContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: ((offset: Offset) -> Unit)? = null,
     onUrlClick: ((url: String) -> Unit)? = null,
+    onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
     val displaySettings = LocalContentDisplaySettings.current
@@ -297,6 +298,7 @@ fun NoteContent(
                     }
                 },
                 onMediaClick = noteCallbacks.onMediaClick,
+                onVideoSoundToggle = onVideoSoundToggle,
             )
         }
 

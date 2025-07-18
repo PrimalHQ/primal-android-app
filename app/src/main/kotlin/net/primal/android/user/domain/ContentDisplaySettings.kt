@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class ContentDisplaySettings(
     val autoPlayVideos: Int = AUTO_PLAY_VIDEO_NEVER,
+    val autoPlayVideoSoundOn: Boolean = true,
     val showAnimatedAvatars: Boolean = false,
     val focusModeEnabled: Boolean = true,
     val tweetsModeEnabled: Boolean = true,

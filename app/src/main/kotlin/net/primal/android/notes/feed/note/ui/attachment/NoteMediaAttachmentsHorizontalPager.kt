@@ -45,6 +45,7 @@ fun NoteMediaAttachmentsHorizontalPager(
     blossoms: List<String>,
     couldAutoPlay: Boolean,
     mediaEventUris: List<EventUriUi> = emptyList(),
+    onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     BoxWithConstraints(modifier = modifier) {
         val imageSizeDp = findImageSize(eventUri = mediaEventUris.first())
@@ -58,6 +59,7 @@ fun NoteMediaAttachmentsHorizontalPager(
                     imageSizeDp = imageSizeDp,
                     couldAutoPlay = couldAutoPlay,
                     onMediaClick = onMediaClick,
+                    onVideoSoundToggle = onVideoSoundToggle,
                 )
             }
             TWO_IMAGES -> {
@@ -317,6 +319,7 @@ private fun SingleImageGallery(
     imageSizeDp: DpSize,
     couldAutoPlay: Boolean,
     onMediaClick: (MediaClickEvent) -> Unit,
+    onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     val mediaEventUri = mediaEventUris.first()
     NoteMediaAttachment(
@@ -338,6 +341,7 @@ private fun SingleImageGallery(
                 ),
             )
         },
+        onVideoSoundToggle = onVideoSoundToggle,
     )
 }
 
@@ -350,6 +354,7 @@ private fun NoteMediaAttachment(
     couldAutoPlay: Boolean,
     onClick: (positionMs: Long) -> Unit,
     modifier: Modifier = Modifier,
+    onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     BoxWithConstraints(
         modifier = modifier,
@@ -365,6 +370,7 @@ private fun NoteMediaAttachment(
                     onVideoClick = { positionMs -> onClick(positionMs) },
                     allowAutoPlay = allowAutoPlay,
                     couldAutoPlay = couldAutoPlay,
+                    onVideoSoundToggle = onVideoSoundToggle,
                 )
             }
 

@@ -457,6 +457,9 @@ private fun FeedNoteCard(
                                 else -> Unit
                             }
                         },
+                        onVideoSoundToggle = { soundPref ->
+                            eventPublisher(UiEvent.UpdateAutoPlayVideoSoundPreference(soundPref))
+                        },
                         contentFooter = contentFooter,
                     )
                 }
@@ -534,6 +537,7 @@ private fun FeedNote(
     onPostAction: ((FeedPostAction) -> Unit)? = null,
     onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
+    onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     val localUriHandler = LocalUriHandler.current
     val uiScope = rememberCoroutineScope()
@@ -610,6 +614,7 @@ private fun FeedNote(
                 onUrlClick = { localUriHandler.openUriSafely(it) },
                 couldAutoPlay = couldAutoPlay,
                 noteCallbacks = noteCallbacks,
+                onVideoSoundToggle = onVideoSoundToggle,
             )
 
             contentFooter()
