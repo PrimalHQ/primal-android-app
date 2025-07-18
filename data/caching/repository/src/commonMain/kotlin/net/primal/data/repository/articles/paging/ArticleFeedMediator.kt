@@ -10,6 +10,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
+import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
@@ -21,7 +22,6 @@ import net.primal.data.remote.api.articles.model.ArticleFeedRequestBody
 import net.primal.data.remote.api.articles.model.ArticleResponse
 import net.primal.data.repository.articles.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
-import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
 import net.primal.domain.common.ContentPrimalPaging
 import net.primal.domain.common.exception.NetworkException
 import net.primal.shared.data.local.db.withTransaction

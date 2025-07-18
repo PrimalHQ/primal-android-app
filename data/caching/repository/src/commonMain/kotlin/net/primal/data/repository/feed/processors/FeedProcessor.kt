@@ -1,12 +1,12 @@
 package net.primal.data.repository.feed.processors
 
 import kotlinx.datetime.Clock
+import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.data.local.dao.notes.FeedPostDataCrossRef
 import net.primal.data.local.dao.notes.FeedPostRemoteKey
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.repository.mappers.remote.asFeedResponse
-import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
 import net.primal.domain.common.ContentPrimalPaging
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.posts.FeedPageSnapshot
