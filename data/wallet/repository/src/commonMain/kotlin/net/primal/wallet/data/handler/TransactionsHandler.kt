@@ -5,17 +5,17 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.domain.profile.ProfileRepository
-import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.Wallet
-import net.primal.wallet.data.service.WalletService
-import net.primal.domain.wallet.model.TransactionsRequest
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.wallet.data.local.db.WalletDatabase
+import net.primal.wallet.data.model.Transaction
+import net.primal.wallet.data.model.TransactionsRequest
 import net.primal.wallet.data.repository.mappers.local.toNostrTransactionData
 import net.primal.wallet.data.repository.mappers.local.toPrimalTransactionData
 import net.primal.wallet.data.repository.mappers.local.toWalletTransactionData
+import net.primal.wallet.data.service.WalletService
 
-class TransactionsHandler(
+internal class TransactionsHandler(
     val dispatchers: DispatcherProvider,
     val primalWalletService: WalletService,
     val nostrWalletService: WalletService,
