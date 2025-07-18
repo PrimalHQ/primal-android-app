@@ -22,6 +22,7 @@ import net.primal.android.notes.feed.note.NoteContract.SideEffect
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
 import net.primal.domain.bookmarks.BookmarkType
@@ -53,6 +54,7 @@ class NoteViewModel @AssistedInject constructor(
     private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -119,6 +121,7 @@ class NoteViewModel @AssistedInject constructor(
                     is UiEvent.BookmarkAction -> handleBookmark(it)
                     is UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.UpdateAutoPlayVideoSoundPreference -> updateVideoSoundSettings(it.soundOn)
                     is UiEvent.RequestDeleteAction -> requestDelete(noteId = it.noteId, userId = it.userId)
                 }
             }
@@ -291,6 +294,13 @@ class NoteViewModel @AssistedInject constructor(
                 setState { copy(error = UiError.NostrSignUnauthorized) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
+            }
+        }
+
+    private fun updateVideoSoundSettings(soundOn: Boolean) =
+        viewModelScope.launch {
+            userRepository.updateContentDisplaySettings(userId = activeAccountStore.activeUserId()) {
+                copy(autoPlayVideoSoundOn = soundOn)
             }
         }
 

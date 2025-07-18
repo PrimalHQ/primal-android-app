@@ -30,6 +30,7 @@ fun NoteAttachments(
     couldAutoPlay: Boolean,
     onUrlClick: ((mediaUrl: String) -> Unit)? = null,
     onMediaClick: ((MediaClickEvent) -> Unit)? = null,
+    onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     val mediaAttachments = remember(eventUris) {
         eventUris.filter { it.isMediaUri() }
@@ -66,6 +67,7 @@ fun NoteAttachments(
             blossoms = blossoms,
             couldAutoPlay = couldAutoPlay,
             onMediaClick = mediaClickHandler,
+            onVideoSoundToggle = onVideoSoundToggle,
         )
     }
 

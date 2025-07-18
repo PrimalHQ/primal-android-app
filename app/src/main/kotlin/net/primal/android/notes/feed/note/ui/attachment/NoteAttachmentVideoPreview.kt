@@ -47,6 +47,7 @@ fun NoteAttachmentVideoPreview(
     allowAutoPlay: Boolean,
     couldAutoPlay: Boolean,
     modifier: Modifier = Modifier,
+    onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     val userPrefersAutoPlay =
         LocalContentDisplaySettings.current.autoPlayVideos == ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
@@ -59,6 +60,7 @@ fun NoteAttachmentVideoPreview(
             playing = couldAutoPlay,
             onVideoClick = onVideoClick,
             modifier = modifier,
+            onVideoSoundToggle = onVideoSoundToggle,
         )
     } else {
         VideoThumbnailImagePreview(
@@ -76,10 +78,12 @@ private fun AutoPlayVideo(
     playing: Boolean,
     onVideoClick: (positionMs: Long) -> Unit,
     modifier: Modifier = Modifier,
+    onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     val exoPlayer = rememberPrimalExoPlayer()
+    val userPrefersSound = LocalContentDisplaySettings.current.autoPlayVideoSoundOn
 
-    var isMuted by remember { mutableStateOf(true) }
+    var isMuted by remember(userPrefersSound) { mutableStateOf(!userPrefersSound) }
     var isBuffering by remember { mutableStateOf(true) }
 
     LaunchedEffect(eventUri.url) {
@@ -87,8 +91,11 @@ private fun AutoPlayVideo(
         exoPlayer.setMediaItem(MediaItem.fromUri(mediaUrl))
         exoPlayer.repeatMode = Player.REPEAT_MODE_ALL
         exoPlayer.playWhenReady = true
-        exoPlayer.volume = if (isMuted) 0f else 1f
         exoPlayer.prepare()
+    }
+
+    LaunchedEffect(isMuted) {
+        exoPlayer.volume = if (isMuted) 0f else 1f
     }
 
     DisposableEffect(Unit) {
@@ -142,8 +149,9 @@ private fun AutoPlayVideo(
                 .size(32.dp),
             imageVector = if (isMuted) PrimalIcons.Unmute else PrimalIcons.Mute,
         ) {
-            isMuted = !isMuted
-            exoPlayer.volume = if (isMuted) 0f else 1f
+            val newMutedState = !isMuted
+            isMuted = newMutedState
+            onVideoSoundToggle?.invoke(!newMutedState)
         }
     }
 }

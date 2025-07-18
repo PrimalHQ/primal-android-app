@@ -69,6 +69,10 @@ interface NoteContract {
             val userId: String,
         ) : UiEvent()
 
+        data class UpdateAutoPlayVideoSoundPreference(
+            val soundOn: Boolean,
+        ) : UiEvent()
+
         data object DismissError : UiEvent()
     }
 }
