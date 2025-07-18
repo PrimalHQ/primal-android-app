@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -68,7 +69,8 @@ class WalletDashboardViewModel @Inject constructor(
     init {
         observeUsdExchangeRate()
         subscribeToEvents()
-        subscribeToActiveWallet()
+        subscribeToActiveWalletId()
+        subscribeToActiveWalletData()
         subscribeToActiveAccount()
         subscribeToPurchases()
         subscribeToBadgesUpdates()
@@ -84,11 +86,19 @@ class WalletDashboardViewModel @Inject constructor(
             }
         }
 
-    private fun subscribeToActiveWallet() =
+    private fun subscribeToActiveWalletId() =
+        viewModelScope.launch {
+            walletAccountRepository.observeActiveWalletId(userId = activeUserId)
+                .filterNotNull()
+                .collect { walletId ->
+                    fetchWalletBalance(walletId = walletId)
+                }
+        }
+
+    private fun subscribeToActiveWalletData() =
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeUserId)
                 .collect { wallet ->
-                    wallet?.let { fetchWalletBalance(walletId = it.walletId) }
                     setState { copy(wallet = wallet, lowBalance = wallet?.balanceInBtc == 0.0) }
                 }
         }
