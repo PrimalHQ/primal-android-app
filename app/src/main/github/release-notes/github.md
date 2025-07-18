@@ -1,5 +1,6 @@
 ## Fixes
 - Implemented playing one video at a time in feeds (#532)
+- Implemented remembering sounds settings for auto-play videos;
 - Implemented `PrimalAsyncImage` and `PrimalImage` to improve feed performance
 - Improved profile tags rendering on article details  (#541)
 - Improved polling on HomeFeedScreen
