@@ -262,6 +262,7 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletSettingsContract.Ui
                     relays = listOf("wss://relay.getalby.com/v1"),
                     lightningAddress = "miljan@getalby.com",
                     walletId = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
+                    userId = "someUserId",
                     spamThresholdAmountInSats = 1L,
                     balanceInBtc = 0.0,
                     maxBalanceInBtc = 0.0,

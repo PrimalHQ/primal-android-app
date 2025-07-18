@@ -12,6 +12,7 @@ fun WalletPO.toDomain(): WalletDO =
         WalletType.PRIMAL ->
             WalletDO.Primal(
                 walletId = info.walletId,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats ?: 1L,
                 balanceInBtc = info.balanceInBtc,
@@ -23,6 +24,7 @@ fun WalletPO.toDomain(): WalletDO =
         WalletType.NWC ->
             WalletDO.NWC(
                 walletId = info.walletId,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats ?: 1L,
                 balanceInBtc = info.balanceInBtc,
@@ -44,6 +46,7 @@ fun ActiveWallet.toDomain(): WalletDO? {
         WalletType.PRIMAL ->
             WalletDO.Primal(
                 walletId = info.walletId,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats ?: 1L,
                 balanceInBtc = info.balanceInBtc,
@@ -55,6 +58,7 @@ fun ActiveWallet.toDomain(): WalletDO? {
         WalletType.NWC ->
             WalletDO.NWC(
                 walletId = info.walletId,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats ?: 1L,
                 balanceInBtc = info.balanceInBtc,
