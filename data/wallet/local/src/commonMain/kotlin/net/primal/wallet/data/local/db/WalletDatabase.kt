@@ -7,7 +7,9 @@ import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
 import net.primal.shared.data.local.serialization.ListsTypeConverters
 import net.primal.wallet.data.local.dao.ActiveWalletData
+import net.primal.wallet.data.local.dao.NostrTransactionData
 import net.primal.wallet.data.local.dao.NostrWalletData
+import net.primal.wallet.data.local.dao.PrimalTransactionData
 import net.primal.wallet.data.local.dao.PrimalWalletData
 import net.primal.wallet.data.local.dao.WalletDao
 import net.primal.wallet.data.local.dao.WalletInfo
@@ -23,6 +25,8 @@ import net.primal.wallet.data.local.dao.WalletTransactionData
         PrimalWalletData::class,
         ActiveWalletData::class,
         WalletTransactionData::class,
+        PrimalTransactionData::class,
+        NostrTransactionData::class,
         WalletSettings::class,
     ],
     version = 1,

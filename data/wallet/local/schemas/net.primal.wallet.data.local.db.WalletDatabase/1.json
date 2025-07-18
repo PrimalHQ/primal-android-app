@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "2779a8536f2aeb591033960afbcd5821",
+    "identityHash": "ba3802bd835d30fb56dfee1f3ed2c6b4",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -152,17 +152,23 @@
       },
       {
         "tableName": "WalletTransactionData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `walletLightningAddress` TEXT NOT NULL, `type` TEXT NOT NULL, `state` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `completedAt` INTEGER, `amountInBtc` REAL NOT NULL, `amountInUsd` REAL, `isZap` INTEGER NOT NULL, `isStorePurchase` INTEGER NOT NULL, `userId` TEXT NOT NULL, `userSubWallet` TEXT NOT NULL, `userLightningAddress` TEXT, `otherUserId` TEXT, `otherLightningAddress` TEXT, `note` TEXT, `invoice` TEXT, `totalFeeInBtc` TEXT, `exchangeRate` TEXT, `onChainAddress` TEXT, `onChainTxId` TEXT, `zapNoteId` TEXT, `zapNoteAuthorId` TEXT, `zappedByUserId` TEXT, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `walletType` TEXT NOT NULL, `type` TEXT NOT NULL, `state` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `completedAt` INTEGER, `userId` TEXT NOT NULL, `note` TEXT, `invoice` TEXT, `amountInBtc` REAL NOT NULL, `totalFeeInBtc` TEXT, PRIMARY KEY(`transactionId`))",
         "fields": [
           {
-            "fieldPath": "id",
-            "columnName": "id",
+            "fieldPath": "transactionId",
+            "columnName": "transactionId",
             "affinity": "TEXT",
             "notNull": true
           },
           {
-            "fieldPath": "walletLightningAddress",
-            "columnName": "walletLightningAddress",
+            "fieldPath": "walletId",
+            "columnName": "walletId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "walletType",
+            "columnName": "walletType",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -196,9 +202,54 @@
             "affinity": "INTEGER"
           },
           {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "invoice",
+            "columnName": "invoice",
+            "affinity": "TEXT"
+          },
+          {
             "fieldPath": "amountInBtc",
             "columnName": "amountInBtc",
             "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalFeeInBtc",
+            "columnName": "totalFeeInBtc",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "transactionId"
+          ]
+        }
+      },
+      {
+        "tableName": "PrimalTransactionData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `walletLightningAddress` TEXT NOT NULL, `amountInUsd` REAL, `isZap` INTEGER NOT NULL, `isStorePurchase` INTEGER NOT NULL, `userSubWallet` TEXT NOT NULL, `userLightningAddress` TEXT, `otherUserId` TEXT, `otherLightningAddress` TEXT, `exchangeRate` TEXT, `onChainAddress` TEXT, `onChainTxId` TEXT, `zapNoteId` TEXT, `zapNoteAuthorId` TEXT, `zappedByUserId` TEXT, PRIMARY KEY(`transactionId`))",
+        "fields": [
+          {
+            "fieldPath": "transactionId",
+            "columnName": "transactionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "walletLightningAddress",
+            "columnName": "walletLightningAddress",
+            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -216,12 +267,6 @@
             "fieldPath": "isStorePurchase",
             "columnName": "isStorePurchase",
             "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "userId",
-            "columnName": "userId",
-            "affinity": "TEXT",
             "notNull": true
           },
           {
@@ -243,21 +288,6 @@
           {
             "fieldPath": "otherLightningAddress",
             "columnName": "otherLightningAddress",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "note",
-            "columnName": "note",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "invoice",
-            "columnName": "invoice",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "totalFeeInBtc",
-            "columnName": "totalFeeInBtc",
             "affinity": "TEXT"
           },
           {
@@ -294,7 +324,45 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "id"
+            "transactionId"
+          ]
+        }
+      },
+      {
+        "tableName": "NostrTransactionData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `preimage` TEXT, `descriptionHash` TEXT, `paymentHash` TEXT, `metadata` TEXT, PRIMARY KEY(`transactionId`))",
+        "fields": [
+          {
+            "fieldPath": "transactionId",
+            "columnName": "transactionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "preimage",
+            "columnName": "preimage",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "descriptionHash",
+            "columnName": "descriptionHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "paymentHash",
+            "columnName": "paymentHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "metadata",
+            "columnName": "metadata",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "transactionId"
           ]
         }
       },
@@ -325,7 +393,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2779a8536f2aeb591033960afbcd5821')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ba3802bd835d30fb56dfee1f3ed2c6b4')"
     ]
   }
 }
