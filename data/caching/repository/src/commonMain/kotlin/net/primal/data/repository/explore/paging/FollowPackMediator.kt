@@ -9,6 +9,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.Clock
+import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.explore.FollowPack as FollowPackPO
@@ -20,7 +21,6 @@ import net.primal.data.remote.api.explore.model.FollowListsRequestBody
 import net.primal.data.remote.api.explore.model.FollowListsResponse
 import net.primal.data.repository.explore.mapAsFollowPackData
 import net.primal.data.repository.explore.processAndPersistFollowLists
-import net.primal.data.repository.mappers.remote.orderByPagingIfNotNull
 import net.primal.domain.common.ContentPrimalPaging
 import net.primal.domain.common.exception.NetworkException
 import net.primal.shared.data.local.db.withTransaction
