@@ -13,24 +13,30 @@ interface WalletTransactionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(data: List<WalletTransactionData>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAllPrimalTransactions(data: List<PrimalTransactionData>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertAllNostrTransactions(data: List<NostrTransactionData>)
+
     @Query(
         """
             SELECT * FROM WalletTransactionData 
-            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED") AND userId IS :userId
+            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED") AND walletId IS :walletId
             ORDER BY updatedAt DESC
         """,
     )
-    fun latestTransactionsPagedByUserId(userId: String): PagingSource<Int, WalletTransactionData>
+    fun latestTransactionsPagedByWalletId(walletId: String): PagingSource<Int, WalletTransaction>
 
-    @Query("SELECT * FROM WalletTransactionData WHERE userId IS :userId ORDER BY updatedAt DESC LIMIT 1")
-    suspend fun firstByUserId(userId: String): WalletTransactionData?
+    @Query("SELECT * FROM WalletTransactionData WHERE walletId IS :walletId ORDER BY updatedAt ASC LIMIT 1")
+    suspend fun firstByWalletId(walletId: String): WalletTransactionData?
 
-    @Query("SELECT * FROM WalletTransactionData WHERE userId IS :userId ORDER BY updatedAt ASC LIMIT 1")
-    suspend fun lastByUserId(userId: String): WalletTransactionData?
+    @Query("SELECT * FROM WalletTransactionData WHERE walletId IS :walletId ORDER BY updatedAt DESC LIMIT 1")
+    suspend fun lastByWalletId(walletId: String): WalletTransactionData?
 
     @Transaction
-    @Query("SELECT * FROM WalletTransactionData WHERE id IS :txId")
-    suspend fun findTransactionById(txId: String): WalletTransactionData?
+    @Query("SELECT * FROM WalletTransactionData WHERE transactionId IS :txId")
+    suspend fun findTransactionById(txId: String): WalletTransaction?
 
     @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
     suspend fun deleteAllTransactionsByUserId(userId: String)
