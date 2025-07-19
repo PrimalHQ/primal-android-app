@@ -23,6 +23,7 @@ fun ReferencedNotesColumn(
     modifier: Modifier = Modifier,
     hasBorder: Boolean = false,
     couldAutoPlay: Boolean = false,
+    onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     val displayableNotes = if (postResources.isNotEmpty()) {
         if (expanded) postResources else postResources.subList(0, 1)
@@ -45,6 +46,7 @@ fun ReferencedNotesColumn(
                 colors = CardDefaults.cardColors(containerColor = containerColor),
                 noteCallbacks = noteCallbacks,
                 couldAutoPlay = couldAutoPlay,
+                onVideoSoundToggle = onVideoSoundToggle,
             )
         }
     }

@@ -35,6 +35,7 @@ fun ReferencedNoteCard(
     hasBorder: Boolean = false,
     colors: CardColors = referencedNoteCardColors(),
     couldAutoPlay: Boolean = false,
+    onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     NoteSurfaceCard(
         modifier = modifier
@@ -78,6 +79,7 @@ fun ReferencedNoteCard(
             onUrlClick = { _ -> noteCallbacks.onNoteClick?.invoke(data.postId) },
             noteCallbacks = noteCallbacks,
             couldAutoPlay = couldAutoPlay,
+            onVideoSoundToggle = onVideoSoundToggle,
         )
 
         Spacer(modifier = Modifier.height(12.dp))

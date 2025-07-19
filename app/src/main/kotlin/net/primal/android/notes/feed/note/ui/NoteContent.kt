@@ -316,6 +316,7 @@ fun NoteContent(
                 noteCallbacks = noteCallbacks,
                 hasBorder = referencedEventsHaveBorder,
                 couldAutoPlay = couldAutoPlay,
+                onVideoSoundToggle = onVideoSoundToggle,
             )
         }
 
