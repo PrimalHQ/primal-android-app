@@ -23,7 +23,7 @@ import net.primal.domain.wallet.TransactionWithProfile
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletPayParams
 import net.primal.domain.wallet.WalletRepository
-import net.primal.domain.wallet.WalletService
+import net.primal.wallet.data.service.WalletService
 import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.wallet.data.local.dao.NostrWalletData
