@@ -1,4 +1,4 @@
-package net.primal.wallet.data.service
+package net.primal.wallet.data.service.concrete
 
 import net.primal.core.networking.nwc.NwcClientFactory
 import net.primal.core.networking.nwc.model.NostrWalletConnect
@@ -6,8 +6,8 @@ import net.primal.core.utils.CurrencyConversionUtils.msatsToBtc
 import net.primal.core.utils.Result
 import net.primal.core.utils.runCatching
 import net.primal.domain.wallet.Wallet
-import net.primal.domain.wallet.WalletService
 import net.primal.domain.wallet.model.WalletBalanceResult
+import net.primal.wallet.data.service.WalletService
 import net.primal.wallet.data.service.mappers.asNO
 
 class NostrWalletServiceImpl : WalletService {
