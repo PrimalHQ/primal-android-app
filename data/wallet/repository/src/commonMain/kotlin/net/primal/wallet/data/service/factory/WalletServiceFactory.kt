@@ -3,8 +3,8 @@ package net.primal.wallet.data.service.factory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
-import net.primal.wallet.data.service.NostrWalletServiceImpl
-import net.primal.wallet.data.service.PrimalWalletServiceImpl
+import net.primal.wallet.data.service.concrete.NostrWalletServiceImpl
+import net.primal.wallet.data.service.concrete.PrimalWalletServiceImpl
 
 object WalletServiceFactory {
 
