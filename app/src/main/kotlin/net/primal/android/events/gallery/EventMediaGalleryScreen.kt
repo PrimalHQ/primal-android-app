@@ -22,7 +22,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -504,9 +503,7 @@ private fun AttachmentsHorizontalPager(
 
                 EventUriType.Video -> {
                     VideoScreen(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .navigationBarsPadding(),
+                        modifier = Modifier.fillMaxSize(),
                         exoPlayer = exoPlayer,
                         positionMs = initialPositionMs,
                         isPageVisible = pagerState.currentPage == index,
@@ -616,8 +613,6 @@ fun VideoScreen(
 
     LaunchedEffect(isPageVisible, immersiveMode) {
         if (isPageVisible) {
-            immersiveMode?.show()
-        } else {
             immersiveMode?.hide()
         }
     }
