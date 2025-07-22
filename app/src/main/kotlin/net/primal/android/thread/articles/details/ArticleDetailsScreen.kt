@@ -696,29 +696,36 @@ private fun ArticleContentWithComments(
                 }
 
                 is ArticlePartRender.ImageRender -> {
-                    SubcomposeAsyncImage(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .clip(AppTheme.shapes.medium)
-                            .clickable {
-                                state.article?.eventId?.let {
-                                    MediaClickEvent(
-                                        noteId = it,
-                                        eventUriType = EventUriType.Image,
-                                        mediaUrl = part.imageUrl,
-                                        positionMs = 0L,
-                                    )
-                                }?.let {
-                                    noteCallbacks.onMediaClick?.invoke(
-                                        it,
-                                    )
-                                }
-                            },
-                        model = part.imageUrl,
-                        contentScale = ContentScale.FillWidth,
-                        contentDescription = null,
-                    )
+                            .background(color = AppTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        SubcomposeAsyncImage(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .clip(AppTheme.shapes.medium)
+                                .clickable {
+                                    state.article?.eventId?.let {
+                                        MediaClickEvent(
+                                            noteId = it,
+                                            eventUriType = EventUriType.Image,
+                                            mediaUrl = part.imageUrl,
+                                            positionMs = 0L,
+                                        )
+                                    }?.let {
+                                        noteCallbacks.onMediaClick?.invoke(
+                                            it,
+                                        )
+                                    }
+                                },
+                            model = part.imageUrl,
+                            contentScale = ContentScale.FillWidth,
+                            contentDescription = null,
+                        )
+                    }
                 }
             }
         }
