@@ -60,6 +60,7 @@ import net.primal.android.articles.feed.ui.ArticleDropdownMenuIcon
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -702,7 +703,7 @@ private fun ArticleContentWithComments(
                             .background(color = AppTheme.colorScheme.surfaceVariant),
                         contentAlignment = Alignment.Center,
                     ) {
-                        SubcomposeAsyncImage(
+                        PrimalAsyncImage(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
