@@ -54,31 +54,40 @@ fun String.splitMarkdownByNostrUris(): List<String> {
 }
 
 /**
- * Uses a regular expression to detect image patterns:
- * - `!\[([^\]]*)\]`        → captures alt text inside square brackets (Group 1)
- * - `\((\S+?)`             → lazily captures the URL (Group 2)
- * - `(?:\s+"[^"]*")?\)`    → optionally matches a quoted image title
+ * Uses a regular expression to detect and split by both simple and linked Markdown images.
+ * - Handles simple images: `![](url)` and `![](url "title")`
+ * - Handles linked images: `[![](url)](link)` and `[![](url "title")](link)`
+ *
+ * Captures:
+ * - **Group 1**: URL of the inner image when wrapped in a link.
+ * - **Group 2**: URL of a standalone image.
  *
  * Example:
  * ```
  * Input:
- *   "Hello ![pic](https://img.com/a.jpg "title") world"
+ *   "See linked: [![](https://img.com/a.png)](link) and simple: ![pic](https://img.com/b.jpg)"
  *
  * Output:
- *   ["Hello ", "https://img.com/a.jpg", " world"]
+ *   ["See linked: ", "https://img.com/a.png", " and simple: ", "https://img.com/b.jpg", ""]
  * ```
  */
 fun String.splitMarkdownByInlineImages(): List<String> {
-    val regex = Regex("""!\[([^\]]*)\]\((\S+?)(?:\s+"[^"]*")?\)""")
-    val result = mutableListOf<String>()
+    val imageRegex =
+        Regex("""\[!\[[^]]*]\(([^\s")]+)(?:\s+"[^"]*")?\)\]\([^\s")]+\)|!\[[^]]*]\(([^\s")]+)(?:\s+"[^"]*")?\)""")
 
+    val result = mutableListOf<String>()
     var lastEndIndex = 0
 
-    regex.findAll(this).forEach { match ->
+    imageRegex.findAll(this).forEach { match ->
         if (match.range.first > lastEndIndex) {
             result.add(this.substring(lastEndIndex, match.range.first))
         }
-        result.add(match.groupValues[2])
+
+        val url = match.groups[1]?.value ?: match.groups[2]?.value
+        if (url != null) {
+            result.add(url)
+        }
+
         lastEndIndex = match.range.last + 1
     }
 
