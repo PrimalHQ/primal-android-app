@@ -72,6 +72,7 @@ import coil3.toBitmap
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import com.github.panpf.zoomimage.rememberCoilZoomState
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -614,6 +615,8 @@ fun VideoScreen(
     LaunchedEffect(isPageVisible, immersiveMode) {
         if (isPageVisible) {
             immersiveMode?.hide()
+            delay(2.seconds.inWholeMilliseconds)
+            immersiveMode?.show()
         }
     }
 
