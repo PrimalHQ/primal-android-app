@@ -173,6 +173,8 @@ fun <T : NotificationSettingsType> NotificationsSettingsBlock(
     notifications: List<NotificationSwitchUi<T>>,
     eventPublisher: (NotificationsSettingsContract.UiEvent) -> Unit,
 ) {
+    val orderedNotifications = notifications.sortedBy { it.settingsType.order }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -197,7 +199,7 @@ fun <T : NotificationSettingsType> NotificationsSettingsBlock(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
         ) {
-            notifications.forEachIndexed { index, notificationSwitchUi ->
+            orderedNotifications.forEachIndexed { index, notificationSwitchUi ->
                 NotificationSettingsRow(
                     title = notificationSwitchUi.settingsType.toTitle(),
                     longTitleText = notificationSwitchUi.settingsType is NotificationSettingsType.Preferences,
@@ -213,7 +215,7 @@ fun <T : NotificationSettingsType> NotificationsSettingsBlock(
                     },
                 )
 
-                if (index < notifications.size - 1) {
+                if (index < orderedNotifications.size - 1) {
                     PrimalDivider()
                 }
             }
