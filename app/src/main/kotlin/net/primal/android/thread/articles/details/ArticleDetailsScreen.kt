@@ -60,6 +60,7 @@ import net.primal.android.articles.feed.ui.ArticleDropdownMenuIcon
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListNoContent
+import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -696,29 +697,36 @@ private fun ArticleContentWithComments(
                 }
 
                 is ArticlePartRender.ImageRender -> {
-                    SubcomposeAsyncImage(
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp)
-                            .clip(AppTheme.shapes.medium)
-                            .clickable {
-                                state.article?.eventId?.let {
-                                    MediaClickEvent(
-                                        noteId = it,
-                                        eventUriType = EventUriType.Image,
-                                        mediaUrl = part.imageUrl,
-                                        positionMs = 0L,
-                                    )
-                                }?.let {
-                                    noteCallbacks.onMediaClick?.invoke(
-                                        it,
-                                    )
-                                }
-                            },
-                        model = part.imageUrl,
-                        contentScale = ContentScale.FillWidth,
-                        contentDescription = null,
-                    )
+                            .background(color = AppTheme.colorScheme.surfaceVariant),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        PrimalAsyncImage(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .clip(AppTheme.shapes.medium)
+                                .clickable {
+                                    state.article?.eventId?.let {
+                                        MediaClickEvent(
+                                            noteId = it,
+                                            eventUriType = EventUriType.Image,
+                                            mediaUrl = part.imageUrl,
+                                            positionMs = 0L,
+                                        )
+                                    }?.let {
+                                        noteCallbacks.onMediaClick?.invoke(
+                                            it,
+                                        )
+                                    }
+                                },
+                            model = part.imageUrl,
+                            contentScale = ContentScale.FillWidth,
+                            contentDescription = null,
+                        )
+                    }
                 }
             }
         }
