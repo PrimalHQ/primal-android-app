@@ -40,12 +40,14 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -72,7 +74,6 @@ import coil3.toBitmap
 import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import com.github.panpf.zoomimage.rememberCoilZoomState
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -325,7 +326,7 @@ private fun MediaGalleryContent(
                     modifier = Modifier.fillMaxSize(),
                     attachments = attachments,
                     pagerState = pagerState,
-                    onCurrentlyVisibleBitmap = onCurrentlyVisibleBitmap,
+                    onCurrentlyVisibleBitmap = { onCurrentlyVisibleBitmap?.invoke(it) },
                     immersiveMode = immersiveMode,
                     exoPlayer = player,
                     initialIndex = initialAttachmentIndex,
@@ -612,34 +613,26 @@ fun VideoScreen(
         KeepScreenOn()
     }
 
-    LaunchedEffect(isPageVisible, immersiveMode) {
-        if (isPageVisible) {
-            immersiveMode?.hide()
-            delay(2.seconds.inWholeMilliseconds)
-            immersiveMode?.show()
-        }
-    }
+    val currentIsPageVisible by rememberUpdatedState(isPageVisible)
+    val currentImmersiveMode by rememberUpdatedState(immersiveMode)
 
-    LifecycleStartEffect(exoPlayer, isPageVisible) {
+    DisposableEffect(exoPlayer) {
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
-                if (isPageVisible) {
+                if (currentIsPageVisible) {
                     isBuffering = playbackState == Player.STATE_BUFFERING
                 }
             }
         }
         exoPlayer.addListener(listener)
-        exoPlayer.seekTo(positionMs)
-        onStopOrDispose {
+        onDispose {
             exoPlayer.removeListener(listener)
         }
     }
 
-    var playerView by remember { mutableStateOf<PlayerView?>(null) }
-
-    LaunchedEffect(playerView, isPageVisible) {
-        if (isPageVisible) {
-            playerView?.player = exoPlayer
+    LaunchedEffect(isPageVisible, positionMs) {
+        if (isPageVisible && positionMs > 0L) {
+            exoPlayer.seekTo(positionMs)
         }
     }
 
@@ -649,26 +642,30 @@ fun VideoScreen(
             factory = { context ->
                 PlayerView(context).apply {
                     useController = true
-                    controllerShowTimeoutMs = 1.seconds.inWholeMilliseconds.toInt()
+                    controllerShowTimeoutMs = 4.seconds.inWholeMilliseconds.toInt()
                     setShowNextButton(false)
                     setShowPreviousButton(false)
+                    setControllerAnimationEnabled(false)
                     setControllerVisibilityListener(
                         PlayerView.ControllerVisibilityListener { visibility ->
-                            if (isPageVisible) {
+                            if (currentIsPageVisible) {
                                 if (visibility == View.VISIBLE) {
-                                    immersiveMode?.hide()
+                                    currentImmersiveMode?.hide()
                                 } else {
-                                    immersiveMode?.show()
+                                    currentImmersiveMode?.show()
                                 }
                             }
                         },
                     )
-                }.also {
-                    playerView = it
                 }
             },
-            onRelease = { view ->
-                view.player = null
+            update = { playerView ->
+                if (isPageVisible) {
+                    playerView.player = exoPlayer
+                    playerView.showController()
+                } else {
+                    playerView.player = null
+                }
             },
         )
 
