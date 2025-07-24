@@ -651,20 +651,22 @@ fun VideoScreen(
                     setShowNextButton(false)
                     setShowPreviousButton(false)
                     setControllerAnimationEnabled(false)
-                    setControllerVisibilityListener(
-                        PlayerView.ControllerVisibilityListener { visibility ->
-                            if (isPageVisible) {
-                                if (visibility == View.VISIBLE) {
-                                    immersiveMode?.hide()
-                                } else {
-                                    immersiveMode?.show()
-                                }
-                            }
-                        },
-                    )
                 }.also {
                     playerView = it
                 }
+            },
+            update = { view ->
+                view.setControllerVisibilityListener(
+                    PlayerView.ControllerVisibilityListener { visibility ->
+                        if (isPageVisible) {
+                            if (visibility == View.VISIBLE) {
+                                immersiveMode?.hide()
+                            } else {
+                                immersiveMode?.show()
+                            }
+                        }
+                    },
+                )
             },
             onRelease = { view ->
                 view.player = null
