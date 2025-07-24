@@ -83,13 +83,18 @@ class WalletAccountRepositoryImpl(
         val kycLevel = WalletKycLevel.Companion.valueOf(accountInfoResponse.kycLevel) ?: return
         val lightningAddress = accountInfoResponse.lightningAddress
         walletDatabase.withTransaction {
-            walletDatabase.wallet().upsertWalletInfo(
+            walletDatabase.wallet().insertOrIgnoreWalletInfo(
                 info = WalletInfo(
                     walletId = userId,
                     userId = userId,
                     lightningAddress = lightningAddress,
                     type = WalletType.PRIMAL,
                 ),
+            )
+
+            walletDatabase.wallet().updateWalletLightningAddress(
+                walletId = userId,
+                lightningAddress = lightningAddress,
             )
 
             walletDatabase.wallet().upsertPrimalWalletData(
