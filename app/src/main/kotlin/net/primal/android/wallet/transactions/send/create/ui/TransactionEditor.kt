@@ -19,9 +19,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
@@ -120,7 +122,8 @@ fun TransactionEditor(
                             .detectUiDensityModeFromMaxHeight()
                     }
                 }
-            },
+            }
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -289,6 +292,11 @@ private fun TransactionActionsRow(
                         UiDensityMode.Comfortable -> 8.dp
                         else -> 4.dp
                     }
+                },
+                top = when (uiMode) {
+                    UiDensityMode.Normal -> 0.dp
+                    UiDensityMode.Comfortable -> 4.dp
+                    else -> 8.dp
                 },
             ),
         horizontalArrangement = Arrangement.SpaceBetween,
