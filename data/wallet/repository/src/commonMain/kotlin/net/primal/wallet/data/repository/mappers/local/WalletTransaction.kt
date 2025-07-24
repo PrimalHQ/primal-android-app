@@ -39,96 +39,13 @@ private fun WalletTransactionPO.fromNostrTxToDomain(otherProfile: ProfileData?) 
 
 private fun WalletTransactionPO.fromPrimalTxToDomain(otherProfile: ProfileData?): TransactionDO =
     when {
-        this.primal?.isZap == true -> {
-            TransactionDO.Zap(
-                transactionId = this.info.transactionId,
-                walletId = this.info.walletId,
-                walletType = this.info.walletType,
-                type = this.info.type,
-                state = this.info.state,
-                createdAt = this.info.createdAt,
-                updatedAt = this.info.updatedAt,
-                completedAt = this.info.completedAt,
-                userId = this.info.userId,
-                note = this.info.note,
-                invoice = this.info.invoice,
-                amountInBtc = this.info.amountInBtc,
-                amountInUsd = this.primal?.amountInUsd,
-                exchangeRate = this.primal?.exchangeRate,
-                totalFeeInBtc = this.info.totalFeeInBtc,
-                otherUserId = this.primal?.otherUserId,
-                otherLightningAddress = this.primal?.otherLightningAddress,
-                zapNoteId = this.primal?.zapNoteId,
-                zapNoteAuthorId = this.primal?.zapNoteAuthorId,
-                zappedByUserId = this.primal?.zappedByUserId,
-                otherUserProfile = otherProfile,
-            )
-        }
+        this.primal?.isZap == true -> this.asZapTransactionDO(otherProfile = otherProfile)
 
-        this.primal?.isStorePurchase == true -> {
-            TransactionDO.StorePurchase(
-                transactionId = this.info.transactionId,
-                walletId = this.info.walletId,
-                walletType = this.info.walletType,
-                type = this.info.type,
-                state = this.info.state,
-                createdAt = this.info.createdAt,
-                updatedAt = this.info.updatedAt,
-                completedAt = this.info.completedAt,
-                userId = this.info.userId,
-                note = this.info.note,
-                invoice = this.info.invoice,
-                amountInBtc = this.info.amountInBtc,
-                amountInUsd = this.primal?.amountInUsd,
-                exchangeRate = this.primal?.exchangeRate,
-                totalFeeInBtc = this.info.totalFeeInBtc,
-            )
-        }
+        this.primal?.isStorePurchase == true -> this.asStorePurchaseTransactionDO()
 
-        this.primal?.onChainAddress != null -> {
-            TransactionDO.OnChain(
-                transactionId = this.info.transactionId,
-                walletId = this.info.walletId,
-                walletType = this.info.walletType,
-                type = this.info.type,
-                state = this.info.state,
-                createdAt = this.info.createdAt,
-                updatedAt = this.info.updatedAt,
-                completedAt = this.info.completedAt,
-                userId = this.info.userId,
-                note = this.info.note,
-                invoice = this.info.invoice,
-                amountInBtc = this.info.amountInBtc,
-                amountInUsd = this.primal?.amountInUsd,
-                exchangeRate = this.primal?.exchangeRate,
-                totalFeeInBtc = this.info.totalFeeInBtc,
-                onChainTxId = this.primal?.onChainTxId,
-                onChainAddress = this.primal?.onChainAddress,
-            )
-        }
+        this.primal?.onChainAddress != null -> this.asOnChainTransactionDO()
 
-        else -> {
-            TransactionDO.Lightning(
-                transactionId = this.info.transactionId,
-                walletId = this.info.walletId,
-                walletType = this.info.walletType,
-                type = this.info.type,
-                state = this.info.state,
-                createdAt = this.info.createdAt,
-                updatedAt = this.info.updatedAt,
-                completedAt = this.info.completedAt,
-                userId = this.info.userId,
-                note = this.info.note,
-                invoice = this.info.invoice,
-                amountInBtc = this.info.amountInBtc,
-                amountInUsd = this.primal?.amountInUsd,
-                exchangeRate = this.primal?.exchangeRate,
-                totalFeeInBtc = this.info.totalFeeInBtc,
-                otherUserId = this.primal?.otherUserId,
-                otherLightningAddress = this.primal?.otherLightningAddress,
-                otherUserProfile = otherProfile,
-            )
-        }
+        else -> this.asLightningTransaction(otherProfile = otherProfile)
     }
 
 internal fun TransactionDto.toWalletTransactionData() =
@@ -174,4 +91,91 @@ internal fun TransactionDto.NWC.toNostrTransactionData() =
         descriptionHash = this.descriptionHash,
         paymentHash = this.paymentHash,
         metadata = this.metadata,
+    )
+
+private fun WalletTransactionPO.asZapTransactionDO(otherProfile: ProfileData?) =
+    TransactionDO.Zap(
+        transactionId = this.info.transactionId,
+        walletId = this.info.walletId,
+        walletType = this.info.walletType,
+        type = this.info.type,
+        state = this.info.state,
+        createdAt = this.info.createdAt,
+        updatedAt = this.info.updatedAt,
+        completedAt = this.info.completedAt,
+        userId = this.info.userId,
+        note = this.info.note,
+        invoice = this.info.invoice,
+        amountInBtc = this.info.amountInBtc,
+        amountInUsd = this.primal?.amountInUsd,
+        exchangeRate = this.primal?.exchangeRate,
+        totalFeeInBtc = this.info.totalFeeInBtc,
+        otherUserId = this.primal?.otherUserId,
+        otherLightningAddress = this.primal?.otherLightningAddress,
+        zapNoteId = this.primal?.zapNoteId,
+        zapNoteAuthorId = this.primal?.zapNoteAuthorId,
+        zappedByUserId = this.primal?.zappedByUserId,
+        otherUserProfile = otherProfile,
+    )
+
+private fun WalletTransactionPO.asStorePurchaseTransactionDO() =
+    TransactionDO.StorePurchase(
+        transactionId = this.info.transactionId,
+        walletId = this.info.walletId,
+        walletType = this.info.walletType,
+        type = this.info.type,
+        state = this.info.state,
+        createdAt = this.info.createdAt,
+        updatedAt = this.info.updatedAt,
+        completedAt = this.info.completedAt,
+        userId = this.info.userId,
+        note = this.info.note,
+        invoice = this.info.invoice,
+        amountInBtc = this.info.amountInBtc,
+        amountInUsd = this.primal?.amountInUsd,
+        exchangeRate = this.primal?.exchangeRate,
+        totalFeeInBtc = this.info.totalFeeInBtc,
+    )
+
+private fun WalletTransactionPO.asOnChainTransactionDO() =
+    TransactionDO.OnChain(
+        transactionId = this.info.transactionId,
+        walletId = this.info.walletId,
+        walletType = this.info.walletType,
+        type = this.info.type,
+        state = this.info.state,
+        createdAt = this.info.createdAt,
+        updatedAt = this.info.updatedAt,
+        completedAt = this.info.completedAt,
+        userId = this.info.userId,
+        note = this.info.note,
+        invoice = this.info.invoice,
+        amountInBtc = this.info.amountInBtc,
+        amountInUsd = this.primal?.amountInUsd,
+        exchangeRate = this.primal?.exchangeRate,
+        totalFeeInBtc = this.info.totalFeeInBtc,
+        onChainTxId = this.primal?.onChainTxId,
+        onChainAddress = this.primal?.onChainAddress,
+    )
+
+private fun WalletTransactionPO.asLightningTransaction(otherProfile: ProfileData?) =
+    TransactionDO.Lightning(
+        transactionId = this.info.transactionId,
+        walletId = this.info.walletId,
+        walletType = this.info.walletType,
+        type = this.info.type,
+        state = this.info.state,
+        createdAt = this.info.createdAt,
+        updatedAt = this.info.updatedAt,
+        completedAt = this.info.completedAt,
+        userId = this.info.userId,
+        note = this.info.note,
+        invoice = this.info.invoice,
+        amountInBtc = this.info.amountInBtc,
+        amountInUsd = this.primal?.amountInUsd,
+        exchangeRate = this.primal?.exchangeRate,
+        totalFeeInBtc = this.info.totalFeeInBtc,
+        otherUserId = this.primal?.otherUserId,
+        otherLightningAddress = this.primal?.otherLightningAddress,
+        otherUserProfile = otherProfile,
     )
