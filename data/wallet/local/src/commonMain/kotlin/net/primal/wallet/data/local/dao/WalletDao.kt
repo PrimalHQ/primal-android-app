@@ -27,6 +27,12 @@ interface WalletDao {
     @Query("SELECT walletId FROM ActiveWalletData WHERE userId = :userId")
     fun observeActiveWalletId(userId: String): Flow<String?>
 
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertOrIgnoreWalletInfo(info: WalletInfo)
+
+    @Query("UPDATE WalletInfo SET lightningAddress = :lightningAddress WHERE walletId = :walletId")
+    suspend fun updateWalletLightningAddress(walletId: String, lightningAddress: String?)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertWalletInfo(info: WalletInfo)
 
