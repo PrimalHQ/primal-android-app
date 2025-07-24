@@ -160,6 +160,9 @@ class WalletSettingsViewModel @AssistedInject constructor(
         }
 
     private suspend fun disconnectWallet() {
+        state.value.wallet?.walletId?.let { walletId ->
+            walletRepository.deleteWalletById(walletId = walletId)
+        }
         walletAccountRepository.clearActiveWallet(userId = activeAccountStore.activeUserId())
     }
 
