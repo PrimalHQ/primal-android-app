@@ -50,6 +50,22 @@ interface WalletDao {
         maxBalanceInBtc: Double?,
     )
 
+    @Query("DELETE FROM WalletInfo WHERE walletId = :walletId")
+    suspend fun deleteWalletInfoById(walletId: String)
+
+    @Query("DELETE FROM PrimalWalletData WHERE walletId = :walletId")
+    suspend fun deletePrimalWalletById(walletId: String)
+
+    @Query("DELETE FROM NostrWalletData WHERE walletId = :walletId")
+    suspend fun deleteNostrWalletById(walletId: String)
+
+    @Transaction
+    suspend fun deleteWalletById(walletId: String) {
+        deleteWalletInfoById(walletId = walletId)
+        deleteNostrWalletById(walletId = walletId)
+        deletePrimalWalletById(walletId = walletId)
+    }
+
     @Query("SELECT * FROM WalletInfo WHERE walletId = :walletId")
     suspend fun findWalletInfo(walletId: String): WalletInfo?
 
