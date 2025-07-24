@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
+import android.view.View
 import android.widget.Toast
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -21,7 +22,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -87,6 +87,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.immersive.ImmersiveModeState
 import net.primal.android.core.compose.immersive.rememberImmersiveModeState
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
@@ -185,7 +186,7 @@ private fun EventMediaGalleryScreen(
                 attachments = state.attachments,
                 pagerIndicatorContainerColor = containerColor,
                 onCurrentlyVisibleBitmap = { mediaItemBitmap = it },
-                toggleImmersiveMode = { immersiveMode?.toggle() },
+                immersiveMode = immersiveMode,
             )
         },
         snackbarHost = {
@@ -252,7 +253,7 @@ private fun MediaGalleryContent(
     initialPositionMs: Long,
     attachments: List<EventUriUi>,
     pagerIndicatorContainerColor: Color,
-    toggleImmersiveMode: () -> Unit,
+    immersiveMode: ImmersiveModeState?,
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
     val context = LocalContext.current
@@ -324,7 +325,7 @@ private fun MediaGalleryContent(
                     attachments = attachments,
                     pagerState = pagerState,
                     onCurrentlyVisibleBitmap = onCurrentlyVisibleBitmap,
-                    toggleImmersiveMode = toggleImmersiveMode,
+                    immersiveMode = immersiveMode,
                     exoPlayer = player,
                     initialIndex = initialAttachmentIndex,
                     initialPositionMs = initialPositionMs,
@@ -472,7 +473,7 @@ private fun MediaCopyMenuItem(onMediaCopyClick: () -> Unit) {
 private fun AttachmentsHorizontalPager(
     pagerState: PagerState,
     attachments: List<EventUriUi>,
-    toggleImmersiveMode: () -> Unit,
+    immersiveMode: ImmersiveModeState?,
     exoPlayer: ExoPlayer,
     modifier: Modifier = Modifier,
     initialIndex: Int = 0,
@@ -496,18 +497,17 @@ private fun AttachmentsHorizontalPager(
                         modifier = Modifier.fillMaxSize(),
                         attachment = attachment,
                         onImageBitmapLoaded = { onCurrentlyVisibleBitmap?.invoke(it) },
-                        toggleImmersiveMode = toggleImmersiveMode,
+                        immersiveMode = immersiveMode,
                     )
                 }
 
                 EventUriType.Video -> {
                     VideoScreen(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .navigationBarsPadding(),
+                        modifier = Modifier.fillMaxSize(),
                         exoPlayer = exoPlayer,
                         positionMs = initialPositionMs,
                         isPageVisible = pagerState.currentPage == index,
+                        immersiveMode = immersiveMode,
                     )
                 }
 
@@ -525,7 +525,7 @@ private fun AttachmentsHorizontalPager(
 private fun ImageScreen(
     attachment: EventUriUi,
     onImageBitmapLoaded: (Bitmap?) -> Unit,
-    toggleImmersiveMode: () -> Unit,
+    immersiveMode: ImmersiveModeState?,
     modifier: Modifier = Modifier,
 ) {
     var loadedBitmap by remember { mutableStateOf<Bitmap?>(null) }
@@ -566,7 +566,7 @@ private fun ImageScreen(
         zoomState = zoomState,
         imageLoader = imageLoader,
         modifier = modifier,
-        onTap = { toggleImmersiveMode() },
+        onTap = { immersiveMode?.toggle() },
         model = ImageRequest.Builder(LocalContext.current)
             .data(attachment.url)
             .placeholderMemoryCacheKey(placeholderKey)
@@ -604,10 +604,17 @@ fun VideoScreen(
     isPageVisible: Boolean,
     positionMs: Long,
     modifier: Modifier = Modifier,
+    immersiveMode: ImmersiveModeState?,
 ) {
     var isBuffering by remember { mutableStateOf(false) }
     if (isPageVisible) {
         KeepScreenOn()
+    }
+
+    LaunchedEffect(isPageVisible, immersiveMode) {
+        if (isPageVisible) {
+            immersiveMode?.hide()
+        }
     }
 
     LifecycleStartEffect(exoPlayer, isPageVisible) {
@@ -630,6 +637,7 @@ fun VideoScreen(
     LaunchedEffect(playerView, isPageVisible) {
         if (isPageVisible) {
             playerView?.player = exoPlayer
+            playerView?.showController()
         }
     }
 
@@ -639,12 +647,26 @@ fun VideoScreen(
             factory = { context ->
                 PlayerView(context).apply {
                     useController = true
-                    controllerShowTimeoutMs = 1.seconds.inWholeMilliseconds.toInt()
+                    controllerShowTimeoutMs = 4.seconds.inWholeMilliseconds.toInt()
                     setShowNextButton(false)
                     setShowPreviousButton(false)
+                    setControllerAnimationEnabled(false)
                 }.also {
                     playerView = it
                 }
+            },
+            update = { view ->
+                view.setControllerVisibilityListener(
+                    PlayerView.ControllerVisibilityListener { visibility ->
+                        if (isPageVisible) {
+                            if (visibility == View.VISIBLE) {
+                                immersiveMode?.hide()
+                            } else {
+                                immersiveMode?.show()
+                            }
+                        }
+                    },
+                )
             },
             onRelease = { view ->
                 view.player = null
