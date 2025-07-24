@@ -1,6 +1,7 @@
 package net.primal.wallet.data.repository
 
 import androidx.paging.ExperimentalPagingApi
+import androidx.paging.LoadType
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -9,6 +10,8 @@ import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
@@ -25,18 +28,20 @@ import net.primal.domain.wallet.WalletPayParams
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.db.withTransaction
+import net.primal.shared.data.repository.paging.PrimalMediator
+import net.primal.wallet.data.handler.TransactionsHandler
 import net.primal.wallet.data.handler.factory.HandlerFactory
 import net.primal.wallet.data.local.dao.NostrWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletTransaction
 import net.primal.wallet.data.local.db.WalletDatabase
+import net.primal.wallet.data.model.TransactionsRequest
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.DepositRequestBody
 import net.primal.wallet.data.repository.mappers.local.toDomain
 import net.primal.wallet.data.repository.mappers.local.toWithdrawRequestDTO
 import net.primal.wallet.data.repository.mappers.remote.asLightingInvoiceResultDO
-import net.primal.wallet.data.repository.transactions.WalletTransactionsMediator
 import net.primal.wallet.data.service.WalletService
 
 @OptIn(ExperimentalPagingApi::class)
@@ -206,25 +211,104 @@ internal class WalletRepositoryImpl(
     private fun createTransactionsPager(
         walletId: String,
         pagingSourceFactory: () -> PagingSource<Int, WalletTransaction>,
-    ) = Pager(
-        config = PagingConfig(
-            pageSize = 50,
-            prefetchDistance = 100,
-            initialLoadSize = 200,
-            enablePlaceholders = true,
-        ),
-        remoteMediator = WalletTransactionsMediator(
-            walletId = walletId,
-            dispatcherProvider = dispatcherProvider,
-            transactionsHandler = HandlerFactory.createTransactionsHandler(
-                dispatchers = dispatcherProvider,
-                primalWalletService = primalWalletService,
-                nostrWalletService = nostrWalletService,
-                walletDatabase = walletDatabase,
-                profileRepository = profileRepository,
+    ): Pager<Int, WalletTransaction> {
+        return Pager(
+            config = PagingConfig(
+                pageSize = 20,
+                prefetchDistance = 20,
+                initialLoadSize = 40,
+                enablePlaceholders = false,
             ),
+            remoteMediator = PrimalMediator(
+                dispatcherProvider = dispatcherProvider,
+                clearKeysAndConnections = {
+                    walletDatabase.withTransaction {
+                        walletDatabase.walletConnections().deleteAllRemoteKeysByWalletId(walletId = walletId)
+                        walletDatabase.walletConnections().deleteAllCrossRefsByWalletId(walletId = walletId)
+                    }
+                },
+                getLatestRemoteKey = {
+                    walletDatabase.walletConnections().findLatestRemoteKeyByWalletId(walletId = walletId)
+                },
+                findLastItemRemoteKey = { state ->
+                    val lastItemId = state.lastItemOrNull()?.info?.transactionId
+                        ?: walletDatabase.walletConnections()
+                            .findLatestCrossRefByWalletId(walletId = walletId)?.transactionId
+
+                    lastItemId?.let {
+                        walletDatabase.walletConnections().findByTransactionId(transactionId = it, walletId = walletId)
+                    }
+                },
+                buildRequest = { until, config, loadType ->
+                    val wallet = withContext(dispatcherProvider.io()) {
+                        walletDatabase.wallet().findWallet(walletId = walletId)
+                    }
+                        ?: return@PrimalMediator Result.failure(IllegalArgumentException("No wallet found with given walletId."))
+
+                    return@PrimalMediator Result.success(
+                        when (wallet.info.type) {
+                            WalletType.PRIMAL -> {
+                                TransactionsRequest.Primal(
+                                    subWallet = SubWallet.Open,
+                                    minAmountInBtc = wallet.settings?.spamThresholdAmountInSats?.toBtc()
+                                        ?.formatAsString(),
+                                    limit = if (loadType == LoadType.REFRESH) {
+                                        config.initialLoadSize
+                                    } else {
+                                        config.pageSize
+                                    },
+                                    since = null,
+                                    until = until,
+                                )
+                            }
+
+                            WalletType.NWC -> {
+                                TransactionsRequest.NWC(
+                                    limit = if (loadType == LoadType.REFRESH) {
+                                        config.initialLoadSize
+                                    } else {
+                                        config.pageSize
+                                    },
+                                    since = null,
+                                    until = until,
+                                )
+                            }
+                        },
+                    )
+                },
+                fetchAndPersistToDatabase = { request ->
+                    val wallet = withContext(dispatcherProvider.io()) {
+                        walletDatabase.wallet().findWallet(walletId = walletId)
+                    } ?: return@PrimalMediator Result.failure<Unit>(IllegalArgumentException("No wallet found."))
+
+                    createTransactionsHandler().fetchAndPersistLatestTransactions(
+                        wallet = wallet.toDomain(),
+                        request = request,
+                    )
+                },
+            ),
+//        remoteMediator = WalletTransactionsMediator(
+//            walletId = walletId,
+//            dispatcherProvider = dispatcherProvider,
+//            transactionsHandler = HandlerFactory.createTransactionsHandler(
+//                dispatchers = dispatcherProvider,
+//                primalWalletService = primalWalletService,
+//                nostrWalletService = nostrWalletService,
+//                walletDatabase = walletDatabase,
+//                profileRepository = profileRepository,
+//            ),
+//            walletDatabase = walletDatabase,
+//        ),
+            pagingSourceFactory = pagingSourceFactory,
+        )
+    }
+
+    private fun createTransactionsHandler(): TransactionsHandler =
+        HandlerFactory.createTransactionsHandler(
+            dispatchers = dispatcherProvider,
+            primalWalletService = primalWalletService,
+            nostrWalletService = nostrWalletService,
             walletDatabase = walletDatabase,
-        ),
-        pagingSourceFactory = pagingSourceFactory,
-    )
+            profileRepository = profileRepository,
+        )
 }

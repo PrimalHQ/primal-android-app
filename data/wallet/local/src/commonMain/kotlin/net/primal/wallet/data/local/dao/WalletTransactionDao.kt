@@ -19,14 +19,26 @@ interface WalletTransactionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAllNostrTransactions(data: List<NostrTransactionData>)
 
+//    @Query(
+//        """
+//            SELECT * FROM WalletTransactionData
+//            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED") AND walletId IS :walletId
+//            ORDER BY updatedAt DESC
+//        """,
+//    )
     @Query(
         """
-            SELECT * FROM WalletTransactionData 
-            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED") AND walletId IS :walletId
-            ORDER BY updatedAt DESC
+            SELECT t.*
+            FROM WalletTransactionData t
+            INNER JOIN WalletTransactionCrossRef cr
+                ON cr.transactionId = t.transactionId
+            WHERE t.walletId = :walletId
+            ORDER BY cr.position ASC
         """,
     )
     fun latestTransactionsPagedByWalletId(walletId: String): PagingSource<Int, WalletTransaction>
+
+
 
     @Query("SELECT * FROM WalletTransactionData WHERE walletId IS :walletId ORDER BY updatedAt ASC LIMIT 1")
     suspend fun firstByWalletId(walletId: String): WalletTransactionData?

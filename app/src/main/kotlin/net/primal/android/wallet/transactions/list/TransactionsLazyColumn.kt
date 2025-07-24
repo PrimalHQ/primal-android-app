@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -30,7 +29,7 @@ import net.primal.domain.wallet.CurrencyMode
 @Composable
 fun TransactionsLazyColumn(
     modifier: Modifier,
-    pagingItems: LazyPagingItems<TransactionListItemDataUi>,
+    pagingItems: LazyPagingItems<TransactionListItemUi>,
     listState: LazyListState,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
@@ -56,37 +55,36 @@ fun TransactionsLazyColumn(
             }
         }
 
-        pagingItems.itemSnapshotList.items.groupBy {
-            it.txUpdatedAt.formatDay(
-                todayTranslation = today,
-                yesterdayTranslation = yesterday,
-            )
-        }.forEach { (day, dayTransactions) ->
-            stickyHeader(
-                key = day,
-                contentType = "DayHeader",
-            ) {
-                TransactionsHeaderListItem(
-                    modifier = Modifier
-                        .background(color = AppTheme.colorScheme.surfaceVariant)
-                        .fillMaxWidth(),
-                    day = day,
-                )
-            }
+        for (index in 0 until pagingItems.itemCount) {
+            when (val item = pagingItems[index]) {
+                is TransactionListItemUi.Header -> {
+                    stickyHeader(
+                        key = item.day,
+                        contentType = "DayHeader",
+                    ) {
+                        TransactionsHeaderListItem(
+                            modifier = Modifier
+                                .background(color = AppTheme.colorScheme.surfaceVariant)
+                                .fillMaxWidth(),
+                            day = item.day,
+                        )
+                    }
+                }
 
-            items(
-                items = dayTransactions,
-                key = { it.txId },
-                contentType = { "Transaction" },
-            ) {
-                TransactionListItem(
-                    data = it,
-                    numberFormat = numberFormat,
-                    onAvatarClick = onProfileClick,
-                    onClick = onTransactionClick,
-                    currencyMode = currencyMode,
-                    exchangeBtcUsdRate = exchangeBtcUsdRate,
-                )
+                is TransactionListItemUi.TxData -> {
+                    item(key = item.txId) {
+                        TransactionListItem(
+                            data = item,
+                            numberFormat = numberFormat,
+                            onAvatarClick = onProfileClick,
+                            onClick = onTransactionClick,
+                            currencyMode = currencyMode,
+                            exchangeBtcUsdRate = exchangeBtcUsdRate,
+                        )
+                    }
+                }
+
+                null -> Unit
             }
         }
 

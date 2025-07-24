@@ -80,6 +80,7 @@ whyoleg-cryptography-kotlin = "0.4.0"
 zoomimage-compose-coil3 = "1.3.0"
 uiautomator = "2.3.0"
 benchmark-macro-junit4 = "1.4.0-rc01"
+kotlin-stdlib = "2.1.21"
 
 [libraries]
 # Core libs
@@ -291,6 +292,7 @@ kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-t
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 androidx-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmark-macro-junit4" }
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin-stdlib" }
 
 [bundles]
 hilt = ["hilt-android", "navigation-hilt"]

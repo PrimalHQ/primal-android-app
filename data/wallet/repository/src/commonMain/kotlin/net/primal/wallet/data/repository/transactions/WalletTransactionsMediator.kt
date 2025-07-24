@@ -80,13 +80,21 @@ class WalletTransactionsMediator internal constructor(
             WalletType.PRIMAL -> TransactionsRequest.Primal(
                 subWallet = SubWallet.Open,
                 minAmountInBtc = walletSettings?.spamThresholdAmountInSats?.toBtc()?.formatAsString(),
-                limit = state.config.pageSize,
+                limit = if (loadType == LoadType.REFRESH) {
+                    state.config.initialLoadSize
+                } else {
+                    state.config.pageSize
+                },
                 since = timestamps.first,
                 until = timestamps.second,
             )
 
             WalletType.NWC -> TransactionsRequest.NWC(
-                limit = state.config.pageSize,
+                limit = if (loadType == LoadType.REFRESH) {
+                    state.config.initialLoadSize
+                } else {
+                    state.config.pageSize
+                },
                 since = timestamps.first,
                 until = timestamps.second,
             )
@@ -105,7 +113,7 @@ class WalletTransactionsMediator internal constructor(
             Napier.d { "Transactions fetched and persisted. Continuing." }
             lastRequests[loadType] = request
         }.onFailure {
-            Napier.d { "Error occurred while fetching transactions. Exiting with Error." }
+            Napier.d(throwable = it) { "Error occurred while fetching transactions. Exiting with Error." }
         }.fold(
             onSuccess = { MediatorResult.Success(endOfPaginationReached = false) },
             onFailure = { MediatorResult.Error(it) },

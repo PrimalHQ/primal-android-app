@@ -43,6 +43,7 @@ kotlin {
                 implementation(project(":domain:wallet"))
 
                 api(project(":data:shared:local"))
+                api(project(":data:shared:repository"))
 
                 // Logging
                 implementation(libs.napier)

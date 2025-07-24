@@ -1,5 +1,7 @@
 import java.net.URI
 
+include(":data:shared:repository")
+
 pluginManagement {
     repositories {
         gradlePluginPortal()

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "ba3802bd835d30fb56dfee1f3ed2c6b4",
+    "identityHash": "8b4da2aa81fe1115b126d476b724d314",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -389,11 +389,96 @@
             "walletId"
           ]
         }
+      },
+      {
+        "tableName": "WalletTransactionRemoteKey",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `sinceId` INTEGER NOT NULL, `untilId` INTEGER NOT NULL, `cachedAt` INTEGER NOT NULL, PRIMARY KEY(`transactionId`, `walletId`))",
+        "fields": [
+          {
+            "fieldPath": "transactionId",
+            "columnName": "transactionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "walletId",
+            "columnName": "walletId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sinceId",
+            "columnName": "sinceId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "untilId",
+            "columnName": "untilId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cachedAt",
+            "columnName": "cachedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "transactionId",
+            "walletId"
+          ]
+        }
+      },
+      {
+        "tableName": "WalletTransactionCrossRef",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`position` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `walletId` TEXT NOT NULL, `transactionId` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "walletId",
+            "columnName": "walletId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transactionId",
+            "columnName": "transactionId",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "position"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_WalletTransactionCrossRef_walletId_transactionId",
+            "unique": true,
+            "columnNames": [
+              "walletId",
+              "transactionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_WalletTransactionCrossRef_walletId_transactionId` ON `${TABLE_NAME}` (`walletId`, `transactionId`)"
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ba3802bd835d30fb56dfee1f3ed2c6b4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8b4da2aa81fe1115b126d476b724d314')"
     ]
   }
 }

@@ -11,12 +11,15 @@ import net.primal.wallet.data.local.dao.NostrTransactionData
 import net.primal.wallet.data.local.dao.NostrWalletData
 import net.primal.wallet.data.local.dao.PrimalTransactionData
 import net.primal.wallet.data.local.dao.PrimalWalletData
+import net.primal.wallet.data.local.dao.WalletConnectionsDao
 import net.primal.wallet.data.local.dao.WalletDao
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletSettingsDao
+import net.primal.wallet.data.local.dao.WalletTransactionCrossRef
 import net.primal.wallet.data.local.dao.WalletTransactionDao
 import net.primal.wallet.data.local.dao.WalletTransactionData
+import net.primal.wallet.data.local.dao.WalletTransactionRemoteKey
 
 @Database(
     entities = [
@@ -28,6 +31,8 @@ import net.primal.wallet.data.local.dao.WalletTransactionData
         PrimalTransactionData::class,
         NostrTransactionData::class,
         WalletSettings::class,
+        WalletTransactionRemoteKey::class,
+        WalletTransactionCrossRef::class,
     ],
     version = 1,
     exportSchema = true,
@@ -38,6 +43,7 @@ abstract class WalletDatabase : RoomDatabase() {
     abstract fun wallet(): WalletDao
     abstract fun walletTransactions(): WalletTransactionDao
     abstract fun walletSettings(): WalletSettingsDao
+    abstract fun walletConnections(): WalletConnectionsDao
 }
 
 // The Room compiler generates the `actual` implementations.

@@ -90,6 +90,7 @@ internal class NwcClientImpl(
                         nwcRelaySocketClient.incomingMessages.filterBySubscriptionId(id = listenerId).collect {
                             if (it is NostrIncomingMessage.EventMessage) {
                                 it.nostrEvent?.let { event ->
+                                    Napier.d(tag = "paging") { "Got event $event" }
                                     resultDeferred.complete(event)
                                 }
                             }
@@ -115,9 +116,14 @@ internal class NwcClientImpl(
                 )
                 val parsed = CommonJson.decodeFromString<NwcResponseContent<R>>(decrypted)
                 parsed.result?.let {
+                    Napier.d(tag = "paging") { "Success! Result: $it" }
                     Result.success(it)
-                } ?: Result.failure(NetworkException("NWC Error: ${parsed.error?.message}"))
+                } ?: run {
+                    Napier.d(tag = "paging") { "NWC Error: ${parsed.error?.message}" }
+                    Result.failure(NetworkException("NWC Error: ${parsed.error?.message}"))
+                }
             } else {
+                Napier.d(tag = "paging") { "No response event received." }
                 Result.failure(NetworkException("No response event received."))
             }
         } catch (e: Exception) {

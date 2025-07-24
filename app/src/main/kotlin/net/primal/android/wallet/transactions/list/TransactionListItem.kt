@@ -73,7 +73,7 @@ import net.primal.domain.wallet.TxType
 
 @Composable
 fun TransactionListItem(
-    data: TransactionListItemDataUi,
+    data: TransactionListItemUi.TxData,
     numberFormat: NumberFormat,
     onAvatarClick: (String) -> Unit,
     onClick: (String) -> Unit,
@@ -313,10 +313,10 @@ private fun Instant.formatAsTime(): String {
     return formatter.format(this.atZone(ZoneId.systemDefault()))
 }
 
-class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
-    override val values: Sequence<TransactionListItemDataUi>
+class TxDataProvider : PreviewParameterProvider<TransactionListItemUi> {
+    override val values: Sequence<TransactionListItemUi>
         get() = sequenceOf(
-            TransactionListItemDataUi(
+            TransactionListItemUi.TxData(
                 txId = "123",
                 txType = TxType.DEPOSIT,
                 txState = TxState.SUCCEEDED,
@@ -331,7 +331,7 @@ class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
                 isStorePurchase = true,
                 isOnChainPayment = false,
             ),
-            TransactionListItemDataUi(
+            TransactionListItemUi.TxData(
                 txId = "123",
                 txType = TxType.DEPOSIT,
                 txState = TxState.SUCCEEDED,
@@ -346,7 +346,7 @@ class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
                 isStorePurchase = false,
                 isOnChainPayment = false,
             ),
-            TransactionListItemDataUi(
+            TransactionListItemUi.TxData(
                 txId = "123",
                 txType = TxType.WITHDRAW,
                 txState = TxState.SUCCEEDED,
@@ -361,7 +361,7 @@ class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
                 isStorePurchase = false,
                 isOnChainPayment = false,
             ),
-            TransactionListItemDataUi(
+            TransactionListItemUi.TxData(
                 txId = "123",
                 txType = TxType.DEPOSIT,
                 txState = TxState.SUCCEEDED,
@@ -376,7 +376,7 @@ class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
                 isStorePurchase = false,
                 isOnChainPayment = true,
             ),
-            TransactionListItemDataUi(
+            TransactionListItemUi.TxData(
                 txId = "123",
                 txType = TxType.DEPOSIT,
                 txState = TxState.SUCCEEDED,
@@ -391,7 +391,7 @@ class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
                 isStorePurchase = false,
                 isOnChainPayment = false,
             ),
-            TransactionListItemDataUi(
+            TransactionListItemUi.TxData(
                 txId = "123",
                 txType = TxType.WITHDRAW,
                 txState = TxState.SUCCEEDED,
@@ -406,7 +406,7 @@ class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
                 isStorePurchase = false,
                 isOnChainPayment = false,
             ),
-            TransactionListItemDataUi(
+            TransactionListItemUi.TxData(
                 txId = "123",
                 txType = TxType.DEPOSIT,
                 txState = TxState.SUCCEEDED,
@@ -421,7 +421,7 @@ class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
                 isStorePurchase = false,
                 isOnChainPayment = false,
             ),
-            TransactionListItemDataUi(
+            TransactionListItemUi.TxData(
                 txId = "123",
                 txType = TxType.WITHDRAW,
                 txState = TxState.SUCCEEDED,
@@ -441,7 +441,7 @@ class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
 
 @Preview
 @Composable
-fun PreviewTransactionListItem(@PreviewParameter(provider = TxDataProvider::class) tx: TransactionListItemDataUi) {
+fun PreviewTransactionListItem(@PreviewParameter(provider = TxDataProvider::class) tx: TransactionListItemUi.TxData) {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
         Surface {
             TransactionListItem(

@@ -3,10 +3,16 @@ package net.primal.android.wallet.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import androidx.paging.insertSeparators
 import androidx.paging.map
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,7 +32,7 @@ import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
-import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
+import net.primal.android.wallet.transactions.list.TransactionListItemUi
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.getIfTypeOrNull
@@ -92,7 +98,8 @@ class WalletDashboardViewModel @Inject constructor(
                         copy(
                             transactions = walletRepository
                                 .latestTransactions(walletId = walletId)
-                                .mapAsPagingDataOfTransactionUi(),
+                                .mapAsPagingDataOfTransactionUi()
+                                .cachedIn(viewModelScope),
                         )
                     }
                 }
@@ -194,9 +201,32 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun Flow<PagingData<Transaction>>.mapAsPagingDataOfTransactionUi() =
         map { pagingData -> pagingData.map { it.mapAsTransactionDataUi() } }
+            .map { pagingData ->
+                pagingData.insertSeparators { before, after ->
+                    when {
+                        before == null && after != null ->
+                            TransactionListItemUi.Header(
+                                day = after.txUpdatedAt.formatDay(
+                                    todayTranslation = "today",
+                                    yesterdayTranslation = "yesterday",
+                                ),
+                            )
+
+                        before is TransactionListItemUi.TxData && after is TransactionListItemUi.TxData &&
+                            !isOnSameDay(before.txUpdatedAt, after.txUpdatedAt) -> {
+                            TransactionListItemUi.Header(after.txUpdatedAt.formatDay("today", "yesterday"))
+                        }
+
+                        else -> null
+                    }
+                }
+            }
+
+    private fun isOnSameDay(first: Instant, second: Instant) =
+        first.formatDay("today", "yesterday") == second.formatDay("today", "yesterday")
 
     private fun Transaction.mapAsTransactionDataUi() =
-        TransactionListItemDataUi(
+        TransactionListItemUi.TxData(
             txId = this.transactionId,
             txType = this.type,
             txState = this.state,
@@ -219,4 +249,18 @@ class WalletDashboardViewModel @Inject constructor(
                 ?: this.getIfTypeOrNull(Transaction.Lightning::otherUserProfile)
                     ?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
         )
+
+    private fun Instant.formatDay(todayTranslation: String, yesterdayTranslation: String): String {
+        val zoneId = ZoneId.systemDefault()
+        val zonedDateTime: ZonedDateTime = this.atZone(zoneId)
+        val now = ZonedDateTime.now(zoneId)
+
+        return if (now.toLocalDate() == zonedDateTime.toLocalDate()) {
+            todayTranslation
+        } else if (now.minusDays(1).toLocalDate() == zonedDateTime.toLocalDate()) {
+            yesterdayTranslation
+        } else {
+            zonedDateTime.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
+        }
+    }
 }

@@ -17,9 +17,9 @@ import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletType
-import net.primal.wallet.data.model.TransactionsRequest
 import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.wallet.data.model.Transaction
+import net.primal.wallet.data.model.TransactionsRequest
 import net.primal.wallet.data.service.WalletService
 import net.primal.wallet.data.service.mappers.asNO
 

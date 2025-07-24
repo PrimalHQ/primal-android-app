@@ -5,13 +5,13 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.user.domain.Badges
-import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
+import net.primal.android.wallet.transactions.list.TransactionListItemUi
 import net.primal.domain.links.CdnImage
 import net.primal.domain.wallet.Wallet
 
 interface WalletDashboardContract {
     data class UiState(
-        val transactions: Flow<PagingData<TransactionListItemDataUi>> = emptyFlow(),
+        val transactions: Flow<PagingData<TransactionListItemUi>> = emptyFlow(),
         val isNpubLogin: Boolean = false,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,

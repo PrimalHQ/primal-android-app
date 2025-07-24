@@ -44,6 +44,7 @@ kotlin {
                 implementation(project(":domain:primal"))
                 implementation(project(":domain:wallet"))
 
+                implementation(project(":data:shared:repository"))
                 implementation(project(":data:wallet:local"))
                 implementation(project(":data:wallet:remote-primal"))
                 implementation(project(":data:wallet:remote-nwc"))
