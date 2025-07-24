@@ -59,6 +59,11 @@ internal class WalletRepositoryImpl(
             )
         }
 
+    override suspend fun deleteWalletById(walletId: String) =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet().deleteWalletById(walletId = walletId)
+        }
+
     override suspend fun upsertNostrWallet(userId: String, wallet: Wallet.NWC) =
         withContext(dispatcherProvider.io()) {
             walletDatabase.withTransaction {
