@@ -3,7 +3,7 @@ package net.primal.android.core.compose
 import android.content.pm.ActivityInfo
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun LockToOrientationPortrait() = LockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
@@ -18,7 +18,7 @@ fun UnlockScreenOrientation() = LockScreenOrientation(ActivityInfo.SCREEN_ORIENT
 fun LockScreenOrientation(orientation: Int) {
     val activity = LocalActivity.current
     if (activity != null) {
-        SideEffect {
+        LaunchedEffect(orientation) {
             activity.requestedOrientation = orientation
         }
     }
