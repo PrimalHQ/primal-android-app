@@ -37,7 +37,7 @@ fun List<ArticleContentSegment>.replaceProfileNostrUrisWithMarkdownLinks(npubToD
             is ArticleContentSegment.Text -> ArticleContentSegment.Text(
                 content = it.content.replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap),
             )
-            is ArticleContentSegment.Image -> it
+            is ArticleContentSegment.Media -> it
         }
     }
 
@@ -91,9 +91,9 @@ fun String.splitMarkdownByInlineImages(): List<ArticleContentSegment> {
         val simpleImageUrl = match.groups[SIMPLE_IMAGE_URL_GROUP_INDEX]?.value
 
         if (linkedImageUrl != null && linkUrl != null) {
-            result.add(ArticleContentSegment.Image(imageUrl = linkedImageUrl, linkUrl = linkUrl))
+            result.add(ArticleContentSegment.Media(mediaUrl = linkedImageUrl, linkUrl = linkUrl))
         } else if (simpleImageUrl != null) {
-            result.add(ArticleContentSegment.Image(imageUrl = simpleImageUrl))
+            result.add(ArticleContentSegment.Media(mediaUrl = simpleImageUrl))
         }
 
         lastEndIndex = match.range.last + 1

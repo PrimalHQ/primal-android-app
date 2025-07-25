@@ -922,12 +922,12 @@ private fun List<ArticleContentSegment>.buildArticleRenderParts(
                     else -> ArticlePartRender.MarkdownRender(markdown = content)
                 }
             }
-            is ArticleContentSegment.Image -> {
-                if (part.imageUrl.isValidHttpOrHttpsUrl()) {
-                    if (part.imageUrl.isVideoUrl()) {
-                        ArticlePartRender.VideoRender(videoUrl = part.imageUrl)
+            is ArticleContentSegment.Media -> {
+                if (part.mediaUrl.isValidHttpOrHttpsUrl()) {
+                    if (part.mediaUrl.isVideoUrl()) {
+                        ArticlePartRender.VideoRender(videoUrl = part.mediaUrl)
                     } else {
-                        ArticlePartRender.ImageRender(imageUrl = part.imageUrl, linkUrl = part.linkUrl)
+                        ArticlePartRender.ImageRender(imageUrl = part.mediaUrl, linkUrl = part.linkUrl)
                     }
                 } else {
                     null
