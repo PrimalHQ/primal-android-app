@@ -101,6 +101,7 @@ import net.primal.android.thread.articles.details.ui.ArticleDetailsHeader
 import net.primal.android.thread.articles.details.ui.ArticleHashtags
 import net.primal.android.thread.articles.details.ui.FloatingArticlePill
 import net.primal.android.thread.articles.details.ui.HighlightActivityBottomSheet
+import net.primal.android.thread.articles.details.ui.model.ArticleContentSegment
 import net.primal.android.thread.articles.details.ui.rendering.MarkdownRenderer
 import net.primal.android.thread.articles.details.ui.rendering.handleArticleLinkClick
 import net.primal.android.thread.articles.details.ui.rendering.isValidHttpOrHttpsUrl
@@ -709,17 +710,21 @@ private fun ArticleContentWithComments(
                                 .padding(horizontal = 16.dp, vertical = 8.dp)
                                 .clip(AppTheme.shapes.medium)
                                 .clickable {
-                                    state.article?.eventId?.let {
-                                        MediaClickEvent(
-                                            noteId = it,
-                                            eventUriType = EventUriType.Image,
-                                            mediaUrl = part.imageUrl,
-                                            positionMs = 0L,
-                                        )
-                                    }?.let {
-                                        noteCallbacks.onMediaClick?.invoke(
-                                            it,
-                                        )
+                                    if (part.linkUrl != null) {
+                                        uriHandler.openUriSafely(part.linkUrl)
+                                    } else {
+                                        state.article?.eventId?.let {
+                                            MediaClickEvent(
+                                                noteId = it,
+                                                eventUriType = EventUriType.Image,
+                                                mediaUrl = part.imageUrl,
+                                                positionMs = 0L,
+                                            )
+                                        }?.let {
+                                            noteCallbacks.onMediaClick?.invoke(
+                                                it,
+                                            )
+                                        }
                                     }
                                 },
                             model = part.imageUrl,
@@ -900,24 +905,34 @@ private fun CommentsHeaderSection(modifier: Modifier, onPostCommentClick: () -> 
     }
 }
 
-private fun List<String>.buildArticleRenderParts(referencedNotes: List<FeedPostUi>): List<ArticlePartRender> {
-    return this.map { part ->
-        when {
-            part.isNostrNote() -> {
-                referencedNotes.find { it.postId == part.takeAsNoteHexIdOrNull() }
-                    ?.let { ArticlePartRender.NoteRender(note = it) }
-                    ?: ArticlePartRender.MarkdownRender(markdown = part)
-            }
-
-            part.isValidHttpOrHttpsUrl() -> {
-                if (part.isVideoUrl()) {
-                    ArticlePartRender.VideoRender(videoUrl = part)
-                } else {
-                    ArticlePartRender.ImageRender(imageUrl = part)
+private fun List<ArticleContentSegment>.buildArticleRenderParts(
+    referencedNotes: List<FeedPostUi>,
+): List<ArticlePartRender> {
+    return this.mapNotNull { part ->
+        when (part) {
+            is ArticleContentSegment.Text -> {
+                val content = part.content
+                if (content.isBlank()) return@mapNotNull null
+                when {
+                    content.isNostrNote() -> {
+                        referencedNotes.find { it.postId == content.takeAsNoteHexIdOrNull() }
+                            ?.let { ArticlePartRender.NoteRender(note = it) }
+                            ?: ArticlePartRender.MarkdownRender(markdown = content)
+                    }
+                    else -> ArticlePartRender.MarkdownRender(markdown = content)
                 }
             }
-
-            else -> ArticlePartRender.MarkdownRender(markdown = part)
+            is ArticleContentSegment.Image -> {
+                if (part.imageUrl.isValidHttpOrHttpsUrl()) {
+                    if (part.imageUrl.isVideoUrl()) {
+                        ArticlePartRender.VideoRender(videoUrl = part.imageUrl)
+                    } else {
+                        ArticlePartRender.ImageRender(imageUrl = part.imageUrl, linkUrl = part.linkUrl)
+                    }
+                } else {
+                    null
+                }
+            }
         }
     }
 }
