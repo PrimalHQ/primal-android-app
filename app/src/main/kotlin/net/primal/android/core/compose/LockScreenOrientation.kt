@@ -3,7 +3,7 @@ package net.primal.android.core.compose
 import android.content.pm.ActivityInfo
 import androidx.activity.compose.LocalActivity
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.SideEffect
 
 @Composable
 fun LockToOrientationPortrait() = LockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
@@ -12,15 +12,14 @@ fun LockToOrientationPortrait() = LockScreenOrientation(ActivityInfo.SCREEN_ORIE
 fun LockToOrientationLandscape() = LockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
 
 @Composable
+fun UnlockScreenOrientation() = LockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED)
+
+@Composable
 fun LockScreenOrientation(orientation: Int) {
     val activity = LocalActivity.current
     if (activity != null) {
-        DisposableEffect(Unit) {
-            val originalOrientation = activity.requestedOrientation
+        SideEffect {
             activity.requestedOrientation = orientation
-            onDispose {
-                activity.requestedOrientation = originalOrientation
-            }
         }
     }
 }

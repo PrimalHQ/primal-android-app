@@ -50,6 +50,7 @@ import net.primal.android.bookmarks.list.BookmarksViewModel
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.UnlockScreenOrientation
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.editor.NoteEditorContract
@@ -1123,6 +1124,7 @@ private fun NavGraphBuilder.onboardingWalletActivation(
     val viewModel = hiltViewModel<WalletActivationViewModel>()
     PrimalTheme(PrimalTheme.Sunset) {
         ApplyEdgeToEdge(isDarkTheme = true)
+        LockToOrientationPortrait()
         OnboardingWalletActivation(
             viewModel = viewModel,
             callbacks = WalletActivationContract.ScreenCallbacks(
@@ -1169,6 +1171,7 @@ private fun NavGraphBuilder.redeemCode(
     val viewModel = hiltViewModel<RedeemCodeViewModel>()
     PrimalTheme(PrimalTheme.Sunset) {
         ApplyEdgeToEdge(isDarkTheme = true)
+        LockToOrientationPortrait()
         RedeemCodeScreen(
             viewModel = viewModel,
             callbacks = RedeemCodeContract.ScreenCallbacks(
@@ -1946,6 +1949,7 @@ private fun NavGraphBuilder.bookmarks(
 ) {
     val viewModel: BookmarksViewModel = hiltViewModel()
     ApplyEdgeToEdge()
+    LockToOrientationPortrait()
     BookmarksScreen(
         viewModel = viewModel,
         noteCallbacks = noteCallbacksHandler(navController),
@@ -2144,6 +2148,7 @@ private fun NavGraphBuilder.media(
     val viewModel = hiltViewModel<EventMediaGalleryViewModel>(navBackEntry)
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ApplyEdgeToEdge(isDarkTheme = true)
+        UnlockScreenOrientation()
         EventMediaGalleryScreen(
             onClose = { navController.navigateUp() },
             viewModel = viewModel,
@@ -2164,6 +2169,7 @@ private fun NavGraphBuilder.mediaItem(
 
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ApplyEdgeToEdge(isDarkTheme = true)
+        UnlockScreenOrientation()
         MediaItemScreen(
             onClose = { navController.navigateUp() },
             viewModel = viewModel,
@@ -2274,9 +2280,9 @@ private fun NavGraphBuilder.profileQrCodeViewer(
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
     val viewModel = hiltViewModel<ProfileQrCodeViewModel>()
-    LockToOrientationPortrait()
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ApplyEdgeToEdge(isDarkTheme = true)
+        LockToOrientationPortrait()
         ProfileQrCodeViewerScreen(
             viewModel = viewModel,
             callbacks = ProfileQrCodeContract.ScreenCallbacks(
