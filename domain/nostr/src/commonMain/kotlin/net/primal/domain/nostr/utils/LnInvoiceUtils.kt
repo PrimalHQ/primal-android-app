@@ -9,6 +9,7 @@ import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 object LnInvoiceUtils {
     private val invoicePattern = Regex(
         "lnbc((?<amount>\\d+)(?<multiplier>[munp])?)?1[^1\\s]+",
+        RegexOption.IGNORE_CASE,
     )
 
     /** The Bech32 character set for encoding.  */
