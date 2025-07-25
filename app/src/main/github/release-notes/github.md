@@ -1,15 +1,9 @@
-## Fixes
-- Implemented playing one video at a time in feeds (#532)
-- Implemented remembering sounds settings for auto-play videos;
-- Implemented `PrimalAsyncImage` and `PrimalImage` to improve feed performance
-- Improved profile tags rendering on article details  (#541)
-- Improved polling on HomeFeedScreen
-- Fixed entering USD amount not working in wallet if amount is 0.00 (#542)
-- Fixed showing wallet server error message when buying minisats (#543)
-- Fixed zoom issues with images in `EventMediaGalleryScreen` (#540)
-- Fixed crash when typing amount in wallet tx editor
-- Fixed explore screen crash on Android 9
-- Fixed socket connections stopped working after some time (#534)
-- Fixed false positive "replying to" indicator in notes (#533)
-- Fixed crash on login screen if npub could not be decoded
-- Fixed missing thumbnail when uploading videos
+## Improvements
+- Implemented landscape support for media gallery
+- Implemented immersive mode in videos gallery (#554)
+- Implemented opening image links in article details (#562)
+- Improved article details images rendering (#559)
+- Added support for upper-case LN invoices (#563)
+- Added scrolling to wallet transaction editor screen (#561)
+- Fixed large screen flickering
+- Fixed notifications settings bug when toggling switches (#560)
