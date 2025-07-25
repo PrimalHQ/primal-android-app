@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
@@ -334,6 +335,7 @@ private fun ThreadConversationLazyColumn(
                 noteCallbacks = noteCallbacks,
                 onRootPostDeleted = onRootPostDeleted,
                 onUiError = onUiError,
+                listState = state.listState,
             )
         }
     }
@@ -344,6 +346,7 @@ private fun ThreadConversationLazyColumn(
 private fun ThreadLazyColumn(
     modifier: Modifier,
     state: ThreadContract.UiState,
+    listState: LazyListState,
     noteCallbacks: NoteCallbacks,
     onRootPostDeleted: () -> Unit,
     onGoToWallet: (() -> Unit),
@@ -359,9 +362,16 @@ private fun ThreadLazyColumn(
         threadListMaxHeightPx.toDp() - highlightPostHeightPx.toDp() - repliesHeightPx.values.sum().toDp()
     }
 
+    LaunchedEffect(state.highlightPostIndex) {
+        if (state.highlightPostIndex > 0) {
+            listState.animateScrollToItem(index = state.highlightPostIndex)
+        }
+    }
+
     LazyColumn(
         modifier = modifier.onSizeChanged { threadListMaxHeightPx = it.height },
         contentPadding = paddingValues,
+        state = listState,
     ) {
         if (state.replyToArticle != null) {
             item(
