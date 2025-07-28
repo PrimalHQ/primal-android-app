@@ -26,6 +26,7 @@ import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
+import net.primal.domain.streams.StreamRepository
 import net.primal.domain.user.UserDataCleanupRepository
 
 @Suppress("TooManyFunctions")
@@ -143,4 +144,7 @@ object RepositoryCachingModule {
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
     ): UserDataCleanupRepository =
         PrimalRepositoryFactory.createUserDataCleanupRepository(cachingPrimalApiClient = primalApiClient)
+
+    @Provides
+    fun provideStreamRepository(): StreamRepository = PrimalRepositoryFactory.createStreamRepository()
 }

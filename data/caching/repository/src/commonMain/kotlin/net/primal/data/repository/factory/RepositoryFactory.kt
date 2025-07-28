@@ -20,6 +20,7 @@ import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
+import net.primal.domain.streams.StreamRepository
 import net.primal.domain.user.UserDataCleanupRepository
 
 internal interface RepositoryFactory {
@@ -78,4 +79,6 @@ internal interface RepositoryFactory {
     ): PublicBookmarksRepository
 
     fun createUserDataCleanupRepository(cachingPrimalApiClient: PrimalApiClient): UserDataCleanupRepository
+
+    fun createStreamRepository(): StreamRepository
 }
