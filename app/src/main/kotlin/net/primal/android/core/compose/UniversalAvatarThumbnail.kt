@@ -49,16 +49,17 @@ fun UniversalAvatarThumbnail(
     onClick: (() -> Unit)? = null,
     hasInnerBorderOverride: Boolean = true,
     forceAnimationIfAvailable: Boolean = false,
+    isLive: Boolean = false,
     avatarBlossoms: List<String> = emptyList(),
     defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
 ) {
     val hasLegendBorder = legendaryCustomization?.avatarGlow == true &&
         legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION
 
-    val borderBrush = if (hasLegendBorder) {
-        legendaryCustomization.legendaryStyle?.primaryBrush
-    } else {
-        null
+    val borderBrush = when {
+        hasLegendBorder -> legendaryCustomization.legendaryStyle?.primaryBrush
+        isLive -> defaultBorderBrush()
+        else -> null
     }
 
     val totalBorderSize = avatarSize.resolveOuterBorderSizeFromAvatarSize() +
@@ -66,26 +67,37 @@ fun UniversalAvatarThumbnail(
 
     val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
 
-    AvatarThumbnailListItemImage(
-        modifier = modifier,
-        avatarSize = avatarSize,
-        cdnVariantUrl = variant?.mediaUrl,
-        sourceUrl = avatarCdnImage?.sourceUrl,
-        blossoms = avatarBlossoms,
-        hasOuterBorder = hasBorder && avatarSize > 0.dp,
-        hasInnerBorder = hasLegendBorder && avatarSize > 0.dp && hasInnerBorderOverride,
-        borderBrush = borderBrush ?: Brush.linearGradient(
-            colors = listOf(
-                fallbackBorderColor,
-                fallbackBorderColor,
+    Box(
+        modifier = modifier.size(avatarSize + totalBorderSize * 2),
+        contentAlignment = Alignment.Center,
+    ) {
+        AvatarThumbnailListItemImage(
+            modifier = Modifier.fillMaxSize(),
+            avatarSize = avatarSize,
+            cdnVariantUrl = variant?.mediaUrl,
+            sourceUrl = avatarCdnImage?.sourceUrl,
+            blossoms = avatarBlossoms,
+            hasOuterBorder = (hasBorder || isLive) && avatarSize > 0.dp,
+            hasInnerBorder = hasLegendBorder && avatarSize > 0.dp && hasInnerBorderOverride,
+            borderBrush = borderBrush ?: Brush.linearGradient(
+                colors = listOf(
+                    fallbackBorderColor,
+                    fallbackBorderColor,
+                ),
             ),
-        ),
-        totalBorderSize = borderSizeOverride ?: totalBorderSize,
-        backgroundColor = backgroundColor,
-        onClick = onClick,
-        defaultAvatar = defaultAvatar,
-        forceAnimationIfAvailable = forceAnimationIfAvailable,
-    )
+            totalBorderSize = borderSizeOverride ?: totalBorderSize,
+            backgroundColor = backgroundColor,
+            onClick = onClick,
+            defaultAvatar = defaultAvatar,
+            forceAnimationIfAvailable = forceAnimationIfAvailable,
+        )
+
+        if (isLive) {
+            LiveChip(
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+    }
 }
 
 @Composable

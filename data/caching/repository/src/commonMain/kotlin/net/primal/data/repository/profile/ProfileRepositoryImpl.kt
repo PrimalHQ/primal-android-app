@@ -16,6 +16,7 @@ import net.primal.data.repository.mappers.local.asProfileDataDO
 import net.primal.data.repository.mappers.local.asProfileStatsDO
 import net.primal.data.repository.mappers.remote.asProfileDataPO
 import net.primal.data.repository.mappers.remote.asProfileStatsPO
+import net.primal.data.repository.mappers.remote.asStreamData
 import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
@@ -120,6 +121,7 @@ class ProfileRepositoryImpl(
                 blossomServers = blossomServers,
             )
             val profileStats = response.profileStats?.asProfileStatsPO()
+            val streamData = response.liveActivity?.asStreamData()
 
             database.withTransaction {
                 if (profileMetadata != null) {
@@ -128,6 +130,10 @@ class ProfileRepositoryImpl(
 
                 if (profileStats != null) {
                     database.profileStats().upsert(data = profileStats)
+                }
+
+                if (streamData != null) {
+                    database.streams().upsertStreamData(data = streamData)
                 }
             }
 

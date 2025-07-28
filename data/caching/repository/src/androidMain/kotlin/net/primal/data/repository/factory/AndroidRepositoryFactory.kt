@@ -23,6 +23,7 @@ import net.primal.data.repository.messages.processors.MessagesProcessor
 import net.primal.data.repository.mute.MutedItemRepositoryImpl
 import net.primal.data.repository.notifications.NotificationRepositoryImpl
 import net.primal.data.repository.profile.ProfileRepositoryImpl
+import net.primal.data.repository.streams.StreamRepositoryImpl
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.events.EventRelayHintsRepository
@@ -42,6 +43,7 @@ import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
+import net.primal.domain.streams.StreamRepository
 import net.primal.domain.user.UserDataCleanupRepository
 import net.primal.shared.data.local.db.LocalDatabaseFactory
 import net.primal.shared.data.local.encryption.AndroidPlatformKeyStore
@@ -224,6 +226,12 @@ object AndroidRepositoryFactory : RepositoryFactory {
 
     override fun createUserDataCleanupRepository(cachingPrimalApiClient: PrimalApiClient): UserDataCleanupRepository {
         return UserDataCleanupRepositoryImpl(
+            database = cachingDatabase,
+        )
+    }
+
+    override fun createStreamRepository(): StreamRepository {
+        return StreamRepositoryImpl(
             database = cachingDatabase,
         )
     }

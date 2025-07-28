@@ -50,6 +50,7 @@ import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.streams.StreamRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -63,6 +64,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private val mutedItemRepository: MutedItemRepository,
     private val zapHandler: ZapHandler,
     private val profileFollowsHandler: ProfileFollowsHandler,
+    private val streamRepository: StreamRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -77,6 +79,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun setEffect(effect: ProfileDetailsContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     private var referencedProfilesObserver: Job? = null
+    private var streamObserverJob: Job? = null
 
     init {
         observeEvents()
@@ -111,6 +114,7 @@ class ProfileDetailsViewModel @Inject constructor(
         observeProfileStats(profileId = profileId)
         observeContainsFeed(profileId = profileId)
         observeMutedAccount(profileId = profileId)
+        findAndObserveLatestStream(profileId = profileId)
         resolveFollowsMe(profileId = profileId)
         markProfileInteraction(profileId = profileId, isActiveUser = isActiveUser)
     }
@@ -330,6 +334,25 @@ class ProfileDetailsViewModel @Inject constructor(
                 }
             }
         }
+
+    private fun findAndObserveLatestStream(profileId: String) {
+        streamObserverJob?.cancel()
+        streamObserverJob = viewModelScope.launch {
+            val latestLiveStream = withContext(dispatcherProvider.io()) {
+                streamRepository.findLatestLiveStreamATag(authorId = profileId)
+            }
+
+            if (latestLiveStream != null) {
+                streamRepository.observeStream(aTag = latestLiveStream).collect { streamData ->
+                    setState {
+                        copy(isLive = streamData?.isLive() == true)
+                    }
+                }
+            } else {
+                setState { copy(isLive = false) }
+            }
+        }
+    }
 
     private fun resolveFollowsMe(profileId: String) {
         val activeUserId = activeAccountStore.activeUserId()
