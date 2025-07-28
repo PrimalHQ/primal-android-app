@@ -17,6 +17,9 @@ import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiS
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
 import net.primal.core.utils.getMaximumUsdAmount
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.wallet.Network
@@ -27,6 +30,7 @@ import timber.log.Timber
 class ReceivePaymentViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
+    private val walletAccountRepository: WalletAccountRepository,
     private val exchangeRateHandler: ExchangeRateHandler,
     private val activeUserStore: ActiveAccountStore,
 ) : ViewModel() {
@@ -44,6 +48,7 @@ class ReceivePaymentViewModel @Inject constructor(
     init {
         fetchOnChainAddress()
         observeEvents()
+        observeActiveWallet()
         observeActiveAccount()
         observeUsdExchangeRate()
     }
@@ -66,21 +71,26 @@ class ReceivePaymentViewModel @Inject constructor(
             }
         }
 
+    private fun observeActiveWallet() =
+        viewModelScope.launch {
+            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
+                .collect { wallet ->
+                    setState {
+                        copy(
+                            activeWallet = wallet,
+                            lightningNetworkDetails = lightningNetworkDetails.copy(
+                                address = wallet?.lightningAddress ?: lightningNetworkDetails.address,
+                            ),
+                        )
+                    }
+                }
+        }
+
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount
                 .collect {
-                    val lightningAddress = it.primalWallet?.lightningAddress
-                    setState {
-                        copy(
-                            lightningNetworkDetails = if (lightningAddress != null) {
-                                this.lightningNetworkDetails.copy(address = lightningAddress)
-                            } else {
-                                this.lightningNetworkDetails
-                            },
-                            hasPremium = it.premiumMembership != null,
-                        )
-                    }
+                    setState { copy(hasPremium = it.premiumMembership != null) }
                 }
         }
 
@@ -125,13 +135,13 @@ class ReceivePaymentViewModel @Inject constructor(
         comment: String?,
     ) = viewModelScope.launch {
         setState { copy(creatingInvoice = true) }
-        try {
-            val response = walletRepository.createLightningInvoice(
-                userId = activeAccountStore.activeUserId(),
-                amountInBtc = amountInBtc,
-                comment = comment,
-            )
+        val activeWalletId = state.value.activeWallet?.walletId ?: return@launch
 
+        walletRepository.createLightningInvoice(
+            walletId = activeWalletId,
+            amountInBtc = amountInBtc,
+            comment = comment,
+        ).onSuccess { result ->
             setState {
                 copy(
                     editMode = false,
@@ -141,7 +151,7 @@ class ReceivePaymentViewModel @Inject constructor(
                         comment = comment,
                     ),
                     lightningNetworkDetails = this.lightningNetworkDetails.copy(
-                        invoice = response.invoice,
+                        invoice = result.invoice,
                     ),
                     bitcoinNetworkDetails = this.bitcoinNetworkDetails.copy(
                         invoice = "bitcoin:${this.bitcoinNetworkDetails.address}?amount=$amountInBtc".let {
@@ -150,15 +160,12 @@ class ReceivePaymentViewModel @Inject constructor(
                     ),
                 )
             }
-        } catch (error: SignatureException) {
+        }.onFailure { error ->
             Timber.w(error)
             setState { copy(error = UiState.ReceivePaymentError.FailedToCreateLightningInvoice(cause = error)) }
-        } catch (error: NetworkException) {
-            Timber.w(error)
-            setState { copy(error = UiState.ReceivePaymentError.FailedToCreateLightningInvoice(cause = error)) }
-        } finally {
-            setState { copy(creatingInvoice = false) }
         }
+
+        setState { copy(creatingInvoice = false) }
     }
 
     private fun changeNetwork(network: Network) =
