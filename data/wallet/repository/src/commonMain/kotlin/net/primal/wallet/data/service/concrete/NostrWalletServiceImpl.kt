@@ -94,7 +94,7 @@ internal class NostrWalletServiceImpl : WalletService {
             nwcData = NostrWalletConnect(
                 lightningAddress = wallet.lightningAddress,
                 relays = wallet.relays,
-                pubkey = wallet.walletId,
+                pubkey = wallet.pubkey,
                 keypair = wallet.keypair.asNO(),
             ),
         )

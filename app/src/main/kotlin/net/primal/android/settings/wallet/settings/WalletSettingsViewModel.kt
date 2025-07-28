@@ -19,6 +19,7 @@ import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.user.domain.parseNWCUrl
 import net.primal.android.wallet.repository.NwcWalletRepository
+import net.primal.core.utils.asSha256Hash
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -130,11 +131,12 @@ class WalletSettingsViewModel @AssistedInject constructor(
             try {
                 val nostrWalletConnect = nwcUrl.parseNWCUrl()
                 val lightningAddress = activeAccountStore.activeUserAccount().lightningAddress
+                val walletId = nostrWalletConnect.keypair.privateKey.asSha256Hash()
 
                 walletRepository.upsertNostrWallet(
                     userId = activeAccountStore.activeUserId(),
                     wallet = Wallet.NWC(
-                        walletId = nostrWalletConnect.pubkey,
+                        walletId = walletId,
                         userId = activeAccountStore.activeUserId(),
                         lightningAddress = lightningAddress,
                         balanceInBtc = null,
@@ -142,6 +144,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         spamThresholdAmountInSats = 1L,
                         lastUpdatedAt = null,
                         relays = nostrWalletConnect.relays,
+                        pubkey = nostrWalletConnect.pubkey,
                         keypair = NostrWalletKeypair(
                             privateKey = nostrWalletConnect.keypair.privateKey,
                             pubKey = nostrWalletConnect.keypair.pubkey,
@@ -151,7 +154,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
                 walletAccountRepository.setActiveWallet(
                     userId = activeAccountStore.activeUserId(),
-                    walletId = nostrWalletConnect.pubkey,
+                    walletId = walletId,
                 )
                 setState { copy(preferPrimalWallet = false) }
             } catch (error: NWCParseException) {
