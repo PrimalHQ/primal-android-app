@@ -317,11 +317,7 @@ private fun MediaGalleryContent(
                 .map { attachments.getOrNull(it)?.type == EventUriType.Video }
                 .distinctUntilChanged()
                 .collect { isVideoPage ->
-                    if (isVideoPage) {
-                        player.playWhenReady = true
-                    } else {
-                        player.playWhenReady = false
-                    }
+                    player.playWhenReady = isVideoPage
                 }
         }
     }
