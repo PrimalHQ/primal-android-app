@@ -40,6 +40,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -75,6 +76,8 @@ import com.github.panpf.zoomimage.CoilZoomAsyncImage
 import com.github.panpf.zoomimage.rememberCoilZoomState
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
@@ -263,13 +266,19 @@ private fun MediaGalleryContent(
 
     var exoPlayer by remember { mutableStateOf<ExoPlayer?>(null) }
     var currentPosition by rememberSaveable { mutableLongStateOf(0L) }
+    var playWhenReady by rememberSaveable { mutableStateOf(true) }
 
     LifecycleStartEffect(Unit) {
-        exoPlayer = initializePlayer(context = context)
+        exoPlayer = initializePlayer(context = context).apply {
+            this.playWhenReady = playWhenReady
+        }
         onStopOrDispose {
-            currentPosition = exoPlayer?.currentPosition ?: 0L
-            exoPlayer?.apply { release() }
-            exoPlayer = null
+            exoPlayer?.let {
+                currentPosition = it.currentPosition
+                playWhenReady = it.playWhenReady
+                it.release()
+                exoPlayer = null
+            }
         }
     }
 
@@ -293,7 +302,6 @@ private fun MediaGalleryContent(
                 exoPlayer.setMediaItems(videoMediaItems, startVideoIndex, C.TIME_UNSET)
                 exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
                 exoPlayer.prepare()
-                exoPlayer.playWhenReady = false
 
                 val position = if (currentPosition > 0) currentPosition else initialPositionMs
                 if (position > 0) {
@@ -303,20 +311,33 @@ private fun MediaGalleryContent(
         }
     }
 
-    LaunchedEffect(exoPlayer, pagerState, videoAttachments) {
-        exoPlayer?.let { exoPlayer ->
-            snapshotFlow { pagerState.currentPage }.distinctUntilChanged().collect { page ->
-                val attachment = attachments.getOrNull(page)
-                if (attachment?.type == EventUriType.Video) {
-                    val videoIndex = videoAttachments.indexOf(attachment)
-                    if (videoIndex != -1 && exoPlayer.currentMediaItemIndex != videoIndex) {
-                        exoPlayer.seekTo(videoIndex, C.TIME_UNSET)
+    LaunchedEffect(exoPlayer, pagerState) {
+        exoPlayer?.let { player ->
+            snapshotFlow { pagerState.currentPage }
+                .map { attachments.getOrNull(it)?.type == EventUriType.Video }
+                .distinctUntilChanged()
+                .collect { isVideoPage ->
+                    if (isVideoPage) {
+                        player.playWhenReady = true
+                    } else {
+                        player.playWhenReady = false
                     }
-                    exoPlayer.playWhenReady = true
-                } else {
-                    exoPlayer.pause()
                 }
-            }
+        }
+    }
+
+    LaunchedEffect(exoPlayer, pagerState) {
+        exoPlayer?.let { player ->
+            snapshotFlow { pagerState.currentPage }
+                .map { attachments.getOrNull(it) }
+                .filter { it?.type == EventUriType.Video }
+                .distinctUntilChanged()
+                .collect { attachment ->
+                    val videoIndex = videoAttachments.indexOf(attachment)
+                    if (videoIndex != -1 && player.currentMediaItemIndex != videoIndex) {
+                        player.seekToDefaultPosition(videoIndex)
+                    }
+                }
         }
     }
 
@@ -617,13 +638,19 @@ fun VideoScreen(
         KeepScreenOn()
     }
 
-    LaunchedEffect(isPageVisible, immersiveMode) {
+    var isControllerVisible by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(isPageVisible, isControllerVisible) {
         if (isPageVisible) {
-            immersiveMode?.hide()
+            if (isControllerVisible) {
+                immersiveMode?.hide()
+            } else {
+                immersiveMode?.show()
+            }
         }
     }
 
-    LifecycleStartEffect(exoPlayer, isPageVisible) {
+    DisposableEffect(exoPlayer) {
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (isPageVisible) {
@@ -633,17 +660,8 @@ fun VideoScreen(
         }
         exoPlayer.addListener(listener)
         exoPlayer.seekTo(positionMs)
-        onStopOrDispose {
+        onDispose {
             exoPlayer.removeListener(listener)
-        }
-    }
-
-    var playerView by remember { mutableStateOf<PlayerView?>(null) }
-
-    LaunchedEffect(playerView, isPageVisible) {
-        if (isPageVisible) {
-            playerView?.player = exoPlayer
-            playerView?.showController()
         }
     }
 
@@ -657,22 +675,27 @@ fun VideoScreen(
                     setShowNextButton(false)
                     setShowPreviousButton(false)
                     setControllerAnimationEnabled(false)
-                }.also {
-                    playerView = it
                 }
             },
             update = { view ->
+                if (view.player != exoPlayer) {
+                    view.player = exoPlayer
+                }
+
                 view.setControllerVisibilityListener(
                     PlayerView.ControllerVisibilityListener { visibility ->
-                        if (isPageVisible) {
-                            if (visibility == View.VISIBLE) {
-                                immersiveMode?.hide()
-                            } else {
-                                immersiveMode?.show()
-                            }
+                        val controllerBecameVisible = visibility == View.VISIBLE
+                        if (isControllerVisible != controllerBecameVisible) {
+                            isControllerVisible = controllerBecameVisible
                         }
                     },
                 )
+
+                if (isControllerVisible) {
+                    view.showController()
+                } else {
+                    view.hideController()
+                }
             },
             onRelease = { view ->
                 view.player = null
