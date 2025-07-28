@@ -43,9 +43,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -257,12 +259,15 @@ private fun MediaGalleryContent(
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    val videoAttachments = remember(attachments) { attachments.filter { it.type == EventUriType.Video } }
+    val videoAttachments = rememberSaveable(attachments) { attachments.filter { it.type == EventUriType.Video } }
 
     var exoPlayer by remember { mutableStateOf<ExoPlayer?>(null) }
+    var currentPosition by rememberSaveable { mutableLongStateOf(0L) }
+
     LifecycleStartEffect(Unit) {
         exoPlayer = initializePlayer(context = context)
         onStopOrDispose {
+            currentPosition = exoPlayer?.currentPosition ?: 0L
             exoPlayer?.apply { release() }
             exoPlayer = null
         }
@@ -290,8 +295,9 @@ private fun MediaGalleryContent(
                 exoPlayer.prepare()
                 exoPlayer.playWhenReady = false
 
-                if (initialPositionMs > 0) {
-                    exoPlayer.seekTo(startVideoIndex, initialPositionMs)
+                val position = if (currentPosition > 0) currentPosition else initialPositionMs
+                if (position > 0) {
+                    exoPlayer.seekTo(startVideoIndex, position)
                 }
             }
         }
