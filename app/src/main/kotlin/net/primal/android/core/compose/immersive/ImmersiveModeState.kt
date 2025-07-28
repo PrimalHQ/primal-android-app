@@ -21,8 +21,8 @@ class ImmersiveModeState internal constructor(
         get() = WindowCompat.getInsetsController(window, window.decorView)
 
     init {
-        controller.systemBarsBehavior =
-            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        if (initialValue) show() else hide()
     }
 
     fun show() {
