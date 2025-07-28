@@ -31,6 +31,7 @@ fun WalletPO.toDomain(): WalletDO =
                 maxBalanceInBtc = info.maxBalanceInBtc,
                 lastUpdatedAt = info.lastUpdatedAt,
                 relays = nwc?.relays ?: emptyList(),
+                pubkey = nwc?.pubkey ?: "",
                 keypair = NostrWalletKeypair(
                     privateKey = nwc?.walletPrivateKey ?: "",
                     pubKey = nwc?.walletPubkey ?: "",
@@ -65,6 +66,7 @@ fun ActiveWallet.toDomain(): WalletDO? {
                 maxBalanceInBtc = info.maxBalanceInBtc,
                 lastUpdatedAt = info.lastUpdatedAt,
                 relays = nwc?.relays ?: emptyList(),
+                pubkey = nwc?.pubkey ?: "",
                 keypair = NostrWalletKeypair(
                     privateKey = nwc?.walletPrivateKey ?: "",
                     pubKey = nwc?.walletPubkey ?: "",
