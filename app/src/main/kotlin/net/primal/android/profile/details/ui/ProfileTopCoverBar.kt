@@ -230,6 +230,7 @@ private fun ProfileTopCoverBar(
                         start = avatarValues.avatarPadding * 1 / 8,
                         end = avatarValues.avatarPadding * 7 / 8,
                     ),
+                isLive = state.isLive,
                 avatarSize = avatarValues.avatarSize,
                 onClick = { state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) } },
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,

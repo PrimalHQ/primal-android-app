@@ -17,6 +17,7 @@ interface ProfileDetailsContract {
         val profileId: String? = null,
         val isResolvingProfileId: Boolean = true,
         val isActiveUser: Boolean? = null,
+        val isLive: Boolean = false,
         val activeUserPremiumTier: String? = null,
         val isProfileFollowed: Boolean = false,
         val isProfileFollowingMe: Boolean = false,
