@@ -56,12 +56,15 @@ import net.primal.data.local.dao.reads.ArticleFeedCrossRef
 import net.primal.data.local.dao.reads.ArticleFeedCrossRefDao
 import net.primal.data.local.dao.reads.HighlightDao
 import net.primal.data.local.dao.reads.HighlightData
+import net.primal.data.local.dao.streams.StreamData
+import net.primal.data.local.dao.streams.StreamDataDao
 import net.primal.data.local.dao.threads.ArticleCommentCrossRef
 import net.primal.data.local.dao.threads.NoteConversationCrossRef
 import net.primal.data.local.dao.threads.ThreadConversationDao
 import net.primal.data.local.serialization.CdnTypeConverters
 import net.primal.data.local.serialization.NostrReferenceTypeConverters
 import net.primal.data.local.serialization.ProfileTypeConverters
+import net.primal.data.local.serialization.StreamTypeConverters
 import net.primal.shared.data.local.serialization.JsonTypeConverters
 import net.primal.shared.data.local.serialization.ListsTypeConverters
 
@@ -95,8 +98,9 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         FollowPackProfileCrossRef::class,
         FollowPackListCrossRef::class,
         FollowPackRemoteKey::class,
+        StreamData::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -106,6 +110,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
     CdnTypeConverters::class,
     ProfileTypeConverters::class,
     NostrReferenceTypeConverters::class,
+    StreamTypeConverters::class,
 )
 abstract class PrimalDatabase : RoomDatabase() {
 
@@ -160,6 +165,8 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun articleFeedsConnections(): ArticleFeedCrossRefDao
 
     abstract fun highlights(): HighlightDao
+
+    abstract fun streams(): StreamDataDao
 }
 
 // The Room compiler generates the `actual` implementations.

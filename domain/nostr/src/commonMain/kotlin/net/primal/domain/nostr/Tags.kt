@@ -96,6 +96,36 @@ fun JsonArray.getTagValueOrNull() = getOrNull(1)?.jsonPrimitive?.content
 
 fun JsonArray.getPubkeyFromReplyOrRootTag() = getOrNull(4)?.jsonPrimitive?.content
 
+fun List<JsonArray>.findFirstStreaming() = firstOrNull { it.isStreamingTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstStatus() = firstOrNull { it.isStatusTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstStarts() = firstOrNull { it.isStartsTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstRecording() = firstOrNull { it.isRecordingTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstEnds() = firstOrNull { it.isEndsTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstCurrentParticipants() = firstOrNull { it.isCurrentParticipantsTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstTotalParticipants() = firstOrNull { it.isTotalParticipantsTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findAllHashtags() = filter { it.isHashtagTag() }.mapNotNull { it.getTagValueOrNull() }
+
+fun JsonArray.isRecordingTag() = getOrNull(0)?.jsonPrimitive?.content == "recording"
+
+fun JsonArray.isEndsTag() = getOrNull(0)?.jsonPrimitive?.content == "ends"
+
+fun JsonArray.isCurrentParticipantsTag() = getOrNull(0)?.jsonPrimitive?.content == "current_participants"
+
+fun JsonArray.isTotalParticipantsTag() = getOrNull(0)?.jsonPrimitive?.content == "total_participants"
+
+fun JsonArray.isStreamingTag() = getOrNull(0)?.jsonPrimitive?.content == "streaming"
+
+fun JsonArray.isStatusTag() = getOrNull(0)?.jsonPrimitive?.content == "status"
+
+fun JsonArray.isStartsTag() = getOrNull(0)?.jsonPrimitive?.content == "starts"
+
 fun JsonArray.hasMentionMarker() = contains(JsonPrimitive("mention"))
 
 fun JsonArray.hasReplyMarker() = contains(JsonPrimitive("reply"))

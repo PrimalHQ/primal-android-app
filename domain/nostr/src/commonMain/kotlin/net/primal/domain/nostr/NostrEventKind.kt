@@ -42,6 +42,7 @@ enum class NostrEventKind(val value: Int) {
     BadgeDefinition(value = 30_009),
     LongFormContent(value = 30_023),
     ApplicationSpecificData(value = 30_078),
+    LiveActivity(value = 30_311),
     AppRecommendation(value = 31_989),
     AppHandler(value = 31_990),
     StarterPack(value = 39_089),
