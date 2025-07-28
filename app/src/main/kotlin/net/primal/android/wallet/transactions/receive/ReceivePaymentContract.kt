@@ -6,9 +6,11 @@ import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.Network
+import net.primal.domain.wallet.Wallet
 
 interface ReceivePaymentContract {
     data class UiState(
+        val activeWallet: Wallet? = null,
         val initialTab: ReceivePaymentTab,
         val currentTab: ReceivePaymentTab = initialTab,
         val loading: Boolean = true,
@@ -24,7 +26,7 @@ interface ReceivePaymentContract {
         val error: ReceivePaymentError? = null,
     ) {
         sealed class ReceivePaymentError {
-            data class FailedToCreateLightningInvoice(val cause: Exception) : ReceivePaymentError()
+            data class FailedToCreateLightningInvoice(val cause: Throwable) : ReceivePaymentError()
         }
     }
 

@@ -24,10 +24,10 @@ interface WalletRepository {
     suspend fun pay(params: WalletPayParams)
 
     suspend fun createLightningInvoice(
-        userId: String,
+        walletId: String,
         amountInBtc: String?,
         comment: String?,
-    ): LnInvoiceCreateResult
+    ): Result<LnInvoiceCreateResult>
 
     suspend fun createOnChainAddress(userId: String): OnChainAddressResult
 
