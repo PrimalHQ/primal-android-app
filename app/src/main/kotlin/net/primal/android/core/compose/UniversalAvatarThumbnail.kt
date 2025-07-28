@@ -56,10 +56,10 @@ fun UniversalAvatarThumbnail(
     val hasLegendBorder = legendaryCustomization?.avatarGlow == true &&
         legendaryCustomization.legendaryStyle != LegendaryStyle.NO_CUSTOMIZATION
 
-    val borderBrush = if (hasLegendBorder) {
-        legendaryCustomization.legendaryStyle?.primaryBrush
-    } else {
-        null
+    val borderBrush = when {
+        hasLegendBorder -> legendaryCustomization.legendaryStyle?.primaryBrush
+        isLive -> defaultBorderBrush()
+        else -> null
     }
 
     val totalBorderSize = avatarSize.resolveOuterBorderSizeFromAvatarSize() +
@@ -77,7 +77,7 @@ fun UniversalAvatarThumbnail(
             cdnVariantUrl = variant?.mediaUrl,
             sourceUrl = avatarCdnImage?.sourceUrl,
             blossoms = avatarBlossoms,
-            hasOuterBorder = hasBorder && avatarSize > 0.dp,
+            hasOuterBorder = (hasBorder || isLive) && avatarSize > 0.dp,
             hasInnerBorder = hasLegendBorder && avatarSize > 0.dp && hasInnerBorderOverride,
             borderBrush = borderBrush ?: Brush.linearGradient(
                 colors = listOf(
