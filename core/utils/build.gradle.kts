@@ -78,6 +78,8 @@ kotlin {
                 // Cryptography
                 implementation(libs.bitcoin.kmp)
                 implementation(libs.secp256k1.kmp)
+
+                implementation(libs.okio)
             }
         }
 
