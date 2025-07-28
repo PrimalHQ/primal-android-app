@@ -34,7 +34,9 @@ internal class TransactionsHandler(
 
             persistTransactions(transactions = transactions)
 
-            profileRepository.fetchProfiles(profileIds = otherUserIds)
+            if (otherUserIds.isNotEmpty()) {
+                profileRepository.fetchProfiles(profileIds = otherUserIds)
+            }
         }
 
     private suspend fun persistTransactions(transactions: List<Transaction>) =
