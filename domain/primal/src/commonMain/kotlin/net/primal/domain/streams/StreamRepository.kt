@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface StreamRepository {
 
-    suspend fun findLatestLiveStream(authorId: String): Stream?
+    suspend fun findLatestLiveStreamATag(authorId: String): String?
 
     fun observeStream(aTag: String): Flow<Stream?>
 }

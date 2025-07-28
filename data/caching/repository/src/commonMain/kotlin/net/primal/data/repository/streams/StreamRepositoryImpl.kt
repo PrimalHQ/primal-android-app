@@ -12,10 +12,10 @@ class StreamRepositoryImpl(
     private val database: PrimalDatabase,
 ) : StreamRepository {
 
-    override suspend fun findLatestLiveStream(authorId: String): Stream? {
+    override suspend fun findLatestLiveStreamATag(authorId: String): String? {
         val streamsPO = database.streams().observeStreamsByAuthorId(authorId).first()
         val liveStreamPO = streamsPO.find { it.data.isLive() }
-        return liveStreamPO?.asStreamDO()
+        return liveStreamPO?.data?.aTag
     }
 
     override fun observeStream(aTag: String): Flow<Stream?> {

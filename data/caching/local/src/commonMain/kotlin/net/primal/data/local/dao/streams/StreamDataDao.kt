@@ -20,9 +20,6 @@ interface StreamDataDao {
     @Query("SELECT * FROM StreamData WHERE aTag = :aTag")
     suspend fun findStreamByATag(aTag: String): Stream?
 
-    @Query("DELETE FROM StreamData WHERE authorId = :authorId")
-    suspend fun deleteStreamsByAuthorId(authorId: String)
-
     @Transaction
     @Query("SELECT * FROM StreamData WHERE aTag = :aTag")
     fun observeStreamByATag(aTag: String): Flow<Stream?>

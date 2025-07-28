@@ -339,19 +339,17 @@ class ProfileDetailsViewModel @Inject constructor(
         streamObserverJob?.cancel()
         streamObserverJob = viewModelScope.launch {
             val latestLiveStream = withContext(dispatcherProvider.io()) {
-                streamRepository.findLatestLiveStream(authorId = profileId)
+                streamRepository.findLatestLiveStreamATag(authorId = profileId)
             }
 
             if (latestLiveStream != null) {
-                streamRepository.observeStream(aTag = latestLiveStream.aTag).collect { streamData ->
+                streamRepository.observeStream(aTag = latestLiveStream).collect { streamData ->
                     setState {
                         copy(isLive = streamData?.isLive() == true)
                     }
                 }
             } else {
-                setState {
-                    copy(isLive = false)
-                }
+                setState { copy(isLive = false) }
             }
         }
     }
