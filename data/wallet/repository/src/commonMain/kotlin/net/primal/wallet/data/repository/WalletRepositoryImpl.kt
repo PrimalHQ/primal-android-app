@@ -83,6 +83,7 @@ internal class WalletRepositoryImpl(
                     data = NostrWalletData(
                         walletId = wallet.walletId,
                         relays = wallet.relays,
+                        pubkey = wallet.pubkey,
                         walletPubkey = wallet.keypair.pubKey,
                         walletPrivateKey = wallet.keypair.privateKey,
                     ),
