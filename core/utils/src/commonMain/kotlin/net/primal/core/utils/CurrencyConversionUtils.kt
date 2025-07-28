@@ -12,6 +12,8 @@ object CurrencyConversionUtils {
 
     fun Long.msatsToBtc() = this.toDouble() / BTC_IN_MSATS
 
+    fun Double.btcToMSats() = this * BTC_IN_MSATS
+
     fun Int.toBtc() = this.toULong().toBtc()
 
     fun Long.toBtc() = this.toULong().toBtc()

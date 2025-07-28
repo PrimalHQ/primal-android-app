@@ -107,6 +107,7 @@ import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.Network
+import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.not
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -185,27 +186,29 @@ fun ReceivePaymentScreen(
             )
         },
         bottomBar = {
-            Column {
-                PrimalDivider()
-                WalletTabsBar(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .height(WalletTabsHeight)
-                        .background(color = AppTheme.colorScheme.surface),
-                    tabs = ReceivePaymentTab.entries.map { it.data },
-                    activeTab = state.currentTab.data,
-                    onTabClick = {
-                        if (state.currentTab.data != it) {
-                            val network = when (ReceivePaymentTab.valueOfOrThrow(it)) {
-                                ReceivePaymentTab.Lightning -> Network.Lightning
-                                ReceivePaymentTab.Bitcoin -> Network.Bitcoin
+            if (state.activeWallet is Wallet.Primal) {
+                Column {
+                    PrimalDivider()
+                    WalletTabsBar(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .navigationBarsPadding()
+                            .height(WalletTabsHeight)
+                            .background(color = AppTheme.colorScheme.surface),
+                        tabs = ReceivePaymentTab.entries.map { it.data },
+                        activeTab = state.currentTab.data,
+                        onTabClick = {
+                            if (state.currentTab.data != it) {
+                                val network = when (ReceivePaymentTab.valueOfOrThrow(it)) {
+                                    ReceivePaymentTab.Lightning -> Network.Lightning
+                                    ReceivePaymentTab.Bitcoin -> Network.Bitcoin
+                                }
+                                eventPublisher(ReceivePaymentContract.UiEvent.ChangeNetwork(network))
                             }
-                            eventPublisher(ReceivePaymentContract.UiEvent.ChangeNetwork(network))
-                        }
-                    },
-                    tabIconSize = 32.dp,
-                )
+                        },
+                        tabIconSize = 32.dp,
+                    )
+                }
             }
         },
         snackbarHost = {

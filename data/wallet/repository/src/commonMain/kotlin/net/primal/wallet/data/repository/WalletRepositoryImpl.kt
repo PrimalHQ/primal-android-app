@@ -6,9 +6,11 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
+import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
+import net.primal.core.utils.CurrencyConversionUtils.btcToMSats
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
@@ -31,11 +33,11 @@ import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletTransaction
 import net.primal.wallet.data.local.db.WalletDatabase
+import net.primal.wallet.data.model.CreateLightningInvoiceRequest
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.DepositRequestBody
 import net.primal.wallet.data.repository.mappers.local.toDomain
 import net.primal.wallet.data.repository.mappers.local.toWithdrawRequestDTO
-import net.primal.wallet.data.repository.mappers.remote.asLightingInvoiceResultDO
 import net.primal.wallet.data.repository.transactions.WalletTransactionsMediator
 import net.primal.wallet.data.service.WalletService
 
@@ -131,20 +133,44 @@ internal class WalletRepositoryImpl(
     }
 
     override suspend fun createLightningInvoice(
-        userId: String,
+        walletId: String,
         amountInBtc: String?,
         comment: String?,
-    ): LnInvoiceCreateResult {
+    ): Result<LnInvoiceCreateResult> {
         return withContext(dispatcherProvider.io()) {
-            val response = primalWalletApi.createLightningInvoice(
-                userId = userId,
-                body = DepositRequestBody(
-                    subWallet = SubWallet.Open,
-                    amountBtc = amountInBtc,
-                    description = comment,
-                ),
-            )
-            response.asLightingInvoiceResultDO()
+            val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
+                ?: return@withContext Result.failure(
+                    exception = IllegalArgumentException("Couldn't find wallet with the given walletId."),
+                )
+
+            when (wallet.info.type) {
+                WalletType.PRIMAL -> primalWalletService.createLightningInvoice(
+                    wallet = wallet.toDomain(),
+                    request = CreateLightningInvoiceRequest.Primal(
+                        description = comment,
+                        subWallet = SubWallet.Open,
+                        amountInBtc = amountInBtc,
+                    ),
+                )
+
+                WalletType.NWC -> {
+                    if (amountInBtc == null) {
+                        return@withContext Result.failure(
+                            exception = IllegalArgumentException("Amount is required for NWC invoices."),
+                        )
+                    }
+
+                    nostrWalletService.createLightningInvoice(
+                        wallet = wallet.toDomain(),
+                        request = CreateLightningInvoiceRequest.NWC(
+                            description = comment,
+                            amountInMSats = amountInBtc.toDouble().btcToMSats().toLong(),
+                            descriptionHash = null,
+                            expiry = 1.hours.inWholeSeconds,
+                        ),
+                    )
+                }
+            }
         }
     }
 

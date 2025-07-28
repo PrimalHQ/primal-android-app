@@ -56,7 +56,6 @@ import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
-import net.primal.android.settings.wallet.utils.isActivePrimalWallet
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState.DashboardError
@@ -222,7 +221,7 @@ fun WalletDashboardScreen(
                                     .padding(top = 16.dp, bottom = 24.dp)
                                     .animateContentSize(),
                                 walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
-                                enabled = state.wallet?.isActivePrimalWallet() == true && !state.isNpubLogin,
+                                enabled = !state.isNpubLogin,
                                 actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
                                 onWalletAction = { action ->
                                     when (action) {
@@ -253,7 +252,7 @@ fun WalletDashboardScreen(
                                     }
                                 },
                                 currencyMode = currencyMode,
-                                enabled = state.wallet?.isActivePrimalWallet() == true && !state.isNpubLogin,
+                                enabled = !state.isNpubLogin,
                                 onSwitchCurrencyMode = { currencyMode = it },
                                 exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                             )
