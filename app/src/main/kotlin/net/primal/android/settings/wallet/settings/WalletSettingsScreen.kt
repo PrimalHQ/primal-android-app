@@ -267,6 +267,7 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletSettingsContract.Ui
                     balanceInBtc = 0.0,
                     maxBalanceInBtc = 0.0,
                     lastUpdatedAt = null,
+                    pubkey = "somePubkey",
                     keypair = NostrWalletKeypair(
                         privateKey = "7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd",
                         pubKey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
