@@ -8,6 +8,7 @@ data class NostrWalletData(
     @PrimaryKey
     val walletId: String,
     val relays: List<String>,
+    val pubkey: String,
     val walletPubkey: String,
     val walletPrivateKey: String,
 )
