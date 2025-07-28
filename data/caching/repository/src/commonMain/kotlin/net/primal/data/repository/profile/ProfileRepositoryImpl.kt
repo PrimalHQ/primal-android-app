@@ -134,8 +134,6 @@ class ProfileRepositoryImpl(
 
                 if (streamData != null) {
                     database.streams().upsertStreamData(data = streamData)
-                } else {
-                    database.streams().deleteStream(authorId = profileId)
                 }
             }
 

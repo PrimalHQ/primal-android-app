@@ -1,6 +1,7 @@
 package net.primal.domain.streams
 
 data class Stream(
+    val aTag: String,
     val authorId: String,
     val dTag: String,
     val title: String?,

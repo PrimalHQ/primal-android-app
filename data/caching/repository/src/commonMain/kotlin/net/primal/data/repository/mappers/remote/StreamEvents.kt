@@ -17,12 +17,22 @@ import net.primal.domain.nostr.findFirstTitle
 import net.primal.domain.nostr.findFirstTotalParticipants
 import net.primal.domain.streams.StreamStatus
 
+fun List<NostrEvent>.mapNotNullAsStreamDataPO(): List<StreamData> {
+    return this.mapNotNull { it.asStreamData() }
+}
+
 fun NostrEvent.asStreamData(): StreamData? {
     if (this.kind != NostrEventKind.LiveActivity.value) return null
 
-    val dTag = this.tags.findFirstIdentifier() ?: return null
+    val dTag = this.tags.findFirstIdentifier()
+    val status = this.tags.findFirstStatus()
+
+    if (dTag == null) {
+        return null
+    }
 
     return StreamData(
+        aTag = "${this.kind}:${this.pubKey}:$dTag",
         authorId = this.pubKey,
         dTag = dTag,
         title = this.tags.findFirstTitle(),
@@ -31,7 +41,7 @@ fun NostrEvent.asStreamData(): StreamData? {
         hashtags = this.tags.findAllHashtags(),
         streamingUrl = this.tags.findFirstStreaming(),
         recordingUrl = this.tags.findFirstRecording(),
-        status = StreamStatus.fromString(this.tags.findFirstStatus()),
+        status = StreamStatus.fromString(status),
         startsAt = this.tags.findFirstStarts()?.toLongOrNull(),
         endsAt = this.tags.findFirstEnds()?.toLongOrNull(),
         currentParticipants = this.tags.findFirstCurrentParticipants()?.toIntOrNull(),

@@ -1,0 +1,23 @@
+package net.primal.data.local.dao.streams
+
+import androidx.room.Embedded
+import androidx.room.Relation
+import net.primal.data.local.dao.events.EventStats
+import net.primal.data.local.dao.profiles.ProfileData
+
+data class Stream(
+    @Embedded
+    val data: StreamData,
+
+    @Relation(
+        parentColumn = "authorId",
+        entityColumn = "ownerId",
+    )
+    val author: ProfileData? = null,
+
+    @Relation(
+        parentColumn = "aTag",
+        entityColumn = "eventId",
+    )
+    val stats: EventStats? = null,
+)

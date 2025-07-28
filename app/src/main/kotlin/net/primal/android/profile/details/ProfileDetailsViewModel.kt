@@ -79,6 +79,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun setEffect(effect: ProfileDetailsContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     private var referencedProfilesObserver: Job? = null
+    private var streamObserverJob: Job? = null
 
     init {
         observeEvents()
@@ -113,7 +114,7 @@ class ProfileDetailsViewModel @Inject constructor(
         observeProfileStats(profileId = profileId)
         observeContainsFeed(profileId = profileId)
         observeMutedAccount(profileId = profileId)
-        observeStreamStatus(profileId = profileId)
+        findAndObserveLatestStream(profileId = profileId)
         resolveFollowsMe(profileId = profileId)
         markProfileInteraction(profileId = profileId, isActiveUser = isActiveUser)
     }
@@ -334,14 +335,26 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun observeStreamStatus(profileId: String) =
-        viewModelScope.launch {
-            streamRepository.observeStream(authorId = profileId).collect { streamData ->
+    private fun findAndObserveLatestStream(profileId: String) {
+        streamObserverJob?.cancel()
+        streamObserverJob = viewModelScope.launch {
+            val latestLiveStream = withContext(dispatcherProvider.io()) {
+                streamRepository.findLatestLiveStream(authorId = profileId)
+            }
+
+            if (latestLiveStream != null) {
+                streamRepository.observeStream(aTag = latestLiveStream.aTag).collect { streamData ->
+                    setState {
+                        copy(isLive = streamData?.isLive() == true)
+                    }
+                }
+            } else {
                 setState {
-                    copy(isLive = streamData?.isLive() == true)
+                    copy(isLive = false)
                 }
             }
         }
+    }
 
     private fun resolveFollowsMe(profileId: String) {
         val activeUserId = activeAccountStore.activeUserId()

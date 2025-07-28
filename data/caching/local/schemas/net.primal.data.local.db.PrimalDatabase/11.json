@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 11,
-    "identityHash": "44ecf669e3cd2228502d6f51a426a4e2",
+    "identityHash": "b1bf8e563180cd6709dc03cf1cb8c254",
     "entities": [
       {
         "tableName": "PostData",
@@ -1621,8 +1621,14 @@
       },
       {
         "tableName": "StreamData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`authorId` TEXT NOT NULL, `dTag` TEXT NOT NULL, `title` TEXT, `summary` TEXT, `imageUrl` TEXT, `hashtags` TEXT NOT NULL, `streamingUrl` TEXT, `recordingUrl` TEXT, `startsAt` INTEGER, `endsAt` INTEGER, `status` TEXT NOT NULL, `currentParticipants` INTEGER, `totalParticipants` INTEGER, PRIMARY KEY(`authorId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aTag` TEXT NOT NULL, `authorId` TEXT NOT NULL, `dTag` TEXT NOT NULL, `title` TEXT, `summary` TEXT, `imageUrl` TEXT, `hashtags` TEXT NOT NULL, `streamingUrl` TEXT, `recordingUrl` TEXT, `startsAt` INTEGER, `endsAt` INTEGER, `status` TEXT NOT NULL, `currentParticipants` INTEGER, `totalParticipants` INTEGER, PRIMARY KEY(`aTag`))",
         "fields": [
+          {
+            "fieldPath": "aTag",
+            "columnName": "aTag",
+            "affinity": "TEXT",
+            "notNull": true
+          },
           {
             "fieldPath": "authorId",
             "columnName": "authorId",
@@ -1696,14 +1702,14 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "authorId"
+            "aTag"
           ]
         }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '44ecf669e3cd2228502d6f51a426a4e2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b1bf8e563180cd6709dc03cf1cb8c254')"
     ]
   }
 }

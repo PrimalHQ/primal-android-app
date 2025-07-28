@@ -1,6 +1,7 @@
 package net.primal.data.repository.streams
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.repository.mappers.local.asStreamDO
@@ -11,9 +12,16 @@ class StreamRepositoryImpl(
     private val database: PrimalDatabase,
 ) : StreamRepository {
 
-    override fun observeStream(authorId: String): Flow<Stream?> {
-        return database.streams().observeStream(authorId = authorId).map {
-            it?.asStreamDO()
-        }
+    override suspend fun findLatestLiveStream(authorId: String): Stream? {
+        val streamsPO = database.streams().observeStreamsByAuthorId(authorId).first()
+        val liveStreamPO = streamsPO.find { it.data.isLive() }
+        return liveStreamPO?.asStreamDO()
+    }
+
+    override fun observeStream(aTag: String): Flow<Stream?> {
+        return database.streams().observeStreamByATag(aTag = aTag)
+            .map { streamPO ->
+                streamPO?.asStreamDO()
+            }
     }
 }
