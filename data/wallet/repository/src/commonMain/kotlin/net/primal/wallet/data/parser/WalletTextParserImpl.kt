@@ -1,41 +1,41 @@
-package net.primal.android.scanner.analysis
-
-import javax.inject.Inject
-import kotlinx.coroutines.withContext
-import net.primal.android.navigation.asUrlDecoded
-import net.primal.android.wallet.utils.isBitcoinAddress
-import net.primal.android.wallet.utils.isBitcoinUri
-import net.primal.android.wallet.utils.isLightningAddress
-import net.primal.android.wallet.utils.isLightningUri
-import net.primal.android.wallet.utils.isLnInvoice
-import net.primal.android.wallet.utils.isLnUrl
-import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import net.primal.core.utils.CurrencyConversionUtils.toSats
-import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.Result
+import net.primal.core.utils.asUrlDecoded
 import net.primal.domain.nostr.cryptography.utils.urlToLnUrlHrp
+import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
+import net.primal.domain.parser.WalletTextParser
+import net.primal.domain.utils.isBitcoinAddress
+import net.primal.domain.utils.isBitcoinUri
+import net.primal.domain.utils.isLightningAddress
+import net.primal.domain.utils.isLightningUri
+import net.primal.domain.utils.isLnInvoice
+import net.primal.domain.utils.isLnUrl
+import net.primal.domain.utils.parseBitcoinPaymentInstructions
 import net.primal.domain.wallet.DraftTx
 import net.primal.domain.wallet.WalletRepository
-import net.primal.wallet.data.remote.parseAsLNUrlOrNull
 
-class WalletTextParser @Inject constructor(
-    private val dispatchers: DispatcherProvider,
+class WalletTextParserImpl(
     private val walletRepository: WalletRepository,
-) {
+) : WalletTextParser {
 
-    suspend fun parseAndQueryText(userId: String, text: String): DraftTx? {
-        return when (text.parseRecipientType()) {
-            WalletRecipientType.LnInvoice -> handleLnInvoiceText(userId, text)
+    override suspend fun parseAndQueryText(userId: String, text: String): Result<DraftTx> {
+        return runCatching {
+            when (text.parseRecipientType()) {
+                WalletRecipientType.LnInvoice -> handleLnInvoiceText(userId, text)
 
-            WalletRecipientType.LnUrl -> handleLnUrlText(userId, text)
+                WalletRecipientType.LnUrl -> handleLnUrlText(userId, text)
 
-            WalletRecipientType.LnAddress -> handleLightningAddressText(userId, text)
+                WalletRecipientType.LnAddress -> handleLightningAddressText(userId, text)
 
-            WalletRecipientType.BitcoinAddress,
-            WalletRecipientType.BitcoinUri,
-            -> handleBitcoinText(text = text)
+                WalletRecipientType.BitcoinAddress,
+                WalletRecipientType.BitcoinUri,
+                -> handleBitcoinText(text = text)
 
-            null -> null
-        }
+                null -> null
+            }
+        }.getOrNull()
+            ?.let { Result.success(it) }
+            ?: Result.failure(IllegalArgumentException("Provided text was not a valid wallet type text."))
     }
 
     private fun String.parseRecipientType(): WalletRecipientType? {
@@ -67,25 +67,23 @@ class WalletTextParser @Inject constructor(
         }
 
     private suspend fun handleLnInvoiceText(userId: String, text: String): DraftTx {
-        val response = withContext(dispatchers.io()) {
-            val lnbc = text.split(":").last()
-            walletRepository.parseLnInvoice(userId = userId, lnbc = lnbc)
-        }
+        val lnbc = text.split(":").last()
+        val response = walletRepository.parseLnInvoice(userId = userId, lnbc = lnbc)
+
         return DraftTx(
             targetUserId = response.userId,
             lnInvoice = text,
             lnInvoiceAmountMilliSats = response.amountMilliSats,
             lnInvoiceDescription = response.description,
             amountSats = ((response.amountMilliSats ?: 0) / 1000).toString(),
-            noteRecipient = response.comment.asUrlDecoded(),
+            noteRecipient = response.comment?.asUrlDecoded(),
         )
     }
 
     private suspend fun handleLnUrlText(userId: String, text: String): DraftTx {
-        val response = withContext(dispatchers.io()) {
-            val lnurl = text.split(":").last()
-            walletRepository.parseLnUrl(userId = userId, lnurl = lnurl)
-        }
+        val lnurl = text.split(":").last()
+        val response = walletRepository.parseLnUrl(userId = userId, lnurl = lnurl)
+
         return DraftTx(
             minSendable = response.minSendable,
             maxSendable = response.maxSendable,

@@ -2,17 +2,17 @@ package net.primal.android.scanner.domain
 
 import net.primal.android.redeem.utils.isPromoCodeUrl
 import net.primal.android.user.domain.isNwcUrl
-import net.primal.android.wallet.utils.isBitcoinAddress
-import net.primal.android.wallet.utils.isBitcoinUri
-import net.primal.android.wallet.utils.isLightningUri
-import net.primal.android.wallet.utils.isLnInvoice
-import net.primal.android.wallet.utils.isLnUrl
 import net.primal.domain.nostr.utils.isNProfile
 import net.primal.domain.nostr.utils.isNProfileUri
 import net.primal.domain.nostr.utils.isNPub
 import net.primal.domain.nostr.utils.isNPubUri
 import net.primal.domain.nostr.utils.isNote
 import net.primal.domain.nostr.utils.isNoteUri
+import net.primal.domain.utils.isBitcoinAddress
+import net.primal.domain.utils.isBitcoinUri
+import net.primal.domain.utils.isLightningUri
+import net.primal.domain.utils.isLnInvoice
+import net.primal.domain.utils.isLnUrl
 
 enum class QrCodeDataType(val validator: (String) -> Boolean) {
     NPUB_URI(validator = { it.isNPubUri() }),

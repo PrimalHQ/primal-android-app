@@ -19,15 +19,15 @@ import net.primal.android.profile.qr.ProfileQrCodeContract.SideEffect
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiEvent
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiState
 import net.primal.android.redeem.utils.getPromoCodeFromUrl
-import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.utils.extractNoteId
 import net.primal.domain.nostr.utils.extractProfileId
+import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
 
@@ -103,20 +103,13 @@ class ProfileQrCodeViewModel @Inject constructor(
         }
 
     private suspend fun processWalletText(text: String) {
-        try {
-            val draftTx = walletTextParser.parseAndQueryText(
-                userId = activeAccountStore.activeUserId(),
-                text = text,
-            )
-            if (draftTx != null) {
-                setEffect(SideEffect.WalletTxDetected(draftTx = draftTx))
-            } else {
-                Timber.w("Unable to parse text. [text = $text]")
-            }
-        } catch (error: SignatureException) {
-            Timber.w(error)
-        } catch (error: NetworkException) {
-            Timber.w(error)
+        walletTextParser.parseAndQueryText(
+            userId = activeAccountStore.activeUserId(),
+            text = text,
+        ).onFailure { error ->
+            Timber.w(error, "Unable to parse text. [text = $text]")
+        }.onSuccess { draftTx ->
+            setEffect(SideEffect.WalletTxDetected(draftTx = draftTx))
         }
     }
 

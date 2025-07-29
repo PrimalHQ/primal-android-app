@@ -15,13 +15,11 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.draftTransaction
 import net.primal.android.navigation.lnbc
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.scanner.analysis.WalletTextParser
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiEvent
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract.UiState
 import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
-import net.primal.android.wallet.utils.isLightningAddress
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.CurrencyConversionUtils.fromUsdToSats
@@ -29,12 +27,16 @@ import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.getMaximumUsdAmount
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.profile.ProfileData
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.fees.OnChainTransactionFeeTier
 import net.primal.domain.rates.fees.TransactionFeeRepository
+import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.DraftTxStatus
 import net.primal.domain.wallet.SubWallet
@@ -68,13 +70,12 @@ class CreateTransactionViewModel @Inject constructor(
         updateMiningFees()
         observeUsdExchangeRate()
 
-        if (argLnbc != null) {
-            viewModelScope.launch {
+        /* it is important that parse finishes before `observeProfileData` as important info could be overwritten. */
+        viewModelScope.launch {
+            if (argLnbc != null) {
                 parseInvoiceAndUpdateState(text = argLnbc)
-                observeProfileData()
-                fetchProfileData()
             }
-        } else {
+
             observeProfileData()
             fetchProfileData()
         }
@@ -236,21 +237,14 @@ class CreateTransactionViewModel @Inject constructor(
     private suspend fun parseInvoiceAndUpdateState(text: String) {
         setState { copy(parsingInvoice = true) }
         val userId = activeUserStore.activeUserId()
-        try {
-            val draftTx = walletTextParser.parseAndQueryText(userId = userId, text = text)
-            if (draftTx != null) {
+        walletTextParser.parseAndQueryText(userId = userId, text = text)
+            .onFailure { error ->
+                setState { copy(error = error) }
+                Timber.w(error, "Unable to parse text. [text=$text]")
+            }.onSuccess { draftTx ->
                 setState { copy(transaction = draftTx) }
-            } else {
-                Timber.w("Unable to parse text. [text=$text]")
             }
-        } catch (error: SignatureException) {
-            Timber.w(error)
-        } catch (error: NetworkException) {
-            Timber.w(error)
-            setState { copy(error = error) }
-        } finally {
-            setState { copy(parsingInvoice = false) }
-        }
+        setState { copy(parsingInvoice = false) }
     }
 
     private fun observeProfileData() =

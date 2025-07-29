@@ -9,3 +9,18 @@ fun String.ellipsizeMiddle(size: Int): String {
         "$firstEight...$lastEight"
     }
 }
+
+/**
+ * Validates that the string is in an email format.
+ * Regex used is the one from Javas `Patterns.EMAIL_ADDRESS`.
+ */
+fun String.isEmailAddress() =
+    Regex(
+        "[a-zA-Z0-9+._%\\-]{1,256}" +
+            "@" +
+            "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,64}" +
+            "(" +
+            "\\." +
+            "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
+            ")+",
+    ).matches(this)

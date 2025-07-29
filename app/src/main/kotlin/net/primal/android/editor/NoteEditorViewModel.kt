@@ -49,7 +49,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
-import net.primal.android.wallet.utils.isLnInvoice
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
@@ -78,6 +77,7 @@ import net.primal.domain.posts.FeedRepository
 import net.primal.domain.reads.Article
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
+import net.primal.domain.utils.isLnInvoice
 import timber.log.Timber
 
 class NoteEditorViewModel @AssistedInject constructor(

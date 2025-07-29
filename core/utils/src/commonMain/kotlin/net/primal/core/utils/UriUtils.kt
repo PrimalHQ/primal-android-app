@@ -1,6 +1,8 @@
 package net.primal.core.utils
 
 import io.ktor.http.Url
+import io.ktor.http.decodeURLQueryComponent
+import io.ktor.utils.io.charsets.Charsets
 
 /**
  * A URL-matching regex that supports:
@@ -139,3 +141,5 @@ fun String.extractTLD(): String? {
         else -> parts.drop(partsCount - 2).joinToString(".")
     }
 }
+
+fun String.asUrlDecoded(): String = decodeURLQueryComponent(plusIsSpace = true, charset = Charsets.UTF_8)
