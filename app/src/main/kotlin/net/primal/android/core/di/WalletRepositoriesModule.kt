@@ -9,10 +9,12 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
+import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.domain.rates.fees.TransactionFeeRepository
 import net.primal.domain.wallet.WalletRepository
+import net.primal.wallet.data.parser.factory.ParserFactory
 import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
 
 @Module
@@ -74,5 +76,10 @@ object WalletRepositoriesModule {
             primalWalletApiClient = primalApiClient,
             nostrEventSignatureHandler = nostrNotary,
         )
+    }
+
+    @Provides
+    fun providesWalletTextParser(walletRepository: WalletRepository): WalletTextParser {
+        return ParserFactory.createWalletTextParser(walletRepository = walletRepository)
     }
 }
