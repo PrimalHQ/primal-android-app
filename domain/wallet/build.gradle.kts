@@ -47,6 +47,8 @@ kotlin {
 
                 // Paging (for PagingData entity in repositories)
                 implementation(libs.paging.common)
+
+                implementation(libs.bitcoin.kmp)
             }
         }
 

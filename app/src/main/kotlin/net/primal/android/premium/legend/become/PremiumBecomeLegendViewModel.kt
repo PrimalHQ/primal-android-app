@@ -20,10 +20,10 @@ import net.primal.android.premium.legend.become.PremiumBecomeLegendContract.UiSt
 import net.primal.android.premium.legend.subscription.PurchaseMonitor
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.utils.parseBitcoinPaymentInstructions
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.rates.exchange.ExchangeRateRepository
+import net.primal.domain.utils.parseBitcoinPaymentInstructions
 import timber.log.Timber
 
 @HiltViewModel
