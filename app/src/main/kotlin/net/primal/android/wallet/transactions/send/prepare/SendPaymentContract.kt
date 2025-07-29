@@ -13,7 +13,7 @@ interface SendPaymentContract {
     ) {
         sealed class SendPaymentError {
             data class LightningAddressNotFound(val userDisplayName: String?) : SendPaymentError()
-            data class ParseException(val cause: Exception) : SendPaymentError()
+            data class ParseException(val cause: Throwable) : SendPaymentError()
         }
     }
     sealed class UiEvent {
