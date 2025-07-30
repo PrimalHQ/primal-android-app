@@ -2,6 +2,7 @@ package net.primal.android.premium.legend.contribute
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import net.primal.domain.wallet.CurrencyMode
+import net.primal.domain.wallet.Wallet
 
 interface LegendContributeContract {
 
@@ -11,6 +12,7 @@ interface LegendContributeContract {
 
     data class UiState(
         val stage: LegendContributeState = LegendContributeState.Intro,
+        val activeWallet: Wallet? = null,
         val paymentMethod: PaymentMethod? = null,
         val amountInUsd: String = "0",
         val amountInSats: String = "0",

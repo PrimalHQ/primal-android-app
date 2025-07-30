@@ -9,11 +9,14 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
+import net.primal.domain.builder.TxRequestBuilder
+import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.domain.rates.fees.TransactionFeeRepository
 import net.primal.domain.wallet.WalletRepository
+import net.primal.wallet.data.builder.factory.TxRequestBuilderFactory
 import net.primal.wallet.data.parser.factory.ParserFactory
 import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
 
@@ -37,11 +40,13 @@ object WalletRepositoriesModule {
         @PrimalWalletApiClient primalApiClient: PrimalApiClient,
         nostrNotary: NostrNotary,
         profileRepository: ProfileRepository,
+        lightningRepository: LightningRepository,
     ): WalletRepository {
         return WalletRepositoryFactory.createWalletRepository(
             primalWalletApiClient = primalApiClient,
             nostrEventSignatureHandler = nostrNotary,
             profileRepository = profileRepository,
+            lightningRepository = lightningRepository,
         )
     }
 
@@ -81,5 +86,10 @@ object WalletRepositoriesModule {
     @Provides
     fun providesWalletTextParser(walletRepository: WalletRepository): WalletTextParser {
         return ParserFactory.createWalletTextParser(walletRepository = walletRepository)
+    }
+
+    @Provides
+    fun providesTxRequestBuilder(): TxRequestBuilder {
+        return TxRequestBuilderFactory.createTxRequestBuilder()
     }
 }

@@ -1,11 +1,14 @@
 package net.primal.wallet.data.service.concrete
 
 import net.primal.core.networking.utils.orderByPagingIfNotNull
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.Result
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.runCatching
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.SubWallet
+import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.wallet.data.model.CreateLightningInvoiceRequest
@@ -14,6 +17,7 @@ import net.primal.wallet.data.model.TransactionsRequest
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.DepositRequestBody
 import net.primal.wallet.data.remote.model.TransactionsRequestBody
+import net.primal.wallet.data.remote.model.WithdrawRequestBody
 import net.primal.wallet.data.repository.mappers.remote.asLightingInvoiceResultDO
 import net.primal.wallet.data.repository.mappers.remote.mapAsPrimalTransactions
 import net.primal.wallet.data.service.WalletService
@@ -68,5 +72,23 @@ internal class PrimalWalletServiceImpl(
             )
 
             response.asLightingInvoiceResultDO()
+        }
+
+    override suspend fun pay(wallet: Wallet, request: TxRequest): Result<Unit> =
+        runCatching {
+            primalWalletApi.withdraw(
+                userId = wallet.userId,
+                body = WithdrawRequestBody(
+                    subWallet = SubWallet.Open,
+                    targetLud16 = request.getIfTypeOrNull(TxRequest.Lightning.LnUrl::lud16),
+                    targetLnUrl = request.getIfTypeOrNull(TxRequest.Lightning.LnUrl::lnUrl),
+                    targetBtcAddress = request.getIfTypeOrNull(TxRequest.BitcoinOnChain::onChainAddress),
+                    onChainTier = request.getIfTypeOrNull(TxRequest.BitcoinOnChain::onChainTier),
+                    lnInvoice = request.getIfTypeOrNull(TxRequest.Lightning.LnInvoice::lnInvoice),
+                    amountBtc = request.amountSats.toLong().toBtc().formatAsString(),
+                    noteRecipient = request.noteRecipient,
+                    noteSelf = request.noteSelf,
+                ),
+            )
         }
 }
