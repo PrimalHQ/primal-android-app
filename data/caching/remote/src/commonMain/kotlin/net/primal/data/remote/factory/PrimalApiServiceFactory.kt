@@ -16,6 +16,8 @@ import net.primal.data.remote.api.feeds.FeedsApi
 import net.primal.data.remote.api.feeds.FeedsApiImpl
 import net.primal.data.remote.api.importing.PrimalImportApi
 import net.primal.data.remote.api.importing.PrimalImportApiImpl
+import net.primal.data.remote.api.lightning.LightningApi
+import net.primal.data.remote.api.lightning.createLightningApi
 import net.primal.data.remote.api.messages.MessagesApi
 import net.primal.data.remote.api.messages.MessagesApiImpl
 import net.primal.data.remote.api.notifications.NotificationsApi
@@ -61,6 +63,12 @@ object PrimalApiServiceFactory {
             .httpClient(client = defaultHttpClient)
             .build()
             .createUserWellKnownApi()
+
+    fun createLightningApi(): LightningApi =
+        Ktorfit.Builder()
+            .httpClient(client = defaultHttpClient)
+            .build()
+            .createLightningApi()
 
     fun createStreamMonitor(primalApiClient: PrimalApiClient): LiveStreamApi =
         LiveStreamApiImpl(primalApiClient = primalApiClient)
