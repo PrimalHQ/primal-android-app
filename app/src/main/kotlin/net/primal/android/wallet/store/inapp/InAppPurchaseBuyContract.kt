@@ -8,11 +8,10 @@ interface InAppPurchaseBuyContract {
     data class UiState(
         val minSatsInAppProduct: InAppProduct? = null,
         val quote: SatsPurchaseQuote? = null,
-        val purchasingQuote: SatsPurchaseQuote? = null,
         val error: Throwable? = null,
     )
     sealed class UiEvent {
-        data object ClearQuote : UiEvent()
+        data object ClearData : UiEvent()
         data object RefreshQuote : UiEvent()
         data class RequestPurchase(val activity: Activity) : UiEvent()
     }

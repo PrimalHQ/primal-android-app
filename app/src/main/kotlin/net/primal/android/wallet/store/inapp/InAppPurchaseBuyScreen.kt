@@ -36,14 +36,14 @@ import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.store.domain.InAppProduct
 import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 
@@ -54,11 +54,11 @@ fun InAppPurchaseBuyBottomSheet(onDismiss: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
     BackHandler {
-        viewModel.setEvent(InAppPurchaseBuyContract.UiEvent.ClearQuote)
+        viewModel.setEvent(InAppPurchaseBuyContract.UiEvent.ClearData)
         onDismiss()
     }
 
-    LaunchedEffect(viewModel, onDismiss) {
+    LaunchedEffect(viewModel) {
         withContext(Dispatchers.IO) {
             while (true) {
                 viewModel.setEvent(InAppPurchaseBuyContract.UiEvent.RefreshQuote)
@@ -67,7 +67,7 @@ fun InAppPurchaseBuyBottomSheet(onDismiss: () -> Unit) {
         }
     }
 
-    LaunchedEffect(viewModel) {
+    LaunchedEffect(viewModel, onDismiss) {
         viewModel.effects.collect {
             when (it) {
                 InAppPurchaseBuyContract.SideEffect.PurchaseConfirmed -> onDismiss()
@@ -75,13 +75,11 @@ fun InAppPurchaseBuyBottomSheet(onDismiss: () -> Unit) {
         }
     }
 
-    LaunchedErrorHandler(viewModel = viewModel)
-
     InAppPurchaseBuyBottomSheet(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
         onDismiss = {
-            viewModel.setEvent(InAppPurchaseBuyContract.UiEvent.ClearQuote)
+            viewModel.setEvent(InAppPurchaseBuyContract.UiEvent.ClearData)
             onDismiss()
         },
     )
@@ -103,7 +101,7 @@ fun InAppPurchaseBuyBottomSheet(
         tonalElevation = 0.dp,
         onDismissRequest = onDismiss,
     ) {
-        if (activity != null && state.minSatsInAppProduct != null) {
+        if (activity != null && state.minSatsInAppProduct != null && state.error == null) {
             PurchaseQuoteColumn(
                 quote = state.quote,
                 onPurchaseRequest = {
@@ -112,6 +110,8 @@ fun InAppPurchaseBuyBottomSheet(
             )
         } else {
             InAppPurchaseNotAvailableNotice(
+                inAppProduct = state.minSatsInAppProduct,
+                error = state.error,
                 onRefresh = {
                     eventPublisher(InAppPurchaseBuyContract.UiEvent.RefreshQuote)
                 },
@@ -216,7 +216,11 @@ private fun CurrencyText(
 }
 
 @Composable
-private fun InAppPurchaseNotAvailableNotice(onRefresh: () -> Unit) {
+private fun InAppPurchaseNotAvailableNotice(
+    inAppProduct: InAppProduct?,
+    error: Throwable?,
+    onRefresh: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -228,7 +232,11 @@ private fun InAppPurchaseNotAvailableNotice(onRefresh: () -> Unit) {
             modifier = Modifier
                 .wrapContentSize()
                 .padding(horizontal = 32.dp),
-            text = stringResource(id = R.string.wallet_in_app_purchase_not_available),
+            text = when {
+                inAppProduct == null -> stringResource(id = R.string.wallet_in_app_purchase_not_available)
+                error != null -> error.message ?: stringResource(id = R.string.app_generic_error)
+                else -> stringResource(id = R.string.app_generic_error)
+            },
             textAlign = TextAlign.Center,
             style = AppTheme.typography.bodyLarge,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
@@ -251,15 +259,14 @@ fun LaunchedErrorHandler(viewModel: InAppPurchaseBuyViewModel) {
     LaunchedEffect(viewModel) {
         viewModel.state
             .filter { it.error != null }
-            .map { it.error }
-            .filterNotNull()
+            .mapNotNull { it.error }
             .collect { error ->
                 uiScope.launch {
                     val message = error.message ?: genericMessage
                     Toast.makeText(
                         context,
                         message,
-                        Toast.LENGTH_SHORT,
+                        Toast.LENGTH_LONG,
                     ).show()
                 }
             }

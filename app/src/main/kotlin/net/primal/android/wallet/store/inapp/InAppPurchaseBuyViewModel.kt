@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.*
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,8 +22,6 @@ import net.primal.android.wallet.store.domain.SatsPurchaseQuote
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.SideEffect
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiEvent
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiState
-import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
@@ -42,6 +42,8 @@ class InAppPurchaseBuyViewModel @Inject constructor(
     val effects = _effects.receiveAsFlow()
     private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
+    private var purchasingQuote: SatsPurchaseQuote? = null
+
     init {
         subscribeToEvents()
         subscribeToPurchases()
@@ -51,19 +53,24 @@ class InAppPurchaseBuyViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    UiEvent.ClearQuote -> setState { copy(quote = null) }
+                    UiEvent.ClearData -> clearAllData()
                     UiEvent.RefreshQuote -> refreshQuote()
                     is UiEvent.RequestPurchase -> launchBillingFlow(it)
                 }
             }
         }
 
+    private fun clearAllData() {
+        purchasingQuote = null
+        setState { copy(quote = null, error = null) }
+    }
+
     private fun refreshQuote() =
         viewModelScope.launch {
             val minSatsInAppProduct = primalBillingClient.queryMinSatsProduct()
             setState { copy(minSatsInAppProduct = minSatsInAppProduct) }
             _state.value.minSatsInAppProduct?.let { inAppProduct ->
-                try {
+                runCatching {
                     val previousQuote = _state.value.quote
                     val localCurrency = Currency.getInstance(inAppProduct.priceCurrencyCode)
                     val response = walletRepository.getInAppPurchaseMinSatsQuote(
@@ -83,16 +90,10 @@ class InAppPurchaseBuyViewModel @Inject constructor(
                             ),
                         )
                     }
-                } catch (error: SignatureException) {
+                }.getOrElse { error ->
                     Timber.w(error)
-                    if (_state.value.quote == null) {
-                        setState { copy(error = error) }
-                    }
-                } catch (error: NetworkException) {
-                    Timber.w(error)
-                    if (_state.value.quote == null) {
-                        setState { copy(error = error) }
-                    }
+                    delay(500.milliseconds)
+                    setState { copy(quote = null, error = error) }
                 }
             }
         }
@@ -100,8 +101,9 @@ class InAppPurchaseBuyViewModel @Inject constructor(
     private fun subscribeToPurchases() =
         viewModelScope.launch {
             primalBillingClient.satsPurchases.collect { purchase ->
-                if (purchase.quote.quoteId == _state.value.purchasingQuote?.quoteId) {
+                if (purchase.quote.quoteId == purchasingQuote?.quoteId) {
                     setEffect(SideEffect.PurchaseConfirmed)
+                    clearAllData()
                 }
             }
         }
@@ -110,7 +112,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _state.value.quote?.let {
-                    setState { copy(purchasingQuote = it) }
+                    purchasingQuote = it
                     primalBillingClient.launchMinSatsBillingFlow(quote = it, activity = event.activity)
                 }
             } catch (error: InAppPurchaseException) {
