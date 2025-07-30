@@ -37,6 +37,8 @@ inline val SavedStateHandle.articleId: String? get() = get(ARTICLE_ID)
 
 const val NADDR = "naddr"
 inline val SavedStateHandle.naddr: String? get() = get(NADDR)
+inline val SavedStateHandle.naddrOrThrow: String
+    get() = get(NADDR) ?: throw IllegalArgumentException("Missing required naddr argument.")
 
 const val FOLLOWS_TYPE = "followsType"
 inline val SavedStateHandle.followsType: String? get() = get(FOLLOWS_TYPE)

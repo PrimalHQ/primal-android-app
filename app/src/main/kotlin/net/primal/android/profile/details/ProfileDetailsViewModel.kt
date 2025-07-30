@@ -39,7 +39,10 @@ import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.feeds.buildLatestNotesUserFeedSpec
 import net.primal.domain.mutes.MutedItemRepository
+import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
@@ -344,12 +347,24 @@ class ProfileDetailsViewModel @Inject constructor(
 
             if (latestLiveStream != null) {
                 streamRepository.observeStream(aTag = latestLiveStream).collect { streamData ->
+                    val isLive = streamData?.isLive() == true
                     setState {
-                        copy(isLive = streamData?.isLive() == true)
+                        copy(
+                            isLive = isLive,
+                            liveStreamNaddr = if (isLive) {
+                                Naddr(
+                                    kind = NostrEventKind.LiveActivity.value,
+                                    userId = streamData.authorId,
+                                    identifier = streamData.dTag,
+                                ).toNaddrString()
+                            } else {
+                                null
+                            },
+                        )
                     }
                 }
             } else {
-                setState { copy(isLive = false) }
+                setState { copy(isLive = false, liveStreamNaddr = null) }
             }
         }
     }

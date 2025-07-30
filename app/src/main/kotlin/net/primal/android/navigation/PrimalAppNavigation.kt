@@ -159,6 +159,8 @@ import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
 import net.primal.android.redeem.RedeemCodeContract
 import net.primal.android.redeem.RedeemCodeScreen
 import net.primal.android.redeem.RedeemCodeViewModel
+import net.primal.android.stream.LiveStreamScreen
+import net.primal.android.stream.LiveStreamViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -284,6 +286,8 @@ private fun NavController.navigateToSettings() = navigate(route = "settings")
 fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
 
 fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$NADDR=$naddr")
+
+fun NavController.navigateToLiveStream(naddr: String) = navigate(route = "liveStream?$NADDR=$naddr")
 
 fun NavController.navigateToReactions(
     eventId: String,
@@ -859,6 +863,22 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
                 },
                 navDeepLink {
                     uriPattern = "https://primal.net/{$PRIMAL_NAME}/{$ARTICLE_ID}"
+                },
+            ),
+            navController = navController,
+        )
+
+        liveStream(
+            route = "liveStream?$NADDR={$NADDR}",
+            arguments = listOf(
+                navArgument(NADDR) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "https://primal.net/ls/{$NADDR}"
                 },
             ),
             navController = navController,
@@ -2109,6 +2129,29 @@ private fun NavGraphBuilder.articleDetails(
     )
 }
 
+private fun NavGraphBuilder.liveStream(
+    route: String,
+    deepLinks: List<NavDeepLink>,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    deepLinks = deepLinks,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) { navBackEntry ->
+    val viewModel = hiltViewModel<LiveStreamViewModel>(navBackEntry)
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    LiveStreamScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+    )
+}
+
 private fun NavGraphBuilder.reactions(
     route: String,
     arguments: List<NamedNavArgument>,
@@ -2218,6 +2261,7 @@ private fun NavGraphBuilder.profile(
                 }
             },
             onNewPostClick = { navController.navigateToNoteEditor(null) },
+            onLiveStreamClick = { naddr -> navController.navigateToLiveStream(naddr) },
         ),
         noteCallbacks = noteCallbacksHandler(navController),
     )
