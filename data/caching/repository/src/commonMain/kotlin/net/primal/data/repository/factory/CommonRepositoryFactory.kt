@@ -3,6 +3,7 @@ package net.primal.data.repository.factory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.remote.api.lightning.LightningApi
 import net.primal.data.remote.factory.PrimalApiServiceFactory
 import net.primal.data.repository.UserDataCleanupRepositoryImpl
 import net.primal.data.repository.articles.ArticleRepositoryImpl
@@ -16,6 +17,7 @@ import net.primal.data.repository.explore.ExploreRepositoryImpl
 import net.primal.data.repository.feed.FeedRepositoryImpl
 import net.primal.data.repository.feeds.FeedsRepositoryImpl
 import net.primal.data.repository.importer.CachingImportRepositoryImpl
+import net.primal.data.repository.lightning.LightningRepositoryImpl
 import net.primal.data.repository.messages.ChatRepositoryImpl
 import net.primal.data.repository.messages.processors.MessagesProcessor
 import net.primal.data.repository.mute.MutedItemRepositoryImpl
@@ -33,6 +35,7 @@ import net.primal.domain.messages.ChatRepository
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.posts.FeedRepository
@@ -202,9 +205,13 @@ abstract class CommonRepositoryFactory {
         )
     }
 
-    fun createUserDataCleanupRepository(cachingPrimalApiClient: PrimalApiClient): UserDataCleanupRepository {
+    fun createUserDataCleanupRepository(): UserDataCleanupRepository {
         return UserDataCleanupRepositoryImpl(
             database = resolveCachingDatabase(),
         )
+    }
+
+    fun createLightningRepository(lightningApi: LightningApi): LightningRepository {
+        return LightningRepositoryImpl(dispatcherProvider = dispatcherProvider, lightningApi = lightningApi)
     }
 }

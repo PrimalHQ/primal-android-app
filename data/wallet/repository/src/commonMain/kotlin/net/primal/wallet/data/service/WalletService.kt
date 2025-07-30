@@ -2,6 +2,7 @@ package net.primal.wallet.data.service
 
 import net.primal.core.utils.Result
 import net.primal.domain.wallet.LnInvoiceCreateResult
+import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.wallet.data.model.CreateLightningInvoiceRequest
@@ -17,4 +18,6 @@ internal interface WalletService {
         wallet: Wallet,
         request: CreateLightningInvoiceRequest,
     ): Result<LnInvoiceCreateResult>
+
+    suspend fun pay(wallet: Wallet, request: TxRequest): Result<Unit>
 }
