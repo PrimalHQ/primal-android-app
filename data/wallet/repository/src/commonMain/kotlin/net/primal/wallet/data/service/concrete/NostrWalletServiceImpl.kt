@@ -7,14 +7,19 @@ import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.core.networking.nwc.nip47.ListTransactionsParams
 import net.primal.core.networking.nwc.nip47.LookupInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.MakeInvoiceParams
+import net.primal.core.networking.nwc.nip47.PayInvoiceParams
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.msatsToBtc
+import net.primal.core.utils.CurrencyConversionUtils.satsToMSats
 import net.primal.core.utils.Result
 import net.primal.core.utils.map
+import net.primal.core.utils.mapCatching
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.InvoiceType
+import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.domain.wallet.LnInvoiceCreateResult
+import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
 import net.primal.domain.wallet.Wallet
@@ -26,7 +31,9 @@ import net.primal.wallet.data.model.TransactionsRequest
 import net.primal.wallet.data.service.WalletService
 import net.primal.wallet.data.service.mappers.asNO
 
-internal class NostrWalletServiceImpl : WalletService {
+internal class NostrWalletServiceImpl(
+    private val lightningRepository: LightningRepository,
+) : WalletService {
     override suspend fun fetchWalletBalance(wallet: Wallet): Result<WalletBalanceResult> =
         runCatching {
             require(wallet is Wallet.NWC) { "Wallet is not type NWC but `NostrWalletService` called." }
@@ -111,6 +118,48 @@ internal class NostrWalletServiceImpl : WalletService {
                 )
             }.getOrThrow()
         }
+
+    override suspend fun pay(wallet: Wallet, request: TxRequest): Result<Unit> =
+        runCatching {
+            require(wallet is Wallet.NWC) { "Wallet is not type NWC but `NostrWalletService` called." }
+            require(request is TxRequest.Lightning) { "Only lightning transactions are supported through NWC wallet." }
+
+            val client = createNwcApiClient(wallet = wallet)
+
+            val amountMSats = request.amountSats.toLong().satsToMSats()
+            val lnInvoice = when (request) {
+                is TxRequest.Lightning.LnInvoice -> request.lnInvoice
+                is TxRequest.Lightning.LnUrl -> resolveLnInvoice(
+                    lnUrl = request.lnUrl,
+                    amountMSats = amountMSats,
+                    comment = request.noteRecipient,
+                ).getOrThrow()
+            }
+
+            return client.payInvoice(
+                params = PayInvoiceParams(
+                    invoice = lnInvoice,
+                    amount = amountMSats,
+                ),
+            ).map { }
+        }
+
+    private suspend fun resolveLnInvoice(
+        lnUrl: String,
+        amountMSats: Long,
+        comment: String?,
+    ): Result<String> =
+        lightningRepository.getPayRequest(lnUrl = lnUrl)
+            .mapCatching {
+                lightningRepository
+                    .getInvoice(
+                        callbackUrl = it.callback,
+                        amountMSats = amountMSats,
+                        comment = comment?.take(it.commentAllowed)?.ifBlank { null },
+                    )
+                    .getOrThrow()
+            }
+            .map { it.invoice }
 
     private fun LookupInvoiceResponsePayload.resolveState(): TxState =
         when {
