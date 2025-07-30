@@ -21,7 +21,7 @@ interface WalletRepository {
 
     suspend fun deleteAllTransactions(userId: String)
 
-    suspend fun pay(params: WalletPayParams)
+    suspend fun pay(walletId: String, request: TxRequest): Result<Unit>
 
     suspend fun createLightningInvoice(
         walletId: String,

@@ -18,8 +18,11 @@ import net.primal.android.premium.legend.subscription.PurchaseMonitor
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.repository.ExchangeRateHandler
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.getMaximumUsdAmount
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.rates.fees.TransactionFeeRepository
@@ -28,8 +31,7 @@ import net.primal.domain.utils.parseLightningPaymentInstructions
 import net.primal.domain.utils.parseSatsToUsd
 import net.primal.domain.utils.parseUsdToSats
 import net.primal.domain.wallet.CurrencyMode
-import net.primal.domain.wallet.SubWallet
-import net.primal.domain.wallet.WalletPayParams
+import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.not
 import timber.log.Timber
@@ -40,6 +42,7 @@ class LegendContributeViewModel @Inject constructor(
     private val exchangeRateHandler: ExchangeRateHandler,
     private val premiumRepository: PremiumRepository,
     private val walletRepository: WalletRepository,
+    private val walletAccountRepository: WalletAccountRepository,
     private val transactionFeeRepository: TransactionFeeRepository,
     private val purchaseMonitor: PurchaseMonitor,
 ) : ViewModel() {
@@ -54,6 +57,7 @@ class LegendContributeViewModel @Inject constructor(
 
     init {
         observeEvents()
+        observeActiveWallet()
         fetchExchangeRate()
         observeUsdExchangeRate()
     }
@@ -119,6 +123,14 @@ class LegendContributeViewModel @Inject constructor(
                     }
                 }
             }
+        }
+
+    private fun observeActiveWallet() =
+        viewModelScope.launch {
+            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
+                .collect { wallet ->
+                    setState { copy(activeWallet = wallet) }
+                }
         }
 
     private fun observeUsdExchangeRate() =
@@ -218,6 +230,7 @@ class LegendContributeViewModel @Inject constructor(
 
     private suspend fun executeOnChainPayment() {
         val activeUserId = activeAccountStore.activeUserId()
+        val activeWalletId = state.value.activeWallet?.walletId ?: return
         val instructions = state.value.qrCodeValue?.parseBitcoinPaymentInstructions()
         val targetBtcAddress = instructions?.address
         val amountBtc = instructions?.amount
@@ -230,11 +243,12 @@ class LegendContributeViewModel @Inject constructor(
             )
 
             walletRepository.pay(
-                params = WalletPayParams(
-                    userId = activeUserId,
-                    subWallet = SubWallet.Open,
-                    targetBtcAddress = targetBtcAddress,
-                    amountBtc = amountBtc,
+                walletId = activeWalletId,
+                request = TxRequest.BitcoinOnChain(
+                    amountSats = amountBtc.toSats().toDouble().formatAsString(),
+                    noteRecipient = null,
+                    noteSelf = null,
+                    onChainAddress = targetBtcAddress,
                     onChainTier = defaultMiningFee?.tierId,
                 ),
             )
@@ -242,15 +256,19 @@ class LegendContributeViewModel @Inject constructor(
     }
 
     private suspend fun executeLightningPayment() {
-        if (state.value.lightningInvoice != null) {
-            walletRepository.pay(
-                params = WalletPayParams(
-                    userId = activeAccountStore.activeUserId(),
-                    subWallet = SubWallet.Open,
-                    lnInvoice = state.value.lightningInvoice,
-                ),
-            )
-        }
+        val lnInvoice = state.value.lightningInvoice ?: return
+        val activeWalletId = state.value.activeWallet?.walletId ?: return
+        val amountSats = state.value.amountInSats
+
+        walletRepository.pay(
+            walletId = activeWalletId,
+            request = TxRequest.Lightning.LnInvoice(
+                noteRecipient = null,
+                noteSelf = null,
+                lnInvoice = lnInvoice,
+                amountSats = amountSats,
+            ),
+        )
     }
 
     private fun updateAmount(amount: String) =

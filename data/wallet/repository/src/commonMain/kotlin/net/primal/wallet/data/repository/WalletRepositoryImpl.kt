@@ -22,8 +22,8 @@ import net.primal.domain.wallet.LnUrlParseResult
 import net.primal.domain.wallet.Network
 import net.primal.domain.wallet.OnChainAddressResult
 import net.primal.domain.wallet.SubWallet
+import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
-import net.primal.domain.wallet.WalletPayParams
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.db.withTransaction
@@ -37,7 +37,6 @@ import net.primal.wallet.data.model.CreateLightningInvoiceRequest
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.DepositRequestBody
 import net.primal.wallet.data.repository.mappers.local.toDomain
-import net.primal.wallet.data.repository.mappers.local.toWithdrawRequestDTO
 import net.primal.wallet.data.repository.transactions.WalletTransactionsMediator
 import net.primal.wallet.data.service.WalletService
 
@@ -123,14 +122,18 @@ internal class WalletRepositoryImpl(
             transaction.toDomain(otherProfile = profile)
         }
 
-    override suspend fun pay(params: WalletPayParams) {
+    override suspend fun pay(walletId: String, request: TxRequest): Result<Unit> =
         withContext(dispatcherProvider.io()) {
-            primalWalletApi.withdraw(
-                userId = params.userId,
-                body = params.toWithdrawRequestDTO(),
-            )
+            val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
+                ?: return@withContext Result.failure(
+                    exception = IllegalArgumentException("Couldn't find wallet with the given walletId."),
+                )
+
+            when (wallet.info.type) {
+                WalletType.PRIMAL -> primalWalletService.pay(wallet = wallet.toDomain(), request = request)
+                WalletType.NWC -> nostrWalletService.pay(wallet = wallet.toDomain(), request = request)
+            }
         }
-    }
 
     override suspend fun createLightningInvoice(
         walletId: String,

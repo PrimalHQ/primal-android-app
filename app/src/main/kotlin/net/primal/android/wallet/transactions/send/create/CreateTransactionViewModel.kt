@@ -29,6 +29,8 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.getMaximumUsdAmount
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.domain.account.WalletAccountRepository
+import net.primal.domain.builder.TxRequestBuilder
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.parser.WalletTextParser
@@ -39,8 +41,6 @@ import net.primal.domain.rates.fees.TransactionFeeRepository
 import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.DraftTxStatus
-import net.primal.domain.wallet.SubWallet
-import net.primal.domain.wallet.WalletPayParams
 import net.primal.domain.wallet.WalletRepository
 import timber.log.Timber
 
@@ -52,6 +52,8 @@ class CreateTransactionViewModel @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val transactionFeeRepository: TransactionFeeRepository,
     private val walletRepository: WalletRepository,
+    private val walletAccountRepository: WalletAccountRepository,
+    private val txRequestBuilder: TxRequestBuilder,
     private val walletTextParser: WalletTextParser,
     private val exchangeRateHandler: ExchangeRateHandler,
 ) : ViewModel() {
@@ -76,6 +78,7 @@ class CreateTransactionViewModel @Inject constructor(
                 parseInvoiceAndUpdateState(text = argLnbc)
             }
 
+            observeActiveWallet()
             observeProfileData()
             fetchProfileData()
         }
@@ -247,6 +250,14 @@ class CreateTransactionViewModel @Inject constructor(
         setState { copy(parsingInvoice = false) }
     }
 
+    private fun observeActiveWallet() =
+        viewModelScope.launch {
+            walletAccountRepository.observeActiveWallet(userId = activeUserStore.activeUserId())
+                .collect { wallet ->
+                    setState { copy(activeWallet = wallet) }
+                }
+        }
+
     private fun observeProfileData() =
         viewModelScope.launch {
             state.value.transaction.targetUserId?.let { targetUserId ->
@@ -277,43 +288,26 @@ class CreateTransactionViewModel @Inject constructor(
 
     private fun sendTransaction(noteRecipient: String?, noteSelf: String?) =
         viewModelScope.launch {
-            try {
-                setState { copy(transaction = transaction.copy(status = DraftTxStatus.Sending)) }
-                val uiState = _state.value
-                val activeUserId = activeUserStore.activeUserId()
-                val miningFeeTier = uiState.selectedFeeTierIndex?.let { uiState.miningFeeTiers.getOrNull(it) }
-                val draftTransaction = uiState.transaction
+            setState { copy(transaction = transaction.copy(status = DraftTxStatus.Sending)) }
+            val uiState = _state.value
+            val activeWalletId = uiState.activeWallet?.walletId ?: return@launch
+            val miningFeeTier = uiState.selectedFeeTierIndex?.let { uiState.miningFeeTiers.getOrNull(it) }
+            val draftTransaction = uiState.transaction
+
+            txRequestBuilder.build(
+                draftTx = draftTransaction.copy(
+                    noteRecipient = noteRecipient,
+                    noteSelf = noteSelf,
+                    onChainMiningFeeTier = miningFeeTier?.id,
+                ),
+            ).mapCatching { txRequest ->
                 walletRepository.pay(
-                    params = WalletPayParams(
-                        userId = activeUserId,
-                        subWallet = SubWallet.Open,
-                        targetLud16 = draftTransaction.targetLud16,
-                        targetLnUrl = draftTransaction.targetLnUrl,
-                        targetPubKey = draftTransaction.targetUserId,
-                        lnInvoice = draftTransaction.lnInvoice,
-                        targetBtcAddress = draftTransaction.targetOnChainAddress,
-                        amountBtc = if (draftTransaction.lnInvoice == null ||
-                            draftTransaction.isLnInvoiceAmountless()
-                        ) {
-                            draftTransaction.amountSats.toULong().toBtc().formatAsString()
-                        } else {
-                            null
-                        },
-                        onChainTier = miningFeeTier?.id,
-                        noteRecipient = noteRecipient,
-                        noteSelf = noteSelf,
-                    ),
-                )
+                    walletId = activeWalletId,
+                    request = txRequest,
+                ).getOrThrow()
+            }.onSuccess {
                 setState { copy(transaction = transaction.copy(status = DraftTxStatus.Sent)) }
-            } catch (error: SignatureException) {
-                Timber.w(error)
-                setState {
-                    copy(
-                        error = error,
-                        transaction = transaction.copy(status = DraftTxStatus.Failed),
-                    )
-                }
-            } catch (error: NetworkException) {
+            }.onFailure { error ->
                 Timber.w(error)
                 setState {
                     copy(

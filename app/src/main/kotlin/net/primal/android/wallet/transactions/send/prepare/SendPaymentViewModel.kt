@@ -24,6 +24,8 @@ import net.primal.android.wallet.transactions.send.prepare.SendPaymentContract.U
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.domain.nostr.cryptography.utils.urlToLnUrlHrp
+import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.utils.isLightningAddress
@@ -100,6 +102,7 @@ class SendPaymentViewModel @Inject constructor(
                 setEffect(
                     SideEffect.DraftTransactionReady(
                         draft = DraftTx(
+                            targetLnUrl = lud16.parseAsLNUrlOrNull()?.urlToLnUrlHrp(),
                             targetLud16 = lud16,
                             targetUserId = profileData.profileId,
                         ),

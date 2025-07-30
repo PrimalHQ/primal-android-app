@@ -6,11 +6,13 @@ import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.domain.links.CdnImage
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.DraftTx
+import net.primal.domain.wallet.Wallet
 
 interface CreateTransactionContract {
 
     data class UiState(
         val transaction: DraftTx,
+        val activeWallet: Wallet? = null,
         val parsingInvoice: Boolean = false,
         val fetchingMiningFees: Boolean = false,
         val miningFeeTiers: List<MiningFeeUi> = emptyList(),

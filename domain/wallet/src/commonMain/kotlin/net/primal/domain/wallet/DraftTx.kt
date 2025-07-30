@@ -12,6 +12,7 @@ data class DraftTx(
     val targetOnChainAddress: String? = null,
     val targetUserId: String? = null,
     val onChainInvoice: String? = null,
+    val onChainMiningFeeTier: String? = null,
     val lnInvoice: String? = null,
     var lnInvoiceAmountMilliSats: Int? = null,
     var lnInvoiceDescription: String? = null,

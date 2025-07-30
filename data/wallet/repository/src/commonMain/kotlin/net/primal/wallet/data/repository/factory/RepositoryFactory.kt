@@ -5,6 +5,7 @@ import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.domain.rates.fees.TransactionFeeRepository
@@ -28,6 +29,7 @@ abstract class RepositoryFactory {
         primalWalletApiClient: PrimalApiClient,
         nostrEventSignatureHandler: NostrEventSignatureHandler,
         profileRepository: ProfileRepository,
+        lightningRepository: LightningRepository,
     ): WalletRepository {
         return WalletRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
@@ -41,7 +43,9 @@ abstract class RepositoryFactory {
                 primalWalletApiClient = primalWalletApiClient,
                 nostrEventSignatureHandler = nostrEventSignatureHandler,
             ),
-            nostrWalletService = WalletServiceFactory.createNostrWalletService(),
+            nostrWalletService = WalletServiceFactory.createNostrWalletService(
+                lightningRepository = lightningRepository,
+            ),
         )
     }
 
