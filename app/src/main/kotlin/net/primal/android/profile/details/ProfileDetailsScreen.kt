@@ -73,14 +73,12 @@ import net.primal.android.notes.feed.grid.MediaFeedGrid
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
-import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.profile.details.ui.PROFILE_TAB_COUNT
 import net.primal.android.profile.details.ui.ProfileHeaderDetails
 import net.primal.android.profile.details.ui.ProfileTabs
 import net.primal.android.profile.details.ui.ProfileTopCoverBar
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.wallet.zaps.canZap
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -296,30 +294,6 @@ private fun ProfileDetailsContent(
         )
     }
 
-    var showZapOptions by remember { mutableStateOf(false) }
-    if (showZapOptions) {
-        ZapBottomSheet(
-            onDismissRequest = { showZapOptions = false },
-            receiverName = state.profileDetails?.userDisplayName
-                ?: stringResource(id = R.string.profile_zap_bottom_sheet_fallback_title),
-            zappingState = state.zappingState,
-            onZap = { zapAmount, zapDescription ->
-                if (state.zappingState.canZap(zapAmount) && state.profileId != null) {
-                    eventPublisher(
-                        ProfileDetailsContract.UiEvent.ZapProfile(
-                            profileId = state.profileId,
-                            profileLnUrlDecoded = state.profileDetails?.lnUrlDecoded,
-                            zapAmount = zapAmount.toULong(),
-                            zapDescription = zapDescription,
-                        ),
-                    )
-                } else {
-                    showCantZapWarning = true
-                }
-            },
-        )
-    }
-
     val context = LocalContext.current
     SnackbarErrorHandler(
         error = state.error,
@@ -353,7 +327,6 @@ private fun ProfileDetailsContent(
                     eventPublisher = eventPublisher,
                     callbacks = callbacks,
                     noteCallbacks = noteCallbacks,
-                    showZapOptions = { showZapOptions = true },
                     showCantZapWarning = { showCantZapWarning = true },
                     snackbarHostState = snackbarHostState,
                 )
