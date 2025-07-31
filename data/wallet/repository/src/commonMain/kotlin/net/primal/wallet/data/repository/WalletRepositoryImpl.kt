@@ -60,6 +60,14 @@ internal class WalletRepositoryImpl(
             )
         }
 
+    override suspend fun getWalletById(walletId: String): Result<Wallet> =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet().findWallet(walletId = walletId)?.toDomain()?.let { Result.success(it) }
+                ?: Result.failure(
+                    IllegalArgumentException("Wallet with given walletId not found."),
+                )
+        }
+
     override suspend fun deleteWalletById(walletId: String) =
         withContext(dispatcherProvider.io()) {
             walletDatabase.wallet().deleteWalletById(walletId = walletId)
