@@ -562,11 +562,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun String.parseForProfileId(): String? =
         when {
             this.startsWith("npub") -> runCatching { bech32ToHexOrThrow() }.getOrNull()
-            this.startsWith("nprofile1") -> {
-                val pubkey = Nip19TLV.parseUriAsNprofileOrNull(this)?.pubkey
-                runCatching { pubkey?.bech32ToHexOrThrow() }.getOrNull()
-            }
-
+            this.startsWith("nprofile1") -> Nip19TLV.parseUriAsNprofileOrNull(this)?.pubkey
             else -> this
         }
 }
