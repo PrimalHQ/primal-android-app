@@ -1,6 +1,7 @@
 package net.primal.domain.nostr.utils
 
 import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
+import net.primal.domain.nostr.cryptography.utils.urlToLnUrlHrp
 
 fun String.parseAsLNUrlOrNull(): String? {
     val parts = this.split("@")
@@ -17,3 +18,10 @@ fun String.decodeLNUrlOrNull(): String? =
         val byteArray = this.bechToBytesOrThrow(hrp = "lnurl")
         byteArray.decodeToString()
     }.getOrNull()
+
+fun String.ensureEncodedLnUrl(): String =
+    if (startsWith("http://") || startsWith("https://")) {
+        this.urlToLnUrlHrp()
+    } else {
+        this
+    }
