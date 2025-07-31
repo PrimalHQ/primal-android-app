@@ -1,5 +1,9 @@
 package net.primal.domain.streams
 
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
+import net.primal.domain.nostr.NostrEventKind
+
 data class Stream(
     val aTag: String,
     val authorId: String,
@@ -17,4 +21,11 @@ data class Stream(
     val totalParticipants: Int?,
 ) {
     fun isLive() = status == StreamStatus.LIVE
+
+    fun toNaddrString(): String? =
+        Naddr(
+            kind = NostrEventKind.LiveActivity.value,
+            userId = this.authorId,
+            identifier = this.dTag,
+        ).toNaddrString()
 }
