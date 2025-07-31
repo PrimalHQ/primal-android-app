@@ -4,8 +4,10 @@ import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -154,6 +156,7 @@ fun ProfileTopCoverBar(
             avatarOffsetY = with(density) { maxAvatarSizePx.times(other = 0.65f).toDp() },
         ),
         eventPublisher = eventPublisher,
+        callbacks = callbacks,
         onClose = callbacks.onClose,
         paddingValues = paddingValues,
         onSearchClick = { state.profileId?.let { callbacks.onSearchClick(state.profileId) } },
@@ -161,11 +164,13 @@ fun ProfileTopCoverBar(
     )
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 private fun ProfileTopCoverBar(
     state: ProfileDetailsContract.UiState,
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
+    callbacks: ProfileDetailsContract.ScreenCallbacks,
     onMediaItemClick: (String) -> Unit,
     onClose: () -> Unit,
     onSearchClick: () -> Unit,
@@ -216,7 +221,7 @@ private fun ProfileTopCoverBar(
         )
 
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .align(Alignment.BottomStart)
                 .offset(y = avatarValues.avatarOffsetY, x = avatarValues.avatarOffsetX)
                 .padding(horizontal = 12.dp),
@@ -224,6 +229,20 @@ private fun ProfileTopCoverBar(
             val legendaryCustomization = state.profileDetails?.premiumDetails?.legendaryCustomization
             UniversalAvatarThumbnail(
                 modifier = Modifier
+                    .combinedClickable(
+                        onClick = {
+                            if (state.isLive) {
+                                state.liveStreamNaddr?.let { callbacks.onLiveStreamClick(it) }
+                            } else {
+                                state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) }
+                            }
+                        },
+                        onLongClick = {
+                            if (state.isLive) {
+                                state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) }
+                            }
+                        },
+                    )
                     .padding(
                         top = avatarValues.avatarPadding * 0 / 3,
                         bottom = avatarValues.avatarPadding * 3 / 3,
@@ -232,7 +251,6 @@ private fun ProfileTopCoverBar(
                     ),
                 isLive = state.isLive,
                 avatarSize = avatarValues.avatarSize,
-                onClick = { state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) } },
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
                 avatarBlossoms = state.profileDetails?.profileBlossoms ?: emptyList(),
                 fallbackBorderColor = if (isDarkTheme) Color.Black else Color.White,

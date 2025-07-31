@@ -27,6 +27,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
+import net.primal.android.stream.toNaddrString
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
@@ -344,12 +345,20 @@ class ProfileDetailsViewModel @Inject constructor(
 
             if (latestLiveStream != null) {
                 streamRepository.observeStream(aTag = latestLiveStream).collect { streamData ->
+                    val isLive = streamData?.isLive() == true
                     setState {
-                        copy(isLive = streamData?.isLive() == true)
+                        copy(
+                            isLive = isLive,
+                            liveStreamNaddr = if (isLive) {
+                                streamData.toNaddrString()
+                            } else {
+                                null
+                            },
+                        )
                     }
                 }
             } else {
-                setState { copy(isLive = false) }
+                setState { copy(isLive = false, liveStreamNaddr = null) }
             }
         }
     }

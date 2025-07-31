@@ -328,6 +328,7 @@ dependencies {
     implementation(libs.telephoto.zoomable.image.coil)
     implementation(libs.media3.decoder)
     implementation(libs.media3.exoplayer.core)
+    implementation(libs.media3.exoplayer.hls)
     implementation(libs.media3.exoplayer.ui)
     implementation(libs.media3.exoplayer.ui.compose)
     implementation(libs.zoomimage.compose.coil3)

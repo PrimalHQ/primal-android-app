@@ -549,6 +549,7 @@ private fun PreviewProfileScreen() {
                 onMessageClick = {},
                 onSendWalletTx = {},
                 onDrawerQrCodeClick = {},
+                onLiveStreamClick = {},
                 onFollowsClick = { _, _ -> },
                 onGoToWallet = {},
                 onPremiumBadgeClick = { _, _ -> },

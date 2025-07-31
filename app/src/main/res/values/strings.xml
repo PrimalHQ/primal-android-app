@@ -1324,6 +1324,16 @@
     </string>
 
     <string name="live_stream_chip_title">LIVE</string>
+    <string name="live_stream_title">Live Stream</string>
+    <string name="live_stream_stream_url_label">Stream URL</string>
+
+    <string name="live_stream_live_indicator">Live</string>
+    <string name="accessibility_rewind_10_seconds">Rewind 10 seconds</string>
+    <string name="accessibility_forward_10_seconds">Forward 10 seconds</string>
+    <string name="accessibility_play_pause">Play or Pause</string>
+    <string name="live_stream_started_at">Started %1$s</string>
+    <string name="live_stream_viewers_count">%1$s watching</string>
+    <string name="live_stream_followers_count">%1$s followers</string>
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>
