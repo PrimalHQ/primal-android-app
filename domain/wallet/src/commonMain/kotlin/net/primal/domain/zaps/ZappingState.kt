@@ -1,4 +1,4 @@
-package net.primal.android.notes.feed.model
+package net.primal.domain.zaps
 
 import net.primal.domain.notifications.ContentZapConfigItem
 import net.primal.domain.notifications.ContentZapDefault
