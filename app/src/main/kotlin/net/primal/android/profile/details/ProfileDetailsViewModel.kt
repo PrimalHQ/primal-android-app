@@ -27,12 +27,14 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
+import net.primal.android.settings.wallet.utils.isConfigured
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
-import net.primal.android.wallet.zaps.hasWallet
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.FEED_KIND_USER
 import net.primal.domain.feeds.FeedSpecKind
@@ -63,6 +65,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private val mutedItemRepository: MutedItemRepository,
     private val zapHandler: ZapHandler,
     private val profileFollowsHandler: ProfileFollowsHandler,
+    private val walletAccountRepository: WalletAccountRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -80,6 +83,7 @@ class ProfileDetailsViewModel @Inject constructor(
 
     init {
         observeEvents()
+        observeActiveWallet()
         observeActiveAccount()
         observeFollowsResults()
         resolveProfileId()
@@ -168,8 +172,12 @@ class ProfileDetailsViewModel @Inject constructor(
             return@launch
         }
 
+        val walletId = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())?.walletId
+            ?: return@launch
+
         val result = zapHandler.zap(
             userId = activeAccountStore.activeUserId(),
+            walletId = walletId,
             target = ZapTarget.Profile(
                 profileId = profileId,
                 profileLnUrlDecoded = profileLnUrlDecoded,
@@ -228,6 +236,21 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
+    private fun observeActiveWallet() =
+        viewModelScope.launch {
+            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
+                .collect { wallet ->
+                    setState {
+                        copy(
+                            zappingState = zappingState.copy(
+                                walletConnected = wallet.isConfigured(),
+                                walletBalanceInBtc = wallet?.balanceInBtc?.formatAsString(),
+                            ),
+                        )
+                    }
+                }
+        }
+
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
@@ -235,11 +258,8 @@ class ProfileDetailsViewModel @Inject constructor(
                     copy(
                         activeUserPremiumTier = it.premiumMembership?.tier,
                         zappingState = this.zappingState.copy(
-                            walletConnected = it.hasWallet(),
-                            walletPreference = it.walletPreference,
                             zapDefault = it.appSettings?.zapDefault ?: this.zappingState.zapDefault,
                             zapsConfig = it.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
-                            walletBalanceInBtc = it.primalWalletState.balanceInBtc,
                         ),
                     )
                 }
