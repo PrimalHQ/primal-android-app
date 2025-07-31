@@ -15,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.media3.common.C
@@ -93,17 +94,21 @@ private fun LiveStreamScreen(
         }
     }
 
-    LaunchedEffect(state.isPlaying, state.isLive, state.isSeeking) {
+    val latestState by rememberUpdatedState(state)
+
+    LaunchedEffect(exoPlayer) {
         while (true) {
-            if (!state.isSeeking) {
+            if (!latestState.isSeeking) {
                 val duration = exoPlayer.duration
                 if (duration != C.TIME_UNSET) {
                     val newCurrentTime = exoPlayer.currentPosition.coerceAtLeast(0L)
                     val newTotalDuration = duration.coerceAtLeast(0L)
-                    val isAtLiveEdge = state.isLive && (newTotalDuration - newCurrentTime <= LIVE_EDGE_THRESHOLD_MS)
+                    val isAtLiveEdge =
+                        latestState.isLive && (newTotalDuration - newCurrentTime <= LIVE_EDGE_THRESHOLD_MS)
 
-                    if (newCurrentTime != state.currentTime || newTotalDuration != state.totalDuration ||
-                        isAtLiveEdge != state.atLiveEdge
+                    if (newCurrentTime != latestState.currentTime ||
+                        newTotalDuration != latestState.totalDuration ||
+                        isAtLiveEdge != latestState.atLiveEdge
                     ) {
                         eventPublisher(
                             LiveStreamContract.UiEvent.OnPlayerStateUpdate(
