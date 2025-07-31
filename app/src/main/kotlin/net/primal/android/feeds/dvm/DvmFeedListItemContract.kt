@@ -2,7 +2,7 @@ package net.primal.android.feeds.dvm
 
 import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
-import net.primal.android.notes.feed.model.ZappingState
+import net.primal.domain.zaps.ZappingState
 
 interface DvmFeedListItemContract {
 
