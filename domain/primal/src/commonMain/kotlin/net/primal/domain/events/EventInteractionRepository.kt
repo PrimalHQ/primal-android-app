@@ -58,6 +58,7 @@ interface EventInteractionRepository {
 
     suspend fun zapEvent(
         userId: String,
+        walletId: String,
         amountInSats: ULong,
         comment: String,
         target: ZapTarget,

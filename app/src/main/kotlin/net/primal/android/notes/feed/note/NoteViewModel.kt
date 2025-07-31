@@ -21,10 +21,12 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.note.NoteContract.SideEffect
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
+import net.primal.android.settings.wallet.utils.isConfigured
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
-import net.primal.android.wallet.zaps.hasWallet
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.BookmarkType
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.common.exception.NetworkException
@@ -55,6 +57,7 @@ class NoteViewModel @AssistedInject constructor(
     private val bookmarksRepository: PublicBookmarksRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
     private val userRepository: UserRepository,
+    private val walletAccountRepository: WalletAccountRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -75,6 +78,7 @@ class NoteViewModel @AssistedInject constructor(
 
     init {
         observeEvents()
+        observeActiveWallet()
         subscribeToActiveAccount()
         if (noteId != null) {
             prepareRelayHints(noteId = noteId)
@@ -89,6 +93,21 @@ class NoteViewModel @AssistedInject constructor(
             }
         }
 
+    private fun observeActiveWallet() =
+        viewModelScope.launch {
+            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
+                .collect { wallet ->
+                    setState {
+                        copy(
+                            zappingState = zappingState.copy(
+                                walletConnected = wallet.isConfigured(),
+                                walletBalanceInBtc = wallet?.balanceInBtc?.formatAsString(),
+                            ),
+                        )
+                    }
+                }
+        }
+
     private fun subscribeToActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
@@ -96,11 +115,8 @@ class NoteViewModel @AssistedInject constructor(
                     copy(
                         activeAccountUserId = activeAccountStore.activeUserId(),
                         zappingState = this.zappingState.copy(
-                            walletConnected = it.hasWallet(),
-                            walletPreference = it.walletPreference,
                             zapDefault = it.appSettings?.zapDefault ?: this.zappingState.zapDefault,
                             zapsConfig = it.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
-                            walletBalanceInBtc = it.primalWalletState.balanceInBtc,
                         ),
                     )
                 }
@@ -184,8 +200,12 @@ class NoteViewModel @AssistedInject constructor(
                 return@launch
             }
 
+            val walletId = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())?.walletId
+                ?: return@launch
+
             val result = zapHandler.zap(
                 userId = activeAccountStore.activeUserId(),
+                walletId = walletId,
                 comment = zapAction.zapDescription,
                 amountInSats = zapAction.zapAmount,
                 target = ZapTarget.Event(

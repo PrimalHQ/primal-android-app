@@ -24,6 +24,7 @@ import net.primal.android.navigation.naddr
 import net.primal.android.navigation.primalName
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.asFeedPostUi
+import net.primal.android.settings.wallet.utils.isConfigured
 import net.primal.android.thread.articles.details.ArticleDetailsContract.SideEffect
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiEvent
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiState
@@ -33,7 +34,8 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
-import net.primal.android.wallet.zaps.hasWallet
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.nostr.Naddr
@@ -74,6 +76,7 @@ class ArticleDetailsViewModel @Inject constructor(
     private val profileFollowsHandler: ProfileFollowsHandler,
     private val eventInteractionRepository: EventInteractionRepository,
     private val zapHandler: ZapHandler,
+    private val walletAccountRepository: WalletAccountRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState(activeAccountUserId = activeAccountStore.activeUserId()))
@@ -105,6 +108,7 @@ class ArticleDetailsViewModel @Inject constructor(
 
                 observeArticle(naddr)
                 observeArticleComments(naddr = naddr)
+                observeActiveWallet()
                 observeActiveAccount()
             }
 
@@ -228,6 +232,21 @@ class ArticleDetailsViewModel @Inject constructor(
             }
         }
 
+    private fun observeActiveWallet() =
+        viewModelScope.launch {
+            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
+                .collect { wallet ->
+                    setState {
+                        copy(
+                            zappingState = zappingState.copy(
+                                walletConnected = wallet.isConfigured(),
+                                walletBalanceInBtc = wallet?.balanceInBtc?.formatAsString(),
+                            ),
+                        )
+                    }
+                }
+        }
+
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeAccountState
@@ -238,11 +257,8 @@ class ArticleDetailsViewModel @Inject constructor(
                             activeAccountUserId = activeAccountStore.activeUserId(),
                             isAuthorFollowed = it.data.following.contains(naddr?.userId),
                             zappingState = this.zappingState.copy(
-                                walletConnected = it.data.hasWallet(),
-                                walletPreference = it.data.walletPreference,
                                 zapDefault = it.data.appSettings?.zapDefault ?: this.zappingState.zapDefault,
                                 zapsConfig = it.data.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
-                                walletBalanceInBtc = it.data.primalWalletState.balanceInBtc,
                             ),
                         )
                     }
@@ -260,8 +276,12 @@ class ArticleDetailsViewModel @Inject constructor(
                 return@launch
             }
 
+            val walletId = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())?.walletId
+                ?: return@launch
+
             val result = zapHandler.zap(
                 userId = activeAccountStore.activeUserId(),
+                walletId = walletId,
                 comment = zapAction.zapDescription,
                 amountInSats = zapAction.zapAmount,
                 target = ZapTarget.ReplaceableEvent(

@@ -131,6 +131,7 @@ class EventInteractionRepositoryImpl(
 
     override suspend fun zapEvent(
         userId: String,
+        walletId: String,
         amountInSats: ULong,
         comment: String,
         target: ZapTarget,
@@ -144,7 +145,7 @@ class EventInteractionRepositoryImpl(
             zapComment = comment,
         )
 
-        val nostrZapper = nostrZapperFactory.createOrNull(userId = userId)
+        val nostrZapper = nostrZapperFactory.createOrNull(walletId = walletId)
             ?: return ZapResult.Failure(error = ZapError.Unknown())
 
         val result = nostrZapper.zap(

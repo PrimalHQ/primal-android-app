@@ -57,7 +57,6 @@ import net.primal.android.profile.details.ProfileDetailsContract
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
 import net.primal.android.profile.domain.ProfileFollowsType
-import net.primal.android.settings.wallet.domain.WalletPreference
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.utils.isLightningAddress
@@ -69,7 +68,6 @@ fun ProfileHeaderDetails(
     eventPublisher: (ProfileDetailsContract.UiEvent) -> Unit,
     callbacks: ProfileDetailsContract.ScreenCallbacks,
     noteCallbacks: NoteCallbacks,
-    showZapOptions: () -> Unit,
     showCantZapWarning: () -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
@@ -78,11 +76,7 @@ fun ProfileHeaderDetails(
 
     fun onZapProfile(draftTx: DraftTx) {
         if (state.zappingState.walletConnected) {
-            if (state.zappingState.walletPreference == WalletPreference.NostrWalletConnect) {
-                showZapOptions()
-            } else {
-                callbacks.onSendWalletTx(draftTx)
-            }
+            callbacks.onSendWalletTx(draftTx)
         } else {
             showCantZapWarning()
         }

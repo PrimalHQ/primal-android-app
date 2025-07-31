@@ -1,5 +1,5 @@
 package net.primal.domain.nostr.zaps
 
 interface NostrZapperFactory {
-    suspend fun createOrNull(userId: String): NostrZapper?
+    suspend fun createOrNull(walletId: String): NostrZapper?
 }
