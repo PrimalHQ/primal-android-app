@@ -4,13 +4,13 @@ import net.primal.android.core.compose.profile.approvals.FollowsApproval
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.errors.UiError
-import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.profile.domain.ProfileFeedSpec
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.wallet.DraftTx
+import net.primal.domain.zaps.ZappingState
 
 interface ProfileDetailsContract {
     data class UiState(

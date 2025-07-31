@@ -60,7 +60,7 @@ import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.notifications.list.ui.NotificationListItem
 import net.primal.android.notifications.list.ui.NotificationUi
-import net.primal.android.wallet.zaps.canZap
+import net.primal.domain.utils.canZap
 
 @Composable
 fun NotificationsScreen(

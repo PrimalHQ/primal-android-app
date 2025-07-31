@@ -1,8 +1,8 @@
 package net.primal.android.notes.feed.note
 
 import net.primal.android.core.errors.UiError
-import net.primal.android.notes.feed.model.ZappingState
 import net.primal.domain.nostr.ReportType
+import net.primal.domain.zaps.ZappingState
 
 interface NoteContract {
 

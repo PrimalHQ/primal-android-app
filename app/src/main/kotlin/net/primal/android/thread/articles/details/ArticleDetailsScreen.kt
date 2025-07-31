@@ -109,7 +109,6 @@ import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMar
 import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByInlineImages
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByNostrUris
-import net.primal.android.wallet.zaps.canZap
 import net.primal.domain.links.EventUriType
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
@@ -120,6 +119,7 @@ import net.primal.domain.nostr.utils.isNEventUri
 import net.primal.domain.nostr.utils.isNostrUri
 import net.primal.domain.nostr.utils.isNote
 import net.primal.domain.nostr.utils.takeAsNoteHexIdOrNull
+import net.primal.domain.utils.canZap
 
 @Composable
 fun ArticleDetailsScreen(
