@@ -49,6 +49,11 @@ class WalletAccountRepositoryImpl(
             walletDatabase.wallet().clearActiveWallet(userId = userId)
         }
 
+    override suspend fun getActiveWallet(userId: String): Wallet? =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet().getActiveWallet(userId = userId)?.toDomain()
+        }
+
     override fun observeActiveWallet(userId: String) =
         walletDatabase.wallet().observeActiveWallet(userId = userId)
             .distinctUntilChanged()
