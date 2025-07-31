@@ -9,10 +9,10 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.approvals.FollowsApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
@@ -94,55 +94,80 @@ class LiveStreamViewModel @Inject constructor(
             setState { copy(loading = true) }
             val naddr = parseAndResolveNaddr()
             if (naddr != null) {
-                observeStream(naddr = naddr)
+                val authorId = naddr.userId
+                setState { copy(profileId = authorId) }
+                initializeObservers(naddr = naddr, authorId = authorId)
             } else {
                 Timber.w("Unable to resolve naddr.")
                 setState { copy(loading = false) }
             }
         }
 
-    private suspend fun parseAndResolveNaddr(): Naddr? {
+    private fun parseAndResolveNaddr(): Naddr? {
         return savedStateHandle.naddr?.let {
             Nip19TLV.parseUriAsNaddrOrNull(it)
         }
     }
 
-    private fun observeStream(naddr: Naddr) =
+    private fun initializeObservers(naddr: Naddr, authorId: String) {
+        observeLiveStream(naddr)
+        observeAuthorProfile(authorId)
+        observeAuthorProfileStats(authorId)
+        observeFollowState(authorId)
+    }
+
+    private fun observeLiveStream(naddr: Naddr) =
         viewModelScope.launch {
-            val authorId = naddr.userId
-            combine(
-                streamRepository.observeStream(aTag = naddr.asATagValue()).filterNotNull(),
-                profileRepository.observeProfileData(profileId = authorId),
-                profileRepository.observeProfileStats(profileId = authorId),
-                activeAccountStore.activeUserAccount,
-            ) { stream, profileData, profileStats, activeUserAccount ->
-                val streamingUrl = stream.streamingUrl
-                if (streamingUrl == null) {
-                    setState { copy(loading = false, profileId = authorId) }
-                    return@combine
+            streamRepository.observeStream(aTag = naddr.asATagValue())
+                .filterNotNull()
+                .collect { stream ->
+                    val streamingUrl = stream.streamingUrl
+                    if (streamingUrl == null) {
+                        setState { copy(loading = false) }
+                        return@collect
+                    }
+                    val isLive = stream.isLive()
+                    setState {
+                        copy(
+                            loading = false,
+                            isLive = isLive,
+                            atLiveEdge = isLive,
+                            streamInfo = StreamInfoUi(
+                                title = stream.title ?: "Live Stream",
+                                streamUrl = streamingUrl,
+                                viewers = stream.currentParticipants ?: 0,
+                                startedAt = stream.startsAt,
+                            ),
+                            comment = TextFieldValue(text = streamingUrl),
+                        )
+                    }
                 }
+        }
 
-                val isLive = stream.isLive()
-
-                setState {
-                    copy(
-                        loading = false,
-                        profileId = authorId,
-                        isFollowed = authorId in activeUserAccount.following,
-                        isLive = isLive,
-                        atLiveEdge = isLive,
-                        streamInfo = StreamInfoUi(
-                            title = stream.title ?: "Live Stream",
-                            streamUrl = streamingUrl,
-                            authorProfile = profileData.asProfileDetailsUi(),
-                            viewers = stream.currentParticipants ?: 0,
-                            startedAt = stream.startsAt,
-                        ),
-                        profileStats = profileStats?.asProfileStatsUi(),
-                        comment = TextFieldValue(text = streamingUrl),
-                    )
+    private fun observeAuthorProfile(authorId: String) =
+        viewModelScope.launch {
+            profileRepository.observeProfileData(profileId = authorId)
+                .collect {
+                    setState { copy(authorProfile = it.asProfileDetailsUi()) }
                 }
-            }.collect()
+        }
+
+    private fun observeAuthorProfileStats(authorId: String) =
+        viewModelScope.launch {
+            profileRepository.observeProfileStats(profileId = authorId)
+                .collect {
+                    setState { copy(profileStats = it?.asProfileStatsUi()) }
+                }
+        }
+
+    private fun observeFollowState(authorId: String) =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount
+                .map { authorId in it.following }
+                .distinctUntilChanged()
+                .collect {
+                    setState { copy(isFollowed = it) }
+                }
         }
 
     private fun follow(profileId: String) =

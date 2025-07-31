@@ -13,6 +13,8 @@ interface LiveStreamContract {
         val profileId: String? = null,
         val isFollowed: Boolean = false,
         val streamInfo: StreamInfoUi? = null,
+        val authorProfile: ProfileDetailsUi? = null,
+        val profileStats: ProfileStatsUi? = null,
         val isLive: Boolean = false,
         val isPlaying: Boolean = false,
         val isBuffering: Boolean = false,
@@ -21,7 +23,6 @@ interface LiveStreamContract {
         val currentTime: Long = 0L,
         val totalDuration: Long = 0L,
         val comment: TextFieldValue = TextFieldValue(),
-        val profileStats: ProfileStatsUi? = null,
         val shouldApproveProfileAction: FollowsApproval? = null,
         val error: UiError? = null,
     )
@@ -29,7 +30,6 @@ interface LiveStreamContract {
     data class StreamInfoUi(
         val title: String,
         val streamUrl: String,
-        val authorProfile: ProfileDetailsUi,
         val viewers: Int,
         val startedAt: Long?,
     )

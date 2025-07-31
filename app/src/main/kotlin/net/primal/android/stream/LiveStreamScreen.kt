@@ -146,7 +146,7 @@ private fun LiveStreamContent(
         PrimalLoadingSpinner()
     }
 
-    if (state.streamInfo != null) {
+    if (state.streamInfo != null && state.authorProfile != null) {
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -191,7 +191,7 @@ private fun LiveStreamContent(
             item("StreamInfo") {
                 StreamInfoSection(
                     title = state.streamInfo.title,
-                    authorProfile = state.streamInfo.authorProfile,
+                    authorProfile = state.authorProfile,
                     viewers = state.streamInfo.viewers,
                     startedAt = state.streamInfo.startedAt,
                     profileStats = state.profileStats,
