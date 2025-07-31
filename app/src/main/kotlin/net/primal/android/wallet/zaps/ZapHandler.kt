@@ -25,6 +25,7 @@ class ZapHandler @Inject constructor(
 
     suspend fun zap(
         userId: String,
+        walletId: String,
         target: ZapTarget,
         amountInSats: ULong? = null,
         comment: String? = null,
@@ -50,6 +51,7 @@ class ZapHandler @Inject constructor(
 
         eventInteractionRepository.zapEvent(
             userId = userId,
+            walletId = walletId,
             amountInSats = zapAmountInSats,
             comment = zapComment,
             target = target,

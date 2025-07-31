@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.notes.feed.model.ZappingState
-import net.primal.android.settings.wallet.domain.WalletPreference
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,12 +43,7 @@ fun UnableToZapBottomSheet(
                 .padding(bottom = 8.dp),
         ) {
             val warningMessage = if (!zappingState.walletConnected) {
-                when (zappingState.walletPreference) {
-                    WalletPreference.NostrWalletConnect -> stringResource(
-                        id = R.string.zap_warning_bottom_sheet_enable_wallet_text,
-                    )
-                    else -> stringResource(id = R.string.zap_warning_bottom_sheet_activate_wallet_text)
-                }
+                stringResource(id = R.string.zap_warning_bottom_sheet_enable_wallet_text)
             } else {
                 stringResource(id = R.string.zap_warning_bottom_sheet_no_sats_to_zap)
             }

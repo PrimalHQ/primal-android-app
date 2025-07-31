@@ -25,6 +25,7 @@ import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.naddr
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.settings.wallet.utils.isConfigured
 import net.primal.android.stream.LiveStreamContract.SideEffect
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
 import net.primal.android.stream.LiveStreamContract.UiEvent
@@ -36,7 +37,8 @@ import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
-import net.primal.android.wallet.zaps.hasWallet
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.BookmarkType
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.common.exception.NetworkException
@@ -72,6 +74,7 @@ class LiveStreamViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val profileFollowsHandler: ProfileFollowsHandler,
     private val zapHandler: ZapHandler,
+    private val walletAccountRepository: WalletAccountRepository,
     private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
     private val eventInteractionRepository: EventInteractionRepository,
@@ -130,6 +133,7 @@ class LiveStreamViewModel @Inject constructor(
         observeAuthorProfile(authorId)
         observeAuthorProfileStats(authorId)
         observeFollowState(authorId)
+        observeActiveWallet()
         observeActiveAccount()
         observeChatMessages(naddr)
         observeZaps(naddr)
@@ -305,6 +309,21 @@ class LiveStreamViewModel @Inject constructor(
                 }
         }
 
+    private fun observeActiveWallet() =
+        viewModelScope.launch {
+            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
+                .collect { wallet ->
+                    setState {
+                        copy(
+                            zappingState = zappingState.copy(
+                                walletConnected = wallet.isConfigured(),
+                                walletBalanceInBtc = wallet?.balanceInBtc?.formatAsString(),
+                            ),
+                        )
+                    }
+                }
+        }
+
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeAccountState
@@ -313,11 +332,8 @@ class LiveStreamViewModel @Inject constructor(
                     setState {
                         copy(
                             zappingState = this.zappingState.copy(
-                                walletConnected = it.data.hasWallet(),
-                                walletPreference = it.data.walletPreference,
                                 zapDefault = it.data.appSettings?.zapDefault ?: this.zappingState.zapDefault,
                                 zapsConfig = it.data.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
-                                walletBalanceInBtc = it.data.primalWalletState.balanceInBtc,
                             ),
                         )
                     }
@@ -337,6 +353,9 @@ class LiveStreamViewModel @Inject constructor(
                 return@launch
             }
 
+            val walletId = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())
+                ?.walletId ?: return@launch
+
             val result = zapHandler.zap(
                 userId = activeAccountStore.activeUserId(),
                 comment = zapAction.zapDescription,
@@ -348,6 +367,7 @@ class LiveStreamViewModel @Inject constructor(
                     eventAuthorId = naddr.userId,
                     eventAuthorLnUrlDecoded = lnUrlDecoded,
                 ),
+                walletId = walletId,
             )
 
             if (result is ZapResult.Failure) {
