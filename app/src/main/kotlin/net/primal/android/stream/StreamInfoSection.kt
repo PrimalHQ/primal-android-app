@@ -2,11 +2,14 @@ package net.primal.android.stream
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -21,7 +24,9 @@ import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.asBeforeNowFormat
+import net.primal.android.core.compose.button.FollowUnfollowButton
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -30,14 +35,18 @@ fun StreamInfoSection(
     authorProfile: ProfileDetailsUi,
     viewers: Int,
     startedAt: Long?,
+    profileStats: ProfileStatsUi?,
+    isFollowed: Boolean,
+    onFollow: () -> Unit,
+    onUnfollow: () -> Unit,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 15.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(horizontal = 16.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(
             text = title,
@@ -80,11 +89,35 @@ fun StreamInfoSection(
                     avatarCdnImage = authorProfile.avatarCdnImage,
                     avatarSize = 48.dp,
                 )
-                NostrUserText(
-                    displayName = authorProfile.authorDisplayName,
-                    internetIdentifier = authorProfile.internetIdentifier,
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    NostrUserText(
+                        displayName = authorProfile.authorDisplayName,
+                        internetIdentifier = authorProfile.internetIdentifier,
+                        legendaryCustomization = authorProfile.premiumDetails?.legendaryCustomization,
+                    )
+                    if (profileStats != null) {
+                        Text(
+                            text = stringResource(
+                                id = R.string.live_stream_followers_count,
+                                profileStats.followersCount ?: 0,
+                            ),
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                            style = AppTheme.typography.bodyMedium,
+                        )
+                    }
+                }
             }
+
+            FollowUnfollowButton(
+                modifier = Modifier
+                    .height(40.dp)
+                    .wrapContentWidth()
+                    .defaultMinSize(minWidth = 108.dp),
+                isFollowed = isFollowed,
+                onClick = { if (isFollowed) onUnfollow() else onFollow() },
+                textStyle = AppTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold),
+                paddingValues = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))

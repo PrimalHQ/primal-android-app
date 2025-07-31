@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -21,6 +23,9 @@ import androidx.media3.exoplayer.ExoPlayer
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.compose.SnackbarErrorHandler
+import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.theme.AppTheme
 
 private const val LIVE_EDGE_THRESHOLD_MS = 20_000
@@ -47,6 +52,24 @@ private fun LiveStreamScreen(
 ) {
     val context = LocalContext.current
     val exoPlayer = remember { ExoPlayer.Builder(context).build() }
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    if (state.shouldApproveProfileAction != null) {
+        FollowsApprovalAlertDialog(
+            followsApproval = state.shouldApproveProfileAction,
+            onFollowsActionsApproved = {
+                eventPublisher(LiveStreamContract.UiEvent.ApproveFollowsActions(it.actions))
+            },
+            onClose = { eventPublisher(LiveStreamContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
+        )
+    }
+
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context) },
+        onErrorDismiss = { eventPublisher(LiveStreamContract.UiEvent.DismissError) },
+    )
 
     DisposableEffect(exoPlayer) {
         val listener = object : Player.Listener {
@@ -98,6 +121,7 @@ private fun LiveStreamScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         content = { paddingValues ->
             LiveStreamContent(
                 state = state,
@@ -170,6 +194,18 @@ private fun LiveStreamContent(
                     authorProfile = state.streamInfo.authorProfile,
                     viewers = state.streamInfo.viewers,
                     startedAt = state.streamInfo.startedAt,
+                    profileStats = state.profileStats,
+                    isFollowed = state.isFollowed,
+                    onFollow = {
+                        state.profileId?.let {
+                            eventPublisher(LiveStreamContract.UiEvent.FollowAction(profileId = it))
+                        }
+                    },
+                    onUnfollow = {
+                        state.profileId?.let {
+                            eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(profileId = it))
+                        }
+                    },
                 )
             }
 
