@@ -66,16 +66,24 @@ class LiveStreamViewModel @Inject constructor(
                     is UiEvent.OnPlayerStateUpdate -> {
                         setState {
                             copy(
-                                isPlaying = it.isPlaying ?: this.isPlaying,
-                                isBuffering = it.isBuffering ?: this.isBuffering,
-                                atLiveEdge = it.atLiveEdge ?: this.atLiveEdge,
-                                currentTime = it.currentTime ?: this.currentTime,
-                                totalDuration = it.totalDuration ?: this.totalDuration,
+                                playerState = playerState.copy(
+                                    isPlaying = it.isPlaying ?: playerState.isPlaying,
+                                    isBuffering = it.isBuffering ?: playerState.isBuffering,
+                                    atLiveEdge = it.atLiveEdge ?: playerState.atLiveEdge,
+                                    currentTime = it.currentTime ?: playerState.currentTime,
+                                    totalDuration = it.totalDuration ?: playerState.totalDuration,
+                                ),
                             )
                         }
                     }
-                    is UiEvent.OnSeekStarted -> setState { copy(isSeeking = true) }
-                    is UiEvent.OnSeek -> setState { copy(isSeeking = false, currentTime = it.positionMs) }
+
+                    is UiEvent.OnSeekStarted -> setState { copy(playerState = playerState.copy(isSeeking = true)) }
+                    is UiEvent.OnSeek -> {
+                        setState {
+                            copy(playerState = playerState.copy(isSeeking = false, currentTime = it.positionMs))
+                        }
+                    }
+
                     is UiEvent.FollowAction -> follow(it.profileId)
                     is UiEvent.UnfollowAction -> unfollow(it.profileId)
                     is UiEvent.ApproveFollowsActions -> approveFollowsActions(it.actions)
@@ -126,8 +134,7 @@ class LiveStreamViewModel @Inject constructor(
                     setState {
                         copy(
                             loading = false,
-                            isLive = isLive,
-                            atLiveEdge = isLive,
+                            playerState = playerState.copy(isLive = isLive, atLiveEdge = isLive),
                             streamInfo = StreamInfoUi(
                                 title = stream.title ?: "Live Stream",
                                 streamUrl = streamingUrl,

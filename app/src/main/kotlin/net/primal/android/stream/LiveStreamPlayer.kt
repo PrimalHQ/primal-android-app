@@ -32,7 +32,7 @@ private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
 fun LiveStreamPlayer(
     exoPlayer: ExoPlayer,
     streamUrl: String,
-    state: LiveStreamContract.UiState,
+    playerState: LiveStreamContract.PlayerState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onPlayPauseClick: () -> Unit,
     onClose: () -> Unit,
@@ -74,15 +74,14 @@ fun LiveStreamPlayer(
             surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
         )
 
-        if (state.isBuffering && !state.isPlaying) {
+        if (playerState.isBuffering && !playerState.isPlaying) {
             PrimalLoadingSpinner()
         }
 
         LiveStreamPlayerControls(
             modifier = Modifier.matchParentSize(),
             isVisible = controlsVisible,
-            state = state,
-            eventPublisher = eventPublisher,
+            playerState = playerState,
             onPlayPauseClick = onPlayPauseClick,
             onRewind = onRewind,
             onForward = onForward,
@@ -91,6 +90,9 @@ fun LiveStreamPlayer(
             onSeek = { positionMs ->
                 exoPlayer.seekTo(positionMs)
                 eventPublisher(LiveStreamContract.UiEvent.OnSeek(positionMs = positionMs))
+            },
+            onSeekStarted = {
+                eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
             },
         )
     }

@@ -15,16 +15,20 @@ interface LiveStreamContract {
         val streamInfo: StreamInfoUi? = null,
         val authorProfile: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
-        val isLive: Boolean = false,
+        val playerState: PlayerState = PlayerState(),
+        val comment: TextFieldValue = TextFieldValue(),
+        val shouldApproveProfileAction: FollowsApproval? = null,
+        val error: UiError? = null,
+    )
+
+    data class PlayerState(
         val isPlaying: Boolean = false,
         val isBuffering: Boolean = false,
         val atLiveEdge: Boolean = false,
         val isSeeking: Boolean = false,
         val currentTime: Long = 0L,
         val totalDuration: Long = 0L,
-        val comment: TextFieldValue = TextFieldValue(),
-        val shouldApproveProfileAction: FollowsApproval? = null,
-        val error: UiError? = null,
+        val isLive: Boolean = false,
     )
 
     data class StreamInfoUi(

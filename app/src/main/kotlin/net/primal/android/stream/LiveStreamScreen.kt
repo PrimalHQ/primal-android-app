@@ -98,17 +98,17 @@ private fun LiveStreamScreen(
 
     LaunchedEffect(exoPlayer) {
         while (true) {
-            if (!latestState.isSeeking) {
+            if (!latestState.playerState.isSeeking) {
                 val duration = exoPlayer.duration
                 if (duration != C.TIME_UNSET) {
                     val newCurrentTime = exoPlayer.currentPosition.coerceAtLeast(0L)
                     val newTotalDuration = duration.coerceAtLeast(0L)
                     val isAtLiveEdge =
-                        latestState.isLive && (newTotalDuration - newCurrentTime <= LIVE_EDGE_THRESHOLD_MS)
+                        latestState.playerState.isLive && (newTotalDuration - newCurrentTime <= LIVE_EDGE_THRESHOLD_MS)
 
-                    if (newCurrentTime != latestState.currentTime ||
-                        newTotalDuration != latestState.totalDuration ||
-                        isAtLiveEdge != latestState.atLiveEdge
+                    if (newCurrentTime != latestState.playerState.currentTime ||
+                        newTotalDuration != latestState.playerState.totalDuration ||
+                        isAtLiveEdge != latestState.playerState.atLiveEdge
                     ) {
                         eventPublisher(
                             LiveStreamContract.UiEvent.OnPlayerStateUpdate(
@@ -162,7 +162,7 @@ private fun LiveStreamContent(
                 LiveStreamPlayer(
                     exoPlayer = exoPlayer,
                     streamUrl = state.streamInfo.streamUrl,
-                    state = state,
+                    playerState = state.playerState,
                     onPlayPauseClick = {
                         if (exoPlayer.isPlaying) {
                             exoPlayer.pause()
@@ -175,16 +175,16 @@ private fun LiveStreamContent(
                         exoPlayer.seekTo(newPosition)
                     },
                     onForward = {
-                        if (state.isLive) {
+                        if (state.playerState.isLive) {
                             val newPosition = exoPlayer.currentPosition + SEEK_INCREMENT_MS
-                            if (newPosition >= state.totalDuration) {
+                            if (newPosition >= state.playerState.totalDuration) {
                                 exoPlayer.seekToDefaultPosition()
                             } else {
                                 exoPlayer.seekTo(newPosition)
                             }
                         } else {
                             val newPosition = (exoPlayer.currentPosition + SEEK_INCREMENT_MS)
-                                .coerceAtMost(state.totalDuration)
+                                .coerceAtMost(state.playerState.totalDuration)
                             exoPlayer.seekTo(newPosition)
                         }
                     },

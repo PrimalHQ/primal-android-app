@@ -61,14 +61,14 @@ private const val SECONDS_IN_MINUTE = 60
 fun LiveStreamPlayerControls(
     modifier: Modifier = Modifier,
     isVisible: Boolean,
-    state: LiveStreamContract.UiState,
-    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
+    playerState: LiveStreamContract.PlayerState,
     onPlayPauseClick: () -> Unit,
     onRewind: () -> Unit,
     onForward: () -> Unit,
     onGoToLive: () -> Unit,
     onClose: () -> Unit,
     onSeek: (Long) -> Unit,
+    onSeekStarted: () -> Unit,
 ) {
     AnimatedVisibility(
         modifier = modifier,
@@ -99,7 +99,7 @@ fun LiveStreamPlayerControls(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.Center),
-                isPlaying = state.isPlaying,
+                isPlaying = playerState.isPlaying,
                 onRewind = onRewind,
                 onPlayPauseClick = onPlayPauseClick,
                 onForward = onForward,
@@ -110,10 +110,10 @@ fun LiveStreamPlayerControls(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
-                state = state,
+                state = playerState,
                 onSeek = onSeek,
                 onGoToLive = onGoToLive,
-                eventPublisher = eventPublisher,
+                onSeekStarted = onSeekStarted,
             )
         }
     }
@@ -181,10 +181,10 @@ private fun CenterPlayerControls(
 @Composable
 private fun BottomControls(
     modifier: Modifier = Modifier,
-    state: LiveStreamContract.UiState,
+    state: LiveStreamContract.PlayerState,
     onSeek: (Long) -> Unit,
     onGoToLive: () -> Unit,
-    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
+    onSeekStarted: () -> Unit,
 ) {
     var localSeekPosition by remember(state.currentTime) { mutableLongStateOf(state.currentTime) }
 
@@ -234,7 +234,7 @@ private fun BottomControls(
                 onValueChange = { newPosition ->
                     if (isInteractive) {
                         if (!state.isSeeking) {
-                            eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
+                            onSeekStarted()
                         }
                         localSeekPosition = newPosition.toLong()
                     }
