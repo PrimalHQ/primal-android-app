@@ -92,7 +92,9 @@ class LiveStreamViewModel @Inject constructor(
     private fun resolveNaddr() =
         viewModelScope.launch {
             setState { copy(loading = true) }
-            val naddr = parseAndResolveNaddr()
+            val naddr = savedStateHandle.naddr?.let {
+                Nip19TLV.parseUriAsNaddrOrNull(it)
+            }
             if (naddr != null) {
                 val authorId = naddr.userId
                 setState { copy(profileId = authorId) }
@@ -102,12 +104,6 @@ class LiveStreamViewModel @Inject constructor(
                 setState { copy(loading = false) }
             }
         }
-
-    private fun parseAndResolveNaddr(): Naddr? {
-        return savedStateHandle.naddr?.let {
-            Nip19TLV.parseUriAsNaddrOrNull(it)
-        }
-    }
 
     private fun initializeObservers(naddr: Naddr, authorId: String) {
         observeLiveStream(naddr)
