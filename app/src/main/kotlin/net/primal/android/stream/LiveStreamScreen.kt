@@ -189,7 +189,12 @@ private fun LiveStreamContent(
                         }
                     },
                     onClose = onClose,
-                    eventPublisher = eventPublisher,
+                    onSeek = { positionMs ->
+                        eventPublisher(LiveStreamContract.UiEvent.OnSeek(positionMs = positionMs))
+                    },
+                    onSeekStarted = {
+                        eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
+                    },
                 )
             }
 

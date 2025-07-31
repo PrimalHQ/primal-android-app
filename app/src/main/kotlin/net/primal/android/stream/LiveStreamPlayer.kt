@@ -33,11 +33,12 @@ fun LiveStreamPlayer(
     exoPlayer: ExoPlayer,
     streamUrl: String,
     playerState: LiveStreamContract.PlayerState,
-    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onPlayPauseClick: () -> Unit,
     onClose: () -> Unit,
     onRewind: () -> Unit,
     onForward: () -> Unit,
+    onSeek: (Long) -> Unit,
+    onSeekStarted: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var controlsVisible by remember { mutableStateOf(true) }
@@ -89,11 +90,9 @@ fun LiveStreamPlayer(
             onClose = onClose,
             onSeek = { positionMs ->
                 exoPlayer.seekTo(positionMs)
-                eventPublisher(LiveStreamContract.UiEvent.OnSeek(positionMs = positionMs))
+                onSeek(positionMs)
             },
-            onSeekStarted = {
-                eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
-            },
+            onSeekStarted = onSeekStarted,
         )
     }
 }
