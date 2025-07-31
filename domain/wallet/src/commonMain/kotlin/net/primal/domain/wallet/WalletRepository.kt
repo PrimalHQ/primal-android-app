@@ -7,6 +7,8 @@ import net.primal.domain.transactions.Transaction
 
 interface WalletRepository {
 
+    suspend fun getWalletById(walletId: String): Result<Wallet>
+
     suspend fun deleteWalletById(walletId: String)
 
     suspend fun upsertNostrWallet(userId: String, wallet: Wallet.NWC)
