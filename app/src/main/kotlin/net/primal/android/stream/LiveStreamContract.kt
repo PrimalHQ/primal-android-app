@@ -6,11 +6,11 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.events.ui.EventZapUiModel
-import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.ReportType
+import net.primal.domain.zaps.ZappingState
 
 interface LiveStreamContract {
     data class UiState(

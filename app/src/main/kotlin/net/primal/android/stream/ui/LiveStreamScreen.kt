@@ -100,8 +100,8 @@ import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.LiveStreamViewModel
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.zaps.canZap
 import net.primal.domain.nostr.ReactionType
+import net.primal.domain.utils.canZap
 
 private const val LIVE_EDGE_THRESHOLD_MS = 20_000
 private const val PLAYER_STATE_UPDATE_INTERVAL_MS = 200L
@@ -406,6 +406,7 @@ private fun StreamInfoAndChatSection(
                     }
                 }
             }
+
             LiveStreamDisplaySection.Chat -> {
                 LiveChatContent(
                     state = state,
