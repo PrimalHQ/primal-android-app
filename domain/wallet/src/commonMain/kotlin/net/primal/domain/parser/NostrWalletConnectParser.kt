@@ -1,25 +1,27 @@
-package net.primal.android.user.domain
+package net.primal.domain.parser
 
-import android.net.Uri
 import fr.acinq.secp256k1.Hex
-import net.primal.core.networking.nwc.model.NostrWalletConnect
-import net.primal.core.networking.nwc.model.NostrWalletKeypair
+import io.ktor.http.Url
+import io.ktor.utils.io.charsets.Charsets
+import io.ktor.utils.io.core.toByteArray
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.toHex
+import net.primal.domain.wallet.NostrWalletConnect
+import net.primal.domain.wallet.NostrWalletKeypair
 
 fun String.parseNWCUrl(): NostrWalletConnect {
-    val uri = Uri.parse(this)
+    val uri = Url(this)
 
     val host = uri.host
     val pubkey = when {
-        host != null && host.toByteArray(Charsets.UTF_8).size == 64 -> host
+        host.toByteArray(Charsets.UTF_8).size == 64 -> host
         else -> null
     }
 
-    val relay = uri.getQueryParameterOrNull("relay")
-    val lud16 = uri.getQueryParameterOrNull("lud16")
+    val relay = uri.parameters["relay"]
+    val lud16 = uri.parameters["lud16"]
 
-    val secretParam = uri.getQueryParameterOrNull("secret")
+    val secretParam = uri.parameters["secret"]
     val keypairSecret = when {
         secretParam != null && secretParam.toByteArray().size == 64 -> secretParam
         else -> null
@@ -40,17 +42,6 @@ fun String.parseNWCUrl(): NostrWalletConnect {
     )
 }
 
-private fun Uri.getQueryParameterOrNull(key: String): String? {
-    return runCatching { this.getQueryParameter(key) }.getOrNull()
-}
-
-fun String.isNwcUrl(): Boolean {
-    return try {
-        this.parseNWCUrl()
-        true
-    } catch (error: NWCParseException) {
-        false
-    }
-}
+fun String.isNwcUrl(): Boolean = runCatching { parseNWCUrl() }.isSuccess
 
 class NWCParseException : RuntimeException()
