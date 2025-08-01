@@ -20,6 +20,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
@@ -40,13 +41,14 @@ fun ArticleTopZapsSection(
     topZaps: List<EventZapUiModel>,
     onZapClick: () -> Unit,
     onTopZapsClick: () -> Unit,
+    sectionTopSpacing: Dp = 12.dp,
 ) {
     val topZap = topZaps.firstOrNull()
     val otherZaps = topZaps.drop(n = 1)
     Column(
         modifier = modifier.animateContentSize(),
     ) {
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(sectionTopSpacing))
 
         if (topZap != null) {
             ArticleTopNoteZapRow(

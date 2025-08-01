@@ -33,6 +33,7 @@ fun NostrEvent.asStreamData(): StreamData? {
 
     return StreamData(
         aTag = "${this.kind}:${this.pubKey}:$dTag",
+        eventId = id,
         authorId = this.pubKey,
         dTag = dTag,
         title = this.tags.findFirstTitle(),

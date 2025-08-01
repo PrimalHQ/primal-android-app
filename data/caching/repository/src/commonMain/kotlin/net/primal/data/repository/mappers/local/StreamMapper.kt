@@ -6,6 +6,7 @@ import net.primal.domain.streams.Stream as StreamDO
 fun StreamPO.asStreamDO(): StreamDO {
     return StreamDO(
         aTag = this.data.aTag,
+        eventId = this.data.eventId,
         authorId = this.data.authorId,
         dTag = this.data.dTag,
         title = this.data.title,
@@ -19,5 +20,6 @@ fun StreamPO.asStreamDO(): StreamDO {
         status = this.data.status,
         currentParticipants = this.data.currentParticipants,
         totalParticipants = this.data.totalParticipants,
+        eventZaps = this.eventZaps.map { it.asEventZapDO() },
     )
 }

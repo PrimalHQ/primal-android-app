@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
@@ -19,21 +20,32 @@ import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.asSignatureUiError
+import net.primal.android.events.ui.EventZapUiModel
+import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.naddr
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
 import net.primal.android.stream.LiveStreamContract.UiEvent
 import net.primal.android.stream.LiveStreamContract.UiState
+import net.primal.android.stream.subscription.LiveFeedMonitor
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
+import net.primal.android.wallet.zaps.ZapHandler
+import net.primal.android.wallet.zaps.hasWallet
+import net.primal.data.repository.mappers.remote.extractZapRequestOrNull
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asATagValue
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.nostr.zaps.ZapError
+import net.primal.domain.nostr.zaps.ZapResult
+import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
 import timber.log.Timber
@@ -45,6 +57,8 @@ class LiveStreamViewModel @Inject constructor(
     private val streamRepository: StreamRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val profileFollowsHandler: ProfileFollowsHandler,
+    private val liveFeedMonitor: LiveFeedMonitor,
+    private val zapHandler: ZapHandler,
 ) : ViewModel() {
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -57,6 +71,47 @@ class LiveStreamViewModel @Inject constructor(
         resolveNaddr()
         observeEvents()
         observeFollowsResults()
+    }
+
+    override fun onCleared() {
+        liveFeedMonitor.stopMonitor(viewModelScope)
+    }
+
+    private fun startLiveStreamMonitor(naddr: Naddr) {
+        liveFeedMonitor.startMonitor(
+            scope = viewModelScope,
+            creatorPubkey = naddr.userId,
+            dTag = naddr.identifier,
+            userPubkey = activeAccountStore.activeUserId(),
+        ) { zapEvent ->
+            viewModelScope.launch {
+                try {
+                    val zapRequest = zapEvent.extractZapRequestOrNull()
+                    val zapperPubkey = zapRequest?.pubKey
+                    if (zapperPubkey == null) {
+                        Timber.w("Unable to extract zapper pubkey from zap event.")
+                        return@launch
+                    }
+
+                    val localProfile = profileRepository.findProfileDataOrNull(profileId = zapperPubkey)
+
+                    if (localProfile == null) {
+                        try {
+                            profileRepository.fetchProfile(profileId = zapperPubkey)
+                        } catch (error: NetworkException) {
+                            Timber.w(error)
+                        }
+                    }
+
+                    streamRepository.saveZap(
+                        zapEvent = zapEvent,
+                        zappedEventATag = naddr.asATagValue(),
+                    )
+                } catch (error: NetworkException) {
+                    Timber.w(error)
+                }
+            }
+        }
     }
 
     private fun observeEvents() =
@@ -76,23 +131,20 @@ class LiveStreamViewModel @Inject constructor(
                             )
                         }
                     }
-
                     is UiEvent.OnSeekStarted -> setState { copy(playerState = playerState.copy(isSeeking = true)) }
                     is UiEvent.OnSeek -> {
                         setState {
                             copy(playerState = playerState.copy(isSeeking = false, currentTime = it.positionMs))
                         }
                     }
-
                     is UiEvent.FollowAction -> follow(it.profileId)
                     is UiEvent.UnfollowAction -> unfollow(it.profileId)
                     is UiEvent.ApproveFollowsActions -> approveFollowsActions(it.actions)
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.DismissConfirmFollowUnfollowAlertDialog -> setState {
-                        copy(
-                            shouldApproveProfileAction = null,
-                        )
+                        copy(shouldApproveProfileAction = null)
                     }
+                    is UiEvent.ZapStream -> zapStream(zapAction = it)
                 }
             }
         }
@@ -118,6 +170,8 @@ class LiveStreamViewModel @Inject constructor(
         observeAuthorProfile(authorId)
         observeAuthorProfileStats(authorId)
         observeFollowState(authorId)
+        observeActiveAccount()
+        startLiveStreamMonitor(naddr)
     }
 
     private fun observeLiveStream(naddr: Naddr) =
@@ -136,12 +190,17 @@ class LiveStreamViewModel @Inject constructor(
                             loading = false,
                             playerState = playerState.copy(isLive = isLive, atLiveEdge = isLive),
                             streamInfo = StreamInfoUi(
+                                atag = stream.aTag,
+                                eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
                                 streamUrl = streamingUrl,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,
                             ),
                             comment = TextFieldValue(text = streamingUrl),
+                            zaps = stream.eventZaps
+                                .map { it.asEventZapUiModel() }
+                                .sortedWith(EventZapUiModel.DefaultComparator),
                         )
                     }
                 }
@@ -172,6 +231,69 @@ class LiveStreamViewModel @Inject constructor(
                     setState { copy(isFollowed = it) }
                 }
         }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeAccountState
+                .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
+                .collect {
+                    setState {
+                        copy(
+                            zappingState = this.zappingState.copy(
+                                walletConnected = it.data.hasWallet(),
+                                walletPreference = it.data.walletPreference,
+                                zapDefault = it.data.appSettings?.zapDefault ?: this.zappingState.zapDefault,
+                                zapsConfig = it.data.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
+                                walletBalanceInBtc = it.data.primalWalletState.balanceInBtc,
+                            ),
+                        )
+                    }
+                }
+        }
+
+    private fun zapStream(zapAction: UiEvent.ZapStream) {
+        val naddr = savedStateHandle.naddr?.let { Nip19TLV.parseUriAsNaddrOrNull(it) } ?: return
+        val streamInfo = state.value.streamInfo ?: return
+        val authorProfile = _state.value.authorProfile ?: return
+
+        viewModelScope.launch {
+            val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = authorProfile.pubkey)
+            val lnUrlDecoded = postAuthorProfileData?.lnUrlDecoded
+            if (lnUrlDecoded == null) {
+                setState { copy(error = UiError.MissingLightningAddress(IllegalStateException("Missing ln url"))) }
+                return@launch
+            }
+
+            val result = zapHandler.zap(
+                userId = activeAccountStore.activeUserId(),
+                comment = zapAction.zapDescription,
+                amountInSats = zapAction.zapAmount,
+                target = ZapTarget.ReplaceableEvent(
+                    kind = NostrEventKind.LiveActivity.value,
+                    identifier = naddr.identifier,
+                    eventId = streamInfo.eventId,
+                    eventAuthorId = naddr.userId,
+                    eventAuthorLnUrlDecoded = lnUrlDecoded,
+                ),
+            )
+
+            if (result is ZapResult.Failure) {
+                when (result.error) {
+                    is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
+                    is ZapError.FailedToFetchZapInvoice,
+                    -> setState { copy(error = UiError.InvalidZapRequest()) }
+
+                    ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
+                        setState { copy(error = UiError.FailedToPublishZapEvent()) }
+                    }
+
+                    is ZapError.Unknown -> {
+                        setState { copy(error = UiError.GenericError()) }
+                    }
+                }
+            }
+        }
+    }
 
     private fun follow(profileId: String) =
         viewModelScope.launch {

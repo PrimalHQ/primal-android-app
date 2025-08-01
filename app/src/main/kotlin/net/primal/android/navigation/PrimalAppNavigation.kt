@@ -2149,6 +2149,8 @@ private fun NavGraphBuilder.liveStream(
     LiveStreamScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
+        noteCallbacks = noteCallbacksHandler(navController = navController),
+        onGoToWallet = { navController.navigateToWallet() },
     )
 }
 
