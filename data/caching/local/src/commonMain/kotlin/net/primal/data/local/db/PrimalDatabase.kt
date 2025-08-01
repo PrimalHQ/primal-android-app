@@ -100,7 +100,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         FollowPackRemoteKey::class,
         StreamData::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)

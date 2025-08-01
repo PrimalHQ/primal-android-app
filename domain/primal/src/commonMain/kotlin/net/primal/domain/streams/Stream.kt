@@ -1,11 +1,13 @@
 package net.primal.domain.streams
 
+import net.primal.domain.events.EventZap
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEventKind
 
 data class Stream(
     val aTag: String,
+    val eventId: String,
     val authorId: String,
     val dTag: String,
     val title: String?,
@@ -19,6 +21,7 @@ data class Stream(
     val status: StreamStatus,
     val currentParticipants: Int?,
     val totalParticipants: Int?,
+    val eventZaps: List<EventZap> = emptyList(),
 ) {
     fun isLive() = status == StreamStatus.LIVE
 

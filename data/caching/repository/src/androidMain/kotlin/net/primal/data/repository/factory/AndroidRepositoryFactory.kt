@@ -233,6 +233,7 @@ object AndroidRepositoryFactory : RepositoryFactory {
     override fun createStreamRepository(): StreamRepository {
         return StreamRepositoryImpl(
             database = cachingDatabase,
+            dispatcherProvider = dispatcherProvider,
         )
     }
 }

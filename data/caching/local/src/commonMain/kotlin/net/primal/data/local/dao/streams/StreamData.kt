@@ -8,6 +8,7 @@ import net.primal.domain.streams.StreamStatus
 data class StreamData(
     @PrimaryKey
     val aTag: String,
+    val eventId: String,
     val authorId: String,
     val dTag: String,
     val title: String?,
