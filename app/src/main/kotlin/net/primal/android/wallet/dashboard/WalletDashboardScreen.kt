@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
@@ -52,6 +53,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.WalletPurchaseSats
 import net.primal.android.core.compose.isEmpty
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
@@ -84,6 +86,18 @@ fun WalletDashboardScreen(
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
+
+    DisposableLifecycleObserverEffect(viewModel) {
+        when (it) {
+            Lifecycle.Event.ON_START -> {
+                if (uiState.value.wallet is Wallet.NWC) {
+                    viewModel.setEvents(UiEvent.RequestWalletBalanceUpdate)
+                }
+            }
+
+            else -> Unit
+        }
+    }
 
     WalletDashboardScreen(
         state = uiState.value,
