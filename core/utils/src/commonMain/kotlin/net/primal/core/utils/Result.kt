@@ -155,6 +155,22 @@ inline fun <R, T> Result<T>.mapCatching(transform: (value: T) -> R): Result<R> =
     }
 
 /**
+ * Performs the given [block] on the encapsulated value if this instance represents [success][Result.isSuccess].
+ * Returns the original `Result` unchanged in case the [block] doesn't fail. If the [block] fails, its own
+ * failure will be returned.
+ *
+ * In case of [Failure] block will be skipped and result bubbled allowing for handling of errors in one place.
+ *
+ * This function catches any [Throwable] exception thrown by [block] function and encapsulates it as a failure.
+ * See [also] for an alternative that rethrows exceptions from [block] function.
+ */
+inline fun <T> Result<T>.alsoCatching(block: (value: T) -> Unit): Result<T> =
+    when (this) {
+        is Success<T> -> runCatching { block(value) }.map { this.value }
+        is Failure<T> -> failure(exception)
+    }
+
+/**
  * Returns the encapsulated result of the given [transform] function applied to the encapsulated [Throwable] exception
  * if this instance represents [failure][Result.isFailure] or the
  * original encapsulated value if it is [success][Result.isSuccess].
