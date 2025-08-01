@@ -3,7 +3,6 @@ package net.primal.wallet.data.service.concrete
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import net.primal.core.networking.nwc.NwcClientFactory
-import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.core.networking.nwc.nip47.ListTransactionsParams
 import net.primal.core.networking.nwc.nip47.LookupInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.MakeInvoiceParams
@@ -19,6 +18,7 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.InvoiceType
 import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.domain.wallet.LnInvoiceCreateResult
+import net.primal.domain.wallet.NostrWalletConnect
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
@@ -29,7 +29,6 @@ import net.primal.wallet.data.model.CreateLightningInvoiceRequest
 import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.model.TransactionsRequest
 import net.primal.wallet.data.service.WalletService
-import net.primal.wallet.data.service.mappers.asNO
 
 internal class NostrWalletServiceImpl(
     private val lightningRepository: LightningRepository,
@@ -174,7 +173,7 @@ internal class NostrWalletServiceImpl(
                 lightningAddress = wallet.lightningAddress,
                 relays = wallet.relays,
                 pubkey = wallet.pubkey,
-                keypair = wallet.keypair.asNO(),
+                keypair = wallet.keypair,
             ),
         )
 }
