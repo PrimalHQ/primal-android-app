@@ -1,13 +1,13 @@
 package net.primal.android.scanner.domain
 
 import net.primal.android.redeem.utils.isPromoCodeUrl
-import net.primal.android.user.domain.isNwcUrl
 import net.primal.domain.nostr.utils.isNProfile
 import net.primal.domain.nostr.utils.isNProfileUri
 import net.primal.domain.nostr.utils.isNPub
 import net.primal.domain.nostr.utils.isNPubUri
 import net.primal.domain.nostr.utils.isNote
 import net.primal.domain.nostr.utils.isNoteUri
+import net.primal.domain.parser.isNwcUrl
 import net.primal.domain.utils.isBitcoinAddress
 import net.primal.domain.utils.isBitcoinUri
 import net.primal.domain.utils.isLightningUri

@@ -34,7 +34,7 @@ fun WalletPO.toDomain(): WalletDO =
                 pubkey = nwc?.pubkey ?: "",
                 keypair = NostrWalletKeypair(
                     privateKey = nwc?.walletPrivateKey ?: "",
-                    pubKey = nwc?.walletPubkey ?: "",
+                    pubkey = nwc?.walletPubkey ?: "",
                 ),
             )
     }
@@ -69,7 +69,7 @@ fun ActiveWallet.toDomain(): WalletDO? {
                 pubkey = nwc?.pubkey ?: "",
                 keypair = NostrWalletKeypair(
                     privateKey = nwc?.walletPrivateKey ?: "",
-                    pubKey = nwc?.walletPubkey ?: "",
+                    pubkey = nwc?.walletPubkey ?: "",
                 ),
             )
     }

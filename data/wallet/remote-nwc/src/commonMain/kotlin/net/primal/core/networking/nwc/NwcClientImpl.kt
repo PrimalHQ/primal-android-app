@@ -12,7 +12,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
-import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.core.networking.nwc.model.NwcWalletRequest
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
@@ -46,6 +45,7 @@ import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapRequestData
 import net.primal.domain.nostr.zaps.ZapResult
+import net.primal.domain.wallet.NostrWalletConnect
 
 internal class NwcClientImpl(
     private val nwcData: NostrWalletConnect,

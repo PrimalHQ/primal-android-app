@@ -1,4 +1,4 @@
-package net.primal.core.networking.nwc.model
+package net.primal.domain.wallet
 
 import kotlinx.serialization.Serializable
 
@@ -16,6 +16,3 @@ data class NostrWalletConnect(
             "&lud16=${lightningAddress ?: ""}"
     }
 }
-
-@Serializable
-data class NostrWalletKeypair(val privateKey: String, val pubkey: String)

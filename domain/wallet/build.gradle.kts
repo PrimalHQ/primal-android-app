@@ -49,6 +49,8 @@ kotlin {
                 implementation(libs.paging.common)
 
                 implementation(libs.bitcoin.kmp)
+
+                implementation(libs.ktor.http)
             }
         }
 

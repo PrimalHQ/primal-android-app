@@ -11,20 +11,16 @@ import kotlinx.coroutines.launch
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.domain.isNwcUrl
-import net.primal.android.user.domain.parseNWCUrl
-import net.primal.core.utils.asSha256Hash
-import net.primal.domain.account.WalletAccountRepository
-import net.primal.domain.wallet.NostrWalletKeypair
-import net.primal.domain.wallet.Wallet
-import net.primal.domain.wallet.WalletRepository
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
+import net.primal.domain.parser.isNwcUrl
+import net.primal.domain.usecase.ConnectNwcUseCase
 import timber.log.Timber
 
 @HiltViewModel
 class NwcQrCodeScannerViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val walletRepository: WalletRepository,
-    private val walletAccountRepository: WalletAccountRepository,
+    private val connectNwcUseCase: ConnectNwcUseCase,
 ) : ViewModel() {
 
     private val events = MutableSharedFlow<NwcQrCodeScannerContract.UiEvent>()
@@ -67,36 +63,8 @@ class NwcQrCodeScannerViewModel @Inject constructor(
 
     private fun connectWallet(nwcUrl: String) =
         viewModelScope.launch {
-            val nostrWalletConnect = runCatching { nwcUrl.parseNWCUrl() }
+            connectNwcUseCase.invoke(userId = activeAccountStore.activeUserId(), nwcUrl = nwcUrl)
                 .onFailure { Timber.w(it) }
-                .getOrNull() ?: return@launch
-
-            val walletId = nostrWalletConnect.keypair.privateKey.asSha256Hash()
-
-            walletRepository.upsertNostrWallet(
-                userId = activeAccountStore.activeUserId(),
-                wallet = Wallet.NWC(
-                    walletId = walletId,
-                    userId = activeAccountStore.activeUserId(),
-                    lightningAddress = nostrWalletConnect.lightningAddress,
-                    balanceInBtc = null,
-                    maxBalanceInBtc = null,
-                    spamThresholdAmountInSats = 1L,
-                    lastUpdatedAt = null,
-                    relays = nostrWalletConnect.relays,
-                    pubkey = nostrWalletConnect.pubkey,
-                    keypair = NostrWalletKeypair(
-                        privateKey = nostrWalletConnect.keypair.privateKey,
-                        pubKey = nostrWalletConnect.keypair.pubkey,
-                    ),
-                ),
-            )
-
-            walletAccountRepository.setActiveWallet(
-                userId = activeAccountStore.activeUserId(),
-                walletId = walletId,
-            )
-
-            setEffect(NwcQrCodeScannerContract.SideEffect.NwcConnected)
+                .onSuccess { setEffect(NwcQrCodeScannerContract.SideEffect.NwcConnected) }
         }
 }
