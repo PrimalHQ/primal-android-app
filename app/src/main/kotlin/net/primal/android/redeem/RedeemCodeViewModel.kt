@@ -23,12 +23,12 @@ import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.UserAccount
-import net.primal.android.wallet.zaps.hasPrimalWallet
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.account.PromoCodeDetails
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.wallet.Wallet
 import timber.log.Timber
 
 @HiltViewModel
@@ -87,17 +87,20 @@ class RedeemCodeViewModel @Inject constructor(
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
-                val userState = when {
-                    it == UserAccount.EMPTY -> RedeemCodeContract.UserState.NoUser
-
-                    it.hasPrimalWallet() -> RedeemCodeContract.UserState.UserWithPrimalWallet
-
-                    else -> RedeemCodeContract.UserState.UserWithoutPrimalWallet
-                }
-
+                val userState = resolveUserState(it)
                 setState { copy(userState = userState) }
             }
         }
+
+    private suspend fun resolveUserState(userAccount: UserAccount): RedeemCodeContract.UserState {
+        if (userAccount == UserAccount.EMPTY) return RedeemCodeContract.UserState.NoUser
+        val wallet = walletAccountRepository.getActiveWallet(userId = userAccount.pubkey)
+
+        return when (wallet) {
+            is Wallet.NWC, null -> RedeemCodeContract.UserState.UserWithoutPrimalWallet
+            is Wallet.Primal -> RedeemCodeContract.UserState.UserWithPrimalWallet
+        }
+    }
 
     private fun qrCodeDetected(result: QrCodeResult) =
         viewModelScope.launch {

@@ -14,23 +14,19 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.premium.repository.asProfileDataDO
 import net.primal.android.profile.domain.ProfileMetadata
-import net.primal.android.settings.wallet.domain.WalletPreference
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.copyFollowListIfNotNull
 import net.primal.android.user.accounts.copyIfNotNull
 import net.primal.android.user.credentials.CredentialsStore
-import net.primal.android.user.db.Relay
 import net.primal.android.user.db.UserProfileInteraction
 import net.primal.android.user.db.UsersDatabase
 import net.primal.android.user.domain.ContentDisplaySettings
-import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.domain.asUserAccountFromFollowListEvent
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.blossom.UploadResult
-import net.primal.core.networking.nwc.model.NostrWalletConnect
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.remote.api.users.UsersApi
@@ -133,19 +129,6 @@ class UserRepository @Inject constructor(
         }
     }
 
-    suspend fun connectNostrWallet(userId: String, nostrWalletConnect: NostrWalletConnect) {
-        withContext(dispatchers.io()) {
-            usersDatabase.relays().upsertAll(
-                relays = nostrWalletConnect.relays.map {
-                    Relay(userId = userId, kind = RelayKind.NwcRelay, url = it, read = false, write = true)
-                },
-            )
-            accountsStore.getAndUpdateAccount(userId = userId) {
-                copy(nostrWallet = nostrWalletConnect)
-            }
-        }
-    }
-
     suspend fun removeUserAccountById(pubkey: String) {
         accountsStore.deleteAccount(pubkey = pubkey)
     }
@@ -245,33 +228,6 @@ class UserRepository @Inject constructor(
                 internetIdentifier = profileData.internetIdentifier,
                 lightningAddress = profileData.lightningAddress,
             )
-        }
-    }
-
-    suspend fun updateWalletPreference(userId: String, walletPreference: WalletPreference) {
-        accountsStore.getAndUpdateAccount(userId = userId) {
-            copy(walletPreference = walletPreference)
-        }
-    }
-
-    suspend fun updatePrimalWalletBalance(
-        userId: String,
-        balanceInBtc: String,
-        maxBalanceInBtc: String? = null,
-    ) {
-        accountsStore.getAndUpdateAccount(userId = userId) {
-            copy(
-                primalWalletState = this.primalWalletState.copy(balanceInBtc = balanceInBtc),
-                primalWalletSettings = this.primalWalletSettings.copy(
-                    maxBalanceInBtc = maxBalanceInBtc ?: this.primalWalletSettings.maxBalanceInBtc,
-                ),
-            )
-        }
-    }
-
-    suspend fun updatePrimalWalletLastUpdatedAt(userId: String, lastUpdatedAt: Long) {
-        accountsStore.getAndUpdateAccount(userId = userId) {
-            copy(primalWalletState = this.primalWalletState.copy(lastUpdatedAt = lastUpdatedAt))
         }
     }
 
