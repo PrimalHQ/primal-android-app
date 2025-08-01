@@ -93,7 +93,7 @@ internal class WalletRepositoryImpl(
                         walletId = wallet.walletId,
                         relays = wallet.relays,
                         pubkey = wallet.pubkey,
-                        walletPubkey = wallet.keypair.pubKey,
+                        walletPubkey = wallet.keypair.pubkey,
                         walletPrivateKey = wallet.keypair.privateKey,
                     ),
                 )

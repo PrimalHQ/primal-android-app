@@ -15,6 +15,7 @@ import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.domain.rates.fees.TransactionFeeRepository
+import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.builder.factory.TxRequestBuilderFactory
 import net.primal.wallet.data.parser.factory.ParserFactory
@@ -91,5 +92,16 @@ object WalletRepositoriesModule {
     @Provides
     fun providesTxRequestBuilder(): TxRequestBuilder {
         return TxRequestBuilderFactory.createTxRequestBuilder()
+    }
+
+    @Provides
+    fun providesConnectNwcUseCase(
+        walletRepository: WalletRepository,
+        walletAccountRepository: WalletAccountRepository,
+    ): ConnectNwcUseCase {
+        return ConnectNwcUseCase(
+            walletRepository = walletRepository,
+            walletAccountRepository = walletAccountRepository,
+        )
     }
 }
