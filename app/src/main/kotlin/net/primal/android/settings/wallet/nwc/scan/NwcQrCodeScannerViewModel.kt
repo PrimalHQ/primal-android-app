@@ -11,16 +11,20 @@ import kotlinx.coroutines.launch
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.user.domain.parseNWCUrl
-import net.primal.android.user.repository.UserRepository
+import net.primal.core.utils.asSha256Hash
+import net.primal.domain.account.WalletAccountRepository
+import net.primal.domain.wallet.NostrWalletKeypair
+import net.primal.domain.wallet.Wallet
+import net.primal.domain.wallet.WalletRepository
 import timber.log.Timber
 
 @HiltViewModel
 class NwcQrCodeScannerViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val userRepository: UserRepository,
+    private val walletRepository: WalletRepository,
+    private val walletAccountRepository: WalletAccountRepository,
 ) : ViewModel() {
 
     private val events = MutableSharedFlow<NwcQrCodeScannerContract.UiEvent>()
@@ -63,15 +67,36 @@ class NwcQrCodeScannerViewModel @Inject constructor(
 
     private fun connectWallet(nwcUrl: String) =
         viewModelScope.launch {
-            try {
-                val nostrWalletConnect = nwcUrl.parseNWCUrl()
-                userRepository.connectNostrWallet(
+            val nostrWalletConnect = runCatching { nwcUrl.parseNWCUrl() }
+                .onFailure { Timber.w(it) }
+                .getOrNull() ?: return@launch
+
+            val walletId = nostrWalletConnect.keypair.privateKey.asSha256Hash()
+
+            walletRepository.upsertNostrWallet(
+                userId = activeAccountStore.activeUserId(),
+                wallet = Wallet.NWC(
+                    walletId = walletId,
                     userId = activeAccountStore.activeUserId(),
-                    nostrWalletConnect = nostrWalletConnect,
-                )
-                setEffect(NwcQrCodeScannerContract.SideEffect.NwcConnected)
-            } catch (error: NWCParseException) {
-                Timber.w(error)
-            }
+                    lightningAddress = nostrWalletConnect.lightningAddress,
+                    balanceInBtc = null,
+                    maxBalanceInBtc = null,
+                    spamThresholdAmountInSats = 1L,
+                    lastUpdatedAt = null,
+                    relays = nostrWalletConnect.relays,
+                    pubkey = nostrWalletConnect.pubkey,
+                    keypair = NostrWalletKeypair(
+                        privateKey = nostrWalletConnect.keypair.privateKey,
+                        pubKey = nostrWalletConnect.keypair.pubkey,
+                    ),
+                ),
+            )
+
+            walletAccountRepository.setActiveWallet(
+                userId = activeAccountStore.activeUserId(),
+                walletId = walletId,
+            )
+
+            setEffect(NwcQrCodeScannerContract.SideEffect.NwcConnected)
         }
 }

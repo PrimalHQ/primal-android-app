@@ -14,16 +14,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.primal.android.core.errors.UiError
 import net.primal.android.navigation.promoCode
-import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.settings.wallet.domain.WalletPreference
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.activation.WalletActivationContract.UiEvent
 import net.primal.android.wallet.activation.WalletActivationContract.UiState
-import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.alsoCatching
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.account.Country
 import net.primal.domain.account.Region
@@ -36,13 +36,11 @@ import net.primal.domain.account.WalletActivationStatus
 import net.primal.domain.account.WalletRegionJson
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.nostr.publisher.MissingRelaysException
 import timber.log.Timber
 
 @HiltViewModel
 class WalletActivationViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val coroutineDispatcher: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val walletAccountRepository: WalletAccountRepository,
     private val userRepository: UserRepository,
@@ -167,55 +165,44 @@ class WalletActivationViewModel @Inject constructor(
     private fun onActivateWallet(code: String) =
         viewModelScope.launch {
             setState { copy(working = true) }
-            try {
-                val userId = activeAccountStore.activeUserId()
-                val lightningAddress = withContext(coroutineDispatcher.io()) {
-                    val response = walletAccountRepository.activateWallet(userId, code)
-                    walletAccountRepository.fetchWalletAccountInfo(userId)
-                    response.lightningAddress
-                }
+            val userId = activeAccountStore.activeUserId()
 
-                val activeUser = activeAccountStore.activeUserAccount()
-                if (activeUser.nostrWallet == null) {
-                    userRepository.updateWalletPreference(userId, WalletPreference.PrimalWallet)
-                }
-                activeUser.primalWallet?.lightningAddress?.let {
-                    try {
-                        userRepository.setLightningAddress(userId = userId, lightningAddress = it)
-                    } catch (error: SignatureException) {
-                        Timber.w(error)
-                    } catch (error: NostrPublishException) {
-                        Timber.w(error)
-                    } catch (error: NetworkException) {
-                        Timber.w(error)
-                    } catch (error: MissingRelaysException) {
-                        Timber.w(error)
-                    }
-                }
+            walletAccountRepository.activateWallet(userId, code)
+                .alsoCatching { walletAccountRepository.fetchWalletAccountInfo(userId) }
+                .onSuccess { response ->
+                    walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
+                    setLightningAddress(userId, response.lightningAddress)
+                    promoCode?.let { redeemPromoCode(it) }
 
-                try {
-                    promoCode?.let {
-                        walletAccountRepository.redeemPromoCode(
-                            userId = activeAccountStore.activeUserId(),
-                            code = promoCode,
+                    setState {
+                        copy(
+                            activatedLightningAddress = response.lightningAddress,
+                            status = WalletActivationStatus.ActivationSuccess,
                         )
                     }
-                } catch (error: NetworkException) {
+                }.onFailure { error ->
                     Timber.w(error)
-                    setState { copy(uiError = UiError.InvalidPromoCode(error)) }
+                    setState { copy(error = error) }
                 }
-
-                setState {
-                    copy(
-                        activatedLightningAddress = lightningAddress,
-                        status = WalletActivationStatus.ActivationSuccess,
-                    )
-                }
-            } catch (error: NetworkException) {
-                Timber.w(error)
-                setState { copy(error = error) }
-            } finally {
-                setState { copy(working = false) }
-            }
+            setState { copy(working = false) }
         }
+
+    private suspend fun redeemPromoCode(promoCode: String) =
+        runCatching {
+            walletAccountRepository.redeemPromoCode(
+                userId = activeAccountStore.activeUserId(),
+                code = promoCode,
+            )
+        }.onFailure { error ->
+            Timber.w(error)
+            setState { copy(uiError = UiError.InvalidPromoCode(error)) }
+        }
+
+    private suspend fun setLightningAddress(userId: String, lightningAddress: String) =
+        runCatching {
+            userRepository.setLightningAddress(
+                userId = userId,
+                lightningAddress = lightningAddress,
+            )
+        }.onFailure { Timber.w(it) }
 }
