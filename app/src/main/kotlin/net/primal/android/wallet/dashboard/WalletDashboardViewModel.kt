@@ -78,6 +78,9 @@ class WalletDashboardViewModel @Inject constructor(
                 when (it) {
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.EnablePrimalWallet -> enablePrimalWallet()
+                    UiEvent.RequestWalletBalanceUpdate -> state.value.wallet?.let { wallet ->
+                        fetchWalletBalance(walletId = wallet.walletId)
+                    }
                 }
             }
         }
