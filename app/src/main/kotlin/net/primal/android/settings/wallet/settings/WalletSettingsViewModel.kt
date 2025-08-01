@@ -15,11 +15,13 @@ import net.primal.android.settings.wallet.domain.NwcConnectionInfo
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.domain.NWCParseException
 import net.primal.android.user.domain.isNwcUrl
 import net.primal.android.user.domain.parseNWCUrl
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.core.utils.asSha256Hash
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -32,6 +34,7 @@ import timber.log.Timber
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
 class WalletSettingsViewModel @AssistedInject constructor(
     @Assisted private val nwcConnectionUrl: String?,
+    private val userRepository: UserRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val walletAccountRepository: WalletAccountRepository,
@@ -128,38 +131,36 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
     private fun connectWallet(nwcUrl: String) =
         viewModelScope.launch {
-            try {
-                val nostrWalletConnect = nwcUrl.parseNWCUrl()
-                val lightningAddress = activeAccountStore.activeUserAccount().lightningAddress
-                val walletId = nostrWalletConnect.keypair.privateKey.asSha256Hash()
+            val nostrWalletConnect = runCatching { nwcUrl.parseNWCUrl() }
+                .onFailure { Timber.w(it) }
+                .getOrNull() ?: return@launch
 
-                walletRepository.upsertNostrWallet(
-                    userId = activeAccountStore.activeUserId(),
-                    wallet = Wallet.NWC(
-                        walletId = walletId,
-                        userId = activeAccountStore.activeUserId(),
-                        lightningAddress = lightningAddress,
-                        balanceInBtc = null,
-                        maxBalanceInBtc = null,
-                        spamThresholdAmountInSats = 1L,
-                        lastUpdatedAt = null,
-                        relays = nostrWalletConnect.relays,
-                        pubkey = nostrWalletConnect.pubkey,
-                        keypair = NostrWalletKeypair(
-                            privateKey = nostrWalletConnect.keypair.privateKey,
-                            pubKey = nostrWalletConnect.keypair.pubkey,
-                        ),
-                    ),
-                )
+            val walletId = nostrWalletConnect.keypair.privateKey.asSha256Hash()
 
-                walletAccountRepository.setActiveWallet(
-                    userId = activeAccountStore.activeUserId(),
+            walletRepository.upsertNostrWallet(
+                userId = activeAccountStore.activeUserId(),
+                wallet = Wallet.NWC(
                     walletId = walletId,
-                )
-                setState { copy(preferPrimalWallet = false) }
-            } catch (error: NWCParseException) {
-                Timber.w(error)
-            }
+                    userId = activeAccountStore.activeUserId(),
+                    lightningAddress = nostrWalletConnect.lightningAddress,
+                    balanceInBtc = null,
+                    maxBalanceInBtc = null,
+                    spamThresholdAmountInSats = 1L,
+                    lastUpdatedAt = null,
+                    relays = nostrWalletConnect.relays,
+                    pubkey = nostrWalletConnect.pubkey,
+                    keypair = NostrWalletKeypair(
+                        privateKey = nostrWalletConnect.keypair.privateKey,
+                        pubKey = nostrWalletConnect.keypair.pubkey,
+                    ),
+                ),
+            )
+
+            walletAccountRepository.setActiveWallet(
+                userId = activeAccountStore.activeUserId(),
+                walletId = walletId,
+            )
+            setState { copy(preferPrimalWallet = false) }
         }
 
     private suspend fun disconnectWallet() {
