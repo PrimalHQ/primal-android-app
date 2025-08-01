@@ -4,8 +4,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.createAppBuildHelper
+import net.primal.core.utils.map
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.account.PromoCodeDetails
 import net.primal.domain.account.WalletAccountRepository
@@ -69,10 +72,14 @@ class WalletAccountRepositoryImpl(
                 ?.toDomain()
         }
 
-    override suspend fun activateWallet(userId: String, code: String): WalletActivationResult {
-        val response = primalWalletApi.activateWallet(userId, code)
-        return WalletActivationResult(lightningAddress = response)
-    }
+    override suspend fun activateWallet(userId: String, code: String): Result<WalletActivationResult> =
+        withContext(dispatcherProvider.io()) {
+            runCatching {
+                primalWalletApi.activateWallet(userId, code)
+            }.map { response ->
+                WalletActivationResult(lightningAddress = response)
+            }
+        }
 
     override suspend fun requestActivationCodeToEmail(params: WalletActivationParams) {
         withContext(dispatcherProvider.io()) {
@@ -83,33 +90,37 @@ class WalletAccountRepositoryImpl(
         }
     }
 
-    override suspend fun fetchWalletAccountInfo(userId: String) {
-        val accountInfoResponse = primalWalletApi.getWalletUserInfo(userId)
-        val kycLevel = WalletKycLevel.Companion.valueOf(accountInfoResponse.kycLevel) ?: return
-        val lightningAddress = accountInfoResponse.lightningAddress
-        walletDatabase.withTransaction {
-            walletDatabase.wallet().insertOrIgnoreWalletInfo(
-                info = WalletInfo(
+    override suspend fun fetchWalletAccountInfo(userId: String): Result<Unit> =
+        withContext(dispatcherProvider.io()) {
+            val accountInfoResponse = primalWalletApi.getWalletUserInfo(userId)
+            val kycLevel = WalletKycLevel.Companion.valueOf(accountInfoResponse.kycLevel)
+                ?: return@withContext Result.failure(IllegalArgumentException("Couldn't parse KycLevel."))
+            val lightningAddress = accountInfoResponse.lightningAddress
+            walletDatabase.withTransaction {
+                walletDatabase.wallet().insertOrIgnoreWalletInfo(
+                    info = WalletInfo(
+                        walletId = userId,
+                        userId = userId,
+                        lightningAddress = lightningAddress,
+                        type = WalletType.PRIMAL,
+                    ),
+                )
+
+                walletDatabase.wallet().updateWalletLightningAddress(
                     walletId = userId,
-                    userId = userId,
                     lightningAddress = lightningAddress,
-                    type = WalletType.PRIMAL,
-                ),
-            )
+                )
 
-            walletDatabase.wallet().updateWalletLightningAddress(
-                walletId = userId,
-                lightningAddress = lightningAddress,
-            )
+                walletDatabase.wallet().upsertPrimalWalletData(
+                    data = PrimalWalletData(
+                        walletId = userId,
+                        kycLevel = kycLevel,
+                    ),
+                )
+            }
 
-            walletDatabase.wallet().upsertPrimalWalletData(
-                data = PrimalWalletData(
-                    walletId = userId,
-                    kycLevel = kycLevel,
-                ),
-            )
+            Result.success(Unit)
         }
-    }
 
     override suspend fun getPromoCodeDetails(code: String): PromoCodeDetails =
         withContext(dispatcherProvider.io()) {
