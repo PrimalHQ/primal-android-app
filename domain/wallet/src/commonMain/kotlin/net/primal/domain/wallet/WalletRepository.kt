@@ -17,6 +17,12 @@ interface WalletRepository {
 
     suspend fun fetchWalletBalance(walletId: String): Result<Unit>
 
+    suspend fun updateWalletBalance(
+        walletId: String,
+        balanceInBtc: Double,
+        maxBalanceInBtc: Double?,
+    )
+
     fun latestTransactions(walletId: String): Flow<PagingData<Transaction>>
 
     suspend fun findTransactionByIdOrNull(txId: String): Transaction?
