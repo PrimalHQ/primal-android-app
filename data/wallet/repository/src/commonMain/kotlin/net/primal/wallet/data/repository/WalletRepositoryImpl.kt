@@ -214,6 +214,18 @@ internal class WalletRepositoryImpl(
             }
         }
 
+    override suspend fun updateWalletBalance(
+        walletId: String,
+        balanceInBtc: Double,
+        maxBalanceInBtc: Double?,
+    ) = withContext(dispatcherProvider.io()) {
+        walletDatabase.wallet().updateWalletBalance(
+            walletId = walletId,
+            balanceInBtc = balanceInBtc,
+            maxBalanceInBtc = maxBalanceInBtc,
+        )
+    }
+
     override suspend fun parseLnUrl(userId: String, lnurl: String): LnUrlParseResult {
         return withContext(dispatcherProvider.io()) {
             val response = primalWalletApi.parseLnUrl(userId = userId, lnurl = lnurl)
