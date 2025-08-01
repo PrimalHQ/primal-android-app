@@ -24,10 +24,15 @@ data class UserAccount(
     val followersCount: Int? = null,
     val notesCount: Int? = null,
     val repliesCount: Int? = null,
+    @Deprecated("Please use WalletDatabase for wallet information.")
     val nostrWallet: NostrWalletConnect? = null,
+    @Deprecated("Please use WalletDatabase for wallet information.")
     val primalWallet: PrimalWallet? = null,
+    @Deprecated("Please use WalletDatabase for wallet information.")
     val primalWalletState: WalletState = WalletState(),
+    @Deprecated("Please use WalletDatabase for wallet information.")
     val primalWalletSettings: WalletSettings = WalletSettings(),
+    @Deprecated("Please use WalletDatabase for wallet information.")
     val walletPreference: WalletPreference = when {
         primalWallet != null -> WalletPreference.PrimalWallet
         nostrWallet != null -> WalletPreference.NostrWalletConnect

@@ -2,6 +2,7 @@ package net.primal.domain.account
 
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
+import net.primal.core.utils.Result
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.wallet.Wallet
@@ -19,11 +20,7 @@ interface WalletAccountRepository {
 
     fun observeActiveWalletId(userId: String): Flow<String?>
 
-    @Throws(
-        NetworkException::class,
-        CancellationException::class,
-    )
-    suspend fun activateWallet(userId: String, code: String): WalletActivationResult
+    suspend fun activateWallet(userId: String, code: String): Result<WalletActivationResult>
 
     @Throws(
         NetworkException::class,
@@ -35,7 +32,7 @@ interface WalletAccountRepository {
         NetworkException::class,
         CancellationException::class,
     )
-    suspend fun fetchWalletAccountInfo(userId: String)
+    suspend fun fetchWalletAccountInfo(userId: String): Result<Unit>
 
     @Throws(
         NetworkException::class,
