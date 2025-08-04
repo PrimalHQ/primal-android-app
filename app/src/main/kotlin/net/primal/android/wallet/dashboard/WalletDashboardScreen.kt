@@ -235,7 +235,7 @@ fun WalletDashboardScreen(
                                     .padding(top = 16.dp, bottom = 24.dp)
                                     .animateContentSize(),
                                 walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
-                                enabled = !state.isNpubLogin,
+                                enabled = state.wallet != null && !state.isNpubLogin,
                                 actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
                                 onWalletAction = { action ->
                                     when (action) {
@@ -266,7 +266,7 @@ fun WalletDashboardScreen(
                                     }
                                 },
                                 currencyMode = currencyMode,
-                                enabled = !state.isNpubLogin,
+                                enabled = state.wallet != null && !state.isNpubLogin,
                                 onSwitchCurrencyMode = { currencyMode = it },
                                 exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                             )
