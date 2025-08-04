@@ -1,30 +1,30 @@
-package net.primal.android.stream.subscription
+package net.primal.data.remote.api.stream
 
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.remote.PrimalVerb
+import net.primal.data.remote.api.stream.model.LiveFeedRequestBody
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 
-class LiveFeedMonitor @Inject constructor(
-    @PrimalCacheApiClient private val primalApiClient: PrimalApiClient,
-) {
+class StreamMonitorImpl(
+    private val primalApiClient: PrimalApiClient,
+) : StreamMonitor {
     private var monitorSubscription: PrimalSocketSubscription<NostrEvent>? = null
     private val monitorMutex = Mutex()
 
-    fun startMonitor(
+    override fun start(
         scope: CoroutineScope,
         creatorPubkey: String,
         dTag: String,
         userPubkey: String,
-        onUpdate: (NostrEvent) -> Unit,
+        onZapEvent: (NostrEvent) -> Unit,
     ) {
         scope.launch {
             monitorMutex.withLock {
@@ -34,14 +34,14 @@ class LiveFeedMonitor @Inject constructor(
                         creatorPubkey = creatorPubkey,
                         dTag = dTag,
                         userPubkey = userPubkey,
-                        onUpdate = onUpdate,
+                        onUpdate = onZapEvent,
                     )
                 }
             }
         }
     }
 
-    fun stopMonitor(scope: CoroutineScope) {
+    override fun stop(scope: CoroutineScope) {
         scope.launch {
             monitorMutex.withLock {
                 monitorSubscription?.unsubscribe()
@@ -60,7 +60,7 @@ class LiveFeedMonitor @Inject constructor(
         scope = scope,
         primalApiClient = primalApiClient,
         cacheFilter = PrimalCacheFilter(
-            primalVerb = "live_feed",
+            primalVerb = PrimalVerb.LIVE_FEED.id,
             optionsJson = LiveFeedRequestBody(
                 kind = NostrEventKind.LiveActivity.value,
                 pubkey = creatorPubkey,

@@ -27,14 +27,12 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
 import net.primal.android.stream.LiveStreamContract.UiEvent
 import net.primal.android.stream.LiveStreamContract.UiState
-import net.primal.android.stream.subscription.LiveFeedMonitor
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
-import net.primal.data.repository.mappers.remote.extractZapRequestOrNull
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nip19TLV
@@ -57,7 +55,6 @@ class LiveStreamViewModel @Inject constructor(
     private val streamRepository: StreamRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val profileFollowsHandler: ProfileFollowsHandler,
-    private val liveFeedMonitor: LiveFeedMonitor,
     private val zapHandler: ZapHandler,
 ) : ViewModel() {
     private val _state = MutableStateFlow(UiState())
@@ -74,44 +71,15 @@ class LiveStreamViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        liveFeedMonitor.stopMonitor(viewModelScope)
+        streamRepository.stopMonitoring(viewModelScope)
     }
 
     private fun startLiveStreamMonitor(naddr: Naddr) {
-        liveFeedMonitor.startMonitor(
+        streamRepository.startMonitoring(
             scope = viewModelScope,
-            creatorPubkey = naddr.userId,
-            dTag = naddr.identifier,
-            userPubkey = activeAccountStore.activeUserId(),
-        ) { zapEvent ->
-            viewModelScope.launch {
-                try {
-                    val zapRequest = zapEvent.extractZapRequestOrNull()
-                    val zapperPubkey = zapRequest?.pubKey
-                    if (zapperPubkey == null) {
-                        Timber.w("Unable to extract zapper pubkey from zap event.")
-                        return@launch
-                    }
-
-                    val localProfile = profileRepository.findProfileDataOrNull(profileId = zapperPubkey)
-
-                    if (localProfile == null) {
-                        try {
-                            profileRepository.fetchProfile(profileId = zapperPubkey)
-                        } catch (error: NetworkException) {
-                            Timber.w(error)
-                        }
-                    }
-
-                    streamRepository.saveZap(
-                        zapEvent = zapEvent,
-                        zappedEventATag = naddr.asATagValue(),
-                    )
-                } catch (error: NetworkException) {
-                    Timber.w(error)
-                }
-            }
-        }
+            naddr = naddr,
+            userId = activeAccountStore.activeUserId(),
+        )
     }
 
     private fun observeEvents() =

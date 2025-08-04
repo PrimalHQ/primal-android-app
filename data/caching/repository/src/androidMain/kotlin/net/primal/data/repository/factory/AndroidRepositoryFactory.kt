@@ -230,10 +230,12 @@ object AndroidRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createStreamRepository(): StreamRepository {
+    override fun createStreamRepository(cachingPrimalApiClient: PrimalApiClient): StreamRepository {
         return StreamRepositoryImpl(
-            database = cachingDatabase,
             dispatcherProvider = dispatcherProvider,
+            database = cachingDatabase,
+            usersApi = PrimalApiServiceFactory.createUsersApi(cachingPrimalApiClient),
+            streamMonitor = PrimalApiServiceFactory.createStreamMonitor(cachingPrimalApiClient),
         )
     }
 }

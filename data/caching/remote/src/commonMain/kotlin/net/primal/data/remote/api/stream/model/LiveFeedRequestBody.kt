@@ -1,4 +1,4 @@
-package net.primal.android.stream.subscription
+package net.primal.data.remote.api.stream.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

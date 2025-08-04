@@ -21,6 +21,8 @@ import net.primal.data.remote.api.notifications.NotificationsApi
 import net.primal.data.remote.api.notifications.NotificationsApiImpl
 import net.primal.data.remote.api.settings.SettingsApi
 import net.primal.data.remote.api.settings.SettingsApiImpl
+import net.primal.data.remote.api.stream.StreamMonitor
+import net.primal.data.remote.api.stream.StreamMonitorImpl
 import net.primal.data.remote.api.users.UserWellKnownApi
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.data.remote.api.users.UsersApiImpl
@@ -57,4 +59,6 @@ object PrimalApiServiceFactory {
             .httpClient(client = defaultHttpClient)
             .build()
             .createUserWellKnownApi()
+
+    fun createStreamMonitor(primalApiClient: PrimalApiClient): StreamMonitor = StreamMonitorImpl(primalApiClient)
 }
