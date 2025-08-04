@@ -112,7 +112,6 @@ fun WalletDashboardScreen(
         onReceiveClick = onReceiveClick,
         eventPublisher = { viewModel.setEvents(it) },
         accountSwitcherCallbacks = accountSwitcherCallbacks,
-
     )
 }
 
@@ -167,6 +166,7 @@ fun WalletDashboardScreen(
         pagingItems.refresh()
     }
 
+    val canBuySats = remember(state.wallet) { isGoogleBuild() && state.wallet is Wallet.Primal }
     val isScrolledToTop by remember(listState) { derivedStateOf { listState.firstVisibleItemScrollOffset == 0 } }
     val dashboardExpanded by rememberSaveable(isScrolledToTop) { mutableStateOf(isScrolledToTop) }
     val dashboardLiteHeightDp = 80.dp
@@ -208,7 +208,7 @@ fun WalletDashboardScreen(
                     uiScope.launch { drawerState.open() }
                 },
                 actions = {
-                    if (isGoogleBuild()) {
+                    if (canBuySats) {
                         AppBarIcon(
                             icon = PrimalIcons.WalletPurchaseSats,
                             onClick = {
@@ -319,24 +319,37 @@ fun WalletDashboardScreen(
 
                 else -> {
                     if (pagingItems.loadState.refresh is LoadState.NotLoading && pagingItems.isEmpty()) {
-                        WalletCallToActionBox(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .animateContentSize()
-                                .padding(paddingValues)
-                                .padding(horizontal = 32.dp)
-                                .padding(bottom = 32.dp)
-                                .navigationBarsPadding(),
-                            message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
-                            actionLabel = if (isGoogleBuild()) {
-                                stringResource(id = R.string.wallet_dashboard_buy_sats_button)
-                            } else {
-                                null
-                            },
-                            onActionClick = {
-                                inAppPurchaseVisible = true
-                            },
-                        )
+                        if (state.wallet.balanceInBtc == 0.0) {
+                            WalletCallToActionBox(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .animateContentSize()
+                                    .padding(paddingValues)
+                                    .padding(horizontal = 32.dp)
+                                    .padding(bottom = 32.dp)
+                                    .navigationBarsPadding(),
+                                message = stringResource(id = R.string.wallet_dashboard_no_sats_hint),
+                                actionLabel = if (canBuySats) {
+                                    stringResource(id = R.string.wallet_dashboard_buy_sats_button)
+                                } else {
+                                    null
+                                },
+                                onActionClick = {
+                                    inAppPurchaseVisible = true
+                                },
+                            )
+                        } else {
+                            WalletCallToActionBox(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .animateContentSize()
+                                    .padding(paddingValues)
+                                    .padding(horizontal = 32.dp)
+                                    .padding(bottom = 32.dp)
+                                    .navigationBarsPadding(),
+                                message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
+                            )
+                        }
                     } else {
                         TransactionsLazyColumn(
                             modifier = Modifier
@@ -350,7 +363,7 @@ fun WalletDashboardScreen(
                             onProfileClick = onProfileClick,
                             onTransactionClick = onTransactionClick,
                             header = {
-                                if (state.lowBalance && pagingItems.itemCount > 0 && isGoogleBuild()) {
+                                if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
                                     WalletCallToActionBox(
                                         modifier = Modifier
                                             .fillMaxSize()
