@@ -226,6 +226,9 @@ private fun ReceiveContent(
     onCancel: () -> Unit,
 ) {
     val clipboardManager = LocalClipboardManager.current
+    val skipViewerMode = remember(state.activeWallet, state.paymentDetails) {
+        state.activeWallet?.lightningAddress == null && state.paymentDetails.amountInBtc == null
+    }
 
     AnimatedContent(
         modifier = Modifier.fillMaxSize(),
@@ -233,7 +236,7 @@ private fun ReceiveContent(
         label = "ReceivePaymentContent",
         contentAlignment = Alignment.Center,
     ) { inEditMode ->
-        when (inEditMode) {
+        when (inEditMode || skipViewerMode) {
             true -> {
                 ReceivePaymentEditor(
                     paddingValues = paddingValues,
