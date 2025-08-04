@@ -1,15 +1,14 @@
 package net.primal.data.repository.streams
 
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
-import net.primal.data.remote.api.stream.StreamMonitor
+import net.primal.data.remote.api.stream.LiveStreamApi
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
@@ -30,7 +29,7 @@ class StreamRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
     private val usersApi: UsersApi,
-    private val streamMonitor: StreamMonitor,
+    private val streamMonitor: LiveStreamApi,
 ) : StreamRepository {
 
     override suspend fun findLatestLiveStreamATag(authorId: String): String? {
@@ -40,32 +39,22 @@ class StreamRepositoryImpl(
     }
 
     override fun observeStream(aTag: String): Flow<Stream?> {
-        return database.streams().observeStreamByATag(aTag = aTag)
-            .map { streamPO ->
-                streamPO?.asStreamDO()
-            }
-    }
-
-    override fun startMonitoring(
-        scope: CoroutineScope,
-        naddr: Naddr,
-        userId: String,
-    ) {
-        streamMonitor.start(
-            scope = scope,
-            creatorPubkey = naddr.userId,
-            dTag = naddr.identifier,
-            userPubkey = userId,
-        ) { zapEvent ->
-            scope.launch {
-                processIncomingZap(zapEvent = zapEvent)
-            }
+        return database.streams().observeStreamByATag(aTag = aTag).map { streamPO ->
+            streamPO?.asStreamDO()
         }
     }
 
-    override fun stopMonitoring(scope: CoroutineScope) {
-        streamMonitor.stop(scope)
-    }
+    override suspend fun startLiveStreamSubscription(naddr: Naddr, userId: String) =
+        coroutineScope {
+            streamMonitor.subscribe(
+                streamingNaddr = naddr,
+                userId = userId,
+            ).collect { response ->
+                response.zaps.forEach {
+                    processIncomingZap(zapEvent = it)
+                }
+            }
+        }
 
     private suspend fun processIncomingZap(zapEvent: NostrEvent) =
         withContext(dispatcherProvider.io()) {

@@ -9,6 +9,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transformWhile
@@ -18,6 +19,7 @@ import net.primal.core.networking.sockets.NostrSocketClientImpl
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
+import net.primal.core.utils.bufferCountOrTimeout
 import net.primal.domain.common.exception.NetworkException
 
 internal class BasePrimalApiClient(
@@ -58,6 +60,7 @@ internal class BasePrimalApiClient(
                 message = "Api unreachable at the moment. [$verb]",
                 cause = this,
             )
+
             else -> NetworkException(message = "${this?.message} [$verb]", cause = this)
         }
     }
@@ -74,6 +77,19 @@ internal class BasePrimalApiClient(
         return socketClient.incomingMessages.filterBySubscriptionId(id = subscriptionId)
     }
 
+    suspend fun subscribeBuffered(
+        subscriptionId: String,
+        message: PrimalCacheFilter,
+    ): Flow<PrimalSubscriptionBufferedResult> {
+        return subscribe(
+            subscriptionId = subscriptionId,
+            message = message,
+        ).bufferCountOrTimeout(
+            count = 200,
+            timeout = 2.seconds,
+        ).map { messages -> messages.collectSubscriptionBufferedResult() }
+    }
+
     suspend fun closeSubscription(subscriptionId: String): Boolean {
         return try {
             socketClient.sendCLOSE(subscriptionId = subscriptionId)
@@ -83,6 +99,23 @@ internal class BasePrimalApiClient(
         } catch (_: Exception) {
             false
         }
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun List<NostrIncomingMessage>.collectSubscriptionBufferedResult(): PrimalSubscriptionBufferedResult {
+        val eventMessages = this.filterIsInstance<NostrIncomingMessage.EventMessage>()
+        val eventsMessage = this.filterIsInstance<NostrIncomingMessage.EventsMessage>()
+
+        val allNostrEvents = eventMessages.mapNotNull { it.nostrEvent } +
+            eventsMessage.map { it.nostrEvents }.flatten()
+
+        val allPrimalEvents = eventMessages.mapNotNull { it.primalEvent } +
+            eventsMessage.map { it.primalEvents }.flatten()
+
+        return PrimalSubscriptionBufferedResult(
+            nostrEvents = allNostrEvents,
+            primalEvents = allPrimalEvents,
+        )
     }
 
     @OptIn(FlowPreview::class)

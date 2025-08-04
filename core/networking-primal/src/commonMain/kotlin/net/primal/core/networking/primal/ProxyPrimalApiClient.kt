@@ -103,6 +103,14 @@ internal class ProxyPrimalApiClient(
         return primalClient.subscribe(subscriptionId = subscriptionId, message = message)
     }
 
+    override suspend fun subscribeBuffered(
+        subscriptionId: String,
+        message: PrimalCacheFilter,
+    ): Flow<PrimalSubscriptionBufferedResult> {
+        clientInitialized.await()
+        return primalClient.subscribeBuffered(subscriptionId = subscriptionId, message = message)
+    }
+
     override suspend fun closeSubscription(subscriptionId: String): Boolean {
         clientInitialized.await()
         return primalClient.closeSubscription(subscriptionId = subscriptionId)

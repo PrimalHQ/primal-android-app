@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,22 +65,45 @@ class LiveStreamViewModel @Inject constructor(
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private var liveStreamSubscriptionJob: Job? = null
+
     init {
         resolveNaddr()
         observeEvents()
         observeFollowsResults()
     }
 
-    override fun onCleared() {
-        streamRepository.stopMonitoring(viewModelScope)
-    }
+    private fun resolveNaddr() =
+        viewModelScope.launch {
+            setState { copy(loading = true) }
+            val naddr = savedStateHandle.naddr?.let {
+                Nip19TLV.parseUriAsNaddrOrNull(it)
+            }
+            if (naddr != null) {
+                val authorId = naddr.userId
+                setState { copy(profileId = authorId) }
+                liveStreamSubscriptionJob = startLiveStreamSubscription(naddr)
+                initializeObservers(naddr = naddr, authorId = authorId)
+            } else {
+                Timber.w("Unable to resolve naddr.")
+                setState { copy(loading = false) }
+            }
+        }
 
-    private fun startLiveStreamMonitor(naddr: Naddr) {
-        streamRepository.startMonitoring(
-            scope = viewModelScope,
-            naddr = naddr,
-            userId = activeAccountStore.activeUserId(),
-        )
+    private fun startLiveStreamSubscription(naddr: Naddr) =
+        viewModelScope.launch {
+            streamRepository.startLiveStreamSubscription(
+                naddr = naddr,
+                userId = activeAccountStore.activeUserId(),
+            )
+        }
+
+    private fun initializeObservers(naddr: Naddr, authorId: String) {
+        observeLiveStream(naddr)
+        observeAuthorProfile(authorId)
+        observeAuthorProfileStats(authorId)
+        observeFollowState(authorId)
+        observeActiveAccount()
     }
 
     private fun observeEvents() =
@@ -99,12 +123,14 @@ class LiveStreamViewModel @Inject constructor(
                             )
                         }
                     }
+
                     is UiEvent.OnSeekStarted -> setState { copy(playerState = playerState.copy(isSeeking = true)) }
                     is UiEvent.OnSeek -> {
                         setState {
                             copy(playerState = playerState.copy(isSeeking = false, currentTime = it.positionMs))
                         }
                     }
+
                     is UiEvent.FollowAction -> follow(it.profileId)
                     is UiEvent.UnfollowAction -> unfollow(it.profileId)
                     is UiEvent.ApproveFollowsActions -> approveFollowsActions(it.actions)
@@ -112,35 +138,11 @@ class LiveStreamViewModel @Inject constructor(
                     UiEvent.DismissConfirmFollowUnfollowAlertDialog -> setState {
                         copy(shouldApproveProfileAction = null)
                     }
+
                     is UiEvent.ZapStream -> zapStream(zapAction = it)
                 }
             }
         }
-
-    private fun resolveNaddr() =
-        viewModelScope.launch {
-            setState { copy(loading = true) }
-            val naddr = savedStateHandle.naddr?.let {
-                Nip19TLV.parseUriAsNaddrOrNull(it)
-            }
-            if (naddr != null) {
-                val authorId = naddr.userId
-                setState { copy(profileId = authorId) }
-                initializeObservers(naddr = naddr, authorId = authorId)
-            } else {
-                Timber.w("Unable to resolve naddr.")
-                setState { copy(loading = false) }
-            }
-        }
-
-    private fun initializeObservers(naddr: Naddr, authorId: String) {
-        observeLiveStream(naddr)
-        observeAuthorProfile(authorId)
-        observeAuthorProfileStats(authorId)
-        observeFollowState(authorId)
-        observeActiveAccount()
-        startLiveStreamMonitor(naddr)
-    }
 
     private fun observeLiveStream(naddr: Naddr) =
         viewModelScope.launch {
@@ -302,17 +304,21 @@ class LiveStreamViewModel @Inject constructor(
                             is NetworkException, is NostrPublishException -> {
                                 setState { copy(error = UiError.FailedToUpdateFollowList(cause = it.error)) }
                             }
+
                             is SigningRejectedException, is SigningKeyNotFoundException -> {
                                 setState { copy(error = UiError.SignatureError(it.error.asSignatureUiError())) }
                             }
+
                             is MissingRelaysException -> {
                                 setState { copy(error = UiError.MissingRelaysConfiguration(cause = it.error)) }
                             }
+
                             is UserRepository.FollowListNotFound -> {
                                 setState { copy(shouldApproveProfileAction = FollowsApproval(it.actions)) }
                             }
                         }
                     }
+
                     ProfileFollowsHandler.ActionResult.Success -> Unit
                 }
             }
