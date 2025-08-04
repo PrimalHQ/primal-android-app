@@ -14,6 +14,7 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.premium.repository.asProfileDataDO
 import net.primal.android.profile.domain.ProfileMetadata
+import net.primal.android.settings.wallet.domain.WalletPreference
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.copyFollowListIfNotNull
@@ -41,6 +42,8 @@ import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.user.UserDataCleanupRepository
 import net.primal.domain.wallet.WalletRepository
+import net.primal.domain.wallet.WalletSettings
+import net.primal.domain.wallet.WalletState
 
 class UserRepository @Inject constructor(
     private val usersDatabase: UsersDatabase,
@@ -64,6 +67,19 @@ class UserRepository @Inject constructor(
 
     fun isNpubLogin(userId: String) =
         runCatching { credentialsStore.isNpubLogin(npub = userId.hexToNpubHrp()) }.getOrDefault(false)
+
+    suspend fun clearWalletData(userId: String) =
+        withContext(dispatchers.io()) {
+            accountsStore.getAndUpdateAccount(userId = userId) {
+                copy(
+                    primalWallet = null,
+                    nostrWallet = null,
+                    walletPreference = WalletPreference.Undefined,
+                    primalWalletState = WalletState(),
+                    primalWalletSettings = WalletSettings(),
+                )
+            }
+        }
 
     suspend fun fetchAndUpdateUserAccount(userId: String): UserAccount {
         val userProfile = fetchUserProfileOrNull(userId = userId)
