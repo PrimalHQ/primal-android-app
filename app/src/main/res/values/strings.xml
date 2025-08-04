@@ -1194,6 +1194,7 @@
     <string name="wallet_receive_transaction_cancel_numeric_pad_button">Cancel</string>
     <string name="wallet_receive_transaction_apply_numeric_pad_button">Apply</string>
     <string name="wallet_receive_transaction_invoice_creation_error">Unable to add details. Please try again in few moments.</string>
+    <string name="wallet_receive_no_lightning_address">We couldn\'t get lightning address for this wallet. Try adding an amount or configuring lightning address.</string>
 
     <string name="wallet_transaction_details_title_zap_received">Zap Received</string>
     <string name="wallet_transaction_details_title_zap_sent">Zap Sent</string>
