@@ -1,6 +1,7 @@
 package net.primal.android.stream
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -218,6 +219,7 @@ private fun LiveStreamContent(
                 .fillMaxSize()
                 .background(AppTheme.colorScheme.surface)
                 .padding(paddingValues),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item("MediaPlayer") {
                 LiveStreamPlayer(
@@ -285,7 +287,8 @@ private fun LiveStreamContent(
                     ArticleTopZapsSection(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                            .padding(horizontal = 16.dp),
+                        sectionTopSpacing = 0.dp,
                         topZaps = state.zaps,
                         onZapClick = onZapClick,
                         onTopZapsClick = {
@@ -297,7 +300,6 @@ private fun LiveStreamContent(
                                 )
                             }
                         },
-                        sectionTopSpacing = 0.dp,
                     )
                 }
             }
