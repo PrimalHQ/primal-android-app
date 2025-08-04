@@ -79,7 +79,6 @@ import com.wajahatkarim.flippable.rememberFlipController
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -414,6 +413,7 @@ private fun ViewerActionsRow(
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         PrimalLoadingButton(
+            enabled = !networkDetails.qrCodeValue.isNullOrEmpty(),
             modifier = Modifier.weight(1f),
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
             contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
@@ -443,11 +443,18 @@ private fun ViewerActionsRow(
 
 @Composable
 fun QrCodeBox(qrCodeValue: String?, network: Network) {
-    Box(
-        modifier = Modifier.background(Color.White, shape = AppTheme.shapes.extraLarge),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (!qrCodeValue.isNullOrEmpty()) {
+    if (qrCodeValue.isNullOrEmpty()) {
+        Text(
+            text = stringResource(id = R.string.wallet_receive_no_lightning_address),
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            style = AppTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+        )
+    } else {
+        Box(
+            modifier = Modifier.background(Color.White, shape = AppTheme.shapes.extraLarge),
+            contentAlignment = Alignment.Center,
+        ) {
             val drawable = rememberQrCodeDrawable(text = qrCodeValue, network = network)
             Spacer(
                 modifier = Modifier
@@ -459,8 +466,6 @@ fun QrCodeBox(qrCodeValue: String?, network: Network) {
                     }
                     .fillMaxSize(),
             )
-        } else {
-            PrimalLoadingSpinner()
         }
     }
 }
