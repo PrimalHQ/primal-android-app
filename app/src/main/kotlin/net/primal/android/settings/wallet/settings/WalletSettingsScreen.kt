@@ -48,9 +48,9 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEven
 import net.primal.android.settings.wallet.settings.ui.ConnectedAppsSettings
 import net.primal.android.settings.wallet.settings.ui.ExternalWalletSettings
 import net.primal.android.settings.wallet.settings.ui.PrimalWalletSettings
-import net.primal.android.settings.wallet.utils.isActivePrimalWallet
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.utils.isActivePrimalWallet
 import net.primal.domain.wallet.NostrWalletKeypair
 import net.primal.domain.wallet.Wallet
 

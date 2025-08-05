@@ -13,7 +13,6 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiEvent
 import net.primal.android.feeds.dvm.DvmFeedListItemContract.UiState
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.settings.wallet.utils.isConfigured
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
@@ -28,6 +27,7 @@ import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
+import net.primal.domain.utils.isConfigured
 import timber.log.Timber
 
 @HiltViewModel

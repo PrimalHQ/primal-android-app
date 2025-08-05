@@ -24,7 +24,6 @@ import net.primal.android.navigation.naddr
 import net.primal.android.navigation.primalName
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.settings.wallet.utils.isConfigured
 import net.primal.android.thread.articles.details.ArticleDetailsContract.SideEffect
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiEvent
 import net.primal.android.thread.articles.details.ArticleDetailsContract.UiState
@@ -63,6 +62,7 @@ import net.primal.domain.posts.FeedRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
+import net.primal.domain.utils.isConfigured
 import timber.log.Timber
 
 @HiltViewModel
