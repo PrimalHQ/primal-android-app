@@ -67,6 +67,7 @@ import net.primal.android.wallet.dashboard.ui.WalletDashboard
 import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
 import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
+import net.primal.domain.utils.isConfigured
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletKycLevel
@@ -235,7 +236,7 @@ fun WalletDashboardScreen(
                                     .padding(top = 16.dp, bottom = 24.dp)
                                     .animateContentSize(),
                                 walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
-                                enabled = state.wallet != null && !state.isNpubLogin,
+                                enabled = state.wallet.isConfigured() && !state.isNpubLogin,
                                 actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
                                 onWalletAction = { action ->
                                     when (action) {
@@ -266,7 +267,7 @@ fun WalletDashboardScreen(
                                     }
                                 },
                                 currencyMode = currencyMode,
-                                enabled = state.wallet != null && !state.isNpubLogin,
+                                enabled = state.wallet.isConfigured() && !state.isNpubLogin,
                                 onSwitchCurrencyMode = { currencyMode = it },
                                 exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                             )
