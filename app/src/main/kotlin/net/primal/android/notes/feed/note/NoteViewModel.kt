@@ -21,7 +21,6 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.note.NoteContract.SideEffect
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
-import net.primal.android.settings.wallet.utils.isConfigured
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
@@ -43,6 +42,7 @@ import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.utils.isConfigured
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteViewModel.Factory::class)

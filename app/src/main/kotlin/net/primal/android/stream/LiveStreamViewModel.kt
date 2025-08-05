@@ -25,7 +25,6 @@ import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.naddr
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.android.settings.wallet.utils.isConfigured
 import net.primal.android.stream.LiveStreamContract.SideEffect
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
 import net.primal.android.stream.LiveStreamContract.UiEvent
@@ -63,6 +62,7 @@ import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
 import net.primal.domain.streams.chat.ChatMessage
 import net.primal.domain.streams.chat.LiveStreamChatRepository
+import net.primal.domain.utils.isConfigured
 import timber.log.Timber
 
 @HiltViewModel
