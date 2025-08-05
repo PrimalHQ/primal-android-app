@@ -27,7 +27,6 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
-import net.primal.android.settings.wallet.utils.isConfigured
 import net.primal.android.stream.toNaddrString
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.handler.ProfileFollowsHandler
@@ -54,6 +53,7 @@ import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
+import net.primal.domain.utils.isConfigured
 import timber.log.Timber
 
 @HiltViewModel
