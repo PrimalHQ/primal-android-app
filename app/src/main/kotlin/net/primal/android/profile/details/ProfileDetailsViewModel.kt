@@ -114,7 +114,6 @@ class ProfileDetailsViewModel @Inject constructor(
         observeProfileStats(profileId = profileId)
         observeContainsFeed(profileId = profileId)
         observeMutedAccount(profileId = profileId)
-        findAndObserveLatestStream(profileId = profileId)
         resolveFollowsMe(profileId = profileId)
         markProfileInteraction(profileId = profileId, isActiveUser = isActiveUser)
     }
@@ -205,6 +204,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun requestProfileUpdate(profileId: String) =
         viewModelScope.launch {
             fetchLatestProfile(profileId = profileId)
+            findAndObserveLatestStream(profileId = profileId)
             fetchProfileFollowedBy(profileId = profileId)
             fetchLatestMuteList()
             setEffect(ProfileDetailsContract.SideEffect.ProfileUpdateFinished)
