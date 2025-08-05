@@ -3,6 +3,7 @@ package net.primal.data.remote.factory
 import de.jensklingenberg.ktorfit.Ktorfit
 import net.primal.core.networking.factory.HttpClientFactory
 import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.api.articles.ArticlesApiImpl
 import net.primal.data.remote.api.events.EventStatsApi
@@ -21,6 +22,8 @@ import net.primal.data.remote.api.notifications.NotificationsApi
 import net.primal.data.remote.api.notifications.NotificationsApiImpl
 import net.primal.data.remote.api.settings.SettingsApi
 import net.primal.data.remote.api.settings.SettingsApiImpl
+import net.primal.data.remote.api.stream.LiveStreamApi
+import net.primal.data.remote.api.stream.LiveStreamApiImpl
 import net.primal.data.remote.api.users.UserWellKnownApi
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.data.remote.api.users.UsersApiImpl
@@ -28,6 +31,7 @@ import net.primal.data.remote.api.users.createUserWellKnownApi
 
 object PrimalApiServiceFactory {
 
+    private val dispatcherProvider = createDispatcherProvider()
     private val defaultHttpClient = HttpClientFactory.createHttpClientWithDefaultConfig()
 
     fun createArticlesApi(primalApiClient: PrimalApiClient): ArticlesApi = ArticlesApiImpl(primalApiClient)
@@ -57,4 +61,7 @@ object PrimalApiServiceFactory {
             .httpClient(client = defaultHttpClient)
             .build()
             .createUserWellKnownApi()
+
+    fun createStreamMonitor(primalApiClient: PrimalApiClient): LiveStreamApi =
+        LiveStreamApiImpl(primalApiClient = primalApiClient)
 }

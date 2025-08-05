@@ -146,5 +146,12 @@ object RepositoryCachingModule {
         PrimalRepositoryFactory.createUserDataCleanupRepository(cachingPrimalApiClient = primalApiClient)
 
     @Provides
-    fun provideStreamRepository(): StreamRepository = PrimalRepositoryFactory.createStreamRepository()
+    fun provideStreamRepository(
+        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): StreamRepository =
+        PrimalRepositoryFactory.createStreamRepository(
+            cachingPrimalApiClient = primalApiClient,
+            primalPublisher = primalPublisher,
+        )
 }

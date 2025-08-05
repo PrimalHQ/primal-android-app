@@ -80,5 +80,8 @@ internal interface RepositoryFactory {
 
     fun createUserDataCleanupRepository(cachingPrimalApiClient: PrimalApiClient): UserDataCleanupRepository
 
-    fun createStreamRepository(): StreamRepository
+    fun createStreamRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
+    ): StreamRepository
 }

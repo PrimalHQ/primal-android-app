@@ -1,16 +1,33 @@
 package net.primal.data.repository.streams
 
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.remote.api.stream.LiveStreamApi
+import net.primal.data.remote.api.stream.model.LiveFeedResponse
 import net.primal.data.repository.mappers.local.asStreamDO
+import net.primal.data.repository.mappers.remote.extractZapRequestOrNull
+import net.primal.data.repository.mappers.remote.mapAsEventZapDO
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.Stream
 import net.primal.domain.streams.StreamRepository
+import net.primal.shared.data.local.db.withTransaction
 
 class StreamRepositoryImpl(
+    dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
+    private val profileRepository: ProfileRepository,
+    private val liveStreamApi: LiveStreamApi,
 ) : StreamRepository {
+
+    private val scope = CoroutineScope(SupervisorJob() + dispatcherProvider.io())
 
     override suspend fun findLatestLiveStreamATag(authorId: String): String? {
         val streamsPO = database.streams().observeStreamsByAuthorId(authorId).first()
@@ -19,9 +36,43 @@ class StreamRepositoryImpl(
     }
 
     override fun observeStream(aTag: String): Flow<Stream?> {
-        return database.streams().observeStreamByATag(aTag = aTag)
-            .map { streamPO ->
-                streamPO?.asStreamDO()
+        return database.streams().observeStreamByATag(aTag = aTag).map { streamPO ->
+            streamPO?.asStreamDO()
+        }
+    }
+
+    override suspend fun startLiveStreamSubscription(naddr: Naddr, userId: String) {
+        liveStreamApi.subscribe(
+            streamingNaddr = naddr,
+            userId = userId,
+        ).collect { response ->
+            processLiveStreamResponse(response = response)
+        }
+    }
+
+    private suspend fun processLiveStreamResponse(response: LiveFeedResponse) {
+        val zapEvents = response.zaps
+        val zapRequests = zapEvents.mapNotNull { it.extractZapRequestOrNull() }
+        val zapperPubkeys = zapRequests.map { it.pubKey }.toSet()
+        val localProfiles = database.profiles().findProfileData(profileIds = zapperPubkeys.toList())
+        val localProfilesMap = localProfiles.associateBy { it.ownerId }
+        val eventZaps = zapEvents.mapAsEventZapDO(profilesMap = localProfilesMap)
+
+        database.withTransaction {
+            if (eventZaps.isNotEmpty()) {
+                database.eventZaps().upsertAll(data = eventZaps)
             }
+        }
+
+        val missingProfileIds = zapperPubkeys - localProfiles.map { it.ownerId }.toSet()
+        if (missingProfileIds.isNotEmpty()) {
+            scope.launch {
+                try {
+                    profileRepository.fetchProfiles(profileIds = missingProfileIds.toList())
+                } catch (error: Exception) {
+                    Napier.w(error) { "Failed to fetch profiles for stream zaps." }
+                }
+            }
+        }
     }
 }

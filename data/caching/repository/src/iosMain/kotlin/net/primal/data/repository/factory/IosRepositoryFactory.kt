@@ -215,9 +215,12 @@ object IosRepositoryFactory : RepositoryFactory {
         )
     }
 
-    override fun createStreamRepository(): StreamRepository {
+    override fun createStreamRepository(cachingPrimalApiClient: PrimalApiClient): StreamRepository {
         return StreamRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
             database = cachingDatabase,
+            usersApi = PrimalApiServiceFactory.createUsersApi(cachingPrimalApiClient),
+            streamMonitor = PrimalApiServiceFactory.createStreamMonitor(cachingPrimalApiClient),
         )
     }
 }
