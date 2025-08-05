@@ -1,4 +1,4 @@
-package net.primal.android.settings.wallet.utils
+package net.primal.domain.utils
 
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletKycLevel

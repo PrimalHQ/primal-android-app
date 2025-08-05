@@ -1,11 +1,11 @@
 package net.primal.android.user.zaps
 
 import javax.inject.Inject
-import net.primal.android.settings.wallet.utils.isActivePrimalWallet
 import net.primal.android.wallet.repository.WalletNostrZapper
 import net.primal.core.networking.nwc.NwcClientFactory
 import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.NostrZapperFactory
+import net.primal.domain.utils.isActivePrimalWallet
 import net.primal.domain.wallet.NostrWalletConnect
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
