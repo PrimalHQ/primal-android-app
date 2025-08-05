@@ -21,7 +21,7 @@ import net.primal.domain.streams.StreamRepository
 import net.primal.shared.data.local.db.withTransaction
 
 class StreamRepositoryImpl(
-    private val dispatcherProvider: DispatcherProvider,
+    dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
     private val profileRepository: ProfileRepository,
     private val liveStreamApi: LiveStreamApi,
