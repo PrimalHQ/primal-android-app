@@ -1,7 +1,9 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.streams.Stream as StreamPO
+import net.primal.data.local.dao.streams.StreamChatMessage
 import net.primal.domain.streams.Stream as StreamDO
+import net.primal.domain.streams.chat.ChatMessage
 
 fun StreamPO.asStreamDO(): StreamDO {
     return StreamDO(
@@ -21,5 +23,17 @@ fun StreamPO.asStreamDO(): StreamDO {
         currentParticipants = this.data.currentParticipants,
         totalParticipants = this.data.totalParticipants,
         eventZaps = this.eventZaps.map { it.asEventZapDO() },
+    )
+}
+
+fun StreamChatMessage.asChatMessageDO(): ChatMessage? {
+    val author = this.author ?: return null
+    return ChatMessage(
+        messageId = this.data.messageId,
+        author = author.asProfileDataDO(),
+        content = this.data.content,
+        createdAt = this.data.createdAt,
+        raw = this.data.raw,
+        client = this.data.client,
     )
 }
