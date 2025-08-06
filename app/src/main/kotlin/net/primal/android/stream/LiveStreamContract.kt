@@ -21,6 +21,7 @@ interface LiveStreamContract {
         val comment: TextFieldValue = TextFieldValue(),
         val shouldApproveProfileAction: FollowsApproval? = null,
         val zaps: List<EventZapUiModel> = emptyList(),
+        val chatItems: List<StreamChatItem> = emptyList(),
         val zappingState: ZappingState = ZappingState(),
         val error: UiError? = null,
     )
@@ -62,6 +63,8 @@ interface LiveStreamContract {
         data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
         data class ApproveFollowsActions(val actions: List<ProfileFollowsHandler.Action>) : UiEvent()
         data class ZapStream(val zapAmount: ULong? = null, val zapDescription: String? = null) : UiEvent()
+        data class OnCommentValueChanged(val value: TextFieldValue) : UiEvent()
+        data class SendMessage(val text: String) : UiEvent()
     }
 
     sealed class SideEffect

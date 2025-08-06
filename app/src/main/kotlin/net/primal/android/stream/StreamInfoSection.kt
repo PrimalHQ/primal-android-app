@@ -23,6 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.airbnb.lottie.model.content.CircleShape
 import java.text.NumberFormat
 import java.time.Instant
 import net.primal.android.R
@@ -71,7 +72,7 @@ fun StreamInfoSection(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            LiveIndicator(isLive = isLive)
+            StreamLiveIndicator(isLive = isLive)
 
             if (startedAt != null) {
                 Text(
@@ -101,7 +102,11 @@ fun StreamInfoSection(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                UniversalAvatarThumbnail(avatarCdnImage = authorProfile.avatarCdnImage, avatarSize = 48.dp)
+                UniversalAvatarThumbnail(
+                    avatarCdnImage = authorProfile.avatarCdnImage,
+                    avatarSize = 48.dp,
+                    legendaryCustomization = authorProfile.premiumDetails?.legendaryCustomization,
+                )
 
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     NostrUserText(
@@ -137,7 +142,7 @@ fun StreamInfoSection(
 }
 
 @Composable
-private fun LiveIndicator(modifier: Modifier = Modifier, isLive: Boolean) {
+fun StreamLiveIndicator(modifier: Modifier = Modifier, isLive: Boolean) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
