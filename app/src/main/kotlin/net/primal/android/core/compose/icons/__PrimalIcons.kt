@@ -66,6 +66,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedReposts
 import net.primal.android.core.compose.icons.primaliconpack.FeedRepostsFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
+import net.primal.android.core.compose.icons.primaliconpack.Follow
 import net.primal.android.core.compose.icons.primaliconpack.FontSize
 import net.primal.android.core.compose.icons.primaliconpack.GenericLinkIcon
 import net.primal.android.core.compose.icons.primaliconpack.Help
@@ -311,6 +312,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             NwcExternalAppForeground,
             NwcExternalAppConnection,
             RemoveAccount,
+            Follow,
         )
         return __PrimalIcons!!
     }

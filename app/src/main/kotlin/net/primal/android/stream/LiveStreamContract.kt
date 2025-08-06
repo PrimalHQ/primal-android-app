@@ -42,6 +42,7 @@ interface LiveStreamContract {
         val streamUrl: String,
         val viewers: Int,
         val startedAt: Long?,
+        val description: String?,
     )
 
     sealed class UiEvent {
