@@ -166,6 +166,7 @@ class LiveStreamViewModel @Inject constructor(
                                 streamUrl = streamingUrl,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,
+                                description = stream.summary,
                             ),
                             comment = TextFieldValue(text = streamingUrl),
                             zaps = stream.eventZaps
