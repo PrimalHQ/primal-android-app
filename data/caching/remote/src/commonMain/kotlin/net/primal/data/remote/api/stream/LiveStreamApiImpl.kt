@@ -43,6 +43,7 @@ class LiveStreamApiImpl(
             .map {
                 LiveFeedResponse(
                     zaps = it.filterNostrEvents(NostrEventKind.Zap),
+                    chatMessages = it.filterNostrEvents(NostrEventKind.ChatMessage),
                 )
             }
     }

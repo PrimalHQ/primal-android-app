@@ -21,6 +21,7 @@ enum class NostrEventKind(val value: Int) {
     ChannelHideMessage(value = 43),
     ChannelMuteUser(value = 44),
     FileMetadata(value = 1063),
+    ChatMessage(value = 1311),
     Reporting(value = 1984),
     ZapRequest(value = 9734),
     Zap(value = 9735),

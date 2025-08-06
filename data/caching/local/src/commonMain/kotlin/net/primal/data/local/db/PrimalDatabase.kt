@@ -56,6 +56,8 @@ import net.primal.data.local.dao.reads.ArticleFeedCrossRef
 import net.primal.data.local.dao.reads.ArticleFeedCrossRefDao
 import net.primal.data.local.dao.reads.HighlightDao
 import net.primal.data.local.dao.reads.HighlightData
+import net.primal.data.local.dao.streams.StreamChatMessageDao
+import net.primal.data.local.dao.streams.StreamChatMessageData
 import net.primal.data.local.dao.streams.StreamData
 import net.primal.data.local.dao.streams.StreamDataDao
 import net.primal.data.local.dao.threads.ArticleCommentCrossRef
@@ -99,8 +101,9 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         FollowPackListCrossRef::class,
         FollowPackRemoteKey::class,
         StreamData::class,
+        StreamChatMessageData::class,
     ],
-    version = 12,
+    version = 13,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -167,6 +170,8 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun highlights(): HighlightDao
 
     abstract fun streams(): StreamDataDao
+
+    abstract fun streamChats(): StreamChatMessageDao
 }
 
 // The Room compiler generates the `actual` implementations.
