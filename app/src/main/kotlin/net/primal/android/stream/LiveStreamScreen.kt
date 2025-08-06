@@ -1,5 +1,6 @@
 package net.primal.android.stream
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +45,8 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.C
@@ -67,6 +71,7 @@ import net.primal.domain.nostr.ReactionType
 private const val LIVE_EDGE_THRESHOLD_MS = 20_000
 private const val PLAYER_STATE_UPDATE_INTERVAL_MS = 200L
 private const val SEEK_INCREMENT_MS = 10_000L
+private const val STREAM_DESCRIPTION_MAX_LINES = 4
 
 private enum class LiveStreamDisplaySection {
     Info,
@@ -385,30 +390,65 @@ private fun LazyItemScope.StreamInfoDisplay(
         }
 
         if (streamInfo.description?.isNotBlank() == true) {
-            val content = streamInfo.description
-            val hashtagColor = AppTheme.colorScheme.primary
-            val annotatedContent = remember(content) {
-                buildAnnotatedStringWithHashtags(text = content, hashtagColor = hashtagColor)
-            }
-
-            PrimalClickableText(
-                modifier = Modifier.fillMaxWidth(),
-                text = annotatedContent,
-                style = AppTheme.typography.bodyLarge.copy(
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    fontSize = 15.sp,
-                    lineHeight = 22.sp,
-                ),
-                textSelectable = true,
-                onClick = { offset, _ ->
-                    annotatedContent.getStringAnnotations("HASHTAG", offset, offset)
-                        .firstOrNull()?.let {
-                            noteCallbacks.onHashtagClick?.invoke(it.item)
-                        }
-                },
+            ExpandableStreamDescription(
+                content = streamInfo.description,
+                noteCallbacks = noteCallbacks,
             )
         }
     }
+}
+
+@Composable
+private fun ExpandableStreamDescription(content: String, noteCallbacks: NoteCallbacks) {
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
+    var isContentOverflowing by remember { mutableStateOf(false) }
+    val hashtagColor = AppTheme.colorScheme.primary
+
+    val annotatedContent = remember(content) {
+        buildAnnotatedStringWithHashtags(text = content, hashtagColor = hashtagColor)
+    }
+
+    val annotatedStringWithSuffix = buildAnnotatedString {
+        append(annotatedContent)
+        if (isContentOverflowing && !isExpanded) {
+            append("... ")
+            withStyle(
+                style = SpanStyle(
+                    color = AppTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                ),
+            ) {
+                append("more")
+            }
+        }
+    }
+
+    PrimalClickableText(
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize()
+            .clickable { isExpanded = !isExpanded },
+        text = annotatedStringWithSuffix,
+        style = AppTheme.typography.bodyLarge.copy(
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            fontSize = 15.sp,
+            lineHeight = 22.sp,
+        ),
+        textSelectable = true,
+        maxLines = if (isExpanded) Int.MAX_VALUE else STREAM_DESCRIPTION_MAX_LINES,
+        overflow = TextOverflow.Ellipsis,
+        onTextLayout = { result ->
+            isContentOverflowing = result.hasVisualOverflow
+        },
+        onClick = { offset, _ ->
+            annotatedContent.getStringAnnotations("HASHTAG", offset, offset)
+                .firstOrNull()?.let {
+                    noteCallbacks.onHashtagClick?.invoke(it.item)
+                } ?: run {
+                isExpanded = !isExpanded
+            }
+        },
+    )
 }
 
 @Composable
