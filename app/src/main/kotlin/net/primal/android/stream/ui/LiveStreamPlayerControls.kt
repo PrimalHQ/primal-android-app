@@ -1,4 +1,4 @@
-package net.primal.android.stream
+package net.primal.android.stream.ui
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
@@ -53,6 +53,7 @@ import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.stream.LiveStreamContract
 import net.primal.android.theme.AppTheme
 
 private const val SECONDS_IN_MINUTE = 60

@@ -28,6 +28,8 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
 import net.primal.android.stream.LiveStreamContract.UiEvent
 import net.primal.android.stream.LiveStreamContract.UiState
+import net.primal.android.stream.ui.ChatMessageUi
+import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.handler.ProfileFollowsHandler

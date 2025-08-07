@@ -1,5 +1,6 @@
-package net.primal.android.stream
+package net.primal.android.stream.ui
 
+import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -23,11 +24,12 @@ import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.stream.LiveStreamContract
 
 private const val VIDEO_ASPECT_RATIO_WIDTH = 16f
 private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
 
-@androidx.annotation.OptIn(UnstableApi::class)
+@OptIn(UnstableApi::class)
 @Composable
 fun LiveStreamPlayer(
     exoPlayer: ExoPlayer,

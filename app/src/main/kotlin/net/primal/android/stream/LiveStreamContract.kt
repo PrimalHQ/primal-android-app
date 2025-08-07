@@ -7,6 +7,7 @@ import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.ZappingState
+import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.handler.ProfileFollowsHandler
 
 interface LiveStreamContract {

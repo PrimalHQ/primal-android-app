@@ -159,8 +159,8 @@ import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
 import net.primal.android.redeem.RedeemCodeContract
 import net.primal.android.redeem.RedeemCodeScreen
 import net.primal.android.redeem.RedeemCodeViewModel
-import net.primal.android.stream.LiveStreamScreen
 import net.primal.android.stream.LiveStreamViewModel
+import net.primal.android.stream.ui.LiveStreamScreen
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme

@@ -1,4 +1,4 @@
-package net.primal.android.stream
+package net.primal.android.stream.ui
 
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 

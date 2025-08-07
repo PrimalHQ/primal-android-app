@@ -1,4 +1,4 @@
-package net.primal.android.stream
+package net.primal.android.stream.ui
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -52,6 +51,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -83,6 +83,8 @@ import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
+import net.primal.android.stream.LiveStreamContract
+import net.primal.android.stream.LiveStreamViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalShapes
 import net.primal.android.wallet.zaps.canZap
@@ -367,7 +369,8 @@ private fun LazyItemScope.StreamInfoDisplay(
             .fillMaxWidth()
             .background(
                 AppTheme.extraColorScheme.surfaceVariantAlt2,
-            ).drawBehind {
+            )
+            .drawBehind {
                 val strokeWidth = 1.dp.toPx()
                 val y = size.height - strokeWidth / 2f
                 drawLine(
@@ -376,7 +379,8 @@ private fun LazyItemScope.StreamInfoDisplay(
                     end = Offset(size.width, y),
                     strokeWidth = strokeWidth,
                 )
-            }.padding(16.dp),
+            }
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         StreamInfoSection(
@@ -524,6 +528,119 @@ private fun LiveChatSection(modifier: Modifier = Modifier, onClick: () -> Unit) 
 }
 
 @Composable
+private fun LiveChatHeaderDetails(state: LiveStreamContract.UiState, onBack: () -> Unit) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            Text(
+                text = stringResource(id = R.string.live_stream_title),
+                style = AppTheme.typography.titleLarge.copy(fontSize = 18.sp, lineHeight = 24.sp),
+                fontWeight = FontWeight.Bold,
+                color = AppTheme.colorScheme.onSurface,
+            )
+
+            Row(
+                modifier = Modifier.padding(bottom = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                StreamLiveIndicator(isLive = state.playerState.isLive)
+
+                if (state.streamInfo?.startedAt != null) {
+                    Text(
+                        text = stringResource(
+                            id = R.string.live_stream_started_at,
+                            Instant.ofEpochSecond(state.streamInfo.startedAt).asBeforeNowFormat(),
+                        ),
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        style = AppTheme.typography.bodyMedium,
+                    )
+                }
+                IconText(
+                    text = numberFormat.format(state.streamInfo?.viewers ?: 0),
+                    leadingIcon = Follow,
+                    iconSize = 16.sp,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    style = AppTheme.typography.bodyMedium,
+                )
+            }
+        }
+
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { }) {
+                Icon(
+                    imageVector = SearchSettings,
+                    contentDescription = "Chat Settings",
+                    tint = AppTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Close,
+                    contentDescription = "Back to Info",
+                    tint = AppTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LiveChatHeader(
+    state: LiveStreamContract.UiState,
+    onBack: () -> Unit,
+    onZapClick: () -> Unit,
+    noteCallbacks: NoteCallbacks,
+) {
+    val borderColor = AppTheme.extraColorScheme.surfaceVariantAlt1
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                AppTheme.extraColorScheme.surfaceVariantAlt2,
+            )
+            .drawBehind {
+                val strokeWidth = 1.dp.toPx()
+                val y = size.height - strokeWidth / 2f
+                drawLine(
+                    color = borderColor,
+                    start = Offset(0f, y),
+                    end = Offset(size.width, y),
+                    strokeWidth = strokeWidth,
+                )
+            }
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        LiveChatHeaderDetails(state = state, onBack = onBack)
+
+        if (state.zaps.isNotEmpty()) {
+            ArticleTopZapsSection(
+                modifier = Modifier.fillMaxWidth(),
+                sectionTopSpacing = 0.dp,
+                topZaps = state.zaps,
+                onZapClick = onZapClick,
+                onTopZapsClick = {
+                    state.streamInfo?.atag?.let { atag ->
+                        noteCallbacks.onEventReactionsClick?.invoke(
+                            atag,
+                            ReactionType.ZAPS,
+                            atag,
+                        )
+                    }
+                },
+            )
+        }
+    }
+}
+
+@Composable
 private fun LiveChatContent(
     state: LiveStreamContract.UiState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
@@ -533,7 +650,6 @@ private fun LiveChatContent(
 ) {
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
-    val numberFormat = remember { NumberFormat.getNumberInstance() }
 
     LaunchedEffect(state.chatItems.size) {
         if (state.chatItems.isNotEmpty()) {
@@ -544,105 +660,12 @@ private fun LiveChatContent(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        val borderColor = AppTheme.extraColorScheme.surfaceVariantAlt1
-
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    AppTheme.extraColorScheme.surfaceVariantAlt2,
-                )
-                .drawBehind {
-                    val strokeWidth = 1.dp.toPx()
-                    val y = size.height - strokeWidth / 2f
-                    drawLine(
-                        color = borderColor,
-                        start = Offset(0f, y),
-                        end = Offset(size.width, y),
-                        strokeWidth = strokeWidth,
-                    )
-                }
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.live_stream_title),
-                        style = AppTheme.typography.titleLarge.copy(fontSize = 18.sp, lineHeight = 24.sp),
-                        fontWeight = FontWeight.Bold,
-                        color = AppTheme.colorScheme.onSurface,
-                    )
-
-                    Row(
-                        modifier = Modifier.padding(bottom = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        StreamLiveIndicator(isLive = true)
-
-                        if (state.streamInfo?.startedAt != null) {
-                            Text(
-                                text = stringResource(
-                                    id = R.string.live_stream_started_at,
-                                    Instant.ofEpochSecond(state.streamInfo.startedAt).asBeforeNowFormat(),
-                                ),
-                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                                style = AppTheme.typography.bodyMedium,
-                            )
-                        }
-                        IconText(
-                            text = numberFormat.format(state.streamInfo?.viewers ?: 0),
-                            leadingIcon = Follow,
-                            iconSize = 16.sp,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                            style = AppTheme.typography.bodyMedium,
-                        )
-                    }
-                }
-
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            imageVector = SearchSettings,
-                            contentDescription = "Chat Settings",
-                            tint = AppTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Close,
-                            contentDescription = "Back to Info",
-                            tint = AppTheme.colorScheme.onSurfaceVariant,
-                        )
-                    }
-                }
-            }
-
-            if (state.zaps.isNotEmpty()) {
-                ArticleTopZapsSection(
-                    modifier = Modifier.fillMaxWidth(),
-                    sectionTopSpacing = 0.dp,
-                    topZaps = state.zaps,
-                    onZapClick = onZapClick,
-                    onTopZapsClick = {
-                        state.streamInfo?.atag?.let { atag ->
-                            noteCallbacks.onEventReactionsClick?.invoke(
-                                atag,
-                                ReactionType.ZAPS,
-                                atag,
-                            )
-                        }
-                    },
-                )
-            }
-        }
+        LiveChatHeader(
+            state = state,
+            onBack = onBack,
+            onZapClick = onZapClick,
+            noteCallbacks = noteCallbacks,
+        )
 
         LazyColumn(
             modifier = Modifier
@@ -659,67 +682,85 @@ private fun LiveChatContent(
                 key = { it.uniqueId },
             ) { chatItem ->
                 when (chatItem) {
-                    is StreamChatItem.ChatMessageItem -> ChatMessage(message = chatItem.message)
-                    is StreamChatItem.ZapMessageItem -> ZapMessage(zap = chatItem.zap)
+                    is StreamChatItem.ChatMessageItem -> ChatMessageListItem(message = chatItem.message)
+                    is StreamChatItem.ZapMessageItem -> ZapMessageListItem(zap = chatItem.zap)
                 }
             }
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .drawBehind {
-                    val strokeWidth = 1.dp.toPx()
-                    drawLine(
-                        color = borderColor,
-                        start = Offset(0f, 0f),
-                        end = Offset(size.width, 0f),
-                        strokeWidth = strokeWidth,
-                    )
-                }
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            OutlinedTextField(
-                modifier = Modifier.weight(1.0f),
-                value = state.comment,
-                onValueChange = { eventPublisher(LiveStreamContract.UiEvent.OnCommentValueChanged(it)) },
-                maxLines = 1,
-                placeholder = {
-                    Text(
-                        text = stringResource(id = R.string.live_stream_send_comment),
-                        maxLines = 1,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                        style = AppTheme.typography.bodyMedium,
-                    )
-                },
-                textStyle = AppTheme.typography.bodyMedium,
-                colors = PrimalDefaults.outlinedTextFieldColors(),
-                shape = AppTheme.shapes.extraLarge,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    capitalization = KeyboardCapitalization.Sentences,
-                ),
-            )
-
-            PrimalLoadingButton(
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .wrapContentWidth()
-                    .height(46.dp),
-                text = stringResource(id = R.string.live_stream_send_button_title),
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Normal,
-                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 0.dp),
-                enabled = state.comment.text.isNotBlank(),
-                onClick = { eventPublisher(LiveStreamContract.UiEvent.SendMessage(state.comment.text)) },
-                shape = PrimalShapes.extraLarge,
-            )
-        }
+        LiveChatCommentInput(
+            state = state,
+            onCommentChanged = {
+                eventPublisher(LiveStreamContract.UiEvent.OnCommentValueChanged(it))
+            },
+            onSendMessage = {
+                eventPublisher(LiveStreamContract.UiEvent.SendMessage(it))
+            },
+        )
     }
 }
 
 @Composable
-private fun ChatMessage(message: ChatMessageUi) {
+private fun LiveChatCommentInput(
+    state: LiveStreamContract.UiState,
+    onCommentChanged: (TextFieldValue) -> Unit,
+    onSendMessage: (String) -> Unit,
+) {
+    val borderColor = AppTheme.extraColorScheme.surfaceVariantAlt1
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .drawBehind {
+                val strokeWidth = 1.dp.toPx()
+                drawLine(
+                    color = borderColor,
+                    start = Offset(0f, 0f),
+                    end = Offset(size.width, 0f),
+                    strokeWidth = strokeWidth,
+                )
+            }
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.weight(1.0f),
+            value = state.comment,
+            onValueChange = onCommentChanged,
+            maxLines = 1,
+            placeholder = {
+                Text(
+                    text = stringResource(id = R.string.live_stream_send_comment),
+                    maxLines = 1,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    style = AppTheme.typography.bodyMedium,
+                )
+            },
+            textStyle = AppTheme.typography.bodyMedium,
+            colors = PrimalDefaults.outlinedTextFieldColors(),
+            shape = AppTheme.shapes.extraLarge,
+            keyboardOptions = KeyboardOptions.Default.copy(
+                capitalization = KeyboardCapitalization.Sentences,
+            ),
+        )
+
+        PrimalLoadingButton(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .wrapContentWidth()
+                .height(46.dp),
+            text = stringResource(id = R.string.live_stream_send_button_title),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Normal,
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 0.dp),
+            enabled = state.comment.text.isNotBlank(),
+            onClick = { onSendMessage(state.comment.text) },
+            shape = PrimalShapes.extraLarge,
+        )
+    }
+}
+
+@Composable
+private fun ChatMessageListItem(message: ChatMessageUi) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
@@ -757,7 +798,7 @@ private fun ChatMessage(message: ChatMessageUi) {
 }
 
 @Composable
-private fun ZapMessage(zap: EventZapUiModel) {
+private fun ZapMessageListItem(zap: EventZapUiModel) {
     val zapperName = zap.zapperName
 
     val headerText = buildAnnotatedString {
