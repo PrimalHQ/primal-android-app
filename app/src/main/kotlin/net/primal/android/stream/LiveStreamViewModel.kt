@@ -47,6 +47,7 @@ import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
+import net.primal.domain.streams.chat.ChatMessage
 import net.primal.domain.streams.chat.LiveStreamChatRepository
 import timber.log.Timber
 
@@ -109,13 +110,13 @@ class LiveStreamViewModel @Inject constructor(
         observeAuthorProfileStats(authorId)
         observeFollowState(authorId)
         observeActiveAccount()
-        observeChatMessages(naddr.asATagValue())
-        observeZaps(naddr.asATagValue())
+        observeChatMessages(naddr)
+        observeZaps(naddr)
     }
 
-    private fun observeZaps(streamATag: String) =
+    private fun observeZaps(naddr: Naddr) =
         viewModelScope.launch {
-            streamRepository.observeStream(aTag = streamATag)
+            streamRepository.observeStream(aTag = naddr.asATagValue())
                 .filterNotNull()
                 .map { it.eventZaps.map { zap -> StreamChatItem.ZapMessageItem(zap.asEventZapUiModel()) } }
                 .collect {
@@ -124,21 +125,10 @@ class LiveStreamViewModel @Inject constructor(
                 }
         }
 
-    private fun observeChatMessages(streamATag: String) =
+    private fun observeChatMessages(naddr: Naddr) =
         viewModelScope.launch {
-            liveStreamChatRepository.observeMessages(streamATag = streamATag)
-                .map { chatList ->
-                    chatList.map { chatMessage ->
-                        StreamChatItem.ChatMessageItem(
-                            ChatMessageUi(
-                                messageId = chatMessage.messageId,
-                                authorProfile = chatMessage.author.asProfileDetailsUi(),
-                                content = chatMessage.content,
-                                timestamp = chatMessage.createdAt,
-                            ),
-                        )
-                    }
-                }
+            liveStreamChatRepository.observeMessages(streamATag = naddr.asATagValue())
+                .map { chatList -> chatList.map { it.toChatMessageItem() } }
                 .collect {
                     chatMessages = it
                     updateChatItems()
@@ -390,4 +380,14 @@ class LiveStreamViewModel @Inject constructor(
                 }
             }
         }
+
+    private fun ChatMessage.toChatMessageItem(): StreamChatItem.ChatMessageItem =
+        StreamChatItem.ChatMessageItem(
+            ChatMessageUi(
+                messageId = this.messageId,
+                authorProfile = this.author.asProfileDetailsUi(),
+                content = this.content,
+                timestamp = this.createdAt,
+            ),
+        )
 }
