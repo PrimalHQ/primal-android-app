@@ -28,6 +28,8 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
 import net.primal.android.stream.LiveStreamContract.UiEvent
 import net.primal.android.stream.LiveStreamContract.UiState
+import net.primal.android.stream.ui.ChatMessageUi
+import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.handler.ProfileFollowsHandler
@@ -47,6 +49,8 @@ import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
+import net.primal.domain.streams.chat.ChatMessage
+import net.primal.domain.streams.chat.LiveStreamChatRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -54,6 +58,7 @@ class LiveStreamViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val profileRepository: ProfileRepository,
     private val streamRepository: StreamRepository,
+    private val liveStreamChatRepository: LiveStreamChatRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val profileFollowsHandler: ProfileFollowsHandler,
     private val zapHandler: ZapHandler,
@@ -66,6 +71,9 @@ class LiveStreamViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     private var liveStreamSubscriptionJob: Job? = null
+
+    private var zaps: List<StreamChatItem.ZapMessageItem> = emptyList()
+    private var chatMessages: List<StreamChatItem.ChatMessageItem> = emptyList()
 
     init {
         resolveNaddr()
@@ -99,11 +107,40 @@ class LiveStreamViewModel @Inject constructor(
         }
 
     private fun initializeObservers(naddr: Naddr, authorId: String) {
-        observeLiveStream(naddr)
+        observeStreamInfo(naddr)
         observeAuthorProfile(authorId)
         observeAuthorProfileStats(authorId)
         observeFollowState(authorId)
         observeActiveAccount()
+        observeChatMessages(naddr)
+        observeZaps(naddr)
+    }
+
+    private fun observeZaps(naddr: Naddr) =
+        viewModelScope.launch {
+            streamRepository.observeStream(aTag = naddr.asATagValue())
+                .filterNotNull()
+                .map { it.eventZaps.map { zap -> StreamChatItem.ZapMessageItem(zap.asEventZapUiModel()) } }
+                .collect {
+                    zaps = it
+                    updateChatItems()
+                }
+        }
+
+    private fun observeChatMessages(naddr: Naddr) =
+        viewModelScope.launch {
+            liveStreamChatRepository.observeMessages(streamATag = naddr.asATagValue())
+                .map { chatList -> chatList.map { it.toChatMessageItem() } }
+                .collect {
+                    chatMessages = it
+                    updateChatItems()
+                }
+        }
+
+    private fun updateChatItems() {
+        val combinedAndSorted = (zaps + chatMessages)
+            .sortedByDescending { it.timestamp }
+        setState { copy(chatItems = combinedAndSorted) }
     }
 
     private fun observeEvents() =
@@ -140,11 +177,36 @@ class LiveStreamViewModel @Inject constructor(
                     }
 
                     is UiEvent.ZapStream -> zapStream(zapAction = it)
+                    is UiEvent.OnCommentValueChanged -> setState { copy(comment = it.value) }
+                    is UiEvent.SendMessage -> sendMessage(text = it.text)
                 }
             }
         }
 
-    private fun observeLiveStream(naddr: Naddr) =
+    private fun sendMessage(text: String) {
+        val streamInfo = state.value.streamInfo ?: return
+        viewModelScope.launch {
+            setState { copy(sendingMessage = true) }
+            try {
+                liveStreamChatRepository.sendMessage(
+                    userId = activeAccountStore.activeUserId(),
+                    streamATag = streamInfo.atag,
+                    content = text,
+                )
+                setState { copy(comment = TextFieldValue()) }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+                setState { copy(error = UiError.FailedToPublishZapEvent(error)) }
+            } catch (error: SigningKeyNotFoundException) {
+                Timber.w(error)
+                setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
+            } finally {
+                setState { copy(sendingMessage = false) }
+            }
+        }
+    }
+
+    private fun observeStreamInfo(naddr: Naddr) =
         viewModelScope.launch {
             streamRepository.observeStream(aTag = naddr.asATagValue())
                 .filterNotNull()
@@ -168,7 +230,6 @@ class LiveStreamViewModel @Inject constructor(
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
                             ),
-                            comment = TextFieldValue(text = streamingUrl),
                             zaps = stream.eventZaps
                                 .map { it.asEventZapUiModel() }
                                 .sortedWith(EventZapUiModel.DefaultComparator),
@@ -324,4 +385,14 @@ class LiveStreamViewModel @Inject constructor(
                 }
             }
         }
+
+    private fun ChatMessage.toChatMessageItem(): StreamChatItem.ChatMessageItem =
+        StreamChatItem.ChatMessageItem(
+            ChatMessageUi(
+                messageId = this.messageId,
+                authorProfile = this.author.asProfileDetailsUi(),
+                content = this.content,
+                timestamp = this.createdAt,
+            ),
+        )
 }

@@ -7,6 +7,7 @@ import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.ZappingState
+import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.handler.ProfileFollowsHandler
 
 interface LiveStreamContract {
@@ -21,7 +22,9 @@ interface LiveStreamContract {
         val comment: TextFieldValue = TextFieldValue(),
         val shouldApproveProfileAction: FollowsApproval? = null,
         val zaps: List<EventZapUiModel> = emptyList(),
+        val chatItems: List<StreamChatItem> = emptyList(),
         val zappingState: ZappingState = ZappingState(),
+        val sendingMessage: Boolean = false,
         val error: UiError? = null,
     )
 
@@ -62,6 +65,8 @@ interface LiveStreamContract {
         data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
         data class ApproveFollowsActions(val actions: List<ProfileFollowsHandler.Action>) : UiEvent()
         data class ZapStream(val zapAmount: ULong? = null, val zapDescription: String? = null) : UiEvent()
+        data class OnCommentValueChanged(val value: TextFieldValue) : UiEvent()
+        data class SendMessage(val text: String) : UiEvent()
     }
 
     sealed class SideEffect

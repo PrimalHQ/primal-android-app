@@ -1,4 +1,4 @@
-package net.primal.android.stream
+package net.primal.android.stream.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -51,8 +51,6 @@ fun StreamInfoSection(
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
 ) {
-    val numberFormat = remember { NumberFormat.getNumberInstance() }
-
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -66,78 +64,117 @@ fun StreamInfoSection(
             fontWeight = FontWeight.Bold,
         )
 
-        Row(
+        StreamMetaData(
             modifier = Modifier.padding(bottom = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            LiveIndicator(isLive = isLive)
+            isLive = isLive,
+            startedAt = startedAt,
+            viewers = viewers,
+        )
 
-            if (startedAt != null) {
-                Text(
-                    text = stringResource(
-                        id = R.string.live_stream_started_at,
-                        Instant.ofEpochSecond(startedAt).asBeforeNowFormat(),
-                    ),
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    style = AppTheme.typography.bodyMedium,
-                )
-            }
-            IconText(
-                text = numberFormat.format(viewers),
-                leadingIcon = Follow,
-                iconSize = 16.sp,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                style = AppTheme.typography.bodyMedium,
-            )
-        }
-
-        Row(
+        StreamAuthorInfo(
             modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                UniversalAvatarThumbnail(avatarCdnImage = authorProfile.avatarCdnImage, avatarSize = 48.dp)
-
-                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                    NostrUserText(
-                        displayName = authorProfile.authorDisplayName,
-                        internetIdentifier = authorProfile.internetIdentifier,
-                        legendaryCustomization = authorProfile.premiumDetails?.legendaryCustomization,
-                    )
-                    if (profileStats != null) {
-                        Text(
-                            text = stringResource(
-                                id = R.string.live_stream_followers_count,
-                                profileStats.followersCount ?: 0,
-                            ),
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                            style = AppTheme.typography.bodyMedium,
-                        )
-                    }
-                }
-            }
-
-            FollowUnfollowButton(
-                modifier = Modifier
-                    .height(35.dp)
-                    .wrapContentWidth()
-                    .defaultMinSize(minWidth = 75.dp),
-                isFollowed = isFollowed,
-                onClick = { if (isFollowed) onUnfollow() else onFollow() },
-                textStyle = AppTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                paddingValues = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
-            )
-        }
+            authorProfile = authorProfile,
+            profileStats = profileStats,
+            isFollowed = isFollowed,
+            onFollow = onFollow,
+            onUnfollow = onUnfollow,
+        )
     }
 }
 
 @Composable
-private fun LiveIndicator(modifier: Modifier = Modifier, isLive: Boolean) {
+private fun StreamMetaData(
+    modifier: Modifier = Modifier,
+    isLive: Boolean,
+    startedAt: Long?,
+    viewers: Int,
+) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        StreamLiveIndicator(isLive = isLive)
+
+        if (startedAt != null) {
+            Text(
+                text = stringResource(
+                    id = R.string.live_stream_started_at,
+                    Instant.ofEpochSecond(startedAt).asBeforeNowFormat(),
+                ),
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                style = AppTheme.typography.bodyMedium,
+            )
+        }
+        IconText(
+            text = numberFormat.format(viewers),
+            leadingIcon = Follow,
+            iconSize = 16.sp,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            style = AppTheme.typography.bodyMedium,
+        )
+    }
+}
+
+@Composable
+private fun StreamAuthorInfo(
+    modifier: Modifier = Modifier,
+    authorProfile: ProfileDetailsUi,
+    profileStats: ProfileStatsUi?,
+    isFollowed: Boolean,
+    onFollow: () -> Unit,
+    onUnfollow: () -> Unit,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            UniversalAvatarThumbnail(
+                avatarCdnImage = authorProfile.avatarCdnImage,
+                avatarSize = 48.dp,
+                legendaryCustomization = authorProfile.premiumDetails?.legendaryCustomization,
+            )
+
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                NostrUserText(
+                    displayName = authorProfile.authorDisplayName,
+                    internetIdentifier = authorProfile.internetIdentifier,
+                    legendaryCustomization = authorProfile.premiumDetails?.legendaryCustomization,
+                )
+                if (profileStats != null) {
+                    Text(
+                        text = stringResource(
+                            id = R.string.live_stream_followers_count,
+                            profileStats.followersCount ?: 0,
+                        ),
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        style = AppTheme.typography.bodyMedium,
+                    )
+                }
+            }
+        }
+
+        FollowUnfollowButton(
+            modifier = Modifier
+                .height(35.dp)
+                .wrapContentWidth()
+                .defaultMinSize(minWidth = 75.dp),
+            isFollowed = isFollowed,
+            onClick = { if (isFollowed) onUnfollow() else onFollow() },
+            textStyle = AppTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+            paddingValues = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+        )
+    }
+}
+
+@Composable
+fun StreamLiveIndicator(modifier: Modifier = Modifier, isLive: Boolean) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,

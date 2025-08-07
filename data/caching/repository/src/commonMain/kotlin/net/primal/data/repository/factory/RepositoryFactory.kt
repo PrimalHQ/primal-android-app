@@ -21,6 +21,7 @@ import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
 import net.primal.domain.streams.StreamRepository
+import net.primal.domain.streams.chat.LiveStreamChatRepository
 import net.primal.domain.user.UserDataCleanupRepository
 
 internal interface RepositoryFactory {
@@ -84,4 +85,6 @@ internal interface RepositoryFactory {
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
     ): StreamRepository
+
+    fun createStreamChatRepository(primalPublisher: PrimalPublisher): LiveStreamChatRepository
 }

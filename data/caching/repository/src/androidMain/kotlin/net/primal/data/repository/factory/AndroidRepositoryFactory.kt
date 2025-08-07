@@ -23,6 +23,7 @@ import net.primal.data.repository.messages.processors.MessagesProcessor
 import net.primal.data.repository.mute.MutedItemRepositoryImpl
 import net.primal.data.repository.notifications.NotificationRepositoryImpl
 import net.primal.data.repository.profile.ProfileRepositoryImpl
+import net.primal.data.repository.streams.LiveStreamChatRepositoryImpl
 import net.primal.data.repository.streams.StreamRepositoryImpl
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.events.EventInteractionRepository
@@ -44,6 +45,7 @@ import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
 import net.primal.domain.streams.StreamRepository
+import net.primal.domain.streams.chat.LiveStreamChatRepository
 import net.primal.domain.user.UserDataCleanupRepository
 import net.primal.shared.data.local.db.LocalDatabaseFactory
 import net.primal.shared.data.local.encryption.AndroidPlatformKeyStore
@@ -239,6 +241,13 @@ object AndroidRepositoryFactory : RepositoryFactory {
             database = cachingDatabase,
             profileRepository = createProfileRepository(cachingPrimalApiClient, primalPublisher),
             liveStreamApi = PrimalApiServiceFactory.createStreamMonitor(cachingPrimalApiClient),
+        )
+    }
+
+    override fun createStreamChatRepository(primalPublisher: PrimalPublisher): LiveStreamChatRepository {
+        return LiveStreamChatRepositoryImpl(
+            database = cachingDatabase,
+            primalPublisher = primalPublisher,
         )
     }
 }

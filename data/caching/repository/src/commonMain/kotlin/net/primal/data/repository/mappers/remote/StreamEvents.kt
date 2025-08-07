@@ -1,9 +1,13 @@
 package net.primal.data.repository.mappers.remote
 
+import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.local.dao.streams.StreamChatMessageData
 import net.primal.data.local.dao.streams.StreamData
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.findAllHashtags
+import net.primal.domain.nostr.findFirstATag
+import net.primal.domain.nostr.findFirstClient
 import net.primal.domain.nostr.findFirstCurrentParticipants
 import net.primal.domain.nostr.findFirstEnds
 import net.primal.domain.nostr.findFirstIdentifier
@@ -47,5 +51,21 @@ fun NostrEvent.asStreamData(): StreamData? {
         endsAt = this.tags.findFirstEnds()?.toLongOrNull(),
         currentParticipants = this.tags.findFirstCurrentParticipants()?.toIntOrNull(),
         totalParticipants = this.tags.findFirstTotalParticipants()?.toIntOrNull(),
+    )
+}
+
+fun NostrEvent.asChatMessageDataDO(): StreamChatMessageData? {
+    if (this.kind != NostrEventKind.ChatMessage.value) return null
+
+    val streamATag = this.tags.findFirstATag() ?: return null
+
+    return StreamChatMessageData(
+        messageId = this.id,
+        streamATag = streamATag,
+        authorId = this.pubKey,
+        createdAt = this.createdAt,
+        content = this.content,
+        raw = this.encodeToJsonString(),
+        client = this.tags.findFirstClient(),
     )
 }

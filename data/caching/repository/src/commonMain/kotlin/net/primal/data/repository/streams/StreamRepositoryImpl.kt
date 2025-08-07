@@ -12,6 +12,7 @@ import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.stream.LiveStreamApi
 import net.primal.data.remote.api.stream.model.LiveFeedResponse
 import net.primal.data.repository.mappers.local.asStreamDO
+import net.primal.data.repository.mappers.remote.asChatMessageDataDO
 import net.primal.data.repository.mappers.remote.extractZapRequestOrNull
 import net.primal.data.repository.mappers.remote.mapAsEventZapDO
 import net.primal.domain.nostr.Naddr
@@ -54,7 +55,12 @@ class StreamRepositoryImpl(
         val zapEvents = response.zaps
         val zapRequests = zapEvents.mapNotNull { it.extractZapRequestOrNull() }
         val zapperPubkeys = zapRequests.map { it.pubKey }.toSet()
-        val localProfiles = database.profiles().findProfileData(profileIds = zapperPubkeys.toList())
+
+        val chatMessages = response.chatMessages.mapNotNull { it.asChatMessageDataDO() }
+        val chatAuthorPubkeys = chatMessages.map { it.authorId }.toSet()
+
+        val allProfileIds = zapperPubkeys + chatAuthorPubkeys
+        val localProfiles = database.profiles().findProfileData(profileIds = allProfileIds.toList())
         val localProfilesMap = localProfiles.associateBy { it.ownerId }
         val eventZaps = zapEvents.mapAsEventZapDO(profilesMap = localProfilesMap)
 
@@ -62,15 +68,18 @@ class StreamRepositoryImpl(
             if (eventZaps.isNotEmpty()) {
                 database.eventZaps().upsertAll(data = eventZaps)
             }
+            if (chatMessages.isNotEmpty()) {
+                database.streamChats().upsertAll(data = chatMessages)
+            }
         }
 
-        val missingProfileIds = zapperPubkeys - localProfiles.map { it.ownerId }.toSet()
+        val missingProfileIds = allProfileIds - localProfiles.map { it.ownerId }.toSet()
         if (missingProfileIds.isNotEmpty()) {
             scope.launch {
                 try {
                     profileRepository.fetchProfiles(profileIds = missingProfileIds.toList())
                 } catch (error: Exception) {
-                    Napier.w(error) { "Failed to fetch profiles for stream zaps." }
+                    Napier.w(error) { "Failed to fetch profiles for stream zaps/chats." }
                 }
             }
         }

@@ -12,6 +12,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Bookmarks
 import net.primal.android.core.compose.icons.primaliconpack.BookmarksFilled
 import net.primal.android.core.compose.icons.primaliconpack.Check
 import net.primal.android.core.compose.icons.primaliconpack.CheckCircleOutline
+import net.primal.android.core.compose.icons.primaliconpack.Close
 import net.primal.android.core.compose.icons.primaliconpack.ConnectRelay
 import net.primal.android.core.compose.icons.primaliconpack.ContextAddBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextBroadcast
@@ -128,6 +129,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Report
 import net.primal.android.core.compose.icons.primaliconpack.Repost
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.icons.primaliconpack.SearchFilled
+import net.primal.android.core.compose.icons.primaliconpack.SearchSettings
 import net.primal.android.core.compose.icons.primaliconpack.Send
 import net.primal.android.core.compose.icons.primaliconpack.Settings
 import net.primal.android.core.compose.icons.primaliconpack.SettingsFilled
@@ -313,6 +315,8 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             NwcExternalAppConnection,
             RemoveAccount,
             Follow,
+            SearchSettings,
+            Close,
         )
         return __PrimalIcons!!
     }

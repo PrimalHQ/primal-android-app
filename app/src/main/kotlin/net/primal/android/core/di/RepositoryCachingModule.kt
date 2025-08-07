@@ -27,6 +27,7 @@ import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
 import net.primal.domain.streams.StreamRepository
+import net.primal.domain.streams.chat.LiveStreamChatRepository
 import net.primal.domain.user.UserDataCleanupRepository
 
 @Suppress("TooManyFunctions")
@@ -152,6 +153,12 @@ object RepositoryCachingModule {
     ): StreamRepository =
         PrimalRepositoryFactory.createStreamRepository(
             cachingPrimalApiClient = primalApiClient,
+            primalPublisher = primalPublisher,
+        )
+
+    @Provides
+    fun provideLiveStreamChatRepository(primalPublisher: PrimalPublisher): LiveStreamChatRepository =
+        PrimalRepositoryFactory.createStreamChatRepository(
             primalPublisher = primalPublisher,
         )
 }
