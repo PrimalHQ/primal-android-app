@@ -21,8 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -273,7 +273,10 @@ private fun LiveStreamContent(
     noteCallbacks: NoteCallbacks,
     onZapClick: () -> Unit,
 ) {
-    var currentSection by remember { mutableStateOf(LiveStreamDisplaySection.Info) }
+    var currentSection by rememberSaveable { mutableStateOf(LiveStreamDisplaySection.Info) }
+    val chatListState = rememberSaveable(saver = LazyListState.Saver) {
+        LazyListState()
+    }
 
     if (state.loading) {
         PrimalLoadingSpinner()
@@ -358,6 +361,7 @@ private fun LiveStreamContent(
                     LiveStreamDisplaySection.Chat -> {
                         LiveChatContent(
                             state = state,
+                            listState = chatListState,
                             eventPublisher = eventPublisher,
                             onBack = { currentSection = LiveStreamDisplaySection.Info },
                             onZapClick = onZapClick,
@@ -660,12 +664,12 @@ private fun LiveChatHeader(
 @Composable
 private fun LiveChatContent(
     state: LiveStreamContract.UiState,
+    listState: LazyListState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onBack: () -> Unit,
     onZapClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
 ) {
-    val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(state.chatItems.size) {
