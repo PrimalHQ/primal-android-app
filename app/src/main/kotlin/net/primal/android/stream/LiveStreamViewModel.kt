@@ -186,6 +186,7 @@ class LiveStreamViewModel @Inject constructor(
     private fun sendMessage(text: String) {
         val streamInfo = state.value.streamInfo ?: return
         viewModelScope.launch {
+            setState { copy(sendingMessage = true) }
             try {
                 liveStreamChatRepository.sendMessage(
                     userId = activeAccountStore.activeUserId(),
@@ -199,6 +200,8 @@ class LiveStreamViewModel @Inject constructor(
             } catch (error: SigningKeyNotFoundException) {
                 Timber.w(error)
                 setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
+            } finally {
+                setState { copy(sendingMessage = false) }
             }
         }
     }

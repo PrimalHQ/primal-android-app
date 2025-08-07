@@ -24,6 +24,7 @@ interface LiveStreamContract {
         val zaps: List<EventZapUiModel> = emptyList(),
         val chatItems: List<StreamChatItem> = emptyList(),
         val zappingState: ZappingState = ZappingState(),
+        val sendingMessage: Boolean = false,
         val error: UiError? = null,
     )
 

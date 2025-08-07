@@ -1,6 +1,12 @@
 package net.primal.android.stream.ui
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -11,14 +17,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -72,7 +79,6 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.asBeforeNowFormat
-import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.primaliconpack.Close
 import net.primal.android.core.compose.icons.primaliconpack.Follow
 import net.primal.android.core.compose.icons.primaliconpack.SearchSettings
@@ -86,7 +92,6 @@ import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.LiveStreamViewModel
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.PrimalShapes
 import net.primal.android.wallet.zaps.canZap
 import net.primal.domain.nostr.ReactionType
 
@@ -319,34 +324,46 @@ private fun LiveStreamContent(
                 },
             )
 
-            when (currentSection) {
-                LiveStreamDisplaySection.Info -> {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        item("StreamInfoContainer") {
-                            StreamInfoDisplay(
-                                state = state,
-                                eventPublisher = eventPublisher,
-                                onZapClick = onZapClick,
-                                noteCallbacks = noteCallbacks,
-                            )
-                        }
+            AnimatedContent(
+                targetState = currentSection,
+                label = "LiveStreamSectionAnimation",
+                transitionSpec = {
+                    if (targetState == LiveStreamDisplaySection.Chat) {
+                        slideInVertically { fullHeight -> fullHeight } togetherWith fadeOut()
+                    } else {
+                        fadeIn() togetherWith slideOutVertically { fullHeight -> fullHeight }
+                    }
+                },
+            ) { section ->
+                when (section) {
+                    LiveStreamDisplaySection.Info -> {
+                        LazyColumn(modifier = Modifier.fillMaxSize()) {
+                            item("StreamInfoContainer") {
+                                StreamInfoDisplay(
+                                    state = state,
+                                    eventPublisher = eventPublisher,
+                                    onZapClick = onZapClick,
+                                    noteCallbacks = noteCallbacks,
+                                )
+                            }
 
-                        item("LiveChatHeader") {
-                            LiveChatSection(
-                                modifier = Modifier.padding(16.dp),
-                                onClick = { currentSection = LiveStreamDisplaySection.Chat },
-                            )
+                            item("LiveChatHeader") {
+                                LiveChatSection(
+                                    modifier = Modifier.padding(16.dp),
+                                    onClick = { currentSection = LiveStreamDisplaySection.Chat },
+                                )
+                            }
                         }
                     }
-                }
-                LiveStreamDisplaySection.Chat -> {
-                    LiveChatContent(
-                        state = state,
-                        eventPublisher = eventPublisher,
-                        onBack = { currentSection = LiveStreamDisplaySection.Info },
-                        onZapClick = onZapClick,
-                        noteCallbacks = noteCallbacks,
-                    )
+                    LiveStreamDisplaySection.Chat -> {
+                        LiveChatContent(
+                            state = state,
+                            eventPublisher = eventPublisher,
+                            onBack = { currentSection = LiveStreamDisplaySection.Info },
+                            onZapClick = onZapClick,
+                            noteCallbacks = noteCallbacks,
+                        )
+                    }
                 }
             }
         }
@@ -659,7 +676,7 @@ private fun LiveChatContent(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.surface)) {
         LiveChatHeader(
             state = state,
             onBack = onBack,
@@ -726,7 +743,7 @@ private fun LiveChatCommentInput(
             modifier = Modifier.weight(1.0f),
             value = state.comment,
             onValueChange = onCommentChanged,
-            maxLines = 1,
+            maxLines = 3,
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.live_stream_send_comment),
@@ -743,19 +760,25 @@ private fun LiveChatCommentInput(
             ),
         )
 
-        PrimalLoadingButton(
-            modifier = Modifier
-                .padding(start = 8.dp)
-                .wrapContentWidth()
-                .height(46.dp),
-            text = stringResource(id = R.string.live_stream_send_button_title),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Normal,
-            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 0.dp),
-            enabled = state.comment.text.isNotBlank(),
-            onClick = { onSendMessage(state.comment.text) },
-            shape = PrimalShapes.extraLarge,
-        )
+        if (state.comment.text.isNotBlank()) {
+            IconButton(
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .size(46.dp),
+                onClick = { onSendMessage(state.comment.text) },
+                enabled = !state.sendingMessage,
+            ) {
+                if (state.sendingMessage) {
+                    PrimalLoadingSpinner(size = 24.dp)
+                } else {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.Send,
+                        contentDescription = stringResource(id = R.string.live_stream_send_button_title),
+                        tint = AppTheme.colorScheme.primary,
+                    )
+                }
+            }
+        }
     }
 }
 
