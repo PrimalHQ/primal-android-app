@@ -36,6 +36,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.foundation.ClickDebounce
@@ -115,7 +116,7 @@ fun PrimalNavigationBarLightningBolt(
     )
 
     Surface(color = Color.Transparent) {
-        Column(modifier = modifier) {
+        Column(modifier = modifier.zIndex(2f)) {
             Box(
                 modifier = Modifier.height(NavigationBarFullHeightDp),
                 contentAlignment = Alignment.BottomCenter,

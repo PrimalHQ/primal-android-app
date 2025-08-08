@@ -6,7 +6,7 @@ import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -20,6 +20,7 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -51,6 +52,7 @@ import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.UnlockScreenOrientation
+import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorOverlay
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.editor.NoteEditorContract
@@ -159,8 +161,8 @@ import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
 import net.primal.android.redeem.RedeemCodeContract
 import net.primal.android.redeem.RedeemCodeScreen
 import net.primal.android.redeem.RedeemCodeViewModel
-import net.primal.android.stream.LiveStreamViewModel
-import net.primal.android.stream.ui.LiveStreamScreen
+import net.primal.android.stream.overlay.LiveStreamOverlay
+import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -287,7 +289,7 @@ fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$n
 
 fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$NADDR=$naddr")
 
-fun NavController.navigateToLiveStream(naddr: String) = navigate(route = "liveStream?$NADDR=$naddr")
+//fun NavController.navigateToLiveStream(naddr: String) = navigate(route = "liveStream?$NADDR=$naddr")
 
 fun NavController.navigateToReactions(
     eventId: String,
@@ -440,7 +442,7 @@ fun noteCallbacksHandler(navController: NavController) =
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
+fun PrimalAppNavigation(startDestination: String) {
     val navController = rememberNavController()
 
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
@@ -469,6 +471,32 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
             is DrawerScreenDestination.SignOut -> navController.navigateToLogout(profileId = it.userId)
         }
     }
+
+    SharedTransitionLayout {
+        ConnectionIndicatorOverlay {
+            LiveStreamOverlay(
+                navController = navController,
+                noteCallbacks = noteCallbacksHandler(navController = navController),
+            ) {
+                PrimalAppNavigation(
+                    navController = navController,
+                    startDestination = startDestination,
+                    drawerDestinationHandler = drawerDestinationHandler,
+                    topLevelDestinationHandler = topLevelDestinationHandler,
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun PrimalAppNavigation(
+    navController: NavHostController,
+    startDestination: String,
+    drawerDestinationHandler: (DrawerScreenDestination) -> Unit,
+    topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit,
+) {
 
     NavHost(
         modifier = Modifier.background(AppTheme.colorScheme.background),
@@ -868,21 +896,21 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
             navController = navController,
         )
 
-        liveStream(
-            route = "liveStream?$NADDR={$NADDR}",
-            arguments = listOf(
-                navArgument(NADDR) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/ls/{$NADDR}"
-                },
-            ),
-            navController = navController,
-        )
+//        liveStream(
+//            route = "liveStream?$NADDR={$NADDR}",
+//            arguments = listOf(
+//                navArgument(NADDR) {
+//                    type = NavType.StringType
+//                    nullable = true
+//                },
+//            ),
+//            deepLinks = listOf(
+//                navDeepLink {
+//                    uriPattern = "https://primal.net/ls/{$NADDR}"
+//                },
+//            ),
+//            navController = navController,
+//        )
 
         reactions(
             route = "reactions/{$EVENT_ID}" +
@@ -1029,7 +1057,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
                 initialRoute == "login" ||
                     initialRoute?.startsWith("onboarding") == true ||
                     initialRoute?.startsWith("redeemCode") == true
-                -> slideInHorizontally(initialOffsetX = { -it })
+                    -> slideInHorizontally(initialOffsetX = { -it })
 
                 else -> null
             }
@@ -1040,7 +1068,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
                 targetRoute == "login" ||
                     targetRoute?.startsWith("onboarding") == true ||
                     targetRoute?.startsWith("redeemCode") == true
-                -> slideOutHorizontally(targetOffsetX = { -it })
+                    -> slideOutHorizontally(targetOffsetX = { -it })
 
                 else -> null
             }
@@ -1464,10 +1492,12 @@ private fun NavGraphBuilder.search(
                     SearchScope.Notes -> navController.navigateToAdvancedSearch(
                         initialQuery = query,
                     )
+
                     SearchScope.Reads -> navController.navigateToAdvancedSearch(
                         initialQuery = query,
                         initialSearchKind = AdvancedSearchContract.SearchKind.Reads,
                     )
+
                     SearchScope.MyNotifications -> navController.navigateToAdvancedSearch(
                         initialQuery = query,
                         initialSearchScope = AdvancedSearchContract.SearchScope.MyNotifications,
@@ -1795,20 +1825,28 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
                     when (it) {
                         PremiumManageContract.ManageDestination.MediaManagement ->
                             navController.navigateToPremiumMediaManagement()
+
                         PremiumManageContract.ManageDestination.PremiumRelay ->
                             navController.navigateToPremiumRelay()
+
                         PremiumManageContract.ManageDestination.ContactListBackup ->
                             navController.navigateToPremiumContactList()
+
                         PremiumManageContract.ManageDestination.ContentBackup ->
                             navController.navigateToPremiumContentBackup()
+
                         PremiumManageContract.ManageDestination.ManageSubscription ->
                             navController.navigateToPremiumOrderHistory()
+
                         PremiumManageContract.ManageDestination.ChangePrimalName ->
                             navController.navigateToPremiumChangePrimalName()
+
                         is PremiumManageContract.ManageDestination.ExtendSubscription ->
                             navController.navigateToPremiumExtendSubscription(primalName = it.primalName)
+
                         PremiumManageContract.ManageDestination.LegendaryProfileCustomization ->
                             navController.navigateToPremiumLegendaryProfile()
+
                         PremiumManageContract.ManageDestination.BecomeALegend ->
                             navController.navigateToPremiumBuyPrimalLegend()
                     }
@@ -1979,6 +2017,7 @@ private fun NavGraphBuilder.bookmarks(
         ),
     )
 }
+
 private fun NavGraphBuilder.chat(
     route: String,
     arguments: List<NamedNavArgument>,
@@ -2129,30 +2168,30 @@ private fun NavGraphBuilder.articleDetails(
     )
 }
 
-private fun NavGraphBuilder.liveStream(
-    route: String,
-    deepLinks: List<NavDeepLink>,
-    arguments: List<NamedNavArgument>,
-    navController: NavController,
-) = composable(
-    route = route,
-    arguments = arguments,
-    deepLinks = deepLinks,
-    enterTransition = { primalSlideInHorizontallyFromEnd },
-    exitTransition = { primalScaleOut },
-    popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontallyToEnd },
-) { navBackEntry ->
-    val viewModel = hiltViewModel<LiveStreamViewModel>(navBackEntry)
-    ApplyEdgeToEdge()
-    LockToOrientationPortrait()
-    LiveStreamScreen(
-        viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        noteCallbacks = noteCallbacksHandler(navController = navController),
-        onGoToWallet = { navController.navigateToWallet() },
-    )
-}
+//private fun NavGraphBuilder.liveStream(
+//    route: String,
+//    deepLinks: List<NavDeepLink>,
+//    arguments: List<NamedNavArgument>,
+//    navController: NavController,
+//) = composable(
+//    route = route,
+//    arguments = arguments,
+//    deepLinks = deepLinks,
+//    enterTransition = { primalSlideInHorizontallyFromEnd },
+//    exitTransition = { primalScaleOut },
+//    popEnterTransition = { primalScaleIn },
+//    popExitTransition = { primalSlideOutHorizontallyToEnd },
+//) { navBackEntry ->
+//    val viewModel = hiltViewModel<LiveStreamViewModel>(navBackEntry)
+//    ApplyEdgeToEdge()
+//    LockToOrientationPortrait()
+//    LiveStreamScreen(
+//        viewModel = viewModel,
+//        onClose = { navController.navigateUp() },
+//        noteCallbacks = noteCallbacksHandler(navController = navController),
+//        onGoToWallet = { navController.navigateToWallet() },
+//    )
+//}
 
 private fun NavGraphBuilder.reactions(
     route: String,
@@ -2236,6 +2275,7 @@ private fun NavGraphBuilder.profile(
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
+    val streamState = LocalStreamState.current
     val viewModel = hiltViewModel<ProfileDetailsViewModel>(it)
 
     ApplyEdgeToEdge()
@@ -2263,7 +2303,7 @@ private fun NavGraphBuilder.profile(
                 }
             },
             onNewPostClick = { navController.navigateToNoteEditor(null) },
-            onLiveStreamClick = { naddr -> navController.navigateToLiveStream(naddr) },
+            onLiveStreamClick = { naddr -> streamState.play(naddr) },
         ),
         noteCallbacks = noteCallbacksHandler(navController),
     )

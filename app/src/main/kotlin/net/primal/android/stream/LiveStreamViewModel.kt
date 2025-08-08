@@ -1,7 +1,6 @@
 package net.primal.android.stream
 
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +22,6 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.asSignatureUiError
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
-import net.primal.android.navigation.naddr
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.stream.LiveStreamContract.SideEffect
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
@@ -67,7 +65,6 @@ import timber.log.Timber
 
 @HiltViewModel
 class LiveStreamViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
     private val profileRepository: ProfileRepository,
     private val streamRepository: StreamRepository,
     private val liveStreamChatRepository: LiveStreamChatRepository,
@@ -98,17 +95,14 @@ class LiveStreamViewModel @Inject constructor(
     private var chatMessages: List<StreamChatItem.ChatMessageItem> = emptyList()
 
     init {
-        resolveNaddr()
         observeEvents()
         observeFollowsResults()
     }
 
-    private fun resolveNaddr() =
+    private fun resolveNaddr(naddrUri: String) =
         viewModelScope.launch {
             setState { copy(loading = true) }
-            val naddr = savedStateHandle.naddr?.let {
-                Nip19TLV.parseUriAsNaddrOrNull(it)
-            }
+            val naddr = Nip19TLV.parseUriAsNaddrOrNull(naddrUri)
             if (naddr != null) {
                 val authorId = naddr.userId
                 setState { copy(profileId = authorId, naddr = naddr) }
@@ -223,6 +217,8 @@ class LiveStreamViewModel @Inject constructor(
                     UiEvent.ToggleMute -> setState {
                         copy(playerState = playerState.copy(isMuted = !playerState.isMuted))
                     }
+
+                    is UiEvent.StartStream -> resolveNaddr(naddrUri = it.naddr)
                 }
             }
         }
@@ -346,7 +342,7 @@ class LiveStreamViewModel @Inject constructor(
         }
 
     private fun zapStream(zapAction: UiEvent.ZapStream) {
-        val naddr = savedStateHandle.naddr?.let { Nip19TLV.parseUriAsNaddrOrNull(it) } ?: return
+        val naddr = state.value.naddr ?: return
         val streamInfo = state.value.streamInfo ?: return
         val authorProfile = _state.value.authorProfile ?: return
 
@@ -379,7 +375,7 @@ class LiveStreamViewModel @Inject constructor(
                 when (result.error) {
                     is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
                     is ZapError.FailedToFetchZapInvoice,
-                    -> setState { copy(error = UiError.InvalidZapRequest()) }
+                        -> setState { copy(error = UiError.InvalidZapRequest()) }
 
                     ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
                         setState { copy(error = UiError.FailedToPublishZapEvent()) }

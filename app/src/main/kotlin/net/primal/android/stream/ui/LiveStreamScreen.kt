@@ -42,7 +42,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -133,15 +132,16 @@ private val ZapMessageProfileHandleColor: Color
         Color(0xFFE47C00)
     }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiveStreamScreen(
+    state: LiveStreamContract.UiState,
+    exoPlayer: ExoPlayer,
     viewModel: LiveStreamViewModel,
     onClose: () -> Unit,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
 ) {
-    val uiState by viewModel.state.collectAsState()
-
     LaunchedEffect(viewModel, noteCallbacks) {
         viewModel.observeSideEffects().collectLatest {
             when (it) {
@@ -157,10 +157,11 @@ fun LiveStreamScreen(
     }
 
     LiveStreamScreen(
-        state = uiState,
+        state = state,
         onClose = onClose,
         eventPublisher = viewModel::setEvent,
         noteCallbacks = noteCallbacks,
+        exoPlayer = exoPlayer,
         onGoToWallet = onGoToWallet,
     )
 }
@@ -172,10 +173,10 @@ private fun LiveStreamScreen(
     onClose: () -> Unit,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     noteCallbacks: NoteCallbacks,
+    exoPlayer: ExoPlayer,
     onGoToWallet: () -> Unit,
 ) {
     val context = LocalContext.current
-    val exoPlayer = remember { ExoPlayer.Builder(context).build() }
     val snackbarHostState = remember { SnackbarHostState() }
 
     var showCantZapWarning by remember { mutableStateOf(false) }
@@ -243,28 +244,6 @@ private fun LiveStreamScreen(
         errorMessageResolver = { it.resolveUiErrorMessage(context) },
         onErrorDismiss = { eventPublisher(LiveStreamContract.UiEvent.DismissError) },
     )
-
-    DisposableEffect(exoPlayer) {
-        val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                eventPublisher(LiveStreamContract.UiEvent.OnPlayerStateUpdate(isPlaying = isPlaying))
-            }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                eventPublisher(
-                    LiveStreamContract.UiEvent.OnPlayerStateUpdate(
-                        isBuffering = playbackState == Player.STATE_BUFFERING,
-                    ),
-                )
-            }
-        }
-        exoPlayer.addListener(listener)
-
-        onDispose {
-            exoPlayer.removeListener(listener)
-            exoPlayer.release()
-        }
-    }
 
     val latestState by rememberUpdatedState(state)
 
@@ -409,24 +388,24 @@ private fun StreamInfoAndChatSection(
                         )
                     }
 
-                    item("LiveChatHeader") {
-                        LiveChatSection(
-                            modifier = Modifier.padding(16.dp),
-                            onClick = { currentSection = LiveStreamDisplaySection.Chat },
-                        )
+                            item("LiveChatHeader") {
+                                LiveChatSection(
+                                    modifier = Modifier.padding(16.dp),
+                                    onClick = { currentSection = LiveStreamDisplaySection.Chat },
+                                )
+                            }
+                        }
                     }
-                }
-            }
 
-            LiveStreamDisplaySection.Chat -> {
-                LiveChatContent(
-                    state = state,
-                    listState = chatListState,
-                    eventPublisher = eventPublisher,
-                    onBack = { currentSection = LiveStreamDisplaySection.Info },
-                    onZapClick = onZapClick,
-                    noteCallbacks = noteCallbacks,
-                    isKeyboardVisible = isKeyboardVisible,
+                    LiveStreamDisplaySection.Chat -> {
+                        LiveChatContent(
+                            state = state,
+                            listState = chatListState,
+                            eventPublisher = eventPublisher,
+                            onBack = { currentSection = LiveStreamDisplaySection.Info },
+                            onZapClick = onZapClick,
+                            noteCallbacks = noteCallbacks,
+                        isKeyboardVisible = isKeyboardVisible,
                 )
             }
         }
@@ -798,11 +777,9 @@ private fun LiveChatContent(
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(AppTheme.colorScheme.surface)
-            .navigationBarsPadding()
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(AppTheme.colorScheme.surface).navigationBarsPadding()
             .imePadding(),
     ) {
         LiveChatHeader(

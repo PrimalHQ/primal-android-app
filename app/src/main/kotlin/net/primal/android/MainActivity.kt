@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
 import androidx.compose.material3.RippleConfiguration
@@ -25,7 +24,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.ApplyEdgeToEdge
-import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorOverlay
 import net.primal.android.navigation.PrimalAppNavigation
 import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.nostr.notary.NostrNotary
@@ -109,11 +107,7 @@ class MainActivity : FragmentActivity() {
                     ApplyEdgeToEdge()
 
                     val isLoggedIn = splashViewModel.isLoggedIn.collectAsState()
-                    SharedTransitionLayout {
-                        ConnectionIndicatorOverlay {
-                            PrimalAppNavigation(startDestination = if (isLoggedIn.value) "home" else "welcome")
-                        }
-                    }
+                    PrimalAppNavigation(startDestination = if (isLoggedIn.value) "home" else "welcome")
                 }
             }
         }
