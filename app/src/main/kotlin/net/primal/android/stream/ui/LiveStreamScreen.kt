@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -61,6 +62,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -741,23 +743,31 @@ private fun LiveChatContent(
             noteCallbacks = noteCallbacks,
         )
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = 16.dp),
-            state = listState,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(vertical = 12.dp),
-            reverseLayout = true,
-        ) {
-            items(
-                items = state.chatItems,
-                key = { it.uniqueId },
-            ) { chatItem ->
-                when (chatItem) {
-                    is StreamChatItem.ChatMessageItem -> ChatMessageListItem(message = chatItem.message)
-                    is StreamChatItem.ZapMessageItem -> ZapMessageListItem(zap = chatItem.zap)
+        if (state.chatItems.isEmpty()) {
+            LiveChatEmpty(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(vertical = 12.dp),
+                reverseLayout = true,
+            ) {
+                items(
+                    items = state.chatItems,
+                    key = { it.uniqueId },
+                ) { chatItem ->
+                    when (chatItem) {
+                        is StreamChatItem.ChatMessageItem -> ChatMessageListItem(message = chatItem.message)
+                        is StreamChatItem.ZapMessageItem -> ZapMessageListItem(zap = chatItem.zap)
+                    }
                 }
             }
         }
@@ -770,6 +780,24 @@ private fun LiveChatContent(
             onSendMessage = {
                 eventPublisher(LiveStreamContract.UiEvent.SendMessage(it))
             },
+        )
+    }
+}
+
+@Composable
+private fun LiveChatEmpty(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxHeight(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = stringResource(id = R.string.live_stream_empty_chat),
+            style = AppTheme.typography.bodyLarge.copy(
+                fontSize = 15.sp,
+                lineHeight = 20.sp,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                textAlign = TextAlign.Center,
+            ),
         )
     }
 }

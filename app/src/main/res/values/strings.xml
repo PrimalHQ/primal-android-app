@@ -1335,6 +1335,7 @@
     <string name="live_stream_viewers_count">%1$s watching</string>
     <string name="live_stream_followers_count">%1$s followers</string>
     <string name="live_stream_join_chat">Join the chat…</string>
+    <string name="live_stream_empty_chat">Be the first to comment</string>
     <string name="live_stream_send_comment">Send a comment…</string>
     <string name="live_stream_send_button_title">send</string>
     <string name="live_stream_menu_quote_stream">Quote Stream</string>
