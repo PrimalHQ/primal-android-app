@@ -22,6 +22,7 @@ data class StreamData(
     val status: StreamStatus,
     val currentParticipants: Int?,
     val totalParticipants: Int?,
+    val raw: String,
 ) {
     fun isLive() = status == StreamStatus.LIVE
 }

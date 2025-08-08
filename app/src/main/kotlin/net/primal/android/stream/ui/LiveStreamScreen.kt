@@ -13,10 +13,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -59,6 +63,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -70,6 +75,7 @@ import java.text.NumberFormat
 import java.time.Instant
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
@@ -79,9 +85,11 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.asBeforeNowFormat
+import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.primaliconpack.Close
 import net.primal.android.core.compose.icons.primaliconpack.Follow
 import net.primal.android.core.compose.icons.primaliconpack.SearchSettings
+import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
 import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.resolveUiErrorMessage
@@ -116,6 +124,20 @@ fun LiveStreamScreen(
     onGoToWallet: () -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel, noteCallbacks) {
+        viewModel.observeSideEffects().collectLatest {
+            when (it) {
+                is LiveStreamContract.SideEffect.NavigateToQuote -> {
+                    noteCallbacks.onNoteQuoteClick?.invoke(it.naddr)
+                }
+
+                LiveStreamContract.SideEffect.StreamDeleted -> {
+                    onClose()
+                }
+            }
+        }
+    }
 
     LiveStreamScreen(
         state = uiState,
@@ -175,6 +197,17 @@ private fun LiveStreamScreen(
         } else {
             showCantZapWarning = true
         }
+    }
+
+    if (state.shouldApproveBookmark) {
+        ApproveBookmarkAlertDialog(
+            onBookmarkConfirmed = {
+                eventPublisher(LiveStreamContract.UiEvent.BookmarkStream(forceUpdate = true))
+            },
+            onClose = {
+                eventPublisher(LiveStreamContract.UiEvent.DismissBookmarkConfirmation)
+            },
+        )
     }
 
     if (state.shouldApproveProfileAction != null) {
@@ -264,6 +297,131 @@ private fun LiveStreamScreen(
 }
 
 @Composable
+private fun StreamPlayer(
+    state: LiveStreamContract.UiState,
+    streamInfo: LiveStreamContract.StreamInfoUi,
+    exoPlayer: ExoPlayer,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
+    onClose: () -> Unit,
+) {
+    LiveStreamPlayer(
+        state = state,
+        exoPlayer = exoPlayer,
+        streamUrl = streamInfo.streamUrl,
+        onPlayPauseClick = {
+            if (exoPlayer.isPlaying) {
+                exoPlayer.pause()
+            } else {
+                exoPlayer.play()
+            }
+        },
+        onRewind = {
+            val newPosition = (exoPlayer.currentPosition - SEEK_INCREMENT_MS).coerceAtLeast(0L)
+            exoPlayer.seekTo(newPosition)
+        },
+        onForward = {
+            if (state.playerState.isLive) {
+                val newPosition = exoPlayer.currentPosition + SEEK_INCREMENT_MS
+                if (newPosition >= state.playerState.totalDuration) {
+                    exoPlayer.seekToDefaultPosition()
+                } else {
+                    exoPlayer.seekTo(newPosition)
+                }
+            } else {
+                val newPosition = (exoPlayer.currentPosition + SEEK_INCREMENT_MS)
+                    .coerceAtMost(state.playerState.totalDuration)
+                exoPlayer.seekTo(newPosition)
+            }
+        },
+        onClose = onClose,
+        onSeek = { positionMs ->
+            eventPublisher(LiveStreamContract.UiEvent.OnSeek(positionMs = positionMs))
+        },
+        onSeekStarted = {
+            eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
+        },
+        onQuoteClick = { naddr ->
+            eventPublisher(LiveStreamContract.UiEvent.QuoteStream(naddr))
+        },
+        onMuteUserClick = {
+            state.profileId?.let { eventPublisher(LiveStreamContract.UiEvent.MuteAction(it)) }
+        },
+        onUnmuteUserClick = {
+            state.profileId?.let { eventPublisher(LiveStreamContract.UiEvent.UnmuteAction(it)) }
+        },
+        onReportContentClick = { reportType ->
+            eventPublisher(LiveStreamContract.UiEvent.ReportAbuse(reportType))
+        },
+        onRequestDeleteClick = {
+            eventPublisher(LiveStreamContract.UiEvent.RequestDeleteStream)
+        },
+        onBookmarkClick = {
+            eventPublisher(LiveStreamContract.UiEvent.BookmarkStream())
+        },
+    )
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun StreamInfoAndChatSection(
+    state: LiveStreamContract.UiState,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
+    noteCallbacks: NoteCallbacks,
+    onZapClick: () -> Unit,
+) {
+    var currentSection by rememberSaveable { mutableStateOf(LiveStreamDisplaySection.Info) }
+    val chatListState = rememberSaveable(saver = LazyListState.Saver) {
+        LazyListState()
+    }
+    val isKeyboardVisible by keyboardVisibilityAsState()
+
+    AnimatedContent(
+        targetState = currentSection,
+        label = "LiveStreamSectionAnimation",
+        transitionSpec = {
+            if (targetState == LiveStreamDisplaySection.Chat) {
+                slideInVertically { fullHeight -> fullHeight } togetherWith fadeOut()
+            } else {
+                fadeIn() togetherWith slideOutVertically { fullHeight -> fullHeight }
+            }
+        },
+    ) { section ->
+        when (section) {
+            LiveStreamDisplaySection.Info -> {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item("StreamInfoContainer") {
+                        StreamInfoDisplay(
+                            state = state,
+                            eventPublisher = eventPublisher,
+                            onZapClick = onZapClick,
+                            noteCallbacks = noteCallbacks,
+                        )
+                    }
+
+                    item("LiveChatHeader") {
+                        LiveChatSection(
+                            modifier = Modifier.padding(16.dp),
+                            onClick = { currentSection = LiveStreamDisplaySection.Chat },
+                        )
+                    }
+                }
+            }
+            LiveStreamDisplaySection.Chat -> {
+                LiveChatContent(
+                    state = state,
+                    listState = chatListState,
+                    eventPublisher = eventPublisher,
+                    onBack = { currentSection = LiveStreamDisplaySection.Info },
+                    onZapClick = onZapClick,
+                    noteCallbacks = noteCallbacks,
+                    isKeyboardVisible = isKeyboardVisible,
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun LiveStreamContent(
     state: LiveStreamContract.UiState,
     exoPlayer: ExoPlayer,
@@ -273,103 +431,33 @@ private fun LiveStreamContent(
     noteCallbacks: NoteCallbacks,
     onZapClick: () -> Unit,
 ) {
-    var currentSection by rememberSaveable { mutableStateOf(LiveStreamDisplaySection.Info) }
-    val chatListState = rememberSaveable(saver = LazyListState.Saver) {
-        LazyListState()
-    }
-
     if (state.loading) {
         PrimalLoadingSpinner()
     }
 
-    if (state.streamInfo != null && state.authorProfile != null) {
+    val streamInfo = state.streamInfo
+    val authorProfile = state.authorProfile
+    if (streamInfo != null && authorProfile != null) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(AppTheme.colorScheme.surface)
                 .padding(paddingValues),
         ) {
-            LiveStreamPlayer(
+            StreamPlayer(
+                state = state,
+                streamInfo = streamInfo,
                 exoPlayer = exoPlayer,
-                streamUrl = state.streamInfo.streamUrl,
-                playerState = state.playerState,
-                onPlayPauseClick = {
-                    if (exoPlayer.isPlaying) {
-                        exoPlayer.pause()
-                    } else {
-                        exoPlayer.play()
-                    }
-                },
-                onRewind = {
-                    val newPosition = (exoPlayer.currentPosition - SEEK_INCREMENT_MS).coerceAtLeast(0L)
-                    exoPlayer.seekTo(newPosition)
-                },
-                onForward = {
-                    if (state.playerState.isLive) {
-                        val newPosition = exoPlayer.currentPosition + SEEK_INCREMENT_MS
-                        if (newPosition >= state.playerState.totalDuration) {
-                            exoPlayer.seekToDefaultPosition()
-                        } else {
-                            exoPlayer.seekTo(newPosition)
-                        }
-                    } else {
-                        val newPosition = (exoPlayer.currentPosition + SEEK_INCREMENT_MS)
-                            .coerceAtMost(state.playerState.totalDuration)
-                        exoPlayer.seekTo(newPosition)
-                    }
-                },
+                eventPublisher = eventPublisher,
                 onClose = onClose,
-                onSeek = { positionMs ->
-                    eventPublisher(LiveStreamContract.UiEvent.OnSeek(positionMs = positionMs))
-                },
-                onSeekStarted = {
-                    eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
-                },
             )
 
-            AnimatedContent(
-                targetState = currentSection,
-                label = "LiveStreamSectionAnimation",
-                transitionSpec = {
-                    if (targetState == LiveStreamDisplaySection.Chat) {
-                        slideInVertically { fullHeight -> fullHeight } togetherWith fadeOut()
-                    } else {
-                        fadeIn() togetherWith slideOutVertically { fullHeight -> fullHeight }
-                    }
-                },
-            ) { section ->
-                when (section) {
-                    LiveStreamDisplaySection.Info -> {
-                        LazyColumn(modifier = Modifier.fillMaxSize()) {
-                            item("StreamInfoContainer") {
-                                StreamInfoDisplay(
-                                    state = state,
-                                    eventPublisher = eventPublisher,
-                                    onZapClick = onZapClick,
-                                    noteCallbacks = noteCallbacks,
-                                )
-                            }
-
-                            item("LiveChatHeader") {
-                                LiveChatSection(
-                                    modifier = Modifier.padding(16.dp),
-                                    onClick = { currentSection = LiveStreamDisplaySection.Chat },
-                                )
-                            }
-                        }
-                    }
-                    LiveStreamDisplaySection.Chat -> {
-                        LiveChatContent(
-                            state = state,
-                            listState = chatListState,
-                            eventPublisher = eventPublisher,
-                            onBack = { currentSection = LiveStreamDisplaySection.Info },
-                            onZapClick = onZapClick,
-                            noteCallbacks = noteCallbacks,
-                        )
-                    }
-                }
-            }
+            StreamInfoAndChatSection(
+                state = state,
+                eventPublisher = eventPublisher,
+                noteCallbacks = noteCallbacks,
+                onZapClick = onZapClick,
+            )
         }
     }
 }
@@ -549,8 +637,11 @@ private fun LiveChatSection(modifier: Modifier = Modifier, onClick: () -> Unit) 
 }
 
 @Composable
-private fun LiveChatHeaderDetails(state: LiveStreamContract.UiState, onBack: () -> Unit) {
-    val numberFormat = remember { NumberFormat.getNumberInstance() }
+private fun LiveChatHeaderDetails(
+    state: LiveStreamContract.UiState,
+    onBack: () -> Unit,
+    isKeyboardVisible: Boolean,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -566,40 +657,45 @@ private fun LiveChatHeaderDetails(state: LiveStreamContract.UiState, onBack: () 
                 color = AppTheme.colorScheme.onSurface,
             )
 
-            Row(
-                modifier = Modifier.padding(bottom = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                StreamLiveIndicator(isLive = state.playerState.isLive)
+            if (!isKeyboardVisible) {
+                val numberFormat = remember { NumberFormat.getNumberInstance() }
+                Row(
+                    modifier = Modifier.padding(bottom = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    StreamLiveIndicator(isLive = state.playerState.isLive)
 
-                if (state.streamInfo?.startedAt != null) {
-                    Text(
-                        text = stringResource(
-                            id = R.string.live_stream_started_at,
-                            Instant.ofEpochSecond(state.streamInfo.startedAt).asBeforeNowFormat(),
-                        ),
+                    if (state.streamInfo?.startedAt != null) {
+                        Text(
+                            text = stringResource(
+                                id = R.string.live_stream_started_at,
+                                Instant.ofEpochSecond(state.streamInfo.startedAt).asBeforeNowFormat(),
+                            ),
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                            style = AppTheme.typography.bodyMedium,
+                        )
+                    }
+                    IconText(
+                        text = numberFormat.format(state.streamInfo?.viewers ?: 0),
+                        leadingIcon = Follow,
+                        iconSize = 16.sp,
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                         style = AppTheme.typography.bodyMedium,
                     )
                 }
-                IconText(
-                    text = numberFormat.format(state.streamInfo?.viewers ?: 0),
-                    leadingIcon = Follow,
-                    iconSize = 16.sp,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    style = AppTheme.typography.bodyMedium,
-                )
             }
         }
 
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { }) {
-                Icon(
-                    imageVector = SearchSettings,
-                    contentDescription = "Chat Settings",
-                    tint = AppTheme.colorScheme.onSurfaceVariant,
-                )
+            if (!isKeyboardVisible) {
+                IconButton(onClick = { }) {
+                    Icon(
+                        imageVector = SearchSettings,
+                        contentDescription = "Chat Settings",
+                        tint = AppTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             IconButton(onClick = onBack) {
                 Icon(
@@ -618,8 +714,16 @@ private fun LiveChatHeader(
     onBack: () -> Unit,
     onZapClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
+    isKeyboardVisible: Boolean,
 ) {
     val borderColor = AppTheme.extraColorScheme.surfaceVariantAlt1
+    val padding = if (isKeyboardVisible) {
+        PaddingValues(horizontal = 16.dp, vertical = 4.dp)
+    } else {
+        PaddingValues(16.dp)
+    }
+    val verticalArrangement = if (isKeyboardVisible) Arrangement.Top else Arrangement.spacedBy(12.dp)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -636,12 +740,12 @@ private fun LiveChatHeader(
                     strokeWidth = strokeWidth,
                 )
             }
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(padding),
+        verticalArrangement = verticalArrangement,
     ) {
-        LiveChatHeaderDetails(state = state, onBack = onBack)
+        LiveChatHeaderDetails(state = state, onBack = onBack, isKeyboardVisible = isKeyboardVisible)
 
-        if (state.zaps.isNotEmpty()) {
+        if (state.zaps.isNotEmpty() && !isKeyboardVisible) {
             ArticleTopZapsSection(
                 modifier = Modifier.fillMaxWidth(),
                 sectionTopSpacing = 0.dp,
@@ -669,6 +773,7 @@ private fun LiveChatContent(
     onBack: () -> Unit,
     onZapClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
+    isKeyboardVisible: Boolean,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -680,31 +785,46 @@ private fun LiveChatContent(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.surface)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppTheme.colorScheme.surface)
+            .navigationBarsPadding()
+            .imePadding(),
+    ) {
         LiveChatHeader(
             state = state,
             onBack = onBack,
             onZapClick = onZapClick,
             noteCallbacks = noteCallbacks,
+            isKeyboardVisible = isKeyboardVisible,
         )
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
-                .padding(horizontal = 16.dp),
-            state = listState,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(vertical = 12.dp),
-            reverseLayout = true,
-        ) {
-            items(
-                items = state.chatItems,
-                key = { it.uniqueId },
-            ) { chatItem ->
-                when (chatItem) {
-                    is StreamChatItem.ChatMessageItem -> ChatMessageListItem(message = chatItem.message)
-                    is StreamChatItem.ZapMessageItem -> ZapMessageListItem(zap = chatItem.zap)
+        if (state.chatItems.isEmpty()) {
+            LiveChatEmpty(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(vertical = 12.dp),
+                reverseLayout = true,
+            ) {
+                items(
+                    items = state.chatItems,
+                    key = { it.uniqueId },
+                ) { chatItem ->
+                    when (chatItem) {
+                        is StreamChatItem.ChatMessageItem -> ChatMessageListItem(message = chatItem.message)
+                        is StreamChatItem.ZapMessageItem -> ZapMessageListItem(zap = chatItem.zap)
+                    }
                 }
             }
         }
@@ -717,6 +837,24 @@ private fun LiveChatContent(
             onSendMessage = {
                 eventPublisher(LiveStreamContract.UiEvent.SendMessage(it))
             },
+        )
+    }
+}
+
+@Composable
+private fun LiveChatEmpty(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.fillMaxHeight(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = stringResource(id = R.string.live_stream_empty_chat),
+            style = AppTheme.typography.bodyLarge.copy(
+                fontSize = 15.sp,
+                lineHeight = 20.sp,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                textAlign = TextAlign.Center,
+            ),
         )
     }
 }

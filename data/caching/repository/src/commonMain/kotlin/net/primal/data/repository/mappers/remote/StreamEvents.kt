@@ -19,6 +19,7 @@ import net.primal.domain.nostr.findFirstStreaming
 import net.primal.domain.nostr.findFirstSummary
 import net.primal.domain.nostr.findFirstTitle
 import net.primal.domain.nostr.findFirstTotalParticipants
+import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.streams.StreamStatus
 
 fun List<NostrEvent>.mapNotNullAsStreamDataPO(): List<StreamData> {
@@ -51,6 +52,7 @@ fun NostrEvent.asStreamData(): StreamData? {
         endsAt = this.tags.findFirstEnds()?.toLongOrNull(),
         currentParticipants = this.tags.findFirstCurrentParticipants()?.toIntOrNull(),
         totalParticipants = this.tags.findFirstTotalParticipants()?.toIntOrNull(),
+        raw = this.toNostrJsonObject().encodeToJsonString(),
     )
 }
 

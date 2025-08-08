@@ -1335,9 +1335,25 @@
     <string name="live_stream_viewers_count">%1$s watching</string>
     <string name="live_stream_followers_count">%1$s followers</string>
     <string name="live_stream_join_chat">Join the chat…</string>
+    <string name="live_stream_empty_chat">Be the first to comment</string>
     <string name="live_stream_send_comment">Send a comment…</string>
     <string name="live_stream_send_button_title">send</string>
-
+    <string name="live_stream_menu_quote_stream">Quote Stream</string>
+    <string name="live_stream_menu_share_stream">Share Stream</string>
+    <string name="live_stream_menu_copy_stream_link">Copy Stream Link</string>
+    <string name="live_stream_menu_copy_stream_id">Copy Stream ID</string>
+    <string name="live_stream_menu_copy_raw_data">Copy Raw Data</string>
+    <string name="live_stream_menu_add_bookmark">Add Bookmark</string>
+    <string name="live_stream_menu_remove_bookmark">Remove Bookmark</string>
+    <string name="live_stream_menu_mute_user">Mute User</string>
+    <string name="live_stream_menu_unmute_user">Unmute User</string>
+    <string name="live_stream_menu_report_content">Report Content</string>
+    <string name="live_stream_menu_request_delete">Request Delete</string>
+    <string name="live_stream_menu_delete_dialog_confirm">Delete</string>
+    <string name="live_stream_menu_delete_dialog_cancel">Cancel</string>
+    <string name="live_stream_menu_delete_dialog_title">Delete Stream</string>
+    <string name="live_stream_menu_delete_dialog_text">Are you sure you want to delete this stream?</string>
+    <string name="live_stream_menu_copied">Copied!</string>
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>

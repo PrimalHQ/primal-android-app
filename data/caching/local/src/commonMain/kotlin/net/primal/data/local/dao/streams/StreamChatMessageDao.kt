@@ -12,6 +12,9 @@ interface StreamChatMessageDao {
     @Upsert
     suspend fun upsertAll(data: List<StreamChatMessageData>)
 
+    @Upsert
+    suspend fun upsert(data: StreamChatMessageData)
+
     @Transaction
     @Query(
         """

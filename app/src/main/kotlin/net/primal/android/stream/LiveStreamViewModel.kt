@@ -25,6 +25,7 @@ import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.naddr
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.stream.LiveStreamContract.SideEffect
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
 import net.primal.android.stream.LiveStreamContract.UiEvent
 import net.primal.android.stream.LiveStreamContract.UiState
@@ -36,14 +37,23 @@ import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.android.wallet.zaps.hasWallet
+import net.primal.domain.bookmarks.BookmarkType
+import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.events.EventInteractionRepository
+import net.primal.domain.events.EventRelayHintsRepository
+import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.PublicBookmarksNotFoundException
+import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.asATagValue
+import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.nostr.publisher.NostrPublishException as DomainNostrPublishException
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
@@ -62,13 +72,22 @@ class LiveStreamViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val profileFollowsHandler: ProfileFollowsHandler,
     private val zapHandler: ZapHandler,
+    private val mutedItemRepository: MutedItemRepository,
+    private val bookmarksRepository: PublicBookmarksRepository,
+    private val eventInteractionRepository: EventInteractionRepository,
+    private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(activeUserId = activeAccountStore.activeUserId()))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    private val _sideEffects = MutableSharedFlow<SideEffect>()
+    fun observeSideEffects() = _sideEffects
+
+    private fun setSideEffect(effect: SideEffect) = viewModelScope.launch { _sideEffects.emit(effect) }
 
     private var liveStreamSubscriptionJob: Job? = null
 
@@ -89,7 +108,7 @@ class LiveStreamViewModel @Inject constructor(
             }
             if (naddr != null) {
                 val authorId = naddr.userId
-                setState { copy(profileId = authorId) }
+                setState { copy(profileId = authorId, naddr = naddr) }
                 liveStreamSubscriptionJob = startLiveStreamSubscription(naddr)
                 initializeObservers(naddr = naddr, authorId = authorId)
             } else {
@@ -114,7 +133,18 @@ class LiveStreamViewModel @Inject constructor(
         observeActiveAccount()
         observeChatMessages(naddr)
         observeZaps(naddr)
+        observeMuteState(authorId)
     }
+
+    private fun observeMuteState(authorId: String) =
+        viewModelScope.launch {
+            mutedItemRepository.observeIsUserMutedByOwnerId(
+                pubkey = authorId,
+                ownerId = activeAccountStore.activeUserId(),
+            ).collect {
+                setState { copy(isMuted = it) }
+            }
+        }
 
     private fun observeZaps(naddr: Naddr) =
         viewModelScope.launch {
@@ -179,6 +209,13 @@ class LiveStreamViewModel @Inject constructor(
                     is UiEvent.ZapStream -> zapStream(zapAction = it)
                     is UiEvent.OnCommentValueChanged -> setState { copy(comment = it.value) }
                     is UiEvent.SendMessage -> sendMessage(text = it.text)
+                    is UiEvent.MuteAction -> mute(it.profileId)
+                    is UiEvent.UnmuteAction -> unmute(it.profileId)
+                    is UiEvent.ReportAbuse -> reportAbuse(it.reportType)
+                    UiEvent.RequestDeleteStream -> requestDeleteStream()
+                    is UiEvent.BookmarkStream -> bookmarkStream(it)
+                    is UiEvent.QuoteStream -> setSideEffect(SideEffect.NavigateToQuote(it.naddr))
+                    UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                 }
             }
         }
@@ -217,9 +254,11 @@ class LiveStreamViewModel @Inject constructor(
                         return@collect
                     }
                     val isLive = stream.isLive()
+                    val isBookmarked = bookmarksRepository.isBookmarked(tagValue = stream.aTag)
                     setState {
                         copy(
                             loading = false,
+                            isBookmarked = isBookmarked,
                             playerState = playerState.copy(isLive = isLive, atLiveEdge = isLive),
                             streamInfo = StreamInfoUi(
                                 atag = stream.aTag,
@@ -229,6 +268,8 @@ class LiveStreamViewModel @Inject constructor(
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
+                                rawNostrEventJson = stream.rawNostrEventJson,
+                                authorId = stream.authorId,
                             ),
                             zaps = stream.eventZaps
                                 .map { it.asEventZapUiModel() }
@@ -384,6 +425,153 @@ class LiveStreamViewModel @Inject constructor(
                     ProfileFollowsHandler.ActionResult.Success -> Unit
                 }
             }
+        }
+
+    private fun mute(profileId: String) =
+        viewModelScope.launch {
+            setState { copy(isMuted = true) }
+            try {
+                mutedItemRepository.muteUserAndPersistMuteList(
+                    userId = activeAccountStore.activeUserId(),
+                    mutedUserId = profileId,
+                )
+            } catch (error: DomainNostrPublishException) {
+                Timber.w(error)
+                setState { copy(error = UiError.FailedToMuteUser(error), isMuted = false) }
+            } catch (error: MissingRelaysException) {
+                Timber.w(error)
+                setState { copy(error = UiError.MissingRelaysConfiguration(error), isMuted = false) }
+            } catch (error: SignatureException) {
+                Timber.w(error)
+                setState { copy(error = UiError.SignatureError(error.asSignatureUiError()), isMuted = false) }
+            }
+        }
+
+    private fun unmute(profileId: String) =
+        viewModelScope.launch {
+            setState { copy(isMuted = false) }
+            try {
+                mutedItemRepository.unmuteUserAndPersistMuteList(
+                    userId = activeAccountStore.activeUserId(),
+                    unmutedUserId = profileId,
+                )
+            } catch (error: DomainNostrPublishException) {
+                Timber.w(error)
+                setState { copy(error = UiError.FailedToUnmuteUser(error), isMuted = true) }
+            } catch (error: MissingRelaysException) {
+                Timber.w(error)
+                setState { copy(error = UiError.MissingRelaysConfiguration(error), isMuted = true) }
+            } catch (error: SignatureException) {
+                Timber.w(error)
+                setState { copy(error = UiError.SignatureError(error.asSignatureUiError()), isMuted = true) }
+            }
+        }
+
+    private fun reportAbuse(reportType: ReportType) =
+        viewModelScope.launch {
+            val streamInfo = state.value.streamInfo ?: return@launch
+            try {
+                profileRepository.reportAbuse(
+                    userId = activeAccountStore.activeUserId(),
+                    reportType = reportType,
+                    profileId = streamInfo.authorId,
+                    eventId = streamInfo.eventId,
+                    articleId = streamInfo.atag,
+                )
+            } catch (error: SigningKeyNotFoundException) {
+                Timber.w(error)
+                setState { copy(error = UiError.MissingPrivateKey) }
+            } catch (error: SigningRejectedException) {
+                Timber.w(error)
+                setState { copy(error = UiError.NostrSignUnauthorized) }
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+            }
+        }
+
+    private fun requestDeleteStream() =
+        viewModelScope.launch {
+            val streamInfo = state.value.streamInfo
+            val activeUserId = state.value.activeUserId
+
+            if (streamInfo == null || activeUserId == null || streamInfo.authorId != activeUserId) {
+                return@launch
+            }
+
+            try {
+                val relayHint = relayHintsRepository
+                    .findRelaysByIds(listOf(streamInfo.eventId))
+                    .flatMap { it.relays }
+                    .firstOrNull()
+
+                eventInteractionRepository.deleteEvent(
+                    userId = activeUserId,
+                    eventIdentifier = streamInfo.atag,
+                    eventKind = NostrEventKind.LiveActivity,
+                    relayHint = relayHint,
+                )
+
+                setSideEffect(SideEffect.StreamDeleted)
+            } catch (error: NostrPublishException) {
+                Timber.w(error)
+                setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }
+            } catch (error: MissingRelaysException) {
+                Timber.w(error)
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+            } catch (error: SigningKeyNotFoundException) {
+                setState { copy(error = UiError.MissingPrivateKey) }
+                Timber.w(error)
+            } catch (error: SigningRejectedException) {
+                setState { copy(error = UiError.NostrSignUnauthorized) }
+                Timber.w(error)
+            }
+        }
+
+    private fun bookmarkStream(event: UiEvent.BookmarkStream) =
+        viewModelScope.launch {
+            val streamInfo = state.value.streamInfo ?: return@launch
+            val userId = activeAccountStore.activeUserId()
+            val isBookmarked = state.value.isBookmarked
+
+            setState { copy(isBookmarked = !isBookmarked, shouldApproveBookmark = false) }
+
+            try {
+                if (isBookmarked) {
+                    bookmarksRepository.removeFromBookmarks(
+                        userId = userId,
+                        forceUpdate = event.forceUpdate,
+                        bookmarkType = BookmarkType.Stream,
+                        tagValue = streamInfo.atag,
+                    )
+                } else {
+                    bookmarksRepository.addToBookmarks(
+                        userId = userId,
+                        forceUpdate = event.forceUpdate,
+                        bookmarkType = BookmarkType.Stream,
+                        tagValue = streamInfo.atag,
+                    )
+                }
+            } catch (error: NostrPublishException) {
+                setState { copy(error = UiError.FailedToBookmarkNote(error)) }
+                Timber.w(error)
+            } catch (error: PublicBookmarksNotFoundException) {
+                Timber.w(error)
+                setState { copy(shouldApproveBookmark = true) }
+            } catch (error: SigningKeyNotFoundException) {
+                setState { copy(error = UiError.MissingPrivateKey) }
+                Timber.w(error)
+            } catch (error: SigningRejectedException) {
+                setState { copy(error = UiError.NostrSignUnauthorized) }
+                Timber.w(error)
+            } catch (error: NetworkException) {
+                setState { copy(error = UiError.FailedToBookmarkNote(error)) }
+                Timber.w(error)
+            }
+        }
+
+    private fun dismissBookmarkConfirmation() =
+        viewModelScope.launch {
+            setState { copy(shouldApproveBookmark = false) }
         }
 
     private fun ChatMessage.toChatMessageItem(): StreamChatItem.ChatMessageItem =
