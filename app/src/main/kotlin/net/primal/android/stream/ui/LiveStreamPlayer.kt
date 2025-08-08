@@ -51,6 +51,7 @@ fun LiveStreamPlayer(
     modifier: Modifier = Modifier,
 ) {
     var controlsVisible by remember { mutableStateOf(true) }
+    var menuVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(streamUrl) {
         val mediaItem = MediaItem.fromUri(streamUrl)
@@ -59,8 +60,8 @@ fun LiveStreamPlayer(
         exoPlayer.playWhenReady = true
     }
 
-    LaunchedEffect(controlsVisible) {
-        if (controlsVisible) {
+    LaunchedEffect(controlsVisible, menuVisible) {
+        if (controlsVisible && !menuVisible) {
             delay(5.seconds)
             controlsVisible = false
         }
@@ -92,6 +93,8 @@ fun LiveStreamPlayer(
             modifier = Modifier.matchParentSize(),
             isVisible = controlsVisible,
             state = state,
+            menuVisible = menuVisible,
+            onMenuVisibilityChange = { menuVisible = it },
             onPlayPauseClick = onPlayPauseClick,
             onRewind = onRewind,
             onForward = onForward,

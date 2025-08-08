@@ -49,6 +49,8 @@ fun LiveStreamMenu(
     isBookmarked: Boolean,
     isStreamAuthor: Boolean,
     rawNostrEvent: String?,
+    menuVisible: Boolean,
+    onMenuVisibilityChange: (Boolean) -> Unit,
     onQuoteClick: (String) -> Unit,
     onMuteUserClick: () -> Unit,
     onUnmuteUserClick: () -> Unit,
@@ -57,7 +59,6 @@ fun LiveStreamMenu(
     onBookmarkClick: () -> Unit,
     icon: @Composable () -> Unit,
 ) {
-    var menuVisible by remember { mutableStateOf(false) }
     var reportDialogVisible by remember { mutableStateOf(false) }
     var deleteDialogVisible by remember { mutableStateOf(false) }
 
@@ -65,7 +66,7 @@ fun LiveStreamMenu(
         modifier = modifier.clickable(
             interactionSource = remember { MutableInteractionSource() },
             indication = null,
-            onClick = { menuVisible = true },
+            onClick = { onMenuVisibilityChange(true) },
         ),
     ) {
         icon()
@@ -78,7 +79,7 @@ fun LiveStreamMenu(
                 isBookmarked = isBookmarked,
                 isStreamAuthor = isStreamAuthor,
                 rawNostrEvent = rawNostrEvent,
-                onDismiss = { menuVisible = false },
+                onDismiss = { onMenuVisibilityChange(false) },
                 onQuoteClick = onQuoteClick,
                 onBookmarkClick = onBookmarkClick,
                 onMuteUserClick = onMuteUserClick,
