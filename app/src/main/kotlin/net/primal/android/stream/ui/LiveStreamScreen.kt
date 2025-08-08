@@ -37,7 +37,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -90,7 +89,6 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.stream.LiveStreamContract
-import net.primal.android.stream.LiveStreamViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.zaps.canZap
 import net.primal.domain.nostr.ReactionType
@@ -108,35 +106,17 @@ private enum class LiveStreamDisplaySection {
 private val ZapMessageBorderColor = Color(0xFFFFA000)
 private val ZapMessageBackgroundColor = Color(0xFF332000)
 
-@Composable
-fun LiveStreamScreen(
-    viewModel: LiveStreamViewModel,
-    onClose: () -> Unit,
-    noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
-) {
-    val uiState by viewModel.state.collectAsState()
-
-    LiveStreamScreen(
-        state = uiState,
-        onClose = onClose,
-        eventPublisher = viewModel::setEvent,
-        noteCallbacks = noteCallbacks,
-        onGoToWallet = onGoToWallet,
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun LiveStreamScreen(
+fun LiveStreamScreen(
     state: LiveStreamContract.UiState,
     onClose: () -> Unit,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     noteCallbacks: NoteCallbacks,
+    exoPlayer: ExoPlayer,
     onGoToWallet: () -> Unit,
 ) {
     val context = LocalContext.current
-    val exoPlayer = remember { ExoPlayer.Builder(context).build() }
     val snackbarHostState = remember { SnackbarHostState() }
 
     var showCantZapWarning by remember { mutableStateOf(false) }
@@ -193,28 +173,6 @@ private fun LiveStreamScreen(
         errorMessageResolver = { it.resolveUiErrorMessage(context) },
         onErrorDismiss = { eventPublisher(LiveStreamContract.UiEvent.DismissError) },
     )
-
-    DisposableEffect(exoPlayer) {
-        val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(isPlaying: Boolean) {
-                eventPublisher(LiveStreamContract.UiEvent.OnPlayerStateUpdate(isPlaying = isPlaying))
-            }
-
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                eventPublisher(
-                    LiveStreamContract.UiEvent.OnPlayerStateUpdate(
-                        isBuffering = playbackState == Player.STATE_BUFFERING,
-                    ),
-                )
-            }
-        }
-        exoPlayer.addListener(listener)
-
-        onDispose {
-            exoPlayer.removeListener(listener)
-            exoPlayer.release()
-        }
-    }
 
     val latestState by rememberUpdatedState(state)
 
@@ -358,6 +316,7 @@ private fun LiveStreamContent(
                             }
                         }
                     }
+
                     LiveStreamDisplaySection.Chat -> {
                         LiveChatContent(
                             state = state,
@@ -680,7 +639,9 @@ private fun LiveChatContent(
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize().background(AppTheme.colorScheme.surface)) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .background(AppTheme.colorScheme.surface)) {
         LiveChatHeader(
             state = state,
             onBack = onBack,
