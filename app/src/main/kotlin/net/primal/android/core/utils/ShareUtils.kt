@@ -56,6 +56,8 @@ fun resolvePrimalNoteLink(nevent: Nevent) = "https://primal.net/e/${nevent.toNev
 
 fun resolvePrimalArticleLink(naddr: String) = "https://primal.net/a/$naddr"
 
+fun resolvePrimalStreamLink(naddr: String) = "https://primal.net/a/$naddr"
+
 fun resolvePrimalProfileLink(profileId: String, primalName: String?): String {
     val path = primalName ?: "p/${Nprofile(pubkey = profileId).toNprofileString()}"
     return "https://primal.net/$path"

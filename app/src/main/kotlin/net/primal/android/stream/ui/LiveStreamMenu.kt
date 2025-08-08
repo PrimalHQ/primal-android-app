@@ -31,6 +31,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.Quote
 import net.primal.android.core.utils.copyText
+import net.primal.android.core.utils.resolvePrimalStreamLink
 import net.primal.android.core.utils.systemShareText
 import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
@@ -38,8 +39,6 @@ import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.utils.withNostrPrefix
-
-private fun resolvePrimalStreamLink(naddr: String): String = "https://primal.net/a/$naddr"
 
 @ExperimentalMaterial3Api
 @Composable

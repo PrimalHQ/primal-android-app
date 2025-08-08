@@ -491,9 +491,12 @@ class LiveStreamViewModel @Inject constructor(
 
     private fun requestDeleteStream() =
         viewModelScope.launch {
-            val streamInfo = state.value.streamInfo ?: return@launch
-            val activeUserId = state.value.activeUserId ?: return@launch
-            if (streamInfo.authorId != activeUserId) return@launch
+            val streamInfo = state.value.streamInfo
+            val activeUserId = state.value.activeUserId
+
+            if (streamInfo == null || activeUserId == null || streamInfo.authorId != activeUserId) {
+                return@launch
+            }
 
             try {
                 val relayHint = relayHintsRepository
