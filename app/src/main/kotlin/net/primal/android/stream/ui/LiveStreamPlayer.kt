@@ -25,6 +25,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.stream.LiveStreamContract
+import net.primal.domain.nostr.ReportType
 
 private const val VIDEO_ASPECT_RATIO_WIDTH = 16f
 private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
@@ -32,15 +33,21 @@ private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
 @OptIn(UnstableApi::class)
 @Composable
 fun LiveStreamPlayer(
+    state: LiveStreamContract.UiState,
     exoPlayer: ExoPlayer,
     streamUrl: String,
-    playerState: LiveStreamContract.PlayerState,
     onPlayPauseClick: () -> Unit,
     onClose: () -> Unit,
     onRewind: () -> Unit,
     onForward: () -> Unit,
     onSeek: (Long) -> Unit,
     onSeekStarted: () -> Unit,
+    onQuoteClick: (String) -> Unit,
+    onMuteUserClick: () -> Unit,
+    onUnmuteUserClick: () -> Unit,
+    onReportContentClick: (ReportType) -> Unit,
+    onRequestDeleteClick: () -> Unit,
+    onBookmarkClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var controlsVisible by remember { mutableStateOf(true) }
@@ -77,14 +84,14 @@ fun LiveStreamPlayer(
             surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
         )
 
-        if (playerState.isBuffering && !playerState.isPlaying) {
+        if (state.playerState.isBuffering && !state.playerState.isPlaying) {
             PrimalLoadingSpinner()
         }
 
         LiveStreamPlayerControls(
             modifier = Modifier.matchParentSize(),
             isVisible = controlsVisible,
-            playerState = playerState,
+            state = state,
             onPlayPauseClick = onPlayPauseClick,
             onRewind = onRewind,
             onForward = onForward,
@@ -95,6 +102,12 @@ fun LiveStreamPlayer(
                 onSeek(positionMs)
             },
             onSeekStarted = onSeekStarted,
+            onQuoteClick = onQuoteClick,
+            onMuteUserClick = onMuteUserClick,
+            onUnmuteUserClick = onUnmuteUserClick,
+            onReportContentClick = onReportContentClick,
+            onRequestDeleteClick = onRequestDeleteClick,
+            onBookmarkClick = onBookmarkClick,
         )
     }
 }

@@ -70,6 +70,7 @@ import java.text.NumberFormat
 import java.time.Instant
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
@@ -82,6 +83,7 @@ import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.icons.primaliconpack.Close
 import net.primal.android.core.compose.icons.primaliconpack.Follow
 import net.primal.android.core.compose.icons.primaliconpack.SearchSettings
+import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
 import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.resolveUiErrorMessage
@@ -116,6 +118,20 @@ fun LiveStreamScreen(
     onGoToWallet: () -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel, noteCallbacks) {
+        viewModel.observeSideEffects().collectLatest {
+            when (it) {
+                is LiveStreamContract.SideEffect.NavigateToQuote -> {
+                    noteCallbacks.onNoteQuoteClick?.invoke(it.naddr)
+                }
+
+                LiveStreamContract.SideEffect.StreamDeleted -> {
+                    onClose()
+                }
+            }
+        }
+    }
 
     LiveStreamScreen(
         state = uiState,
@@ -175,6 +191,17 @@ private fun LiveStreamScreen(
         } else {
             showCantZapWarning = true
         }
+    }
+
+    if (state.shouldApproveBookmark) {
+        ApproveBookmarkAlertDialog(
+            onBookmarkConfirmed = {
+                eventPublisher(LiveStreamContract.UiEvent.BookmarkStream(forceUpdate = true))
+            },
+            onClose = {
+                eventPublisher(LiveStreamContract.UiEvent.DismissBookmarkConfirmation)
+            },
+        )
     }
 
     if (state.shouldApproveProfileAction != null) {
@@ -290,9 +317,9 @@ private fun LiveStreamContent(
                 .padding(paddingValues),
         ) {
             LiveStreamPlayer(
+                state = state,
                 exoPlayer = exoPlayer,
                 streamUrl = state.streamInfo.streamUrl,
-                playerState = state.playerState,
                 onPlayPauseClick = {
                     if (exoPlayer.isPlaying) {
                         exoPlayer.pause()
@@ -324,6 +351,24 @@ private fun LiveStreamContent(
                 },
                 onSeekStarted = {
                     eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
+                },
+                onQuoteClick = { naddr ->
+                    eventPublisher(LiveStreamContract.UiEvent.QuoteStream(naddr))
+                },
+                onMuteUserClick = {
+                    state.profileId?.let { eventPublisher(LiveStreamContract.UiEvent.MuteAction(it)) }
+                },
+                onUnmuteUserClick = {
+                    state.profileId?.let { eventPublisher(LiveStreamContract.UiEvent.UnmuteAction(it)) }
+                },
+                onReportContentClick = { reportType ->
+                    eventPublisher(LiveStreamContract.UiEvent.ReportAbuse(reportType))
+                },
+                onRequestDeleteClick = {
+                    eventPublisher(LiveStreamContract.UiEvent.RequestDeleteStream)
+                },
+                onBookmarkClick = {
+                    eventPublisher(LiveStreamContract.UiEvent.BookmarkStream())
                 },
             )
 

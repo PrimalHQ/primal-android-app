@@ -118,7 +118,7 @@ class PublicBookmarksRepositoryImpl(
     private fun BookmarkType.toTagType() =
         when (this) {
             BookmarkType.Note -> "e"
-            BookmarkType.Article -> "a"
+            BookmarkType.Article, BookmarkType.Stream -> "a"
         }
 
     private suspend fun publishAddBookmark(

@@ -55,14 +55,16 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.theme.AppTheme
+import net.primal.domain.nostr.ReportType
 
 private const val SECONDS_IN_MINUTE = 60
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiveStreamPlayerControls(
     modifier: Modifier = Modifier,
     isVisible: Boolean,
-    playerState: LiveStreamContract.PlayerState,
+    state: LiveStreamContract.UiState,
     onPlayPauseClick: () -> Unit,
     onRewind: () -> Unit,
     onForward: () -> Unit,
@@ -70,6 +72,12 @@ fun LiveStreamPlayerControls(
     onClose: () -> Unit,
     onSeek: (Long) -> Unit,
     onSeekStarted: () -> Unit,
+    onQuoteClick: (String) -> Unit,
+    onMuteUserClick: () -> Unit,
+    onUnmuteUserClick: () -> Unit,
+    onReportContentClick: (ReportType) -> Unit,
+    onRequestDeleteClick: () -> Unit,
+    onBookmarkClick: () -> Unit,
 ) {
     AnimatedVisibility(
         modifier = modifier,
@@ -93,14 +101,21 @@ fun LiveStreamPlayerControls(
                     .fillMaxWidth()
                     .align(Alignment.TopCenter)
                     .padding(horizontal = 8.dp),
+                state = state,
                 onClose = onClose,
+                onQuoteClick = onQuoteClick,
+                onMuteUserClick = onMuteUserClick,
+                onUnmuteUserClick = onUnmuteUserClick,
+                onReportContentClick = onReportContentClick,
+                onRequestDeleteClick = onRequestDeleteClick,
+                onBookmarkClick = onBookmarkClick,
             )
 
             CenterPlayerControls(
                 modifier = Modifier
                     .fillMaxWidth()
                     .align(Alignment.Center),
-                isPlaying = playerState.isPlaying,
+                isPlaying = state.playerState.isPlaying,
                 onRewind = onRewind,
                 onPlayPauseClick = onPlayPauseClick,
                 onForward = onForward,
@@ -111,7 +126,7 @@ fun LiveStreamPlayerControls(
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
-                state = playerState,
+                state = state.playerState,
                 onSeek = onSeek,
                 onGoToLive = onGoToLive,
                 onSeekStarted = onSeekStarted,
@@ -120,15 +135,56 @@ fun LiveStreamPlayerControls(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TopPlayerControls(modifier: Modifier, onClose: () -> Unit) {
+private fun TopPlayerControls(
+    modifier: Modifier,
+    state: LiveStreamContract.UiState,
+    onClose: () -> Unit,
+    onQuoteClick: (String) -> Unit,
+    onMuteUserClick: () -> Unit,
+    onUnmuteUserClick: () -> Unit,
+    onReportContentClick: (ReportType) -> Unit,
+    onRequestDeleteClick: () -> Unit,
+    onBookmarkClick: () -> Unit,
+) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         AppBarIcon(icon = PrimalIcons.ArrowBack, onClick = onClose)
-        AppBarIcon(icon = PrimalIcons.More, onClick = { })
+
+        val streamInfo = state.streamInfo
+        val authorId = state.profileId
+        val naddr = state.naddr
+        if (streamInfo != null && authorId != null && naddr != null) {
+            LiveStreamMenu(
+                modifier = Modifier,
+                naddr = naddr,
+                isMuted = state.isMuted,
+                isBookmarked = state.isBookmarked,
+                isStreamAuthor = state.activeUserId == authorId,
+                rawNostrEvent = streamInfo.rawNostrEventJson,
+                onQuoteClick = onQuoteClick,
+                onMuteUserClick = onMuteUserClick,
+                onUnmuteUserClick = onUnmuteUserClick,
+                onReportContentClick = onReportContentClick,
+                onRequestDeleteClick = onRequestDeleteClick,
+                onBookmarkClick = onBookmarkClick,
+            ) {
+                Icon(
+                    imageVector = PrimalIcons.More,
+                    contentDescription = "More options",
+                    tint = Color.White,
+                    modifier = Modifier
+                        .size(48.dp)
+                        .padding(12.dp),
+                )
+            }
+        } else {
+            AppBarIcon(icon = PrimalIcons.More, onClick = {})
+        }
     }
 }
 

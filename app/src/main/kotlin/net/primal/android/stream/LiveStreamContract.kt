@@ -9,18 +9,25 @@ import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.ZappingState
 import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.handler.ProfileFollowsHandler
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.ReportType
 
 interface LiveStreamContract {
     data class UiState(
         val loading: Boolean = true,
+        val naddr: Naddr? = null,
         val profileId: String? = null,
+        val activeUserId: String? = null,
         val isFollowed: Boolean = false,
+        val isMuted: Boolean = false,
+        val isBookmarked: Boolean = false,
         val streamInfo: StreamInfoUi? = null,
         val authorProfile: ProfileDetailsUi? = null,
         val profileStats: ProfileStatsUi? = null,
         val playerState: PlayerState = PlayerState(),
         val comment: TextFieldValue = TextFieldValue(),
         val shouldApproveProfileAction: FollowsApproval? = null,
+        val shouldApproveBookmark: Boolean = false,
         val zaps: List<EventZapUiModel> = emptyList(),
         val chatItems: List<StreamChatItem> = emptyList(),
         val zappingState: ZappingState = ZappingState(),
@@ -46,6 +53,8 @@ interface LiveStreamContract {
         val viewers: Int,
         val startedAt: Long?,
         val description: String?,
+        val rawNostrEventJson: String,
+        val authorId: String,
     )
 
     sealed class UiEvent {
@@ -63,11 +72,21 @@ interface LiveStreamContract {
         data class UnfollowAction(val profileId: String) : UiEvent()
         data object DismissError : UiEvent()
         data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
+        data object DismissBookmarkConfirmation : UiEvent()
         data class ApproveFollowsActions(val actions: List<ProfileFollowsHandler.Action>) : UiEvent()
         data class ZapStream(val zapAmount: ULong? = null, val zapDescription: String? = null) : UiEvent()
         data class OnCommentValueChanged(val value: TextFieldValue) : UiEvent()
         data class SendMessage(val text: String) : UiEvent()
+        data class MuteAction(val profileId: String) : UiEvent()
+        data class UnmuteAction(val profileId: String) : UiEvent()
+        data class ReportAbuse(val reportType: ReportType) : UiEvent()
+        data object RequestDeleteStream : UiEvent()
+        data class BookmarkStream(val forceUpdate: Boolean = false) : UiEvent()
+        data class QuoteStream(val naddr: String) : UiEvent()
     }
 
-    sealed class SideEffect
+    sealed class SideEffect {
+        data class NavigateToQuote(val naddr: String) : SideEffect()
+        data object StreamDeleted : SideEffect()
+    }
 }

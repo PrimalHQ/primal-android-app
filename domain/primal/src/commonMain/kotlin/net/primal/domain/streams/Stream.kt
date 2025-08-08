@@ -22,6 +22,7 @@ data class Stream(
     val currentParticipants: Int?,
     val totalParticipants: Int?,
     val eventZaps: List<EventZap> = emptyList(),
+    val rawNostrEventJson: String,
 ) {
     fun isLive() = status == StreamStatus.LIVE
 
