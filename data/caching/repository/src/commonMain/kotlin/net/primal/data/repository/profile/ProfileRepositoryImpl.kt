@@ -16,8 +16,8 @@ import net.primal.data.repository.mappers.local.asProfileDataDO
 import net.primal.data.repository.mappers.local.asProfileStatsDO
 import net.primal.data.repository.mappers.remote.asProfileDataPO
 import net.primal.data.repository.mappers.remote.asProfileStatsPO
-import net.primal.data.repository.mappers.remote.asStreamData
 import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsStreamDataPO
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
@@ -121,7 +121,7 @@ class ProfileRepositoryImpl(
                 blossomServers = blossomServers,
             )
             val profileStats = response.profileStats?.asProfileStatsPO()
-            val streamData = response.liveActivity?.asStreamData()
+            val streamData = response.liveActivity.mapNotNullAsStreamDataPO()
 
             database.withTransaction {
                 if (profileMetadata != null) {
@@ -132,7 +132,7 @@ class ProfileRepositoryImpl(
                     database.profileStats().upsert(data = profileStats)
                 }
 
-                if (streamData != null) {
+                if (streamData.isNotEmpty()) {
                     database.streams().upsertStreamData(data = streamData)
                 }
             }
@@ -189,14 +189,14 @@ class ProfileRepositoryImpl(
             }.sortedByDescending { it.followersCount }
         }
 
-    override suspend fun fetchFollowers(userId: String) =
+    override suspend fun fetchFollowers(profileId: String) =
         queryRemoteUsers {
-            usersApi.getUserFollowers(userId = userId)
+            usersApi.getUserFollowers(userId = profileId)
         }
 
-    override suspend fun fetchFollowing(userId: String) =
+    override suspend fun fetchFollowing(profileId: String) =
         queryRemoteUsers {
-            usersApi.getUserFollowing(userId = userId)
+            usersApi.getUserFollowing(userId = profileId)
         }
 
     override suspend fun reportAbuse(

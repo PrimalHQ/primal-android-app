@@ -22,6 +22,7 @@ import net.primal.data.repository.mappers.remote.mapNotNullAsEventStatsPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsEventUserStatsPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsPostDataPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsRepostDataPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsStreamDataPO
 import net.primal.data.repository.mappers.remote.mapReferencedEventsAsArticleDataPO
 import net.primal.data.repository.mappers.remote.mapReferencedEventsAsHighlightDataPO
 import net.primal.data.repository.mappers.remote.mapReferencedNostrUriAsEventUriNostrPO
@@ -100,6 +101,7 @@ internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String,
     val reposts = reposts.mapNotNullAsRepostDataPO()
     val postStats = primalEventStats.mapNotNullAsEventStatsPO()
     val userPostStats = primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
+    val streamData = liveActivity.mapNotNullAsStreamDataPO()
 
     database.withTransaction {
         database.profiles().insertOrUpdateAll(data = profiles)
@@ -112,6 +114,7 @@ internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String,
         database.eventUserStats().upsertAll(data = userPostStats)
         database.articles().upsertAll(list = allArticles)
         database.highlights().upsertAll(data = referencedHighlights)
+        database.streams().upsertStreamData(data = streamData)
 
         val eventHintsDao = database.eventHints()
         val hintsMap = eventHints.associateBy { it.eventId }

@@ -41,6 +41,7 @@ internal class FeedApiImpl(
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
             genericReposts = queryResult.filterNostrEvents(NostrEventKind.GenericRepost),
             pictureNotes = queryResult.filterNostrEvents(NostrEventKind.PictureNote),
+            liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
         )
     }
 
@@ -71,6 +72,7 @@ internal class FeedApiImpl(
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
             genericReposts = emptyList(),
             pictureNotes = queryResult.filterNostrEvents(NostrEventKind.PictureNote),
+            liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
         )
     }
 
@@ -104,6 +106,7 @@ internal class FeedApiImpl(
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
             genericReposts = emptyList(),
             pictureNotes = queryResult.filterNostrEvents(NostrEventKind.PictureNote),
+            liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
         )
     }
 }

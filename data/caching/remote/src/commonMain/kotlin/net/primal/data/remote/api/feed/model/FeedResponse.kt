@@ -23,4 +23,5 @@ data class FeedResponse(
     val primalPremiumInfo: PrimalEvent? = null,
     val genericReposts: List<NostrEvent> = emptyList(),
     val pictureNotes: List<NostrEvent> = emptyList(),
+    val liveActivity: List<NostrEvent> = emptyList(),
 )

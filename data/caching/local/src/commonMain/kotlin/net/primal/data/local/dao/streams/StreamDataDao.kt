@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 interface StreamDataDao {
 
     @Upsert
-    suspend fun upsertStreamData(data: StreamData)
+    suspend fun upsertStreamData(data: List<StreamData>)
 
     @Transaction
     @Query("SELECT * FROM StreamData WHERE authorId = :authorId ORDER BY startsAt DESC")

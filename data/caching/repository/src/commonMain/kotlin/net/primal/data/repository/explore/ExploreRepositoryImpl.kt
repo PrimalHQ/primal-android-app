@@ -38,6 +38,7 @@ import net.primal.data.repository.mappers.remote.flatMapPostsAsReferencedNostrUr
 import net.primal.data.repository.mappers.remote.mapAsEventZapDO
 import net.primal.data.repository.mappers.remote.mapAsPostDataPO
 import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsStreamDataPO
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
@@ -242,6 +243,7 @@ class ExploreRepositoryImpl(
                 primalLegendProfiles = primalLegendProfiles,
                 blossomServers = blossomServers,
             )
+            val streamData = response.liveActivity.mapNotNullAsStreamDataPO()
             val userScoresMap = response.userScores?.takeContentAsPrimalUserScoresOrNull()
             val result = profiles.map {
                 val score = userScoresMap?.get(it.ownerId)
@@ -255,6 +257,7 @@ class ExploreRepositoryImpl(
             database.withTransaction {
                 database.profiles().insertOrUpdateAll(data = profiles)
                 database.profileStats().insertOrIgnore(data = result.map { it.asProfileStatsPO() })
+                database.streams().upsertStreamData(data = streamData)
             }
 
             result
