@@ -398,5 +398,3 @@ fun WalletDashboardScreen(
         },
     )
 }
-
-private const val DISABLED_WALLET_ALPHA = 0.42f
