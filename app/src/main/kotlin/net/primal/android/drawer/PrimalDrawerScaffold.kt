@@ -32,11 +32,13 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.NavigationBarFullHeightDp
 import net.primal.android.core.compose.PrimalNavigationBarLightningBolt
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
+import net.primal.android.stream.player.rememberStreamState
 import net.primal.android.user.domain.Badges
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +69,7 @@ fun PrimalDrawerScaffold(
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val localDensity = LocalDensity.current
+    val streamState = rememberStreamState()
 
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
 
@@ -81,6 +84,9 @@ fun PrimalDrawerScaffold(
             }
         }
     }
+
+    streamState.bottomPadding = (bottomBarRealHeight - bottomBarInitialHeight / 2 - 16.dp).coerceAtLeast(0.dp)
+    streamState.backgroundOpacity = if (topAppBarState.collapsedFraction > 0.4f) 1f else 0f
 
     val isBottomBarVisible by remember {
         derivedStateOf {

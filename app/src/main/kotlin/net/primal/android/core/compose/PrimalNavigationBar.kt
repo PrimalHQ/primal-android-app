@@ -36,7 +36,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.foundation.ClickDebounce
@@ -52,6 +51,7 @@ import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.NotificationsFilled
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.Badges
 
@@ -110,15 +110,32 @@ fun PrimalNavigationBarLightningBolt(
     onActiveDestinationClick: (() -> Unit)? = null,
     badges: Badges = Badges(),
 ) {
+    val streamState = LocalStreamState.current
     val clickDebounce by remember(onTopLevelDestinationChanged) { mutableStateOf(ClickDebounce()) }
     val badgesMap = mapOf(
         Pair(PrimalTopLevelDestination.Notifications, badges.unreadNotificationsCount),
     )
 
     Surface(color = Color.Transparent) {
-        Column(modifier = modifier.zIndex(2f)) {
+        Column(modifier = modifier) {
+            if (streamState.isActive()) {
+                Box(
+                    modifier = Modifier
+                        .height((NavigationBarFullHeightDp.value + 6).dp)
+                        .fillMaxWidth()
+                        .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
+                )
+            }
             Box(
-                modifier = Modifier.height(NavigationBarFullHeightDp),
+                modifier = Modifier
+                    .run {
+                        if (streamState.isActive()) {
+                            background(AppTheme.extraColorScheme.surfaceVariantAlt2)
+                        } else {
+                            this
+                        }
+                    }
+                    .height(NavigationBarFullHeightDp),
                 contentAlignment = Alignment.BottomCenter,
             ) {
                 Spacer(

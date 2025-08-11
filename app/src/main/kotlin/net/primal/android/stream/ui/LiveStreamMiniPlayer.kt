@@ -29,13 +29,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import net.primal.android.R
-import net.primal.android.core.compose.NavigationBarFullHeightDp
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.video.toggle
 import net.primal.android.stream.LiveStreamContract
@@ -55,15 +53,19 @@ fun LiveStreamMiniPlayer(
     onStopStream: () -> Unit,
 ) {
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.BottomCenter,
     ) {
         Row(
             modifier = modifier
-                .zIndex(1f)
                 .fillMaxWidth()
-                .padding(bottom = if (applyBottomBarPadding) NavigationBarFullHeightDp else 0.dp)
-                .background(AppTheme.extraColorScheme.surfaceVariantAlt2)
+                .run {
+                    if (applyBottomBarPadding) {
+                        background(Color.Transparent)
+                    } else {
+                        background(AppTheme.extraColorScheme.surfaceVariantAlt2)
+                    }
+                }
                 .padding(start = 6.dp, end = 16.dp, top = 6.dp)
                 .navigationBarsPadding()
                 .clickable { onExpandStream() },

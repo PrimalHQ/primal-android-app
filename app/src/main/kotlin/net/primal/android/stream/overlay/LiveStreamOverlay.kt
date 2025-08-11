@@ -1,15 +1,24 @@
 package net.primal.android.stream.overlay
 
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.LocalActivity
 import androidx.annotation.OptIn
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import net.primal.android.core.video.rememberPrimalStreamExoPlayer
@@ -22,6 +31,7 @@ import net.primal.android.stream.player.StreamMode
 import net.primal.android.stream.player.StreamStateProvider
 import net.primal.android.stream.ui.LiveStreamMiniPlayer
 import net.primal.android.stream.ui.LiveStreamScreen
+import net.primal.android.theme.AppTheme
 
 private val bottomBarRoutes = listOf("home", "reads", "wallet", "notifications", "explore")
 
@@ -58,6 +68,12 @@ private fun LiveStreamOverlay(
     val currentBackStack = navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStack.value?.destination?.route
 
+    if (!currentBackStack.value.isTopLevelRoute()) {
+        streamState.reset()
+    }
+
+    val animatedPadding by animateDpAsState(streamState.bottomPadding)
+
     BackHandler(enabled = streamState.mode is StreamMode.Expanded) {
         streamState.minimize()
     }
@@ -91,6 +107,10 @@ private fun LiveStreamOverlay(
 
         is StreamMode.Minimized -> {
             LiveStreamMiniPlayer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = animatedPadding)
+                    .background(AppTheme.extraColorScheme.surfaceVariantAlt2.copy(alpha = streamState.backgroundOpacity)),
                 applyBottomBarPadding = bottomBarRoutes.any { currentRoute?.startsWith(it) == true },
                 state = uiState.value,
                 exoPlayer = exoPlayer,
@@ -104,5 +124,7 @@ private fun LiveStreamOverlay(
 
         StreamMode.Hidden -> Unit
     }
-
 }
+
+private fun NavBackStackEntry?.isTopLevelRoute() =
+    bottomBarRoutes.any { this?.destination?.route?.startsWith(it) == true }
