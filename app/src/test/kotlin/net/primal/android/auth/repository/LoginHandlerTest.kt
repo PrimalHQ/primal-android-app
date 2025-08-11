@@ -16,6 +16,7 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.mutes.MutedItemRepository
@@ -41,6 +42,7 @@ class LoginHandlerTest {
         userRepository: UserRepository = mockk(relaxed = true),
         mutedItemRepository: MutedItemRepository = mockk(relaxed = true),
         bookmarksRepository: PublicBookmarksRepository = mockk(relaxed = true),
+        walletAccountRepository: WalletAccountRepository = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
         nostrNotary: NostrNotary = mockk(relaxed = true),
     ): LoginHandler =
@@ -53,6 +55,7 @@ class LoginHandlerTest {
             dispatchers = coroutinesTestRule.dispatcherProvider,
             credentialsStore = credentialsStore,
             nostrNotary = nostrNotary,
+            walletAccountRepository = walletAccountRepository,
         )
 
     private fun createDummyNostrEvent(
@@ -159,6 +162,50 @@ class LoginHandlerTest {
 
             coVerify {
                 mutedItemRepository.fetchAndPersistMuteList(expectedUserId)
+            }
+        }
+
+    @Test
+    fun login_callsFetchWalletAccountInfo() =
+        runTest {
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns expectedUserId
+            }
+            val walletAccountRepository = mockk<WalletAccountRepository>(relaxed = true)
+            val loginHandler = createLoginHandler(
+                walletAccountRepository = walletAccountRepository,
+                credentialsStore = credentialsStore,
+            )
+            loginHandler.login(
+                nostrKey = "random",
+                loginType = LoginType.PrivateKey,
+                authorizationEvent = null,
+            )
+
+            coVerify {
+                walletAccountRepository.fetchWalletAccountInfo(expectedUserId)
+            }
+        }
+
+    @Test
+    fun login_setsActiveWalletId() =
+        runTest {
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns expectedUserId
+            }
+            val walletAccountRepository = mockk<WalletAccountRepository>(relaxed = true)
+            val loginHandler = createLoginHandler(
+                walletAccountRepository = walletAccountRepository,
+                credentialsStore = credentialsStore,
+            )
+            loginHandler.login(
+                nostrKey = "random",
+                loginType = LoginType.PrivateKey,
+                authorizationEvent = null,
+            )
+
+            coVerify {
+                walletAccountRepository.setActiveWallet(expectedUserId, expectedUserId)
             }
         }
 
