@@ -40,6 +40,7 @@ fun LiveStreamPlayer(
     onClose: () -> Unit,
     onRewind: () -> Unit,
     onForward: () -> Unit,
+    onSoundClick: () -> Unit,
     onSeek: (Long) -> Unit,
     onSeekStarted: () -> Unit,
     onQuoteClick: (String) -> Unit,
@@ -58,6 +59,10 @@ fun LiveStreamPlayer(
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
         exoPlayer.playWhenReady = true
+    }
+
+    LaunchedEffect(state.playerState.isMuted) {
+        exoPlayer.volume = if (state.playerState.isMuted) 0f else 1f
     }
 
     LaunchedEffect(controlsVisible, menuVisible) {
@@ -111,6 +116,7 @@ fun LiveStreamPlayer(
             onReportContentClick = onReportContentClick,
             onRequestDeleteClick = onRequestDeleteClick,
             onBookmarkClick = onBookmarkClick,
+            onSoundClick = onSoundClick,
         )
     }
 }

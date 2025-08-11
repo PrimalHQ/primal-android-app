@@ -333,6 +333,9 @@ private fun StreamPlayer(
                 exoPlayer.seekTo(newPosition)
             }
         },
+        onSoundClick = {
+            eventPublisher(LiveStreamContract.UiEvent.ToggleMute)
+        },
         onClose = onClose,
         onSeek = { positionMs ->
             eventPublisher(LiveStreamContract.UiEvent.OnSeek(positionMs = positionMs))

@@ -49,6 +49,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FullScreen
 import net.primal.android.core.compose.icons.primaliconpack.Minimize
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.icons.primaliconpack.SoundOff
 import net.primal.android.core.compose.icons.primaliconpack.SoundOn
 import net.primal.android.core.compose.icons.primaliconpack.VideoBack
 import net.primal.android.core.compose.icons.primaliconpack.VideoForward
@@ -71,6 +72,7 @@ fun LiveStreamPlayerControls(
     onPlayPauseClick: () -> Unit,
     onRewind: () -> Unit,
     onForward: () -> Unit,
+    onSoundClick: () -> Unit,
     onGoToLive: () -> Unit,
     onClose: () -> Unit,
     onSeek: (Long) -> Unit,
@@ -134,7 +136,7 @@ fun LiveStreamPlayerControls(
                 onSeek = onSeek,
                 onGoToLive = onGoToLive,
                 onSeekStarted = onSeekStarted,
-                onSoundClick = { },
+                onSoundClick = onSoundClick,
                 onFullscreenClick = { },
             )
         }
@@ -273,6 +275,7 @@ private fun BottomControls(
                 .padding(horizontal = 16.dp, vertical = 4.dp),
             isLive = state.isLive,
             isAtLiveEdge = state.atLiveEdge,
+            isMuted = state.isMuted,
             onGoToLive = onGoToLive,
             onSoundClick = onSoundClick,
             onFullscreenClick = onFullscreenClick,
@@ -307,6 +310,7 @@ private fun PlayerActionButtons(
     modifier: Modifier = Modifier,
     isLive: Boolean,
     isAtLiveEdge: Boolean,
+    isMuted: Boolean,
     onGoToLive: () -> Unit,
     onSoundClick: () -> Unit,
     onFullscreenClick: () -> Unit,
@@ -330,7 +334,11 @@ private fun PlayerActionButtons(
         Spacer(modifier = Modifier.weight(1f))
 
         IconButton(onClick = onSoundClick) {
-            Icon(imageVector = SoundOn, contentDescription = "Sound", tint = Color.White)
+            Icon(
+                imageVector = if (isMuted) SoundOff else SoundOn,
+                contentDescription = "Sound",
+                tint = Color.White,
+            )
         }
         IconButton(onClick = onFullscreenClick) {
             Icon(imageVector = FullScreen, contentDescription = "Full screen", tint = Color.White)

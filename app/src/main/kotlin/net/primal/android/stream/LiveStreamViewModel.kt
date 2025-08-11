@@ -220,6 +220,9 @@ class LiveStreamViewModel @Inject constructor(
                     is UiEvent.BookmarkStream -> bookmarkStream(it)
                     is UiEvent.QuoteStream -> setSideEffect(SideEffect.NavigateToQuote(it.naddr))
                     UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
+                    UiEvent.ToggleMute -> setState {
+                        copy(playerState = playerState.copy(isMuted = !playerState.isMuted))
+                    }
                 }
             }
         }
