@@ -35,6 +35,8 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEven
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 
+private const val DEFAULT_MAX_BALANCE_IN_SATS = 0.01
+
 @Composable
 fun PrimalWalletSettings(state: WalletSettingsContract.UiState, eventPublisher: (UiEvent) -> Unit) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
@@ -65,8 +67,8 @@ fun PrimalWalletSettings(state: WalletSettingsContract.UiState, eventPublisher: 
         Spacer(modifier = Modifier.height(8.dp))
 
         var maxWalletBalanceShown by remember { mutableStateOf(false) }
-        val maxBalanceInSats =
-            numberFormat.format((state.wallet?.maxBalanceInBtc ?: 0.01).toSats().toLong())
+        val maxBalanceInSats = numberFormat
+            .format((state.wallet?.maxBalanceInBtc ?: DEFAULT_MAX_BALANCE_IN_SATS).toSats().toLong())
         SettingsItem(
             headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
             supportText = "$maxBalanceInSats sats",
