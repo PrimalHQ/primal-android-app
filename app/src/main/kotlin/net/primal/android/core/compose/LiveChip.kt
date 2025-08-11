@@ -43,10 +43,11 @@ fun LiveChip(modifier: Modifier = Modifier) {
             modifier = Modifier.padding(start = 4.dp, top = 1.dp),
             text = stringResource(id = R.string.live_stream_chip_title),
             style = AppTheme.typography.bodySmall.copy(
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
                 color = Color.White,
                 letterSpacing = 1.sp,
                 fontSize = 12.sp,
+                lineHeight = 11.sp,
             ),
         )
     }

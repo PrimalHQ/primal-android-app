@@ -1323,7 +1323,7 @@
        We couldn’t locate the article.\nMake sure you’ve got the right one.
     </string>
 
-    <string name="live_stream_chip_title">Live</string>
+    <string name="live_stream_chip_title">LIVE</string>
     <string name="live_stream_title">Live Stream</string>
     <string name="live_stream_stream_url_label">Stream URL</string>
 
