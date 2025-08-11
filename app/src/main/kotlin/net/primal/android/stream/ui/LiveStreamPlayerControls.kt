@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -19,12 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Forward10
-import androidx.compose.material.icons.filled.Pause
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Replay10
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -46,13 +41,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.Locale
+import java.util.*
 import java.util.concurrent.TimeUnit
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.FullScreen
+import net.primal.android.core.compose.icons.primaliconpack.Minimize
 import net.primal.android.core.compose.icons.primaliconpack.More
+import net.primal.android.core.compose.icons.primaliconpack.SoundOn
+import net.primal.android.core.compose.icons.primaliconpack.VideoBack
+import net.primal.android.core.compose.icons.primaliconpack.VideoForward
+import net.primal.android.core.compose.icons.primaliconpack.VideoPause
+import net.primal.android.core.compose.icons.primaliconpack.VideoPlay
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
@@ -128,12 +129,13 @@ fun LiveStreamPlayerControls(
             BottomControls(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
+                    .fillMaxWidth(),
                 state = state.playerState,
                 onSeek = onSeek,
                 onGoToLive = onGoToLive,
                 onSeekStarted = onSeekStarted,
+                onSoundClick = { },
+                onFullscreenClick = { },
             )
         }
     }
@@ -159,7 +161,7 @@ private fun TopPlayerControls(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AppBarIcon(icon = PrimalIcons.ArrowBack, onClick = onClose)
+        AppBarIcon(icon = Minimize, onClick = onClose)
 
         val streamInfo = state.streamInfo
         val authorId = state.profileId
@@ -215,7 +217,7 @@ private fun CenterPlayerControls(
         ) {
             Icon(
                 modifier = Modifier.size(42.dp),
-                imageVector = Icons.Default.Replay10,
+                imageVector = VideoBack,
                 contentDescription = stringResource(id = R.string.accessibility_rewind_10_seconds),
             )
         }
@@ -225,7 +227,7 @@ private fun CenterPlayerControls(
         ) {
             Icon(
                 modifier = Modifier.size(64.dp),
-                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                imageVector = if (isPlaying) VideoPause else VideoPlay,
                 contentDescription = stringResource(id = R.string.accessibility_play_pause),
             )
         }
@@ -235,7 +237,7 @@ private fun CenterPlayerControls(
         ) {
             Icon(
                 modifier = Modifier.size(42.dp),
-                imageVector = Icons.Default.Forward10,
+                imageVector = VideoForward,
                 contentDescription = stringResource(id = R.string.accessibility_forward_10_seconds),
             )
         }
@@ -250,85 +252,146 @@ private fun BottomControls(
     onSeek: (Long) -> Unit,
     onGoToLive: () -> Unit,
     onSeekStarted: () -> Unit,
+    onSoundClick: () -> Unit,
+    onFullscreenClick: () -> Unit,
 ) {
     var localSeekPosition by remember(state.currentTime) { mutableLongStateOf(state.currentTime) }
-
     val sliderPosition = if (state.isSeeking) localSeekPosition else state.currentTime
     val isInteractive = state.totalDuration > 0 && (!state.isLive || !state.atLiveEdge)
 
-    Column(
-        modifier = modifier.padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+    val valueRangeEnd = (state.totalDuration.takeIf { it > 0L } ?: 1L).toFloat()
+    val sliderValue = if (state.isLive && state.atLiveEdge) {
+        valueRangeEnd
+    } else {
+        sliderPosition.toFloat()
+    }
+
+    Column(modifier = modifier) {
+        PlayerActionButtons(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+            isLive = state.isLive,
+            isAtLiveEdge = state.atLiveEdge,
+            onGoToLive = onGoToLive,
+            onSoundClick = onSoundClick,
+            onFullscreenClick = onFullscreenClick,
+        )
+
+        PlayerSlider(
+            modifier = Modifier.fillMaxWidth(),
+            isLive = state.isLive,
+            isLiveAtEdge = state.isLive && state.atLiveEdge,
+            isInteractive = isInteractive,
+            sliderValue = sliderValue,
+            valueRangeEnd = valueRangeEnd,
+            currentTime = sliderPosition,
+            totalDuration = state.totalDuration,
+            onValueChange = { newPosition ->
+                if (isInteractive) {
+                    if (!state.isSeeking) onSeekStarted()
+                    localSeekPosition = newPosition.toLong()
+                }
+            },
+            onValueChangeFinished = {
+                if (isInteractive) {
+                    onSeek(localSeekPosition)
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun PlayerActionButtons(
+    modifier: Modifier = Modifier,
+    isLive: Boolean,
+    isAtLiveEdge: Boolean,
+    onGoToLive: () -> Unit,
+    onSoundClick: () -> Unit,
+    onFullscreenClick: () -> Unit,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (state.isLive) {
+        if (isLive) {
             LiveIndicator(
                 modifier = Modifier.clickable(
-                    enabled = !state.atLiveEdge,
+                    enabled = !isAtLiveEdge,
                     onClick = onGoToLive,
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
                 ),
-                isAtLiveEdge = state.atLiveEdge,
+                isAtLiveEdge = isAtLiveEdge,
             )
         }
 
-        val valueRangeEnd = (state.totalDuration.takeIf { it > 0L } ?: 1L).toFloat()
-        val sliderValue = if (state.isLive && state.atLiveEdge) {
-            valueRangeEnd
-        } else {
-            sliderPosition.toFloat()
+        Spacer(modifier = Modifier.weight(1f))
+
+        IconButton(onClick = onSoundClick) {
+            Icon(imageVector = SoundOn, contentDescription = "Sound", tint = Color.White)
+        }
+        IconButton(onClick = onFullscreenClick) {
+            Icon(imageVector = FullScreen, contentDescription = "Full screen", tint = Color.White)
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PlayerSlider(
+    modifier: Modifier = Modifier,
+    isLive: Boolean,
+    isLiveAtEdge: Boolean,
+    isInteractive: Boolean,
+    sliderValue: Float,
+    valueRangeEnd: Float,
+    currentTime: Long,
+    totalDuration: Long,
+    onValueChange: (Float) -> Unit,
+    onValueChangeFinished: () -> Unit,
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        if (!isLive) {
+            Text(
+                text = formatDuration(currentTime),
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.width(52.dp),
+            )
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            if (!state.isLive) {
-                Text(
-                    text = formatDuration(sliderPosition),
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    modifier = Modifier.width(52.dp),
+        Slider(
+            modifier = Modifier
+                .weight(1f)
+                .height(0.dp),
+            value = sliderValue,
+            onValueChange = onValueChange,
+            onValueChangeFinished = onValueChangeFinished,
+            valueRange = 0f..valueRangeEnd,
+            enabled = isInteractive,
+            thumb = { },
+            track = { sliderState ->
+                CustomTrackWithThumb(
+                    sliderState = sliderState,
+                    isInteractive = isInteractive,
+                    isLiveAtEdge = isLiveAtEdge,
                 )
-            }
+            },
+        )
 
-            Slider(
-                modifier = Modifier.weight(1f),
-                value = sliderValue,
-                onValueChange = { newPosition ->
-                    if (isInteractive) {
-                        if (!state.isSeeking) {
-                            onSeekStarted()
-                        }
-                        localSeekPosition = newPosition.toLong()
-                    }
-                },
-                onValueChangeFinished = {
-                    if (isInteractive) {
-                        onSeek(localSeekPosition)
-                    }
-                },
-                valueRange = 0f..valueRangeEnd,
-                enabled = isInteractive,
-                thumb = { },
-                track = { sliderState ->
-                    CustomTrackWithThumb(
-                        sliderState = sliderState,
-                        isInteractive = isInteractive,
-                        isLiveAtEdge = state.isLive && state.atLiveEdge,
-                    )
-                },
+        if (!isLive) {
+            Text(
+                text = formatDuration(totalDuration),
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.width(52.dp),
             )
-
-            if (!state.isLive) {
-                Text(
-                    text = formatDuration(state.totalDuration),
-                    color = Color.White,
-                    fontSize = 14.sp,
-                    modifier = Modifier.width(52.dp),
-                )
-            }
         }
     }
 }
@@ -364,14 +427,14 @@ private fun CustomTrackWithThumb(
             modifier = Modifier
                 .height(2.dp)
                 .fillMaxWidth()
-                .background(inactiveTrackColor, RoundedCornerShape(1.dp)),
+                .background(color = inactiveTrackColor),
         )
 
         Box(
             modifier = Modifier
                 .height(2.dp)
                 .fillMaxWidth(fraction = activeFraction)
-                .background(if (isLiveAtEdge) thumbColor else activeTrackColor, RoundedCornerShape(1.dp)),
+                .background(color = if (isLiveAtEdge) thumbColor else activeTrackColor),
         )
 
         if (isInteractive) {

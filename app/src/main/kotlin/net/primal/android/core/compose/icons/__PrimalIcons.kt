@@ -69,6 +69,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZaps
 import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Follow
 import net.primal.android.core.compose.icons.primaliconpack.FontSize
+import net.primal.android.core.compose.icons.primaliconpack.FullScreen
 import net.primal.android.core.compose.icons.primaliconpack.GenericLinkIcon
 import net.primal.android.core.compose.icons.primaliconpack.Help
 import net.primal.android.core.compose.icons.primaliconpack.Highlight
@@ -90,6 +91,7 @@ import net.primal.android.core.compose.icons.primaliconpack.MediaVideoFilled
 import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.icons.primaliconpack.Messages
 import net.primal.android.core.compose.icons.primaliconpack.MessagesFilled
+import net.primal.android.core.compose.icons.primaliconpack.Minimize
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.Mute
 import net.primal.android.core.compose.icons.primaliconpack.MuteUser
@@ -140,6 +142,10 @@ import net.primal.android.core.compose.icons.primaliconpack.UserFeedAdd
 import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
 import net.primal.android.core.compose.icons.primaliconpack.Verified
 import net.primal.android.core.compose.icons.primaliconpack.VerifiedFilled
+import net.primal.android.core.compose.icons.primaliconpack.VideoBack
+import net.primal.android.core.compose.icons.primaliconpack.VideoForward
+import net.primal.android.core.compose.icons.primaliconpack.VideoPause
+import net.primal.android.core.compose.icons.primaliconpack.VideoPlay
 import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletChangeCurrency
 import net.primal.android.core.compose.icons.primaliconpack.WalletError
@@ -317,6 +323,12 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Follow,
             SearchSettings,
             Close,
+            VideoPlay,
+            VideoPause,
+            VideoForward,
+            VideoBack,
+            Minimize,
+            FullScreen,
         )
         return __PrimalIcons!!
     }
