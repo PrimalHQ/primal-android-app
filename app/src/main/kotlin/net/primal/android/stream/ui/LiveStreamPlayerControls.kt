@@ -123,6 +123,7 @@ fun LiveStreamPlayerControls(
                     .fillMaxWidth()
                     .align(Alignment.Center),
                 isPlaying = state.playerState.isPlaying,
+                isLive = state.playerState.isLive,
                 onRewind = onRewind,
                 onPlayPauseClick = onPlayPauseClick,
                 onForward = onForward,
@@ -204,6 +205,7 @@ private fun TopPlayerControls(
 private fun CenterPlayerControls(
     modifier: Modifier,
     isPlaying: Boolean,
+    isLive: Boolean,
     onRewind: () -> Unit,
     onPlayPauseClick: () -> Unit,
     onForward: () -> Unit,
@@ -213,15 +215,17 @@ private fun CenterPlayerControls(
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(
-            onClick = onRewind,
-            colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
-        ) {
-            Icon(
-                modifier = Modifier.size(42.dp),
-                imageVector = VideoBack,
-                contentDescription = stringResource(id = R.string.accessibility_rewind_10_seconds),
-            )
+        if (!isLive) {
+            IconButton(
+                onClick = onRewind,
+                colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
+            ) {
+                Icon(
+                    modifier = Modifier.size(42.dp),
+                    imageVector = VideoBack,
+                    contentDescription = stringResource(id = R.string.accessibility_rewind_10_seconds),
+                )
+            }
         }
         IconButton(
             onClick = onPlayPauseClick,
@@ -233,15 +237,17 @@ private fun CenterPlayerControls(
                 contentDescription = stringResource(id = R.string.accessibility_play_pause),
             )
         }
-        IconButton(
-            onClick = onForward,
-            colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
-        ) {
-            Icon(
-                modifier = Modifier.size(42.dp),
-                imageVector = VideoForward,
-                contentDescription = stringResource(id = R.string.accessibility_forward_10_seconds),
-            )
+        if (!isLive) {
+            IconButton(
+                onClick = onForward,
+                colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
+            ) {
+                Icon(
+                    modifier = Modifier.size(42.dp),
+                    imageVector = VideoForward,
+                    contentDescription = stringResource(id = R.string.accessibility_forward_10_seconds),
+                )
+            }
         }
     }
 }

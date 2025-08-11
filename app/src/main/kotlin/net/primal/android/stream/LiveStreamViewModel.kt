@@ -255,12 +255,14 @@ class LiveStreamViewModel @Inject constructor(
             streamRepository.observeStream(aTag = naddr.asATagValue())
                 .filterNotNull()
                 .collect { stream ->
-                    val streamingUrl = stream.streamingUrl
-                    if (streamingUrl == null) {
+                    val isLive = stream.isLive()
+                    val streamUrlToPlay = if (isLive) stream.streamingUrl else stream.recordingUrl
+
+                    if (streamUrlToPlay == null) {
                         setState { copy(loading = false) }
                         return@collect
                     }
-                    val isLive = stream.isLive()
+
                     val isBookmarked = bookmarksRepository.isBookmarked(tagValue = stream.aTag)
                     setState {
                         copy(
@@ -271,7 +273,7 @@ class LiveStreamViewModel @Inject constructor(
                                 atag = stream.aTag,
                                 eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
-                                streamUrl = streamingUrl,
+                                streamUrl = streamUrlToPlay,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,
                                 description = stream.summary,

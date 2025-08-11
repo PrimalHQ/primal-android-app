@@ -320,18 +320,9 @@ private fun StreamPlayer(
             exoPlayer.seekTo(newPosition)
         },
         onForward = {
-            if (state.playerState.isLive) {
-                val newPosition = exoPlayer.currentPosition + SEEK_INCREMENT_MS
-                if (newPosition >= state.playerState.totalDuration) {
-                    exoPlayer.seekToDefaultPosition()
-                } else {
-                    exoPlayer.seekTo(newPosition)
-                }
-            } else {
-                val newPosition = (exoPlayer.currentPosition + SEEK_INCREMENT_MS)
-                    .coerceAtMost(state.playerState.totalDuration)
-                exoPlayer.seekTo(newPosition)
-            }
+            val newPosition = (exoPlayer.currentPosition + SEEK_INCREMENT_MS)
+                .coerceAtMost(state.playerState.totalDuration)
+            exoPlayer.seekTo(newPosition)
         },
         onSoundClick = {
             eventPublisher(LiveStreamContract.UiEvent.ToggleMute)
