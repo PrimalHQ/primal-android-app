@@ -2,22 +2,9 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="17">
-      <module name="Primal.data.caching.remote.desktopMain" target="21" />
-      <module name="Primal.data.caching.remote.desktopTest" target="21" />
-      <module name="Primal.data.caching.repository.desktopMain" target="21" />
-      <module name="Primal.data.caching.repository.desktopTest" target="21" />
-      <module name="Primal.data.wallet.local" target="21" />
-      <module name="Primal.data.wallet.local.desktopMain" target="21" />
-      <module name="Primal.data.wallet.local.desktopTest" target="21" />
-      <module name="Primal.data.wallet.remote-nwc" target="21" />
-      <module name="Primal.data.wallet.remote-nwc.desktopMain" target="21" />
-      <module name="Primal.data.wallet.remote-nwc.desktopTest" target="21" />
-      <module name="Primal.data.wallet.remote-primal" target="21" />
-      <module name="Primal.data.wallet.remote-primal.desktopMain" target="21" />
-      <module name="Primal.data.wallet.remote-primal.desktopTest" target="21" />
-      <module name="Primal.data.wallet.repository" target="21" />
-      <module name="Primal.data.wallet.repository.desktopMain" target="21" />
-      <module name="Primal.data.wallet.repository.desktopTest" target="21" />
+      <module name="Primal.core.networking-nwc" target="21" />
+      <module name="Primal.core.networking-nwc.desktopMain" target="21" />
+      <module name="Primal.core.networking-nwc.desktopTest" target="21" />
     </bytecodeTargetLevel>
   </component>
 </project>

@@ -11,6 +11,7 @@
 /.idea/artifacts/
 /.idea/caches
 /.idea/libraries
+/.idea/compiler.xml
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
