@@ -6,6 +6,9 @@ import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.toHex
+import net.primal.domain.parser.NWCParseException
+import net.primal.domain.parser.isNwcUrl
+import net.primal.domain.parser.parseNWCUrl
 import org.junit.Test
 import org.junit.runner.RunWith
 
