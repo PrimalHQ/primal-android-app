@@ -103,7 +103,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReactionType
 import net.primal.domain.utils.canZap
 
-private const val LIVE_EDGE_THRESHOLD_MS = 20_000
+private const val LIVE_EDGE_THRESHOLD_MS = 60_000
 private const val PLAYER_STATE_UPDATE_INTERVAL_MS = 200L
 private const val SEEK_INCREMENT_MS = 10_000L
 private const val STREAM_DESCRIPTION_MAX_LINES = 4
@@ -320,18 +320,12 @@ private fun StreamPlayer(
             exoPlayer.seekTo(newPosition)
         },
         onForward = {
-            if (state.playerState.isLive) {
-                val newPosition = exoPlayer.currentPosition + SEEK_INCREMENT_MS
-                if (newPosition >= state.playerState.totalDuration) {
-                    exoPlayer.seekToDefaultPosition()
-                } else {
-                    exoPlayer.seekTo(newPosition)
-                }
-            } else {
-                val newPosition = (exoPlayer.currentPosition + SEEK_INCREMENT_MS)
-                    .coerceAtMost(state.playerState.totalDuration)
-                exoPlayer.seekTo(newPosition)
-            }
+            val newPosition = (exoPlayer.currentPosition + SEEK_INCREMENT_MS)
+                .coerceAtMost(state.playerState.totalDuration)
+            exoPlayer.seekTo(newPosition)
+        },
+        onSoundClick = {
+            eventPublisher(LiveStreamContract.UiEvent.ToggleMute)
         },
         onClose = onClose,
         onSeek = { positionMs ->
@@ -500,6 +494,7 @@ private fun LazyItemScope.StreamInfoDisplay(
             startedAt = streamInfo.startedAt,
             profileStats = state.profileStats,
             isFollowed = state.isFollowed,
+            isLive = state.playerState.isLive,
             onFollow = {
                 state.profileId?.let {
                     eventPublisher(LiveStreamContract.UiEvent.FollowAction(profileId = it))

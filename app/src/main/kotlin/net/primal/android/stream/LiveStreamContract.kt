@@ -37,6 +37,7 @@ interface LiveStreamContract {
 
     data class PlayerState(
         val isPlaying: Boolean = false,
+        val isMuted: Boolean = false,
         val isBuffering: Boolean = false,
         val atLiveEdge: Boolean = false,
         val isSeeking: Boolean = false,
@@ -68,6 +69,7 @@ interface LiveStreamContract {
 
         data object OnSeekStarted : UiEvent()
         data class OnSeek(val positionMs: Long) : UiEvent()
+        data object ToggleMute : UiEvent()
         data class FollowAction(val profileId: String) : UiEvent()
         data class UnfollowAction(val profileId: String) : UiEvent()
         data object DismissError : UiEvent()
