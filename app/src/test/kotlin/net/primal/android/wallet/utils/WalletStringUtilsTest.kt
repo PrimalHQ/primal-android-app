@@ -2,6 +2,12 @@ package net.primal.android.wallet.utils
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.kotest.matchers.shouldBe
+import net.primal.domain.utils.isBitcoinAddress
+import net.primal.domain.utils.isBitcoinUri
+import net.primal.domain.utils.isLightningUri
+import net.primal.domain.utils.isLnInvoice
+import net.primal.domain.utils.isLnUrl
+import net.primal.domain.utils.parseBitcoinPaymentInstructions
 import net.primal.domain.wallet.BitcoinPaymentInstruction
 import org.junit.Test
 import org.junit.runner.RunWith
