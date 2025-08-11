@@ -14,5 +14,5 @@ fun String.parseAsLNUrlOrNull(): String? {
 
 fun String.decodeLNUrlOrNull(): String? =
     runCatching {
-        this.bechToBytesOrThrow(hrp = "lnurl").contentToString()
+        this.bechToBytesOrThrow(hrp = "lnurl").decodeToString()
     }.getOrNull()
