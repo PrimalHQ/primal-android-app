@@ -12,4 +12,5 @@ data class FeedPostAuthor(
     val avatarCdnImage: CdnImage? = null,
     val legendProfile: PrimalLegendProfile? = null,
     val blossomServers: List<String> = emptyList(),
+    val isLiveStreamingNow: Boolean = false,
 )

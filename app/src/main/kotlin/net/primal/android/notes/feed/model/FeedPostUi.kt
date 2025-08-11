@@ -43,6 +43,7 @@ data class FeedPostUi(
     val authorLegendaryCustomization: LegendaryCustomization? = null,
     val authorBlossoms: List<String> = emptyList(),
     val eventRelayHints: List<String> = emptyList(),
+    val isAuthorLiveStreamingNow: Boolean = false,
 )
 
 fun FeedPost.asFeedPostUi(): FeedPostUi {
@@ -85,6 +86,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
             .sortedWith(EventZapUiModel.DefaultComparator),
         authorLegendaryCustomization = this.author.legendProfile?.asLegendaryCustomization(),
         eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
+        isAuthorLiveStreamingNow = this.author.isLiveStreamingNow,
     )
 }
 

@@ -51,6 +51,7 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
             avatarCdnImage = this.author?.avatarCdnImage,
             legendProfile = this.author?.primalPremiumInfo?.legendProfile,
             blossomServers = this.author?.blossoms ?: emptyList(),
+            isLiveStreamingNow = this.streams.count { it.isLive() } > 0,
         ),
         content = this.data.content,
         tags = this.data.tags,

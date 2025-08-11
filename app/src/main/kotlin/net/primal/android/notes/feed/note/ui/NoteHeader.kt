@@ -52,6 +52,7 @@ fun FeedNoteHeader(
     replyToAuthor: String? = null,
     label: String? = authorInternetIdentifier,
     labelStyle: TextStyle? = null,
+    isLive: Boolean = false,
     onAuthorAvatarClick: (() -> Unit)? = null,
 ) {
     val displaySettings = LocalContentDisplaySettings.current
@@ -71,6 +72,7 @@ fun FeedNoteHeader(
                 onClick = onAuthorAvatarClick,
                 legendaryCustomization = authorLegendaryCustomization,
                 avatarBlossoms = authorBlossoms,
+                isLive = isLive,
             )
         }
 

@@ -9,6 +9,7 @@ import net.primal.data.local.dao.events.EventUri
 import net.primal.data.local.dao.events.EventUriNostr
 import net.primal.data.local.dao.events.EventZap
 import net.primal.data.local.dao.profiles.ProfileData
+import net.primal.data.local.dao.streams.StreamData
 
 data class FeedPost(
 
@@ -71,4 +72,10 @@ data class FeedPost(
         parentColumn = "postId",
     )
     val bookmark: PublicBookmark? = null,
+
+    @Relation(
+        entityColumn = "authorId",
+        parentColumn = "authorId",
+    )
+    val streams: List<StreamData> = emptyList(),
 )

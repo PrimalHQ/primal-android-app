@@ -556,6 +556,7 @@ private fun FeedNote(
                 } else {
                     null
                 },
+                isLive = data.isAuthorLiveStreamingNow,
             )
         }
 
@@ -577,6 +578,7 @@ private fun FeedNote(
                 authorLegendaryCustomization = data.authorLegendaryCustomization,
                 authorBlossoms = data.authorBlossoms,
                 replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
+                isLive = data.isAuthorLiveStreamingNow,
                 onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
                     { noteCallbacks.onProfileClick.invoke(data.authorId) }
                 } else {
