@@ -47,7 +47,7 @@ fun StreamInfoSection(
     startedAt: Long?,
     profileStats: ProfileStatsUi?,
     isFollowed: Boolean,
-    isLive: Boolean = true,
+    isLive: Boolean,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
 ) {
