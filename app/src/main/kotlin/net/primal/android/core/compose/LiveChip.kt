@@ -13,50 +13,113 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
+private object LiveChipDefaults {
+    const val DOT_SIZE_SCALE_FACTOR = 0.080f
+    const val VERTICAL_PADDING_SCALE_FACTOR = 0.036f
+    const val HORIZONTAL_PADDING_SCALE_FACTOR = 0.090f
+    const val TEXT_START_PADDING_SCALE_FACTOR = 0.052f
+    const val FONT_SIZE_SCALE_FACTOR = 0.140f
+    const val LETTER_SPACING_SCALE_FACTOR = 0.011f
+}
+
 @Composable
-fun LiveChip(modifier: Modifier = Modifier) {
+fun LiveChip(
+    modifier: Modifier = Modifier,
+    containerWidth: Dp,
+    minContainerWidth: Dp? = null,
+) {
+    val density = LocalDensity.current
+
+    val calculationWidth = if (minContainerWidth != null) {
+        containerWidth.coerceAtLeast(minContainerWidth)
+    } else {
+        containerWidth
+    }
+
+    val dotSize = calculationWidth * LiveChipDefaults.DOT_SIZE_SCALE_FACTOR
+    val verticalPadding = calculationWidth * LiveChipDefaults.VERTICAL_PADDING_SCALE_FACTOR
+    val horizontalPadding = calculationWidth * LiveChipDefaults.HORIZONTAL_PADDING_SCALE_FACTOR
+    val textStartPadding = calculationWidth * LiveChipDefaults.TEXT_START_PADDING_SCALE_FACTOR
+
+    val fontSize = with(density) { (calculationWidth * LiveChipDefaults.FONT_SIZE_SCALE_FACTOR).toSp() }
+    val letterSpacing = with(density) { (calculationWidth * LiveChipDefaults.LETTER_SPACING_SCALE_FACTOR).toSp() }
+
     Row(
         modifier = modifier
             .clip(AppTheme.shapes.extraLarge)
             .background(color = Color.Black)
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(horizontal = horizontalPadding, vertical = verticalPadding),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
             modifier = Modifier
-                .size(8.dp)
+                .size(dotSize)
                 .background(color = Color.Red, shape = CircleShape),
         )
 
         Text(
-            modifier = Modifier.padding(start = 4.dp, top = 1.dp),
-            text = stringResource(id = R.string.live_stream_chip_title),
+            modifier = Modifier.padding(start = textStartPadding),
+            text = stringResource(id = R.string.live_stream_chip_title).uppercase(),
             style = AppTheme.typography.bodySmall.copy(
                 fontWeight = FontWeight.ExtraBold,
                 color = Color.White,
-                letterSpacing = 1.sp,
-                fontSize = 12.sp,
-                lineHeight = 11.sp,
+                fontSize = fontSize,
+                letterSpacing = letterSpacing,
             ),
         )
     }
 }
 
-@Preview
+@Preview(name = "With Min Width (Below Limit)")
 @Composable
-fun LiveChipPreview() {
+fun LiveChipWithMinWidthBelowLimitPreview() {
     PrimalTheme(PrimalTheme.Sunset) {
-        LiveChip()
+        Box(modifier = Modifier.size(40.dp)) {
+            LiveChip(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                containerWidth = 40.dp,
+                minContainerWidth = 50.dp,
+            )
+        }
+    }
+}
+
+@Preview(name = "Without Min Width")
+@Composable
+fun LiveChipWithoutMinWidthPreview() {
+    PrimalTheme(PrimalTheme.Sunset) {
+        Box(modifier = Modifier.size(40.dp)) {
+            LiveChip(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                containerWidth = 40.dp,
+                minContainerWidth = null,
+            )
+        }
+    }
+}
+
+@Preview(name = "Large")
+@Composable
+fun LiveChipLargePreview() {
+    PrimalTheme(PrimalTheme.Sunset) {
+        Box(modifier = Modifier.size(120.dp)) {
+            LiveChip(
+                modifier = Modifier.align(Alignment.BottomCenter),
+                containerWidth = 120.dp,
+                minContainerWidth = 50.dp,
+            )
+        }
     }
 }

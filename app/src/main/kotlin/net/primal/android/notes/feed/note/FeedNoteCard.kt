@@ -557,6 +557,7 @@ private fun FeedNote(
                     null
                 },
                 isLive = data.isAuthorLiveStreamingNow,
+                minLiveContainerWidth = 50.dp,
             )
         }
 

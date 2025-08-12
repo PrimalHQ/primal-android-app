@@ -50,6 +50,7 @@ fun UniversalAvatarThumbnail(
     hasInnerBorderOverride: Boolean = true,
     forceAnimationIfAvailable: Boolean = false,
     isLive: Boolean = false,
+    minLiveContainerWidth: Dp? = null,
     avatarBlossoms: List<String> = emptyList(),
     defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
 ) {
@@ -95,6 +96,8 @@ fun UniversalAvatarThumbnail(
         if (isLive) {
             LiveChip(
                 modifier = Modifier.align(Alignment.BottomCenter),
+                containerWidth = avatarSize,
+                minContainerWidth = minLiveContainerWidth,
             )
         }
     }

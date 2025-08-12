@@ -73,6 +73,7 @@ fun FeedNoteHeader(
                 legendaryCustomization = authorLegendaryCustomization,
                 avatarBlossoms = authorBlossoms,
                 isLive = isLive,
+                minLiveContainerWidth = 50.dp,
             )
         }
 
