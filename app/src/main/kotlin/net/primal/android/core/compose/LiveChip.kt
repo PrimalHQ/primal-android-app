@@ -40,7 +40,7 @@ fun LiveChip(
     canDownscaleToZero: Boolean = false,
 ) {
     val density = LocalDensity.current
-    val dynamicMinWidth = avatarSize + 11.dp
+    val dynamicMinWidth = avatarSize + 13.dp
 
     val calculationWidth = if (canDownscaleToZero) {
         avatarSize
