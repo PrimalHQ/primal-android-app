@@ -189,7 +189,7 @@ fun StreamLiveIndicator(modifier: Modifier = Modifier, isLive: Boolean) {
                 ),
         )
         Text(
-            text = stringResource(id = R.string.live_stream_chip_title),
+            text = stringResource(id = R.string.live_stream_live_indicator),
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             style = AppTheme.typography.bodyMedium,
         )
