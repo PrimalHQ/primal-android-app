@@ -24,7 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -83,7 +83,7 @@ fun OnboardingProfileFollowsScreen(
     BackHandler { backSequence() }
 
     var shouldCustomize by remember { mutableStateOf(state.customizeFollows) }
-    Scaffold(
+    PrimalScaffold(
         containerColor = Color.Transparent,
         topBar = {
             PrimalTopAppBar(

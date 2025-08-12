@@ -118,14 +118,6 @@ fun PrimalNavigationBarLightningBolt(
 
     Surface(color = Color.Transparent) {
         Column(modifier = modifier) {
-            if (streamState.isActive()) {
-                Box(
-                    modifier = Modifier
-                        .height((NavigationBarFullHeightDp.value + 6).dp)
-                        .fillMaxWidth()
-                        .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
-                )
-            }
             Box(
                 modifier = Modifier
                     .run {

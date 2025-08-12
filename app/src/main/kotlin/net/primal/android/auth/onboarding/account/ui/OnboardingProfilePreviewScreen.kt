@@ -27,7 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -97,7 +97,7 @@ fun OnboardingProfilePreviewScreen(
         onErrorDismiss = { eventPublisher(OnboardingContract.UiEvent.DismissError) },
     )
 
-    Scaffold(
+    PrimalScaffold(
         containerColor = Color.Transparent,
         topBar = {
             PrimalTopAppBar(

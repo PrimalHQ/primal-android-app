@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -47,7 +48,6 @@ private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
 fun LiveStreamMiniPlayer(
     modifier: Modifier = Modifier,
     exoPlayer: ExoPlayer,
-    applyBottomBarPadding: Boolean,
     state: LiveStreamContract.UiState,
     onExpandStream: () -> Unit,
     onStopStream: () -> Unit,
@@ -58,16 +58,6 @@ fun LiveStreamMiniPlayer(
     ) {
         Row(
             modifier = modifier
-                .fillMaxWidth()
-                .run {
-                    if (applyBottomBarPadding) {
-                        background(Color.Transparent)
-                    } else {
-                        background(AppTheme.extraColorScheme.surfaceVariantAlt2)
-                    }
-                }
-                .padding(start = 6.dp, end = 16.dp, top = 6.dp)
-                .navigationBarsPadding()
                 .clickable { onExpandStream() },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,

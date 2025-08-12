@@ -1,21 +1,26 @@
 package net.primal.android.stream.overlay
 
 import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalActivity
 import androidx.annotation.OptIn
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavBackStackEntry
@@ -65,14 +70,13 @@ private fun LiveStreamOverlay(
 ) {
     val uiState = viewModel.state.collectAsState()
     val streamState = LocalStreamState.current
-    val currentBackStack = navController.currentBackStackEntryAsState()
-    val currentRoute = currentBackStack.value?.destination?.route
-
-    if (!currentBackStack.value.isTopLevelRoute()) {
-        streamState.reset()
-    }
+    val localDensity = LocalDensity.current
+    val currentBackStack by navController.currentBackStackEntryAsState()
 
     val animatedPadding by animateDpAsState(streamState.bottomPadding)
+    var miniPlayerHeight by remember { mutableStateOf(0.dp) }
+
+    streamState.miniPlayerHeight = miniPlayerHeight
 
     BackHandler(enabled = streamState.mode is StreamMode.Expanded) {
         streamState.minimize()
@@ -109,9 +113,30 @@ private fun LiveStreamOverlay(
             LiveStreamMiniPlayer(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .onSizeChanged { size ->
+                        miniPlayerHeight = with(localDensity) { size.height.toDp() }
+                    }
                     .padding(bottom = animatedPadding)
-                    .background(AppTheme.extraColorScheme.surfaceVariantAlt2.copy(alpha = streamState.backgroundOpacity)),
-                applyBottomBarPadding = bottomBarRoutes.any { currentRoute?.startsWith(it) == true },
+                    .run {
+                        if (!streamState.isTopLevelScreen) {
+                            this.imePadding()
+                        } else {
+                            this
+                        }
+                    }
+                    .background(AppTheme.extraColorScheme.surfaceVariantAlt2)
+                    .run {
+                        if (streamState.bottomPadding <= 3.dp) this.navigationBarsPadding()
+                        else this
+                    }
+                    .run {
+                        if (!streamState.isTopLevelScreen) {
+                            this.padding(bottom = 6.dp)
+                        } else {
+                            this
+                        }
+                    }
+                    .padding(start = 6.dp, end = 16.dp, top = 6.dp),
                 state = uiState.value,
                 exoPlayer = exoPlayer,
                 onExpandStream = { streamState.expand() },

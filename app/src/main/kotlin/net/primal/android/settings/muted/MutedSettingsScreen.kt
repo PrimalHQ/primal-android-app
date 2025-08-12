@@ -6,7 +6,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -88,7 +88,7 @@ fun MutedSettingsScreen(
         }
     }
 
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(

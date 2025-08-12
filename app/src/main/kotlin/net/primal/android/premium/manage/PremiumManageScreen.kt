@@ -11,7 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -46,7 +46,7 @@ fun PremiumManageScreen(viewModel: PremiumManageViewModel, callbacks: PremiumMan
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PremiumManageScreen(state: PremiumManageContract.UiState, callbacks: PremiumManageContract.ScreenCallbacks) {
-    Scaffold(
+    PrimalScaffold(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.premium_manage_title),

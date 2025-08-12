@@ -7,7 +7,7 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -66,7 +66,7 @@ private fun BookmarksScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
-    Scaffold(
+    PrimalScaffold(
         topBar = {
             BookmarksTopAppBar(
                 feedSpecKind = state.feedSpecKind,

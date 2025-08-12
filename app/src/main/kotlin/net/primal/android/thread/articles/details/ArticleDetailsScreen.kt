@@ -24,7 +24,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -295,7 +295,7 @@ private fun ArticleDetailsScreen(
         },
     )
 
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier.imePadding(),
         topBar = {
             ArticleDetailsTopAppBar(

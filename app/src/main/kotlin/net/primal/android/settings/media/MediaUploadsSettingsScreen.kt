@@ -24,7 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemColors
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -109,7 +109,7 @@ private fun MediaUploadsSettingsScreen(
         backSequence()
     }
 
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(

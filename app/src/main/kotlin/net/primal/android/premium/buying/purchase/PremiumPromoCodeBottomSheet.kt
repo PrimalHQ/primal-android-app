@@ -11,7 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -55,7 +55,7 @@ fun PremiumPromoCodeBottomSheet(
         sheetState = sheetState,
         containerColor = AppTheme.colorScheme.surfaceVariant,
     ) {
-        Scaffold(
+        PrimalScaffold(
             topBar = {
                 PrimalTopAppBar(
                     title = stringResource(id = R.string.premium_promo_code_title),

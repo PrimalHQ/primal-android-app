@@ -7,7 +7,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
@@ -59,7 +59,7 @@ private fun ReactionsScreen(state: ReactionsContract.UiState, callbacks: Reactio
         },
         pageCount = { REACTION_TABS_COUNT },
     )
-    Scaffold(
+    PrimalScaffold(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.reactions_title),

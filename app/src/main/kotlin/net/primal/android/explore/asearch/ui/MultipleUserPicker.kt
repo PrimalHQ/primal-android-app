@@ -26,7 +26,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -88,7 +88,7 @@ fun MultipleUserPicker(
         sheetState = sheetState,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
     ) {
-        Scaffold(
+        PrimalScaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
                 MultipleUserPickerTopAppBar(

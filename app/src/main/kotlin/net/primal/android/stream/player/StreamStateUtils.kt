@@ -9,12 +9,12 @@ import androidx.compose.ui.unit.dp
 fun rememberStreamState(): StreamState {
     val streamState = LocalStreamState.current
 
-//    DisposableEffect(streamState) {
-//        onDispose {
+    DisposableEffect(streamState) {
+        onDispose {
 //            streamState.backgroundOpacity = 1f
 //            streamState.bottomPadding = 0.dp
-//        }
-//    }
+        }
+    }
 
     return streamState
 }

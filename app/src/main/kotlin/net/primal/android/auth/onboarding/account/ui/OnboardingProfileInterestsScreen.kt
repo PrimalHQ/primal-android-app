@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
@@ -43,7 +43,7 @@ fun OnboardingProfileInterestsScreen(
     eventPublisher: (OnboardingContract.UiEvent) -> Unit,
     onBack: () -> Unit,
 ) {
-    Scaffold(
+    PrimalScaffold(
         containerColor = Color.Transparent,
         topBar = {
             PrimalTopAppBar(

@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -103,7 +103,7 @@ fun FloatingArticlePill(
 @Preview
 private fun PreviewFloatingArticlePill() {
     PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
-        Scaffold(
+        PrimalScaffold(
             floatingActionButton = {
                 FloatingArticlePill(
                     commentsCount = 72,

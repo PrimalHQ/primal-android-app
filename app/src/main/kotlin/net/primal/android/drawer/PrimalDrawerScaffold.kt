@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.TopAppBarState
@@ -32,10 +31,10 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.NavigationBarFullHeightDp
 import net.primal.android.core.compose.PrimalNavigationBarLightningBolt
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.stream.player.rememberStreamState
@@ -85,9 +84,6 @@ fun PrimalDrawerScaffold(
         }
     }
 
-    streamState.bottomPadding = (bottomBarRealHeight - bottomBarInitialHeight / 2 - 16.dp).coerceAtLeast(0.dp)
-    streamState.backgroundOpacity = if (topAppBarState.collapsedFraction > 0.4f) 1f else 0f
-
     val isBottomBarVisible by remember {
         derivedStateOf {
             bottomBarInitialHeight.isZeroOrNavigationBarFullHeight() || bottomBarRealHeight > 0.dp
@@ -111,13 +107,14 @@ fun PrimalDrawerScaffold(
             )
         },
         content = {
-            Scaffold(
-                modifier = if (focusModeEnabled) {
+            PrimalScaffold(
+                modifier = if (focusModeEnabled && !streamState.isActive()) {
                     Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
                 } else {
                     Modifier
                 },
-                topBar = { topAppBar(if (focusModeEnabled) topAppBarScrollBehavior else null) },
+                isTopLevelScreen = true,
+                topBar = { topAppBar(if (focusModeEnabled && !streamState.isActive()) topAppBarScrollBehavior else null) },
                 content = { paddingValues ->
                     Box {
                         content(paddingValues)

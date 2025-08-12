@@ -24,7 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
@@ -118,7 +118,7 @@ fun FeedList(
         )
     }
 
-    Scaffold(
+    PrimalScaffold(
         modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(

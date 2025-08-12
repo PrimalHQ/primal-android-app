@@ -11,9 +11,9 @@ import androidx.compose.ui.unit.dp
 class StreamState internal constructor() {
     private var _mode by mutableStateOf<StreamMode>(StreamMode.Hidden)
 
+    var isTopLevelScreen by mutableStateOf(false)
     var bottomPadding by mutableStateOf(0.dp)
-
-    var backgroundOpacity by mutableFloatStateOf(1f)
+    var miniPlayerHeight by mutableStateOf(0.dp)
 
     val mode: StreamMode get() = _mode
 
@@ -39,10 +39,5 @@ class StreamState internal constructor() {
 
     fun stop() {
         _mode = StreamMode.Hidden
-    }
-
-    fun reset() {
-        bottomPadding = 0.dp
-        backgroundOpacity = 1f
     }
 }

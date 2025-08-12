@@ -21,7 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -109,7 +109,7 @@ fun OnboardingWalletActivation(
     ColumnWithBackground(
         backgroundPainter = painterResource(id = R.drawable.onboarding_spot5),
     ) {
-        Scaffold(
+        PrimalScaffold(
             modifier = Modifier.imePadding(),
             containerColor = Color.Transparent,
             topBar = {

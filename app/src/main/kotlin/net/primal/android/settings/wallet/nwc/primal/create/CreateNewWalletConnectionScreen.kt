@@ -20,7 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -85,7 +85,7 @@ private fun CreateNewWalletConnectionScreen(
     eventPublisher: (CreateNewWalletConnectionContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
-    Scaffold(
+    PrimalScaffold(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_wallet_new_nwc_connection_title),

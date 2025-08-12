@@ -27,7 +27,7 @@ import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.HourglassBottom
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -126,7 +126,7 @@ fun ChatScreen(
     val participantUsername = state.participantProfile?.userDisplayName
         ?: state.participantId.asEllipsizedNpub()
 
-    Scaffold(
+    PrimalScaffold(
         topBar = {
             PrimalTopAppBar(
                 title = participantUsername,

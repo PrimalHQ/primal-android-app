@@ -24,7 +24,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SliderState
@@ -97,7 +97,7 @@ fun AppearanceSettingsScreen(
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val isSystemInDarkTheme = isSystemInDarkTheme()
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(

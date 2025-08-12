@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -32,7 +32,7 @@ fun DvmFeedDetails(
     modifier: Modifier = Modifier,
     onAddOrRemoveFeed: (() -> Unit)? = null,
 ) {
-    Scaffold(
+    PrimalScaffold(
         modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(

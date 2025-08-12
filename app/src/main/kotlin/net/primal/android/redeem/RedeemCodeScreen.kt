@@ -5,7 +5,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -74,7 +74,7 @@ fun RedeemCodeScreen(
     ColumnWithBackground(
         backgroundPainter = painterResource(id = R.drawable.onboarding_spot2),
     ) { size ->
-        Scaffold(
+        PrimalScaffold(
             containerColor = Color.Transparent,
             topBar = {
                 RedeemCodeTopAppBar(

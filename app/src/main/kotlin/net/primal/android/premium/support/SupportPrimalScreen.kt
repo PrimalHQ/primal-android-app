@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -55,7 +55,7 @@ private fun SupportPrimalScreen(
     callbacks: SupportPrimalContract.ScreenCallbacks,
 ) {
     val context = LocalContext.current
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             PrimalTopAppBar(

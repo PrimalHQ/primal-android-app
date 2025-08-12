@@ -28,7 +28,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -70,7 +70,7 @@ fun OnboardingProfileDetailsScreen(
     eventPublisher: (OnboardingContract.UiEvent) -> Unit,
     onBack: () -> Unit,
 ) {
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier.imePadding(),
         containerColor = Color.Transparent,
         topBar = {

@@ -11,7 +11,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -51,7 +51,7 @@ fun SettingsHomeScreen(
     onClose: () -> Unit,
     onSettingsSectionClick: (PrimalSettingsSection) -> Unit,
 ) {
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(

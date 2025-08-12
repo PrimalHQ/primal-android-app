@@ -29,7 +29,7 @@ import androidx.compose.material.icons.outlined.OpenInFull
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -168,7 +168,7 @@ fun ThreadScreen(
         },
     )
 
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier.imePadding(),
         topBar = {
             PrimalTopAppBar(

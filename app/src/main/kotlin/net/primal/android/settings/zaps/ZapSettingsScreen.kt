@@ -33,7 +33,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -101,7 +101,7 @@ fun ZapSettingsScreen(
         backSequence()
     }
 
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(

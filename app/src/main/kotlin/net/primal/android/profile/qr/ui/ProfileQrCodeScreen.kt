@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
+import net.primal.android.core.compose.PrimalScaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -79,7 +79,7 @@ private fun ProfileQrCodeViewerScreen(
     }
     var qrCodeMode by remember { mutableStateOf(QrCodeMode.Viewer) }
     ColumnWithBackground(backgroundPainter = painterResource(id = R.drawable.profile_qrcode_background)) {
-        Scaffold(
+        PrimalScaffold(
             containerColor = Color.Transparent,
             topBar = {
                 PrimalTopAppBar(
