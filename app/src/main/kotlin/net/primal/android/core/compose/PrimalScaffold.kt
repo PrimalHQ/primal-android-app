@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.stream.player.LocalStreamState
 
@@ -37,14 +38,18 @@ fun PrimalScaffold(
     content: @Composable (PaddingValues) -> Unit,
 ) {
     val streamState = LocalStreamState.current
+    streamState.isTopLevelScreen = isTopLevelScreen
     val localDensity = LocalDensity.current
 
-    var bottomBarHeight by remember { mutableStateOf(0.dp) }
-    val bottomBarMeasureHeightModifier = Modifier.onGloballyPositioned { layoutCoordinates ->
-        bottomBarHeight = with(localDensity) { layoutCoordinates.size.height.toDp() }
-    }
+    var bottomBarHeight by remember { mutableStateOf<Dp?>(null) }
 
-    streamState.bottomPadding = bottomBarHeight
+    bottomBarHeight?.let { streamState.bottomPadding = it }
+
+    val bottomBarMeasureHeightModifier = Modifier.onGloballyPositioned { layoutCoordinates ->
+        bottomBarHeight = with(localDensity) {
+            layoutCoordinates.size.height.toDp()
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -59,7 +64,8 @@ fun PrimalScaffold(
             Box(
                 modifier = Modifier
                     .padding(
-                        bottom = (streamState.miniPlayerHeight - bottomBarHeight).coerceAtLeast(0.dp),
+                        bottom = (streamState.miniPlayerHeight - (bottomBarHeight ?: 0.dp))
+                            .coerceAtLeast(0.dp),
                     ),
             ) {
                 floatingActionButton()

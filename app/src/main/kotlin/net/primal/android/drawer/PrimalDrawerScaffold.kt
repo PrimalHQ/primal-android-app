@@ -39,6 +39,7 @@ import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.stream.player.rememberStreamState
 import net.primal.android.user.domain.Badges
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +84,9 @@ fun PrimalDrawerScaffold(
             }
         }
     }
+
+    Timber.d(bottomBarInitialHeight.toString())
+    Timber.d(bottomBarRealHeight.toString())
 
     val isBottomBarVisible by remember {
         derivedStateOf {

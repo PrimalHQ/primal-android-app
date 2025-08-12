@@ -37,6 +37,7 @@ import net.primal.android.stream.player.StreamStateProvider
 import net.primal.android.stream.ui.LiveStreamMiniPlayer
 import net.primal.android.stream.ui.LiveStreamScreen
 import net.primal.android.theme.AppTheme
+import timber.log.Timber
 
 private val bottomBarRoutes = listOf("home", "reads", "wallet", "notifications", "explore")
 
@@ -71,12 +72,12 @@ private fun LiveStreamOverlay(
     val uiState = viewModel.state.collectAsState()
     val streamState = LocalStreamState.current
     val localDensity = LocalDensity.current
-    val currentBackStack by navController.currentBackStackEntryAsState()
 
     val animatedPadding by animateDpAsState(streamState.bottomPadding)
     var miniPlayerHeight by remember { mutableStateOf(0.dp) }
 
     streamState.miniPlayerHeight = miniPlayerHeight
+    Timber.d(streamState.bottomPadding.toString())
 
     BackHandler(enabled = streamState.mode is StreamMode.Expanded) {
         streamState.minimize()
