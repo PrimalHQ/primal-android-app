@@ -4,7 +4,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import net.primal.android.core.compose.profile.approvals.FollowsApproval
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
+import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.errors.UiError
+import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.handler.ProfileFollowsHandler
@@ -33,7 +35,14 @@ interface LiveStreamContract {
         val zappingState: ZappingState = ZappingState(),
         val sendingMessage: Boolean = false,
         val error: UiError? = null,
-    )
+        val taggedUsers: List<NoteTaggedUser> = emptyList(),
+        val userTaggingQuery: String? = null,
+        val users: List<UserProfileItemUi> = emptyList(),
+        val popularUsers: List<UserProfileItemUi> = emptyList(),
+        val searchingUsers: Boolean = false,
+    ) {
+        val recommendedUsers: List<UserProfileItemUi> get() = popularUsers
+    }
 
     data class PlayerState(
         val isPlaying: Boolean = false,
@@ -85,6 +94,10 @@ interface LiveStreamContract {
         data object RequestDeleteStream : UiEvent()
         data class BookmarkStream(val forceUpdate: Boolean = false) : UiEvent()
         data class QuoteStream(val naddr: String) : UiEvent()
+        data class SearchUsers(val query: String) : UiEvent()
+        data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
+        data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
+        data object AppendUserTagAtSign : UiEvent()
     }
 
     sealed class SideEffect {
