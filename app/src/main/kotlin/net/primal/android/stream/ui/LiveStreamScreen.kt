@@ -56,6 +56,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -64,6 +65,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -93,6 +95,7 @@ import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDia
 import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
 import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.core.ext.openUriSafely
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
@@ -100,9 +103,12 @@ import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.LiveStreamViewModel
 import net.primal.android.theme.AppTheme
+import net.primal.core.utils.detectUrls
 import net.primal.domain.nostr.ReactionType
+import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.utils.canZap
 
+private const val URL_ANNOTATION_TAG = "url"
 private const val LIVE_EDGE_THRESHOLD_MS = 60_000
 private const val PLAYER_STATE_UPDATE_INTERVAL_MS = 200L
 private const val SEEK_INCREMENT_MS = 10_000L
@@ -922,6 +928,38 @@ private fun LiveChatCommentInput(
 
 @Composable
 private fun ChatMessageListItem(message: ChatMessageUi) {
+    val localUriHandler = LocalUriHandler.current
+
+    val authorNameColor = AppTheme.colorScheme.onSurface
+    val defaultTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1
+    val linkStyle = SpanStyle(textDecoration = TextDecoration.Underline)
+
+    val annotatedContent = remember(
+        message.content,
+        message.authorProfile.authorDisplayName,
+        authorNameColor,
+        defaultTextColor,
+    ) {
+        buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(
+                    fontWeight = FontWeight.Bold,
+                    color = authorNameColor,
+                ),
+            ) {
+                append(message.authorProfile.authorDisplayName)
+            }
+            append(" ")
+
+            val messageWithLinks = spannableTextWithLinks(
+                text = message.content,
+                defaultColor = defaultTextColor,
+                linkStyle = linkStyle,
+            )
+            append(messageWithLinks)
+        }
+    }
+
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
@@ -932,62 +970,25 @@ private fun ChatMessageListItem(message: ChatMessageUi) {
             legendaryCustomization = message.authorProfile.premiumDetails?.legendaryCustomization,
         )
 
-        Text(
+        PrimalClickableText(
             modifier = Modifier.padding(top = 10.dp),
-            text = buildAnnotatedString {
-                withStyle(
-                    style = SpanStyle(
-                        fontWeight = FontWeight.Bold,
-                        color = AppTheme.colorScheme.onSurface,
-                    ),
-                ) {
-                    append(message.authorProfile.authorDisplayName)
-                }
-                append(" ")
-                withStyle(
-                    style = SpanStyle(
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    ),
-                ) {
-                    append(message.content)
+            text = annotatedContent,
+            style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+            onClick = { position, _ ->
+                annotatedContent.getStringAnnotations(
+                    tag = URL_ANNOTATION_TAG,
+                    start = position,
+                    end = position,
+                ).firstOrNull()?.let { annotation ->
+                    localUriHandler.openUriSafely(annotation.item)
                 }
             },
-            style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-            lineHeight = 22.sp,
         )
     }
 }
 
 @Composable
 private fun ZapMessageListItem(zap: EventZapUiModel) {
-    val zapperName = zap.zapperName
-
-    val headerText = buildAnnotatedString {
-        withStyle(
-            style = SpanStyle(
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-            ),
-        ) {
-            append(zapperName)
-        }
-        withStyle(
-            style = SpanStyle(
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-            ),
-        ) {
-            append(" zapped ")
-        }
-        withStyle(
-            style = SpanStyle(
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-            ),
-        ) {
-            append("${zap.amountInSats} sats")
-        }
-    }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -1010,26 +1011,64 @@ private fun ZapMessageListItem(zap: EventZapUiModel) {
                 avatarCdnImage = zap.zapperAvatarCdnImage,
                 avatarSize = 32.dp,
             )
+            ZapMessageContent(zap = zap)
+        }
+    }
+}
 
-            Column(
-                modifier = Modifier.padding(top = 9.dp),
-            ) {
-                Text(
-                    text = headerText,
-                    style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-                    lineHeight = 22.sp,
-                )
+@Composable
+private fun ZapMessageContent(zap: EventZapUiModel) {
+    val localUriHandler = LocalUriHandler.current
+    val zapHeaderColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1
 
-                if (!zap.message.isNullOrBlank()) {
-                    Text(
-                        modifier = Modifier.padding(top = 2.dp),
-                        text = zap.message,
-                        style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-                        lineHeight = 22.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-                    )
-                }
+    val headerText = remember(zap.zapperName, zap.amountInSats, zapHeaderColor) {
+        buildAnnotatedString {
+            withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
+                append(zap.zapperName)
             }
+            withStyle(style = SpanStyle(color = zapHeaderColor)) {
+                append(" zapped ")
+            }
+            withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
+                append("${zap.amountInSats} sats")
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier.padding(top = 9.dp),
+    ) {
+        Text(
+            text = headerText,
+            style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+            lineHeight = 22.sp,
+        )
+
+        if (!zap.message.isNullOrBlank()) {
+            val defaultTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1
+            val linkStyle = SpanStyle(textDecoration = TextDecoration.Underline)
+
+            val contentText = remember(zap.message, defaultTextColor) {
+                spannableTextWithLinks(
+                    text = zap.message,
+                    defaultColor = defaultTextColor,
+                    linkStyle = linkStyle,
+                )
+            }
+            PrimalClickableText(
+                modifier = Modifier.padding(top = 2.dp),
+                text = contentText,
+                style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
+                onClick = { position, _ ->
+                    contentText.getStringAnnotations(
+                        tag = URL_ANNOTATION_TAG,
+                        start = position,
+                        end = position,
+                    ).firstOrNull()?.let { annotation ->
+                        localUriHandler.openUriSafely(annotation.item)
+                    }
+                },
+            )
         }
     }
 }
@@ -1050,6 +1089,50 @@ private fun buildAnnotatedStringWithHashtags(text: String, hashtagColor: Color):
                 start = matchResult.range.first,
                 end = matchResult.range.last + 1,
             )
+        }
+    }
+}
+
+private fun AnnotatedString.Builder.addUrlAnnotation(
+    url: String,
+    content: String,
+    linkStyle: SpanStyle,
+) {
+    var startIndex = content.indexOf(url)
+
+    while (startIndex >= 0) {
+        val endIndex = startIndex + url.length
+        addStyle(
+            style = linkStyle,
+            start = startIndex,
+            end = endIndex,
+        )
+
+        addStringAnnotation(
+            tag = URL_ANNOTATION_TAG,
+            annotation = url,
+            start = startIndex,
+            end = endIndex,
+        )
+
+        startIndex = content.indexOf(url, startIndex + 1)
+    }
+}
+
+private fun spannableTextWithLinks(
+    text: String,
+    defaultColor: Color,
+    linkStyle: SpanStyle,
+): AnnotatedString {
+    val uriLinks = text.detectUrls() + text.parseNostrUris()
+
+    return buildAnnotatedString {
+        withStyle(style = SpanStyle(color = defaultColor)) {
+            append(text)
+        }
+
+        uriLinks.forEach { url ->
+            addUrlAnnotation(url = url, content = text, linkStyle = linkStyle)
         }
     }
 }
