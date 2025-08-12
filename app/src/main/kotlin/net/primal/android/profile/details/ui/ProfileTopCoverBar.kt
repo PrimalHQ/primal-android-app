@@ -180,7 +180,6 @@ private fun ProfileTopCoverBar(
     modifier: Modifier = Modifier,
     paddingValues: PaddingValues,
 ) {
-    val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
     val coverBlur = AppTheme.colorScheme.surface.copy(alpha = coverValues.coverAlpha)
 
     BoxWithConstraints(
@@ -253,10 +252,11 @@ private fun ProfileTopCoverBar(
                 avatarSize = avatarValues.avatarSize,
                 avatarCdnImage = state.profileDetails?.avatarCdnImage,
                 avatarBlossoms = state.profileDetails?.profileBlossoms ?: emptyList(),
-                fallbackBorderColor = if (isDarkTheme) Color.Black else Color.White,
+                fallbackBorderColor = if (LocalPrimalTheme.current.isDarkTheme) Color.Black else Color.White,
                 borderSizeOverride = if (legendaryCustomization == null) 5.dp else null,
                 legendaryCustomization = legendaryCustomization,
                 forceAnimationIfAvailable = true,
+                canDownscaleToZero = true,
             )
         }
     }

@@ -36,15 +36,16 @@ private object LiveChipDefaults {
 @Composable
 fun LiveChip(
     modifier: Modifier = Modifier,
-    containerWidth: Dp,
-    minContainerWidth: Dp? = null,
+    avatarSize: Dp,
+    canDownscaleToZero: Boolean = false,
 ) {
     val density = LocalDensity.current
+    val dynamicMinWidth = avatarSize + 11.dp
 
-    val calculationWidth = if (minContainerWidth != null) {
-        containerWidth.coerceAtLeast(minContainerWidth)
+    val calculationWidth = if (canDownscaleToZero) {
+        avatarSize
     } else {
-        containerWidth
+        dynamicMinWidth
     }
 
     val dotSize = calculationWidth * LiveChipDefaults.DOT_SIZE_SCALE_FACTOR
@@ -82,43 +83,42 @@ fun LiveChip(
     }
 }
 
-@Preview(name = "With Min Width (Below Limit)")
+@Preview(name = "Default (uses dynamic min width)")
 @Composable
-fun LiveChipWithMinWidthBelowLimitPreview() {
+fun LiveChipDefaultBehaviorPreview() {
     PrimalTheme(PrimalTheme.Sunset) {
         Box(modifier = Modifier.size(40.dp)) {
             LiveChip(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                containerWidth = 40.dp,
-                minContainerWidth = 50.dp,
+                avatarSize = 32.dp,
+                canDownscaleToZero = false,
             )
         }
     }
 }
 
-@Preview(name = "Without Min Width")
+@Preview(name = "Can Downscale to Zero (ignores min width)")
 @Composable
-fun LiveChipWithoutMinWidthPreview() {
+fun LiveChipCanDownscalePreview() {
     PrimalTheme(PrimalTheme.Sunset) {
         Box(modifier = Modifier.size(40.dp)) {
             LiveChip(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                containerWidth = 40.dp,
-                minContainerWidth = null,
+                avatarSize = 32.dp,
+                canDownscaleToZero = true,
             )
         }
     }
 }
 
-@Preview(name = "Large")
+@Preview(name = "Large Size (default behavior)")
 @Composable
 fun LiveChipLargePreview() {
     PrimalTheme(PrimalTheme.Sunset) {
         Box(modifier = Modifier.size(120.dp)) {
             LiveChip(
                 modifier = Modifier.align(Alignment.BottomCenter),
-                containerWidth = 120.dp,
-                minContainerWidth = 50.dp,
+                avatarSize = 120.dp,
             )
         }
     }
