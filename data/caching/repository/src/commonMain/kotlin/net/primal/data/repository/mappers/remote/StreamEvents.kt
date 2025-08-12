@@ -10,6 +10,7 @@ import net.primal.domain.nostr.findFirstATag
 import net.primal.domain.nostr.findFirstClient
 import net.primal.domain.nostr.findFirstCurrentParticipants
 import net.primal.domain.nostr.findFirstEnds
+import net.primal.domain.nostr.findFirstHostPubkey
 import net.primal.domain.nostr.findFirstIdentifier
 import net.primal.domain.nostr.findFirstImage
 import net.primal.domain.nostr.findFirstRecording
@@ -31,15 +32,16 @@ fun NostrEvent.asStreamData(): StreamData? {
 
     val dTag = this.tags.findFirstIdentifier()
     val status = this.tags.findFirstStatus()
+    val authorId = this.tags.findFirstHostPubkey()
 
-    if (dTag == null) {
+    if (dTag == null || authorId == null) {
         return null
     }
 
     return StreamData(
-        aTag = "${this.kind}:${this.pubKey}:$dTag",
+        aTag = "${this.kind}:$authorId:$dTag",
         eventId = id,
-        authorId = this.pubKey,
+        authorId = authorId,
         dTag = dTag,
         title = this.tags.findFirstTitle(),
         summary = this.tags.findFirstSummary(),
