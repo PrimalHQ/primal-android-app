@@ -40,6 +40,7 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.streams.StreamRepository
 import net.primal.domain.user.UserDataCleanupRepository
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletSettings
@@ -58,6 +59,7 @@ class UserRepository @Inject constructor(
     private val userDataCleanupRepository: UserDataCleanupRepository,
     private val cachingImportRepository: CachingImportRepository,
     private val walletRepository: WalletRepository,
+    private val streamRepository: StreamRepository,
 ) {
     suspend fun setActiveAccount(userId: String) =
         withContext(dispatchers.io()) {
@@ -349,11 +351,16 @@ class UserRepository @Inject constructor(
 
                 val profiles = profileRepository.findProfileData(profileIds).associateBy { it.profileId }
                 val statsMap = profileRepository.findProfileStats(profileIds).associateBy { it.profileId }
+                val liveProfiles = streamRepository.findWhoIsLive(profileIds)
 
                 profileIds.mapNotNull { profileId ->
                     profiles[profileId]?.let { profile ->
                         val stats = statsMap[profileId]
-                        UserProfileSearchItem(metadata = profile, followersCount = stats?.followers)
+                        UserProfileSearchItem(
+                            metadata = profile,
+                            followersCount = stats?.followers,
+                            isLive = liveProfiles.contains(profileId),
+                        )
                     }
                 }
             }

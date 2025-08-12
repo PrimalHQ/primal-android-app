@@ -56,6 +56,7 @@ fun UserProfileListItem(
                 avatarBlossoms = data.avatarBlossoms,
                 onClick = { onClick(data) },
                 legendaryCustomization = data.legendaryCustomization,
+                isLive = data.isLive,
             )
         },
         headlineContent = {

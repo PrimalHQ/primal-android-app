@@ -6,4 +6,5 @@ data class UserProfileSearchItem(
     val metadata: ProfileData,
     val score: Float? = null,
     val followersCount: Int? = null,
+    val isLive: Boolean = false,
 )
