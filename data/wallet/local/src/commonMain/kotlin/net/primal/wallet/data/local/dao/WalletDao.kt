@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
 import net.primal.domain.wallet.WalletType
+import net.primal.shared.data.local.encryption.Encryptable
 
 @Dao
 interface WalletDao {
@@ -31,7 +32,7 @@ interface WalletDao {
     suspend fun insertOrIgnoreWalletInfo(info: WalletInfo)
 
     @Query("UPDATE WalletInfo SET lightningAddress = :lightningAddress WHERE walletId = :walletId")
-    suspend fun updateWalletLightningAddress(walletId: String, lightningAddress: String?)
+    suspend fun updateWalletLightningAddress(walletId: String, lightningAddress: Encryptable<String>?)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertWalletInfo(info: WalletInfo)
@@ -52,8 +53,8 @@ interface WalletDao {
     )
     suspend fun updateWalletBalance(
         walletId: String,
-        balanceInBtc: Double,
-        maxBalanceInBtc: Double?,
+        balanceInBtc: Encryptable<Double>,
+        maxBalanceInBtc: Encryptable<Double>?,
     )
 
     @Query("DELETE FROM WalletInfo WHERE walletId = :walletId")
@@ -85,5 +86,5 @@ interface WalletDao {
         ORDER BY lastUpdatedAt DESC LIMIT 1
         """,
     )
-    suspend fun findLastUsedWalletByType(userId: String, type: WalletType): Wallet?
+    suspend fun findLastUsedWalletByType(userId: Encryptable<String>, type: WalletType): Wallet?
 }

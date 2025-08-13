@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "2e4606731f014b7a4cc1d66cfc370eb7",
+    "identityHash": "67cd3616a3619ca75633e12fdf3b2f2c",
     "entities": [
       {
         "tableName": "WalletInfo",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `lightningAddress` TEXT, `type` TEXT NOT NULL, `balanceInBtc` REAL, `maxBalanceInBtc` REAL, `lastUpdatedAt` INTEGER, PRIMARY KEY(`walletId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `userId` BLOB NOT NULL, `lightningAddress` BLOB, `type` TEXT NOT NULL, `balanceInBtc` BLOB, `maxBalanceInBtc` BLOB, `lastUpdatedAt` INTEGER, PRIMARY KEY(`walletId`))",
         "fields": [
           {
             "fieldPath": "walletId",
@@ -17,13 +17,13 @@
           {
             "fieldPath": "userId",
             "columnName": "userId",
-            "affinity": "TEXT",
+            "affinity": "BLOB",
             "notNull": true
           },
           {
             "fieldPath": "lightningAddress",
             "columnName": "lightningAddress",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "type",
@@ -34,12 +34,12 @@
           {
             "fieldPath": "balanceInBtc",
             "columnName": "balanceInBtc",
-            "affinity": "REAL"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "maxBalanceInBtc",
             "columnName": "maxBalanceInBtc",
-            "affinity": "REAL"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "lastUpdatedAt",
@@ -56,7 +56,7 @@
       },
       {
         "tableName": "NostrWalletData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `relays` TEXT NOT NULL, `pubkey` TEXT NOT NULL, `walletPubkey` TEXT NOT NULL, `walletPrivateKey` TEXT NOT NULL, PRIMARY KEY(`walletId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `relays` BLOB NOT NULL, `pubkey` BLOB NOT NULL, `walletPubkey` BLOB NOT NULL, `walletPrivateKey` BLOB NOT NULL, PRIMARY KEY(`walletId`))",
         "fields": [
           {
             "fieldPath": "walletId",
@@ -67,25 +67,25 @@
           {
             "fieldPath": "relays",
             "columnName": "relays",
-            "affinity": "TEXT",
+            "affinity": "BLOB",
             "notNull": true
           },
           {
             "fieldPath": "pubkey",
             "columnName": "pubkey",
-            "affinity": "TEXT",
+            "affinity": "BLOB",
             "notNull": true
           },
           {
             "fieldPath": "walletPubkey",
             "columnName": "walletPubkey",
-            "affinity": "TEXT",
+            "affinity": "BLOB",
             "notNull": true
           },
           {
             "fieldPath": "walletPrivateKey",
             "columnName": "walletPrivateKey",
-            "affinity": "TEXT",
+            "affinity": "BLOB",
             "notNull": true
           }
         ],
@@ -158,7 +158,7 @@
       },
       {
         "tableName": "WalletTransactionData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `walletType` TEXT NOT NULL, `type` TEXT NOT NULL, `state` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `completedAt` INTEGER, `userId` TEXT NOT NULL, `note` TEXT, `invoice` TEXT, `amountInBtc` REAL NOT NULL, `totalFeeInBtc` TEXT, PRIMARY KEY(`transactionId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `walletType` TEXT NOT NULL, `type` TEXT NOT NULL, `state` TEXT NOT NULL, `createdAt` BLOB NOT NULL, `updatedAt` INTEGER NOT NULL, `completedAt` BLOB, `userId` BLOB NOT NULL, `note` BLOB, `invoice` BLOB, `amountInBtc` BLOB NOT NULL, `totalFeeInBtc` BLOB, PRIMARY KEY(`transactionId`))",
         "fields": [
           {
             "fieldPath": "transactionId",
@@ -193,7 +193,7 @@
           {
             "fieldPath": "createdAt",
             "columnName": "createdAt",
-            "affinity": "INTEGER",
+            "affinity": "BLOB",
             "notNull": true
           },
           {
@@ -205,34 +205,34 @@
           {
             "fieldPath": "completedAt",
             "columnName": "completedAt",
-            "affinity": "INTEGER"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "userId",
             "columnName": "userId",
-            "affinity": "TEXT",
+            "affinity": "BLOB",
             "notNull": true
           },
           {
             "fieldPath": "note",
             "columnName": "note",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "invoice",
             "columnName": "invoice",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "amountInBtc",
             "columnName": "amountInBtc",
-            "affinity": "REAL",
+            "affinity": "BLOB",
             "notNull": true
           },
           {
             "fieldPath": "totalFeeInBtc",
             "columnName": "totalFeeInBtc",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           }
         ],
         "primaryKey": {
@@ -244,7 +244,7 @@
       },
       {
         "tableName": "PrimalTransactionData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `walletLightningAddress` TEXT NOT NULL, `amountInUsd` REAL, `isZap` INTEGER NOT NULL, `isStorePurchase` INTEGER NOT NULL, `userSubWallet` TEXT NOT NULL, `userLightningAddress` TEXT, `otherUserId` TEXT, `otherLightningAddress` TEXT, `exchangeRate` TEXT, `onChainAddress` TEXT, `onChainTxId` TEXT, `zapNoteId` TEXT, `zapNoteAuthorId` TEXT, `zappedByUserId` TEXT, PRIMARY KEY(`transactionId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `walletLightningAddress` BLOB NOT NULL, `amountInUsd` BLOB, `isZap` INTEGER NOT NULL, `isStorePurchase` INTEGER NOT NULL, `userSubWallet` TEXT NOT NULL, `userLightningAddress` BLOB, `otherUserId` BLOB, `otherLightningAddress` BLOB, `exchangeRate` BLOB, `onChainAddress` BLOB, `onChainTxId` BLOB, `zapNoteId` BLOB, `zapNoteAuthorId` BLOB, `zappedByUserId` BLOB, PRIMARY KEY(`transactionId`))",
         "fields": [
           {
             "fieldPath": "transactionId",
@@ -255,13 +255,13 @@
           {
             "fieldPath": "walletLightningAddress",
             "columnName": "walletLightningAddress",
-            "affinity": "TEXT",
+            "affinity": "BLOB",
             "notNull": true
           },
           {
             "fieldPath": "amountInUsd",
             "columnName": "amountInUsd",
-            "affinity": "REAL"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "isZap",
@@ -284,47 +284,47 @@
           {
             "fieldPath": "userLightningAddress",
             "columnName": "userLightningAddress",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "otherUserId",
             "columnName": "otherUserId",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "otherLightningAddress",
             "columnName": "otherLightningAddress",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "exchangeRate",
             "columnName": "exchangeRate",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "onChainAddress",
             "columnName": "onChainAddress",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "onChainTxId",
             "columnName": "onChainTxId",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "zapNoteId",
             "columnName": "zapNoteId",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "zapNoteAuthorId",
             "columnName": "zapNoteAuthorId",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "zappedByUserId",
             "columnName": "zappedByUserId",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           }
         ],
         "primaryKey": {
@@ -336,7 +336,7 @@
       },
       {
         "tableName": "NostrTransactionData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `preimage` TEXT, `descriptionHash` TEXT, `paymentHash` TEXT, `metadata` TEXT, PRIMARY KEY(`transactionId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `preimage` BLOB, `descriptionHash` BLOB, `paymentHash` BLOB, `metadata` BLOB, PRIMARY KEY(`transactionId`))",
         "fields": [
           {
             "fieldPath": "transactionId",
@@ -347,22 +347,22 @@
           {
             "fieldPath": "preimage",
             "columnName": "preimage",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "descriptionHash",
             "columnName": "descriptionHash",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "paymentHash",
             "columnName": "paymentHash",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           },
           {
             "fieldPath": "metadata",
             "columnName": "metadata",
-            "affinity": "TEXT"
+            "affinity": "BLOB"
           }
         ],
         "primaryKey": {
@@ -374,7 +374,7 @@
       },
       {
         "tableName": "WalletSettings",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `spamThresholdAmountInSats` INTEGER NOT NULL, PRIMARY KEY(`walletId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `spamThresholdAmountInSats` BLOB NOT NULL, PRIMARY KEY(`walletId`))",
         "fields": [
           {
             "fieldPath": "walletId",
@@ -385,7 +385,7 @@
           {
             "fieldPath": "spamThresholdAmountInSats",
             "columnName": "spamThresholdAmountInSats",
-            "affinity": "INTEGER",
+            "affinity": "BLOB",
             "notNull": true
           }
         ],
@@ -399,7 +399,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2e4606731f014b7a4cc1d66cfc370eb7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '67cd3616a3619ca75633e12fdf3b2f2c')"
     ]
   }
 }

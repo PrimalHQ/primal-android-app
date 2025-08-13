@@ -12,11 +12,11 @@ fun WalletPO.toDomain(): WalletDO =
         WalletType.PRIMAL ->
             WalletDO.Primal(
                 walletId = info.walletId,
-                userId = info.userId,
-                lightningAddress = info.lightningAddress,
-                spamThresholdAmountInSats = settings?.spamThresholdAmountInSats ?: 1L,
-                balanceInBtc = info.balanceInBtc,
-                maxBalanceInBtc = info.maxBalanceInBtc,
+                userId = info.userId.decrypted,
+                lightningAddress = info.lightningAddress?.decrypted,
+                spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
+                balanceInBtc = info.balanceInBtc?.decrypted,
+                maxBalanceInBtc = info.maxBalanceInBtc?.decrypted,
                 lastUpdatedAt = info.lastUpdatedAt,
                 kycLevel = primal?.kycLevel ?: WalletKycLevel.None,
             )
@@ -24,17 +24,17 @@ fun WalletPO.toDomain(): WalletDO =
         WalletType.NWC ->
             WalletDO.NWC(
                 walletId = info.walletId,
-                userId = info.userId,
-                lightningAddress = info.lightningAddress,
-                spamThresholdAmountInSats = settings?.spamThresholdAmountInSats ?: 1L,
-                balanceInBtc = info.balanceInBtc,
-                maxBalanceInBtc = info.maxBalanceInBtc,
+                userId = info.userId.decrypted,
+                lightningAddress = info.lightningAddress?.decrypted,
+                spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
+                balanceInBtc = info.balanceInBtc?.decrypted,
+                maxBalanceInBtc = info.maxBalanceInBtc?.decrypted,
                 lastUpdatedAt = info.lastUpdatedAt,
-                relays = nwc?.relays ?: emptyList(),
-                pubkey = nwc?.pubkey ?: "",
+                relays = nwc?.relays?.decrypted ?: emptyList(),
+                pubkey = nwc?.pubkey?.decrypted ?: "",
                 keypair = NostrWalletKeypair(
-                    privateKey = nwc?.walletPrivateKey ?: "",
-                    pubkey = nwc?.walletPubkey ?: "",
+                    privateKey = nwc?.walletPrivateKey?.decrypted ?: "",
+                    pubkey = nwc?.walletPubkey?.decrypted ?: "",
                 ),
             )
     }
@@ -47,11 +47,11 @@ fun ActiveWallet.toDomain(): WalletDO? {
         WalletType.PRIMAL ->
             WalletDO.Primal(
                 walletId = info.walletId,
-                userId = info.userId,
-                lightningAddress = info.lightningAddress,
-                spamThresholdAmountInSats = settings?.spamThresholdAmountInSats ?: 1L,
-                balanceInBtc = info.balanceInBtc,
-                maxBalanceInBtc = info.maxBalanceInBtc,
+                userId = info.userId.decrypted,
+                lightningAddress = info.lightningAddress?.decrypted,
+                spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
+                balanceInBtc = info.balanceInBtc?.decrypted,
+                maxBalanceInBtc = info.maxBalanceInBtc?.decrypted,
                 lastUpdatedAt = info.lastUpdatedAt,
                 kycLevel = primal?.kycLevel ?: WalletKycLevel.None,
             )
@@ -59,17 +59,17 @@ fun ActiveWallet.toDomain(): WalletDO? {
         WalletType.NWC ->
             WalletDO.NWC(
                 walletId = info.walletId,
-                userId = info.userId,
-                lightningAddress = info.lightningAddress,
-                spamThresholdAmountInSats = settings?.spamThresholdAmountInSats ?: 1L,
-                balanceInBtc = info.balanceInBtc,
-                maxBalanceInBtc = info.maxBalanceInBtc,
+                userId = info.userId.decrypted,
+                lightningAddress = info.lightningAddress?.decrypted,
+                spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
+                balanceInBtc = info.balanceInBtc?.decrypted,
+                maxBalanceInBtc = info.maxBalanceInBtc?.decrypted,
                 lastUpdatedAt = info.lastUpdatedAt,
-                relays = nwc?.relays ?: emptyList(),
-                pubkey = nwc?.pubkey ?: "",
+                relays = nwc?.relays?.decrypted ?: emptyList(),
+                pubkey = nwc?.pubkey?.decrypted ?: "",
                 keypair = NostrWalletKeypair(
-                    privateKey = nwc?.walletPrivateKey ?: "",
-                    pubkey = nwc?.walletPubkey ?: "",
+                    privateKey = nwc?.walletPrivateKey?.decrypted ?: "",
+                    pubkey = nwc?.walletPubkey?.decrypted ?: "",
                 ),
             )
     }
