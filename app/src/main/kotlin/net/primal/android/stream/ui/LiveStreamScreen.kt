@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -79,6 +80,7 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalClickableText
@@ -88,8 +90,10 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
+import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Close
 import net.primal.android.core.compose.icons.primaliconpack.Follow
+import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.SearchSettings
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
@@ -120,7 +124,14 @@ private enum class LiveStreamDisplaySection {
 }
 
 private val ZapMessageBorderColor = Color(0xFFFFA000)
-private val ZapMessageBackgroundColor = Color(0xFF332000)
+private val ZapMessageBackgroundColor = Color(0xFFE47C00)
+private val ZapMessageProfileHandleColor: Color
+    @Composable
+    get() = if (LocalPrimalTheme.current.isDarkTheme) {
+        Color(0xFFFFA02F)
+    } else {
+        Color(0xFFE47C00)
+    }
 
 @Composable
 fun LiveStreamScreen(
@@ -812,8 +823,7 @@ private fun LiveChatContent(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 16.dp),
+                    .weight(1f),
                 state = listState,
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(vertical = 12.dp),
@@ -961,12 +971,13 @@ private fun ChatMessageListItem(message: ChatMessageUi) {
     }
 
     Row(
+        modifier = Modifier.padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
     ) {
         UniversalAvatarThumbnail(
             avatarCdnImage = message.authorProfile.avatarCdnImage,
-            avatarSize = 32.dp,
+            avatarSize = 24.dp,
             legendaryCustomization = message.authorProfile.premiumDetails?.legendaryCustomization,
         )
 
@@ -991,6 +1002,7 @@ private fun ChatMessageListItem(message: ChatMessageUi) {
 private fun ZapMessageListItem(zap: EventZapUiModel) {
     Box(
         modifier = Modifier
+            .padding(horizontal = 8.dp)
             .fillMaxWidth()
             .border(
                 width = 1.dp,
@@ -998,10 +1010,8 @@ private fun ZapMessageListItem(zap: EventZapUiModel) {
                 shape = AppTheme.shapes.medium,
             )
             .clip(AppTheme.shapes.medium)
-            .background(
-                color = ZapMessageBackgroundColor,
-            )
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .background(color = ZapMessageBackgroundColor.copy(alpha = 0.2f))
+            .padding(horizontal = 8.dp, vertical = 10.dp),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -1009,7 +1019,8 @@ private fun ZapMessageListItem(zap: EventZapUiModel) {
         ) {
             UniversalAvatarThumbnail(
                 avatarCdnImage = zap.zapperAvatarCdnImage,
-                avatarSize = 32.dp,
+                avatarSize = 24.dp,
+                legendaryCustomization = zap.zapperLegendaryCustomization,
             )
             ZapMessageContent(zap = zap)
         }
@@ -1019,33 +1030,60 @@ private fun ZapMessageListItem(zap: EventZapUiModel) {
 @Composable
 private fun ZapMessageContent(zap: EventZapUiModel) {
     val localUriHandler = LocalUriHandler.current
-    val zapHeaderColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1
 
-    val headerText = remember(zap.zapperName, zap.amountInSats, zapHeaderColor) {
-        buildAnnotatedString {
-            withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
-                append(zap.zapperName)
-            }
-            withStyle(style = SpanStyle(color = zapHeaderColor)) {
-                append(" zapped ")
-            }
-            withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
-                append("${zap.amountInSats} sats")
+    Column(modifier = Modifier.padding(top = 0.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = ZapMessageProfileHandleColor, fontWeight = FontWeight.Bold)) {
+                        append(zap.zapperName)
+                    }
+                    withStyle(style = SpanStyle(color = ZapMessageProfileHandleColor)) {
+                        append(" zapped")
+                    }
+                },
+                style = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp),
+                lineHeight = 20.sp,
+            )
+
+            Spacer(Modifier.weight(1f))
+
+            Row(
+                modifier = Modifier
+                    .background(
+                        color = ZapMessageProfileHandleColor,
+                        shape = AppTheme.shapes.extraLarge,
+                    )
+                    .padding(horizontal = 6.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val numberFormatter = remember { NumberFormat.getInstance() }
+                val formattedAmount = remember(zap.amountInSats) {
+                    numberFormatter.format(zap.amountInSats.toLong())
+                }
+
+                IconText(
+                    modifier = Modifier
+                        .alignByBaseline()
+                        .padding(end = 2.dp, top = 1.dp),
+                    text = formattedAmount,
+                    fontWeight = FontWeight.Bold,
+                    style = AppTheme.typography.bodySmall.copy(
+                        fontSize = 16.sp,
+                        lineHeight = 16.sp,
+                    ),
+                    leadingIcon = PrimalIcons.NavWalletBoltFilled,
+                    iconSize = 16.sp,
+                    color = AppTheme.colorScheme.surface,
+                )
             }
         }
-    }
-
-    Column(
-        modifier = Modifier.padding(top = 9.dp),
-    ) {
-        Text(
-            text = headerText,
-            style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-            lineHeight = 22.sp,
-        )
 
         if (!zap.message.isNullOrBlank()) {
-            val defaultTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1
+            val defaultTextColor = AppTheme.colorScheme.onSurface
             val linkStyle = SpanStyle(textDecoration = TextDecoration.Underline)
 
             val contentText = remember(zap.message, defaultTextColor) {
@@ -1056,7 +1094,7 @@ private fun ZapMessageContent(zap: EventZapUiModel) {
                 )
             }
             PrimalClickableText(
-                modifier = Modifier.padding(top = 2.dp),
+                modifier = Modifier.padding(top = 5.dp),
                 text = contentText,
                 style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
                 onClick = { position, _ ->
