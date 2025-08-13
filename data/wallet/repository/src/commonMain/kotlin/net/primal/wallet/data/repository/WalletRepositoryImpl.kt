@@ -27,6 +27,7 @@ import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.db.withTransaction
+import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.handler.factory.HandlerFactory
 import net.primal.wallet.data.local.dao.NostrWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
@@ -84,7 +85,7 @@ internal class WalletRepositoryImpl(
                         type = WalletType.NWC,
                         balanceInBtc = wallet.balanceInBtc,
                         maxBalanceInBtc = wallet.maxBalanceInBtc,
-                        lastUpdatedAt = wallet.lastUpdatedAt,
+                        lastUpdatedAt = wallet.lastUpdatedAt?.asEncryptable(),
                     ),
                 )
 

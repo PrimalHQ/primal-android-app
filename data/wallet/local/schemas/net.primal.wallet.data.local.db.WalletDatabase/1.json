@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "2e4606731f014b7a4cc1d66cfc370eb7",
+    "identityHash": "550e3ec1477c67b1f37f20165f215dbb",
     "entities": [
       {
         "tableName": "WalletInfo",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `lightningAddress` TEXT, `type` TEXT NOT NULL, `balanceInBtc` REAL, `maxBalanceInBtc` REAL, `lastUpdatedAt` INTEGER, PRIMARY KEY(`walletId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `lightningAddress` TEXT, `type` TEXT NOT NULL, `balanceInBtc` REAL, `maxBalanceInBtc` REAL, `lastUpdatedAt` BLOB, PRIMARY KEY(`walletId`))",
         "fields": [
           {
             "fieldPath": "walletId",
@@ -44,7 +44,7 @@
           {
             "fieldPath": "lastUpdatedAt",
             "columnName": "lastUpdatedAt",
-            "affinity": "INTEGER"
+            "affinity": "BLOB"
           }
         ],
         "primaryKey": {
@@ -399,7 +399,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2e4606731f014b7a4cc1d66cfc370eb7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '550e3ec1477c67b1f37f20165f215dbb')"
     ]
   }
 }

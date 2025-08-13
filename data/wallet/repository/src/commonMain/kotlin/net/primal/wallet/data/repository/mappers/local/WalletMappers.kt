@@ -17,7 +17,7 @@ fun WalletPO.toDomain(): WalletDO =
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats ?: 1L,
                 balanceInBtc = info.balanceInBtc,
                 maxBalanceInBtc = info.maxBalanceInBtc,
-                lastUpdatedAt = info.lastUpdatedAt,
+                lastUpdatedAt = info.lastUpdatedAt?.decrypted,
                 kycLevel = primal?.kycLevel ?: WalletKycLevel.None,
             )
 
@@ -29,7 +29,7 @@ fun WalletPO.toDomain(): WalletDO =
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats ?: 1L,
                 balanceInBtc = info.balanceInBtc,
                 maxBalanceInBtc = info.maxBalanceInBtc,
-                lastUpdatedAt = info.lastUpdatedAt,
+                lastUpdatedAt = info.lastUpdatedAt?.decrypted,
                 relays = nwc?.relays ?: emptyList(),
                 pubkey = nwc?.pubkey ?: "",
                 keypair = NostrWalletKeypair(
@@ -52,7 +52,7 @@ fun ActiveWallet.toDomain(): WalletDO? {
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats ?: 1L,
                 balanceInBtc = info.balanceInBtc,
                 maxBalanceInBtc = info.maxBalanceInBtc,
-                lastUpdatedAt = info.lastUpdatedAt,
+                lastUpdatedAt = info.lastUpdatedAt?.decrypted,
                 kycLevel = primal?.kycLevel ?: WalletKycLevel.None,
             )
 
@@ -64,7 +64,7 @@ fun ActiveWallet.toDomain(): WalletDO? {
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats ?: 1L,
                 balanceInBtc = info.balanceInBtc,
                 maxBalanceInBtc = info.maxBalanceInBtc,
-                lastUpdatedAt = info.lastUpdatedAt,
+                lastUpdatedAt = info.lastUpdatedAt?.decrypted,
                 relays = nwc?.relays ?: emptyList(),
                 pubkey = nwc?.pubkey ?: "",
                 keypair = NostrWalletKeypair(

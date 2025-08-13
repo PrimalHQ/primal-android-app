@@ -2,8 +2,10 @@ package net.primal.shared.data.local.encryption
 
 import dev.whyoleg.cryptography.CryptographyProvider
 import dev.whyoleg.cryptography.algorithms.AES
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 
-internal object CryptoManager {
+object CryptoManager {
 
     private val rawKey: ByteArray = createPlatformKeyStore().getOrCreateKey()
 
@@ -21,4 +23,10 @@ internal object CryptoManager {
     fun encryptAsByteArray(text: String): ByteArray = encryptAsByteArray(text.encodeToByteArray())
 
     fun decryptToString(blob: ByteArray): String = decryptToByteArray(blob).decodeToString()
+
+    inline fun <reified T> encrypt(value: T?): ByteArray? =
+        value?.let { encryptAsByteArray(text = value.encodeToJsonString()) }
+
+    inline fun <reified T> decrypt(value: ByteArray?): T? =
+        value?.let { decryptToString(blob = value) }?.decodeFromJsonStringOrNull()
 }
