@@ -79,7 +79,7 @@ class WalletTransactionsMediator internal constructor(
         val request = when (wallet.info.type) {
             WalletType.PRIMAL -> TransactionsRequest.Primal(
                 subWallet = SubWallet.Open,
-                minAmountInBtc = walletSettings?.spamThresholdAmountInSats?.toBtc()?.formatAsString(),
+                minAmountInBtc = walletSettings?.spamThresholdAmountInSats?.decrypted?.toBtc()?.formatAsString(),
                 limit = state.config.pageSize,
                 since = timestamps.first,
                 until = timestamps.second,

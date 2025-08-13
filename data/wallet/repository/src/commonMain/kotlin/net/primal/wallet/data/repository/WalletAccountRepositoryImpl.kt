@@ -23,6 +23,7 @@ import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletKycLevel
 import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.db.withTransaction
+import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.local.dao.ActiveWalletData
 import net.primal.wallet.data.local.dao.PrimalWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
@@ -68,7 +69,7 @@ class WalletAccountRepositoryImpl(
 
     override suspend fun findLastUsedNostrWallet(userId: String): Wallet? =
         withContext(dispatcherProvider.io()) {
-            walletDatabase.wallet().findLastUsedWalletByType(userId = userId, type = WalletType.NWC)
+            walletDatabase.wallet().findLastUsedWalletByType(userId = userId.asEncryptable(), type = WalletType.NWC)
                 ?.toDomain()
         }
 
@@ -100,15 +101,15 @@ class WalletAccountRepositoryImpl(
                 walletDatabase.wallet().insertOrIgnoreWalletInfo(
                     info = WalletInfo(
                         walletId = userId,
-                        userId = userId,
-                        lightningAddress = lightningAddress,
+                        userId = userId.asEncryptable(),
+                        lightningAddress = lightningAddress.asEncryptable(),
                         type = WalletType.PRIMAL,
                     ),
                 )
 
                 walletDatabase.wallet().updateWalletLightningAddress(
                     walletId = userId,
-                    lightningAddress = lightningAddress,
+                    lightningAddress = lightningAddress.asEncryptable(),
                 )
 
                 walletDatabase.wallet().upsertPrimalWalletData(
