@@ -11,6 +11,7 @@ import net.primal.domain.links.EventLink
 import net.primal.domain.links.EventLinkPreviewData
 import net.primal.domain.links.EventUriType
 import net.primal.domain.nostr.utils.isNostrUri
+import net.primal.shared.data.local.encryption.map
 
 private data class EventIdUriPair(
     val eventId: String,

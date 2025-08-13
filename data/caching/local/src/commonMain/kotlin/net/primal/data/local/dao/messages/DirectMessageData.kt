@@ -1,9 +1,7 @@
 package net.primal.data.local.dao.messages
 
 import androidx.room.Entity
-import androidx.room.TypeConverters
-import net.primal.shared.data.local.encryption.EncryptableString
-import net.primal.shared.data.local.serialization.EncryptableStringConvertor
+import net.primal.shared.data.local.encryption.Encryptable
 
 @Entity(primaryKeys = ["messageId", "ownerId"])
 data class DirectMessageData(
@@ -13,7 +11,7 @@ data class DirectMessageData(
     val receiverId: String,
     val participantId: String,
     val createdAt: Long,
-    @field:TypeConverters(EncryptableStringConvertor::class) val content: EncryptableString,
-    @field:TypeConverters(EncryptableStringConvertor::class) val uris: List<String>,
-    @field:TypeConverters(EncryptableStringConvertor::class) val hashtags: List<String>,
+    val content: Encryptable<String>,
+    val uris: Encryptable<List<String>>,
+    val hashtags: Encryptable<List<String>>,
 )
