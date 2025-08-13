@@ -781,7 +781,7 @@ private fun LiveChatListOrSearch(
     noteCallbacks: NoteCallbacks,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
 ) {
-    if (state.userTaggingQuery == null) {
+    if (!state.userTaggingState.isUserTaggingActive) {
         if (state.chatItems.isEmpty()) {
             LiveChatEmpty(
                 modifier = modifier,
@@ -809,7 +809,7 @@ private fun LiveChatListOrSearch(
             }
         }
     } else {
-        if (state.searchingUsers) {
+        if (state.userTaggingState.isSearching) {
             Box(
                 modifier = modifier,
                 contentAlignment = Alignment.Center,
@@ -821,14 +821,12 @@ private fun LiveChatListOrSearch(
                 modifier = modifier,
                 content = state.comment,
                 taggedUsers = state.taggedUsers,
-                users = state.users.ifEmpty {
-                    if (state.userTaggingQuery.isEmpty()) {
-                        state.recommendedUsers
-                    } else {
-                        emptyList()
-                    }
+                users = if (state.userTaggingState.userTaggingQuery.isNullOrEmpty()) {
+                    state.userTaggingState.recommendedUsers
+                } else {
+                    state.userTaggingState.searchResults
                 },
-                userTaggingQuery = state.userTaggingQuery,
+                userTaggingQuery = state.userTaggingState.userTaggingQuery ?: "",
                 onUserClick = { newContent, newTaggedUsers ->
                     eventPublisher(LiveStreamContract.UiEvent.OnCommentValueChanged(newContent))
                     eventPublisher(LiveStreamContract.UiEvent.TagUser(taggedUser = newTaggedUsers.last()))

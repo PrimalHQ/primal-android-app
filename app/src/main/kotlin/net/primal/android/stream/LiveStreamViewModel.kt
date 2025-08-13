@@ -7,24 +7,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.primal.android.core.compose.profile.approvals.FollowsApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
-import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.asSignatureUiError
 import net.primal.android.editor.domain.NoteTaggedUser
@@ -33,6 +28,7 @@ import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.naddr
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.NoteNostrUriUi
+import net.primal.android.profile.mention.UserMentionHandler
 import net.primal.android.stream.LiveStreamContract.SideEffect
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
 import net.primal.android.stream.LiveStreamContract.UiEvent
@@ -45,7 +41,6 @@ import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
-import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.BookmarkType
 import net.primal.domain.bookmarks.PublicBookmarksRepository
@@ -95,7 +90,15 @@ class LiveStreamViewModel @Inject constructor(
     private val eventInteractionRepository: EventInteractionRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
     private val exploreRepository: ExploreRepository,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
+
+    private val userMentionHandler = UserMentionHandler(
+        scope = viewModelScope,
+        userId = activeAccountStore.activeUserId(),
+        exploreRepository = exploreRepository,
+        userRepository = userRepository,
+    )
     private val _state = MutableStateFlow(UiState(activeUserId = activeAccountStore.activeUserId()))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
@@ -117,8 +120,11 @@ class LiveStreamViewModel @Inject constructor(
         resolveNaddr()
         observeEvents()
         observeFollowsResults()
-        observeDebouncedQueryChanges()
-        fetchPopularUsers()
+        viewModelScope.launch {
+            userMentionHandler.state.collect { taggingState ->
+                setState { copy(userTaggingState = taggingState) }
+            }
+        }
     }
 
     private fun resolveNaddr() =
@@ -241,59 +247,18 @@ class LiveStreamViewModel @Inject constructor(
                     UiEvent.ToggleMute -> setState {
                         copy(playerState = playerState.copy(isMuted = !playerState.isMuted))
                     }
-                    is UiEvent.SearchUsers -> setState { copy(userTaggingQuery = it.query) }
-                    is UiEvent.ToggleSearchUsers -> setState {
-                        copy(
-                            userTaggingQuery = if (it.enabled) "" else null,
-                            users = if (it.enabled) this.users else emptyList(),
-                        )
-                    }
+                    is UiEvent.SearchUsers -> userMentionHandler.search(it.query)
+                    is UiEvent.ToggleSearchUsers -> userMentionHandler.toggleSearch(it.enabled)
                     is UiEvent.TagUser -> {
                         setState {
                             copy(taggedUsers = this.taggedUsers.toMutableList().apply { add(it.taggedUser) })
                         }
+                        userMentionHandler.markUserAsMentioned(it.taggedUser.userId)
                     }
                     UiEvent.AppendUserTagAtSign -> setState {
                         copy(comment = this.comment.appendUserTagAtSignAtCursorPosition())
                     }
                 }
-            }
-        }
-
-    @OptIn(FlowPreview::class)
-    private fun observeDebouncedQueryChanges() =
-        viewModelScope.launch {
-            events.filterIsInstance<UiEvent.SearchUsers>()
-                .debounce(0.42.seconds)
-                .collect {
-                    searchUserTagging(query = it.query)
-                }
-        }
-
-    private fun fetchPopularUsers() =
-        viewModelScope.launch {
-            try {
-                val popularUsers = exploreRepository.fetchPopularUsers()
-                setState { copy(popularUsers = popularUsers.map { it.mapAsUserProfileUi() }) }
-            } catch (error: NetworkException) {
-                Timber.w(error)
-            }
-        }
-
-    private fun searchUserTagging(query: String) =
-        viewModelScope.launch {
-            setState { copy(searchingUsers = true) }
-            try {
-                if (query.isNotEmpty()) {
-                    val result = exploreRepository.searchUsers(query = query, limit = 10)
-                    setState { copy(users = result.map { it.mapAsUserProfileUi() }) }
-                } else {
-                    setState { copy(users = emptyList()) }
-                }
-            } catch (error: NetworkException) {
-                Timber.w(error)
-            } finally {
-                setState { copy(searchingUsers = false) }
             }
         }
 
@@ -479,7 +444,7 @@ class LiveStreamViewModel @Inject constructor(
                 when (result.error) {
                     is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
                     is ZapError.FailedToFetchZapInvoice,
-                        -> setState { copy(error = UiError.InvalidZapRequest()) }
+                    -> setState { copy(error = UiError.InvalidZapRequest()) }
 
                     ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
                         setState { copy(error = UiError.FailedToPublishZapEvent()) }

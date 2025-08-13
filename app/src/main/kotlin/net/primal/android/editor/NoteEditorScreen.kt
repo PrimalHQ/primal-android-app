@@ -583,19 +583,17 @@ private fun NoteEditorFooter(
     Column(modifier = modifier) {
         HorizontalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
 
-        if (state.userTaggingQuery != null) {
+        if (state.userTaggingState.isUserTaggingActive) {
             NoteTagUserLazyColumn(
                 modifier = Modifier.heightIn(min = 0.dp, max = 288.dp),
                 content = state.content,
                 taggedUsers = state.taggedUsers,
-                users = state.users.ifEmpty {
-                    if (state.userTaggingQuery.isEmpty()) {
-                        state.recommendedUsers
-                    } else {
-                        emptyList()
-                    }
+                users = if (state.userTaggingState.userTaggingQuery.isNullOrEmpty()) {
+                    state.userTaggingState.recommendedUsers
+                } else {
+                    state.userTaggingState.searchResults
                 },
-                userTaggingQuery = state.userTaggingQuery,
+                userTaggingQuery = state.userTaggingState.userTaggingQuery ?: "",
                 onUserClick = { newContent, newTaggedUsers ->
                     eventPublisher(UiEvent.UpdateContent(content = newContent))
                     eventPublisher(UiEvent.TagUser(taggedUser = newTaggedUsers.last()))
