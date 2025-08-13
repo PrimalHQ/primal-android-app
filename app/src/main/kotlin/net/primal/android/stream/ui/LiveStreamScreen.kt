@@ -127,7 +127,11 @@ private val ZapMessageBorderColor = Color(0xFFFFA000)
 private val ZapMessageBackgroundColor = Color(0xFFE47C00)
 private val ZapMessageProfileHandleColor: Color
     @Composable
-    get() = if (LocalPrimalTheme.current.isDarkTheme) Color(0xFFFFA02F) else Color(0xFFE47C00)
+    get() = if (LocalPrimalTheme.current.isDarkTheme) {
+        Color(0xFFFFA02F)
+    } else {
+        Color(0xFFE47C00)
+    }
 
 @Composable
 fun LiveStreamScreen(
@@ -819,8 +823,7 @@ private fun LiveChatContent(
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
-                    .padding(horizontal = 16.dp),
+                    .weight(1f),
                 state = listState,
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(vertical = 12.dp),
@@ -968,12 +971,13 @@ private fun ChatMessageListItem(message: ChatMessageUi) {
     }
 
     Row(
+        modifier = Modifier.padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
     ) {
         UniversalAvatarThumbnail(
             avatarCdnImage = message.authorProfile.avatarCdnImage,
-            avatarSize = 32.dp,
+            avatarSize = 24.dp,
             legendaryCustomization = message.authorProfile.premiumDetails?.legendaryCustomization,
         )
 
@@ -998,6 +1002,7 @@ private fun ChatMessageListItem(message: ChatMessageUi) {
 private fun ZapMessageListItem(zap: EventZapUiModel) {
     Box(
         modifier = Modifier
+            .padding(horizontal = 8.dp)
             .fillMaxWidth()
             .border(
                 width = 1.dp,
@@ -1005,10 +1010,8 @@ private fun ZapMessageListItem(zap: EventZapUiModel) {
                 shape = AppTheme.shapes.medium,
             )
             .clip(AppTheme.shapes.medium)
-            .background(
-                color = ZapMessageBackgroundColor.copy(alpha = 0.2f),
-            )
-            .padding(horizontal = 12.dp, vertical = 10.dp),
+            .background(color = ZapMessageBackgroundColor.copy(alpha = 0.2f))
+            .padding(horizontal = 8.dp, vertical = 10.dp),
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -1016,7 +1019,8 @@ private fun ZapMessageListItem(zap: EventZapUiModel) {
         ) {
             UniversalAvatarThumbnail(
                 avatarCdnImage = zap.zapperAvatarCdnImage,
-                avatarSize = 32.dp,
+                avatarSize = 24.dp,
+                legendaryCustomization = zap.zapperLegendaryCustomization,
             )
             ZapMessageContent(zap = zap)
         }
@@ -1027,10 +1031,9 @@ private fun ZapMessageListItem(zap: EventZapUiModel) {
 private fun ZapMessageContent(zap: EventZapUiModel) {
     val localUriHandler = LocalUriHandler.current
 
-    Column(modifier = Modifier.padding(top = 5.dp)) {
+    Column(modifier = Modifier.padding(top = 0.dp)) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
