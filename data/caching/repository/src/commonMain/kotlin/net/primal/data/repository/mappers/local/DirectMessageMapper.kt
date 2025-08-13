@@ -20,7 +20,7 @@ fun DirectMessageData.asDirectMessageDO(): DirectMessageDO {
         participantId = this.participantId,
         createdAt = this.createdAt,
         content = this.content.decrypted,
-        hashtags = this.hashtags,
+        hashtags = this.hashtags.decrypted,
         links = emptyList(),
         nostrUris = emptyList(),
     )

@@ -6,7 +6,7 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.utils.parseHashtags
 import net.primal.domain.nostr.utils.parseNostrUris
-import net.primal.shared.data.local.encryption.EncryptableString
+import net.primal.shared.data.local.encryption.asEncryptable
 
 fun List<NostrEvent>.mapAsMessageDataPO(
     userId: String,
@@ -30,8 +30,8 @@ fun NostrEvent.mapAsMessageDataPO(
         receiverId = receiverId,
         participantId = participantId,
         createdAt = this.createdAt,
-        content = EncryptableString(decrypted = decryptedMessage),
-        uris = decryptedMessage.detectUrls() + decryptedMessage.parseNostrUris(),
-        hashtags = decryptedMessage.parseHashtags(),
+        content = decryptedMessage.asEncryptable(),
+        uris = (decryptedMessage.detectUrls() + decryptedMessage.parseNostrUris()).asEncryptable(),
+        hashtags = decryptedMessage.parseHashtags().asEncryptable(),
     )
 }

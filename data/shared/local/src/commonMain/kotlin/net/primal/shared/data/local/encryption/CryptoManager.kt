@@ -16,15 +16,17 @@ internal object CryptoManager {
             .decodeFromByteArrayBlocking(AES.Key.Format.RAW, rawKey)
     }
 
-    fun encryptAsByteArray(bytes: ByteArray): ByteArray = gcmKey.cipher().encryptBlocking(bytes)
     inline fun <reified T> encrypt(value: T?): ByteArray? =
         value?.let { encryptAsByteArray(text = value.encodeToJsonString()) }
 
-    fun decryptToByteArray(blob: ByteArray): ByteArray = gcmKey.cipher().decryptBlocking(blob)
     inline fun <reified T> decrypt(value: ByteArray?): T? =
         value?.let { decryptToString(blob = value) }?.decodeFromJsonStringOrNull()
 
-    fun encryptAsByteArray(text: String): ByteArray = encryptAsByteArray(text.encodeToByteArray())
+    private fun encryptAsByteArray(bytes: ByteArray): ByteArray = gcmKey.cipher().encryptBlocking(bytes)
 
-    fun decryptToString(blob: ByteArray): String = decryptToByteArray(blob).decodeToString()
+    private fun decryptToByteArray(blob: ByteArray): ByteArray = gcmKey.cipher().decryptBlocking(blob)
+
+    private fun encryptAsByteArray(text: String): ByteArray = encryptAsByteArray(text.encodeToByteArray())
+
+    private fun decryptToString(blob: ByteArray): String = decryptToByteArray(blob).decodeToString()
 }

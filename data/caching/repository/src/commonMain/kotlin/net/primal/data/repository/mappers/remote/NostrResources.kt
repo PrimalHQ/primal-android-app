@@ -92,7 +92,7 @@ fun List<DirectMessageData>.flatMapMessagesAsReferencedNostrUriDO(
     linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
 ) = flatMap { messageData ->
-    messageData.uris.mapAsReferencedNostrUriDO(
+    messageData.uris.decrypted.mapAsReferencedNostrUriDO(
         eventId = messageData.messageId,
         eventIdToNostrEvent = eventIdToNostrEvent,
         postIdToPostDataMap = postIdToPostDataMap,

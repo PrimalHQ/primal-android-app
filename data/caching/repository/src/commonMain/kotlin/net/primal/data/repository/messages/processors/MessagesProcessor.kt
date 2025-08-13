@@ -74,7 +74,7 @@ internal class MessagesProcessor(
     }
 
     private suspend fun processNostrUrisAndSave(userId: String, messageDataList: List<DirectMessageData>) {
-        val nostrUris = messageDataList.flatMap { it.uris }.filter { it.isNostrUri() }
+        val nostrUris = messageDataList.flatMap { it.uris.decrypted }.filter { it.isNostrUri() }
 
         val referencedEventIds = nostrUris.mapNotNull { it.extractNoteId() }.toSet()
         val localNotes = database.posts().findPosts(referencedEventIds.toList())
