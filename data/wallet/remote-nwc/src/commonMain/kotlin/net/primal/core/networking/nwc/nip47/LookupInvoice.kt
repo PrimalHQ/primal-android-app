@@ -2,6 +2,7 @@ package net.primal.core.networking.nwc.nip47
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 import net.primal.domain.nostr.InvoiceType
 
 @Serializable
@@ -23,5 +24,5 @@ data class LookupInvoiceResponsePayload(
     @SerialName("created_at") val createdAt: Long,
     @SerialName("expires_at") val expiresAt: Long? = null,
     @SerialName("settled_at") val settledAt: Long? = null,
-    val metadata: Map<String, String>? = null,
+    val metadata: Map<String, JsonElement>? = null,
 )
