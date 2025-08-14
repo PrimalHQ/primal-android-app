@@ -20,7 +20,8 @@ object AndroidRepositoryFactory : RepositoryFactory() {
         )
     }
 
-    fun init(context: Context) {
+    fun init(context: Context, enableDbEncryption: Boolean) {
+        WalletDatabase.setEncryption(enableEncryption = enableDbEncryption)
         this.appContext = context.applicationContext
         AndroidPlatformKeyStore.init(context)
         AppConfigInitializer.init(context)

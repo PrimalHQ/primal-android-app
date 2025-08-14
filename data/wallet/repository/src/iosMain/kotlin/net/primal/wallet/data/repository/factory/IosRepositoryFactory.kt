@@ -11,5 +11,9 @@ object IosRepositoryFactory : RepositoryFactory() {
         LocalDatabaseFactory.createDatabase<WalletDatabase>(databaseName = "wallet_database.db")
     }
 
+    fun init(enableDbEncryption: Boolean) {
+        WalletDatabase.setEncryption(enableEncryption = enableDbEncryption)
+    }
+
     override fun resolveWalletDatabase(): WalletDatabase = walletDatabase
 }

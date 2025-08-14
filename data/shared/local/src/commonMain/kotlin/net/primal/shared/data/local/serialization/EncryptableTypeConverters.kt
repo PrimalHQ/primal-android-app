@@ -1,43 +1,60 @@
 package net.primal.shared.data.local.serialization
 
 import androidx.room.TypeConverter
+import kotlin.io.encoding.ExperimentalEncodingApi
 import net.primal.shared.data.local.encryption.CryptoManager
 import net.primal.shared.data.local.encryption.Encryptable
+import net.primal.shared.data.local.encryption.EncryptionType
 import net.primal.shared.data.local.encryption.asEncryptable
 
+@OptIn(ExperimentalEncodingApi::class)
 object EncryptableTypeConverters {
-    @TypeConverter
-    fun fromLong(value: Encryptable<Long>?): ByteArray? = value?.let { CryptoManager.encrypt(value.decrypted) }
+    var enableEncryption = true
+
+    private val encryptionType: EncryptionType
+        get() = if (enableEncryption) {
+            EncryptionType.AES
+        } else {
+            EncryptionType.PlainText
+        }
 
     @TypeConverter
-    fun toLong(value: ByteArray?): Encryptable<Long>? =
-        value?.let { CryptoManager.decrypt<Long>(value)?.asEncryptable() }
+    fun fromLong(value: Encryptable<Long>?): String? =
+        value?.let { CryptoManager.encrypt(value.decrypted, encryptionType) }
 
     @TypeConverter
-    fun fromString(value: Encryptable<String>?): ByteArray? = value?.let { CryptoManager.encrypt(value.decrypted) }
+    fun toLong(value: String?): Encryptable<Long>? =
+        value?.let { CryptoManager.decrypt<Long>(value, encryptionType)?.asEncryptable() }
 
     @TypeConverter
-    fun toString(value: ByteArray?): Encryptable<String>? =
-        value?.let { CryptoManager.decrypt<String>(value)?.asEncryptable() }
+    fun fromString(value: Encryptable<String>?): String? =
+        value?.let { CryptoManager.encrypt(value.decrypted, encryptionType) }
 
     @TypeConverter
-    fun fromStringList(value: Encryptable<List<String>>?): ByteArray? =
-        value?.let { CryptoManager.encrypt(value.decrypted) }
+    fun toString(value: String?): Encryptable<String>? =
+        value?.let { CryptoManager.decrypt<String>(value, encryptionType)?.asEncryptable() }
 
     @TypeConverter
-    fun toStringList(value: ByteArray?): Encryptable<List<String>>? =
-        value?.let { CryptoManager.decrypt<List<String>>(value)?.asEncryptable() }
+    fun fromStringList(value: Encryptable<List<String>>?): String? =
+        value?.let { CryptoManager.encrypt(value.decrypted, encryptionType) }
 
     @TypeConverter
-    fun fromDouble(value: Encryptable<Double>?): ByteArray? = value?.let { CryptoManager.encrypt(value.decrypted) }
+    fun toStringList(value: String?): Encryptable<List<String>>? =
+        value?.let { CryptoManager.decrypt<List<String>>(value, encryptionType)?.asEncryptable() }
 
     @TypeConverter
-    fun toDouble(value: ByteArray?): Encryptable<Double>? =
-        value?.let { CryptoManager.decrypt<Double>(value)?.asEncryptable() }
+    fun fromDouble(value: Encryptable<Double>?): String? =
+        value?.let { CryptoManager.encrypt(value.decrypted, encryptionType) }
 
     @TypeConverter
-    fun fromInt(value: Encryptable<Int>?): ByteArray? = value?.let { CryptoManager.encrypt(value.decrypted) }
+    fun toDouble(value: String?): Encryptable<Double>? =
+        value?.let { CryptoManager.decrypt<Double>(value, encryptionType)?.asEncryptable() }
 
     @TypeConverter
-    fun toInt(value: ByteArray?): Encryptable<Int>? = value?.let { CryptoManager.decrypt<Int>(value)?.asEncryptable() }
+    fun fromInt(value: Encryptable<Int>?): String? =
+        value?.let { CryptoManager.encrypt(value.decrypted, encryptionType) }
+
+    @TypeConverter
+    fun toInt(value: String?): Encryptable<Int>? =
+        value?.let { CryptoManager.decrypt<Int>(value, encryptionType)?.asEncryptable() }
 }
