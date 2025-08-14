@@ -39,6 +39,12 @@ abstract class WalletDatabase : RoomDatabase() {
     abstract fun wallet(): WalletDao
     abstract fun walletTransactions(): WalletTransactionDao
     abstract fun walletSettings(): WalletSettingsDao
+
+    companion object {
+        fun setEncryption(enableEncryption: Boolean) {
+            EncryptableTypeConverters.enableEncryption = enableEncryption
+        }
+    }
 }
 
 // The Room compiler generates the `actual` implementations.
