@@ -29,7 +29,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -55,6 +54,7 @@ import java.io.IOException
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.ApplyEdgeToEdge
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.ToSAndPrivacyPolicyText
 import net.primal.android.core.compose.applyEdgeToEdge
@@ -111,7 +111,7 @@ private fun WalletActivationScreen(
     eventPublisher: (UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier.imePadding(),
         topBar = {
             PrimalTopAppBar(

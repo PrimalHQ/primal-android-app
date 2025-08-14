@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -20,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
@@ -59,7 +59,7 @@ private fun ProfileFollowsScreen(
         onErrorDismiss = { eventPublisher(ProfileFollowsContract.UiEvent.DismissError) },
     )
 
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(

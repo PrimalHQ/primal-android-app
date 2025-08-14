@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -22,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.text.NumberFormat
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FeedReplies
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
@@ -103,7 +103,7 @@ fun FloatingArticlePill(
 @Preview
 private fun PreviewFloatingArticlePill() {
     PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
-        Scaffold(
+        PrimalScaffold(
             floatingActionButton = {
                 FloatingArticlePill(
                     commentsCount = 72,

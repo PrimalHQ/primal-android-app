@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -32,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.core.compose.MAX_COMPONENT_WIDTH
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -79,7 +79,7 @@ private fun ProfileQrCodeViewerScreen(
     }
     var qrCodeMode by remember { mutableStateOf(QrCodeMode.Viewer) }
     ColumnWithBackground(backgroundPainter = painterResource(id = R.drawable.profile_qrcode_background)) {
-        Scaffold(
+        PrimalScaffold(
             containerColor = Color.Transparent,
             topBar = {
                 PrimalTopAppBar(

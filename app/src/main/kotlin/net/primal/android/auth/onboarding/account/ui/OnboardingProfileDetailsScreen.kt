@@ -28,7 +28,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -57,6 +56,7 @@ import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -70,7 +70,7 @@ fun OnboardingProfileDetailsScreen(
     eventPublisher: (OnboardingContract.UiEvent) -> Unit,
     onBack: () -> Unit,
 ) {
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier.imePadding(),
         containerColor = Color.Transparent,
         topBar = {

@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -54,6 +53,7 @@ import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
@@ -83,7 +83,7 @@ fun OnboardingProfileFollowsScreen(
     BackHandler { backSequence() }
 
     var shouldCustomize by remember { mutableStateOf(state.customizeFollows) }
-    Scaffold(
+    PrimalScaffold(
         containerColor = Color.Transparent,
         topBar = {
             PrimalTopAppBar(

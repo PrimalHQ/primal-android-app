@@ -35,7 +35,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarDefaults
@@ -79,6 +78,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.HorizontalPagerIndicator
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
@@ -163,7 +163,7 @@ private fun EventMediaGalleryScreen(
 
     val containerColor = AppTheme.colorScheme.surface.copy(alpha = 0.21f)
 
-    Scaffold(
+    PrimalScaffold(
         contentColor = AppTheme.colorScheme.background,
         topBar = {
             AnimatedVisibility(

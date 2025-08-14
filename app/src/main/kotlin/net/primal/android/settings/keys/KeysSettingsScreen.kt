@@ -19,7 +19,6 @@ import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,6 +44,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.BiometricPrompt
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -70,7 +70,7 @@ fun KeysSettingsScreen(viewModel: KeysSettingsViewModel, onClose: () -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun KeysSettingsScreen(state: KeysSettingsContract.UiState, onClose: () -> Unit) {
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(

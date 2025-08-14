@@ -28,7 +28,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -54,6 +53,7 @@ import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
@@ -119,7 +119,7 @@ private fun LegendaryProfileCustomizationScreen(
         cancelEditMode()
     }
 
-    Scaffold(
+    PrimalScaffold(
         modifier = Modifier.imePadding(),
         topBar = {
             PrimalTopAppBar(
