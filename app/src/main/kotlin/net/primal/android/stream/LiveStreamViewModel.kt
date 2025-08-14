@@ -1,6 +1,5 @@
 package net.primal.android.stream
 
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -8,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.approvals.FollowsApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
@@ -29,6 +30,7 @@ import net.primal.android.navigation.naddr
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.profile.mention.UserMentionHandler
+import net.primal.android.profile.mention.appendUserTagAtSignAtCursorPosition
 import net.primal.android.stream.LiveStreamContract.SideEffect
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
 import net.primal.android.stream.LiveStreamContract.UiEvent
@@ -47,7 +49,6 @@ import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.events.EventRelayHintsRepository
-import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.links.EventUriNostrType
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.mutes.MutedItemRepository
@@ -77,7 +78,8 @@ import timber.log.Timber
 
 @HiltViewModel
 class LiveStreamViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
+    userMentionHandlerFactory: UserMentionHandler.Factory,
     private val profileRepository: ProfileRepository,
     private val streamRepository: StreamRepository,
     private val liveStreamChatRepository: LiveStreamChatRepository,
@@ -89,15 +91,13 @@ class LiveStreamViewModel @Inject constructor(
     private val bookmarksRepository: PublicBookmarksRepository,
     private val eventInteractionRepository: EventInteractionRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
-    private val exploreRepository: ExploreRepository,
-    private val userRepository: UserRepository,
 ) : ViewModel() {
 
-    private val userMentionHandler = UserMentionHandler(
+    private val naddrArg = savedStateHandle.naddr
+
+    private val userMentionHandler = userMentionHandlerFactory.create(
         scope = viewModelScope,
         userId = activeAccountStore.activeUserId(),
-        exploreRepository = exploreRepository,
-        userRepository = userRepository,
     )
     private val _state = MutableStateFlow(UiState(activeUserId = activeAccountStore.activeUserId()))
     val state = _state.asStateFlow()
@@ -106,10 +106,9 @@ class LiveStreamViewModel @Inject constructor(
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
-    private val _sideEffects = MutableSharedFlow<SideEffect>()
-    fun observeSideEffects() = _sideEffects
-
-    private fun setSideEffect(effect: SideEffect) = viewModelScope.launch { _sideEffects.emit(effect) }
+    private val _effect: Channel<SideEffect> = Channel()
+    val effect = _effect.receiveAsFlow()
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
     private var liveStreamSubscriptionJob: Job? = null
 
@@ -130,9 +129,7 @@ class LiveStreamViewModel @Inject constructor(
     private fun resolveNaddr() =
         viewModelScope.launch {
             setState { copy(loading = true) }
-            val naddr = savedStateHandle.naddr?.let {
-                Nip19TLV.parseUriAsNaddrOrNull(it)
-            }
+            val naddr = naddrArg?.let { Nip19TLV.parseUriAsNaddrOrNull(it) }
             if (naddr != null) {
                 val authorId = naddr.userId
                 setState { copy(profileId = authorId, naddr = naddr) }
@@ -242,11 +239,12 @@ class LiveStreamViewModel @Inject constructor(
                     is UiEvent.ReportAbuse -> reportAbuse(it.reportType)
                     UiEvent.RequestDeleteStream -> requestDeleteStream()
                     is UiEvent.BookmarkStream -> bookmarkStream(it)
-                    is UiEvent.QuoteStream -> setSideEffect(SideEffect.NavigateToQuote(it.naddr))
+                    is UiEvent.QuoteStream -> setEffect(SideEffect.NavigateToQuote(it.naddr))
                     UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                     UiEvent.ToggleMute -> setState {
                         copy(playerState = playerState.copy(isMuted = !playerState.isMuted))
                     }
+
                     is UiEvent.SearchUsers -> userMentionHandler.search(it.query)
                     is UiEvent.ToggleSearchUsers -> userMentionHandler.toggleSearch(it.enabled)
                     is UiEvent.TagUser -> {
@@ -255,6 +253,7 @@ class LiveStreamViewModel @Inject constructor(
                         }
                         userMentionHandler.markUserAsMentioned(it.taggedUser.userId)
                     }
+
                     UiEvent.AppendUserTagAtSign -> setState {
                         copy(comment = this.comment.appendUserTagAtSignAtCursorPosition())
                     }
@@ -296,23 +295,6 @@ class LiveStreamViewModel @Inject constructor(
             )
         }
         return content
-    }
-
-    private fun TextFieldValue.appendUserTagAtSignAtCursorPosition(): TextFieldValue {
-        val text = this.text
-        val selection = this.selection
-
-        val newText = if (selection.length > 0) {
-            text.replaceRange(startIndex = selection.start, endIndex = selection.end, "@")
-        } else {
-            text.substring(0, selection.start) + "@" + text.substring(selection.start)
-        }
-        val newSelectionStart = selection.start + 1
-
-        return this.copy(
-            text = newText,
-            selection = TextRange(start = newSelectionStart, end = newSelectionStart),
-        )
     }
 
     private fun observeStreamInfo(naddr: Naddr) =
@@ -411,7 +393,7 @@ class LiveStreamViewModel @Inject constructor(
         }
 
     private fun zapStream(zapAction: UiEvent.ZapStream) {
-        val naddr = savedStateHandle.naddr?.let { Nip19TLV.parseUriAsNaddrOrNull(it) } ?: return
+        val naddr = naddrArg?.let { Nip19TLV.parseUriAsNaddrOrNull(it) } ?: return
         val streamInfo = state.value.streamInfo ?: return
         val authorProfile = _state.value.authorProfile ?: return
 
@@ -601,7 +583,7 @@ class LiveStreamViewModel @Inject constructor(
                     relayHint = relayHint,
                 )
 
-                setSideEffect(SideEffect.StreamDeleted)
+                setEffect(SideEffect.StreamDeleted)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }

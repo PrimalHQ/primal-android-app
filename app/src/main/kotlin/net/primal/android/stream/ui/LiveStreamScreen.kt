@@ -137,8 +137,8 @@ fun LiveStreamScreen(
 ) {
     val uiState by viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel, noteCallbacks) {
-        viewModel.observeSideEffects().collectLatest {
+    LaunchedEffect(viewModel, noteCallbacks, onClose) {
+        viewModel.effect.collectLatest {
             when (it) {
                 is LiveStreamContract.SideEffect.NavigateToQuote -> {
                     noteCallbacks.onNoteQuoteClick?.invoke(it.naddr)
@@ -803,37 +803,29 @@ private fun LiveChatListOrSearch(
                             message = chatItem.message,
                             noteCallbacks = noteCallbacks,
                         )
+
                         is StreamChatItem.ZapMessageItem -> ZapMessageListItem(zap = chatItem.zap)
                     }
                 }
             }
         }
     } else {
-        if (state.userTaggingState.isSearching) {
-            Box(
-                modifier = modifier,
-                contentAlignment = Alignment.Center,
-            ) {
-                PrimalLoadingSpinner()
-            }
-        } else {
-            NoteTagUserLazyColumn(
-                modifier = modifier,
-                content = state.comment,
-                taggedUsers = state.taggedUsers,
-                users = if (state.userTaggingState.userTaggingQuery.isNullOrEmpty()) {
-                    state.userTaggingState.recommendedUsers
-                } else {
-                    state.userTaggingState.searchResults
-                },
-                userTaggingQuery = state.userTaggingState.userTaggingQuery ?: "",
-                onUserClick = { newContent, newTaggedUsers ->
-                    eventPublisher(LiveStreamContract.UiEvent.OnCommentValueChanged(newContent))
-                    eventPublisher(LiveStreamContract.UiEvent.TagUser(taggedUser = newTaggedUsers.last()))
-                    eventPublisher(LiveStreamContract.UiEvent.ToggleSearchUsers(enabled = false))
-                },
-            )
-        }
+        NoteTagUserLazyColumn(
+            modifier = modifier,
+            content = state.comment,
+            taggedUsers = state.taggedUsers,
+            users = if (state.userTaggingState.userTaggingQuery.isNullOrEmpty()) {
+                state.userTaggingState.recommendedUsers
+            } else {
+                state.userTaggingState.searchResults
+            },
+            userTaggingQuery = state.userTaggingState.userTaggingQuery ?: "",
+            onUserClick = { newContent, newTaggedUsers ->
+                eventPublisher(LiveStreamContract.UiEvent.OnCommentValueChanged(newContent))
+                eventPublisher(LiveStreamContract.UiEvent.TagUser(taggedUser = newTaggedUsers.last()))
+                eventPublisher(LiveStreamContract.UiEvent.ToggleSearchUsers(enabled = false))
+            },
+        )
     }
 }
 

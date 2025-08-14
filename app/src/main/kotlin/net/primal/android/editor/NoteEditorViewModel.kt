@@ -42,17 +42,16 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.mention.UserMentionHandler
+import net.primal.android.profile.mention.appendUserTagAtSignAtCursorPosition
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
-import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
 import net.primal.core.utils.fetchAndGet
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRelayHintsRepository
-import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
@@ -78,6 +77,7 @@ import net.primal.domain.utils.isLnInvoice
 import timber.log.Timber
 
 class NoteEditorViewModel @AssistedInject constructor(
+    userMentionHandlerFactory: UserMentionHandler.Factory,
     @Assisted private val args: NoteEditorArgs,
     private val fileAnalyser: FileAnalyser,
     private val activeAccountStore: ActiveAccountStore,
@@ -85,18 +85,14 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val notePublishHandler: NotePublishHandler,
     private val primalUploadService: AndroidPrimalBlossomUploadService,
     private val highlightRepository: HighlightRepository,
-    private val exploreRepository: ExploreRepository,
-    private val userRepository: UserRepository,
     private val articleRepository: ArticleRepository,
     private val relayRepository: RelayRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
 
-    private val userMentionHandler = UserMentionHandler(
+    private val userMentionHandler = userMentionHandlerFactory.create(
         scope = viewModelScope,
         userId = activeAccountStore.activeUserId(),
-        exploreRepository = exploreRepository,
-        userRepository = userRepository,
     )
 
     private val referencedArticleNaddr = args.referencedArticleNaddr?.let(Nip19TLV::parseUriAsNaddrOrNull)
@@ -689,23 +685,6 @@ class NoteEditorViewModel @AssistedInject constructor(
                 setState { copy(error = null) }
             }
         }
-    }
-
-    private fun TextFieldValue.appendUserTagAtSignAtCursorPosition(): TextFieldValue {
-        val text = this.text
-        val selection = this.selection
-
-        val newText = if (selection.length > 0) {
-            text.replaceRange(startIndex = selection.start, endIndex = selection.end, "@")
-        } else {
-            text.substring(0, selection.start) + "@" + text.substring(selection.start)
-        }
-        val newSelectionStart = selection.start + 1
-
-        return this.copy(
-            text = newText,
-            selection = TextRange(start = newSelectionStart, end = newSelectionStart),
-        )
     }
 
     private inline fun <reified T : ReferencedUri<*>> List<ReferencedUri<*>>.updateByUri(

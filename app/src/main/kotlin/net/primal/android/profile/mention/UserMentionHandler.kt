@@ -1,10 +1,14 @@
 package net.primal.android.profile.mention
 
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
@@ -16,12 +20,18 @@ import net.primal.domain.explore.ExploreRepository
 import timber.log.Timber
 
 @OptIn(FlowPreview::class)
-class UserMentionHandler(
-    private val scope: CoroutineScope,
-    private val userId: String,
+class UserMentionHandler @AssistedInject constructor(
+    @Assisted private val scope: CoroutineScope,
+    @Assisted private val userId: String,
     private val exploreRepository: ExploreRepository,
     private val userRepository: UserRepository,
 ) {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(scope: CoroutineScope, userId: String): UserMentionHandler
+    }
+
     private val _state = MutableStateFlow(UserTaggingState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UserTaggingState.() -> UserTaggingState) = _state.getAndUpdate(reducer)
@@ -33,7 +43,7 @@ class UserMentionHandler(
             searchQueryFlow
                 .debounce(0.42.seconds)
                 .distinctUntilChanged()
-                .collect { query ->
+                .collectLatest { query ->
                     searchUsers(query)
                 }
         }
@@ -83,7 +93,7 @@ class UserMentionHandler(
         if (enabled) {
             search(query = "")
         } else {
-            setState { copy(userTaggingQuery = null) }
+            setState { copy(userTaggingQuery = null, searchResults = emptyList(), isSearching = false) }
         }
     }
 
