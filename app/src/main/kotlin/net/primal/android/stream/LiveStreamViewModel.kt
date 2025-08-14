@@ -1,7 +1,6 @@
 package net.primal.android.stream
 
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +25,6 @@ import net.primal.android.core.errors.asSignatureUiError
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
-import net.primal.android.navigation.naddr
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.profile.mention.UserMentionHandler
@@ -78,7 +76,6 @@ import timber.log.Timber
 
 @HiltViewModel
 class LiveStreamViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     userMentionHandlerFactory: UserMentionHandler.Factory,
     private val profileRepository: ProfileRepository,
     private val streamRepository: StreamRepository,
@@ -92,8 +89,6 @@ class LiveStreamViewModel @Inject constructor(
     private val eventInteractionRepository: EventInteractionRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
-
-    private val naddrArg = savedStateHandle.naddr
 
     private val userMentionHandler = userMentionHandlerFactory.create(
         scope = viewModelScope,
@@ -116,16 +111,15 @@ class LiveStreamViewModel @Inject constructor(
     private var chatMessages: List<StreamChatItem.ChatMessageItem> = emptyList()
 
     init {
-        resolveNaddr()
         observeEvents()
         observeFollowsResults()
         observeUserTaggingState()
     }
 
-    private fun resolveNaddr() =
+    private fun resolveNaddr(naddrUri: String) =
         viewModelScope.launch {
             setState { copy(loading = true) }
-            val naddr = naddrArg?.let { Nip19TLV.parseUriAsNaddrOrNull(it) }
+            val naddr = Nip19TLV.parseUriAsNaddrOrNull(naddrUri)
             if (naddr != null) {
                 val authorId = naddr.userId
                 setState { copy(profileId = authorId, naddr = naddr) }
@@ -248,6 +242,8 @@ class LiveStreamViewModel @Inject constructor(
                     UiEvent.ToggleMute -> setState {
                         copy(playerState = playerState.copy(isMuted = !playerState.isMuted))
                     }
+
+                    is UiEvent.StartStream -> resolveNaddr(naddrUri = it.naddr)
 
                     is UiEvent.SearchUsers -> userMentionHandler.search(it.query)
                     is UiEvent.ToggleSearchUsers -> userMentionHandler.toggleSearch(it.enabled)
@@ -397,7 +393,7 @@ class LiveStreamViewModel @Inject constructor(
         }
 
     private fun zapStream(zapAction: UiEvent.ZapStream) {
-        val naddr = naddrArg?.let { Nip19TLV.parseUriAsNaddrOrNull(it) } ?: return
+        val naddr = state.value.naddr ?: return
         val streamInfo = state.value.streamInfo ?: return
         val authorProfile = _state.value.authorProfile ?: return
 
