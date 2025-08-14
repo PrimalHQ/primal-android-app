@@ -5,8 +5,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
+import net.primal.android.core.compose.icons.PrimalIcons
 
-val SoundOn: ImageVector
+val PrimalIcons.SoundOn: ImageVector
     get() {
         if (_SoundOn != null) {
             return _SoundOn!!

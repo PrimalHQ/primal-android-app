@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.icons.PrimalIcons
 
-public val PrimalIcons.More: ImageVector
+val PrimalIcons.More: ImageVector
     get() {
         if (_more != null) {
             return _more!!

@@ -5,8 +5,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
+import net.primal.android.core.compose.icons.PrimalIcons
 
-val VideoPause: ImageVector
+val PrimalIcons.VideoPause: ImageVector
     get() {
         if (_VideoPause != null) {
             return _VideoPause!!
@@ -16,11 +17,11 @@ val VideoPause: ImageVector
             defaultWidth = 48.dp,
             defaultHeight = 48.dp,
             viewportWidth = 48f,
-            viewportHeight = 48f
+            viewportHeight = 48f,
         ).apply {
             path(
                 fill = SolidColor(Color.Black),
-                fillAlpha = 0.25f
+                fillAlpha = 0.25f,
             ) {
                 moveTo(24f, 24f)
                 moveToRelative(-24f, 0f)

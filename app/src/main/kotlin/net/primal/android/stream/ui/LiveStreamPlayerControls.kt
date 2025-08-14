@@ -164,7 +164,7 @@ private fun TopPlayerControls(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AppBarIcon(icon = Minimize, onClick = onClose)
+        AppBarIcon(icon = PrimalIcons.Minimize, onClick = onClose)
 
         val streamInfo = state.streamInfo
         val authorId = state.profileId
@@ -222,7 +222,7 @@ private fun CenterPlayerControls(
             ) {
                 Icon(
                     modifier = Modifier.size(42.dp),
-                    imageVector = VideoBack,
+                    imageVector = PrimalIcons.VideoBack,
                     contentDescription = stringResource(id = R.string.accessibility_rewind_10_seconds),
                 )
             }
@@ -233,7 +233,7 @@ private fun CenterPlayerControls(
         ) {
             Icon(
                 modifier = Modifier.size(64.dp),
-                imageVector = if (isPlaying) VideoPause else VideoPlay,
+                imageVector = if (isPlaying) PrimalIcons.VideoPause else PrimalIcons.VideoPlay,
                 contentDescription = stringResource(id = R.string.accessibility_play_pause),
             )
         }
@@ -244,7 +244,7 @@ private fun CenterPlayerControls(
             ) {
                 Icon(
                     modifier = Modifier.size(42.dp),
-                    imageVector = VideoForward,
+                    imageVector = PrimalIcons.VideoForward,
                     contentDescription = stringResource(id = R.string.accessibility_forward_10_seconds),
                 )
             }
@@ -341,13 +341,13 @@ private fun PlayerActionButtons(
 
         IconButton(onClick = onSoundClick) {
             Icon(
-                imageVector = if (isMuted) SoundOff else SoundOn,
+                imageVector = if (isMuted) PrimalIcons.SoundOff else PrimalIcons.SoundOn,
                 contentDescription = "Sound",
                 tint = Color.White,
             )
         }
         IconButton(onClick = onFullscreenClick) {
-            Icon(imageVector = FullScreen, contentDescription = "Full screen", tint = Color.White)
+            Icon(imageVector = PrimalIcons.FullScreen, contentDescription = "Full screen", tint = Color.White)
         }
     }
 }
