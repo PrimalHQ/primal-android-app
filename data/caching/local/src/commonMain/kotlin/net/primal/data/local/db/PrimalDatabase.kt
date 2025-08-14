@@ -67,6 +67,7 @@ import net.primal.data.local.serialization.CdnTypeConverters
 import net.primal.data.local.serialization.NostrReferenceTypeConverters
 import net.primal.data.local.serialization.ProfileTypeConverters
 import net.primal.data.local.serialization.StreamTypeConverters
+import net.primal.shared.data.local.serialization.EncryptableTypeConverters
 import net.primal.shared.data.local.serialization.JsonTypeConverters
 import net.primal.shared.data.local.serialization.ListsTypeConverters
 
@@ -103,7 +104,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         StreamData::class,
         StreamChatMessageData::class,
     ],
-    version = 14,
+    version = 15,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -114,6 +115,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
     ProfileTypeConverters::class,
     NostrReferenceTypeConverters::class,
     StreamTypeConverters::class,
+    EncryptableTypeConverters::class,
 )
 abstract class PrimalDatabase : RoomDatabase() {
 

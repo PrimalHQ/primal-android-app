@@ -112,6 +112,8 @@ fun List<JsonArray>.findFirstTotalParticipants() = firstOrNull { it.isTotalParti
 
 fun List<JsonArray>.findAllHashtags() = filter { it.isHashtagTag() }.mapNotNull { it.getTagValueOrNull() }
 
+fun List<JsonArray>.findFirstHostPubkey() = firstOrNull { it.isPubKeyTag() && it.hasHostMarker() }?.getTagValueOrNull()
+
 fun JsonArray.isRecordingTag() = getOrNull(0)?.jsonPrimitive?.content == "recording"
 
 fun JsonArray.isEndsTag() = getOrNull(0)?.jsonPrimitive?.content == "ends"
@@ -125,6 +127,8 @@ fun JsonArray.isStreamingTag() = getOrNull(0)?.jsonPrimitive?.content == "stream
 fun JsonArray.isStatusTag() = getOrNull(0)?.jsonPrimitive?.content == "status"
 
 fun JsonArray.isStartsTag() = getOrNull(0)?.jsonPrimitive?.content == "starts"
+
+fun JsonArray.hasHostMarker() = contains(JsonPrimitive("host"))
 
 fun JsonArray.hasMentionMarker() = contains(JsonPrimitive("mention"))
 

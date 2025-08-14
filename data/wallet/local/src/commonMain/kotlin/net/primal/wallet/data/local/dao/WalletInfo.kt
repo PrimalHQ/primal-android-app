@@ -4,16 +4,17 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlin.uuid.ExperimentalUuidApi
 import net.primal.domain.wallet.WalletType
+import net.primal.shared.data.local.encryption.Encryptable
 
 @Entity
 @OptIn(ExperimentalUuidApi::class)
 data class WalletInfo(
     @PrimaryKey
     val walletId: String,
-    val userId: String,
-    val lightningAddress: String?,
+    val userId: Encryptable<String>,
+    val lightningAddress: Encryptable<String>?,
     val type: WalletType,
-    val balanceInBtc: Double? = null,
-    val maxBalanceInBtc: Double? = null,
+    val balanceInBtc: Encryptable<Double>? = null,
+    val maxBalanceInBtc: Encryptable<Double>? = null,
     val lastUpdatedAt: Long? = null,
 )

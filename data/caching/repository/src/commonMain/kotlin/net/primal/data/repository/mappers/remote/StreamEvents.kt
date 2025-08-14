@@ -10,6 +10,7 @@ import net.primal.domain.nostr.findFirstATag
 import net.primal.domain.nostr.findFirstClient
 import net.primal.domain.nostr.findFirstCurrentParticipants
 import net.primal.domain.nostr.findFirstEnds
+import net.primal.domain.nostr.findFirstHostPubkey
 import net.primal.domain.nostr.findFirstIdentifier
 import net.primal.domain.nostr.findFirstImage
 import net.primal.domain.nostr.findFirstRecording
@@ -29,17 +30,14 @@ fun List<NostrEvent>.mapNotNullAsStreamDataPO(): List<StreamData> {
 fun NostrEvent.asStreamData(): StreamData? {
     if (this.kind != NostrEventKind.LiveActivity.value) return null
 
-    val dTag = this.tags.findFirstIdentifier()
+    val dTag = this.tags.findFirstIdentifier() ?: return null
     val status = this.tags.findFirstStatus()
-
-    if (dTag == null) {
-        return null
-    }
+    val authorId = this.tags.findFirstHostPubkey() ?: this.pubKey
 
     return StreamData(
-        aTag = "${this.kind}:${this.pubKey}:$dTag",
+        aTag = "${this.kind}:$authorId:$dTag",
         eventId = id,
-        authorId = this.pubKey,
+        authorId = authorId,
         dTag = dTag,
         title = this.tags.findFirstTitle(),
         summary = this.tags.findFirstSummary(),

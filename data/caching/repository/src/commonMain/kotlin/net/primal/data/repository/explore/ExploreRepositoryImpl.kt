@@ -244,6 +244,10 @@ class ExploreRepositoryImpl(
                 blossomServers = blossomServers,
             )
             val streamData = response.liveActivity.mapNotNullAsStreamDataPO()
+            val authorToIsLiveMap = streamData
+                .groupBy { it.authorId }
+                .mapValues { it.value.any { stream -> stream.isLive() } }
+
             val userScoresMap = response.userScores?.takeContentAsPrimalUserScoresOrNull()
             val result = profiles.map {
                 val score = userScoresMap?.get(it.ownerId)
@@ -251,6 +255,7 @@ class ExploreRepositoryImpl(
                     metadata = it.asProfileDataDO(),
                     score = score,
                     followersCount = score?.toInt(),
+                    isLive = authorToIsLiveMap[it.ownerId] ?: false,
                 )
             }.sortedByDescending { it.score }
 

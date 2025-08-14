@@ -18,6 +18,7 @@ data class UserProfileItemUi(
     val score: Float? = null,
     val isFollowed: Boolean? = null,
     val legendaryCustomization: LegendaryCustomization? = null,
+    val isLive: Boolean = false,
 )
 
 fun UserProfileSearchItem.mapAsUserProfileUi() =
@@ -30,6 +31,7 @@ fun UserProfileSearchItem.mapAsUserProfileUi() =
         followersCount = this.followersCount,
         score = this.score,
         legendaryCustomization = this.metadata.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+        isLive = this.isLive,
     )
 
 fun FollowPackProfileData.mapAsUserProfileUi() =

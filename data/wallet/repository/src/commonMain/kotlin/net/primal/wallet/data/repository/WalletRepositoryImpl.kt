@@ -27,6 +27,7 @@ import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.db.withTransaction
+import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.handler.factory.HandlerFactory
 import net.primal.wallet.data.local.dao.NostrWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
@@ -55,7 +56,7 @@ internal class WalletRepositoryImpl(
             walletDatabase.walletSettings().upsertWalletSettings(
                 WalletSettings(
                     walletId = walletId,
-                    spamThresholdAmountInSats = spamThresholdAmountInSats,
+                    spamThresholdAmountInSats = spamThresholdAmountInSats.asEncryptable(),
                 ),
             )
         }
@@ -79,11 +80,11 @@ internal class WalletRepositoryImpl(
                 walletDatabase.wallet().upsertWalletInfo(
                     info = WalletInfo(
                         walletId = wallet.walletId,
-                        userId = userId,
-                        lightningAddress = wallet.lightningAddress,
+                        userId = userId.asEncryptable(),
+                        lightningAddress = wallet.lightningAddress?.asEncryptable(),
                         type = WalletType.NWC,
-                        balanceInBtc = wallet.balanceInBtc,
-                        maxBalanceInBtc = wallet.maxBalanceInBtc,
+                        balanceInBtc = wallet.balanceInBtc?.asEncryptable(),
+                        maxBalanceInBtc = wallet.maxBalanceInBtc?.asEncryptable(),
                         lastUpdatedAt = wallet.lastUpdatedAt,
                     ),
                 )
@@ -91,10 +92,10 @@ internal class WalletRepositoryImpl(
                 walletDatabase.wallet().upsertNostrWalletData(
                     data = NostrWalletData(
                         walletId = wallet.walletId,
-                        relays = wallet.relays,
-                        pubkey = wallet.pubkey,
-                        walletPubkey = wallet.keypair.pubkey,
-                        walletPrivateKey = wallet.keypair.privateKey,
+                        relays = wallet.relays.asEncryptable(),
+                        pubkey = wallet.pubkey.asEncryptable(),
+                        walletPubkey = wallet.keypair.pubkey.asEncryptable(),
+                        walletPrivateKey = wallet.keypair.privateKey.asEncryptable(),
                     ),
                 )
             }
@@ -108,7 +109,7 @@ internal class WalletRepositoryImpl(
                 when (txData.info.walletType) {
                     WalletType.PRIMAL -> {
                         val otherProfile = txData.primal?.otherUserId?.let { profileId ->
-                            profileRepository.findProfileDataOrNull(profileId)
+                            profileRepository.findProfileDataOrNull(profileId.decrypted)
                         }
                         txData.toDomain(otherProfile = otherProfile)
                     }
@@ -125,7 +126,7 @@ internal class WalletRepositoryImpl(
                 ?: return@withContext null
 
             val profile = transaction.primal?.otherUserId
-                ?.let { profileRepository.findProfileDataOrNull(profileId = it) }
+                ?.let { profileRepository.findProfileDataOrNull(profileId = it.decrypted) }
 
             transaction.toDomain(otherProfile = profile)
         }
@@ -208,8 +209,8 @@ internal class WalletRepositoryImpl(
             }.map { response ->
                 walletDatabase.wallet().updateWalletBalance(
                     walletId = walletId,
-                    balanceInBtc = response.balanceInBtc,
-                    maxBalanceInBtc = response.maxBalanceInBtc,
+                    balanceInBtc = response.balanceInBtc.asEncryptable(),
+                    maxBalanceInBtc = response.maxBalanceInBtc?.asEncryptable(),
                 )
             }
         }
@@ -221,8 +222,8 @@ internal class WalletRepositoryImpl(
     ) = withContext(dispatcherProvider.io()) {
         walletDatabase.wallet().updateWalletBalance(
             walletId = walletId,
-            balanceInBtc = balanceInBtc,
-            maxBalanceInBtc = maxBalanceInBtc,
+            balanceInBtc = balanceInBtc.asEncryptable(),
+            maxBalanceInBtc = maxBalanceInBtc?.asEncryptable(),
         )
     }
 
@@ -255,7 +256,7 @@ internal class WalletRepositoryImpl(
 
     override suspend fun deleteAllTransactions(userId: String) =
         withContext(dispatcherProvider.io()) {
-            walletDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId)
+            walletDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId.asEncryptable())
         }
 
     private fun createTransactionsPager(

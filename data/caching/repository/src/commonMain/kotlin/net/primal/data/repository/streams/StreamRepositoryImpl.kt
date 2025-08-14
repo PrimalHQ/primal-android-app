@@ -36,6 +36,15 @@ class StreamRepositoryImpl(
         return liveStreamPO?.data?.aTag
     }
 
+    override suspend fun findWhoIsLive(authorIds: List<String>): Set<String> {
+        return database.streams()
+            .findStreamData(authorIds)
+            .groupBy { it.authorId }
+            .mapValues { it.value.any { streamData -> streamData.isLive() } }
+            .filter { it.value }
+            .keys
+    }
+
     override fun observeStream(aTag: String): Flow<Stream?> {
         return database.streams().observeStreamByATag(aTag = aTag).map { streamPO ->
             streamPO?.asStreamDO()

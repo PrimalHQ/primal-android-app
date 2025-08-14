@@ -5,6 +5,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
+import net.primal.shared.data.local.serialization.EncryptableTypeConverters
 import net.primal.shared.data.local.serialization.ListsTypeConverters
 import net.primal.wallet.data.local.dao.ActiveWalletData
 import net.primal.wallet.data.local.dao.NostrTransactionData
@@ -32,12 +33,18 @@ import net.primal.wallet.data.local.dao.WalletTransactionData
     version = 1,
     exportSchema = true,
 )
-@TypeConverters(ListsTypeConverters::class)
+@TypeConverters(ListsTypeConverters::class, EncryptableTypeConverters::class)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class WalletDatabase : RoomDatabase() {
     abstract fun wallet(): WalletDao
     abstract fun walletTransactions(): WalletTransactionDao
     abstract fun walletSettings(): WalletSettingsDao
+
+    companion object {
+        fun setEncryption(enableEncryption: Boolean) {
+            EncryptableTypeConverters.enableEncryption = enableEncryption
+        }
+    }
 }
 
 // The Room compiler generates the `actual` implementations.
