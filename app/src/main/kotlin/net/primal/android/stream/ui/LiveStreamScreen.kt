@@ -40,7 +40,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -72,7 +71,6 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.C
-import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import java.text.NumberFormat
 import java.time.Instant
@@ -86,15 +84,16 @@ import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.Close
 import net.primal.android.core.compose.icons.primaliconpack.Follow
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
-import net.primal.android.core.compose.icons.primaliconpack.SearchSettings
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
 import net.primal.android.core.compose.zaps.ArticleTopZapsSection
@@ -697,7 +696,7 @@ private fun LiveChatHeaderDetails(
                     }
                     IconText(
                         text = numberFormat.format(state.streamInfo?.viewers ?: 0),
-                        leadingIcon = Follow,
+                        leadingIcon = PrimalIcons.Follow,
                         iconSize = 16.sp,
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                         style = AppTheme.typography.bodyMedium,
@@ -710,7 +709,7 @@ private fun LiveChatHeaderDetails(
             if (!isKeyboardVisible) {
                 IconButton(onClick = { }) {
                     Icon(
-                        imageVector = SearchSettings,
+                        imageVector = PrimalIcons.AdvancedSearch,
                         contentDescription = "Chat Settings",
                         tint = AppTheme.colorScheme.onSurfaceVariant,
                     )
@@ -718,7 +717,7 @@ private fun LiveChatHeaderDetails(
             }
             IconButton(onClick = onBack) {
                 Icon(
-                    imageVector = Close,
+                    imageVector = PrimalIcons.Close,
                     contentDescription = "Back to Info",
                     tint = AppTheme.colorScheme.onSurfaceVariant,
                 )
