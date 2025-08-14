@@ -112,32 +112,7 @@ private fun LiveStreamOverlay(
 
         is StreamMode.Minimized -> {
             LiveStreamMiniPlayer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onSizeChanged { size ->
-                        miniPlayerHeight = with(localDensity) { size.height.toDp() }
-                    }
-                    .padding(bottom = animatedPadding)
-                    .run {
-                        if (!streamState.isTopLevelScreen) {
-                            this.imePadding()
-                        } else {
-                            this
-                        }
-                    }
-                    .background(AppTheme.extraColorScheme.surfaceVariantAlt2)
-                    .run {
-                        if (streamState.bottomPadding <= 3.dp) this.navigationBarsPadding()
-                        else this
-                    }
-                    .run {
-                        if (!streamState.isTopLevelScreen) {
-                            this.padding(bottom = 6.dp)
-                        } else {
-                            this
-                        }
-                    }
-                    .padding(start = 6.dp, end = 16.dp, top = 6.dp),
+                modifier = Modifier.padding(bottom = animatedPadding),
                 state = uiState.value,
                 exoPlayer = exoPlayer,
                 onExpandStream = { streamState.expand() },
