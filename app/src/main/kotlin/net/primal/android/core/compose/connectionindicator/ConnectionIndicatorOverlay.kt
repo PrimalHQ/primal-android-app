@@ -1,7 +1,6 @@
 package net.primal.android.core.compose.connectionindicator
 
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -29,7 +28,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,6 +48,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.compose.animatableSaver
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NoConnectionBlack
 import net.primal.android.core.compose.icons.primaliconpack.NoConnectionWhite
@@ -241,9 +240,3 @@ fun FloatingNoConnectionOverlay(modifier: Modifier = Modifier) {
         )
     }
 }
-
-private fun animatableSaver(): Saver<Animatable<Float, AnimationVector1D>, *> =
-    Saver(
-        save = { it.value },
-        restore = { Animatable(it) },
-    )
