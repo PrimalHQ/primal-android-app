@@ -119,11 +119,7 @@ class LiveStreamViewModel @Inject constructor(
         resolveNaddr()
         observeEvents()
         observeFollowsResults()
-        viewModelScope.launch {
-            userMentionHandler.state.collect { taggingState ->
-                setState { copy(userTaggingState = taggingState) }
-            }
-        }
+        observeUserTaggingState()
     }
 
     private fun resolveNaddr() =
@@ -159,6 +155,14 @@ class LiveStreamViewModel @Inject constructor(
         observeChatMessages(naddr)
         observeZaps(naddr)
         observeMuteState(authorId)
+    }
+
+    private fun observeUserTaggingState() {
+        viewModelScope.launch {
+            userMentionHandler.state.collect { taggingState ->
+                setState { copy(userTaggingState = taggingState) }
+            }
+        }
     }
 
     private fun observeMuteState(authorId: String) =

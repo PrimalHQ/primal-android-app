@@ -116,11 +116,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         handleArgs()
         subscribeToEvents()
         subscribeToActiveAccount()
-        viewModelScope.launch {
-            userMentionHandler.state.collect { taggingState ->
-                setState { copy(userTaggingState = taggingState) }
-            }
-        }
+        observeUserTaggingState()
     }
 
     private fun handleArgs() {
@@ -199,6 +195,14 @@ class NoteEditorViewModel @AssistedInject constructor(
                 ),
                 taggedUsers = args.taggedUsers,
             )
+        }
+    }
+
+    private fun observeUserTaggingState() {
+        viewModelScope.launch {
+            userMentionHandler.state.collect { taggingState ->
+                setState { copy(userTaggingState = taggingState) }
+            }
         }
     }
 
