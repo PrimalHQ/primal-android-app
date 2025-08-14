@@ -6,7 +6,7 @@ import android.os.Build
 import androidx.activity.compose.LocalActivity
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -20,6 +20,7 @@ import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -51,6 +52,7 @@ import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.UnlockScreenOrientation
+import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorOverlay
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.editor.NoteEditorContract
@@ -159,6 +161,7 @@ import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
 import net.primal.android.redeem.RedeemCodeContract
 import net.primal.android.redeem.RedeemCodeScreen
 import net.primal.android.redeem.RedeemCodeViewModel
+import net.primal.android.stream.overlay.LiveStreamOverlay
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
@@ -437,7 +440,7 @@ fun noteCallbacksHandler(navController: NavController) =
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
+fun PrimalAppNavigation(startDestination: String) {
     val navController = rememberNavController()
 
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
@@ -467,6 +470,31 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
         }
     }
 
+    SharedTransitionLayout {
+        ConnectionIndicatorOverlay {
+            LiveStreamOverlay(
+                navController = navController,
+                noteCallbacks = noteCallbacksHandler(navController = navController),
+            ) {
+                PrimalAppNavigation(
+                    navController = navController,
+                    startDestination = startDestination,
+                    drawerDestinationHandler = drawerDestinationHandler,
+                    topLevelDestinationHandler = topLevelDestinationHandler,
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalSharedTransitionApi::class)
+@Composable
+private fun PrimalAppNavigation(
+    navController: NavHostController,
+    startDestination: String,
+    drawerDestinationHandler: (DrawerScreenDestination) -> Unit,
+    topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit,
+) {
     NavHost(
         modifier = Modifier.background(AppTheme.colorScheme.background),
         navController = navController,
