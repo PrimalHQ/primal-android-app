@@ -63,6 +63,7 @@ interface LiveStreamContract {
     )
 
     sealed class UiEvent {
+        data class StartStream(val naddr: String) : UiEvent()
         data class OnPlayerStateUpdate(
             val isPlaying: Boolean? = null,
             val isBuffering: Boolean? = null,
