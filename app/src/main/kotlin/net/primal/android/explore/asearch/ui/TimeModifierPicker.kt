@@ -27,7 +27,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalBottomSheetProperties
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
@@ -51,6 +50,7 @@ import kotlin.time.Duration.Companion.days
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
@@ -250,7 +250,7 @@ private fun CustomTimePicker(
         )
     }
 
-    Scaffold(
+    PrimalScaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         bottomBar = {

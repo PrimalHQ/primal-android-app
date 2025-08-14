@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -25,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Settings
@@ -69,7 +69,7 @@ fun ProfileAppBarIcon(
 @Composable
 fun PreviewProfileAppBarIcon() {
     PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
-        Scaffold(
+        PrimalScaffold(
             topBar = {
                 Column {
                     TopAppBar(

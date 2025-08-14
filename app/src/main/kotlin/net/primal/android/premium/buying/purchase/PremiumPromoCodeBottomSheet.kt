@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -31,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.OtpTextField
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -55,7 +55,7 @@ fun PremiumPromoCodeBottomSheet(
         sheetState = sheetState,
         containerColor = AppTheme.colorScheme.surfaceVariant,
     ) {
-        Scaffold(
+        PrimalScaffold(
             topBar = {
                 PrimalTopAppBar(
                     title = stringResource(id = R.string.premium_promo_code_title),
