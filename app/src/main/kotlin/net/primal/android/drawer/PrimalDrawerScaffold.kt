@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.TopAppBarState
@@ -35,8 +34,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.NavigationBarFullHeightDp
 import net.primal.android.core.compose.PrimalNavigationBarLightningBolt
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
+import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.user.domain.Badges
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +68,7 @@ fun PrimalDrawerScaffold(
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val localDensity = LocalDensity.current
+    val streamState = LocalStreamState.current
 
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
 
@@ -105,13 +107,17 @@ fun PrimalDrawerScaffold(
             )
         },
         content = {
-            Scaffold(
-                modifier = if (focusModeEnabled) {
+            PrimalScaffold(
+                modifier = if (focusModeEnabled && !streamState.isActive()) {
                     Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
                 } else {
                     Modifier
                 },
-                topBar = { topAppBar(if (focusModeEnabled) topAppBarScrollBehavior else null) },
+                topBar = {
+                    topAppBar(
+                        if (focusModeEnabled && !streamState.isActive()) topAppBarScrollBehavior else null,
+                    )
+                },
                 content = { paddingValues ->
                     Box {
                         content(paddingValues)
