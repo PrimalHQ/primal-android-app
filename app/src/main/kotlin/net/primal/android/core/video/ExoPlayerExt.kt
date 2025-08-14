@@ -2,8 +2,10 @@ package net.primal.android.core.video
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.CacheDataSource
@@ -79,3 +81,39 @@ fun initializePlayer(context: Context): ExoPlayer {
         )
         .build()
 }
+
+@Composable
+fun rememberPrimalStreamExoPlayer(
+    onIsPlayingChanged: (Boolean) -> Unit,
+    onPlaybackStateChanged: (Int) -> Unit,
+): ExoPlayer {
+    val context = LocalContext.current
+    val exoPlayer = remember { ExoPlayer.Builder(context).build() }
+
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            override fun onIsPlayingChanged(isPlaying: Boolean) {
+                onIsPlayingChanged(isPlaying)
+            }
+
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                onPlaybackStateChanged(playbackState)
+            }
+        }
+        exoPlayer.addListener(listener)
+
+        onDispose {
+            exoPlayer.removeListener(listener)
+            exoPlayer.release()
+        }
+    }
+
+    return exoPlayer
+}
+
+fun ExoPlayer.toggle() =
+    if (isPlaying) {
+        pause()
+    } else {
+        play()
+    }
