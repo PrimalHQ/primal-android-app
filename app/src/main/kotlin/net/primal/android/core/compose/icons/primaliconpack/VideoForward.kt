@@ -6,8 +6,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
+import net.primal.android.core.compose.icons.PrimalIcons
 
-val VideoForward: ImageVector
+val PrimalIcons.VideoForward: ImageVector
     get() {
         if (_VideoForward != null) {
             return _VideoForward!!

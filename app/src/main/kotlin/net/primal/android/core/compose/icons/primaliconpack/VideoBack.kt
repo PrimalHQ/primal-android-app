@@ -5,8 +5,9 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
+import net.primal.android.core.compose.icons.PrimalIcons
 
-val VideoBack: ImageVector
+val PrimalIcons.VideoBack: ImageVector
     get() {
         if (_VideoBack != null) {
             return _VideoBack!!
@@ -16,11 +17,11 @@ val VideoBack: ImageVector
             defaultWidth = 40.dp,
             defaultHeight = 40.dp,
             viewportWidth = 40f,
-            viewportHeight = 40f
+            viewportHeight = 40f,
         ).apply {
             path(
                 fill = SolidColor(Color.Black),
-                fillAlpha = 0.25f
+                fillAlpha = 0.25f,
             ) {
                 moveTo(20f, 20f)
                 moveToRelative(-20f, 0f)

@@ -31,6 +31,7 @@ import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.button.FollowUnfollowButton
+import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Follow
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
@@ -109,7 +110,7 @@ private fun StreamMetaData(
         }
         IconText(
             text = numberFormat.format(viewers),
-            leadingIcon = Follow,
+            leadingIcon = PrimalIcons.Follow,
             iconSize = 16.sp,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             style = AppTheme.typography.bodyMedium,
