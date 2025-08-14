@@ -159,8 +159,7 @@ import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
 import net.primal.android.redeem.RedeemCodeContract
 import net.primal.android.redeem.RedeemCodeScreen
 import net.primal.android.redeem.RedeemCodeViewModel
-import net.primal.android.stream.LiveStreamViewModel
-import net.primal.android.stream.ui.LiveStreamScreen
+import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -286,8 +285,6 @@ private fun NavController.navigateToSettings() = navigate(route = "settings")
 fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
 
 fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$NADDR=$naddr")
-
-fun NavController.navigateToLiveStream(naddr: String) = navigate(route = "liveStream?$NADDR=$naddr")
 
 fun NavController.navigateToReactions(
     eventId: String,
@@ -863,22 +860,6 @@ fun SharedTransitionScope.PrimalAppNavigation(startDestination: String) {
                 },
                 navDeepLink {
                     uriPattern = "https://primal.net/{$PRIMAL_NAME}/{$ARTICLE_ID}"
-                },
-            ),
-            navController = navController,
-        )
-
-        liveStream(
-            route = "liveStream?$NADDR={$NADDR}",
-            arguments = listOf(
-                navArgument(NADDR) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/ls/{$NADDR}"
                 },
             ),
             navController = navController,
@@ -1464,10 +1445,12 @@ private fun NavGraphBuilder.search(
                     SearchScope.Notes -> navController.navigateToAdvancedSearch(
                         initialQuery = query,
                     )
+
                     SearchScope.Reads -> navController.navigateToAdvancedSearch(
                         initialQuery = query,
                         initialSearchKind = AdvancedSearchContract.SearchKind.Reads,
                     )
+
                     SearchScope.MyNotifications -> navController.navigateToAdvancedSearch(
                         initialQuery = query,
                         initialSearchScope = AdvancedSearchContract.SearchScope.MyNotifications,
@@ -1795,20 +1778,28 @@ private fun NavGraphBuilder.premiumManage(route: String, navController: NavContr
                     when (it) {
                         PremiumManageContract.ManageDestination.MediaManagement ->
                             navController.navigateToPremiumMediaManagement()
+
                         PremiumManageContract.ManageDestination.PremiumRelay ->
                             navController.navigateToPremiumRelay()
+
                         PremiumManageContract.ManageDestination.ContactListBackup ->
                             navController.navigateToPremiumContactList()
+
                         PremiumManageContract.ManageDestination.ContentBackup ->
                             navController.navigateToPremiumContentBackup()
+
                         PremiumManageContract.ManageDestination.ManageSubscription ->
                             navController.navigateToPremiumOrderHistory()
+
                         PremiumManageContract.ManageDestination.ChangePrimalName ->
                             navController.navigateToPremiumChangePrimalName()
+
                         is PremiumManageContract.ManageDestination.ExtendSubscription ->
                             navController.navigateToPremiumExtendSubscription(primalName = it.primalName)
+
                         PremiumManageContract.ManageDestination.LegendaryProfileCustomization ->
                             navController.navigateToPremiumLegendaryProfile()
+
                         PremiumManageContract.ManageDestination.BecomeALegend ->
                             navController.navigateToPremiumBuyPrimalLegend()
                     }
@@ -1979,6 +1970,7 @@ private fun NavGraphBuilder.bookmarks(
         ),
     )
 }
+
 private fun NavGraphBuilder.chat(
     route: String,
     arguments: List<NamedNavArgument>,
@@ -2129,31 +2121,6 @@ private fun NavGraphBuilder.articleDetails(
     )
 }
 
-private fun NavGraphBuilder.liveStream(
-    route: String,
-    deepLinks: List<NavDeepLink>,
-    arguments: List<NamedNavArgument>,
-    navController: NavController,
-) = composable(
-    route = route,
-    arguments = arguments,
-    deepLinks = deepLinks,
-    enterTransition = { primalSlideInHorizontallyFromEnd },
-    exitTransition = { primalScaleOut },
-    popEnterTransition = { primalScaleIn },
-    popExitTransition = { primalSlideOutHorizontallyToEnd },
-) { navBackEntry ->
-    val viewModel = hiltViewModel<LiveStreamViewModel>(navBackEntry)
-    ApplyEdgeToEdge()
-    LockToOrientationPortrait()
-    LiveStreamScreen(
-        viewModel = viewModel,
-        onClose = { navController.navigateUp() },
-        noteCallbacks = noteCallbacksHandler(navController = navController),
-        onGoToWallet = { navController.navigateToWallet() },
-    )
-}
-
 private fun NavGraphBuilder.reactions(
     route: String,
     arguments: List<NamedNavArgument>,
@@ -2236,6 +2203,7 @@ private fun NavGraphBuilder.profile(
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
+    val streamState = LocalStreamState.current
     val viewModel = hiltViewModel<ProfileDetailsViewModel>(it)
 
     ApplyEdgeToEdge()
@@ -2263,7 +2231,7 @@ private fun NavGraphBuilder.profile(
                 }
             },
             onNewPostClick = { navController.navigateToNoteEditor(null) },
-            onLiveStreamClick = { naddr -> navController.navigateToLiveStream(naddr) },
+            onLiveStreamClick = { naddr -> streamState.play(naddr) },
         ),
         noteCallbacks = noteCallbacksHandler(navController),
     )
