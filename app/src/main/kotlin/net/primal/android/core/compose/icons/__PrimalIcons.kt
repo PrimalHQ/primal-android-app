@@ -142,9 +142,12 @@ import net.primal.android.core.compose.icons.primaliconpack.UserFeedRemove
 import net.primal.android.core.compose.icons.primaliconpack.Verified
 import net.primal.android.core.compose.icons.primaliconpack.VerifiedFilled
 import net.primal.android.core.compose.icons.primaliconpack.VideoBack
+import net.primal.android.core.compose.icons.primaliconpack.VideoCloseMini
 import net.primal.android.core.compose.icons.primaliconpack.VideoForward
 import net.primal.android.core.compose.icons.primaliconpack.VideoPause
+import net.primal.android.core.compose.icons.primaliconpack.VideoPauseMini
 import net.primal.android.core.compose.icons.primaliconpack.VideoPlay
+import net.primal.android.core.compose.icons.primaliconpack.VideoPlayMini
 import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
 import net.primal.android.core.compose.icons.primaliconpack.WalletChangeCurrency
 import net.primal.android.core.compose.icons.primaliconpack.WalletError
@@ -323,6 +326,9 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Close,
             VideoPlay,
             VideoPause,
+            VideoPlayMini,
+            VideoPauseMini,
+            VideoCloseMini,
             VideoForward,
             VideoBack,
             Minimize,
