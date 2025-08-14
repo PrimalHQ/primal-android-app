@@ -201,8 +201,7 @@ fun ThreadScreen(
                     },
                 )
 
-                val mentionQuery = replyState.userTaggingQuery
-                if (mentionQuery != null) {
+                if (replyState.userTaggingState.isUserTaggingActive) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -214,14 +213,12 @@ fun ThreadScreen(
                             modifier = Modifier.wrapContentHeight(),
                             content = replyState.content,
                             taggedUsers = replyState.taggedUsers,
-                            users = replyState.users.ifEmpty {
-                                if (mentionQuery.isEmpty()) {
-                                    replyState.recommendedUsers
-                                } else {
-                                    emptyList()
-                                }
+                            users = if (replyState.userTaggingState.userTaggingQuery.isNullOrEmpty()) {
+                                replyState.userTaggingState.recommendedUsers
+                            } else {
+                                replyState.userTaggingState.searchResults
                             },
-                            userTaggingQuery = mentionQuery,
+                            userTaggingQuery = replyState.userTaggingState.userTaggingQuery ?: "",
                             onUserClick = { newContent, newTaggedUsers ->
                                 noteEditorViewModel.setEvent(
                                     NoteEditorContract.UiEvent.UpdateContent(content = newContent),

@@ -5,7 +5,9 @@ import net.primal.android.core.compose.profile.approvals.FollowsApproval
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.ProfileStatsUi
 import net.primal.android.core.errors.UiError
+import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.events.ui.EventZapUiModel
+import net.primal.android.profile.mention.UserTaggingState
 import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.domain.nostr.Naddr
@@ -33,6 +35,8 @@ interface LiveStreamContract {
         val zappingState: ZappingState = ZappingState(),
         val sendingMessage: Boolean = false,
         val error: UiError? = null,
+        val taggedUsers: List<NoteTaggedUser> = emptyList(),
+        val userTaggingState: UserTaggingState = UserTaggingState(),
     )
 
     data class PlayerState(
@@ -85,6 +89,10 @@ interface LiveStreamContract {
         data object RequestDeleteStream : UiEvent()
         data class BookmarkStream(val forceUpdate: Boolean = false) : UiEvent()
         data class QuoteStream(val naddr: String) : UiEvent()
+        data class SearchUsers(val query: String) : UiEvent()
+        data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
+        data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
+        data object AppendUserTagAtSign : UiEvent()
     }
 
     sealed class SideEffect {

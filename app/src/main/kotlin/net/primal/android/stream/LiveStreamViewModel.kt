@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -15,16 +16,21 @@ import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.approvals.FollowsApproval
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.asSignatureUiError
+import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.naddr
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.notes.feed.model.NoteNostrUriUi
+import net.primal.android.profile.mention.UserMentionHandler
+import net.primal.android.profile.mention.appendUserTagAtSignAtCursorPosition
 import net.primal.android.stream.LiveStreamContract.SideEffect
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
 import net.primal.android.stream.LiveStreamContract.UiEvent
@@ -43,10 +49,14 @@ import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.events.EventRelayHintsRepository
+import net.primal.domain.links.EventUriNostrType
+import net.primal.domain.links.ReferencedUser
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nip19TLV
+import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.Nprofile
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.asATagValue
@@ -55,6 +65,7 @@ import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.publisher.NostrPublishException as DomainNostrPublishException
+import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
@@ -67,7 +78,8 @@ import timber.log.Timber
 
 @HiltViewModel
 class LiveStreamViewModel @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
+    savedStateHandle: SavedStateHandle,
+    userMentionHandlerFactory: UserMentionHandler.Factory,
     private val profileRepository: ProfileRepository,
     private val streamRepository: StreamRepository,
     private val liveStreamChatRepository: LiveStreamChatRepository,
@@ -80,6 +92,13 @@ class LiveStreamViewModel @Inject constructor(
     private val eventInteractionRepository: EventInteractionRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
+
+    private val naddrArg = savedStateHandle.naddr
+
+    private val userMentionHandler = userMentionHandlerFactory.create(
+        scope = viewModelScope,
+        userId = activeAccountStore.activeUserId(),
+    )
     private val _state = MutableStateFlow(UiState(activeUserId = activeAccountStore.activeUserId()))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
@@ -87,10 +106,9 @@ class LiveStreamViewModel @Inject constructor(
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
-    private val _sideEffects = MutableSharedFlow<SideEffect>()
-    fun observeSideEffects() = _sideEffects
-
-    private fun setSideEffect(effect: SideEffect) = viewModelScope.launch { _sideEffects.emit(effect) }
+    private val _effect: Channel<SideEffect> = Channel()
+    val effect = _effect.receiveAsFlow()
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
     private var liveStreamSubscriptionJob: Job? = null
 
@@ -101,14 +119,13 @@ class LiveStreamViewModel @Inject constructor(
         resolveNaddr()
         observeEvents()
         observeFollowsResults()
+        observeUserTaggingState()
     }
 
     private fun resolveNaddr() =
         viewModelScope.launch {
             setState { copy(loading = true) }
-            val naddr = savedStateHandle.naddr?.let {
-                Nip19TLV.parseUriAsNaddrOrNull(it)
-            }
+            val naddr = naddrArg?.let { Nip19TLV.parseUriAsNaddrOrNull(it) }
             if (naddr != null) {
                 val authorId = naddr.userId
                 setState { copy(profileId = authorId, naddr = naddr) }
@@ -138,6 +155,14 @@ class LiveStreamViewModel @Inject constructor(
         observeChatMessages(naddr)
         observeZaps(naddr)
         observeMuteState(authorId)
+    }
+
+    private fun observeUserTaggingState() {
+        viewModelScope.launch {
+            userMentionHandler.state.collect { taggingState ->
+                setState { copy(userTaggingState = taggingState) }
+            }
+        }
     }
 
     private fun observeMuteState(authorId: String) =
@@ -218,10 +243,23 @@ class LiveStreamViewModel @Inject constructor(
                     is UiEvent.ReportAbuse -> reportAbuse(it.reportType)
                     UiEvent.RequestDeleteStream -> requestDeleteStream()
                     is UiEvent.BookmarkStream -> bookmarkStream(it)
-                    is UiEvent.QuoteStream -> setSideEffect(SideEffect.NavigateToQuote(it.naddr))
+                    is UiEvent.QuoteStream -> setEffect(SideEffect.NavigateToQuote(it.naddr))
                     UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                     UiEvent.ToggleMute -> setState {
                         copy(playerState = playerState.copy(isMuted = !playerState.isMuted))
+                    }
+
+                    is UiEvent.SearchUsers -> userMentionHandler.search(it.query)
+                    is UiEvent.ToggleSearchUsers -> userMentionHandler.toggleSearch(it.enabled)
+                    is UiEvent.TagUser -> {
+                        setState {
+                            copy(taggedUsers = this.taggedUsers.toMutableList().apply { add(it.taggedUser) })
+                        }
+                        userMentionHandler.markUserAsMentioned(it.taggedUser.userId)
+                    }
+
+                    UiEvent.AppendUserTagAtSign -> setState {
+                        copy(comment = this.comment.appendUserTagAtSignAtCursorPosition())
                     }
                 }
             }
@@ -232,12 +270,13 @@ class LiveStreamViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(sendingMessage = true) }
             try {
+                val content = text.replaceUserMentionsWithNostrUris(users = state.value.taggedUsers)
                 liveStreamChatRepository.sendMessage(
                     userId = activeAccountStore.activeUserId(),
                     streamATag = streamInfo.atag,
-                    content = text,
+                    content = content,
                 )
-                setState { copy(comment = TextFieldValue()) }
+                setState { copy(comment = TextFieldValue(), taggedUsers = emptyList()) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToPublishZapEvent(error)) }
@@ -248,6 +287,18 @@ class LiveStreamViewModel @Inject constructor(
                 setState { copy(sendingMessage = false) }
             }
         }
+    }
+
+    private fun String.replaceUserMentionsWithNostrUris(users: List<NoteTaggedUser>): String {
+        var content = this
+        users.forEach { user ->
+            val nprofile = Nprofile(pubkey = user.userId, relays = emptyList())
+            content = content.replace(
+                oldValue = user.displayUsername,
+                newValue = "nostr:${nprofile.toNprofileString()}",
+            )
+        }
+        return content
     }
 
     private fun observeStreamInfo(naddr: Naddr) =
@@ -346,7 +397,7 @@ class LiveStreamViewModel @Inject constructor(
         }
 
     private fun zapStream(zapAction: UiEvent.ZapStream) {
-        val naddr = savedStateHandle.naddr?.let { Nip19TLV.parseUriAsNaddrOrNull(it) } ?: return
+        val naddr = naddrArg?.let { Nip19TLV.parseUriAsNaddrOrNull(it) } ?: return
         val streamInfo = state.value.streamInfo ?: return
         val authorProfile = _state.value.authorProfile ?: return
 
@@ -536,7 +587,7 @@ class LiveStreamViewModel @Inject constructor(
                     relayHint = relayHint,
                 )
 
-                setSideEffect(SideEffect.StreamDeleted)
+                setEffect(SideEffect.StreamDeleted)
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }
@@ -599,13 +650,46 @@ class LiveStreamViewModel @Inject constructor(
             setState { copy(shouldApproveBookmark = false) }
         }
 
-    private fun ChatMessage.toChatMessageItem(): StreamChatItem.ChatMessageItem =
-        StreamChatItem.ChatMessageItem(
+    private suspend fun ChatMessage.toChatMessageItem(): StreamChatItem.ChatMessageItem {
+        val nostrUrisRaw = this.content.parseNostrUris()
+        val nostrUrisUi = nostrUrisRaw.mapNotNull { uriString ->
+            val position = this.content.indexOf(uriString)
+            Nip19TLV.parseUriAsNprofileOrNull(uriString)?.let { nprofile ->
+                try {
+                    val profileData = profileRepository.findProfileDataOrNull(profileId = nprofile.pubkey)
+                    if (profileData?.handle != null) {
+                        NoteNostrUriUi(
+                            uri = uriString,
+                            type = EventUriNostrType.Profile,
+                            referencedUser = ReferencedUser(
+                                userId = nprofile.pubkey,
+                                handle = profileData.handle!!,
+                            ),
+                            referencedEventAlt = null,
+                            referencedNote = null,
+                            referencedArticle = null,
+                            referencedHighlight = null,
+                            referencedZap = null,
+                            position = position,
+                        )
+                    } else {
+                        null
+                    }
+                } catch (error: NetworkException) {
+                    Timber.w(error, "Failed to resolve profile for $uriString")
+                    null
+                }
+            }
+        }
+
+        return StreamChatItem.ChatMessageItem(
             ChatMessageUi(
                 messageId = this.messageId,
                 authorProfile = this.author.asProfileDetailsUi(),
                 content = this.content,
                 timestamp = this.createdAt,
+                nostrUris = nostrUrisUi,
             ),
         )
+    }
 }

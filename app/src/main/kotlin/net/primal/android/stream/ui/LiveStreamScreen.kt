@@ -28,13 +28,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -100,7 +100,10 @@ import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDia
 import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.editor.ui.NoteOutlinedTextField
+import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.events.ui.EventZapUiModel
+import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
@@ -108,7 +111,10 @@ import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.LiveStreamViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.detectUrls
+import net.primal.domain.links.EventUriNostrType
+import net.primal.domain.links.ReferencedUser
 import net.primal.domain.nostr.ReactionType
+import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
 import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.utils.canZap
 
@@ -142,8 +148,8 @@ fun LiveStreamScreen(
 ) {
     val uiState by viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel, noteCallbacks) {
-        viewModel.observeSideEffects().collectLatest {
+    LaunchedEffect(viewModel, noteCallbacks, onClose) {
+        viewModel.effect.collectLatest {
             when (it) {
                 is LiveStreamContract.SideEffect.NavigateToQuote -> {
                     noteCallbacks.onNoteQuoteClick?.invoke(it.naddr)
@@ -779,6 +785,62 @@ private fun LiveChatHeader(
 }
 
 @Composable
+private fun LiveChatListOrSearch(
+    modifier: Modifier = Modifier,
+    state: LiveStreamContract.UiState,
+    listState: LazyListState,
+    noteCallbacks: NoteCallbacks,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
+) {
+    if (!state.userTaggingState.isUserTaggingActive) {
+        if (state.chatItems.isEmpty()) {
+            LiveChatEmpty(
+                modifier = modifier,
+            )
+        } else {
+            LazyColumn(
+                modifier = modifier.padding(horizontal = 16.dp),
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(vertical = 12.dp),
+                reverseLayout = true,
+            ) {
+                items(
+                    items = state.chatItems,
+                    key = { it.uniqueId },
+                ) { chatItem ->
+                    when (chatItem) {
+                        is StreamChatItem.ChatMessageItem -> ChatMessageListItem(
+                            message = chatItem.message,
+                            noteCallbacks = noteCallbacks,
+                        )
+
+                        is StreamChatItem.ZapMessageItem -> ZapMessageListItem(zap = chatItem.zap)
+                    }
+                }
+            }
+        }
+    } else {
+        NoteTagUserLazyColumn(
+            modifier = modifier,
+            content = state.comment,
+            taggedUsers = state.taggedUsers,
+            users = if (state.userTaggingState.userTaggingQuery.isNullOrEmpty()) {
+                state.userTaggingState.recommendedUsers
+            } else {
+                state.userTaggingState.searchResults
+            },
+            userTaggingQuery = state.userTaggingState.userTaggingQuery ?: "",
+            onUserClick = { newContent, newTaggedUsers ->
+                eventPublisher(LiveStreamContract.UiEvent.OnCommentValueChanged(newContent))
+                eventPublisher(LiveStreamContract.UiEvent.TagUser(taggedUser = newTaggedUsers.last()))
+                eventPublisher(LiveStreamContract.UiEvent.ToggleSearchUsers(enabled = false))
+            },
+        )
+    }
+}
+
+@Composable
 private fun LiveChatContent(
     state: LiveStreamContract.UiState,
     listState: LazyListState,
@@ -813,33 +875,15 @@ private fun LiveChatContent(
             isKeyboardVisible = isKeyboardVisible,
         )
 
-        if (state.chatItems.isEmpty()) {
-            LiveChatEmpty(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                state = listState,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                contentPadding = PaddingValues(vertical = 12.dp),
-                reverseLayout = true,
-            ) {
-                items(
-                    items = state.chatItems,
-                    key = { it.uniqueId },
-                ) { chatItem ->
-                    when (chatItem) {
-                        is StreamChatItem.ChatMessageItem -> ChatMessageListItem(message = chatItem.message)
-                        is StreamChatItem.ZapMessageItem -> ZapMessageListItem(zap = chatItem.zap)
-                    }
-                }
-            }
-        }
+        LiveChatListOrSearch(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            state = state,
+            listState = listState,
+            noteCallbacks = noteCallbacks,
+            eventPublisher = eventPublisher,
+        )
 
         LiveChatCommentInput(
             state = state,
@@ -848,6 +892,12 @@ private fun LiveChatContent(
             },
             onSendMessage = {
                 eventPublisher(LiveStreamContract.UiEvent.SendMessage(it))
+            },
+            onUserTaggingModeChanged = { enabled ->
+                eventPublisher(LiveStreamContract.UiEvent.ToggleSearchUsers(enabled = enabled))
+            },
+            onUserTagSearch = { query ->
+                eventPublisher(LiveStreamContract.UiEvent.SearchUsers(query = query))
             },
         )
     }
@@ -876,6 +926,8 @@ private fun LiveChatCommentInput(
     state: LiveStreamContract.UiState,
     onCommentChanged: (TextFieldValue) -> Unit,
     onSendMessage: (String) -> Unit,
+    onUserTaggingModeChanged: (Boolean) -> Unit,
+    onUserTagSearch: (String) -> Unit,
 ) {
     val borderColor = AppTheme.extraColorScheme.surfaceVariantAlt1
     Row(
@@ -893,7 +945,7 @@ private fun LiveChatCommentInput(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        OutlinedTextField(
+        NoteOutlinedTextField(
             modifier = Modifier.weight(1.0f),
             value = state.comment,
             onValueChange = onCommentChanged,
@@ -911,6 +963,12 @@ private fun LiveChatCommentInput(
             shape = AppTheme.shapes.extraLarge,
             keyboardOptions = KeyboardOptions.Default.copy(
                 capitalization = KeyboardCapitalization.Sentences,
+            ),
+            taggedUsers = state.taggedUsers,
+            onUserTaggingModeChanged = onUserTaggingModeChanged,
+            onUserTagSearch = onUserTagSearch,
+            keyboardActions = KeyboardActions(
+                onSend = { onSendMessage(state.comment.text) },
             ),
         )
 
@@ -937,19 +995,15 @@ private fun LiveChatCommentInput(
 }
 
 @Composable
-private fun ChatMessageListItem(message: ChatMessageUi) {
+private fun ChatMessageListItem(message: ChatMessageUi, noteCallbacks: NoteCallbacks) {
     val localUriHandler = LocalUriHandler.current
 
     val authorNameColor = AppTheme.colorScheme.onSurface
     val defaultTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1
     val linkStyle = SpanStyle(textDecoration = TextDecoration.Underline)
+    val highlightColor = AppTheme.colorScheme.primary
 
-    val annotatedContent = remember(
-        message.content,
-        message.authorProfile.authorDisplayName,
-        authorNameColor,
-        defaultTextColor,
-    ) {
+    val annotatedContent = remember(message) {
         buildAnnotatedString {
             withStyle(
                 style = SpanStyle(
@@ -961,8 +1015,13 @@ private fun ChatMessageListItem(message: ChatMessageUi) {
             }
             append(" ")
 
+            val renderedContent = renderChatMessageContentAsAnnotatedString(
+                message = message,
+                highlightColor = highlightColor,
+            )
+
             val messageWithLinks = spannableTextWithLinks(
-                text = message.content,
+                text = renderedContent,
                 defaultColor = defaultTextColor,
                 linkStyle = linkStyle,
             )
@@ -986,12 +1045,26 @@ private fun ChatMessageListItem(message: ChatMessageUi) {
             text = annotatedContent,
             style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
             onClick = { position, _ ->
-                annotatedContent.getStringAnnotations(
+                val urlAnnotation = annotatedContent.getStringAnnotations(
                     tag = URL_ANNOTATION_TAG,
                     start = position,
                     end = position,
-                ).firstOrNull()?.let { annotation ->
-                    localUriHandler.openUriSafely(annotation.item)
+                ).firstOrNull()
+
+                if (urlAnnotation != null) {
+                    localUriHandler.openUriSafely(urlAnnotation.item)
+                    return@PrimalClickableText
+                }
+
+                val profileAnnotation = annotatedContent.getStringAnnotations(
+                    tag = "profileId",
+                    start = position,
+                    end = position,
+                ).firstOrNull()
+
+                if (profileAnnotation != null) {
+                    noteCallbacks.onProfileClick?.invoke(profileAnnotation.item)
+                    return@PrimalClickableText
                 }
             },
         )
@@ -1088,7 +1161,7 @@ private fun ZapMessageContent(zap: EventZapUiModel) {
 
             val contentText = remember(zap.message, defaultTextColor) {
                 spannableTextWithLinks(
-                    text = zap.message,
+                    text = AnnotatedString(zap.message),
                     defaultColor = defaultTextColor,
                     linkStyle = linkStyle,
                 )
@@ -1131,38 +1204,13 @@ private fun buildAnnotatedStringWithHashtags(text: String, hashtagColor: Color):
     }
 }
 
-private fun AnnotatedString.Builder.addUrlAnnotation(
-    url: String,
-    content: String,
-    linkStyle: SpanStyle,
-) {
-    var startIndex = content.indexOf(url)
-
-    while (startIndex >= 0) {
-        val endIndex = startIndex + url.length
-        addStyle(
-            style = linkStyle,
-            start = startIndex,
-            end = endIndex,
-        )
-
-        addStringAnnotation(
-            tag = URL_ANNOTATION_TAG,
-            annotation = url,
-            start = startIndex,
-            end = endIndex,
-        )
-
-        startIndex = content.indexOf(url, startIndex + 1)
-    }
-}
-
 private fun spannableTextWithLinks(
-    text: String,
+    text: AnnotatedString,
     defaultColor: Color,
     linkStyle: SpanStyle,
 ): AnnotatedString {
-    val uriLinks = text.detectUrls() + text.parseNostrUris()
+    val uriLinks = text.text.detectUrls() + text.text.parseNostrUris()
+        .filterNot { it.contains("nprofile") }
 
     return buildAnnotatedString {
         withStyle(style = SpanStyle(color = defaultColor)) {
@@ -1170,7 +1218,82 @@ private fun spannableTextWithLinks(
         }
 
         uriLinks.forEach { url ->
-            addUrlAnnotation(url = url, content = text, linkStyle = linkStyle)
+            val startIndex = text.text.indexOf(url)
+            if (startIndex != -1) {
+                addStyle(
+                    style = linkStyle,
+                    start = startIndex,
+                    end = startIndex + url.length,
+                )
+                addStringAnnotation(
+                    tag = URL_ANNOTATION_TAG,
+                    annotation = url,
+                    start = startIndex,
+                    end = startIndex + url.length,
+                )
+            }
         }
+    }
+}
+
+private fun String.replaceNostrProfileUrisWithHandles(resources: List<NoteNostrUriUi>): String {
+    var newContent = this
+    resources.forEach {
+        checkNotNull(it.referencedUser)
+        newContent = newContent.replace(
+            oldValue = it.uri,
+            newValue = it.referencedUser.displayUsername,
+            ignoreCase = true,
+        )
+    }
+    return newContent
+}
+
+private fun renderChatMessageContentAsAnnotatedString(message: ChatMessageUi, highlightColor: Color): AnnotatedString {
+    val mentionedUsers = message.nostrUris.filter { it.type == EventUriNostrType.Profile }
+
+    val refinedContent = message.content
+        .clearAtSignFromNostrUris()
+        .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
+
+    return buildAnnotatedString {
+        append(refinedContent)
+
+        mentionedUsers.forEach {
+            checkNotNull(it.referencedUser)
+            addProfileAnnotation(
+                referencedUser = it.referencedUser,
+                content = refinedContent,
+                highlightColor = highlightColor,
+            )
+        }
+    }
+}
+
+private fun AnnotatedString.Builder.addProfileAnnotation(
+    referencedUser: ReferencedUser,
+    content: String,
+    highlightColor: Color,
+) {
+    val displayHandle = referencedUser.displayUsername
+    var startIndex = content.indexOf(displayHandle)
+
+    while (startIndex >= 0) {
+        val endIndex = startIndex + displayHandle.length
+
+        addStyle(
+            style = SpanStyle(color = highlightColor),
+            start = startIndex,
+            end = endIndex,
+        )
+
+        addStringAnnotation(
+            tag = "profileId",
+            annotation = referencedUser.userId,
+            start = startIndex,
+            end = endIndex,
+        )
+
+        startIndex = content.indexOf(displayHandle, startIndex + 1)
     }
 }

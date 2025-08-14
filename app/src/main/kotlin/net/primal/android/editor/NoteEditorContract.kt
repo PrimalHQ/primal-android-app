@@ -5,12 +5,12 @@ import androidx.compose.ui.text.input.TextFieldValue
 import java.util.*
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.articles.highlights.HighlightUi
-import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.profile.mention.UserTaggingState
 import net.primal.domain.links.CdnImage
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
@@ -31,15 +31,11 @@ interface NoteEditorContract {
         val uploadingAttachments: Boolean = false,
         val attachments: List<NoteAttachment> = emptyList(),
         val taggedUsers: List<NoteTaggedUser> = emptyList(),
-        val userTaggingQuery: String? = null,
-        val users: List<UserProfileItemUi> = emptyList(),
-        val recentUsers: List<UserProfileItemUi> = emptyList(),
-        val popularUsers: List<UserProfileItemUi> = emptyList(),
         val referencedNostrUris: List<ReferencedUri<*>> = emptyList(),
+        val userTaggingState: UserTaggingState = UserTaggingState(),
     ) {
         val isReply: Boolean get() = replyToConversation.isNotEmpty()
         val replyToNote: FeedPostUi? = replyToConversation.lastOrNull()
-        val recommendedUsers: List<UserProfileItemUi> get() = recentUsers + popularUsers
     }
 
     sealed class UiEvent {

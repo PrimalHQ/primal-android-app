@@ -12,14 +12,11 @@ import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
@@ -31,7 +28,6 @@ import net.primal.android.articles.feed.ui.generateNaddr
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.articles.highlights.asHighlightUi
 import net.primal.android.articles.highlights.generateNevent
-import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.editor.NoteEditorContract.ReferencedUri
@@ -45,17 +41,17 @@ import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.android.profile.mention.UserMentionHandler
+import net.primal.android.profile.mention.appendUserTagAtSignAtCursorPosition
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.repository.RelayRepository
-import net.primal.android.user.repository.UserRepository
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
 import net.primal.core.utils.fetchAndGet
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRelayHintsRepository
-import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
@@ -81,6 +77,7 @@ import net.primal.domain.utils.isLnInvoice
 import timber.log.Timber
 
 class NoteEditorViewModel @AssistedInject constructor(
+    userMentionHandlerFactory: UserMentionHandler.Factory,
     @Assisted private val args: NoteEditorArgs,
     private val fileAnalyser: FileAnalyser,
     private val activeAccountStore: ActiveAccountStore,
@@ -88,12 +85,15 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val notePublishHandler: NotePublishHandler,
     private val primalUploadService: AndroidPrimalBlossomUploadService,
     private val highlightRepository: HighlightRepository,
-    private val exploreRepository: ExploreRepository,
-    private val userRepository: UserRepository,
     private val articleRepository: ArticleRepository,
     private val relayRepository: RelayRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
+
+    private val userMentionHandler = userMentionHandlerFactory.create(
+        scope = viewModelScope,
+        userId = activeAccountStore.activeUserId(),
+    )
 
     private val referencedArticleNaddr = args.referencedArticleNaddr?.let(Nip19TLV::parseUriAsNaddrOrNull)
     private val referencedHighlightNevent = args.referencedHighlightNevent?.let(Nip19TLV::parseUriAsNeventOrNull)
@@ -116,9 +116,7 @@ class NoteEditorViewModel @AssistedInject constructor(
         handleArgs()
         subscribeToEvents()
         subscribeToActiveAccount()
-        observeDebouncedQueryChanges()
-        observeRecentUsers()
-        fetchPopularUsers()
+        observeUserTaggingState()
     }
 
     private fun handleArgs() {
@@ -200,6 +198,14 @@ class NoteEditorViewModel @AssistedInject constructor(
         }
     }
 
+    private fun observeUserTaggingState() {
+        viewModelScope.launch {
+            userMentionHandler.state.collect { taggingState ->
+                setState { copy(userTaggingState = taggingState) }
+            }
+        }
+    }
+
     @Suppress("CyclomaticComplexMethod")
     private fun subscribeToEvents() =
         viewModelScope.launch {
@@ -211,13 +217,8 @@ class NoteEditorViewModel @AssistedInject constructor(
                     is UiEvent.ImportLocalFiles -> importPhotos(event.uris)
                     is UiEvent.DiscardNoteAttachment -> discardAttachment(event.attachmentId)
                     is UiEvent.RetryUpload -> retryAttachmentUpload(event.attachmentId)
-                    is UiEvent.SearchUsers -> setState { copy(userTaggingQuery = event.query) }
-                    is UiEvent.ToggleSearchUsers -> setState {
-                        copy(
-                            userTaggingQuery = if (event.enabled) "" else null,
-                            users = if (event.enabled) this.users else emptyList(),
-                        )
-                    }
+                    is UiEvent.SearchUsers -> userMentionHandler.search(event.query)
+                    is UiEvent.ToggleSearchUsers -> userMentionHandler.toggleSearch(event.enabled)
 
                     is UiEvent.TagUser -> {
                         setState {
@@ -225,7 +226,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                                 taggedUsers = this.taggedUsers.toMutableList().apply { add(event.taggedUser) },
                             )
                         }
-                        markProfileInteraction(profileId = event.taggedUser.userId)
+                        userMentionHandler.markUserAsMentioned(profileId = event.taggedUser.userId)
                     }
 
                     UiEvent.AppendUserTagAtSign -> setState {
@@ -560,8 +561,6 @@ class NoteEditorViewModel @AssistedInject constructor(
             copy(
                 content = TextFieldValue(),
                 attachments = emptyList(),
-                users = emptyList(),
-                userTaggingQuery = null,
             )
         }
     }
@@ -689,73 +688,6 @@ class NoteEditorViewModel @AssistedInject constructor(
             if (state.value.error == error) {
                 setState { copy(error = null) }
             }
-        }
-    }
-
-    @OptIn(FlowPreview::class)
-    private fun observeDebouncedQueryChanges() =
-        viewModelScope.launch {
-            events.filterIsInstance<UiEvent.SearchUsers>()
-                .debounce(0.42.seconds)
-                .collect {
-                    searchUserTagging(query = it.query)
-                }
-        }
-
-    private fun observeRecentUsers() {
-        viewModelScope.launch {
-            userRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
-                .distinctUntilChanged()
-                .collect {
-                    setState { copy(recentUsers = it.map { it.mapAsUserProfileUi() }) }
-                }
-        }
-    }
-
-    private fun fetchPopularUsers() =
-        viewModelScope.launch {
-            try {
-                val popularUsers = exploreRepository.fetchPopularUsers()
-                setState { copy(popularUsers = popularUsers.map { it.mapAsUserProfileUi() }) }
-            } catch (error: NetworkException) {
-                Timber.w(error)
-            }
-        }
-
-    private fun searchUserTagging(query: String) =
-        viewModelScope.launch {
-            if (query.isNotEmpty()) {
-                try {
-                    val result = exploreRepository.searchUsers(query = query, limit = 10)
-                    setState { copy(users = result.map { it.mapAsUserProfileUi() }) }
-                } catch (error: NetworkException) {
-                    Timber.w(error)
-                }
-            } else {
-                setState { copy(users = emptyList()) }
-            }
-        }
-
-    private fun TextFieldValue.appendUserTagAtSignAtCursorPosition(): TextFieldValue {
-        val text = this.text
-        val selection = this.selection
-
-        val newText = if (selection.length > 0) {
-            text.replaceRange(startIndex = selection.start, endIndex = selection.end, "@")
-        } else {
-            text.substring(0, selection.start) + "@" + text.substring(selection.start)
-        }
-        val newSelectionStart = selection.start + 1
-
-        return this.copy(
-            text = newText,
-            selection = TextRange(start = newSelectionStart, end = newSelectionStart),
-        )
-    }
-
-    private fun markProfileInteraction(profileId: String) {
-        viewModelScope.launch {
-            userRepository.markAsInteracted(profileId = profileId, ownerId = activeAccountStore.activeUserId())
         }
     }
 
