@@ -16,8 +16,8 @@ import net.primal.domain.zaps.ZappingState
 
 interface LiveStreamContract {
     data class UiState(
-        val loading: Boolean = true,
         val naddr: Naddr? = null,
+        val loading: Boolean = true,
         val activeUserId: String? = null,
         val isBookmarked: Boolean = false,
         val streamInfo: StreamInfoUi? = null,
@@ -29,9 +29,9 @@ interface LiveStreamContract {
         val chatItems: List<StreamChatItem> = emptyList(),
         val zappingState: ZappingState = ZappingState(),
         val sendingMessage: Boolean = false,
-        val error: UiError? = null,
         val taggedUsers: List<NoteTaggedUser> = emptyList(),
         val userTaggingState: UserTaggingState = UserTaggingState(),
+        val error: UiError? = null,
     )
 
     data class PlayerState(
@@ -54,11 +54,11 @@ interface LiveStreamContract {
         val startedAt: Long?,
         val description: String?,
         val rawNostrEventJson: String,
-        val authorId: String,
-        val authorProfile: ProfileDetailsUi? = null,
-        val authorProfileStats: ProfileStatsUi? = null,
-        val isFollowedByActiveUser: Boolean = false,
-        val isMutedByActiveUser: Boolean = false,
+        val mainHostId: String,
+        val mainHostProfile: ProfileDetailsUi? = null,
+        val mainHostProfileStats: ProfileStatsUi? = null,
+        val isMainHostFollowedByActiveUser: Boolean = false,
+        val isMainHostMutedByActiveUser: Boolean = false,
     )
 
     sealed class UiEvent {

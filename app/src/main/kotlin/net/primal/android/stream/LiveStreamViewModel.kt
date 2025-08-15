@@ -174,7 +174,7 @@ class LiveStreamViewModel @Inject constructor(
             ).collect {
                 setState {
                     copy(
-                        streamInfo = this.streamInfo?.copy(isMutedByActiveUser = it),
+                        streamInfo = this.streamInfo?.copy(isMainHostMutedByActiveUser = it),
                     )
                 }
             }
@@ -321,7 +321,7 @@ class LiveStreamViewModel @Inject constructor(
                         return@collect
                     }
 
-                    if (authorObserversJob == null || state.value.streamInfo?.authorId != stream.authorId) {
+                    if (authorObserversJob == null || state.value.streamInfo?.mainHostId != stream.authorId) {
                         initializeAuthorObservers(authorId = stream.authorId)
                     }
 
@@ -340,7 +340,7 @@ class LiveStreamViewModel @Inject constructor(
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
                                 rawNostrEventJson = stream.rawNostrEventJson,
-                                authorId = stream.authorId,
+                                mainHostId = stream.authorId,
                             ) ?: StreamInfoUi(
                                 atag = stream.aTag,
                                 eventId = stream.eventId,
@@ -350,7 +350,7 @@ class LiveStreamViewModel @Inject constructor(
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
                                 rawNostrEventJson = stream.rawNostrEventJson,
-                                authorId = stream.authorId,
+                                mainHostId = stream.authorId,
                             ),
                             zaps = stream.eventZaps
                                 .map { it.asEventZapUiModel() }
@@ -367,7 +367,7 @@ class LiveStreamViewModel @Inject constructor(
                     setState {
                         copy(
                             streamInfo = this.streamInfo?.copy(
-                                authorProfile = profileData.asProfileDetailsUi(),
+                                mainHostProfile = profileData.asProfileDetailsUi(),
                             ),
                         )
                     }
@@ -381,7 +381,7 @@ class LiveStreamViewModel @Inject constructor(
                     setState {
                         copy(
                             streamInfo = this.streamInfo?.copy(
-                                authorProfileStats = stats?.asProfileStatsUi(),
+                                mainHostProfileStats = stats?.asProfileStatsUi(),
                             ),
                         )
                     }
@@ -395,7 +395,7 @@ class LiveStreamViewModel @Inject constructor(
                 .distinctUntilChanged()
                 .collect { isFollowed ->
                     setState {
-                        copy(streamInfo = this.streamInfo?.copy(isFollowedByActiveUser = isFollowed))
+                        copy(streamInfo = this.streamInfo?.copy(isMainHostFollowedByActiveUser = isFollowed))
                     }
                 }
         }
@@ -434,7 +434,7 @@ class LiveStreamViewModel @Inject constructor(
     private fun zapStream(zapAction: UiEvent.ZapStream) {
         val naddr = state.value.naddr ?: return
         val streamInfo = state.value.streamInfo ?: return
-        val authorProfile = _state.value.streamInfo?.authorProfile ?: return
+        val authorProfile = _state.value.streamInfo?.mainHostProfile ?: return
 
         viewModelScope.launch {
             val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = authorProfile.pubkey)
@@ -483,7 +483,7 @@ class LiveStreamViewModel @Inject constructor(
         viewModelScope.launch {
             setState {
                 copy(
-                    streamInfo = this.streamInfo?.copy(isFollowedByActiveUser = true),
+                    streamInfo = this.streamInfo?.copy(isMainHostFollowedByActiveUser = true),
                     shouldApproveProfileAction = null,
                 )
             }
@@ -497,7 +497,7 @@ class LiveStreamViewModel @Inject constructor(
         viewModelScope.launch {
             setState {
                 copy(
-                    streamInfo = this.streamInfo?.copy(isFollowedByActiveUser = false),
+                    streamInfo = this.streamInfo?.copy(isMainHostFollowedByActiveUser = false),
                     shouldApproveProfileAction = null,
                 )
             }
@@ -513,7 +513,7 @@ class LiveStreamViewModel @Inject constructor(
                 copy(
                     shouldApproveProfileAction = null,
                     streamInfo = this.streamInfo?.copy(
-                        isFollowedByActiveUser = actions.firstOrNull() is ProfileFollowsHandler.Action.Follow,
+                        isMainHostFollowedByActiveUser = actions.firstOrNull() is ProfileFollowsHandler.Action.Follow,
                     ),
                 )
             }
@@ -528,7 +528,7 @@ class LiveStreamViewModel @Inject constructor(
                         setState {
                             copy(
                                 streamInfo = this.streamInfo?.copy(
-                                    isFollowedByActiveUser = !this.streamInfo.isFollowedByActiveUser,
+                                    isMainHostFollowedByActiveUser = !this.streamInfo.isMainHostFollowedByActiveUser,
                                 ),
                             )
                         }
@@ -558,7 +558,7 @@ class LiveStreamViewModel @Inject constructor(
 
     private fun mute(profileId: String) =
         viewModelScope.launch {
-            setState { copy(streamInfo = this.streamInfo?.copy(isMutedByActiveUser = true)) }
+            setState { copy(streamInfo = this.streamInfo?.copy(isMainHostMutedByActiveUser = true)) }
             try {
                 mutedItemRepository.muteUserAndPersistMuteList(
                     userId = activeAccountStore.activeUserId(),
@@ -569,7 +569,7 @@ class LiveStreamViewModel @Inject constructor(
                 setState {
                     copy(
                         error = UiError.FailedToMuteUser(error),
-                        streamInfo = streamInfo?.copy(isMutedByActiveUser = false),
+                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = false),
                     )
                 }
             } catch (error: MissingRelaysException) {
@@ -577,7 +577,7 @@ class LiveStreamViewModel @Inject constructor(
                 setState {
                     copy(
                         error = UiError.MissingRelaysConfiguration(error),
-                        streamInfo = streamInfo?.copy(isMutedByActiveUser = false),
+                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = false),
                     )
                 }
             } catch (error: SignatureException) {
@@ -585,7 +585,7 @@ class LiveStreamViewModel @Inject constructor(
                 setState {
                     copy(
                         error = UiError.SignatureError(error.asSignatureUiError()),
-                        streamInfo = streamInfo?.copy(isMutedByActiveUser = false),
+                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = false),
                     )
                 }
             }
@@ -593,7 +593,7 @@ class LiveStreamViewModel @Inject constructor(
 
     private fun unmute(profileId: String) =
         viewModelScope.launch {
-            setState { copy(streamInfo = this.streamInfo?.copy(isMutedByActiveUser = false)) }
+            setState { copy(streamInfo = this.streamInfo?.copy(isMainHostMutedByActiveUser = false)) }
             try {
                 mutedItemRepository.unmuteUserAndPersistMuteList(
                     userId = activeAccountStore.activeUserId(),
@@ -604,7 +604,7 @@ class LiveStreamViewModel @Inject constructor(
                 setState {
                     copy(
                         error = UiError.FailedToUnmuteUser(error),
-                        streamInfo = streamInfo?.copy(isMutedByActiveUser = true),
+                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = true),
                     )
                 }
             } catch (error: MissingRelaysException) {
@@ -612,7 +612,7 @@ class LiveStreamViewModel @Inject constructor(
                 setState {
                     copy(
                         error = UiError.MissingRelaysConfiguration(error),
-                        streamInfo = streamInfo?.copy(isMutedByActiveUser = true),
+                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = true),
                     )
                 }
             } catch (error: SignatureException) {
@@ -620,7 +620,7 @@ class LiveStreamViewModel @Inject constructor(
                 setState {
                     copy(
                         error = UiError.SignatureError(error.asSignatureUiError()),
-                        streamInfo = streamInfo?.copy(isMutedByActiveUser = true),
+                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = true),
                     )
                 }
             }
@@ -633,7 +633,7 @@ class LiveStreamViewModel @Inject constructor(
                 profileRepository.reportAbuse(
                     userId = activeAccountStore.activeUserId(),
                     reportType = reportType,
-                    profileId = streamInfo.authorId,
+                    profileId = streamInfo.mainHostId,
                     eventId = streamInfo.eventId,
                     articleId = streamInfo.atag,
                 )
@@ -653,7 +653,7 @@ class LiveStreamViewModel @Inject constructor(
             val streamInfo = state.value.streamInfo
             val activeUserId = state.value.activeUserId
 
-            if (streamInfo == null || activeUserId == null || streamInfo.authorId != activeUserId) {
+            if (streamInfo == null || activeUserId == null || streamInfo.mainHostId != activeUserId) {
                 return@launch
             }
 

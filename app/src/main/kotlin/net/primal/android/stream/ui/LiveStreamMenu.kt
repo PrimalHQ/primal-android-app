@@ -45,9 +45,9 @@ import net.primal.domain.nostr.utils.withNostrPrefix
 fun LiveStreamMenu(
     modifier: Modifier,
     naddr: Naddr,
-    isMuted: Boolean,
+    isMainHostMuted: Boolean,
     isBookmarked: Boolean,
-    isStreamAuthor: Boolean,
+    isActiveUserMainHost: Boolean,
     rawNostrEvent: String?,
     menuVisible: Boolean,
     onMenuVisibilityChange: (Boolean) -> Unit,
@@ -75,9 +75,9 @@ fun LiveStreamMenu(
             val naddrString = naddr.toNaddrString()
             MenuContent(
                 naddrString = naddrString,
-                isMuted = isMuted,
+                isMuted = isMainHostMuted,
                 isBookmarked = isBookmarked,
-                isStreamAuthor = isStreamAuthor,
+                isStreamAuthor = isActiveUserMainHost,
                 rawNostrEvent = rawNostrEvent,
                 onDismiss = { onMenuVisibilityChange(false) },
                 onQuoteClick = onQuoteClick,
