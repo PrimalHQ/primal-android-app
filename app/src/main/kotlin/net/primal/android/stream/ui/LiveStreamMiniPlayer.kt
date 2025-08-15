@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.PlayerSurface
@@ -95,6 +96,17 @@ fun LiveStreamMiniPlayer(
     val paddingPx = with(localDensity) { PADDING.toPx() }
 
     var controlsOverlayVisibility by remember { mutableStateOf(false) }
+
+    LaunchedEffect(exoPlayer) {
+        if (!exoPlayer.isPlaying) {
+            state.streamInfo?.streamUrl?.let { streamUrl ->
+                val mediaItem = MediaItem.fromUri(streamUrl)
+                exoPlayer.setMediaItem(mediaItem)
+                exoPlayer.prepare()
+                exoPlayer.playWhenReady = true
+            }
+        }
+    }
 
     LaunchedEffect(controlsOverlayVisibility) {
         if (controlsOverlayVisibility) {
