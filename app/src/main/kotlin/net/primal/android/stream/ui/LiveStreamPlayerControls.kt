@@ -164,7 +164,7 @@ private fun TopPlayerControls(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        AppBarIcon(icon = PrimalIcons.Minimize, onClick = onClose)
+        AppBarIcon(icon = PrimalIcons.Minimize, onClick = onClose, tint = Color.White)
 
         val streamInfo = state.streamInfo
         val authorId = state.profileId
