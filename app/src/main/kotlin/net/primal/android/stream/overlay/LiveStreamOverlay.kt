@@ -79,8 +79,16 @@ private fun LiveStreamOverlay(
                 state = uiState.value,
                 exoPlayer = exoPlayer,
                 onClose = { streamState.minimize() },
-                noteCallbacks = noteCallbacks,
-                onGoToWallet = { navController.navigateToWallet() },
+                noteCallbacks = noteCallbacks.copy(
+                    onNoteQuoteClick = {
+                        noteCallbacks.onNoteQuoteClick?.invoke(it)
+                        streamState.minimize()
+                    },
+                ),
+                onGoToWallet = {
+                    navController.navigateToWallet()
+                    streamState.minimize()
+                },
             )
         }
 

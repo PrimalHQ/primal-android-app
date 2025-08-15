@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -74,6 +75,7 @@ import net.primal.domain.streams.chat.LiveStreamChatRepository
 import net.primal.domain.utils.isConfigured
 import timber.log.Timber
 
+@Suppress("LargeClass")
 @HiltViewModel
 class LiveStreamViewModel @Inject constructor(
     userMentionHandlerFactory: UserMentionHandler.Factory,
@@ -106,6 +108,7 @@ class LiveStreamViewModel @Inject constructor(
     private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
     private var liveStreamSubscriptionJob: Job? = null
+    private var authorObserversJob: Job? = null
 
     private var zaps: List<StreamChatItem.ZapMessageItem> = emptyList()
     private var chatMessages: List<StreamChatItem.ChatMessageItem> = emptyList()
@@ -121,10 +124,9 @@ class LiveStreamViewModel @Inject constructor(
             setState { copy(loading = true) }
             val naddr = Nip19TLV.parseUriAsNaddrOrNull(naddrUri)
             if (naddr != null) {
-                val authorId = naddr.userId
-                setState { copy(profileId = authorId, naddr = naddr) }
+                setState { copy(naddr = naddr) }
                 liveStreamSubscriptionJob = startLiveStreamSubscription(naddr)
-                initializeObservers(naddr = naddr, authorId = authorId)
+                initializeObservers(naddr = naddr)
             } else {
                 Timber.w("Unable to resolve naddr.")
                 setState { copy(loading = false) }
@@ -139,16 +141,12 @@ class LiveStreamViewModel @Inject constructor(
             )
         }
 
-    private fun initializeObservers(naddr: Naddr, authorId: String) {
+    private fun initializeObservers(naddr: Naddr) {
         observeStreamInfo(naddr)
-        observeAuthorProfile(authorId)
-        observeAuthorProfileStats(authorId)
-        observeFollowState(authorId)
         observeActiveWallet()
         observeActiveAccount()
         observeChatMessages(naddr)
         observeZaps(naddr)
-        observeMuteState(authorId)
     }
 
     private fun observeUserTaggingState() {
@@ -158,16 +156,6 @@ class LiveStreamViewModel @Inject constructor(
             }
         }
     }
-
-    private fun observeMuteState(authorId: String) =
-        viewModelScope.launch {
-            mutedItemRepository.observeIsUserMutedByOwnerId(
-                pubkey = authorId,
-                ownerId = activeAccountStore.activeUserId(),
-            ).collect {
-                setState { copy(isMuted = it) }
-            }
-        }
 
     private fun observeZaps(naddr: Naddr) =
         viewModelScope.launch {
@@ -310,13 +298,17 @@ class LiveStreamViewModel @Inject constructor(
                         return@collect
                     }
 
+                    if (authorObserversJob == null || state.value.streamInfo?.mainHostId != stream.authorId) {
+                        initializeMainHostObservers(mainHostId = stream.authorId)
+                    }
+
                     val isBookmarked = bookmarksRepository.isBookmarked(tagValue = stream.aTag)
                     setState {
                         copy(
                             loading = false,
                             isBookmarked = isBookmarked,
                             playerState = playerState.copy(isLive = isLive, atLiveEdge = isLive),
-                            streamInfo = StreamInfoUi(
+                            streamInfo = this.streamInfo?.copy(
                                 atag = stream.aTag,
                                 eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
@@ -325,7 +317,17 @@ class LiveStreamViewModel @Inject constructor(
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
                                 rawNostrEventJson = stream.rawNostrEventJson,
-                                authorId = stream.authorId,
+                                mainHostId = stream.authorId,
+                            ) ?: StreamInfoUi(
+                                atag = stream.aTag,
+                                eventId = stream.eventId,
+                                title = stream.title ?: "Live Stream",
+                                streamUrl = streamUrlToPlay,
+                                viewers = stream.currentParticipants ?: 0,
+                                startedAt = stream.startsAt,
+                                description = stream.summary,
+                                rawNostrEventJson = stream.rawNostrEventJson,
+                                mainHostId = stream.authorId,
                             ),
                             zaps = stream.eventZaps
                                 .map { it.asEventZapUiModel() }
@@ -335,30 +337,68 @@ class LiveStreamViewModel @Inject constructor(
                 }
         }
 
-    private fun observeAuthorProfile(authorId: String) =
-        viewModelScope.launch {
-            profileRepository.observeProfileData(profileId = authorId)
-                .collect {
-                    setState { copy(authorProfile = it.asProfileDetailsUi()) }
+    private fun initializeMainHostObservers(mainHostId: String) {
+        authorObserversJob?.cancel()
+        authorObserversJob = viewModelScope.launch {
+            observeAuthorProfile(mainHostId)
+            observeAuthorProfileStats(mainHostId)
+            observeFollowState(mainHostId)
+            observeMuteState(mainHostId)
+        }
+    }
+
+    private fun CoroutineScope.observeAuthorProfile(mainHostId: String) =
+        launch {
+            profileRepository.observeProfileData(profileId = mainHostId)
+                .collect { profileData ->
+                    setState {
+                        copy(
+                            streamInfo = this.streamInfo?.copy(
+                                mainHostProfile = profileData.asProfileDetailsUi(),
+                            ),
+                        )
+                    }
                 }
         }
 
-    private fun observeAuthorProfileStats(authorId: String) =
-        viewModelScope.launch {
-            profileRepository.observeProfileStats(profileId = authorId)
-                .collect {
-                    setState { copy(profileStats = it?.asProfileStatsUi()) }
+    private fun CoroutineScope.observeAuthorProfileStats(mainHostId: String) =
+        launch {
+            profileRepository.observeProfileStats(profileId = mainHostId)
+                .collect { stats ->
+                    setState {
+                        copy(
+                            streamInfo = this.streamInfo?.copy(
+                                mainHostProfileStats = stats?.asProfileStatsUi(),
+                            ),
+                        )
+                    }
                 }
         }
 
-    private fun observeFollowState(authorId: String) =
-        viewModelScope.launch {
+    private fun CoroutineScope.observeFollowState(mainHostId: String) =
+        launch {
             activeAccountStore.activeUserAccount
-                .map { authorId in it.following }
+                .map { mainHostId in it.following }
                 .distinctUntilChanged()
-                .collect {
-                    setState { copy(isFollowed = it) }
+                .collect { isFollowed ->
+                    setState {
+                        copy(streamInfo = this.streamInfo?.copy(isMainHostFollowedByActiveUser = isFollowed))
+                    }
                 }
+        }
+
+    private fun CoroutineScope.observeMuteState(mainHostId: String) =
+        launch {
+            mutedItemRepository.observeIsUserMutedByOwnerId(
+                pubkey = mainHostId,
+                ownerId = activeAccountStore.activeUserId(),
+            ).collect {
+                setState {
+                    copy(
+                        streamInfo = this.streamInfo?.copy(isMainHostMutedByActiveUser = it),
+                    )
+                }
+            }
         }
 
     private fun observeActiveWallet() =
@@ -395,7 +435,7 @@ class LiveStreamViewModel @Inject constructor(
     private fun zapStream(zapAction: UiEvent.ZapStream) {
         val naddr = state.value.naddr ?: return
         val streamInfo = state.value.streamInfo ?: return
-        val authorProfile = _state.value.authorProfile ?: return
+        val authorProfile = _state.value.streamInfo?.mainHostProfile ?: return
 
         viewModelScope.launch {
             val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = authorProfile.pubkey)
@@ -442,7 +482,12 @@ class LiveStreamViewModel @Inject constructor(
 
     private fun follow(profileId: String) =
         viewModelScope.launch {
-            setState { copy(isFollowed = true, shouldApproveProfileAction = null) }
+            setState {
+                copy(
+                    streamInfo = this.streamInfo?.copy(isMainHostFollowedByActiveUser = true),
+                    shouldApproveProfileAction = null,
+                )
+            }
             profileFollowsHandler.follow(
                 userId = activeAccountStore.activeUserId(),
                 profileId = profileId,
@@ -451,7 +496,12 @@ class LiveStreamViewModel @Inject constructor(
 
     private fun unfollow(profileId: String) =
         viewModelScope.launch {
-            setState { copy(isFollowed = false, shouldApproveProfileAction = null) }
+            setState {
+                copy(
+                    streamInfo = this.streamInfo?.copy(isMainHostFollowedByActiveUser = false),
+                    shouldApproveProfileAction = null,
+                )
+            }
             profileFollowsHandler.unfollow(
                 userId = activeAccountStore.activeUserId(),
                 profileId = profileId,
@@ -463,7 +513,9 @@ class LiveStreamViewModel @Inject constructor(
             setState {
                 copy(
                     shouldApproveProfileAction = null,
-                    isFollowed = actions.firstOrNull() is ProfileFollowsHandler.Action.Follow,
+                    streamInfo = this.streamInfo?.copy(
+                        isMainHostFollowedByActiveUser = actions.firstOrNull() is ProfileFollowsHandler.Action.Follow,
+                    ),
                 )
             }
             profileFollowsHandler.forceUpdateList(actions = actions)
@@ -474,7 +526,13 @@ class LiveStreamViewModel @Inject constructor(
             profileFollowsHandler.observeResults().collect {
                 when (it) {
                     is ProfileFollowsHandler.ActionResult.Error -> {
-                        setState { copy(isFollowed = !isFollowed) }
+                        setState {
+                            copy(
+                                streamInfo = this.streamInfo?.copy(
+                                    isMainHostFollowedByActiveUser = !this.streamInfo.isMainHostFollowedByActiveUser,
+                                ),
+                            )
+                        }
                         when (it.error) {
                             is NetworkException, is NostrPublishException -> {
                                 setState { copy(error = UiError.FailedToUpdateFollowList(cause = it.error)) }
@@ -501,7 +559,7 @@ class LiveStreamViewModel @Inject constructor(
 
     private fun mute(profileId: String) =
         viewModelScope.launch {
-            setState { copy(isMuted = true) }
+            setState { copy(streamInfo = this.streamInfo?.copy(isMainHostMutedByActiveUser = true)) }
             try {
                 mutedItemRepository.muteUserAndPersistMuteList(
                     userId = activeAccountStore.activeUserId(),
@@ -509,19 +567,34 @@ class LiveStreamViewModel @Inject constructor(
                 )
             } catch (error: DomainNostrPublishException) {
                 Timber.w(error)
-                setState { copy(error = UiError.FailedToMuteUser(error), isMuted = false) }
+                setState {
+                    copy(
+                        error = UiError.FailedToMuteUser(error),
+                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = false),
+                    )
+                }
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                setState { copy(error = UiError.MissingRelaysConfiguration(error), isMuted = false) }
+                setState {
+                    copy(
+                        error = UiError.MissingRelaysConfiguration(error),
+                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = false),
+                    )
+                }
             } catch (error: SignatureException) {
                 Timber.w(error)
-                setState { copy(error = UiError.SignatureError(error.asSignatureUiError()), isMuted = false) }
+                setState {
+                    copy(
+                        error = UiError.SignatureError(error.asSignatureUiError()),
+                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = false),
+                    )
+                }
             }
         }
 
     private fun unmute(profileId: String) =
         viewModelScope.launch {
-            setState { copy(isMuted = false) }
+            setState { copy(streamInfo = this.streamInfo?.copy(isMainHostMutedByActiveUser = false)) }
             try {
                 mutedItemRepository.unmuteUserAndPersistMuteList(
                     userId = activeAccountStore.activeUserId(),
@@ -529,13 +602,28 @@ class LiveStreamViewModel @Inject constructor(
                 )
             } catch (error: DomainNostrPublishException) {
                 Timber.w(error)
-                setState { copy(error = UiError.FailedToUnmuteUser(error), isMuted = true) }
+                setState {
+                    copy(
+                        error = UiError.FailedToUnmuteUser(error),
+                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = true),
+                    )
+                }
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                setState { copy(error = UiError.MissingRelaysConfiguration(error), isMuted = true) }
+                setState {
+                    copy(
+                        error = UiError.MissingRelaysConfiguration(error),
+                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = true),
+                    )
+                }
             } catch (error: SignatureException) {
                 Timber.w(error)
-                setState { copy(error = UiError.SignatureError(error.asSignatureUiError()), isMuted = true) }
+                setState {
+                    copy(
+                        error = UiError.SignatureError(error.asSignatureUiError()),
+                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = true),
+                    )
+                }
             }
         }
 
@@ -546,7 +634,7 @@ class LiveStreamViewModel @Inject constructor(
                 profileRepository.reportAbuse(
                     userId = activeAccountStore.activeUserId(),
                     reportType = reportType,
-                    profileId = streamInfo.authorId,
+                    profileId = streamInfo.mainHostId,
                     eventId = streamInfo.eventId,
                     articleId = streamInfo.atag,
                 )
@@ -566,7 +654,7 @@ class LiveStreamViewModel @Inject constructor(
             val streamInfo = state.value.streamInfo
             val activeUserId = state.value.activeUserId
 
-            if (streamInfo == null || activeUserId == null || streamInfo.authorId != activeUserId) {
+            if (streamInfo == null || activeUserId == null || streamInfo.mainHostId != activeUserId) {
                 return@launch
             }
 
