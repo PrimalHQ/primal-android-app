@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -148,16 +149,6 @@ class LiveStreamViewModel @Inject constructor(
         observeZaps(naddr)
     }
 
-    private fun initializeAuthorObservers(authorId: String) {
-        authorObserversJob?.cancel()
-        authorObserversJob = viewModelScope.launch {
-            observeAuthorProfile(authorId)
-            observeAuthorProfileStats(authorId)
-            observeFollowState(authorId)
-            observeMuteState(authorId)
-        }
-    }
-
     private fun observeUserTaggingState() {
         viewModelScope.launch {
             userMentionHandler.state.collect { taggingState ->
@@ -165,20 +156,6 @@ class LiveStreamViewModel @Inject constructor(
             }
         }
     }
-
-    private fun observeMuteState(authorId: String) =
-        viewModelScope.launch {
-            mutedItemRepository.observeIsUserMutedByOwnerId(
-                pubkey = authorId,
-                ownerId = activeAccountStore.activeUserId(),
-            ).collect {
-                setState {
-                    copy(
-                        streamInfo = this.streamInfo?.copy(isMainHostMutedByActiveUser = it),
-                    )
-                }
-            }
-        }
 
     private fun observeZaps(naddr: Naddr) =
         viewModelScope.launch {
@@ -322,7 +299,7 @@ class LiveStreamViewModel @Inject constructor(
                     }
 
                     if (authorObserversJob == null || state.value.streamInfo?.mainHostId != stream.authorId) {
-                        initializeAuthorObservers(authorId = stream.authorId)
+                        initializeMainHostObservers(mainHostId = stream.authorId)
                     }
 
                     val isBookmarked = bookmarksRepository.isBookmarked(tagValue = stream.aTag)
@@ -360,9 +337,19 @@ class LiveStreamViewModel @Inject constructor(
                 }
         }
 
-    private fun observeAuthorProfile(authorId: String) =
-        viewModelScope.launch {
-            profileRepository.observeProfileData(profileId = authorId)
+    private fun initializeMainHostObservers(mainHostId: String) {
+        authorObserversJob?.cancel()
+        authorObserversJob = viewModelScope.launch {
+            observeAuthorProfile(mainHostId)
+            observeAuthorProfileStats(mainHostId)
+            observeFollowState(mainHostId)
+            observeMuteState(mainHostId)
+        }
+    }
+
+    private fun CoroutineScope.observeAuthorProfile(mainHostId: String) =
+        launch {
+            profileRepository.observeProfileData(profileId = mainHostId)
                 .collect { profileData ->
                     setState {
                         copy(
@@ -374,9 +361,9 @@ class LiveStreamViewModel @Inject constructor(
                 }
         }
 
-    private fun observeAuthorProfileStats(authorId: String) =
-        viewModelScope.launch {
-            profileRepository.observeProfileStats(profileId = authorId)
+    private fun CoroutineScope.observeAuthorProfileStats(mainHostId: String) =
+        launch {
+            profileRepository.observeProfileStats(profileId = mainHostId)
                 .collect { stats ->
                     setState {
                         copy(
@@ -388,16 +375,30 @@ class LiveStreamViewModel @Inject constructor(
                 }
         }
 
-    private fun observeFollowState(authorId: String) =
-        viewModelScope.launch {
+    private fun CoroutineScope.observeFollowState(mainHostId: String) =
+        launch {
             activeAccountStore.activeUserAccount
-                .map { authorId in it.following }
+                .map { mainHostId in it.following }
                 .distinctUntilChanged()
                 .collect { isFollowed ->
                     setState {
                         copy(streamInfo = this.streamInfo?.copy(isMainHostFollowedByActiveUser = isFollowed))
                     }
                 }
+        }
+
+    private fun CoroutineScope.observeMuteState(mainHostId: String) =
+        launch {
+            mutedItemRepository.observeIsUserMutedByOwnerId(
+                pubkey = mainHostId,
+                ownerId = activeAccountStore.activeUserId(),
+            ).collect {
+                setState {
+                    copy(
+                        streamInfo = this.streamInfo?.copy(isMainHostMutedByActiveUser = it),
+                    )
+                }
+            }
         }
 
     private fun observeActiveWallet() =
