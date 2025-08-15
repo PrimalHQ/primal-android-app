@@ -60,11 +60,13 @@ import net.primal.android.explore.asearch.ui.FilterPicker
 import net.primal.android.explore.asearch.ui.MultipleUserPicker
 import net.primal.android.explore.asearch.ui.SingleChoicePicker
 import net.primal.android.explore.asearch.ui.TimeModifierPicker
+import net.primal.android.stream.player.hideStreamMiniPlayer
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun AdvancedSearchScreen(viewModel: AdvancedSearchViewModel, callbacks: AdvancedSearchContract.ScreenCallbacks) {
     val state = viewModel.state.collectAsState()
+    hideStreamMiniPlayer()
 
     LaunchedEffect(viewModel, callbacks) {
         viewModel.effects.collect {
