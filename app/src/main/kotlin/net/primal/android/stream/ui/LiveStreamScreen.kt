@@ -125,12 +125,19 @@ fun LiveStreamScreen(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
 ) {
+    val disabledNavigationNoteCallbacks = remember(noteCallbacks) {
+        noteCallbacks.copy(
+            onProfileClick = null,
+            onEventReactionsClick = null,
+            onNoteQuoteClick = null,
+        )
+    }
+
     ApplyEdgeToEdge()
     LaunchedEffect(viewModel, noteCallbacks, onClose) {
         viewModel.effect.collectLatest {
             when (it) {
                 is LiveStreamContract.SideEffect.NavigateToQuote -> {
-                    noteCallbacks.onNoteQuoteClick?.invoke(it.naddr)
                 }
 
                 LiveStreamContract.SideEffect.StreamDeleted -> {
@@ -144,7 +151,7 @@ fun LiveStreamScreen(
         state = state,
         onClose = onClose,
         eventPublisher = viewModel::setEvent,
-        noteCallbacks = noteCallbacks,
+        noteCallbacks = disabledNavigationNoteCallbacks,
         exoPlayer = exoPlayer,
         onGoToWallet = onGoToWallet,
     )
