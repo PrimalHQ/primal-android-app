@@ -173,10 +173,10 @@ private fun LiveStreamScreen(
     }
 
     var showZapOptions by remember { mutableStateOf(false) }
-    if (showZapOptions && state.authorProfile != null) {
+    if (showZapOptions && state.streamInfo?.authorProfile != null) {
         ZapBottomSheet(
             onDismissRequest = { showZapOptions = false },
-            receiverName = state.authorProfile.authorDisplayName,
+            receiverName = state.streamInfo.authorProfile.authorDisplayName,
             zappingState = state.zappingState,
             onZap = { zapAmount, zapDescription ->
                 if (state.zappingState.canZap(zapAmount)) {
@@ -318,10 +318,10 @@ private fun StreamPlayer(
             eventPublisher(LiveStreamContract.UiEvent.QuoteStream(naddr))
         },
         onMuteUserClick = {
-            state.profileId?.let { eventPublisher(LiveStreamContract.UiEvent.MuteAction(it)) }
+            state.streamInfo?.authorId?.let { eventPublisher(LiveStreamContract.UiEvent.MuteAction(it)) }
         },
         onUnmuteUserClick = {
-            state.profileId?.let { eventPublisher(LiveStreamContract.UiEvent.UnmuteAction(it)) }
+            state.streamInfo?.authorId?.let { eventPublisher(LiveStreamContract.UiEvent.UnmuteAction(it)) }
         },
         onReportContentClick = { reportType ->
             eventPublisher(LiveStreamContract.UiEvent.ReportAbuse(reportType))
@@ -381,8 +381,7 @@ private fun LiveStreamContent(
     }
 
     val streamInfo = state.streamInfo
-    val authorProfile = state.authorProfile
-    if (streamInfo != null && authorProfile != null) {
+    if (streamInfo != null) {
         Column(
             modifier = Modifier
                 .fillMaxSize()

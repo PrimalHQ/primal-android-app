@@ -167,13 +167,13 @@ private fun TopPlayerControls(
         AppBarIcon(icon = PrimalIcons.Minimize, onClick = onClose, tint = Color.White)
 
         val streamInfo = state.streamInfo
-        val authorId = state.profileId
+        val authorId = streamInfo?.authorId
         val naddr = state.naddr
         if (streamInfo != null && authorId != null && naddr != null) {
             LiveStreamMenu(
                 modifier = Modifier,
                 naddr = naddr,
-                isMuted = state.isMuted,
+                isMuted = streamInfo.isMutedByActiveUser,
                 isBookmarked = state.isBookmarked,
                 isStreamAuthor = state.activeUserId == authorId,
                 rawNostrEvent = streamInfo.rawNostrEventJson,

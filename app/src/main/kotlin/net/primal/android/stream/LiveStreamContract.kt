@@ -18,14 +18,9 @@ interface LiveStreamContract {
     data class UiState(
         val loading: Boolean = true,
         val naddr: Naddr? = null,
-        val profileId: String? = null,
         val activeUserId: String? = null,
-        val isFollowed: Boolean = false,
-        val isMuted: Boolean = false,
         val isBookmarked: Boolean = false,
         val streamInfo: StreamInfoUi? = null,
-        val authorProfile: ProfileDetailsUi? = null,
-        val profileStats: ProfileStatsUi? = null,
         val playerState: PlayerState = PlayerState(),
         val comment: TextFieldValue = TextFieldValue(),
         val shouldApproveProfileAction: FollowsApproval? = null,
@@ -60,6 +55,10 @@ interface LiveStreamContract {
         val description: String?,
         val rawNostrEventJson: String,
         val authorId: String,
+        val authorProfile: ProfileDetailsUi? = null,
+        val authorProfileStats: ProfileStatsUi? = null,
+        val isFollowedByActiveUser: Boolean = false,
+        val isMutedByActiveUser: Boolean = false,
     )
 
     sealed class UiEvent {
