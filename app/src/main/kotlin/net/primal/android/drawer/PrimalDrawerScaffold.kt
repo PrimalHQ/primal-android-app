@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material3.DrawerState
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -69,6 +71,17 @@ fun PrimalDrawerScaffold(
 ) {
     val localDensity = LocalDensity.current
     val streamState = LocalStreamState.current
+
+    DisposableEffect(drawerState.targetValue, streamState) {
+        when (drawerState.targetValue) {
+            DrawerValue.Closed -> streamState.show()
+            DrawerValue.Open -> streamState.hide()
+        }
+
+        onDispose {
+            streamState.show()
+        }
+    }
 
     val topAppBarScrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(topAppBarState)
 
