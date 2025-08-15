@@ -121,15 +121,13 @@ fun PrimalDrawerScaffold(
         },
         content = {
             PrimalScaffold(
-                modifier = if (focusModeEnabled && !streamState.isActive()) {
+                modifier = if (focusModeEnabled) {
                     Modifier.nestedScroll(topAppBarScrollBehavior.nestedScrollConnection)
                 } else {
                     Modifier
                 },
                 topBar = {
-                    topAppBar(
-                        if (focusModeEnabled && !streamState.isActive()) topAppBarScrollBehavior else null,
-                    )
+                    topAppBar(if (focusModeEnabled) topAppBarScrollBehavior else null)
                 },
                 content = { paddingValues ->
                     Box {
