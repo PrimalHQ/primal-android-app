@@ -79,12 +79,7 @@ private fun LiveStreamOverlay(
                 state = uiState.value,
                 exoPlayer = exoPlayer,
                 onClose = { streamState.minimize() },
-                noteCallbacks = noteCallbacks.copy(
-                    onNoteQuoteClick = {
-                        noteCallbacks.onNoteQuoteClick?.invoke(it)
-                        streamState.minimize()
-                    },
-                ),
+                noteCallbacks = noteCallbacks.withActionAfterCallback { streamState.minimize() },
                 onGoToWallet = {
                     navController.navigateToWallet()
                     streamState.minimize()
@@ -106,4 +101,100 @@ private fun LiveStreamOverlay(
 
         StreamMode.Closed -> Unit
     }
+}
+
+@Suppress("LongMethod", "CyclomaticComplexMethod")
+private fun NoteCallbacks.withActionAfterCallback(action: () -> Unit): NoteCallbacks {
+    return this.copy(
+        onNoteClick = this.onNoteClick?.let { original ->
+            { noteId ->
+                original(noteId)
+                action()
+            }
+        },
+        onNoteReplyClick = this.onNoteReplyClick?.let { original ->
+            { noteNevent ->
+                original(noteNevent)
+                action()
+            }
+        },
+        onNoteQuoteClick = this.onNoteQuoteClick?.let { original ->
+            { noteNevent ->
+                original(noteNevent)
+                action()
+            }
+        },
+        onHighlightReplyClick = this.onHighlightReplyClick?.let { original ->
+            { highlightNevent, articleNaddr ->
+                original(highlightNevent, articleNaddr)
+                action()
+            }
+        },
+        onHighlightQuoteClick = this.onHighlightQuoteClick?.let { original ->
+            { highlightNevent, articleNaddr ->
+                original(highlightNevent, articleNaddr)
+                action()
+            }
+        },
+        onArticleClick = this.onArticleClick?.let { original ->
+            { naddr ->
+                original(naddr)
+                action()
+            }
+        },
+        onArticleReplyClick = this.onArticleReplyClick?.let { original ->
+            { naddr ->
+                original(naddr)
+                action()
+            }
+        },
+        onArticleQuoteClick = this.onArticleQuoteClick?.let { original ->
+            { naddr ->
+                original(naddr)
+                action()
+            }
+        },
+        onProfileClick = this.onProfileClick?.let { original ->
+            { profileId ->
+                original(profileId)
+                action()
+            }
+        },
+        onHashtagClick = this.onHashtagClick?.let { original ->
+            { hashtag ->
+                original(hashtag)
+                action()
+            }
+        },
+        onMediaClick = this.onMediaClick?.let { original ->
+            { event ->
+                original(event)
+                action()
+            }
+        },
+        onPayInvoiceClick = this.onPayInvoiceClick?.let { original ->
+            { event ->
+                original(event)
+                action()
+            }
+        },
+        onEventReactionsClick = this.onEventReactionsClick?.let { original ->
+            { eventId, initialTab, articleATag ->
+                original(eventId, initialTab, articleATag)
+                action()
+            }
+        },
+        onGetPrimalPremiumClick = this.onGetPrimalPremiumClick?.let { original ->
+            {
+                original()
+                action()
+            }
+        },
+        onPrimalLegendsLeaderboardClick = this.onPrimalLegendsLeaderboardClick?.let { original ->
+            {
+                original()
+                action()
+            }
+        },
+    )
 }
