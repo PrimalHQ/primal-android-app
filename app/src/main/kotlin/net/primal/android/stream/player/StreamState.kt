@@ -7,11 +7,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
 @Stable
-class StreamState internal constructor() {
-    private var _mode by mutableStateOf<StreamMode>(StreamMode.Closed)
+class StreamState internal constructor(
+    initialMode: StreamMode = StreamMode.Closed,
+    initialBottomBarHeight: Int = 0,
+    initialTopBarHeight: Int = 0,
+) {
+    private var _mode by mutableStateOf(initialMode)
 
-    var bottomBarHeight by mutableIntStateOf(0)
-    var topBarHeight by mutableIntStateOf(0)
+    var bottomBarHeight by mutableIntStateOf(initialBottomBarHeight)
+    var topBarHeight by mutableIntStateOf(initialTopBarHeight)
 
     val mode: StreamMode get() = _mode
 
