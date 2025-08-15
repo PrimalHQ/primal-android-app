@@ -95,6 +95,7 @@ private fun LiveStreamOverlay(
                 onStopStream = {
                     exoPlayer.stop()
                     streamState.stop()
+                    viewModel.setEvent(LiveStreamContract.UiEvent.StopStream)
                 },
             )
         }

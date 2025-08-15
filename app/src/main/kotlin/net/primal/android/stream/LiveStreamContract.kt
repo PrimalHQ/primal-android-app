@@ -88,6 +88,7 @@ interface LiveStreamContract {
         data class ReportAbuse(val reportType: ReportType) : UiEvent()
         data object RequestDeleteStream : UiEvent()
         data class BookmarkStream(val forceUpdate: Boolean = false) : UiEvent()
+        data object StopStream : UiEvent()
         data class QuoteStream(val naddr: String) : UiEvent()
         data class SearchUsers(val query: String) : UiEvent()
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()

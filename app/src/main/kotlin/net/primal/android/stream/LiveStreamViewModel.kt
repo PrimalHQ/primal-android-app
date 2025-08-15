@@ -113,6 +113,21 @@ class LiveStreamViewModel @Inject constructor(
     private var zaps: List<StreamChatItem.ZapMessageItem> = emptyList()
     private var chatMessages: List<StreamChatItem.ChatMessageItem> = emptyList()
 
+    private fun stopSubscriptions() {
+        liveStreamSubscriptionJob?.cancel()
+        liveStreamSubscriptionJob = null
+        authorObserversJob?.cancel()
+        authorObserversJob = null
+        setState {
+            copy(
+                naddr = null,
+                streamInfo = null,
+                zaps = emptyList(),
+                chatItems = emptyList(),
+            )
+        }
+    }
+
     init {
         observeEvents()
         observeFollowsResults()
@@ -231,7 +246,15 @@ class LiveStreamViewModel @Inject constructor(
                         copy(playerState = playerState.copy(isMuted = !playerState.isMuted))
                     }
 
-                    is UiEvent.StartStream -> resolveNaddr(naddrUri = it.naddr)
+                    is UiEvent.StartStream -> {
+                        val newNaddr = Nip19TLV.parseUriAsNaddrOrNull(it.naddr)
+                        if (state.value.naddr != newNaddr) {
+                            stopSubscriptions()
+                            resolveNaddr(naddrUri = it.naddr)
+                        }
+                    }
+
+                    UiEvent.StopStream -> stopSubscriptions()
 
                     is UiEvent.SearchUsers -> userMentionHandler.search(it.query)
                     is UiEvent.ToggleSearchUsers -> userMentionHandler.toggleSearch(it.enabled)
