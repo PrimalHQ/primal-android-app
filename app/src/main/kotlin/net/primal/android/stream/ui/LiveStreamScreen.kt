@@ -1,15 +1,8 @@
 package net.primal.android.stream.ui
 
-import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,11 +14,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
@@ -65,14 +56,12 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
 import java.text.NumberFormat
-import java.time.Instant
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -86,16 +75,11 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.UniversalAvatarThumbnail
-import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
-import net.primal.android.core.compose.icons.primaliconpack.Close
-import net.primal.android.core.compose.icons.primaliconpack.Follow
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
-import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.editor.ui.NoteOutlinedTextField
@@ -120,12 +104,6 @@ private const val URL_ANNOTATION_TAG = "url"
 private const val LIVE_EDGE_THRESHOLD_MS = 60_000
 private const val PLAYER_STATE_UPDATE_INTERVAL_MS = 200L
 private const val SEEK_INCREMENT_MS = 10_000L
-private const val STREAM_DESCRIPTION_MAX_LINES = 4
-
-private enum class LiveStreamDisplaySection {
-    Info,
-    Chat,
-}
 
 private val ZapMessageBorderColor = Color(0xFFFFA000)
 private val ZapMessageBackgroundColor = Color(0xFFE47C00)
@@ -360,61 +338,31 @@ private fun StreamPlayer(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun StreamInfoAndChatSection(
+    modifier: Modifier = Modifier,
     state: LiveStreamContract.UiState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     noteCallbacks: NoteCallbacks,
     onZapClick: () -> Unit,
 ) {
-    var currentSection by rememberSaveable { mutableStateOf(LiveStreamDisplaySection.Info) }
     val chatListState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
     }
     val isKeyboardVisible by keyboardVisibilityAsState()
 
-    AnimatedContent(
-        targetState = currentSection,
-        label = "LiveStreamSectionAnimation",
-        transitionSpec = {
-            if (targetState == LiveStreamDisplaySection.Chat) {
-                slideInVertically { fullHeight -> fullHeight } togetherWith fadeOut()
-            } else {
-                fadeIn() togetherWith slideOutVertically { fullHeight -> fullHeight }
-            }
-        },
-    ) { section ->
-        when (section) {
-            LiveStreamDisplaySection.Info -> {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    item("StreamInfoContainer") {
-                        StreamInfoDisplay(
-                            state = state,
-                            eventPublisher = eventPublisher,
-                            onZapClick = onZapClick,
-                            noteCallbacks = noteCallbacks,
-                        )
-                    }
+    Column(modifier = modifier.fillMaxSize()) {
+        StreamInfoDisplay(
+            state = state,
+            onZapClick = onZapClick,
+            noteCallbacks = noteCallbacks,
+            isKeyboardVisible = isKeyboardVisible,
+        )
 
-                    item("LiveChatHeader") {
-                        LiveChatSection(
-                            modifier = Modifier.padding(16.dp),
-                            onClick = { currentSection = LiveStreamDisplaySection.Chat },
-                        )
-                    }
-                }
-            }
-
-            LiveStreamDisplaySection.Chat -> {
-                LiveChatContent(
-                    state = state,
-                    listState = chatListState,
-                    eventPublisher = eventPublisher,
-                    onBack = { currentSection = LiveStreamDisplaySection.Info },
-                    onZapClick = onZapClick,
-                    noteCallbacks = noteCallbacks,
-                    isKeyboardVisible = isKeyboardVisible,
-                )
-            }
-        }
+        LiveChatContent(
+            state = state,
+            listState = chatListState,
+            eventPublisher = eventPublisher,
+            noteCallbacks = noteCallbacks,
+        )
     }
 }
 
@@ -450,6 +398,7 @@ private fun LiveStreamContent(
             )
 
             StreamInfoAndChatSection(
+                modifier = Modifier.weight(1f),
                 state = state,
                 eventPublisher = eventPublisher,
                 noteCallbacks = noteCallbacks,
@@ -460,19 +409,19 @@ private fun LiveStreamContent(
 }
 
 @Composable
-private fun LazyItemScope.StreamInfoDisplay(
+private fun StreamInfoDisplay(
     state: LiveStreamContract.UiState,
-    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onZapClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
+    isKeyboardVisible: Boolean,
 ) {
     val streamInfo = state.streamInfo ?: return
-    val authorProfile = state.authorProfile ?: return
     val bottomBorderColor = AppTheme.extraColorScheme.surfaceVariantAlt1
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .animateContentSize()
             .background(
                 AppTheme.extraColorScheme.surfaceVariantAlt2,
             )
@@ -491,266 +440,21 @@ private fun LazyItemScope.StreamInfoDisplay(
     ) {
         StreamInfoSection(
             title = streamInfo.title,
-            authorProfile = authorProfile,
             viewers = streamInfo.viewers,
             startedAt = streamInfo.startedAt,
-            profileStats = state.profileStats,
-            isFollowed = state.isFollowed,
             isLive = state.playerState.isLive,
-            onFollow = {
-                state.profileId?.let {
-                    eventPublisher(LiveStreamContract.UiEvent.FollowAction(profileId = it))
-                }
-            },
-            onUnfollow = {
-                state.profileId?.let {
-                    eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(profileId = it))
-                }
-            },
+            onInfoClick = {},
+            onChatSettingsClick = {},
+            isKeyboardVisible = isKeyboardVisible,
         )
 
-        if (state.zaps.isNotEmpty()) {
-            ArticleTopZapsSection(
+        if (!isKeyboardVisible) {
+            StreamTopZapsSection(
                 modifier = Modifier.fillMaxWidth(),
-                sectionTopSpacing = 0.dp,
                 topZaps = state.zaps,
                 onZapClick = onZapClick,
                 onTopZapsClick = {
-                    noteCallbacks.onEventReactionsClick?.invoke(
-                        streamInfo.atag,
-                        ReactionType.ZAPS,
-                        streamInfo.atag,
-                    )
-                },
-            )
-        }
-
-        if (streamInfo.description?.isNotBlank() == true) {
-            ExpandableStreamDescription(
-                content = streamInfo.description,
-                noteCallbacks = noteCallbacks,
-            )
-        }
-    }
-}
-
-@Composable
-private fun ExpandableStreamDescription(content: String, noteCallbacks: NoteCallbacks) {
-    var isExpanded by rememberSaveable { mutableStateOf(false) }
-    var isContentOverflowing by remember { mutableStateOf(false) }
-    val hashtagColor = AppTheme.colorScheme.primary
-
-    val annotatedContent = remember(content) {
-        buildAnnotatedStringWithHashtags(text = content, hashtagColor = hashtagColor)
-    }
-
-    val annotatedStringWithSuffix = buildAnnotatedString {
-        append(annotatedContent)
-        if (isContentOverflowing && !isExpanded) {
-            append("... ")
-            withStyle(
-                style = SpanStyle(
-                    color = AppTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                ),
-            ) {
-                append("more")
-            }
-        }
-    }
-
-    PrimalClickableText(
-        modifier = Modifier
-            .fillMaxWidth()
-            .animateContentSize()
-            .clickable { isExpanded = !isExpanded },
-        text = annotatedStringWithSuffix,
-        style = AppTheme.typography.bodyLarge.copy(
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-            fontSize = 15.sp,
-            lineHeight = 22.sp,
-        ),
-        textSelectable = true,
-        maxLines = if (isExpanded) Int.MAX_VALUE else STREAM_DESCRIPTION_MAX_LINES,
-        overflow = TextOverflow.Ellipsis,
-        onTextLayout = { result ->
-            isContentOverflowing = result.hasVisualOverflow
-        },
-        onClick = { offset, _ ->
-            annotatedContent.getStringAnnotations("HASHTAG", offset, offset)
-                .firstOrNull()?.let {
-                    noteCallbacks.onHashtagClick?.invoke(it.item)
-                } ?: run {
-                isExpanded = !isExpanded
-            }
-        },
-    )
-}
-
-@Composable
-private fun LiveChatSection(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                shape = AppTheme.shapes.large,
-            )
-            .clip(AppTheme.shapes.large)
-            .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Text(
-            text = stringResource(
-                id = R.string.live_stream_title,
-            ),
-            style = AppTheme.typography.titleLarge.copy(
-                fontSize = 16.sp,
-                lineHeight = 20.sp,
-            ),
-            fontWeight = FontWeight.Bold,
-            color = AppTheme.colorScheme.onSurface,
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    color = AppTheme.extraColorScheme.surfaceVariantAlt2,
-                    shape = AppTheme.shapes.extraLarge,
-                )
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            contentAlignment = Alignment.CenterStart,
-        ) {
-            Text(
-                text = stringResource(
-                    id = R.string.live_stream_join_chat,
-                ),
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                style = AppTheme.typography.bodyMedium,
-            )
-        }
-    }
-}
-
-@Composable
-private fun LiveChatHeaderDetails(
-    state: LiveStreamContract.UiState,
-    onBack: () -> Unit,
-    isKeyboardVisible: Boolean,
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            Text(
-                text = stringResource(id = R.string.live_stream_title),
-                style = AppTheme.typography.titleLarge.copy(fontSize = 18.sp, lineHeight = 24.sp),
-                fontWeight = FontWeight.Bold,
-                color = AppTheme.colorScheme.onSurface,
-            )
-
-            if (!isKeyboardVisible) {
-                val numberFormat = remember { NumberFormat.getNumberInstance() }
-                Row(
-                    modifier = Modifier.padding(bottom = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    StreamLiveIndicator(isLive = state.playerState.isLive)
-
-                    if (state.streamInfo?.startedAt != null) {
-                        Text(
-                            text = stringResource(
-                                id = R.string.live_stream_started_at,
-                                Instant.ofEpochSecond(state.streamInfo.startedAt).asBeforeNowFormat(),
-                            ),
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                            style = AppTheme.typography.bodyMedium,
-                        )
-                    }
-                    IconText(
-                        text = numberFormat.format(state.streamInfo?.viewers ?: 0),
-                        leadingIcon = PrimalIcons.Follow,
-                        iconSize = 16.sp,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                        style = AppTheme.typography.bodyMedium,
-                    )
-                }
-            }
-        }
-
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (!isKeyboardVisible) {
-                IconButton(onClick = { }) {
-                    Icon(
-                        imageVector = PrimalIcons.AdvancedSearch,
-                        contentDescription = "Chat Settings",
-                        tint = AppTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
-            IconButton(onClick = onBack) {
-                Icon(
-                    imageVector = PrimalIcons.Close,
-                    contentDescription = "Back to Info",
-                    tint = AppTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun LiveChatHeader(
-    state: LiveStreamContract.UiState,
-    onBack: () -> Unit,
-    onZapClick: () -> Unit,
-    noteCallbacks: NoteCallbacks,
-    isKeyboardVisible: Boolean,
-) {
-    val borderColor = AppTheme.extraColorScheme.surfaceVariantAlt1
-    val padding = if (isKeyboardVisible) {
-        PaddingValues(horizontal = 16.dp, vertical = 4.dp)
-    } else {
-        PaddingValues(16.dp)
-    }
-    val verticalArrangement = if (isKeyboardVisible) Arrangement.Top else Arrangement.spacedBy(12.dp)
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(
-                AppTheme.extraColorScheme.surfaceVariantAlt2,
-            )
-            .drawBehind {
-                val strokeWidth = 1.dp.toPx()
-                val y = size.height - strokeWidth / 2f
-                drawLine(
-                    color = borderColor,
-                    start = Offset(0f, y),
-                    end = Offset(size.width, y),
-                    strokeWidth = strokeWidth,
-                )
-            }
-            .padding(padding),
-        verticalArrangement = verticalArrangement,
-    ) {
-        LiveChatHeaderDetails(state = state, onBack = onBack, isKeyboardVisible = isKeyboardVisible)
-
-        if (state.zaps.isNotEmpty() && !isKeyboardVisible) {
-            ArticleTopZapsSection(
-                modifier = Modifier.fillMaxWidth(),
-                sectionTopSpacing = 0.dp,
-                topZaps = state.zaps,
-                onZapClick = onZapClick,
-                onTopZapsClick = {
-                    state.streamInfo?.atag?.let { atag ->
+                    state.streamInfo.atag.let { atag ->
                         noteCallbacks.onEventReactionsClick?.invoke(
                             atag,
                             ReactionType.ZAPS,
@@ -778,7 +482,7 @@ private fun LiveChatListOrSearch(
             )
         } else {
             LazyColumn(
-                modifier = modifier.padding(horizontal = 16.dp),
+                modifier = modifier,
                 state = listState,
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(vertical = 12.dp),
@@ -824,10 +528,7 @@ private fun LiveChatContent(
     state: LiveStreamContract.UiState,
     listState: LazyListState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
-    onBack: () -> Unit,
-    onZapClick: () -> Unit,
     noteCallbacks: NoteCallbacks,
-    isKeyboardVisible: Boolean,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -842,17 +543,9 @@ private fun LiveChatContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppTheme.colorScheme.surface).navigationBarsPadding()
+            .background(AppTheme.colorScheme.surface)
             .imePadding(),
     ) {
-        LiveChatHeader(
-            state = state,
-            onBack = onBack,
-            onZapClick = onZapClick,
-            noteCallbacks = noteCallbacks,
-            isKeyboardVisible = isKeyboardVisible,
-        )
-
         LiveChatListOrSearch(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1157,26 +850,6 @@ private fun ZapMessageContent(zap: EventZapUiModel) {
                         localUriHandler.openUriSafely(annotation.item)
                     }
                 },
-            )
-        }
-    }
-}
-
-private fun buildAnnotatedStringWithHashtags(text: String, hashtagColor: Color): AnnotatedString {
-    return buildAnnotatedString {
-        append(text)
-        val hashtagRegex = "(#\\w+)".toRegex()
-        hashtagRegex.findAll(text).forEach { matchResult ->
-            addStyle(
-                style = SpanStyle(color = hashtagColor),
-                start = matchResult.range.first,
-                end = matchResult.range.last + 1,
-            )
-            addStringAnnotation(
-                tag = "HASHTAG",
-                annotation = matchResult.value.substring(1),
-                start = matchResult.range.first,
-                end = matchResult.range.last + 1,
             )
         }
     }

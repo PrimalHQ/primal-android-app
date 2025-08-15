@@ -77,6 +77,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Home
 import net.primal.android.core.compose.icons.primaliconpack.HomeFilled
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
+import net.primal.android.core.compose.icons.primaliconpack.Info
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.Keyboard
 import net.primal.android.core.compose.icons.primaliconpack.LegendaryProfileNoCustomization
@@ -333,6 +334,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             VideoBack,
             Minimize,
             FullScreen,
+            Info,
         )
         return __PrimalIcons!!
     }
