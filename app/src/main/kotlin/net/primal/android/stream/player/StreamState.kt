@@ -8,14 +8,16 @@ import androidx.compose.runtime.setValue
 
 @Stable
 class StreamState internal constructor() {
-    private var _mode by mutableStateOf<StreamMode>(StreamMode.Hidden)
+    private var _mode by mutableStateOf<StreamMode>(StreamMode.Closed)
 
     var bottomBarHeight by mutableIntStateOf(0)
     var topBarHeight by mutableIntStateOf(0)
 
     val mode: StreamMode get() = _mode
 
-    fun isActive() = mode != StreamMode.Hidden
+    fun isActive() = mode != StreamMode.Closed
+
+    fun isHidden() = mode is StreamMode.Hidden
 
     fun play(naddr: String) {
         _mode = StreamMode.Expanded(naddr)
@@ -35,7 +37,18 @@ class StreamState internal constructor() {
         }
     }
 
+    fun hide() {
+        _mode = StreamMode.Hidden(modeToRestore = _mode)
+    }
+
+    fun show() {
+        val current = _mode
+        if (current is StreamMode.Hidden) {
+            _mode = current.modeToRestore
+        }
+    }
+
     fun stop() {
-        _mode = StreamMode.Hidden
+        _mode = StreamMode.Closed
     }
 }

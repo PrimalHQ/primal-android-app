@@ -84,7 +84,7 @@ private fun LiveStreamOverlay(
             )
         }
 
-        is StreamMode.Minimized -> {
+        is StreamMode.Minimized, is StreamMode.Hidden -> {
             LiveStreamMiniPlayer(
                 state = uiState.value,
                 exoPlayer = exoPlayer,
@@ -96,6 +96,6 @@ private fun LiveStreamOverlay(
             )
         }
 
-        StreamMode.Hidden -> Unit
+        StreamMode.Closed -> Unit
     }
 }
