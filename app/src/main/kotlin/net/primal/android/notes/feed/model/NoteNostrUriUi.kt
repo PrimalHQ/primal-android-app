@@ -5,6 +5,7 @@ import net.primal.domain.links.EventUriNostrType
 import net.primal.domain.links.ReferencedArticle
 import net.primal.domain.links.ReferencedHighlight
 import net.primal.domain.links.ReferencedNote
+import net.primal.domain.links.ReferencedStream
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.links.ReferencedZap
 
@@ -17,6 +18,7 @@ data class NoteNostrUriUi(
     val referencedArticle: ReferencedArticle?,
     val referencedUser: ReferencedUser?,
     val referencedZap: ReferencedZap?,
+    val referencedStream: ReferencedStream?,
     val position: Int,
 )
 
@@ -30,5 +32,6 @@ fun EventUriNostrReference.asNoteNostrUriUi() =
         referencedArticle = this.referencedArticle,
         referencedUser = this.referencedUser,
         referencedZap = referencedZap,
+        referencedStream = referencedStream,
         position = this.position ?: 0,
     )
