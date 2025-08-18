@@ -99,6 +99,7 @@ class ExploreRepositoryImpl(
                 eventIdToNostrEvent = emptyMap(),
                 postIdToPostDataMap = emptyMap(),
                 articleIdToArticle = emptyMap(),
+                streamIdToStreamData = emptyMap(),
                 profileIdToProfileDataMap = profilesMap,
                 cdnResources = cdnResources,
                 videoThumbnails = videoThumbnails,

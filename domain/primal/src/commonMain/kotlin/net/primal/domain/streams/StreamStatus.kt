@@ -1,5 +1,8 @@
 package net.primal.domain.streams
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 enum class StreamStatus(val nostrValue: String) {
     PLANNED("planned"),
     LIVE("live"),
