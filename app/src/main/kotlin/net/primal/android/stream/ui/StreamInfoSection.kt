@@ -27,6 +27,7 @@ import java.time.Instant
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.asBeforeNowFormat
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.Follow
@@ -34,7 +35,8 @@ import net.primal.android.core.compose.icons.primaliconpack.Info
 import net.primal.android.theme.AppTheme
 
 private val LiveIndicatorColor = Color(0xFFEE0000)
-private val NotLiveIndicatorColor = Color(0xFFAAAAAA)
+private val NotLiveIndicatorColorDark = Color(0xFF757575)
+private val NotLiveIndicatorColorLight = Color(0xFF666666)
 
 @Composable
 fun StreamInfoSection(
@@ -147,7 +149,12 @@ private fun StreamMetaData(
 }
 
 @Composable
-fun StreamLiveIndicator(modifier: Modifier = Modifier, isLive: Boolean) {
+fun StreamLiveIndicator(
+    modifier: Modifier = Modifier,
+    isLive: Boolean,
+    hideTextIfNotLive: Boolean = false,
+    textColor: Color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -157,17 +164,27 @@ fun StreamLiveIndicator(modifier: Modifier = Modifier, isLive: Boolean) {
             modifier = Modifier
                 .size(6.dp)
                 .background(
-                    color = if (isLive) LiveIndicatorColor else NotLiveIndicatorColor,
+                    color = if (isLive) {
+                        LiveIndicatorColor
+                    } else {
+                        if (isAppInDarkPrimalTheme()) {
+                            NotLiveIndicatorColorDark
+                        } else {
+                            NotLiveIndicatorColorLight
+                        }
+                    },
                     shape = CircleShape,
                 ),
         )
-        Text(
-            text = stringResource(id = R.string.live_stream_live_indicator),
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            style = AppTheme.typography.bodyMedium.copy(
-                fontSize = 14.sp,
-                lineHeight = 14.sp,
-            ),
-        )
+        if (!hideTextIfNotLive && isLive) {
+            Text(
+                text = stringResource(id = R.string.live_stream_live_indicator),
+                color = textColor,
+                style = AppTheme.typography.bodyMedium.copy(
+                    fontSize = 14.sp,
+                    lineHeight = 14.sp,
+                ),
+            )
+        }
     }
 }

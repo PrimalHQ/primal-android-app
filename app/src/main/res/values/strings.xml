@@ -1331,7 +1331,9 @@
     <string name="accessibility_rewind_10_seconds">Rewind 10 seconds</string>
     <string name="accessibility_forward_10_seconds">Forward 10 seconds</string>
     <string name="accessibility_play_pause">Play or Pause</string>
+    <string name="live_stream_starting">Starting</string>
     <string name="live_stream_started_at">Started %1$s ago</string>
+    <string name="live_stream_streamed">Streamed %1$s ago</string>
     <string name="live_stream_viewers_count">%1$s watching</string>
     <string name="live_stream_followers_count">%1$s followers</string>
     <string name="live_stream_join_chat">Join the chat…</string>
