@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
+import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.PrimalDivider
@@ -119,7 +121,7 @@ private fun HostInfoAndActions(
                 )
                 streamInfo.mainHostProfileStats?.followersCount?.let {
                     Text(
-                        text = "${numberFormat.format(it)} followers",
+                        text = stringResource(id = R.string.live_stream_followers_count, numberFormat.format(it)),
                         style = AppTheme.typography.bodyLarge.copy(
                             fontSize = 16.sp,
                             lineHeight = 16.sp,
