@@ -754,6 +754,7 @@ class LiveStreamViewModel @Inject constructor(
                             referencedArticle = null,
                             referencedHighlight = null,
                             referencedZap = null,
+                            referencedStream = null,
                             position = position,
                         )
                     } else {

@@ -15,5 +15,6 @@ internal fun EventUriNostr.asReferencedNostrUriDO(forcePosition: Int? = null): E
         referencedArticle = this.referencedArticle,
         referencedUser = this.referencedUser,
         referencedZap = this.referencedZap,
+        referencedStream = this.referencedStream,
     )
 }

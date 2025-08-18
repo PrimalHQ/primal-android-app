@@ -14,4 +14,5 @@ data class EventUriNostrReference(
     val referencedArticle: ReferencedArticle? = null,
     val referencedUser: ReferencedUser? = null,
     val referencedZap: ReferencedZap? = null,
+    val referencedStream: ReferencedStream? = null,
 )

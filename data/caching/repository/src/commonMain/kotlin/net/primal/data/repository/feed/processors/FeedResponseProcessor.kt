@@ -86,11 +86,13 @@ internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String,
     )
 
     val refEvents = referencedEvents.mapNotNull { it.content.decodeFromJsonStringOrNull<NostrEvent>() }
+    val streamData = liveActivity.mapNotNullAsStreamDataPO() + refEvents.mapNotNullAsStreamDataPO()
 
     val noteNostrUris = allPosts.flatMapPostsAsReferencedNostrUriDO(
         eventIdToNostrEvent = refEvents.associateBy { it.id },
         postIdToPostDataMap = allPosts.groupBy { it.postId }.mapValues { it.value.first() },
         articleIdToArticle = allArticles.groupBy { it.articleId }.mapValues { it.value.first() },
+        streamIdToStreamData = streamData.groupBy { it.dTag }.mapValues { it.value.first() },
         profileIdToProfileDataMap = profileIdToProfileDataMap,
         cdnResources = cdnResources,
         videoThumbnails = videoThumbnails,
@@ -101,7 +103,6 @@ internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String,
     val reposts = reposts.mapNotNullAsRepostDataPO()
     val postStats = primalEventStats.mapNotNullAsEventStatsPO()
     val userPostStats = primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
-    val streamData = liveActivity.mapNotNullAsStreamDataPO()
 
     database.withTransaction {
         database.profiles().insertOrUpdateAll(data = profiles)

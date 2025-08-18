@@ -7,6 +7,7 @@ import net.primal.domain.links.EventUriNostrType
 import net.primal.domain.links.ReferencedArticle
 import net.primal.domain.links.ReferencedHighlight
 import net.primal.domain.links.ReferencedNote
+import net.primal.domain.links.ReferencedStream
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.links.ReferencedZap
 
@@ -23,4 +24,5 @@ data class EventUriNostr(
     val referencedArticle: ReferencedArticle? = null,
     val referencedUser: ReferencedUser? = null,
     val referencedZap: ReferencedZap? = null,
+    val referencedStream: ReferencedStream? = null,
 )
