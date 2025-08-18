@@ -106,7 +106,7 @@ fun StreamInfoSection(
 }
 
 @Composable
-private fun StreamMetaData(
+fun StreamMetaData(
     modifier: Modifier = Modifier,
     isLive: Boolean,
     startedAt: Long?,

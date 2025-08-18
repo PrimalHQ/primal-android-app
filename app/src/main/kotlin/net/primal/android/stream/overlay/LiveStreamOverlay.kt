@@ -12,6 +12,9 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavHostController
 import net.primal.android.core.video.rememberPrimalStreamExoPlayer
+import net.primal.android.navigation.navigateToChat
+import net.primal.android.navigation.navigateToProfileEditor
+import net.primal.android.navigation.navigateToProfileQrCodeViewer
 import net.primal.android.navigation.navigateToWallet
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.stream.LiveStreamContract
@@ -74,16 +77,47 @@ private fun LiveStreamOverlay(
         is StreamMode.Expanded -> {
             viewModel.setEvent(LiveStreamContract.UiEvent.StartStream(mode.naddr))
 
-            LiveStreamScreen(
-                viewModel = viewModel,
-                state = uiState.value,
-                exoPlayer = exoPlayer,
+            val callbacks = LiveStreamContract.ScreenCallbacks(
                 onClose = { streamState.minimize() },
-                noteCallbacks = noteCallbacks.withActionAfterCallback { streamState.minimize() },
                 onGoToWallet = {
                     navController.navigateToWallet()
                     streamState.minimize()
                 },
+                onEditProfileClick = {
+                    navController.navigateToProfileEditor()
+                    streamState.minimize()
+                },
+                onMessageClick = { profileId ->
+                    navController.navigateToChat(profileId)
+                    streamState.minimize()
+                },
+                onDrawerQrCodeClick = { profileId ->
+                    navController.navigateToProfileQrCodeViewer(profileId)
+                    streamState.minimize()
+                },
+                onQuoteStreamClick = { naddr ->
+                    noteCallbacks.onNoteQuoteClick?.invoke(naddr)
+                    streamState.minimize()
+                },
+                onProfileClick = { profileId ->
+                    noteCallbacks.onProfileClick?.invoke(profileId)
+                    streamState.minimize()
+                },
+                onHashtagClick = { hashtag ->
+                    noteCallbacks.onHashtagClick?.invoke(hashtag)
+                    streamState.minimize()
+                },
+                onEventReactionsClick = { eventId, initialTab, articleATag ->
+                    noteCallbacks.onEventReactionsClick?.invoke(eventId, initialTab, articleATag)
+                    streamState.minimize()
+                },
+            )
+
+            LiveStreamScreen(
+                viewModel = viewModel,
+                state = uiState.value,
+                exoPlayer = exoPlayer,
+                callbacks = callbacks,
             )
         }
 
@@ -101,100 +135,4 @@ private fun LiveStreamOverlay(
 
         StreamMode.Closed -> Unit
     }
-}
-
-@Suppress("LongMethod", "CyclomaticComplexMethod")
-private fun NoteCallbacks.withActionAfterCallback(action: () -> Unit): NoteCallbacks {
-    return this.copy(
-        onNoteClick = this.onNoteClick?.let { original ->
-            { noteId ->
-                original(noteId)
-                action()
-            }
-        },
-        onNoteReplyClick = this.onNoteReplyClick?.let { original ->
-            { noteNevent ->
-                original(noteNevent)
-                action()
-            }
-        },
-        onNoteQuoteClick = this.onNoteQuoteClick?.let { original ->
-            { noteNevent ->
-                original(noteNevent)
-                action()
-            }
-        },
-        onHighlightReplyClick = this.onHighlightReplyClick?.let { original ->
-            { highlightNevent, articleNaddr ->
-                original(highlightNevent, articleNaddr)
-                action()
-            }
-        },
-        onHighlightQuoteClick = this.onHighlightQuoteClick?.let { original ->
-            { highlightNevent, articleNaddr ->
-                original(highlightNevent, articleNaddr)
-                action()
-            }
-        },
-        onArticleClick = this.onArticleClick?.let { original ->
-            { naddr ->
-                original(naddr)
-                action()
-            }
-        },
-        onArticleReplyClick = this.onArticleReplyClick?.let { original ->
-            { naddr ->
-                original(naddr)
-                action()
-            }
-        },
-        onArticleQuoteClick = this.onArticleQuoteClick?.let { original ->
-            { naddr ->
-                original(naddr)
-                action()
-            }
-        },
-        onProfileClick = this.onProfileClick?.let { original ->
-            { profileId ->
-                original(profileId)
-                action()
-            }
-        },
-        onHashtagClick = this.onHashtagClick?.let { original ->
-            { hashtag ->
-                original(hashtag)
-                action()
-            }
-        },
-        onMediaClick = this.onMediaClick?.let { original ->
-            { event ->
-                original(event)
-                action()
-            }
-        },
-        onPayInvoiceClick = this.onPayInvoiceClick?.let { original ->
-            { event ->
-                original(event)
-                action()
-            }
-        },
-        onEventReactionsClick = this.onEventReactionsClick?.let { original ->
-            { eventId, initialTab, articleATag ->
-                original(eventId, initialTab, articleATag)
-                action()
-            }
-        },
-        onGetPrimalPremiumClick = this.onGetPrimalPremiumClick?.let { original ->
-            {
-                original()
-                action()
-            }
-        },
-        onPrimalLegendsLeaderboardClick = this.onPrimalLegendsLeaderboardClick?.let { original ->
-            {
-                original()
-                action()
-            }
-        },
-    )
 }

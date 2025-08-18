@@ -11,6 +11,7 @@ import net.primal.android.profile.mention.UserTaggingState
 import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.zaps.ZappingState
 
@@ -31,8 +32,14 @@ interface LiveStreamContract {
         val sendingMessage: Boolean = false,
         val taggedUsers: List<NoteTaggedUser> = emptyList(),
         val userTaggingState: UserTaggingState = UserTaggingState(),
+        val bottomSheet: StreamBottomSheet = StreamBottomSheet.None,
         val error: UiError? = null,
     )
+
+    sealed interface StreamBottomSheet {
+        data object None : StreamBottomSheet
+        data object StreamInfo : StreamBottomSheet
+    }
 
     data class PlayerState(
         val isPlaying: Boolean = false,
@@ -88,15 +95,27 @@ interface LiveStreamContract {
         data class ReportAbuse(val reportType: ReportType) : UiEvent()
         data object RequestDeleteStream : UiEvent()
         data class BookmarkStream(val forceUpdate: Boolean = false) : UiEvent()
-        data class QuoteStream(val naddr: String) : UiEvent()
         data class SearchUsers(val query: String) : UiEvent()
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
         data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
         data object AppendUserTagAtSign : UiEvent()
+        data object ShowStreamInfoBottomSheet : UiEvent()
+        data object HideBottomSheet : UiEvent()
     }
 
     sealed class SideEffect {
-        data class NavigateToQuote(val naddr: String) : SideEffect()
         data object StreamDeleted : SideEffect()
     }
+
+    data class ScreenCallbacks(
+        val onClose: () -> Unit,
+        val onGoToWallet: () -> Unit,
+        val onEditProfileClick: () -> Unit,
+        val onMessageClick: (profileId: String) -> Unit,
+        val onDrawerQrCodeClick: (profileId: String) -> Unit,
+        val onQuoteStreamClick: (naddr: String) -> Unit,
+        val onProfileClick: (profileId: String) -> Unit,
+        val onHashtagClick: (hashtag: String) -> Unit,
+        val onEventReactionsClick: (eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit,
+    )
 }

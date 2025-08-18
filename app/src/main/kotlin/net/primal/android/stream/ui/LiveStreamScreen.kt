@@ -6,7 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,10 +25,12 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -86,7 +87,6 @@ import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.NoteNostrUriUi
-import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.stream.LiveStreamContract
@@ -121,20 +121,14 @@ fun LiveStreamScreen(
     state: LiveStreamContract.UiState,
     exoPlayer: ExoPlayer,
     viewModel: LiveStreamViewModel,
-    onClose: () -> Unit,
-    noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
+    callbacks: LiveStreamContract.ScreenCallbacks,
 ) {
     ApplyEdgeToEdge()
-    LaunchedEffect(viewModel, noteCallbacks, onClose) {
+    LaunchedEffect(viewModel, callbacks) {
         viewModel.effect.collectLatest {
             when (it) {
-                is LiveStreamContract.SideEffect.NavigateToQuote -> {
-                    noteCallbacks.onNoteQuoteClick?.invoke(it.naddr)
-                }
-
                 LiveStreamContract.SideEffect.StreamDeleted -> {
-                    onClose()
+                    callbacks.onClose()
                 }
             }
         }
@@ -142,11 +136,9 @@ fun LiveStreamScreen(
 
     LiveStreamScreen(
         state = state,
-        onClose = onClose,
         eventPublisher = viewModel::setEvent,
-        noteCallbacks = noteCallbacks,
         exoPlayer = exoPlayer,
-        onGoToWallet = onGoToWallet,
+        callbacks = callbacks,
     )
 }
 
@@ -154,21 +146,20 @@ fun LiveStreamScreen(
 @Composable
 private fun LiveStreamScreen(
     state: LiveStreamContract.UiState,
-    onClose: () -> Unit,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
-    noteCallbacks: NoteCallbacks,
     exoPlayer: ExoPlayer,
-    onGoToWallet: () -> Unit,
+    callbacks: LiveStreamContract.ScreenCallbacks,
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var showCantZapWarning by remember { mutableStateOf(false) }
     if (showCantZapWarning) {
         UnableToZapBottomSheet(
             zappingState = state.zappingState,
             onDismissRequest = { showCantZapWarning = false },
-            onGoToWallet = onGoToWallet,
+            onGoToWallet = callbacks.onGoToWallet,
         )
     }
 
@@ -198,6 +189,38 @@ private fun LiveStreamScreen(
             showZapOptions = true
         } else {
             showCantZapWarning = true
+        }
+    }
+
+    if (state.bottomSheet is LiveStreamContract.StreamBottomSheet.StreamInfo &&
+        state.streamInfo != null && state.activeUserId != null
+    ) {
+        ModalBottomSheet(
+            onDismissRequest = { eventPublisher(LiveStreamContract.UiEvent.HideBottomSheet) },
+            sheetState = sheetState,
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+            tonalElevation = 0.dp,
+        ) {
+            StreamInfoBottomSheet(
+                activeUserId = state.activeUserId,
+                streamInfo = state.streamInfo,
+                isLive = state.playerState.isLive,
+                onFollow = {
+                    state.streamInfo.mainHostId.let {
+                        eventPublisher(LiveStreamContract.UiEvent.FollowAction(it))
+                    }
+                },
+                onUnfollow = {
+                    state.streamInfo.mainHostId.let {
+                        eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(it))
+                    }
+                },
+                onZap = { invokeZapOptionsOrShowWarning() },
+                onEditProfileClick = callbacks.onEditProfileClick,
+                onMessageClick = callbacks.onMessageClick,
+                onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
+                onHashtagClick = callbacks.onHashtagClick,
+            )
         }
     }
 
@@ -268,8 +291,7 @@ private fun LiveStreamScreen(
                 exoPlayer = exoPlayer,
                 eventPublisher = eventPublisher,
                 paddingValues = paddingValues,
-                onClose = onClose,
-                noteCallbacks = noteCallbacks,
+                callbacks = callbacks,
                 onZapClick = { invokeZapOptionsOrShowWarning() },
             )
         },
@@ -283,6 +305,7 @@ private fun StreamPlayer(
     exoPlayer: ExoPlayer,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onClose: () -> Unit,
+    onQuoteStreamClick: (String) -> Unit,
 ) {
     LiveStreamPlayer(
         state = state,
@@ -314,9 +337,7 @@ private fun StreamPlayer(
         onSeekStarted = {
             eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
         },
-        onQuoteClick = { naddr ->
-            eventPublisher(LiveStreamContract.UiEvent.QuoteStream(naddr))
-        },
+        onQuoteClick = onQuoteStreamClick,
         onMuteUserClick = {
             state.streamInfo?.mainHostId?.let { eventPublisher(LiveStreamContract.UiEvent.MuteAction(it)) }
         },
@@ -335,14 +356,15 @@ private fun StreamPlayer(
     )
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun StreamInfoAndChatSection(
     modifier: Modifier = Modifier,
     state: LiveStreamContract.UiState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
-    noteCallbacks: NoteCallbacks,
     onZapClick: () -> Unit,
+    onInfoClick: () -> Unit,
+    onProfileClick: (String) -> Unit,
+    onEventReactionsClick: (eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit,
 ) {
     val chatListState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
@@ -353,15 +375,16 @@ private fun StreamInfoAndChatSection(
         StreamInfoDisplay(
             state = state,
             onZapClick = onZapClick,
-            noteCallbacks = noteCallbacks,
             isKeyboardVisible = isKeyboardVisible,
+            onInfoClick = onInfoClick,
+            onEventReactionsClick = onEventReactionsClick,
         )
 
         LiveChatContent(
             state = state,
             listState = chatListState,
             eventPublisher = eventPublisher,
-            noteCallbacks = noteCallbacks,
+            onProfileClick = onProfileClick,
         )
     }
 }
@@ -372,8 +395,7 @@ private fun LiveStreamContent(
     exoPlayer: ExoPlayer,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     paddingValues: PaddingValues,
-    onClose: () -> Unit,
-    noteCallbacks: NoteCallbacks,
+    callbacks: LiveStreamContract.ScreenCallbacks,
     onZapClick: () -> Unit,
 ) {
     if (state.loading) {
@@ -393,15 +415,18 @@ private fun LiveStreamContent(
                 streamInfo = streamInfo,
                 exoPlayer = exoPlayer,
                 eventPublisher = eventPublisher,
-                onClose = onClose,
+                onClose = callbacks.onClose,
+                onQuoteStreamClick = callbacks.onQuoteStreamClick,
             )
 
             StreamInfoAndChatSection(
                 modifier = Modifier.weight(1f),
                 state = state,
                 eventPublisher = eventPublisher,
-                noteCallbacks = noteCallbacks,
                 onZapClick = onZapClick,
+                onInfoClick = { eventPublisher(LiveStreamContract.UiEvent.ShowStreamInfoBottomSheet) },
+                onProfileClick = callbacks.onProfileClick,
+                onEventReactionsClick = callbacks.onEventReactionsClick,
             )
         }
     }
@@ -411,8 +436,9 @@ private fun LiveStreamContent(
 private fun StreamInfoDisplay(
     state: LiveStreamContract.UiState,
     onZapClick: () -> Unit,
-    noteCallbacks: NoteCallbacks,
     isKeyboardVisible: Boolean,
+    onInfoClick: () -> Unit,
+    onEventReactionsClick: (eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit,
 ) {
     val streamInfo = state.streamInfo ?: return
     val bottomBorderColor = AppTheme.extraColorScheme.surfaceVariantAlt1
@@ -442,7 +468,7 @@ private fun StreamInfoDisplay(
             viewers = streamInfo.viewers,
             startedAt = streamInfo.startedAt,
             isLive = state.playerState.isLive,
-            onInfoClick = {},
+            onInfoClick = onInfoClick,
             onChatSettingsClick = {},
             isKeyboardVisible = isKeyboardVisible,
         )
@@ -454,7 +480,7 @@ private fun StreamInfoDisplay(
                 onZapClick = onZapClick,
                 onTopZapsClick = {
                     state.streamInfo.atag.let { atag ->
-                        noteCallbacks.onEventReactionsClick?.invoke(
+                        onEventReactionsClick(
                             atag,
                             ReactionType.ZAPS,
                             atag,
@@ -471,8 +497,8 @@ private fun LiveChatListOrSearch(
     modifier: Modifier = Modifier,
     state: LiveStreamContract.UiState,
     listState: LazyListState,
-    noteCallbacks: NoteCallbacks,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
+    onProfileClick: (String) -> Unit,
 ) {
     if (!state.userTaggingState.isUserTaggingActive) {
         if (state.chatItems.isEmpty()) {
@@ -494,7 +520,7 @@ private fun LiveChatListOrSearch(
                     when (chatItem) {
                         is StreamChatItem.ChatMessageItem -> ChatMessageListItem(
                             message = chatItem.message,
-                            noteCallbacks = noteCallbacks,
+                            onProfileClick = onProfileClick,
                         )
 
                         is StreamChatItem.ZapMessageItem -> ZapMessageListItem(zap = chatItem.zap)
@@ -527,7 +553,7 @@ private fun LiveChatContent(
     state: LiveStreamContract.UiState,
     listState: LazyListState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
-    noteCallbacks: NoteCallbacks,
+    onProfileClick: (String) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -551,8 +577,8 @@ private fun LiveChatContent(
                 .weight(1f),
             state = state,
             listState = listState,
-            noteCallbacks = noteCallbacks,
             eventPublisher = eventPublisher,
+            onProfileClick = onProfileClick,
         )
 
         LiveChatCommentInput(
@@ -665,7 +691,7 @@ private fun LiveChatCommentInput(
 }
 
 @Composable
-private fun ChatMessageListItem(message: ChatMessageUi, noteCallbacks: NoteCallbacks) {
+private fun ChatMessageListItem(message: ChatMessageUi, onProfileClick: (String) -> Unit) {
     val localUriHandler = LocalUriHandler.current
 
     val authorNameColor = AppTheme.colorScheme.onSurface
@@ -733,7 +759,7 @@ private fun ChatMessageListItem(message: ChatMessageUi, noteCallbacks: NoteCallb
                 ).firstOrNull()
 
                 if (profileAnnotation != null) {
-                    noteCallbacks.onProfileClick?.invoke(profileAnnotation.item)
+                    onProfileClick(profileAnnotation.item)
                     return@PrimalClickableText
                 }
             },
