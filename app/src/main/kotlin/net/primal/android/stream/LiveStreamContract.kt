@@ -32,14 +32,8 @@ interface LiveStreamContract {
         val sendingMessage: Boolean = false,
         val taggedUsers: List<NoteTaggedUser> = emptyList(),
         val userTaggingState: UserTaggingState = UserTaggingState(),
-        val bottomSheet: StreamBottomSheet = StreamBottomSheet.None,
         val error: UiError? = null,
     )
-
-    sealed interface StreamBottomSheet {
-        data object None : StreamBottomSheet
-        data object StreamInfo : StreamBottomSheet
-    }
 
     data class PlayerState(
         val isPlaying: Boolean = false,
@@ -99,8 +93,6 @@ interface LiveStreamContract {
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
         data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
         data object AppendUserTagAtSign : UiEvent()
-        data object ShowStreamInfoBottomSheet : UiEvent()
-        data object HideBottomSheet : UiEvent()
     }
 
     sealed class SideEffect {

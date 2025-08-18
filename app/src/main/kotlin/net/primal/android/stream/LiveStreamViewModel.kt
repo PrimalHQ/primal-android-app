@@ -31,7 +31,6 @@ import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.profile.mention.UserMentionHandler
 import net.primal.android.profile.mention.appendUserTagAtSignAtCursorPosition
 import net.primal.android.stream.LiveStreamContract.SideEffect
-import net.primal.android.stream.LiveStreamContract.StreamBottomSheet
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
 import net.primal.android.stream.LiveStreamContract.UiEvent
 import net.primal.android.stream.LiveStreamContract.UiState
@@ -245,11 +244,6 @@ class LiveStreamViewModel @Inject constructor(
                     UiEvent.AppendUserTagAtSign -> setState {
                         copy(comment = this.comment.appendUserTagAtSignAtCursorPosition())
                     }
-
-                    UiEvent.ShowStreamInfoBottomSheet ->
-                        setState { copy(bottomSheet = StreamBottomSheet.StreamInfo) }
-
-                    UiEvent.HideBottomSheet -> setState { copy(bottomSheet = StreamBottomSheet.None) }
                 }
             }
         }

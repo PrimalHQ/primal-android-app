@@ -115,6 +115,11 @@ private val ZapMessageProfileHandleColor: Color
         Color(0xFFE47C00)
     }
 
+private sealed interface ActiveBottomSheet {
+    data object None : ActiveBottomSheet
+    data object StreamInfo : ActiveBottomSheet
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LiveStreamScreen(
@@ -152,7 +157,7 @@ private fun LiveStreamScreen(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var activeBottomSheet by remember { mutableStateOf<ActiveBottomSheet>(ActiveBottomSheet.None) }
 
     var showCantZapWarning by remember { mutableStateOf(false) }
     if (showCantZapWarning) {
@@ -192,37 +197,14 @@ private fun LiveStreamScreen(
         }
     }
 
-    if (state.bottomSheet is LiveStreamContract.StreamBottomSheet.StreamInfo &&
-        state.streamInfo != null && state.activeUserId != null
-    ) {
-        ModalBottomSheet(
-            onDismissRequest = { eventPublisher(LiveStreamContract.UiEvent.HideBottomSheet) },
-            sheetState = sheetState,
-            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-            tonalElevation = 0.dp,
-        ) {
-            StreamInfoBottomSheet(
-                activeUserId = state.activeUserId,
-                streamInfo = state.streamInfo,
-                isLive = state.playerState.isLive,
-                onFollow = {
-                    state.streamInfo.mainHostId.let {
-                        eventPublisher(LiveStreamContract.UiEvent.FollowAction(it))
-                    }
-                },
-                onUnfollow = {
-                    state.streamInfo.mainHostId.let {
-                        eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(it))
-                    }
-                },
-                onZap = { invokeZapOptionsOrShowWarning() },
-                onEditProfileClick = callbacks.onEditProfileClick,
-                onMessageClick = callbacks.onMessageClick,
-                onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
-                onHashtagClick = callbacks.onHashtagClick,
-            )
-        }
-    }
+    LiveStreamModalBottomSheets(
+        activeSheet = activeBottomSheet,
+        onDismiss = { activeBottomSheet = ActiveBottomSheet.None },
+        state = state,
+        eventPublisher = eventPublisher,
+        callbacks = callbacks,
+        onZapClick = { invokeZapOptionsOrShowWarning() },
+    )
 
     if (state.shouldApproveBookmark) {
         ApproveBookmarkAlertDialog(
@@ -293,9 +275,59 @@ private fun LiveStreamScreen(
                 paddingValues = paddingValues,
                 callbacks = callbacks,
                 onZapClick = { invokeZapOptionsOrShowWarning() },
+                onInfoClick = { activeBottomSheet = ActiveBottomSheet.StreamInfo },
             )
         },
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun LiveStreamModalBottomSheets(
+    activeSheet: ActiveBottomSheet,
+    onDismiss: () -> Unit,
+    state: LiveStreamContract.UiState,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
+    callbacks: LiveStreamContract.ScreenCallbacks,
+    onZapClick: () -> Unit,
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    when (activeSheet) {
+        is ActiveBottomSheet.StreamInfo -> {
+            if (state.streamInfo != null && state.activeUserId != null) {
+                ModalBottomSheet(
+                    onDismissRequest = onDismiss,
+                    sheetState = sheetState,
+                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+                    tonalElevation = 0.dp,
+                ) {
+                    StreamInfoBottomSheet(
+                        activeUserId = state.activeUserId,
+                        streamInfo = state.streamInfo,
+                        isLive = state.playerState.isLive,
+                        onFollow = {
+                            state.streamInfo.mainHostId.let {
+                                eventPublisher(LiveStreamContract.UiEvent.FollowAction(it))
+                            }
+                        },
+                        onUnfollow = {
+                            state.streamInfo.mainHostId.let {
+                                eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(it))
+                            }
+                        },
+                        onZap = onZapClick,
+                        onEditProfileClick = callbacks.onEditProfileClick,
+                        onMessageClick = callbacks.onMessageClick,
+                        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
+                        onHashtagClick = callbacks.onHashtagClick,
+                    )
+                }
+            }
+        }
+        is ActiveBottomSheet.None -> {
+        }
+    }
 }
 
 @Composable
@@ -397,6 +429,7 @@ private fun LiveStreamContent(
     paddingValues: PaddingValues,
     callbacks: LiveStreamContract.ScreenCallbacks,
     onZapClick: () -> Unit,
+    onInfoClick: () -> Unit,
 ) {
     if (state.loading) {
         PrimalLoadingSpinner()
@@ -424,7 +457,7 @@ private fun LiveStreamContent(
                 state = state,
                 eventPublisher = eventPublisher,
                 onZapClick = onZapClick,
-                onInfoClick = { eventPublisher(LiveStreamContract.UiEvent.ShowStreamInfoBottomSheet) },
+                onInfoClick = onInfoClick,
                 onProfileClick = callbacks.onProfileClick,
                 onEventReactionsClick = callbacks.onEventReactionsClick,
             )
