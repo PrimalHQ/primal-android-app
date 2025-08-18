@@ -1343,8 +1343,6 @@
     <string name="live_stream_menu_copy_stream_link">Copy Stream Link</string>
     <string name="live_stream_menu_copy_stream_id">Copy Stream ID</string>
     <string name="live_stream_menu_copy_raw_data">Copy Raw Data</string>
-    <string name="live_stream_menu_add_bookmark">Add Bookmark</string>
-    <string name="live_stream_menu_remove_bookmark">Remove Bookmark</string>
     <string name="live_stream_menu_mute_user">Mute User</string>
     <string name="live_stream_menu_unmute_user">Unmute User</string>
     <string name="live_stream_menu_report_content">Report Content</string>
