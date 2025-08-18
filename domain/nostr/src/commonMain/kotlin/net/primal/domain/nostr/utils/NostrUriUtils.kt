@@ -59,7 +59,7 @@ private fun String.extract(parser: (bechPrefix: String?, key: String?) -> String
 fun String.isNostrUri(): Boolean {
     val uri = lowercase()
     return uri.startsWith(NOSTR) || uri.startsWith(NPUB) || uri.startsWith(NOTE) ||
-        uri.startsWith(NEVENT) || uri.startsWith(NPROFILE)
+        uri.startsWith(NEVENT) || uri.startsWith(NPROFILE) || uri.startsWith(NADDR)
 }
 
 fun String.clearAtSignFromNostrUris(): String =
