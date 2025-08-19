@@ -50,8 +50,10 @@ import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
 import net.primal.core.utils.fetchAndGet
+import net.primal.core.utils.onSuccess
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRelayHintsRepository
+import net.primal.domain.mappers.asReferencedStream
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
@@ -73,6 +75,7 @@ import net.primal.domain.posts.FeedRepository
 import net.primal.domain.reads.Article
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
+import net.primal.domain.streams.StreamRepository
 import net.primal.domain.utils.isLnInvoice
 import timber.log.Timber
 
@@ -85,6 +88,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val notePublishHandler: NotePublishHandler,
     private val primalUploadService: AndroidPrimalBlossomUploadService,
     private val highlightRepository: HighlightRepository,
+    private val streamRepository: StreamRepository,
     private val articleRepository: ArticleRepository,
     private val relayRepository: RelayRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
@@ -98,6 +102,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val referencedArticleNaddr = args.referencedArticleNaddr?.let(Nip19TLV::parseUriAsNaddrOrNull)
     private val referencedHighlightNevent = args.referencedHighlightNevent?.let(Nip19TLV::parseUriAsNeventOrNull)
     private val referencedNoteNevent = args.referencedNoteNevent?.let(Nip19TLV::parseUriAsNeventOrNull)
+    private val referencedStreamNaddr = args.referencedStreamNaddr?.let(Nip19TLV::parseUriAsNaddrOrNull)
 
     private val _state = MutableStateFlow(UiState(isQuoting = args.isQuoting))
     val state = _state.asStateFlow()
@@ -156,6 +161,14 @@ class NoteEditorViewModel @AssistedInject constructor(
                 },
                 referencedArticleNaddr?.let {
                     ReferencedUri.Article(
+                        data = null,
+                        loading = true,
+                        uri = it.toNaddrString(),
+                        naddr = it,
+                    )
+                },
+                referencedStreamNaddr?.let {
+                    ReferencedUri.Stream(
                         data = null,
                         loading = true,
                         uri = it.toNaddrString(),
@@ -285,6 +298,8 @@ class NoteEditorViewModel @AssistedInject constructor(
                     is ReferencedUri.Highlight ->
                         getAndUpdateHighlightUriDetails(it.uri, it.nevent)
 
+                    is ReferencedUri.Stream -> updateStreamUriDetails(it.uri, it.naddr)
+
                     is ReferencedUri.LightningInvoice -> Unit
                 }
             }
@@ -352,6 +367,28 @@ class NoteEditorViewModel @AssistedInject constructor(
             } catch (error: NetworkException) {
                 Timber.w(error)
             }
+        }
+
+    private fun updateStreamUriDetails(uri: String, naddr: Naddr) =
+        viewModelScope.launch {
+            streamRepository.getStream(aTag = naddr.asATagValue())
+                .onSuccess { stream ->
+                    setState {
+                        copy(
+                            referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Stream>(uri = uri) {
+                                copy(data = stream.asReferencedStream())
+                            },
+                        )
+                    }
+                }.run {
+                    setState {
+                        copy(
+                            referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Stream>(uri = uri) {
+                                copy(loading = false)
+                            },
+                        )
+                    }
+                }
         }
 
     private fun fetchAndUpdateNoteUriDetails(uri: String, nevent: Nevent) =
@@ -712,14 +749,32 @@ class NoteEditorViewModel @AssistedInject constructor(
             )
         }
 
-        return uri.takeAsNaddrOrNull()?.let { naddr ->
-            ReferencedUri.Article(
-                data = null,
-                loading = true,
-                uri = uri,
-                naddr = naddr,
-            )
-        } ?: uri.takeAsNeventOrNull()
+        return uri.takeAsNaddrOrNull()
+            .takeIf {
+                it?.kind == NostrEventKind.LongFormContent.value ||
+                    it?.kind == NostrEventKind.LiveActivity.value
+            }
+            ?.let { naddr ->
+                when (naddr.kind) {
+                    NostrEventKind.LiveActivity.value ->
+                        ReferencedUri.Stream(
+                            data = null,
+                            loading = true,
+                            uri = uri,
+                            naddr = naddr,
+                        )
+
+                    NostrEventKind.LongFormContent.value ->
+                        ReferencedUri.Article(
+                            data = null,
+                            loading = true,
+                            uri = uri,
+                            naddr = naddr,
+                        )
+
+                    else -> null
+                }
+            } ?: uri.takeAsNeventOrNull()
             .takeIf {
                 it?.kind == NostrEventKind.ShortTextNote.value ||
                     it?.kind == NostrEventKind.Highlight.value
