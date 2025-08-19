@@ -4,11 +4,13 @@ import net.primal.domain.events.EventZap
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.profile.ProfileData
 
 data class Stream(
     val aTag: String,
     val eventId: String,
     val authorId: String,
+    val authorProfile: ProfileData?,
     val dTag: String,
     val title: String?,
     val summary: String?,
