@@ -152,7 +152,7 @@ fun ProfileTopCoverBar(
             avatarPadding = with(
                 density,
             ) { (maxAvatarSizePx - avatarSizePx.floatValue).toDp() },
-            avatarOffsetY = with(density) { maxAvatarSizePx.times(other = 0.65f).toDp() },
+            avatarOffsetY = with(density) { maxAvatarSizePx.times(other = 0.60f).toDp() },
         ),
         eventPublisher = eventPublisher,
         callbacks = callbacks,
@@ -228,8 +228,8 @@ private fun ProfileTopCoverBar(
             UniversalAvatarThumbnail(
                 modifier = Modifier
                     .padding(
-                        top = avatarValues.avatarPadding * 1 / 3,
-                        bottom = avatarValues.avatarPadding * 3 / 3,
+                        top = avatarValues.avatarPadding * 2 / 5,
+                        bottom = avatarValues.avatarPadding * 3 / 5,
                         start = avatarValues.avatarPadding * 1 / 8,
                         end = avatarValues.avatarPadding * 7 / 8,
                     ),
