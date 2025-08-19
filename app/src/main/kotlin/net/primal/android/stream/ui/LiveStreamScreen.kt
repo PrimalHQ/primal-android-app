@@ -41,7 +41,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -65,12 +64,9 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
 import java.text.NumberFormat
-import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
@@ -104,8 +100,6 @@ import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.DraftTx
 
 private const val URL_ANNOTATION_TAG = "url"
-private const val LIVE_EDGE_THRESHOLD_MS = 60_000
-private const val PLAYER_STATE_UPDATE_INTERVAL_MS = 200L
 private const val SEEK_INCREMENT_MS = 10_000L
 private const val VIDEO_ASPECT_RATIO_WIDTH = 16f
 private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
@@ -191,36 +185,6 @@ fun LiveStreamScreen(
         errorMessageResolver = { it.resolveUiErrorMessage(context) },
         onErrorDismiss = { eventPublisher(LiveStreamContract.UiEvent.DismissError) },
     )
-
-    val latestState by rememberUpdatedState(state)
-
-    LaunchedEffect(exoPlayer) {
-        while (true) {
-            if (!latestState.playerState.isSeeking) {
-                val duration = exoPlayer.duration
-                if (duration != C.TIME_UNSET) {
-                    val newCurrentTime = exoPlayer.currentPosition.coerceAtLeast(0L)
-                    val newTotalDuration = duration.coerceAtLeast(0L)
-                    val isAtLiveEdge =
-                        latestState.playerState.isLive && (newTotalDuration - newCurrentTime <= LIVE_EDGE_THRESHOLD_MS)
-
-                    if (newCurrentTime != latestState.playerState.currentTime ||
-                        newTotalDuration != latestState.playerState.totalDuration ||
-                        isAtLiveEdge != latestState.playerState.atLiveEdge
-                    ) {
-                        eventPublisher(
-                            LiveStreamContract.UiEvent.OnPlayerStateUpdate(
-                                atLiveEdge = isAtLiveEdge,
-                                currentTime = newCurrentTime,
-                                totalDuration = newTotalDuration,
-                            ),
-                        )
-                    }
-                }
-            }
-            delay(PLAYER_STATE_UPDATE_INTERVAL_MS.milliseconds)
-        }
-    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
