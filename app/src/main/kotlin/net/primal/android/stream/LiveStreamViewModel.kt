@@ -214,7 +214,6 @@ class LiveStreamViewModel @AssistedInject constructor(
                     is UiEvent.UnmuteAction -> unmute(it.profileId)
                     is UiEvent.ReportAbuse -> reportAbuse(it.reportType)
                     UiEvent.RequestDeleteStream -> requestDeleteStream()
-                    is UiEvent.QuoteStream -> setEffect(SideEffect.NavigateToQuote(it.naddr))
                     UiEvent.ToggleMute -> setState {
                         copy(playerState = playerState.copy(isMuted = !playerState.isMuted))
                     }

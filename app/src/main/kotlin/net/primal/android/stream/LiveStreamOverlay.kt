@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -14,11 +15,16 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.collectLatest
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.video.rememberPrimalStreamExoPlayer
+import net.primal.android.navigation.navigateToChat
+import net.primal.android.navigation.navigateToProfileEditor
+import net.primal.android.navigation.navigateToProfileQrCodeViewer
 import net.primal.android.navigation.navigateToWallet
+import net.primal.android.navigation.navigateToWalletCreateTransaction
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.stream.di.rememberLiveStreamViewModel
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.stream.player.StreamMode
+import net.primal.android.stream.player.StreamState
 import net.primal.android.stream.player.StreamStateProvider
 import net.primal.android.stream.ui.LiveStreamMiniPlayer
 import net.primal.android.stream.ui.LiveStreamScreen
@@ -61,10 +67,6 @@ private fun LiveStreamOverlay(
     LaunchedEffect(viewModel, noteCallbacks, streamState) {
         viewModel.effect.collectLatest {
             when (it) {
-                is LiveStreamContract.SideEffect.NavigateToQuote -> {
-                    noteCallbacks.onNoteQuoteClick?.invoke(it.naddr)
-                }
-
                 LiveStreamContract.SideEffect.StreamDeleted -> {
                     streamState.stop()
                 }
@@ -92,17 +94,18 @@ private fun LiveStreamOverlay(
 
     when (streamState.mode) {
         is StreamMode.Expanded -> {
+            val callbacks = rememberLiveStreamScreenCallbacks(
+                navController = navController,
+                noteCallbacks = noteCallbacks,
+                streamState = streamState,
+            )
+
             ApplyEdgeToEdge()
             LiveStreamScreen(
                 eventPublisher = viewModel::setEvent,
                 state = uiState.value,
                 exoPlayer = exoPlayer,
-                onClose = { streamState.minimize() },
-                noteCallbacks = noteCallbacks.withActionAfterCallback { streamState.minimize() },
-                onGoToWallet = {
-                    navController.navigateToWallet()
-                    streamState.minimize()
-                },
+                callbacks = callbacks,
             )
         }
 
@@ -122,98 +125,51 @@ private fun LiveStreamOverlay(
     }
 }
 
-@Suppress("LongMethod", "CyclomaticComplexMethod")
-private fun NoteCallbacks.withActionAfterCallback(action: () -> Unit): NoteCallbacks {
-    return this.copy(
-        onNoteClick = this.onNoteClick?.let { original ->
-            { noteId ->
-                original(noteId)
-                action()
-            }
-        },
-        onNoteReplyClick = this.onNoteReplyClick?.let { original ->
-            { noteNevent ->
-                original(noteNevent)
-                action()
-            }
-        },
-        onNoteQuoteClick = this.onNoteQuoteClick?.let { original ->
-            { noteNevent ->
-                original(noteNevent)
-                action()
-            }
-        },
-        onHighlightReplyClick = this.onHighlightReplyClick?.let { original ->
-            { highlightNevent, articleNaddr ->
-                original(highlightNevent, articleNaddr)
-                action()
-            }
-        },
-        onHighlightQuoteClick = this.onHighlightQuoteClick?.let { original ->
-            { highlightNevent, articleNaddr ->
-                original(highlightNevent, articleNaddr)
-                action()
-            }
-        },
-        onArticleClick = this.onArticleClick?.let { original ->
-            { naddr ->
-                original(naddr)
-                action()
-            }
-        },
-        onArticleReplyClick = this.onArticleReplyClick?.let { original ->
-            { naddr ->
-                original(naddr)
-                action()
-            }
-        },
-        onArticleQuoteClick = this.onArticleQuoteClick?.let { original ->
-            { naddr ->
-                original(naddr)
-                action()
-            }
-        },
-        onProfileClick = this.onProfileClick?.let { original ->
-            { profileId ->
-                original(profileId)
-                action()
-            }
-        },
-        onHashtagClick = this.onHashtagClick?.let { original ->
-            { hashtag ->
-                original(hashtag)
-                action()
-            }
-        },
-        onMediaClick = this.onMediaClick?.let { original ->
-            { event ->
-                original(event)
-                action()
-            }
-        },
-        onPayInvoiceClick = this.onPayInvoiceClick?.let { original ->
-            { event ->
-                original(event)
-                action()
-            }
-        },
-        onEventReactionsClick = this.onEventReactionsClick?.let { original ->
-            { eventId, initialTab, articleATag ->
-                original(eventId, initialTab, articleATag)
-                action()
-            }
-        },
-        onGetPrimalPremiumClick = this.onGetPrimalPremiumClick?.let { original ->
-            {
-                original()
-                action()
-            }
-        },
-        onPrimalLegendsLeaderboardClick = this.onPrimalLegendsLeaderboardClick?.let { original ->
-            {
-                original()
-                action()
-            }
-        },
-    )
+@Composable
+private fun rememberLiveStreamScreenCallbacks(
+    navController: NavHostController,
+    noteCallbacks: NoteCallbacks,
+    streamState: StreamState,
+): LiveStreamContract.ScreenCallbacks {
+    return remember(navController, noteCallbacks, streamState) {
+        LiveStreamContract.ScreenCallbacks(
+            onClose = { streamState.minimize() },
+            onGoToWallet = {
+                navController.navigateToWallet()
+                streamState.minimize()
+            },
+            onEditProfileClick = {
+                navController.navigateToProfileEditor()
+                streamState.minimize()
+            },
+            onMessageClick = { profileId ->
+                navController.navigateToChat(profileId)
+                streamState.minimize()
+            },
+            onDrawerQrCodeClick = { profileId ->
+                navController.navigateToProfileQrCodeViewer(profileId)
+                streamState.minimize()
+            },
+            onQuoteStreamClick = { naddr ->
+                noteCallbacks.onNoteQuoteClick?.invoke(naddr)
+                streamState.minimize()
+            },
+            onProfileClick = { profileId ->
+                noteCallbacks.onProfileClick?.invoke(profileId)
+                streamState.minimize()
+            },
+            onHashtagClick = { hashtag ->
+                noteCallbacks.onHashtagClick?.invoke(hashtag)
+                streamState.minimize()
+            },
+            onEventReactionsClick = { eventId, initialTab, articleATag ->
+                noteCallbacks.onEventReactionsClick?.invoke(eventId, initialTab, articleATag)
+                streamState.minimize()
+            },
+            onSendWalletTx = { draftTx ->
+                navController.navigateToWalletCreateTransaction(draftTx)
+                streamState.minimize()
+            },
+        )
+    }
 }

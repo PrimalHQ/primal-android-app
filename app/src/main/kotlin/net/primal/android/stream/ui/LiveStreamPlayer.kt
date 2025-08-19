@@ -25,10 +25,9 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.stream.LiveStreamContract
+import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
+import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
 import net.primal.domain.nostr.ReportType
-
-private const val VIDEO_ASPECT_RATIO_WIDTH = 16f
-private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
 
 @OptIn(UnstableApi::class)
 @Composable

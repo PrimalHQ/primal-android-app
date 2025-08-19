@@ -266,7 +266,7 @@ fun NavController.navigateToRedeemCode(promoCode: String? = null) =
 
 private fun NavController.navigateToMessages() = navigate(route = "messages")
 
-private fun NavController.navigateToChat(profileId: String) = navigate(route = "messages/$profileId")
+fun NavController.navigateToChat(profileId: String) = navigate(route = "messages/$profileId")
 
 private fun NavController.navigateToNewMessage() = navigate(route = "messages/new")
 
