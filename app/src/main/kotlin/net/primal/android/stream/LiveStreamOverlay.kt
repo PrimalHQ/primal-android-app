@@ -151,7 +151,7 @@ private fun rememberLiveStreamScreenCallbacks(
                 streamState.minimize()
             },
             onQuoteStreamClick = { naddr ->
-                noteCallbacks.onNoteQuoteClick?.invoke(naddr)
+                noteCallbacks.onStreamQuoteClick?.invoke(naddr)
                 streamState.minimize()
             },
             onProfileClick = { profileId ->

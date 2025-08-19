@@ -10,6 +10,7 @@ data class NoteEditorArgs(
     val referencedNoteNevent: String? = null,
     val referencedArticleNaddr: String? = null,
     val referencedHighlightNevent: String? = null,
+    val referencedStreamNaddr: String? = null,
     val mediaUris: List<String> = emptyList(),
     val content: String = "",
     val contentSelectionStart: Int = 0,
