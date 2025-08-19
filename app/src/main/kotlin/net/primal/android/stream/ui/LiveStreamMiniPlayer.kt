@@ -63,10 +63,9 @@ import net.primal.android.core.compose.rememberKeyboardState
 import net.primal.android.core.video.toggle
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.LocalStreamState
+import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
+import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
 import net.primal.android.theme.AppTheme
-
-private const val VIDEO_ASPECT_RATIO_WIDTH = 16f
-private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
 
 private val PADDING = 16.dp
 private val springSpec = spring<Float>(

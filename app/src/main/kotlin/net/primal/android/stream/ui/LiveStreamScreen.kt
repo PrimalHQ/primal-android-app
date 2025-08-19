@@ -89,6 +89,9 @@ import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.notes.feed.zaps.ZapHost
 import net.primal.android.notes.feed.zaps.rememberZapHostState
 import net.primal.android.stream.LiveStreamContract
+import net.primal.android.stream.player.SEEK_INCREMENT_MS
+import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
+import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.detectUrls
 import net.primal.domain.links.EventUriNostrType
@@ -100,10 +103,6 @@ import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.DraftTx
 
 private const val URL_ANNOTATION_TAG = "url"
-private const val SEEK_INCREMENT_MS = 10_000L
-private const val VIDEO_ASPECT_RATIO_WIDTH = 16f
-private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
-
 private val ZapMessageBorderColor = Color(0xFFFFA000)
 private val ZapMessageBackgroundColor = Color(0xFFE47C00)
 private val ZapMessageProfileHandleColor: Color
@@ -129,9 +128,6 @@ fun LiveStreamScreen(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
-    var activeBottomSheet by remember { mutableStateOf<ActiveBottomSheet>(ActiveBottomSheet.None) }
-    var bottomSheetHeight by remember { mutableStateOf<Dp?>(null) }
 
     val zapHostState = rememberZapHostState(
         zappingState = state.zappingState,
@@ -161,24 +157,6 @@ fun LiveStreamScreen(
         )
     }
 
-    LiveStreamModalBottomSheets(
-        activeSheet = activeBottomSheet,
-        onDismiss = { activeBottomSheet = ActiveBottomSheet.None },
-        state = state,
-        eventPublisher = eventPublisher,
-        callbacks = callbacks,
-        onZapClick = {
-            handleZapProfile(
-                state = state,
-                callbacks = callbacks,
-                coroutineScope = coroutineScope,
-                snackbarHostState = snackbarHostState,
-                context = context,
-            )
-        },
-        bottomSheetHeight = bottomSheetHeight,
-    )
-
     SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
@@ -191,8 +169,17 @@ fun LiveStreamScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         content = { paddingValues ->
             BoxWithConstraints {
+                val coroutineScope = rememberCoroutineScope()
+
                 val playerHeight = this.maxWidth * (VIDEO_ASPECT_RATIO_HEIGHT / VIDEO_ASPECT_RATIO_WIDTH)
-                bottomSheetHeight = this.maxHeight - playerHeight - 50.dp
+                val topInset = paddingValues.calculateTopPadding()
+                val bottomInset = paddingValues.calculateBottomPadding()
+
+                val bottomSheetHeight = remember(this.maxHeight, playerHeight, topInset, bottomInset) {
+                    (this.maxHeight - topInset - playerHeight - bottomInset).coerceAtLeast(0.dp)
+                }
+
+                var activeBottomSheet by remember { mutableStateOf<ActiveBottomSheet>(ActiveBottomSheet.None) }
 
                 LiveStreamContent(
                     state = state,
@@ -202,6 +189,24 @@ fun LiveStreamScreen(
                     callbacks = callbacks,
                     onZapClick = { zapHostState.showZapOptionsOrShowWarning() },
                     onInfoClick = { activeBottomSheet = ActiveBottomSheet.StreamInfo },
+                )
+
+                LiveStreamModalBottomSheets(
+                    activeSheet = activeBottomSheet,
+                    onDismiss = { activeBottomSheet = ActiveBottomSheet.None },
+                    state = state,
+                    eventPublisher = eventPublisher,
+                    callbacks = callbacks,
+                    onZapClick = {
+                        handleZapProfile(
+                            state = state,
+                            callbacks = callbacks,
+                            coroutineScope = coroutineScope,
+                            snackbarHostState = snackbarHostState,
+                            context = context,
+                        )
+                    },
+                    bottomSheetHeight = bottomSheetHeight,
                 )
             }
         },
@@ -254,6 +259,7 @@ private fun LiveStreamModalBottomSheets(
                 }
             }
         }
+
         is ActiveBottomSheet.None -> Unit
     }
 }
