@@ -28,7 +28,7 @@ data class Stream(
 ) {
     fun isLive() = status == StreamStatus.LIVE
 
-    fun toNaddrString(): String? =
+    fun toNaddrString(): String =
         Naddr(
             kind = NostrEventKind.LiveActivity.value,
             userId = this.authorId,
