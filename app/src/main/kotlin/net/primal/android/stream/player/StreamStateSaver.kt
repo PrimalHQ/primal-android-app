@@ -27,7 +27,7 @@ private fun restoreMode(raw: Any): StreamMode {
     val payload = list[1]
     return when (tag) {
         MODE_CLOSED -> StreamMode.Closed
-        MODE_HIDDEN -> StreamMode.Hidden(naddr = payload as String, modeToRestore = restoreMode(payload))
+        MODE_HIDDEN -> StreamMode.Hidden(modeToRestore = restoreMode(payload))
         MODE_MINIMIZED -> StreamMode.Minimized(naddr = payload as String)
         MODE_EXPANDED -> StreamMode.Expanded(naddr = payload as String)
         else -> StreamMode.Closed

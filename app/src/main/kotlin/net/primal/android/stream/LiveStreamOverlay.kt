@@ -31,13 +31,7 @@ fun LiveStreamOverlay(
 ) {
     StreamStateProvider {
         val streamState = LocalStreamState.current
-        val naddrUri: String? = when (val mode = streamState.mode) {
-            is StreamMode.Expanded -> mode.naddr
-            is StreamMode.Minimized -> mode.naddr
-            is StreamMode.Hidden -> mode.naddr
-            else -> null
-        }
-
+        val naddrUri: String? = streamState.mode.resolveNaddr()
         val liveStreamViewModel = rememberLiveStreamViewModel(naddrUri)
 
         Box(modifier = Modifier.fillMaxSize()) {

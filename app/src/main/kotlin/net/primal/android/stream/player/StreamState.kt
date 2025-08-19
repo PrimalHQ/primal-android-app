@@ -42,13 +42,9 @@ class StreamState internal constructor(
     }
 
     fun hide() {
-        val naddr = when (_mode) {
-            is StreamMode.Minimized -> (_mode as StreamMode.Minimized).naddr
-            is StreamMode.Expanded -> (_mode as StreamMode.Expanded).naddr
-            else -> null
-        }
-        if (naddr != null) {
-            _mode = StreamMode.Hidden(naddr = naddr, modeToRestore = _mode)
+        val current = _mode
+        if (current !is StreamMode.Hidden) {
+            _mode = StreamMode.Hidden(modeToRestore = current)
         }
     }
 
