@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.stream.LiveStreamApi
@@ -50,6 +51,11 @@ class StreamRepositoryImpl(
             streamPO?.asStreamDO()
         }
     }
+
+    override suspend fun getStream(aTag: String): Result<Stream> =
+        database.streams().findStreamByATag(aTag = aTag)?.let {
+            Result.success(it.asStreamDO())
+        } ?: Result.failure(IllegalArgumentException("stream with given aTag could not be found."))
 
     override suspend fun startLiveStreamSubscription(naddr: Naddr, userId: String) {
         liveStreamApi.subscribe(
