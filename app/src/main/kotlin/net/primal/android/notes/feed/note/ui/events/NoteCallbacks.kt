@@ -6,6 +6,7 @@ data class NoteCallbacks(
     val onNoteClick: ((noteId: String) -> Unit)? = null,
     val onNoteReplyClick: ((noteNevent: String) -> Unit)? = null,
     val onNoteQuoteClick: ((noteNevent: String) -> Unit)? = null,
+    val onStreamQuoteClick: ((streamNaddr: String) -> Unit)? = null,
     val onHighlightReplyClick: ((highlightNevent: String, articleNaddr: String) -> Unit)? = null,
     val onHighlightQuoteClick: ((highlightNevent: String, articleNaddr: String) -> Unit)? = null,
     val onArticleClick: ((naddr: String) -> Unit)? = null,

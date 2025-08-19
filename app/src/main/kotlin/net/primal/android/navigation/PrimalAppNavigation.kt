@@ -386,6 +386,14 @@ fun noteCallbacksHandler(navController: NavController) =
                 ),
             )
         },
+        onStreamQuoteClick = { streamNaddr ->
+            navController.navigateToNoteEditor(
+                args = NoteEditorArgs(
+                    referencedStreamNaddr = streamNaddr,
+                    isQuoting = true,
+                ),
+            )
+        },
         onHighlightReplyClick = { highlightNevent, articleNaddr ->
             navController.navigateToNoteEditor(
                 args = NoteEditorArgs(
