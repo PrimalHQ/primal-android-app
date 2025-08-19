@@ -1,8 +1,9 @@
 package net.primal.android.core.compose
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -36,6 +37,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.core.networking.blossom.resolveBlossomUrls
 import net.primal.domain.links.CdnImage
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UniversalAvatarThumbnail(
     modifier: Modifier = Modifier,
@@ -47,6 +49,7 @@ fun UniversalAvatarThumbnail(
     borderSizeOverride: Dp? = null,
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null,
     hasInnerBorderOverride: Boolean = true,
     forceAnimationIfAvailable: Boolean = false,
     isLive: Boolean = false,
@@ -68,8 +71,19 @@ fun UniversalAvatarThumbnail(
 
     val variant = avatarCdnImage?.variants?.minByOrNull { it.width }
 
+    val clickableModifier = if (onClick != null || onLongClick != null) {
+        Modifier.combinedClickable(
+            onClick = { onClick?.invoke() },
+            onLongClick = { onLongClick?.invoke() },
+        )
+    } else {
+        Modifier
+    }
+
     Box(
-        modifier = modifier.size(avatarSize + totalBorderSize * 2),
+        modifier = modifier
+            .size(avatarSize + totalBorderSize * 2)
+            .then(clickableModifier),
         contentAlignment = Alignment.Center,
     ) {
         AvatarThumbnailListItemImage(
@@ -88,7 +102,6 @@ fun UniversalAvatarThumbnail(
             ),
             totalBorderSize = borderSizeOverride ?: totalBorderSize,
             backgroundColor = backgroundColor,
-            onClick = onClick,
             defaultAvatar = defaultAvatar,
             forceAnimationIfAvailable = forceAnimationIfAvailable,
         )
@@ -127,7 +140,6 @@ private fun AvatarThumbnailListItemImage(
     hasInnerBorder: Boolean = false,
     borderBrush: Brush = defaultBorderBrush(),
     backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
-    onClick: (() -> Unit)? = null,
     defaultAvatar: @Composable () -> Unit,
     forceAnimationIfAvailable: Boolean = false,
 ) {
@@ -140,13 +152,6 @@ private fun AvatarThumbnailListItemImage(
             borderBrush = borderBrush,
             hasOuterBorder = hasOuterBorder,
             hasInnerBorder = hasInnerBorder,
-        )
-        .then(
-            if (onClick != null) {
-                Modifier.clickable(onClick = onClick)
-            } else {
-                Modifier
-            },
         )
 
     val blossomUrls = resolveBlossomUrls(originalUrl = sourceUrl, blossoms = blossoms)
@@ -206,7 +211,6 @@ fun Modifier.adjustAvatarBackground(
         val innerBorderSize = avatarSize.resolveInnerBorderSizeFromAvatarSize()
         val outerBorderSize = totalBorderSize - innerBorderSize
         this
-            .size(avatarSize + totalBorderSize * 2)
             .border(
                 width = outerBorderSize,
                 brush = borderBrush,
@@ -228,7 +232,6 @@ fun Modifier.adjustAvatarBackground(
             .clip(CircleShape)
     } else {
         this
-            .size(avatarSize + totalBorderSize * 2)
             .border(
                 width = totalBorderSize,
                 brush = transparentBorderBrush(),
