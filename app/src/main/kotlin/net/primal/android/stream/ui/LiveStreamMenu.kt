@@ -20,12 +20,10 @@ import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
 import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.ContextAddBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteId
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyNoteLink
 import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
-import net.primal.android.core.compose.icons.primaliconpack.ContextRemoveBookmark
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportContent
 import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.Delete
@@ -46,7 +44,6 @@ fun LiveStreamMenu(
     modifier: Modifier,
     naddr: Naddr,
     isMainHostMuted: Boolean,
-    isBookmarked: Boolean,
     isActiveUserMainHost: Boolean,
     rawNostrEvent: String?,
     menuVisible: Boolean,
@@ -56,7 +53,6 @@ fun LiveStreamMenu(
     onUnmuteUserClick: () -> Unit,
     onReportContentClick: (ReportType) -> Unit,
     onRequestDeleteClick: () -> Unit,
-    onBookmarkClick: () -> Unit,
     icon: @Composable () -> Unit,
 ) {
     var reportDialogVisible by remember { mutableStateOf(false) }
@@ -76,12 +72,10 @@ fun LiveStreamMenu(
             MenuContent(
                 naddrString = naddrString,
                 isMuted = isMainHostMuted,
-                isBookmarked = isBookmarked,
                 isStreamAuthor = isActiveUserMainHost,
                 rawNostrEvent = rawNostrEvent,
                 onDismiss = { onMenuVisibilityChange(false) },
                 onQuoteClick = onQuoteClick,
-                onBookmarkClick = onBookmarkClick,
                 onMuteUserClick = onMuteUserClick,
                 onUnmuteUserClick = onUnmuteUserClick,
                 onReportContentClick = { reportDialogVisible = true },
@@ -119,12 +113,10 @@ fun LiveStreamMenu(
 private fun MenuContent(
     naddrString: String,
     isMuted: Boolean,
-    isBookmarked: Boolean,
     isStreamAuthor: Boolean,
     rawNostrEvent: String?,
     onDismiss: () -> Unit,
     onQuoteClick: (String) -> Unit,
-    onBookmarkClick: () -> Unit,
     onMuteUserClick: () -> Unit,
     onUnmuteUserClick: () -> Unit,
     onReportContentClick: () -> Unit,
@@ -177,20 +169,6 @@ private fun MenuContent(
                 onClick = { dismissAndCopyWithToast(rawNostrEvent) },
             )
         }
-        DropdownPrimalMenuItem(
-            trailingIconVector = if (isBookmarked) {
-                PrimalIcons.ContextRemoveBookmark
-            } else {
-                PrimalIcons.ContextAddBookmark
-            },
-            text = if (isBookmarked) {
-                stringResource(id = R.string.live_stream_menu_remove_bookmark)
-            } else {
-                stringResource(id = R.string.live_stream_menu_add_bookmark)
-            },
-            onClick = { dismissAnd { onBookmarkClick() } },
-        )
-
         if (!isStreamAuthor) {
             AuthorActions(
                 isMuted = isMuted,
@@ -199,7 +177,6 @@ private fun MenuContent(
                 onReport = { dismissAnd { onReportContentClick() } },
             )
         }
-
         if (isStreamAuthor) {
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.Delete,

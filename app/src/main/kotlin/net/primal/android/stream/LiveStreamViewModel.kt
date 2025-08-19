@@ -3,8 +3,9 @@ package net.primal.android.stream
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -43,8 +44,6 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.domain.account.WalletAccountRepository
-import net.primal.domain.bookmarks.BookmarkType
-import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.events.EventRelayHintsRepository
@@ -56,7 +55,6 @@ import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
-import net.primal.domain.nostr.PublicBookmarksNotFoundException
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.asATagValue
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -76,9 +74,9 @@ import net.primal.domain.utils.isConfigured
 import timber.log.Timber
 
 @Suppress("LargeClass")
-@HiltViewModel
-class LiveStreamViewModel @Inject constructor(
+class LiveStreamViewModel @AssistedInject constructor(
     userMentionHandlerFactory: UserMentionHandler.Factory,
+    @Assisted val streamNaddr: Naddr,
     private val profileRepository: ProfileRepository,
     private val streamRepository: StreamRepository,
     private val liveStreamChatRepository: LiveStreamChatRepository,
@@ -87,16 +85,26 @@ class LiveStreamViewModel @Inject constructor(
     private val zapHandler: ZapHandler,
     private val walletAccountRepository: WalletAccountRepository,
     private val mutedItemRepository: MutedItemRepository,
-    private val bookmarksRepository: PublicBookmarksRepository,
     private val eventInteractionRepository: EventInteractionRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
+
+    @AssistedFactory
+    interface Factory {
+        fun create(naddr: Naddr): LiveStreamViewModel
+    }
 
     private val userMentionHandler = userMentionHandlerFactory.create(
         scope = viewModelScope,
         userId = activeAccountStore.activeUserId(),
     )
-    private val _state = MutableStateFlow(UiState(activeUserId = activeAccountStore.activeUserId()))
+
+    private val _state = MutableStateFlow(
+        UiState(
+            naddr = streamNaddr,
+            activeUserId = activeAccountStore.activeUserId(),
+        ),
+    )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -107,47 +115,30 @@ class LiveStreamViewModel @Inject constructor(
     val effect = _effect.receiveAsFlow()
     private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
-    private var liveStreamSubscriptionJob: Job? = null
     private var authorObserversJob: Job? = null
 
     private var zaps: List<StreamChatItem.ZapMessageItem> = emptyList()
     private var chatMessages: List<StreamChatItem.ChatMessageItem> = emptyList()
 
     init {
+        startLiveStreamSubscription()
         observeEvents()
         observeFollowsResults()
         observeUserTaggingState()
+        observeStreamInfo()
+        observeActiveWallet()
+        observeActiveAccount()
+        observeChatMessages()
+        observeZaps()
     }
 
-    private fun resolveNaddr(naddrUri: String) =
-        viewModelScope.launch {
-            setState { copy(loading = true) }
-            val naddr = Nip19TLV.parseUriAsNaddrOrNull(naddrUri)
-            if (naddr != null) {
-                setState { copy(naddr = naddr) }
-                liveStreamSubscriptionJob = startLiveStreamSubscription(naddr)
-                initializeObservers(naddr = naddr)
-            } else {
-                Timber.w("Unable to resolve naddr.")
-                setState { copy(loading = false) }
-            }
-        }
-
-    private fun startLiveStreamSubscription(naddr: Naddr) =
+    private fun startLiveStreamSubscription() =
         viewModelScope.launch {
             streamRepository.startLiveStreamSubscription(
-                naddr = naddr,
+                naddr = streamNaddr,
                 userId = activeAccountStore.activeUserId(),
             )
         }
-
-    private fun initializeObservers(naddr: Naddr) {
-        observeStreamInfo(naddr)
-        observeActiveWallet()
-        observeActiveAccount()
-        observeChatMessages(naddr)
-        observeZaps(naddr)
-    }
 
     private fun observeUserTaggingState() {
         viewModelScope.launch {
@@ -157,9 +148,9 @@ class LiveStreamViewModel @Inject constructor(
         }
     }
 
-    private fun observeZaps(naddr: Naddr) =
+    private fun observeZaps() =
         viewModelScope.launch {
-            streamRepository.observeStream(aTag = naddr.asATagValue())
+            streamRepository.observeStream(aTag = streamNaddr.asATagValue())
                 .filterNotNull()
                 .map { it.eventZaps.map { zap -> StreamChatItem.ZapMessageItem(zap.asEventZapUiModel()) } }
                 .collect {
@@ -168,9 +159,9 @@ class LiveStreamViewModel @Inject constructor(
                 }
         }
 
-    private fun observeChatMessages(naddr: Naddr) =
+    private fun observeChatMessages() =
         viewModelScope.launch {
-            liveStreamChatRepository.observeMessages(streamATag = naddr.asATagValue())
+            liveStreamChatRepository.observeMessages(streamATag = streamNaddr.asATagValue())
                 .map { chatList -> chatList.map { it.toChatMessageItem() } }
                 .collect {
                     chatMessages = it
@@ -179,8 +170,7 @@ class LiveStreamViewModel @Inject constructor(
         }
 
     private fun updateChatItems() {
-        val combinedAndSorted = (zaps + chatMessages)
-            .sortedByDescending { it.timestamp }
+        val combinedAndSorted = (zaps + chatMessages).sortedByDescending { it.timestamp }
         setState { copy(chatItems = combinedAndSorted) }
     }
 
@@ -224,14 +214,10 @@ class LiveStreamViewModel @Inject constructor(
                     is UiEvent.UnmuteAction -> unmute(it.profileId)
                     is UiEvent.ReportAbuse -> reportAbuse(it.reportType)
                     UiEvent.RequestDeleteStream -> requestDeleteStream()
-                    is UiEvent.BookmarkStream -> bookmarkStream(it)
                     is UiEvent.QuoteStream -> setEffect(SideEffect.NavigateToQuote(it.naddr))
-                    UiEvent.DismissBookmarkConfirmation -> dismissBookmarkConfirmation()
                     UiEvent.ToggleMute -> setState {
                         copy(playerState = playerState.copy(isMuted = !playerState.isMuted))
                     }
-
-                    is UiEvent.StartStream -> resolveNaddr(naddrUri = it.naddr)
 
                     is UiEvent.SearchUsers -> userMentionHandler.search(it.query)
                     is UiEvent.ToggleSearchUsers -> userMentionHandler.toggleSearch(it.enabled)
@@ -285,9 +271,9 @@ class LiveStreamViewModel @Inject constructor(
         return content
     }
 
-    private fun observeStreamInfo(naddr: Naddr) =
+    private fun observeStreamInfo() =
         viewModelScope.launch {
-            streamRepository.observeStream(aTag = naddr.asATagValue())
+            streamRepository.observeStream(aTag = streamNaddr.asATagValue())
                 .filterNotNull()
                 .collect { stream ->
                     val isLive = stream.isLive()
@@ -302,11 +288,9 @@ class LiveStreamViewModel @Inject constructor(
                         initializeMainHostObservers(mainHostId = stream.authorId)
                     }
 
-                    val isBookmarked = bookmarksRepository.isBookmarked(tagValue = stream.aTag)
                     setState {
                         copy(
                             loading = false,
-                            isBookmarked = isBookmarked,
                             playerState = playerState.copy(isLive = isLive, atLiveEdge = isLive),
                             streamInfo = this.streamInfo?.copy(
                                 atag = stream.aTag,
@@ -685,53 +669,6 @@ class LiveStreamViewModel @Inject constructor(
                 setState { copy(error = UiError.NostrSignUnauthorized) }
                 Timber.w(error)
             }
-        }
-
-    private fun bookmarkStream(event: UiEvent.BookmarkStream) =
-        viewModelScope.launch {
-            val streamInfo = state.value.streamInfo ?: return@launch
-            val userId = activeAccountStore.activeUserId()
-            val isBookmarked = state.value.isBookmarked
-
-            setState { copy(isBookmarked = !isBookmarked, shouldApproveBookmark = false) }
-
-            try {
-                if (isBookmarked) {
-                    bookmarksRepository.removeFromBookmarks(
-                        userId = userId,
-                        forceUpdate = event.forceUpdate,
-                        bookmarkType = BookmarkType.Stream,
-                        tagValue = streamInfo.atag,
-                    )
-                } else {
-                    bookmarksRepository.addToBookmarks(
-                        userId = userId,
-                        forceUpdate = event.forceUpdate,
-                        bookmarkType = BookmarkType.Stream,
-                        tagValue = streamInfo.atag,
-                    )
-                }
-            } catch (error: NostrPublishException) {
-                setState { copy(error = UiError.FailedToBookmarkNote(error)) }
-                Timber.w(error)
-            } catch (error: PublicBookmarksNotFoundException) {
-                Timber.w(error)
-                setState { copy(shouldApproveBookmark = true) }
-            } catch (error: SigningKeyNotFoundException) {
-                setState { copy(error = UiError.MissingPrivateKey) }
-                Timber.w(error)
-            } catch (error: SigningRejectedException) {
-                setState { copy(error = UiError.NostrSignUnauthorized) }
-                Timber.w(error)
-            } catch (error: NetworkException) {
-                setState { copy(error = UiError.FailedToBookmarkNote(error)) }
-                Timber.w(error)
-            }
-        }
-
-    private fun dismissBookmarkConfirmation() =
-        viewModelScope.launch {
-            setState { copy(shouldApproveBookmark = false) }
         }
 
     private suspend fun ChatMessage.toChatMessageItem(): StreamChatItem.ChatMessageItem {

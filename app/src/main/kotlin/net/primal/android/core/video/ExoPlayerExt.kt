@@ -21,6 +21,7 @@ import net.primal.android.core.video.PlaybackConstants.MAX_BUFFER_MSEC
 import net.primal.android.core.video.PlaybackConstants.MAX_VIDEO_HEIGHT
 import net.primal.android.core.video.PlaybackConstants.MAX_VIDEO_WIDTH
 import net.primal.android.core.video.PlaybackConstants.MIN_BUFFER_MSEC
+import net.primal.domain.nostr.Naddr
 
 private object PlaybackConstants {
     const val MAX_VIDEO_WIDTH = 1280
@@ -84,13 +85,14 @@ fun initializePlayer(context: Context): ExoPlayer {
 
 @Composable
 fun rememberPrimalStreamExoPlayer(
+    streamNaddr: Naddr,
     onIsPlayingChanged: (Boolean) -> Unit,
     onPlaybackStateChanged: (Int) -> Unit,
 ): ExoPlayer {
     val context = LocalContext.current
-    val exoPlayer = remember { ExoPlayer.Builder(context).build() }
+    val exoPlayer = remember(streamNaddr) { ExoPlayer.Builder(context).build() }
 
-    DisposableEffect(exoPlayer) {
+    DisposableEffect(exoPlayer, onIsPlayingChanged, onPlaybackStateChanged) {
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 onIsPlayingChanged(isPlaying)

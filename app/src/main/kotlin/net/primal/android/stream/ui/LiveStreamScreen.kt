@@ -33,12 +33,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -64,11 +62,9 @@ import androidx.media3.exoplayer.ExoPlayer
 import java.text.NumberFormat
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
-import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.PrimalDefaults
@@ -78,7 +74,6 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
-import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
@@ -87,10 +82,9 @@ import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
-import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
-import net.primal.android.notes.feed.zaps.ZapBottomSheet
+import net.primal.android.notes.feed.zaps.ZapHost
+import net.primal.android.notes.feed.zaps.rememberZapHostState
 import net.primal.android.stream.LiveStreamContract
-import net.primal.android.stream.LiveStreamViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.detectUrls
 import net.primal.domain.links.EventUriNostrType
@@ -98,7 +92,6 @@ import net.primal.domain.links.ReferencedUser
 import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
 import net.primal.domain.nostr.utils.parseNostrUris
-import net.primal.domain.utils.canZap
 
 private const val URL_ANNOTATION_TAG = "url"
 private const val LIVE_EDGE_THRESHOLD_MS = 60_000
@@ -119,98 +112,29 @@ private val ZapMessageProfileHandleColor: Color
 @Composable
 fun LiveStreamScreen(
     state: LiveStreamContract.UiState,
-    exoPlayer: ExoPlayer,
-    viewModel: LiveStreamViewModel,
-    onClose: () -> Unit,
-    noteCallbacks: NoteCallbacks,
-    onGoToWallet: () -> Unit,
-) {
-    ApplyEdgeToEdge()
-    LaunchedEffect(viewModel, noteCallbacks, onClose) {
-        viewModel.effect.collectLatest {
-            when (it) {
-                is LiveStreamContract.SideEffect.NavigateToQuote -> {
-                    noteCallbacks.onNoteQuoteClick?.invoke(it.naddr)
-                }
-
-                LiveStreamContract.SideEffect.StreamDeleted -> {
-                    onClose()
-                }
-            }
-        }
-    }
-
-    LiveStreamScreen(
-        state = state,
-        onClose = onClose,
-        eventPublisher = viewModel::setEvent,
-        noteCallbacks = noteCallbacks,
-        exoPlayer = exoPlayer,
-        onGoToWallet = onGoToWallet,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun LiveStreamScreen(
-    state: LiveStreamContract.UiState,
     onClose: () -> Unit,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     noteCallbacks: NoteCallbacks,
     exoPlayer: ExoPlayer,
     onGoToWallet: () -> Unit,
 ) {
-    val context = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
+    val zapHostState = rememberZapHostState(
+        zappingState = state.zappingState,
+        receiverName = state.streamInfo?.mainHostProfile?.authorDisplayName,
+    )
 
-    var showCantZapWarning by remember { mutableStateOf(false) }
-    if (showCantZapWarning) {
-        UnableToZapBottomSheet(
-            zappingState = state.zappingState,
-            onDismissRequest = { showCantZapWarning = false },
-            onGoToWallet = onGoToWallet,
-        )
-    }
-
-    var showZapOptions by remember { mutableStateOf(false) }
-    if (showZapOptions && state.streamInfo?.mainHostProfile != null) {
-        ZapBottomSheet(
-            onDismissRequest = { showZapOptions = false },
-            receiverName = state.streamInfo.mainHostProfile.authorDisplayName,
-            zappingState = state.zappingState,
-            onZap = { zapAmount, zapDescription ->
-                if (state.zappingState.canZap(zapAmount)) {
-                    eventPublisher(
-                        LiveStreamContract.UiEvent.ZapStream(
-                            zapAmount = zapAmount.toULong(),
-                            zapDescription = zapDescription,
-                        ),
-                    )
-                } else {
-                    showCantZapWarning = true
-                }
-            },
-        )
-    }
-
-    fun invokeZapOptionsOrShowWarning() {
-        if (state.zappingState.walletConnected) {
-            showZapOptions = true
-        } else {
-            showCantZapWarning = true
-        }
-    }
-
-    if (state.shouldApproveBookmark) {
-        ApproveBookmarkAlertDialog(
-            onBookmarkConfirmed = {
-                eventPublisher(LiveStreamContract.UiEvent.BookmarkStream(forceUpdate = true))
-            },
-            onClose = {
-                eventPublisher(LiveStreamContract.UiEvent.DismissBookmarkConfirmation)
-            },
-        )
-    }
+    ZapHost(
+        zapHostState = zapHostState,
+        onZap = { zapAmount, zapDescription ->
+            eventPublisher(
+                LiveStreamContract.UiEvent.ZapStream(
+                    zapAmount = zapAmount.toULong(),
+                    zapDescription = zapDescription,
+                ),
+            )
+        },
+        onGoToWallet = onGoToWallet,
+    )
 
     if (state.shouldApproveProfileAction != null) {
         FollowsApprovalAlertDialog(
@@ -222,6 +146,8 @@ private fun LiveStreamScreen(
         )
     }
 
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
     SnackbarErrorHandler(
         error = state.error,
         snackbarHostState = snackbarHostState,
@@ -270,7 +196,7 @@ private fun LiveStreamScreen(
                 paddingValues = paddingValues,
                 onClose = onClose,
                 noteCallbacks = noteCallbacks,
-                onZapClick = { invokeZapOptionsOrShowWarning() },
+                onZapClick = { zapHostState.showZapOptionsOrShowWarning() },
             )
         },
     )
@@ -328,9 +254,6 @@ private fun StreamPlayer(
         },
         onRequestDeleteClick = {
             eventPublisher(LiveStreamContract.UiEvent.RequestDeleteStream)
-        },
-        onBookmarkClick = {
-            eventPublisher(LiveStreamContract.UiEvent.BookmarkStream())
         },
     )
 }
