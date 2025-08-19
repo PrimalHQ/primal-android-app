@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +41,7 @@ private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 
 @Composable
 fun StreamInfoBottomSheet(
+    modifier: Modifier = Modifier,
     activeUserId: String,
     streamInfo: LiveStreamContract.StreamInfoUi,
     isLive: Boolean,
@@ -54,9 +54,8 @@ fun StreamInfoBottomSheet(
     onHashtagClick: (String) -> Unit,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .height(700.dp)
             .padding(top = 8.dp),
     ) {
         HostInfoAndActions(

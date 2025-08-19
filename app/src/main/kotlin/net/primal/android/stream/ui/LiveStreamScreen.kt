@@ -1,10 +1,12 @@
 package net.primal.android.stream.ui
 
+import android.annotation.SuppressLint
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -58,6 +61,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.C
@@ -104,6 +108,8 @@ private const val URL_ANNOTATION_TAG = "url"
 private const val LIVE_EDGE_THRESHOLD_MS = 60_000
 private const val PLAYER_STATE_UPDATE_INTERVAL_MS = 200L
 private const val SEEK_INCREMENT_MS = 10_000L
+private const val VIDEO_ASPECT_RATIO_WIDTH = 16f
+private const val VIDEO_ASPECT_RATIO_HEIGHT = 9f
 
 private val ZapMessageBorderColor = Color(0xFFFFA000)
 private val ZapMessageBackgroundColor = Color(0xFFE47C00)
@@ -147,6 +153,7 @@ fun LiveStreamScreen(
     )
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun LiveStreamScreen(
@@ -158,8 +165,18 @@ private fun LiveStreamScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
     var activeBottomSheet by remember { mutableStateOf<ActiveBottomSheet>(ActiveBottomSheet.None) }
-
+    var bottomSheetHeight by remember { mutableStateOf<Dp?>(null) }
     var showCantZapWarning by remember { mutableStateOf(false) }
+    var showZapOptions by remember { mutableStateOf(false) }
+
+    fun invokeZapOptionsOrShowWarning() {
+        if (state.zappingState.walletConnected) {
+            showZapOptions = true
+        } else {
+            showCantZapWarning = true
+        }
+    }
+
     if (showCantZapWarning) {
         UnableToZapBottomSheet(
             zappingState = state.zappingState,
@@ -168,7 +185,6 @@ private fun LiveStreamScreen(
         )
     }
 
-    var showZapOptions by remember { mutableStateOf(false) }
     if (showZapOptions && state.streamInfo?.mainHostProfile != null) {
         ZapBottomSheet(
             onDismissRequest = { showZapOptions = false },
@@ -189,13 +205,10 @@ private fun LiveStreamScreen(
         )
     }
 
-    fun invokeZapOptionsOrShowWarning() {
-        if (state.zappingState.walletConnected) {
-            showZapOptions = true
-        } else {
-            showCantZapWarning = true
-        }
-    }
+    LiveStreamUiEventsHandler(
+        state = state,
+        eventPublisher = eventPublisher,
+    )
 
     LiveStreamModalBottomSheets(
         activeSheet = activeBottomSheet,
@@ -204,28 +217,8 @@ private fun LiveStreamScreen(
         eventPublisher = eventPublisher,
         callbacks = callbacks,
         onZapClick = { invokeZapOptionsOrShowWarning() },
+        bottomSheetHeight = bottomSheetHeight,
     )
-
-    if (state.shouldApproveBookmark) {
-        ApproveBookmarkAlertDialog(
-            onBookmarkConfirmed = {
-                eventPublisher(LiveStreamContract.UiEvent.BookmarkStream(forceUpdate = true))
-            },
-            onClose = {
-                eventPublisher(LiveStreamContract.UiEvent.DismissBookmarkConfirmation)
-            },
-        )
-    }
-
-    if (state.shouldApproveProfileAction != null) {
-        FollowsApprovalAlertDialog(
-            followsApproval = state.shouldApproveProfileAction,
-            onFollowsActionsApproved = {
-                eventPublisher(LiveStreamContract.UiEvent.ApproveFollowsActions(it.actions))
-            },
-            onClose = { eventPublisher(LiveStreamContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
-        )
-    }
 
     SnackbarErrorHandler(
         error = state.error,
@@ -268,17 +261,49 @@ private fun LiveStreamScreen(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         content = { paddingValues ->
-            LiveStreamContent(
-                state = state,
-                exoPlayer = exoPlayer,
-                eventPublisher = eventPublisher,
-                paddingValues = paddingValues,
-                callbacks = callbacks,
-                onZapClick = { invokeZapOptionsOrShowWarning() },
-                onInfoClick = { activeBottomSheet = ActiveBottomSheet.StreamInfo },
-            )
+            BoxWithConstraints {
+                val playerHeight = maxWidth * (VIDEO_ASPECT_RATIO_HEIGHT / VIDEO_ASPECT_RATIO_WIDTH)
+                bottomSheetHeight = maxHeight - playerHeight - 50.dp
+
+                LiveStreamContent(
+                    state = state,
+                    exoPlayer = exoPlayer,
+                    eventPublisher = eventPublisher,
+                    paddingValues = paddingValues,
+                    callbacks = callbacks,
+                    onZapClick = { invokeZapOptionsOrShowWarning() },
+                    onInfoClick = { activeBottomSheet = ActiveBottomSheet.StreamInfo },
+                )
+            }
         },
     )
+}
+
+@Composable
+private fun LiveStreamUiEventsHandler(
+    state: LiveStreamContract.UiState,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
+) {
+    if (state.shouldApproveBookmark) {
+        ApproveBookmarkAlertDialog(
+            onBookmarkConfirmed = {
+                eventPublisher(LiveStreamContract.UiEvent.BookmarkStream(forceUpdate = true))
+            },
+            onClose = {
+                eventPublisher(LiveStreamContract.UiEvent.DismissBookmarkConfirmation)
+            },
+        )
+    }
+
+    if (state.shouldApproveProfileAction != null) {
+        FollowsApprovalAlertDialog(
+            followsApproval = state.shouldApproveProfileAction,
+            onFollowsActionsApproved = {
+                eventPublisher(LiveStreamContract.UiEvent.ApproveFollowsActions(it.actions))
+            },
+            onClose = { eventPublisher(LiveStreamContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -290,12 +315,13 @@ private fun LiveStreamModalBottomSheets(
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     callbacks: LiveStreamContract.ScreenCallbacks,
     onZapClick: () -> Unit,
+    bottomSheetHeight: Dp?,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     when (activeSheet) {
         is ActiveBottomSheet.StreamInfo -> {
-            if (state.streamInfo != null && state.activeUserId != null) {
+            if (state.streamInfo != null && state.activeUserId != null && bottomSheetHeight != null) {
                 ModalBottomSheet(
                     onDismissRequest = onDismiss,
                     sheetState = sheetState,
@@ -303,6 +329,7 @@ private fun LiveStreamModalBottomSheets(
                     tonalElevation = 0.dp,
                 ) {
                     StreamInfoBottomSheet(
+                        modifier = Modifier.height(bottomSheetHeight),
                         activeUserId = state.activeUserId,
                         streamInfo = state.streamInfo,
                         isLive = state.playerState.isLive,
@@ -325,8 +352,7 @@ private fun LiveStreamModalBottomSheets(
                 }
             }
         }
-        is ActiveBottomSheet.None -> {
-        }
+        is ActiveBottomSheet.None -> Unit
     }
 }
 
