@@ -9,21 +9,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import net.primal.android.stream.player.LocalStreamState
 
 @Composable
 fun PrimalScaffold(
     modifier: Modifier = Modifier,
-    topBar: @Composable () -> Unit = {},
-    bottomBar: @Composable () -> Unit = {},
+    topBar: (@Composable () -> Unit)? = null,
+    bottomBar: (@Composable () -> Unit)? = null,
     snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
@@ -34,30 +29,32 @@ fun PrimalScaffold(
 ) {
     val streamState = LocalStreamState.current
 
-    var bottomBarHeight by remember { mutableStateOf<Int?>(null) }
-    var topBarHeight by remember { mutableStateOf<Int?>(null) }
-
-    bottomBarHeight?.let { streamState.bottomBarHeight = it }
-    topBarHeight?.let { streamState.topBarHeight = it }
-
     Scaffold(
         modifier = modifier,
         topBar = {
-            Box(
-                modifier = Modifier.onSizeChanged { size ->
-                    topBarHeight = size.height
-                },
-            ) {
-                topBar()
+            topBar?.let {
+                Box(
+                    modifier = Modifier.onSizeChanged { size ->
+                        streamState.topBarHeight = size.height
+                    },
+                ) {
+                    topBar()
+                }
+            } ?: run {
+                streamState.topBarHeight = 0
             }
         },
         bottomBar = {
-            Box(
-                modifier = Modifier.onGloballyPositioned { layoutCoordinates ->
-                    bottomBarHeight = layoutCoordinates.size.height
-                },
-            ) {
-                bottomBar()
+            bottomBar?.let {
+                Box(
+                    modifier = Modifier.onSizeChanged { size ->
+                        streamState.bottomBarHeight = size.height
+                    },
+                ) {
+                    bottomBar()
+                }
+            } ?: run {
+                streamState.bottomBarHeight = 0
             }
         },
         snackbarHost = snackbarHost,
