@@ -183,8 +183,6 @@ private fun LiveStreamScreen(
         }
     }
 
-    // PROMENA: Lokalna funkcija onZapProfile() je obrisana odavde.
-
     if (showCantZapWarning) {
         UnableToZapBottomSheet(
             zappingState = state.zappingState,
@@ -371,8 +369,6 @@ private fun LiveStreamModalBottomSheets(
         is ActiveBottomSheet.None -> Unit
     }
 }
-
-// ... ostatak fajla ostaje nepromenjen ...
 
 @Composable
 private fun StreamPlayer(
