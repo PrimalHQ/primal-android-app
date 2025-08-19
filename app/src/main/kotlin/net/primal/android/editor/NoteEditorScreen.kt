@@ -101,6 +101,7 @@ import net.primal.android.notes.feed.note.ui.NoteUnknownEvent
 import net.primal.android.notes.feed.note.ui.ReferencedArticleCard
 import net.primal.android.notes.feed.note.ui.ReferencedHighlight
 import net.primal.android.notes.feed.note.ui.ReferencedNoteCard
+import net.primal.android.notes.feed.note.ui.ReferencedStream
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.asATagValue
@@ -424,6 +425,16 @@ fun LazyListScope.nostrUris(
                                     onClick = {},
                                 )
                             }
+                        }
+                    }
+
+                    is NoteEditorContract.ReferencedUri.Stream -> {
+                        uri.data?.let { stream ->
+                            ReferencedStream(
+                                stream = stream,
+                                onClick = {},
+                                onProfileClick = {},
+                            )
                         }
                     }
                 }

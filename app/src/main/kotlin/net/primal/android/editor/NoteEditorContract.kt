@@ -12,6 +12,7 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.profile.mention.UserTaggingState
 import net.primal.domain.links.CdnImage
+import net.primal.domain.links.ReferencedStream
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 
@@ -90,6 +91,13 @@ interface NoteEditorContract {
             override val uri: String,
             override val data: String,
         ) : ReferencedUri<String>
+
+        data class Stream(
+            override val data: ReferencedStream?,
+            override val loading: Boolean,
+            override val uri: String,
+            val naddr: Naddr,
+        ) : ReferencedUri<ReferencedStream>
     }
 
     data class ScreenCallbacks(
