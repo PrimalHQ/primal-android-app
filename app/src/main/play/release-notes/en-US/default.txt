@@ -1,3 +1,2 @@
-- Media gallery landscape & immersive mode support.
-- Image links support in article.
-- Various minor improvements and stability fixes.
+- Full NWC Wallet support;
+- Live Streaming support;

@@ -1,2 +1,3 @@
 ## Improvements
-- Full NWC Support
+- Full NWC Wallet support;
+- Live Streaming support;
