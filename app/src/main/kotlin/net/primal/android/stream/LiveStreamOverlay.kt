@@ -34,6 +34,7 @@ fun LiveStreamOverlay(
         val naddrUri: String? = when (val mode = streamState.mode) {
             is StreamMode.Expanded -> mode.naddr
             is StreamMode.Minimized -> mode.naddr
+            is StreamMode.Hidden -> mode.naddr
             else -> null
         }
 

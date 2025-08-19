@@ -130,12 +130,6 @@ class LiveStreamViewModel @AssistedInject constructor(
         observeActiveAccount()
         observeChatMessages()
         observeZaps()
-        Timber.e("Init $streamNaddr")
-    }
-
-    override fun onCleared() {
-        Timber.e("Clear $streamNaddr")
-        super.onCleared()
     }
 
     private fun startLiveStreamSubscription() =
