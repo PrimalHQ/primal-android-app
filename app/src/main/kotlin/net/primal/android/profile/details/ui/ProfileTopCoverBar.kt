@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -153,7 +152,7 @@ fun ProfileTopCoverBar(
             avatarPadding = with(
                 density,
             ) { (maxAvatarSizePx - avatarSizePx.floatValue).toDp() },
-            avatarOffsetY = with(density) { maxAvatarSizePx.times(other = 0.65f).toDp() },
+            avatarOffsetY = with(density) { maxAvatarSizePx.times(other = 0.60f).toDp() },
         ),
         eventPublisher = eventPublisher,
         callbacks = callbacks,
@@ -228,23 +227,9 @@ private fun ProfileTopCoverBar(
             val legendaryCustomization = state.profileDetails?.premiumDetails?.legendaryCustomization
             UniversalAvatarThumbnail(
                 modifier = Modifier
-                    .combinedClickable(
-                        onClick = {
-                            if (state.isLive) {
-                                state.liveStreamNaddr?.let { callbacks.onLiveStreamClick(it) }
-                            } else {
-                                state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) }
-                            }
-                        },
-                        onLongClick = {
-                            if (state.isLive) {
-                                state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) }
-                            }
-                        },
-                    )
                     .padding(
-                        top = avatarValues.avatarPadding * 0 / 3,
-                        bottom = avatarValues.avatarPadding * 3 / 3,
+                        top = avatarValues.avatarPadding * 2 / 5,
+                        bottom = avatarValues.avatarPadding * 3 / 5,
                         start = avatarValues.avatarPadding * 1 / 8,
                         end = avatarValues.avatarPadding * 7 / 8,
                     ),
@@ -257,6 +242,18 @@ private fun ProfileTopCoverBar(
                 legendaryCustomization = legendaryCustomization,
                 forceAnimationIfAvailable = true,
                 canDownscaleToZero = true,
+                onClick = {
+                    if (state.isLive) {
+                        state.liveStreamNaddr?.let { callbacks.onLiveStreamClick(it) }
+                    } else {
+                        state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) }
+                    }
+                },
+                onLongClick = {
+                    if (state.isLive) {
+                        state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) }
+                    }
+                },
             )
         }
     }
