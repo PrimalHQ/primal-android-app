@@ -15,13 +15,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.theme.AppTheme
 
 private val LiveIndicatorColor = Color(0xFFEE0000)
-private val NotLiveIndicatorColor = Color(0xFFAAAAAA)
+private val NotLiveIndicatorColorDark = Color(0xFF757575)
+private val NotLiveIndicatorColorLight = Color(0xFF666666)
 
 @Composable
-fun StreamLiveIndicator(modifier: Modifier = Modifier, isLive: Boolean) {
+fun StreamLiveIndicator(
+    modifier: Modifier = Modifier,
+    isLive: Boolean,
+    hideTextIfNotLive: Boolean = false,
+    textColor: Color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -31,17 +38,27 @@ fun StreamLiveIndicator(modifier: Modifier = Modifier, isLive: Boolean) {
             modifier = Modifier
                 .size(6.dp)
                 .background(
-                    color = if (isLive) LiveIndicatorColor else NotLiveIndicatorColor,
+                    color = if (isLive) {
+                        LiveIndicatorColor
+                    } else {
+                        if (isAppInDarkPrimalTheme()) {
+                            NotLiveIndicatorColorDark
+                        } else {
+                            NotLiveIndicatorColorLight
+                        }
+                    },
                     shape = CircleShape,
                 ),
         )
-        Text(
-            text = stringResource(id = R.string.live_stream_live_indicator),
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            style = AppTheme.typography.bodyMedium.copy(
-                fontSize = 14.sp,
-                lineHeight = 14.sp,
-            ),
-        )
+        if (!hideTextIfNotLive && isLive) {
+            Text(
+                text = stringResource(id = R.string.live_stream_live_indicator),
+                color = textColor,
+                style = AppTheme.typography.bodyMedium.copy(
+                    fontSize = 14.sp,
+                    lineHeight = 14.sp,
+                ),
+            )
+        }
     }
 }

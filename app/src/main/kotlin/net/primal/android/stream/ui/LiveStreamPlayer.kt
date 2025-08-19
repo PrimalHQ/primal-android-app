@@ -48,7 +48,6 @@ fun LiveStreamPlayer(
     onUnmuteUserClick: () -> Unit,
     onReportContentClick: (ReportType) -> Unit,
     onRequestDeleteClick: () -> Unit,
-    onBookmarkClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var controlsVisible by remember { mutableStateOf(true) }
@@ -117,7 +116,6 @@ fun LiveStreamPlayer(
             onUnmuteUserClick = onUnmuteUserClick,
             onReportContentClick = onReportContentClick,
             onRequestDeleteClick = onRequestDeleteClick,
-            onBookmarkClick = onBookmarkClick,
             onSoundClick = onSoundClick,
         )
     }

@@ -6,6 +6,7 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.links.ReferencedArticle
 import net.primal.domain.links.ReferencedHighlight
 import net.primal.domain.links.ReferencedNote
+import net.primal.domain.links.ReferencedStream
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.links.ReferencedZap
 
@@ -74,5 +75,15 @@ class NostrReferenceTypeConverters {
             null -> null
             else -> refNote.encodeToJsonString()
         }
+    }
+
+    @TypeConverter
+    fun stringToReferencedStream(value: String?): ReferencedStream? {
+        return value.decodeFromJsonStringOrNull()
+    }
+
+    @TypeConverter
+    fun referencedStreamToString(refStream: ReferencedStream?): String? {
+        return refStream?.encodeToJsonString()
     }
 }

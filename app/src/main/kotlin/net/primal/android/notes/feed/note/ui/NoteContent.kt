@@ -43,6 +43,7 @@ import net.primal.android.notes.feed.note.ui.attachment.NoteAttachments
 import net.primal.android.notes.feed.note.ui.events.InvoicePayClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.common.util.isPrimalIdentifier
@@ -238,6 +239,28 @@ fun NoteContent(
                 textSelectable = textSelectable,
                 onClick = clickHandler,
             )
+        }
+
+        val referencedStreams = remember(data.nostrUris) {
+            data.nostrUris
+                .filter(type = EventUriNostrType.Stream)
+                .mapNotNull { it.referencedStream }
+        }
+
+        if (referencedStreams.isNotEmpty()) {
+            val streamState = LocalStreamState.current
+
+            referencedStreams.forEachIndexed { index, stream ->
+                ReferencedStream(
+                    stream = stream,
+                    onClick = { streamState.play(it) },
+                    onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
+                )
+
+                if (index < referencedStreams.size - 1) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+            }
         }
 
         val referencedHighlights = remember(data.nostrUris) {
@@ -653,6 +676,7 @@ fun PreviewPostContent() {
                             referencedArticle = null,
                             referencedHighlight = null,
                             referencedZap = null,
+                            referencedStream = null,
                             position = 0,
                         ),
                     ),
@@ -688,6 +712,7 @@ fun PreviewPostUnknownReferencedEventWithAlt() {
                             referencedArticle = null,
                             referencedHighlight = null,
                             referencedZap = null,
+                            referencedStream = null,
                             position = 0,
                         ),
                     ),
@@ -723,6 +748,7 @@ fun PreviewPostUnknownReferencedEventWithoutAlt() {
                             referencedArticle = null,
                             referencedHighlight = null,
                             referencedZap = null,
+                            referencedStream = null,
                             position = 0,
                         ),
                     ),
@@ -780,6 +806,7 @@ fun PreviewPostContentWithReferencedPost() {
                             referencedEventAlt = null,
                             referencedHighlight = null,
                             referencedZap = null,
+                            referencedStream = null,
                             position = 0,
                         ),
                         NoteNostrUriUi(
@@ -804,6 +831,7 @@ fun PreviewPostContentWithReferencedPost() {
                             referencedEventAlt = null,
                             referencedHighlight = null,
                             referencedZap = null,
+                            referencedStream = null,
                             position = 1,
                         ),
                     ),

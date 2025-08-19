@@ -21,12 +21,10 @@ interface LiveStreamContract {
         val naddr: Naddr? = null,
         val loading: Boolean = true,
         val activeUserId: String? = null,
-        val isBookmarked: Boolean = false,
         val streamInfo: StreamInfoUi? = null,
         val playerState: PlayerState = PlayerState(),
         val comment: TextFieldValue = TextFieldValue(),
         val shouldApproveProfileAction: FollowsApproval? = null,
-        val shouldApproveBookmark: Boolean = false,
         val zaps: List<EventZapUiModel> = emptyList(),
         val chatItems: List<StreamChatItem> = emptyList(),
         val zappingState: ZappingState = ZappingState(),
@@ -64,7 +62,6 @@ interface LiveStreamContract {
     )
 
     sealed class UiEvent {
-        data class StartStream(val naddr: String) : UiEvent()
         data class OnPlayerStateUpdate(
             val isPlaying: Boolean? = null,
             val isBuffering: Boolean? = null,
@@ -80,7 +77,6 @@ interface LiveStreamContract {
         data class UnfollowAction(val profileId: String) : UiEvent()
         data object DismissError : UiEvent()
         data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
-        data object DismissBookmarkConfirmation : UiEvent()
         data class ApproveFollowsActions(val actions: List<ProfileFollowsHandler.Action>) : UiEvent()
         data class ZapStream(val zapAmount: ULong? = null, val zapDescription: String? = null) : UiEvent()
         data class OnCommentValueChanged(val value: TextFieldValue) : UiEvent()
@@ -89,7 +85,6 @@ interface LiveStreamContract {
         data class UnmuteAction(val profileId: String) : UiEvent()
         data class ReportAbuse(val reportType: ReportType) : UiEvent()
         data object RequestDeleteStream : UiEvent()
-        data class BookmarkStream(val forceUpdate: Boolean = false) : UiEvent()
         data class SearchUsers(val query: String) : UiEvent()
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
         data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()

@@ -82,7 +82,6 @@ fun LiveStreamPlayerControls(
     onUnmuteUserClick: () -> Unit,
     onReportContentClick: (ReportType) -> Unit,
     onRequestDeleteClick: () -> Unit,
-    onBookmarkClick: () -> Unit,
 ) {
     AnimatedVisibility(
         modifier = modifier,
@@ -115,7 +114,6 @@ fun LiveStreamPlayerControls(
                 onUnmuteUserClick = onUnmuteUserClick,
                 onReportContentClick = onReportContentClick,
                 onRequestDeleteClick = onRequestDeleteClick,
-                onBookmarkClick = onBookmarkClick,
             )
 
             CenterPlayerControls(
@@ -157,7 +155,6 @@ private fun TopPlayerControls(
     onUnmuteUserClick: () -> Unit,
     onReportContentClick: (ReportType) -> Unit,
     onRequestDeleteClick: () -> Unit,
-    onBookmarkClick: () -> Unit,
 ) {
     Row(
         modifier = modifier,
@@ -174,7 +171,6 @@ private fun TopPlayerControls(
                 modifier = Modifier,
                 naddr = naddr,
                 isMainHostMuted = streamInfo.isMainHostMutedByActiveUser,
-                isBookmarked = state.isBookmarked,
                 isActiveUserMainHost = state.activeUserId == mainHostId,
                 rawNostrEvent = streamInfo.rawNostrEventJson,
                 menuVisible = menuVisible,
@@ -184,7 +180,6 @@ private fun TopPlayerControls(
                 onUnmuteUserClick = onUnmuteUserClick,
                 onReportContentClick = onReportContentClick,
                 onRequestDeleteClick = onRequestDeleteClick,
-                onBookmarkClick = onBookmarkClick,
             ) {
                 Icon(
                     imageVector = PrimalIcons.More,

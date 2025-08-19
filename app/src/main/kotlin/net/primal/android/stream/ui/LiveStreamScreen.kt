@@ -1,6 +1,5 @@
 package net.primal.android.stream.ui
 
-import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
@@ -72,11 +71,9 @@ import java.text.NumberFormat
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
-import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.PrimalDefaults
@@ -86,7 +83,6 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
-import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
@@ -94,10 +90,9 @@ import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.NoteNostrUriUi
-import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
-import net.primal.android.notes.feed.zaps.ZapBottomSheet
+import net.primal.android.notes.feed.zaps.ZapHost
+import net.primal.android.notes.feed.zaps.rememberZapHostState
 import net.primal.android.stream.LiveStreamContract
-import net.primal.android.stream.LiveStreamViewModel
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.detectUrls
 import net.primal.domain.links.EventUriNostrType
@@ -105,7 +100,6 @@ import net.primal.domain.links.ReferencedUser
 import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
 import net.primal.domain.nostr.utils.parseNostrUris
-import net.primal.domain.utils.canZap
 import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.DraftTx
 
@@ -135,34 +129,6 @@ private sealed interface ActiveBottomSheet {
 @Composable
 fun LiveStreamScreen(
     state: LiveStreamContract.UiState,
-    exoPlayer: ExoPlayer,
-    viewModel: LiveStreamViewModel,
-    callbacks: LiveStreamContract.ScreenCallbacks,
-) {
-    ApplyEdgeToEdge()
-    LaunchedEffect(viewModel, callbacks) {
-        viewModel.effect.collectLatest {
-            when (it) {
-                LiveStreamContract.SideEffect.StreamDeleted -> {
-                    callbacks.onClose()
-                }
-            }
-        }
-    }
-
-    LiveStreamScreen(
-        state = state,
-        eventPublisher = viewModel::setEvent,
-        exoPlayer = exoPlayer,
-        callbacks = callbacks,
-    )
-}
-
-@SuppressLint("UnusedBoxWithConstraintsScope")
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun LiveStreamScreen(
-    state: LiveStreamContract.UiState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     exoPlayer: ExoPlayer,
     callbacks: LiveStreamContract.ScreenCallbacks,
@@ -172,49 +138,34 @@ private fun LiveStreamScreen(
     val coroutineScope = rememberCoroutineScope()
     var activeBottomSheet by remember { mutableStateOf<ActiveBottomSheet>(ActiveBottomSheet.None) }
     var bottomSheetHeight by remember { mutableStateOf<Dp?>(null) }
-    var showCantZapWarning by remember { mutableStateOf(false) }
-    var showZapOptions by remember { mutableStateOf(false) }
 
-    fun invokeZapOptionsOrShowWarning() {
-        if (state.zappingState.walletConnected) {
-            showZapOptions = true
-        } else {
-            showCantZapWarning = true
-        }
-    }
-
-    if (showCantZapWarning) {
-        UnableToZapBottomSheet(
-            zappingState = state.zappingState,
-            onDismissRequest = { showCantZapWarning = false },
-            onGoToWallet = callbacks.onGoToWallet,
-        )
-    }
-
-    if (showZapOptions && state.streamInfo?.mainHostProfile != null) {
-        ZapBottomSheet(
-            onDismissRequest = { showZapOptions = false },
-            receiverName = state.streamInfo.mainHostProfile.authorDisplayName,
-            zappingState = state.zappingState,
-            onZap = { zapAmount, zapDescription ->
-                if (state.zappingState.canZap(zapAmount)) {
-                    eventPublisher(
-                        LiveStreamContract.UiEvent.ZapStream(
-                            zapAmount = zapAmount.toULong(),
-                            zapDescription = zapDescription,
-                        ),
-                    )
-                } else {
-                    showCantZapWarning = true
-                }
-            },
-        )
-    }
-
-    LiveStreamUiEventsHandler(
-        state = state,
-        eventPublisher = eventPublisher,
+    val zapHostState = rememberZapHostState(
+        zappingState = state.zappingState,
+        receiverName = state.streamInfo?.mainHostProfile?.authorDisplayName,
     )
+
+    ZapHost(
+        zapHostState = zapHostState,
+        onZap = { zapAmount, zapDescription ->
+            eventPublisher(
+                LiveStreamContract.UiEvent.ZapStream(
+                    zapAmount = zapAmount.toULong(),
+                    zapDescription = zapDescription,
+                ),
+            )
+        },
+        onGoToWallet = callbacks.onGoToWallet,
+    )
+
+    if (state.shouldApproveProfileAction != null) {
+        FollowsApprovalAlertDialog(
+            followsApproval = state.shouldApproveProfileAction,
+            onFollowsActionsApproved = {
+                eventPublisher(LiveStreamContract.UiEvent.ApproveFollowsActions(it.actions))
+            },
+            onClose = { eventPublisher(LiveStreamContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
+        )
+    }
 
     LiveStreamModalBottomSheets(
         activeSheet = activeBottomSheet,
@@ -276,8 +227,8 @@ private fun LiveStreamScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         content = { paddingValues ->
             BoxWithConstraints {
-                val playerHeight = maxWidth * (VIDEO_ASPECT_RATIO_HEIGHT / VIDEO_ASPECT_RATIO_WIDTH)
-                bottomSheetHeight = maxHeight - playerHeight - 50.dp
+                val playerHeight = this.maxWidth * (VIDEO_ASPECT_RATIO_HEIGHT / VIDEO_ASPECT_RATIO_WIDTH)
+                bottomSheetHeight = this.maxHeight - playerHeight - 50.dp
 
                 LiveStreamContent(
                     state = state,
@@ -285,39 +236,12 @@ private fun LiveStreamScreen(
                     eventPublisher = eventPublisher,
                     paddingValues = paddingValues,
                     callbacks = callbacks,
-                    onZapClick = { invokeZapOptionsOrShowWarning() },
+                    onZapClick = { zapHostState.showZapOptionsOrShowWarning() },
                     onInfoClick = { activeBottomSheet = ActiveBottomSheet.StreamInfo },
                 )
             }
         },
     )
-}
-
-@Composable
-private fun LiveStreamUiEventsHandler(
-    state: LiveStreamContract.UiState,
-    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
-) {
-    if (state.shouldApproveBookmark) {
-        ApproveBookmarkAlertDialog(
-            onBookmarkConfirmed = {
-                eventPublisher(LiveStreamContract.UiEvent.BookmarkStream(forceUpdate = true))
-            },
-            onClose = {
-                eventPublisher(LiveStreamContract.UiEvent.DismissBookmarkConfirmation)
-            },
-        )
-    }
-
-    if (state.shouldApproveProfileAction != null) {
-        FollowsApprovalAlertDialog(
-            followsApproval = state.shouldApproveProfileAction,
-            onFollowsActionsApproved = {
-                eventPublisher(LiveStreamContract.UiEvent.ApproveFollowsActions(it.actions))
-            },
-            onClose = { eventPublisher(LiveStreamContract.UiEvent.DismissConfirmFollowUnfollowAlertDialog) },
-        )
-    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -421,9 +345,6 @@ private fun StreamPlayer(
         },
         onRequestDeleteClick = {
             eventPublisher(LiveStreamContract.UiEvent.RequestDeleteStream)
-        },
-        onBookmarkClick = {
-            eventPublisher(LiveStreamContract.UiEvent.BookmarkStream())
         },
     )
 }

@@ -42,7 +42,10 @@ class StreamState internal constructor(
     }
 
     fun hide() {
-        _mode = StreamMode.Hidden(modeToRestore = _mode)
+        val current = _mode
+        if (current !is StreamMode.Hidden) {
+            _mode = StreamMode.Hidden(modeToRestore = current)
+        }
     }
 
     fun show() {
