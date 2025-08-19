@@ -13,6 +13,7 @@ import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.ReportType
+import net.primal.domain.wallet.DraftTx
 import net.primal.domain.zaps.ZappingState
 
 interface LiveStreamContract {
@@ -109,5 +110,6 @@ interface LiveStreamContract {
         val onProfileClick: (profileId: String) -> Unit,
         val onHashtagClick: (hashtag: String) -> Unit,
         val onEventReactionsClick: (eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit,
+        val onSendWalletTx: (DraftTx) -> Unit,
     )
 }

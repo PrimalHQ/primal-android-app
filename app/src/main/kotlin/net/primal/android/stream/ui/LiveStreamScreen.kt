@@ -1,6 +1,7 @@
 package net.primal.android.stream.ui
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -68,6 +70,7 @@ import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
 import java.text.NumberFormat
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -103,6 +106,8 @@ import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
 import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.utils.canZap
+import net.primal.domain.utils.isLightningAddress
+import net.primal.domain.wallet.DraftTx
 
 private const val URL_ANNOTATION_TAG = "url"
 private const val LIVE_EDGE_THRESHOLD_MS = 60_000
@@ -164,6 +169,7 @@ private fun LiveStreamScreen(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
     var activeBottomSheet by remember { mutableStateOf<ActiveBottomSheet>(ActiveBottomSheet.None) }
     var bottomSheetHeight by remember { mutableStateOf<Dp?>(null) }
     var showCantZapWarning by remember { mutableStateOf(false) }
@@ -176,6 +182,8 @@ private fun LiveStreamScreen(
             showCantZapWarning = true
         }
     }
+
+    // PROMENA: Lokalna funkcija onZapProfile() je obrisana odavde.
 
     if (showCantZapWarning) {
         UnableToZapBottomSheet(
@@ -216,7 +224,15 @@ private fun LiveStreamScreen(
         state = state,
         eventPublisher = eventPublisher,
         callbacks = callbacks,
-        onZapClick = { invokeZapOptionsOrShowWarning() },
+        onZapClick = {
+            handleZapProfile(
+                state = state,
+                callbacks = callbacks,
+                coroutineScope = coroutineScope,
+                snackbarHostState = snackbarHostState,
+                context = context,
+            )
+        },
         bottomSheetHeight = bottomSheetHeight,
     )
 
@@ -355,6 +371,8 @@ private fun LiveStreamModalBottomSheets(
         is ActiveBottomSheet.None -> Unit
     }
 }
+
+// ... ostatak fajla ostaje nepromenjen ...
 
 @Composable
 private fun StreamPlayer(
@@ -934,6 +952,38 @@ private fun ZapMessageContent(zap: EventZapUiModel) {
                         localUriHandler.openUriSafely(annotation.item)
                     }
                 },
+            )
+        }
+    }
+}
+
+private fun handleZapProfile(
+    state: LiveStreamContract.UiState,
+    callbacks: LiveStreamContract.ScreenCallbacks,
+    coroutineScope: CoroutineScope,
+    snackbarHostState: SnackbarHostState,
+    context: Context,
+) {
+    val streamInfo = state.streamInfo ?: return
+    val profileDetails = streamInfo.mainHostProfile
+    val profileLud16 = profileDetails?.lightningAddress
+
+    if (profileLud16?.isLightningAddress() == true) {
+        callbacks.onSendWalletTx(
+            DraftTx(
+                targetUserId = streamInfo.mainHostId,
+                targetLud16 = profileLud16,
+            ),
+        )
+    } else {
+        coroutineScope.launch {
+            snackbarHostState.showSnackbar(
+                message = context.getString(
+                    R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
+                    profileDetails?.authorDisplayName
+                        ?: context.getString(R.string.wallet_send_payment_this_user_chunk),
+                ),
+                duration = SnackbarDuration.Short,
             )
         }
     }
