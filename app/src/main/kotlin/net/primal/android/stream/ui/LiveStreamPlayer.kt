@@ -1,11 +1,15 @@
 package net.primal.android.stream.ui
 
+import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -16,12 +20,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
+import androidx.recyclerview.widget.RecyclerView
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -49,6 +55,7 @@ fun LiveStreamPlayer(
     onUnmuteUserClick: () -> Unit,
     onReportContentClick: (ReportType) -> Unit,
     onRequestDeleteClick: () -> Unit,
+    onToggleFullScreenClick: () -> Unit,
     modifier: Modifier = Modifier,
     playerModifier: Modifier = Modifier,
 ) {
@@ -75,10 +82,15 @@ fun LiveStreamPlayer(
         }
     }
 
+    val localConfiguration = LocalConfiguration.current
+
+    val boxSizingModifier = remember(localConfiguration.orientation) {
+        Modifier.resolveBoxSizingModifier(localConfiguration.orientation)
+    }
+
     Box(
         modifier = modifier
-            .fillMaxWidth()
-            .aspectRatio(VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT)
+            .then(boxSizingModifier)
             .background(Color.Black)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
@@ -87,8 +99,13 @@ fun LiveStreamPlayer(
             ),
         contentAlignment = Alignment.Center,
     ) {
+        val playerSizingModifier = remember(localConfiguration.orientation) {
+            Modifier.resolvePlayerSizingModifier(orientation = localConfiguration.orientation, scope = this)
+        }
+
         PlayerSurface(
             modifier = playerModifier
+                .then(playerSizingModifier)
                 .onDragDownBeyond(
                     threshold = 36.dp,
                     onTriggered = onClose,
@@ -103,7 +120,7 @@ fun LiveStreamPlayer(
         }
 
         LiveStreamPlayerControls(
-            modifier = Modifier.matchParentSize(),
+            modifier = Modifier.fillMaxSize(),
             isVisible = controlsVisible,
             state = state,
             menuVisible = menuVisible,
@@ -124,6 +141,32 @@ fun LiveStreamPlayer(
             onReportContentClick = onReportContentClick,
             onRequestDeleteClick = onRequestDeleteClick,
             onSoundClick = onSoundClick,
+            onToggleFullScreenClick = onToggleFullScreenClick,
         )
+    }
+}
+
+private fun Modifier.resolveBoxSizingModifier(@RecyclerView.Orientation orientation: Int) =
+    if (orientation == ORIENTATION_LANDSCAPE) {
+        this.fillMaxSize()
+    } else {
+        this
+            .fillMaxWidth()
+            .aspectRatio(VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT)
+    }
+
+private fun Modifier.resolvePlayerSizingModifier(
+    @RecyclerView.Orientation orientation: Int,
+    scope: BoxScope,
+): Modifier {
+    return if (orientation == ORIENTATION_LANDSCAPE) {
+        this
+            .fillMaxHeight()
+            .aspectRatio(
+                ratio = VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT,
+                matchHeightConstraintsFirst = true,
+            )
+    } else {
+        with(scope) { this@resolvePlayerSizingModifier.matchParentSize() }
     }
 }

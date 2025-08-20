@@ -3,6 +3,7 @@
 package net.primal.android.stream.ui
 
 import android.content.Context
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -54,6 +55,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -85,6 +87,7 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
+import net.primal.android.core.compose.rememberFullScreenController
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.editor.ui.NoteOutlinedTextField
@@ -285,6 +288,8 @@ private fun StreamPlayer(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
+    val fullScreenController = rememberFullScreenController()
+
     with(sharedTransitionScope) {
         LiveStreamPlayer(
             playerModifier = Modifier
@@ -334,6 +339,7 @@ private fun StreamPlayer(
             onRequestDeleteClick = {
                 eventPublisher(LiveStreamContract.UiEvent.RequestDeleteStream)
             },
+            onToggleFullScreenClick = { fullScreenController.toggle() },
         )
     }
 }
@@ -383,6 +389,7 @@ private fun LiveStreamContent(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
+    val localConfiguration = LocalConfiguration.current
     if (state.loading) {
         PrimalLoadingSpinner()
     }
@@ -406,15 +413,17 @@ private fun LiveStreamContent(
                 animatedVisibilityScope = animatedVisibilityScope,
             )
 
-            StreamInfoAndChatSection(
-                modifier = Modifier.weight(1f),
-                state = state,
-                eventPublisher = eventPublisher,
-                onZapClick = onZapClick,
-                onInfoClick = onInfoClick,
-                onProfileClick = callbacks.onProfileClick,
-                onEventReactionsClick = callbacks.onEventReactionsClick,
-            )
+            if (localConfiguration.orientation != Configuration.ORIENTATION_LANDSCAPE) {
+                StreamInfoAndChatSection(
+                    modifier = Modifier.weight(1f),
+                    state = state,
+                    eventPublisher = eventPublisher,
+                    onZapClick = onZapClick,
+                    onInfoClick = onInfoClick,
+                    onProfileClick = callbacks.onProfileClick,
+                    onEventReactionsClick = callbacks.onEventReactionsClick,
+                )
+            }
         }
     }
 }
