@@ -70,6 +70,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FeedZapsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Follow
 import net.primal.android.core.compose.icons.primaliconpack.FontSize
 import net.primal.android.core.compose.icons.primaliconpack.FullScreen
+import net.primal.android.core.compose.icons.primaliconpack.FullScreenRestore
 import net.primal.android.core.compose.icons.primaliconpack.GenericLinkIcon
 import net.primal.android.core.compose.icons.primaliconpack.Help
 import net.primal.android.core.compose.icons.primaliconpack.Highlight
@@ -334,6 +335,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             VideoBack,
             Minimize,
             FullScreen,
+            FullScreenRestore,
             Info,
         )
         return __PrimalIcons!!
