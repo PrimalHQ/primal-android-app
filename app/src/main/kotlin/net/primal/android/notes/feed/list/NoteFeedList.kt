@@ -1,5 +1,7 @@
 package net.primal.android.notes.feed.list
 
+import androidx.annotation.PluralsRes
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -19,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -34,7 +37,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
@@ -67,6 +75,7 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
+import net.primal.domain.links.CdnImage
 
 @Composable
 fun NoteFeedList(
@@ -340,20 +349,121 @@ private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
                 shape = AppTheme.shapes.extraLarge,
             )
             .padding(horizontal = 2.dp)
+            .padding(start = 4.dp, end = 12.dp)
             .clickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        AvatarThumbnailsRow(
-            modifier = Modifier.padding(start = 6.dp),
-            avatarCdnImages = syncStats.latestAvatarCdnImages,
-            onClick = { onClick() },
-        )
+        when {
+            syncStats.latestNotesCount > 1 && syncStats.streamsCount == 1 -> {
+                NewPillPluralIndicator(
+                    id = R.plurals.feed_new_posts_notice,
+                    count = syncStats.latestNotesCount,
+                    avatars = syncStats.latestAvatarCdnImages,
+                )
+
+                VerticalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    color = Color.White.copy(alpha = 0.5f),
+                )
+
+                NewPillStringIndicator(
+                    id = R.string.feed_new_stream,
+                    count = 1,
+                    avatars = syncStats.streamAvatarCdnImages,
+                )
+            }
+
+            syncStats.latestNotesCount > 0 && syncStats.streamsCount == 0 -> {
+                NewPillPluralIndicator(
+                    id = R.plurals.feed_new_posts_notice_extended,
+                    count = syncStats.latestNotesCount,
+                    avatars = syncStats.latestAvatarCdnImages,
+                )
+            }
+
+            syncStats.latestNotesCount == 0 && syncStats.streamsCount > 0 -> {
+                NewPillPluralIndicator(
+                    id = R.plurals.feed_new_lives_notice,
+                    count = syncStats.streamsCount,
+                    avatars = syncStats.streamAvatarCdnImages,
+                )
+            }
+
+            else -> {
+                NewPillPluralIndicator(
+                    id = R.plurals.feed_new_posts_notice,
+                    count = syncStats.latestNotesCount,
+                    avatars = syncStats.latestAvatarCdnImages,
+                )
+
+                VerticalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    color = Color.White.copy(alpha = 0.5f),
+                )
+
+                NewPillPluralIndicator(
+                    id = R.plurals.feed_new_lives_notice,
+                    count = syncStats.streamsCount,
+                    avatars = syncStats.streamAvatarCdnImages,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NewPillPluralIndicator(
+    modifier: Modifier = Modifier,
+    @PluralsRes id: Int,
+    count: Int,
+    avatars: List<CdnImage?>,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AvatarThumbnailsRow(avatarCdnImages = avatars)
 
         Text(
-            modifier = Modifier
-                .padding(start = 12.dp, end = 16.dp)
-                .wrapContentHeight(),
-            text = stringResource(id = R.string.feed_new_posts_notice_general),
+            modifier = Modifier.wrapContentHeight(),
+            text = buildAnnotatedString {
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append(count.toString())
+                    append(" ")
+                }
+                append(pluralStringResource(id = id, count = count))
+            },
+            style = AppTheme.typography.bodySmall,
+            color = Color.White,
+        )
+    }
+}
+
+@Composable
+private fun NewPillStringIndicator(
+    modifier: Modifier = Modifier,
+    @StringRes id: Int,
+    count: Int,
+    avatars: List<CdnImage?>,
+) {
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AvatarThumbnailsRow(avatarCdnImages = avatars)
+
+        Text(
+            modifier = Modifier.wrapContentHeight(),
+            text = buildAnnotatedString {
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append(count.toString())
+                    append(" ")
+                }
+                append(stringResource(id = id))
+            },
             style = AppTheme.typography.bodySmall,
             color = Color.White,
         )
