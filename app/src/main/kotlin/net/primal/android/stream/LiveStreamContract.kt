@@ -32,6 +32,7 @@ interface LiveStreamContract {
         val taggedUsers: List<NoteTaggedUser> = emptyList(),
         val userTaggingState: UserTaggingState = UserTaggingState(),
         val error: UiError? = null,
+        val chatLoading: Boolean = true,
     )
 
     data class PlayerState(
