@@ -2,8 +2,10 @@ package net.primal.android.stream.ui
 
 import android.content.Context
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -49,6 +52,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -76,8 +80,10 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.ContextReportContent
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDialog
 import net.primal.android.core.errors.resolveUiErrorMessage
@@ -88,6 +94,7 @@ import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.notes.feed.zaps.ZapHost
 import net.primal.android.notes.feed.zaps.rememberZapHostState
+import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.SEEK_INCREMENT_MS
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
@@ -97,6 +104,7 @@ import net.primal.core.utils.detectUrls
 import net.primal.domain.links.EventUriNostrType
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.nostr.ReactionType
+import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
 import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.utils.isLightningAddress
@@ -112,10 +120,19 @@ private val ZapMessageProfileHandleColor: Color
     } else {
         Color(0xFFE47C00)
     }
+private val ReportButtonHandleColor: Color
+    @Composable
+    get() = if (LocalPrimalTheme.current.isDarkTheme) {
+        Color(0xFF333333)
+    } else {
+        Color(0xFFD5D5D5)
+    }
 
 private sealed interface ActiveBottomSheet {
     data object None : ActiveBottomSheet
     data object StreamInfo : ActiveBottomSheet
+    data class ChatDetails(val message: ChatMessageUi) : ActiveBottomSheet
+    data class ZapDetails(val zap: EventZapUiModel) : ActiveBottomSheet
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -189,6 +206,8 @@ fun LiveStreamScreen(
                     callbacks = callbacks,
                     onZapClick = { zapHostState.showZapOptionsOrShowWarning() },
                     onInfoClick = { activeBottomSheet = ActiveBottomSheet.StreamInfo },
+                    onChatMessageLongClick = { activeBottomSheet = ActiveBottomSheet.ChatDetails(it) },
+                    onZapMessageLongClick = { activeBottomSheet = ActiveBottomSheet.ZapDetails(it) },
                 )
 
                 LiveStreamModalBottomSheets(
@@ -226,41 +245,84 @@ private fun LiveStreamModalBottomSheets(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    when (activeSheet) {
-        is ActiveBottomSheet.StreamInfo -> {
-            if (state.streamInfo != null && state.activeUserId != null && bottomSheetHeight != null) {
-                ModalBottomSheet(
-                    onDismissRequest = onDismiss,
-                    sheetState = sheetState,
-                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-                    tonalElevation = 0.dp,
-                ) {
-                    StreamInfoBottomSheet(
-                        modifier = Modifier.height(bottomSheetHeight),
-                        activeUserId = state.activeUserId,
-                        streamInfo = state.streamInfo,
-                        isLive = state.playerState.isLive,
-                        onFollow = {
-                            state.streamInfo.mainHostId.let {
-                                eventPublisher(LiveStreamContract.UiEvent.FollowAction(it))
+    if (activeSheet != ActiveBottomSheet.None) {
+        val streamInfo = state.streamInfo ?: return
+        val activeUserId = state.activeUserId ?: return
+
+        ModalBottomSheet(
+            onDismissRequest = onDismiss,
+            sheetState = sheetState,
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+            tonalElevation = 0.dp,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .then(if (bottomSheetHeight != null) Modifier.height(bottomSheetHeight) else Modifier)
+                    .padding(top = 8.dp),
+            ) {
+                StreamInfoBottomSheet(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    activeUserId = activeUserId,
+                    streamInfo = streamInfo,
+                    isLive = state.playerState.isLive,
+                    onFollow = { eventPublisher(LiveStreamContract.UiEvent.FollowAction(streamInfo.mainHostId)) },
+                    onUnfollow = {
+                        eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(streamInfo.mainHostId))
+                    },
+                    onZap = onZapClick,
+                    onEditProfileClick = callbacks.onEditProfileClick,
+                    onMessageClick = callbacks.onMessageClick,
+                    onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
+                    bottomContent = {
+                        when (activeSheet) {
+                            is ActiveBottomSheet.StreamInfo -> {
+                                StreamDescriptionSection(
+                                    streamInfo = streamInfo,
+                                    isLive = state.playerState.isLive,
+                                    onHashtagClick = callbacks.onHashtagClick,
+                                )
                             }
-                        },
-                        onUnfollow = {
-                            state.streamInfo.mainHostId.let {
-                                eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(it))
+
+                            is ActiveBottomSheet.ChatDetails -> {
+                                ChatDetailsSection(
+                                    message = activeSheet.message,
+                                    onReport = { reportType ->
+                                        eventPublisher(
+                                            LiveStreamContract.UiEvent.ReportMessage(
+                                                reportType = reportType,
+                                                messageId = activeSheet.message.messageId,
+                                                authorId = activeSheet.message.authorProfile.pubkey,
+                                            ),
+                                        )
+                                        onDismiss()
+                                    },
+                                )
                             }
-                        },
-                        onZap = onZapClick,
-                        onEditProfileClick = callbacks.onEditProfileClick,
-                        onMessageClick = callbacks.onMessageClick,
-                        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
-                        onHashtagClick = callbacks.onHashtagClick,
-                    )
-                }
+
+                            is ActiveBottomSheet.ZapDetails -> {
+                                ZapDetailsSection(
+                                    zap = activeSheet.zap,
+                                    onReport = { reportType ->
+                                        activeSheet.zap.zapperId.let { zapperId ->
+                                            eventPublisher(
+                                                LiveStreamContract.UiEvent.ReportMessage(
+                                                    reportType = reportType,
+                                                    messageId = activeSheet.zap.id,
+                                                    authorId = zapperId,
+                                                ),
+                                            )
+                                        }
+                                        onDismiss()
+                                    },
+                                )
+                            }
+                            is ActiveBottomSheet.None -> Unit
+                        }
+                    },
+                )
             }
         }
-
-        is ActiveBottomSheet.None -> Unit
     }
 }
 
@@ -328,6 +390,8 @@ private fun StreamInfoAndChatSection(
     onInfoClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onEventReactionsClick: (eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit,
+    onChatMessageLongClick: (ChatMessageUi) -> Unit,
+    onZapMessageLongClick: (EventZapUiModel) -> Unit,
 ) {
     val chatListState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
@@ -348,6 +412,8 @@ private fun StreamInfoAndChatSection(
             listState = chatListState,
             eventPublisher = eventPublisher,
             onProfileClick = onProfileClick,
+            onChatMessageLongClick = onChatMessageLongClick,
+            onZapMessageLongClick = onZapMessageLongClick,
         )
     }
 }
@@ -361,6 +427,8 @@ private fun LiveStreamContent(
     callbacks: LiveStreamContract.ScreenCallbacks,
     onZapClick: () -> Unit,
     onInfoClick: () -> Unit,
+    onChatMessageLongClick: (ChatMessageUi) -> Unit,
+    onZapMessageLongClick: (EventZapUiModel) -> Unit,
 ) {
     if (state.loading) {
         PrimalLoadingSpinner()
@@ -391,6 +459,8 @@ private fun LiveStreamContent(
                 onInfoClick = onInfoClick,
                 onProfileClick = callbacks.onProfileClick,
                 onEventReactionsClick = callbacks.onEventReactionsClick,
+                onChatMessageLongClick = onChatMessageLongClick,
+                onZapMessageLongClick = onZapMessageLongClick,
             )
         }
     }
@@ -463,6 +533,8 @@ private fun LiveChatListOrSearch(
     listState: LazyListState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
+    onChatMessageLongClick: (ChatMessageUi) -> Unit,
+    onZapMessageLongClick: (EventZapUiModel) -> Unit,
 ) {
     if (!state.userTaggingState.isUserTaggingActive) {
         if (state.chatItems.isEmpty()) {
@@ -483,11 +555,17 @@ private fun LiveChatListOrSearch(
                 ) { chatItem ->
                     when (chatItem) {
                         is StreamChatItem.ChatMessageItem -> ChatMessageListItem(
+                            modifier = Modifier.padding(horizontal = 16.dp),
                             message = chatItem.message,
                             onProfileClick = onProfileClick,
+                            onLongClick = { onChatMessageLongClick(chatItem.message) },
                         )
 
-                        is StreamChatItem.ZapMessageItem -> ZapMessageListItem(zap = chatItem.zap)
+                        is StreamChatItem.ZapMessageItem -> ZapMessageListItem(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            zap = chatItem.zap,
+                            onLongClick = { onZapMessageLongClick(chatItem.zap) },
+                        )
                     }
                 }
             }
@@ -518,6 +596,8 @@ private fun LiveChatContent(
     listState: LazyListState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
+    onChatMessageLongClick: (ChatMessageUi) -> Unit,
+    onZapMessageLongClick: (EventZapUiModel) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -543,6 +623,8 @@ private fun LiveChatContent(
             listState = listState,
             eventPublisher = eventPublisher,
             onProfileClick = onProfileClick,
+            onChatMessageLongClick = onChatMessageLongClick,
+            onZapMessageLongClick = onZapMessageLongClick,
         )
 
         LiveChatCommentInput(
@@ -654,8 +736,14 @@ private fun LiveChatCommentInput(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ChatMessageListItem(message: ChatMessageUi, onProfileClick: (String) -> Unit) {
+private fun ChatMessageListItem(
+    message: ChatMessageUi,
+    onProfileClick: (String) -> Unit,
+    onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val localUriHandler = LocalUriHandler.current
 
     val authorNameColor = AppTheme.colorScheme.onSurface
@@ -690,7 +778,12 @@ private fun ChatMessageListItem(message: ChatMessageUi, onProfileClick: (String)
     }
 
     Row(
-        modifier = Modifier.padding(horizontal = 16.dp),
+        modifier = modifier
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onLongPress = { onLongClick() },
+                )
+            },
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
     ) {
@@ -701,7 +794,7 @@ private fun ChatMessageListItem(message: ChatMessageUi, onProfileClick: (String)
         )
 
         PrimalClickableText(
-            modifier = Modifier.padding(top = 10.dp),
+            modifier = Modifier.padding(top = 7.dp),
             text = annotatedContent,
             style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
             onClick = { position, _ ->
@@ -727,15 +820,20 @@ private fun ChatMessageListItem(message: ChatMessageUi, onProfileClick: (String)
                     return@PrimalClickableText
                 }
             },
+            onLongClick = onLongClick,
         )
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ZapMessageListItem(zap: EventZapUiModel) {
+private fun ZapMessageListItem(
+    zap: EventZapUiModel,
+    onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Box(
-        modifier = Modifier
-            .padding(horizontal = 8.dp)
+        modifier = modifier
             .fillMaxWidth()
             .border(
                 width = 1.dp,
@@ -744,6 +842,11 @@ private fun ZapMessageListItem(zap: EventZapUiModel) {
             )
             .clip(AppTheme.shapes.medium)
             .background(color = ZapMessageBackgroundColor.copy(alpha = 0.2f))
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onLongPress = { onLongClick() },
+                )
+            }
             .padding(horizontal = 8.dp, vertical = 10.dp),
     ) {
         Row(
@@ -764,7 +867,7 @@ private fun ZapMessageListItem(zap: EventZapUiModel) {
 private fun ZapMessageContent(zap: EventZapUiModel) {
     val localUriHandler = LocalUriHandler.current
 
-    Column(modifier = Modifier.padding(top = 0.dp)) {
+    Column(modifier = Modifier.padding(top = 1.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -841,6 +944,115 @@ private fun ZapMessageContent(zap: EventZapUiModel) {
                 },
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) -> Unit) {
+    var reportDialogVisible by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .background(
+                AppTheme.extraColorScheme.surfaceVariantAlt1,
+            )
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = stringResource(id = R.string.live_stream_chat_message),
+            style = AppTheme.typography.bodyLarge.copy(
+                fontSize = 15.sp,
+                lineHeight = 16.sp,
+            ),
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        )
+
+        ChatMessageListItem(message = message, onProfileClick = {}, onLongClick = {})
+
+        PrimalFilledButton(
+            modifier = Modifier.padding(start = 40.dp),
+            containerColor = ReportButtonHandleColor,
+            contentColor = AppTheme.colorScheme.onSurface,
+            textStyle = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp, lineHeight = 20.sp),
+            onClick = { reportDialogVisible = true },
+            contentPadding = PaddingValues(18.dp, vertical = 1.dp),
+            height = 41.dp,
+        ) {
+            Icon(
+                imageVector = PrimalIcons.ContextReportContent,
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = stringResource(id = R.string.live_stream_report_message_button))
+        }
+    }
+
+    if (reportDialogVisible) {
+        ReportUserDialog(
+            onDismissRequest = { reportDialogVisible = false },
+            onReportClick = { type ->
+                reportDialogVisible = false
+                onReport(type)
+            },
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ZapDetailsSection(zap: EventZapUiModel, onReport: (ReportType) -> Unit) {
+    var reportDialogVisible by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .background(
+                AppTheme.extraColorScheme.surfaceVariantAlt1,
+            )
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = stringResource(id = R.string.live_stream_chat_message),
+            style = AppTheme.typography.bodyLarge.copy(
+                fontSize = 15.sp,
+                lineHeight = 16.sp,
+            ),
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        )
+
+        ZapMessageListItem(zap = zap, onLongClick = {})
+
+        PrimalFilledButton(
+            containerColor = ReportButtonHandleColor,
+            contentColor = AppTheme.colorScheme.onSurface,
+            textStyle = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp, lineHeight = 20.sp),
+            onClick = { reportDialogVisible = true },
+            contentPadding = PaddingValues(18.dp, vertical = 0.dp),
+            height = 41.dp,
+        ) {
+            Icon(
+                imageVector = PrimalIcons.ContextReportContent,
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = stringResource(id = R.string.live_stream_report_message_button))
+        }
+    }
+
+    if (reportDialogVisible) {
+        ReportUserDialog(
+            onDismissRequest = { reportDialogVisible = false },
+            onReportClick = { type ->
+                reportDialogVisible = false
+                onReport(type)
+            },
+        )
     }
 }
 

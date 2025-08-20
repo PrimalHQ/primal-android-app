@@ -1355,6 +1355,8 @@
     <string name="live_stream_menu_delete_dialog_text">Are you sure you want to delete this stream?</string>
     <string name="live_stream_menu_copied">Copied!</string>
     <string name="stream_be_the_first_to_zap">Be the first to zap this stream!</string>
+    <string name="live_stream_report_message_button">Report message</string>
+    <string name="live_stream_chat_message">Chat Message</string>
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>

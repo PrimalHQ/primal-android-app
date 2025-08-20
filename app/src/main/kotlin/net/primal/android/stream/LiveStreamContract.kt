@@ -89,6 +89,12 @@ interface LiveStreamContract {
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
         data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
         data object AppendUserTagAtSign : UiEvent()
+
+        data class ReportMessage(
+            val reportType: ReportType,
+            val messageId: String,
+            val authorId: String,
+        ) : UiEvent()
     }
 
     sealed class SideEffect {

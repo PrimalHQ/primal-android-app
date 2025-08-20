@@ -26,15 +26,22 @@ fun PrimalClickableText(
     maxLines: Int = Int.MAX_VALUE,
     onTextLayout: (TextLayoutResult) -> Unit = {},
     onClick: (Int, Offset) -> Unit,
+    onLongClick: (() -> Unit)? = null,
     inlineContent: Map<String, InlineTextContent> = mapOf(),
 ) {
     val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
-    val pressIndicator = Modifier.pointerInput(onClick) {
-        detectTapGestures { pos ->
-            layoutResult.value?.let { layoutResult ->
-                onClick(layoutResult.getOffsetForPosition(pos), pos)
-            }
-        }
+
+    val pressIndicator = Modifier.pointerInput(onClick, onLongClick) {
+        detectTapGestures(
+            onLongPress = {
+                onLongClick?.invoke()
+            },
+            onTap = { pos ->
+                layoutResult.value?.let { layoutResult ->
+                    onClick(layoutResult.getOffsetForPosition(pos), pos)
+                }
+            },
+        )
     }
 
     val textContent: @Composable () -> Unit = {

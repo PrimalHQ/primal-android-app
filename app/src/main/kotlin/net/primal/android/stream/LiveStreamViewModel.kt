@@ -230,6 +230,12 @@ class LiveStreamViewModel @AssistedInject constructor(
                     UiEvent.AppendUserTagAtSign -> setState {
                         copy(comment = this.comment.appendUserTagAtSignAtCursorPosition())
                     }
+
+                    is UiEvent.ReportMessage -> reportMessage(
+                        reportType = it.reportType,
+                        messageId = it.messageId,
+                        authorId = it.authorId,
+                    )
                 }
             }
         }
@@ -631,6 +637,31 @@ class LiveStreamViewModel @AssistedInject constructor(
                 Timber.w(error)
             }
         }
+
+    private fun reportMessage(
+        reportType: ReportType,
+        messageId: String,
+        authorId: String,
+    ) = viewModelScope.launch {
+        val streamInfo = state.value.streamInfo ?: return@launch
+        try {
+            profileRepository.reportAbuse(
+                userId = activeAccountStore.activeUserId(),
+                reportType = reportType,
+                profileId = authorId,
+                eventId = messageId,
+                articleId = streamInfo.atag,
+            )
+        } catch (error: SigningKeyNotFoundException) {
+            Timber.w(error)
+            setState { copy(error = UiError.MissingPrivateKey) }
+        } catch (error: SigningRejectedException) {
+            Timber.w(error)
+            setState { copy(error = UiError.NostrSignUnauthorized) }
+        } catch (error: NostrPublishException) {
+            Timber.w(error)
+        }
+    }
 
     private fun requestDeleteStream() =
         viewModelScope.launch {
