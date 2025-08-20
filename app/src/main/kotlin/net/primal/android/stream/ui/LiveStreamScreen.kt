@@ -992,12 +992,20 @@ private fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) ->
             contentPadding = PaddingValues(18.dp, vertical = 1.dp),
             height = 41.dp,
         ) {
-            Icon(
-                imageVector = PrimalIcons.ContextReportContent,
-                contentDescription = null,
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = stringResource(id = R.string.live_stream_report_message_button))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    imageVector = PrimalIcons.ContextReportContent,
+                    contentDescription = null,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    modifier = Modifier.padding(3.dp),
+                    text = stringResource(id = R.string.live_stream_report_message_button),
+                )
+            }
         }
     }
 
@@ -1046,12 +1054,20 @@ private fun ZapDetailsSection(zap: EventZapUiModel, onReport: (ReportType) -> Un
             contentPadding = PaddingValues(18.dp, vertical = 0.dp),
             height = 41.dp,
         ) {
-            Icon(
-                imageVector = PrimalIcons.ContextReportContent,
-                contentDescription = null,
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = stringResource(id = R.string.live_stream_report_message_button))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    imageVector = PrimalIcons.ContextReportContent,
+                    contentDescription = null,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    modifier = Modifier.padding(top = 3.dp),
+                    text = stringResource(id = R.string.live_stream_report_message_button),
+                )
+            }
         }
     }
 
