@@ -24,6 +24,7 @@ import net.primal.android.core.ext.asMapByKey
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
+import net.primal.android.notes.feed.model.StreamPillUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.mapAsProfileDataDO
@@ -246,10 +247,20 @@ class NoteFeedViewModel @AssistedInject constructor(
             streamAvatarCdnImages = avatarCdnImagesStreams.take(MAX_AVATARS),
         )
 
+        val streamPills = liveActivity.map { stream ->
+            StreamPillUi(
+                naddr = stream.toNaddrString(),
+                currentParticipants = stream.currentParticipants,
+                title = stream.title,
+                hostProfileId = stream.authorId,
+                hostAvatarCdnImage = stream.authorProfile?.avatarCdnImage,
+            )
+        }.distinctBy { it.naddr }
+
         if (newSyncStats.isTopVisibleNoteTheLatestNote()) {
-            setState { copy(syncStats = FeedPostsSyncStats()) }
+            setState { copy(syncStats = FeedPostsSyncStats(), streams = streamPills) }
         } else {
-            setState { copy(syncStats = newSyncStats) }
+            setState { copy(syncStats = newSyncStats, streams = streamPills) }
         }
     }
 

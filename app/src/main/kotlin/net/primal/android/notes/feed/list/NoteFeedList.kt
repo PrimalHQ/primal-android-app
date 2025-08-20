@@ -73,6 +73,7 @@ import net.primal.android.drawer.FloatingNewDataHostTopPadding
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
+import net.primal.android.notes.feed.model.StreamPillUi
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
@@ -202,6 +203,7 @@ private fun NoteFeedList(
     Box {
         NoteFeedList(
             pagingItems = pagingItems,
+            streamPills = state.streams,
             pullToRefreshEnabled = pullToRefreshEnabled,
             feedListState = listState,
             showPaywall = state.paywall,
@@ -239,9 +241,7 @@ private fun NoteFeedList(
                 if (buttonVisible) {
                     NewPostsButton(
                         syncStats = state.syncStats,
-                        onClick = {
-                            eventPublisher(UiEvent.ShowLatestNotes)
-                        },
+                        onClick = { eventPublisher(UiEvent.ShowLatestNotes) },
                     )
                 }
             }
@@ -254,6 +254,7 @@ private fun NoteFeedList(
 fun NoteFeedList(
     feedListState: LazyListState,
     pagingItems: LazyPagingItems<FeedPostUi>,
+    streamPills: List<StreamPillUi>,
     showPaywall: Boolean,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
@@ -324,6 +325,7 @@ fun NoteFeedList(
                 .fillMaxSize(),
             contentPadding = paddingValues,
             pagingItems = pagingItems,
+            streamPills = streamPills,
             listState = feedListState,
             showPaywall = showPaywall,
             noteCallbacks = noteCallbacks,

@@ -36,8 +36,10 @@ import net.primal.android.core.compose.zaps.FeedNoteTopZapsSection
 import net.primal.android.core.errors.UiError
 import net.primal.android.nostr.mappers.asFeedPostUi
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.StreamPillUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.stream.player.LocalStreamState
 import net.primal.domain.nostr.ReactionType
 import timber.log.Timber
 
@@ -49,6 +51,7 @@ internal const val FEED_NESTED_NOTES_CUT_OFF_LIMIT = 2
 fun NoteFeedLazyColumn(
     modifier: Modifier = Modifier,
     pagingItems: LazyPagingItems<FeedPostUi>,
+    streamPills: List<StreamPillUi>,
     listState: LazyListState,
     showPaywall: Boolean,
     noteCallbacks: NoteCallbacks,
@@ -65,6 +68,7 @@ fun NoteFeedLazyColumn(
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
+    val streamState = LocalStreamState.current
     var firstVisibleVideoPlayingIndex by rememberFirstVisibleVideoPlayingItemIndex(
         listState = listState,
         hasVideo = { index ->
@@ -90,6 +94,14 @@ fun NoteFeedLazyColumn(
             item {
                 header()
             }
+        }
+
+        item {
+            StreamPillsRow(
+                streamPills = streamPills,
+                onClick = { streamState.play(it) },
+                onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
+            )
         }
 
         if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
