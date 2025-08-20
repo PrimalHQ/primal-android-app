@@ -1357,6 +1357,8 @@
     <string name="stream_be_the_first_to_zap">Be the first to zap this stream!</string>
     <string name="live_stream_report_message_button">Report message</string>
     <string name="live_stream_chat_message">Chat Message</string>
+    <string name="live_stream_bottom_sheet_unmute_user">Unmute</string>
+    <string name="live_stream_bottom_sheet_mute_user">Mute</string>
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>

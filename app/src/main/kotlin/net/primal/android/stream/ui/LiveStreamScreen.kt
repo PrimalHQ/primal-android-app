@@ -249,6 +249,9 @@ private fun LiveStreamModalBottomSheets(
         val streamInfo = state.streamInfo ?: return
         val activeUserId = state.activeUserId ?: return
 
+        val isMuteStreamHostButtonVisible = activeSheet is
+            ActiveBottomSheet.ChatDetails || activeSheet is ActiveBottomSheet.ZapDetails
+
         ModalBottomSheet(
             onDismissRequest = onDismiss,
             sheetState = sheetState,
@@ -263,12 +266,19 @@ private fun LiveStreamModalBottomSheets(
             ) {
                 StreamInfoBottomSheet(
                     modifier = Modifier.padding(bottom = 16.dp),
+                    isMuteStreamHostButtonVisible = isMuteStreamHostButtonVisible,
                     activeUserId = activeUserId,
                     streamInfo = streamInfo,
                     isLive = state.playerState.isLive,
                     onFollow = { eventPublisher(LiveStreamContract.UiEvent.FollowAction(streamInfo.mainHostId)) },
                     onUnfollow = {
                         eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(streamInfo.mainHostId))
+                    },
+                    onMute = {
+                        eventPublisher(LiveStreamContract.UiEvent.MuteAction(profileId = streamInfo.mainHostId))
+                    },
+                    onUnmute = {
+                        eventPublisher(LiveStreamContract.UiEvent.UnmuteAction(profileId = streamInfo.mainHostId))
                     },
                     onZap = onZapClick,
                     onEditProfileClick = callbacks.onEditProfileClick,
