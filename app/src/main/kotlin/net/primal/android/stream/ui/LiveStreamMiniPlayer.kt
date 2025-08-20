@@ -2,6 +2,7 @@
 
 package net.primal.android.stream.ui
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -42,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -72,6 +74,8 @@ import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
 import net.primal.android.theme.AppTheme
 
 internal val PADDING = 16.dp
+private const val THIRD = 3
+private const val HALF = 2
 private val springSpec = spring<Float>(
     dampingRatio = Spring.DampingRatioLowBouncy,
     stiffness = Spring.StiffnessLow,
@@ -93,11 +97,17 @@ fun LiveStreamMiniPlayer(
 ) {
     val scope = rememberCoroutineScope()
     val streamState = LocalStreamState.current
+    val localConfiguration = LocalConfiguration.current
     val localDensity = LocalDensity.current
     val displayMetrics = LocalContext.current.resources.displayMetrics
     val screenWidthPx = displayMetrics.widthPixels
     val screenHeightPx = displayMetrics.heightPixels
-    val playerWidth = screenWidthPx / 2
+    val playerWidth = if (localConfiguration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        screenWidthPx / THIRD
+    } else {
+        screenWidthPx / HALF
+    }
+
     val playerHeight = playerWidth / (VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT)
     val statusBarHeight = WindowInsets.statusBars.getTop(localDensity)
     val paddingPx = with(localDensity) { PADDING.toPx() }
