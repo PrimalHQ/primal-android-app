@@ -48,6 +48,7 @@ fun LiveStreamPlayer(
     onReportContentClick: (ReportType) -> Unit,
     onRequestDeleteClick: () -> Unit,
     modifier: Modifier = Modifier,
+    playerModifier: Modifier = Modifier,
 ) {
     var controlsVisible by remember { mutableStateOf(true) }
     var menuVisible by remember { mutableStateOf(false) }
@@ -85,7 +86,7 @@ fun LiveStreamPlayer(
         contentAlignment = Alignment.Center,
     ) {
         PlayerSurface(
-            modifier = Modifier.matchParentSize(),
+            modifier = playerModifier.matchParentSize(),
             player = exoPlayer,
             surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
         )
