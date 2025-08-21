@@ -37,6 +37,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Mute
 import net.primal.android.core.compose.icons.primaliconpack.Play
 import net.primal.android.core.compose.icons.primaliconpack.Unmute
 import net.primal.android.core.video.rememberPrimalExoPlayer
+import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.ContentDisplaySettings
 
@@ -49,10 +50,11 @@ fun NoteAttachmentVideoPreview(
     modifier: Modifier = Modifier,
     onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
+    val streamState = LocalStreamState.current
     val userPrefersAutoPlay =
         LocalContentDisplaySettings.current.autoPlayVideos == ContentDisplaySettings.AUTO_PLAY_VIDEO_ALWAYS
 
-    val shouldAutoPlay = userPrefersAutoPlay && allowAutoPlay
+    val shouldAutoPlay = userPrefersAutoPlay && allowAutoPlay && !streamState.isActive()
 
     if (shouldAutoPlay) {
         AutoPlayVideo(
