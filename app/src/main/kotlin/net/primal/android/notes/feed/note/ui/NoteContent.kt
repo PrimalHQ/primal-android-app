@@ -253,7 +253,7 @@ fun NoteContent(
             referencedStreams.forEachIndexed { index, stream ->
                 ReferencedStream(
                     stream = stream,
-                    onClick = { streamState.play(it) },
+                    onClick = { streamState.start(it) },
                     onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
                 )
 
