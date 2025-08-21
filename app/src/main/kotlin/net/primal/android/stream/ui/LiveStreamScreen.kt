@@ -1,6 +1,11 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package net.primal.android.stream.ui
 
 import android.content.Context
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -90,6 +95,7 @@ import net.primal.android.notes.feed.zaps.ZapHost
 import net.primal.android.notes.feed.zaps.rememberZapHostState
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.SEEK_INCREMENT_MS
+import net.primal.android.stream.player.SHARED_TRANSITION_PLAYER_KEY
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
 import net.primal.android.theme.AppTheme
@@ -125,6 +131,8 @@ fun LiveStreamScreen(
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     exoPlayer: ExoPlayer,
     callbacks: LiveStreamContract.ScreenCallbacks,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -189,6 +197,8 @@ fun LiveStreamScreen(
                     callbacks = callbacks,
                     onZapClick = { zapHostState.showZapOptionsOrShowWarning() },
                     onInfoClick = { activeBottomSheet = ActiveBottomSheet.StreamInfo },
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
                 )
 
                 LiveStreamModalBottomSheets(
@@ -272,51 +282,60 @@ private fun StreamPlayer(
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     onQuoteStreamClick: (String) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
-    LiveStreamPlayer(
-        state = state,
-        exoPlayer = exoPlayer,
-        streamUrl = streamInfo.streamUrl,
-        onPlayPauseClick = {
-            if (exoPlayer.isPlaying) {
-                exoPlayer.pause()
-            } else {
-                exoPlayer.play()
-            }
-        },
-        onRewind = {
-            val newPosition = (exoPlayer.currentPosition - SEEK_INCREMENT_MS).coerceAtLeast(0L)
-            exoPlayer.seekTo(newPosition)
-        },
-        onForward = {
-            val newPosition = (exoPlayer.currentPosition + SEEK_INCREMENT_MS)
-                .coerceAtMost(state.playerState.totalDuration)
-            exoPlayer.seekTo(newPosition)
-        },
-        onSoundClick = {
-            eventPublisher(LiveStreamContract.UiEvent.ToggleMute)
-        },
-        onClose = onClose,
-        onSeek = { positionMs ->
-            eventPublisher(LiveStreamContract.UiEvent.OnSeek(positionMs = positionMs))
-        },
-        onSeekStarted = {
-            eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
-        },
-        onQuoteClick = onQuoteStreamClick,
-        onMuteUserClick = {
-            state.streamInfo?.mainHostId?.let { eventPublisher(LiveStreamContract.UiEvent.MuteAction(it)) }
-        },
-        onUnmuteUserClick = {
-            state.streamInfo?.mainHostId?.let { eventPublisher(LiveStreamContract.UiEvent.UnmuteAction(it)) }
-        },
-        onReportContentClick = { reportType ->
-            eventPublisher(LiveStreamContract.UiEvent.ReportAbuse(reportType))
-        },
-        onRequestDeleteClick = {
-            eventPublisher(LiveStreamContract.UiEvent.RequestDeleteStream)
-        },
-    )
+    with(sharedTransitionScope) {
+        LiveStreamPlayer(
+            playerModifier = Modifier
+                .sharedElement(
+                    sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_PLAYER_KEY),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                ),
+            state = state,
+            exoPlayer = exoPlayer,
+            streamUrl = streamInfo.streamUrl,
+            onPlayPauseClick = {
+                if (exoPlayer.isPlaying) {
+                    exoPlayer.pause()
+                } else {
+                    exoPlayer.play()
+                }
+            },
+            onRewind = {
+                val newPosition = (exoPlayer.currentPosition - SEEK_INCREMENT_MS).coerceAtLeast(0L)
+                exoPlayer.seekTo(newPosition)
+            },
+            onForward = {
+                val newPosition = (exoPlayer.currentPosition + SEEK_INCREMENT_MS)
+                    .coerceAtMost(state.playerState.totalDuration)
+                exoPlayer.seekTo(newPosition)
+            },
+            onSoundClick = {
+                eventPublisher(LiveStreamContract.UiEvent.ToggleMute)
+            },
+            onClose = onClose,
+            onSeek = { positionMs ->
+                eventPublisher(LiveStreamContract.UiEvent.OnSeek(positionMs = positionMs))
+            },
+            onSeekStarted = {
+                eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
+            },
+            onQuoteClick = onQuoteStreamClick,
+            onMuteUserClick = {
+                state.streamInfo?.mainHostId?.let { eventPublisher(LiveStreamContract.UiEvent.MuteAction(it)) }
+            },
+            onUnmuteUserClick = {
+                state.streamInfo?.mainHostId?.let { eventPublisher(LiveStreamContract.UiEvent.UnmuteAction(it)) }
+            },
+            onReportContentClick = { reportType ->
+                eventPublisher(LiveStreamContract.UiEvent.ReportAbuse(reportType))
+            },
+            onRequestDeleteClick = {
+                eventPublisher(LiveStreamContract.UiEvent.RequestDeleteStream)
+            },
+        )
+    }
 }
 
 @Composable
@@ -361,6 +380,8 @@ private fun LiveStreamContent(
     callbacks: LiveStreamContract.ScreenCallbacks,
     onZapClick: () -> Unit,
     onInfoClick: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     if (state.loading) {
         PrimalLoadingSpinner()
@@ -381,6 +402,8 @@ private fun LiveStreamContent(
                 eventPublisher = eventPublisher,
                 onClose = callbacks.onClose,
                 onQuoteStreamClick = callbacks.onQuoteStreamClick,
+                sharedTransitionScope = sharedTransitionScope,
+                animatedVisibilityScope = animatedVisibilityScope,
             )
 
             StreamInfoAndChatSection(

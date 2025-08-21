@@ -1,19 +1,29 @@
+@file:kotlin.OptIn(ExperimentalSharedTransitionApi::class)
+
 package net.primal.android.stream
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.OptIn
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.collectLatest
 import net.primal.android.core.compose.ApplyEdgeToEdge
+import net.primal.android.core.compose.animatableSaver
 import net.primal.android.core.video.rememberPrimalStreamExoPlayer
 import net.primal.android.navigation.navigateToChat
 import net.primal.android.navigation.navigateToProfileEditor
@@ -26,8 +36,11 @@ import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.stream.player.StreamMode
 import net.primal.android.stream.player.StreamState
 import net.primal.android.stream.player.StreamStateProvider
+import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
+import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
 import net.primal.android.stream.ui.LiveStreamMiniPlayer
 import net.primal.android.stream.ui.LiveStreamScreen
+import net.primal.android.stream.ui.PADDING
 
 @Composable
 fun LiveStreamOverlay(
@@ -92,36 +105,57 @@ private fun LiveStreamOverlay(
         },
     )
 
-    when (streamState.mode) {
-        is StreamMode.Expanded -> {
-            val callbacks = rememberLiveStreamScreenCallbacks(
-                navController = navController,
-                noteCallbacks = noteCallbacks,
-                streamState = streamState,
-            )
+    val localDensity = LocalDensity.current
+    val displayMetrics = LocalContext.current.resources.displayMetrics
+    val playerWidth = displayMetrics.widthPixels / 2
+    val playerHeight = playerWidth / (VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT)
+    val paddingPx = with(localDensity) { PADDING.toPx() }
 
-            ApplyEdgeToEdge()
-            LiveStreamScreen(
-                eventPublisher = viewModel::setEvent,
-                state = uiState.value,
-                exoPlayer = exoPlayer,
-                callbacks = callbacks,
-            )
+    val offsetX = rememberSaveable(saver = animatableSaver()) { Animatable(paddingPx) }
+    val offsetY = rememberSaveable(saver = animatableSaver()) {
+        Animatable(displayMetrics.heightPixels - streamState.bottomBarHeight - playerHeight - paddingPx)
+    }
+
+    SharedTransitionLayout {
+        AnimatedContent(targetState = streamState.mode) { streamMode ->
+            when (streamMode) {
+                is StreamMode.Expanded -> {
+                    val callbacks = rememberLiveStreamScreenCallbacks(
+                        navController = navController,
+                        noteCallbacks = noteCallbacks,
+                        streamState = streamState,
+                    )
+
+                    ApplyEdgeToEdge()
+                    LiveStreamScreen(
+                        eventPublisher = viewModel::setEvent,
+                        state = uiState.value,
+                        exoPlayer = exoPlayer,
+                        callbacks = callbacks,
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        animatedVisibilityScope = this,
+                    )
+                }
+
+                is StreamMode.Minimized, is StreamMode.Hidden -> {
+                    LiveStreamMiniPlayer(
+                        state = uiState.value,
+                        exoPlayer = exoPlayer,
+                        offsetX = offsetX,
+                        offsetY = offsetY,
+                        onExpandStream = { streamState.expand() },
+                        onStopStream = {
+                            exoPlayer.stop()
+                            streamState.stop()
+                        },
+                        sharedTransitionScope = this@SharedTransitionLayout,
+                        animatedVisibilityScope = this,
+                    )
+                }
+
+                StreamMode.Closed -> Unit
+            }
         }
-
-        is StreamMode.Minimized, is StreamMode.Hidden -> {
-            LiveStreamMiniPlayer(
-                state = uiState.value,
-                exoPlayer = exoPlayer,
-                onExpandStream = { streamState.expand() },
-                onStopStream = {
-                    exoPlayer.stop()
-                    streamState.stop()
-                },
-            )
-        }
-
-        StreamMode.Closed -> Unit
     }
 }
 
