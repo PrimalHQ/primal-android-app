@@ -2267,7 +2267,7 @@ private fun NavGraphBuilder.profile(
                 }
             },
             onNewPostClick = { navController.navigateToNoteEditor(null) },
-            onLiveStreamClick = { naddr -> streamState.play(naddr) },
+            onLiveStreamClick = { naddr -> streamState.start(naddr) },
         ),
         noteCallbacks = noteCallbacksHandler(navController),
     )

@@ -100,7 +100,7 @@ fun NoteFeedLazyColumn(
         item(key = STREAM_PILLS_ROW_KEY) {
             StreamPillsRow(
                 streamPills = streamPills,
-                onClick = { streamState.play(it) },
+                onClick = { streamState.start(it) },
                 onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
             )
         }

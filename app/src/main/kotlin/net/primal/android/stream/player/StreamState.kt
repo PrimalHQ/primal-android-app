@@ -23,7 +23,7 @@ class StreamState internal constructor(
 
     fun isHidden() = mode is StreamMode.Hidden
 
-    fun play(naddr: String) {
+    fun start(naddr: String) {
         _mode = StreamMode.Expanded(naddr)
     }
 
