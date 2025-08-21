@@ -77,6 +77,7 @@ import timber.log.Timber
 class LiveStreamViewModel @AssistedInject constructor(
     userMentionHandlerFactory: UserMentionHandler.Factory,
     @Assisted val streamNaddr: Naddr,
+    private val userRepository: UserRepository,
     private val profileRepository: ProfileRepository,
     private val streamRepository: StreamRepository,
     private val liveStreamChatRepository: LiveStreamChatRepository,
@@ -214,9 +215,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     is UiEvent.UnmuteAction -> unmute(it.profileId)
                     is UiEvent.ReportAbuse -> reportAbuse(it.reportType)
                     UiEvent.RequestDeleteStream -> requestDeleteStream()
-                    UiEvent.ToggleMute -> setState {
-                        copy(playerState = playerState.copy(isMuted = !playerState.isMuted))
-                    }
+                    UiEvent.ToggleMute -> toggleMute()
 
                     is UiEvent.SearchUsers -> userMentionHandler.search(it.query)
                     is UiEvent.ToggleSearchUsers -> userMentionHandler.toggleSearch(it.enabled)
@@ -231,6 +230,21 @@ class LiveStreamViewModel @AssistedInject constructor(
                         copy(comment = this.comment.appendUserTagAtSignAtCursorPosition())
                     }
                 }
+            }
+        }
+
+    private fun toggleMute() =
+        viewModelScope.launch {
+            val newIsMuted = !state.value.playerState.isMuted
+            updateVideoSoundSettings(soundOn = !newIsMuted)
+
+            setState { copy(playerState = playerState.copy(isMuted = newIsMuted)) }
+        }
+
+    private fun updateVideoSoundSettings(soundOn: Boolean) =
+        viewModelScope.launch {
+            userRepository.updateContentDisplaySettings(userId = activeAccountStore.activeUserId()) {
+                copy(autoPlayVideoSoundOn = soundOn)
             }
         }
 
