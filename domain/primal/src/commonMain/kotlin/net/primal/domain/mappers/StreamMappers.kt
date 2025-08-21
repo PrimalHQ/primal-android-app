@@ -32,11 +32,11 @@ fun Stream.asReferencedStream() =
         startedAt = this.startsAt,
         endedAt = this.endsAt,
         status = this.status,
-        mainHostId = this.authorId,
+        mainHostId = this.mainHostId,
         mainHostName = authorNameUiFriendly(
             displayName = this.authorProfile?.displayName,
             name = this.authorProfile?.handle,
-            pubkey = this.authorId,
+            pubkey = this.mainHostId,
         ),
         mainHostIsLive = this.isLive(),
         mainHostAvatarCdnImage = this.authorProfile?.avatarCdnImage,

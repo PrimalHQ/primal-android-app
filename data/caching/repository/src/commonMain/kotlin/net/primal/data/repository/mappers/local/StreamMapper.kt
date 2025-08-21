@@ -11,6 +11,7 @@ fun StreamPO.asStreamDO(): StreamDO {
         eventId = this.data.eventId,
         authorId = this.data.authorId,
         authorProfile = this.author?.asProfileDataDO(),
+        mainHostId = this.data.mainHostId,
         dTag = this.data.dTag,
         title = this.data.title,
         summary = this.data.summary,
