@@ -33,6 +33,7 @@ import net.primal.android.navigation.navigateToWalletCreateTransaction
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.stream.di.rememberLiveStreamViewModel
 import net.primal.android.stream.player.LocalStreamState
+import net.primal.android.stream.player.PlayerCommand
 import net.primal.android.stream.player.StreamMode
 import net.primal.android.stream.player.StreamState
 import net.primal.android.stream.player.StreamStateProvider
@@ -104,6 +105,15 @@ private fun LiveStreamOverlay(
             )
         },
     )
+
+    LaunchedEffect(streamState, streamState.commands) {
+        streamState.commands.collect { command ->
+            when (command) {
+                PlayerCommand.Play -> exoPlayer.play()
+                PlayerCommand.Pause -> exoPlayer.pause()
+            }
+        }
+    }
 
     val localDensity = LocalDensity.current
     val displayMetrics = LocalContext.current.resources.displayMetrics
