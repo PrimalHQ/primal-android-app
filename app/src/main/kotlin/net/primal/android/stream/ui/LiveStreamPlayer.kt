@@ -16,6 +16,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -24,6 +25,7 @@ import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.ext.onDragDownBeyond
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
@@ -86,7 +88,12 @@ fun LiveStreamPlayer(
         contentAlignment = Alignment.Center,
     ) {
         PlayerSurface(
-            modifier = playerModifier.matchParentSize(),
+            modifier = playerModifier
+                .onDragDownBeyond(
+                    threshold = 36.dp,
+                    onTriggered = onClose,
+                )
+                .matchParentSize(),
             player = exoPlayer,
             surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
         )
