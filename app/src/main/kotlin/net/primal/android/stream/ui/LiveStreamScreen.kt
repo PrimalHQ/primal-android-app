@@ -2,8 +2,10 @@ package net.primal.android.stream.ui
 
 import android.content.Context
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -14,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -28,13 +29,11 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -61,7 +60,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.exoplayer.ExoPlayer
@@ -87,6 +85,7 @@ import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.notes.feed.zaps.ZapHost
+import net.primal.android.notes.feed.zaps.ZapHostState
 import net.primal.android.notes.feed.zaps.rememberZapHostState
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.SEEK_INCREMENT_MS
@@ -113,9 +112,11 @@ private val ZapMessageProfileHandleColor: Color
         Color(0xFFE47C00)
     }
 
-private sealed interface ActiveBottomSheet {
+internal sealed interface ActiveBottomSheet {
     data object None : ActiveBottomSheet
     data object StreamInfo : ActiveBottomSheet
+    data class ChatDetails(val message: StreamChatItem.ChatMessageItem) : ActiveBottomSheet
+    data class ZapDetails(val zap: StreamChatItem.ZapMessageItem) : ActiveBottomSheet
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -128,12 +129,87 @@ fun LiveStreamScreen(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     val zapHostState = rememberZapHostState(
         zappingState = state.zappingState,
         receiverName = state.streamInfo?.mainHostProfile?.authorDisplayName,
     )
 
+    val zapProfileHandlerArgs = remember(coroutineScope, snackbarHostState, context) {
+        ZapProfileHandlerArgs(
+            coroutineScope = coroutineScope,
+            snackbarHostState = snackbarHostState,
+            context = context,
+        )
+    }
+
+    LiveStreamScreenSideEffects(
+        state = state,
+        eventPublisher = eventPublisher,
+        callbacks = callbacks,
+        snackbarHostState = snackbarHostState,
+        zapHostState = zapHostState,
+        context = context,
+    )
+
+    Scaffold(
+        modifier = Modifier.fillMaxSize(),
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+        content = { paddingValues ->
+            BoxWithConstraints {
+                val playerHeight = this.maxWidth * (VIDEO_ASPECT_RATIO_HEIGHT / VIDEO_ASPECT_RATIO_WIDTH)
+                val topInset = paddingValues.calculateTopPadding()
+                val bottomInset = paddingValues.calculateBottomPadding()
+
+                val bottomSheetHeight = remember(this.maxHeight, playerHeight, topInset, bottomInset) {
+                    (this.maxHeight - topInset - playerHeight - bottomInset).coerceAtLeast(0.dp)
+                }
+
+                var activeBottomSheet by remember { mutableStateOf<ActiveBottomSheet>(ActiveBottomSheet.None) }
+
+                LiveStreamContent(
+                    state = state,
+                    exoPlayer = exoPlayer,
+                    eventPublisher = eventPublisher,
+                    paddingValues = paddingValues,
+                    callbacks = callbacks,
+                    onZapClick = { zapHostState.showZapOptionsOrShowWarning() },
+                    onInfoClick = { activeBottomSheet = ActiveBottomSheet.StreamInfo },
+                    onChatMessageClick = { activeBottomSheet = ActiveBottomSheet.ChatDetails(it) },
+                    onZapMessageClick = { activeBottomSheet = ActiveBottomSheet.ZapDetails(it) },
+                )
+
+                LiveStreamModalBottomSheets(
+                    activeSheet = activeBottomSheet,
+                    onDismiss = { activeBottomSheet = ActiveBottomSheet.None },
+                    state = state,
+                    eventPublisher = eventPublisher,
+                    callbacks = callbacks,
+                    onZapClick = { pubkey, lud16 ->
+                        handleZapProfile(
+                            pubkey = pubkey,
+                            lud16 = lud16,
+                            callbacks = callbacks,
+                            handlerArgs = zapProfileHandlerArgs,
+                        )
+                    },
+                    bottomSheetHeight = bottomSheetHeight,
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun LiveStreamScreenSideEffects(
+    state: LiveStreamContract.UiState,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
+    callbacks: LiveStreamContract.ScreenCallbacks,
+    snackbarHostState: SnackbarHostState,
+    zapHostState: ZapHostState,
+    context: Context,
+) {
     ZapHost(
         zapHostState = zapHostState,
         onZap = { zapAmount, zapDescription ->
@@ -163,105 +239,6 @@ fun LiveStreamScreen(
         errorMessageResolver = { it.resolveUiErrorMessage(context) },
         onErrorDismiss = { eventPublisher(LiveStreamContract.UiEvent.DismissError) },
     )
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        content = { paddingValues ->
-            BoxWithConstraints {
-                val coroutineScope = rememberCoroutineScope()
-
-                val playerHeight = this.maxWidth * (VIDEO_ASPECT_RATIO_HEIGHT / VIDEO_ASPECT_RATIO_WIDTH)
-                val topInset = paddingValues.calculateTopPadding()
-                val bottomInset = paddingValues.calculateBottomPadding()
-
-                val bottomSheetHeight = remember(this.maxHeight, playerHeight, topInset, bottomInset) {
-                    (this.maxHeight - topInset - playerHeight - bottomInset).coerceAtLeast(0.dp)
-                }
-
-                var activeBottomSheet by remember { mutableStateOf<ActiveBottomSheet>(ActiveBottomSheet.None) }
-
-                LiveStreamContent(
-                    state = state,
-                    exoPlayer = exoPlayer,
-                    eventPublisher = eventPublisher,
-                    paddingValues = paddingValues,
-                    callbacks = callbacks,
-                    onZapClick = { zapHostState.showZapOptionsOrShowWarning() },
-                    onInfoClick = { activeBottomSheet = ActiveBottomSheet.StreamInfo },
-                )
-
-                LiveStreamModalBottomSheets(
-                    activeSheet = activeBottomSheet,
-                    onDismiss = { activeBottomSheet = ActiveBottomSheet.None },
-                    state = state,
-                    eventPublisher = eventPublisher,
-                    callbacks = callbacks,
-                    onZapClick = {
-                        handleZapProfile(
-                            state = state,
-                            callbacks = callbacks,
-                            coroutineScope = coroutineScope,
-                            snackbarHostState = snackbarHostState,
-                            context = context,
-                        )
-                    },
-                    bottomSheetHeight = bottomSheetHeight,
-                )
-            }
-        },
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun LiveStreamModalBottomSheets(
-    activeSheet: ActiveBottomSheet,
-    onDismiss: () -> Unit,
-    state: LiveStreamContract.UiState,
-    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
-    callbacks: LiveStreamContract.ScreenCallbacks,
-    onZapClick: () -> Unit,
-    bottomSheetHeight: Dp?,
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    when (activeSheet) {
-        is ActiveBottomSheet.StreamInfo -> {
-            if (state.streamInfo != null && state.activeUserId != null && bottomSheetHeight != null) {
-                ModalBottomSheet(
-                    onDismissRequest = onDismiss,
-                    sheetState = sheetState,
-                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-                    tonalElevation = 0.dp,
-                ) {
-                    StreamInfoBottomSheet(
-                        modifier = Modifier.height(bottomSheetHeight),
-                        activeUserId = state.activeUserId,
-                        streamInfo = state.streamInfo,
-                        isLive = state.playerState.isLive,
-                        onFollow = {
-                            state.streamInfo.mainHostId.let {
-                                eventPublisher(LiveStreamContract.UiEvent.FollowAction(it))
-                            }
-                        },
-                        onUnfollow = {
-                            state.streamInfo.mainHostId.let {
-                                eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(it))
-                            }
-                        },
-                        onZap = onZapClick,
-                        onEditProfileClick = callbacks.onEditProfileClick,
-                        onMessageClick = callbacks.onMessageClick,
-                        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
-                        onHashtagClick = callbacks.onHashtagClick,
-                    )
-                }
-            }
-        }
-
-        is ActiveBottomSheet.None -> Unit
-    }
 }
 
 @Composable
@@ -328,6 +305,8 @@ private fun StreamInfoAndChatSection(
     onInfoClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onEventReactionsClick: (eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit,
+    onChatMessageClick: (StreamChatItem.ChatMessageItem) -> Unit,
+    onZapMessageClick: (StreamChatItem.ZapMessageItem) -> Unit,
 ) {
     val chatListState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
@@ -348,6 +327,8 @@ private fun StreamInfoAndChatSection(
             listState = chatListState,
             eventPublisher = eventPublisher,
             onProfileClick = onProfileClick,
+            onChatMessageClick = onChatMessageClick,
+            onZapMessageClick = onZapMessageClick,
         )
     }
 }
@@ -361,6 +342,8 @@ private fun LiveStreamContent(
     callbacks: LiveStreamContract.ScreenCallbacks,
     onZapClick: () -> Unit,
     onInfoClick: () -> Unit,
+    onChatMessageClick: (StreamChatItem.ChatMessageItem) -> Unit,
+    onZapMessageClick: (StreamChatItem.ZapMessageItem) -> Unit,
 ) {
     if (state.loading) {
         PrimalLoadingSpinner()
@@ -391,6 +374,8 @@ private fun LiveStreamContent(
                 onInfoClick = onInfoClick,
                 onProfileClick = callbacks.onProfileClick,
                 onEventReactionsClick = callbacks.onEventReactionsClick,
+                onChatMessageClick = onChatMessageClick,
+                onZapMessageClick = onZapMessageClick,
             )
         }
     }
@@ -463,7 +448,19 @@ private fun LiveChatListOrSearch(
     listState: LazyListState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
+    onChatMessageClick: (StreamChatItem.ChatMessageItem) -> Unit,
+    onZapMessageClick: (StreamChatItem.ZapMessageItem) -> Unit,
 ) {
+    if (state.chatLoading) {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+        ) {
+            PrimalLoadingSpinner()
+        }
+        return
+    }
+
     if (!state.userTaggingState.isUserTaggingActive) {
         if (state.chatItems.isEmpty()) {
             LiveChatEmpty(
@@ -483,11 +480,17 @@ private fun LiveChatListOrSearch(
                 ) { chatItem ->
                     when (chatItem) {
                         is StreamChatItem.ChatMessageItem -> ChatMessageListItem(
+                            modifier = Modifier.padding(horizontal = 16.dp),
                             message = chatItem.message,
                             onProfileClick = onProfileClick,
+                            onClick = { onChatMessageClick(chatItem) },
                         )
 
-                        is StreamChatItem.ZapMessageItem -> ZapMessageListItem(zap = chatItem.zap)
+                        is StreamChatItem.ZapMessageItem -> ZapMessageListItem(
+                            modifier = Modifier.padding(horizontal = 8.dp),
+                            zap = chatItem.zap,
+                            onClick = { onZapMessageClick(chatItem) },
+                        )
                     }
                 }
             }
@@ -518,6 +521,8 @@ private fun LiveChatContent(
     listState: LazyListState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
+    onChatMessageClick: (StreamChatItem.ChatMessageItem) -> Unit,
+    onZapMessageClick: (StreamChatItem.ZapMessageItem) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -543,6 +548,8 @@ private fun LiveChatContent(
             listState = listState,
             eventPublisher = eventPublisher,
             onProfileClick = onProfileClick,
+            onChatMessageClick = onChatMessageClick,
+            onZapMessageClick = onZapMessageClick,
         )
 
         LiveChatCommentInput(
@@ -654,8 +661,14 @@ private fun LiveChatCommentInput(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ChatMessageListItem(message: ChatMessageUi, onProfileClick: (String) -> Unit) {
+internal fun ChatMessageListItem(
+    message: ChatMessageUi,
+    onProfileClick: (String) -> Unit,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val localUriHandler = LocalUriHandler.current
 
     val authorNameColor = AppTheme.colorScheme.onSurface
@@ -690,7 +703,8 @@ private fun ChatMessageListItem(message: ChatMessageUi, onProfileClick: (String)
     }
 
     Row(
-        modifier = Modifier.padding(horizontal = 16.dp),
+        modifier = modifier
+            .clickable(onClick = onClick),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
     ) {
@@ -701,7 +715,7 @@ private fun ChatMessageListItem(message: ChatMessageUi, onProfileClick: (String)
         )
 
         PrimalClickableText(
-            modifier = Modifier.padding(top = 10.dp),
+            modifier = Modifier.padding(top = 7.dp),
             text = annotatedContent,
             style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
             onClick = { position, _ ->
@@ -726,22 +740,29 @@ private fun ChatMessageListItem(message: ChatMessageUi, onProfileClick: (String)
                     onProfileClick(profileAnnotation.item)
                     return@PrimalClickableText
                 }
+
+                onClick()
             },
         )
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ZapMessageListItem(zap: EventZapUiModel) {
+internal fun ZapMessageListItem(
+    zap: EventZapUiModel,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Box(
-        modifier = Modifier
-            .padding(horizontal = 8.dp)
+        modifier = modifier
             .fillMaxWidth()
             .border(
                 width = 1.dp,
                 color = ZapMessageBorderColor,
                 shape = AppTheme.shapes.medium,
             )
+            .clickable(onClick = onClick)
             .clip(AppTheme.shapes.medium)
             .background(color = ZapMessageBackgroundColor.copy(alpha = 0.2f))
             .padding(horizontal = 8.dp, vertical = 10.dp),
@@ -764,7 +785,7 @@ private fun ZapMessageListItem(zap: EventZapUiModel) {
 private fun ZapMessageContent(zap: EventZapUiModel) {
     val localUriHandler = LocalUriHandler.current
 
-    Column(modifier = Modifier.padding(top = 0.dp)) {
+    Column(modifier = Modifier.padding(top = 1.dp)) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
@@ -845,33 +866,29 @@ private fun ZapMessageContent(zap: EventZapUiModel) {
 }
 
 private fun handleZapProfile(
-    state: LiveStreamContract.UiState,
+    pubkey: String,
+    lud16: String?,
     callbacks: LiveStreamContract.ScreenCallbacks,
-    coroutineScope: CoroutineScope,
-    snackbarHostState: SnackbarHostState,
-    context: Context,
+    handlerArgs: ZapProfileHandlerArgs,
 ) {
-    val streamInfo = state.streamInfo ?: return
-    val profileDetails = streamInfo.mainHostProfile
-    val profileLud16 = profileDetails?.lightningAddress
-
-    if (profileLud16?.isLightningAddress() == true) {
+    if (lud16?.isLightningAddress() == true) {
         callbacks.onSendWalletTx(
             DraftTx(
-                targetUserId = streamInfo.mainHostId,
-                targetLud16 = profileLud16,
+                targetUserId = pubkey,
+                targetLud16 = lud16,
             ),
         )
     } else {
-        coroutineScope.launch {
-            snackbarHostState.showSnackbar(
-                message = context.getString(
-                    R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
-                    profileDetails?.authorDisplayName
-                        ?: context.getString(R.string.wallet_send_payment_this_user_chunk),
-                ),
-                duration = SnackbarDuration.Short,
-            )
+        with(handlerArgs) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = context.getString(
+                        R.string.wallet_send_payment_error_nostr_user_without_lightning_address,
+                        context.getString(R.string.wallet_send_payment_this_user_chunk),
+                    ),
+                    duration = SnackbarDuration.Short,
+                )
+            }
         }
     }
 }
@@ -969,3 +986,9 @@ private fun AnnotatedString.Builder.addProfileAnnotation(
         startIndex = content.indexOf(displayHandle, startIndex + 1)
     }
 }
+
+private data class ZapProfileHandlerArgs(
+    val coroutineScope: CoroutineScope,
+    val snackbarHostState: SnackbarHostState,
+    val context: Context,
+)

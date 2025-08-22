@@ -7,6 +7,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,6 +16,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -40,6 +42,7 @@ import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.handler.ProfileFollowsHandler
+import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
@@ -50,8 +53,8 @@ import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.links.EventUriNostrType
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.mutes.MutedItemRepository
+import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
-import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.Nprofile
@@ -62,6 +65,7 @@ import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.publisher.NostrPublishException as DomainNostrPublishException
+import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
@@ -87,6 +91,7 @@ class LiveStreamViewModel @AssistedInject constructor(
     private val mutedItemRepository: MutedItemRepository,
     private val eventInteractionRepository: EventInteractionRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
+    private val relayRepository: RelayRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -103,6 +108,7 @@ class LiveStreamViewModel @AssistedInject constructor(
         UiState(
             naddr = streamNaddr,
             activeUserId = activeAccountStore.activeUserId(),
+            chatLoading = true,
         ),
     )
     val state = _state.asStateFlow()
@@ -119,12 +125,15 @@ class LiveStreamViewModel @AssistedInject constructor(
 
     private var zaps: List<StreamChatItem.ZapMessageItem> = emptyList()
     private var chatMessages: List<StreamChatItem.ChatMessageItem> = emptyList()
+    private var initialZapsReceived = false
+    private var initialMessagesReceived = false
 
     init {
         startLiveStreamSubscription()
         observeEvents()
         observeFollowsResults()
         observeUserTaggingState()
+        observeMutedList()
         observeStreamInfo()
         observeActiveWallet()
         observeActiveAccount()
@@ -148,30 +157,83 @@ class LiveStreamViewModel @AssistedInject constructor(
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private fun observeMutedList() =
+        viewModelScope.launch {
+            mutedItemRepository.observeMutedProfileIdsByOwnerId(ownerId = activeAccountStore.activeUserId())
+                .collect {
+                    setState { copy(mutedUserIds = it.toSet()) }
+                }
+        }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeZaps() =
         viewModelScope.launch {
-            streamRepository.observeStream(aTag = streamNaddr.asATagValue())
-                .filterNotNull()
-                .map { it.eventZaps.map { zap -> StreamChatItem.ZapMessageItem(zap.asEventZapUiModel()) } }
+            activeAccountStore.activeUserAccount
+                .flatMapLatest { account ->
+                    streamRepository.observeStream(aTag = streamNaddr.asATagValue()).filterNotNull()
+                        .map { stream ->
+                            stream.eventZaps.map { zap ->
+                                val profileData = profileRepository.findProfileDataOrNull(profileId = zap.zapperId)
+                                val stats = profileRepository.findProfileStats(
+                                    profileIds = listOf(zap.zapperId),
+                                ).firstOrNull()
+                                StreamChatItem.ZapMessageItem(
+                                    zap = zap.asEventZapUiModel(),
+                                    zapperProfile = profileData?.asProfileDetailsUi(),
+                                    isZapperFollowed = zap.zapperId in account.following,
+                                    isZapperMuted = zap.zapperId in state.value.mutedUserIds,
+                                    zapperProfileStats = stats?.asProfileStatsUi(),
+                                )
+                            }
+                        }
+                }
                 .collect {
+                    if (!initialZapsReceived) {
+                        initialZapsReceived = true
+                    }
                     zaps = it
                     updateChatItems()
                 }
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     private fun observeChatMessages() =
         viewModelScope.launch {
-            liveStreamChatRepository.observeMessages(streamATag = streamNaddr.asATagValue())
-                .map { chatList -> chatList.map { it.toChatMessageItem() } }
-                .collect {
+            activeAccountStore.activeUserAccount
+                .flatMapLatest { account ->
+                    liveStreamChatRepository.observeMessages(streamATag = streamNaddr.asATagValue())
+                        .map { messages ->
+                            val mappedMessages = mutableListOf<StreamChatItem.ChatMessageItem>()
+                            for (message in messages) {
+                                mappedMessages.add(
+                                    message.toChatMessageItem(
+                                        isFollowed = message.author.profileId in account.following,
+                                        isMuted = message.author.profileId in state.value.mutedUserIds,
+                                    ),
+                                )
+                            }
+                            mappedMessages
+                        }
+                }.collect {
+                    if (!initialMessagesReceived) {
+                        initialMessagesReceived = true
+                    }
                     chatMessages = it
                     updateChatItems()
                 }
         }
 
     private fun updateChatItems() {
-        val combinedAndSorted = (zaps + chatMessages).sortedByDescending { it.timestamp }
-        setState { copy(chatItems = combinedAndSorted) }
+        if (initialZapsReceived && initialMessagesReceived) {
+            val combinedAndSorted = (zaps + chatMessages).sortedByDescending { it.timestamp }
+            setState {
+                copy(
+                    chatItems = combinedAndSorted,
+                    chatLoading = false,
+                )
+            }
+        }
     }
 
     private fun observeEvents() =
@@ -199,8 +261,14 @@ class LiveStreamViewModel @AssistedInject constructor(
                         }
                     }
 
-                    is UiEvent.FollowAction -> follow(it.profileId)
-                    is UiEvent.UnfollowAction -> unfollow(it.profileId)
+                    is UiEvent.FollowAction -> {
+                        follow(it.profileId)
+                        setState { optimisticallyUpdateFollowState(it.profileId, true) }
+                    }
+                    is UiEvent.UnfollowAction -> {
+                        unfollow(it.profileId)
+                        setState { optimisticallyUpdateFollowState(it.profileId, false) }
+                    }
                     is UiEvent.ApproveFollowsActions -> approveFollowsActions(it.actions)
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.DismissConfirmFollowUnfollowAlertDialog -> setState {
@@ -210,8 +278,14 @@ class LiveStreamViewModel @AssistedInject constructor(
                     is UiEvent.ZapStream -> zapStream(zapAction = it)
                     is UiEvent.OnCommentValueChanged -> setState { copy(comment = it.value) }
                     is UiEvent.SendMessage -> sendMessage(text = it.text)
-                    is UiEvent.MuteAction -> mute(it.profileId)
-                    is UiEvent.UnmuteAction -> unmute(it.profileId)
+                    is UiEvent.MuteAction -> {
+                        mute(it.profileId)
+                        setState { optimisticallyUpdateMuteState(it.profileId, true) }
+                    }
+                    is UiEvent.UnmuteAction -> {
+                        unmute(it.profileId)
+                        setState { optimisticallyUpdateMuteState(it.profileId, false) }
+                    }
                     is UiEvent.ReportAbuse -> reportAbuse(it.reportType)
                     UiEvent.RequestDeleteStream -> requestDeleteStream()
                     UiEvent.ToggleMute -> setState {
@@ -230,9 +304,55 @@ class LiveStreamViewModel @AssistedInject constructor(
                     UiEvent.AppendUserTagAtSign -> setState {
                         copy(comment = this.comment.appendUserTagAtSignAtCursorPosition())
                     }
+
+                    is UiEvent.ReportMessage -> reportMessage(
+                        reportType = it.reportType,
+                        messageId = it.messageId,
+                        authorId = it.authorId,
+                    )
                 }
             }
         }
+
+    private fun UiState.optimisticallyUpdateFollowState(profileId: String, isFollowed: Boolean): UiState {
+        val updatedChatItems = this.chatItems.map { chatItem ->
+            when (chatItem) {
+                is StreamChatItem.ChatMessageItem ->
+                    if (chatItem.message.authorProfile.pubkey == profileId) {
+                        chatItem.copy(isAuthorFollowed = isFollowed)
+                    } else {
+                        chatItem
+                    }
+                is StreamChatItem.ZapMessageItem ->
+                    if (chatItem.zap.zapperId == profileId) {
+                        chatItem.copy(isZapperFollowed = isFollowed)
+                    } else {
+                        chatItem
+                    }
+            }
+        }
+        return this.copy(chatItems = updatedChatItems)
+    }
+
+    private fun UiState.optimisticallyUpdateMuteState(profileId: String, isMuted: Boolean): UiState {
+        val updatedChatItems = this.chatItems.map { chatItem ->
+            when (chatItem) {
+                is StreamChatItem.ChatMessageItem ->
+                    if (chatItem.message.authorProfile.pubkey == profileId) {
+                        chatItem.copy(isAuthorMuted = isMuted)
+                    } else {
+                        chatItem
+                    }
+                is StreamChatItem.ZapMessageItem ->
+                    if (chatItem.zap.zapperId == profileId) {
+                        chatItem.copy(isZapperMuted = isMuted)
+                    } else {
+                        chatItem
+                    }
+            }
+        }
+        return this.copy(chatItems = updatedChatItems)
+    }
 
     private fun sendMessage(text: String) {
         val streamInfo = state.value.streamInfo ?: return
@@ -258,10 +378,23 @@ class LiveStreamViewModel @AssistedInject constructor(
         }
     }
 
-    private fun String.replaceUserMentionsWithNostrUris(users: List<NoteTaggedUser>): String {
+    private suspend fun String.replaceUserMentionsWithNostrUris(users: List<NoteTaggedUser>): String {
         var content = this
+        val userRelaysMap = try {
+            relayRepository
+                .fetchAndUpdateUserRelays(userIds = users.map { it.userId })
+                .associateBy { it.pubkey }
+        } catch (error: NetworkException) {
+            Timber.w(error)
+            emptyMap()
+        }
+
         users.forEach { user ->
-            val nprofile = Nprofile(pubkey = user.userId, relays = emptyList())
+            val nprofile = Nprofile(
+                pubkey = user.userId,
+                relays = userRelaysMap[user.userId]?.relays
+                    ?.filter { it.write }?.map { it.url }?.take(MAX_RELAY_HINTS) ?: emptyList(),
+            )
             content = content.replace(
                 oldValue = user.displayUsername,
                 newValue = "nostr:${nprofile.toNprofileString()}",
@@ -465,12 +598,7 @@ class LiveStreamViewModel @AssistedInject constructor(
 
     private fun follow(profileId: String) =
         viewModelScope.launch {
-            setState {
-                copy(
-                    streamInfo = this.streamInfo?.copy(isMainHostFollowedByActiveUser = true),
-                    shouldApproveProfileAction = null,
-                )
-            }
+            setState { copy(shouldApproveProfileAction = null) }
             profileFollowsHandler.follow(
                 userId = activeAccountStore.activeUserId(),
                 profileId = profileId,
@@ -479,12 +607,7 @@ class LiveStreamViewModel @AssistedInject constructor(
 
     private fun unfollow(profileId: String) =
         viewModelScope.launch {
-            setState {
-                copy(
-                    streamInfo = this.streamInfo?.copy(isMainHostFollowedByActiveUser = false),
-                    shouldApproveProfileAction = null,
-                )
-            }
+            setState { copy(shouldApproveProfileAction = null) }
             profileFollowsHandler.unfollow(
                 userId = activeAccountStore.activeUserId(),
                 profileId = profileId,
@@ -542,7 +665,6 @@ class LiveStreamViewModel @AssistedInject constructor(
 
     private fun mute(profileId: String) =
         viewModelScope.launch {
-            setState { copy(streamInfo = this.streamInfo?.copy(isMainHostMutedByActiveUser = true)) }
             try {
                 mutedItemRepository.muteUserAndPersistMuteList(
                     userId = activeAccountStore.activeUserId(),
@@ -550,34 +672,18 @@ class LiveStreamViewModel @AssistedInject constructor(
                 )
             } catch (error: DomainNostrPublishException) {
                 Timber.w(error)
-                setState {
-                    copy(
-                        error = UiError.FailedToMuteUser(error),
-                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = false),
-                    )
-                }
+                setState { copy(error = UiError.FailedToMuteUser(error)) }
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                setState {
-                    copy(
-                        error = UiError.MissingRelaysConfiguration(error),
-                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = false),
-                    )
-                }
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
                 Timber.w(error)
-                setState {
-                    copy(
-                        error = UiError.SignatureError(error.asSignatureUiError()),
-                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = false),
-                    )
-                }
+                setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             }
         }
 
     private fun unmute(profileId: String) =
         viewModelScope.launch {
-            setState { copy(streamInfo = this.streamInfo?.copy(isMainHostMutedByActiveUser = false)) }
             try {
                 mutedItemRepository.unmuteUserAndPersistMuteList(
                     userId = activeAccountStore.activeUserId(),
@@ -585,28 +691,13 @@ class LiveStreamViewModel @AssistedInject constructor(
                 )
             } catch (error: DomainNostrPublishException) {
                 Timber.w(error)
-                setState {
-                    copy(
-                        error = UiError.FailedToUnmuteUser(error),
-                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = true),
-                    )
-                }
+                setState { copy(error = UiError.FailedToUnmuteUser(error)) }
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
-                setState {
-                    copy(
-                        error = UiError.MissingRelaysConfiguration(error),
-                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = true),
-                    )
-                }
+                setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
                 Timber.w(error)
-                setState {
-                    copy(
-                        error = UiError.SignatureError(error.asSignatureUiError()),
-                        streamInfo = streamInfo?.copy(isMainHostMutedByActiveUser = true),
-                    )
-                }
+                setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             }
         }
 
@@ -631,6 +722,31 @@ class LiveStreamViewModel @AssistedInject constructor(
                 Timber.w(error)
             }
         }
+
+    private fun reportMessage(
+        reportType: ReportType,
+        messageId: String,
+        authorId: String,
+    ) = viewModelScope.launch {
+        val streamInfo = state.value.streamInfo ?: return@launch
+        try {
+            profileRepository.reportAbuse(
+                userId = activeAccountStore.activeUserId(),
+                reportType = reportType,
+                profileId = authorId,
+                eventId = messageId,
+                articleId = streamInfo.atag,
+            )
+        } catch (error: SigningKeyNotFoundException) {
+            Timber.w(error)
+            setState { copy(error = UiError.MissingPrivateKey) }
+        } catch (error: SigningRejectedException) {
+            Timber.w(error)
+            setState { copy(error = UiError.NostrSignUnauthorized) }
+        } catch (error: NostrPublishException) {
+            Timber.w(error)
+        }
+    }
 
     private fun requestDeleteStream() =
         viewModelScope.launch {
@@ -670,20 +786,25 @@ class LiveStreamViewModel @AssistedInject constructor(
             }
         }
 
-    private suspend fun ChatMessage.toChatMessageItem(): StreamChatItem.ChatMessageItem {
+    private suspend fun ChatMessage.toChatMessageItem(
+        isFollowed: Boolean,
+        isMuted: Boolean,
+    ): StreamChatItem.ChatMessageItem {
         val nostrUrisRaw = this.content.parseNostrUris()
         val nostrUrisUi = nostrUrisRaw.mapNotNull { uriString ->
             val position = this.content.indexOf(uriString)
-            Nip19TLV.parseUriAsNprofileOrNull(uriString)?.let { nprofile ->
+            val pubkey = uriString.extractProfileId()
+            if (pubkey != null) {
                 try {
-                    val profileData = profileRepository.findProfileDataOrNull(profileId = nprofile.pubkey)
-                    if (profileData?.handle != null) {
+                    val profileData = profileRepository.findProfileDataOrNull(profileId = pubkey)
+                    val handle = profileData?.handle
+                    if (handle != null) {
                         NoteNostrUriUi(
                             uri = uriString,
                             type = EventUriNostrType.Profile,
                             referencedUser = ReferencedUser(
-                                userId = nprofile.pubkey,
-                                handle = profileData.handle!!,
+                                userId = pubkey,
+                                handle = handle,
                             ),
                             referencedEventAlt = null,
                             referencedNote = null,
@@ -700,17 +821,24 @@ class LiveStreamViewModel @AssistedInject constructor(
                     Timber.w(error, "Failed to resolve profile for $uriString")
                     null
                 }
+            } else {
+                null
             }
         }
 
+        val stats = profileRepository.findProfileStats(profileIds = listOf(this.author.profileId)).firstOrNull()
+
         return StreamChatItem.ChatMessageItem(
-            ChatMessageUi(
+            message = ChatMessageUi(
                 messageId = this.messageId,
                 authorProfile = this.author.asProfileDetailsUi(),
                 content = this.content,
                 timestamp = this.createdAt,
                 nostrUris = nostrUrisUi,
             ),
+            isAuthorFollowed = isFollowed,
+            isAuthorMuted = isMuted,
+            authorProfileStats = stats?.asProfileStatsUi(),
         )
     }
 }
