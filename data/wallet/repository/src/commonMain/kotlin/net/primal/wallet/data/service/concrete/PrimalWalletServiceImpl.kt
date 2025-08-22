@@ -7,6 +7,7 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.utils.ensureEncodedLnUrl
+import net.primal.domain.nostr.utils.stripLightningPrefix
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.SubWallet
 import net.primal.domain.wallet.TxRequest
@@ -82,10 +83,12 @@ internal class PrimalWalletServiceImpl(
                 body = WithdrawRequestBody(
                     subWallet = SubWallet.Open,
                     targetLud16 = request.getIfTypeOrNull(TxRequest.Lightning.LnUrl::lud16),
-                    targetLnUrl = request.getIfTypeOrNull(TxRequest.Lightning.LnUrl::lnUrl)?.ensureEncodedLnUrl(),
+                    targetLnUrl = request.getIfTypeOrNull(TxRequest.Lightning.LnUrl::lnUrl)
+                        ?.ensureEncodedLnUrl()?.stripLightningPrefix(),
                     targetBtcAddress = request.getIfTypeOrNull(TxRequest.BitcoinOnChain::onChainAddress),
                     onChainTier = request.getIfTypeOrNull(TxRequest.BitcoinOnChain::onChainTier),
-                    lnInvoice = request.getIfTypeOrNull(TxRequest.Lightning.LnInvoice::lnInvoice),
+                    lnInvoice = request.getIfTypeOrNull(TxRequest.Lightning.LnInvoice::lnInvoice)
+                        ?.stripLightningPrefix(),
                     amountBtc = request.amountSats.toLong().toBtc().formatAsString(),
                     noteRecipient = request.noteRecipient,
                     noteSelf = request.noteSelf,
