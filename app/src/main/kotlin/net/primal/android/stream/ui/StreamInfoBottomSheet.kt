@@ -30,7 +30,6 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.profile.details.ui.ProfileActions
-import net.primal.android.stream.LiveStreamContract
 import net.primal.android.theme.AppTheme
 
 private val MuteButtonHandleColor: Color
@@ -44,10 +43,7 @@ private val MuteButtonHandleColor: Color
 @Composable
 fun StreamInfoBottomSheet(
     modifier: Modifier = Modifier,
-    isMuteStreamHostButtonVisible: Boolean,
-    activeUserId: String,
-    streamInfo: LiveStreamContract.StreamInfoUi,
-    isLive: Boolean,
+    profile: BottomSheetProfile,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
     onMute: () -> Unit,
@@ -59,9 +55,9 @@ fun StreamInfoBottomSheet(
     bottomContent: @Composable () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        HostInfoAndActions(
+        ProfileInfoAndActions(
             modifier = Modifier.padding(horizontal = 16.dp),
-            isMuteButtonVisible = isMuteStreamHostButtonVisible,
+            profile = profile,
             onFollow = onFollow,
             onUnfollow = onUnfollow,
             onMute = onMute,
@@ -70,9 +66,6 @@ fun StreamInfoBottomSheet(
             onEditProfileClick = onEditProfileClick,
             onMessageClick = onMessageClick,
             onDrawerQrCodeClick = onDrawerQrCodeClick,
-            activeUserId = activeUserId,
-            streamInfo = streamInfo,
-            isLive = isLive,
         )
 
         PrimalDivider(modifier = Modifier.padding(top = 16.dp))
@@ -82,12 +75,9 @@ fun StreamInfoBottomSheet(
 }
 
 @Composable
-private fun HostInfoAndActions(
+private fun ProfileInfoAndActions(
     modifier: Modifier = Modifier,
-    isMuteButtonVisible: Boolean,
-    activeUserId: String,
-    streamInfo: LiveStreamContract.StreamInfoUi,
-    isLive: Boolean,
+    profile: BottomSheetProfile,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
     onMute: () -> Unit,
@@ -98,14 +88,11 @@ private fun HostInfoAndActions(
     onDrawerQrCodeClick: (String) -> Unit,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        HostProfileSummary(
-            streamInfo = streamInfo,
-            isLive = isLive,
+        ProfileSummary(
+            profile = profile,
         )
-        HostActionRow(
-            isMuteButtonVisible = isMuteButtonVisible,
-            activeUserId = activeUserId,
-            streamInfo = streamInfo,
+        ProfileActionRow(
+            profile = profile,
             onFollow = onFollow,
             onUnfollow = onUnfollow,
             onMute = onMute,
@@ -119,8 +106,8 @@ private fun HostInfoAndActions(
 }
 
 @Composable
-private fun HostProfileSummary(streamInfo: LiveStreamContract.StreamInfoUi, isLive: Boolean) {
-    val mainHostProfile = streamInfo.mainHostProfile!!
+private fun ProfileSummary(profile: BottomSheetProfile) {
+    val profileDetails = profile.details
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -128,21 +115,20 @@ private fun HostProfileSummary(streamInfo: LiveStreamContract.StreamInfoUi, isLi
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         UniversalAvatarThumbnail(
-            isLive = isLive,
-            avatarCdnImage = mainHostProfile.avatarCdnImage,
+            avatarCdnImage = profileDetails.avatarCdnImage,
             avatarSize = 56.dp,
-            legendaryCustomization = mainHostProfile.premiumDetails?.legendaryCustomization,
+            legendaryCustomization = profileDetails.premiumDetails?.legendaryCustomization,
         )
         Column(modifier = Modifier.weight(1f)) {
             NostrUserText(
                 modifier = Modifier.padding(top = 4.dp),
-                displayName = streamInfo.mainHostProfile.userDisplayName,
-                internetIdentifier = streamInfo.mainHostProfile.internetIdentifier,
+                displayName = profileDetails.userDisplayName,
+                internetIdentifier = profileDetails.internetIdentifier,
                 internetIdentifierBadgeSize = 20.dp,
                 internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
-                legendaryCustomization = streamInfo.mainHostProfile.premiumDetails?.legendaryCustomization,
+                legendaryCustomization = profileDetails.premiumDetails?.legendaryCustomization,
             )
-            streamInfo.mainHostProfileStats?.followersCount?.let {
+            profile.stats?.followersCount?.let {
                 Text(
                     text = stringResource(id = R.string.live_stream_followers_count, numberFormat.format(it)),
                     style = AppTheme.typography.bodyLarge.copy(
@@ -157,10 +143,8 @@ private fun HostProfileSummary(streamInfo: LiveStreamContract.StreamInfoUi, isLi
 }
 
 @Composable
-private fun HostActionRow(
-    isMuteButtonVisible: Boolean,
-    activeUserId: String,
-    streamInfo: LiveStreamContract.StreamInfoUi,
+private fun ProfileActionRow(
+    profile: BottomSheetProfile,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
     onMute: () -> Unit,
@@ -174,8 +158,8 @@ private fun HostActionRow(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (isMuteButtonVisible) {
-            val isMuted = streamInfo.isMainHostMutedByActiveUser
+        if (!profile.isActiveUser) {
+            val isMuted = profile.isMuted
             PrimalFilledButton(
                 containerColor = MuteButtonHandleColor,
                 contentColor = AppTheme.colorScheme.onSurface,
@@ -209,12 +193,12 @@ private fun HostActionRow(
 
         ProfileActions(
             modifier = Modifier,
-            isFollowed = streamInfo.isMainHostFollowedByActiveUser,
-            isActiveUser = activeUserId == streamInfo.mainHostId,
+            isFollowed = profile.isFollowed,
+            isActiveUser = profile.isActiveUser,
             onEditProfileClick = onEditProfileClick,
-            onMessageClick = { onMessageClick(streamInfo.mainHostId) },
+            onMessageClick = { onMessageClick(profile.details.pubkey) },
             onZapProfileClick = onZap,
-            onDrawerQrCodeClick = { onDrawerQrCodeClick(streamInfo.mainHostId) },
+            onDrawerQrCodeClick = { onDrawerQrCodeClick(profile.details.pubkey) },
             onFollow = onFollow,
             onUnfollow = onUnfollow,
         )

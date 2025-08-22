@@ -33,6 +33,7 @@ interface LiveStreamContract {
         val userTaggingState: UserTaggingState = UserTaggingState(),
         val error: UiError? = null,
         val chatLoading: Boolean = true,
+        val mutedUserIds: Set<String> = emptySet(),
     )
 
     data class PlayerState(
