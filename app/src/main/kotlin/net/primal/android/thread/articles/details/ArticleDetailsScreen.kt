@@ -461,6 +461,9 @@ private fun ArticleDetailsTopAppBar(
                     onClick = { onBookmarkClick?.invoke() },
                 )
 
+                val primalName = state.article.authorInternetIdentifier?.substringBefore('@')
+                val articleSlug = state.article.articleId
+
                 ArticleDropdownMenuIcon(
                     modifier = Modifier
                         .size(42.dp)
@@ -474,6 +477,8 @@ private fun ArticleDetailsTopAppBar(
                     isBookmarked = state.article.isBookmarked,
                     isArticleAuthor = state.article.authorId == state.activeAccountUserId,
                     showHighlights = state.showHighlights,
+                    primalName = primalName,
+                    articleSlug = articleSlug,
                     onToggleHighlightsClick = onToggleHighlightsClick,
                     onBookmarkClick = onBookmarkClick,
                     onMuteUserClick = onMuteUserClick,

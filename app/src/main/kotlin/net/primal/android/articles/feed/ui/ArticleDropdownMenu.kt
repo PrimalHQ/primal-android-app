@@ -59,6 +59,8 @@ fun ArticleDropdownMenuIcon(
     enabled: Boolean = true,
     isArticleAuthor: Boolean,
     showHighlights: Boolean? = null,
+    primalName: String? = null,
+    articleSlug: String? = null,
     onToggleHighlightsClick: (() -> Unit)? = null,
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
@@ -77,6 +79,12 @@ fun ArticleDropdownMenuIcon(
         userId = authorId,
         kind = NostrEventKind.LongFormContent.value,
     ).toNaddrString()
+
+    val shareUrl = if (!primalName.isNullOrBlank() && !articleSlug.isNullOrBlank()) {
+        "https://primal.net/$primalName/$articleSlug"
+    } else {
+        resolvePrimalArticleLink(naddr = naddr)
+    }
 
     var reportDialogVisible by remember { mutableStateOf(false) }
     if (reportDialogVisible) {
@@ -124,7 +132,7 @@ fun ArticleDropdownMenuIcon(
                 onClick = {
                     systemShareText(
                         context = context,
-                        text = resolvePrimalArticleLink(naddr = naddr),
+                        text = shareUrl,
                     )
                     menuVisible = false
                 },
@@ -167,7 +175,7 @@ fun ArticleDropdownMenuIcon(
                 trailingIconVector = PrimalIcons.ContextCopyNoteLink,
                 text = stringResource(id = R.string.article_feed_context_copy_article_link),
                 onClick = {
-                    copyText(context = context, text = resolvePrimalArticleLink(naddr = naddr))
+                    copyText(context = context, text = shareUrl)
                     menuVisible = false
                     uiScope.launch {
                         Toast.makeText(
