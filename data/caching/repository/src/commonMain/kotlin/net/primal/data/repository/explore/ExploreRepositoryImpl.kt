@@ -246,7 +246,7 @@ class ExploreRepositoryImpl(
             )
             val streamData = response.liveActivity.mapNotNullAsStreamDataPO()
             val authorToIsLiveMap = streamData
-                .groupBy { it.authorId }
+                .groupBy { it.mainHostId }
                 .mapValues { it.value.any { stream -> stream.isLive() } }
 
             val userScoresMap = response.userScores?.takeContentAsPrimalUserScoresOrNull()
