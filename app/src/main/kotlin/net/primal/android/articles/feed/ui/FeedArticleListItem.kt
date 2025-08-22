@@ -134,7 +134,7 @@ private fun ListItemHeader(
     val overflowIconSizeDp = 40.dp
     Box(contentAlignment = Alignment.TopEnd) {
         if (enabledDropdownMenu) {
-            ArticleDropdownMenuIcon(
+            ArticleDropdownMenu(
                 modifier = Modifier
                     .size(overflowIconSizeDp)
                     .padding(top = 6.dp)

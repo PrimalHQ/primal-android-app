@@ -54,7 +54,17 @@ fun resolvePrimalNoteLink(noteId: String) = resolvePrimalNoteLink(nevent = Neven
 
 fun resolvePrimalNoteLink(nevent: Nevent) = "https://primal.net/e/${nevent.toNeventString()}"
 
-fun resolvePrimalArticleLink(naddr: String) = "https://primal.net/a/$naddr"
+fun resolvePrimalArticleLink(
+    naddr: String,
+    primalName: String? = null,
+    articleSlug: String? = null,
+): String {
+    return if (!primalName.isNullOrBlank() && !articleSlug.isNullOrBlank()) {
+        "https://primal.net/$primalName/$articleSlug"
+    } else {
+        "https://primal.net/a/$naddr"
+    }
+}
 
 fun resolvePrimalStreamLink(naddr: String) = "https://primal.net/a/$naddr"
 
