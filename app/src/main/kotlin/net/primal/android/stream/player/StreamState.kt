@@ -31,6 +31,7 @@ class StreamState internal constructor(
     val mode: StreamMode get() = _mode
 
     private val _pauseHolders = AtomicInt(0)
+    private val _hideHolders = AtomicInt(0)
 
     private val _commands = Channel<PlayerCommand>()
     val commands = _commands.receiveAsFlow()
@@ -71,17 +72,22 @@ class StreamState internal constructor(
         }
     }
 
-    fun hide() {
-        val current = _mode
-        if (current !is StreamMode.Hidden) {
-            _mode = StreamMode.Hidden(modeToRestore = current)
+    fun acquireHide() {
+        if (_hideHolders.fetchAndIncrement() == 0) {
+            val current = _mode
+            if (current !is StreamMode.Hidden) {
+                _mode = StreamMode.Hidden(modeToRestore = current)
+            }
         }
     }
 
-    fun show() {
-        val current = _mode
-        if (current is StreamMode.Hidden) {
-            _mode = current.modeToRestore
+    fun releaseHide() {
+        if (_hideHolders.decrementAndFetch() <= 0) {
+            _hideHolders.store(0)
+            val current = _mode
+            if (current is StreamMode.Hidden) {
+                _mode = current.modeToRestore
+            }
         }
     }
 
