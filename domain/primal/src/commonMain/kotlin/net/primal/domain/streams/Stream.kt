@@ -9,7 +9,7 @@ import net.primal.domain.profile.ProfileData
 data class Stream(
     val aTag: String,
     val eventId: String,
-    val authorId: String,
+    val eventAuthorId: String,
     val mainHostId: String,
     val mainHostProfile: ProfileData?,
     val dTag: String,
@@ -32,7 +32,7 @@ data class Stream(
     fun toNaddrString(): String =
         Naddr(
             kind = NostrEventKind.LiveActivity.value,
-            userId = this.authorId,
+            userId = this.eventAuthorId,
             identifier = this.dTag,
         ).toNaddrString()
 }

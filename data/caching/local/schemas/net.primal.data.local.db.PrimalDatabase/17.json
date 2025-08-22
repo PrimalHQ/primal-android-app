@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 17,
-    "identityHash": "55afac0f17eaaa3ac46cf6c2b171bcb0",
+    "identityHash": "265d3a9d5c3bd47ff218d58a687f22a2",
     "entities": [
       {
         "tableName": "PostData",
@@ -1626,7 +1626,7 @@
       },
       {
         "tableName": "StreamData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aTag` TEXT NOT NULL, `eventId` TEXT NOT NULL, `authorId` TEXT NOT NULL, `mainHostId` TEXT NOT NULL, `dTag` TEXT NOT NULL, `title` TEXT, `summary` TEXT, `imageUrl` TEXT, `hashtags` TEXT NOT NULL, `streamingUrl` TEXT, `recordingUrl` TEXT, `startsAt` INTEGER, `endsAt` INTEGER, `status` TEXT NOT NULL, `currentParticipants` INTEGER, `totalParticipants` INTEGER, `raw` TEXT NOT NULL, PRIMARY KEY(`aTag`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aTag` TEXT NOT NULL, `eventId` TEXT NOT NULL, `eventAuthorId` TEXT NOT NULL, `mainHostId` TEXT NOT NULL, `dTag` TEXT NOT NULL, `title` TEXT, `summary` TEXT, `imageUrl` TEXT, `hashtags` TEXT NOT NULL, `streamingUrl` TEXT, `recordingUrl` TEXT, `startsAt` INTEGER, `endsAt` INTEGER, `status` TEXT NOT NULL, `currentParticipants` INTEGER, `totalParticipants` INTEGER, `raw` TEXT NOT NULL, PRIMARY KEY(`aTag`))",
         "fields": [
           {
             "fieldPath": "aTag",
@@ -1641,8 +1641,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "authorId",
-            "columnName": "authorId",
+            "fieldPath": "eventAuthorId",
+            "columnName": "eventAuthorId",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -1805,7 +1805,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '55afac0f17eaaa3ac46cf6c2b171bcb0')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '265d3a9d5c3bd47ff218d58a687f22a2')"
     ]
   }
 }

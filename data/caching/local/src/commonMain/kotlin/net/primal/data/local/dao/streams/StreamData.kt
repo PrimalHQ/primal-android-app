@@ -9,7 +9,7 @@ data class StreamData(
     @PrimaryKey
     val aTag: String,
     val eventId: String,
-    val authorId: String,
+    val eventAuthorId: String,
     val mainHostId: String,
     val dTag: String,
     val title: String?,

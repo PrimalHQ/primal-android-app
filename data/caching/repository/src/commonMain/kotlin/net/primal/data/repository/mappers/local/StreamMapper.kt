@@ -9,7 +9,7 @@ fun StreamPO.asStreamDO(): StreamDO {
     return StreamDO(
         aTag = this.data.aTag,
         eventId = this.data.eventId,
-        authorId = this.data.authorId,
+        eventAuthorId = this.data.eventAuthorId,
         mainHostProfile = this.mainHost?.asProfileDataDO(),
         mainHostId = this.data.mainHostId,
         dTag = this.data.dTag,

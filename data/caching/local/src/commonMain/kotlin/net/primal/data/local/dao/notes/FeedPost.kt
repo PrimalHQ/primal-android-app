@@ -74,7 +74,7 @@ data class FeedPost(
     val bookmark: PublicBookmark? = null,
 
     @Relation(
-        entityColumn = "authorId",
+        entityColumn = "mainHostId",
         parentColumn = "authorId",
     )
     val streams: List<StreamData> = emptyList(),

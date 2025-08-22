@@ -39,7 +39,7 @@ fun NostrEvent.asStreamData(): StreamData? {
 
     val dTag = this.tags.findFirstIdentifier() ?: return null
     val mainHostId = this.tags.findFirstHostPubkey() ?: this.pubKey
-    val authorId = this.pubKey
+    val eventAuthorId = this.pubKey
 
     val statusTagValue = this.tags.findFirstStatus()
     val endsAtTimestamp = this.tags.findFirstEnds()?.toLongOrNull()
@@ -61,9 +61,9 @@ fun NostrEvent.asStreamData(): StreamData? {
     }
 
     return StreamData(
-        aTag = "${this.kind}:$authorId:$dTag",
+        aTag = "${this.kind}:$eventAuthorId:$dTag",
         eventId = id,
-        authorId = authorId,
+        eventAuthorId = eventAuthorId,
         mainHostId = mainHostId,
         dTag = dTag,
         title = this.tags.findFirstTitle(),
