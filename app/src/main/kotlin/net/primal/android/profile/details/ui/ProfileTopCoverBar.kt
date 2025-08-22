@@ -152,7 +152,7 @@ fun ProfileTopCoverBar(
             avatarPadding = with(
                 density,
             ) { (maxAvatarSizePx - avatarSizePx.floatValue).toDp() },
-            avatarOffsetY = with(density) { maxAvatarSizePx.times(other = 0.60f).toDp() },
+            avatarOffsetY = with(density) { maxAvatarSizePx.times(other = 0.65f).toDp() },
         ),
         eventPublisher = eventPublisher,
         callbacks = callbacks,
@@ -224,37 +224,39 @@ private fun ProfileTopCoverBar(
                 .offset(y = avatarValues.avatarOffsetY, x = avatarValues.avatarOffsetX)
                 .padding(horizontal = 12.dp),
         ) {
-            val legendaryCustomization = state.profileDetails?.premiumDetails?.legendaryCustomization
-            UniversalAvatarThumbnail(
-                modifier = Modifier
-                    .padding(
-                        top = avatarValues.avatarPadding * 2 / 5,
-                        bottom = avatarValues.avatarPadding * 3 / 5,
-                        start = avatarValues.avatarPadding * 1 / 8,
-                        end = avatarValues.avatarPadding * 7 / 8,
-                    ),
-                isLive = state.isLive,
-                avatarSize = avatarValues.avatarSize,
-                avatarCdnImage = state.profileDetails?.avatarCdnImage,
-                avatarBlossoms = state.profileDetails?.profileBlossoms ?: emptyList(),
-                fallbackBorderColor = if (LocalPrimalTheme.current.isDarkTheme) Color.Black else Color.White,
-                borderSizeOverride = if (legendaryCustomization == null) 5.dp else null,
-                legendaryCustomization = legendaryCustomization,
-                forceAnimationIfAvailable = true,
-                canDownscaleToZero = true,
-                onClick = {
-                    if (state.isLive) {
-                        state.liveStreamNaddr?.let { callbacks.onLiveStreamClick(it) }
-                    } else {
-                        state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) }
-                    }
-                },
-                onLongClick = {
-                    if (state.isLive) {
-                        state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) }
-                    }
-                },
-            )
+            if (avatarValues.avatarSize >= 20.dp) {
+                val legendaryCustomization = state.profileDetails?.premiumDetails?.legendaryCustomization
+                UniversalAvatarThumbnail(
+                    modifier = Modifier
+                        .padding(
+                            top = avatarValues.avatarPadding * 2 / 5,
+                            bottom = avatarValues.avatarPadding * 5 / 5,
+                            start = avatarValues.avatarPadding * 1 / 8,
+                            end = avatarValues.avatarPadding * 7 / 8,
+                        ),
+                    isLive = state.isLive,
+                    avatarSize = avatarValues.avatarSize,
+                    avatarCdnImage = state.profileDetails?.avatarCdnImage,
+                    avatarBlossoms = state.profileDetails?.profileBlossoms ?: emptyList(),
+                    fallbackBorderColor = if (LocalPrimalTheme.current.isDarkTheme) Color.Black else Color.White,
+                    borderSizeOverride = if (legendaryCustomization == null) 5.dp else null,
+                    legendaryCustomization = legendaryCustomization,
+                    forceAnimationIfAvailable = true,
+                    canDownscaleToZero = true,
+                    onClick = {
+                        if (state.isLive) {
+                            state.liveStreamNaddr?.let { callbacks.onLiveStreamClick(it) }
+                        } else {
+                            state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) }
+                        }
+                    },
+                    onLongClick = {
+                        if (state.isLive) {
+                            state.profileDetails?.avatarCdnImage?.sourceUrl?.let { onMediaItemClick(it) }
+                        }
+                    },
+                )
+            }
         }
     }
 }
