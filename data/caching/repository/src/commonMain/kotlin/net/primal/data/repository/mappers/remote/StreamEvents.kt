@@ -34,6 +34,9 @@ fun List<NostrEvent>.mapNotNullAsStreamDataPO(): List<StreamData> {
 fun NostrEvent.asStreamData(): StreamData? {
     if (this.kind != NostrEventKind.LiveActivity.value) return null
 
+    val streamingUrl = this.tags.findFirstStreaming()
+    if (streamingUrl.isNullOrBlank()) return null
+
     val dTag = this.tags.findFirstIdentifier() ?: return null
     val mainHostId = this.tags.findFirstHostPubkey() ?: this.pubKey
     val authorId = this.pubKey
