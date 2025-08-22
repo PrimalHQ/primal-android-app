@@ -5,7 +5,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -52,7 +52,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -206,8 +205,8 @@ fun LiveStreamScreen(
                     callbacks = callbacks,
                     onZapClick = { zapHostState.showZapOptionsOrShowWarning() },
                     onInfoClick = { activeBottomSheet = ActiveBottomSheet.StreamInfo },
-                    onChatMessageLongClick = { activeBottomSheet = ActiveBottomSheet.ChatDetails(it) },
-                    onZapMessageLongClick = { activeBottomSheet = ActiveBottomSheet.ZapDetails(it) },
+                    onChatMessageClick = { activeBottomSheet = ActiveBottomSheet.ChatDetails(it) },
+                    onZapMessageClick = { activeBottomSheet = ActiveBottomSheet.ZapDetails(it) },
                 )
 
                 LiveStreamModalBottomSheets(
@@ -400,8 +399,8 @@ private fun StreamInfoAndChatSection(
     onInfoClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onEventReactionsClick: (eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit,
-    onChatMessageLongClick: (ChatMessageUi) -> Unit,
-    onZapMessageLongClick: (EventZapUiModel) -> Unit,
+    onChatMessageClick: (ChatMessageUi) -> Unit,
+    onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
     val chatListState = rememberSaveable(saver = LazyListState.Saver) {
         LazyListState()
@@ -422,8 +421,8 @@ private fun StreamInfoAndChatSection(
             listState = chatListState,
             eventPublisher = eventPublisher,
             onProfileClick = onProfileClick,
-            onChatMessageLongClick = onChatMessageLongClick,
-            onZapMessageLongClick = onZapMessageLongClick,
+            onChatMessageClick = onChatMessageClick,
+            onZapMessageClick = onZapMessageClick,
         )
     }
 }
@@ -437,8 +436,8 @@ private fun LiveStreamContent(
     callbacks: LiveStreamContract.ScreenCallbacks,
     onZapClick: () -> Unit,
     onInfoClick: () -> Unit,
-    onChatMessageLongClick: (ChatMessageUi) -> Unit,
-    onZapMessageLongClick: (EventZapUiModel) -> Unit,
+    onChatMessageClick: (ChatMessageUi) -> Unit,
+    onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
     if (state.loading) {
         PrimalLoadingSpinner()
@@ -469,8 +468,8 @@ private fun LiveStreamContent(
                 onInfoClick = onInfoClick,
                 onProfileClick = callbacks.onProfileClick,
                 onEventReactionsClick = callbacks.onEventReactionsClick,
-                onChatMessageLongClick = onChatMessageLongClick,
-                onZapMessageLongClick = onZapMessageLongClick,
+                onChatMessageClick = onChatMessageClick,
+                onZapMessageClick = onZapMessageClick,
             )
         }
     }
@@ -543,8 +542,8 @@ private fun LiveChatListOrSearch(
     listState: LazyListState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
-    onChatMessageLongClick: (ChatMessageUi) -> Unit,
-    onZapMessageLongClick: (EventZapUiModel) -> Unit,
+    onChatMessageClick: (ChatMessageUi) -> Unit,
+    onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
     if (state.chatLoading) {
         Box(
@@ -578,13 +577,13 @@ private fun LiveChatListOrSearch(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             message = chatItem.message,
                             onProfileClick = onProfileClick,
-                            onLongClick = { onChatMessageLongClick(chatItem.message) },
+                            onClick = { onChatMessageClick(chatItem.message) },
                         )
 
                         is StreamChatItem.ZapMessageItem -> ZapMessageListItem(
                             modifier = Modifier.padding(horizontal = 8.dp),
                             zap = chatItem.zap,
-                            onLongClick = { onZapMessageLongClick(chatItem.zap) },
+                            onClick = { onZapMessageClick(chatItem.zap) },
                         )
                     }
                 }
@@ -616,8 +615,8 @@ private fun LiveChatContent(
     listState: LazyListState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
-    onChatMessageLongClick: (ChatMessageUi) -> Unit,
-    onZapMessageLongClick: (EventZapUiModel) -> Unit,
+    onChatMessageClick: (ChatMessageUi) -> Unit,
+    onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
 
@@ -643,8 +642,8 @@ private fun LiveChatContent(
             listState = listState,
             eventPublisher = eventPublisher,
             onProfileClick = onProfileClick,
-            onChatMessageLongClick = onChatMessageLongClick,
-            onZapMessageLongClick = onZapMessageLongClick,
+            onChatMessageClick = onChatMessageClick,
+            onZapMessageClick = onZapMessageClick,
         )
 
         LiveChatCommentInput(
@@ -761,7 +760,7 @@ private fun LiveChatCommentInput(
 private fun ChatMessageListItem(
     message: ChatMessageUi,
     onProfileClick: (String) -> Unit,
-    onLongClick: () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val localUriHandler = LocalUriHandler.current
@@ -799,11 +798,7 @@ private fun ChatMessageListItem(
 
     Row(
         modifier = modifier
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onLongPress = { onLongClick() },
-                )
-            },
+            .clickable(onClick = onClick),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
     ) {
@@ -839,8 +834,9 @@ private fun ChatMessageListItem(
                     onProfileClick(profileAnnotation.item)
                     return@PrimalClickableText
                 }
+
+                onClick()
             },
-            onLongClick = onLongClick,
         )
     }
 }
@@ -849,7 +845,7 @@ private fun ChatMessageListItem(
 @Composable
 private fun ZapMessageListItem(
     zap: EventZapUiModel,
-    onLongClick: () -> Unit,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -860,13 +856,9 @@ private fun ZapMessageListItem(
                 color = ZapMessageBorderColor,
                 shape = AppTheme.shapes.medium,
             )
+            .clickable(onClick = onClick)
             .clip(AppTheme.shapes.medium)
             .background(color = ZapMessageBackgroundColor.copy(alpha = 0.2f))
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onLongPress = { onLongClick() },
-                )
-            }
             .padding(horizontal = 8.dp, vertical = 10.dp),
     ) {
         Row(
@@ -991,7 +983,7 @@ private fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) ->
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         )
 
-        ChatMessageListItem(message = message, onProfileClick = {}, onLongClick = {})
+        ChatMessageListItem(message = message, onProfileClick = {}, onClick = {})
 
         PrimalFilledButton(
             modifier = Modifier.padding(start = 40.dp),
@@ -1054,7 +1046,7 @@ private fun ZapDetailsSection(zap: EventZapUiModel, onReport: (ReportType) -> Un
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         )
 
-        ZapMessageListItem(zap = zap, onLongClick = {})
+        ZapMessageListItem(zap = zap, onClick = {})
 
         PrimalFilledButton(
             containerColor = ReportButtonHandleColor,
