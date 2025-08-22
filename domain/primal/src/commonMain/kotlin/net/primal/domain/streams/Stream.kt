@@ -11,7 +11,7 @@ data class Stream(
     val eventId: String,
     val authorId: String,
     val mainHostId: String,
-    val authorProfile: ProfileData?,
+    val mainHostProfile: ProfileData?,
     val dTag: String,
     val title: String?,
     val summary: String?,

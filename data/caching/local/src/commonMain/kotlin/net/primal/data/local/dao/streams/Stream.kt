@@ -14,7 +14,7 @@ data class Stream(
         parentColumn = "mainHostId",
         entityColumn = "ownerId",
     )
-    val author: ProfileData? = null,
+    val mainHost: ProfileData? = null,
 
     @Relation(
         parentColumn = "aTag",

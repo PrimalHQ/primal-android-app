@@ -34,14 +34,14 @@ fun Stream.asReferencedStream() =
         status = this.status,
         mainHostId = this.mainHostId,
         mainHostName = authorNameUiFriendly(
-            displayName = this.authorProfile?.displayName,
-            name = this.authorProfile?.handle,
+            displayName = this.mainHostProfile?.displayName,
+            name = this.mainHostProfile?.handle,
             pubkey = this.mainHostId,
         ),
         mainHostIsLive = this.isLive(),
-        mainHostAvatarCdnImage = this.authorProfile?.avatarCdnImage,
-        mainHostLegendProfile = this.authorProfile?.primalPremiumInfo?.legendProfile,
-        mainHostInternetIdentifier = this.authorProfile?.internetIdentifier,
+        mainHostAvatarCdnImage = this.mainHostProfile?.avatarCdnImage,
+        mainHostLegendProfile = this.mainHostProfile?.primalPremiumInfo?.legendProfile,
+        mainHostInternetIdentifier = this.mainHostProfile?.internetIdentifier,
     )
 
 fun List<NostrEvent>.mapAsStreamDO(profilesMap: Map<String, ProfileData>) =
