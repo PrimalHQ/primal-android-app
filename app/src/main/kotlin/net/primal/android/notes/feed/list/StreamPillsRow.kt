@@ -1,6 +1,7 @@
 package net.primal.android.notes.feed.list
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +23,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -32,9 +32,11 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import java.text.NumberFormat
 import net.primal.android.R
+import net.primal.android.core.compose.FadingEdge
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.fadingEdge
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Follow
 import net.primal.android.notes.feed.model.StreamPillUi
@@ -140,9 +142,19 @@ private fun StreamPill(
 
         streamPill.title?.let {
             Text(
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .padding(start = 8.dp)
+                    .fadingEdge(
+                        edge = FadingEdge.End,
+                        color = AppTheme.colorScheme.primary,
+                        length = 24.dp,
+                    )
+                    .basicMarquee(
+                        iterations = Int.MAX_VALUE,
+                        velocity = 18.dp,
+                    )
+                    .weight(1f),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
                 text = streamPill.title,
                 style = AppTheme.typography.bodyLarge,
                 color = Color.White,
