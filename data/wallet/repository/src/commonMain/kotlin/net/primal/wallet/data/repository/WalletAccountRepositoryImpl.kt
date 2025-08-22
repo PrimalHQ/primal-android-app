@@ -93,34 +93,36 @@ class WalletAccountRepositoryImpl(
 
     override suspend fun fetchWalletAccountInfo(userId: String): Result<Unit> =
         withContext(dispatcherProvider.io()) {
-            val accountInfoResponse = primalWalletApi.getWalletUserInfo(userId)
-            val kycLevel = WalletKycLevel.Companion.valueOf(accountInfoResponse.kycLevel)
-                ?: return@withContext Result.failure(IllegalArgumentException("Couldn't parse KycLevel."))
-            val lightningAddress = accountInfoResponse.lightningAddress
-            walletDatabase.withTransaction {
-                walletDatabase.wallet().insertOrIgnoreWalletInfo(
-                    info = WalletInfo(
+            runCatching {
+                val accountInfoResponse = primalWalletApi.getWalletUserInfo(userId)
+
+                val kycLevel = WalletKycLevel.Companion.valueOf(accountInfoResponse.kycLevel)
+                    ?: throw IllegalArgumentException("Couldn't parse KycLevel.")
+
+                val lightningAddress = accountInfoResponse.lightningAddress
+                walletDatabase.withTransaction {
+                    walletDatabase.wallet().insertOrIgnoreWalletInfo(
+                        info = WalletInfo(
+                            walletId = userId,
+                            userId = userId.asEncryptable(),
+                            lightningAddress = lightningAddress.asEncryptable(),
+                            type = WalletType.PRIMAL,
+                        ),
+                    )
+
+                    walletDatabase.wallet().updateWalletLightningAddress(
                         walletId = userId,
-                        userId = userId.asEncryptable(),
                         lightningAddress = lightningAddress.asEncryptable(),
-                        type = WalletType.PRIMAL,
-                    ),
-                )
+                    )
 
-                walletDatabase.wallet().updateWalletLightningAddress(
-                    walletId = userId,
-                    lightningAddress = lightningAddress.asEncryptable(),
-                )
-
-                walletDatabase.wallet().upsertPrimalWalletData(
-                    data = PrimalWalletData(
-                        walletId = userId,
-                        kycLevel = kycLevel,
-                    ),
-                )
+                    walletDatabase.wallet().upsertPrimalWalletData(
+                        data = PrimalWalletData(
+                            walletId = userId,
+                            kycLevel = kycLevel,
+                        ),
+                    )
+                }
             }
-
-            Result.success(Unit)
         }
 
     override suspend fun getPromoCodeDetails(code: String): PromoCodeDetails =
