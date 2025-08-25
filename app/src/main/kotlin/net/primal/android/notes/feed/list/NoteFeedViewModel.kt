@@ -247,15 +247,18 @@ class NoteFeedViewModel @AssistedInject constructor(
             streamAvatarCdnImages = avatarCdnImagesStreams.take(MAX_AVATARS),
         )
 
-        val streamPills = liveActivity.map { stream ->
-            StreamPillUi(
-                naddr = stream.toNaddrString(),
-                currentParticipants = stream.currentParticipants,
-                title = stream.title,
-                hostProfileId = stream.authorId,
-                hostAvatarCdnImage = stream.authorProfile?.avatarCdnImage,
+        val streamPills = (
+            liveActivity.map { stream ->
+                StreamPillUi(
+                    naddr = stream.toNaddrString(),
+                    currentParticipants = stream.currentParticipants,
+                    title = stream.title,
+                    hostProfileId = stream.authorId,
+                    hostAvatarCdnImage = stream.authorProfile?.avatarCdnImage,
+                )
+            } + state.value.streams
             )
-        }.distinctBy { it.naddr }
+            .distinctBy { it.naddr }
 
         if (newSyncStats.isTopVisibleNoteTheLatestNote()) {
             setState { copy(syncStats = FeedPostsSyncStats(), streams = streamPills) }

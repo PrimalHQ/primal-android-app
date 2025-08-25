@@ -67,6 +67,7 @@ import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
+import net.primal.android.core.compose.rememberIsItemVisible
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.FloatingNewDataHostTopPadding
@@ -168,6 +169,7 @@ private fun NoteFeedList(
 ) {
     val pagingItems = state.notes.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
+    val isStreamPillsRowVisible = listState.rememberIsItemVisible(key = STREAM_PILLS_ROW_KEY, fallback = false)
 
     LaunchedEffect(shouldAnimateScrollToTop, state.shouldAnimateScrollToTop) {
         if (shouldAnimateScrollToTop || state.shouldAnimateScrollToTop == true) {
@@ -238,7 +240,7 @@ private fun NoteFeedList(
                     delay(10.milliseconds)
                     buttonVisible = true
                 }
-                if (buttonVisible) {
+                if (buttonVisible && !isStreamPillsRowVisible.value) {
                     NewPostsButton(
                         syncStats = state.syncStats,
                         onClick = { eventPublisher(UiEvent.ShowLatestNotes) },

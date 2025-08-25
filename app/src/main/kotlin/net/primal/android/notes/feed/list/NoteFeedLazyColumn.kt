@@ -44,6 +44,7 @@ import net.primal.domain.nostr.ReactionType
 import timber.log.Timber
 
 internal const val FEED_NESTED_NOTES_CUT_OFF_LIMIT = 2
+internal const val STREAM_PILLS_ROW_KEY = "streamPillsRow"
 
 @ExperimentalMaterial3Api
 @ExperimentalFoundationApi
@@ -96,7 +97,7 @@ fun NoteFeedLazyColumn(
             }
         }
 
-        item {
+        item(key = STREAM_PILLS_ROW_KEY) {
             StreamPillsRow(
                 streamPills = streamPills,
                 onClick = { streamState.play(it) },
