@@ -20,9 +20,11 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import net.primal.android.core.ext.asMapByKey
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
+import net.primal.android.notes.feed.model.StreamPillUi
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.mapAsProfileDataDO
@@ -38,6 +40,7 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.isPremiumFeedSpec
 import net.primal.domain.feeds.supportsUpwardsNotesPagination
+import net.primal.domain.mappers.mapAsStreamDO
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstEventId
@@ -190,7 +193,7 @@ class NoteFeedViewModel @AssistedInject constructor(
 
         val notes = this.notes.map { it.createdAt to it }
         val latestTimestamp = (
-            (newestLocalNote?.reposts?.mapNotNull { it.repostCreatedAt } ?: emptyList<Long>()) +
+            (newestLocalNote?.reposts?.mapNotNull { it.repostCreatedAt } ?: emptyList()) +
                 listOfNotNull(newestLocalNote?.timestamp?.epochSeconds)
             ).maxOrNull()
 
@@ -228,19 +231,39 @@ class NoteFeedViewModel @AssistedInject constructor(
             }
             .distinct()
 
+        val liveActivity = this.liveActivity.mapAsStreamDO(profilesMap = profiles.asMapByKey { it.profileId })
+
+        val avatarCdnImagesStreams = liveActivity.map { it.authorProfile?.avatarCdnImage }
+
         val limit = avatarCdnImagesAndLegendaryCustomizations.count().coerceAtMost(MAX_AVATARS)
 
         val newSyncStats = FeedPostsSyncStats(
+            latestNotesCount = allNotesFromNotMutedProfiles.size,
             latestNoteIds = allNotesFromNotMutedProfiles.map { it.id },
             latestAvatarCdnImages = avatarCdnImagesAndLegendaryCustomizations
                 .map { it.first }
                 .take(limit),
+            streamsCount = liveActivity.size,
+            streamAvatarCdnImages = avatarCdnImagesStreams.take(MAX_AVATARS),
         )
 
+        val streamPills = (
+            liveActivity.map { stream ->
+                StreamPillUi(
+                    naddr = stream.toNaddrString(),
+                    currentParticipants = stream.currentParticipants,
+                    title = stream.title,
+                    hostProfileId = stream.authorId,
+                    hostAvatarCdnImage = stream.authorProfile?.avatarCdnImage,
+                )
+            } + state.value.streams
+            )
+            .distinctBy { it.naddr }
+
         if (newSyncStats.isTopVisibleNoteTheLatestNote()) {
-            setState { copy(syncStats = FeedPostsSyncStats()) }
+            setState { copy(syncStats = FeedPostsSyncStats(), streams = streamPills) }
         } else {
-            setState { copy(syncStats = newSyncStats) }
+            setState { copy(syncStats = newSyncStats, streams = streamPills) }
         }
     }
 
