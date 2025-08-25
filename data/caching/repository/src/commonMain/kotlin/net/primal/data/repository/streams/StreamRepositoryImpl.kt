@@ -31,16 +31,16 @@ class StreamRepositoryImpl(
 
     private val scope = CoroutineScope(SupervisorJob() + dispatcherProvider.io())
 
-    override suspend fun findLatestLiveStreamATag(authorId: String): String? {
-        val streamsPO = database.streams().observeStreamsByAuthorId(authorId).first()
+    override suspend fun findLatestLiveStreamATag(mainHostId: String): String? {
+        val streamsPO = database.streams().observeStreamsByAuthorId(mainHostId).first()
         val liveStreamPO = streamsPO.find { it.data.isLive() }
         return liveStreamPO?.data?.aTag
     }
 
-    override suspend fun findWhoIsLive(authorIds: List<String>): Set<String> {
+    override suspend fun findWhoIsLive(mainHostIds: List<String>): Set<String> {
         return database.streams()
-            .findStreamData(authorIds)
-            .groupBy { it.authorId }
+            .findStreamData(mainHostIds)
+            .groupBy { it.mainHostId }
             .mapValues { it.value.any { streamData -> streamData.isLive() } }
             .filter { it.value }
             .keys

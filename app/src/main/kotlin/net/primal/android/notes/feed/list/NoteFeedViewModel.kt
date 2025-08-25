@@ -40,13 +40,13 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.isPremiumFeedSpec
 import net.primal.domain.feeds.supportsUpwardsNotesPagination
-import net.primal.domain.mappers.mapAsStreamDO
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.posts.FeedPageSnapshot
 import net.primal.domain.posts.FeedPost
 import net.primal.domain.posts.FeedRepository
+import net.primal.domain.streams.mappers.mapAsStreamDO
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteFeedViewModel.Factory::class)
@@ -233,7 +233,7 @@ class NoteFeedViewModel @AssistedInject constructor(
 
         val liveActivity = this.liveActivity.mapAsStreamDO(profilesMap = profiles.asMapByKey { it.profileId })
 
-        val avatarCdnImagesStreams = liveActivity.map { it.authorProfile?.avatarCdnImage }
+        val avatarCdnImagesStreams = liveActivity.map { it.mainHostProfile?.avatarCdnImage }
 
         val limit = avatarCdnImagesAndLegendaryCustomizations.count().coerceAtMost(MAX_AVATARS)
 
@@ -253,8 +253,8 @@ class NoteFeedViewModel @AssistedInject constructor(
                     naddr = stream.toNaddrString(),
                     currentParticipants = stream.currentParticipants,
                     title = stream.title,
-                    hostProfileId = stream.authorId,
-                    hostAvatarCdnImage = stream.authorProfile?.avatarCdnImage,
+                    hostProfileId = stream.mainHostId,
+                    hostAvatarCdnImage = stream.mainHostProfile?.avatarCdnImage,
                 )
             } + state.value.streams
             )

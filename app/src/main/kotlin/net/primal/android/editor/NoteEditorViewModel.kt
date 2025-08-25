@@ -53,7 +53,6 @@ import net.primal.core.utils.fetchAndGet
 import net.primal.core.utils.onSuccess
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRelayHintsRepository
-import net.primal.domain.mappers.asReferencedStream
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
@@ -76,6 +75,7 @@ import net.primal.domain.reads.Article
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
 import net.primal.domain.streams.StreamRepository
+import net.primal.domain.streams.mappers.asReferencedStream
 import net.primal.domain.utils.isLnInvoice
 import timber.log.Timber
 

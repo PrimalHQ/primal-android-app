@@ -1,4 +1,4 @@
-package net.primal.domain.mappers
+package net.primal.domain.streams.mappers
 
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.links.ReferencedStream
@@ -13,7 +13,6 @@ import net.primal.domain.nostr.findFirstIdentifier
 import net.primal.domain.nostr.findFirstImage
 import net.primal.domain.nostr.findFirstRecording
 import net.primal.domain.nostr.findFirstStarts
-import net.primal.domain.nostr.findFirstStatus
 import net.primal.domain.nostr.findFirstStreaming
 import net.primal.domain.nostr.findFirstSummary
 import net.primal.domain.nostr.findFirstTitle
@@ -21,7 +20,6 @@ import net.primal.domain.nostr.findFirstTotalParticipants
 import net.primal.domain.nostr.utils.authorNameUiFriendly
 import net.primal.domain.profile.ProfileData
 import net.primal.domain.streams.Stream
-import net.primal.domain.streams.StreamStatus
 
 fun Stream.asReferencedStream() =
     ReferencedStream(
@@ -32,27 +30,26 @@ fun Stream.asReferencedStream() =
         startedAt = this.startsAt,
         endedAt = this.endsAt,
         status = this.status,
-        mainHostId = this.authorId,
+        mainHostId = this.mainHostId,
         mainHostName = authorNameUiFriendly(
-            displayName = this.authorProfile?.displayName,
-            name = this.authorProfile?.handle,
-            pubkey = this.authorId,
+            displayName = this.mainHostProfile?.displayName,
+            name = this.mainHostProfile?.handle,
+            pubkey = this.mainHostId,
         ),
         mainHostIsLive = this.isLive(),
-        mainHostAvatarCdnImage = this.authorProfile?.avatarCdnImage,
-        mainHostLegendProfile = this.authorProfile?.primalPremiumInfo?.legendProfile,
-        mainHostInternetIdentifier = this.authorProfile?.internetIdentifier,
+        mainHostAvatarCdnImage = this.mainHostProfile?.avatarCdnImage,
+        mainHostLegendProfile = this.mainHostProfile?.primalPremiumInfo?.legendProfile,
+        mainHostInternetIdentifier = this.mainHostProfile?.internetIdentifier,
     )
 
 fun List<NostrEvent>.mapAsStreamDO(profilesMap: Map<String, ProfileData>) =
     mapNotNull { event ->
-        val authorId = event.tags.findFirstHostPubkey() ?: event.pubKey
+        val eventAuthorId = event.pubKey
+        val mainHostId = event.tags.findFirstHostPubkey() ?: return@mapNotNull null
         val dTag = event.tags.findFirstIdentifier() ?: return@mapNotNull null
         Stream(
             aTag = event.tags.findFirstATag() ?: "${NostrEventKind.LiveActivity.value}:${event.pubKey}:$dTag",
             eventId = event.id,
-            authorId = authorId,
-            authorProfile = profilesMap[authorId],
             dTag = dTag,
             title = event.tags.findFirstTitle(),
             summary = event.tags.findFirstSummary(),
@@ -62,10 +59,13 @@ fun List<NostrEvent>.mapAsStreamDO(profilesMap: Map<String, ProfileData>) =
             recordingUrl = event.tags.findFirstRecording(),
             startsAt = event.tags.findFirstStarts()?.toLong(),
             endsAt = event.tags.findFirstEnds()?.toLong(),
-            status = StreamStatus.fromString(event.tags.findFirstStatus()),
+            status = event.resolveStreamStatus(),
             currentParticipants = event.tags.findFirstCurrentParticipants()?.toInt(),
             totalParticipants = event.tags.findFirstTotalParticipants()?.toInt(),
             eventZaps = emptyList(),
             rawNostrEventJson = event.encodeToJsonString(),
+            eventAuthorId = eventAuthorId,
+            mainHostId = mainHostId,
+            mainHostProfile = profilesMap[mainHostId],
         )
     }

@@ -11,10 +11,10 @@ data class Stream(
     val data: StreamData,
 
     @Relation(
-        parentColumn = "authorId",
+        parentColumn = "mainHostId",
         entityColumn = "ownerId",
     )
-    val author: ProfileData? = null,
+    val mainHost: ProfileData? = null,
 
     @Relation(
         parentColumn = "aTag",

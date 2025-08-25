@@ -283,8 +283,8 @@ class LiveStreamViewModel @AssistedInject constructor(
                         return@collect
                     }
 
-                    if (authorObserversJob == null || state.value.streamInfo?.mainHostId != stream.authorId) {
-                        initializeMainHostObservers(mainHostId = stream.authorId)
+                    if (authorObserversJob == null || state.value.streamInfo?.mainHostId != stream.mainHostId) {
+                        initializeMainHostObservers(mainHostId = stream.mainHostId)
                     }
 
                     setState {
@@ -300,7 +300,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
                                 rawNostrEventJson = stream.rawNostrEventJson,
-                                mainHostId = stream.authorId,
+                                mainHostId = stream.mainHostId,
                             ) ?: StreamInfoUi(
                                 atag = stream.aTag,
                                 eventId = stream.eventId,
@@ -310,7 +310,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
                                 rawNostrEventJson = stream.rawNostrEventJson,
-                                mainHostId = stream.authorId,
+                                mainHostId = stream.mainHostId,
                             ),
                             zaps = stream.eventZaps
                                 .map { it.asEventZapUiModel() }
