@@ -54,10 +54,20 @@ fun LiveStreamOverlay(
         val naddrUri: String? = streamState.mode.resolveNaddr()
         val liveStreamViewModel = rememberLiveStreamViewModel(naddrUri)
 
+        BackHandler(enabled = streamState.mode is StreamMode.Expanded) { streamState.minimize() }
+
         Box(modifier = Modifier.fillMaxSize()) {
             content()
 
             if (liveStreamViewModel != null) {
+                LaunchedEffect(liveStreamViewModel, noteCallbacks, streamState) {
+                    liveStreamViewModel.effect.collectLatest {
+                        when (it) {
+                            LiveStreamContract.SideEffect.StreamDeleted -> streamState.stop()
+                        }
+                    }
+                }
+
                 LiveStreamOverlay(
                     viewModel = liveStreamViewModel,
                     navController = navController,
@@ -78,20 +88,6 @@ private fun LiveStreamOverlay(
     val streamState = LocalStreamState.current
     val uiState = viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel, noteCallbacks, streamState) {
-        viewModel.effect.collectLatest {
-            when (it) {
-                LiveStreamContract.SideEffect.StreamDeleted -> {
-                    streamState.stop()
-                }
-            }
-        }
-    }
-
-    BackHandler(enabled = streamState.mode is StreamMode.Expanded) {
-        streamState.minimize()
-    }
-
     val exoPlayer = rememberPrimalStreamExoPlayer(
         streamNaddr = viewModel.streamNaddr,
         onIsPlayingChanged = { isPlaying ->
@@ -99,9 +95,7 @@ private fun LiveStreamOverlay(
         },
         onPlaybackStateChanged = { playbackState ->
             viewModel.setEvent(
-                LiveStreamContract.UiEvent.OnPlayerStateUpdate(
-                    isBuffering = playbackState == Player.STATE_BUFFERING,
-                ),
+                LiveStreamContract.UiEvent.OnPlayerStateUpdate(isBuffering = playbackState == Player.STATE_BUFFERING),
             )
         },
     )
