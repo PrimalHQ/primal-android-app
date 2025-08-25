@@ -470,7 +470,7 @@ private fun ArticleDetailsTopAppBar(
                         userId = state.article.authorId,
                         kind = NostrEventKind.LongFormContent.value,
                     ).toNaddrString(),
-                    primalName = state.article.authorInternetIdentifier?.substringBefore('@'),
+                    internetIdentifier = state.article.authorInternetIdentifier,
                     articleSlug = state.article.articleId,
                 )
 

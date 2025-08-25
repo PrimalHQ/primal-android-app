@@ -160,7 +160,7 @@ private fun ListItemHeader(
                         userId = data.authorId,
                         kind = NostrEventKind.LongFormContent.value,
                     ).toNaddrString(),
-                    primalName = data.authorInternetIdentifier,
+                    internetIdentifier = data.authorInternetIdentifier,
                     articleSlug = data.articleId,
                 ),
                 icon = {
