@@ -233,7 +233,7 @@ class NoteFeedViewModel @AssistedInject constructor(
 
         val liveActivity = this.liveActivity.mapAsStreamDO(profilesMap = profiles.asMapByKey { it.profileId })
 
-        val avatarCdnImagesStreams = liveActivity.map { it.authorProfile?.avatarCdnImage }
+        val avatarCdnImagesStreams = liveActivity.map { it.mainHostProfile?.avatarCdnImage }
 
         val limit = avatarCdnImagesAndLegendaryCustomizations.count().coerceAtMost(MAX_AVATARS)
 
@@ -253,8 +253,8 @@ class NoteFeedViewModel @AssistedInject constructor(
                     naddr = stream.toNaddrString(),
                     currentParticipants = stream.currentParticipants,
                     title = stream.title,
-                    hostProfileId = stream.authorId,
-                    hostAvatarCdnImage = stream.authorProfile?.avatarCdnImage,
+                    hostProfileId = stream.mainHostId,
+                    hostAvatarCdnImage = stream.mainHostProfile?.avatarCdnImage,
                 )
             } + state.value.streams
             )

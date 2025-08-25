@@ -46,13 +46,12 @@ fun Stream.asReferencedStream() =
 
 fun List<NostrEvent>.mapAsStreamDO(profilesMap: Map<String, ProfileData>) =
     mapNotNull { event ->
-        val authorId = event.tags.findFirstHostPubkey() ?: event.pubKey
+        val eventAuthorId = event.pubKey
+        val mainHostId = event.tags.findFirstHostPubkey() ?: return@mapNotNull null
         val dTag = event.tags.findFirstIdentifier() ?: return@mapNotNull null
         Stream(
             aTag = event.tags.findFirstATag() ?: "${NostrEventKind.LiveActivity.value}:${event.pubKey}:$dTag",
             eventId = event.id,
-            authorId = authorId,
-            authorProfile = profilesMap[authorId],
             dTag = dTag,
             title = event.tags.findFirstTitle(),
             summary = event.tags.findFirstSummary(),
@@ -67,5 +66,8 @@ fun List<NostrEvent>.mapAsStreamDO(profilesMap: Map<String, ProfileData>) =
             totalParticipants = event.tags.findFirstTotalParticipants()?.toInt(),
             eventZaps = emptyList(),
             rawNostrEventJson = event.encodeToJsonString(),
+            eventAuthorId = eventAuthorId,
+            mainHostId = mainHostId,
+            mainHostProfile = profilesMap[mainHostId],
         )
     }
