@@ -54,7 +54,21 @@ fun resolvePrimalNoteLink(noteId: String) = resolvePrimalNoteLink(nevent = Neven
 
 fun resolvePrimalNoteLink(nevent: Nevent) = "https://primal.net/e/${nevent.toNeventString()}"
 
-fun resolvePrimalArticleLink(naddr: String) = "https://primal.net/a/$naddr"
+fun resolvePrimalArticleLink(
+    naddr: String,
+    internetIdentifier: String? = null,
+    articleSlug: String? = null,
+): String {
+    val primalName = internetIdentifier
+        ?.takeIf { it.endsWith("@primal.net", ignoreCase = true) }
+        ?.substringBefore("@")
+
+    return if (!primalName.isNullOrBlank() && !articleSlug.isNullOrBlank()) {
+        "https://primal.net/$primalName/$articleSlug"
+    } else {
+        "https://primal.net/a/$naddr"
+    }
+}
 
 fun resolvePrimalStreamLink(naddr: String) = "https://primal.net/a/$naddr"
 

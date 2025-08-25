@@ -25,6 +25,7 @@ data class FeedArticleUi(
     val rawNostrEventJson: String?,
     val isBookmarked: Boolean,
     val stats: EventStatsUi,
+    val authorInternetIdentifier: String? = null,
     val authorAvatarCdnImage: CdnImage? = null,
     val authorBlossoms: List<String> = emptyList(),
     val imageCdnImage: CdnImage? = null,
@@ -52,6 +53,7 @@ fun Article.mapAsFeedArticleUi(): FeedArticleUi {
         readingTimeInMinutes = this.wordsCount.wordsCountToReadingTime(),
         eventZaps = this.eventZaps.map { it.asEventZapUiModel() },
         authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+        authorInternetIdentifier = this.author?.internetIdentifier,
     )
 }
 
