@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.Instant
@@ -53,6 +54,7 @@ import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.zaps.ZappersAvatarThumbnailRow
+import net.primal.android.core.utils.resolvePrimalArticleLink
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.notes.feed.model.EventStatsUi
@@ -152,11 +154,21 @@ private fun ListItemHeader(
                 onRequestDeleteClick = onRequestDeleteClick,
                 onReportContentClick = onReportContentClick,
                 isArticleAuthor = isArticleAuthor,
+                shareUrl = resolvePrimalArticleLink(
+                    naddr = Naddr(
+                        identifier = data.articleId,
+                        userId = data.authorId,
+                        kind = NostrEventKind.LongFormContent.value,
+                    ).toNaddrString(),
+                    primalName = data.authorInternetIdentifier,
+                    articleSlug = data.articleId,
+                ),
                 icon = {
                     Icon(
-                        modifier = Modifier
-                            .padding(start = 14.dp, end = 8.dp)
-                            .wrapContentSize(align = Alignment.TopEnd),
+                        modifier = Modifier.padding(
+                            start = 14.dp,
+                            end = 8.dp,
+                        ).wrapContentSize(align = Alignment.TopEnd),
                         imageVector = PrimalIcons.More,
                         contentDescription = stringResource(id = R.string.accessibility_article_drop_down),
                     )
@@ -164,43 +176,56 @@ private fun ListItemHeader(
             )
         }
 
-        Row(
-            modifier = Modifier
-                .height(32.dp)
-                .padding(end = overflowIconSizeDp - 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            UniversalAvatarThumbnail(
-                avatarSize = 24.dp,
-                avatarCdnImage = data.authorAvatarCdnImage,
-                avatarBlossoms = data.authorBlossoms,
-                legendaryCustomization = data.authorLegendaryCustomization,
-            )
+        ArticleAuthorMeta(
+            overflowIconSizeDp = overflowIconSizeDp,
+            data = data,
+            textStyle = textStyle,
+        )
+    }
+}
 
-            Box(modifier = Modifier.fillMaxWidth()) {
-                WrappedContentWithSuffix(
-                    modifier = Modifier,
-                    wrappedContent = {
-                        Text(
-                            modifier = Modifier.padding(start = 8.dp, top = 4.dp),
-                            text = data.authorName,
-                            style = textStyle,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                    suffixFixedContent = {
-                        Text(
-                            modifier = Modifier.padding(top = 4.dp),
-                            text = " • ${data.publishedAt.asBeforeNowFormat()}",
-                            textAlign = TextAlign.Center,
-                            maxLines = 1,
-                            style = textStyle,
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                        )
-                    },
-                )
-            }
+@Composable
+private fun ArticleAuthorMeta(
+    overflowIconSizeDp: Dp,
+    data: FeedArticleUi,
+    textStyle: TextStyle,
+) {
+    Row(
+        modifier = Modifier
+            .height(32.dp)
+            .padding(end = overflowIconSizeDp - 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        UniversalAvatarThumbnail(
+            avatarSize = 24.dp,
+            avatarCdnImage = data.authorAvatarCdnImage,
+            avatarBlossoms = data.authorBlossoms,
+            legendaryCustomization = data.authorLegendaryCustomization,
+        )
+
+        Box(modifier = Modifier.fillMaxWidth()) {
+            WrappedContentWithSuffix(
+                modifier = Modifier,
+                wrappedContent = {
+                    Text(
+                        modifier = Modifier.padding(start = 8.dp, top = 4.dp),
+                        text = data.authorName,
+                        style = textStyle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+                suffixFixedContent = {
+                    Text(
+                        modifier = Modifier.padding(top = 4.dp),
+                        text = " • ${data.publishedAt.asBeforeNowFormat()}",
+                        textAlign = TextAlign.Center,
+                        maxLines = 1,
+                        style = textStyle,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    )
+                },
+            )
         }
     }
 }
@@ -345,6 +370,7 @@ private class FeedArticleUiProvider : PreviewParameterProvider<FeedArticleUi> {
                 stats = EventStatsUi(
                     repliesCount = 23,
                 ),
+                authorInternetIdentifier = "",
                 eventZaps = listOf(
                     EventZapUiModel(
                         id = "",
@@ -390,6 +416,7 @@ private class FeedArticleUiProvider : PreviewParameterProvider<FeedArticleUi> {
                 stats = EventStatsUi(
                     repliesCount = 23,
                 ),
+                authorInternetIdentifier = "",
                 eventZaps = listOf(
                     EventZapUiModel(
                         id = "",

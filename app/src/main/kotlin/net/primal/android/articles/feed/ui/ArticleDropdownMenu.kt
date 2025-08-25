@@ -55,10 +55,10 @@ fun ArticleDropdownMenu(
     articleRawData: String?,
     authorId: String,
     isBookmarked: Boolean,
+    shareUrl: String?,
     enabled: Boolean = true,
     isArticleAuthor: Boolean,
     showHighlights: Boolean? = null,
-    shareUrl: String? = null,
     onToggleHighlightsClick: (() -> Unit)? = null,
     onBookmarkClick: (() -> Unit)? = null,
     onMuteUserClick: (() -> Unit)? = null,
@@ -104,27 +104,64 @@ fun ArticleDropdownMenu(
     ) {
         icon()
 
-        DropdownPrimalMenu(
+        ArticleDropdownPrimalMenu(
             expanded = menuVisible,
             onDismissRequest = { menuVisible = false },
-        ) {
-            ArticleMenuItems(
-                articleId = articleId,
-                articleContent = articleContent,
-                articleRawData = articleRawData,
-                authorId = authorId,
-                isBookmarked = isBookmarked,
-                isArticleAuthor = isArticleAuthor,
-                showHighlights = showHighlights,
-                shareUrl = shareUrl,
-                onToggleHighlightsClick = { onToggleHighlightsClick?.invoke() },
-                onBookmarkClick = { onBookmarkClick?.invoke() },
-                onMuteUserClick = { onMuteUserClick?.invoke() },
-                onShowReportDialog = { reportDialogVisible = true },
-                onShowDeleteDialog = { deleteDialogVisible = true },
-                onDismiss = { menuVisible = false },
-            )
-        }
+            articleId = articleId,
+            articleContent = articleContent,
+            articleRawData = articleRawData,
+            authorId = authorId,
+            isBookmarked = isBookmarked,
+            isArticleAuthor = isArticleAuthor,
+            showHighlights = showHighlights,
+            shareUrl = shareUrl,
+            onToggleHighlightsClick = { onToggleHighlightsClick?.invoke() },
+            onBookmarkClick = { onBookmarkClick?.invoke() },
+            onMuteUserClick = { onMuteUserClick?.invoke() },
+            onShowReportDialog = { reportDialogVisible = true },
+            onShowDeleteDialog = { deleteDialogVisible = true },
+        )
+    }
+}
+
+@Composable
+private fun ArticleDropdownPrimalMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    articleId: String,
+    articleContent: String?,
+    articleRawData: String?,
+    authorId: String,
+    isBookmarked: Boolean,
+    isArticleAuthor: Boolean,
+    showHighlights: Boolean?,
+    shareUrl: String?,
+    onToggleHighlightsClick: () -> Unit,
+    onBookmarkClick: () -> Unit,
+    onMuteUserClick: () -> Unit,
+    onShowReportDialog: () -> Unit,
+    onShowDeleteDialog: () -> Unit,
+) {
+    DropdownPrimalMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+    ) {
+        ArticleMenuItems(
+            articleId = articleId,
+            articleContent = articleContent,
+            articleRawData = articleRawData,
+            authorId = authorId,
+            isBookmarked = isBookmarked,
+            isArticleAuthor = isArticleAuthor,
+            showHighlights = showHighlights,
+            shareUrl = shareUrl,
+            onToggleHighlightsClick = onToggleHighlightsClick,
+            onBookmarkClick = onBookmarkClick,
+            onMuteUserClick = onMuteUserClick,
+            onShowReportDialog = onShowReportDialog,
+            onShowDeleteDialog = onShowDeleteDialog,
+            onDismiss = onDismissRequest,
+        )
     }
 }
 
@@ -148,7 +185,8 @@ private fun ArticleMenuItems(
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
     val copyConfirmationText = stringResource(id = R.string.feed_context_copied_toast)
-    val showToast = {
+
+    fun showCopiedToast() {
         uiScope.launch {
             Toast.makeText(context, copyConfirmationText, Toast.LENGTH_SHORT).show()
         }
@@ -206,7 +244,7 @@ private fun ArticleMenuItems(
         onClick = {
             if (shareUrl != null) {
                 copyText(context = context, text = shareUrl)
-                showToast()
+                showCopiedToast()
             }
             onDismiss()
         },
@@ -217,7 +255,7 @@ private fun ArticleMenuItems(
             text = stringResource(id = R.string.article_feed_context_copy_article_text),
             onClick = {
                 copyText(context = context, text = articleContent)
-                showToast()
+                showCopiedToast()
                 onDismiss()
             },
         )
@@ -228,7 +266,7 @@ private fun ArticleMenuItems(
         text = stringResource(id = R.string.article_feed_context_copy_article_id),
         onClick = {
             copyText(context = context, text = naddr.withNostrPrefix())
-            showToast()
+            showCopiedToast()
             onDismiss()
         },
     )
@@ -239,7 +277,7 @@ private fun ArticleMenuItems(
             text = stringResource(id = R.string.article_feed_context_copy_raw_data),
             onClick = {
                 copyText(context = context, text = articleRawData)
-                showToast()
+                showCopiedToast()
                 onDismiss()
             },
         )
@@ -250,7 +288,7 @@ private fun ArticleMenuItems(
         text = stringResource(id = R.string.article_feed_context_copy_user_id),
         onClick = {
             copyText(context = context, text = authorId.hexToNpubHrp().withNostrPrefix())
-            showToast()
+            showCopiedToast()
             onDismiss()
         },
     )
