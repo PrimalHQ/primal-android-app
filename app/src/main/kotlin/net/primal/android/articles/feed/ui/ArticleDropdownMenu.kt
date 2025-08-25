@@ -55,7 +55,7 @@ fun ArticleDropdownMenu(
     articleRawData: String?,
     authorId: String,
     isBookmarked: Boolean,
-    shareUrl: String?,
+    shareUrl: String,
     enabled: Boolean = true,
     isArticleAuthor: Boolean,
     showHighlights: Boolean? = null,
@@ -135,7 +135,7 @@ private fun ArticleDropdownPrimalMenu(
     isBookmarked: Boolean,
     isArticleAuthor: Boolean,
     showHighlights: Boolean?,
-    shareUrl: String?,
+    shareUrl: String,
     onToggleHighlightsClick: () -> Unit,
     onBookmarkClick: () -> Unit,
     onMuteUserClick: () -> Unit,
@@ -146,41 +146,80 @@ private fun ArticleDropdownPrimalMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest,
     ) {
-        ArticleMenuItems(
+        val context = LocalContext.current
+
+        DropdownPrimalMenuItem(
+            trailingIconVector = PrimalIcons.ContextShare,
+            text = stringResource(id = R.string.article_feed_context_share_article),
+            onClick = {
+                systemShareText(context = context, text = shareUrl)
+                onDismissRequest()
+            },
+        )
+
+        DropdownPrimalMenuItem(
+            trailingIconVector = if (isBookmarked) {
+                PrimalIcons.ContextRemoveBookmark
+            } else {
+                PrimalIcons.ContextAddBookmark
+            },
+            text = if (isBookmarked) {
+                stringResource(id = R.string.article_feed_context_remove_from_bookmark)
+            } else {
+                stringResource(id = R.string.article_feed_context_add_to_bookmark)
+            },
+            onClick = {
+                onBookmarkClick()
+                onDismissRequest()
+            },
+        )
+
+        if (showHighlights != null) {
+            DropdownPrimalMenuItem(
+                trailingIconVector = if (showHighlights) {
+                    PrimalIcons.ContextHideHighlightsOutlined
+                } else {
+                    PrimalIcons.ContextShowHighlightsOutlined
+                },
+                text = if (showHighlights) {
+                    stringResource(id = R.string.article_feed_context_hide_highglights)
+                } else {
+                    stringResource(id = R.string.article_feed_context_show_highglights)
+                },
+                onClick = {
+                    onToggleHighlightsClick()
+                    onDismissRequest()
+                },
+            )
+        }
+
+        CopyMenuItems(
             articleId = articleId,
             articleContent = articleContent,
             articleRawData = articleRawData,
             authorId = authorId,
-            isBookmarked = isBookmarked,
-            isArticleAuthor = isArticleAuthor,
-            showHighlights = showHighlights,
             shareUrl = shareUrl,
-            onToggleHighlightsClick = onToggleHighlightsClick,
-            onBookmarkClick = onBookmarkClick,
+            onDismissRequest = onDismissRequest,
+        )
+
+        ContentModerationMenuItems(
+            isArticleAuthor = isArticleAuthor,
             onMuteUserClick = onMuteUserClick,
+            onDismissRequest = onDismissRequest,
             onShowReportDialog = onShowReportDialog,
             onShowDeleteDialog = onShowDeleteDialog,
-            onDismiss = onDismissRequest,
         )
     }
 }
 
 @Composable
-private fun ArticleMenuItems(
+private fun CopyMenuItems(
     articleId: String,
     articleContent: String?,
     articleRawData: String?,
     authorId: String,
-    isBookmarked: Boolean,
-    isArticleAuthor: Boolean,
-    showHighlights: Boolean?,
-    shareUrl: String?,
-    onToggleHighlightsClick: () -> Unit,
-    onBookmarkClick: () -> Unit,
-    onMuteUserClick: () -> Unit,
-    onShowReportDialog: () -> Unit,
-    onShowDeleteDialog: () -> Unit,
-    onDismiss: () -> Unit,
+    shareUrl: String,
+    onDismissRequest: () -> Unit,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -199,54 +238,12 @@ private fun ArticleMenuItems(
     ).toNaddrString()
 
     DropdownPrimalMenuItem(
-        trailingIconVector = PrimalIcons.ContextShare,
-        text = stringResource(id = R.string.article_feed_context_share_article),
-        onClick = {
-            if (shareUrl != null) {
-                systemShareText(context = context, text = shareUrl)
-            }
-            onDismiss()
-        },
-    )
-    DropdownPrimalMenuItem(
-        trailingIconVector = if (isBookmarked) PrimalIcons.ContextRemoveBookmark else PrimalIcons.ContextAddBookmark,
-        text = if (isBookmarked) {
-            stringResource(id = R.string.article_feed_context_remove_from_bookmark)
-        } else {
-            stringResource(id = R.string.article_feed_context_add_to_bookmark)
-        },
-        onClick = {
-            onBookmarkClick()
-            onDismiss()
-        },
-    )
-    if (showHighlights != null) {
-        DropdownPrimalMenuItem(
-            trailingIconVector = if (showHighlights) {
-                PrimalIcons.ContextHideHighlightsOutlined
-            } else {
-                PrimalIcons.ContextShowHighlightsOutlined
-            },
-            text = if (showHighlights) {
-                stringResource(id = R.string.article_feed_context_hide_highglights)
-            } else {
-                stringResource(id = R.string.article_feed_context_show_highglights)
-            },
-            onClick = {
-                onToggleHighlightsClick()
-                onDismiss()
-            },
-        )
-    }
-    DropdownPrimalMenuItem(
         trailingIconVector = PrimalIcons.ContextCopyNoteLink,
         text = stringResource(id = R.string.article_feed_context_copy_article_link),
         onClick = {
-            if (shareUrl != null) {
-                copyText(context = context, text = shareUrl)
-                showCopiedToast()
-            }
-            onDismiss()
+            copyText(context = context, text = shareUrl)
+            showCopiedToast()
+            onDismissRequest()
         },
     )
     if (!articleContent.isNullOrEmpty()) {
@@ -256,7 +253,7 @@ private fun ArticleMenuItems(
             onClick = {
                 copyText(context = context, text = articleContent)
                 showCopiedToast()
-                onDismiss()
+                onDismissRequest()
             },
         )
     }
@@ -267,7 +264,7 @@ private fun ArticleMenuItems(
         onClick = {
             copyText(context = context, text = naddr.withNostrPrefix())
             showCopiedToast()
-            onDismiss()
+            onDismissRequest()
         },
     )
 
@@ -278,7 +275,7 @@ private fun ArticleMenuItems(
             onClick = {
                 copyText(context = context, text = articleRawData)
                 showCopiedToast()
-                onDismiss()
+                onDismissRequest()
             },
         )
     }
@@ -289,10 +286,19 @@ private fun ArticleMenuItems(
         onClick = {
             copyText(context = context, text = authorId.hexToNpubHrp().withNostrPrefix())
             showCopiedToast()
-            onDismiss()
+            onDismissRequest()
         },
     )
+}
 
+@Composable
+private fun ContentModerationMenuItems(
+    isArticleAuthor: Boolean,
+    onMuteUserClick: () -> Unit,
+    onDismissRequest: () -> Unit,
+    onShowReportDialog: () -> Unit,
+    onShowDeleteDialog: () -> Unit,
+) {
     if (!isArticleAuthor) {
         DropdownPrimalMenuItem(
             trailingIconVector = PrimalIcons.ContextMuteUser,
@@ -300,7 +306,7 @@ private fun ArticleMenuItems(
             text = stringResource(id = R.string.context_menu_mute_user),
             onClick = {
                 onMuteUserClick()
-                onDismiss()
+                onDismissRequest()
             },
         )
 
@@ -310,7 +316,7 @@ private fun ArticleMenuItems(
             text = stringResource(id = R.string.context_menu_report_content),
             onClick = {
                 onShowReportDialog()
-                onDismiss()
+                onDismissRequest()
             },
         )
     }
@@ -322,7 +328,7 @@ private fun ArticleMenuItems(
             text = stringResource(id = R.string.article_feed_context_request_delete),
             onClick = {
                 onShowDeleteDialog()
-                onDismiss()
+                onDismissRequest()
             },
         )
     }
