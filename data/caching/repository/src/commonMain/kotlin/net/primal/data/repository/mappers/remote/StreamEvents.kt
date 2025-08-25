@@ -40,6 +40,7 @@ fun NostrEvent.asStreamData(): StreamData? {
     val streamingUrl = this.tags.findFirstStreaming()
 
     val statusTagValue = this.tags.findFirstStatus()
+    val startsAtTimestamp = this.tags.findFirstStarts()?.toLongOrNull()
     val endsAtTimestamp = this.tags.findFirstEnds()?.toLongOrNull()
 
     val initialStatus = StreamStatus.fromString(statusTagValue)
@@ -49,7 +50,11 @@ fun NostrEvent.asStreamData(): StreamData? {
         val nowEpochSecond = Clock.System.now().epochSeconds
 
         if (streamingUrl.isNullOrBlank()) {
-            finalStatus = StreamStatus.ENDED
+            finalStatus = when {
+                startsAtTimestamp == null -> StreamStatus.ENDED
+                startsAtTimestamp > nowEpochSecond -> StreamStatus.PLANNED
+                else -> StreamStatus.ENDED
+            }
         } else if (endsAtTimestamp != null && endsAtTimestamp < nowEpochSecond) {
             finalStatus = StreamStatus.ENDED
         } else {
