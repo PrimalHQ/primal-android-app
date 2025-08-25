@@ -34,12 +34,10 @@ fun List<NostrEvent>.mapNotNullAsStreamDataPO(): List<StreamData> {
 fun NostrEvent.asStreamData(): StreamData? {
     if (this.kind != NostrEventKind.LiveActivity.value) return null
 
-    val streamingUrl = this.tags.findFirstStreaming()
-    if (streamingUrl.isNullOrBlank()) return null
-
     val dTag = this.tags.findFirstIdentifier() ?: return null
     val mainHostId = this.tags.findFirstHostPubkey() ?: this.pubKey
     val eventAuthorId = this.pubKey
+    val streamingUrl = this.tags.findFirstStreaming()
 
     val statusTagValue = this.tags.findFirstStatus()
     val endsAtTimestamp = this.tags.findFirstEnds()?.toLongOrNull()
@@ -50,7 +48,9 @@ fun NostrEvent.asStreamData(): StreamData? {
     if (initialStatus == StreamStatus.LIVE) {
         val nowEpochSecond = Clock.System.now().epochSeconds
 
-        if (endsAtTimestamp != null && endsAtTimestamp < nowEpochSecond) {
+        if (streamingUrl.isNullOrBlank()) {
+            finalStatus = StreamStatus.ENDED
+        } else if (endsAtTimestamp != null && endsAtTimestamp < nowEpochSecond) {
             finalStatus = StreamStatus.ENDED
         } else {
             val eventAgeSeconds = nowEpochSecond - this.createdAt
