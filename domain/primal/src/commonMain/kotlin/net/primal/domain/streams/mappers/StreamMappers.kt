@@ -1,4 +1,4 @@
-package net.primal.domain.mappers
+package net.primal.domain.streams.mappers
 
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.links.ReferencedStream
@@ -13,7 +13,6 @@ import net.primal.domain.nostr.findFirstIdentifier
 import net.primal.domain.nostr.findFirstImage
 import net.primal.domain.nostr.findFirstRecording
 import net.primal.domain.nostr.findFirstStarts
-import net.primal.domain.nostr.findFirstStatus
 import net.primal.domain.nostr.findFirstStreaming
 import net.primal.domain.nostr.findFirstSummary
 import net.primal.domain.nostr.findFirstTitle
@@ -21,7 +20,6 @@ import net.primal.domain.nostr.findFirstTotalParticipants
 import net.primal.domain.nostr.utils.authorNameUiFriendly
 import net.primal.domain.profile.ProfileData
 import net.primal.domain.streams.Stream
-import net.primal.domain.streams.StreamStatus
 
 fun Stream.asReferencedStream() =
     ReferencedStream(
@@ -61,7 +59,7 @@ fun List<NostrEvent>.mapAsStreamDO(profilesMap: Map<String, ProfileData>) =
             recordingUrl = event.tags.findFirstRecording(),
             startsAt = event.tags.findFirstStarts()?.toLong(),
             endsAt = event.tags.findFirstEnds()?.toLong(),
-            status = StreamStatus.fromString(event.tags.findFirstStatus()),
+            status = event.resolveStreamStatus(),
             currentParticipants = event.tags.findFirstCurrentParticipants()?.toInt(),
             totalParticipants = event.tags.findFirstTotalParticipants()?.toInt(),
             eventZaps = emptyList(),

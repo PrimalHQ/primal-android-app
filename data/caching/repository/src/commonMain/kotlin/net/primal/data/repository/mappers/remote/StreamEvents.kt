@@ -1,7 +1,5 @@
 package net.primal.data.repository.mappers.remote
 
-import kotlin.time.Duration.Companion.hours
-import kotlinx.datetime.Clock
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.streams.StreamChatMessageData
 import net.primal.data.local.dao.streams.StreamData
@@ -17,15 +15,12 @@ import net.primal.domain.nostr.findFirstIdentifier
 import net.primal.domain.nostr.findFirstImage
 import net.primal.domain.nostr.findFirstRecording
 import net.primal.domain.nostr.findFirstStarts
-import net.primal.domain.nostr.findFirstStatus
 import net.primal.domain.nostr.findFirstStreaming
 import net.primal.domain.nostr.findFirstSummary
 import net.primal.domain.nostr.findFirstTitle
 import net.primal.domain.nostr.findFirstTotalParticipants
 import net.primal.domain.nostr.serialization.toNostrJsonObject
-import net.primal.domain.streams.StreamStatus
-
-private val LIVE_STREAM_STALE_THRESHOLD = 2.hours
+import net.primal.domain.streams.mappers.resolveStreamStatus
 
 fun List<NostrEvent>.mapNotNullAsStreamDataPO(): List<StreamData> {
     return this.mapNotNull { it.asStreamData() }
@@ -37,33 +32,6 @@ fun NostrEvent.asStreamData(): StreamData? {
     val dTag = this.tags.findFirstIdentifier() ?: return null
     val mainHostId = this.tags.findFirstHostPubkey() ?: this.pubKey
     val eventAuthorId = this.pubKey
-    val streamingUrl = this.tags.findFirstStreaming()
-
-    val statusTagValue = this.tags.findFirstStatus()
-    val startsAtTimestamp = this.tags.findFirstStarts()?.toLongOrNull()
-    val endsAtTimestamp = this.tags.findFirstEnds()?.toLongOrNull()
-
-    val initialStatus = StreamStatus.fromString(statusTagValue)
-    var finalStatus = initialStatus
-
-    if (initialStatus == StreamStatus.LIVE) {
-        val nowEpochSecond = Clock.System.now().epochSeconds
-
-        if (streamingUrl.isNullOrBlank()) {
-            finalStatus = when {
-                startsAtTimestamp == null -> StreamStatus.ENDED
-                startsAtTimestamp > nowEpochSecond -> StreamStatus.PLANNED
-                else -> StreamStatus.ENDED
-            }
-        } else if (endsAtTimestamp != null && endsAtTimestamp < nowEpochSecond) {
-            finalStatus = StreamStatus.ENDED
-        } else {
-            val eventAgeSeconds = nowEpochSecond - this.createdAt
-            if (eventAgeSeconds > LIVE_STREAM_STALE_THRESHOLD.inWholeSeconds) {
-                finalStatus = StreamStatus.ENDED
-            }
-        }
-    }
 
     return StreamData(
         aTag = "${this.kind}:$eventAuthorId:$dTag",
@@ -77,9 +45,9 @@ fun NostrEvent.asStreamData(): StreamData? {
         hashtags = this.tags.findAllHashtags(),
         streamingUrl = this.tags.findFirstStreaming(),
         recordingUrl = this.tags.findFirstRecording(),
-        status = finalStatus,
+        status = this.resolveStreamStatus(),
         startsAt = this.tags.findFirstStarts()?.toLongOrNull(),
-        endsAt = endsAtTimestamp,
+        endsAt = this.tags.findFirstEnds()?.toLongOrNull(),
         currentParticipants = this.tags.findFirstCurrentParticipants()?.toIntOrNull(),
         totalParticipants = this.tags.findFirstTotalParticipants()?.toIntOrNull(),
         raw = this.toNostrJsonObject().encodeToJsonString(),
