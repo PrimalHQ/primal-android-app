@@ -118,7 +118,7 @@ fun LiveStreamMiniPlayer(
     var controlsOverlayVisibility by remember { mutableStateOf(false) }
 
     LaunchedEffect(exoPlayer, state.streamInfo?.streamUrl) {
-        if (!exoPlayer.isPlaying) {
+        if (!exoPlayer.isPlaying && exoPlayer.currentMediaItem == null) {
             state.streamInfo?.streamUrl?.let { streamUrl ->
                 val mediaItem = MediaItem.fromUri(streamUrl)
                 exoPlayer.setMediaItem(mediaItem)
