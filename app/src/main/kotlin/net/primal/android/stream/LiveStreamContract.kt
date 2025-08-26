@@ -26,7 +26,7 @@ interface LiveStreamContract {
         val playerState: PlayerState = PlayerState(),
         val comment: TextFieldValue = TextFieldValue(),
         val shouldApproveProfileAction: FollowsApproval? = null,
-        val moderationMode: StreamContentModerationMode = StreamContentModerationMode.Moderated,
+        val contentModerationMode: StreamContentModerationMode = StreamContentModerationMode.Moderated,
         val zaps: List<EventZapUiModel> = emptyList(),
         val chatItems: List<StreamChatItem> = emptyList(),
         val zappingState: ZappingState = ZappingState(),
@@ -81,7 +81,7 @@ interface LiveStreamContract {
         data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
         data class ApproveFollowsActions(val actions: List<ProfileFollowsHandler.Action>) : UiEvent()
         data class ZapStream(val zapAmount: ULong? = null, val zapDescription: String? = null) : UiEvent()
-        data class ChangeStreamModeration(val moderationMode: StreamContentModerationMode) : UiEvent()
+        data class ChangeContentModeration(val moderationMode: StreamContentModerationMode) : UiEvent()
         data class OnCommentValueChanged(val value: TextFieldValue) : UiEvent()
         data class SendMessage(val text: String) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()

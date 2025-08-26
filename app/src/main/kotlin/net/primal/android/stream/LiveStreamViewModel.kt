@@ -141,17 +141,16 @@ class LiveStreamViewModel @AssistedInject constructor(
             streamRepository.startLiveStreamSubscription(
                 naddr = streamNaddr,
                 userId = activeAccountStore.activeUserId(),
-                streamContentModerationMode = _state.value.moderationMode,
+                streamContentModerationMode = _state.value.contentModerationMode,
             )
         }
     }
 
     private fun changeContentModeration(moderationMode: StreamContentModerationMode) =
         viewModelScope.launch {
-            if (moderationMode != _state.value.moderationMode) {
-                setState { copy(loading = true) }
+            if (moderationMode != _state.value.contentModerationMode) {
+                setState { copy(loading = true, contentModerationMode = moderationMode) }
                 val aTagValue = streamNaddr.asATagValue()
-                setState { copy(moderationMode = moderationMode) }
                 liveStreamChatRepository.clearMessages(streamATag = aTagValue)
                 eventInteractionRepository.deleteZaps(eventId = aTagValue)
                 startLiveStreamSubscription()
@@ -247,7 +246,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                         copy(comment = this.comment.appendUserTagAtSignAtCursorPosition())
                     }
 
-                    is UiEvent.ChangeStreamModeration -> changeContentModeration(moderationMode = it.moderationMode)
+                    is UiEvent.ChangeContentModeration -> changeContentModeration(moderationMode = it.moderationMode)
                 }
             }
         }
