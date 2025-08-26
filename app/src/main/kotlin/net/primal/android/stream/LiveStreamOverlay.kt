@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -120,6 +121,9 @@ private fun LiveStreamOverlay(
         Animatable(displayMetrics.heightPixels - streamState.bottomBarHeight - playerHeight - paddingPx)
     }
 
+    val isAtBottom = rememberSaveable { mutableStateOf(true) }
+    val isAtTop = rememberSaveable { mutableStateOf(false) }
+
     SharedTransitionLayout {
         AnimatedContent(targetState = streamState.mode) { streamMode ->
             when (streamMode) {
@@ -147,6 +151,8 @@ private fun LiveStreamOverlay(
                         exoPlayer = exoPlayer,
                         offsetX = offsetX,
                         offsetY = offsetY,
+                        isAtTop = isAtTop,
+                        isAtBottom = isAtBottom,
                         onExpandStream = { streamState.expand() },
                         onStopStream = {
                             exoPlayer.stop()

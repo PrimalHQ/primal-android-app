@@ -31,6 +31,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -89,6 +90,8 @@ fun LiveStreamMiniPlayer(
     exoPlayer: ExoPlayer,
     offsetX: Animatable<Float, AnimationVector1D>,
     offsetY: Animatable<Float, AnimationVector1D>,
+    isAtBottom: MutableState<Boolean>,
+    isAtTop: MutableState<Boolean>,
     state: LiveStreamContract.UiState,
     onExpandStream: () -> Unit,
     onStopStream: () -> Unit,
@@ -149,20 +152,25 @@ fun LiveStreamMiniPlayer(
 
     adjustPositionWithKeyboard(offsetY, screenHeightPx, playerHeight, paddingPx)
 
-    AnimatedVisibility(
-        visible = !streamState.isHidden(),
-        enter = fadeIn(animationSpec = tween(durationMillis = 400)),
-        exit = fadeOut(animationSpec = tween(durationMillis = 50)),
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            LaunchedEffect(streamState.bottomBarHeight, streamState.topBarHeight) {
+    LaunchedEffect(streamState.bottomBarHeight, streamState.topBarHeight) {
+        when {
+            isAtBottom.value -> launch { offsetY.animateTo(targetValue = maxSafeY, animationSpec = springSpec) }
+            isAtTop.value -> launch { offsetY.animateTo(targetValue = minSafeY, animationSpec = springSpec) }
+            else -> {
                 val targetY = offsetY.value.coerceIn(
                     minimumValue = minSafeY,
                     maximumValue = maxSafeY,
                 )
                 launch { offsetY.animateTo(targetValue = targetY, animationSpec = springSpec) }
             }
-
+        }
+    }
+    AnimatedVisibility(
+        visible = !streamState.isHidden(),
+        enter = fadeIn(animationSpec = tween(durationMillis = 400)),
+        exit = fadeOut(animationSpec = tween(durationMillis = 50)),
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = modifier
                     .offset {
@@ -186,9 +194,14 @@ fun LiveStreamMiniPlayer(
                                 )
                                 scope.launch { offsetX.animateTo(targetX, animationSpec = springSpec) }
                                 scope.launch { offsetY.animateTo(targetY, animationSpec = springSpec) }
+
+                                isAtBottom.value = targetY == maxSafeY
+                                isAtTop.value = targetY == minSafeY
                             },
                             onDrag = { change, dragAmount ->
                                 change.consume()
+                                isAtBottom.value = false
+                                isAtTop.value = false
                                 scope.launch {
                                     offsetX.snapTo(offsetX.value + dragAmount.x)
                                     offsetY.snapTo(offsetY.value + dragAmount.y)
