@@ -14,5 +14,9 @@ interface StreamRepository {
 
     suspend fun getStream(aTag: String): Result<Stream>
 
-    suspend fun startLiveStreamSubscription(naddr: Naddr, userId: String)
+    suspend fun startLiveStreamSubscription(
+        naddr: Naddr,
+        userId: String,
+        streamContentModerationMode: StreamContentModerationMode,
+    )
 }

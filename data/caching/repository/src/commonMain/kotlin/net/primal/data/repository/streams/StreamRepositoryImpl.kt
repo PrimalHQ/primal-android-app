@@ -1,6 +1,7 @@
 package net.primal.data.repository.streams
 
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
@@ -19,6 +20,7 @@ import net.primal.data.repository.mappers.remote.mapAsEventZapDO
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.Stream
+import net.primal.domain.streams.StreamContentModerationMode
 import net.primal.domain.streams.StreamRepository
 import net.primal.shared.data.local.db.withTransaction
 
@@ -57,16 +59,26 @@ class StreamRepositoryImpl(
             Result.success(it.asStreamDO())
         } ?: Result.failure(IllegalArgumentException("stream with given aTag could not be found."))
 
-    override suspend fun startLiveStreamSubscription(naddr: Naddr, userId: String) {
+    override suspend fun startLiveStreamSubscription(
+        naddr: Naddr,
+        userId: String,
+        streamContentModerationMode: StreamContentModerationMode,
+    ) {
         liveStreamApi.subscribe(
             streamingNaddr = naddr,
             userId = userId,
+            contentModerationMode = when (streamContentModerationMode) {
+                StreamContentModerationMode.Moderated -> "moderated"
+                StreamContentModerationMode.None -> "all"
+            },
         ).collect { response ->
             processLiveStreamResponse(response = response)
         }
     }
 
     private suspend fun processLiveStreamResponse(response: LiveFeedResponse) {
+        // TODO Verify io operations
+        Napier.e { "Name =" + scope.coroutineContext[CoroutineName] }
         val zapEvents = response.zaps
         val zapRequests = zapEvents.mapNotNull { it.extractZapRequestOrNull() }
         val zapperPubkeys = zapRequests.map { it.pubKey }.toSet()

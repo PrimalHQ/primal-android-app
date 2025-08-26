@@ -166,6 +166,12 @@ class EventInteractionRepositoryImpl(
         return result
     }
 
+    override suspend fun deleteZaps(eventId: String) {
+        withContext(dispatcherProvider.io()) {
+            database.eventZaps().deleteAll(eventId = eventId)
+        }
+    }
+
     private fun ZapTarget.buildPostStatsUpdaterIfApplicable(userId: String): EventStatsUpdater? =
         when (this) {
             is ZapTarget.Event -> EventStatsUpdater(

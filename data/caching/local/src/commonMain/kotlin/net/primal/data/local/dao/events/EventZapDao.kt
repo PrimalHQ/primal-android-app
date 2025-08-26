@@ -27,6 +27,9 @@ interface EventZapDao {
         timestamp: Long,
     )
 
+    @Query("DELETE FROM EventZap WHERE eventId = :eventId")
+    suspend fun deleteAll(eventId: String)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(data: List<EventZap>)
 

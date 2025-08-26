@@ -9,4 +9,5 @@ data class LiveFeedRequestBody(
     val pubkey: String,
     val identifier: String,
     @SerialName("user_pubkey") val userPubkey: String,
+    @SerialName("content_moderation_mode") val contentModerationMode: String,
 )

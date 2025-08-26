@@ -24,4 +24,7 @@ interface StreamChatMessageDao {
         """,
     )
     fun observeMessages(streamATag: String): Flow<List<StreamChatMessage>>
+
+    @Query("DELETE FROM StreamChatMessageData WHERE streamATag = :streamATag")
+    suspend fun deleteMessages(streamATag: String)
 }

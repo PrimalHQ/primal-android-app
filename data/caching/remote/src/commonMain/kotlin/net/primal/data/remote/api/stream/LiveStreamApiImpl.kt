@@ -20,7 +20,11 @@ class LiveStreamApiImpl(
 ) : LiveStreamApi {
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun subscribe(streamingNaddr: Naddr, userId: String): Flow<LiveFeedResponse> {
+    override suspend fun subscribe(
+        streamingNaddr: Naddr,
+        userId: String,
+        contentModerationMode: String,
+    ): Flow<LiveFeedResponse> {
         val subscriptionId = Uuid.random().toPrimalSubscriptionId()
         return primalApiClient
             .subscribeBuffered(
@@ -32,6 +36,7 @@ class LiveStreamApiImpl(
                         pubkey = streamingNaddr.userId,
                         identifier = streamingNaddr.identifier,
                         userPubkey = userId,
+                        contentModerationMode = contentModerationMode,
                     ).encodeToJsonString(),
                 ),
             )
