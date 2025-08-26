@@ -55,8 +55,6 @@ fun LiveStreamOverlay(
         val naddrUri: String? = streamState.mode.resolveNaddr()
         val liveStreamViewModel = rememberLiveStreamViewModel(naddrUri)
 
-        BackHandler(enabled = streamState.mode is StreamMode.Expanded) { streamState.minimize() }
-
         Box(modifier = Modifier.fillMaxSize()) {
             content()
 
@@ -88,6 +86,8 @@ private fun LiveStreamOverlay(
 ) {
     val streamState = LocalStreamState.current
     val uiState = viewModel.state.collectAsState()
+
+    BackHandler(enabled = streamState.mode is StreamMode.Expanded) { streamState.minimize() }
 
     val exoPlayer = rememberPrimalStreamExoPlayer(
         streamNaddr = viewModel.streamNaddr,
