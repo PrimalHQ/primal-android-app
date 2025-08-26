@@ -63,7 +63,7 @@ fun LiveStreamPlayer(
     var menuVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(streamUrl) {
-        if (!exoPlayer.isPlaying) {
+        if (!exoPlayer.isPlaying && exoPlayer.currentMediaItem == null) {
             val mediaItem = MediaItem.fromUri(streamUrl)
             exoPlayer.setMediaItem(mediaItem)
             exoPlayer.prepare()
