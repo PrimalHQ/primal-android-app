@@ -170,7 +170,7 @@ private fun TopPlayerControls(
             LiveStreamMenu(
                 modifier = Modifier,
                 naddr = naddr,
-                isMainHostMuted = streamInfo.isMainHostMutedByActiveUser,
+                isMainHostMuted = state.activeUserMutedProfiles.contains(state.streamInfo.mainHostId),
                 isActiveUserMainHost = state.activeUserId == mainHostId,
                 rawNostrEvent = streamInfo.rawNostrEventJson,
                 menuVisible = menuVisible,

@@ -33,6 +33,10 @@ interface LiveStreamContract {
         val userTaggingState: UserTaggingState = UserTaggingState(),
         val error: UiError? = null,
         val chatLoading: Boolean = true,
+        val activeUserFollowedProfiles: Set<String> = emptySet(),
+        val activeUserMutedProfiles: Set<String> = emptySet(),
+        val profileIdToFollowerCount: Map<String, Int> = emptyMap(),
+        val liveProfiles: Set<String> = emptySet(),
     )
 
     data class PlayerState(
@@ -58,8 +62,6 @@ interface LiveStreamContract {
         val mainHostId: String,
         val mainHostProfile: ProfileDetailsUi? = null,
         val mainHostProfileStats: ProfileStatsUi? = null,
-        val isMainHostFollowedByActiveUser: Boolean = false,
-        val isMainHostMutedByActiveUser: Boolean = false,
     )
 
     sealed class UiEvent {
@@ -90,12 +92,12 @@ interface LiveStreamContract {
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
         data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
         data object AppendUserTagAtSign : UiEvent()
-
         data class ReportMessage(
             val reportType: ReportType,
             val messageId: String,
             val authorId: String,
         ) : UiEvent()
+        data class FetchFollowerCount(val profileId: String) : UiEvent()
     }
 
     sealed class SideEffect {
