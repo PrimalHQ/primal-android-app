@@ -36,3 +36,31 @@ suspend inline fun <T, reified E : Exception> fetchAndGet(
     } finally {
         onFinally()
     }
+
+/**
+ * Attempts to retrieve data using a `get` function. If the data is not present,
+ * it triggers a `fetch` operation and retries the `get` call.
+ *
+ * This function is useful for lazy-loading data where a local cache or database
+ * might return `null`, and a network or fallback fetch is required to populate it.
+ *
+ * Execution flow:
+ * - Call [get]. If it returns a non-null value, return it immediately.
+ * - Otherwise, call [fetch] and then retry [get].
+ * - If [get] returns a non-null value after fetch, call [onSuccess] with it.
+ * - Always call [onFinally] before returning.
+ *
+ * @param T the type of the value to retrieve
+ * @param fetch suspend function that attempts to fetch or refresh the data
+ * @param get suspend function that attempts to get the current data
+ * @param onFinally callback always invoked at the end of the process
+ * @param onSuccess callback invoked if a non-null value is successfully retrieved
+ *
+ * @return the retrieved value of type [T], or `null` if none was available even after fetch
+ */
+suspend inline fun <T> fetchAndGetResult(
+    noinline fetch: suspend () -> Result<Unit>,
+    get: suspend () -> T?,
+    onFinally: () -> Unit,
+    onSuccess: (T) -> Unit,
+): T? = get() ?: (fetch().run { get() }?.also { onSuccess(it) }).also { onFinally() }
