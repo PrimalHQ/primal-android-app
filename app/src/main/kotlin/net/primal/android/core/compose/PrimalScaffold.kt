@@ -22,6 +22,7 @@ fun PrimalScaffold(
     snackbarHost: @Composable () -> Unit = {},
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
+    propagateBottomBarSize: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.background,
     contentColor: Color = contentColorFor(containerColor),
     contentWindowInsets: WindowInsets = ScaffoldDefaults.contentWindowInsets,
@@ -45,16 +46,20 @@ fun PrimalScaffold(
             }
         },
         bottomBar = {
-            bottomBar?.let {
-                Box(
-                    modifier = Modifier.onSizeChanged { size ->
-                        streamState.bottomBarHeight = size.height
-                    },
-                ) {
-                    bottomBar()
+            if (propagateBottomBarSize) {
+                bottomBar?.let {
+                    Box(
+                        modifier = Modifier.onSizeChanged { size ->
+                            streamState.bottomBarHeight = size.height
+                        },
+                    ) {
+                        bottomBar()
+                    }
+                } ?: run {
+                    streamState.bottomBarHeight = 0
                 }
-            } ?: run {
-                streamState.bottomBarHeight = 0
+            } else {
+                bottomBar?.invoke()
             }
         },
         snackbarHost = snackbarHost,
