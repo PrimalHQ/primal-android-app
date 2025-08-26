@@ -1,6 +1,12 @@
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package net.primal.android.stream.ui
 
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.Spring
@@ -31,13 +37,13 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -54,7 +60,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.KeyboardState
 import net.primal.android.core.compose.PrimalLoadingSpinner
-import net.primal.android.core.compose.animatableSaver
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.VideoCloseMini
 import net.primal.android.core.compose.icons.primaliconpack.VideoPauseMini
@@ -63,11 +68,14 @@ import net.primal.android.core.compose.rememberKeyboardState
 import net.primal.android.core.video.toggle
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.LocalStreamState
+import net.primal.android.stream.player.SHARED_TRANSITION_PLAYER_KEY
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
 import net.primal.android.theme.AppTheme
 
-private val PADDING = 16.dp
+internal val PADDING = 16.dp
+private const val THIRD = 3
+private const val HALF = 2
 private val springSpec = spring<Float>(
     dampingRatio = Spring.DampingRatioLowBouncy,
     stiffness = Spring.StiffnessLow,
@@ -79,24 +87,34 @@ private val springSpec = spring<Float>(
 fun LiveStreamMiniPlayer(
     modifier: Modifier = Modifier,
     exoPlayer: ExoPlayer,
+    offsetX: Animatable<Float, AnimationVector1D>,
+    offsetY: Animatable<Float, AnimationVector1D>,
     state: LiveStreamContract.UiState,
     onExpandStream: () -> Unit,
     onStopStream: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     val scope = rememberCoroutineScope()
     val streamState = LocalStreamState.current
+    val localConfiguration = LocalConfiguration.current
     val localDensity = LocalDensity.current
     val displayMetrics = LocalContext.current.resources.displayMetrics
     val screenWidthPx = displayMetrics.widthPixels
     val screenHeightPx = displayMetrics.heightPixels
-    val playerWidth = screenWidthPx / 2
+    val playerWidth = if (localConfiguration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        screenWidthPx / THIRD
+    } else {
+        screenWidthPx / HALF
+    }
+
     val playerHeight = playerWidth / (VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT)
     val statusBarHeight = WindowInsets.statusBars.getTop(localDensity)
     val paddingPx = with(localDensity) { PADDING.toPx() }
 
     var controlsOverlayVisibility by remember { mutableStateOf(false) }
 
-    LaunchedEffect(exoPlayer) {
+    LaunchedEffect(exoPlayer, state.streamInfo?.streamUrl) {
         if (!exoPlayer.isPlaying) {
             state.streamInfo?.streamUrl?.let { streamUrl ->
                 val mediaItem = MediaItem.fromUri(streamUrl)
@@ -129,9 +147,6 @@ fun LiveStreamMiniPlayer(
         derivedStateOf { screenHeightPx - streamState.bottomBarHeight - playerHeight - paddingPx }
     }
 
-    val offsetX = rememberSaveable(saver = animatableSaver()) { Animatable(paddingPx) }
-    val offsetY = rememberSaveable(saver = animatableSaver()) { Animatable(maxSafeY) }
-
     adjustPositionWithKeyboard(offsetY, screenHeightPx, playerHeight, paddingPx)
 
     AnimatedVisibility(
@@ -150,7 +165,12 @@ fun LiveStreamMiniPlayer(
 
             Box(
                 modifier = modifier
-                    .offset { IntOffset(offsetX.value.toInt(), offsetY.value.toInt()) }
+                    .offset {
+                        IntOffset(
+                            offsetX.value.toInt(),
+                            offsetY.value.toInt(),
+                        )
+                    }
                     .pointerInput(Unit) {
                         detectDragGestures(
                             onDragEnd = {
@@ -181,18 +201,26 @@ fun LiveStreamMiniPlayer(
                         height = with(localDensity) { playerHeight.toDp() },
                     )
                     .clip(AppTheme.shapes.large)
-                    .background(AppTheme.colorScheme.background)
                     .clickable { controlsOverlayVisibility = true },
             ) {
-                PlayerBox(exoPlayer = exoPlayer, state = state)
+                with(sharedTransitionScope) {
+                    PlayerBox(
+                        modifier = Modifier.sharedElement(
+                            sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_PLAYER_KEY),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                        ),
+                        exoPlayer = exoPlayer,
+                        state = state,
+                    )
 
-                PlayerControls(
-                    controlsOverlayVisibility = controlsOverlayVisibility,
-                    onTogglePlayer = { exoPlayer.toggle() },
-                    isPlaying = exoPlayer.isPlaying,
-                    onStopStream = onStopStream,
-                    onExpandStream = onExpandStream,
-                )
+                    PlayerControls(
+                        controlsOverlayVisibility = controlsOverlayVisibility,
+                        onTogglePlayer = { exoPlayer.toggle() },
+                        isPlaying = exoPlayer.isPlaying,
+                        onStopStream = onStopStream,
+                        onExpandStream = onExpandStream,
+                    )
+                }
             }
         }
     }
@@ -288,19 +316,34 @@ private fun adjustPositionWithKeyboard(
 
 @UnstableApi
 @Composable
-private fun PlayerBox(exoPlayer: ExoPlayer, state: LiveStreamContract.UiState) {
+private fun PlayerBox(
+    exoPlayer: ExoPlayer,
+    state: LiveStreamContract.UiState,
+    modifier: Modifier = Modifier,
+) {
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .clip(AppTheme.shapes.large)
+            .fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         PlayerSurface(
-            modifier = Modifier.matchParentSize(),
+            modifier = modifier
+                .clip(AppTheme.shapes.large)
+                .matchParentSize(),
             player = exoPlayer,
             surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
         )
 
         if (state.playerState.isBuffering && !state.playerState.isPlaying) {
-            PrimalLoadingSpinner()
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(AppTheme.shapes.large)
+                    .background(AppTheme.colorScheme.background),
+            ) {
+                PrimalLoadingSpinner()
+            }
         }
     }
 }

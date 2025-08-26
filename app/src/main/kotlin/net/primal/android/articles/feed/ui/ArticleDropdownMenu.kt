@@ -34,7 +34,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextShare
 import net.primal.android.core.compose.icons.primaliconpack.ContextShowHighlightsOutlined
 import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.utils.copyText
-import net.primal.android.core.utils.resolvePrimalArticleLink
 import net.primal.android.core.utils.systemShareText
 import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
@@ -47,7 +46,7 @@ import net.primal.domain.nostr.utils.withNostrPrefix
 
 @ExperimentalMaterial3Api
 @Composable
-fun ArticleDropdownMenuIcon(
+fun ArticleDropdownMenu(
     modifier: Modifier,
     articleId: String,
     eventId: String,
@@ -56,6 +55,7 @@ fun ArticleDropdownMenuIcon(
     articleRawData: String?,
     authorId: String,
     isBookmarked: Boolean,
+    shareUrl: String,
     enabled: Boolean = true,
     isArticleAuthor: Boolean,
     showHighlights: Boolean? = null,
@@ -67,18 +67,9 @@ fun ArticleDropdownMenuIcon(
     icon: @Composable () -> Unit,
 ) {
     var menuVisible by remember { mutableStateOf(false) }
-
-    val context = LocalContext.current
-    val uiScope = rememberCoroutineScope()
-    val copyConfirmationText = stringResource(id = R.string.feed_context_copied_toast)
-
-    val naddr = Naddr(
-        identifier = articleId,
-        userId = authorId,
-        kind = NostrEventKind.LongFormContent.value,
-    ).toNaddrString()
-
     var reportDialogVisible by remember { mutableStateOf(false) }
+    var deleteDialogVisible by remember { mutableStateOf(false) }
+
     if (reportDialogVisible) {
         ReportUserDialog(
             onDismissRequest = { reportDialogVisible = false },
@@ -89,7 +80,6 @@ fun ArticleDropdownMenuIcon(
         )
     }
 
-    var deleteDialogVisible by remember { mutableStateOf(false) }
     if (deleteDialogVisible && onRequestDeleteClick != null) {
         ConfirmActionAlertDialog(
             confirmText = stringResource(id = R.string.context_confirm_delete_positive),
@@ -114,171 +104,232 @@ fun ArticleDropdownMenuIcon(
     ) {
         icon()
 
-        DropdownPrimalMenu(
+        ArticleDropdownPrimalMenu(
             expanded = menuVisible,
             onDismissRequest = { menuVisible = false },
-        ) {
+            articleId = articleId,
+            articleContent = articleContent,
+            articleRawData = articleRawData,
+            authorId = authorId,
+            isBookmarked = isBookmarked,
+            isArticleAuthor = isArticleAuthor,
+            showHighlights = showHighlights,
+            shareUrl = shareUrl,
+            onToggleHighlightsClick = { onToggleHighlightsClick?.invoke() },
+            onBookmarkClick = { onBookmarkClick?.invoke() },
+            onMuteUserClick = { onMuteUserClick?.invoke() },
+            onShowReportDialog = { reportDialogVisible = true },
+            onShowDeleteDialog = { deleteDialogVisible = true },
+        )
+    }
+}
+
+@Composable
+private fun ArticleDropdownPrimalMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    articleId: String,
+    articleContent: String?,
+    articleRawData: String?,
+    authorId: String,
+    isBookmarked: Boolean,
+    isArticleAuthor: Boolean,
+    showHighlights: Boolean?,
+    shareUrl: String,
+    onToggleHighlightsClick: () -> Unit,
+    onBookmarkClick: () -> Unit,
+    onMuteUserClick: () -> Unit,
+    onShowReportDialog: () -> Unit,
+    onShowDeleteDialog: () -> Unit,
+) {
+    DropdownPrimalMenu(
+        expanded = expanded,
+        onDismissRequest = onDismissRequest,
+    ) {
+        val context = LocalContext.current
+
+        DropdownPrimalMenuItem(
+            trailingIconVector = PrimalIcons.ContextShare,
+            text = stringResource(id = R.string.article_feed_context_share_article),
+            onClick = {
+                systemShareText(context = context, text = shareUrl)
+                onDismissRequest()
+            },
+        )
+
+        DropdownPrimalMenuItem(
+            trailingIconVector = if (isBookmarked) {
+                PrimalIcons.ContextRemoveBookmark
+            } else {
+                PrimalIcons.ContextAddBookmark
+            },
+            text = if (isBookmarked) {
+                stringResource(id = R.string.article_feed_context_remove_from_bookmark)
+            } else {
+                stringResource(id = R.string.article_feed_context_add_to_bookmark)
+            },
+            onClick = {
+                onBookmarkClick()
+                onDismissRequest()
+            },
+        )
+
+        if (showHighlights != null) {
             DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextShare,
-                text = stringResource(id = R.string.article_feed_context_share_article),
-                onClick = {
-                    systemShareText(
-                        context = context,
-                        text = resolvePrimalArticleLink(naddr = naddr),
-                    )
-                    menuVisible = false
-                },
-            )
-            DropdownPrimalMenuItem(
-                trailingIconVector = if (isBookmarked) {
-                    PrimalIcons.ContextRemoveBookmark
+                trailingIconVector = if (showHighlights) {
+                    PrimalIcons.ContextHideHighlightsOutlined
                 } else {
-                    PrimalIcons.ContextAddBookmark
+                    PrimalIcons.ContextShowHighlightsOutlined
                 },
-                text = if (isBookmarked) {
-                    stringResource(id = R.string.article_feed_context_remove_from_bookmark)
+                text = if (showHighlights) {
+                    stringResource(id = R.string.article_feed_context_hide_highglights)
                 } else {
-                    stringResource(id = R.string.article_feed_context_add_to_bookmark)
+                    stringResource(id = R.string.article_feed_context_show_highglights)
                 },
                 onClick = {
-                    onBookmarkClick?.invoke()
-                    menuVisible = false
+                    onToggleHighlightsClick()
+                    onDismissRequest()
                 },
             )
-            if (showHighlights != null) {
-                DropdownPrimalMenuItem(
-                    trailingIconVector = if (showHighlights) {
-                        PrimalIcons.ContextHideHighlightsOutlined
-                    } else {
-                        PrimalIcons.ContextShowHighlightsOutlined
-                    },
-                    text = if (showHighlights) {
-                        stringResource(id = R.string.article_feed_context_hide_highglights)
-                    } else {
-                        stringResource(id = R.string.article_feed_context_show_highglights)
-                    },
-                    onClick = {
-                        onToggleHighlightsClick?.invoke()
-                        menuVisible = false
-                    },
-                )
-            }
-            DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextCopyNoteLink,
-                text = stringResource(id = R.string.article_feed_context_copy_article_link),
-                onClick = {
-                    copyText(context = context, text = resolvePrimalArticleLink(naddr = naddr))
-                    menuVisible = false
-                    uiScope.launch {
-                        Toast.makeText(
-                            context,
-                            copyConfirmationText,
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                    }
-                },
-            )
-            if (!articleContent.isNullOrEmpty()) {
-                DropdownPrimalMenuItem(
-                    trailingIconVector = PrimalIcons.ContextCopyNoteText,
-                    text = stringResource(id = R.string.article_feed_context_copy_article_text),
-                    onClick = {
-                        copyText(context = context, text = articleContent)
-                        menuVisible = false
-                        uiScope.launch {
-                            Toast.makeText(
-                                context,
-                                copyConfirmationText,
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                        }
-                    },
-                )
-            }
-
-            DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextCopyNoteId,
-                text = stringResource(id = R.string.article_feed_context_copy_article_id),
-                onClick = {
-                    copyText(context = context, text = naddr.withNostrPrefix())
-                    menuVisible = false
-                    uiScope.launch {
-                        Toast.makeText(
-                            context,
-                            copyConfirmationText,
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                    }
-                },
-            )
-
-            if (articleRawData != null) {
-                DropdownPrimalMenuItem(
-                    trailingIconVector = PrimalIcons.ContextCopyRawData,
-                    text = stringResource(id = R.string.article_feed_context_copy_raw_data),
-                    onClick = {
-                        copyText(context = context, text = articleRawData)
-                        menuVisible = false
-                        uiScope.launch {
-                            Toast.makeText(
-                                context,
-                                copyConfirmationText,
-                                Toast.LENGTH_SHORT,
-                            ).show()
-                        }
-                    },
-                )
-            }
-
-            DropdownPrimalMenuItem(
-                trailingIconVector = PrimalIcons.ContextCopyPublicKey,
-                text = stringResource(id = R.string.article_feed_context_copy_user_id),
-                onClick = {
-                    copyText(context = context, text = authorId.hexToNpubHrp().withNostrPrefix())
-                    menuVisible = false
-                    uiScope.launch {
-                        Toast.makeText(
-                            context,
-                            copyConfirmationText,
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                    }
-                },
-            )
-
-            if (!isArticleAuthor) {
-                DropdownPrimalMenuItem(
-                    trailingIconVector = PrimalIcons.ContextMuteUser,
-                    tint = AppTheme.colorScheme.error,
-                    text = stringResource(id = R.string.context_menu_mute_user),
-                    onClick = {
-                        onMuteUserClick?.invoke()
-                        menuVisible = false
-                    },
-                )
-
-                DropdownPrimalMenuItem(
-                    trailingIconVector = PrimalIcons.ContextReportContent,
-                    tint = AppTheme.colorScheme.error,
-                    text = stringResource(id = R.string.context_menu_report_content),
-                    onClick = {
-                        menuVisible = false
-                        reportDialogVisible = true
-                    },
-                )
-            }
-
-            if (isArticleAuthor) {
-                DropdownPrimalMenuItem(
-                    trailingIconVector = PrimalIcons.Delete,
-                    tint = AppTheme.colorScheme.error,
-                    text = stringResource(id = R.string.article_feed_context_request_delete),
-                    onClick = {
-                        menuVisible = false
-                        deleteDialogVisible = true
-                    },
-                )
-            }
         }
+
+        CopyMenuItems(
+            articleId = articleId,
+            articleContent = articleContent,
+            articleRawData = articleRawData,
+            authorId = authorId,
+            shareUrl = shareUrl,
+            onDismissRequest = onDismissRequest,
+        )
+
+        ContentModerationMenuItems(
+            isArticleAuthor = isArticleAuthor,
+            onMuteUserClick = onMuteUserClick,
+            onDismissRequest = onDismissRequest,
+            onShowReportDialog = onShowReportDialog,
+            onShowDeleteDialog = onShowDeleteDialog,
+        )
+    }
+}
+
+@Composable
+private fun CopyMenuItems(
+    articleId: String,
+    articleContent: String?,
+    articleRawData: String?,
+    authorId: String,
+    shareUrl: String,
+    onDismissRequest: () -> Unit,
+) {
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
+    val copyConfirmationText = stringResource(id = R.string.feed_context_copied_toast)
+
+    fun showCopiedToast() {
+        uiScope.launch {
+            Toast.makeText(context, copyConfirmationText, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    val naddr = Naddr(
+        identifier = articleId,
+        userId = authorId,
+        kind = NostrEventKind.LongFormContent.value,
+    ).toNaddrString()
+
+    DropdownPrimalMenuItem(
+        trailingIconVector = PrimalIcons.ContextCopyNoteLink,
+        text = stringResource(id = R.string.article_feed_context_copy_article_link),
+        onClick = {
+            copyText(context = context, text = shareUrl)
+            showCopiedToast()
+            onDismissRequest()
+        },
+    )
+    if (!articleContent.isNullOrEmpty()) {
+        DropdownPrimalMenuItem(
+            trailingIconVector = PrimalIcons.ContextCopyNoteText,
+            text = stringResource(id = R.string.article_feed_context_copy_article_text),
+            onClick = {
+                copyText(context = context, text = articleContent)
+                showCopiedToast()
+                onDismissRequest()
+            },
+        )
+    }
+
+    DropdownPrimalMenuItem(
+        trailingIconVector = PrimalIcons.ContextCopyNoteId,
+        text = stringResource(id = R.string.article_feed_context_copy_article_id),
+        onClick = {
+            copyText(context = context, text = naddr.withNostrPrefix())
+            showCopiedToast()
+            onDismissRequest()
+        },
+    )
+
+    if (articleRawData != null) {
+        DropdownPrimalMenuItem(
+            trailingIconVector = PrimalIcons.ContextCopyRawData,
+            text = stringResource(id = R.string.article_feed_context_copy_raw_data),
+            onClick = {
+                copyText(context = context, text = articleRawData)
+                showCopiedToast()
+                onDismissRequest()
+            },
+        )
+    }
+
+    DropdownPrimalMenuItem(
+        trailingIconVector = PrimalIcons.ContextCopyPublicKey,
+        text = stringResource(id = R.string.article_feed_context_copy_user_id),
+        onClick = {
+            copyText(context = context, text = authorId.hexToNpubHrp().withNostrPrefix())
+            showCopiedToast()
+            onDismissRequest()
+        },
+    )
+}
+
+@Composable
+private fun ContentModerationMenuItems(
+    isArticleAuthor: Boolean,
+    onMuteUserClick: () -> Unit,
+    onDismissRequest: () -> Unit,
+    onShowReportDialog: () -> Unit,
+    onShowDeleteDialog: () -> Unit,
+) {
+    if (!isArticleAuthor) {
+        DropdownPrimalMenuItem(
+            trailingIconVector = PrimalIcons.ContextMuteUser,
+            tint = AppTheme.colorScheme.error,
+            text = stringResource(id = R.string.context_menu_mute_user),
+            onClick = {
+                onMuteUserClick()
+                onDismissRequest()
+            },
+        )
+
+        DropdownPrimalMenuItem(
+            trailingIconVector = PrimalIcons.ContextReportContent,
+            tint = AppTheme.colorScheme.error,
+            text = stringResource(id = R.string.context_menu_report_content),
+            onClick = {
+                onShowReportDialog()
+                onDismissRequest()
+            },
+        )
+    }
+
+    if (isArticleAuthor) {
+        DropdownPrimalMenuItem(
+            trailingIconVector = PrimalIcons.Delete,
+            tint = AppTheme.colorScheme.error,
+            text = stringResource(id = R.string.article_feed_context_request_delete),
+            onClick = {
+                onShowDeleteDialog()
+                onDismissRequest()
+            },
+        )
     }
 }

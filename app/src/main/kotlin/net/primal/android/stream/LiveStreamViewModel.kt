@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -80,6 +79,7 @@ import timber.log.Timber
 class LiveStreamViewModel @AssistedInject constructor(
     userMentionHandlerFactory: UserMentionHandler.Factory,
     @Assisted val streamNaddr: Naddr,
+    private val userRepository: UserRepository,
     private val profileRepository: ProfileRepository,
     private val streamRepository: StreamRepository,
     private val liveStreamChatRepository: LiveStreamChatRepository,
@@ -205,7 +205,7 @@ class LiveStreamViewModel @AssistedInject constructor(
             }.distinct()
 
             if (authorIds.isNotEmpty()) {
-                val liveProfileIds = streamRepository.findWhoIsLive(authorIds = authorIds)
+                val liveProfileIds = streamRepository.findWhoIsLive(mainHostIds = authorIds)
                 setState { copy(liveProfiles = liveProfileIds) }
             }
         }
@@ -251,9 +251,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     is UiEvent.UnmuteAction -> unmute(it.profileId)
                     is UiEvent.ReportAbuse -> reportAbuse(it.reportType)
                     UiEvent.RequestDeleteStream -> requestDeleteStream()
-                    UiEvent.ToggleMute -> setState {
-                        copy(playerState = playerState.copy(isMuted = !playerState.isMuted))
-                    }
+                    UiEvent.ToggleMute -> toggleMute()
 
                     is UiEvent.SearchUsers -> userMentionHandler.search(it.query)
                     is UiEvent.ToggleSearchUsers -> userMentionHandler.toggleSearch(it.enabled)
@@ -300,6 +298,21 @@ class LiveStreamViewModel @AssistedInject constructor(
             }
         }
     }
+
+    private fun toggleMute() =
+        viewModelScope.launch {
+            val newIsMuted = !state.value.playerState.isMuted
+            updateVideoSoundSettings(soundOn = !newIsMuted)
+
+            setState { copy(playerState = playerState.copy(isMuted = newIsMuted)) }
+        }
+
+    private fun updateVideoSoundSettings(soundOn: Boolean) =
+        viewModelScope.launch {
+            userRepository.updateContentDisplaySettings(userId = activeAccountStore.activeUserId()) {
+                copy(autoPlayVideoSoundOn = soundOn)
+            }
+        }
 
     private fun sendMessage(text: String) {
         val streamInfo = state.value.streamInfo ?: return
@@ -363,8 +376,8 @@ class LiveStreamViewModel @AssistedInject constructor(
                         return@collect
                     }
 
-                    if (authorObserversJob == null || state.value.streamInfo?.mainHostId != stream.authorId) {
-                        initializeMainHostObservers(mainHostId = stream.authorId)
+                    if (authorObserversJob == null || state.value.streamInfo?.mainHostId != stream.mainHostId) {
+                        initializeMainHostObservers(mainHostId = stream.mainHostId)
                     }
 
                     setState {
@@ -380,7 +393,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
                                 rawNostrEventJson = stream.rawNostrEventJson,
-                                mainHostId = stream.authorId,
+                                mainHostId = stream.mainHostId,
                             ) ?: StreamInfoUi(
                                 atag = stream.aTag,
                                 eventId = stream.eventId,
@@ -390,7 +403,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
                                 rawNostrEventJson = stream.rawNostrEventJson,
-                                mainHostId = stream.authorId,
+                                mainHostId = stream.mainHostId,
                             ),
                             zaps = stream.eventZaps
                                 .map { it.asEventZapUiModel() }

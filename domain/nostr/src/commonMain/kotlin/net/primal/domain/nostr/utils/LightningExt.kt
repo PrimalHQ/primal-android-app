@@ -25,3 +25,5 @@ fun String.ensureEncodedLnUrl(): String =
     } else {
         this
     }
+
+fun String.stripLightningPrefix() = this.removePrefix("lightning:")

@@ -359,7 +359,7 @@ class ProfileDetailsViewModel @Inject constructor(
         streamObserverJob?.cancel()
         streamObserverJob = viewModelScope.launch {
             val latestLiveStream = withContext(dispatcherProvider.io()) {
-                streamRepository.findLatestLiveStreamATag(authorId = profileId)
+                streamRepository.findLatestLiveStreamATag(mainHostId = profileId)
             }
 
             if (latestLiveStream != null) {

@@ -551,11 +551,20 @@
     <string name="feeds_error_loading_user_feeds">Unable to load feeds. Please try again.</string>
     <string name="feeds_or">or</string>
 
+    <string name="feed_new_stream">stream</string>
     <string name="feed_new_posts_notice_general">posted</string>
     <string name="feed_new_posts_notice_100plus">100+ new notes</string>
     <plurals name="feed_new_posts_notice">
-        <item quantity="one">%1$s new notes</item>
-        <item quantity="other">%1$s new notes</item>
+        <item quantity="one">new note</item>
+        <item quantity="other">notes</item>
+    </plurals>
+    <plurals name="feed_new_posts_notice_extended">
+        <item quantity="one">new note</item>
+        <item quantity="other">new notes</item>
+    </plurals>
+    <plurals name="feed_new_lives_notice">
+        <item quantity="one">live stream</item>
+        <item quantity="other">live</item>
     </plurals>
 
     <string name="feed_context_unmute_thread">Unmute Thread</string>

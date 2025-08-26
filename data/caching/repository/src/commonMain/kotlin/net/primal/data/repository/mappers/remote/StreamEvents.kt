@@ -15,13 +15,12 @@ import net.primal.domain.nostr.findFirstIdentifier
 import net.primal.domain.nostr.findFirstImage
 import net.primal.domain.nostr.findFirstRecording
 import net.primal.domain.nostr.findFirstStarts
-import net.primal.domain.nostr.findFirstStatus
 import net.primal.domain.nostr.findFirstStreaming
 import net.primal.domain.nostr.findFirstSummary
 import net.primal.domain.nostr.findFirstTitle
 import net.primal.domain.nostr.findFirstTotalParticipants
 import net.primal.domain.nostr.serialization.toNostrJsonObject
-import net.primal.domain.streams.StreamStatus
+import net.primal.domain.streams.mappers.resolveStreamStatus
 
 fun List<NostrEvent>.mapNotNullAsStreamDataPO(): List<StreamData> {
     return this.mapNotNull { it.asStreamData() }
@@ -31,13 +30,14 @@ fun NostrEvent.asStreamData(): StreamData? {
     if (this.kind != NostrEventKind.LiveActivity.value) return null
 
     val dTag = this.tags.findFirstIdentifier() ?: return null
-    val status = this.tags.findFirstStatus()
-    val authorId = this.tags.findFirstHostPubkey() ?: this.pubKey
+    val mainHostId = this.tags.findFirstHostPubkey() ?: this.pubKey
+    val eventAuthorId = this.pubKey
 
     return StreamData(
-        aTag = "${this.kind}:$authorId:$dTag",
+        aTag = "${this.kind}:$eventAuthorId:$dTag",
         eventId = id,
-        authorId = authorId,
+        eventAuthorId = eventAuthorId,
+        mainHostId = mainHostId,
         dTag = dTag,
         title = this.tags.findFirstTitle(),
         summary = this.tags.findFirstSummary(),
@@ -45,7 +45,7 @@ fun NostrEvent.asStreamData(): StreamData? {
         hashtags = this.tags.findAllHashtags(),
         streamingUrl = this.tags.findFirstStreaming(),
         recordingUrl = this.tags.findFirstRecording(),
-        status = StreamStatus.fromString(status),
+        status = this.resolveStreamStatus(),
         startsAt = this.tags.findFirstStarts()?.toLongOrNull(),
         endsAt = this.tags.findFirstEnds()?.toLongOrNull(),
         currentParticipants = this.tags.findFirstCurrentParticipants()?.toIntOrNull(),

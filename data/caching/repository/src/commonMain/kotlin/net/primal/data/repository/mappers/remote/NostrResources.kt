@@ -132,7 +132,7 @@ fun List<String>.mapAsReferencedNostrUriDO(
     val refNaddrAuthor = profileIdToProfileDataMap[refNaddr?.userId]
     val refArticle = articleIdToArticle[refNaddr?.identifier]
     val refStream = streamIdToStreamData[refNaddr?.identifier]
-    val refStreamMainHost = profileIdToProfileDataMap[refStream?.authorId]
+    val refStreamMainHost = profileIdToProfileDataMap[refStream?.mainHostId]
 
     val referencedNostrEvent: NostrEvent? = eventIdToNostrEvent[link.extractEventId()]
 
@@ -218,7 +218,7 @@ private fun takeAsReferencedStreamOrNull(
         endedAt = streamData.endsAt,
         status = streamData.status,
         mainHostId = mainHost.ownerId,
-        mainHostIsLive = streams.filter { it.isLive() }.any { it.authorId == mainHost.ownerId },
+        mainHostIsLive = streams.filter { it.isLive() }.any { it.mainHostId == mainHost.ownerId },
         mainHostName = mainHost.authorNameUiFriendly(),
         mainHostAvatarCdnImage = mainHost.avatarCdnImage,
         mainHostLegendProfile = mainHost.primalPremiumInfo?.legendProfile,

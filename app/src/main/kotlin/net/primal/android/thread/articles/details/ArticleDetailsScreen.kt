@@ -55,7 +55,7 @@ import coil3.compose.SubcomposeAsyncImage
 import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.articles.feed.ui.ArticleDropdownMenuIcon
+import net.primal.android.articles.feed.ui.ArticleDropdownMenu
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.ListNoContent
@@ -78,6 +78,7 @@ import net.primal.android.core.compose.zaps.ArticleTopZapsSection
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.core.utils.resolvePrimalArticleLink
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
@@ -110,8 +111,10 @@ import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNos
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByInlineImages
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByNostrUris
 import net.primal.domain.links.EventUriType
+import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.utils.isNEvent
@@ -461,10 +464,21 @@ private fun ArticleDetailsTopAppBar(
                     onClick = { onBookmarkClick?.invoke() },
                 )
 
-                ArticleDropdownMenuIcon(
+                val shareUrl = resolvePrimalArticleLink(
+                    naddr = Naddr(
+                        identifier = state.article.articleId,
+                        userId = state.article.authorId,
+                        kind = NostrEventKind.LongFormContent.value,
+                    ).toNaddrString(),
+                    internetIdentifier = state.article.authorInternetIdentifier,
+                    articleSlug = state.article.articleId,
+                )
+
+                ArticleDropdownMenu(
                     modifier = Modifier
                         .size(42.dp)
                         .clip(CircleShape),
+                    shareUrl = shareUrl,
                     eventId = state.article.eventId,
                     articleATag = state.article.aTag,
                     articleId = state.article.articleId,

@@ -24,6 +24,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,14 +73,25 @@ fun PrimalDrawerScaffold(
     val localDensity = LocalDensity.current
     val streamState = LocalStreamState.current
 
+    var streamHidden by rememberSaveable { mutableStateOf(false) }
+
     DisposableEffect(drawerState.targetValue, streamState) {
         when (drawerState.targetValue) {
-            DrawerValue.Closed -> streamState.show()
-            DrawerValue.Open -> streamState.hide()
+            DrawerValue.Closed -> {
+                streamHidden = false
+                streamState.releaseHide()
+            }
+            DrawerValue.Open -> {
+                streamHidden = true
+                streamState.acquireHide()
+            }
         }
 
         onDispose {
-            streamState.show()
+            if (streamHidden) {
+                streamHidden = false
+                streamState.releaseHide()
+            }
         }
     }
 

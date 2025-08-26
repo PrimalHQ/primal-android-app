@@ -1,6 +1,7 @@
 package net.primal.android.stream.ui
 
 import android.annotation.SuppressLint
+import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -35,8 +36,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,6 +48,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FullScreen
+import net.primal.android.core.compose.icons.primaliconpack.FullScreenRestore
 import net.primal.android.core.compose.icons.primaliconpack.Minimize
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.icons.primaliconpack.SoundOff
@@ -82,6 +84,7 @@ fun LiveStreamPlayerControls(
     onUnmuteUserClick: () -> Unit,
     onReportContentClick: (ReportType) -> Unit,
     onRequestDeleteClick: () -> Unit,
+    onToggleFullScreenClick: () -> Unit,
 ) {
     AnimatedVisibility(
         modifier = modifier,
@@ -89,17 +92,7 @@ fun LiveStreamPlayerControls(
         enter = fadeIn(),
         exit = fadeOut(),
     ) {
-        Box(
-            modifier = Modifier.background(
-                brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color.Black.copy(alpha = 0.6f),
-                        Color.Transparent,
-                        Color.Black.copy(alpha = 0.6f),
-                    ),
-                ),
-            ),
-        ) {
+        Box(modifier = Modifier.background(Color.Black.copy(alpha = 0.5f))) {
             TopPlayerControls(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -136,7 +129,7 @@ fun LiveStreamPlayerControls(
                 onGoToLive = onGoToLive,
                 onSeekStarted = onSeekStarted,
                 onSoundClick = onSoundClick,
-                onFullscreenClick = { },
+                onFullscreenClick = onToggleFullScreenClick,
             )
         }
     }
@@ -316,6 +309,15 @@ private fun PlayerActionButtons(
     onSoundClick: () -> Unit,
     onFullscreenClick: () -> Unit,
 ) {
+    val localConfiguration = LocalConfiguration.current
+    val fullScreenIcon = remember(localConfiguration.orientation) {
+        if (localConfiguration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            PrimalIcons.FullScreenRestore
+        } else {
+            PrimalIcons.FullScreen
+        }
+    }
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -342,7 +344,11 @@ private fun PlayerActionButtons(
             )
         }
         IconButton(onClick = onFullscreenClick) {
-            Icon(imageVector = PrimalIcons.FullScreen, contentDescription = "Full screen", tint = Color.White)
+            Icon(
+                imageVector = fullScreenIcon,
+                contentDescription = "Full screen",
+                tint = Color.White,
+            )
         }
     }
 }

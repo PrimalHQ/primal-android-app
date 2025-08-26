@@ -12,12 +12,12 @@ interface StreamDataDao {
     @Upsert
     suspend fun upsertStreamData(data: List<StreamData>)
 
-    @Query("SELECT * FROM StreamData WHERE authorId IN (:authorIds) ORDER BY startsAt DESC")
-    suspend fun findStreamData(authorIds: List<String>): List<StreamData>
+    @Query("SELECT * FROM StreamData WHERE mainHostId IN (:mainHostIds) ORDER BY startsAt DESC")
+    suspend fun findStreamData(mainHostIds: List<String>): List<StreamData>
 
     @Transaction
-    @Query("SELECT * FROM StreamData WHERE authorId = :authorId ORDER BY startsAt DESC")
-    fun observeStreamsByAuthorId(authorId: String): Flow<List<Stream>>
+    @Query("SELECT * FROM StreamData WHERE mainHostId = :mainHostId ORDER BY startsAt DESC")
+    fun observeStreamsByAuthorId(mainHostId: String): Flow<List<Stream>>
 
     @Transaction
     @Query("SELECT * FROM StreamData WHERE aTag = :aTag")
