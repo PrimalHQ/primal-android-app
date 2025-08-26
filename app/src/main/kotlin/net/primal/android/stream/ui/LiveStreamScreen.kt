@@ -484,16 +484,6 @@ private fun LiveChatListOrSearch(
     onChatMessageClick: (ChatMessageUi) -> Unit,
     onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
-    if (state.chatLoading) {
-        Box(
-            modifier = modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
-        ) {
-            PrimalLoadingSpinner()
-        }
-        return
-    }
-
     if (!state.userTaggingState.isUserTaggingActive) {
         if (state.chatItems.isEmpty()) {
             LiveChatEmpty(
