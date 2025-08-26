@@ -260,7 +260,7 @@ class NoteFeedViewModel @AssistedInject constructor(
             )
             .distinctBy { it.naddr }
 
-        if (newSyncStats.isTopVisibleNoteTheLatestNote()) {
+        if (newSyncStats.isTopVisibleNoteTheLatestNote() || latestTimestamp == null) {
             setState { copy(syncStats = FeedPostsSyncStats(), streams = streamPills) }
         } else {
             setState { copy(syncStats = newSyncStats, streams = streamPills) }
