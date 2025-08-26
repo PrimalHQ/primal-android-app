@@ -249,15 +249,9 @@ private fun LiveStreamScaffold(
                     onFetchFollowerCount = { profileId ->
                         eventPublisher(LiveStreamContract.UiEvent.FetchFollowerCount(profileId))
                     },
-                    onFollow = { profileId ->
-                        eventPublisher(LiveStreamContract.UiEvent.FollowAction(profileId))
-                    },
-                    onUnfollow = { profileId ->
-                        eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(profileId))
-                    },
-                    onMute = { profileId ->
-                        eventPublisher(LiveStreamContract.UiEvent.MuteAction(profileId))
-                    },
+                    onFollow = { profileId -> eventPublisher(LiveStreamContract.UiEvent.FollowAction(profileId)) },
+                    onUnfollow = { profileId -> eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(profileId)) },
+                    onMute = { profileId -> eventPublisher(LiveStreamContract.UiEvent.MuteAction(profileId)) },
                     onUnmute = { profileId ->
                         eventPublisher(LiveStreamContract.UiEvent.UnmuteAction(profileId))
                     },
@@ -431,17 +425,19 @@ private fun LiveStreamContent(
                 animatedVisibilityScope = animatedVisibilityScope,
             )
 
-            if (localConfiguration.orientation != Configuration.ORIENTATION_LANDSCAPE) {StreamInfoAndChatSection(
-                modifier = Modifier.weight(1f),
-                state = state,
-                eventPublisher = eventPublisher,
-                onZapClick = onZapClick,
-                onInfoClick = onInfoClick,
-                onProfileClick = callbacks.onProfileClick,
-                onEventReactionsClick = callbacks.onEventReactionsClick,
-                onChatMessageClick = onChatMessageClick,
-                onZapMessageClick = onZapMessageClick,
-            )}
+            if (localConfiguration.orientation != Configuration.ORIENTATION_LANDSCAPE) {
+                StreamInfoAndChatSection(
+                    modifier = Modifier.weight(1f),
+                    state = state,
+                    eventPublisher = eventPublisher,
+                    onZapClick = onZapClick,
+                    onInfoClick = onInfoClick,
+                    onProfileClick = callbacks.onProfileClick,
+                    onEventReactionsClick = callbacks.onEventReactionsClick,
+                    onChatMessageClick = onChatMessageClick,
+                    onZapMessageClick = onZapMessageClick,
+                )
+            }
         }
     }
 }
