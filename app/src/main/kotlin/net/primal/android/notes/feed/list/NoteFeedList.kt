@@ -240,7 +240,7 @@ private fun NoteFeedList(
                     delay(10.milliseconds)
                     buttonVisible = true
                 }
-                if (buttonVisible && !isStreamPillsRowVisible.value) {
+                if (buttonVisible && (!isStreamPillsRowVisible.value || state.streams.isEmpty())) {
                     NewPostsButton(
                         syncStats = state.syncStats,
                         onClick = { eventPublisher(UiEvent.ShowLatestNotes) },
