@@ -101,7 +101,6 @@ class LiveStreamViewModel @AssistedInject constructor(
         UiState(
             naddr = streamNaddr,
             activeUserId = activeAccountStore.activeUserId(),
-            chatLoading = true,
         ),
     )
     val state = _state.asStateFlow()
@@ -119,8 +118,6 @@ class LiveStreamViewModel @AssistedInject constructor(
 
     private var zaps: List<StreamChatItem.ZapMessageItem> = emptyList()
     private var chatMessages: List<StreamChatItem.ChatMessageItem> = emptyList()
-    private var initialZapsReceived = false
-    private var initialMessagesReceived = false
 
     init {
         startLiveStreamSubscription()
@@ -172,7 +169,6 @@ class LiveStreamViewModel @AssistedInject constructor(
                 .filterNotNull()
                 .map { it.eventZaps.map { zap -> StreamChatItem.ZapMessageItem(zap.asEventZapUiModel()) } }
                 .collect {
-                    initialZapsReceived = true
                     zaps = it
                     updateChatItems()
                 }
@@ -183,23 +179,16 @@ class LiveStreamViewModel @AssistedInject constructor(
             liveStreamChatRepository.observeMessages(streamATag = streamNaddr.asATagValue())
                 .map { chatList -> chatList.map { it.toChatMessageItem() } }
                 .collect {
-                    initialMessagesReceived = true
                     chatMessages = it
                     updateChatItems()
                 }
         }
 
     private fun updateChatItems() {
-        if (initialZapsReceived && initialMessagesReceived) {
-            val combinedAndSorted = (zaps + chatMessages).sortedByDescending { it.timestamp }
-            setState {
-                copy(
-                    chatItems = combinedAndSorted,
-                    chatLoading = false,
-                )
-            }
-            updateLiveProfilesStatus(chatItems = combinedAndSorted)
-        }
+        val combinedAndSorted = (zaps + chatMessages).sortedByDescending { it.timestamp }
+        setState { copy(chatItems = combinedAndSorted) }
+
+        updateLiveProfilesStatus(combinedAndSorted)
     }
 
     private fun updateLiveProfilesStatus(chatItems: List<StreamChatItem>) {
