@@ -356,6 +356,13 @@ private fun PlayerSlider(
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,
 ) {
+    val configuration = LocalConfiguration.current
+    val sliderHeight = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+        20.dp
+    } else {
+        0.dp
+    }
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
@@ -363,6 +370,11 @@ private fun PlayerSlider(
     ) {
         Slider(
             modifier = Modifier
+                .padding(
+                    start = sliderHeight,
+                    end = sliderHeight,
+                    bottom = sliderHeight,
+                )
                 .weight(1f)
                 .height(0.dp),
             value = sliderValue,
