@@ -47,6 +47,7 @@ import net.primal.android.core.compose.FeedsErrorColumn
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.fab.NewPostFloatingActionButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
@@ -62,6 +63,7 @@ import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.stream.player.LocalStreamState
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.links.CdnImage
 
@@ -74,13 +76,23 @@ fun HomeFeedScreen(
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
     callbacks: HomeFeedContract.ScreenCallbacks,
 ) {
+    val streamState = LocalStreamState.current
     val uiState = viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel, viewModel.effects) {
+        viewModel.effects.collect {
+            when (it) {
+                is HomeFeedContract.SideEffect.StartStream -> streamState.start(naddr = it.naddr)
+            }
+        }
+    }
 
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
             Lifecycle.Event.ON_START -> {
                 viewModel.setEvent(UiEvent.RequestUserDataUpdate)
             }
+
             else -> Unit
         }
     }
@@ -111,6 +123,13 @@ fun HomeFeedScreen(
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val snackbarHostState = remember { SnackbarHostState() }
+
+    SnackbarErrorHandler(
+        error = state.uiError,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context = context) },
+        onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
+    )
 
     var shouldAnimateScrollToTop by remember { mutableStateOf(false) }
     var activeFeed by remember { mutableStateOf<FeedUi?>(null) }
