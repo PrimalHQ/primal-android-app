@@ -27,15 +27,9 @@ fun String?.asBase64Decoded(): String? {
     }
 }
 
-fun String?.isMainScreenRoute(): Boolean {
-    return when (this) {
-        "home",
-        "reads",
-        "walletDashboard",
-        "notifications",
-        "explore",
-        -> true
-
-        else -> false
-    }
-}
+fun String?.isMainScreenRoute(): Boolean =
+    this?.startsWith("home") == true ||
+        this == "reads" ||
+        this == "walletDashboard" ||
+        this == "notifications" ||
+        this == "explore"

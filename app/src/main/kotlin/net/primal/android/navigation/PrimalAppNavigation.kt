@@ -562,16 +562,36 @@ private fun PrimalAppNavigation(
         )
 
         home(
-            route = "home",
+            route = "home?$PROFILE_NPUB={$PROFILE_NPUB}&$IDENTIFIER={$IDENTIFIER}&$PRIMAL_NAME={$PRIMAL_NAME}",
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
+            arguments = listOf(
+                navArgument(PROFILE_NPUB) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(IDENTIFIER) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(PRIMAL_NAME) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
             deepLinks = listOf(
                 navDeepLink {
                     uriPattern = "https://primal.net"
                 },
                 navDeepLink {
                     uriPattern = "https://primal.net/home"
+                },
+                navDeepLink {
+                    uriPattern = "https://primal.net/p/{$PROFILE_NPUB}/live/{$IDENTIFIER}"
+                },
+                navDeepLink {
+                    uriPattern = "https://primal.net/{$PRIMAL_NAME}/live/{$IDENTIFIER}"
                 },
             ),
         )
@@ -1222,12 +1242,14 @@ private fun NavGraphBuilder.redeemCode(
 
 private fun NavGraphBuilder.home(
     route: String,
+    arguments: List<NamedNavArgument>,
     deepLinks: List<NavDeepLink>,
     navController: NavController,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
 ) = composable(
     route = route,
+    arguments = arguments,
     deepLinks = deepLinks,
     enterTransition = { null },
     exitTransition = {
