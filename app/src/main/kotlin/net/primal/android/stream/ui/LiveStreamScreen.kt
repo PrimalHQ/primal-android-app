@@ -98,6 +98,7 @@ import net.primal.android.notes.feed.zaps.ZapHost
 import net.primal.android.notes.feed.zaps.rememberZapHostState
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.SEEK_INCREMENT_MS
+import net.primal.android.stream.player.SHARED_TRANSITION_LOADING_PLAYER_KEY
 import net.primal.android.stream.player.SHARED_TRANSITION_PLAYER_KEY
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
@@ -295,6 +296,11 @@ private fun StreamPlayer(
             playerModifier = Modifier
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_PLAYER_KEY),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                ),
+            loadingModifier = Modifier
+                .sharedElement(
+                    sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_LOADING_PLAYER_KEY),
                     animatedVisibilityScope = animatedVisibilityScope,
                 ),
             state = state,
