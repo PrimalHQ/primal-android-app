@@ -107,7 +107,7 @@ fun LiveStreamPlayer(
             modifier = playerModifier
                 .then(playerSizingModifier)
                 .onDragDownBeyond(
-                    threshold = 36.dp,
+                    threshold = 100.dp,
                     onTriggered = onClose,
                 )
                 .matchParentSize(),
