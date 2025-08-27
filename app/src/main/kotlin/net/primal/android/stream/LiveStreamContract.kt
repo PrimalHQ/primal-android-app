@@ -13,6 +13,7 @@ import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.ReportType
+import net.primal.domain.streams.StreamContentModerationMode
 import net.primal.domain.wallet.DraftTx
 import net.primal.domain.zaps.ZappingState
 
@@ -25,6 +26,7 @@ interface LiveStreamContract {
         val playerState: PlayerState = PlayerState(),
         val comment: TextFieldValue = TextFieldValue(),
         val shouldApproveProfileAction: FollowsApproval? = null,
+        val contentModerationMode: StreamContentModerationMode = StreamContentModerationMode.Moderated,
         val zaps: List<EventZapUiModel> = emptyList(),
         val chatItems: List<StreamChatItem> = emptyList(),
         val zappingState: ZappingState = ZappingState(),
@@ -79,6 +81,7 @@ interface LiveStreamContract {
         data object DismissConfirmFollowUnfollowAlertDialog : UiEvent()
         data class ApproveFollowsActions(val actions: List<ProfileFollowsHandler.Action>) : UiEvent()
         data class ZapStream(val zapAmount: ULong? = null, val zapDescription: String? = null) : UiEvent()
+        data class ChangeContentModeration(val moderationMode: StreamContentModerationMode) : UiEvent()
         data class OnCommentValueChanged(val value: TextFieldValue) : UiEvent()
         data class SendMessage(val text: String) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()

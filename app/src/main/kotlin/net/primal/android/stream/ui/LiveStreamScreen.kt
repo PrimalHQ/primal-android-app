@@ -497,7 +497,9 @@ private fun LiveChatListOrSearch(
     onProfileClick: (String) -> Unit,
 ) {
     if (!state.userTaggingState.isUserTaggingActive) {
-        if (state.chatItems.isEmpty()) {
+        if (state.loading) {
+            PrimalLoadingSpinner()
+        } else if (state.chatItems.isEmpty()) {
             LiveChatEmpty(
                 modifier = modifier,
             )

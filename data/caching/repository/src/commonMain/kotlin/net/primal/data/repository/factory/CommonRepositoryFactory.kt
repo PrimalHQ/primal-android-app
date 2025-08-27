@@ -228,6 +228,7 @@ abstract class CommonRepositoryFactory {
 
     fun createStreamChatRepository(primalPublisher: PrimalPublisher): LiveStreamChatRepository {
         return LiveStreamChatRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
             database = resolveCachingDatabase(),
             primalPublisher = primalPublisher,
         )

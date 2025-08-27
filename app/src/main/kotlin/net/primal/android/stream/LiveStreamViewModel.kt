@@ -67,6 +67,7 @@ import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.streams.StreamContentModerationMode
 import net.primal.domain.streams.StreamRepository
 import net.primal.domain.streams.chat.ChatMessage
 import net.primal.domain.streams.chat.LiveStreamChatRepository
@@ -117,6 +118,7 @@ class LiveStreamViewModel @AssistedInject constructor(
     private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
     private var authorObserversJob: Job? = null
+    private var streamSubscriptionJob: Job? = null
 
     private var zaps: List<StreamChatItem.ZapMessageItem> = emptyList()
     private var chatMessages: List<StreamChatItem.ChatMessageItem> = emptyList()
@@ -133,12 +135,26 @@ class LiveStreamViewModel @AssistedInject constructor(
         observeZaps()
     }
 
-    private fun startLiveStreamSubscription() =
-        viewModelScope.launch {
+    private fun startLiveStreamSubscription() {
+        streamSubscriptionJob?.cancel()
+        streamSubscriptionJob = viewModelScope.launch {
             streamRepository.startLiveStreamSubscription(
                 naddr = streamNaddr,
                 userId = activeAccountStore.activeUserId(),
+                streamContentModerationMode = _state.value.contentModerationMode,
             )
+        }
+    }
+
+    private fun changeContentModeration(moderationMode: StreamContentModerationMode) =
+        viewModelScope.launch {
+            if (moderationMode != _state.value.contentModerationMode) {
+                setState { copy(loading = true, contentModerationMode = moderationMode) }
+                val aTagValue = streamNaddr.asATagValue()
+                liveStreamChatRepository.clearMessages(streamATag = aTagValue)
+                eventInteractionRepository.deleteZaps(eventId = aTagValue)
+                startLiveStreamSubscription()
+            }
         }
 
     private fun observeUserTaggingState() {
@@ -229,6 +245,8 @@ class LiveStreamViewModel @AssistedInject constructor(
                     UiEvent.AppendUserTagAtSign -> setState {
                         copy(comment = this.comment.appendUserTagAtSignAtCursorPosition())
                     }
+
+                    is UiEvent.ChangeContentModeration -> changeContentModeration(moderationMode = it.moderationMode)
                 }
             }
         }
