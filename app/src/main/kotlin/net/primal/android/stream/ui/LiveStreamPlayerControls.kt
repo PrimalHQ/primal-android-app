@@ -40,8 +40,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import java.util.*
-import java.util.concurrent.TimeUnit
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -66,6 +64,7 @@ fun LiveStreamPlayerControls(
     isVisible: Boolean,
     state: LiveStreamContract.UiState,
     menuVisible: Boolean,
+    isStreamUnavailable: Boolean,
     onMenuVisibilityChange: (Boolean) -> Unit,
     onPlayPauseClick: () -> Unit,
     onRewind: () -> Unit,
@@ -105,28 +104,30 @@ fun LiveStreamPlayerControls(
                 onRequestDeleteClick = onRequestDeleteClick,
             )
 
-            CenterPlayerControls(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.Center),
-                isPlaying = state.playerState.isPlaying,
-                isLive = state.playerState.isLive,
-                onRewind = onRewind,
-                onPlayPauseClick = onPlayPauseClick,
-                onForward = onForward,
-            )
+            if (!isStreamUnavailable) {
+                CenterPlayerControls(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center),
+                    isPlaying = state.playerState.isPlaying,
+                    isLive = state.playerState.isLive,
+                    onRewind = onRewind,
+                    onPlayPauseClick = onPlayPauseClick,
+                    onForward = onForward,
+                )
 
-            BottomControls(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth(),
-                state = state.playerState,
-                onSeek = onSeek,
-                onGoToLive = onGoToLive,
-                onSeekStarted = onSeekStarted,
-                onSoundClick = onSoundClick,
-                onFullscreenClick = onToggleFullScreenClick,
-            )
+                BottomControls(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth(),
+                    state = state.playerState,
+                    onSeek = onSeek,
+                    onGoToLive = onGoToLive,
+                    onSeekStarted = onSeekStarted,
+                    onSoundClick = onSoundClick,
+                    onFullscreenClick = onToggleFullScreenClick,
+                )
+            }
         }
     }
 }

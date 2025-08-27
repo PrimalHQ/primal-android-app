@@ -40,6 +40,7 @@ interface LiveStreamContract {
         val activeUserMutedProfiles: Set<String> = emptySet(),
         val profileIdToFollowerCount: Map<String, Int> = emptyMap(),
         val liveProfiles: Set<String> = emptySet(),
+        val isStreamUnavailable: Boolean = false,
         val activeBottomSheet: ActiveBottomSheet = ActiveBottomSheet.None,
     )
 
@@ -104,6 +105,7 @@ interface LiveStreamContract {
             val messageId: String,
             val authorId: String,
         ) : UiEvent()
+        data object OnPlayerUnavailable : UiEvent()
         data class ChangeActiveBottomSheet(val sheet: ActiveBottomSheet) : UiEvent()
     }
 

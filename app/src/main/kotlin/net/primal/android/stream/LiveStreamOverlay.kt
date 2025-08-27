@@ -99,6 +99,9 @@ private fun LiveStreamOverlay(
                 LiveStreamContract.UiEvent.OnPlayerStateUpdate(isBuffering = playbackState == Player.STATE_BUFFERING),
             )
         },
+        onPlayerError = {
+            viewModel.setEvent(LiveStreamContract.UiEvent.OnPlayerUnavailable)
+        },
     )
 
     LaunchedEffect(streamState, streamState.commands) {

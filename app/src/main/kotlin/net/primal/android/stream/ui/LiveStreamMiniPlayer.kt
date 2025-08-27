@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalSharedTransitionApi::class)
-
 package net.primal.android.stream.ui
 
 import android.content.res.Configuration
@@ -28,6 +26,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -80,7 +79,7 @@ private val springSpec = spring<Float>(
     stiffness = Spring.StiffnessLow,
 )
 
-@OptIn(ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class, ExperimentalSharedTransitionApi::class)
 @UnstableApi
 @Composable
 fun LiveStreamMiniPlayer(
@@ -221,6 +220,7 @@ fun LiveStreamMiniPlayer(
                         onTogglePlayer = { exoPlayer.toggle() },
                         isLoading = state.playerState.isLoading,
                         isPlaying = exoPlayer.isPlaying,
+                        isStreamUnavailable = state.isStreamUnavailable,
                         onStopStream = onStopStream,
                         onExpandStream = onExpandStream,
                     )
@@ -236,6 +236,7 @@ private fun PlayerControls(
     onTogglePlayer: () -> Unit,
     isPlaying: Boolean,
     isLoading: Boolean,
+    isStreamUnavailable: Boolean,
     onStopStream: () -> Unit,
 ) {
     val playPauseIcon = remember(isPlaying) {
@@ -252,10 +253,14 @@ private fun PlayerControls(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = if (isLoading) Arrangement.End else Arrangement.SpaceBetween,
+            horizontalArrangement = when {
+                isStreamUnavailable -> Arrangement.End
+                isLoading -> Arrangement.End
+                else -> Arrangement.SpaceBetween
+            },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (!isLoading) {
+            if (!isLoading && !isStreamUnavailable) {
                 IconButton(onClick = onTogglePlayer) {
                     ShadowIcon(
                         modifier = Modifier.size(36.dp),
@@ -270,7 +275,7 @@ private fun PlayerControls(
                     modifier = Modifier.size(36.dp),
                     tint = Color.White,
                     imageVector = PrimalIcons.VideoCloseMini,
-                    contentDescription = null,
+                    contentDescription = stringResource(id = R.string.accessibility_close),
                 )
             }
         }
@@ -326,21 +331,36 @@ private fun PlayerBox(
             .fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        PlayerSurface(
-            modifier = modifier
-                .clip(AppTheme.shapes.large)
-                .matchParentSize(),
-            player = exoPlayer,
-            surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
-        )
-
-        if (state.playerState.isLoading) {
-            StreamPlayerLoadingIndicator(
-                modifier = loadingModifier
-                    .matchParentSize()
+        if (state.isStreamUnavailable) {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(Color.Black),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.live_stream_recording_not_available),
+                    color = Color.White,
+                    style = AppTheme.typography.bodySmall,
+                )
+            }
+        } else {
+            PlayerSurface(
+                modifier = modifier
                     .clip(AppTheme.shapes.large)
-                    .background(AppTheme.colorScheme.background),
+                    .matchParentSize(),
+                player = exoPlayer,
+                surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
             )
+
+            if (state.playerState.isLoading) {
+                StreamPlayerLoadingIndicator(
+                    modifier = loadingModifier
+                        .matchParentSize()
+                        .clip(AppTheme.shapes.large)
+                        .background(AppTheme.colorScheme.background),
+                )
+            }
         }
     }
 }

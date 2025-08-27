@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
@@ -88,11 +89,12 @@ fun rememberPrimalStreamExoPlayer(
     streamNaddr: Naddr,
     onIsPlayingChanged: (Boolean) -> Unit,
     onPlaybackStateChanged: (Int) -> Unit,
+    onPlayerError: () -> Unit,
 ): ExoPlayer {
     val context = LocalContext.current
     val exoPlayer = remember(streamNaddr) { ExoPlayer.Builder(context).build() }
 
-    DisposableEffect(exoPlayer, onIsPlayingChanged, onPlaybackStateChanged) {
+    DisposableEffect(exoPlayer, onIsPlayingChanged, onPlaybackStateChanged, onPlayerError) {
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 onIsPlayingChanged(isPlaying)
@@ -100,6 +102,10 @@ fun rememberPrimalStreamExoPlayer(
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 onPlaybackStateChanged(playbackState)
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                onPlayerError()
             }
         }
         exoPlayer.addListener(listener)

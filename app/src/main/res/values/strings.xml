@@ -1368,6 +1368,7 @@
     <string name="live_stream_chat_message">Chat Message</string>
     <string name="live_stream_bottom_sheet_unmute_user">Unmute</string>
     <string name="live_stream_bottom_sheet_mute_user">Mute</string>
+    <string name="live_stream_recording_not_available">Video recording not available</string>
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>
