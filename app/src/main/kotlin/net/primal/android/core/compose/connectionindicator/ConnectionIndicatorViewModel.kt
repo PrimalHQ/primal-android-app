@@ -27,7 +27,7 @@ class ConnectionIndicatorViewModel @Inject constructor(
     }
 
     companion object {
-        private const val DELAY_ON_DISCONNECT = 2000L
+        private const val DELAY_ON_DISCONNECT = 10_000L
     }
 
     private fun observeCachingServiceConnection() =
