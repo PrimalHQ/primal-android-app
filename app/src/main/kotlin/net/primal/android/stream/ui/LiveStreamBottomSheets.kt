@@ -9,7 +9,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
@@ -43,7 +42,6 @@ fun LiveStreamModalBottomSheetHost(
     followedProfiles: Set<String>,
     bottomSheetHeight: Dp?,
     onDismiss: () -> Unit,
-    onFetchFollowerCount: (String) -> Unit,
     onFollow: (String) -> Unit,
     onUnfollow: (String) -> Unit,
     onMute: (String) -> Unit,
@@ -56,13 +54,6 @@ fun LiveStreamModalBottomSheetHost(
     onDrawerQrCodeClick: (String) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    val profileIdToFetch = activeSheet.getProfileId(streamInfo)
-    LaunchedEffect(profileIdToFetch) {
-        if (profileIdToFetch != null) {
-            onFetchFollowerCount(profileIdToFetch)
-        }
-    }
 
     if (activeSheet != ActiveBottomSheet.None) {
         val profileDetails = activeSheet.getProfileDetails(streamInfo)
@@ -204,14 +195,6 @@ private fun StreamBottomSectionSwitcher(
         ActiveBottomSheet.None -> Unit
     }
 }
-
-private fun ActiveBottomSheet.getProfileId(streamInfo: LiveStreamContract.StreamInfoUi?): String? =
-    when (this) {
-        is ActiveBottomSheet.ChatDetails -> this.message.authorProfile.pubkey
-        is ActiveBottomSheet.ZapDetails -> this.zap.zapperId
-        is ActiveBottomSheet.StreamInfo -> streamInfo?.mainHostId
-        ActiveBottomSheet.None -> null
-    }
 
 private fun ActiveBottomSheet.getProfileDetails(streamInfo: LiveStreamContract.StreamInfoUi?): ProfileDetailsUi? =
     when (this) {

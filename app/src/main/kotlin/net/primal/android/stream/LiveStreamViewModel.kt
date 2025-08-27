@@ -172,9 +172,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                 .filterNotNull()
                 .map { it.eventZaps.map { zap -> StreamChatItem.ZapMessageItem(zap.asEventZapUiModel()) } }
                 .collect {
-                    if (!initialZapsReceived) {
-                        initialZapsReceived = true
-                    }
+                    initialZapsReceived = true
                     zaps = it
                     updateChatItems()
                 }
@@ -185,9 +183,7 @@ class LiveStreamViewModel @AssistedInject constructor(
             liveStreamChatRepository.observeMessages(streamATag = streamNaddr.asATagValue())
                 .map { chatList -> chatList.map { it.toChatMessageItem() } }
                 .collect {
-                    if (!initialMessagesReceived) {
-                        initialMessagesReceived = true
-                    }
+                    initialMessagesReceived = true
                     chatMessages = it
                     updateChatItems()
                 }
@@ -284,7 +280,6 @@ class LiveStreamViewModel @AssistedInject constructor(
                         messageId = it.messageId,
                         authorId = it.authorId,
                     )
-                    is UiEvent.FetchFollowerCount -> fetchFollowerCount(profileId = it.profileId)
                     is UiEvent.ChangeActiveBottomSheet -> {
                         setState { copy(activeBottomSheet = it.sheet) }
                         when (val sheet = it.sheet) {
@@ -293,6 +288,11 @@ class LiveStreamViewModel @AssistedInject constructor(
                             }
                             is ActiveBottomSheet.ZapDetails -> {
                                 fetchFollowerCount(sheet.zap.zapperId)
+                            }
+                            is ActiveBottomSheet.StreamInfo -> {
+                                state.value.streamInfo?.mainHostId?.let { hostId ->
+                                    fetchFollowerCount(hostId)
+                                }
                             }
                             else -> Unit
                         }

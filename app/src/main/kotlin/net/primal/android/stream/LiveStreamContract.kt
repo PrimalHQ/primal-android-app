@@ -102,7 +102,6 @@ interface LiveStreamContract {
             val messageId: String,
             val authorId: String,
         ) : UiEvent()
-        data class FetchFollowerCount(val profileId: String) : UiEvent()
         data class ChangeActiveBottomSheet(val sheet: ActiveBottomSheet) : UiEvent()
     }
 

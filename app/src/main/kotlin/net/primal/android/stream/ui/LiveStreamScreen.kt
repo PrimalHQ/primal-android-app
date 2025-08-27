@@ -268,7 +268,6 @@ private fun LiveStreamBottomSheet(
         followedProfiles = state.activeUserFollowedProfiles,
         bottomSheetHeight = bottomSheetHeight,
         onDismiss = { eventPublisher(LiveStreamContract.UiEvent.ChangeActiveBottomSheet(ActiveBottomSheet.None)) },
-        onFetchFollowerCount = { eventPublisher(LiveStreamContract.UiEvent.FetchFollowerCount(it)) },
         onFollow = { eventPublisher(LiveStreamContract.UiEvent.FollowAction(it)) },
         onUnfollow = { eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(it)) },
         onMute = { eventPublisher(LiveStreamContract.UiEvent.MuteAction(it)) },
