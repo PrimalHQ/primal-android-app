@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -201,13 +200,13 @@ private fun HostActionRow(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Icon(
                         modifier = Modifier.size(16.dp),
                         imageVector = PrimalIcons.ContextMuteUser,
                         contentDescription = null,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         modifier = Modifier.padding(top = 3.dp),
                         text = if (isProfileMuted) {

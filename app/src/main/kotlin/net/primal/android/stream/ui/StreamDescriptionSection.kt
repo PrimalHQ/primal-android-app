@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.core.utils.parseHashtags
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.detectUrls
@@ -42,9 +43,7 @@ fun StreamDescriptionSection(
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .background(
-                AppTheme.extraColorScheme.surfaceVariantAlt1,
-            )
+            .background(BottomSheetSectionColorHandler)
             .padding(horizontal = 16.dp)
             .padding(top = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -118,15 +117,13 @@ fun StreamDescriptionSection(
     }
 }
 
-private fun String.detectHashtags(): List<String> = Regex("""#\w+""").findAll(this).map { it.value }.toList()
-
 private fun buildAnnotatedStringWithHighlights(
     text: String,
     urlStyle: SpanStyle,
     hashtagStyle: SpanStyle,
 ): AnnotatedString {
     val urls = text.detectUrls() + text.parseNostrUris()
-    val hashtags = text.detectHashtags()
+    val hashtags = text.parseHashtags()
 
     return buildAnnotatedString {
         append(text)

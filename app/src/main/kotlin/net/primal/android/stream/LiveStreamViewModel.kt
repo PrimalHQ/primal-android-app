@@ -12,7 +12,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
@@ -34,11 +33,13 @@ import net.primal.android.stream.LiveStreamContract.SideEffect
 import net.primal.android.stream.LiveStreamContract.StreamInfoUi
 import net.primal.android.stream.LiveStreamContract.UiEvent
 import net.primal.android.stream.LiveStreamContract.UiState
+import net.primal.android.stream.ui.ActiveBottomSheet
 import net.primal.android.stream.ui.ChatMessageUi
 import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.handler.ProfileFollowsHandler
+import net.primal.android.user.handler.ProfileFollowsHandler.Companion.foldActions
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
@@ -54,8 +55,6 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.asATagValue
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
-import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.publisher.NostrPublishException as DomainNostrPublishException
 import net.primal.domain.nostr.utils.extractProfileId
@@ -133,6 +132,8 @@ class LiveStreamViewModel @AssistedInject constructor(
         observeActiveAccount()
         observeChatMessages()
         observeZaps()
+        observeFollowState()
+        observeMuteState()
     }
 
     private fun startLiveStreamSubscription() {
@@ -284,6 +285,18 @@ class LiveStreamViewModel @AssistedInject constructor(
                         authorId = it.authorId,
                     )
                     is UiEvent.FetchFollowerCount -> fetchFollowerCount(profileId = it.profileId)
+                    is UiEvent.ChangeActiveBottomSheet -> {
+                        setState { copy(activeBottomSheet = it.sheet) }
+                        when (val sheet = it.sheet) {
+                            is ActiveBottomSheet.ChatDetails -> {
+                                fetchFollowerCount(sheet.message.authorProfile.pubkey)
+                            }
+                            is ActiveBottomSheet.ZapDetails -> {
+                                fetchFollowerCount(sheet.zap.zapperId)
+                            }
+                            else -> Unit
+                        }
+                    }
                 }
             }
         }
@@ -300,9 +313,7 @@ class LiveStreamViewModel @AssistedInject constructor(
 
                 if (followerCount != null) {
                     setState {
-                        val newMap = this.profileIdToFollowerCount.toMutableMap()
-                        newMap[profileId] = followerCount
-                        copy(profileIdToFollowerCount = newMap)
+                        copy(profileIdToFollowerCount = profileIdToFollowerCount + (profileId to followerCount))
                     }
                 }
             } catch (error: NetworkException) {
@@ -345,7 +356,7 @@ class LiveStreamViewModel @AssistedInject constructor(
             } catch (error: NostrPublishException) {
                 Timber.w(error)
                 setState { copy(error = UiError.FailedToPublishZapEvent(error)) }
-            } catch (error: SigningKeyNotFoundException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
                 setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } finally {
@@ -409,8 +420,6 @@ class LiveStreamViewModel @AssistedInject constructor(
         authorObserversJob = viewModelScope.launch {
             observeAuthorProfile(mainHostId)
             observeAuthorProfileStats(mainHostId)
-            observeFollowState()
-            observeMuteState()
         }
     }
 
@@ -442,10 +451,9 @@ class LiveStreamViewModel @AssistedInject constructor(
                 }
         }
 
-    private fun CoroutineScope.observeFollowState() =
-        launch {
+    private fun observeFollowState() =
+        viewModelScope.launch {
             activeAccountStore.activeUserAccount
-                .distinctUntilChanged()
                 .collect { followers ->
                     setState {
                         copy(
@@ -455,10 +463,9 @@ class LiveStreamViewModel @AssistedInject constructor(
                 }
         }
 
-    private fun CoroutineScope.observeMuteState() =
-        launch {
+    private fun observeMuteState() =
+        viewModelScope.launch {
             mutedItemRepository.observeMutedUsersByOwnerId(ownerId = activeAccountStore.activeUserId())
-                .distinctUntilChanged()
                 .collect { muted ->
                     setState {
                         copy(
@@ -587,25 +594,35 @@ class LiveStreamViewModel @AssistedInject constructor(
 
     private fun observeFollowsResults() =
         viewModelScope.launch {
-            profileFollowsHandler.observeResults().collect {
-                when (it) {
+            profileFollowsHandler.observeResults().collect { result ->
+                when (result) {
                     is ProfileFollowsHandler.ActionResult.Error -> {
-                        when (it.error) {
+                        setState {
+                            val following = activeUserFollowedProfiles
+                                .foldActions(actions = result.actions.map { it.flip() }.reversed())
+                            copy(activeUserFollowedProfiles = following)
+                        }
+                        when (result.error) {
                             is NetworkException, is NostrPublishException -> {
-                                setState { copy(error = UiError.FailedToUpdateFollowList(cause = it.error)) }
+                                setState { copy(error = UiError.FailedToUpdateFollowList(cause = result.error)) }
                             }
 
-                            is SigningRejectedException, is SigningKeyNotFoundException -> {
-                                setState { copy(error = UiError.SignatureError(it.error.asSignatureUiError())) }
+                            is SignatureException -> {
+                                setState {
+                                    copy(
+                                        error = UiError.SignatureError(error = result.error.asSignatureUiError()),
+                                    )
+                                }
                             }
 
                             is MissingRelaysException -> {
-                                setState { copy(error = UiError.MissingRelaysConfiguration(cause = it.error)) }
+                                setState { copy(error = UiError.MissingRelaysConfiguration(cause = result.error)) }
                             }
 
                             is UserRepository.FollowListNotFound -> {
-                                setState { copy(shouldApproveProfileAction = FollowsApproval(it.actions)) }
+                                setState { copy(shouldApproveProfileAction = FollowsApproval(result.actions)) }
                             }
+                            else -> setState { copy(error = UiError.GenericError()) }
                         }
                     }
 
@@ -701,12 +718,9 @@ class LiveStreamViewModel @AssistedInject constructor(
                     eventId = streamInfo.eventId,
                     articleId = streamInfo.atag,
                 )
-            } catch (error: SigningKeyNotFoundException) {
+            } catch (error: SignatureException) {
                 Timber.w(error)
-                setState { copy(error = UiError.MissingPrivateKey) }
-            } catch (error: SigningRejectedException) {
-                Timber.w(error)
-                setState { copy(error = UiError.NostrSignUnauthorized) }
+                setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
             }
@@ -726,12 +740,9 @@ class LiveStreamViewModel @AssistedInject constructor(
                 eventId = messageId,
                 articleId = streamInfo.atag,
             )
-        } catch (error: SigningKeyNotFoundException) {
+        } catch (error: SignatureException) {
             Timber.w(error)
-            setState { copy(error = UiError.MissingPrivateKey) }
-        } catch (error: SigningRejectedException) {
-            Timber.w(error)
-            setState { copy(error = UiError.NostrSignUnauthorized) }
+            setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
         } catch (error: NostrPublishException) {
             Timber.w(error)
         }
@@ -766,12 +777,9 @@ class LiveStreamViewModel @AssistedInject constructor(
             } catch (error: MissingRelaysException) {
                 Timber.w(error)
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-            } catch (error: SigningKeyNotFoundException) {
-                setState { copy(error = UiError.MissingPrivateKey) }
+            } catch (error: SignatureException) {
                 Timber.w(error)
-            } catch (error: SigningRejectedException) {
-                setState { copy(error = UiError.NostrSignUnauthorized) }
-                Timber.w(error)
+                setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             }
         }
 

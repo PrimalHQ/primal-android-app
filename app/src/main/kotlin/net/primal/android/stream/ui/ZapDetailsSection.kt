@@ -52,9 +52,7 @@ fun ZapDetailsSection(zap: EventZapUiModel, onReport: (ReportType) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .background(
-                AppTheme.extraColorScheme.surfaceVariantAlt1,
-            )
+            .background(BottomSheetSectionColorHandler)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

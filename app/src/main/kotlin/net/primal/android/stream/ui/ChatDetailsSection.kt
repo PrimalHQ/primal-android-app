@@ -5,12 +5,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -51,9 +49,7 @@ fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .background(
-                AppTheme.extraColorScheme.surfaceVariantAlt1,
-            )
+            .background(BottomSheetSectionColorHandler)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -79,13 +75,13 @@ fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) -> Unit) {
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Icon(
                     modifier = Modifier.size(20.dp),
                     imageVector = PrimalIcons.ContextReportContent,
                     contentDescription = null,
                 )
-                Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     modifier = Modifier.padding(3.dp),
                     text = stringResource(id = R.string.live_stream_report_message_button),

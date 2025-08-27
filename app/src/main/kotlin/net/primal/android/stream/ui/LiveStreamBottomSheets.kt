@@ -11,14 +11,24 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
+
+val BottomSheetSectionColorHandler: Color
+    @Composable
+    get() = if (LocalPrimalTheme.current.isDarkTheme) {
+        Color(0xFF222222)
+    } else {
+        Color(0xFFE5E5E5)
+    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +59,7 @@ fun LiveStreamModalBottomSheetHost(
 
     val profileIdToFetch = activeSheet.getProfileId(streamInfo)
     LaunchedEffect(profileIdToFetch) {
-        if (profileIdToFetch != null && !followerCountMap.containsKey(profileIdToFetch)) {
+        if (profileIdToFetch != null) {
             onFetchFollowerCount(profileIdToFetch)
         }
     }
