@@ -24,7 +24,6 @@ import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.asSignatureUiError
-import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -40,7 +39,6 @@ import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.handler.ProfileFollowsHandler
-import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
@@ -51,11 +49,8 @@ import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.links.EventUriNostrType
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.mutes.MutedItemRepository
-import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
-import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.Nprofile
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.asATagValue
 import net.primal.domain.nostr.cryptography.SignatureException
@@ -90,7 +85,6 @@ class LiveStreamViewModel @AssistedInject constructor(
     private val mutedItemRepository: MutedItemRepository,
     private val eventInteractionRepository: EventInteractionRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
-    private val relayRepository: RelayRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -319,7 +313,11 @@ class LiveStreamViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setState { copy(sendingMessage = true) }
             try {
-                val content = text.replaceUserMentionsWithNostrUris(users = state.value.taggedUsers)
+                val content = userMentionHandler.replaceUserMentionsWithUserIds(
+                    content = text,
+                    users = state.value.taggedUsers,
+                )
+
                 liveStreamChatRepository.sendMessage(
                     userId = activeAccountStore.activeUserId(),
                     streamATag = streamInfo.atag,
@@ -336,31 +334,6 @@ class LiveStreamViewModel @AssistedInject constructor(
                 setState { copy(sendingMessage = false) }
             }
         }
-    }
-
-    private suspend fun String.replaceUserMentionsWithNostrUris(users: List<NoteTaggedUser>): String {
-        var content = this
-        val userRelaysMap = try {
-            relayRepository
-                .fetchAndUpdateUserRelays(userIds = users.map { it.userId })
-                .associateBy { it.pubkey }
-        } catch (error: NetworkException) {
-            Timber.w(error)
-            emptyMap()
-        }
-
-        users.forEach { user ->
-            val nprofile = Nprofile(
-                pubkey = user.userId,
-                relays = userRelaysMap[user.userId]?.relays
-                    ?.filter { it.write }?.map { it.url }?.take(MAX_RELAY_HINTS) ?: emptyList(),
-            )
-            content = content.replace(
-                oldValue = user.displayUsername,
-                newValue = "nostr:${nprofile.toNprofileString()}",
-            )
-        }
-        return content
     }
 
     private fun observeStreamInfo() =

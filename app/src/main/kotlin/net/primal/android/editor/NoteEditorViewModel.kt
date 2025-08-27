@@ -36,7 +36,6 @@ import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
-import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
@@ -45,7 +44,6 @@ import net.primal.android.profile.mention.UserMentionHandler
 import net.primal.android.profile.mention.appendUserTagAtSignAtCursorPosition
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
-import net.primal.android.user.repository.RelayRepository
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
@@ -59,9 +57,7 @@ import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
-import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.Nprofile
 import net.primal.domain.nostr.asATagValue
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
@@ -90,7 +86,6 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val highlightRepository: HighlightRepository,
     private val streamRepository: StreamRepository,
     private val articleRepository: ArticleRepository,
-    private val relayRepository: RelayRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
 
@@ -506,8 +501,10 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setState { copy(publishing = true) }
             try {
-                val noteContent = _state.value.content.text
-                    .replaceUserMentionsWithUserIds(users = _state.value.taggedUsers)
+                val noteContent = userMentionHandler.replaceUserMentionsWithUserIds(
+                    content = _state.value.content.text,
+                    users = _state.value.taggedUsers,
+                )
 
                 val publishResult = if (args.isQuoting) {
                     notePublishHandler.publishShortTextNote(
@@ -567,31 +564,6 @@ class NoteEditorViewModel @AssistedInject constructor(
             delay(750.milliseconds)
             fetchNoteReplies()
         }
-
-    private suspend fun String.replaceUserMentionsWithUserIds(users: List<NoteTaggedUser>): String {
-        var content = this
-        val userRelaysMap = try {
-            relayRepository
-                .fetchAndUpdateUserRelays(userIds = users.map { it.userId })
-                .associateBy { it.pubkey }
-        } catch (error: NetworkException) {
-            Timber.w(error)
-            emptyMap()
-        }
-
-        users.forEach { user ->
-            val nprofile = Nprofile(
-                pubkey = user.userId,
-                relays = userRelaysMap[user.userId]?.relays
-                    ?.filter { it.write }?.map { it.url }?.take(MAX_RELAY_HINTS) ?: emptyList(),
-            )
-            content = content.replace(
-                oldValue = user.displayUsername,
-                newValue = "nostr:${nprofile.toNprofileString()}",
-            )
-        }
-        return content
-    }
 
     private fun resetState() {
         setState {
