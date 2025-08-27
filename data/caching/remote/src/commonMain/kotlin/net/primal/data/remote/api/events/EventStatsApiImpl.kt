@@ -2,12 +2,18 @@ package net.primal.data.remote.api.events
 
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.primal.PrimalQueryResult
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.remote.PrimalVerb
 import net.primal.data.remote.api.events.model.EventActionsRequestBody
 import net.primal.data.remote.api.events.model.EventActionsResponse
 import net.primal.data.remote.api.events.model.EventZapsRequestBody
 import net.primal.data.remote.api.events.model.EventZapsResponse
+import net.primal.data.remote.api.events.model.ReplaceableEventRequest
+import net.primal.data.remote.api.events.model.ReplaceableEventResponse
+import net.primal.data.remote.api.events.model.ReplaceableEventsRequest
 import net.primal.domain.nostr.NostrEventKind
 
 internal class EventStatsApiImpl(
@@ -17,7 +23,7 @@ internal class EventStatsApiImpl(
     override suspend fun getEventZaps(body: EventZapsRequestBody): EventZapsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = net.primal.data.remote.PrimalVerb.EVENT_ZAPS.id,
+                primalVerb = PrimalVerb.EVENT_ZAPS.id,
                 optionsJson = body.encodeToJsonString(),
             ),
         )
@@ -40,7 +46,7 @@ internal class EventStatsApiImpl(
     override suspend fun getEventActions(body: EventActionsRequestBody): EventActionsResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = net.primal.data.remote.PrimalVerb.EVENT_ACTIONS.id,
+                primalVerb = PrimalVerb.EVENT_ACTIONS.id,
                 optionsJson = body.encodeToJsonString(),
             ),
         )
@@ -57,4 +63,43 @@ internal class EventStatsApiImpl(
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
         )
     }
+
+    override suspend fun getReplaceableEvent(body: ReplaceableEventRequest) =
+        runCatching {
+            val queryResult = primalApiClient.query(
+                message = PrimalCacheFilter(
+                    primalVerb = PrimalVerb.PARAMETRIZED_REPLACEABLE_EVENT.id,
+                    optionsJson = body.encodeToJsonString(),
+                ),
+            )
+
+            buildReplaceableEventResponse(queryResult = queryResult)
+        }
+
+    override suspend fun getReplaceableEvents(body: ReplaceableEventsRequest) =
+        runCatching {
+            val queryResult = primalApiClient.query(
+                message = PrimalCacheFilter(
+                    primalVerb = PrimalVerb.PARAMETRIZED_REPLACEABLE_EVENTS.id,
+                    optionsJson = body.encodeToJsonString(),
+                ),
+            )
+
+            buildReplaceableEventResponse(queryResult = queryResult)
+        }
+
+    private fun buildReplaceableEventResponse(queryResult: PrimalQueryResult) =
+        ReplaceableEventResponse(
+            metadata = queryResult.filterNostrEvents(kind = NostrEventKind.Metadata),
+            articles = queryResult.filterNostrEvents(kind = NostrEventKind.LongFormContent),
+            liveActivity = queryResult.filterNostrEvents(kind = NostrEventKind.LiveActivity),
+            cdnResources = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalCdnResource),
+            blossomServers = queryResult.filterNostrEvents(kind = NostrEventKind.BlossomServerList),
+            eventStats = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalEventStats),
+            wordCount = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalLongFormWordsCount),
+            relayHints = queryResult.filterPrimalEvents(kind = NostrEventKind.PrimalRelayHint),
+            primalUserNames = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalLegendProfiles),
+            primalPremiumInfo = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalPremiumInfo),
+        )
 }

@@ -6,5 +6,9 @@ import net.primal.domain.nostr.Naddr
 
 interface LiveStreamApi {
 
-    suspend fun subscribe(streamingNaddr: Naddr, userId: String): Flow<LiveFeedResponse>
+    suspend fun subscribe(
+        streamingNaddr: Naddr,
+        userId: String,
+        contentModerationMode: String,
+    ): Flow<LiveFeedResponse>
 }

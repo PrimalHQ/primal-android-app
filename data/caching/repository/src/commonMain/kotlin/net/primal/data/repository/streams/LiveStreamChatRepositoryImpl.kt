@@ -2,6 +2,8 @@ package net.primal.data.repository.streams
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.streams.StreamChatMessageData
 import net.primal.data.local.db.PrimalDatabase
@@ -15,6 +17,7 @@ import net.primal.domain.streams.chat.ChatMessage
 import net.primal.domain.streams.chat.LiveStreamChatRepository
 
 class LiveStreamChatRepositoryImpl(
+    private val dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
     private val primalPublisher: PrimalPublisher,
 ) : LiveStreamChatRepository {
@@ -30,7 +33,7 @@ class LiveStreamChatRepositoryImpl(
         userId: String,
         streamATag: String,
         content: String,
-    ) {
+    ) = withContext(dispatcherProvider.io()) {
         val unsignedEvent = NostrUnsignedEvent(
             pubKey = userId,
             kind = NostrEventKind.ChatMessage.value,
@@ -53,4 +56,9 @@ class LiveStreamChatRepositoryImpl(
             ),
         )
     }
+
+    override suspend fun clearMessages(streamATag: String) =
+        withContext(dispatcherProvider.io()) {
+            database.streamChats().deleteMessages(streamATag)
+        }
 }

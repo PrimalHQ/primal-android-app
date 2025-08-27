@@ -64,4 +64,6 @@ interface EventInteractionRepository {
         target: ZapTarget,
         zapRequestEvent: NostrEvent,
     ): ZapResult
+
+    suspend fun deleteZaps(eventId: String)
 }

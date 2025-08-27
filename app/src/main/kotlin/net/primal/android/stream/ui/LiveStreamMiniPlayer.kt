@@ -27,10 +27,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -54,12 +54,11 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.KeyboardState
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.compose.ShadowIcon
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.VideoCloseMini
 import net.primal.android.core.compose.icons.primaliconpack.VideoPauseMini
@@ -89,6 +88,8 @@ fun LiveStreamMiniPlayer(
     exoPlayer: ExoPlayer,
     offsetX: Animatable<Float, AnimationVector1D>,
     offsetY: Animatable<Float, AnimationVector1D>,
+    isAtBottom: MutableState<Boolean>,
+    isAtTop: MutableState<Boolean>,
     state: LiveStreamContract.UiState,
     onExpandStream: () -> Unit,
     onStopStream: () -> Unit,
@@ -112,10 +113,8 @@ fun LiveStreamMiniPlayer(
     val statusBarHeight = WindowInsets.statusBars.getTop(localDensity)
     val paddingPx = with(localDensity) { PADDING.toPx() }
 
-    var controlsOverlayVisibility by remember { mutableStateOf(false) }
-
     LaunchedEffect(exoPlayer, state.streamInfo?.streamUrl) {
-        if (!exoPlayer.isPlaying) {
+        if (!exoPlayer.isPlaying && exoPlayer.currentMediaItem == null) {
             state.streamInfo?.streamUrl?.let { streamUrl ->
                 val mediaItem = MediaItem.fromUri(streamUrl)
                 exoPlayer.setMediaItem(mediaItem)
@@ -125,14 +124,6 @@ fun LiveStreamMiniPlayer(
         }
     }
 
-    LaunchedEffect(controlsOverlayVisibility) {
-        if (controlsOverlayVisibility) {
-            launch {
-                delay(3.seconds)
-                controlsOverlayVisibility = false
-            }
-        }
-    }
     val minSafeY by remember {
         derivedStateOf {
             if (streamState.topBarHeight == 0) {
@@ -149,20 +140,25 @@ fun LiveStreamMiniPlayer(
 
     adjustPositionWithKeyboard(offsetY, screenHeightPx, playerHeight, paddingPx)
 
-    AnimatedVisibility(
-        visible = !streamState.isHidden(),
-        enter = fadeIn(animationSpec = tween(durationMillis = 400)),
-        exit = fadeOut(animationSpec = tween(durationMillis = 50)),
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            LaunchedEffect(streamState.bottomBarHeight, streamState.topBarHeight) {
+    LaunchedEffect(streamState.bottomBarHeight, streamState.topBarHeight) {
+        when {
+            isAtBottom.value -> launch { offsetY.animateTo(targetValue = maxSafeY, animationSpec = springSpec) }
+            isAtTop.value -> launch { offsetY.animateTo(targetValue = minSafeY, animationSpec = springSpec) }
+            else -> {
                 val targetY = offsetY.value.coerceIn(
                     minimumValue = minSafeY,
                     maximumValue = maxSafeY,
                 )
                 launch { offsetY.animateTo(targetValue = targetY, animationSpec = springSpec) }
             }
-
+        }
+    }
+    AnimatedVisibility(
+        visible = !streamState.isHidden(),
+        enter = fadeIn(animationSpec = tween(durationMillis = 400)),
+        exit = fadeOut(animationSpec = tween(durationMillis = 50)),
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = modifier
                     .offset {
@@ -186,9 +182,14 @@ fun LiveStreamMiniPlayer(
                                 )
                                 scope.launch { offsetX.animateTo(targetX, animationSpec = springSpec) }
                                 scope.launch { offsetY.animateTo(targetY, animationSpec = springSpec) }
+
+                                isAtBottom.value = targetY == maxSafeY
+                                isAtTop.value = targetY == minSafeY
                             },
                             onDrag = { change, dragAmount ->
                                 change.consume()
+                                isAtBottom.value = false
+                                isAtTop.value = false
                                 scope.launch {
                                     offsetX.snapTo(offsetX.value + dragAmount.x)
                                     offsetY.snapTo(offsetY.value + dragAmount.y)
@@ -200,8 +201,7 @@ fun LiveStreamMiniPlayer(
                         width = with(localDensity) { playerWidth.toDp() },
                         height = with(localDensity) { playerHeight.toDp() },
                     )
-                    .clip(AppTheme.shapes.large)
-                    .clickable { controlsOverlayVisibility = true },
+                    .clip(AppTheme.shapes.large),
             ) {
                 with(sharedTransitionScope) {
                     PlayerBox(
@@ -214,7 +214,6 @@ fun LiveStreamMiniPlayer(
                     )
 
                     PlayerControls(
-                        controlsOverlayVisibility = controlsOverlayVisibility,
                         onTogglePlayer = { exoPlayer.toggle() },
                         isPlaying = exoPlayer.isPlaying,
                         onStopStream = onStopStream,
@@ -228,7 +227,6 @@ fun LiveStreamMiniPlayer(
 
 @Composable
 private fun PlayerControls(
-    controlsOverlayVisibility: Boolean,
     onExpandStream: () -> Unit,
     onTogglePlayer: () -> Unit,
     isPlaying: Boolean,
@@ -241,39 +239,31 @@ private fun PlayerControls(
             PrimalIcons.VideoPlayMini
         }
     }
-
-    AnimatedVisibility(
-        visible = controlsOverlayVisibility,
-        enter = fadeIn(),
-        exit = fadeOut(),
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable { onExpandStream() },
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.5f))
-                .clickable { onExpandStream() },
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconButton(onClick = onTogglePlayer) {
-                    Icon(
-                        modifier = Modifier.size(36.dp),
-                        tint = Color.White,
-                        imageVector = playPauseIcon,
-                        contentDescription = stringResource(id = R.string.accessibility_play_pause),
-                    )
-                }
-                IconButton(onClick = onStopStream) {
-                    Icon(
-                        modifier = Modifier.size(36.dp),
-                        tint = Color.White,
-                        imageVector = PrimalIcons.VideoCloseMini,
-                        contentDescription = null,
-                    )
-                }
+            IconButton(onClick = onTogglePlayer) {
+                ShadowIcon(
+                    modifier = Modifier.size(36.dp),
+                    tint = Color.White,
+                    imageVector = playPauseIcon,
+                    contentDescription = stringResource(id = R.string.accessibility_play_pause),
+                )
+            }
+            IconButton(onClick = onStopStream) {
+                ShadowIcon(
+                    modifier = Modifier.size(36.dp),
+                    tint = Color.White,
+                    imageVector = PrimalIcons.VideoCloseMini,
+                    contentDescription = null,
+                )
             }
         }
     }

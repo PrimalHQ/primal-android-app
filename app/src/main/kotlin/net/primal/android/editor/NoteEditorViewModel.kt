@@ -48,9 +48,12 @@ import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
 import net.primal.core.utils.fetchAndGet
+import net.primal.core.utils.fetchAndGetResult
 import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRelayHintsRepository
+import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
@@ -87,6 +90,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val streamRepository: StreamRepository,
     private val articleRepository: ArticleRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
+    private val eventRepository: EventRepository,
 ) : ViewModel() {
 
     private val userMentionHandler = userMentionHandlerFactory.create(
@@ -293,7 +297,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                     is ReferencedUri.Highlight ->
                         getAndUpdateHighlightUriDetails(it.uri, it.nevent)
 
-                    is ReferencedUri.Stream -> updateStreamUriDetails(it.uri, it.naddr)
+                    is ReferencedUri.Stream -> fetchAndUpdateStreamUriDetails(it.uri, it.naddr)
 
                     is ReferencedUri.LightningInvoice -> Unit
                 }
@@ -364,8 +368,39 @@ class NoteEditorViewModel @AssistedInject constructor(
             }
         }
 
-    private fun updateStreamUriDetails(uri: String, naddr: Naddr) =
+    private fun fetchAndUpdateStreamUriDetails(uri: String, naddr: Naddr) =
         viewModelScope.launch {
+            setState {
+                copy(
+                    referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Stream>(
+                        uri = uri,
+                    ) { copy(loading = true) },
+                )
+            }
+
+            fetchAndGetResult(
+                fetch = { eventRepository.fetchReplaceableEvent(naddr) },
+                get = { streamRepository.getStream(aTag = naddr.asATagValue()).getOrNull() },
+                onFinally = {
+                    setState {
+                        copy(
+                            referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Stream>(
+                                uri = uri,
+                            ) { copy(loading = false) },
+                        )
+                    }
+                },
+                onSuccess = { stream ->
+                    setState {
+                        copy(
+                            referencedNostrUris = referencedNostrUris.updateByUri<ReferencedUri.Stream>(uri = uri) {
+                                copy(data = stream.asReferencedStream())
+                            },
+                        )
+                    }
+                },
+            )
+
             streamRepository.getStream(aTag = naddr.asATagValue())
                 .onSuccess { stream ->
                     setState {

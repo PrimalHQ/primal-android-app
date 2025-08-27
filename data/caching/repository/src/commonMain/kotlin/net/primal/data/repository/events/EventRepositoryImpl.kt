@@ -10,13 +10,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.utils.Result
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 import net.primal.data.local.dao.events.EventZap as EventZapPO
+import net.primal.data.local.dao.events.eventRelayHintsUpserter
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.events.EventStatsApi
 import net.primal.data.remote.api.events.model.EventActionsRequestBody
 import net.primal.data.remote.api.events.model.EventZapsRequestBody
+import net.primal.data.remote.api.events.model.ReplaceableEventResponse
+import net.primal.data.remote.api.events.model.ReplaceableEventsRequest
+import net.primal.data.remote.api.events.model.toReplaceableEventRequest
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.data.repository.events.paging.EventZapsMediator
@@ -25,7 +31,12 @@ import net.primal.data.repository.mappers.local.asEventZapDO
 import net.primal.data.repository.mappers.local.asNostrEventStats
 import net.primal.data.repository.mappers.local.asNostrEventUserStats
 import net.primal.data.repository.mappers.local.asProfileDataDO
+import net.primal.data.repository.mappers.remote.flatMapAsEventHintsPO
+import net.primal.data.repository.mappers.remote.flatMapAsWordCount
 import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsEventStatsPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsStreamDataPO
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
@@ -33,6 +44,7 @@ import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserScoresOr
 import net.primal.domain.events.EventRepository
 import net.primal.domain.events.EventZap as EventZapDO
 import net.primal.domain.events.NostrEventAction
+import net.primal.domain.nostr.Naddr
 import net.primal.shared.data.local.db.withTransaction
 
 class EventRepositoryImpl(
@@ -111,6 +123,67 @@ class EventRepositoryImpl(
             database.eventZaps().pagedEventZaps(eventId = articleATag ?: eventId)
         }.flow.map { it.map { it.asEventZapDO() } }
             .flowOn(dispatcherProvider.io())
+    }
+
+    override suspend fun fetchReplaceableEvent(naddr: Naddr): Result<Unit> =
+        withContext(dispatcherProvider.io()) {
+            runCatching {
+                val response = eventStatsApi.getReplaceableEvent(body = naddr.toReplaceableEventRequest())
+
+                persistReplaceableEventResponse(response = response.getOrThrow())
+            }
+        }
+
+    override suspend fun fetchReplaceableEvents(naddrs: List<Naddr>): Result<Unit> =
+        withContext(dispatcherProvider.io()) {
+            runCatching {
+                val response = eventStatsApi.getReplaceableEvents(
+                    body = ReplaceableEventsRequest(events = naddrs.map { it.toReplaceableEventRequest() }),
+                )
+
+                persistReplaceableEventResponse(response = response.getOrThrow())
+            }
+        }
+
+    private suspend fun persistReplaceableEventResponse(response: ReplaceableEventResponse) {
+        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
+        val eventHints = response.relayHints.flatMapAsEventHintsPO()
+        val wordsCountMap = response.wordCount.flatMapAsWordCount()
+
+        val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
+        val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
+        val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
+
+        val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
+
+        val profiles = response.metadata.mapAsProfileDataPO(
+            cdnResources = cdnResources,
+            primalUserNames = primalUserNames,
+            primalPremiumInfo = primalPremiumInfo,
+            primalLegendProfiles = primalLegendProfiles,
+            blossomServers = blossomServers,
+        )
+
+        val streamData = response.liveActivity.mapNotNullAsStreamDataPO()
+
+        val articles = response.articles.mapNotNullAsArticleDataPO(
+            wordsCountMap = wordsCountMap,
+            cdnResources = cdnResources,
+        )
+
+        val eventStats = response.eventStats.mapNotNullAsEventStatsPO()
+
+        database.withTransaction {
+            database.eventStats().upsertAll(eventStats)
+            database.streams().upsertStreamData(streamData)
+            database.profiles().insertOrUpdateAll(profiles)
+            database.articles().upsertAll(articles)
+
+            val hintsMap = eventHints.associateBy { it.eventId }
+            eventRelayHintsUpserter(dao = database.eventHints(), eventIds = eventHints.map { it.eventId }) {
+                copy(relays = hintsMap[this.eventId]?.relays ?: emptyList())
+            }
+        }
     }
 
     @OptIn(ExperimentalPagingApi::class)

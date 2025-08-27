@@ -20,6 +20,7 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.TopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -81,6 +82,7 @@ fun PrimalDrawerScaffold(
                 streamHidden = false
                 streamState.releaseHide()
             }
+
             DrawerValue.Open -> {
                 streamHidden = true
                 streamState.acquireHide()
@@ -106,6 +108,12 @@ fun PrimalDrawerScaffold(
             with(localDensity) {
                 ((1 - topAppBarState.collapsedFraction) * bottomBarInitialHeight.roundToPx()).toDp()
             }
+        }
+    }
+
+    LaunchedEffect(bottomBarRealHeight) {
+        if (bottomBarInitialHeight != 0.dp) {
+            streamState.bottomBarHeight = with(localDensity) { bottomBarRealHeight.toPx().toInt() }
         }
     }
 
@@ -141,6 +149,7 @@ fun PrimalDrawerScaffold(
                 topBar = {
                     topAppBar(if (focusModeEnabled) topAppBarScrollBehavior else null)
                 },
+                propagateBottomBarSize = false,
                 content = { paddingValues ->
                     Box {
                         content(paddingValues)

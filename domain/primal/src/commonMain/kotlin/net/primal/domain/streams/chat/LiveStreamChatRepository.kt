@@ -19,4 +19,6 @@ interface LiveStreamChatRepository {
         streamATag: String,
         content: String,
     )
+
+    suspend fun clearMessages(streamATag: String)
 }

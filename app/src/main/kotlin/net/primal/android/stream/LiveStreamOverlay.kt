@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -54,8 +55,6 @@ fun LiveStreamOverlay(
         val naddrUri: String? = streamState.mode.resolveNaddr()
         val liveStreamViewModel = rememberLiveStreamViewModel(naddrUri)
 
-        BackHandler(enabled = streamState.mode is StreamMode.Expanded) { streamState.minimize() }
-
         Box(modifier = Modifier.fillMaxSize()) {
             content()
 
@@ -87,6 +86,8 @@ private fun LiveStreamOverlay(
 ) {
     val streamState = LocalStreamState.current
     val uiState = viewModel.state.collectAsState()
+
+    BackHandler(enabled = streamState.mode is StreamMode.Expanded) { streamState.minimize() }
 
     val exoPlayer = rememberPrimalStreamExoPlayer(
         streamNaddr = viewModel.streamNaddr,
@@ -120,6 +121,9 @@ private fun LiveStreamOverlay(
         Animatable(displayMetrics.heightPixels - streamState.bottomBarHeight - playerHeight - paddingPx)
     }
 
+    val isAtBottom = rememberSaveable { mutableStateOf(true) }
+    val isAtTop = rememberSaveable { mutableStateOf(false) }
+
     SharedTransitionLayout {
         AnimatedContent(targetState = streamState.mode) { streamMode ->
             when (streamMode) {
@@ -147,6 +151,8 @@ private fun LiveStreamOverlay(
                         exoPlayer = exoPlayer,
                         offsetX = offsetX,
                         offsetY = offsetY,
+                        isAtTop = isAtTop,
+                        isAtBottom = isAtBottom,
                         onExpandStream = { streamState.expand() },
                         onStopStream = {
                             exoPlayer.stop()
