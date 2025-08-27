@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -41,7 +40,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import java.util.*
 import java.util.concurrent.TimeUnit
 import net.primal.android.R
@@ -60,8 +58,6 @@ import net.primal.android.core.compose.icons.primaliconpack.VideoPlay
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
-
-private const val SECONDS_IN_MINUTE = 60
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -277,13 +273,10 @@ private fun BottomControls(
 
         PlayerSlider(
             modifier = Modifier.fillMaxWidth(),
-            isLive = state.isLive,
             isLiveAtEdge = state.isLive && state.atLiveEdge,
             isInteractive = isInteractive,
             sliderValue = sliderValue,
             valueRangeEnd = valueRangeEnd,
-            currentTime = sliderPosition,
-            totalDuration = state.totalDuration,
             onValueChange = { newPosition ->
                 if (isInteractive) {
                     if (!state.isSeeking) onSeekStarted()
@@ -322,17 +315,15 @@ private fun PlayerActionButtons(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        if (isLive) {
-            LiveIndicator(
-                modifier = Modifier.clickable(
-                    enabled = !isAtLiveEdge,
-                    onClick = onGoToLive,
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                ),
-                isAtLiveEdge = isAtLiveEdge,
-            )
-        }
+        LiveIndicator(
+            modifier = Modifier.clickable(
+                enabled = !isAtLiveEdge,
+                onClick = onGoToLive,
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+            ),
+            isAtLiveEdge = isLive && isAtLiveEdge,
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -357,13 +348,10 @@ private fun PlayerActionButtons(
 @Composable
 private fun PlayerSlider(
     modifier: Modifier = Modifier,
-    isLive: Boolean,
     isLiveAtEdge: Boolean,
     isInteractive: Boolean,
     sliderValue: Float,
     valueRangeEnd: Float,
-    currentTime: Long,
-    totalDuration: Long,
     onValueChange: (Float) -> Unit,
     onValueChangeFinished: () -> Unit,
 ) {
@@ -372,15 +360,6 @@ private fun PlayerSlider(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        if (!isLive) {
-            Text(
-                text = formatDuration(currentTime),
-                color = Color.White,
-                fontSize = 14.sp,
-                modifier = Modifier.width(52.dp),
-            )
-        }
-
         Slider(
             modifier = Modifier
                 .weight(1f)
@@ -399,15 +378,6 @@ private fun PlayerSlider(
                 )
             },
         )
-
-        if (!isLive) {
-            Text(
-                text = formatDuration(totalDuration),
-                color = Color.White,
-                fontSize = 14.sp,
-                modifier = Modifier.width(52.dp),
-            )
-        }
     }
 }
 
@@ -488,11 +458,4 @@ private fun LiveIndicator(modifier: Modifier = Modifier, isAtLiveEdge: Boolean) 
             style = AppTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
         )
     }
-}
-
-private fun formatDuration(millis: Long): String {
-    val totalSeconds = TimeUnit.MILLISECONDS.toSeconds(millis)
-    val minutes = totalSeconds / SECONDS_IN_MINUTE
-    val seconds = totalSeconds % SECONDS_IN_MINUTE
-    return String.format(Locale.US, "%02d:%02d", minutes, seconds)
 }

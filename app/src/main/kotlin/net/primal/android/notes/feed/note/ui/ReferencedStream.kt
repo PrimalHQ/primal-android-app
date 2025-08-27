@@ -51,7 +51,7 @@ fun ReferencedStream(
                 color = AppTheme.extraColorScheme.surfaceVariantAlt3,
             )
             .padding(12.dp)
-            .clickable(enabled = stream.status == StreamStatus.LIVE) { onClick(stream.naddr) },
+            .clickable { onClick(stream.naddr) },
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.Top,
     ) {
