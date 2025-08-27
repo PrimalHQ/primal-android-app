@@ -8,6 +8,7 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.profile.mention.UserTaggingState
+import net.primal.android.stream.ui.ActiveBottomSheet
 import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.domain.nostr.Naddr
@@ -34,6 +35,12 @@ interface LiveStreamContract {
         val taggedUsers: List<NoteTaggedUser> = emptyList(),
         val userTaggingState: UserTaggingState = UserTaggingState(),
         val error: UiError? = null,
+        val chatLoading: Boolean = true,
+        val activeUserFollowedProfiles: Set<String> = emptySet(),
+        val activeUserMutedProfiles: Set<String> = emptySet(),
+        val profileIdToFollowerCount: Map<String, Int> = emptyMap(),
+        val liveProfiles: Set<String> = emptySet(),
+        val activeBottomSheet: ActiveBottomSheet = ActiveBottomSheet.None,
     )
 
     data class PlayerState(
@@ -61,8 +68,6 @@ interface LiveStreamContract {
         val mainHostId: String,
         val mainHostProfile: ProfileDetailsUi? = null,
         val mainHostProfileStats: ProfileStatsUi? = null,
-        val isMainHostFollowedByActiveUser: Boolean = false,
-        val isMainHostMutedByActiveUser: Boolean = false,
     )
 
     sealed class UiEvent {
@@ -94,6 +99,12 @@ interface LiveStreamContract {
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
         data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
         data object AppendUserTagAtSign : UiEvent()
+        data class ReportMessage(
+            val reportType: ReportType,
+            val messageId: String,
+            val authorId: String,
+        ) : UiEvent()
+        data class ChangeActiveBottomSheet(val sheet: ActiveBottomSheet) : UiEvent()
     }
 
     sealed class SideEffect {
