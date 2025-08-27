@@ -45,7 +45,9 @@ interface LiveStreamContract {
         val currentTime: Long = 0L,
         val totalDuration: Long = 0L,
         val isLive: Boolean = false,
-    )
+    ) {
+        val isLoading: Boolean get() = isBuffering && !isPlaying
+    }
 
     data class StreamInfoUi(
         val atag: String,

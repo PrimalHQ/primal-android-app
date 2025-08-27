@@ -19,7 +19,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
@@ -30,11 +29,11 @@ import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
-import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.ext.onDragDownBeyond
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
+import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
 
 @OptIn(UnstableApi::class)
@@ -58,8 +57,9 @@ fun LiveStreamPlayer(
     onToggleFullScreenClick: () -> Unit,
     modifier: Modifier = Modifier,
     playerModifier: Modifier = Modifier,
+    loadingModifier: Modifier = Modifier,
 ) {
-    var controlsVisible by remember { mutableStateOf(true) }
+    var controlsVisible by remember { mutableStateOf(false) }
     var menuVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(streamUrl) {
@@ -91,7 +91,7 @@ fun LiveStreamPlayer(
     Box(
         modifier = modifier
             .then(boxSizingModifier)
-            .background(Color.Black)
+            .background(AppTheme.colorScheme.background)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
@@ -115,8 +115,8 @@ fun LiveStreamPlayer(
             surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
         )
 
-        if (state.playerState.isBuffering && !state.playerState.isPlaying) {
-            PrimalLoadingSpinner()
+        if (state.playerState.isLoading) {
+            StreamPlayerLoadingIndicator(modifier = loadingModifier.matchParentSize())
         }
 
         LiveStreamPlayerControls(

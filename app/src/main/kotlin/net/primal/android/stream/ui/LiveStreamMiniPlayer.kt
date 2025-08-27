@@ -57,7 +57,6 @@ import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.KeyboardState
-import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.ShadowIcon
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.VideoCloseMini
@@ -67,6 +66,7 @@ import net.primal.android.core.compose.rememberKeyboardState
 import net.primal.android.core.video.toggle
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.LocalStreamState
+import net.primal.android.stream.player.SHARED_TRANSITION_LOADING_PLAYER_KEY
 import net.primal.android.stream.player.SHARED_TRANSITION_PLAYER_KEY
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
@@ -209,12 +209,17 @@ fun LiveStreamMiniPlayer(
                             sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_PLAYER_KEY),
                             animatedVisibilityScope = animatedVisibilityScope,
                         ),
+                        loadingModifier = Modifier.sharedElement(
+                            sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_LOADING_PLAYER_KEY),
+                            animatedVisibilityScope = animatedVisibilityScope,
+                        ),
                         exoPlayer = exoPlayer,
                         state = state,
                     )
 
                     PlayerControls(
                         onTogglePlayer = { exoPlayer.toggle() },
+                        isLoading = state.playerState.isLoading,
                         isPlaying = exoPlayer.isPlaying,
                         onStopStream = onStopStream,
                         onExpandStream = onExpandStream,
@@ -230,6 +235,7 @@ private fun PlayerControls(
     onExpandStream: () -> Unit,
     onTogglePlayer: () -> Unit,
     isPlaying: Boolean,
+    isLoading: Boolean,
     onStopStream: () -> Unit,
 ) {
     val playPauseIcon = remember(isPlaying) {
@@ -246,16 +252,18 @@ private fun PlayerControls(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = if (isLoading) Arrangement.End else Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            IconButton(onClick = onTogglePlayer) {
-                ShadowIcon(
-                    modifier = Modifier.size(36.dp),
-                    tint = Color.White,
-                    imageVector = playPauseIcon,
-                    contentDescription = stringResource(id = R.string.accessibility_play_pause),
-                )
+            if (!isLoading) {
+                IconButton(onClick = onTogglePlayer) {
+                    ShadowIcon(
+                        modifier = Modifier.size(36.dp),
+                        tint = Color.White,
+                        imageVector = playPauseIcon,
+                        contentDescription = stringResource(id = R.string.accessibility_play_pause),
+                    )
+                }
             }
             IconButton(onClick = onStopStream) {
                 ShadowIcon(
@@ -310,6 +318,7 @@ private fun PlayerBox(
     exoPlayer: ExoPlayer,
     state: LiveStreamContract.UiState,
     modifier: Modifier = Modifier,
+    loadingModifier: Modifier = Modifier,
 ) {
     Box(
         modifier = Modifier
@@ -325,15 +334,13 @@ private fun PlayerBox(
             surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
         )
 
-        if (state.playerState.isBuffering && !state.playerState.isPlaying) {
-            Box(
-                modifier = Modifier
+        if (state.playerState.isLoading) {
+            StreamPlayerLoadingIndicator(
+                modifier = loadingModifier
                     .matchParentSize()
                     .clip(AppTheme.shapes.large)
                     .background(AppTheme.colorScheme.background),
-            ) {
-                PrimalLoadingSpinner()
-            }
+            )
         }
     }
 }
