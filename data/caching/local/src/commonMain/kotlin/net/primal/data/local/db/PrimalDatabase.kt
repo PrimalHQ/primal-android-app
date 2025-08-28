@@ -104,7 +104,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         StreamData::class,
         StreamChatMessageData::class,
     ],
-    version = 17,
+    version = 18,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
