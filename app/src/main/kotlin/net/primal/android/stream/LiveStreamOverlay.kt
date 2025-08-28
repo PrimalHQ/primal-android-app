@@ -11,7 +11,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -25,7 +24,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavHostController
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.animatableSaver
@@ -36,9 +34,9 @@ import net.primal.android.navigation.navigateToProfileQrCodeViewer
 import net.primal.android.navigation.navigateToWallet
 import net.primal.android.navigation.navigateToWalletCreateTransaction
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.stream.LiveStreamContract.UiEvent
 import net.primal.android.stream.di.rememberLiveStreamViewModel
 import net.primal.android.stream.player.LocalStreamState
-import net.primal.android.stream.player.PLAYER_STATE_UPDATE_INTERVAL
 import net.primal.android.stream.player.PlayerCommand
 import net.primal.android.stream.player.StreamMode
 import net.primal.android.stream.player.StreamState
@@ -91,55 +89,40 @@ private fun LiveStreamOverlay(
     val streamState = LocalStreamState.current
     val uiState = viewModel.state.collectAsState()
 
-    BackHandler(enabled = streamState.mode is StreamMode.Expanded) { streamState.minimize() }
-
     val exoPlayer = rememberPrimalStreamExoPlayer(
         streamNaddr = viewModel.streamNaddr,
-        onIsPlayingChanged = { isPlaying ->
-            viewModel.setEvent(LiveStreamContract.UiEvent.OnPlayerStateUpdate(isPlaying = isPlaying))
-        },
-        onPlaybackStateChanged = { playbackState ->
+        onIsPlayingChanged = { exoPlayer, isPlaying ->
             viewModel.setEvent(
-                LiveStreamContract.UiEvent.OnPlayerStateUpdate(isBuffering = playbackState == Player.STATE_BUFFERING),
+                UiEvent.OnPlayerStateUpdate(isPlaying = isPlaying, currentTime = exoPlayer.currentPosition),
             )
-            if (playbackState == Player.STATE_ENDED) {
-                viewModel.setEvent(LiveStreamContract.UiEvent.OnVideoEnded)
+        },
+        onPlaybackStateChanged = { exoPlayer, playbackState ->
+            viewModel.setEvent(
+                UiEvent.OnPlayerStateUpdate(isBuffering = playbackState == Player.STATE_BUFFERING),
+            )
+            when (playbackState) {
+                Player.STATE_READY -> {
+                    exoPlayer.duration.takeIf { it > 0L }?.let { duration ->
+                        viewModel.setEvent(UiEvent.OnPlayerStateUpdate(totalDuration = duration))
+                    }
+                }
+
+                Player.STATE_ENDED -> {
+                    viewModel.setEvent(UiEvent.OnVideoEnded)
+                }
             }
         },
         onPlayerError = {
-            viewModel.setEvent(LiveStreamContract.UiEvent.OnVideoUnavailable)
+            viewModel.setEvent(UiEvent.OnVideoUnavailable)
         },
     )
 
-    DisposableEffect(exoPlayer, viewModel) {
-        val listener = object : Player.Listener {
-            override fun onPlaybackStateChanged(playbackState: Int) {
-                if (playbackState == Player.STATE_READY) {
-                    val duration = exoPlayer.duration.takeIf { it > 0L }
-                    if (duration != null) {
-                        viewModel.setEvent(
-                            LiveStreamContract.UiEvent.OnPlayerStateUpdate(totalDuration = duration),
-                        )
-                    }
-                }
-            }
-        }
-        exoPlayer.addListener(listener)
-        onDispose {
-            exoPlayer.removeListener(listener)
-        }
-    }
-
-    LaunchedEffect(exoPlayer, viewModel) {
-        while (true) {
-            delay(PLAYER_STATE_UPDATE_INTERVAL)
-            if (exoPlayer.isPlaying) {
-                viewModel.setEvent(
-                    LiveStreamContract.UiEvent.OnPlayerStateUpdate(
-                        currentTime = exoPlayer.currentPosition,
-                    ),
-                )
-            }
+    BackHandler(enabled = streamState.mode is StreamMode.Expanded) {
+        if (uiState.value.playerState.isVideoFinished) {
+            exoPlayer.stop()
+            streamState.stop()
+        } else {
+            streamState.minimize()
         }
     }
 

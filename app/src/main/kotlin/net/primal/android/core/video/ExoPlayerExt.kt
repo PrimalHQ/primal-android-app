@@ -87,9 +87,9 @@ fun initializePlayer(context: Context): ExoPlayer {
 @Composable
 fun rememberPrimalStreamExoPlayer(
     streamNaddr: Naddr,
-    onIsPlayingChanged: (Boolean) -> Unit,
-    onPlaybackStateChanged: (Int) -> Unit,
-    onPlayerError: () -> Unit,
+    onIsPlayingChanged: (ExoPlayer, Boolean) -> Unit,
+    onPlaybackStateChanged: (ExoPlayer, Int) -> Unit,
+    onPlayerError: (errorCode: Int) -> Unit,
 ): ExoPlayer {
     val context = LocalContext.current
     val exoPlayer = remember(streamNaddr) { ExoPlayer.Builder(context).build() }
@@ -97,15 +97,15 @@ fun rememberPrimalStreamExoPlayer(
     DisposableEffect(exoPlayer, onIsPlayingChanged, onPlaybackStateChanged, onPlayerError) {
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
-                onIsPlayingChanged(isPlaying)
+                onIsPlayingChanged(exoPlayer, isPlaying)
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
-                onPlaybackStateChanged(playbackState)
+                onPlaybackStateChanged(exoPlayer, playbackState)
             }
 
             override fun onPlayerError(error: PlaybackException) {
-                onPlayerError()
+                onPlayerError(error.errorCode)
             }
         }
         exoPlayer.addListener(listener)
