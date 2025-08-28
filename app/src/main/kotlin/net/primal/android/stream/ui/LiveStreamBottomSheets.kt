@@ -20,6 +20,7 @@ import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
+import net.primal.domain.streams.StreamContentModerationMode
 
 val BottomSheetSectionColorHandler: Color
     @Composable
@@ -36,6 +37,8 @@ fun LiveStreamModalBottomSheetHost(
     streamInfo: LiveStreamContract.StreamInfoUi?,
     isStreamLive: Boolean,
     activeUserId: String?,
+    mainHostStreamsMuted: Boolean,
+    contentModeration: StreamContentModerationMode,
     followerCountMap: Map<String, Int>,
     liveProfiles: Set<String>,
     mutedProfiles: Set<String>,
@@ -50,46 +53,67 @@ fun LiveStreamModalBottomSheetHost(
     onReport: (ReportType, String, String) -> Unit,
     onHashtagClick: (String) -> Unit,
     onMessageClick: (String) -> Unit,
+    onContentModerationChanged: (StreamContentModerationMode) -> Unit,
+    onStreamNotificationsChanged: (Boolean) -> Unit,
     onEditProfileClick: () -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    if (activeSheet != ActiveBottomSheet.None) {
-        val profileDetails = activeSheet.getProfileDetails(streamInfo)
+    when (activeSheet) {
+        is ActiveBottomSheet.ChatDetails,
+        ActiveBottomSheet.StreamInfo,
+        is ActiveBottomSheet.ZapDetails,
+        -> {
+            val profileDetails = activeSheet.getProfileDetails(streamInfo)
 
-        if (profileDetails != null && activeUserId != null && streamInfo != null) {
-            ProfileDetailsBottomSheet(
+            if (profileDetails != null && activeUserId != null && streamInfo != null) {
+                ProfileDetailsBottomSheet(
+                    sheetState = sheetState,
+                    onDismiss = onDismiss,
+                    bottomSheetHeight = bottomSheetHeight,
+                    profileDetails = profileDetails,
+                    isMuteUserButtonVisible = activeSheet.isMuteButtonVisible(),
+                    activeUserId = activeUserId,
+                    isLive = liveProfiles.contains(profileDetails.pubkey),
+                    isProfileMuted = mutedProfiles.contains(profileDetails.pubkey),
+                    isProfileFollowed = followedProfiles.contains(profileDetails.pubkey),
+                    followersCount = followerCountMap[profileDetails.pubkey] ?: 0,
+                    onFollow = { onFollow(profileDetails.pubkey) },
+                    onUnfollow = { onUnfollow(profileDetails.pubkey) },
+                    onMute = { onMute(profileDetails.pubkey) },
+                    onUnmute = { onUnmute(profileDetails.pubkey) },
+                    onZap = { onZapClick(profileDetails) },
+                    onEditProfileClick = onEditProfileClick,
+                    onMessageClick = onMessageClick,
+                    onDrawerQrCodeClick = onDrawerQrCodeClick,
+                    bottomContent = {
+                        ProfileDetailsBottomSheetContent(
+                            activeSheet = activeSheet,
+                            streamInfo = streamInfo,
+                            isStreamLive = isStreamLive,
+                            onHashtagClick = onHashtagClick,
+                            onReport = onReport,
+                            onDismiss = onDismiss,
+                        )
+                    },
+                )
+            }
+        }
+
+        ActiveBottomSheet.StreamSettings -> {
+            StreamSettingsBottomSheet(
                 sheetState = sheetState,
                 onDismiss = onDismiss,
                 bottomSheetHeight = bottomSheetHeight,
-                profileDetails = profileDetails,
-                isMuteUserButtonVisible = activeSheet.isMuteButtonVisible(),
-                activeUserId = activeUserId,
-                isLive = liveProfiles.contains(profileDetails.pubkey),
-                isProfileMuted = mutedProfiles.contains(profileDetails.pubkey),
-                isProfileFollowed = followedProfiles.contains(profileDetails.pubkey),
-                followersCount = followerCountMap[profileDetails.pubkey] ?: 0,
-                onFollow = { onFollow(profileDetails.pubkey) },
-                onUnfollow = { onUnfollow(profileDetails.pubkey) },
-                onMute = { onMute(profileDetails.pubkey) },
-                onUnmute = { onUnmute(profileDetails.pubkey) },
-                onZap = { onZapClick(profileDetails) },
-                onEditProfileClick = onEditProfileClick,
-                onMessageClick = onMessageClick,
-                onDrawerQrCodeClick = onDrawerQrCodeClick,
-                bottomContent = {
-                    StreamBottomSectionSwitcher(
-                        activeSheet = activeSheet,
-                        streamInfo = streamInfo,
-                        isStreamLive = isStreamLive,
-                        onHashtagClick = onHashtagClick,
-                        onReport = onReport,
-                        onDismiss = onDismiss,
-                    )
-                },
+                contentModerationMode = contentModeration,
+                mainHostStreamsMuted = mainHostStreamsMuted,
+                onStreamNotificationsChanged = onStreamNotificationsChanged,
+                onContentModerationChanged = onContentModerationChanged,
             )
         }
+
+        ActiveBottomSheet.None -> Unit
     }
 }
 
@@ -152,7 +176,7 @@ private fun ProfileDetailsBottomSheet(
 }
 
 @Composable
-private fun StreamBottomSectionSwitcher(
+private fun ProfileDetailsBottomSheetContent(
     activeSheet: ActiveBottomSheet,
     streamInfo: LiveStreamContract.StreamInfoUi,
     isStreamLive: Boolean,
@@ -168,6 +192,7 @@ private fun StreamBottomSectionSwitcher(
                 onHashtagClick = onHashtagClick,
             )
         }
+
         is ActiveBottomSheet.ChatDetails -> {
             ChatDetailsSection(
                 message = activeSheet.message,
@@ -181,6 +206,7 @@ private fun StreamBottomSectionSwitcher(
                 },
             )
         }
+
         is ActiveBottomSheet.ZapDetails -> {
             ZapDetailsSection(
                 zap = activeSheet.zap,
@@ -192,7 +218,8 @@ private fun StreamBottomSectionSwitcher(
                 },
             )
         }
-        ActiveBottomSheet.None -> Unit
+
+        else -> Unit
     }
 }
 
@@ -201,7 +228,7 @@ private fun ActiveBottomSheet.getProfileDetails(streamInfo: LiveStreamContract.S
         is ActiveBottomSheet.ChatDetails -> this.message.authorProfile
         is ActiveBottomSheet.ZapDetails -> this.zap.toProfileDetailsUi()
         is ActiveBottomSheet.StreamInfo -> streamInfo?.mainHostProfile
-        ActiveBottomSheet.None -> null
+        ActiveBottomSheet.StreamSettings, ActiveBottomSheet.None -> null
     }
 
 private fun ActiveBottomSheet.isMuteButtonVisible(): Boolean =

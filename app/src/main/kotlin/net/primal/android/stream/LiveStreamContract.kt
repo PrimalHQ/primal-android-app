@@ -36,6 +36,7 @@ interface LiveStreamContract {
         val userTaggingState: UserTaggingState = UserTaggingState(),
         val error: UiError? = null,
         val chatLoading: Boolean = true,
+        val mainHostStreamsMuted: Boolean = false,
         val activeUserFollowedProfiles: Set<String> = emptySet(),
         val activeUserMutedProfiles: Set<String> = emptySet(),
         val profileIdToFollowerCount: Map<String, Int> = emptyMap(),
@@ -89,6 +90,7 @@ interface LiveStreamContract {
         data class ApproveFollowsActions(val actions: List<ProfileFollowsHandler.Action>) : UiEvent()
         data class ZapStream(val zapAmount: ULong? = null, val zapDescription: String? = null) : UiEvent()
         data class ChangeContentModeration(val moderationMode: StreamContentModerationMode) : UiEvent()
+        data class ChangeStreamMuted(val isMuted: Boolean) : UiEvent()
         data class OnCommentValueChanged(val value: TextFieldValue) : UiEvent()
         data class SendMessage(val text: String) : UiEvent()
         data class MuteAction(val profileId: String) : UiEvent()
@@ -104,6 +106,7 @@ interface LiveStreamContract {
             val messageId: String,
             val authorId: String,
         ) : UiEvent()
+
         data class ChangeActiveBottomSheet(val sheet: ActiveBottomSheet) : UiEvent()
     }
 

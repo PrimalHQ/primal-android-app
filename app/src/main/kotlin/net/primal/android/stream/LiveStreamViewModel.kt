@@ -269,24 +269,48 @@ class LiveStreamViewModel @AssistedInject constructor(
                         messageId = it.messageId,
                         authorId = it.authorId,
                     )
+
                     is UiEvent.ChangeActiveBottomSheet -> {
                         setState { copy(activeBottomSheet = it.sheet) }
                         when (val sheet = it.sheet) {
                             is ActiveBottomSheet.ChatDetails -> {
                                 fetchFollowerCount(sheet.message.authorProfile.pubkey)
                             }
+
                             is ActiveBottomSheet.ZapDetails -> {
                                 fetchFollowerCount(sheet.zap.zapperId)
                             }
+
                             is ActiveBottomSheet.StreamInfo -> {
                                 state.value.streamInfo?.mainHostId?.let { hostId ->
                                     fetchFollowerCount(hostId)
                                 }
                             }
+
                             else -> Unit
                         }
                     }
+
+                    is UiEvent.ChangeStreamMuted -> changeStreamMuted(it.isMuted)
                 }
+            }
+        }
+
+    private fun changeStreamMuted(isMuted: Boolean) =
+        viewModelScope.launch {
+            val mainHostId = state.value.streamInfo?.mainHostId ?: return@launch
+
+            setState { copy(mainHostStreamsMuted = isMuted) }
+            if (isMuted) {
+                mutedItemRepository.muteStreamNotifications(
+                    ownerId = activeAccountStore.activeUserId(),
+                    pubkey = mainHostId,
+                )
+            } else {
+                mutedItemRepository.unmuteStreamNotifications(
+                    ownerId = activeAccountStore.activeUserId(),
+                    pubkey = mainHostId,
+                )
             }
         }
 
@@ -409,6 +433,7 @@ class LiveStreamViewModel @AssistedInject constructor(
         authorObserversJob = viewModelScope.launch {
             observeAuthorProfile(mainHostId)
             observeAuthorProfileStats(mainHostId)
+            observeIsStreamMuted(mainHostId)
         }
     }
 
@@ -438,6 +463,14 @@ class LiveStreamViewModel @AssistedInject constructor(
                         )
                     }
                 }
+        }
+
+    private fun CoroutineScope.observeIsStreamMuted(pubkey: String) =
+        launch {
+            mutedItemRepository.observeIsStreamMutedByOwnerId(
+                ownerId = activeAccountStore.activeUserId(),
+                pubkey = pubkey,
+            ).collect { setState { copy(mainHostStreamsMuted = it) } }
         }
 
     private fun observeFollowState() =
@@ -611,6 +644,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                             is UserRepository.FollowListNotFound -> {
                                 setState { copy(shouldApproveProfileAction = FollowsApproval(result.actions)) }
                             }
+
                             else -> setState { copy(error = UiError.GenericError()) }
                         }
                     }
