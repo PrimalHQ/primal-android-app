@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +22,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.collectLatest
 import net.primal.android.core.compose.ApplyEdgeToEdge
@@ -32,6 +34,7 @@ import net.primal.android.navigation.navigateToProfileQrCodeViewer
 import net.primal.android.navigation.navigateToWallet
 import net.primal.android.navigation.navigateToWalletCreateTransaction
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.stream.LiveStreamContract.UiEvent
 import net.primal.android.stream.di.rememberLiveStreamViewModel
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.stream.player.PlayerCommand
@@ -77,7 +80,6 @@ fun LiveStreamOverlay(
     }
 }
 
-@OptIn(UnstableApi::class)
 @Composable
 private fun LiveStreamOverlay(
     viewModel: LiveStreamViewModel,
@@ -87,21 +89,44 @@ private fun LiveStreamOverlay(
     val streamState = LocalStreamState.current
     val uiState = viewModel.state.collectAsState()
 
-    BackHandler(enabled = streamState.mode is StreamMode.Expanded) { streamState.minimize() }
-
     val exoPlayer = rememberPrimalStreamExoPlayer(
         streamNaddr = viewModel.streamNaddr,
-        onIsPlayingChanged = { isPlaying ->
-            viewModel.setEvent(LiveStreamContract.UiEvent.OnPlayerStateUpdate(isPlaying = isPlaying))
-        },
-        onPlaybackStateChanged = { playbackState ->
+        onIsPlayingChanged = { exoPlayer, isPlaying ->
             viewModel.setEvent(
-                LiveStreamContract.UiEvent.OnPlayerStateUpdate(isBuffering = playbackState == Player.STATE_BUFFERING),
+                UiEvent.OnPlayerStateUpdate(isPlaying = isPlaying, currentTime = exoPlayer.currentPosition),
             )
+        },
+        onPlaybackStateChanged = { exoPlayer, playbackState ->
+            viewModel.setEvent(
+                UiEvent.OnPlayerStateUpdate(isBuffering = playbackState == Player.STATE_BUFFERING),
+            )
+            when (playbackState) {
+                Player.STATE_READY -> {
+                    exoPlayer.duration.takeIf { it > 0L }?.let { duration ->
+                        viewModel.setEvent(UiEvent.OnPlayerStateUpdate(totalDuration = duration))
+                    }
+                }
+
+                Player.STATE_ENDED -> {
+                    viewModel.setEvent(UiEvent.OnVideoEnded)
+                }
+            }
+        },
+        onPlayerError = {
+            viewModel.setEvent(UiEvent.OnVideoUnavailable)
         },
     )
 
-    LaunchedEffect(streamState, streamState.commands) {
+    BackHandler(enabled = streamState.mode is StreamMode.Expanded) {
+        if (uiState.value.playerState.isVideoFinished) {
+            exoPlayer.stop()
+            streamState.stop()
+        } else {
+            streamState.minimize()
+        }
+    }
+
+    LaunchedEffect(streamState, streamState.commands, exoPlayer) {
         streamState.commands.collect { command ->
             when (command) {
                 PlayerCommand.Play -> exoPlayer.play()
@@ -110,6 +135,26 @@ private fun LiveStreamOverlay(
         }
     }
 
+    LiveStreamAnimatedContent(
+        streamState = streamState,
+        navController = navController,
+        noteCallbacks = noteCallbacks,
+        viewModel = viewModel,
+        uiState = uiState,
+        exoPlayer = exoPlayer,
+    )
+}
+
+@OptIn(UnstableApi::class)
+@Composable
+private fun LiveStreamAnimatedContent(
+    streamState: StreamState,
+    navController: NavHostController,
+    noteCallbacks: NoteCallbacks,
+    viewModel: LiveStreamViewModel,
+    uiState: State<LiveStreamContract.UiState>,
+    exoPlayer: ExoPlayer,
+) {
     val localDensity = LocalDensity.current
     val displayMetrics = LocalContext.current.resources.displayMetrics
     val playerWidth = displayMetrics.widthPixels / 2

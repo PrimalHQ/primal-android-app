@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -19,7 +20,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
@@ -29,6 +32,7 @@ import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
+import net.primal.android.R
 import net.primal.android.core.ext.onDragDownBeyond
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
@@ -63,7 +67,12 @@ fun LiveStreamPlayer(
     var menuVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(streamUrl) {
-        if (!exoPlayer.isPlaying && exoPlayer.currentMediaItem == null) {
+        val currentMediaItemUri = exoPlayer.currentMediaItem?.localConfiguration?.uri?.toString()
+
+        if (currentMediaItemUri != streamUrl) {
+            exoPlayer.stop()
+            exoPlayer.clearMediaItems()
+
             val mediaItem = MediaItem.fromUri(streamUrl)
             exoPlayer.setMediaItem(mediaItem)
             exoPlayer.prepare()
@@ -82,20 +91,78 @@ fun LiveStreamPlayer(
         }
     }
 
+    PlayerBox(
+        modifier = modifier,
+        playerModifier = playerModifier,
+        loadingModifier = loadingModifier,
+        state = state,
+        exoPlayer = exoPlayer,
+        controlsVisible = controlsVisible,
+        menuVisible = menuVisible,
+        onClose = onClose,
+        onControlsVisibilityChange = { controlsVisible = !controlsVisible },
+        onMenuVisibilityChange = { menuVisible = it },
+        onPlayPauseClick = onPlayPauseClick,
+        onRewind = onRewind,
+        onForward = onForward,
+        onSeek = onSeek,
+        onSeekStarted = onSeekStarted,
+        onQuoteClick = onQuoteClick,
+        onMuteUserClick = onMuteUserClick,
+        onUnmuteUserClick = onUnmuteUserClick,
+        onReportContentClick = onReportContentClick,
+        onRequestDeleteClick = onRequestDeleteClick,
+        onSoundClick = onSoundClick,
+        onToggleFullScreenClick = onToggleFullScreenClick,
+    )
+}
+
+@Composable
+@OptIn(UnstableApi::class)
+private fun PlayerBox(
+    modifier: Modifier,
+    playerModifier: Modifier,
+    loadingModifier: Modifier,
+    state: LiveStreamContract.UiState,
+    exoPlayer: ExoPlayer,
+    controlsVisible: Boolean,
+    menuVisible: Boolean,
+    onClose: () -> Unit,
+    onControlsVisibilityChange: () -> Unit,
+    onMenuVisibilityChange: (Boolean) -> Unit,
+    onPlayPauseClick: () -> Unit,
+    onRewind: () -> Unit,
+    onForward: () -> Unit,
+    onSeek: (Long) -> Unit,
+    onSeekStarted: () -> Unit,
+    onQuoteClick: (String) -> Unit,
+    onMuteUserClick: () -> Unit,
+    onUnmuteUserClick: () -> Unit,
+    onReportContentClick: (ReportType) -> Unit,
+    onRequestDeleteClick: () -> Unit,
+    onSoundClick: () -> Unit,
+    onToggleFullScreenClick: () -> Unit,
+) {
     val localConfiguration = LocalConfiguration.current
 
     val boxSizingModifier = remember(localConfiguration.orientation) {
         Modifier.resolveBoxSizingModifier(localConfiguration.orientation)
     }
 
+    val playerBackgroundColor = if (state.isStreamUnavailable || state.playerState.isVideoFinished) {
+        Color.Black
+    } else {
+        AppTheme.colorScheme.background
+    }
+
     Box(
         modifier = modifier
             .then(boxSizingModifier)
-            .background(AppTheme.colorScheme.background)
+            .background(playerBackgroundColor)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-                onClick = { controlsVisible = !controlsVisible },
+                onClick = onControlsVisibilityChange,
             ),
         contentAlignment = Alignment.Center,
     ) {
@@ -103,19 +170,33 @@ fun LiveStreamPlayer(
             Modifier.resolvePlayerSizingModifier(orientation = localConfiguration.orientation, scope = this)
         }
 
-        PlayerSurface(
-            modifier = playerModifier
-                .then(playerSizingModifier)
-                .onDragDownBeyond(
-                    threshold = 100.dp,
-                    onTriggered = onClose,
-                )
-                .matchParentSize(),
-            player = exoPlayer,
-            surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
-        )
+        if (state.isStreamUnavailable || state.playerState.isVideoFinished) {
+            val messageText = if (state.playerState.isVideoFinished) {
+                stringResource(id = R.string.live_stream_video_ended)
+            } else {
+                stringResource(id = R.string.live_stream_recording_not_available)
+            }
 
-        if (state.playerState.isLoading) {
+            Text(
+                text = messageText,
+                style = AppTheme.typography.bodyLarge,
+                color = Color.White,
+            )
+        } else {
+            PlayerSurface(
+                modifier = playerModifier
+                    .then(playerSizingModifier)
+                    .onDragDownBeyond(
+                        threshold = 100.dp,
+                        onTriggered = onClose,
+                    )
+                    .matchParentSize(),
+                player = exoPlayer,
+                surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
+            )
+        }
+
+        if (state.playerState.isLoading && !state.isStreamUnavailable) {
             StreamPlayerLoadingIndicator(modifier = loadingModifier.matchParentSize())
         }
 
@@ -124,7 +205,8 @@ fun LiveStreamPlayer(
             isVisible = controlsVisible,
             state = state,
             menuVisible = menuVisible,
-            onMenuVisibilityChange = { menuVisible = it },
+            isStreamUnavailable = state.isStreamUnavailable,
+            onMenuVisibilityChange = onMenuVisibilityChange,
             onPlayPauseClick = onPlayPauseClick,
             onRewind = onRewind,
             onForward = onForward,

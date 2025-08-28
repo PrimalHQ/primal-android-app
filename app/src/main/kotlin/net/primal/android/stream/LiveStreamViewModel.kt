@@ -220,12 +220,20 @@ class LiveStreamViewModel @AssistedInject constructor(
                                     atLiveEdge = it.atLiveEdge ?: playerState.atLiveEdge,
                                     currentTime = it.currentTime ?: playerState.currentTime,
                                     totalDuration = it.totalDuration ?: playerState.totalDuration,
+                                    isVideoFinished = if (it.isPlaying == true && playerState.isVideoFinished) {
+                                        false
+                                    } else {
+                                        playerState.isVideoFinished
+                                    },
                                 ),
                             )
                         }
                     }
 
-                    is UiEvent.OnSeekStarted -> setState { copy(playerState = playerState.copy(isSeeking = true)) }
+                    is UiEvent.OnSeekStarted -> setState {
+                        copy(playerState = playerState.copy(isSeeking = true, isVideoFinished = false))
+                    }
+
                     is UiEvent.OnSeek -> {
                         setState {
                             copy(playerState = playerState.copy(isSeeking = false, currentTime = it.positionMs))
@@ -289,6 +297,12 @@ class LiveStreamViewModel @AssistedInject constructor(
 
                             else -> Unit
                         }
+                    }
+                    UiEvent.OnVideoUnavailable -> {
+                        setState { copy(isStreamUnavailable = true) }
+                    }
+                    UiEvent.OnVideoEnded -> {
+                        setState { copy(playerState = playerState.copy(isVideoFinished = true, isPlaying = false)) }
                     }
 
                     is UiEvent.ChangeStreamMuted -> changeStreamMuted(it.isMuted)
@@ -387,7 +401,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     val streamUrlToPlay = if (isLive) stream.streamingUrl else stream.recordingUrl
 
                     if (streamUrlToPlay == null) {
-                        setState { copy(loading = false) }
+                        setState { copy(loading = false, isStreamUnavailable = true) }
                         return@collect
                     }
 
@@ -398,7 +412,12 @@ class LiveStreamViewModel @AssistedInject constructor(
                     setState {
                         copy(
                             loading = false,
-                            playerState = playerState.copy(isLive = isLive, atLiveEdge = isLive),
+                            isStreamUnavailable = false,
+                            playerState = playerState.copy(
+                                isLive = isLive,
+                                atLiveEdge = isLive,
+                                isVideoFinished = false,
+                            ),
                             streamInfo = this.streamInfo?.copy(
                                 atag = stream.aTag,
                                 eventId = stream.eventId,

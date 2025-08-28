@@ -41,6 +41,7 @@ interface LiveStreamContract {
         val activeUserMutedProfiles: Set<String> = emptySet(),
         val profileIdToFollowerCount: Map<String, Int> = emptyMap(),
         val liveProfiles: Set<String> = emptySet(),
+        val isStreamUnavailable: Boolean = false,
         val activeBottomSheet: ActiveBottomSheet = ActiveBottomSheet.None,
     )
 
@@ -53,6 +54,7 @@ interface LiveStreamContract {
         val currentTime: Long = 0L,
         val totalDuration: Long = 0L,
         val isLive: Boolean = false,
+        val isVideoFinished: Boolean = false,
     ) {
         val isLoading: Boolean get() = isBuffering && !isPlaying
     }
@@ -106,7 +108,8 @@ interface LiveStreamContract {
             val messageId: String,
             val authorId: String,
         ) : UiEvent()
-
+        data object OnVideoUnavailable : UiEvent()
+        data object OnVideoEnded : UiEvent()
         data class ChangeActiveBottomSheet(val sheet: ActiveBottomSheet) : UiEvent()
     }
 

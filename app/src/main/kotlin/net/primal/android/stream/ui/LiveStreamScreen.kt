@@ -95,7 +95,8 @@ import net.primal.android.notes.feed.zaps.ZapHost
 import net.primal.android.notes.feed.zaps.ZapHostState
 import net.primal.android.notes.feed.zaps.rememberZapHostState
 import net.primal.android.stream.LiveStreamContract
-import net.primal.android.stream.player.SEEK_INCREMENT_MS
+import net.primal.android.stream.player.SEEK_BACK_MS
+import net.primal.android.stream.player.SEEK_FORWARD_MS
 import net.primal.android.stream.player.SHARED_TRANSITION_LOADING_PLAYER_KEY
 import net.primal.android.stream.player.SHARED_TRANSITION_PLAYER_KEY
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
@@ -354,13 +355,17 @@ private fun StreamPlayer(
                 }
             },
             onRewind = {
-                val newPosition = (exoPlayer.currentPosition - SEEK_INCREMENT_MS).coerceAtLeast(0L)
+                eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
+                val newPosition = (exoPlayer.currentPosition - SEEK_BACK_MS).coerceAtLeast(0L)
                 exoPlayer.seekTo(newPosition)
+                eventPublisher(LiveStreamContract.UiEvent.OnSeek(newPosition))
             },
             onForward = {
-                val newPosition = (exoPlayer.currentPosition + SEEK_INCREMENT_MS)
+                eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
+                val newPosition = (exoPlayer.currentPosition + SEEK_FORWARD_MS)
                     .coerceAtMost(state.playerState.totalDuration)
                 exoPlayer.seekTo(newPosition)
+                eventPublisher(LiveStreamContract.UiEvent.OnSeek(newPosition))
             },
             onSoundClick = {
                 eventPublisher(LiveStreamContract.UiEvent.ToggleMute)

@@ -1368,6 +1368,8 @@
     <string name="live_stream_chat_message">Chat Message</string>
     <string name="live_stream_bottom_sheet_unmute_user">Unmute</string>
     <string name="live_stream_bottom_sheet_mute_user">Mute</string>
+    <string name="live_stream_recording_not_available">Video not available</string>
+    <string name="live_stream_video_ended">Video ended</string>
     <string name="live_stream_bottom_sheet_stream_notifications">Stream Notifications</string>
     <string name="live_stream_bottom_sheet_stream_notifications_desc">Notify me about live streams from this account</string>
     <string name="live_stream_bottom_sheet_chat_filtering">Chat Filtering</string>
