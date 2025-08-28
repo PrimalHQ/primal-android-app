@@ -331,15 +331,21 @@ private fun PlayerBox(
             .fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        if (state.isStreamUnavailable) {
+        if (state.isStreamUnavailable || state.playerState.isVideoFinished) {
             Box(
                 modifier = modifier
                     .fillMaxSize()
                     .background(Color.Black),
                 contentAlignment = Alignment.Center,
             ) {
+                val messageText = if (state.playerState.isVideoFinished) {
+                    stringResource(id = R.string.live_stream_video_ended)
+                } else {
+                    stringResource(id = R.string.live_stream_recording_not_available)
+                }
+
                 Text(
-                    text = stringResource(id = R.string.live_stream_recording_not_available),
+                    text = messageText,
                     color = Color.White,
                     style = AppTheme.typography.bodySmall,
                 )

@@ -149,7 +149,7 @@ private fun PlayerBox(
         Modifier.resolveBoxSizingModifier(localConfiguration.orientation)
     }
 
-    val playerBackgroundColor = if (state.isStreamUnavailable) {
+    val playerBackgroundColor = if (state.isStreamUnavailable || state.playerState.isVideoFinished) {
         Color.Black
     } else {
         AppTheme.colorScheme.background
@@ -170,9 +170,15 @@ private fun PlayerBox(
             Modifier.resolvePlayerSizingModifier(orientation = localConfiguration.orientation, scope = this)
         }
 
-        if (state.isStreamUnavailable) {
+        if (state.isStreamUnavailable || state.playerState.isVideoFinished) {
+            val messageText = if (state.playerState.isVideoFinished) {
+                stringResource(id = R.string.live_stream_video_ended)
+            } else {
+                stringResource(id = R.string.live_stream_recording_not_available)
+            }
+
             Text(
-                text = stringResource(id = R.string.live_stream_recording_not_available),
+                text = messageText,
                 style = AppTheme.typography.bodyLarge,
                 color = Color.White,
             )

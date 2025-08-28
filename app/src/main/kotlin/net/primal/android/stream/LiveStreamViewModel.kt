@@ -220,12 +220,20 @@ class LiveStreamViewModel @AssistedInject constructor(
                                     atLiveEdge = it.atLiveEdge ?: playerState.atLiveEdge,
                                     currentTime = it.currentTime ?: playerState.currentTime,
                                     totalDuration = it.totalDuration ?: playerState.totalDuration,
+                                    isVideoFinished = if (it.isPlaying == true && playerState.isVideoFinished) {
+                                        false
+                                    } else {
+                                        playerState.isVideoFinished
+                                    },
                                 ),
                             )
                         }
                     }
 
-                    is UiEvent.OnSeekStarted -> setState { copy(playerState = playerState.copy(isSeeking = true)) }
+                    is UiEvent.OnSeekStarted -> setState {
+                        copy(playerState = playerState.copy(isSeeking = true, isVideoFinished = false))
+                    }
+
                     is UiEvent.OnSeek -> {
                         setState {
                             copy(playerState = playerState.copy(isSeeking = false, currentTime = it.positionMs))
@@ -288,6 +296,9 @@ class LiveStreamViewModel @AssistedInject constructor(
                     }
                     UiEvent.OnVideoUnavailable -> {
                         setState { copy(isStreamUnavailable = true) }
+                    }
+                    UiEvent.OnVideoEnded -> {
+                        setState { copy(playerState = playerState.copy(isVideoFinished = true, isPlaying = false)) }
                     }
                 }
             }
@@ -378,7 +389,11 @@ class LiveStreamViewModel @AssistedInject constructor(
                         copy(
                             loading = false,
                             isStreamUnavailable = false,
-                            playerState = playerState.copy(isLive = isLive, atLiveEdge = isLive),
+                            playerState = playerState.copy(
+                                isLive = isLive,
+                                atLiveEdge = isLive,
+                                isVideoFinished = false,
+                            ),
                             streamInfo = this.streamInfo?.copy(
                                 atag = stream.aTag,
                                 eventId = stream.eventId,

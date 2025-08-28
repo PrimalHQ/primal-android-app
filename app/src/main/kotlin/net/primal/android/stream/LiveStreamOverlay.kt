@@ -102,6 +102,9 @@ private fun LiveStreamOverlay(
             viewModel.setEvent(
                 LiveStreamContract.UiEvent.OnPlayerStateUpdate(isBuffering = playbackState == Player.STATE_BUFFERING),
             )
+            if (playbackState == Player.STATE_ENDED) {
+                viewModel.setEvent(LiveStreamContract.UiEvent.OnVideoEnded)
+            }
         },
         onPlayerError = {
             viewModel.setEvent(LiveStreamContract.UiEvent.OnVideoUnavailable)

@@ -335,13 +335,17 @@ private fun StreamPlayer(
                 }
             },
             onRewind = {
+                eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
                 val newPosition = (exoPlayer.currentPosition - SEEK_BACK_MS).coerceAtLeast(0L)
                 exoPlayer.seekTo(newPosition)
+                eventPublisher(LiveStreamContract.UiEvent.OnSeek(newPosition))
             },
             onForward = {
+                eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
                 val newPosition = (exoPlayer.currentPosition + SEEK_FORWARD_MS)
                     .coerceAtMost(state.playerState.totalDuration)
                 exoPlayer.seekTo(newPosition)
+                eventPublisher(LiveStreamContract.UiEvent.OnSeek(newPosition))
             },
             onSoundClick = {
                 eventPublisher(LiveStreamContract.UiEvent.ToggleMute)
