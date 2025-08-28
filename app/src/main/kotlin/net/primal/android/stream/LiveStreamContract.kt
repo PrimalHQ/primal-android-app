@@ -105,7 +105,7 @@ interface LiveStreamContract {
             val messageId: String,
             val authorId: String,
         ) : UiEvent()
-        data object OnPlayerUnavailable : UiEvent()
+        data object OnVideoUnavailable : UiEvent()
         data class ChangeActiveBottomSheet(val sheet: ActiveBottomSheet) : UiEvent()
     }
 

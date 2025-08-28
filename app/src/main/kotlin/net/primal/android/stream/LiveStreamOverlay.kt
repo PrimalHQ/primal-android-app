@@ -100,7 +100,7 @@ private fun LiveStreamOverlay(
             )
         },
         onPlayerError = {
-            viewModel.setEvent(LiveStreamContract.UiEvent.OnPlayerUnavailable)
+            viewModel.setEvent(LiveStreamContract.UiEvent.OnVideoUnavailable)
         },
     )
 

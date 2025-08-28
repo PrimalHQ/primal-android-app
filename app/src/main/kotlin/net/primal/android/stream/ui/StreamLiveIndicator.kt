@@ -50,7 +50,7 @@ fun StreamLiveIndicator(
                     shape = CircleShape,
                 ),
         )
-        if (!hideTextIfNotLive && isLive) {
+        if (!hideTextIfNotLive) {
             Text(
                 text = stringResource(id = R.string.live_stream_live_indicator),
                 color = textColor,

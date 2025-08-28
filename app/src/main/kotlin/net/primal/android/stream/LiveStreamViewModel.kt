@@ -286,7 +286,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                             else -> Unit
                         }
                     }
-                    UiEvent.OnPlayerUnavailable -> {
+                    UiEvent.OnVideoUnavailable -> {
                         setState { copy(isStreamUnavailable = true) }
                     }
                 }

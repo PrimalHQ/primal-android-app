@@ -149,10 +149,16 @@ private fun PlayerBox(
         Modifier.resolveBoxSizingModifier(localConfiguration.orientation)
     }
 
+    val playerBackgroundColor = if (state.isStreamUnavailable) {
+        Color.Black
+    } else {
+        AppTheme.colorScheme.background
+    }
+
     Box(
         modifier = modifier
             .then(boxSizingModifier)
-            .background(AppTheme.colorScheme.background)
+            .background(playerBackgroundColor)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
