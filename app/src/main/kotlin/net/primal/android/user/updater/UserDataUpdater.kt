@@ -78,6 +78,7 @@ class UserDataUpdater @AssistedInject constructor(
         runCatching { walletAccountRepository.fetchWalletAccountInfo(userId = userId) }
         runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }
         runCatching { mutedItemRepository.fetchAndPersistMuteList(userId = userId) }
+        mutedItemRepository.fetchAndPersistStreamMuteList(userId = userId)
     }
 
     @OptIn(ExperimentalTime::class)
