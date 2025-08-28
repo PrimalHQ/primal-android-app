@@ -231,7 +231,9 @@ class NoteFeedViewModel @AssistedInject constructor(
             }
             .distinct()
 
-        val liveActivity = this.liveActivity.mapAsStreamDO(profilesMap = profiles.asMapByKey { it.profileId })
+        val liveActivity = this.liveActivity
+            .mapAsStreamDO(profilesMap = profiles.asMapByKey { it.profileId })
+            .filter { it.isLive() }
 
         val avatarCdnImagesStreams = liveActivity.map { it.mainHostProfile?.avatarCdnImage }
 
