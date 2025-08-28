@@ -107,6 +107,7 @@ import net.primal.domain.links.ReferencedUser
 import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
 import net.primal.domain.nostr.utils.parseNostrUris
+import net.primal.domain.streams.StreamContentModerationMode
 import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.DraftTx
 
@@ -218,6 +219,11 @@ private fun LiveStreamScaffold(
                     paddingValues = paddingValues,
                     callbacks = callbacks,
                     onZapClick = { zapHostState.showZapOptionsOrShowWarning() },
+                    onChatSettingsClick = {
+                        eventPublisher(
+                            LiveStreamContract.UiEvent.ChangeActiveBottomSheet(ActiveBottomSheet.StreamSettings),
+                        )
+                    },
                     onInfoClick = {
                         eventPublisher(LiveStreamContract.UiEvent.ChangeActiveBottomSheet(ActiveBottomSheet.StreamInfo))
                     },
@@ -263,6 +269,8 @@ private fun LiveStreamBottomSheet(
         streamInfo = state.streamInfo,
         isStreamLive = state.playerState.isLive,
         activeUserId = state.activeUserId,
+        mainHostStreamsMuted = state.mainHostStreamsMuted,
+        contentModeration = state.contentModerationMode,
         followerCountMap = state.profileIdToFollowerCount,
         liveProfiles = state.liveProfiles,
         mutedProfiles = state.activeUserMutedProfiles,
@@ -273,6 +281,18 @@ private fun LiveStreamBottomSheet(
         onUnfollow = { eventPublisher(LiveStreamContract.UiEvent.UnfollowAction(it)) },
         onMute = { eventPublisher(LiveStreamContract.UiEvent.MuteAction(it)) },
         onUnmute = { eventPublisher(LiveStreamContract.UiEvent.UnmuteAction(it)) },
+        onStreamNotificationsChanged = { eventPublisher(LiveStreamContract.UiEvent.ChangeStreamMuted(it)) },
+        onContentModerationChanged = { contentModeration ->
+            when (contentModeration) {
+                StreamContentModerationMode.Moderated ->
+                    eventPublisher(LiveStreamContract.UiEvent.ChangeContentModeration(StreamContentModerationMode.None))
+
+                StreamContentModerationMode.None ->
+                    eventPublisher(
+                        LiveStreamContract.UiEvent.ChangeContentModeration(StreamContentModerationMode.Moderated),
+                    )
+            }
+        },
         onZapClick = { profileDetails ->
             handleZapProfile(
                 profileDetails = profileDetails,
@@ -377,6 +397,7 @@ private fun StreamInfoAndChatSection(
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onZapClick: () -> Unit,
     onInfoClick: () -> Unit,
+    onChatSettingsClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onEventReactionsClick: (eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit,
     onChatMessageClick: (ChatMessageUi) -> Unit,
@@ -393,6 +414,7 @@ private fun StreamInfoAndChatSection(
             onZapClick = onZapClick,
             isKeyboardVisible = isKeyboardVisible,
             onInfoClick = onInfoClick,
+            onChatSettingsClick = onChatSettingsClick,
             onEventReactionsClick = onEventReactionsClick,
         )
 
@@ -418,6 +440,7 @@ private fun LiveStreamContent(
     animatedVisibilityScope: AnimatedVisibilityScope,
     onZapClick: () -> Unit,
     onInfoClick: () -> Unit,
+    onChatSettingsClick: () -> Unit,
     onChatMessageClick: (ChatMessageUi) -> Unit,
     onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
@@ -456,6 +479,7 @@ private fun LiveStreamContent(
                     onEventReactionsClick = callbacks.onEventReactionsClick,
                     onChatMessageClick = onChatMessageClick,
                     onZapMessageClick = onZapMessageClick,
+                    onChatSettingsClick = onChatSettingsClick,
                 )
             }
         }
@@ -467,6 +491,7 @@ private fun StreamInfoDisplay(
     state: LiveStreamContract.UiState,
     onZapClick: () -> Unit,
     isKeyboardVisible: Boolean,
+    onChatSettingsClick: () -> Unit,
     onInfoClick: () -> Unit,
     onEventReactionsClick: (eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit,
 ) {
@@ -499,7 +524,7 @@ private fun StreamInfoDisplay(
             startedAt = streamInfo.startedAt,
             isLive = state.playerState.isLive,
             onInfoClick = onInfoClick,
-            onChatSettingsClick = {},
+            onChatSettingsClick = onChatSettingsClick,
             isKeyboardVisible = isKeyboardVisible,
         )
 
