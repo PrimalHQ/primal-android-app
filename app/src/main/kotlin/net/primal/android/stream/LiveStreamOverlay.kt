@@ -25,6 +25,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.animatableSaver
@@ -107,7 +108,7 @@ private fun LiveStreamOverlay(
         },
     )
 
-    DisposableEffect(exoPlayer) {
+    DisposableEffect(exoPlayer, viewModel) {
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 if (playbackState == Player.STATE_READY) {
@@ -126,9 +127,9 @@ private fun LiveStreamOverlay(
         }
     }
 
-    LaunchedEffect(exoPlayer) {
+    LaunchedEffect(exoPlayer, viewModel) {
         while (true) {
-            kotlinx.coroutines.delay(PLAYER_STATE_UPDATE_INTERVAL)
+            delay(PLAYER_STATE_UPDATE_INTERVAL)
             if (exoPlayer.isPlaying) {
                 viewModel.setEvent(
                     LiveStreamContract.UiEvent.OnPlayerStateUpdate(
@@ -139,7 +140,7 @@ private fun LiveStreamOverlay(
         }
     }
 
-    LaunchedEffect(streamState, streamState.commands) {
+    LaunchedEffect(streamState, streamState.commands, exoPlayer) {
         streamState.commands.collect { command ->
             when (command) {
                 PlayerCommand.Play -> exoPlayer.play()
