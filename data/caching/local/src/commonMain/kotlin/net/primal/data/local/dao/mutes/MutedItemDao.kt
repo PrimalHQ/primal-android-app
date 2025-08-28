@@ -17,6 +17,9 @@ interface MutedItemDao {
     @Query("DELETE FROM MutedItemData WHERE ownerId = :ownerId")
     suspend fun deleteAllByOwnerId(ownerId: String)
 
+    @Query("DELETE FROM MutedItemData WHERE ownerId = :ownerId AND listType = :listType")
+    suspend fun deleteListByOwnerId(ownerId: String, listType: ListType)
+
     @Transaction
     @RewriteQueriesToDropUnusedColumns
     @Query(
@@ -29,8 +32,23 @@ interface MutedItemDao {
     )
     fun observeMutedUsersByOwnerId(ownerId: String): Flow<List<MutedUser>>
 
-    @Query("SELECT EXISTS(SELECT * FROM MutedItemData WHERE item = :pubkey AND ownerId = :ownerId)")
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT * FROM MutedItemData WHERE item = :pubkey AND ownerId = :ownerId AND listType = 'MuteList'
+        )
+        """,
+    )
     fun observeIsUserMutedByOwnerId(pubkey: String, ownerId: String): Flow<Boolean>
+
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT * FROM MutedItemData WHERE item = :pubkey AND ownerId = :ownerId AND listType = 'StreamMuteList'
+        )
+        """,
+    )
+    fun observeIsStreamMutedByOwnerId(pubkey: String, ownerId: String): Flow<Boolean>
 
     @Query("SELECT * FROM MutedItemData WHERE ownerId = :ownerId AND type = :type")
     fun observeMutedItemsByType(ownerId: String, type: MutedItemType): Flow<List<MutedItemData>>

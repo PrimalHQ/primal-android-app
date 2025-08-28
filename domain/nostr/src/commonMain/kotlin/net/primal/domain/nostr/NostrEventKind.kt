@@ -31,6 +31,7 @@ enum class NostrEventKind(val value: Int) {
     RelayListMetadata(value = 10_002),
     BookmarksList(value = 10_003),
     BlossomServerList(value = 10_063),
+    StreamMuteList(value = 10_555),
     WalletInfo(value = 13_194),
     ClientAuthentication(value = 22_242),
     NwcRequest(value = 23_194),
