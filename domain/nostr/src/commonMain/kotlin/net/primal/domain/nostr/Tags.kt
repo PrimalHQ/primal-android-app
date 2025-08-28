@@ -128,7 +128,7 @@ fun JsonArray.isStatusTag() = getOrNull(0)?.jsonPrimitive?.content == "status"
 
 fun JsonArray.isStartsTag() = getOrNull(0)?.jsonPrimitive?.content == "starts"
 
-fun JsonArray.hasHostMarker() = contains(JsonPrimitive("host"))
+fun JsonArray.hasHostMarker() = this.map { it.jsonPrimitive.content.lowercase() }.contains("host")
 
 fun JsonArray.hasMentionMarker() = contains(JsonPrimitive("mention"))
 
