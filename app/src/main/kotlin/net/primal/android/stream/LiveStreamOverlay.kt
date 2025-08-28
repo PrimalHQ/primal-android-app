@@ -11,7 +11,9 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.collectLatest
 import net.primal.android.core.compose.ApplyEdgeToEdge
@@ -34,6 +37,7 @@ import net.primal.android.navigation.navigateToWalletCreateTransaction
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.stream.di.rememberLiveStreamViewModel
 import net.primal.android.stream.player.LocalStreamState
+import net.primal.android.stream.player.PLAYER_STATE_UPDATE_INTERVAL
 import net.primal.android.stream.player.PlayerCommand
 import net.primal.android.stream.player.StreamMode
 import net.primal.android.stream.player.StreamState
@@ -77,7 +81,6 @@ fun LiveStreamOverlay(
     }
 }
 
-@OptIn(UnstableApi::class)
 @Composable
 private fun LiveStreamOverlay(
     viewModel: LiveStreamViewModel,
@@ -104,6 +107,38 @@ private fun LiveStreamOverlay(
         },
     )
 
+    DisposableEffect(exoPlayer) {
+        val listener = object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                if (playbackState == Player.STATE_READY) {
+                    val duration = exoPlayer.duration.takeIf { it > 0L }
+                    if (duration != null) {
+                        viewModel.setEvent(
+                            LiveStreamContract.UiEvent.OnPlayerStateUpdate(totalDuration = duration),
+                        )
+                    }
+                }
+            }
+        }
+        exoPlayer.addListener(listener)
+        onDispose {
+            exoPlayer.removeListener(listener)
+        }
+    }
+
+    LaunchedEffect(exoPlayer) {
+        while (true) {
+            kotlinx.coroutines.delay(PLAYER_STATE_UPDATE_INTERVAL)
+            if (exoPlayer.isPlaying) {
+                viewModel.setEvent(
+                    LiveStreamContract.UiEvent.OnPlayerStateUpdate(
+                        currentTime = exoPlayer.currentPosition,
+                    ),
+                )
+            }
+        }
+    }
+
     LaunchedEffect(streamState, streamState.commands) {
         streamState.commands.collect { command ->
             when (command) {
@@ -113,6 +148,26 @@ private fun LiveStreamOverlay(
         }
     }
 
+    LiveStreamAnimatedContent(
+        streamState = streamState,
+        navController = navController,
+        noteCallbacks = noteCallbacks,
+        viewModel = viewModel,
+        uiState = uiState,
+        exoPlayer = exoPlayer,
+    )
+}
+
+@OptIn(UnstableApi::class)
+@Composable
+private fun LiveStreamAnimatedContent(
+    streamState: StreamState,
+    navController: NavHostController,
+    noteCallbacks: NoteCallbacks,
+    viewModel: LiveStreamViewModel,
+    uiState: State<LiveStreamContract.UiState>,
+    exoPlayer: ExoPlayer,
+) {
     val localDensity = LocalDensity.current
     val displayMetrics = LocalContext.current.resources.displayMetrics
     val playerWidth = displayMetrics.widthPixels / 2

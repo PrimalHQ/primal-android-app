@@ -350,7 +350,7 @@ private fun PlayerActionButtons(
 private fun PlayerSlider(
     modifier: Modifier = Modifier,
     isLiveAtEdge: Boolean,
-    isInteractive: Boolean,
+    @Suppress("UnusedParameter") isInteractive: Boolean,
     sliderValue: Float,
     valueRangeEnd: Float,
     onValueChange: (Float) -> Unit,
@@ -381,12 +381,12 @@ private fun PlayerSlider(
             onValueChange = onValueChange,
             onValueChangeFinished = onValueChangeFinished,
             valueRange = 0f..valueRangeEnd,
-            enabled = isInteractive,
+            enabled = false,
             thumb = { },
             track = { sliderState ->
                 CustomTrackWithThumb(
                     sliderState = sliderState,
-                    isInteractive = isInteractive,
+                    isInteractive = false,
                     isLiveAtEdge = isLiveAtEdge,
                 )
             },

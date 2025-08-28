@@ -8,5 +8,7 @@ const val SEEK_BACK_MS = 15_000L
 
 const val SEEK_FORWARD_MS = 30_000L
 
+const val PLAYER_STATE_UPDATE_INTERVAL = 500L
+
 const val SHARED_TRANSITION_PLAYER_KEY = "streamPlayer"
 const val SHARED_TRANSITION_LOADING_PLAYER_KEY = "streamPlayerLoading"
