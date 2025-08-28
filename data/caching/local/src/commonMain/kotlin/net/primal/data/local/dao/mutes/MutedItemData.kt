@@ -9,4 +9,5 @@ data class MutedItemData(
     val item: String,
     val ownerId: String,
     val type: MutedItemType,
+    val listType: ListType,
 )

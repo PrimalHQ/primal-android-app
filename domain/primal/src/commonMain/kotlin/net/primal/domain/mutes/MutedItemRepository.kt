@@ -2,6 +2,7 @@ package net.primal.domain.mutes
 
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
+import net.primal.core.utils.Result
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
@@ -19,8 +20,16 @@ interface MutedItemRepository {
 
     fun observeMutedProfileIdsByOwnerId(ownerId: String): Flow<List<String>>
 
+    fun observeIsStreamMutedByOwnerId(pubkey: String, ownerId: String): Flow<Boolean>
+
     @Throws(NetworkException::class, CancellationException::class)
     suspend fun fetchAndPersistMuteList(userId: String)
+
+    suspend fun fetchAndPersistStreamMuteList(userId: String): Result<Unit>
+
+    suspend fun muteStreamNotifications(ownerId: String, pubkey: String): Result<Unit>
+
+    suspend fun unmuteStreamNotifications(ownerId: String, pubkey: String): Result<Unit>
 
     @Throws(
         MissingRelaysException::class,
