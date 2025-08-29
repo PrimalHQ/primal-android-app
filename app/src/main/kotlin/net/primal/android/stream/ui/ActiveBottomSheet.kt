@@ -8,4 +8,5 @@ sealed interface ActiveBottomSheet {
     data object StreamSettings : ActiveBottomSheet
     data class ChatDetails(val message: ChatMessageUi) : ActiveBottomSheet
     data class ZapDetails(val zap: EventZapUiModel) : ActiveBottomSheet
+    data object StreamZapLeaderboard : ActiveBottomSheet
 }
