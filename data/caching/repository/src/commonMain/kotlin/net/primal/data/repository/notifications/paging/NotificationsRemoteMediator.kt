@@ -18,6 +18,7 @@ import net.primal.data.remote.api.notifications.model.NotificationsRequestBody
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.mapNotNullAsNotificationPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsProfileStatsPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsStreamDataPO
 import net.primal.domain.common.exception.NetworkException
 import net.primal.shared.data.local.db.withTransaction
 
@@ -111,6 +112,7 @@ class NotificationsRemoteMediator(
 
         lastRequests[loadType] = requestBody
 
+        val streamData = response.liveActivity.mapNotNullAsStreamDataPO()
         val userProfileStats = response.primalUserProfileStats.mapNotNullAsProfileStatsPO()
         val notifications = response.primalNotifications.mapNotNullAsNotificationPO()
 
@@ -140,6 +142,7 @@ class NotificationsRemoteMediator(
             database.withTransaction {
                 database.profileStats().upsertAll(data = userProfileStats)
                 database.notifications().upsertAll(data = notifications.mapWithSeenAtTimestamps())
+                database.streams().upsertStreamData(data = streamData)
             }
         }
 

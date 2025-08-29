@@ -26,4 +26,7 @@ data class ContentPrimalNotification(
     @SerialName("who_highlighted_it") val whoHighlightedIt: String? = null,
     @SerialName("who_bookmarked_it") val whoBookmarkedIt: String? = null,
     val reaction: String? = null,
+    val host: String? = null,
+    @SerialName("live_event_id") val liveEventId: String? = null,
+    val coordinate: String? = null,
 )

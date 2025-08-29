@@ -795,6 +795,8 @@
     <string name="notification_list_item_post_where_you_post_was_mentioned_was_reposted">reposted a note your note was mentioned in</string>
     <string name="notification_list_item_post_where_you_post_was_mentioned_was_replied_to">replied to a note your note was mentioned in</string>
     <string name="notification_list_item_bookmarked_your_post">bookmarked your note</string>
+    <string name="notification_list_item_is_live">is live</string>
+    <string name="notification_list_item_was_live">was live</string>
     <string name="notification_list_item_highlighted_your_article">highlighted your article</string>
     <string name="notification_list_button_jump_to_start">New notifications</string>
 
@@ -910,6 +912,7 @@
     <string name="settings_notifications_group_reactions">Reactions</string>
     <string name="settings_notifications_group_replies">Replies</string>
     <string name="settings_notifications_group_reposts">Reposts</string>
+    <string name="settings_notifications_live_streams">Live streams</string>
     <string name="settings_notifications_group_mentions">Mentions</string>
     <string name="settings_notifications_group_direct_messages">Direct Messages</string>
     <string name="settings_notifications_group_wallet_txs">Wallet Transactions</string>

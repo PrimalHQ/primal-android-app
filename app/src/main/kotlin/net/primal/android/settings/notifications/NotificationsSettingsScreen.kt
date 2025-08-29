@@ -446,6 +446,10 @@ private fun NotificationSettingsType.toTitle(): String =
         )
 
         NotificationSettingsType.TabNotifications.Zaps -> stringResource(R.string.settings_notifications_group_zaps)
+
+        NotificationSettingsType.TabNotifications.LiveEvents -> stringResource(
+            id = R.string.settings_notifications_live_streams,
+        )
     }
 
 @Suppress("CyclomaticComplexMethod")
@@ -535,6 +539,12 @@ private fun NotificationSettingsType.toImagePainter(): Painter? =
             painterResource(
                 darkResId = R.drawable.notification_type_your_post_was_zapped_dark,
                 lightResId = R.drawable.notification_type_your_post_was_zapped_light,
+            )
+
+        NotificationSettingsType.TabNotifications.LiveEvents ->
+            painterResource(
+                darkResId = R.drawable.notification_type_live_stream_dark,
+                lightResId = R.drawable.notification_type_live_stream_light,
             )
     }
 

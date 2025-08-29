@@ -98,6 +98,11 @@ enum class NotificationType(
         type = 302,
         collapsable = true,
     ),
+    LIVE_EVENT_HAPPENING(
+        id = "LIVE_EVENT_HAPPENING",
+        type = 501,
+        collapsable = false,
+    ),
     ;
 
     companion object {

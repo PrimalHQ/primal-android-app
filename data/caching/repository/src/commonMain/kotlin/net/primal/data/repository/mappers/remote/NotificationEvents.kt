@@ -24,6 +24,7 @@ private fun ContentPrimalNotification.parseActionUserId(type: NotificationType):
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> this.whoRepliedToIt
         NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> this.whoHighlightedIt
         NotificationType.YOUR_POST_WAS_BOOKMARKED -> this.whoBookmarkedIt
+        NotificationType.LIVE_EVENT_HAPPENING -> this.host
     }
 }
 
@@ -45,6 +46,7 @@ private fun ContentPrimalNotification.parseActionPostId(type: NotificationType):
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> this.reply
         NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> this.yourPost
         NotificationType.YOUR_POST_WAS_BOOKMARKED -> this.yourPost
+        NotificationType.LIVE_EVENT_HAPPENING -> this.coordinate
         else -> null
     }
 }

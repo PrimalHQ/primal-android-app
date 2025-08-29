@@ -67,15 +67,37 @@ fun ReferencedStream(
 }
 
 @Composable
-private fun StreamInfo(stream: ReferencedStream) {
+fun ReferencedNotificationStream(
+    modifier: Modifier = Modifier,
+    stream: ReferencedStream,
+    onClick: (naddr: String) -> Unit,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                shape = AppTheme.shapes.medium,
+                color = AppTheme.extraColorScheme.surfaceVariantAlt3,
+            )
+            .padding(12.dp)
+            .clickable { onClick(stream.naddr) },
+    ) {
+        StreamInfo(stream = stream, showHostInfo = false)
+    }
+}
+
+@Composable
+private fun StreamInfo(stream: ReferencedStream, showHostInfo: Boolean = true) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        NostrUserText(
-            displayName = stream.mainHostName,
-            internetIdentifier = stream.mainHostInternetIdentifier,
-            legendaryCustomization = stream.mainHostLegendProfile?.asLegendaryCustomization(),
-        )
+        if (showHostInfo) {
+            NostrUserText(
+                displayName = stream.mainHostName,
+                internetIdentifier = stream.mainHostInternetIdentifier,
+                legendaryCustomization = stream.mainHostLegendProfile?.asLegendaryCustomization(),
+            )
+        }
 
         stream.title?.let { title ->
             Text(

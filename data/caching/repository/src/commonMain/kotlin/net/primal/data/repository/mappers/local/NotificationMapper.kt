@@ -7,6 +7,7 @@ import net.primal.domain.notifications.Notification as NotificationDO
 import net.primal.domain.posts.FeedPost
 import net.primal.domain.posts.FeedPostAuthor
 import net.primal.domain.posts.FeedPostStats
+import net.primal.domain.streams.Stream
 
 fun NotificationPO.asNotificationDO(): NotificationDO {
     return NotificationDO(
@@ -56,6 +57,29 @@ fun NotificationPO.asNotificationDO(): NotificationDO {
                 nostrUris = this.actionPostNostrUris.map { it.asReferencedNostrUriDO() },
                 eventZaps = emptyList(),
                 bookmark = null,
+            )
+        },
+        liveActivity = this.liveActivity?.let { stream ->
+            Stream(
+                aTag = stream.aTag,
+                eventId = stream.eventId,
+                eventAuthorId = stream.eventAuthorId,
+                mainHostProfile = this.actionByUser?.asProfileDataDO(),
+                mainHostId = stream.mainHostId,
+                dTag = stream.dTag,
+                title = stream.title,
+                summary = stream.summary,
+                imageUrl = stream.imageUrl,
+                hashtags = stream.hashtags,
+                streamingUrl = stream.streamingUrl,
+                recordingUrl = stream.recordingUrl,
+                startsAt = stream.startsAt,
+                endsAt = stream.endsAt,
+                status = stream.status,
+                currentParticipants = stream.currentParticipants,
+                totalParticipants = stream.totalParticipants,
+                eventZaps = emptyList(),
+                rawNostrEventJson = stream.raw,
             )
         },
     )
