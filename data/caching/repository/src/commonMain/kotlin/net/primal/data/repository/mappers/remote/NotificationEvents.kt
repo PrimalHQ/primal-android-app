@@ -46,7 +46,7 @@ private fun ContentPrimalNotification.parseActionPostId(type: NotificationType):
         NotificationType.POST_YOUR_POST_WAS_MENTIONED_IN_WAS_REPLIED_TO -> this.reply
         NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> this.yourPost
         NotificationType.YOUR_POST_WAS_BOOKMARKED -> this.yourPost
-        NotificationType.LIVE_EVENT_HAPPENING -> this.coordinate
+        NotificationType.LIVE_EVENT_HAPPENING -> this.aTag
         else -> null
     }
 }

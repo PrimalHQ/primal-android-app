@@ -28,5 +28,5 @@ data class ContentPrimalNotification(
     val reaction: String? = null,
     val host: String? = null,
     @SerialName("live_event_id") val liveEventId: String? = null,
-    val coordinate: String? = null,
+    @SerialName("coordinate") val aTag: String? = null,
 )
