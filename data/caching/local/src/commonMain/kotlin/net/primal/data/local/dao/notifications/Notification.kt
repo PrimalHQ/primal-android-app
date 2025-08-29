@@ -8,6 +8,7 @@ import net.primal.data.local.dao.events.EventUriNostr
 import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.notes.PostData
 import net.primal.data.local.dao.profiles.ProfileData
+import net.primal.data.local.dao.streams.StreamData
 
 data class Notification(
     @Embedded
@@ -30,4 +31,7 @@ data class Notification(
 
     @Relation(entityColumn = "eventId", parentColumn = "actionPostId")
     val actionPostNostrUris: List<EventUriNostr> = emptyList(),
+
+    @Relation(entityColumn = "aTag", parentColumn = "actionPostId")
+    val liveActivity: StreamData? = null,
 )

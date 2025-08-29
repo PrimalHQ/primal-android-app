@@ -93,4 +93,9 @@ fun NotificationType.toImagePainter(): Painter =
             darkResId = R.drawable.notification_type_bookmarked_dark,
             lightResId = R.drawable.notification_type_bookmarked_light,
         )
+
+        NotificationType.LIVE_EVENT_HAPPENING -> painterResource(
+            darkResId = R.drawable.notification_type_live_stream_dark,
+            lightResId = R.drawable.notification_type_live_stream_light,
+        )
     }

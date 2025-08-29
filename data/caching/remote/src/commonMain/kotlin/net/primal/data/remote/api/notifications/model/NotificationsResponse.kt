@@ -17,4 +17,5 @@ data class NotificationsResponse(
     val primalUserNames: PrimalEvent? = null,
     val primalLegendProfiles: PrimalEvent? = null,
     val primalPremiumInfo: PrimalEvent? = null,
+    val liveActivity: List<NostrEvent>,
 )

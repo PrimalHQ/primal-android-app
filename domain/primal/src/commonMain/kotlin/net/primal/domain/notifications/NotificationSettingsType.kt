@@ -141,5 +141,13 @@ sealed class NotificationSettingsType(val id: String, val order: Int) {
             ),
             order = 6,
         )
+
+//        data object LiveEvents : TabNotifications(
+//            id = "LIVE_EVENTS",
+//            types = listOf(
+//                NotificationType.LIVE_EVENT_HAPPENING,
+//            ),
+//            order = 7,
+//        )
     }
 }

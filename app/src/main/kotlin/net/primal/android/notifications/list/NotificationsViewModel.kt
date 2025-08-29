@@ -32,11 +32,13 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.links.ReferencedStream
 import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.notifications.Notification
 import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.notifications.NotificationType
+import net.primal.domain.streams.mappers.asReferencedStream
 import timber.log.Timber
 
 @HiltViewModel
@@ -190,7 +192,14 @@ class NotificationsViewModel @Inject constructor(
                 ?.legendProfile?.asLegendaryCustomization(),
             actionUserSatsZapped = this.satsZapped,
             actionPost = this.extractFeedPostUi(),
+            referencedStream = this.extractReferencedStream(),
         )
+    }
+
+    private fun Notification.extractReferencedStream(): ReferencedStream? {
+        return this.liveActivity.let {
+            this.liveActivity?.asReferencedStream()
+        }
     }
 
     private fun Notification.extractFeedPostUi(): FeedPostUi? {
