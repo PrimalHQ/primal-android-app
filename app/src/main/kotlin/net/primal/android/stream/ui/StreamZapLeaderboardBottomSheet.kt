@@ -136,6 +136,12 @@ private fun LeaderboardHeader(
 
 @Composable
 private fun ZapCountText(zapCount: Int, numberFormat: NumberFormat) {
+    val formattedCount = numberFormat.format(zapCount)
+    val formatString = stringResource(id = R.string.live_stream_leaderboard_zaps_count)
+    val textParts = formatString.split("%1\$s")
+    val textBeforeCount = textParts.getOrNull(0) ?: ""
+    val textAfterCount = textParts.getOrNull(1) ?: ""
+
     Text(
         text = buildAnnotatedString {
             withStyle(
@@ -145,7 +151,7 @@ private fun ZapCountText(zapCount: Int, numberFormat: NumberFormat) {
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 ),
             ) {
-                append(stringResource(id = R.string.live_stream_leaderboard_total) + " ")
+                append(textBeforeCount)
             }
             withStyle(
                 style = SpanStyle(
@@ -153,7 +159,7 @@ private fun ZapCountText(zapCount: Int, numberFormat: NumberFormat) {
                     fontWeight = FontWeight.Bold,
                 ),
             ) {
-                append(numberFormat.format(zapCount))
+                append(formattedCount)
             }
             withStyle(
                 style = SpanStyle(
@@ -162,7 +168,7 @@ private fun ZapCountText(zapCount: Int, numberFormat: NumberFormat) {
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 ),
             ) {
-                append(" " + stringResource(id = R.string.live_stream_leaderboard_zaps_suffix))
+                append(textAfterCount)
             }
         },
         color = AppTheme.colorScheme.onSurface,
@@ -172,6 +178,11 @@ private fun ZapCountText(zapCount: Int, numberFormat: NumberFormat) {
 
 @Composable
 private fun TotalSatsText(totalSats: ULong, numberFormat: NumberFormat) {
+    val formattedSats = numberFormat.format(totalSats.toLong())
+    val formatString = stringResource(id = R.string.live_stream_leaderboard_sats_total)
+    val textParts = formatString.split("%1\$s")
+    val textAfterSats = textParts.getOrNull(1) ?: ""
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -191,7 +202,7 @@ private fun TotalSatsText(totalSats: ULong, numberFormat: NumberFormat) {
                         fontWeight = FontWeight.Bold,
                     ),
                 ) {
-                    append(numberFormat.format(totalSats.toLong()))
+                    append(formattedSats)
                 }
                 withStyle(
                     style = SpanStyle(
@@ -200,7 +211,7 @@ private fun TotalSatsText(totalSats: ULong, numberFormat: NumberFormat) {
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     ),
                 ) {
-                    append(" " + stringResource(id = R.string.live_stream_leaderboard_sats_suffix))
+                    append(textAfterSats)
                 }
             },
             color = AppTheme.colorScheme.onSurface,
