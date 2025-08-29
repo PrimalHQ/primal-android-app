@@ -35,6 +35,7 @@ val BottomSheetSectionColorHandler: Color
 fun LiveStreamModalBottomSheetHost(
     activeSheet: ActiveBottomSheet,
     streamInfo: LiveStreamContract.StreamInfoUi?,
+    zaps: List<EventZapUiModel>,
     isStreamLive: Boolean,
     activeUserId: String?,
     mainHostStreamsMuted: Boolean,
@@ -57,6 +58,7 @@ fun LiveStreamModalBottomSheetHost(
     onStreamNotificationsChanged: (Boolean) -> Unit,
     onEditProfileClick: () -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
+    onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -110,6 +112,16 @@ fun LiveStreamModalBottomSheetHost(
                 mainHostStreamsMuted = mainHostStreamsMuted,
                 onStreamNotificationsChanged = onStreamNotificationsChanged,
                 onContentModerationChanged = onContentModerationChanged,
+            )
+        }
+
+        ActiveBottomSheet.StreamZapLeaderboard -> {
+            StreamZapLeaderboardBottomSheet(
+                sheetState = sheetState,
+                onDismiss = onDismiss,
+                bottomSheetHeight = bottomSheetHeight,
+                zaps = zaps,
+                onZapMessageClick = onZapMessageClick,
             )
         }
 
@@ -228,7 +240,7 @@ private fun ActiveBottomSheet.getProfileDetails(streamInfo: LiveStreamContract.S
         is ActiveBottomSheet.ChatDetails -> this.message.authorProfile
         is ActiveBottomSheet.ZapDetails -> this.zap.toProfileDetailsUi()
         is ActiveBottomSheet.StreamInfo -> streamInfo?.mainHostProfile
-        ActiveBottomSheet.StreamSettings, ActiveBottomSheet.None -> null
+        ActiveBottomSheet.StreamSettings, ActiveBottomSheet.None, ActiveBottomSheet.StreamZapLeaderboard -> null
     }
 
 private fun ActiveBottomSheet.isMuteButtonVisible(): Boolean =

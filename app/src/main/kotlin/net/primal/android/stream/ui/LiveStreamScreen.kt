@@ -105,7 +105,6 @@ import net.primal.android.theme.AppTheme
 import net.primal.core.utils.detectUrls
 import net.primal.domain.links.EventUriNostrType
 import net.primal.domain.links.ReferencedUser
-import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
 import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.streams.StreamContentModerationMode
@@ -113,7 +112,7 @@ import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.DraftTx
 
 private const val URL_ANNOTATION_TAG = "url"
-private val ZapMessageBorderColor = Color(0xFFFFA000)
+private val ZapMessageBorderColor = Color(0xFFE47C00)
 private val ZapMessageBackgroundColor = Color(0xFFE47C00)
 private val ZapMessageProfileHandleColor: Color
     @Composable
@@ -268,6 +267,7 @@ private fun LiveStreamBottomSheet(
     LiveStreamModalBottomSheetHost(
         activeSheet = state.activeBottomSheet,
         streamInfo = state.streamInfo,
+        zaps = state.zaps,
         isStreamLive = state.playerState.isLive,
         activeUserId = state.activeUserId,
         mainHostStreamsMuted = state.mainHostStreamsMuted,
@@ -316,6 +316,9 @@ private fun LiveStreamBottomSheet(
         onMessageClick = callbacks.onMessageClick,
         onEditProfileClick = callbacks.onEditProfileClick,
         onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
+        onZapMessageClick = {
+            eventPublisher(LiveStreamContract.UiEvent.ChangeActiveBottomSheet(ActiveBottomSheet.ZapDetails(it)))
+        },
     )
 }
 
@@ -404,7 +407,6 @@ private fun StreamInfoAndChatSection(
     onInfoClick: () -> Unit,
     onChatSettingsClick: () -> Unit,
     onProfileClick: (String) -> Unit,
-    onEventReactionsClick: (eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit,
     onChatMessageClick: (ChatMessageUi) -> Unit,
     onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
@@ -420,7 +422,11 @@ private fun StreamInfoAndChatSection(
             isKeyboardVisible = isKeyboardVisible,
             onInfoClick = onInfoClick,
             onChatSettingsClick = onChatSettingsClick,
-            onEventReactionsClick = onEventReactionsClick,
+            onTopZapsClick = {
+                eventPublisher(
+                    LiveStreamContract.UiEvent.ChangeActiveBottomSheet(ActiveBottomSheet.StreamZapLeaderboard),
+                )
+            },
         )
 
         LiveChatContent(
@@ -481,7 +487,6 @@ private fun LiveStreamContent(
                     onZapClick = onZapClick,
                     onInfoClick = onInfoClick,
                     onProfileClick = callbacks.onProfileClick,
-                    onEventReactionsClick = callbacks.onEventReactionsClick,
                     onChatMessageClick = onChatMessageClick,
                     onZapMessageClick = onZapMessageClick,
                     onChatSettingsClick = onChatSettingsClick,
@@ -498,7 +503,7 @@ private fun StreamInfoDisplay(
     isKeyboardVisible: Boolean,
     onChatSettingsClick: () -> Unit,
     onInfoClick: () -> Unit,
-    onEventReactionsClick: (eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit,
+    onTopZapsClick: () -> Unit,
 ) {
     val streamInfo = state.streamInfo ?: return
     val bottomBorderColor = AppTheme.extraColorScheme.surfaceVariantAlt1
@@ -538,15 +543,7 @@ private fun StreamInfoDisplay(
                 modifier = Modifier.fillMaxWidth(),
                 topZaps = state.zaps,
                 onZapClick = onZapClick,
-                onTopZapsClick = {
-                    state.streamInfo.atag.let { atag ->
-                        onEventReactionsClick(
-                            atag,
-                            ReactionType.ZAPS,
-                            atag,
-                        )
-                    }
-                },
+                onTopZapsClick = onTopZapsClick,
             )
         }
     }
