@@ -1,5 +1,6 @@
 package net.primal.android.stream.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -61,26 +62,34 @@ fun StreamInfoBottomSheet(
     bottomContent: @Composable () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        HostInfoAndActions(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            isMuteButtonVisible = isMuteUserButtonVisible,
-            onFollow = onFollow,
-            onUnfollow = onUnfollow,
-            onMute = onMute,
-            onUnmute = onUnmute,
-            onZap = onZap,
-            onEditProfileClick = onEditProfileClick,
-            onMessageClick = onMessageClick,
-            onDrawerQrCodeClick = onDrawerQrCodeClick,
-            activeUserId = activeUserId,
-            isLive = isLive,
-            isProfileMuted = isProfileMuted,
-            isProfileFollowed = isProfileFollowed,
-            followersCount = followersCount,
-            profileDetails = profileDetails,
-        )
+        Column(
+            modifier = Modifier.background(color = BottomSheetBackgroundPrimaryColor),
+        ) {
+            HostInfoAndActions(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                isMuteButtonVisible = isMuteUserButtonVisible,
+                onFollow = onFollow,
+                onUnfollow = onUnfollow,
+                onMute = onMute,
+                onUnmute = onUnmute,
+                onZap = onZap,
+                onEditProfileClick = onEditProfileClick,
+                onMessageClick = onMessageClick,
+                onDrawerQrCodeClick = onDrawerQrCodeClick,
+                activeUserId = activeUserId,
+                isLive = isLive,
+                isProfileMuted = isProfileMuted,
+                isProfileFollowed = isProfileFollowed,
+                followersCount = followersCount,
+                profileDetails = profileDetails,
+            )
 
-        PrimalDivider(modifier = Modifier.padding(top = 16.dp))
+            PrimalDivider(
+                modifier = Modifier.padding(top = 16.dp),
+                color = BottomSheetDividerColor,
+                thickness = 1.dp,
+            )
+        }
 
         bottomContent()
     }

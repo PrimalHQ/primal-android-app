@@ -1,34 +1,26 @@
 package net.primal.android.stream.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.stream.LiveStreamContract
-import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.streams.StreamContentModerationMode
-
-val BottomSheetSectionColorHandler: Color
-    @Composable
-    get() = if (LocalPrimalTheme.current.isDarkTheme) {
-        Color(0xFF222222)
-    } else {
-        Color(0xFFE5E5E5)
-    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -155,14 +147,23 @@ private fun ProfileDetailsBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+        containerColor = BottomSheetBackgroundSecondaryColor,
         tonalElevation = 0.dp,
+        dragHandle = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(BottomSheetBackgroundPrimaryColor),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                BottomSheetDefaults.DragHandle()
+            }
+        },
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .then(if (bottomSheetHeight != null) Modifier.height(bottomSheetHeight) else Modifier)
-                .padding(top = 8.dp),
+                .then(if (bottomSheetHeight != null) Modifier.height(bottomSheetHeight) else Modifier),
         ) {
             StreamInfoBottomSheet(
                 modifier = Modifier.padding(bottom = 16.dp),

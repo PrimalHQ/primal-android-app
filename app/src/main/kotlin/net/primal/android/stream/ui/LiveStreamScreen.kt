@@ -112,15 +112,6 @@ import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.DraftTx
 
 private const val URL_ANNOTATION_TAG = "url"
-private val ZapMessageBorderColor = Color(0xFFE47C00)
-private val ZapMessageBackgroundColor = Color(0xFFE47C00)
-private val ZapMessageProfileHandleColor: Color
-    @Composable
-    get() = if (LocalPrimalTheme.current.isDarkTheme) {
-        Color(0xFFFFA02F)
-    } else {
-        Color(0xFFE47C00)
-    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -862,6 +853,14 @@ fun ZapMessageListItem(
             )
             .clickable(onClick = onClick)
             .clip(AppTheme.shapes.medium)
+            .background(
+                color =
+                if (LocalPrimalTheme.current.isDarkTheme) {
+                    Color.Black
+                } else {
+                    Color.White
+                },
+            )
             .background(color = ZapMessageBackgroundColor.copy(alpha = 0.2f))
             .padding(horizontal = 8.dp, vertical = 10.dp),
     ) {

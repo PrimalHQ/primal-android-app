@@ -1,6 +1,5 @@
 package net.primal.android.stream.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -19,11 +18,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -31,14 +28,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextReportContent
 import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
-
-private val ReportButtonHandleColor: Color
-    @Composable
-    get() = if (LocalPrimalTheme.current.isDarkTheme) {
-        Color(0xFF333333)
-    } else {
-        Color(0xFFD5D5D5)
-    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +38,6 @@ fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .background(BottomSheetSectionColorHandler)
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

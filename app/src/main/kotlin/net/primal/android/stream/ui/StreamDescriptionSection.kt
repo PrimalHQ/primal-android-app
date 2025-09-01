@@ -1,6 +1,5 @@
 package net.primal.android.stream.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -43,7 +42,6 @@ fun StreamDescriptionSection(
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .background(BottomSheetSectionColorHandler)
             .padding(horizontal = 16.dp)
             .padding(top = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),

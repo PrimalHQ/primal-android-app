@@ -49,12 +49,23 @@ fun StreamZapLeaderboardBottomSheet(
     zaps: List<EventZapUiModel>,
     onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
+    val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+        containerColor = if (isDarkTheme) Color.Black else Color.White,
         tonalElevation = 0.dp,
-        dragHandle = { BottomSheetDefaults.DragHandle() },
+        dragHandle = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(BottomSheetBackgroundPrimaryColor),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                BottomSheetDefaults.DragHandle()
+            }
+        },
     ) {
         Column(
             modifier = Modifier
@@ -70,13 +81,8 @@ fun StreamZapLeaderboardBottomSheet(
                 numberFormat = numberFormat,
             )
 
-            val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
-            val listBackgroundColor = if (isDarkTheme) Color.Black else Color.White
-
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(listBackgroundColor),
+                modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(horizontal = 5.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(9.dp),
             ) {
@@ -94,32 +100,13 @@ fun StreamZapLeaderboardBottomSheet(
     }
 }
 
-private object LeaderboardHeaderDefaults {
-    val DarkThemeBackgroundColor = Color(0xFF121212)
-    val LightThemeBackgroundColor = Color(0xFFF5F5F5)
-    val DarkThemeDividerColor = Color(0xFF222222)
-    val LightThemeDividerColor = Color(0xFFE5E5E5)
-}
-
 @Composable
 private fun LeaderboardHeader(
     zapCount: Int,
     totalSats: ULong,
     numberFormat: NumberFormat,
 ) {
-    val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
-    val backgroundColor = if (isDarkTheme) {
-        LeaderboardHeaderDefaults.DarkThemeBackgroundColor
-    } else {
-        LeaderboardHeaderDefaults.LightThemeBackgroundColor
-    }
-    val dividerColor = if (isDarkTheme) {
-        LeaderboardHeaderDefaults.DarkThemeDividerColor
-    } else {
-        LeaderboardHeaderDefaults.LightThemeDividerColor
-    }
-
-    Column(modifier = Modifier.background(backgroundColor)) {
+    Column(modifier = Modifier.background(BottomSheetBackgroundPrimaryColor)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -130,7 +117,7 @@ private fun LeaderboardHeader(
             ZapCountText(zapCount = zapCount, numberFormat = numberFormat)
             TotalSatsText(totalSats = totalSats, numberFormat = numberFormat)
         }
-        PrimalDivider(color = dividerColor)
+        PrimalDivider(color = BottomSheetDividerColor)
     }
 }
 
