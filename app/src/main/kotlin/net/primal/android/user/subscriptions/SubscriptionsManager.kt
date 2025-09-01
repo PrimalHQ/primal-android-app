@@ -8,6 +8,8 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -34,6 +36,7 @@ import net.primal.data.remote.api.notifications.model.PubkeyRequestBody
 import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
+import net.primal.domain.streams.StreamRepository
 import net.primal.domain.wallet.SubWallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.remote.model.BalanceRequestBody
@@ -45,15 +48,17 @@ class SubscriptionsManager @Inject constructor(
     dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
+    private val streamRepository: StreamRepository,
     private val nostrNotary: NostrNotary,
     @PrimalCacheApiClient private val cacheApiClient: PrimalApiClient,
     @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,
 ) {
 
     private val lifecycle: Lifecycle = ProcessLifecycleOwner.get().lifecycle
-    private val scope = CoroutineScope(dispatcherProvider.io())
+    private val scope = CoroutineScope(dispatcherProvider.io() + SupervisorJob())
     private var subscriptionsActive = false
 
+    private var streamsFromFollowsSubscription: Job? = null
     private var notificationsSummarySubscription: PrimalSocketSubscription<NotificationsSummary>? = null
     private var messagesUnreadCountSubscription: PrimalSocketSubscription<MessagesUnreadCount>? = null
     private var walletBalanceSubscription: PrimalSocketSubscription<PrimalEvent>? = null
@@ -119,6 +124,7 @@ class SubscriptionsManager @Inject constructor(
 
     private suspend fun subscribeAll(userId: String) {
         subscriptionsActive = true
+        streamsFromFollowsSubscription = launchStreamsFromFollowsSubscription(userId = userId)
         notificationsSummarySubscription = launchNotificationsSummarySubscription(userId = userId)
         messagesUnreadCountSubscription = launchMessagesUnreadCountSubscription(userId = userId)
         walletBalanceSubscription = launchWalletMonitorSubscription(userId = userId)
@@ -126,10 +132,16 @@ class SubscriptionsManager @Inject constructor(
 
     private suspend fun unsubscribeAll() {
         subscriptionsActive = false
+        streamsFromFollowsSubscription?.cancel()
         notificationsSummarySubscription?.unsubscribe()
         messagesUnreadCountSubscription?.unsubscribe()
         walletBalanceSubscription?.unsubscribe()
     }
+
+    private fun launchStreamsFromFollowsSubscription(userId: String) =
+        scope.launch {
+            streamRepository.startLiveEventsFromFollowsSubscription(userId = userId)
+        }
 
     private fun launchNotificationsSummarySubscription(userId: String) =
         PrimalSocketSubscription.launch(

@@ -17,7 +17,7 @@ interface StreamDataDao {
 
     @Transaction
     @Query("SELECT * FROM StreamData WHERE mainHostId = :mainHostId ORDER BY startsAt DESC")
-    fun observeStreamsByAuthorId(mainHostId: String): Flow<List<Stream>>
+    fun observeStreamsByMainHostId(mainHostId: String): Flow<List<Stream>>
 
     @Transaction
     @Query("SELECT * FROM StreamData WHERE aTag = :aTag")

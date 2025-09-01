@@ -2,6 +2,7 @@ package net.primal.android.notes.home
 
 import net.primal.android.core.errors.UiError
 import net.primal.android.feeds.list.ui.model.FeedUi
+import net.primal.android.notes.feed.model.StreamPillUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.user.domain.Badges
 import net.primal.domain.links.CdnImage
@@ -10,6 +11,7 @@ interface HomeFeedContract {
 
     data class UiState(
         val feeds: List<FeedUi> = emptyList(),
+        val streams: List<StreamPillUi> = emptyList(),
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
         val activeAccountBlossoms: List<String> = emptyList(),
