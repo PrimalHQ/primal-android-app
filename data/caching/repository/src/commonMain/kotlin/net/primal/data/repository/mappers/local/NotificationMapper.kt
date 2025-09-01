@@ -80,6 +80,7 @@ fun NotificationPO.asNotificationDO(): NotificationDO {
                 totalParticipants = stream.totalParticipants,
                 eventZaps = emptyList(),
                 rawNostrEventJson = stream.raw,
+                createdAt = stream.createdAt,
             )
         },
     )

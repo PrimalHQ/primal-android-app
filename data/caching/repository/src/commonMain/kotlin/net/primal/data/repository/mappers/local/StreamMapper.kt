@@ -26,6 +26,7 @@ fun StreamPO.asStreamDO(): StreamDO {
         totalParticipants = this.data.totalParticipants,
         eventZaps = this.eventZaps.map { it.asEventZapDO() },
         rawNostrEventJson = this.data.raw,
+        createdAt = this.data.createdAt,
     )
 }
 

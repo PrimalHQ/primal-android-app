@@ -5,6 +5,7 @@ import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.profile.ProfileData
+import net.primal.domain.streams.mappers.resolveStreamStatus
 
 data class Stream(
     val aTag: String,
@@ -21,13 +22,23 @@ data class Stream(
     val recordingUrl: String?,
     val startsAt: Long?,
     val endsAt: Long?,
-    val status: StreamStatus,
     val currentParticipants: Int?,
     val totalParticipants: Int?,
     val eventZaps: List<EventZap> = emptyList(),
     val rawNostrEventJson: String,
+    val createdAt: Long,
+    internal val status: StreamStatus,
 ) {
-    fun isLive() = status == StreamStatus.LIVE
+    val resolvedStatus
+        get() = resolveStreamStatus(
+            status = status,
+            streamingUrl = streamingUrl,
+            startsAt = startsAt,
+            endsAt = endsAt,
+            createdAt = createdAt,
+        )
+
+    fun isLive() = resolvedStatus == StreamStatus.LIVE
 
     fun toNaddrString(): String =
         Naddr(

@@ -3,6 +3,7 @@ package net.primal.data.local.dao.streams
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import net.primal.domain.streams.StreamStatus
+import net.primal.domain.streams.mappers.resolveStreamStatus
 
 @Entity
 data class StreamData(
@@ -24,6 +25,16 @@ data class StreamData(
     val currentParticipants: Int?,
     val totalParticipants: Int?,
     val raw: String,
+    val createdAt: Long,
 ) {
-    fun isLive() = status == StreamStatus.LIVE
+    val resolvedStatus
+        get() = resolveStreamStatus(
+            status = status,
+            streamingUrl = streamingUrl,
+            startsAt = startsAt,
+            endsAt = endsAt,
+            createdAt = createdAt,
+        )
+
+    fun isLive() = resolvedStatus == StreamStatus.LIVE
 }

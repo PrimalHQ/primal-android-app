@@ -19,4 +19,8 @@ interface StreamRepository {
         userId: String,
         streamContentModerationMode: StreamContentModerationMode,
     )
+
+    suspend fun startLiveEventsFromFollowsSubscription(userId: String)
+
+    fun observeLiveEventsFromFollows(userId: String): Flow<List<Stream>>
 }

@@ -35,6 +35,9 @@ interface ProfileDataDao {
         PrimalPremiumInfo?,
         >
 
+    @Query("SELECT ownerId FROM ProfileData WHERE ownerId in (:profileIds)")
+    suspend fun findExistingProfileIds(profileIds: List<String>): List<String>
+
     @Transaction
     @Query("SELECT * FROM ProfileData WHERE ownerId = :profileId")
     fun observeProfile(profileId: String): Flow<Profile?>
