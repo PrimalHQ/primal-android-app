@@ -2,6 +2,7 @@ package net.primal.domain.profile
 
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
+import net.primal.core.utils.Result
 import net.primal.domain.common.UserProfileSearchItem
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.ReportType
@@ -27,6 +28,8 @@ interface ProfileRepository {
 
     @Throws(NetworkException::class, CancellationException::class)
     suspend fun fetchProfiles(profileIds: List<String>): List<ProfileData>
+
+    suspend fun fetchMissingProfiles(profileIds: List<String>): Result<List<ProfileData>>
 
     @Throws(NetworkException::class, CancellationException::class)
     suspend fun fetchUserProfileFollowedBy(
