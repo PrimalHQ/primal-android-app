@@ -75,6 +75,7 @@ import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
 import net.primal.android.notes.feed.model.StreamPillUi
+import net.primal.android.notes.feed.model.StreamsSyncStats
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
@@ -88,6 +89,8 @@ fun NoteFeedList(
     newNotesNoticeAlpha: Float = 1.00f,
     allowMutedThreads: Boolean = false,
     showTopZaps: Boolean = false,
+    bigPillStreams: List<StreamPillUi> = emptyList(),
+    showStreamsInNewPill: Boolean = false,
     previewMode: Boolean = false,
     pullToRefreshEnabled: Boolean = true,
     pollingEnabled: Boolean = true,
@@ -108,7 +111,7 @@ fun NoteFeedList(
     }
 
     val viewModel = hiltViewModel<NoteFeedViewModel, NoteFeedViewModel.Factory>(key = viewModelKey) { factory ->
-        factory.create(feedSpec = feedSpec, allowMutedThreads = allowMutedThreads)
+        factory.create(feedSpec = feedSpec, allowMutedThreads = allowMutedThreads, showStreams = showStreamsInNewPill)
     }
     val uiState = viewModel.state.collectAsState()
 
@@ -135,6 +138,7 @@ fun NoteFeedList(
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         newNotesNoticeAlpha = newNotesNoticeAlpha,
+        bigPillStreams = bigPillStreams,
         showTopZaps = showTopZaps,
         contentPadding = contentPadding,
         onUiError = onUiError,
@@ -156,6 +160,7 @@ private fun NoteFeedList(
     onGoToWallet: () -> Unit,
     newNotesNoticeAlpha: Float = 1.00f,
     showTopZaps: Boolean = false,
+    bigPillStreams: List<StreamPillUi> = emptyList(),
     pullToRefreshEnabled: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onUiError: ((UiError) -> Unit)? = null,
@@ -175,9 +180,7 @@ private fun NoteFeedList(
         if (shouldAnimateScrollToTop || state.shouldAnimateScrollToTop == true) {
             snapshotFlow {
                 pagingItems.itemCount > 0 && listState.layoutInfo.totalItemsCount > 0
-            }
-                .filter { it }
-                .first()
+            }.filter { it }.first()
 
             listState.animateScrollToItem(index = 0)
         }
@@ -205,7 +208,7 @@ private fun NoteFeedList(
     Box {
         NoteFeedList(
             pagingItems = pagingItems,
-            streamPills = state.streams,
+            streamPills = bigPillStreams,
             pullToRefreshEnabled = pullToRefreshEnabled,
             feedListState = listState,
             showPaywall = state.paywall,
@@ -234,15 +237,16 @@ private fun NoteFeedList(
                 .align(Alignment.TopCenter)
                 .graphicsLayer { this.alpha = newNotesNoticeAlpha },
         ) {
-            if (state.syncStats.latestNoteIds.isNotEmpty() && pagingItems.isNotEmpty()) {
+            if (state.showSyncStats && pagingItems.isNotEmpty()) {
                 var buttonVisible by remember { mutableStateOf(false) }
                 LaunchedEffect(true) {
                     delay(10.milliseconds)
                     buttonVisible = true
                 }
-                if (buttonVisible && (!isStreamPillsRowVisible.value || state.streams.isEmpty())) {
+                if (buttonVisible && (!isStreamPillsRowVisible.value || bigPillStreams.isEmpty())) {
                     NewPostsButton(
-                        syncStats = state.syncStats,
+                        streamsSyncStats = state.streamsSyncStats,
+                        notesSyncStats = state.notesSyncStats,
                         onClick = { eventPublisher(UiEvent.ShowLatestNotes) },
                     )
                 }
@@ -344,7 +348,11 @@ fun NoteFeedList(
 }
 
 @Composable
-private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
+private fun NewPostsButton(
+    streamsSyncStats: StreamsSyncStats,
+    notesSyncStats: FeedPostsSyncStats,
+    onClick: () -> Unit,
+) {
     Row(
         modifier = Modifier
             .height(40.dp)
@@ -359,11 +367,11 @@ private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         when {
-            syncStats.latestNotesCount > 1 && syncStats.streamsCount == 1 -> {
+            notesSyncStats.latestNotesCount > 1 && streamsSyncStats.streamsCount == 1 -> {
                 NewPillPluralIndicator(
                     id = R.plurals.feed_new_posts_notice,
-                    count = syncStats.latestNotesCount,
-                    avatars = syncStats.latestAvatarCdnImages,
+                    count = notesSyncStats.latestNotesCount,
+                    avatars = notesSyncStats.latestAvatarCdnImages,
                 )
 
                 VerticalDivider(
@@ -374,31 +382,31 @@ private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
                 NewPillStringIndicator(
                     id = R.string.feed_new_stream,
                     count = 1,
-                    avatars = syncStats.streamAvatarCdnImages,
+                    avatars = streamsSyncStats.streamAvatarCdnImages,
                 )
             }
 
-            syncStats.latestNotesCount > 0 && syncStats.streamsCount == 0 -> {
+            notesSyncStats.latestNotesCount > 0 && streamsSyncStats.streamsCount == 0 -> {
                 NewPillPluralIndicator(
                     id = R.plurals.feed_new_posts_notice_extended,
-                    count = syncStats.latestNotesCount,
-                    avatars = syncStats.latestAvatarCdnImages,
+                    count = notesSyncStats.latestNotesCount,
+                    avatars = notesSyncStats.latestAvatarCdnImages,
                 )
             }
 
-            syncStats.latestNotesCount == 0 && syncStats.streamsCount > 0 -> {
+            notesSyncStats.latestNotesCount == 0 && streamsSyncStats.streamsCount > 0 -> {
                 NewPillPluralIndicator(
                     id = R.plurals.feed_new_lives_notice,
-                    count = syncStats.streamsCount,
-                    avatars = syncStats.streamAvatarCdnImages,
+                    count = streamsSyncStats.streamsCount,
+                    avatars = streamsSyncStats.streamAvatarCdnImages,
                 )
             }
 
             else -> {
                 NewPillPluralIndicator(
                     id = R.plurals.feed_new_posts_notice,
-                    count = syncStats.latestNotesCount,
-                    avatars = syncStats.latestAvatarCdnImages,
+                    count = notesSyncStats.latestNotesCount,
+                    avatars = notesSyncStats.latestAvatarCdnImages,
                 )
 
                 VerticalDivider(
@@ -408,13 +416,15 @@ private fun NewPostsButton(syncStats: FeedPostsSyncStats, onClick: () -> Unit) {
 
                 NewPillPluralIndicator(
                     id = R.plurals.feed_new_lives_notice,
-                    count = syncStats.streamsCount,
-                    avatars = syncStats.streamAvatarCdnImages,
+                    count = streamsSyncStats.streamsCount,
+                    avatars = streamsSyncStats.streamAvatarCdnImages,
                 )
             }
         }
     }
 }
+
+private const val MAX_NOTES_IN_PILL = 20
 
 @Composable
 private fun NewPillPluralIndicator(
@@ -434,7 +444,10 @@ private fun NewPillPluralIndicator(
             modifier = Modifier.wrapContentHeight(),
             text = buildAnnotatedString {
                 withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(count.toString())
+                    append(count.coerceAtMost(MAX_NOTES_IN_PILL).toString())
+                    if (count > MAX_NOTES_IN_PILL) {
+                        append("+")
+                    }
                     append(" ")
                 }
                 append(pluralStringResource(id = id, count = count))

@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -35,12 +34,10 @@ class StreamRepositoryImpl(
 
     private val scope = CoroutineScope(SupervisorJob() + dispatcherProvider.io())
 
-    override suspend fun findLatestLiveStreamATag(mainHostId: String): String? =
-        withContext(dispatcherProvider.io()) {
-            val streamsPO = database.streams().observeStreamsByAuthorId(mainHostId).first()
-            val liveStreamPO = streamsPO.find { it.data.isLive() }
-            liveStreamPO?.data?.aTag
-        }
+    override fun observeLiveStreamsByMainHostId(mainHostId: String) =
+        database.streams().observeStreamsByMainHostId(mainHostId = mainHostId)
+            .map { list -> list.map { it.asStreamDO() }.filter { it.isLive() } }
+            .distinctUntilChanged()
 
     override suspend fun findWhoIsLive(mainHostIds: List<String>): Set<String> =
         withContext(dispatcherProvider.io()) {

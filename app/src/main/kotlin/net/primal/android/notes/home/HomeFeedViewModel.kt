@@ -6,10 +6,12 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -19,6 +21,7 @@ import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.navigation.identifier
 import net.primal.android.navigation.npub
 import net.primal.android.navigation.primalName
+import net.primal.android.notes.feed.model.asStreamPillUi
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.notes.home.HomeFeedContract.UiState
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -40,6 +43,7 @@ import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.utils.npubToPubkey
 import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.streams.StreamRepository
 import timber.log.Timber
 
 @HiltViewModel
@@ -52,6 +56,7 @@ class HomeFeedViewModel @Inject constructor(
     private val feedsRepository: FeedsRepository,
     private val profileRepository: ProfileRepository,
     private val userDataSyncerFactory: UserDataUpdaterFactory,
+    private val streamRepository: StreamRepository,
 ) : ViewModel() {
 
     private val hostNpub = savedStateHandle.npub
@@ -73,6 +78,7 @@ class HomeFeedViewModel @Inject constructor(
 
     init {
         resolveStreamParams()
+        observeLiveEventsFromFollows()
         observeEvents()
         observeActiveAccount()
         observeBadgesUpdates()
@@ -104,6 +110,13 @@ class HomeFeedViewModel @Inject constructor(
             } else {
                 setState { copy(uiError = UiError.InvalidNaddr) }
             }
+        }
+
+    @OptIn(FlowPreview::class)
+    private fun observeLiveEventsFromFollows() =
+        viewModelScope.launch {
+            streamRepository.observeLiveEventsFromFollows(userId = activeAccountStore.activeUserId())
+                .collectLatest { streams -> setState { copy(streams = streams.map { it.asStreamPillUi() }) } }
         }
 
     private fun observeEvents() {
