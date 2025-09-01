@@ -5,8 +5,8 @@ import net.primal.domain.streams.Stream
 
 data class StreamPillUi(
     val naddr: String,
-    val currentParticipants: Int?,
     val title: String?,
+    val currentParticipants: Int,
     val hostProfileId: String,
     val hostAvatarCdnImage: CdnImage?,
 )
@@ -14,8 +14,8 @@ data class StreamPillUi(
 fun Stream.asStreamPillUi() =
     StreamPillUi(
         naddr = this.toNaddrString(),
-        currentParticipants = this.currentParticipants,
         title = this.title,
+        currentParticipants = this.currentParticipants ?: 0,
         hostProfileId = this.mainHostId,
         hostAvatarCdnImage = this.mainHostProfile?.avatarCdnImage,
     )
