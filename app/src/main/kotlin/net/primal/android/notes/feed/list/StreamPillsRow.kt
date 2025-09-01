@@ -1,16 +1,17 @@
 package net.primal.android.notes.feed.list
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -70,16 +71,22 @@ fun StreamPillsRow(
     }
 
     if (streamPills.isNotEmpty()) {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .horizontalScroll(rememberScrollState())
-                .padding(padding),
+        LazyRow(
+            modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(itemSpacedBy),
             verticalAlignment = Alignment.CenterVertically,
+            contentPadding = PaddingValues(all = padding),
         ) {
-            streamPills.forEach { item ->
+            items(
+                count = streamPills.size,
+                key = { streamPills[it].naddr },
+            ) { index ->
+                val item = streamPills[index]
+
                 StreamPill(
+                    modifier = Modifier
+                        .animateContentSize()
+                        .animateItem(),
                     avatarSize = avatarSize,
                     itemWidth = itemWidth,
                     streamPill = item,
