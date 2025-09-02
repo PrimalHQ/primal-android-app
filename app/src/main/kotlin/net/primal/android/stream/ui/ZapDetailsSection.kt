@@ -53,7 +53,7 @@ fun ZapDetailsSection(zap: EventZapUiModel, onReport: (ReportType) -> Unit) {
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
         )
 
-        ZapMessageListItem(zap = zap, onClick = {})
+        ZapMessageListItem(zap = zap, onClick = {}, isClickable = false)
 
         PrimalFilledButton(
             containerColor = ReportButtonHandleColor,

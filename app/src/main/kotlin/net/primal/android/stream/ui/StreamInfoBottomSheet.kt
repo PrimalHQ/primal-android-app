@@ -50,6 +50,7 @@ fun StreamInfoBottomSheet(
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
+    onProfileClick: (String) -> Unit,
     bottomContent: @Composable () -> Unit,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
@@ -67,6 +68,7 @@ fun StreamInfoBottomSheet(
                 onEditProfileClick = onEditProfileClick,
                 onMessageClick = onMessageClick,
                 onDrawerQrCodeClick = onDrawerQrCodeClick,
+                onProfileClick = onProfileClick,
                 activeUserId = activeUserId,
                 isLive = isLive,
                 isProfileMuted = isProfileMuted,
@@ -106,6 +108,7 @@ private fun HostInfoAndActions(
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
+    onProfileClick: (String) -> Unit,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(16.dp)) {
         HostProfileSummary(
@@ -113,6 +116,7 @@ private fun HostInfoAndActions(
             followersCount = followersCount,
             isLive = isLive,
             showInternetIdentifier = showInternetIdentifier,
+            onProfileClick = onProfileClick,
         )
         HostActionRow(
             isMuteButtonVisible = isMuteButtonVisible,
@@ -138,6 +142,7 @@ private fun HostProfileSummary(
     followersCount: Int,
     isLive: Boolean,
     showInternetIdentifier: Boolean,
+    onProfileClick: (String) -> Unit,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -148,6 +153,7 @@ private fun HostProfileSummary(
             avatarCdnImage = profileDetails.avatarCdnImage,
             avatarSize = 46.dp,
             legendaryCustomization = profileDetails.premiumDetails?.legendaryCustomization,
+            onClick = { onProfileClick(profileDetails.pubkey) },
         )
         Row(
             modifier = Modifier.fillMaxWidth(),

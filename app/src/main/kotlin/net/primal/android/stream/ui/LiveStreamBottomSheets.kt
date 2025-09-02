@@ -51,6 +51,7 @@ fun LiveStreamModalBottomSheetHost(
     onEditProfileClick: () -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
     onZapMessageClick: (EventZapUiModel) -> Unit,
+    onProfileClick: (String) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -81,6 +82,7 @@ fun LiveStreamModalBottomSheetHost(
                     onEditProfileClick = onEditProfileClick,
                     onMessageClick = onMessageClick,
                     onDrawerQrCodeClick = onDrawerQrCodeClick,
+                    onProfileClick = onProfileClick,
                     bottomContent = {
                         ProfileDetailsBottomSheetContent(
                             activeSheet = activeSheet,
@@ -144,6 +146,7 @@ private fun ProfileDetailsBottomSheet(
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
+    onProfileClick: (String) -> Unit,
     bottomContent: @Composable () -> Unit,
 ) {
     ModalBottomSheet(
@@ -180,6 +183,7 @@ private fun ProfileDetailsBottomSheet(
                 onEditProfileClick = onEditProfileClick,
                 onMessageClick = onMessageClick,
                 onDrawerQrCodeClick = onDrawerQrCodeClick,
+                onProfileClick = onProfileClick,
                 bottomContent = bottomContent,
                 profileDetails = profileDetails,
                 isProfileMuted = isProfileMuted,

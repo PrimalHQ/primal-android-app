@@ -50,7 +50,7 @@ fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) -> Unit) {
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
         )
 
-        ChatMessageListItem(message = message, onProfileClick = {}, onClick = {})
+        ChatMessageListItem(message = message, onProfileClick = {}, onClick = {}, isClickable = false)
 
         PrimalFilledButton(
             modifier = Modifier.padding(start = 40.dp),

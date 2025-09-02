@@ -4,6 +4,7 @@ package net.primal.android.stream.ui
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -190,6 +191,12 @@ private fun LiveStreamScaffold(
     snackbarHostState: SnackbarHostState,
     zapHostState: ZapHostState,
 ) {
+    if (state.activeBottomSheet != ActiveBottomSheet.None) {
+        BackHandler {
+            eventPublisher(LiveStreamContract.UiEvent.ChangeActiveBottomSheet(ActiveBottomSheet.None))
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -309,6 +316,10 @@ private fun LiveStreamBottomSheet(
         onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
         onZapMessageClick = {
             eventPublisher(LiveStreamContract.UiEvent.ChangeActiveBottomSheet(ActiveBottomSheet.ZapDetails(it)))
+        },
+        onProfileClick = { profileId ->
+            eventPublisher(LiveStreamContract.UiEvent.ChangeActiveBottomSheet(ActiveBottomSheet.None))
+            callbacks.onProfileClick(profileId)
         },
     )
 }
@@ -758,6 +769,7 @@ fun ChatMessageListItem(
     onProfileClick: (String) -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isClickable: Boolean = true,
 ) {
     val localUriHandler = LocalUriHandler.current
 
@@ -794,7 +806,7 @@ fun ChatMessageListItem(
 
     Row(
         modifier = modifier
-            .clickable(onClick = onClick),
+            .then(if (isClickable) Modifier.clickable(onClick = onClick) else Modifier),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
     ) {
@@ -842,6 +854,7 @@ fun ZapMessageListItem(
     zap: EventZapUiModel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    isClickable: Boolean = true,
 ) {
     Box(
         modifier = modifier
@@ -851,7 +864,7 @@ fun ZapMessageListItem(
                 color = ZapMessageBorderColor,
                 shape = AppTheme.shapes.medium,
             )
-            .clickable(onClick = onClick)
+            .then(if (isClickable) Modifier.clickable(onClick = onClick) else Modifier)
             .clip(AppTheme.shapes.medium)
             .background(
                 color =
@@ -873,13 +886,13 @@ fun ZapMessageListItem(
                 avatarSize = 24.dp,
                 legendaryCustomization = zap.zapperLegendaryCustomization,
             )
-            ZapMessageContent(zap = zap)
+            ZapMessageContent(zap = zap, onClick = onClick)
         }
     }
 }
 
 @Composable
-private fun ZapMessageContent(zap: EventZapUiModel) {
+private fun ZapMessageContent(zap: EventZapUiModel, onClick: () -> Unit) {
     val localUriHandler = LocalUriHandler.current
 
     Column(modifier = Modifier.padding(top = 1.dp)) {
@@ -949,12 +962,16 @@ private fun ZapMessageContent(zap: EventZapUiModel) {
                 text = contentText,
                 style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
                 onClick = { position, _ ->
-                    contentText.getStringAnnotations(
+                    val urlAnnotation = contentText.getStringAnnotations(
                         tag = URL_ANNOTATION_TAG,
                         start = position,
                         end = position,
-                    ).firstOrNull()?.let { annotation ->
-                        localUriHandler.openUriSafely(annotation.item)
+                    ).firstOrNull()
+
+                    if (urlAnnotation != null) {
+                        localUriHandler.openUriSafely(urlAnnotation.item)
+                    } else {
+                        onClick()
                     }
                 },
             )
