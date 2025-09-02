@@ -85,6 +85,14 @@ class ArticleRepositoryImpl(
         highlightsResponse.persistToDatabaseAsTransaction(database = database)
     }
 
+    override suspend fun observeArticle(aTag: String): Flow<ArticleDO> =
+        withContext(dispatcherProvider.io()) {
+            database.articles().observeArticleByATag(aTag = aTag)
+                .distinctUntilChanged()
+                .filterNotNull()
+                .map { it.asArticleDO() }
+        }
+
     override suspend fun observeArticle(articleId: String, articleAuthorId: String): Flow<ArticleDO> =
         withContext(dispatcherProvider.io()) {
             database.articles().observeArticle(articleId = articleId, authorId = articleAuthorId)
