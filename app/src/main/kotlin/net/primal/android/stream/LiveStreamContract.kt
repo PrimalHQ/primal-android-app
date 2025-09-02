@@ -128,5 +128,6 @@ interface LiveStreamContract {
         val onHashtagClick: (hashtag: String) -> Unit,
         val onEventReactionsClick: (eventId: String, initialTab: ReactionType, articleATag: String?) -> Unit,
         val onSendWalletTx: (DraftTx) -> Unit,
+        val onNostrUriClick: (uri: String) -> Unit,
     )
 }
