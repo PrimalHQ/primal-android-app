@@ -2,6 +2,7 @@ package net.primal.wallet.data.service.concrete
 
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import kotlinx.serialization.json.jsonObject
 import net.primal.core.networking.nwc.NwcClientFactory
 import net.primal.core.networking.nwc.nip47.ListTransactionsParams
 import net.primal.core.networking.nwc.nip47.LookupInvoiceResponsePayload
@@ -14,8 +15,12 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.map
 import net.primal.core.utils.mapCatching
 import net.primal.core.utils.runCatching
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.InvoiceType
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.findFirstEventId
+import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.NostrWalletConnect
@@ -65,6 +70,10 @@ internal class NostrWalletServiceImpl(
                 ),
             ).map { response ->
                 response.transactions.map { transaction ->
+                    val zapRequest = (transaction.metadata?.get("nostr") ?: transaction.metadata?.get("zap_request"))
+                        ?.jsonObject?.toString()
+                        ?.decodeFromJsonStringOrNull<NostrEvent>()
+
                     Transaction.NWC(
                         transactionId = transaction.paymentHash ?: transaction.invoice ?: Uuid.random().toString(),
                         walletId = wallet.walletId,
@@ -78,7 +87,8 @@ internal class NostrWalletServiceImpl(
                         updatedAt = transaction.settledAt ?: transaction.createdAt,
                         completedAt = transaction.settledAt,
                         userId = wallet.userId,
-                        note = transaction.description,
+                        note = transaction.description ?: zapRequest?.content
+                            ?: transaction.metadata?.get("comment")?.toString(),
                         invoice = transaction.invoice,
                         amountInBtc = transaction.amount.msatsToBtc(),
                         totalFeeInBtc = transaction.feesPaid.msatsToBtc().formatAsString(),
@@ -86,6 +96,14 @@ internal class NostrWalletServiceImpl(
                         descriptionHash = transaction.descriptionHash,
                         paymentHash = transaction.paymentHash,
                         metadata = transaction.metadata?.encodeToJsonString(),
+                        zapNoteId = zapRequest?.tags?.findFirstEventId(),
+                        otherUserId = when (transaction.type) {
+                            InvoiceType.Incoming -> zapRequest?.pubKey
+                            InvoiceType.Outgoing -> null
+                        },
+                        zappedByUserId = zapRequest?.pubKey,
+                        zapNoteAuthorId = zapRequest?.tags?.findFirstProfileId(),
+                        otherUserProfile = null,
                     )
                 }
             }.getOrThrow()

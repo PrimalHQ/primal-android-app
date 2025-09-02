@@ -30,7 +30,7 @@ import net.primal.wallet.data.local.dao.WalletTransactionData
         NostrTransactionData::class,
         WalletSettings::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @TypeConverters(ListsTypeConverters::class, EncryptableTypeConverters::class)

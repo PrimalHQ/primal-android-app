@@ -104,8 +104,8 @@ class WalletTransactionsMediator internal constructor(
         ).onSuccess {
             Napier.d { "Transactions fetched and persisted. Continuing." }
             lastRequests[loadType] = request
-        }.onFailure {
-            Napier.d { "Error occurred while fetching transactions. Exiting with Error." }
+        }.onFailure { error ->
+            Napier.d(throwable = error) { "Error occurred while fetching transactions. Exiting with Error." }
         }.fold(
             onSuccess = { MediatorResult.Success(endOfPaginationReached = false) },
             onFailure = { MediatorResult.Error(it) },
