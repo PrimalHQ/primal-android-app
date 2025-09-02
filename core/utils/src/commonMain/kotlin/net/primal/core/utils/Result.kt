@@ -215,3 +215,5 @@ inline fun <T> Result<T>.onSuccess(action: (value: T) -> Unit): Result<T> {
     getOrNull()?.let { action(it) }
     return this
 }
+
+fun <T> T.asSuccess(): Result<T> = success(this)
