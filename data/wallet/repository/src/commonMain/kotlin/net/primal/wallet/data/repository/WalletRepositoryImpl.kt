@@ -106,16 +106,11 @@ internal class WalletRepositoryImpl(
             walletDatabase.walletTransactions().latestTransactionsPagedByWalletId(walletId = walletId)
         }.flow.mapNotNull {
             it.map { txData ->
-                when (txData.info.walletType) {
-                    WalletType.PRIMAL -> {
-                        val otherProfile = txData.primal?.otherUserId?.let { profileId ->
-                            profileRepository.findProfileDataOrNull(profileId.decrypted)
-                        }
-                        txData.toDomain(otherProfile = otherProfile)
-                    }
-
-                    WalletType.NWC -> txData.toDomain()
+                val otherProfile = txData.info.otherUserId?.let { profileId ->
+                    profileRepository.findProfileDataOrNull(profileId.decrypted)
                 }
+
+                txData.toDomain(otherProfile = otherProfile)
             }
         }
     }
@@ -125,7 +120,7 @@ internal class WalletRepositoryImpl(
             val transaction = walletDatabase.walletTransactions().findTransactionById(txId = txId)
                 ?: return@withContext null
 
-            val profile = transaction.primal?.otherUserId
+            val profile = transaction.info.otherUserId
                 ?.let { profileRepository.findProfileDataOrNull(profileId = it.decrypted) }
 
             transaction.toDomain(otherProfile = profile)

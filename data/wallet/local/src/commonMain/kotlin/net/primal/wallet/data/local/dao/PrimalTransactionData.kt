@@ -15,12 +15,8 @@ data class PrimalTransactionData(
     val isStorePurchase: Boolean,
     val userSubWallet: SubWallet,
     val userLightningAddress: Encryptable<String>?,
-    val otherUserId: Encryptable<String>?,
     val otherLightningAddress: Encryptable<String>?,
     val exchangeRate: Encryptable<String>?,
     val onChainAddress: Encryptable<String>?,
     val onChainTxId: Encryptable<String>?,
-    val zapNoteId: Encryptable<String>?,
-    val zapNoteAuthorId: Encryptable<String>?,
-    val zappedByUserId: Encryptable<String>?,
 )
