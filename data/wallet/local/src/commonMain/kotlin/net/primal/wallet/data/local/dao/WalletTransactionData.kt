@@ -24,7 +24,6 @@ data class WalletTransactionData(
     val amountInBtc: Encryptable<Double>,
     val totalFeeInBtc: Encryptable<String>?,
     val otherUserId: Encryptable<String>?,
-    val zapNoteId: Encryptable<String>?,
-    val zapNoteAuthorId: Encryptable<String>?,
+    val zappedEntity: Encryptable<String>?,
     val zappedByUserId: Encryptable<String>?,
 )

@@ -19,8 +19,6 @@ import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.InvoiceType
 import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.nostr.findFirstEventId
-import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.NostrWalletConnect
@@ -33,6 +31,7 @@ import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.wallet.data.model.CreateLightningInvoiceRequest
 import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.model.TransactionsRequest
+import net.primal.wallet.data.repository.mappers.remote.toNostrEntity
 import net.primal.wallet.data.service.WalletService
 
 internal class NostrWalletServiceImpl(
@@ -74,6 +73,8 @@ internal class NostrWalletServiceImpl(
                         ?.jsonObject?.toString()
                         ?.decodeFromJsonStringOrNull<NostrEvent>()
 
+                    val zappedEntity = zapRequest?.toNostrEntity()
+
                     Transaction.NWC(
                         transactionId = transaction.paymentHash ?: transaction.invoice ?: Uuid.random().toString(),
                         walletId = wallet.walletId,
@@ -96,13 +97,12 @@ internal class NostrWalletServiceImpl(
                         descriptionHash = transaction.descriptionHash,
                         paymentHash = transaction.paymentHash,
                         metadata = transaction.metadata?.encodeToJsonString(),
-                        zapNoteId = zapRequest?.tags?.findFirstEventId(),
                         otherUserId = when (transaction.type) {
                             InvoiceType.Incoming -> zapRequest?.pubKey
                             InvoiceType.Outgoing -> null
                         },
                         zappedByUserId = zapRequest?.pubKey,
-                        zapNoteAuthorId = zapRequest?.tags?.findFirstProfileId(),
+                        zappedEntity = zappedEntity,
                         otherUserProfile = null,
                     )
                 }

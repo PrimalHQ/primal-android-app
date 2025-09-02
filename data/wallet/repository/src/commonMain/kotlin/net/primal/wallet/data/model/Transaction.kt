@@ -1,5 +1,6 @@
 package net.primal.wallet.data.model
 
+import net.primal.domain.nostr.NostrEntity
 import net.primal.domain.profile.ProfileData
 import net.primal.domain.wallet.SubWallet
 import net.primal.domain.wallet.TxState
@@ -20,9 +21,8 @@ internal sealed class Transaction(
     open val invoice: String?,
     open val amountInBtc: Double,
     open val totalFeeInBtc: String?,
-    open val zapNoteId: String?,
     open val otherUserId: String?,
-    open val zapNoteAuthorId: String?,
+    open val zappedEntity: NostrEntity?,
     open val zappedByUserId: String?,
     open val otherUserProfile: ProfileData?,
 ) {
@@ -40,9 +40,8 @@ internal sealed class Transaction(
         override val invoice: String?,
         override val amountInBtc: Double,
         override val totalFeeInBtc: String?,
-        override val zapNoteId: String?,
         override val otherUserId: String?,
-        override val zapNoteAuthorId: String?,
+        override val zappedEntity: NostrEntity?,
         override val zappedByUserId: String?,
         override val otherUserProfile: ProfileData?,
         val walletLightningAddress: String,
@@ -69,8 +68,7 @@ internal sealed class Transaction(
         invoice = invoice,
         amountInBtc = amountInBtc,
         totalFeeInBtc = totalFeeInBtc,
-        zapNoteId = zapNoteId,
-        zapNoteAuthorId = zapNoteAuthorId,
+        zappedEntity = zappedEntity,
         otherUserId = otherUserId,
         zappedByUserId = zappedByUserId,
         otherUserProfile = otherUserProfile,
@@ -90,9 +88,8 @@ internal sealed class Transaction(
         override val invoice: String?,
         override val amountInBtc: Double,
         override val totalFeeInBtc: String?,
-        override val zapNoteId: String?,
         override val otherUserId: String?,
-        override val zapNoteAuthorId: String?,
+        override val zappedEntity: NostrEntity?,
         override val zappedByUserId: String?,
         override val otherUserProfile: ProfileData?,
         val preimage: String?,
@@ -113,9 +110,8 @@ internal sealed class Transaction(
         invoice = invoice,
         amountInBtc = amountInBtc,
         totalFeeInBtc = totalFeeInBtc,
-        zapNoteId = zapNoteId,
+        zappedEntity = zappedEntity,
         otherUserId = otherUserId,
-        zapNoteAuthorId = zapNoteAuthorId,
         zappedByUserId = zappedByUserId,
         otherUserProfile = otherUserProfile,
     )

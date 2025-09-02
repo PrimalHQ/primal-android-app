@@ -60,23 +60,40 @@ class TransactionDetailsViewModel @Inject constructor(
             val tx = walletRepository.findTransactionByIdOrNull(txId = transactionId)
             setState { copy(loading = false, txData = tx?.mapAsTransactionDataUi()) }
             if (tx is Transaction.Zap) {
-                tx.zapNoteId?.let {
-                    observeZappedNote(it)
-                    fetchZappedNote(it)
-                    observeZappedArticle(articleId = it, articleAuthorId = tx.zapNoteAuthorId)
-                    fetchZappedArticle(articleId = it, articleAuthorId = tx.zapNoteAuthorId)
+                tx.zappedEntity.let { entity ->
+                    when (entity) {
+                        is Naddr -> {
+                            fetchAndObserveNaddrEntity(entity)
+                        }
+
+                        is Nevent -> {
+                            observeZappedNote(entity.eventId)
+                            fetchZappedNote(entity.eventId)
+                        }
+
+                        is Nprofile -> Unit
+                    }
                 }
             }
         }
 
-    private fun observeZappedArticle(articleId: String, articleAuthorId: String?) =
-        viewModelScope.launch {
-            articleAuthorId?.let {
-                articleRepository.observeArticleByEventId(eventId = articleId, articleAuthorId = articleAuthorId)
-                    .collect {
-                        setState { copy(articlePost = it.mapAsFeedArticleUi()) }
-                    }
+    private fun fetchAndObserveNaddrEntity(naddr: Naddr) {
+        when (naddr.kind) {
+            NostrEventKind.LongFormContent.value -> {
+                observeZappedArticle(naddr = naddr)
+                fetchZappedArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
             }
+
+            else -> Unit
+        }
+    }
+
+    private fun observeZappedArticle(naddr: Naddr) =
+        viewModelScope.launch {
+            articleRepository.observeArticle(aTag = naddr.asATagValue())
+                .collect {
+                    setState { copy(articlePost = it.mapAsFeedArticleUi()) }
+                }
         }
 
     private fun fetchZappedArticle(articleId: String, articleAuthorId: String?) =
