@@ -9,6 +9,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.domain.links.CdnImage
 import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.reads.Article
@@ -68,4 +69,4 @@ fun FeedArticleUi.generateNaddr() =
         kind = NostrEventKind.LongFormContent.value,
     )
 
-fun FeedArticleUi.generateNaddrString() = generateNaddr().toString()
+fun FeedArticleUi.generateNaddrString() = generateNaddr().toNaddrString()
