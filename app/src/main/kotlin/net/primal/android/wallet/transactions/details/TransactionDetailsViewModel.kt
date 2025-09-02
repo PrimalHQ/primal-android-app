@@ -26,8 +26,16 @@ import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.events.EventRepository
+import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nevent
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.Nprofile
+import net.primal.domain.nostr.asATagValue
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.reads.ArticleRepository
+import net.primal.domain.streams.StreamRepository
+import net.primal.domain.streams.mappers.asReferencedStream
 import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.WalletRepository
 import timber.log.Timber
@@ -40,6 +48,8 @@ class TransactionDetailsViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
     private val feedRepository: FeedRepository,
     private val articleRepository: ArticleRepository,
+    private val streamRepository: StreamRepository,
+    private val eventRepository: EventRepository,
     private val exchangeRateHandler: ExchangeRateHandler,
 ) : ViewModel() {
 
@@ -84,9 +94,27 @@ class TransactionDetailsViewModel @Inject constructor(
                 fetchZappedArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
             }
 
+            NostrEventKind.LiveActivity.value -> {
+                observeZappedStream(naddr = naddr)
+                fetchZappedStream(naddr = naddr)
+            }
+
             else -> Unit
         }
     }
+
+    private fun observeZappedStream(naddr: Naddr) =
+        viewModelScope.launch {
+            streamRepository.observeStream(aTag = naddr.asATagValue())
+                .collect {
+                    setState { copy(referencedStream = it?.asReferencedStream()) }
+                }
+        }
+
+    private fun fetchZappedStream(naddr: Naddr) =
+        viewModelScope.launch {
+            eventRepository.fetchReplaceableEvent(naddr = naddr)
+        }
 
     private fun observeZappedArticle(naddr: Naddr) =
         viewModelScope.launch {

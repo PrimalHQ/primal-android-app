@@ -105,9 +105,12 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.ReferencedArticleCard
+import net.primal.android.notes.feed.note.ui.ReferencedStream
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.note.ui.referencedArticleCardColors
+import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.dashboard.ui.BtcAmountText
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
@@ -118,6 +121,7 @@ import net.primal.android.wallet.walletWithdrawColor
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toUsd
 import net.primal.core.utils.detectUrls
+import net.primal.domain.links.ReferencedStream as ReferencedStreamDO
 import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
@@ -220,6 +224,13 @@ fun TransactionDetailsScreen(
                         noteCallbacks = noteCallbacks,
                     )
                 }
+
+                state.referencedStream?.let { stream ->
+                    StreamColumn(
+                        data = stream,
+                        onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
+                    )
+                }
             }
         },
     )
@@ -247,6 +258,30 @@ private fun ArticlePost(data: FeedArticleUi, noteCallbacks: NoteCallbacks) {
         colors = referencedArticleCardColors().copy(
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         ),
+    )
+
+    Spacer(modifier = Modifier.height(32.dp))
+}
+
+@Composable
+private fun StreamColumn(data: ReferencedStreamDO, onProfileClick: (String) -> Unit) {
+    val streamState = LocalStreamState.current
+    Text(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        text = stringResource(id = R.string.wallet_transaction_details_zapped_stream).uppercase(),
+        textAlign = TextAlign.Start,
+        style = AppTheme.typography.bodyMedium,
+        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+    )
+
+    ReferencedStream(
+        modifier = Modifier.padding(horizontal = 12.dp),
+        stream = data,
+        onClick = { streamState.start(it) },
+        onProfileClick = onProfileClick,
+        backgroundColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
     )
 
     Spacer(modifier = Modifier.height(32.dp))
@@ -808,7 +843,7 @@ fun PreviewTransactionDetail(
     @PreviewParameter(provider = TransactionParameterProvider::class)
     txDataParam: TransactionDetailDataUi,
 ) {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         Surface {
             TransactionDetailsScreen(
                 state = UiState(
