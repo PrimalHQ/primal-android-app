@@ -46,6 +46,8 @@ import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
 import net.primal.android.stream.ui.LiveStreamMiniPlayer
 import net.primal.android.stream.ui.LiveStreamScreen
 import net.primal.android.stream.ui.PADDING
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.utils.takeAsNaddrOrNull
 
 @Composable
 fun LiveStreamOverlay(
@@ -258,6 +260,20 @@ private fun rememberLiveStreamScreenCallbacks(
             onSendWalletTx = { draftTx ->
                 navController.navigateToWalletCreateTransaction(draftTx)
                 streamState.minimize()
+            },
+            onNostrUriClick = { uri ->
+                val naddr = uri.takeAsNaddrOrNull()
+                if (naddr != null) {
+                    when (naddr.kind) {
+                        NostrEventKind.LiveActivity.value -> {
+                            streamState.start(uri)
+                        }
+                        NostrEventKind.LongFormContent.value -> {
+                            noteCallbacks.onArticleClick?.invoke(uri)
+                            streamState.minimize()
+                        }
+                    }
+                }
             },
         )
     }

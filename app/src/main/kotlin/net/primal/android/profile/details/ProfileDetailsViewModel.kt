@@ -24,6 +24,7 @@ import net.primal.android.core.errors.asSignatureUiError
 import net.primal.android.navigation.primalName
 import net.primal.android.navigation.profileId
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.notes.feed.model.asStreamPillUi
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.profile.details.ProfileDetailsContract.UiEvent
 import net.primal.android.profile.details.ProfileDetailsContract.UiState
@@ -212,7 +213,7 @@ class ProfileDetailsViewModel @Inject constructor(
     private fun requestProfileUpdate(profileId: String) =
         viewModelScope.launch {
             fetchLatestProfile(profileId = profileId)
-            findAndObserveLatestStream(profileId = profileId)
+            observeLiveStreamsByProfile(profileId = profileId)
             fetchProfileFollowedBy(profileId = profileId)
             fetchLatestMuteList()
             setEffect(ProfileDetailsContract.SideEffect.ProfileUpdateFinished)
@@ -355,30 +356,19 @@ class ProfileDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun findAndObserveLatestStream(profileId: String) {
+    private fun observeLiveStreamsByProfile(profileId: String) {
         streamObserverJob?.cancel()
         streamObserverJob = viewModelScope.launch {
-            val latestLiveStream = withContext(dispatcherProvider.io()) {
-                streamRepository.findLatestLiveStreamATag(mainHostId = profileId)
-            }
-
-            if (latestLiveStream != null) {
-                streamRepository.observeStream(aTag = latestLiveStream).collect { streamData ->
-                    val isLive = streamData?.isLive() == true
+            streamRepository.observeLiveStreamsByMainHostId(mainHostId = profileId)
+                .collect { streams ->
                     setState {
                         copy(
-                            isLive = isLive,
-                            liveStreamNaddr = if (isLive) {
-                                streamData.toNaddrString()
-                            } else {
-                                null
-                            },
+                            isLive = streams.isNotEmpty(),
+                            liveStreamNaddr = streams.firstOrNull()?.toNaddrString(),
+                            streamPills = streams.map { it.asStreamPillUi() },
                         )
                     }
                 }
-            } else {
-                setState { copy(isLive = false, liveStreamNaddr = null) }
-            }
         }
     }
 

@@ -55,7 +55,7 @@ fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) -> Unit) {
             },
         )
 
-        ChatMessageListItem(message = message, onProfileClick = {})
+        ChatMessageListItem(message = message, onProfileClick = {}, onNostrUriClick = {})
 
         PrimalFilledButton(
             modifier = Modifier.padding(start = 40.dp),

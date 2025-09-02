@@ -80,7 +80,7 @@ class FullScreenController(
         hasUnlockedAfterPortrait = true
         hasUnlockedAfterLandscape = true
 
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
     }
 
     @Suppress("FunctionName")
@@ -109,7 +109,7 @@ fun rememberFullScreenController(onFullscreenChanged: (Boolean) -> Unit = {}): F
     }
 
     DisposableEffect(Unit) {
-        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
+        activity.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
         controller._init()
         onDispose { controller._dispose() }
     }

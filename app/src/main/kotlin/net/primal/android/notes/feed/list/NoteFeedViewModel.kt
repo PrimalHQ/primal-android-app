@@ -20,11 +20,10 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import net.primal.android.core.ext.asMapByKey
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedContract.UiState
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
-import net.primal.android.notes.feed.model.StreamPillUi
+import net.primal.android.notes.feed.model.StreamsSyncStats
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.repository.mapAsProfileDataDO
@@ -46,22 +45,28 @@ import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.posts.FeedPageSnapshot
 import net.primal.domain.posts.FeedPost
 import net.primal.domain.posts.FeedRepository
-import net.primal.domain.streams.mappers.mapAsStreamDO
+import net.primal.domain.streams.StreamRepository
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteFeedViewModel.Factory::class)
 class NoteFeedViewModel @AssistedInject constructor(
     @Assisted private val feedSpec: String,
-    @Assisted private val allowMutedThreads: Boolean,
+    @Assisted("allowMutedThreads") private val allowMutedThreads: Boolean,
+    @Assisted("showStreamsInNewPill") private val showStreamsInNewPill: Boolean,
     private val feedRepository: FeedRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val mutedItemRepository: MutedItemRepository,
+    private val streamRepository: StreamRepository,
     private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
     @AssistedFactory
     interface Factory {
-        fun create(feedSpec: String, allowMutedThreads: Boolean): NoteFeedViewModel
+        fun create(
+            feedSpec: String,
+            @Assisted("allowMutedThreads") allowMutedThreads: Boolean,
+            @Assisted("showStreamsInNewPill") showStreams: Boolean,
+        ): NoteFeedViewModel
     }
 
     private fun buildFeedByDirective(feedSpec: String) =
@@ -86,6 +91,9 @@ class NoteFeedViewModel @AssistedInject constructor(
     private var pollingJob: Job? = null
 
     init {
+        if (showStreamsInNewPill) {
+            observeLiveEventsFromFollows()
+        }
         subscribeToEvents()
         observeActiveAccount()
         observeMutedUsers()
@@ -96,6 +104,22 @@ class NoteFeedViewModel @AssistedInject constructor(
             mutedItemRepository.observeMutedProfileIdsByOwnerId(ownerId = activeAccountStore.activeUserId())
                 .collect {
                     setState { copy(mutedProfileIds = it) }
+                }
+        }
+
+    private fun observeLiveEventsFromFollows() =
+        viewModelScope.launch {
+            streamRepository.observeLiveEventsFromFollows(userId = activeAccountStore.activeUserId())
+                .collect { streams ->
+                    setState {
+                        copy(
+                            streamsSyncStats = StreamsSyncStats(
+                                streamsCount = streams.size,
+                                streamAvatarCdnImages = streams.mapNotNull { it.mainHostProfile?.avatarCdnImage }
+                                    .take(MAX_AVATARS),
+                            ),
+                        )
+                    }
                 }
         }
 
@@ -146,8 +170,8 @@ class NoteFeedViewModel @AssistedInject constructor(
 
     private fun handleScrolledToTop() =
         viewModelScope.launch {
-            if (_state.value.syncStats.isTopVisibleNoteTheLatestNote()) {
-                setState { copy(syncStats = FeedPostsSyncStats()) }
+            if (_state.value.notesSyncStats.isTopVisibleNoteTheLatestNote()) {
+                setState { copy(notesSyncStats = FeedPostsSyncStats()) }
             }
         }
 
@@ -231,12 +255,6 @@ class NoteFeedViewModel @AssistedInject constructor(
             }
             .distinct()
 
-        val liveActivity = this.liveActivity
-            .mapAsStreamDO(profilesMap = profiles.asMapByKey { it.profileId })
-            .filter { it.isLive() }
-
-        val avatarCdnImagesStreams = liveActivity.map { it.mainHostProfile?.avatarCdnImage }
-
         val limit = avatarCdnImagesAndLegendaryCustomizations.count().coerceAtMost(MAX_AVATARS)
 
         val newSyncStats = FeedPostsSyncStats(
@@ -245,27 +263,12 @@ class NoteFeedViewModel @AssistedInject constructor(
             latestAvatarCdnImages = avatarCdnImagesAndLegendaryCustomizations
                 .map { it.first }
                 .take(limit),
-            streamsCount = liveActivity.size,
-            streamAvatarCdnImages = avatarCdnImagesStreams.take(MAX_AVATARS),
         )
 
-        val streamPills = (
-            liveActivity.map { stream ->
-                StreamPillUi(
-                    naddr = stream.toNaddrString(),
-                    currentParticipants = stream.currentParticipants,
-                    title = stream.title,
-                    hostProfileId = stream.mainHostId,
-                    hostAvatarCdnImage = stream.mainHostProfile?.avatarCdnImage,
-                )
-            } + state.value.streams
-            )
-            .distinctBy { it.naddr }
-
         if (newSyncStats.isTopVisibleNoteTheLatestNote() || latestTimestamp == null) {
-            setState { copy(syncStats = FeedPostsSyncStats(), streams = streamPills) }
+            setState { copy(notesSyncStats = FeedPostsSyncStats()) }
         } else {
-            setState { copy(syncStats = newSyncStats, streams = streamPills) }
+            setState { copy(notesSyncStats = newSyncStats) }
         }
     }
 
@@ -279,7 +282,7 @@ class NoteFeedViewModel @AssistedInject constructor(
                 )
 
                 delay(187.milliseconds)
-                setState { copy(syncStats = FeedPostsSyncStats(), shouldAnimateScrollToTop = true) }
+                setState { copy(notesSyncStats = FeedPostsSyncStats(), shouldAnimateScrollToTop = true) }
 
                 viewModelScope.launch {
                     delay(1.seconds)

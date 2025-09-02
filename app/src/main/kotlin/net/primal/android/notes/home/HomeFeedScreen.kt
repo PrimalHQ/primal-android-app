@@ -214,6 +214,8 @@ fun HomeFeedScreen(
                         pollingEnabled = pollingStates[feedUi] ?: false,
                         noteCallbacks = noteCallbacks,
                         showTopZaps = true,
+                        bigPillStreams = state.streams,
+                        showStreamsInNewPill = true,
                         newNotesNoticeAlpha = (1 - topAppBarState.collapsedFraction) * 1.0f,
                         onGoToWallet = callbacks.onGoToWallet,
                         contentPadding = paddingValues,

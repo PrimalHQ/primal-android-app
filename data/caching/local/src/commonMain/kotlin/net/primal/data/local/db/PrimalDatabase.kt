@@ -60,6 +60,8 @@ import net.primal.data.local.dao.streams.StreamChatMessageDao
 import net.primal.data.local.dao.streams.StreamChatMessageData
 import net.primal.data.local.dao.streams.StreamData
 import net.primal.data.local.dao.streams.StreamDataDao
+import net.primal.data.local.dao.streams.StreamFollowsCrossRef
+import net.primal.data.local.dao.streams.StreamFollowsCrossRefDao
 import net.primal.data.local.dao.threads.ArticleCommentCrossRef
 import net.primal.data.local.dao.threads.NoteConversationCrossRef
 import net.primal.data.local.dao.threads.ThreadConversationDao
@@ -103,8 +105,9 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         FollowPackRemoteKey::class,
         StreamData::class,
         StreamChatMessageData::class,
+        StreamFollowsCrossRef::class,
     ],
-    version = 18,
+    version = 19,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -174,6 +177,8 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun streams(): StreamDataDao
 
     abstract fun streamChats(): StreamChatMessageDao
+
+    abstract fun streamFollows(): StreamFollowsCrossRefDao
 }
 
 // The Room compiler generates the `actual` implementations.

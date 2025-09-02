@@ -4,8 +4,10 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.core.utils.Result
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.explore.model.UsersResponse
 import net.primal.data.remote.api.users.UserWellKnownApi
@@ -80,6 +82,18 @@ class ProfileRepositoryImpl(
         database.profileStats().observeProfileStats(profileId = profileId)
             .filterNotNull()
             .map { it.asProfileStatsDO() }
+
+    override suspend fun fetchMissingProfiles(profileIds: List<String>): Result<List<ProfileData>> =
+        withContext(dispatcherProvider.io()) {
+            val existingProfileIds = database.profiles().findExistingProfileIds(profileIds = profileIds)
+            val missingProfileIds = profileIds.toSet() - existingProfileIds.toSet()
+
+            if (missingProfileIds.isNotEmpty()) {
+                runCatching { fetchProfiles(profileIds = missingProfileIds.toList()) }
+            } else {
+                Result.success(emptyList())
+            }
+        }
 
     override suspend fun fetchUserProfileFollowedBy(
         profileId: String,

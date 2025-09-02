@@ -6,7 +6,7 @@ import net.primal.domain.nostr.Naddr
 
 interface StreamRepository {
 
-    suspend fun findLatestLiveStreamATag(mainHostId: String): String?
+    fun observeLiveStreamsByMainHostId(mainHostId: String): Flow<List<Stream>>
 
     suspend fun findWhoIsLive(mainHostIds: List<String>): Set<String>
 
@@ -19,4 +19,8 @@ interface StreamRepository {
         userId: String,
         streamContentModerationMode: StreamContentModerationMode,
     )
+
+    suspend fun startLiveEventsFromFollowsSubscription(userId: String)
+
+    fun observeLiveEventsFromFollows(userId: String): Flow<List<Stream>>
 }
