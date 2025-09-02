@@ -5,6 +5,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -92,7 +94,15 @@ fun rememberPrimalStreamExoPlayer(
     onPlayerError: (errorCode: Int) -> Unit,
 ): ExoPlayer {
     val context = LocalContext.current
-    val exoPlayer = remember(streamNaddr) { ExoPlayer.Builder(context).build() }
+    val exoPlayer = remember(streamNaddr) {
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(C.USAGE_MEDIA)
+            .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
+            .build()
+        ExoPlayer.Builder(context)
+            .setAudioAttributes(audioAttributes, true)
+            .build()
+    }
 
     DisposableEffect(exoPlayer, onIsPlayingChanged, onPlaybackStateChanged, onPlayerError) {
         val listener = object : Player.Listener {
