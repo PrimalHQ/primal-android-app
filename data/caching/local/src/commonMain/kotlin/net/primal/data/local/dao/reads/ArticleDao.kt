@@ -43,6 +43,10 @@ interface ArticleDao {
     fun observeArticle(articleId: String, authorId: String): Flow<Article?>
 
     @Transaction
+    @Query("SELECT * FROM ArticleData WHERE aTag = :aTag")
+    fun observeArticleByATag(aTag: String): Flow<Article?>
+
+    @Transaction
     @Query(
         """
         SELECT * FROM ArticleData
