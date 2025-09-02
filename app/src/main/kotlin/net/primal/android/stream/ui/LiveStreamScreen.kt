@@ -407,6 +407,7 @@ private fun StreamInfoAndChatSection(
     onInfoClick: () -> Unit,
     onChatSettingsClick: () -> Unit,
     onProfileClick: (String) -> Unit,
+    onNostrUriClick: (String) -> Unit,
     onChatMessageClick: (ChatMessageUi) -> Unit,
     onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
@@ -434,6 +435,7 @@ private fun StreamInfoAndChatSection(
             listState = chatListState,
             eventPublisher = eventPublisher,
             onProfileClick = onProfileClick,
+            onNostrUriClick = onNostrUriClick,
             onChatMessageClick = onChatMessageClick,
             onZapMessageClick = onZapMessageClick,
         )
@@ -487,6 +489,7 @@ private fun LiveStreamContent(
                     onZapClick = onZapClick,
                     onInfoClick = onInfoClick,
                     onProfileClick = callbacks.onProfileClick,
+                    onNostrUriClick = callbacks.onNostrUriClick,
                     onChatMessageClick = onChatMessageClick,
                     onZapMessageClick = onZapMessageClick,
                     onChatSettingsClick = onChatSettingsClick,
@@ -556,6 +559,7 @@ private fun LiveChatListOrSearch(
     listState: LazyListState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
+    onNostrUriClick: (String) -> Unit,
     onChatMessageClick: (ChatMessageUi) -> Unit,
     onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
@@ -582,6 +586,7 @@ private fun LiveChatListOrSearch(
                         is StreamChatItem.ChatMessageItem -> ChatMessageListItem(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             message = chatItem.message,
+                            onNostrUriClick = onNostrUriClick,
                             onProfileClick = onProfileClick,
                             onClick = { onChatMessageClick(chatItem.message) },
                         )
@@ -621,6 +626,7 @@ private fun LiveChatContent(
     listState: LazyListState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
+    onNostrUriClick: (String) -> Unit,
     onChatMessageClick: (ChatMessageUi) -> Unit,
     onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
@@ -648,6 +654,7 @@ private fun LiveChatContent(
             listState = listState,
             eventPublisher = eventPublisher,
             onProfileClick = onProfileClick,
+            onNostrUriClick = onNostrUriClick,
             onChatMessageClick = onChatMessageClick,
             onZapMessageClick = onZapMessageClick,
         )
@@ -764,6 +771,7 @@ private fun LiveChatCommentInput(
 @Composable
 fun ChatMessageListItem(
     message: ChatMessageUi,
+    onNostrUriClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -825,7 +833,12 @@ fun ChatMessageListItem(
                 ).firstOrNull()
 
                 if (urlAnnotation != null) {
-                    localUriHandler.openUriSafely(urlAnnotation.item)
+                    val uri = urlAnnotation.item
+                    if (uri.startsWith("nostr:")) {
+                        onNostrUriClick(uri)
+                    } else {
+                        localUriHandler.openUriSafely(uri)
+                    }
                     return@PrimalClickableText
                 }
 
