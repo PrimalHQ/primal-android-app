@@ -1,17 +1,14 @@
 package net.primal.android.stream.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -155,14 +152,7 @@ private fun ProfileDetailsBottomSheet(
         containerColor = BottomSheetBackgroundSecondaryColor,
         tonalElevation = 0.dp,
         dragHandle = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(BottomSheetBackgroundPrimaryColor),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                BottomSheetDefaults.DragHandle()
-            }
+            LiveStreamBottomSheetDragHandle()
         },
     ) {
         Column(

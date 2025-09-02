@@ -186,11 +186,11 @@ private fun HostProfileSummary(
                     }
                 } else {
                     Text(
-                        text = stringResource(id = R.string.live_stream_followers_count, followersCount.shortened()),
-                        style = AppTheme.typography.bodyLarge.copy(
-                            fontSize = 16.sp,
-                            lineHeight = 16.sp,
+                        text = stringResource(
+                            id = R.string.live_stream_followers_count,
+                            followersCount.shortened().lowercase(),
                         ),
+                        style = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp, lineHeight = 16.sp),
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                     )
                 }
@@ -202,7 +202,7 @@ private fun HostProfileSummary(
                     horizontalAlignment = Alignment.End,
                 ) {
                     Text(
-                        text = followersCount.shortened(),
+                        text = followersCount.shortened().lowercase(),
                         style = AppTheme.typography.bodyLarge.copy(
                             fontSize = 14.sp,
                             lineHeight = 16.sp,
@@ -212,10 +212,7 @@ private fun HostProfileSummary(
                     )
                     Text(
                         text = stringResource(id = R.string.profile_followers_stat),
-                        style = AppTheme.typography.bodyLarge.copy(
-                            fontSize = 14.sp,
-                            lineHeight = 14.sp,
-                        ),
+                        style = AppTheme.typography.bodyLarge.copy(fontSize = 14.sp, lineHeight = 14.sp),
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
                     )
                 }

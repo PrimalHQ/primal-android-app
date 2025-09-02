@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.core.compose.PrimalClickableText
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.stream.LiveStreamContract
@@ -90,7 +91,11 @@ fun StreamDescriptionSection(
                 style = AppTheme.typography.bodyLarge.copy(
                     fontSize = 15.sp,
                     lineHeight = 22.sp,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    color = if (isAppInDarkPrimalTheme()) {
+                        AppTheme.extraColorScheme.onSurfaceVariantAlt1
+                    } else {
+                        AppTheme.extraColorScheme.onSurfaceVariantAlt2
+                    },
                 ),
                 onClick = { position, _ ->
                     val annotations = annotatedDescription.getStringAnnotations(

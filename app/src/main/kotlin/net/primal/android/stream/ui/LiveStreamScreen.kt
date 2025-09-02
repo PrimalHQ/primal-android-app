@@ -80,6 +80,7 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
@@ -767,14 +768,18 @@ private fun LiveChatCommentInput(
 fun ChatMessageListItem(
     message: ChatMessageUi,
     onProfileClick: (String) -> Unit,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isClickable: Boolean = true,
+    onClick: (() -> Unit)? = null,
 ) {
     val localUriHandler = LocalUriHandler.current
 
     val authorNameColor = AppTheme.colorScheme.onSurface
-    val defaultTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1
+    val defaultTextColor = if (isAppInDarkPrimalTheme()) {
+        AppTheme.extraColorScheme.onSurfaceVariantAlt1
+    } else {
+        AppTheme.extraColorScheme.onSurfaceVariantAlt2
+    }
+
     val linkStyle = SpanStyle(textDecoration = TextDecoration.Underline)
     val highlightColor = AppTheme.colorScheme.primary
 
@@ -806,7 +811,11 @@ fun ChatMessageListItem(
 
     Row(
         modifier = modifier
-            .then(if (isClickable) Modifier.clickable(onClick = onClick) else Modifier),
+            .fillMaxWidth()
+            .clickable(
+                enabled = onClick != null,
+                onClick = { onClick?.invoke() },
+            ),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
     ) {
@@ -843,7 +852,7 @@ fun ChatMessageListItem(
                     return@PrimalClickableText
                 }
 
-                onClick()
+                onClick?.invoke()
             },
         )
     }
@@ -852,9 +861,8 @@ fun ChatMessageListItem(
 @Composable
 fun ZapMessageListItem(
     zap: EventZapUiModel,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    isClickable: Boolean = true,
+    onClick: (() -> Unit)? = null,
 ) {
     Box(
         modifier = modifier
@@ -864,8 +872,11 @@ fun ZapMessageListItem(
                 color = ZapMessageBorderColor,
                 shape = AppTheme.shapes.medium,
             )
-            .then(if (isClickable) Modifier.clickable(onClick = onClick) else Modifier)
             .clip(AppTheme.shapes.medium)
+            .clickable(
+                enabled = onClick != null,
+                onClick = { onClick?.invoke() },
+            )
             .background(
                 color =
                 if (LocalPrimalTheme.current.isDarkTheme) {
@@ -892,7 +903,7 @@ fun ZapMessageListItem(
 }
 
 @Composable
-private fun ZapMessageContent(zap: EventZapUiModel, onClick: () -> Unit) {
+private fun ZapMessageContent(zap: EventZapUiModel, onClick: (() -> Unit)?) {
     val localUriHandler = LocalUriHandler.current
 
     Column(modifier = Modifier.padding(top = 1.dp)) {
@@ -906,7 +917,7 @@ private fun ZapMessageContent(zap: EventZapUiModel, onClick: () -> Unit) {
                         append(zap.zapperName)
                     }
                     withStyle(style = SpanStyle(color = ZapMessageProfileHandleColor)) {
-                        append(" zapped")
+                        append(" ${stringResource(id = R.string.live_stream_zapped)}")
                     }
                 },
                 style = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp),
@@ -971,7 +982,7 @@ private fun ZapMessageContent(zap: EventZapUiModel, onClick: () -> Unit) {
                     if (urlAnnotation != null) {
                         localUriHandler.openUriSafely(urlAnnotation.item)
                     } else {
-                        onClick()
+                        onClick?.invoke()
                     }
                 },
             )

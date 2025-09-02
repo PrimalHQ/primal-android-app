@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ContextReportContent
 import net.primal.android.profile.report.ReportUserDialog
@@ -47,10 +48,14 @@ fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) -> Unit) {
                 fontSize = 15.sp,
                 lineHeight = 16.sp,
             ),
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+            color = if (isAppInDarkPrimalTheme()) {
+                AppTheme.extraColorScheme.onSurfaceVariantAlt4
+            } else {
+                AppTheme.extraColorScheme.onSurfaceVariantAlt2
+            },
         )
 
-        ChatMessageListItem(message = message, onProfileClick = {}, onClick = {}, isClickable = false)
+        ChatMessageListItem(message = message, onProfileClick = {})
 
         PrimalFilledButton(
             modifier = Modifier.padding(start = 40.dp),
