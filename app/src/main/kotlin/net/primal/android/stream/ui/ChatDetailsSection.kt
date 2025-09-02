@@ -47,7 +47,7 @@ fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) -> Unit) {
                 fontSize = 15.sp,
                 lineHeight = 16.sp,
             ),
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
         )
 
         ChatMessageListItem(message = message, onProfileClick = {}, onClick = {})
@@ -59,7 +59,7 @@ fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) -> Unit) {
             textStyle = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp, lineHeight = 20.sp),
             onClick = { reportDialogVisible = true },
             contentPadding = PaddingValues(18.dp, vertical = 1.dp),
-            height = 41.dp,
+            height = 37.dp,
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

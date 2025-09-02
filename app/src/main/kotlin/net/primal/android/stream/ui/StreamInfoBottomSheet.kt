@@ -12,16 +12,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlaceholderVerticalAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.text.NumberFormat
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
@@ -30,16 +27,9 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ContextMuteUser
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.utils.shortened
 import net.primal.android.profile.details.ui.ProfileActions
 import net.primal.android.theme.AppTheme
-
-private val MuteButtonHandleColor: Color
-    @Composable
-    get() = if (LocalPrimalTheme.current.isDarkTheme) {
-        Color(0xFF333333)
-    } else {
-        Color(0xFFD5D5D5)
-    }
 
 @Composable
 fun StreamInfoBottomSheet(
@@ -51,6 +41,7 @@ fun StreamInfoBottomSheet(
     isMuteUserButtonVisible: Boolean,
     activeUserId: String,
     isLive: Boolean,
+    showInternetIdentifier: Boolean,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
     onMute: () -> Unit,
@@ -82,6 +73,7 @@ fun StreamInfoBottomSheet(
                 isProfileFollowed = isProfileFollowed,
                 followersCount = followersCount,
                 profileDetails = profileDetails,
+                showInternetIdentifier = showInternetIdentifier,
             )
 
             PrimalDivider(
@@ -105,6 +97,7 @@ private fun HostInfoAndActions(
     followersCount: Int,
     activeUserId: String,
     isLive: Boolean,
+    showInternetIdentifier: Boolean,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
     onMute: () -> Unit,
@@ -119,6 +112,7 @@ private fun HostInfoAndActions(
             profileDetails = profileDetails,
             followersCount = followersCount,
             isLive = isLive,
+            showInternetIdentifier = showInternetIdentifier,
         )
         HostActionRow(
             isMuteButtonVisible = isMuteButtonVisible,
@@ -143,37 +137,83 @@ private fun HostProfileSummary(
     profileDetails: ProfileDetailsUi,
     followersCount: Int,
     isLive: Boolean,
+    showInternetIdentifier: Boolean,
 ) {
-    val numberFormat = remember { NumberFormat.getNumberInstance() }
-
     Row(
-        modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         UniversalAvatarThumbnail(
             isLive = isLive,
             avatarCdnImage = profileDetails.avatarCdnImage,
-            avatarSize = 56.dp,
+            avatarSize = 46.dp,
             legendaryCustomization = profileDetails.premiumDetails?.legendaryCustomization,
         )
-        Column(modifier = Modifier.weight(1f)) {
-            NostrUserText(
-                modifier = Modifier.padding(top = 4.dp),
-                displayName = profileDetails.userDisplayName,
-                internetIdentifier = profileDetails.internetIdentifier,
-                internetIdentifierBadgeSize = 20.dp,
-                internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
-                legendaryCustomization = profileDetails.premiumDetails?.legendaryCustomization,
-            )
-            Text(
-                text = stringResource(id = R.string.live_stream_followers_count, numberFormat.format(followersCount)),
-                style = AppTheme.typography.bodyLarge.copy(
-                    fontSize = 16.sp,
-                    lineHeight = 16.sp,
-                ),
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                NostrUserText(
+                    displayName = profileDetails.userDisplayName,
+                    internetIdentifier = profileDetails.internetIdentifier,
+                    internetIdentifierBadgeSize = 13.dp,
+                    internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
+                    legendaryCustomization = profileDetails.premiumDetails?.legendaryCustomization,
+                    style = AppTheme.typography.bodyLarge.copy(
+                        fontSize = 16.sp,
+                        lineHeight = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                )
+                if (showInternetIdentifier) {
+                    profileDetails.internetIdentifier?.let {
+                        Text(
+                            text = it,
+                            style = AppTheme.typography.bodyLarge.copy(
+                                fontSize = 14.sp,
+                                lineHeight = 14.sp,
+                            ),
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                        )
+                    }
+                } else {
+                    Text(
+                        text = stringResource(id = R.string.live_stream_followers_count, followersCount.shortened()),
+                        style = AppTheme.typography.bodyLarge.copy(
+                            fontSize = 16.sp,
+                            lineHeight = 16.sp,
+                        ),
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    )
+                }
+            }
+
+            if (showInternetIdentifier) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    horizontalAlignment = Alignment.End,
+                ) {
+                    Text(
+                        text = followersCount.shortened(),
+                        style = AppTheme.typography.bodyLarge.copy(
+                            fontSize = 14.sp,
+                            lineHeight = 16.sp,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                        color = AppTheme.colorScheme.onSurface,
+                    )
+                    Text(
+                        text = stringResource(id = R.string.profile_followers_stat),
+                        style = AppTheme.typography.bodyLarge.copy(
+                            fontSize = 14.sp,
+                            lineHeight = 14.sp,
+                        ),
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    )
+                }
+            }
         }
     }
 }
@@ -200,12 +240,12 @@ private fun HostActionRow(
     ) {
         if (isMuteButtonVisible) {
             PrimalFilledButton(
-                containerColor = MuteButtonHandleColor,
+                containerColor = ActionButtonHandleColor,
                 contentColor = AppTheme.colorScheme.onSurface,
                 textStyle = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp, lineHeight = 20.sp),
                 onClick = { if (isProfileMuted) onUnmute() else onMute() },
                 contentPadding = PaddingValues(16.dp, 0.dp),
-                height = 40.dp,
+                height = 35.dp,
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -240,6 +280,7 @@ private fun HostActionRow(
             onDrawerQrCodeClick = { onDrawerQrCodeClick(profileId) },
             onFollow = onFollow,
             onUnfollow = onUnfollow,
+            containerColor = ActionButtonHandleColor,
         )
     }
 }

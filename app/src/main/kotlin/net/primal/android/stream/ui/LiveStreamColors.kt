@@ -47,3 +47,19 @@ val ReportButtonHandleColor: Color
     } else {
         Color(0xFFD5D5D5)
     }
+
+val ActionButtonHandleColor: Color
+    @Composable
+    get() = if (LocalPrimalTheme.current.isDarkTheme) {
+        Color(0xFF333333)
+    } else {
+        Color(0xFFD5D5D5)
+    }
+
+val ChatBackgroundHandleColor: Color
+    @Composable
+    get() = if (LocalPrimalTheme.current.isDarkTheme) {
+        Color.Black
+    } else {
+        Color.White
+    }

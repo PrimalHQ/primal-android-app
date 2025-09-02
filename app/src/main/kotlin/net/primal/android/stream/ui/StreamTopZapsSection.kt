@@ -204,6 +204,7 @@ private fun ZapButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     Row(
         modifier = modifier
             .height(26.dp)
+            .padding(horizontal = 6.dp)
             .animateContentSize()
             .background(
                 color = AppTheme.colorScheme.onSurface,

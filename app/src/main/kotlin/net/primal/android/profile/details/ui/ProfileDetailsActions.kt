@@ -36,6 +36,7 @@ fun ProfileActions(
     modifier: Modifier,
     isFollowed: Boolean,
     isActiveUser: Boolean,
+    containerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     onEditProfileClick: () -> Unit,
     onMessageClick: () -> Unit,
     onZapProfileClick: () -> Unit,
@@ -48,6 +49,7 @@ fun ProfileActions(
         horizontalArrangement = Arrangement.End,
     ) {
         ActionButton(
+            containerColor = containerColor,
             onClick = onDrawerQrCodeClick,
             iconVector = PrimalIcons.QrCode,
             iconPadding = 11.dp,
@@ -58,6 +60,7 @@ fun ProfileActions(
 
         if (!isActiveUser) {
             ActionButton(
+                containerColor = containerColor,
                 onClick = onZapProfileClick,
                 iconVector = PrimalIcons.FeedZaps,
                 contentDescription = stringResource(id = R.string.accessibility_profile_send_zap),
@@ -67,6 +70,7 @@ fun ProfileActions(
         }
 
         ActionButton(
+            containerColor = containerColor,
             onClick = onMessageClick,
             iconVector = PrimalIcons.Message,
             iconPadding = 3.dp,
@@ -91,13 +95,14 @@ private fun ActionButton(
     iconVector: ImageVector,
     onClick: () -> Unit,
     iconPadding: Dp = 2.dp,
+    containerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
     contentDescription: String? = null,
 ) {
     IconButton(
         modifier = Modifier.size(40.dp),
         onClick = onClick,
         colors = IconButtonDefaults.iconButtonColors(
-            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+            containerColor = containerColor,
             contentColor = AppTheme.colorScheme.onSurface,
         ),
     ) {

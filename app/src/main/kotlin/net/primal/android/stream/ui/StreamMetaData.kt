@@ -40,7 +40,7 @@ fun StreamMetaData(
                     id = R.string.live_stream_started_at,
                     Instant.ofEpochSecond(startedAt).asBeforeNowFormat(),
                 ),
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                 style = AppTheme.typography.bodyMedium.copy(
                     fontSize = 14.sp,
                     lineHeight = 14.sp,
@@ -51,7 +51,7 @@ fun StreamMetaData(
             text = numberFormat.format(viewers),
             leadingIcon = PrimalIcons.Follow,
             iconSize = 12.sp,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
             style = AppTheme.typography.bodyMedium.copy(
                 fontSize = 14.sp,
                 lineHeight = 16.sp,

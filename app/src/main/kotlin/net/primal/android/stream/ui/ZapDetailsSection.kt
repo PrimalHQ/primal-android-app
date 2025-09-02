@@ -50,7 +50,7 @@ fun ZapDetailsSection(zap: EventZapUiModel, onReport: (ReportType) -> Unit) {
                 fontSize = 15.sp,
                 lineHeight = 16.sp,
             ),
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
         )
 
         ZapMessageListItem(zap = zap, onClick = {})
@@ -61,7 +61,7 @@ fun ZapDetailsSection(zap: EventZapUiModel, onReport: (ReportType) -> Unit) {
             textStyle = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp, lineHeight = 20.sp),
             onClick = { reportDialogVisible = true },
             contentPadding = PaddingValues(18.dp, vertical = 0.dp),
-            height = 41.dp,
+            height = 37.dp,
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,

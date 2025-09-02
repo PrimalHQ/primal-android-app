@@ -91,6 +91,7 @@ fun LiveStreamModalBottomSheetHost(
                             onDismiss = onDismiss,
                         )
                     },
+                    showInternetIdentifier = activeSheet != ActiveBottomSheet.StreamInfo,
                 )
             }
         }
@@ -133,6 +134,7 @@ private fun ProfileDetailsBottomSheet(
     isLive: Boolean,
     isProfileMuted: Boolean,
     isProfileFollowed: Boolean,
+    showInternetIdentifier: Boolean,
     followersCount: Int,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
@@ -183,6 +185,7 @@ private fun ProfileDetailsBottomSheet(
                 isProfileMuted = isProfileMuted,
                 isProfileFollowed = isProfileFollowed,
                 followersCount = followersCount,
+                showInternetIdentifier = showInternetIdentifier,
             )
         }
     }

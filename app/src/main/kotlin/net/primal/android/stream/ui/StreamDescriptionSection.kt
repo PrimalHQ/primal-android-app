@@ -14,7 +14,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -73,7 +72,6 @@ fun StreamDescriptionSection(
         if (!streamInfo.description.isNullOrEmpty()) {
             val urlStyle = SpanStyle(
                 color = AppTheme.colorScheme.secondary,
-                textDecoration = TextDecoration.Underline,
             )
             val hashtagStyle = SpanStyle(
                 color = AppTheme.colorScheme.secondary,

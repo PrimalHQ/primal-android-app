@@ -628,7 +628,7 @@ private fun LiveChatContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppTheme.colorScheme.surface)
+            .background(ChatBackgroundHandleColor)
             .imePadding(),
     ) {
         LiveChatListOrSearch(

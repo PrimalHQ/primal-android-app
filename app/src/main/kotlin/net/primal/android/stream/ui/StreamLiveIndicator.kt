@@ -27,7 +27,7 @@ fun StreamLiveIndicator(
     modifier: Modifier = Modifier,
     isLive: Boolean,
     hideTextIfNotLive: Boolean = false,
-    textColor: Color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+    textColor: Color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
 ) {
     Row(
         modifier = modifier,
