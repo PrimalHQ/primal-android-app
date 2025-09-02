@@ -8,7 +8,7 @@ data class Naddr(
     val userId: String,
     val identifier: String,
     val relays: List<String> = emptyList(),
-)
+) : NostrEntity
 
 @Suppress("MagicNumber")
 fun JsonArray.aTagToNaddr(): Naddr? {

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "7ef4d2524518dc1b92e9c83c38630ff4",
+    "identityHash": "1b8ee08581ab62eb995d7fab9d0bb6cf",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -158,7 +158,7 @@
       },
       {
         "tableName": "WalletTransactionData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `walletType` TEXT NOT NULL, `type` TEXT NOT NULL, `state` TEXT NOT NULL, `createdAt` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, `completedAt` TEXT, `userId` TEXT NOT NULL, `note` TEXT, `invoice` TEXT, `amountInBtc` TEXT NOT NULL, `totalFeeInBtc` TEXT, `otherUserId` TEXT, `zapNoteId` TEXT, `zapNoteAuthorId` TEXT, `zappedByUserId` TEXT, PRIMARY KEY(`transactionId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `walletType` TEXT NOT NULL, `type` TEXT NOT NULL, `state` TEXT NOT NULL, `createdAt` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, `completedAt` TEXT, `userId` TEXT NOT NULL, `note` TEXT, `invoice` TEXT, `amountInBtc` TEXT NOT NULL, `totalFeeInBtc` TEXT, `otherUserId` TEXT, `zappedEntity` TEXT, `zappedByUserId` TEXT, PRIMARY KEY(`transactionId`))",
         "fields": [
           {
             "fieldPath": "transactionId",
@@ -240,13 +240,8 @@
             "affinity": "TEXT"
           },
           {
-            "fieldPath": "zapNoteId",
-            "columnName": "zapNoteId",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "zapNoteAuthorId",
-            "columnName": "zapNoteAuthorId",
+            "fieldPath": "zappedEntity",
+            "columnName": "zappedEntity",
             "affinity": "TEXT"
           },
           {
@@ -399,7 +394,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7ef4d2524518dc1b92e9c83c38630ff4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1b8ee08581ab62eb995d7fab9d0bb6cf')"
     ]
   }
 }

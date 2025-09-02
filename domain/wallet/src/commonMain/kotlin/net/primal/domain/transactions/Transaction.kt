@@ -1,5 +1,6 @@
 package net.primal.domain.transactions
 
+import net.primal.domain.nostr.NostrEntity
 import net.primal.domain.profile.ProfileData
 import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
@@ -109,10 +110,9 @@ sealed class Transaction(
         override val amountInUsd: Double?,
         override val exchangeRate: String?,
         override val totalFeeInBtc: String?,
+        val zappedEntity: NostrEntity,
         val otherUserId: String?,
         val otherLightningAddress: String?,
-        val zapNoteId: String?,
-        val zapNoteAuthorId: String?,
         val zappedByUserId: String?,
         val otherUserProfile: ProfileData?,
     ) : Transaction(

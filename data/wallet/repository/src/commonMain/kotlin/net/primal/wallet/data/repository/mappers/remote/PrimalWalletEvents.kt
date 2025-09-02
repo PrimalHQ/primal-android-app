@@ -2,8 +2,6 @@ package net.primal.wallet.data.repository.mappers.remote
 
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.nostr.findFirstEventId
-import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.wallet.WalletType
 import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.remote.nostr.ContentWalletTransaction
@@ -20,6 +18,7 @@ internal fun ContentWalletTransaction.asPrimalTransactionDO(
     walletAddress: String?,
 ): Transaction {
     val zapEvent = this.zapRequestRawJson.decodeFromJsonStringOrNull<NostrEvent>()
+    val zappedEntity = zapEvent?.toNostrEntity()
     return Transaction.Primal(
         transactionId = this.id,
         walletId = walletId,
@@ -45,8 +44,7 @@ internal fun ContentWalletTransaction.asPrimalTransactionDO(
         exchangeRate = this.exchangeRate,
         onChainAddress = this.onChainAddress,
         onChainTxId = this.onChainTxId,
-        zapNoteId = zapEvent?.tags?.findFirstEventId(),
-        zapNoteAuthorId = zapEvent?.tags?.findFirstProfileId(),
+        zappedEntity = zappedEntity,
         zappedByUserId = zapEvent?.pubKey,
         otherUserProfile = null,
     )
