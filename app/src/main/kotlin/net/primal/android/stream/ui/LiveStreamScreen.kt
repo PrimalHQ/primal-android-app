@@ -794,10 +794,7 @@ fun ChatMessageListItem(
     val annotatedContent = remember(message) {
         buildAnnotatedString {
             withStyle(
-                style = SpanStyle(
-                    fontWeight = FontWeight.Bold,
-                    color = authorNameColor,
-                ),
+                style = SpanStyle(fontWeight = FontWeight.Bold, color = authorNameColor),
             ) {
                 append(message.authorProfile.authorDisplayName)
             }
