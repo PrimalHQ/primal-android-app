@@ -10,6 +10,7 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.builder.TxRequestBuilder
+import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.profile.ProfileRepository
@@ -42,12 +43,14 @@ object WalletRepositoriesModule {
         nostrNotary: NostrNotary,
         profileRepository: ProfileRepository,
         lightningRepository: LightningRepository,
+        eventRepository: EventRepository,
     ): WalletRepository {
         return WalletRepositoryFactory.createWalletRepository(
             primalWalletApiClient = primalApiClient,
             nostrEventSignatureHandler = nostrNotary,
             profileRepository = profileRepository,
             lightningRepository = lightningRepository,
+            eventRepository = eventRepository,
         )
     }
 

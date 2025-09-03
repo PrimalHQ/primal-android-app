@@ -1,6 +1,7 @@
 package net.primal.wallet.data.service.factory
 
 import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
@@ -19,6 +20,9 @@ internal object WalletServiceFactory {
         ),
     )
 
-    fun createNostrWalletService(lightningRepository: LightningRepository) =
-        NostrWalletServiceImpl(lightningRepository = lightningRepository)
+    fun createNostrWalletService(lightningRepository: LightningRepository, eventRepository: EventRepository) =
+        NostrWalletServiceImpl(
+            lightningRepository = lightningRepository,
+            eventRepository = eventRepository,
+        )
 }
