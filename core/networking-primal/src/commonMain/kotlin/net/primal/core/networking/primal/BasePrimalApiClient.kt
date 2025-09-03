@@ -10,6 +10,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.transformWhile
@@ -20,6 +22,7 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.utils.bufferCountOrTimeout
+import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 
 internal class BasePrimalApiClient(
@@ -65,22 +68,21 @@ internal class BasePrimalApiClient(
         }
     }
 
-    suspend fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
-        try {
-            sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
-        } catch (error: CancellationException) {
-            throw error
-        } catch (error: Exception) {
-            Napier.w(error) { "Unable to subscribe." }
-            throw NetworkException(message = "Api unreachable at the moment.", cause = error)
-        }
+    fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
         return socketClient.incomingMessages.filterBySubscriptionId(id = subscriptionId)
+            .onStart {
+                try {
+                    sendMessageOrThrow(subscriptionId = subscriptionId, data = message.toPrimalJsonObject())
+                } catch (error: CancellationException) {
+                    throw error
+                } catch (error: Exception) {
+                    Napier.w(error) { "Unable to subscribe." }
+                    throw NetworkException(message = "Api unreachable at the moment.", cause = error)
+                }
+            }.onCompletion { runCatching { closeSubscription(subscriptionId = subscriptionId) } }
     }
 
-    suspend fun subscribeBuffered(
-        subscriptionId: String,
-        message: PrimalCacheFilter,
-    ): Flow<PrimalSubscriptionBufferedResult> {
+    fun subscribeBuffered(subscriptionId: String, message: PrimalCacheFilter): Flow<PrimalSubscriptionBufferedResult> {
         return subscribe(
             subscriptionId = subscriptionId,
             message = message,

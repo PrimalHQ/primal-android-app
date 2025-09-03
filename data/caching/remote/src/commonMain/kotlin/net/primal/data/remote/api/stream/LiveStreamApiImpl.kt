@@ -1,11 +1,12 @@
 package net.primal.data.remote.api.stream
 
+import io.github.aakira.napier.Napier
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.onCompletion
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.NostrIncomingMessage
@@ -44,11 +45,7 @@ class LiveStreamApiImpl(
                     ).encodeToJsonString(),
                 ),
             )
-            .onCompletion {
-                runCatching {
-                    primalApiClient.closeSubscription(subscriptionId)
-                }
-            }
+            .catch { Napier.w(throwable = it) { "Couldn't subscribe to live feed." } }
             .map {
                 LiveFeedResponse(
                     zaps = it.filterNostrEvents(NostrEventKind.Zap),
@@ -67,8 +64,7 @@ class LiveStreamApiImpl(
                     primalVerb = PrimalVerb.LIVE_EVENTS_FROM_FOLLOWS.id,
                     optionsJson = LiveEventsFromFollowsRequest(pubkey = userId).encodeToJsonString(),
                 ),
-            )
-            .onCompletion { runCatching { primalApiClient.closeSubscription(subscriptionId) } }
+            ).catch { Napier.w(throwable = it) { "Couldn't subscribe to `live_events_from_follows`." } }
             .mapNotNull { message ->
                 when (message) {
                     is NostrIncomingMessage.EventMessage -> message.nostrEvent
