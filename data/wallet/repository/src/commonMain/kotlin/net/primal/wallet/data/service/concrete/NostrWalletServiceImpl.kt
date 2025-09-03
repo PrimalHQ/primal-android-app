@@ -17,8 +17,10 @@ import net.primal.core.utils.mapCatching
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.InvoiceType
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.NostrWalletConnect
@@ -36,6 +38,7 @@ import net.primal.wallet.data.service.WalletService
 
 internal class NostrWalletServiceImpl(
     private val lightningRepository: LightningRepository,
+    private val eventRepository: EventRepository,
 ) : WalletService {
     override suspend fun fetchWalletBalance(wallet: Wallet): Result<WalletBalanceResult> =
         runCatching {
@@ -68,10 +71,15 @@ internal class NostrWalletServiceImpl(
                     type = request.type,
                 ),
             ).map { response ->
+                val invoices = response.transactions.mapNotNull { it.invoice }
+
+                val zapReceiptsMap = eventRepository.getZapReceipts(invoices = invoices).getOrNull()
+
                 response.transactions.map { transaction ->
                     val zapRequest = (transaction.metadata?.get("nostr") ?: transaction.metadata?.get("zap_request"))
                         ?.jsonObject?.toString()
                         ?.decodeFromJsonStringOrNull<NostrEvent>()
+                        ?: zapReceiptsMap?.get(transaction.invoice)
 
                     val zappedEntity = zapRequest?.toNostrEntity()
 
@@ -88,7 +96,7 @@ internal class NostrWalletServiceImpl(
                         updatedAt = transaction.settledAt ?: transaction.createdAt,
                         completedAt = transaction.settledAt,
                         userId = wallet.userId,
-                        note = transaction.description ?: zapRequest?.content
+                        note = zapRequest?.content ?: transaction.description
                             ?: transaction.metadata?.get("comment")?.toString(),
                         invoice = transaction.invoice,
                         amountInBtc = transaction.amount.msatsToBtc(),
@@ -99,7 +107,7 @@ internal class NostrWalletServiceImpl(
                         metadata = transaction.metadata?.encodeToJsonString(),
                         otherUserId = when (transaction.type) {
                             InvoiceType.Incoming -> zapRequest?.pubKey
-                            InvoiceType.Outgoing -> null
+                            InvoiceType.Outgoing -> zapRequest?.tags?.findFirstProfileId()
                         },
                         zappedByUserId = zapRequest?.pubKey,
                         zappedEntity = zappedEntity,

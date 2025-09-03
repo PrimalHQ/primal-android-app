@@ -4,6 +4,7 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
+import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.domain.profile.ProfileRepository
@@ -30,6 +31,7 @@ abstract class RepositoryFactory {
         nostrEventSignatureHandler: NostrEventSignatureHandler,
         profileRepository: ProfileRepository,
         lightningRepository: LightningRepository,
+        eventRepository: EventRepository,
     ): WalletRepository {
         return WalletRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
@@ -45,6 +47,7 @@ abstract class RepositoryFactory {
             ),
             nostrWalletService = WalletServiceFactory.createNostrWalletService(
                 lightningRepository = lightningRepository,
+                eventRepository = eventRepository,
             ),
         )
     }
