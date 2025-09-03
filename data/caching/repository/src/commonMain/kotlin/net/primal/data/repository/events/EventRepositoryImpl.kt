@@ -13,7 +13,11 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.map
+import net.primal.core.utils.mapCatching
+import net.primal.core.utils.recover
 import net.primal.core.utils.runCatching
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.dao.events.EventZap as EventZapPO
 import net.primal.data.local.dao.events.eventRelayHintsUpserter
 import net.primal.data.local.db.PrimalDatabase
@@ -33,6 +37,7 @@ import net.primal.data.repository.mappers.local.asNostrEventUserStats
 import net.primal.data.repository.mappers.local.asProfileDataDO
 import net.primal.data.repository.mappers.remote.flatMapAsEventHintsPO
 import net.primal.data.repository.mappers.remote.flatMapAsWordCount
+import net.primal.data.repository.mappers.remote.mapAsEventZapDO
 import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsEventStatsPO
@@ -45,6 +50,7 @@ import net.primal.domain.events.EventRepository
 import net.primal.domain.events.EventZap as EventZapDO
 import net.primal.domain.events.NostrEventAction
 import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.NostrEvent
 import net.primal.shared.data.local.db.withTransaction
 
 class EventRepositoryImpl(
@@ -185,6 +191,35 @@ class EventRepositoryImpl(
             }
         }
     }
+
+    override suspend fun getZapReceipts(invoices: List<String>): Result<Map<String, NostrEvent>> =
+        withContext(dispatcherProvider.io()) {
+            if (invoices.isEmpty()) return@withContext Result.success(emptyMap())
+
+            val localZapReceipts = database.eventZaps().findAllByInvoices(invoices = invoices)
+            val localMap = localZapReceipts.mapNotNull { zapEvent ->
+                val invoice = zapEvent.invoice
+                val nostrEvent = zapEvent.rawNostrEvent?.decodeFromJsonStringOrNull<NostrEvent>()
+                if (invoice != null && nostrEvent != null) invoice to nostrEvent else null
+            }.toMap()
+
+            val missingZapReceiptsByInvoice = invoices.toSet() - localZapReceipts.mapNotNull { it.invoice }.toSet()
+
+            if (missingZapReceiptsByInvoice.isNotEmpty()) {
+                eventStatsApi.getZapReceipts(invoices = missingZapReceiptsByInvoice.toList())
+                    .mapCatching { response ->
+                        val map = response.mapEvent?.content?.decodeFromJsonStringOrNull<Map<String, NostrEvent>>()
+                            ?: throw IllegalArgumentException("failed to parse invoices map.")
+
+                        database.eventZaps()
+                            .upsertAll(data = map.values.toList().mapAsEventZapDO(profilesMap = emptyMap()))
+
+                        map
+                    }
+            } else {
+                Result.success(emptyMap())
+            }.map { it + localMap }.recover { localMap }
+        }
 
     @OptIn(ExperimentalPagingApi::class)
     private fun createPager(

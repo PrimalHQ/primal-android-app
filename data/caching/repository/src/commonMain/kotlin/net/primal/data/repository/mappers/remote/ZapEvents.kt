@@ -2,6 +2,7 @@ package net.primal.data.repository.mappers.remote
 
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.core.utils.toDouble
 import net.primal.data.local.dao.events.EventZap
 import net.primal.data.local.dao.profiles.ProfileData
@@ -49,6 +50,8 @@ fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
             zapReceiptAt = zapReceipt.createdAt,
             amountInBtc = amountInSats.toBtc().toDouble(),
             message = zapRequest.content,
+            invoice = zapReceipt.tags.findFirstBolt11(),
+            rawNostrEvent = zapReceipt.encodeToJsonString(),
         )
     }
 
