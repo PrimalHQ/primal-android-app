@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
@@ -22,7 +21,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -32,7 +30,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -52,9 +49,11 @@ fun StreamZapLeaderboardBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+        containerColor = AppTheme.colorScheme.surfaceVariant,
         tonalElevation = 0.dp,
-        dragHandle = { BottomSheetDefaults.DragHandle() },
+        dragHandle = {
+            LiveStreamBottomSheetDragHandle()
+        },
     ) {
         Column(
             modifier = Modifier
@@ -70,14 +69,9 @@ fun StreamZapLeaderboardBottomSheet(
                 numberFormat = numberFormat,
             )
 
-            val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
-            val listBackgroundColor = if (isDarkTheme) Color.Black else Color.White
-
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(listBackgroundColor),
-                contentPadding = PaddingValues(horizontal = 5.dp, vertical = 12.dp),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(8.dp),
                 verticalArrangement = Arrangement.spacedBy(9.dp),
             ) {
                 items(
@@ -94,32 +88,13 @@ fun StreamZapLeaderboardBottomSheet(
     }
 }
 
-private object LeaderboardHeaderDefaults {
-    val DarkThemeBackgroundColor = Color(0xFF121212)
-    val LightThemeBackgroundColor = Color(0xFFF5F5F5)
-    val DarkThemeDividerColor = Color(0xFF222222)
-    val LightThemeDividerColor = Color(0xFFE5E5E5)
-}
-
 @Composable
 private fun LeaderboardHeader(
     zapCount: Int,
     totalSats: ULong,
     numberFormat: NumberFormat,
 ) {
-    val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
-    val backgroundColor = if (isDarkTheme) {
-        LeaderboardHeaderDefaults.DarkThemeBackgroundColor
-    } else {
-        LeaderboardHeaderDefaults.LightThemeBackgroundColor
-    }
-    val dividerColor = if (isDarkTheme) {
-        LeaderboardHeaderDefaults.DarkThemeDividerColor
-    } else {
-        LeaderboardHeaderDefaults.LightThemeDividerColor
-    }
-
-    Column(modifier = Modifier.background(backgroundColor)) {
+    Column(modifier = Modifier.background(BottomSheetBackgroundPrimaryColor)) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -130,7 +105,7 @@ private fun LeaderboardHeader(
             ZapCountText(zapCount = zapCount, numberFormat = numberFormat)
             TotalSatsText(totalSats = totalSats, numberFormat = numberFormat)
         }
-        PrimalDivider(color = dividerColor)
+        PrimalDivider(color = BottomSheetDividerColor)
     }
 }
 

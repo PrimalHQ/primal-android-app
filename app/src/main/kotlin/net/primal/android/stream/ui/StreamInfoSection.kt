@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.Info
@@ -64,7 +65,11 @@ fun StreamInfoSection(
                         Icon(
                             imageVector = PrimalIcons.AdvancedSearch,
                             contentDescription = "Chat Settings",
-                            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                            tint = if (isAppInDarkPrimalTheme()) {
+                                AppTheme.extraColorScheme.onSurfaceVariantAlt1
+                            } else {
+                                AppTheme.extraColorScheme.onSurfaceVariantAlt2
+                            },
                         )
                     }
 
@@ -75,7 +80,11 @@ fun StreamInfoSection(
                         Icon(
                             imageVector = PrimalIcons.Info,
                             contentDescription = "Information",
-                            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                            tint = if (isAppInDarkPrimalTheme()) {
+                                AppTheme.extraColorScheme.onSurfaceVariantAlt1
+                            } else {
+                                AppTheme.extraColorScheme.onSurfaceVariantAlt2
+                            },
                         )
                     }
                 }

@@ -1,6 +1,5 @@
 package net.primal.android.stream.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -15,11 +14,11 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.core.compose.PrimalClickableText
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.utils.parseHashtags
 import net.primal.android.stream.LiveStreamContract
@@ -43,7 +42,6 @@ fun StreamDescriptionSection(
         modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
-            .background(BottomSheetSectionColorHandler)
             .padding(horizontal = 16.dp)
             .padding(top = 24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -75,7 +73,6 @@ fun StreamDescriptionSection(
         if (!streamInfo.description.isNullOrEmpty()) {
             val urlStyle = SpanStyle(
                 color = AppTheme.colorScheme.secondary,
-                textDecoration = TextDecoration.Underline,
             )
             val hashtagStyle = SpanStyle(
                 color = AppTheme.colorScheme.secondary,
@@ -94,7 +91,11 @@ fun StreamDescriptionSection(
                 style = AppTheme.typography.bodyLarge.copy(
                     fontSize = 15.sp,
                     lineHeight = 22.sp,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    color = if (isAppInDarkPrimalTheme()) {
+                        AppTheme.extraColorScheme.onSurfaceVariantAlt1
+                    } else {
+                        AppTheme.extraColorScheme.onSurfaceVariantAlt2
+                    },
                 ),
                 onClick = { position, _ ->
                     val annotations = annotatedDescription.getStringAnnotations(

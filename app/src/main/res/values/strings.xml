@@ -1379,6 +1379,7 @@
     <string name="live_stream_bottom_sheet_chat_filtering_desc">Exclude messages from accounts muted by the stream host, and potential spam</string>
     <string name="live_stream_leaderboard_total">Total</string>
     <string name="live_stream_leaderboard_zaps_suffix">zaps</string>
+    <string name="live_stream_zapped">zapped</string>
     <string name="live_stream_leaderboard_sats_suffix">sats</string>
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>

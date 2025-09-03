@@ -10,25 +10,14 @@ import androidx.compose.material3.SheetState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.stream.LiveStreamContract
-import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.streams.StreamContentModerationMode
-
-val BottomSheetSectionColorHandler: Color
-    @Composable
-    get() = if (LocalPrimalTheme.current.isDarkTheme) {
-        Color(0xFF222222)
-    } else {
-        Color(0xFFE5E5E5)
-    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +48,7 @@ fun LiveStreamModalBottomSheetHost(
     onEditProfileClick: () -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
     onZapMessageClick: (EventZapUiModel) -> Unit,
+    onProfileClick: (String) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -89,6 +79,7 @@ fun LiveStreamModalBottomSheetHost(
                     onEditProfileClick = onEditProfileClick,
                     onMessageClick = onMessageClick,
                     onDrawerQrCodeClick = onDrawerQrCodeClick,
+                    onProfileClick = onProfileClick,
                     bottomContent = {
                         ProfileDetailsBottomSheetContent(
                             activeSheet = activeSheet,
@@ -99,6 +90,7 @@ fun LiveStreamModalBottomSheetHost(
                             onDismiss = onDismiss,
                         )
                     },
+                    showInternetIdentifier = activeSheet != ActiveBottomSheet.StreamInfo,
                 )
             }
         }
@@ -141,6 +133,7 @@ private fun ProfileDetailsBottomSheet(
     isLive: Boolean,
     isProfileMuted: Boolean,
     isProfileFollowed: Boolean,
+    showInternetIdentifier: Boolean,
     followersCount: Int,
     onFollow: () -> Unit,
     onUnfollow: () -> Unit,
@@ -150,19 +143,22 @@ private fun ProfileDetailsBottomSheet(
     onEditProfileClick: () -> Unit,
     onMessageClick: (String) -> Unit,
     onDrawerQrCodeClick: (String) -> Unit,
+    onProfileClick: (String) -> Unit,
     bottomContent: @Composable () -> Unit,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
-        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+        containerColor = BottomSheetBackgroundSecondaryColor,
         tonalElevation = 0.dp,
+        dragHandle = {
+            LiveStreamBottomSheetDragHandle()
+        },
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .then(if (bottomSheetHeight != null) Modifier.height(bottomSheetHeight) else Modifier)
-                .padding(top = 8.dp),
+                .then(if (bottomSheetHeight != null) Modifier.height(bottomSheetHeight) else Modifier),
         ) {
             StreamInfoBottomSheet(
                 modifier = Modifier.padding(bottom = 16.dp),
@@ -177,11 +173,13 @@ private fun ProfileDetailsBottomSheet(
                 onEditProfileClick = onEditProfileClick,
                 onMessageClick = onMessageClick,
                 onDrawerQrCodeClick = onDrawerQrCodeClick,
+                onProfileClick = onProfileClick,
                 bottomContent = bottomContent,
                 profileDetails = profileDetails,
                 isProfileMuted = isProfileMuted,
                 isProfileFollowed = isProfileFollowed,
                 followersCount = followersCount,
+                showInternetIdentifier = showInternetIdentifier,
             )
         }
     }

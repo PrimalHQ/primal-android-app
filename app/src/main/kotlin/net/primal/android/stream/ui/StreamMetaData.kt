@@ -15,6 +15,7 @@ import java.time.Instant
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.asBeforeNowFormat
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Follow
 import net.primal.android.theme.AppTheme
@@ -27,12 +28,18 @@ fun StreamMetaData(
     viewers: Int,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
+    val textColor = if (isAppInDarkPrimalTheme()) {
+        AppTheme.extraColorScheme.onSurfaceVariantAlt3
+    } else {
+        AppTheme.extraColorScheme.onSurfaceVariantAlt2
+    }
+
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        StreamLiveIndicator(isLive = isLive)
+        StreamLiveIndicator(isLive = isLive, textColor = textColor)
 
         if (startedAt != null) {
             Text(
@@ -40,7 +47,7 @@ fun StreamMetaData(
                     id = R.string.live_stream_started_at,
                     Instant.ofEpochSecond(startedAt).asBeforeNowFormat(),
                 ),
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                color = textColor,
                 style = AppTheme.typography.bodyMedium.copy(
                     fontSize = 14.sp,
                     lineHeight = 14.sp,
@@ -51,7 +58,7 @@ fun StreamMetaData(
             text = numberFormat.format(viewers),
             leadingIcon = PrimalIcons.Follow,
             iconSize = 12.sp,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            color = textColor,
             style = AppTheme.typography.bodyMedium.copy(
                 fontSize = 14.sp,
                 lineHeight = 16.sp,

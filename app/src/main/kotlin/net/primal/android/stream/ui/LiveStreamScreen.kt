@@ -4,6 +4,7 @@ package net.primal.android.stream.ui
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -17,7 +18,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,8 +27,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -79,6 +81,7 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
@@ -112,15 +115,6 @@ import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.DraftTx
 
 private const val URL_ANNOTATION_TAG = "url"
-private val ZapMessageBorderColor = Color(0xFFE47C00)
-private val ZapMessageBackgroundColor = Color(0xFFE47C00)
-private val ZapMessageProfileHandleColor: Color
-    @Composable
-    get() = if (LocalPrimalTheme.current.isDarkTheme) {
-        Color(0xFFFFA02F)
-    } else {
-        Color(0xFFE47C00)
-    }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -199,6 +193,12 @@ private fun LiveStreamScaffold(
     snackbarHostState: SnackbarHostState,
     zapHostState: ZapHostState,
 ) {
+    if (state.activeBottomSheet != ActiveBottomSheet.None) {
+        BackHandler {
+            eventPublisher(LiveStreamContract.UiEvent.ChangeActiveBottomSheet(ActiveBottomSheet.None))
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -318,6 +318,10 @@ private fun LiveStreamBottomSheet(
         onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
         onZapMessageClick = {
             eventPublisher(LiveStreamContract.UiEvent.ChangeActiveBottomSheet(ActiveBottomSheet.ZapDetails(it)))
+        },
+        onProfileClick = { profileId ->
+            eventPublisher(LiveStreamContract.UiEvent.ChangeActiveBottomSheet(ActiveBottomSheet.None))
+            callbacks.onProfileClick(profileId)
         },
     )
 }
@@ -643,7 +647,7 @@ private fun LiveChatContent(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(AppTheme.colorScheme.surface)
+            .background(ChatBackgroundHandleColor)
             .imePadding(),
     ) {
         LiveChatListOrSearch(
@@ -773,23 +777,25 @@ fun ChatMessageListItem(
     message: ChatMessageUi,
     onNostrUriClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
 ) {
     val localUriHandler = LocalUriHandler.current
 
     val authorNameColor = AppTheme.colorScheme.onSurface
-    val defaultTextColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1
+    val defaultTextColor = if (isAppInDarkPrimalTheme()) {
+        AppTheme.extraColorScheme.onSurfaceVariantAlt1
+    } else {
+        AppTheme.extraColorScheme.onSurfaceVariantAlt2
+    }
+
     val linkStyle = SpanStyle(textDecoration = TextDecoration.Underline)
     val highlightColor = AppTheme.colorScheme.primary
 
     val annotatedContent = remember(message) {
         buildAnnotatedString {
             withStyle(
-                style = SpanStyle(
-                    fontWeight = FontWeight.Bold,
-                    color = authorNameColor,
-                ),
+                style = SpanStyle(fontWeight = FontWeight.Bold, color = authorNameColor),
             ) {
                 append(message.authorProfile.authorDisplayName)
             }
@@ -811,7 +817,11 @@ fun ChatMessageListItem(
 
     Row(
         modifier = modifier
-            .clickable(onClick = onClick),
+            .fillMaxWidth()
+            .clickable(
+                enabled = onClick != null,
+                onClick = { onClick?.invoke() },
+            ),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.Top,
     ) {
@@ -853,7 +863,7 @@ fun ChatMessageListItem(
                     return@PrimalClickableText
                 }
 
-                onClick()
+                onClick?.invoke()
             },
         )
     }
@@ -862,8 +872,8 @@ fun ChatMessageListItem(
 @Composable
 fun ZapMessageListItem(
     zap: EventZapUiModel,
-    onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
 ) {
     Box(
         modifier = modifier
@@ -873,8 +883,19 @@ fun ZapMessageListItem(
                 color = ZapMessageBorderColor,
                 shape = AppTheme.shapes.medium,
             )
-            .clickable(onClick = onClick)
             .clip(AppTheme.shapes.medium)
+            .clickable(
+                enabled = onClick != null,
+                onClick = { onClick?.invoke() },
+            )
+            .background(
+                color =
+                if (LocalPrimalTheme.current.isDarkTheme) {
+                    Color.Black
+                } else {
+                    Color.White
+                },
+            )
             .background(color = ZapMessageBackgroundColor.copy(alpha = 0.2f))
             .padding(horizontal = 8.dp, vertical = 10.dp),
     ) {
@@ -887,65 +908,17 @@ fun ZapMessageListItem(
                 avatarSize = 24.dp,
                 legendaryCustomization = zap.zapperLegendaryCustomization,
             )
-            ZapMessageContent(zap = zap)
+            ZapMessageContent(zap = zap, onClick = onClick)
         }
     }
 }
 
 @Composable
-private fun ZapMessageContent(zap: EventZapUiModel) {
+private fun ZapMessageContent(zap: EventZapUiModel, onClick: (() -> Unit)?) {
     val localUriHandler = LocalUriHandler.current
 
     Column(modifier = Modifier.padding(top = 1.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = ZapMessageProfileHandleColor, fontWeight = FontWeight.Bold)) {
-                        append(zap.zapperName)
-                    }
-                    withStyle(style = SpanStyle(color = ZapMessageProfileHandleColor)) {
-                        append(" zapped")
-                    }
-                },
-                style = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp),
-                lineHeight = 20.sp,
-            )
-
-            Spacer(Modifier.weight(1f))
-
-            Row(
-                modifier = Modifier
-                    .background(
-                        color = ZapMessageProfileHandleColor,
-                        shape = AppTheme.shapes.extraLarge,
-                    )
-                    .padding(horizontal = 6.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                val numberFormatter = remember { NumberFormat.getInstance() }
-                val formattedAmount = remember(zap.amountInSats) {
-                    numberFormatter.format(zap.amountInSats.toLong())
-                }
-
-                IconText(
-                    modifier = Modifier
-                        .alignByBaseline()
-                        .padding(end = 2.dp, top = 1.dp),
-                    text = formattedAmount,
-                    fontWeight = FontWeight.Bold,
-                    style = AppTheme.typography.bodySmall.copy(
-                        fontSize = 16.sp,
-                        lineHeight = 16.sp,
-                    ),
-                    leadingIcon = PrimalIcons.NavWalletBoltFilled,
-                    iconSize = 16.sp,
-                    color = AppTheme.colorScheme.surface,
-                )
-            }
-        }
+        ZapMessageHeader(zap = zap)
 
         if (!zap.message.isNullOrBlank()) {
             val defaultTextColor = AppTheme.colorScheme.onSurface
@@ -963,14 +936,78 @@ private fun ZapMessageContent(zap: EventZapUiModel) {
                 text = contentText,
                 style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
                 onClick = { position, _ ->
-                    contentText.getStringAnnotations(
+                    val urlAnnotation = contentText.getStringAnnotations(
                         tag = URL_ANNOTATION_TAG,
                         start = position,
                         end = position,
-                    ).firstOrNull()?.let { annotation ->
-                        localUriHandler.openUriSafely(annotation.item)
+                    ).firstOrNull()
+
+                    if (urlAnnotation != null) {
+                        localUriHandler.openUriSafely(urlAnnotation.item)
+                    } else {
+                        onClick?.invoke()
                     }
                 },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ZapMessageHeader(zap: EventZapUiModel) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        BasicText(
+            modifier = Modifier.weight(1f),
+            text = buildAnnotatedString {
+                withStyle(style = SpanStyle(color = ZapMessageProfileHandleColor, fontWeight = FontWeight.Bold)) {
+                    append(zap.zapperName)
+                }
+                withStyle(style = SpanStyle(color = ZapMessageProfileHandleColor)) {
+                    append(" ${stringResource(id = R.string.live_stream_zapped)}")
+                }
+            },
+            style = AppTheme.typography.bodyLarge.copy(
+                fontSize = 16.sp,
+                lineHeight = 20.sp,
+            ),
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = 4.sp,
+                maxFontSize = 16.sp,
+            ),
+            maxLines = 1,
+        )
+
+        Row(
+            modifier = Modifier
+                .background(
+                    color = ZapMessageProfileHandleColor,
+                    shape = AppTheme.shapes.extraLarge,
+                )
+                .padding(horizontal = 6.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            val numberFormatter = remember { NumberFormat.getInstance() }
+            val formattedAmount = remember(zap.amountInSats) {
+                numberFormatter.format(zap.amountInSats.toLong())
+            }
+
+            IconText(
+                modifier = Modifier
+                    .alignByBaseline()
+                    .padding(end = 2.dp, top = 1.dp),
+                text = formattedAmount,
+                fontWeight = FontWeight.Bold,
+                style = AppTheme.typography.bodySmall.copy(
+                    fontSize = 16.sp,
+                    lineHeight = 16.sp,
+                ),
+                leadingIcon = PrimalIcons.NavWalletBoltFilled,
+                iconSize = 16.sp,
+                color = AppTheme.colorScheme.surface,
             )
         }
     }
