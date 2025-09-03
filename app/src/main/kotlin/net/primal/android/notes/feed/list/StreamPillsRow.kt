@@ -158,7 +158,7 @@ private fun StreamPill(
                     )
                     .basicMarquee(
                         iterations = Int.MAX_VALUE,
-                        velocity = 18.dp,
+                        velocity = 64.dp,
                     )
                     .weight(1f),
                 maxLines = 1,
