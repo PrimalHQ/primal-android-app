@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,8 +27,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -917,55 +918,7 @@ private fun ZapMessageContent(zap: EventZapUiModel, onClick: (() -> Unit)?) {
     val localUriHandler = LocalUriHandler.current
 
     Column(modifier = Modifier.padding(top = 1.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = ZapMessageProfileHandleColor, fontWeight = FontWeight.Bold)) {
-                        append(zap.zapperName)
-                    }
-                    withStyle(style = SpanStyle(color = ZapMessageProfileHandleColor)) {
-                        append(" ${stringResource(id = R.string.live_stream_zapped)}")
-                    }
-                },
-                style = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp),
-                lineHeight = 20.sp,
-            )
-
-            Spacer(Modifier.weight(1f))
-
-            Row(
-                modifier = Modifier
-                    .background(
-                        color = ZapMessageProfileHandleColor,
-                        shape = AppTheme.shapes.extraLarge,
-                    )
-                    .padding(horizontal = 6.dp, vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                val numberFormatter = remember { NumberFormat.getInstance() }
-                val formattedAmount = remember(zap.amountInSats) {
-                    numberFormatter.format(zap.amountInSats.toLong())
-                }
-
-                IconText(
-                    modifier = Modifier
-                        .alignByBaseline()
-                        .padding(end = 2.dp, top = 1.dp),
-                    text = formattedAmount,
-                    fontWeight = FontWeight.Bold,
-                    style = AppTheme.typography.bodySmall.copy(
-                        fontSize = 16.sp,
-                        lineHeight = 16.sp,
-                    ),
-                    leadingIcon = PrimalIcons.NavWalletBoltFilled,
-                    iconSize = 16.sp,
-                    color = AppTheme.colorScheme.surface,
-                )
-            }
-        }
+        ZapMessageHeader(zap = zap)
 
         if (!zap.message.isNullOrBlank()) {
             val defaultTextColor = AppTheme.colorScheme.onSurface
@@ -995,6 +948,66 @@ private fun ZapMessageContent(zap: EventZapUiModel, onClick: (() -> Unit)?) {
                         onClick?.invoke()
                     }
                 },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ZapMessageHeader(zap: EventZapUiModel) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        BasicText(
+            modifier = Modifier.weight(1f),
+            text = buildAnnotatedString {
+                withStyle(style = SpanStyle(color = ZapMessageProfileHandleColor, fontWeight = FontWeight.Bold)) {
+                    append(zap.zapperName)
+                }
+                withStyle(style = SpanStyle(color = ZapMessageProfileHandleColor)) {
+                    append(" ${stringResource(id = R.string.live_stream_zapped)}")
+                }
+            },
+            style = AppTheme.typography.bodyLarge.copy(
+                fontSize = 16.sp,
+                lineHeight = 20.sp,
+            ),
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = 4.sp,
+                maxFontSize = 16.sp,
+            ),
+            maxLines = 1,
+        )
+
+        Row(
+            modifier = Modifier
+                .background(
+                    color = ZapMessageProfileHandleColor,
+                    shape = AppTheme.shapes.extraLarge,
+                )
+                .padding(horizontal = 6.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            val numberFormatter = remember { NumberFormat.getInstance() }
+            val formattedAmount = remember(zap.amountInSats) {
+                numberFormatter.format(zap.amountInSats.toLong())
+            }
+
+            IconText(
+                modifier = Modifier
+                    .alignByBaseline()
+                    .padding(end = 2.dp, top = 1.dp),
+                text = formattedAmount,
+                fontWeight = FontWeight.Bold,
+                style = AppTheme.typography.bodySmall.copy(
+                    fontSize = 16.sp,
+                    lineHeight = 16.sp,
+                ),
+                leadingIcon = PrimalIcons.NavWalletBoltFilled,
+                iconSize = 16.sp,
+                color = AppTheme.colorScheme.surface,
             )
         }
     }
