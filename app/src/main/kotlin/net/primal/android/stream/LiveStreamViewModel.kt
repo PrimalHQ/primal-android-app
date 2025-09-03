@@ -185,7 +185,12 @@ class LiveStreamViewModel @AssistedInject constructor(
         }
 
     private fun updateChatItems() {
-        val combinedAndSorted = (zaps + chatMessages).sortedByDescending { it.timestamp }
+        val mutedProfiles = state.value.activeUserMutedProfiles
+
+        val filteredZaps = zaps.filterNot { it.zap.zapperId in mutedProfiles }
+        val filteredChatMessages = chatMessages.filterNot { it.message.authorProfile.pubkey in mutedProfiles }
+
+        val combinedAndSorted = (filteredZaps + filteredChatMessages).sortedByDescending { it.timestamp }
         setState { copy(chatItems = combinedAndSorted) }
 
         updateLiveProfilesStatus(combinedAndSorted)
@@ -514,6 +519,8 @@ class LiveStreamViewModel @AssistedInject constructor(
                         )
                     }
                 }
+
+            updateChatItems()
         }
 
     private fun observeActiveWallet() =
