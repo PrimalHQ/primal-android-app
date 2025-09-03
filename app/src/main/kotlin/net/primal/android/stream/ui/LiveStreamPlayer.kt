@@ -119,6 +119,7 @@ fun LiveStreamPlayer(
 
 @Composable
 @OptIn(UnstableApi::class)
+@Suppress("LongMethod")
 private fun PlayerBox(
     modifier: Modifier,
     playerModifier: Modifier,
@@ -149,7 +150,11 @@ private fun PlayerBox(
         Modifier.resolveBoxSizingModifier(localConfiguration.orientation)
     }
 
-    val playerBackgroundColor = if (state.isStreamUnavailable || state.playerState.isVideoFinished) {
+    val playerBackgroundColor = if (
+        state.isStreamUnavailable ||
+        state.playerState.isVideoFinished ||
+        localConfiguration.orientation == ORIENTATION_LANDSCAPE
+    ) {
         Color.Black
     } else {
         AppTheme.colorScheme.background
