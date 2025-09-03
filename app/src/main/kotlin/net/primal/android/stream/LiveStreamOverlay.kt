@@ -20,6 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -118,6 +119,12 @@ private fun LiveStreamOverlay(
             viewModel.setEvent(UiEvent.OnVideoUnavailable)
         },
     )
+
+    LifecycleStartEffect(exoPlayer) {
+        onStopOrDispose {
+            exoPlayer.pause()
+        }
+    }
 
     BackHandler(enabled = streamState.mode is StreamMode.Expanded) {
         if (uiState.value.playerState.isVideoFinished) {
