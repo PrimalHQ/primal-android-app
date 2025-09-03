@@ -12,8 +12,10 @@ interface PrimalApiClient {
     @Throws(NetworkException::class, kotlin.coroutines.cancellation.CancellationException::class)
     suspend fun query(message: PrimalCacheFilter): PrimalQueryResult
 
+    @Throws(NetworkException::class, kotlin.coroutines.cancellation.CancellationException::class)
     suspend fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage>
 
+    @Throws(NetworkException::class, kotlin.coroutines.cancellation.CancellationException::class)
     suspend fun subscribeBuffered(
         subscriptionId: String,
         message: PrimalCacheFilter,
