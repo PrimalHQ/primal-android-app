@@ -1,6 +1,9 @@
 package net.primal.android.notes.feed.list
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -70,7 +73,11 @@ fun StreamPillsRow(
         }
     }
 
-    if (streamPills.isNotEmpty()) {
+    AnimatedVisibility(
+        visible = streamPills.isNotEmpty(),
+        enter = slideInVertically(),
+        exit = slideOutVertically(targetOffsetY = { -it }),
+    ) {
         LazyRow(
             modifier = modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(itemSpacedBy),
