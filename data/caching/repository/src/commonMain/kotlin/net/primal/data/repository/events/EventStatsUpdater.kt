@@ -72,6 +72,7 @@ internal class EventStatsUpdater(
                     zapSenderPrimalLegendProfile = zapSender?.primalPremiumInfo?.legendProfile,
                     amountInBtc = amountInSats.toBtc(),
                     message = zapComment,
+                    invoice = null,
                 ),
             )
         }

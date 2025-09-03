@@ -96,6 +96,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalLegendLeaderboard(value = 10_000_170),
     PrimalPremiumLeaderboard(value = 10_000_171),
     PrimalRecommendedBlossomServer(value = 10_000_175),
+    PrimalInvoicesToZapRequests(value = 10_000_177),
     PrimalWalletOperation(value = 10_000_300),
     PrimalWalletBalance(value = 10_000_301),
     PrimalWalletDepositInvoice(value = 10_000_302),

@@ -33,6 +33,9 @@ interface EventZapDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAll(data: List<EventZap>)
 
+    @Query("SELECT * FROM EventZap WHERE invoice IN (:invoices)")
+    suspend fun findAllByInvoices(invoices: List<String>): List<EventZap>
+
     @Transaction
     @Query(
         """

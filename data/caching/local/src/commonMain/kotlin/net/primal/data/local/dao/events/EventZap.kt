@@ -19,6 +19,8 @@ data class EventZap(
     val zapReceiptAt: Long,
     val amountInBtc: Double,
     val message: String?,
+    val invoice: String?,
+    val rawNostrEvent: String? = null,
     val zapSenderDisplayName: String? = null,
     val zapSenderHandle: String? = null,
     val zapSenderInternetIdentifier: String? = null,

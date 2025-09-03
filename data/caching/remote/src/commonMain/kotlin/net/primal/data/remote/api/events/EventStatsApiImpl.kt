@@ -11,6 +11,8 @@ import net.primal.data.remote.api.events.model.EventActionsRequestBody
 import net.primal.data.remote.api.events.model.EventActionsResponse
 import net.primal.data.remote.api.events.model.EventZapsRequestBody
 import net.primal.data.remote.api.events.model.EventZapsResponse
+import net.primal.data.remote.api.events.model.InvoicesToZapReceiptsRequest
+import net.primal.data.remote.api.events.model.InvoicesToZapReceiptsResponse
 import net.primal.data.remote.api.events.model.ReplaceableEventRequest
 import net.primal.data.remote.api.events.model.ReplaceableEventResponse
 import net.primal.data.remote.api.events.model.ReplaceableEventsRequest
@@ -102,4 +104,18 @@ internal class EventStatsApiImpl(
             primalLegendProfiles = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalLegendProfiles),
             primalPremiumInfo = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalPremiumInfo),
         )
+
+    override suspend fun getZapReceipts(invoices: List<String>) =
+        runCatching {
+            val queryResult = primalApiClient.query(
+                message = PrimalCacheFilter(
+                    primalVerb = PrimalVerb.INVOICES_TO_ZAP_RECEIPTS.id,
+                    optionsJson = InvoicesToZapReceiptsRequest(invoices = invoices).encodeToJsonString(),
+                ),
+            )
+
+            InvoicesToZapReceiptsResponse(
+                mapEvent = queryResult.findPrimalEvent(kind = NostrEventKind.PrimalInvoicesToZapRequests),
+            )
+        }
 }

@@ -77,4 +77,5 @@ enum class PrimalVerb(val id: String) {
     REPLACEABLE_EVENT("replaceable_event"),
     PARAMETRIZED_REPLACEABLE_EVENT("parametrized_replaceable_event"),
     PARAMETRIZED_REPLACEABLE_EVENTS("parametrized_replaceable_events"),
+    INVOICES_TO_ZAP_RECEIPTS("invoices_to_zap_receipts"),
 }

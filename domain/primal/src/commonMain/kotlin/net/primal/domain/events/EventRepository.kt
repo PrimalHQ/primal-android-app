@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import net.primal.core.utils.Result
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.NostrEvent
 
 interface EventRepository {
     fun pagedEventZaps(
@@ -30,4 +31,6 @@ interface EventRepository {
     suspend fun fetchReplaceableEvent(naddr: Naddr): Result<Unit>
 
     suspend fun fetchReplaceableEvents(naddrs: List<Naddr>): Result<Unit>
+
+    suspend fun getZapReceipts(invoices: List<String>): Result<Map<String, NostrEvent>>
 }
