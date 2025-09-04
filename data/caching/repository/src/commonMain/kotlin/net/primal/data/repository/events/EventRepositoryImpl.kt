@@ -7,6 +7,7 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -130,6 +131,13 @@ class EventRepositoryImpl(
         }.flow.map { it.map { it.asEventZapDO() } }
             .flowOn(dispatcherProvider.io())
     }
+
+    override suspend fun observeZapsByEventId(eventId: String): Flow<List<EventZapDO>> =
+        withContext(dispatcherProvider.io()) {
+            database.eventZaps().observeAllByEventId(eventId = eventId)
+                .distinctUntilChanged()
+                .map { list -> list.map { it.asEventZapDO() } }
+        }
 
     override suspend fun fetchReplaceableEvent(naddr: Naddr): Result<Unit> =
         withContext(dispatcherProvider.io()) {

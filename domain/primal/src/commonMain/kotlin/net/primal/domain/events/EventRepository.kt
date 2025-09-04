@@ -15,6 +15,8 @@ interface EventRepository {
         articleATag: String?,
     ): Flow<PagingData<EventZap>>
 
+    suspend fun observeZapsByEventId(eventId: String): Flow<List<EventZap>>
+
     fun observeEventStats(eventIds: List<String>): Flow<List<NostrEventStats>>
     fun observeUserEventStatus(eventIds: List<String>, userId: String): Flow<List<NostrEventUserStats>>
 

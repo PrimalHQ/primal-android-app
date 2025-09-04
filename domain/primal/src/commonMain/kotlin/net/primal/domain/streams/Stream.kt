@@ -1,6 +1,5 @@
 package net.primal.domain.streams
 
-import net.primal.domain.events.EventZap
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.NostrEventKind
@@ -24,7 +23,6 @@ data class Stream(
     val endsAt: Long?,
     val currentParticipants: Int?,
     val totalParticipants: Int?,
-    val eventZaps: List<EventZap> = emptyList(),
     val rawNostrEventJson: String,
     val createdAt: Long,
     internal val status: StreamStatus,
