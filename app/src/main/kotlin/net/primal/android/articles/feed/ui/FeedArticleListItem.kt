@@ -239,9 +239,10 @@ private fun ListItemContent(data: FeedArticleUi, modifier: Modifier = Modifier) 
                 .weight(1f),
             text = data.title,
             style = AppTheme.typography.titleLarge.copy(
-                fontSize = 22.sp,
-                fontWeight = FontWeight.ExtraBold,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
                 color = AppTheme.colorScheme.onPrimary,
+                lineHeight = 22.sp,
             ),
             maxLines = 5,
             overflow = TextOverflow.Ellipsis,

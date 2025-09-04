@@ -67,9 +67,9 @@ fun ArticleDetailsHeader(
         Text(
             text = title,
             style = AppTheme.typography.titleLarge.copy(
-                fontSize = 32.sp,
-                lineHeight = 38.sp,
-                fontWeight = FontWeight.ExtraBold,
+                fontSize = 26.sp,
+                lineHeight = 32.sp,
+                fontWeight = FontWeight.Bold,
                 color = AppTheme.colorScheme.onSurface,
             ),
         )
