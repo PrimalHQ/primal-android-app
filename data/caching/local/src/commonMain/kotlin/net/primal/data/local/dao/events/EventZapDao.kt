@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface EventZapDao {
@@ -35,6 +36,10 @@ interface EventZapDao {
 
     @Query("SELECT * FROM EventZap WHERE invoice IN (:invoices)")
     suspend fun findAllByInvoices(invoices: List<String>): List<EventZap>
+
+    @Transaction
+    @Query("SELECT * FROM EventZap WHERE eventId = :eventId")
+    fun observeAllByEventId(eventId: String): Flow<List<EventZap>>
 
     @Transaction
     @Query(

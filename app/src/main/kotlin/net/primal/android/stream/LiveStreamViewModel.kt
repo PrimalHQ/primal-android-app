@@ -47,6 +47,7 @@ import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.events.EventRelayHintsRepository
+import net.primal.domain.events.EventRepository
 import net.primal.domain.links.EventUriNostrType
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.mutes.MutedItemRepository
@@ -84,6 +85,7 @@ class LiveStreamViewModel @AssistedInject constructor(
     private val walletAccountRepository: WalletAccountRepository,
     private val mutedItemRepository: MutedItemRepository,
     private val eventInteractionRepository: EventInteractionRepository,
+    private val eventRepository: EventRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
 ) : ViewModel() {
 
@@ -165,11 +167,15 @@ class LiveStreamViewModel @AssistedInject constructor(
 
     private fun observeZaps() =
         viewModelScope.launch {
-            streamRepository.observeStream(aTag = streamNaddr.asATagValue())
-                .filterNotNull()
-                .map { it.eventZaps.map { zap -> StreamChatItem.ZapMessageItem(zap.asEventZapUiModel()) } }
-                .collect {
-                    zaps = it
+            eventRepository.observeZapsByEventId(eventId = streamNaddr.asATagValue())
+                .collect { streamZaps ->
+                    setState {
+                        copy(
+                            zaps = streamZaps.map { it.asEventZapUiModel() }
+                                .sortedWith(EventZapUiModel.DefaultComparator),
+                        )
+                    }
+                    zaps = streamZaps.map { StreamChatItem.ZapMessageItem(it.asEventZapUiModel()) }
                     updateChatItems()
                 }
         }
@@ -303,9 +309,11 @@ class LiveStreamViewModel @AssistedInject constructor(
                             else -> Unit
                         }
                     }
+
                     UiEvent.OnVideoUnavailable -> {
                         setState { copy(isStreamUnavailable = true) }
                     }
+
                     UiEvent.OnVideoEnded -> {
                         setState { copy(playerState = playerState.copy(isVideoFinished = true, isPlaying = false)) }
                     }
@@ -444,9 +452,6 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 rawNostrEventJson = stream.rawNostrEventJson,
                                 mainHostId = stream.mainHostId,
                             ),
-                            zaps = stream.eventZaps
-                                .map { it.asEventZapUiModel() }
-                                .sortedWith(EventZapUiModel.DefaultComparator),
                         )
                     }
                 }

@@ -78,7 +78,6 @@ fun NotificationPO.asNotificationDO(): NotificationDO {
                 status = stream.status,
                 currentParticipants = stream.currentParticipants,
                 totalParticipants = stream.totalParticipants,
-                eventZaps = emptyList(),
                 rawNostrEventJson = stream.raw,
                 createdAt = stream.createdAt,
             )
