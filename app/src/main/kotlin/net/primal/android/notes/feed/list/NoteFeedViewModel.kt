@@ -116,6 +116,7 @@ class NoteFeedViewModel @AssistedInject constructor(
                             streamsSyncStats = StreamsSyncStats(
                                 streamsCount = streams.size,
                                 streamAvatarCdnImages = streams.mapNotNull { it.mainHostProfile?.avatarCdnImage }
+                                    .distinct()
                                     .take(MAX_AVATARS),
                             ),
                         )
