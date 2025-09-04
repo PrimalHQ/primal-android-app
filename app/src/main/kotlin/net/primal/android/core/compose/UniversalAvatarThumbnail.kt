@@ -245,22 +245,20 @@ fun Modifier.adjustAvatarBackground(
 @Suppress("MagicNumber")
 private fun Dp.resolveOuterBorderSizeFromAvatarSize(): Dp =
     when {
-        this >= 121.dp -> (5.0).dp
-        this in (112.dp..120.dp) -> (4.5).dp
-        this in (60.dp..112.dp) -> (3.0).dp
-        this in (52.dp..60.dp) -> (2.5).dp
-        this in (40.dp..52.dp) -> (2.0).dp
-        this in (0.dp..40.dp) -> (1.5).dp
+        this >= 121.dp -> (3.5).dp
+        this in (112.dp..120.dp) -> (2.5).dp
+        this in (64.dp..112.dp) -> (1.5).dp
+        this in (32.dp..64.dp) -> (1.0).dp
+        this in (24.dp..32.dp) -> (0.5).dp
         else -> 0.dp
     }
 
 @Suppress("MagicNumber")
 private fun Dp.resolveInnerBorderSizeFromAvatarSize(): Dp =
     when {
-        this >= 120.dp -> (2.0).dp
-        this in (112.dp..120.dp) -> (1.5).dp
-        this in (40.dp..112.dp) -> (1.0).dp
-        this in (32.dp..40.dp) -> (0.5).dp
+        this >= 121.dp -> (1.5).dp
+        this in (64.dp..120.dp) -> (1.0).dp
+        this in (24.dp..64.dp) -> (0.5).dp
         else -> 0.dp
     }
 
