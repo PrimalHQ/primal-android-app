@@ -75,6 +75,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.PrimalDefaults
@@ -548,6 +549,7 @@ private fun StreamInfoDisplay(
         if (!isKeyboardVisible) {
             StreamTopZapsSection(
                 modifier = Modifier.fillMaxWidth(),
+                chatLoading = state.chatLoading,
                 topZaps = state.zaps,
                 onZapClick = onZapClick,
                 onTopZapsClick = onTopZapsClick,
@@ -568,8 +570,8 @@ private fun LiveChatListOrSearch(
     onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
     if (!state.userTaggingState.isUserTaggingActive) {
-        if (state.loading) {
-            PrimalLoadingSpinner()
+        if (state.chatLoading) {
+            HeightAdjustableLoadingLazyListPlaceholder(height = 140.dp)
         } else if (state.chatItems.isEmpty()) {
             LiveChatEmpty(
                 modifier = modifier,
@@ -663,21 +665,23 @@ private fun LiveChatContent(
             onZapMessageClick = onZapMessageClick,
         )
 
-        LiveChatCommentInput(
-            state = state,
-            onCommentChanged = {
-                eventPublisher(LiveStreamContract.UiEvent.OnCommentValueChanged(it))
-            },
-            onSendMessage = {
-                eventPublisher(LiveStreamContract.UiEvent.SendMessage(it))
-            },
-            onUserTaggingModeChanged = { enabled ->
-                eventPublisher(LiveStreamContract.UiEvent.ToggleSearchUsers(enabled = enabled))
-            },
-            onUserTagSearch = { query ->
-                eventPublisher(LiveStreamContract.UiEvent.SearchUsers(query = query))
-            },
-        )
+        if (!state.chatLoading) {
+            LiveChatCommentInput(
+                state = state,
+                onCommentChanged = {
+                    eventPublisher(LiveStreamContract.UiEvent.OnCommentValueChanged(it))
+                },
+                onSendMessage = {
+                    eventPublisher(LiveStreamContract.UiEvent.SendMessage(it))
+                },
+                onUserTaggingModeChanged = { enabled ->
+                    eventPublisher(LiveStreamContract.UiEvent.ToggleSearchUsers(enabled = enabled))
+                },
+                onUserTagSearch = { query ->
+                    eventPublisher(LiveStreamContract.UiEvent.SearchUsers(query = query))
+                },
+            )
+        }
     }
 }
 
