@@ -2,6 +2,8 @@ package net.primal.android.drawer
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +32,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -302,21 +305,31 @@ private fun DrawerMenu(
             items = state.menuItems,
             key = { it.toString() },
         ) { item ->
+            val interactionSource = remember { MutableInteractionSource() }
+            val isPressed by interactionSource.collectIsPressedAsState()
             ListItem(
                 colors = ListItemDefaults.colors(
                     containerColor = AppTheme.colorScheme.surface,
                     leadingIconColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                     headlineColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 ),
-                modifier = Modifier.clickable {
-                    onDrawerDestinationClick(item)
-                },
+                modifier = Modifier.clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = {
+                        onDrawerDestinationClick(item)
+                    },
+                ),
                 leadingContent = {
                     Icon(
                         modifier = Modifier.padding(start = 8.dp),
                         imageVector = item.icon(),
                         contentDescription = item.label(),
-                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        tint = if (isPressed) {
+                            AppTheme.colorScheme.onSurface
+                        } else {
+                            AppTheme.extraColorScheme.onSurfaceVariantAlt2
+                        },
                     )
                 },
                 headlineContent = {
@@ -337,11 +350,16 @@ private fun DrawerMenu(
                         },
                     ) {
                         Text(
-                            text = item.label().uppercase(),
+                            text = item.label(),
                             modifier = Modifier
                                 .wrapContentWidth()
                                 .padding(top = (3.5).dp),
                             style = AppTheme.typography.titleLarge,
+                            color = if (isPressed) {
+                                AppTheme.colorScheme.onSurface
+                            } else {
+                                AppTheme.extraColorScheme.onSurfaceVariantAlt2
+                            },
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Normal,
                             lineHeight = 20.sp,

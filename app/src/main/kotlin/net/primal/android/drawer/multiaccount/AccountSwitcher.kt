@@ -22,7 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AddAccount
-import net.primal.android.core.compose.icons.primaliconpack.DetailsRounded
+import net.primal.android.core.compose.icons.primaliconpack.MenuAccount
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.drawer.multiaccount.ui.AccountSwitcherBottomSheet
 import net.primal.android.theme.AppTheme
@@ -67,7 +67,7 @@ private fun AccountSwitcher(
     val bottomSheetIcon = if (state.userAccounts.isEmpty()) {
         PrimalIcons.AddAccount
     } else {
-        PrimalIcons.DetailsRounded
+        PrimalIcons.MenuAccount
     }
 
     if (accountsBottomSheetVisibility && state.activeAccount != null) {

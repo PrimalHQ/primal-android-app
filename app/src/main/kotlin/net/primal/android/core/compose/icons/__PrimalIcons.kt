@@ -33,7 +33,6 @@ import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.icons.primaliconpack.CopyAlt
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
 import net.primal.android.core.compose.icons.primaliconpack.Delete
-import net.primal.android.core.compose.icons.primaliconpack.DetailsRounded
 import net.primal.android.core.compose.icons.primaliconpack.Directory
 import net.primal.android.core.compose.icons.primaliconpack.Discuss
 import net.primal.android.core.compose.icons.primaliconpack.Document
@@ -90,6 +89,7 @@ import net.primal.android.core.compose.icons.primaliconpack.LongRead
 import net.primal.android.core.compose.icons.primaliconpack.LongReadFilled
 import net.primal.android.core.compose.icons.primaliconpack.MediaGalleryFilled
 import net.primal.android.core.compose.icons.primaliconpack.MediaVideoFilled
+import net.primal.android.core.compose.icons.primaliconpack.MenuAccount
 import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.icons.primaliconpack.Messages
 import net.primal.android.core.compose.icons.primaliconpack.MessagesFilled
@@ -189,7 +189,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             FeedZapsFilled,
             FeedLikes,
             Settings,
-            DetailsRounded,
+            MenuAccount,
             Download,
             FeedRepliesFilled,
             FeedReplies,
