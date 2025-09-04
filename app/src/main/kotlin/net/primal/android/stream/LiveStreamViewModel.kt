@@ -118,8 +118,8 @@ class LiveStreamViewModel @AssistedInject constructor(
     private var authorObserversJob: Job? = null
     private var streamSubscriptionJob: Job? = null
 
-    private var zaps: List<StreamChatItem.ZapMessageItem> = emptyList()
-    private var chatMessages: List<StreamChatItem.ChatMessageItem> = emptyList()
+    private var zaps: List<StreamChatItem.ZapMessageItem>? = null
+    private var chatMessages: List<StreamChatItem.ChatMessageItem>? = null
 
     init {
         startLiveStreamSubscription()
@@ -136,9 +136,9 @@ class LiveStreamViewModel @AssistedInject constructor(
     }
 
     private fun startLiveStreamSubscription() {
-        streamSubscriptionJob?.cancel()
-        streamSubscriptionJob = viewModelScope.launch {
-            streamRepository.startLiveStreamSubscription(
+        viewModelScope.launch {
+            streamSubscriptionJob?.cancel()
+            streamSubscriptionJob = streamRepository.startLiveStreamSubscription(
                 naddr = streamNaddr,
                 userId = activeAccountStore.activeUserId(),
                 streamContentModerationMode = _state.value.contentModerationMode,
@@ -149,8 +149,9 @@ class LiveStreamViewModel @AssistedInject constructor(
     private fun changeContentModeration(moderationMode: StreamContentModerationMode) =
         viewModelScope.launch {
             if (moderationMode != _state.value.contentModerationMode) {
-                setState { copy(loading = true, contentModerationMode = moderationMode) }
                 val aTagValue = streamNaddr.asATagValue()
+
+                setState { copy(chatLoading = true, contentModerationMode = moderationMode) }
                 liveStreamChatRepository.clearMessages(streamATag = aTagValue)
                 eventInteractionRepository.deleteZaps(eventId = aTagValue)
                 startLiveStreamSubscription()
@@ -193,11 +194,13 @@ class LiveStreamViewModel @AssistedInject constructor(
     private fun updateChatItems() {
         val mutedProfiles = state.value.activeUserMutedProfiles
 
-        val filteredZaps = zaps.filterNot { it.zap.zapperId in mutedProfiles }
-        val filteredChatMessages = chatMessages.filterNot { it.message.authorProfile.pubkey in mutedProfiles }
+        val filteredZaps = zaps?.filterNot { it.zap.zapperId in mutedProfiles } ?: return
+        val filteredChatMessages = chatMessages
+            ?.filterNot { it.message.authorProfile.pubkey in mutedProfiles }
+            ?: return
 
         val combinedAndSorted = (filteredZaps + filteredChatMessages).sortedByDescending { it.timestamp }
-        setState { copy(chatItems = combinedAndSorted) }
+        setState { copy(chatLoading = streamSubscriptionJob?.isActive != true, chatItems = combinedAndSorted) }
 
         updateLiveProfilesStatus(combinedAndSorted)
     }
@@ -517,13 +520,7 @@ class LiveStreamViewModel @AssistedInject constructor(
     private fun observeMuteState() =
         viewModelScope.launch {
             mutedItemRepository.observeMutedUsersByOwnerId(ownerId = activeAccountStore.activeUserId())
-                .collect { muted ->
-                    setState {
-                        copy(
-                            activeUserMutedProfiles = muted.map { it.profileId }.toSet(),
-                        )
-                    }
-                }
+                .collect { muted -> setState { copy(activeUserMutedProfiles = muted.map { it.profileId }.toSet()) } }
 
             updateChatItems()
         }

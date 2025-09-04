@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.PulsingListItemPlaceholder
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
@@ -35,86 +37,131 @@ private const val OTHER_ZAPS_COUNT = 3
 @Composable
 fun StreamTopZapsSection(
     modifier: Modifier = Modifier,
+    chatLoading: Boolean,
     topZaps: List<EventZapUiModel>,
     onZapClick: () -> Unit,
     onTopZapsClick: () -> Unit,
 ) {
-    if (topZaps.isEmpty()) {
-        Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(ZAPS_SECTION_HEIGHT),
-            contentAlignment = Alignment.Center,
+    when {
+        chatLoading -> LoadingTopZapsSection(modifier)
+
+        topZaps.isEmpty() -> EmptyTopZapsSection(modifier, onZapClick)
+
+        else -> TopZapsSection(modifier, topZaps, onTopZapsClick, onZapClick)
+    }
+}
+
+@Composable
+private fun LoadingTopZapsSection(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(ZAPS_SECTION_HEIGHT),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        PulsingListItemPlaceholder(height = 26.dp, shape = CircleShape, widthFraction = 0.6f)
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier
-                    .height(30.dp)
-                    .background(
-                        color = AppTheme.colorScheme.onSurface,
-                        shape = AppTheme.shapes.extraLarge,
-                    )
-                    .clickable { onZapClick() }
-                    .padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                IconText(
-                    text = stringResource(id = R.string.stream_be_the_first_to_zap),
-                    fontWeight = FontWeight.Bold,
-                    style = AppTheme.typography.bodySmall.copy(
-                        fontSize = 14.sp,
-                        lineHeight = 18.sp,
-                    ),
-                    color = AppTheme.colorScheme.surface,
-                    leadingIcon = PrimalIcons.NavWalletBoltFilled,
-                    iconSize = 16.sp,
+            repeat(times = 4) {
+                PulsingListItemPlaceholder(
+                    modifier = Modifier.weight(1f),
+                    height = 26.dp,
+                    shape = CircleShape,
                 )
             }
         }
-    } else {
-        Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(ZAPS_SECTION_HEIGHT),
+    }
+}
+
+@Composable
+private fun TopZapsSection(
+    modifier: Modifier,
+    topZaps: List<EventZapUiModel>,
+    onTopZapsClick: () -> Unit,
+    onZapClick: () -> Unit,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(ZAPS_SECTION_HEIGHT),
+    ) {
+        val topZap = topZaps.first()
+        val otherZaps = topZaps.drop(n = 1)
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            val topZap = topZaps.first()
-            val otherZaps = topZaps.drop(n = 1)
+            StreamTopNoteZapRow(
+                noteZap = topZap,
+                onClick = onTopZapsClick,
+            )
 
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                ArticleTopNoteZapRow(
-                    noteZap = topZap,
-                    onClick = onTopZapsClick,
-                )
-
-                if (otherZaps.isNotEmpty()) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        otherZaps.take(OTHER_ZAPS_COUNT).forEach {
-                            key(it.id) {
-                                ArticleNoteZapListItem(
-                                    noteZap = it,
-                                    onClick = onTopZapsClick,
-                                )
-                            }
+            if (otherZaps.isNotEmpty()) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    otherZaps.take(OTHER_ZAPS_COUNT).forEach {
+                        key(it.id) {
+                            StreamNoteZapListItem(
+                                noteZap = it,
+                                onClick = onTopZapsClick,
+                            )
                         }
                     }
                 }
             }
+        }
 
-            ZapButton(
-                modifier = Modifier.align(Alignment.BottomEnd),
-                onClick = onZapClick,
+        ZapButton(
+            modifier = Modifier.align(Alignment.BottomEnd),
+            onClick = onZapClick,
+        )
+    }
+}
+
+@Composable
+private fun EmptyTopZapsSection(modifier: Modifier, onZapClick: () -> Unit) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(ZAPS_SECTION_HEIGHT),
+        contentAlignment = Alignment.Center,
+    ) {
+        Row(
+            modifier = Modifier
+                .height(30.dp)
+                .background(
+                    color = AppTheme.colorScheme.onSurface,
+                    shape = AppTheme.shapes.extraLarge,
+                )
+                .clickable { onZapClick() }
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            IconText(
+                text = stringResource(id = R.string.stream_be_the_first_to_zap),
+                fontWeight = FontWeight.Bold,
+                style = AppTheme.typography.bodySmall.copy(
+                    fontSize = 14.sp,
+                    lineHeight = 18.sp,
+                ),
+                color = AppTheme.colorScheme.surface,
+                leadingIcon = PrimalIcons.NavWalletBoltFilled,
+                iconSize = 16.sp,
             )
         }
     }
 }
 
 @Composable
-private fun ArticleTopNoteZapRow(noteZap: EventZapUiModel, onClick: () -> Unit) {
+private fun StreamTopNoteZapRow(noteZap: EventZapUiModel, onClick: () -> Unit) {
     val numberFormat = NumberFormat.getNumberInstance()
     Row(
         modifier = Modifier
@@ -163,7 +210,7 @@ private fun ArticleTopNoteZapRow(noteZap: EventZapUiModel, onClick: () -> Unit) 
 }
 
 @Composable
-private fun ArticleNoteZapListItem(noteZap: EventZapUiModel, onClick: () -> Unit) {
+private fun StreamNoteZapListItem(noteZap: EventZapUiModel, onClick: () -> Unit) {
     val numberFormat = NumberFormat.getNumberInstance()
     Row(
         modifier = Modifier
