@@ -33,11 +33,6 @@ fun HeightAdjustableLoadingLazyListPlaceholder(
     height: Dp = 100.dp,
     firstItemHeight: Dp = height,
 ) {
-    val animationRawResId = when (LocalPrimalTheme.current.isDarkTheme) {
-        true -> R.raw.primal_loader_generic_square_dark
-        false -> R.raw.primal_loader_generic_square_light
-    }
-
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -48,20 +43,11 @@ fun HeightAdjustableLoadingLazyListPlaceholder(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         repeat(times = repeat) { index ->
-            Box(
-                modifier = Modifier
-                    .clipToBounds()
-                    .clip(clipShape)
-                    .fillMaxWidth()
-                    .height(if (index == 0) firstItemHeight else height),
-            ) {
-                InfiniteLottieAnimation(
-                    modifier = Modifier
-                        .scale(scale = 10f)
-                        .padding(itemPadding),
-                    resId = animationRawResId,
-                )
-            }
+            PulsingListItemPlaceholder(
+                height = if (index == 0) firstItemHeight else height,
+                shape = clipShape,
+                padding = itemPadding,
+            )
         }
     }
 }
