@@ -58,6 +58,7 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.stream.player.hideStreamMiniPlayer
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.activation.WalletActivationContract
@@ -75,6 +76,7 @@ fun OnboardingWalletActivation(
     viewModel: WalletActivationViewModel,
     callbacks: WalletActivationContract.ScreenCallbacks,
 ) {
+    hideStreamMiniPlayer()
     val uiState = viewModel.uiState.collectAsState()
     OnboardingWalletActivation(
         state = uiState.value,

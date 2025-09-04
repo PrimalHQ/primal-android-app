@@ -74,6 +74,7 @@ import net.primal.android.signer.launchSignEvent
 import net.primal.android.signer.rememberAmberPubkeyLauncher
 import net.primal.android.signer.rememberAmberSignerLauncher
 import net.primal.android.signer.utils.isCompatibleAmberVersionInstalled
+import net.primal.android.stream.player.hideStreamMiniPlayer
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.LoginType
@@ -92,6 +93,7 @@ fun LoginScreen(viewModel: LoginViewModel, callbacks: LoginContract.ScreenCallba
 
     LaunchedErrorHandler(viewModel = viewModel)
 
+    hideStreamMiniPlayer()
     val uiState = viewModel.state.collectAsState()
     LoginScreen(
         state = uiState.value,

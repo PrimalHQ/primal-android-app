@@ -21,6 +21,7 @@ import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.OnboardingViewModel
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.stream.player.hideStreamMiniPlayer
 import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
@@ -36,6 +37,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, callbacks: OnboardingContra
 
     BackHandler { handleBackEvent() }
 
+    hideStreamMiniPlayer()
     OnboardingScreen(
         state = uiState.value,
         eventPublisher = { viewModel.setEvent(it) },
