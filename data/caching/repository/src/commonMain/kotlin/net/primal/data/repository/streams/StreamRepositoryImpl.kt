@@ -66,7 +66,7 @@ class StreamRepositoryImpl(
             } ?: Result.failure(IllegalArgumentException("stream with given aTag could not be found."))
         }
 
-    override suspend fun startLiveStreamSubscription(
+    override suspend fun awaitLiveStreamSubscriptionStart(
         naddr: Naddr,
         userId: String,
         streamContentModerationMode: StreamContentModerationMode,

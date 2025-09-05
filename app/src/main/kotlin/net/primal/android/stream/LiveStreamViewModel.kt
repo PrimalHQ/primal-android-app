@@ -138,7 +138,7 @@ class LiveStreamViewModel @AssistedInject constructor(
     private fun startLiveStreamSubscription() {
         viewModelScope.launch {
             streamSubscriptionJob?.cancel()
-            streamSubscriptionJob = streamRepository.startLiveStreamSubscription(
+            streamSubscriptionJob = streamRepository.awaitLiveStreamSubscriptionStart(
                 naddr = streamNaddr,
                 userId = activeAccountStore.activeUserId(),
                 streamContentModerationMode = _state.value.contentModerationMode,

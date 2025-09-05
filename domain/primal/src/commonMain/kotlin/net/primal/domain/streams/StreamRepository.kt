@@ -27,7 +27,7 @@ interface StreamRepository {
      * @param streamContentModerationMode Moderation level to apply to the stream.
      * @return A [Job] that owns the continuous collection of live events.
      */
-    suspend fun startLiveStreamSubscription(
+    suspend fun awaitLiveStreamSubscriptionStart(
         naddr: Naddr,
         userId: String,
         streamContentModerationMode: StreamContentModerationMode,
