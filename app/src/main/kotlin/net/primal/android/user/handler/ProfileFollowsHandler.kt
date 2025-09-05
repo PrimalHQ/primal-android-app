@@ -7,8 +7,8 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
-import net.primal.android.core.utils.batchOnInactivity
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.coroutines.DispatcherProvider
 
 class ProfileFollowsHandler @Inject constructor(
