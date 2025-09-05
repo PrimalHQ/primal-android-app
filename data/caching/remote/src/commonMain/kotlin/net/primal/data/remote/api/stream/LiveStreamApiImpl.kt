@@ -1,6 +1,7 @@
 package net.primal.data.remote.api.stream
 
 import io.github.aakira.napier.Napier
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
@@ -32,7 +33,7 @@ class LiveStreamApiImpl(
     ): Flow<LiveFeedResponse> {
         val subscriptionId = Uuid.random().toPrimalSubscriptionId()
         return primalApiClient
-            .subscribeBuffered(
+            .subscribeBufferedOnInactivity(
                 subscriptionId = subscriptionId,
                 message = PrimalCacheFilter(
                     primalVerb = PrimalVerb.LIVE_FEED.id,
@@ -44,6 +45,7 @@ class LiveStreamApiImpl(
                         contentModerationMode = contentModerationMode,
                     ).encodeToJsonString(),
                 ),
+                inactivityTimeout = 500.milliseconds,
             )
             .catch { Napier.w(throwable = it) { "Couldn't subscribe to live feed." } }
             .map {
