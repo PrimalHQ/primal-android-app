@@ -417,7 +417,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     val streamUrlToPlay = if (isLive) stream.streamingUrl else stream.recordingUrl
 
                     if (streamUrlToPlay == null) {
-                        setState { copy(loading = false, isStreamUnavailable = true) }
+                        setState { copy(streamInfoLoading = false, isStreamUnavailable = true) }
                         return@collect
                     }
 
@@ -427,7 +427,7 @@ class LiveStreamViewModel @AssistedInject constructor(
 
                     setState {
                         copy(
-                            loading = false,
+                            streamInfoLoading = false,
                             isStreamUnavailable = false,
                             playerState = playerState.copy(
                                 isLive = isLive,
