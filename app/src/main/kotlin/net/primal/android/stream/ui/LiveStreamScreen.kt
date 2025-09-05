@@ -463,7 +463,7 @@ private fun LiveStreamContent(
     onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
     val localConfiguration = LocalConfiguration.current
-    if (state.loading) {
+    if (state.streamInfoLoading) {
         PrimalLoadingSpinner()
     }
 

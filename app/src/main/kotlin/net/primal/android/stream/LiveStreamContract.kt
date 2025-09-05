@@ -21,7 +21,8 @@ import net.primal.domain.zaps.ZappingState
 interface LiveStreamContract {
     data class UiState(
         val naddr: Naddr? = null,
-        val loading: Boolean = true,
+        val streamInfoLoading: Boolean = true,
+        val chatLoading: Boolean = true,
         val activeUserId: String? = null,
         val streamInfo: StreamInfoUi? = null,
         val playerState: PlayerState = PlayerState(),
@@ -35,7 +36,6 @@ interface LiveStreamContract {
         val taggedUsers: List<NoteTaggedUser> = emptyList(),
         val userTaggingState: UserTaggingState = UserTaggingState(),
         val error: UiError? = null,
-        val chatLoading: Boolean = true,
         val mainHostStreamsMuted: Boolean = false,
         val activeUserFollowedProfiles: Set<String> = emptySet(),
         val activeUserMutedProfiles: Set<String> = emptySet(),
@@ -108,6 +108,7 @@ interface LiveStreamContract {
             val messageId: String,
             val authorId: String,
         ) : UiEvent()
+
         data object OnVideoUnavailable : UiEvent()
         data object OnVideoEnded : UiEvent()
         data class ChangeActiveBottomSheet(val sheet: ActiveBottomSheet) : UiEvent()
