@@ -1,8 +1,12 @@
 package net.primal.data.repository.streams
 
+import io.github.aakira.napier.Napier
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -66,18 +70,30 @@ class StreamRepositoryImpl(
         naddr: Naddr,
         userId: String,
         streamContentModerationMode: StreamContentModerationMode,
-    ) = withContext(dispatcherProvider.io()) {
-        liveStreamApi.subscribeToLiveEvent(
-            streamingNaddr = naddr,
-            userId = userId,
-            contentModerationMode = when (streamContentModerationMode) {
-                StreamContentModerationMode.Moderated -> "moderated"
-                StreamContentModerationMode.None -> "all"
-            },
-        ).collect { response ->
-            processLiveStreamResponse(response = response)
+    ): Job =
+        withContext(dispatcherProvider.io()) {
+            val firstEmission = CompletableDeferred<Unit>()
+
+            val job = scope.launch {
+                liveStreamApi.subscribeToLiveEvent(
+                    streamingNaddr = naddr,
+                    userId = userId,
+                    contentModerationMode = when (streamContentModerationMode) {
+                        StreamContentModerationMode.Moderated -> "moderated"
+                        StreamContentModerationMode.None -> "all"
+                    },
+                ).catch {
+                    Napier.w(throwable = it) { "Couldn't subscribe to live feed." }
+                    firstEmission.complete(Unit)
+                }.collect {
+                    processLiveStreamResponse(response = it)
+                    firstEmission.complete(Unit)
+                }
+            }
+
+            firstEmission.await()
+            return@withContext job
         }
-    }
 
     override suspend fun startLiveEventsFromFollowsSubscription(userId: String) =
         withContext(dispatcherProvider.io()) {

@@ -47,7 +47,6 @@ class LiveStreamApiImpl(
                 ),
                 inactivityTimeout = 500.milliseconds,
             )
-            .catch { Napier.w(throwable = it) { "Couldn't subscribe to live feed." } }
             .map {
                 LiveFeedResponse(
                     zaps = it.filterNostrEvents(NostrEventKind.Zap),
