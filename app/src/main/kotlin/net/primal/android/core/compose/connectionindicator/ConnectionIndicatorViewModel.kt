@@ -1,6 +1,8 @@
 package net.primal.android.core.compose.connectionindicator
 
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.flowWithLifecycle
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -32,12 +34,14 @@ class ConnectionIndicatorViewModel @Inject constructor(
 
     private fun observeCachingServiceConnection() =
         viewModelScope.launch {
-            primalApiClient.connectionStatus.collectLatest {
-                if (!it.connected) {
-                    delay(DELAY_ON_DISCONNECT)
-                }
+            primalApiClient.connectionStatus
+                .flowWithLifecycle(ProcessLifecycleOwner.get().lifecycle)
+                .collectLatest {
+                    if (!it.connected) {
+                        delay(DELAY_ON_DISCONNECT)
+                    }
 
-                setState { copy(hasConnection = it.connected) }
-            }
+                    setState { copy(hasConnection = it.connected) }
+                }
         }
 }
