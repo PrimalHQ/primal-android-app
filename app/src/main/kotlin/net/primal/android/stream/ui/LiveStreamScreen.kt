@@ -12,6 +12,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -786,43 +787,14 @@ fun ChatMessageListItem(
 ) {
     val localUriHandler = LocalUriHandler.current
 
-    val authorNameColor = AppTheme.colorScheme.onSurface
-    val defaultTextColor = if (isAppInDarkPrimalTheme()) {
-        AppTheme.extraColorScheme.onSurfaceVariantAlt1
-    } else {
-        AppTheme.extraColorScheme.onSurfaceVariantAlt2
-    }
-
-    val linkStyle = SpanStyle(textDecoration = TextDecoration.Underline)
-    val highlightColor = AppTheme.colorScheme.primary
-
-    val annotatedContent = remember(message) {
-        buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(fontWeight = FontWeight.Bold, color = authorNameColor),
-            ) {
-                append(message.authorProfile.authorDisplayName)
-            }
-            append(" ")
-
-            val renderedContent = renderChatMessageContentAsAnnotatedString(
-                message = message,
-                highlightColor = highlightColor,
-            )
-
-            val messageWithLinks = spannableTextWithLinks(
-                text = renderedContent,
-                defaultColor = defaultTextColor,
-                linkStyle = linkStyle,
-            )
-            append(messageWithLinks)
-        }
-    }
+    val annotatedContent = rememberAnnotatedContent(message = message)
 
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
                 enabled = onClick != null,
                 onClick = { onClick?.invoke() },
             ),
@@ -870,6 +842,42 @@ fun ChatMessageListItem(
                 onClick?.invoke()
             },
         )
+    }
+}
+
+@Composable
+private fun rememberAnnotatedContent(message: ChatMessageUi): AnnotatedString {
+    val authorNameColor = AppTheme.colorScheme.onSurface
+    val defaultTextColor = if (isAppInDarkPrimalTheme()) {
+        AppTheme.extraColorScheme.onSurfaceVariantAlt1
+    } else {
+        AppTheme.extraColorScheme.onSurfaceVariantAlt2
+    }
+
+    val linkStyle = SpanStyle(textDecoration = TextDecoration.Underline)
+    val highlightColor = AppTheme.colorScheme.primary
+
+    return remember(message) {
+        buildAnnotatedString {
+            withStyle(
+                style = SpanStyle(fontWeight = FontWeight.Bold, color = authorNameColor),
+            ) {
+                append(message.authorProfile.authorDisplayName)
+            }
+            append(" ")
+
+            val renderedContent = renderChatMessageContentAsAnnotatedString(
+                message = message,
+                highlightColor = highlightColor,
+            )
+
+            val messageWithLinks = spannableTextWithLinks(
+                text = renderedContent,
+                defaultColor = defaultTextColor,
+                linkStyle = linkStyle,
+            )
+            append(messageWithLinks)
+        }
     }
 }
 
