@@ -2,6 +2,7 @@ package net.primal.core.networking.primal
 
 import io.github.aakira.napier.Napier
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -21,6 +22,7 @@ import net.primal.core.networking.sockets.NostrSocketClientImpl
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
+import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.bufferCountOrTimeout
 import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
@@ -80,6 +82,20 @@ internal class BasePrimalApiClient(
                     throw NetworkException(message = "Api unreachable at the moment.", cause = error)
                 }
             }.onCompletion { runCatching { closeSubscription(subscriptionId = subscriptionId) } }
+    }
+
+    @OptIn(FlowPreview::class)
+    fun subscribeBufferedOnInactivity(
+        subscriptionId: String,
+        message: PrimalCacheFilter,
+        inactivityTimeout: Duration,
+    ): Flow<PrimalSubscriptionBufferedResult> {
+        return subscribe(
+            subscriptionId = subscriptionId,
+            message = message,
+        ).batchOnInactivity(
+            inactivityTimeout = inactivityTimeout,
+        ).map { messages -> messages.collectSubscriptionBufferedResult() }
     }
 
     fun subscribeBuffered(subscriptionId: String, message: PrimalCacheFilter): Flow<PrimalSubscriptionBufferedResult> {
