@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -85,26 +86,31 @@ private fun TopZapsSection(
     onTopZapsClick: () -> Unit,
     onZapClick: () -> Unit,
 ) {
-    Box(
+    val topZap = topZaps.first()
+    val otherZaps = topZaps.drop(n = 1)
+
+    Column(
         modifier = modifier
             .fillMaxWidth()
             .height(ZAPS_SECTION_HEIGHT),
+        horizontalAlignment = Alignment.Start,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        val topZap = topZaps.first()
-        val otherZaps = topZaps.drop(n = 1)
+        StreamTopNoteZapRow(
+            noteZap = topZap,
+            onClick = onTopZapsClick,
+        )
 
-        Column(
+        Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = if (otherZaps.isEmpty()) Arrangement.End else Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            StreamTopNoteZapRow(
-                noteZap = topZap,
-                onClick = onTopZapsClick,
-            )
-
             if (otherZaps.isNotEmpty()) {
-                Row(
+                FlowRow(
+                    modifier = Modifier.weight(1f),
+                    maxLines = 1,
+                    maxItemsInEachRow = OTHER_ZAPS_COUNT,
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     otherZaps.take(OTHER_ZAPS_COUNT).forEach {
@@ -117,12 +123,9 @@ private fun TopZapsSection(
                     }
                 }
             }
-        }
 
-        ZapButton(
-            modifier = Modifier.align(Alignment.BottomEnd),
-            onClick = onZapClick,
-        )
+            ZapButton(onClick = onZapClick)
+        }
     }
 }
 
