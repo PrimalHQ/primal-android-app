@@ -1,6 +1,7 @@
 package net.primal.core.networking.primal
 
 import io.ktor.client.HttpClient
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
@@ -101,6 +102,19 @@ internal class ProxyPrimalApiClient(
     override suspend fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage> {
         clientInitialized.await()
         return primalClient.subscribe(subscriptionId = subscriptionId, message = message)
+    }
+
+    override suspend fun subscribeBufferedOnInactivity(
+        subscriptionId: String,
+        message: PrimalCacheFilter,
+        inactivityTimeout: Duration,
+    ): Flow<PrimalSubscriptionBufferedResult> {
+        clientInitialized.await()
+        return primalClient.subscribeBufferedOnInactivity(
+            subscriptionId = subscriptionId,
+            message = message,
+            inactivityTimeout = inactivityTimeout,
+        )
     }
 
     override suspend fun subscribeBuffered(

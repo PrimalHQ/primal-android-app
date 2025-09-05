@@ -1,5 +1,7 @@
 package net.primal.core.networking.primal
 
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import net.primal.core.networking.sockets.NostrIncomingMessage
@@ -14,6 +16,13 @@ interface PrimalApiClient {
 
     @Throws(NetworkException::class, kotlin.coroutines.cancellation.CancellationException::class)
     suspend fun subscribe(subscriptionId: String, message: PrimalCacheFilter): Flow<NostrIncomingMessage>
+
+    @Throws(NetworkException::class, kotlin.coroutines.cancellation.CancellationException::class)
+    suspend fun subscribeBufferedOnInactivity(
+        subscriptionId: String,
+        message: PrimalCacheFilter,
+        inactivityTimeout: Duration = 1.seconds,
+    ): Flow<PrimalSubscriptionBufferedResult>
 
     @Throws(NetworkException::class, kotlin.coroutines.cancellation.CancellationException::class)
     suspend fun subscribeBuffered(
