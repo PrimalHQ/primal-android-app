@@ -1,6 +1,8 @@
 package net.primal.android.scanner.domain
 
 import net.primal.android.redeem.utils.isPromoCodeUrl
+import net.primal.domain.nostr.utils.isNAddr
+import net.primal.domain.nostr.utils.isNAddrUri
 import net.primal.domain.nostr.utils.isNEvent
 import net.primal.domain.nostr.utils.isNEventUri
 import net.primal.domain.nostr.utils.isNProfile
@@ -21,6 +23,8 @@ enum class QrCodeDataType(val validator: (String) -> Boolean) {
     NPUB(validator = { it.isNPub() }),
     NPROFILE_URI(validator = { it.isNProfileUri() }),
     NPROFILE(validator = { it.isNProfile() }),
+    NADDR_URI(validator = { it.isNAddrUri() }),
+    NADDR(validator = { it.isNAddr() }),
     NEVENT_URI(validator = { it.isNEventUri() }),
     NEVENT(validator = { it.isNEvent() }),
     NOTE_URI(validator = { it.isNoteUri() }),

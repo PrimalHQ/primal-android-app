@@ -27,6 +27,7 @@ import net.primal.core.utils.onSuccess
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.utils.extractNoteId
 import net.primal.domain.nostr.utils.extractProfileId
+import net.primal.domain.nostr.utils.takeAsNaddrStringOrNull
 import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.profile.ProfileRepository
 import timber.log.Timber
@@ -85,6 +86,9 @@ class ProfileQrCodeViewModel @Inject constructor(
                 QrCodeDataType.NPROFILE,
                 -> result.value.extractProfileId()?.let { processProfileId(profileId = it) }
 
+                QrCodeDataType.NADDR -> processLiveStream(naddr = result.value)
+                QrCodeDataType.NADDR_URI -> result.value.takeAsNaddrStringOrNull()?.let { processLiveStream(naddr = it) }
+
                 QrCodeDataType.NEVENT -> processNoteId(noteId = result.value.bech32ToHexOrThrow())
                 QrCodeDataType.NEVENT_URI -> result.value.extractNoteId()?.let { processNoteId(noteId = it) }
                 QrCodeDataType.NOTE -> processNoteId(noteId = result.value.bech32ToHexOrThrow())
@@ -121,5 +125,9 @@ class ProfileQrCodeViewModel @Inject constructor(
 
     private fun processNoteId(noteId: String) {
         setEffect(SideEffect.NostrNoteDetected(noteId = noteId))
+    }
+
+    private fun processLiveStream(naddr: String) {
+        setEffect(SideEffect.NostrLiveStreamDetected(naddr = naddr))
     }
 }
