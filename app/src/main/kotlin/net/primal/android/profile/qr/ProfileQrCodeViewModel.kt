@@ -85,6 +85,8 @@ class ProfileQrCodeViewModel @Inject constructor(
                 QrCodeDataType.NPROFILE,
                 -> result.value.extractProfileId()?.let { processProfileId(profileId = it) }
 
+                QrCodeDataType.NEVENT -> processNoteId(noteId = result.value.bech32ToHexOrThrow())
+                QrCodeDataType.NEVENT_URI -> result.value.extractNoteId()?.let { processNoteId(noteId = it) }
                 QrCodeDataType.NOTE -> processNoteId(noteId = result.value.bech32ToHexOrThrow())
                 QrCodeDataType.NOTE_URI -> result.value.extractNoteId()?.let { processNoteId(noteId = it) }
 
