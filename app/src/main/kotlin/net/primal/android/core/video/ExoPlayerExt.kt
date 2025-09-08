@@ -1,6 +1,7 @@
 package net.primal.android.core.video
 
 import android.content.Context
+import androidx.annotation.OptIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
@@ -17,6 +18,7 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
+import androidx.media3.session.MediaSession
 import net.primal.android.core.video.PlaybackConstants.BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MSEC
 import net.primal.android.core.video.PlaybackConstants.BUFFER_FOR_PLAYBACK_MSEC
 import net.primal.android.core.video.PlaybackConstants.MAX_BITRATE
@@ -127,6 +129,22 @@ fun rememberPrimalStreamExoPlayer(
     }
 
     return exoPlayer
+}
+
+@OptIn(UnstableApi::class)
+@Composable
+fun rememberMediaSession(exoPlayer: ExoPlayer): MediaSession {
+    val context = LocalContext.current
+
+    val mediaSession = remember(context, exoPlayer) {
+        MediaSession.Builder(context, exoPlayer).build()
+    }
+
+    DisposableEffect(mediaSession) {
+        onDispose { mediaSession.release() }
+    }
+
+    return mediaSession
 }
 
 fun ExoPlayer.toggle() =

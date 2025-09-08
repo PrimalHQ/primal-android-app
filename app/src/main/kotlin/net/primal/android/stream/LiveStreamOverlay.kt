@@ -28,6 +28,9 @@ import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.collectLatest
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.animatableSaver
+import net.primal.android.core.pip.LocalPiPManager
+import net.primal.android.core.pip.rememberIsInPipMode
+import net.primal.android.core.video.rememberMediaSession
 import net.primal.android.core.video.rememberPrimalStreamExoPlayer
 import net.primal.android.navigation.navigateToChat
 import net.primal.android.navigation.navigateToProfileEditor
@@ -83,18 +86,30 @@ fun LiveStreamOverlay(
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 private fun LiveStreamOverlay(
     viewModel: LiveStreamViewModel,
     navController: NavHostController,
     noteCallbacks: NoteCallbacks,
 ) {
+    val pipManager = LocalPiPManager.current
+    val isInPipMode = rememberIsInPipMode()
     val streamState = LocalStreamState.current
     val uiState = viewModel.state.collectAsState()
+
+    LaunchedEffect(isInPipMode) {
+        if (isInPipMode) {
+            if (streamState.mode is StreamMode.Minimized) {
+                streamState.expand()
+            }
+        }
+    }
 
     val exoPlayer = rememberPrimalStreamExoPlayer(
         streamNaddr = viewModel.streamNaddr,
         onIsPlayingChanged = { exoPlayer, isPlaying ->
+            pipManager.shouldEnterPiPMode = isPlaying
             viewModel.setEvent(
                 UiEvent.OnPlayerStateUpdate(isPlaying = isPlaying, currentTime = exoPlayer.currentPosition),
             )
@@ -111,14 +126,18 @@ private fun LiveStreamOverlay(
                 }
 
                 Player.STATE_ENDED -> {
+                    pipManager.shouldEnterPiPMode = false
                     viewModel.setEvent(UiEvent.OnVideoEnded)
                 }
             }
         },
         onPlayerError = {
+            pipManager.shouldEnterPiPMode = false
             viewModel.setEvent(UiEvent.OnVideoUnavailable)
         },
     )
+
+    rememberMediaSession(exoPlayer = exoPlayer)
 
     LifecycleStartEffect(exoPlayer) {
         onStopOrDispose {
@@ -275,6 +294,7 @@ private fun rememberLiveStreamScreenCallbacks(
                         NostrEventKind.LiveActivity.value -> {
                             streamState.start(uri)
                         }
+
                         NostrEventKind.LongFormContent.value -> {
                             noteCallbacks.onArticleClick?.invoke(uri)
                             streamState.minimize()
