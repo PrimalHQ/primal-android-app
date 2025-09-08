@@ -92,6 +92,7 @@ import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.rememberFullScreenController
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.core.pip.rememberIsInPipMode
 import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.events.ui.EventZapUiModel
@@ -463,6 +464,7 @@ private fun LiveStreamContent(
     onChatMessageClick: (ChatMessageUi) -> Unit,
     onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
+    val isInPipMode = rememberIsInPipMode()
     val localConfiguration = LocalConfiguration.current
     if (state.streamInfoLoading) {
         PrimalLoadingSpinner()
@@ -487,7 +489,7 @@ private fun LiveStreamContent(
                 animatedVisibilityScope = animatedVisibilityScope,
             )
 
-            if (localConfiguration.orientation != Configuration.ORIENTATION_LANDSCAPE) {
+            if (localConfiguration.orientation != Configuration.ORIENTATION_LANDSCAPE && !isInPipMode) {
                 StreamInfoAndChatSection(
                     modifier = Modifier.weight(1f),
                     state = state,

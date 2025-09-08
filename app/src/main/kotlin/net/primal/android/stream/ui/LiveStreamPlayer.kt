@@ -21,9 +21,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toAndroidRectF
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.toRect
 import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
@@ -34,6 +38,8 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import net.primal.android.R
 import net.primal.android.core.ext.onDragDownBeyond
+import net.primal.android.core.pip.LocalPiPManager
+import net.primal.android.core.pip.rememberIsInPipMode
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
@@ -145,6 +151,8 @@ private fun PlayerBox(
     onToggleFullScreenClick: () -> Unit,
 ) {
     val localConfiguration = LocalConfiguration.current
+    val isInPipMode = rememberIsInPipMode()
+    val pipManager = LocalPiPManager.current
 
     val boxSizingModifier = remember(localConfiguration.orientation) {
         Modifier.resolveBoxSizingModifier(localConfiguration.orientation)
@@ -191,6 +199,11 @@ private fun PlayerBox(
             PlayerSurface(
                 modifier = playerModifier
                     .then(playerSizingModifier)
+                    .then(
+                        Modifier.onGloballyPositioned { layoutCoordinates ->
+                            pipManager.sourceRectHint = layoutCoordinates.boundsInWindow().toAndroidRectF().toRect()
+                        },
+                    )
                     .onDragDownBeyond(
                         threshold = 100.dp,
                         onTriggered = onClose,
@@ -205,31 +218,33 @@ private fun PlayerBox(
             StreamPlayerLoadingIndicator(modifier = loadingModifier.matchParentSize())
         }
 
-        LiveStreamPlayerControls(
-            modifier = Modifier.fillMaxSize(),
-            isVisible = controlsVisible,
-            state = state,
-            menuVisible = menuVisible,
-            isStreamUnavailable = state.isStreamUnavailable,
-            onMenuVisibilityChange = onMenuVisibilityChange,
-            onPlayPauseClick = onPlayPauseClick,
-            onRewind = onRewind,
-            onForward = onForward,
-            onGoToLive = { exoPlayer.seekToDefaultPosition() },
-            onClose = onClose,
-            onSeek = { positionMs ->
-                exoPlayer.seekTo(positionMs)
-                onSeek(positionMs)
-            },
-            onSeekStarted = onSeekStarted,
-            onQuoteClick = onQuoteClick,
-            onMuteUserClick = onMuteUserClick,
-            onUnmuteUserClick = onUnmuteUserClick,
-            onReportContentClick = onReportContentClick,
-            onRequestDeleteClick = onRequestDeleteClick,
-            onSoundClick = onSoundClick,
-            onToggleFullScreenClick = onToggleFullScreenClick,
-        )
+        if (!isInPipMode) {
+            LiveStreamPlayerControls(
+                modifier = Modifier.fillMaxSize(),
+                isVisible = controlsVisible,
+                state = state,
+                menuVisible = menuVisible,
+                isStreamUnavailable = state.isStreamUnavailable,
+                onMenuVisibilityChange = onMenuVisibilityChange,
+                onPlayPauseClick = onPlayPauseClick,
+                onRewind = onRewind,
+                onForward = onForward,
+                onGoToLive = { exoPlayer.seekToDefaultPosition() },
+                onClose = onClose,
+                onSeek = { positionMs ->
+                    exoPlayer.seekTo(positionMs)
+                    onSeek(positionMs)
+                },
+                onSeekStarted = onSeekStarted,
+                onQuoteClick = onQuoteClick,
+                onMuteUserClick = onMuteUserClick,
+                onUnmuteUserClick = onUnmuteUserClick,
+                onReportContentClick = onReportContentClick,
+                onRequestDeleteClick = onRequestDeleteClick,
+                onSoundClick = onSoundClick,
+                onToggleFullScreenClick = onToggleFullScreenClick,
+            )
+        }
     }
 }
 

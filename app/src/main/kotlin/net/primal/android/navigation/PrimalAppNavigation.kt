@@ -53,6 +53,7 @@ import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.UnlockScreenOrientation
 import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorOverlay
+import net.primal.android.core.pip.PiPManagerProvider
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.editor.NoteEditorContract
@@ -480,16 +481,18 @@ fun PrimalAppNavigation(startDestination: String) {
 
     SharedTransitionLayout {
         ConnectionIndicatorOverlay {
-            LiveStreamOverlay(
-                navController = navController,
-                noteCallbacks = noteCallbacksHandler(navController = navController),
-            ) {
-                PrimalAppNavigation(
+            PiPManagerProvider {
+                LiveStreamOverlay(
                     navController = navController,
-                    startDestination = startDestination,
-                    drawerDestinationHandler = drawerDestinationHandler,
-                    topLevelDestinationHandler = topLevelDestinationHandler,
-                )
+                    noteCallbacks = noteCallbacksHandler(navController = navController),
+                ) {
+                    PrimalAppNavigation(
+                        navController = navController,
+                        startDestination = startDestination,
+                        drawerDestinationHandler = drawerDestinationHandler,
+                        topLevelDestinationHandler = topLevelDestinationHandler,
+                    )
+                }
             }
         }
     }
