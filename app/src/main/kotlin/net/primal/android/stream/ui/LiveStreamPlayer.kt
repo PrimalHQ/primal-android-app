@@ -188,7 +188,9 @@ private fun PlayerBox(
                 onTriggered = onClose,
             )
 
-        if (state.isStreamUnavailable || state.playerState.isVideoFinished) {
+        if (state.streamInfo?.streamUrl.isNullOrEmpty() ||
+            state.isStreamUnavailable || state.playerState.isVideoFinished
+        ) {
             Column(
                 modifier = playerAndMessageModifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,

@@ -345,7 +345,28 @@ private fun PlayerBox(
             .fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        if (state.isStreamUnavailable || state.playerState.isVideoFinished) {
+        val showPlayerSurface = !state.streamInfo?.streamUrl.isNullOrEmpty() &&
+            !state.isStreamUnavailable &&
+            !state.playerState.isVideoFinished
+
+        if (showPlayerSurface) {
+            PlayerSurface(
+                modifier = modifier
+                    .clip(AppTheme.shapes.large)
+                    .matchParentSize(),
+                player = exoPlayer,
+                surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
+            )
+
+            if (state.playerState.isLoading) {
+                StreamPlayerLoadingIndicator(
+                    modifier = loadingModifier
+                        .matchParentSize()
+                        .clip(AppTheme.shapes.large)
+                        .background(AppTheme.colorScheme.background),
+                )
+            }
+        } else {
             Box(
                 modifier = modifier
                     .fillMaxSize()
@@ -379,23 +400,6 @@ private fun PlayerBox(
                         )
                     }
                 }
-            }
-        } else {
-            PlayerSurface(
-                modifier = modifier
-                    .clip(AppTheme.shapes.large)
-                    .matchParentSize(),
-                player = exoPlayer,
-                surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
-            )
-
-            if (state.playerState.isLoading) {
-                StreamPlayerLoadingIndicator(
-                    modifier = loadingModifier
-                        .matchParentSize()
-                        .clip(AppTheme.shapes.large)
-                        .background(AppTheme.colorScheme.background),
-                )
             }
         }
     }

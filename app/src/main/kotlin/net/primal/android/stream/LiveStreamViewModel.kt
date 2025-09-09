@@ -430,7 +430,6 @@ class LiveStreamViewModel @AssistedInject constructor(
                     setState {
                         copy(
                             streamInfoLoading = false,
-                            isStreamUnavailable = false,
                             playerState = playerState.copy(
                                 isLive = isLive,
                                 atLiveEdge = isLive,
