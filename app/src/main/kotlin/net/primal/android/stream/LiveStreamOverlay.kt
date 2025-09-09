@@ -14,24 +14,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaController
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.collectLatest
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.animatableSaver
 import net.primal.android.core.pip.LocalPiPManager
 import net.primal.android.core.pip.rememberIsInPipMode
-import net.primal.android.core.video.rememberMediaSession
-import net.primal.android.core.video.rememberPrimalStreamExoPlayer
+import net.primal.android.core.service.rememberManagedMediaController
 import net.primal.android.navigation.navigateToChat
 import net.primal.android.navigation.navigateToProfileEditor
 import net.primal.android.navigation.navigateToProfileQrCodeViewer
@@ -106,21 +105,21 @@ private fun LiveStreamOverlay(
         }
     }
 
-    val exoPlayer = rememberPrimalStreamExoPlayer(
+    val mediaController = rememberManagedMediaController(
         streamNaddr = viewModel.streamNaddr,
-        onIsPlayingChanged = { exoPlayer, isPlaying ->
+        onIsPlayingChanged = { currentPosition, isPlaying ->
             pipManager.shouldEnterPiPMode = isPlaying
             viewModel.setEvent(
-                UiEvent.OnPlayerStateUpdate(isPlaying = isPlaying, currentTime = exoPlayer.currentPosition),
+                UiEvent.OnPlayerStateUpdate(isPlaying = isPlaying, currentTime = currentPosition),
             )
         },
-        onPlaybackStateChanged = { exoPlayer, playbackState ->
+        onPlaybackStateChanged = { duration, playbackState ->
             viewModel.setEvent(
                 UiEvent.OnPlayerStateUpdate(isBuffering = playbackState == Player.STATE_BUFFERING),
             )
             when (playbackState) {
                 Player.STATE_READY -> {
-                    exoPlayer.duration.takeIf { it > 0L }?.let { duration ->
+                    duration?.takeIf { it > 0L }?.let { duration ->
                         viewModel.setEvent(UiEvent.OnPlayerStateUpdate(totalDuration = duration))
                     }
                 }
@@ -137,40 +136,34 @@ private fun LiveStreamOverlay(
         },
     )
 
-    rememberMediaSession(exoPlayer = exoPlayer)
-
-    LifecycleStartEffect(exoPlayer) {
-        onStopOrDispose {
-            exoPlayer.pause()
-        }
-    }
-
     BackHandler(enabled = streamState.mode is StreamMode.Expanded) {
         if (uiState.value.playerState.isVideoFinished) {
-            exoPlayer.stop()
+            mediaController?.stop()
             streamState.stop()
         } else {
             streamState.minimize()
         }
     }
 
-    LaunchedEffect(streamState, streamState.commands, exoPlayer) {
+    LaunchedEffect(streamState, streamState.commands, mediaController) {
         streamState.commands.collect { command ->
             when (command) {
-                PlayerCommand.Play -> exoPlayer.play()
-                PlayerCommand.Pause -> exoPlayer.pause()
+                PlayerCommand.Play -> mediaController?.play()
+                PlayerCommand.Pause -> mediaController?.pause()
             }
         }
     }
 
-    LiveStreamAnimatedContent(
-        streamState = streamState,
-        navController = navController,
-        noteCallbacks = noteCallbacks,
-        viewModel = viewModel,
-        uiState = uiState,
-        exoPlayer = exoPlayer,
-    )
+    mediaController?.let {
+        LiveStreamAnimatedContent(
+            streamState = streamState,
+            navController = navController,
+            noteCallbacks = noteCallbacks,
+            viewModel = viewModel,
+            uiState = uiState,
+            mediaController = it,
+        )
+    }
 }
 
 @OptIn(UnstableApi::class)
@@ -181,7 +174,7 @@ private fun LiveStreamAnimatedContent(
     noteCallbacks: NoteCallbacks,
     viewModel: LiveStreamViewModel,
     uiState: State<LiveStreamContract.UiState>,
-    exoPlayer: ExoPlayer,
+    mediaController: MediaController,
 ) {
     val localDensity = LocalDensity.current
     val displayMetrics = LocalContext.current.resources.displayMetrics
@@ -211,7 +204,7 @@ private fun LiveStreamAnimatedContent(
                     LiveStreamScreen(
                         eventPublisher = viewModel::setEvent,
                         state = uiState.value,
-                        exoPlayer = exoPlayer,
+                        mediaController = mediaController,
                         callbacks = callbacks,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this,
@@ -221,14 +214,14 @@ private fun LiveStreamAnimatedContent(
                 is StreamMode.Minimized, is StreamMode.Hidden -> {
                     LiveStreamMiniPlayer(
                         state = uiState.value,
-                        exoPlayer = exoPlayer,
+                        mediaController = mediaController,
                         offsetX = offsetX,
                         offsetY = offsetY,
                         isAtTop = isAtTop,
                         isAtBottom = isAtBottom,
                         onExpandStream = { streamState.expand() },
                         onStopStream = {
-                            exoPlayer.stop()
+                            mediaController.clearMediaItems()
                             streamState.stop()
                         },
                         sharedTransitionScope = this@SharedTransitionLayout,

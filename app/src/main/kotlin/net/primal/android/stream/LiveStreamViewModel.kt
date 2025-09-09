@@ -448,6 +448,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 atag = stream.aTag,
                                 eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
+                                image = stream.imageUrl,
                                 streamUrl = streamUrlToPlay,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,

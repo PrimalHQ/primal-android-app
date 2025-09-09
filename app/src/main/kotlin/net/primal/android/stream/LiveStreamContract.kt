@@ -65,6 +65,7 @@ interface LiveStreamContract {
         val title: String,
         val streamUrl: String,
         val viewers: Int,
+        val image: String?,
         val startedAt: Long?,
         val description: String?,
         val rawNostrEventJson: String,

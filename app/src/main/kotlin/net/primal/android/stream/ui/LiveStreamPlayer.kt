@@ -28,9 +28,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toRect
-import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaController
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.recyclerview.widget.RecyclerView
@@ -43,6 +42,7 @@ import net.primal.android.core.pip.rememberIsInPipMode
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
+import net.primal.android.stream.utils.buildMediaItem
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
 
@@ -50,7 +50,7 @@ import net.primal.domain.nostr.ReportType
 @Composable
 fun LiveStreamPlayer(
     state: LiveStreamContract.UiState,
-    exoPlayer: ExoPlayer,
+    mediaController: MediaController,
     streamUrl: String,
     onPlayPauseClick: () -> Unit,
     onClose: () -> Unit,
@@ -73,21 +73,19 @@ fun LiveStreamPlayer(
     var menuVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(streamUrl) {
-        val currentMediaItemUri = exoPlayer.currentMediaItem?.localConfiguration?.uri?.toString()
+        val currentMediaItemUri = mediaController.currentMediaItem?.localConfiguration?.uri?.toString()
 
         if (currentMediaItemUri != streamUrl) {
-            exoPlayer.stop()
-            exoPlayer.clearMediaItems()
+            mediaController.stop()
 
-            val mediaItem = MediaItem.fromUri(streamUrl)
-            exoPlayer.setMediaItem(mediaItem)
-            exoPlayer.prepare()
-            exoPlayer.playWhenReady = true
+            mediaController.setMediaItem(buildMediaItem(streamUrl, state.streamInfo))
+            mediaController.prepare()
+            mediaController.playWhenReady = true
         }
     }
 
     LaunchedEffect(state.playerState.isMuted) {
-        exoPlayer.volume = if (state.playerState.isMuted) 0f else 1f
+        mediaController.volume = if (state.playerState.isMuted) 0f else 1f
     }
 
     LaunchedEffect(controlsVisible, menuVisible) {
@@ -102,7 +100,7 @@ fun LiveStreamPlayer(
         playerModifier = playerModifier,
         loadingModifier = loadingModifier,
         state = state,
-        exoPlayer = exoPlayer,
+        mediaController = mediaController,
         controlsVisible = controlsVisible,
         menuVisible = menuVisible,
         onClose = onClose,
@@ -131,7 +129,7 @@ private fun PlayerBox(
     playerModifier: Modifier,
     loadingModifier: Modifier,
     state: LiveStreamContract.UiState,
-    exoPlayer: ExoPlayer,
+    mediaController: MediaController,
     controlsVisible: Boolean,
     menuVisible: Boolean,
     onClose: () -> Unit,
@@ -209,7 +207,7 @@ private fun PlayerBox(
                         onTriggered = onClose,
                     )
                     .matchParentSize(),
-                player = exoPlayer,
+                player = mediaController,
                 surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
             )
         }
@@ -229,10 +227,10 @@ private fun PlayerBox(
                 onPlayPauseClick = onPlayPauseClick,
                 onRewind = onRewind,
                 onForward = onForward,
-                onGoToLive = { exoPlayer.seekToDefaultPosition() },
+                onGoToLive = { mediaController.seekToDefaultPosition() },
                 onClose = onClose,
                 onSeek = { positionMs ->
-                    exoPlayer.seekTo(positionMs)
+                    mediaController.seekTo(positionMs)
                     onSeek(positionMs)
                 },
                 onSeekStarted = onSeekStarted,

@@ -70,7 +70,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaController
 import java.text.NumberFormat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -93,6 +93,7 @@ import net.primal.android.core.compose.rememberFullScreenController
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.pip.rememberIsInPipMode
+import net.primal.android.core.video.toggle
 import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.events.ui.EventZapUiModel
@@ -124,7 +125,7 @@ private const val URL_ANNOTATION_TAG = "url"
 fun LiveStreamScreen(
     state: LiveStreamContract.UiState,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
-    exoPlayer: ExoPlayer,
+    mediaController: MediaController,
     callbacks: LiveStreamContract.ScreenCallbacks,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
@@ -175,7 +176,7 @@ fun LiveStreamScreen(
 
     LiveStreamScaffold(
         state = state,
-        exoPlayer = exoPlayer,
+        mediaController = mediaController,
         eventPublisher = eventPublisher,
         callbacks = callbacks,
         snackbarHostState = snackbarHostState,
@@ -188,7 +189,7 @@ fun LiveStreamScreen(
 @Composable
 private fun LiveStreamScaffold(
     state: LiveStreamContract.UiState,
-    exoPlayer: ExoPlayer,
+    mediaController: MediaController,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
@@ -217,7 +218,7 @@ private fun LiveStreamScaffold(
 
                 LiveStreamContent(
                     state = state,
-                    exoPlayer = exoPlayer,
+                    mediaController = mediaController,
                     eventPublisher = eventPublisher,
                     paddingValues = paddingValues,
                     callbacks = callbacks,
@@ -333,7 +334,7 @@ private fun LiveStreamBottomSheet(
 private fun StreamPlayer(
     state: LiveStreamContract.UiState,
     streamInfo: LiveStreamContract.StreamInfoUi,
-    exoPlayer: ExoPlayer,
+    mediaController: MediaController,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     onQuoteStreamClick: (String) -> Unit,
@@ -355,26 +356,20 @@ private fun StreamPlayer(
                     animatedVisibilityScope = animatedVisibilityScope,
                 ),
             state = state,
-            exoPlayer = exoPlayer,
+            mediaController = mediaController,
             streamUrl = streamInfo.streamUrl,
-            onPlayPauseClick = {
-                if (exoPlayer.isPlaying) {
-                    exoPlayer.pause()
-                } else {
-                    exoPlayer.play()
-                }
-            },
+            onPlayPauseClick = { mediaController.toggle() },
             onRewind = {
                 eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
-                val newPosition = (exoPlayer.currentPosition - SEEK_BACK_MS).coerceAtLeast(0L)
-                exoPlayer.seekTo(newPosition)
+                val newPosition = (mediaController.currentPosition - SEEK_BACK_MS).coerceAtLeast(0L)
+                mediaController.seekTo(newPosition)
                 eventPublisher(LiveStreamContract.UiEvent.OnSeek(newPosition))
             },
             onForward = {
                 eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
-                val newPosition = (exoPlayer.currentPosition + SEEK_FORWARD_MS)
+                val newPosition = (mediaController.currentPosition + SEEK_FORWARD_MS)
                     .coerceAtMost(state.playerState.totalDuration)
-                exoPlayer.seekTo(newPosition)
+                mediaController.seekTo(newPosition)
                 eventPublisher(LiveStreamContract.UiEvent.OnSeek(newPosition))
             },
             onSoundClick = {
@@ -452,7 +447,7 @@ private fun StreamInfoAndChatSection(
 @Composable
 private fun LiveStreamContent(
     state: LiveStreamContract.UiState,
-    exoPlayer: ExoPlayer,
+    mediaController: MediaController,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     paddingValues: PaddingValues,
     callbacks: LiveStreamContract.ScreenCallbacks,
@@ -481,7 +476,7 @@ private fun LiveStreamContent(
             StreamPlayer(
                 state = state,
                 streamInfo = streamInfo,
-                exoPlayer = exoPlayer,
+                mediaController = mediaController,
                 eventPublisher = eventPublisher,
                 onClose = callbacks.onClose,
                 onQuoteStreamClick = callbacks.onQuoteStreamClick,
