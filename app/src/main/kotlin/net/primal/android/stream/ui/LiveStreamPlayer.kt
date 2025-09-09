@@ -78,7 +78,7 @@ fun LiveStreamPlayer(
         if (currentMediaItemUri != streamUrl) {
             mediaController.stop()
 
-            mediaController.setMediaItem(buildMediaItem(streamUrl, state.streamInfo))
+            mediaController.setMediaItem(buildMediaItem(state.naddr, streamUrl, state.streamInfo))
             mediaController.prepare()
             mediaController.playWhenReady = true
         }
