@@ -115,7 +115,7 @@ fun LiveStreamMiniPlayer(
     LaunchedEffect(mediaController, state.streamInfo?.streamUrl) {
         if (!mediaController.isPlaying && mediaController.currentMediaItem == null) {
             state.streamInfo?.streamUrl?.let { streamUrl ->
-                mediaController.setMediaItem(buildMediaItem(streamUrl, state.streamInfo))
+                mediaController.setMediaItem(buildMediaItem(state.naddr, streamUrl, state.streamInfo))
                 mediaController.prepare()
                 mediaController.playWhenReady = true
             }

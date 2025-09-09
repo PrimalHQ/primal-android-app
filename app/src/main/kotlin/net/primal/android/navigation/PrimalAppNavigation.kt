@@ -565,7 +565,8 @@ private fun PrimalAppNavigation(
         )
 
         home(
-            route = "home?$PROFILE_NPUB={$PROFILE_NPUB}&$IDENTIFIER={$IDENTIFIER}&$PRIMAL_NAME={$PRIMAL_NAME}",
+            route = "home?$PROFILE_NPUB={$PROFILE_NPUB}&$IDENTIFIER={$IDENTIFIER}" +
+                "&$PRIMAL_NAME={$PRIMAL_NAME}&$NADDR={$NADDR}",
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
@@ -582,6 +583,10 @@ private fun PrimalAppNavigation(
                     type = NavType.StringType
                     nullable = true
                 },
+                navArgument(NADDR) {
+                    type = NavType.StringType
+                    nullable = true
+                },
             ),
             deepLinks = listOf(
                 navDeepLink {
@@ -595,6 +600,9 @@ private fun PrimalAppNavigation(
                 },
                 navDeepLink {
                     uriPattern = "https://primal.net/{$PRIMAL_NAME}/live/{$IDENTIFIER}"
+                },
+                navDeepLink {
+                    uriPattern = "primal://live/{$NADDR}"
                 },
             ),
         )

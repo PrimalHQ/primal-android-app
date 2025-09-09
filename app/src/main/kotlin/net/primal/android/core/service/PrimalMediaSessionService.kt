@@ -1,8 +1,13 @@
 package net.primal.android.core.service
 
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
 import androidx.annotation.OptIn
+import androidx.core.net.toUri
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
+import androidx.media3.common.MediaItem
 import androidx.media3.common.Player.COMMAND_SEEK_TO_NEXT
 import androidx.media3.common.Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM
 import androidx.media3.common.Player.COMMAND_SEEK_TO_PREVIOUS
@@ -11,6 +16,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
+import com.google.common.util.concurrent.ListenableFuture
+import net.primal.android.MainActivity
 
 class PrimalMediaSessionService : MediaSessionService() {
 
@@ -32,6 +39,26 @@ class PrimalMediaSessionService : MediaSessionService() {
             .setCallback(
                 object : MediaSession.Callback {
                     @OptIn(UnstableApi::class)
+                    override fun onSetMediaItems(
+                        mediaSession: MediaSession,
+                        controller: MediaSession.ControllerInfo,
+                        mediaItems: List<MediaItem>,
+                        startIndex: Int,
+                        startPositionMs: Long,
+                    ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> {
+                        mediaItems.firstOrNull()?.let {
+                            mediaSession.setSessionActivity(
+                                deepLinkPendingIntent(
+                                    this@PrimalMediaSessionService,
+                                    it.mediaId,
+                                ),
+                            )
+                        }
+
+                        return super.onSetMediaItems(mediaSession, controller, mediaItems, startIndex, startPositionMs)
+                    }
+
+                    @OptIn(UnstableApi::class)
                     override fun onConnect(
                         session: MediaSession,
                         controller: MediaSession.ControllerInfo,
@@ -52,6 +79,23 @@ class PrimalMediaSessionService : MediaSessionService() {
                 },
             )
             .build()
+    }
+
+    private fun deepLinkPendingIntent(context: Context, mediaId: String): PendingIntent {
+        val uri = "primal://live/$mediaId".toUri()
+        val intent = Intent(Intent.ACTION_VIEW, uri, context, MainActivity::class.java).apply {
+            addFlags(
+                Intent.FLAG_ACTIVITY_SINGLE_TOP or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_REORDER_TO_FRONT,
+            )
+        }
+        return PendingIntent.getActivity(
+            context,
+            mediaId.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaSession? = mediaSession
