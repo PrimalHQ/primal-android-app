@@ -17,12 +17,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.IconButton
@@ -46,6 +48,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
@@ -92,6 +96,7 @@ fun LiveStreamMiniPlayer(
     state: LiveStreamContract.UiState,
     onExpandStream: () -> Unit,
     onStopStream: () -> Unit,
+    onRetry: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
@@ -214,6 +219,7 @@ fun LiveStreamMiniPlayer(
                         ),
                         exoPlayer = exoPlayer,
                         state = state,
+                        onRetry = onRetry,
                     )
 
                     PlayerControls(
@@ -246,10 +252,17 @@ private fun PlayerControls(
             PrimalIcons.VideoPlayMini
         }
     }
-    Box(
-        modifier = Modifier
+
+    val boxModifier = if (isStreamUnavailable) {
+        Modifier.fillMaxSize()
+    } else {
+        Modifier
             .fillMaxSize()
-            .clickable { onExpandStream() },
+            .clickable { onExpandStream() }
+    }
+
+    Box(
+        modifier = boxModifier,
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -324,6 +337,7 @@ private fun PlayerBox(
     state: LiveStreamContract.UiState,
     modifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
+    onRetry: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -338,17 +352,33 @@ private fun PlayerBox(
                     .background(Color.Black),
                 contentAlignment = Alignment.Center,
             ) {
-                val messageText = if (state.playerState.isVideoFinished) {
-                    stringResource(id = R.string.live_stream_video_ended)
-                } else {
-                    stringResource(id = R.string.live_stream_recording_not_available)
-                }
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(4.dp),
+                ) {
+                    val messageText = if (state.playerState.isVideoFinished) {
+                        stringResource(id = R.string.live_stream_video_ended)
+                    } else {
+                        stringResource(id = R.string.live_stream_recording_not_available)
+                    }
 
-                Text(
-                    text = messageText,
-                    color = Color.White,
-                    style = AppTheme.typography.bodySmall,
-                )
+                    Text(
+                        text = messageText,
+                        color = Color.White,
+                        style = AppTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                    )
+
+                    if (state.isStreamUnavailable && !state.playerState.isVideoFinished) {
+                        Text(
+                            text = stringResource(id = R.string.live_stream_retry_button).uppercase(),
+                            color = AppTheme.colorScheme.primary,
+                            style = AppTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
+                            modifier = Modifier.clickable { onRetry() },
+                        )
+                    }
+                }
             }
         } else {
             PlayerSurface(

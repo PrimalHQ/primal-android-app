@@ -5,13 +5,16 @@ import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,6 +62,7 @@ fun LiveStreamPlayer(
     onReportContentClick: (ReportType) -> Unit,
     onRequestDeleteClick: () -> Unit,
     onToggleFullScreenClick: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     playerModifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
@@ -114,6 +118,7 @@ fun LiveStreamPlayer(
         onRequestDeleteClick = onRequestDeleteClick,
         onSoundClick = onSoundClick,
         onToggleFullScreenClick = onToggleFullScreenClick,
+        onRetry = onRetry,
     )
 }
 
@@ -143,6 +148,7 @@ private fun PlayerBox(
     onRequestDeleteClick: () -> Unit,
     onSoundClick: () -> Unit,
     onToggleFullScreenClick: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     val localConfiguration = LocalConfiguration.current
 
@@ -176,17 +182,31 @@ private fun PlayerBox(
         }
 
         if (state.isStreamUnavailable || state.playerState.isVideoFinished) {
-            val messageText = if (state.playerState.isVideoFinished) {
-                stringResource(id = R.string.live_stream_video_ended)
-            } else {
-                stringResource(id = R.string.live_stream_recording_not_available)
-            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                val messageText = if (state.playerState.isVideoFinished) {
+                    stringResource(id = R.string.live_stream_video_ended)
+                } else {
+                    stringResource(id = R.string.live_stream_recording_not_available)
+                }
 
-            Text(
-                text = messageText,
-                style = AppTheme.typography.bodyLarge,
-                color = Color.White,
-            )
+                Text(
+                    text = messageText,
+                    style = AppTheme.typography.bodyLarge,
+                    color = Color.White,
+                )
+
+                if (state.isStreamUnavailable && !state.playerState.isVideoFinished) {
+                    TextButton(onClick = onRetry) {
+                        Text(
+                            text = stringResource(id = R.string.live_stream_retry_button),
+                            color = AppTheme.colorScheme.primary,
+                        )
+                    }
+                }
+            }
         } else {
             PlayerSurface(
                 modifier = playerModifier

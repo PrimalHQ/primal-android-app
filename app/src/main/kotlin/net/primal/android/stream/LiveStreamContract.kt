@@ -112,6 +112,7 @@ interface LiveStreamContract {
         data object OnVideoUnavailable : UiEvent()
         data object OnVideoEnded : UiEvent()
         data class ChangeActiveBottomSheet(val sheet: ActiveBottomSheet) : UiEvent()
+        data object OnRetryStream : UiEvent()
     }
 
     sealed class SideEffect {

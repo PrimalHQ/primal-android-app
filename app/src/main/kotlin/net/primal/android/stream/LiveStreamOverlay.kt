@@ -196,6 +196,11 @@ private fun LiveStreamAnimatedContent(
                         callbacks = callbacks,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this,
+                        onRetry = {
+                            viewModel.setEvent(UiEvent.OnRetryStream)
+                            exoPlayer.prepare()
+                            exoPlayer.play()
+                        },
                     )
                 }
 
@@ -214,6 +219,11 @@ private fun LiveStreamAnimatedContent(
                         },
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this,
+                        onRetry = {
+                            viewModel.setEvent(UiEvent.OnRetryStream)
+                            exoPlayer.prepare()
+                            exoPlayer.play()
+                        },
                     )
                 }
 
