@@ -181,8 +181,16 @@ private fun PlayerBox(
             Modifier.resolvePlayerSizingModifier(orientation = localConfiguration.orientation, scope = this)
         }
 
+        val playerAndMessageModifier = playerModifier
+            .then(playerSizingModifier)
+            .onDragDownBeyond(
+                threshold = 100.dp,
+                onTriggered = onClose,
+            )
+
         if (state.isStreamUnavailable || state.playerState.isVideoFinished) {
             Column(
+                modifier = playerAndMessageModifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -209,13 +217,7 @@ private fun PlayerBox(
             }
         } else {
             PlayerSurface(
-                modifier = playerModifier
-                    .then(playerSizingModifier)
-                    .onDragDownBeyond(
-                        threshold = 100.dp,
-                        onTriggered = onClose,
-                    )
-                    .matchParentSize(),
+                modifier = playerAndMessageModifier.matchParentSize(),
                 player = exoPlayer,
                 surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
             )
