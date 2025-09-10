@@ -48,7 +48,7 @@ fun Article.mapAsFeedArticleUi(): FeedArticleUi {
         rawNostrEventJson = this.articleRawJson,
         imageCdnImage = this.imageCdnImage ?: this.author?.avatarCdnImage,
         authorName = this.author?.authorNameUiFriendly() ?: this.authorId.asEllipsizedNpub(),
-        authorPrimalName = this.author?.primalName,
+        authorPrimalName = this.author?.primalPremiumInfo?.primalName,
         authorAvatarCdnImage = this.author?.avatarCdnImage,
         authorBlossoms = this.author?.blossoms ?: emptyList(),
         isBookmarked = this.bookmark != null,
