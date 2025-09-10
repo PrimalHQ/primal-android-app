@@ -9,6 +9,7 @@ import java.io.File
 import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
@@ -56,13 +57,9 @@ fun resolvePrimalNoteLink(nevent: Nevent) = "https://primal.net/e/${nevent.toNev
 
 fun resolvePrimalArticleLink(
     naddr: String,
-    internetIdentifier: String? = null,
+    primalName: String?,
     articleSlug: String? = null,
 ): String {
-    val primalName = internetIdentifier
-        ?.takeIf { it.endsWith("@primal.net", ignoreCase = true) }
-        ?.substringBefore("@")
-
     return if (!primalName.isNullOrBlank() && !articleSlug.isNullOrBlank()) {
         "https://primal.net/$primalName/$articleSlug"
     } else {
@@ -70,7 +67,16 @@ fun resolvePrimalArticleLink(
     }
 }
 
-fun resolvePrimalStreamLink(naddr: String) = "https://primal.net/a/$naddr"
+fun resolvePrimalStreamLink(naddr: Naddr, primalName: String?): String {
+    val identifier = naddr.identifier
+
+    return if (!primalName.isNullOrBlank()) {
+        "https://primal.net/$primalName/live/$identifier"
+    } else {
+        val nprofile = Nprofile(pubkey = naddr.userId).toNprofileString()
+        "https://primal.net/$nprofile/live/$identifier"
+    }
+}
 
 fun resolvePrimalProfileLink(profileId: String, primalName: String?): String {
     val path = primalName ?: "p/${Nprofile(pubkey = profileId).toNprofileString()}"
