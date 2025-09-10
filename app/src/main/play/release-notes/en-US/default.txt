@@ -1,2 +1,1 @@
-- Full NWC Wallet support;
-- Live Streaming support;
+Live Streaming improvements and stability fixes.

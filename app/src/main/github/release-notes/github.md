@@ -1,3 +1,15 @@
-## Improvements
-- Full NWC Wallet support;
-- Live Streaming support;
+## Changes
+- Implemented Picture-in-Picture support for live streams
+- Implemented playing live stream in background
+- Implemented proper chat and zap loading logic
+- Implemented breath animation on big streaming pills
+- Improved connectivity indicator to avoid false positives
+- Fixed padding on summary in article details header
+- Fixed generating share stream & article links (#651)
+- Fixed deep-linking crashes
+- Fixed overlapping zap items when big amount gets zapped
+- Fixed small feed pill does not scroll to top when only streams are shown
+- Fixed performance issue with zap items in live streams
+- Removed click indicator from stream chat messages
+- Reduced live stream stale threshold to 1 hour
+- Added ZapStore publish flow
