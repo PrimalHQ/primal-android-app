@@ -53,6 +53,7 @@ import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.UnlockScreenOrientation
 import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorOverlay
+import net.primal.android.core.pip.PiPManagerProvider
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.editor.NoteEditorContract
@@ -480,16 +481,18 @@ fun PrimalAppNavigation(startDestination: String) {
 
     SharedTransitionLayout {
         ConnectionIndicatorOverlay {
-            LiveStreamOverlay(
-                navController = navController,
-                noteCallbacks = noteCallbacksHandler(navController = navController),
-            ) {
-                PrimalAppNavigation(
+            PiPManagerProvider {
+                LiveStreamOverlay(
                     navController = navController,
-                    startDestination = startDestination,
-                    drawerDestinationHandler = drawerDestinationHandler,
-                    topLevelDestinationHandler = topLevelDestinationHandler,
-                )
+                    noteCallbacks = noteCallbacksHandler(navController = navController),
+                ) {
+                    PrimalAppNavigation(
+                        navController = navController,
+                        startDestination = startDestination,
+                        drawerDestinationHandler = drawerDestinationHandler,
+                        topLevelDestinationHandler = topLevelDestinationHandler,
+                    )
+                }
             }
         }
     }
@@ -562,7 +565,8 @@ private fun PrimalAppNavigation(
         )
 
         home(
-            route = "home?$PROFILE_NPUB={$PROFILE_NPUB}&$IDENTIFIER={$IDENTIFIER}&$PRIMAL_NAME={$PRIMAL_NAME}",
+            route = "home?$PROFILE_NPUB={$PROFILE_NPUB}&$IDENTIFIER={$IDENTIFIER}" +
+                "&$PRIMAL_NAME={$PRIMAL_NAME}&$NADDR={$NADDR}",
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
@@ -579,6 +583,10 @@ private fun PrimalAppNavigation(
                     type = NavType.StringType
                     nullable = true
                 },
+                navArgument(NADDR) {
+                    type = NavType.StringType
+                    nullable = true
+                },
             ),
             deepLinks = listOf(
                 navDeepLink {
@@ -592,6 +600,9 @@ private fun PrimalAppNavigation(
                 },
                 navDeepLink {
                     uriPattern = "https://primal.net/{$PRIMAL_NAME}/live/{$IDENTIFIER}"
+                },
+                navDeepLink {
+                    uriPattern = "primal://live/{$NADDR}"
                 },
             ),
         )

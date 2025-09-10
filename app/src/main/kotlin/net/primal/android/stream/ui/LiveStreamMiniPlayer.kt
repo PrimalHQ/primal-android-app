@@ -52,9 +52,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.media3.common.MediaItem
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaController
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import kotlinx.coroutines.launch
@@ -73,6 +72,7 @@ import net.primal.android.stream.player.SHARED_TRANSITION_LOADING_PLAYER_KEY
 import net.primal.android.stream.player.SHARED_TRANSITION_PLAYER_KEY
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
+import net.primal.android.stream.utils.buildMediaItem
 import net.primal.android.theme.AppTheme
 
 internal val PADDING = 16.dp
@@ -88,7 +88,7 @@ private val springSpec = spring<Float>(
 @Composable
 fun LiveStreamMiniPlayer(
     modifier: Modifier = Modifier,
-    exoPlayer: ExoPlayer,
+    mediaController: MediaController,
     offsetX: Animatable<Float, AnimationVector1D>,
     offsetY: Animatable<Float, AnimationVector1D>,
     isAtBottom: MutableState<Boolean>,
@@ -117,13 +117,12 @@ fun LiveStreamMiniPlayer(
     val statusBarHeight = WindowInsets.statusBars.getTop(localDensity)
     val paddingPx = with(localDensity) { PADDING.toPx() }
 
-    LaunchedEffect(exoPlayer, state.streamInfo?.streamUrl) {
-        if (!exoPlayer.isPlaying && exoPlayer.currentMediaItem == null) {
+    LaunchedEffect(mediaController, state.streamInfo?.streamUrl) {
+        if (!mediaController.isPlaying && mediaController.currentMediaItem == null) {
             state.streamInfo?.streamUrl?.let { streamUrl ->
-                val mediaItem = MediaItem.fromUri(streamUrl)
-                exoPlayer.setMediaItem(mediaItem)
-                exoPlayer.prepare()
-                exoPlayer.playWhenReady = true
+                mediaController.setMediaItem(buildMediaItem(state.naddr, streamUrl, state.streamInfo))
+                mediaController.prepare()
+                mediaController.playWhenReady = true
             }
         }
     }
@@ -217,15 +216,15 @@ fun LiveStreamMiniPlayer(
                             sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_LOADING_PLAYER_KEY),
                             animatedVisibilityScope = animatedVisibilityScope,
                         ),
-                        exoPlayer = exoPlayer,
+                        mediaController = mediaController,
                         state = state,
                         onRetry = onRetry,
                     )
 
                     PlayerControls(
-                        onTogglePlayer = { exoPlayer.toggle() },
+                        onTogglePlayer = { mediaController.toggle() },
                         isLoading = state.playerState.isLoading,
-                        isPlaying = exoPlayer.isPlaying,
+                        isPlaying = mediaController.isPlaying,
                         isStreamUnavailable = state.isStreamUnavailable,
                         onStopStream = onStopStream,
                         onExpandStream = onExpandStream,
@@ -333,7 +332,7 @@ private fun adjustPositionWithKeyboard(
 @UnstableApi
 @Composable
 private fun PlayerBox(
-    exoPlayer: ExoPlayer,
+    mediaController: MediaController,
     state: LiveStreamContract.UiState,
     modifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
@@ -354,7 +353,7 @@ private fun PlayerBox(
                 modifier = modifier
                     .clip(AppTheme.shapes.large)
                     .matchParentSize(),
-                player = exoPlayer,
+                player = mediaController,
                 surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
             )
 
