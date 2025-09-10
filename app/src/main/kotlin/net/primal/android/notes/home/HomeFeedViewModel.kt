@@ -45,6 +45,7 @@ import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.utils.npubToPubkey
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
+import net.primal.domain.usecase.UpdateStaleStreamDataUseCase
 import timber.log.Timber
 
 @HiltViewModel
@@ -57,6 +58,7 @@ class HomeFeedViewModel @Inject constructor(
     private val feedsRepository: FeedsRepository,
     private val profileRepository: ProfileRepository,
     private val userDataSyncerFactory: UserDataUpdaterFactory,
+    private val updateStaleStreamDataUseCase: UpdateStaleStreamDataUseCase,
     private val streamRepository: StreamRepository,
 ) : ViewModel() {
 
@@ -81,6 +83,7 @@ class HomeFeedViewModel @Inject constructor(
     init {
         resolveStreamParams()
         observeLiveEventsFromFollows()
+        updateStaleStreamData()
         observeEvents()
         observeActiveAccount()
         observeBadgesUpdates()
@@ -138,6 +141,8 @@ class HomeFeedViewModel @Inject constructor(
             }
         }
     }
+
+    private fun updateStaleStreamData() = viewModelScope.launch { updateStaleStreamDataUseCase.invoke() }
 
     private fun restoreDefaultNoteFeeds() =
         viewModelScope.launch {
