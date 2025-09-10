@@ -112,7 +112,7 @@ fun ArticleDetailsHeader(
                                 color = lineColor,
                                 start = Offset(
                                     x = -startPadding,
-                                    y = -verticalPadding,
+                                    y = verticalPadding,
                                 ),
                                 end = Offset(
                                     x = -startPadding,
