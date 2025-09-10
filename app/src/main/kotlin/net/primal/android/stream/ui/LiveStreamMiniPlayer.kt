@@ -272,7 +272,7 @@ private fun PlayerControls(
             if (isStreamUnavailable) {
                 IconButton(onClick = onRetry) {
                     ShadowIcon(
-                        modifier = Modifier.size(30.dp),
+                        modifier = Modifier.size(26.dp),
                         tint = Color.White,
                         imageVector = Icons.Default.Refresh,
                         contentDescription = stringResource(id = R.string.live_stream_retry_button),
