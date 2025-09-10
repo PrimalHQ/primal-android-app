@@ -170,7 +170,7 @@ private fun TopPlayerControls(
                 onUnmuteUserClick = onUnmuteUserClick,
                 onReportContentClick = onReportContentClick,
                 onRequestDeleteClick = onRequestDeleteClick,
-                authorInternetIdentifier = streamInfo.mainHostProfile?.internetIdentifier,
+                primalName = streamInfo.mainHostProfile?.primalName,
             ) {
                 Icon(
                     imageVector = PrimalIcons.More,

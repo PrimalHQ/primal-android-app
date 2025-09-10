@@ -57,11 +57,9 @@ fun resolvePrimalNoteLink(nevent: Nevent) = "https://primal.net/e/${nevent.toNev
 
 fun resolvePrimalArticleLink(
     naddr: String,
-    internetIdentifier: String? = null,
+    primalName: String?,
     articleSlug: String? = null,
 ): String {
-    val primalName = extractPrimalName(internetIdentifier)
-
     return if (!primalName.isNullOrBlank() && !articleSlug.isNullOrBlank()) {
         "https://primal.net/$primalName/$articleSlug"
     } else {
@@ -69,9 +67,8 @@ fun resolvePrimalArticleLink(
     }
 }
 
-fun resolvePrimalStreamLink(naddr: Naddr, internetIdentifier: String?): String {
+fun resolvePrimalStreamLink(naddr: Naddr, primalName: String?): String {
     val identifier = naddr.identifier
-    val primalName = extractPrimalName(internetIdentifier)
 
     return if (!primalName.isNullOrBlank()) {
         "https://primal.net/$primalName/live/$identifier"
@@ -84,11 +81,4 @@ fun resolvePrimalStreamLink(naddr: Naddr, internetIdentifier: String?): String {
 fun resolvePrimalProfileLink(profileId: String, primalName: String?): String {
     val path = primalName ?: "p/${Nprofile(pubkey = profileId).toNprofileString()}"
     return "https://primal.net/$path"
-}
-
-private fun extractPrimalName(internetIdentifier: String?): String? {
-    return internetIdentifier
-        ?.takeIf { it.endsWith("@primal.net", ignoreCase = true) }
-        ?.substringBefore('@')
-        ?.ifBlank { null }
 }

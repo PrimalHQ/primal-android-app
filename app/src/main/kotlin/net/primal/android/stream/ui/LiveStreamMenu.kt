@@ -43,7 +43,7 @@ import net.primal.domain.nostr.utils.withNostrPrefix
 fun LiveStreamMenu(
     modifier: Modifier,
     naddr: Naddr,
-    authorInternetIdentifier: String?,
+    primalName: String?,
     isMainHostMuted: Boolean,
     isActiveUserMainHost: Boolean,
     rawNostrEvent: String?,
@@ -71,7 +71,7 @@ fun LiveStreamMenu(
         if (menuVisible) {
             MenuContent(
                 naddr = naddr,
-                authorInternetIdentifier = authorInternetIdentifier,
+                primalName = primalName,
                 isMuted = isMainHostMuted,
                 isStreamAuthor = isActiveUserMainHost,
                 rawNostrEvent = rawNostrEvent,
@@ -113,7 +113,7 @@ fun LiveStreamMenu(
 @Composable
 private fun MenuContent(
     naddr: Naddr,
-    authorInternetIdentifier: String?,
+    primalName: String?,
     isMuted: Boolean,
     isStreamAuthor: Boolean,
     rawNostrEvent: String?,
@@ -127,8 +127,8 @@ private fun MenuContent(
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
     val copyConfirmationText = stringResource(id = R.string.live_stream_menu_copied)
-    val streamLink = remember(naddr, authorInternetIdentifier) {
-        resolvePrimalStreamLink(naddr = naddr, internetIdentifier = authorInternetIdentifier)
+    val streamLink = remember(naddr, primalName) {
+        resolvePrimalStreamLink(naddr = naddr, primalName = primalName)
     }
     val naddrString = naddr.toNaddrString()
 
