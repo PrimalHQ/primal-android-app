@@ -317,7 +317,12 @@ class LiveStreamViewModel @AssistedInject constructor(
                         setState { copy(isStreamUnavailable = true) }
                     }
 
-                    UiEvent.OnRetryStream -> setState { copy(isStreamUnavailable = false) }
+                    UiEvent.OnRetryStream -> setState {
+                        copy(
+                            isStreamUnavailable = false,
+                            playerState = playerState.copy(isBuffering = true, isVideoFinished = false),
+                        )
+                    }
 
                     UiEvent.OnVideoEnded -> {
                         setState { copy(playerState = playerState.copy(isVideoFinished = true, isPlaying = false)) }

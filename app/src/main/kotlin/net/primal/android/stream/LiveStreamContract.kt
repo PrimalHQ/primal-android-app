@@ -56,7 +56,7 @@ interface LiveStreamContract {
         val isLive: Boolean = false,
         val isVideoFinished: Boolean = false,
     ) {
-        val isLoading: Boolean get() = isBuffering && !isPlaying
+        val isLoading: Boolean get() = isBuffering
     }
 
     data class StreamInfoUi(
