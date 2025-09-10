@@ -13,8 +13,12 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,6 +43,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import net.primal.android.R
+import net.primal.android.core.compose.ShadowIcon
 import net.primal.android.core.ext.onDragDownBeyond
 import net.primal.android.core.pip.LocalPiPManager
 import net.primal.android.core.pip.rememberIsInPipMode
@@ -198,7 +203,9 @@ private fun PlayerBox(
             state.isStreamUnavailable || state.playerState.isVideoFinished
         ) {
             Column(
-                modifier = playerAndMessageModifier.fillMaxSize(),
+                modifier = playerAndMessageModifier
+                    .fillMaxSize()
+                    .padding(top = 13.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -215,10 +222,12 @@ private fun PlayerBox(
                 )
 
                 if (state.isStreamUnavailable && !state.playerState.isVideoFinished) {
-                    TextButton(onClick = onRetry) {
-                        Text(
-                            text = stringResource(id = R.string.live_stream_retry_button),
-                            color = AppTheme.colorScheme.primary,
+                    IconButton(onClick = onRetry) {
+                        ShadowIcon(
+                            modifier = Modifier.size(30.dp),
+                            tint = Color.White,
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = stringResource(id = R.string.live_stream_retry_button),
                         )
                     }
                 }

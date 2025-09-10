@@ -27,6 +27,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,7 +50,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
@@ -118,9 +119,12 @@ fun LiveStreamMiniPlayer(
     val paddingPx = with(localDensity) { PADDING.toPx() }
 
     LaunchedEffect(mediaController, state.streamInfo?.streamUrl) {
-        if (!mediaController.isPlaying && mediaController.currentMediaItem == null) {
-            state.streamInfo?.streamUrl?.let { streamUrl ->
-                mediaController.setMediaItem(buildMediaItem(state.naddr, streamUrl, state.streamInfo))
+        val newStreamUrl = state.streamInfo?.streamUrl
+        if (newStreamUrl != null) {
+            val currentMediaItem = mediaController.currentMediaItem
+            val currentMediaItemUri = currentMediaItem?.localConfiguration?.uri?.toString()
+            if (newStreamUrl != currentMediaItemUri) {
+                mediaController.setMediaItem(buildMediaItem(state.naddr, newStreamUrl, state.streamInfo))
                 mediaController.prepare()
                 mediaController.playWhenReady = true
             }
@@ -218,7 +222,6 @@ fun LiveStreamMiniPlayer(
                         ),
                         mediaController = mediaController,
                         state = state,
-                        onRetry = onRetry,
                     )
 
                     PlayerControls(
@@ -228,6 +231,7 @@ fun LiveStreamMiniPlayer(
                         isStreamUnavailable = state.isStreamUnavailable,
                         onStopStream = onStopStream,
                         onExpandStream = onExpandStream,
+                        onRetry = onRetry,
                     )
                 }
             }
@@ -243,6 +247,7 @@ private fun PlayerControls(
     isLoading: Boolean,
     isStreamUnavailable: Boolean,
     onStopStream: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     val playPauseIcon = remember(isPlaying) {
         if (isPlaying) {
@@ -252,27 +257,28 @@ private fun PlayerControls(
         }
     }
 
-    val boxModifier = if (isStreamUnavailable) {
-        Modifier.fillMaxSize()
-    } else {
-        Modifier
-            .fillMaxSize()
-            .clickable { onExpandStream() }
-    }
-
     Box(
-        modifier = boxModifier,
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(
+                onClick = onExpandStream,
+            ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = when {
-                isStreamUnavailable -> Arrangement.End
-                isLoading -> Arrangement.End
-                else -> Arrangement.SpaceBetween
-            },
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (!isLoading && !isStreamUnavailable) {
+            if (isStreamUnavailable) {
+                IconButton(onClick = onRetry) {
+                    ShadowIcon(
+                        modifier = Modifier.size(30.dp),
+                        tint = Color.White,
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = stringResource(id = R.string.live_stream_retry_button),
+                    )
+                }
+            } else if (!isLoading) {
                 IconButton(onClick = onTogglePlayer) {
                     ShadowIcon(
                         modifier = Modifier.size(36.dp),
@@ -336,7 +342,6 @@ private fun PlayerBox(
     state: LiveStreamContract.UiState,
     modifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
-    onRetry: () -> Unit,
 ) {
     Box(
         modifier = Modifier
@@ -389,15 +394,6 @@ private fun PlayerBox(
                         style = AppTheme.typography.bodySmall,
                         textAlign = TextAlign.Center,
                     )
-
-                    if (state.isStreamUnavailable && !state.playerState.isVideoFinished) {
-                        Text(
-                            text = stringResource(id = R.string.live_stream_retry_button).uppercase(),
-                            color = AppTheme.colorScheme.primary,
-                            style = AppTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.clickable { onRetry() },
-                        )
-                    }
                 }
             }
         }
