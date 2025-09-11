@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,8 +14,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.primal.android.core.errors.UiError
+import net.primal.android.core.updater.DataUpdater
 import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.navigation.identifier
 import net.primal.android.navigation.naddr
@@ -28,11 +27,7 @@ import net.primal.android.notes.home.HomeFeedContract.UiState
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
-import net.primal.android.user.updater.UserDataUpdater
-import net.primal.android.user.updater.UserDataUpdaterFactory
-import net.primal.core.config.AppConfigHandler
 import net.primal.core.networking.utils.retryNetworkCall
-import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.FeedsRepository
@@ -45,20 +40,16 @@ import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.utils.npubToPubkey
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
-import net.primal.domain.usecase.UpdateStaleStreamDataUseCase
 import timber.log.Timber
 
 @HiltViewModel
 class HomeFeedViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dispatcherProvider: DispatcherProvider,
+    private val dataUpdater: DataUpdater,
     private val activeAccountStore: ActiveAccountStore,
-    private val appConfigHandler: AppConfigHandler,
     private val subscriptionsManager: SubscriptionsManager,
     private val feedsRepository: FeedsRepository,
     private val profileRepository: ProfileRepository,
-    private val userDataSyncerFactory: UserDataUpdaterFactory,
-    private val updateStaleStreamDataUseCase: UpdateStaleStreamDataUseCase,
     private val streamRepository: StreamRepository,
 ) : ViewModel() {
 
@@ -78,12 +69,9 @@ class HomeFeedViewModel @Inject constructor(
     val effects = _effects.receiveAsFlow()
     private fun setEffect(effect: HomeFeedContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
-    private var userDataUpdater: UserDataUpdater? = null
-
     init {
         resolveStreamParams()
         observeLiveEventsFromFollows()
-        updateStaleStreamData()
         observeEvents()
         observeActiveAccount()
         observeBadgesUpdates()
@@ -133,7 +121,7 @@ class HomeFeedViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    UiEvent.RequestUserDataUpdate -> updateUserData()
+                    UiEvent.RequestUserDataUpdate -> dataUpdater.updateData()
                     UiEvent.RefreshNoteFeeds -> fetchAndPersistNoteFeeds()
                     UiEvent.RestoreDefaultNoteFeeds -> restoreDefaultNoteFeeds()
                     UiEvent.DismissError -> setState { copy(uiError = null) }
@@ -141,8 +129,6 @@ class HomeFeedViewModel @Inject constructor(
             }
         }
     }
-
-    private fun updateStaleStreamData() = viewModelScope.launch { updateStaleStreamDataUseCase.invoke() }
 
     private fun restoreDefaultNoteFeeds() =
         viewModelScope.launch {
@@ -200,7 +186,6 @@ class HomeFeedViewModel @Inject constructor(
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
-                initUserUpdater(activeUserId = it.pubkey)
                 setState {
                     copy(
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
@@ -211,28 +196,12 @@ class HomeFeedViewModel @Inject constructor(
             }
         }
 
-    private fun initUserUpdater(activeUserId: String) {
-        userDataUpdater = if (userDataUpdater?.userId != activeUserId) {
-            userDataSyncerFactory.create(userId = activeUserId)
-        } else {
-            userDataUpdater
-        }
-    }
-
     private fun observeBadgesUpdates() =
         viewModelScope.launch {
             subscriptionsManager.badges.collect {
                 setState {
                     copy(badges = it)
                 }
-            }
-        }
-
-    private fun updateUserData() =
-        viewModelScope.launch {
-            withContext(dispatcherProvider.io()) {
-                userDataUpdater?.updateUserDataWithDebounce(30.minutes)
-                appConfigHandler.updateAppConfigWithDebounce(30.minutes)
             }
         }
 }

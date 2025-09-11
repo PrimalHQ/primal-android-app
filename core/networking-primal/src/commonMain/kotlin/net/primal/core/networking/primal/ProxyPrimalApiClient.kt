@@ -44,7 +44,7 @@ internal class ProxyPrimalApiClient(
     }
 
     init {
-        scope.launch { appConfigHandler.updateAppConfigOrFailSilently() }
+        scope.launch { appConfigHandler.invokeImmediately() }
         observeApiUrlAndInitializeSocketClient()
     }
 
@@ -85,7 +85,7 @@ internal class ProxyPrimalApiClient(
             },
             onSocketConnectionClosed = { _, _ ->
                 updateStatus { copy(connected = false) }
-                scope.launch { appConfigHandler.updateAppConfigWithDebounce(1.minutes) }
+                scope.launch { appConfigHandler.invokeWithDebounce(1.minutes) }
             },
         )
     }

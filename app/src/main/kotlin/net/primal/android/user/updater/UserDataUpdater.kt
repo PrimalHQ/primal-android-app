@@ -2,9 +2,7 @@ package net.primal.android.user.updater
 
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import java.time.Instant
 import kotlin.time.Clock
-import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
 import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.nostr.notary.NostrNotary
@@ -15,7 +13,9 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.utils.Result
 import net.primal.core.utils.asSha256Hash
+import net.primal.core.utils.debouncer.Debouncer
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.mutes.MutedItemRepository
@@ -36,22 +36,9 @@ class UserDataUpdater @AssistedInject constructor(
     private val mutedItemRepository: MutedItemRepository,
     private val nostrNotary: NostrNotary,
     private val pushNotificationsTokenUpdater: PushNotificationsTokenUpdater,
-) {
+) : Debouncer() {
 
-    private var lastTimeFetched: Instant = Instant.EPOCH
-
-    private fun isUserDataSyncedInLast(duration: Duration): Boolean {
-        return lastTimeFetched < Instant.now().minusMillis(duration.inWholeMilliseconds)
-    }
-
-    suspend fun updateUserDataWithDebounce(duration: Duration) {
-        if (isUserDataSyncedInLast(duration)) {
-            updateData()
-            lastTimeFetched = Instant.now()
-        }
-    }
-
-    private suspend fun updateData() {
+    override suspend fun doWork(): Result<Unit> {
         activeAccountStore.activeUserAccount().let { activeAccount ->
             if (activeAccount.nostrWallet != null || activeAccount.primalWallet != null) {
                 runCatching { migrateWalletData(userAccount = activeAccount) }
@@ -79,6 +66,8 @@ class UserDataUpdater @AssistedInject constructor(
         runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }
         runCatching { mutedItemRepository.fetchAndPersistMuteList(userId = userId) }
         mutedItemRepository.fetchAndPersistStreamMuteList(userId = userId)
+
+        return Result.success(Unit)
     }
 
     @OptIn(ExperimentalTime::class)
