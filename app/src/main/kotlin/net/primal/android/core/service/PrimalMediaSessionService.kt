@@ -8,34 +8,179 @@ import androidx.core.net.toUri
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
+import androidx.media3.common.Player
 import androidx.media3.common.Player.COMMAND_SEEK_TO_NEXT
 import androidx.media3.common.Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM
 import androidx.media3.common.Player.COMMAND_SEEK_TO_PREVIOUS
 import androidx.media3.common.Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.cronet.CronetDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.analytics.AnalyticsListener
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
+import androidx.media3.exoplayer.source.LoadEventInfo
+import androidx.media3.exoplayer.source.MediaLoadData
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.google.common.util.concurrent.ListenableFuture
+import java.io.IOException
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import net.primal.android.BuildConfig
 import net.primal.android.MainActivity
+import org.chromium.net.CronetEngine
+import timber.log.Timber
 
 class PrimalMediaSessionService : MediaSessionService() {
 
     private var mediaSession: MediaSession? = null
+    private var cronetEngine: CronetEngine? = null
+    private var cronetExecutor: ExecutorService? = null
+
+    @UnstableApi
+    private class PrimalStreamAnalyticsListener : AnalyticsListener {
+        private companion object {
+            const val BITS_IN_KILOBIT = 1000
+            const val BYTES_IN_KILOBYTE = 1024
+        }
+
+        private var isUsingCronet: Boolean = false
+        private var cronetVersion: String = "N/A"
+
+        fun setCronetInfo(version: String) {
+            isUsingCronet = true
+            cronetVersion = version
+        }
+
+        override fun onPlayerError(eventTime: AnalyticsListener.EventTime, error: PlaybackException) {
+            Timber.e(error, "Player Error at ${eventTime.realtimeMs}:")
+        }
+
+        override fun onLoadError(
+            eventTime: AnalyticsListener.EventTime,
+            loadEventInfo: LoadEventInfo,
+            mediaLoadData: MediaLoadData,
+            error: IOException,
+            wasCanceled: Boolean,
+        ) {
+            if (!wasCanceled) {
+                Timber.w(error, "Network Load Error at ${eventTime.realtimeMs}: uri=${loadEventInfo.uri}")
+            }
+        }
+
+        override fun onBandwidthEstimate(
+            eventTime: AnalyticsListener.EventTime,
+            totalLoadTimeMs: Int,
+            totalBytesLoaded: Long,
+            bitrateEstimate: Long,
+        ) {
+            Timber.d(
+                "Bandwidth Estimate: ${bitrateEstimate / BITS_IN_KILOBIT} kbps " +
+                    "(loaded ${totalBytesLoaded / BYTES_IN_KILOBYTE} KB in ${totalLoadTimeMs}ms)",
+            )
+        }
+
+        override fun onDroppedVideoFrames(
+            eventTime: AnalyticsListener.EventTime,
+            droppedFrames: Int,
+            elapsedMs: Long,
+        ) {
+            if (droppedFrames > 0) {
+                Timber.w("Dropped $droppedFrames video frames in ${elapsedMs}ms")
+            }
+        }
+
+        override fun onPlaybackStateChanged(eventTime: AnalyticsListener.EventTime, state: Int) {
+            val stateString = when (state) {
+                Player.STATE_IDLE -> "IDLE"
+                Player.STATE_BUFFERING -> "BUFFERING"
+                Player.STATE_READY -> "READY"
+                Player.STATE_ENDED -> "ENDED"
+                else -> "?"
+            }
+            Timber.d("Playback state changed to: $stateString")
+        }
+
+        override fun onIsPlayingChanged(eventTime: AnalyticsListener.EventTime, isPlaying: Boolean) {
+            Timber.d("Is playing changed to: $isPlaying")
+        }
+
+        override fun onDownstreamFormatChanged(eventTime: AnalyticsListener.EventTime, mediaLoadData: MediaLoadData) {
+            val format = mediaLoadData.trackFormat
+            if (format != null) {
+                Timber.d(
+                    "Downstream format changed: Resolution=%dx%d, Bitrate=%d, MimeType=%s",
+                    format.width,
+                    format.height,
+                    format.bitrate,
+                    format.sampleMimeType,
+                )
+            }
+        }
+
+        override fun onRenderedFirstFrame(
+            eventTime: AnalyticsListener.EventTime,
+            output: Any,
+            renderTimeMs: Long,
+        ) {
+            Timber.d("Rendered first frame in ${renderTimeMs}ms. Using Cronet: $isUsingCronet (v: $cronetVersion)")
+        }
+    }
 
     override fun onCreate() {
         super.onCreate()
+        val player = createPlayer()
+        mediaSession = buildMediaSession(player)
+    }
 
+    @OptIn(UnstableApi::class)
+    private fun createPlayer(): Player {
         val audioAttributes = AudioAttributes.Builder()
             .setUsage(C.USAGE_MEDIA)
             .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
             .build()
 
-        val player = ExoPlayer.Builder(this)
-            .setAudioAttributes(audioAttributes, true)
-            .build()
+        val analyticsListener = PrimalStreamAnalyticsListener()
 
-        mediaSession = MediaSession.Builder(this, player)
+        val playerBuilder = ExoPlayer.Builder(this)
+            .setAudioAttributes(audioAttributes, true)
+
+        cronetEngine = runCatching {
+            CronetEngine.Builder(this)
+                .enableHttp2(true)
+                .enableQuic(true)
+                .enableBrotli(true)
+                .setUserAgent("PrimalAndroid/${BuildConfig.VERSION_NAME}")
+                .build()
+        }.onSuccess { engine ->
+            val executor = Executors.newSingleThreadExecutor()
+            this.cronetExecutor = executor
+
+            val dataSourceFactory = CronetDataSource.Factory(engine, executor)
+            val mediaSourceFactory = DefaultMediaSourceFactory(this).setDataSourceFactory(dataSourceFactory)
+            playerBuilder.setMediaSourceFactory(mediaSourceFactory)
+
+            val version = try {
+                engine.versionString
+            } catch (_: Exception) {
+                "unknown"
+            }
+            analyticsListener.setCronetInfo(version)
+
+            Timber.i("Cronet enabled for media playback: $version")
+        }.onFailure {
+            Timber.w(it, "Cronet is not available. Using default HTTP stack for media playback.")
+        }.getOrNull()
+
+        val player = playerBuilder.build()
+        player.addAnalyticsListener(analyticsListener)
+
+        return player
+    }
+
+    private fun buildMediaSession(player: Player): MediaSession {
+        return MediaSession.Builder(this, player)
             .setCallback(
                 object : MediaSession.Callback {
                     @OptIn(UnstableApi::class)
@@ -106,6 +251,11 @@ class PrimalMediaSessionService : MediaSessionService() {
             release()
             mediaSession = null
         }
+
+        cronetEngine?.shutdown()
+        cronetExecutor?.shutdownNow()
+        cronetEngine = null
+        cronetExecutor = null
 
         super.onDestroy()
     }
