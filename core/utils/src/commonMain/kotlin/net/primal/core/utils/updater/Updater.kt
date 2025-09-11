@@ -1,33 +1,33 @@
-package net.primal.core.utils.debouncer
+package net.primal.core.utils.updater
 
 import kotlin.time.Duration
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import net.primal.core.utils.Result
 
-abstract class Debouncer {
+abstract class Updater {
 
     private var lastTimeFetched: Instant = Instant.DISTANT_PAST
 
-    private fun canDoWork(duration: Duration): Boolean {
+    private fun canUpdate(duration: Duration): Boolean {
         return lastTimeFetched < Clock.System.now().minus(duration)
     }
 
-    suspend fun invokeImmediately(): Result<Unit> {
+    suspend fun updateImmediately(): Result<Unit> {
         lastTimeFetched = Clock.System.now()
-        return doWork()
+        return doUpdate()
     }
 
-    suspend fun invokeWithDebounce(duration: Duration): Result<Unit> {
-        if (canDoWork(duration)) {
+    suspend fun updateWithDebounce(duration: Duration): Result<Unit> {
+        if (canUpdate(duration)) {
             lastTimeFetched = Clock.System.now()
-            return doWork()
+            return doUpdate()
         } else {
             return Result.failure(DebounceException())
         }
     }
 
-    protected abstract suspend fun doWork(): Result<Unit>
+    protected abstract suspend fun doUpdate(): Result<Unit>
 
     class DebounceException : RuntimeException("Work invoked too early. Use `invokeImmediately` to ignore debounce.")
 }
