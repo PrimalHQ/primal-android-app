@@ -23,6 +23,7 @@ import net.primal.data.repository.mappers.remote.asStreamData
 import net.primal.data.repository.mappers.remote.extractZapRequestOrNull
 import net.primal.data.repository.mappers.remote.mapAsEventZapDO
 import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.Stream
 import net.primal.domain.streams.StreamContentModerationMode
@@ -64,6 +65,17 @@ class StreamRepositoryImpl(
             database.streams().findStreamByATag(aTag = aTag)?.let {
                 Result.success(it.asStreamDO())
             } ?: Result.failure(IllegalArgumentException("stream with given aTag could not be found."))
+        }
+
+    override suspend fun getStaleStreamNaddrs(): List<Naddr> =
+        withContext(dispatcherProvider.io()) {
+            database.streams().findStaleStreamData().map {
+                Naddr(
+                    kind = NostrEventKind.LiveActivity.value,
+                    userId = it.eventAuthorId,
+                    identifier = it.dTag,
+                )
+            }
         }
 
     override suspend fun awaitLiveStreamSubscriptionStart(
