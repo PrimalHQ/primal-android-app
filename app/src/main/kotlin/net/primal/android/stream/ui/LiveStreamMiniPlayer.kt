@@ -266,7 +266,10 @@ private fun PlayerControls(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = when {
+                isLoading -> Arrangement.End
+                else -> Arrangement.SpaceBetween
+            },
             verticalAlignment = Alignment.CenterVertically,
         ) {
             if (isStreamUnavailable) {
