@@ -171,8 +171,7 @@ class NoteFeedViewModel @AssistedInject constructor(
 
     private fun handleScrolledToTop() =
         viewModelScope.launch {
-            val state = state.value
-            if (state.notesSyncStats.isTopVisibleNoteTheLatestNote() || state.streamsSyncStats.streamsCount != 0) {
+            if (_state.value.notesSyncStats.isTopVisibleNoteTheLatestNote()) {
                 setState { copy(notesSyncStats = FeedPostsSyncStats()) }
             }
         }
