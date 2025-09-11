@@ -1,0 +1,37 @@
+name: 'Manual: Publish to Zapstore'
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The git tag or ref to publish'
+        required: true
+      zapstore-version:
+        description: 'Zapstore CLI version to be used to publish the event'
+        required: true
+        default: '0.2.4'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out at specified tag
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.tag }}
+
+      - name: Install SQLite dependency
+        run: sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev
+
+      - name: Download & install zapstore-cli
+        run: |
+          DOWNLOAD_URL="https://github.com/zapstore/zapstore-cli/releases/download/${{ github.event.inputs.zapstore-version }}/zapstore-cli-${{ github.event.inputs.zapstore-version }}-linux-amd64"
+          curl -fsSL "$DOWNLOAD_URL" -o zapstore
+          sudo chmod +x zapstore
+          sudo mv zapstore /usr/local/bin/zapstore
+
+      - name: Publish to Zapstore
+        env:
+          SIGN_WITH: ${{ secrets.ZAPSTORE_SIGN_WITH }}
+        run: zapstore publish
+

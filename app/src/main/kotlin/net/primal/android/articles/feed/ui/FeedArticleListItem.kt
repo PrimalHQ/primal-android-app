@@ -160,7 +160,7 @@ private fun ListItemHeader(
                         userId = data.authorId,
                         kind = NostrEventKind.LongFormContent.value,
                     ).toNaddrString(),
-                    internetIdentifier = data.authorInternetIdentifier,
+                    primalName = data.authorPrimalName,
                     articleSlug = data.articleId,
                 ),
                 icon = {
@@ -372,6 +372,7 @@ private class FeedArticleUiProvider : PreviewParameterProvider<FeedArticleUi> {
                     repliesCount = 23,
                 ),
                 authorInternetIdentifier = "",
+                authorPrimalName = "",
                 eventZaps = listOf(
                     EventZapUiModel(
                         id = "",
@@ -418,6 +419,7 @@ private class FeedArticleUiProvider : PreviewParameterProvider<FeedArticleUi> {
                     repliesCount = 23,
                 ),
                 authorInternetIdentifier = "",
+                authorPrimalName = "",
                 eventZaps = listOf(
                     EventZapUiModel(
                         id = "",

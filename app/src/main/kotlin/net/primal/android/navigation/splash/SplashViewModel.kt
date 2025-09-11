@@ -34,6 +34,6 @@ class SplashViewModel @Inject constructor(
 
     private fun fetchLatestAppConfig() =
         viewModelScope.launch {
-            appConfigHandler.updateAppConfigOrFailSilently()
+            appConfigHandler.updateImmediately()
         }
 }

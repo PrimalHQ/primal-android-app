@@ -36,6 +36,8 @@ fun String.urlToLnUrlHrp() =
 
 fun String.bech32ToHexOrThrow() = Bech32.decodeBytes(bech32 = this).second.toHex()
 
+fun String.bech32ToHexOrNull() = runCatching { this.bech32ToHexOrThrow() }.getOrNull()
+
 fun ByteArray.toNpub() = Bech32.encodeBytes(hrp = "npub", this, Bech32.Encoding.Bech32)
 
 @OptIn(ExperimentalStdlibApi::class)

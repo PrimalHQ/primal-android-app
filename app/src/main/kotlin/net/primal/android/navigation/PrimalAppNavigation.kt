@@ -565,8 +565,7 @@ private fun PrimalAppNavigation(
         )
 
         home(
-            route = "home?$PROFILE_NPUB={$PROFILE_NPUB}&$IDENTIFIER={$IDENTIFIER}" +
-                "&$PRIMAL_NAME={$PRIMAL_NAME}&$NADDR={$NADDR}",
+            route = "home",
             navController = navController,
             onTopLevelDestinationChanged = topLevelDestinationHandler,
             onDrawerScreenClick = drawerDestinationHandler,
@@ -574,18 +573,22 @@ private fun PrimalAppNavigation(
                 navArgument(PROFILE_NPUB) {
                     type = NavType.StringType
                     nullable = true
+                    defaultValue = null
                 },
                 navArgument(IDENTIFIER) {
                     type = NavType.StringType
                     nullable = true
+                    defaultValue = null
                 },
                 navArgument(PRIMAL_NAME) {
                     type = NavType.StringType
                     nullable = true
+                    defaultValue = null
                 },
                 navArgument(NADDR) {
                     type = NavType.StringType
                     nullable = true
+                    defaultValue = null
                 },
             ),
             deepLinks = listOf(
