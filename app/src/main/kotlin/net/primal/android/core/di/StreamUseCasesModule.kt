@@ -10,7 +10,7 @@ import net.primal.domain.usecase.UpdateStaleStreamDataUseCase
 
 @Module
 @InstallIn(SingletonComponent::class)
-object UseCasesModule {
+object StreamUseCasesModule {
     @Provides
     fun provideUpdateStaleStreamDataUseCase(
         streamRepository: StreamRepository,
