@@ -17,14 +17,18 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,6 +50,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
@@ -92,6 +97,7 @@ fun LiveStreamMiniPlayer(
     state: LiveStreamContract.UiState,
     onExpandStream: () -> Unit,
     onStopStream: () -> Unit,
+    onRetry: () -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
@@ -113,9 +119,12 @@ fun LiveStreamMiniPlayer(
     val paddingPx = with(localDensity) { PADDING.toPx() }
 
     LaunchedEffect(mediaController, state.streamInfo?.streamUrl) {
-        if (!mediaController.isPlaying && mediaController.currentMediaItem == null) {
-            state.streamInfo?.streamUrl?.let { streamUrl ->
-                mediaController.setMediaItem(buildMediaItem(state.naddr, streamUrl, state.streamInfo))
+        val newStreamUrl = state.streamInfo?.streamUrl
+        if (newStreamUrl != null) {
+            val currentMediaItem = mediaController.currentMediaItem
+            val currentMediaItemUri = currentMediaItem?.localConfiguration?.uri?.toString()
+            if (newStreamUrl != currentMediaItemUri) {
+                mediaController.setMediaItem(buildMediaItem(state.naddr, newStreamUrl, state.streamInfo))
                 mediaController.prepare()
                 mediaController.playWhenReady = true
             }
@@ -222,6 +231,7 @@ fun LiveStreamMiniPlayer(
                         isStreamUnavailable = state.isStreamUnavailable,
                         onStopStream = onStopStream,
                         onExpandStream = onExpandStream,
+                        onRetry = onRetry,
                     )
                 }
             }
@@ -237,6 +247,7 @@ private fun PlayerControls(
     isLoading: Boolean,
     isStreamUnavailable: Boolean,
     onStopStream: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     val playPauseIcon = remember(isPlaying) {
         if (isPlaying) {
@@ -245,21 +256,32 @@ private fun PlayerControls(
             PrimalIcons.VideoPlayMini
         }
     }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .clickable { onExpandStream() },
+            .clickable(
+                onClick = onExpandStream,
+            ),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = when {
-                isStreamUnavailable -> Arrangement.End
                 isLoading -> Arrangement.End
                 else -> Arrangement.SpaceBetween
             },
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (!isLoading && !isStreamUnavailable) {
+            if (isStreamUnavailable) {
+                IconButton(onClick = onRetry) {
+                    ShadowIcon(
+                        modifier = Modifier.size(26.dp),
+                        tint = Color.White,
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = stringResource(id = R.string.live_stream_retry_button),
+                    )
+                }
+            } else if (!isLoading) {
                 IconButton(onClick = onTogglePlayer) {
                     ShadowIcon(
                         modifier = Modifier.size(36.dp),
@@ -330,26 +352,11 @@ private fun PlayerBox(
             .fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        if (state.isStreamUnavailable || state.playerState.isVideoFinished) {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(Color.Black),
-                contentAlignment = Alignment.Center,
-            ) {
-                val messageText = if (state.playerState.isVideoFinished) {
-                    stringResource(id = R.string.live_stream_video_ended)
-                } else {
-                    stringResource(id = R.string.live_stream_recording_not_available)
-                }
+        val showPlayerSurface = !state.streamInfo?.streamUrl.isNullOrEmpty() &&
+            !state.isStreamUnavailable &&
+            !state.playerState.isVideoFinished
 
-                Text(
-                    text = messageText,
-                    color = Color.White,
-                    style = AppTheme.typography.bodySmall,
-                )
-            }
-        } else {
+        if (showPlayerSurface) {
             PlayerSurface(
                 modifier = modifier
                     .clip(AppTheme.shapes.large)
@@ -365,6 +372,32 @@ private fun PlayerBox(
                         .clip(AppTheme.shapes.large)
                         .background(AppTheme.colorScheme.background),
                 )
+            }
+        } else {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+                    .background(Color.Black),
+                contentAlignment = Alignment.Center,
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                    modifier = Modifier.padding(4.dp),
+                ) {
+                    val messageText = if (state.playerState.isVideoFinished) {
+                        stringResource(id = R.string.live_stream_video_ended)
+                    } else {
+                        stringResource(id = R.string.live_stream_recording_not_available)
+                    }
+
+                    Text(
+                        text = messageText,
+                        color = Color.White,
+                        style = AppTheme.typography.bodySmall,
+                        textAlign = TextAlign.Center,
+                    )
+                }
             }
         }
     }

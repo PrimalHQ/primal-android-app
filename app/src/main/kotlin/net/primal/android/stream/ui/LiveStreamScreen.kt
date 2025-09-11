@@ -129,6 +129,7 @@ fun LiveStreamScreen(
     callbacks: LiveStreamContract.ScreenCallbacks,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
+    onRetry: () -> Unit,
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -183,6 +184,7 @@ fun LiveStreamScreen(
         zapHostState = zapHostState,
         sharedTransitionScope = sharedTransitionScope,
         animatedVisibilityScope = animatedVisibilityScope,
+        onRetry = onRetry,
     )
 }
 
@@ -196,6 +198,7 @@ private fun LiveStreamScaffold(
     callbacks: LiveStreamContract.ScreenCallbacks,
     snackbarHostState: SnackbarHostState,
     zapHostState: ZapHostState,
+    onRetry: () -> Unit,
 ) {
     if (state.activeBottomSheet != ActiveBottomSheet.None) {
         BackHandler {
@@ -243,6 +246,7 @@ private fun LiveStreamScaffold(
                     },
                     sharedTransitionScope = sharedTransitionScope,
                     animatedVisibilityScope = animatedVisibilityScope,
+                    onRetry = onRetry,
                 )
 
                 LiveStreamBottomSheet(
@@ -340,6 +344,7 @@ private fun StreamPlayer(
     onQuoteStreamClick: (String) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
+    onRetry: () -> Unit,
 ) {
     val fullScreenController = rememberFullScreenController()
 
@@ -396,6 +401,7 @@ private fun StreamPlayer(
                 eventPublisher(LiveStreamContract.UiEvent.RequestDeleteStream)
             },
             onToggleFullScreenClick = { fullScreenController.toggle() },
+            onRetry = onRetry,
         )
     }
 }
@@ -458,6 +464,7 @@ private fun LiveStreamContent(
     onChatSettingsClick: () -> Unit,
     onChatMessageClick: (ChatMessageUi) -> Unit,
     onZapMessageClick: (EventZapUiModel) -> Unit,
+    onRetry: () -> Unit,
 ) {
     val isInPipMode = rememberIsInPipMode()
     val localConfiguration = LocalConfiguration.current
@@ -482,6 +489,7 @@ private fun LiveStreamContent(
                 onQuoteStreamClick = callbacks.onQuoteStreamClick,
                 sharedTransitionScope = sharedTransitionScope,
                 animatedVisibilityScope = animatedVisibilityScope,
+                onRetry = onRetry,
             )
 
             if (localConfiguration.orientation != Configuration.ORIENTATION_LANDSCAPE && !isInPipMode) {

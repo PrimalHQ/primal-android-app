@@ -5,12 +5,19 @@ import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -36,6 +43,7 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import net.primal.android.R
+import net.primal.android.core.compose.ShadowIcon
 import net.primal.android.core.ext.onDragDownBeyond
 import net.primal.android.core.pip.LocalPiPManager
 import net.primal.android.core.pip.rememberIsInPipMode
@@ -65,6 +73,7 @@ fun LiveStreamPlayer(
     onReportContentClick: (ReportType) -> Unit,
     onRequestDeleteClick: () -> Unit,
     onToggleFullScreenClick: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     playerModifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
@@ -118,6 +127,7 @@ fun LiveStreamPlayer(
         onRequestDeleteClick = onRequestDeleteClick,
         onSoundClick = onSoundClick,
         onToggleFullScreenClick = onToggleFullScreenClick,
+        onRetry = onRetry,
     )
 }
 
@@ -147,6 +157,7 @@ private fun PlayerBox(
     onRequestDeleteClick: () -> Unit,
     onSoundClick: () -> Unit,
     onToggleFullScreenClick: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     val localConfiguration = LocalConfiguration.current
     val isInPipMode = rememberIsInPipMode()
@@ -181,30 +192,53 @@ private fun PlayerBox(
             Modifier.resolvePlayerSizingModifier(orientation = localConfiguration.orientation, scope = this)
         }
 
-        if (state.isStreamUnavailable || state.playerState.isVideoFinished) {
-            val messageText = if (state.playerState.isVideoFinished) {
-                stringResource(id = R.string.live_stream_video_ended)
-            } else {
-                stringResource(id = R.string.live_stream_recording_not_available)
-            }
-
-            Text(
-                text = messageText,
-                style = AppTheme.typography.bodyLarge,
-                color = Color.White,
+        val playerAndMessageModifier = playerModifier
+            .then(playerSizingModifier)
+            .onDragDownBeyond(
+                threshold = 100.dp,
+                onTriggered = onClose,
             )
+
+        if (state.streamInfo?.streamUrl.isNullOrEmpty() ||
+            state.isStreamUnavailable || state.playerState.isVideoFinished
+        ) {
+            Column(
+                modifier = playerAndMessageModifier
+                    .fillMaxSize()
+                    .padding(top = 13.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+            ) {
+                val messageText = if (state.playerState.isVideoFinished) {
+                    stringResource(id = R.string.live_stream_video_ended)
+                } else {
+                    stringResource(id = R.string.live_stream_recording_not_available)
+                }
+
+                Text(
+                    text = messageText,
+                    style = AppTheme.typography.bodyLarge,
+                    color = Color.White,
+                )
+
+                if (state.isStreamUnavailable && !state.playerState.isVideoFinished) {
+                    IconButton(onClick = onRetry) {
+                        ShadowIcon(
+                            modifier = Modifier.size(30.dp),
+                            tint = Color.White,
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = stringResource(id = R.string.live_stream_retry_button),
+                        )
+                    }
+                }
+            }
         } else {
             PlayerSurface(
-                modifier = playerModifier
-                    .then(playerSizingModifier)
+                modifier = playerAndMessageModifier
                     .then(
                         Modifier.onGloballyPositioned { layoutCoordinates ->
                             pipManager.sourceRectHint = layoutCoordinates.boundsInWindow().toAndroidRectF().toRect()
                         },
-                    )
-                    .onDragDownBeyond(
-                        threshold = 100.dp,
-                        onTriggered = onClose,
                     )
                     .matchParentSize(),
                 player = mediaController,
