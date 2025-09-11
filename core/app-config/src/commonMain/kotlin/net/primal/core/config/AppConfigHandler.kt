@@ -9,18 +9,18 @@ import net.primal.core.config.api.WellKnownApi
 import net.primal.core.config.store.AppConfigDataStore
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.core.utils.debouncer.Debouncer
+import net.primal.core.utils.updater.Updater
 import net.primal.domain.common.exception.NetworkException
 
 class AppConfigHandler internal constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val appConfigStore: AppConfigDataStore,
     private val wellKnownApi: WellKnownApi,
-) : Debouncer() {
+) : Updater() {
 
     private val fetchMutex = Mutex()
 
-    override suspend fun doWork(): Result<Unit> {
+    override suspend fun doUpdate(): Result<Unit> {
         fetchMutex.withLock {
             return withContext(dispatcherProvider.io()) {
                 val response = fetchAppConfigOrNull()

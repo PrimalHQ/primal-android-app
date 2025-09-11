@@ -15,7 +15,7 @@ import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.Result
 import net.primal.core.utils.asSha256Hash
-import net.primal.core.utils.debouncer.Debouncer
+import net.primal.core.utils.updater.Updater
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.mutes.MutedItemRepository
@@ -36,9 +36,9 @@ class UserDataUpdater @AssistedInject constructor(
     private val mutedItemRepository: MutedItemRepository,
     private val nostrNotary: NostrNotary,
     private val pushNotificationsTokenUpdater: PushNotificationsTokenUpdater,
-) : Debouncer() {
+) : Updater() {
 
-    override suspend fun doWork(): Result<Unit> {
+    override suspend fun doUpdate(): Result<Unit> {
         activeAccountStore.activeUserAccount().let { activeAccount ->
             if (activeAccount.nostrWallet != null || activeAccount.primalWallet != null) {
                 runCatching { migrateWalletData(userAccount = activeAccount) }

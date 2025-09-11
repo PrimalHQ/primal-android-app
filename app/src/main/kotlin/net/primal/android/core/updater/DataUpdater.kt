@@ -1,6 +1,7 @@
 package net.primal.android.core.updater
 
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
@@ -12,6 +13,7 @@ import net.primal.core.config.AppConfigHandler
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.usecase.UpdateStaleStreamDataUseCase
 
+@Singleton
 class DataUpdater @Inject constructor(
     dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
@@ -28,9 +30,9 @@ class DataUpdater @Inject constructor(
 
     fun updateData() =
         scope.launch {
-            userDataUpdater?.invokeWithDebounce(30.minutes)
-            appConfigHandler.invokeWithDebounce(30.minutes)
-            updateStaleStreamDataUseCase.invokeWithDebounce(30.minutes)
+            userDataUpdater?.updateWithDebounce(30.minutes)
+            appConfigHandler.updateWithDebounce(30.minutes)
+            updateStaleStreamDataUseCase.updateWithDebounce(30.minutes)
         }
 
     private fun observeActiveAccount() =
