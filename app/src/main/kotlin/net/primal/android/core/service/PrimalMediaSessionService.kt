@@ -15,23 +15,19 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.google.common.util.concurrent.ListenableFuture
-import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import net.primal.android.MainActivity
-import net.primal.android.core.service.di.MediaSessionServiceEntryPoint
 
+@AndroidEntryPoint
 class PrimalMediaSessionService : MediaSessionService() {
 
-    private lateinit var playerManager: PlayerManager
+    @Inject
+    lateinit var playerManager: PlayerManager
 
     private var mediaSession: MediaSession? = null
 
     override fun onCreate() {
-        val entryPoint = EntryPointAccessors.fromApplication(
-            applicationContext,
-            MediaSessionServiceEntryPoint::class.java,
-        )
-        playerManager = entryPoint.playerManager()
-
         super.onCreate()
         val player = playerManager.createPlayer(this)
         mediaSession = buildMediaSession(player)

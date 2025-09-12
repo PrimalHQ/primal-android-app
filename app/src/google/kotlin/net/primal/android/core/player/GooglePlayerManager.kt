@@ -50,14 +50,8 @@ class GooglePlayerManager @Inject constructor() : PlayerManager {
             val mediaSourceFactory = DefaultMediaSourceFactory(context).setDataSourceFactory(dataSourceFactory)
             playerBuilder.setMediaSourceFactory(mediaSourceFactory)
 
-            val version = try {
-                engine.versionString
-            } catch (_: Exception) {
-                "unknown"
-            }
+            val version = runCatching { engine.versionString }.getOrElse { "unknown" }
             analyticsListener.setCronetInfo(version)
-
-            Timber.i("Cronet enabled for media playback: $version")
         }.onFailure {
             Timber.w(it, "Cronet is not available. Using default HTTP stack for media playback.")
         }.getOrNull()
