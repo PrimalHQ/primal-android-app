@@ -342,8 +342,8 @@ dependencies {
     implementation(libs.media3.exoplayer.hls)
     implementation(libs.media3.exoplayer.ui)
     implementation(libs.media3.exoplayer.ui.compose)
-    implementation(libs.media3.datasource.cronet)
-    implementation(libs.google.play.services.cronet)
+    "googleImplementation"(libs.media3.datasource.cronet)
+    "googleImplementation"(libs.google.play.services.cronet)
     implementation(libs.zoomimage.compose.coil3)
 
     implementation(libs.lottie.compose)

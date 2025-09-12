@@ -27,8 +27,9 @@ import com.google.common.util.concurrent.ListenableFuture
 import java.io.IOException
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import net.primal.android.BuildConfig
 import net.primal.android.MainActivity
+import net.primal.android.networking.UserAgentProvider
+import net.primal.core.utils.AndroidBuildConfig
 import org.chromium.net.CronetEngine
 import timber.log.Timber
 
@@ -151,7 +152,7 @@ class PrimalMediaSessionService : MediaSessionService() {
                 .enableHttp2(true)
                 .enableQuic(true)
                 .enableBrotli(true)
-                .setUserAgent("PrimalAndroid/${BuildConfig.VERSION_NAME}")
+                .setUserAgent("${UserAgentProvider.APP_NAME}/${AndroidBuildConfig}")
                 .build()
         }.onSuccess { engine ->
             val executor = Executors.newSingleThreadExecutor()
