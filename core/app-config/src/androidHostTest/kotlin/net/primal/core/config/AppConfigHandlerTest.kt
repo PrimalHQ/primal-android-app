@@ -24,7 +24,7 @@ class AppConfigHandlerTest {
     fun whenUpdateWithDebounceIsCalledMultipleTimesWithinDebounceValue_fetchIsPerformedOnlyOnce() =
         runTest {
             val wellKnownApi = mockk<WellKnownApi>(relaxed = true)
-            val appConfigHandler = AppConfigHandlerImpl(
+            val appConfigHandler = AppConfigHandler(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,
                 appConfigStore = mockk(relaxed = true),
                 wellKnownApi = wellKnownApi,
@@ -53,7 +53,7 @@ class AppConfigHandlerTest {
 //                    )
 //                )
             }
-            val appConfigHandler = AppConfigHandlerImpl(
+            val appConfigHandler = AppConfigHandler(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,
                 appConfigStore = mockk(relaxed = true),
                 wellKnownApi = wellKnownApi,
@@ -78,7 +78,7 @@ class AppConfigHandlerTest {
 
             val appConfigPersistence = FakeDataStore(initialValue = DEFAULT_APP_CONFIG)
 
-            val appConfigHandler = AppConfigHandlerImpl(
+            val appConfigHandler = AppConfigHandler(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,
                 appConfigStore = AppConfigDataStore(
                     dispatcherProvider = coroutinesTestRule.dispatcherProvider,
@@ -99,7 +99,7 @@ class AppConfigHandlerTest {
     fun overrideCacheUrl_callsOverrideCacheUrlOnAppConfigStore_withCorrectUrl() =
         runTest {
             val appConfigStore = mockk<AppConfigDataStore>(relaxed = true)
-            val appConfigHandler = AppConfigHandlerImpl(
+            val appConfigHandler = AppConfigHandler(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,
                 appConfigStore = appConfigStore,
                 wellKnownApi = mockk<WellKnownApi>(relaxed = true),
@@ -123,7 +123,7 @@ class AppConfigHandlerTest {
     fun restoreDefaultCacheUrl_callsRevertCacheUrlOverrideFlag() =
         runTest {
             val appConfigStore = mockk<AppConfigDataStore>(relaxed = true)
-            val appConfigHandler = AppConfigHandlerImpl(
+            val appConfigHandler = AppConfigHandler(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,
                 appConfigStore = appConfigStore,
                 wellKnownApi = mockk<WellKnownApi>(relaxed = true),
@@ -150,7 +150,7 @@ class AppConfigHandlerTest {
             }
 
             val appConfigPersistence = FakeDataStore(initialValue = DEFAULT_APP_CONFIG)
-            val appConfigHandler = AppConfigHandlerImpl(
+            val appConfigHandler = AppConfigHandler(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,
                 appConfigStore = AppConfigDataStore(
                     dispatcherProvider = coroutinesTestRule.dispatcherProvider,
@@ -172,7 +172,7 @@ class AppConfigHandlerTest {
                 coEvery { fetchApiConfig() } throws IOException()
             }
             val appConfigPersistence = FakeDataStore(initialValue = DEFAULT_APP_CONFIG.copy(cacheUrl = "fake"))
-            val appConfigHandler = AppConfigHandlerImpl(
+            val appConfigHandler = AppConfigHandler(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,
                 appConfigStore = AppConfigDataStore(
                     dispatcherProvider = coroutinesTestRule.dispatcherProvider,

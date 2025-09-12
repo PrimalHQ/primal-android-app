@@ -15,6 +15,8 @@ interface StreamRepository {
 
     suspend fun getStream(aTag: String): Result<Stream>
 
+    suspend fun getStaleStreamNaddrs(): List<Naddr>
+
     /**
      * Starts a live stream subscription and begins collecting events in a background [Job].
      *

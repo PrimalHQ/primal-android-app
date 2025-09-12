@@ -317,6 +317,16 @@ class LiveStreamViewModel @AssistedInject constructor(
                         setState { copy(isStreamUnavailable = true) }
                     }
 
+                    UiEvent.OnRetryStream -> {
+                        setState {
+                            copy(
+                                isStreamUnavailable = false,
+                                playerState = playerState.copy(isVideoFinished = false),
+                            )
+                        }
+                        startLiveStreamSubscription()
+                    }
+
                     UiEvent.OnVideoEnded -> {
                         setState { copy(playerState = playerState.copy(isVideoFinished = true, isPlaying = false)) }
                     }
@@ -428,7 +438,6 @@ class LiveStreamViewModel @AssistedInject constructor(
                     setState {
                         copy(
                             streamInfoLoading = false,
-                            isStreamUnavailable = false,
                             playerState = playerState.copy(
                                 isLive = isLive,
                                 atLiveEdge = isLive,
@@ -448,6 +457,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 atag = stream.aTag,
                                 eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
+                                image = stream.imageUrl,
                                 streamUrl = streamUrlToPlay,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,

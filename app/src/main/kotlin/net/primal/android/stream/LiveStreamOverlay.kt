@@ -14,21 +14,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.lifecycle.compose.LifecycleStartEffect
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.session.MediaController
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.collectLatest
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.animatableSaver
-import net.primal.android.core.video.rememberPrimalStreamExoPlayer
+import net.primal.android.core.pip.LocalPiPManager
+import net.primal.android.core.pip.rememberIsInPipMode
+import net.primal.android.core.service.rememberManagedMediaController
 import net.primal.android.navigation.navigateToChat
 import net.primal.android.navigation.navigateToProfileEditor
 import net.primal.android.navigation.navigateToProfileQrCodeViewer
@@ -83,75 +85,85 @@ fun LiveStreamOverlay(
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 private fun LiveStreamOverlay(
     viewModel: LiveStreamViewModel,
     navController: NavHostController,
     noteCallbacks: NoteCallbacks,
 ) {
+    val pipManager = LocalPiPManager.current
+    val isInPipMode = rememberIsInPipMode()
     val streamState = LocalStreamState.current
     val uiState = viewModel.state.collectAsState()
 
-    val exoPlayer = rememberPrimalStreamExoPlayer(
+    LaunchedEffect(isInPipMode) {
+        if (isInPipMode) {
+            if (streamState.mode is StreamMode.Minimized) {
+                streamState.expand()
+            }
+        }
+    }
+
+    val mediaController = rememberManagedMediaController(
         streamNaddr = viewModel.streamNaddr,
-        onIsPlayingChanged = { exoPlayer, isPlaying ->
+        onIsPlayingChanged = { currentPosition, isPlaying ->
+            pipManager.shouldEnterPiPMode = isPlaying
             viewModel.setEvent(
-                UiEvent.OnPlayerStateUpdate(isPlaying = isPlaying, currentTime = exoPlayer.currentPosition),
+                UiEvent.OnPlayerStateUpdate(isPlaying = isPlaying, currentTime = currentPosition),
             )
         },
-        onPlaybackStateChanged = { exoPlayer, playbackState ->
+        onPlaybackStateChanged = { duration, playbackState ->
             viewModel.setEvent(
                 UiEvent.OnPlayerStateUpdate(isBuffering = playbackState == Player.STATE_BUFFERING),
             )
             when (playbackState) {
                 Player.STATE_READY -> {
-                    exoPlayer.duration.takeIf { it > 0L }?.let { duration ->
+                    duration?.takeIf { it > 0L }?.let { duration ->
                         viewModel.setEvent(UiEvent.OnPlayerStateUpdate(totalDuration = duration))
                     }
                 }
 
                 Player.STATE_ENDED -> {
+                    pipManager.shouldEnterPiPMode = false
                     viewModel.setEvent(UiEvent.OnVideoEnded)
                 }
             }
         },
         onPlayerError = {
+            pipManager.shouldEnterPiPMode = false
             viewModel.setEvent(UiEvent.OnVideoUnavailable)
         },
     )
 
-    LifecycleStartEffect(exoPlayer) {
-        onStopOrDispose {
-            exoPlayer.pause()
-        }
-    }
-
     BackHandler(enabled = streamState.mode is StreamMode.Expanded) {
         if (uiState.value.playerState.isVideoFinished) {
-            exoPlayer.stop()
+            mediaController?.stop()
             streamState.stop()
         } else {
             streamState.minimize()
         }
     }
 
-    LaunchedEffect(streamState, streamState.commands, exoPlayer) {
+    LaunchedEffect(streamState, streamState.commands, mediaController) {
         streamState.commands.collect { command ->
             when (command) {
-                PlayerCommand.Play -> exoPlayer.play()
-                PlayerCommand.Pause -> exoPlayer.pause()
+                PlayerCommand.Play -> mediaController?.play()
+                PlayerCommand.Pause -> mediaController?.pause()
             }
         }
     }
 
-    LiveStreamAnimatedContent(
-        streamState = streamState,
-        navController = navController,
-        noteCallbacks = noteCallbacks,
-        viewModel = viewModel,
-        uiState = uiState,
-        exoPlayer = exoPlayer,
-    )
+    mediaController?.let {
+        LiveStreamAnimatedContent(
+            streamState = streamState,
+            navController = navController,
+            noteCallbacks = noteCallbacks,
+            viewModel = viewModel,
+            uiState = uiState,
+            mediaController = it,
+        )
+    }
 }
 
 @OptIn(UnstableApi::class)
@@ -162,7 +174,7 @@ private fun LiveStreamAnimatedContent(
     noteCallbacks: NoteCallbacks,
     viewModel: LiveStreamViewModel,
     uiState: State<LiveStreamContract.UiState>,
-    exoPlayer: ExoPlayer,
+    mediaController: MediaController,
 ) {
     val localDensity = LocalDensity.current
     val displayMetrics = LocalContext.current.resources.displayMetrics
@@ -192,28 +204,38 @@ private fun LiveStreamAnimatedContent(
                     LiveStreamScreen(
                         eventPublisher = viewModel::setEvent,
                         state = uiState.value,
-                        exoPlayer = exoPlayer,
+                        mediaController = mediaController,
                         callbacks = callbacks,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this,
+                        onRetry = {
+                            viewModel.setEvent(UiEvent.OnRetryStream)
+                            mediaController.prepare()
+                            mediaController.play()
+                        },
                     )
                 }
 
                 is StreamMode.Minimized, is StreamMode.Hidden -> {
                     LiveStreamMiniPlayer(
                         state = uiState.value,
-                        exoPlayer = exoPlayer,
+                        mediaController = mediaController,
                         offsetX = offsetX,
                         offsetY = offsetY,
                         isAtTop = isAtTop,
                         isAtBottom = isAtBottom,
                         onExpandStream = { streamState.expand() },
                         onStopStream = {
-                            exoPlayer.stop()
+                            mediaController.clearMediaItems()
                             streamState.stop()
                         },
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this,
+                        onRetry = {
+                            viewModel.setEvent(UiEvent.OnRetryStream)
+                            mediaController.prepare()
+                            mediaController.play()
+                        },
                     )
                 }
 
@@ -275,6 +297,7 @@ private fun rememberLiveStreamScreenCallbacks(
                         NostrEventKind.LiveActivity.value -> {
                             streamState.start(uri)
                         }
+
                         NostrEventKind.LongFormContent.value -> {
                             noteCallbacks.onArticleClick?.invoke(uri)
                             streamState.minimize()

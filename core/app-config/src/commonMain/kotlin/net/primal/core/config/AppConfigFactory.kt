@@ -53,7 +53,7 @@ object AppConfigFactory {
     }
 
     fun createAppConfigHandler(): AppConfigHandler {
-        return AppConfigHandlerImpl(
+        return AppConfigHandler(
             dispatcherProvider = dispatcherProvider,
             appConfigStore = appConfigDataStore,
             wellKnownApi = wellKnownApi,

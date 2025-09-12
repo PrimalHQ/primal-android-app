@@ -56,7 +56,7 @@ interface LiveStreamContract {
         val isLive: Boolean = false,
         val isVideoFinished: Boolean = false,
     ) {
-        val isLoading: Boolean get() = isBuffering && !isPlaying
+        val isLoading: Boolean get() = isBuffering
     }
 
     data class StreamInfoUi(
@@ -65,6 +65,7 @@ interface LiveStreamContract {
         val title: String,
         val streamUrl: String,
         val viewers: Int,
+        val image: String?,
         val startedAt: Long?,
         val description: String?,
         val rawNostrEventJson: String,
@@ -112,6 +113,7 @@ interface LiveStreamContract {
         data object OnVideoUnavailable : UiEvent()
         data object OnVideoEnded : UiEvent()
         data class ChangeActiveBottomSheet(val sheet: ActiveBottomSheet) : UiEvent()
+        data object OnRetryStream : UiEvent()
     }
 
     sealed class SideEffect {

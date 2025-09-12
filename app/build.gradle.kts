@@ -53,8 +53,8 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     )
 }
 
-val appVersionCode = 2627
-val appVersionName = "2.5.8"
+val appVersionCode = 2630
+val appVersionName = "2.5.11"
 
 tasks.register("generateReleaseProperties") {
     doLast {
@@ -337,10 +337,13 @@ dependencies {
     implementation(libs.telephoto.zoomable.peek.overlay)
     implementation(libs.telephoto.zoomable.image.coil)
     implementation(libs.media3.decoder)
+    implementation(libs.media3.session)
     implementation(libs.media3.exoplayer.core)
     implementation(libs.media3.exoplayer.hls)
     implementation(libs.media3.exoplayer.ui)
     implementation(libs.media3.exoplayer.ui.compose)
+    "googleImplementation"(libs.media3.datasource.cronet)
+    "googleImplementation"(libs.google.play.services.cronet)
     implementation(libs.zoomimage.compose.coil3)
 
     implementation(libs.lottie.compose)
