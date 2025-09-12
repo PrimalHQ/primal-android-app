@@ -24,9 +24,12 @@ import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrNull
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.utils.extractNoteId
 import net.primal.domain.nostr.utils.extractProfileId
+import net.primal.domain.nostr.utils.takeAsNaddrOrNull
 import net.primal.domain.nostr.utils.takeAsNaddrStringOrNull
 import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.profile.ProfileRepository
@@ -79,19 +82,19 @@ class ProfileQrCodeViewModel @Inject constructor(
     private fun processQrCodeResult(result: QrCodeResult) =
         viewModelScope.launch {
             when (result.type) {
-                QrCodeDataType.NPUB -> processProfileId(profileId = result.value.bech32ToHexOrThrow())
+                QrCodeDataType.NPUB -> result.value.bech32ToHexOrNull()?.let { processProfileId(profileId = it) }
 
                 QrCodeDataType.NPUB_URI,
                 QrCodeDataType.NPROFILE_URI,
                 QrCodeDataType.NPROFILE,
                 -> result.value.extractProfileId()?.let { processProfileId(profileId = it) }
 
-                QrCodeDataType.NADDR -> processLiveStream(naddr = result.value)
-                QrCodeDataType.NADDR_URI -> result.value.takeAsNaddrStringOrNull()?.let { processLiveStream(naddr = it) }
+                QrCodeDataType.NADDR -> processNaddr(naddr = result.value)
+                QrCodeDataType.NADDR_URI -> result.value.takeAsNaddrStringOrNull()?.let { processNaddr(naddr = it) }
 
-                QrCodeDataType.NEVENT -> processNoteId(noteId = result.value.bech32ToHexOrThrow())
+                QrCodeDataType.NEVENT -> result.value.bech32ToHexOrNull()?.let { processNoteId(noteId = it) }
                 QrCodeDataType.NEVENT_URI -> result.value.extractNoteId()?.let { processNoteId(noteId = it) }
-                QrCodeDataType.NOTE -> processNoteId(noteId = result.value.bech32ToHexOrThrow())
+                QrCodeDataType.NOTE -> result.value.bech32ToHexOrNull()?.let { processNoteId(noteId = it) }
                 QrCodeDataType.NOTE_URI -> result.value.extractNoteId()?.let { processNoteId(noteId = it) }
 
                 QrCodeDataType.LNBC,
@@ -127,7 +130,19 @@ class ProfileQrCodeViewModel @Inject constructor(
         setEffect(SideEffect.NostrNoteDetected(noteId = noteId))
     }
 
-    private fun processLiveStream(naddr: String) {
-        setEffect(SideEffect.NostrLiveStreamDetected(naddr = naddr))
+    private fun processNaddr(naddr: String) {
+        val naddrObject = naddr.takeAsNaddrOrNull()
+        when (naddrObject?.kind) {
+            NostrEventKind.LiveActivity.value -> {
+                setEffect(SideEffect.NostrLiveStreamDetected(naddr = naddr))
+            }
+            NostrEventKind.LongFormContent.value -> {
+                // TODO: Add article processing when article viewer is implemented
+                // For now, we'll ignore articles as requested in the comment
+            }
+            else -> {
+                // Ignore unsupported naddr kinds
+            }
+        }
     }
 }
