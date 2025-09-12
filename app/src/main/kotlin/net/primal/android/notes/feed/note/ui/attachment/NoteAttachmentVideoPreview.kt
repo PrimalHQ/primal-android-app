@@ -1,5 +1,8 @@
 package net.primal.android.notes.feed.note.ui.attachment
 
+import android.graphics.SurfaceTexture
+import android.view.Surface
+import android.view.TextureView
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,7 +30,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.ui.PlayerView
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -100,7 +102,7 @@ private fun AutoPlayVideo(
         exoPlayer.volume = if (isMuted) 0f else 1f
     }
 
-    DisposableEffect(Unit) {
+    DisposableEffect(exoPlayer) {
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 isBuffering = playbackState == Player.STATE_BUFFERING
@@ -125,15 +127,39 @@ private fun AutoPlayVideo(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
+        DisposableEffect(exoPlayer) {
+            onDispose {
+                exoPlayer.clearVideoSurface()
+            }
+        }
         AndroidView(
             modifier = Modifier
                 .fillMaxSize()
                 .clickable { onVideoClick(exoPlayer.currentPosition) },
-            factory = { ctx ->
-                PlayerView(ctx).apply {
-                    player = exoPlayer
-                    useController = false
-                    resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+            factory = { context ->
+                TextureView(context).apply {
+                    surfaceTextureListener = object : TextureView.SurfaceTextureListener {
+                        override fun onSurfaceTextureAvailable(
+                            surface: SurfaceTexture,
+                            width: Int,
+                            height: Int,
+                        ) {
+                            exoPlayer.setVideoSurface(Surface(surface))
+                        }
+
+                        override fun onSurfaceTextureSizeChanged(
+                            surface: SurfaceTexture,
+                            width: Int,
+                            height: Int,
+                        ) = Unit
+
+                        override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
+                            exoPlayer.clearVideoSurface()
+                            return true
+                        }
+
+                        override fun onSurfaceTextureUpdated(surface: SurfaceTexture) = Unit
+                    }
                 }
             },
         )
