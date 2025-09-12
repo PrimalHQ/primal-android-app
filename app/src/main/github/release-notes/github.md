@@ -6,6 +6,7 @@
 - Implemented updating stale live streams (#656)
 - Improved connectivity indicator to avoid false positives
 - Improved video unavailable handling on streams (#650)
+- Use cronet for streaming videos for Google builds (#658)
 - Fixed padding on summary in article details header
 - Fixed generating share stream & article links (#651)
 - Fixed deep-linking crashes
