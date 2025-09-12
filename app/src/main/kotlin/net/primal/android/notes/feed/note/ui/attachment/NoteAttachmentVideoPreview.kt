@@ -24,6 +24,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -88,19 +91,34 @@ private fun AutoPlayVideo(
     var isMuted by remember(userPrefersSound) { mutableStateOf(!userPrefersSound) }
     var isBuffering by remember { mutableStateOf(true) }
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+    var isResumed by remember {
+        mutableStateOf(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
+    }
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            when (event) {
+                Lifecycle.Event.ON_RESUME -> isResumed = true
+                Lifecycle.Event.ON_PAUSE -> isResumed = false
+                else -> Unit
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+
     LaunchedEffect(eventUri.url) {
         val mediaUrl = eventUri.variants?.firstOrNull()?.mediaUrl ?: eventUri.url
-        exoPlayer.setMediaItem(MediaItem.fromUri(mediaUrl))
-        exoPlayer.repeatMode = Player.REPEAT_MODE_ALL
-        exoPlayer.playWhenReady = true
-        exoPlayer.prepare()
+        exoPlayer.apply {
+            setMediaItem(MediaItem.fromUri(mediaUrl))
+            repeatMode = Player.REPEAT_MODE_ALL
+            playWhenReady = true
+            prepare()
+        }
     }
 
-    LaunchedEffect(isMuted) {
-        exoPlayer.volume = if (isMuted) 0f else 1f
-    }
-
-    DisposableEffect(Unit) {
+    DisposableEffect(exoPlayer) {
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 isBuffering = playbackState == Player.STATE_BUFFERING
@@ -109,12 +127,14 @@ private fun AutoPlayVideo(
         exoPlayer.addListener(listener)
         onDispose {
             exoPlayer.removeListener(listener)
+            exoPlayer.stop()
             exoPlayer.release()
         }
     }
 
-    LaunchedEffect(playing) {
-        if (playing) {
+    LaunchedEffect(playing, isResumed, isMuted) {
+        exoPlayer.volume = if (isMuted) 0f else 1f
+        if (playing && isResumed) {
             exoPlayer.play()
         } else {
             exoPlayer.pause()
@@ -139,9 +159,7 @@ private fun AutoPlayVideo(
         )
 
         if (isBuffering) {
-            PrimalLoadingSpinner(
-                size = 48.dp,
-            )
+            PrimalLoadingSpinner(size = 48.dp)
         }
 
         AudioButton(
