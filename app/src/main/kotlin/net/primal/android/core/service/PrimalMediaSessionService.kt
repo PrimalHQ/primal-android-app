@@ -5,37 +5,36 @@ import android.content.Context
 import android.content.Intent
 import androidx.annotation.OptIn
 import androidx.core.net.toUri
-import androidx.media3.common.AudioAttributes
-import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.common.Player.COMMAND_SEEK_TO_NEXT
 import androidx.media3.common.Player.COMMAND_SEEK_TO_NEXT_MEDIA_ITEM
 import androidx.media3.common.Player.COMMAND_SEEK_TO_PREVIOUS
 import androidx.media3.common.Player.COMMAND_SEEK_TO_PREVIOUS_MEDIA_ITEM
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 import com.google.common.util.concurrent.ListenableFuture
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import net.primal.android.MainActivity
 
+@AndroidEntryPoint
 class PrimalMediaSessionService : MediaSessionService() {
+
+    @Inject
+    lateinit var playerManager: PlayerManager
 
     private var mediaSession: MediaSession? = null
 
     override fun onCreate() {
         super.onCreate()
+        val player = playerManager.createPlayer(this)
+        mediaSession = buildMediaSession(player)
+    }
 
-        val audioAttributes = AudioAttributes.Builder()
-            .setUsage(C.USAGE_MEDIA)
-            .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE)
-            .build()
-
-        val player = ExoPlayer.Builder(this)
-            .setAudioAttributes(audioAttributes, true)
-            .build()
-
-        mediaSession = MediaSession.Builder(this, player)
+    private fun buildMediaSession(player: Player): MediaSession {
+        return MediaSession.Builder(this, player)
             .setCallback(
                 object : MediaSession.Callback {
                     @OptIn(UnstableApi::class)
@@ -106,7 +105,7 @@ class PrimalMediaSessionService : MediaSessionService() {
             release()
             mediaSession = null
         }
-
+        playerManager.cleanup()
         super.onDestroy()
     }
 }
