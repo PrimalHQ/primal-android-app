@@ -53,6 +53,7 @@ fun ProfileQrCodeViewerScreen(viewModel: ProfileQrCodeViewModel, callbacks: Prof
                 is ProfileQrCodeContract.SideEffect.NostrProfileDetected -> callbacks.onProfileScan(it.profileId)
                 is ProfileQrCodeContract.SideEffect.NostrNoteDetected -> callbacks.onNoteScan(it.noteId)
                 is ProfileQrCodeContract.SideEffect.NostrLiveStreamDetected -> callbacks.onLiveStreamScan(it.naddr)
+                is ProfileQrCodeContract.SideEffect.NostrArticleDetected -> callbacks.onArticleScan(it.naddr)
                 is ProfileQrCodeContract.SideEffect.WalletTxDetected -> callbacks.onDraftTxScan(it.draftTx)
                 is ProfileQrCodeContract.SideEffect.PromoCodeDetected -> callbacks.onPromoCodeScan(it.promoCode)
             }
@@ -215,6 +216,7 @@ private fun PreviewProfileQrCodeViewerScreen() {
                     onProfileScan = {},
                     onNoteScan = {},
                     onLiveStreamScan = {},
+                    onArticleScan = {},
                     onDraftTxScan = {},
                     onPromoCodeScan = {},
                 ),

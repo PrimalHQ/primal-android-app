@@ -2383,8 +2383,12 @@ private fun NavGraphBuilder.profileQrCodeViewer(
                     navController.navigateToThread(noteId)
                 },
                 onLiveStreamScan = { naddr ->
-                    navController.popBackStack()
                     streamState.start(naddr)
+                    navController.popBackStack()
+                },
+                onArticleScan = { naddr ->
+                    navController.popBackStack()
+                    navController.navigateToArticleDetails(naddr)
                 },
                 onDraftTxScan = { draftTx ->
                     navController.popBackStack()

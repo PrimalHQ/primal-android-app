@@ -137,8 +137,7 @@ class ProfileQrCodeViewModel @Inject constructor(
                 setEffect(SideEffect.NostrLiveStreamDetected(naddr = naddr))
             }
             NostrEventKind.LongFormContent.value -> {
-                // TODO: Add article processing when article viewer is implemented
-                // For now, we'll ignore articles as requested in the comment
+                setEffect(SideEffect.NostrArticleDetected(naddr = naddr))
             }
             else -> {
                 // Ignore unsupported naddr kinds
