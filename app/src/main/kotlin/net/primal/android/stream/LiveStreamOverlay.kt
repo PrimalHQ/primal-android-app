@@ -295,7 +295,6 @@ private fun rememberLiveStreamScreenCallbacks(
                 if (naddr != null) {
                     when (naddr.kind) {
                         NostrEventKind.LiveActivity.value -> {
-                            android.util.Log.d("PRIMAL_QR", "🚀 NOSTR URI CLICK: Live stream clicked with uri: $uri")
                             streamState.start(uri)
                         }
 
