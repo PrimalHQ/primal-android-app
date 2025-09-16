@@ -70,6 +70,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.media3.session.MediaController
 import java.text.NumberFormat
 import kotlinx.coroutines.CoroutineScope
@@ -336,6 +337,7 @@ private fun LiveStreamBottomSheet(
 
 @Composable
 private fun StreamPlayer(
+    modifier: Modifier = Modifier,
     state: LiveStreamContract.UiState,
     streamInfo: LiveStreamContract.StreamInfoUi,
     mediaController: MediaController,
@@ -350,6 +352,7 @@ private fun StreamPlayer(
 
     with(sharedTransitionScope) {
         LiveStreamPlayer(
+            modifier = modifier,
             playerModifier = Modifier
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_PLAYER_KEY),
@@ -481,6 +484,7 @@ private fun LiveStreamContent(
                 .padding(paddingValues),
         ) {
             StreamPlayer(
+                modifier = Modifier.zIndex(1f),
                 state = state,
                 streamInfo = streamInfo,
                 mediaController = mediaController,

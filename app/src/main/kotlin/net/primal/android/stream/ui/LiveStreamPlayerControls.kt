@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -25,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,6 +40,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -351,7 +352,7 @@ private fun PlayerActionButtons(
 private fun PlayerSlider(
     modifier: Modifier = Modifier,
     isLiveAtEdge: Boolean,
-    @Suppress("UnusedParameter") isInteractive: Boolean,
+    isInteractive: Boolean,
     sliderValue: Float,
     valueRangeEnd: Float,
     onValueChange: (Float) -> Unit,
@@ -382,12 +383,29 @@ private fun PlayerSlider(
             onValueChange = onValueChange,
             onValueChangeFinished = onValueChangeFinished,
             valueRange = 0f..valueRangeEnd,
-            enabled = false,
-            thumb = { },
+            enabled = isInteractive,
+            colors = SliderDefaults.colors(
+                thumbColor = AppTheme.colorScheme.primary,
+                activeTrackColor = Color.Transparent,
+                inactiveTrackColor = Color.Transparent,
+            ),
+            thumb = {
+                if (isInteractive) {
+                    Box(
+                        modifier = Modifier
+                            .zIndex(1f)
+                            .padding(top = 3.5.dp)
+                            .size(8.dp)
+                            .background(
+                                color = AppTheme.colorScheme.primary,
+                                shape = CircleShape,
+                            ),
+                    )
+                }
+            },
             track = { sliderState ->
-                CustomTrackWithThumb(
+                CustomTrack(
                     sliderState = sliderState,
-                    isInteractive = false,
                     isLiveAtEdge = isLiveAtEdge,
                 )
             },
@@ -398,11 +416,7 @@ private fun PlayerSlider(
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CustomTrackWithThumb(
-    sliderState: SliderState,
-    isInteractive: Boolean,
-    isLiveAtEdge: Boolean,
-) {
+private fun CustomTrack(sliderState: SliderState, isLiveAtEdge: Boolean) {
     val inactiveTrackColor = Color.White.copy(alpha = 0.3f)
     val activeTrackColor = AppTheme.colorScheme.primary
     val thumbColor = AppTheme.colorScheme.primary
@@ -419,35 +433,24 @@ private fun CustomTrackWithThumb(
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .height(9.dp),
+            .height(8.dp),
         contentAlignment = Alignment.CenterStart,
     ) {
         Box(
             modifier = Modifier
                 .height(2.dp)
                 .fillMaxWidth()
-                .background(color = inactiveTrackColor),
+                .background(color = inactiveTrackColor)
+                .align(Alignment.Center),
         )
 
         Box(
             modifier = Modifier
                 .height(2.dp)
                 .fillMaxWidth(fraction = activeFraction)
-                .background(color = if (isLiveAtEdge) thumbColor else activeTrackColor),
+                .background(color = if (isLiveAtEdge) thumbColor else activeTrackColor)
+                .align(Alignment.CenterStart),
         )
-
-        if (isInteractive) {
-            Box(
-                modifier = Modifier
-                    .offset(x = maxWidth * activeFraction - 4.5.dp),
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(9.dp)
-                        .background(thumbColor, CircleShape),
-                )
-            }
-        }
     }
 }
 
