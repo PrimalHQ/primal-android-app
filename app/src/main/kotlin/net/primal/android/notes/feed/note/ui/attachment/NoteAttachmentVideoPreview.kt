@@ -25,8 +25,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -39,6 +37,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Mute
 import net.primal.android.core.compose.icons.primaliconpack.Play
 import net.primal.android.core.compose.icons.primaliconpack.Unmute
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.video.rememberPrimalExoPlayer
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
@@ -91,21 +90,12 @@ private fun AutoPlayVideo(
     var isMuted by remember(userPrefersSound) { mutableStateOf(!userPrefersSound) }
     var isBuffering by remember { mutableStateOf(true) }
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    var isResumed by remember {
-        mutableStateOf(lifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
-    }
-
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> isResumed = true
-                Lifecycle.Event.ON_PAUSE -> isResumed = false
-                else -> Unit
-            }
+    DisposableLifecycleObserverEffect(key1 = exoPlayer) { event ->
+        when (event) {
+            Lifecycle.Event.ON_RESUME -> if (playing) exoPlayer.play()
+            Lifecycle.Event.ON_PAUSE -> exoPlayer.pause()
+            else -> Unit
         }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     LaunchedEffect(eventUri.url) {
@@ -132,9 +122,9 @@ private fun AutoPlayVideo(
         }
     }
 
-    LaunchedEffect(playing, isResumed, isMuted) {
+    LaunchedEffect(playing, isMuted) {
         exoPlayer.volume = if (isMuted) 0f else 1f
-        if (playing && isResumed) {
+        if (playing) {
             exoPlayer.play()
         } else {
             exoPlayer.pause()
