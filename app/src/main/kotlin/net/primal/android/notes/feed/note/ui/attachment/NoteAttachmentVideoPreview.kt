@@ -117,7 +117,6 @@ private fun AutoPlayVideo(
         exoPlayer.addListener(listener)
         onDispose {
             exoPlayer.removeListener(listener)
-            exoPlayer.stop()
             exoPlayer.release()
         }
     }
