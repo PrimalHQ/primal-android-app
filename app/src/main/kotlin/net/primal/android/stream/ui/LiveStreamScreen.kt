@@ -44,6 +44,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -644,8 +645,14 @@ private fun LiveChatContent(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(state.chatItems.size) {
-        if (state.chatItems.isNotEmpty()) {
+    val isUserAtBottom by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex < 2
+        }
+    }
+
+    LaunchedEffect(state.chatItems) {
+        if (isUserAtBottom && state.chatItems.isNotEmpty()) {
             coroutineScope.launch {
                 listState.animateScrollToItem(0)
             }
