@@ -1,16 +1,20 @@
 package net.primal.android.stream.ui
 
-import android.annotation.SuppressLint
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -18,29 +22,37 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.setProgress
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -58,7 +70,9 @@ import net.primal.android.stream.LiveStreamContract
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
 
-@OptIn(ExperimentalMaterial3Api::class)
+private const val SECONDS_IN_A_MINUTE = 60
+private val ControlsVerticalOverlap = (-20).dp
+
 @Composable
 fun LiveStreamPlayerControls(
     modifier: Modifier = Modifier,
@@ -112,22 +126,31 @@ fun LiveStreamPlayerControls(
                         .align(Alignment.Center),
                     isPlaying = state.playerState.isPlaying,
                     isLive = state.playerState.isLive,
+                    isBuffering = state.playerState.isBuffering,
                     onRewind = onRewind,
                     onPlayPauseClick = onPlayPauseClick,
                     onForward = onForward,
                 )
 
-                BottomControls(
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth(),
-                    state = state.playerState,
-                    onSeek = onSeek,
-                    onGoToLive = onGoToLive,
-                    onSeekStarted = onSeekStarted,
-                    onSoundClick = onSoundClick,
-                    onFullscreenClick = onToggleFullScreenClick,
-                )
+                Popup(
+                    alignment = Alignment.BottomCenter,
+                    properties = PopupProperties(
+                        focusable = false,
+                        dismissOnBackPress = false,
+                        dismissOnClickOutside = false,
+                        clippingEnabled = false,
+                    ),
+                ) {
+                    BottomControls(
+                        modifier = Modifier.fillMaxWidth(),
+                        state = state.playerState,
+                        onSeek = onSeek,
+                        onGoToLive = onGoToLive,
+                        onSeekStarted = onSeekStarted,
+                        onSoundClick = onSoundClick,
+                        onFullscreenClick = onToggleFullScreenClick,
+                    )
+                }
             }
         }
     }
@@ -193,53 +216,60 @@ private fun CenterPlayerControls(
     modifier: Modifier,
     isPlaying: Boolean,
     isLive: Boolean,
+    isBuffering: Boolean,
     onRewind: () -> Unit,
     onPlayPauseClick: () -> Unit,
     onForward: () -> Unit,
 ) {
-    Row(
+    AnimatedVisibility(
         modifier = modifier,
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically,
+        visible = !isBuffering,
+        enter = fadeIn(),
+        exit = fadeOut(),
     ) {
-        if (!isLive) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (!isLive) {
+                IconButton(
+                    onClick = onRewind,
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
+                ) {
+                    Icon(
+                        modifier = Modifier.size(42.dp),
+                        imageVector = PrimalIcons.VideoBack,
+                        contentDescription = stringResource(id = R.string.accessibility_rewind_10_seconds),
+                    )
+                }
+            }
             IconButton(
-                onClick = onRewind,
+                onClick = onPlayPauseClick,
                 colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
             ) {
                 Icon(
-                    modifier = Modifier.size(42.dp),
-                    imageVector = PrimalIcons.VideoBack,
-                    contentDescription = stringResource(id = R.string.accessibility_rewind_10_seconds),
+                    modifier = Modifier.size(64.dp),
+                    imageVector = if (isPlaying) PrimalIcons.VideoPause else PrimalIcons.VideoPlay,
+                    contentDescription = stringResource(id = R.string.accessibility_play_pause),
                 )
             }
-        }
-        IconButton(
-            onClick = onPlayPauseClick,
-            colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
-        ) {
-            Icon(
-                modifier = Modifier.size(64.dp),
-                imageVector = if (isPlaying) PrimalIcons.VideoPause else PrimalIcons.VideoPlay,
-                contentDescription = stringResource(id = R.string.accessibility_play_pause),
-            )
-        }
-        if (!isLive) {
-            IconButton(
-                onClick = onForward,
-                colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
-            ) {
-                Icon(
-                    modifier = Modifier.size(42.dp),
-                    imageVector = PrimalIcons.VideoForward,
-                    contentDescription = stringResource(id = R.string.accessibility_forward_10_seconds),
-                )
+            if (!isLive) {
+                IconButton(
+                    onClick = onForward,
+                    colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
+                ) {
+                    Icon(
+                        modifier = Modifier.size(42.dp),
+                        imageVector = PrimalIcons.VideoForward,
+                        contentDescription = stringResource(id = R.string.accessibility_forward_10_seconds),
+                    )
+                }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomControls(
     modifier: Modifier = Modifier,
@@ -250,22 +280,31 @@ private fun BottomControls(
     onSoundClick: () -> Unit,
     onFullscreenClick: () -> Unit,
 ) {
-    var localSeekPosition by remember(state.currentTime) { mutableLongStateOf(state.currentTime) }
-    val sliderPosition = if (state.isSeeking) localSeekPosition else state.currentTime
     val isInteractive = state.totalDuration > 0 && (!state.isLive || !state.atLiveEdge)
+    val totalDuration = state.totalDuration.takeIf { it > 0L } ?: 1L
 
-    val valueRangeEnd = (state.totalDuration.takeIf { it > 0L } ?: 1L).toFloat()
-    val sliderValue = if (state.isLive && state.atLiveEdge) {
-        valueRangeEnd
+    val progress = if (state.isLive && state.atLiveEdge) {
+        1f
     } else {
-        sliderPosition.toFloat()
+        (state.currentTime.toFloat() / totalDuration).coerceIn(0f, 1f)
     }
 
-    Column(modifier = modifier) {
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val bottomPadding = if (isLandscape) 20.dp else 0.dp
+
+    Column(
+        modifier = modifier.padding(
+            start = bottomPadding,
+            bottom = bottomPadding,
+            end = bottomPadding,
+        ),
+        verticalArrangement = Arrangement.spacedBy(ControlsVerticalOverlap),
+    ) {
         PlayerActionButtons(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
+                .padding(horizontal = 16.dp),
             isLive = state.isLive,
             isAtLiveEdge = state.atLiveEdge,
             isMuted = state.isMuted,
@@ -274,23 +313,24 @@ private fun BottomControls(
             onFullscreenClick = onFullscreenClick,
         )
 
-        PlayerSlider(
-            modifier = Modifier.fillMaxWidth(),
-            isLiveAtEdge = state.isLive && state.atLiveEdge,
+        PrimalSeekBar(
+            progress = progress,
             isInteractive = isInteractive,
-            sliderValue = sliderValue,
-            valueRangeEnd = valueRangeEnd,
-            onValueChange = { newPosition ->
+            onScrub = { newProgress ->
                 if (isInteractive) {
                     if (!state.isSeeking) onSeekStarted()
-                    localSeekPosition = newPosition.toLong()
+                    val newPosition = (newProgress * totalDuration).toLong()
+                    onSeek(newPosition)
                 }
             },
-            onValueChangeFinished = {
-                if (isInteractive) {
-                    onSeek(localSeekPosition)
+            onScrubEnd = {
+                if (state.isSeeking) {
+                    val finalPosition = (progress * totalDuration).toLong()
+                    onSeek(finalPosition)
                 }
             },
+            totalDurationMs = state.totalDuration,
+            currentTimeMs = state.currentTime,
         )
     }
 }
@@ -347,111 +387,158 @@ private fun PlayerActionButtons(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PlayerSlider(
-    modifier: Modifier = Modifier,
-    isLiveAtEdge: Boolean,
+private fun PrimalSeekBar(
+    progress: Float,
     isInteractive: Boolean,
-    sliderValue: Float,
-    valueRangeEnd: Float,
-    onValueChange: (Float) -> Unit,
-    onValueChangeFinished: () -> Unit,
+    onScrub: (Float) -> Unit,
+    onScrubEnd: () -> Unit,
+    modifier: Modifier = Modifier,
+    totalDurationMs: Long,
+    currentTimeMs: Long,
 ) {
-    val configuration = LocalConfiguration.current
-    val sliderHeight = if (configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-        20.dp
-    } else {
-        0.dp
+    val accessibleDescription = stringResource(
+        id = R.string.accessibility_live_stream_seek_bar,
+        formatDuration(currentTimeMs),
+        formatDuration(totalDurationMs),
+    )
+
+    var isDragging by remember { mutableStateOf(false) }
+    var visualTarget by remember { mutableFloatStateOf(progress) }
+
+    LaunchedEffect(progress, isDragging) {
+        if (!isDragging) {
+            visualTarget = progress
+        }
     }
 
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Slider(
-            modifier = Modifier
-                .padding(
-                    start = sliderHeight,
-                    end = sliderHeight,
-                    bottom = sliderHeight,
-                )
-                .weight(1f)
-                .height(0.dp),
-            value = sliderValue,
-            onValueChange = onValueChange,
-            onValueChangeFinished = onValueChangeFinished,
-            valueRange = 0f..valueRangeEnd,
-            enabled = isInteractive,
-            colors = SliderDefaults.colors(
-                thumbColor = AppTheme.colorScheme.primary,
-                activeTrackColor = Color.Transparent,
-                inactiveTrackColor = Color.Transparent,
-            ),
-            thumb = {
+    val visualProgress by animateFloatAsState(
+        targetValue = visualTarget,
+        animationSpec = if (isDragging) snap() else spring(),
+        label = "SeekBarVisualProgress",
+    )
+
+    val touchableAreaHeight = 32.dp
+
+    Box(
+        modifier = modifier
+            .semantics(mergeDescendants = true) {
+                contentDescription = accessibleDescription
                 if (isInteractive) {
-                    Box(
-                        modifier = Modifier
-                            .zIndex(1f)
-                            .padding(top = 3.5.dp)
-                            .size(8.dp)
-                            .background(
-                                color = AppTheme.colorScheme.primary,
-                                shape = CircleShape,
-                            ),
-                    )
+                    setProgress { target ->
+                        visualTarget = target
+                        onScrub(target)
+                        onScrubEnd()
+                        true
+                    }
                 }
-            },
-            track = { sliderState ->
-                CustomTrack(
-                    sliderState = sliderState,
-                    isLiveAtEdge = isLiveAtEdge,
+            }
+            .pointerInput(isInteractive) {
+                if (!isInteractive) return@pointerInput
+                detectTapGestures { offset ->
+                    val newProgress = (offset.x / size.width).coerceIn(0f, 1f)
+                    isDragging = false
+                    visualTarget = newProgress
+                    onScrub(newProgress)
+                    onScrubEnd()
+                }
+            }
+            .pointerInput(isInteractive) {
+                if (!isInteractive) return@pointerInput
+                detectDragGestures(
+                    onDragStart = { offset ->
+                        isDragging = true
+                        val newProgress = (offset.x / size.width).coerceIn(0f, 1f)
+                        visualTarget = newProgress
+                        onScrub(newProgress)
+                    },
+                    onDrag = { change, _ ->
+                        change.consume()
+                        val newProgress = (change.position.x / size.width).coerceIn(0f, 1f)
+                        visualTarget = newProgress
+                        onScrub(newProgress)
+                    },
+                    onDragEnd = {
+                        isDragging = false
+                        onScrubEnd()
+                    },
+                    onDragCancel = {
+                        isDragging = false
+                        onScrubEnd()
+                    },
                 )
-            },
+            }
+            .fillMaxWidth()
+            .height(touchableAreaHeight),
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        SeekBarTrack(
+            visualProgress = visualProgress,
+            isInteractive = isInteractive,
         )
     }
 }
 
-@SuppressLint("UnusedBoxWithConstraintsScope")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun CustomTrack(sliderState: SliderState, isLiveAtEdge: Boolean) {
+private fun SeekBarTrack(
+    modifier: Modifier = Modifier,
+    visualProgress: Float,
+    isInteractive: Boolean,
+) {
     val inactiveTrackColor = Color.White.copy(alpha = 0.3f)
     val activeTrackColor = AppTheme.colorScheme.primary
     val thumbColor = AppTheme.colorScheme.primary
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
-    val activeFraction = if (sliderState.valueRange.endInclusive > sliderState.valueRange.start) {
-        (
-            (sliderState.value - sliderState.valueRange.start) /
-                (sliderState.valueRange.endInclusive - sliderState.valueRange.start)
-            )
-    } else {
-        0f
-    }
+    val trackHeight = 3.dp
+    val thumbRadius = 8.dp
 
-    BoxWithConstraints(
-        modifier = Modifier
+    Canvas(
+        modifier = modifier
             .fillMaxWidth()
-            .height(8.dp),
-        contentAlignment = Alignment.CenterStart,
+            .height(trackHeight),
     ) {
-        Box(
-            modifier = Modifier
-                .height(2.dp)
-                .fillMaxWidth()
-                .background(color = inactiveTrackColor)
-                .align(Alignment.Center),
+        val trackY = center.y
+        val trackStroke = trackHeight.toPx()
+        val canvasWidth = size.width
+
+        drawLine(
+            color = inactiveTrackColor,
+            start = Offset(0f, trackY),
+            end = Offset(canvasWidth, trackY),
+            strokeWidth = trackStroke,
+            cap = StrokeCap.Round,
         )
 
-        Box(
-            modifier = Modifier
-                .height(2.dp)
-                .fillMaxWidth(fraction = activeFraction)
-                .background(color = if (isLiveAtEdge) thumbColor else activeTrackColor)
-                .align(Alignment.CenterStart),
+        val progressPx = (visualProgress * canvasWidth).coerceIn(0f, canvasWidth)
+        val (startPx, endPx) = if (isRtl) {
+            Pair(canvasWidth, canvasWidth - progressPx)
+        } else {
+            Pair(0f, progressPx)
+        }
+        drawLine(
+            color = activeTrackColor,
+            start = Offset(startPx, trackY),
+            end = Offset(endPx, trackY),
+            strokeWidth = trackStroke,
+            cap = StrokeCap.Round,
         )
+
+        if (isInteractive) {
+            val thumbX = if (isRtl) canvasWidth - progressPx else progressPx
+            drawCircle(
+                color = thumbColor,
+                radius = thumbRadius.toPx(),
+                center = Offset(thumbX, trackY),
+            )
+        }
     }
+}
+
+private fun formatDuration(millis: Long): String {
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(millis)
+    val seconds = TimeUnit.MILLISECONDS.toSeconds(millis) % SECONDS_IN_A_MINUTE
+    return String.format(Locale.ROOT, "%02d:%02d", minutes, seconds)
 }
 
 @Composable
@@ -466,8 +553,7 @@ private fun LiveIndicator(modifier: Modifier = Modifier, isAtLiveEdge: Boolean) 
         Box(
             modifier = Modifier
                 .size(size = 8.dp)
-                .clip(CircleShape)
-                .background(indicatorColor),
+                .background(indicatorColor, shape = AppTheme.shapes.extraLarge),
         )
         Text(
             text = stringResource(id = R.string.live_stream_live_indicator).uppercase(),
