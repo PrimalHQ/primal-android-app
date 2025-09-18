@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -96,61 +97,68 @@ fun LiveStreamPlayerControls(
     onRequestDeleteClick: () -> Unit,
     onToggleFullScreenClick: () -> Unit,
 ) {
-    AnimatedVisibility(
-        modifier = modifier,
-        visible = isVisible,
-        enter = fadeIn(),
-        exit = fadeOut(),
-    ) {
-        Box(modifier = Modifier.background(Color.Black.copy(alpha = 0.5f))) {
-            TopPlayerControls(
+    Box(modifier = modifier) {
+        AnimatedVisibility(
+            visible = isVisible,
+            enter = fadeIn(),
+            exit = fadeOut(),
+        ) {
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter)
-                    .padding(horizontal = 8.dp),
-                state = state,
-                menuVisible = menuVisible,
-                onMenuVisibilityChange = onMenuVisibilityChange,
-                onClose = onClose,
-                onQuoteClick = onQuoteClick,
-                onMuteUserClick = onMuteUserClick,
-                onUnmuteUserClick = onUnmuteUserClick,
-                onReportContentClick = onReportContentClick,
-                onRequestDeleteClick = onRequestDeleteClick,
-            )
-
-            if (!isStreamUnavailable) {
-                CenterPlayerControls(
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+            ) {
+                TopPlayerControls(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.Center),
-                    isPlaying = state.playerState.isPlaying,
-                    isLive = state.playerState.isLive,
-                    isBuffering = state.playerState.isBuffering,
-                    onRewind = onRewind,
-                    onPlayPauseClick = onPlayPauseClick,
-                    onForward = onForward,
+                        .align(Alignment.TopCenter)
+                        .padding(horizontal = 8.dp),
+                    state = state,
+                    menuVisible = menuVisible,
+                    onMenuVisibilityChange = onMenuVisibilityChange,
+                    onClose = onClose,
+                    onQuoteClick = onQuoteClick,
+                    onMuteUserClick = onMuteUserClick,
+                    onUnmuteUserClick = onUnmuteUserClick,
+                    onReportContentClick = onReportContentClick,
+                    onRequestDeleteClick = onRequestDeleteClick,
                 )
 
-                Popup(
-                    alignment = Alignment.BottomCenter,
-                    properties = PopupProperties(
-                        focusable = false,
-                        dismissOnBackPress = false,
-                        dismissOnClickOutside = false,
-                        clippingEnabled = false,
-                    ),
-                ) {
-                    BottomControls(
-                        modifier = Modifier.fillMaxWidth(),
-                        state = state.playerState,
-                        onSeek = onSeek,
-                        onGoToLive = onGoToLive,
-                        onSeekStarted = onSeekStarted,
-                        onSoundClick = onSoundClick,
-                        onFullscreenClick = onToggleFullScreenClick,
+                if (!isStreamUnavailable) {
+                    CenterPlayerControls(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.Center),
+                        isPlaying = state.playerState.isPlaying,
+                        isLive = state.playerState.isLive,
+                        isBuffering = state.playerState.isBuffering,
+                        onRewind = onRewind,
+                        onPlayPauseClick = onPlayPauseClick,
+                        onForward = onForward,
                     )
                 }
+            }
+        }
+
+        if (isVisible && !isStreamUnavailable) {
+            Popup(
+                alignment = Alignment.BottomCenter,
+                properties = PopupProperties(
+                    focusable = false,
+                    dismissOnBackPress = false,
+                    dismissOnClickOutside = false,
+                    clippingEnabled = false,
+                ),
+            ) {
+                BottomControls(
+                    modifier = Modifier.fillMaxWidth(),
+                    state = state.playerState,
+                    onSeek = onSeek,
+                    onGoToLive = onGoToLive,
+                    onSeekStarted = onSeekStarted,
+                    onSoundClick = onSoundClick,
+                    onFullscreenClick = onToggleFullScreenClick,
+                )
             }
         }
     }
