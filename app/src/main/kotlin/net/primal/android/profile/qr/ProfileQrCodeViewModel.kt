@@ -79,6 +79,7 @@ class ProfileQrCodeViewModel @Inject constructor(
                 }
         }
 
+    @Suppress("CyclomaticComplexMethod")
     private fun processQrCodeResult(result: QrCodeResult) =
         viewModelScope.launch {
             when (result.type) {
