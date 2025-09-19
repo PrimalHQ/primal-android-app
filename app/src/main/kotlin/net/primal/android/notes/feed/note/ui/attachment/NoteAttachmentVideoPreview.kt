@@ -121,13 +121,16 @@ private fun AutoPlayVideo(
         }
     }
 
-    LaunchedEffect(playing, isMuted) {
-        exoPlayer.volume = if (isMuted) 0f else 1f
+    LaunchedEffect(playing) {
         if (playing) {
             exoPlayer.play()
         } else {
             exoPlayer.pause()
         }
+    }
+
+    LaunchedEffect(isMuted) {
+        exoPlayer.volume = if (isMuted) 0f else 1f
     }
 
     Box(
