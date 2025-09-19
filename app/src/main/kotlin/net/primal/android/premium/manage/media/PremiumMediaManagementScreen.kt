@@ -140,7 +140,7 @@ fun PremiumMediaManagementScreen(
 
             items(
                 items = state.mediaItems,
-                key = { it.mediaId },
+                key = { it.mediaId.ifBlank { it.mediaUrl }.ifBlank { it.hashCode() } },
             ) { item ->
                 PrimalDivider()
                 MediaListItem(
