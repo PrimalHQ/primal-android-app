@@ -1284,6 +1284,7 @@
     <string name="accessibility_copy_content">Copy content</string>
     <string name="accessibility_warning">Warning</string>
     <string name="accessibility_feed_reorder_drag_handle">Drag feed to change order</string>
+    <string name="accessibility_primal_seek_bar">Seek bar. Current position %1$s of %2$s.</string>
 
     <string name="article_feed_no_content">Articles will show up here.</string>
     <string name="article_feed_reading_time">%1$s min read</string>
@@ -1383,7 +1384,6 @@
     <string name="live_stream_zapped">zapped</string>
     <string name="live_stream_leaderboard_sats_suffix">sats</string>
     <string name="live_stream_retry_button">Retry</string>
-    <string name="accessibility_live_stream_seek_bar">Seek bar. Current position %1$s of %2$s.</string>
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>
