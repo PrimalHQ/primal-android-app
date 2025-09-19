@@ -82,9 +82,7 @@ fun LiveStreamPlayer(
     var controlsVisible by remember { mutableStateOf(false) }
     var menuVisible by remember { mutableStateOf(false) }
 
-    if (state.playerState.isPlaying) {
-        KeepScreenOn()
-    }
+    KeepScreenOn(enabled = state.playerState.isPlaying)
 
     LaunchedEffect(streamUrl) {
         val currentMediaItemUri = mediaController.currentMediaItem?.localConfiguration?.uri?.toString()

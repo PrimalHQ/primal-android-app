@@ -14,3 +14,16 @@ fun KeepScreenOn() {
         }
     }
 }
+
+@Composable
+fun KeepScreenOn(enabled: Boolean) {
+    val currentView = LocalView.current
+    DisposableEffect(enabled) {
+        if (enabled) {
+            currentView.keepScreenOn = true
+        }
+        onDispose {
+            currentView.keepScreenOn = false
+        }
+    }
+}
