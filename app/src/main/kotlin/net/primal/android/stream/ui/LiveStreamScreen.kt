@@ -645,14 +645,14 @@ private fun LiveChatContent(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    val isUserAtBottom by remember {
+    val isChatShowingLatestContent by remember {
         derivedStateOf {
             listState.firstVisibleItemIndex < 2
         }
     }
 
     LaunchedEffect(state.chatItems) {
-        if (isUserAtBottom && state.chatItems.isNotEmpty()) {
+        if (isChatShowingLatestContent && state.chatItems.isNotEmpty()) {
             coroutineScope.launch {
                 listState.animateScrollToItem(0)
             }
