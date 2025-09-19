@@ -44,6 +44,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import net.primal.android.R
 import net.primal.android.core.compose.ShadowIcon
+import net.primal.android.core.compose.foundation.KeepScreenOn
 import net.primal.android.core.ext.onDragDownBeyond
 import net.primal.android.core.pip.LocalPiPManager
 import net.primal.android.core.pip.rememberIsInPipMode
@@ -80,6 +81,8 @@ fun LiveStreamPlayer(
 ) {
     var controlsVisible by remember { mutableStateOf(false) }
     var menuVisible by remember { mutableStateOf(false) }
+
+    KeepScreenOn(enabled = state.playerState.isPlaying)
 
     LaunchedEffect(streamUrl) {
         val currentMediaItemUri = mediaController.currentMediaItem?.localConfiguration?.uri?.toString()
