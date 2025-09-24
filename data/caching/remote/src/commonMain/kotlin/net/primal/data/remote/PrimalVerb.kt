@@ -74,6 +74,7 @@ enum class PrimalVerb(val id: String) {
     PROMO_CODES_REDEEM("promo_codes_redeem"),
     LIVE_FEED("live_feed"),
     LIVE_EVENTS_FROM_FOLLOWS("live_events_from_follows"),
+    FIND_LIVE_EVENTS("find_live_events"),
     REPLACEABLE_EVENT("replaceable_event"),
     PARAMETRIZED_REPLACEABLE_EVENT("parametrized_replaceable_event"),
     PARAMETRIZED_REPLACEABLE_EVENTS("parametrized_replaceable_events"),
