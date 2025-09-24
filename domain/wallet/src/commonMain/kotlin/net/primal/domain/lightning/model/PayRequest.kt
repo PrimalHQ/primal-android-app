@@ -1,4 +1,4 @@
-package net.primal.domain.nostr.lightning.model
+package net.primal.domain.lightning.model
 
 import kotlinx.serialization.Serializable
 

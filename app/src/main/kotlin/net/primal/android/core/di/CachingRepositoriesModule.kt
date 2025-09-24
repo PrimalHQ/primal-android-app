@@ -7,7 +7,6 @@ import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.core.networking.primal.PrimalApiClient
-import net.primal.data.remote.api.lightning.LightningApi
 import net.primal.data.repository.factory.PrimalRepositoryFactory
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.events.EventInteractionRepository
@@ -20,7 +19,6 @@ import net.primal.domain.links.EventUriRepository
 import net.primal.domain.messages.ChatRepository
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.MessageCipher
-import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.posts.FeedRepository
@@ -145,10 +143,6 @@ object CachingRepositoriesModule {
     @Provides
     fun provideUserDataCleanupRepository(): UserDataCleanupRepository =
         PrimalRepositoryFactory.createUserDataCleanupRepository()
-
-    @Provides
-    fun providesLightningRepository(lightningApi: LightningApi): LightningRepository =
-        PrimalRepositoryFactory.createLightningRepository(lightningApi = lightningApi)
 
     @Provides
     fun provideStreamRepository(

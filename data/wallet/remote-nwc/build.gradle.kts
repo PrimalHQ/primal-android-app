@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.touchlab.skie)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.ktorfit)
 }
 
 private val xcfName = "PrimalDataWalletRemoteNwc"
@@ -18,7 +20,7 @@ kotlin {
     }
 
     // JVM Target
-    jvm("desktop")
+//    jvm("desktop")
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
@@ -48,6 +50,15 @@ kotlin {
                 implementation(libs.okio)
                 implementation(libs.napier)
 
+                // Serialization
+                implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.io)
+
+                // Ktorfit
+                implementation(libs.ktorfit.light)
+                implementation(libs.ktorfit.converters.response)
+                implementation(libs.ktorfit.converters.call)
+
                 // Interop
                 implementation(libs.skie.configuration.annotations)
             }
@@ -75,9 +86,9 @@ kotlin {
             }
         }
 
-        val desktopMain by getting
-        desktopMain.dependencies {
-        }
+//        val desktopMain by getting
+//        desktopMain.dependencies {
+//        }
     }
 
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
