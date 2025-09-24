@@ -9,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,11 +29,8 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupProperties
 import net.primal.android.R
 import net.primal.android.core.compose.AppBarIcon
-import net.primal.android.core.compose.PrimalSeekBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.FullScreen
 import net.primal.android.core.compose.icons.primaliconpack.FullScreenRestore
@@ -50,8 +46,6 @@ import net.primal.android.stream.LiveStreamContract
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
 
-private val ControlsVerticalOverlap = (-20).dp
-
 @Composable
 fun LiveStreamPlayerControls(
     modifier: Modifier = Modifier,
@@ -66,8 +60,6 @@ fun LiveStreamPlayerControls(
     onSoundClick: () -> Unit,
     onGoToLive: () -> Unit,
     onClose: () -> Unit,
-    onSeek: (Long) -> Unit,
-    onSeekStarted: () -> Unit,
     onQuoteClick: (String) -> Unit,
     onMuteUserClick: () -> Unit,
     onUnmuteUserClick: () -> Unit,
@@ -115,28 +107,21 @@ fun LiveStreamPlayerControls(
                         onForward = onForward,
                     )
                 }
-            }
-        }
 
-        if (isVisible && !isStreamUnavailable) {
-            Popup(
-                alignment = Alignment.BottomCenter,
-                properties = PopupProperties(
-                    focusable = false,
-                    dismissOnBackPress = false,
-                    dismissOnClickOutside = false,
-                    clippingEnabled = false,
-                ),
-            ) {
-                BottomControls(
-                    modifier = Modifier.fillMaxWidth(),
-                    state = state.playerState,
-                    onSeek = onSeek,
-                    onGoToLive = onGoToLive,
-                    onSeekStarted = onSeekStarted,
-                    onSoundClick = onSoundClick,
-                    onFullscreenClick = onToggleFullScreenClick,
-                )
+                if (!isStreamUnavailable) {
+                    PlayerActionButtons(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomCenter)
+                            .padding(horizontal = 16.dp),
+                        isLive = state.playerState.isLive,
+                        isAtLiveEdge = state.playerState.atLiveEdge,
+                        isMuted = state.playerState.isMuted,
+                        onGoToLive = onGoToLive,
+                        onSoundClick = onSoundClick,
+                        onFullscreenClick = onToggleFullScreenClick,
+                    )
+                }
             }
         }
     }
@@ -257,71 +242,6 @@ private fun CenterPlayerControls(
 }
 
 @Composable
-private fun BottomControls(
-    modifier: Modifier = Modifier,
-    state: LiveStreamContract.PlayerState,
-    onSeek: (Long) -> Unit,
-    onGoToLive: () -> Unit,
-    onSeekStarted: () -> Unit,
-    onSoundClick: () -> Unit,
-    onFullscreenClick: () -> Unit,
-) {
-    val isInteractive = state.totalDuration > 0 && (!state.isLive || !state.atLiveEdge)
-    val totalDuration = state.totalDuration.takeIf { it > 0L } ?: 1L
-
-    val progress = if (state.isLive && state.atLiveEdge) {
-        1f
-    } else {
-        (state.currentTime.toFloat() / totalDuration).coerceIn(0f, 1f)
-    }
-
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-    val bottomPadding = if (isLandscape) 20.dp else 0.dp
-
-    Column(
-        modifier = modifier.padding(
-            start = bottomPadding,
-            bottom = bottomPadding,
-            end = bottomPadding,
-        ),
-        verticalArrangement = Arrangement.spacedBy(ControlsVerticalOverlap),
-    ) {
-        PlayerActionButtons(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            isLive = state.isLive,
-            isAtLiveEdge = state.atLiveEdge,
-            isMuted = state.isMuted,
-            onGoToLive = onGoToLive,
-            onSoundClick = onSoundClick,
-            onFullscreenClick = onFullscreenClick,
-        )
-
-        PrimalSeekBar(
-            progress = progress,
-            isInteractive = isInteractive,
-            onScrub = { newProgress ->
-                if (isInteractive) {
-                    if (!state.isSeeking) onSeekStarted()
-                    val newPosition = (newProgress * totalDuration).toLong()
-                    onSeek(newPosition)
-                }
-            },
-            onScrubEnd = {
-                if (state.isSeeking) {
-                    val finalPosition = (progress * totalDuration).toLong()
-                    onSeek(finalPosition)
-                }
-            },
-            totalDurationMs = state.totalDuration,
-            currentTimeMs = state.currentTime,
-        )
-    }
-}
-
-@Composable
 private fun PlayerActionButtons(
     modifier: Modifier = Modifier,
     isLive: Boolean,
@@ -340,8 +260,10 @@ private fun PlayerActionButtons(
         }
     }
 
+    val bottomPadding = if (localConfiguration.orientation == Configuration.ORIENTATION_LANDSCAPE) 40.dp else 10.dp
+
     Row(
-        modifier = modifier,
+        modifier = modifier.padding(bottom = bottomPadding),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         LiveIndicator(

@@ -5,10 +5,13 @@ package net.primal.android.stream.ui
 import android.content.Context
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -45,9 +48,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -72,7 +77,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.session.MediaController
 import java.text.NumberFormat
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
@@ -81,6 +88,7 @@ import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.compose.PrimalSeekBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
@@ -206,6 +214,16 @@ private fun LiveStreamScaffold(
         }
     }
 
+    var controlsVisible by remember { mutableStateOf(false) }
+    var menuVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(controlsVisible, menuVisible) {
+        if (controlsVisible && !menuVisible) {
+            delay(5.seconds)
+            controlsVisible = false
+        }
+    }
+
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
@@ -225,6 +243,11 @@ private fun LiveStreamScaffold(
                     eventPublisher = eventPublisher,
                     paddingValues = paddingValues,
                     callbacks = callbacks,
+                    controlsVisible = controlsVisible,
+                    menuVisible = menuVisible,
+                    playerHeight = playerHeight,
+                    onControlsVisibilityChange = { controlsVisible = !controlsVisible },
+                    onMenuVisibilityChange = { menuVisible = it },
                     onZapClick = { zapHostState.showZapOptionsOrShowWarning() },
                     onChatSettingsClick = {
                         eventPublisher(
@@ -339,9 +362,13 @@ private fun StreamPlayer(
     state: LiveStreamContract.UiState,
     streamInfo: LiveStreamContract.StreamInfoUi,
     mediaController: MediaController,
+    controlsVisible: Boolean,
+    menuVisible: Boolean,
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onClose: () -> Unit,
     onQuoteStreamClick: (String) -> Unit,
+    onControlsVisibilityChange: () -> Unit,
+    onMenuVisibilityChange: (Boolean) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
     onRetry: () -> Unit,
@@ -363,6 +390,8 @@ private fun StreamPlayer(
             state = state,
             mediaController = mediaController,
             streamUrl = streamInfo.streamUrl,
+            controlsVisible = controlsVisible,
+            menuVisible = menuVisible,
             onPlayPauseClick = { mediaController.toggle() },
             onRewind = {
                 eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
@@ -381,12 +410,8 @@ private fun StreamPlayer(
                 eventPublisher(LiveStreamContract.UiEvent.ToggleMute)
             },
             onClose = onClose,
-            onSeek = { positionMs ->
-                eventPublisher(LiveStreamContract.UiEvent.OnSeek(positionMs = positionMs))
-            },
-            onSeekStarted = {
-                eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
-            },
+            onControlsVisibilityChange = onControlsVisibilityChange,
+            onMenuVisibilityChange = onMenuVisibilityChange,
             onQuoteClick = onQuoteStreamClick,
             onMuteUserClick = {
                 state.streamInfo?.mainHostId?.let { eventPublisher(LiveStreamContract.UiEvent.MuteAction(it)) }
@@ -457,6 +482,11 @@ private fun LiveStreamContent(
     eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     paddingValues: PaddingValues,
     callbacks: LiveStreamContract.ScreenCallbacks,
+    controlsVisible: Boolean,
+    menuVisible: Boolean,
+    playerHeight: Dp,
+    onControlsVisibilityChange: () -> Unit,
+    onMenuVisibilityChange: (Boolean) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
     onZapClick: () -> Unit,
@@ -474,39 +504,121 @@ private fun LiveStreamContent(
 
     val streamInfo = state.streamInfo
     if (streamInfo != null) {
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AppTheme.colorScheme.surface)
                 .padding(paddingValues),
         ) {
-            StreamPlayer(
-                state = state,
-                streamInfo = streamInfo,
-                mediaController = mediaController,
-                eventPublisher = eventPublisher,
-                onClose = callbacks.onClose,
-                onQuoteStreamClick = callbacks.onQuoteStreamClick,
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope,
-                onRetry = onRetry,
-            )
-
-            if (localConfiguration.orientation != Configuration.ORIENTATION_LANDSCAPE && !isInPipMode) {
-                StreamInfoAndChatSection(
-                    modifier = Modifier.weight(1f),
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(AppTheme.colorScheme.surface),
+            ) {
+                StreamPlayer(
                     state = state,
+                    streamInfo = streamInfo,
+                    mediaController = mediaController,
+                    controlsVisible = controlsVisible,
+                    menuVisible = menuVisible,
                     eventPublisher = eventPublisher,
-                    onZapClick = onZapClick,
-                    onInfoClick = onInfoClick,
-                    onProfileClick = callbacks.onProfileClick,
-                    onNostrUriClick = callbacks.onNostrUriClick,
-                    onChatMessageClick = onChatMessageClick,
-                    onZapMessageClick = onZapMessageClick,
-                    onChatSettingsClick = onChatSettingsClick,
+                    onClose = callbacks.onClose,
+                    onQuoteStreamClick = callbacks.onQuoteStreamClick,
+                    onControlsVisibilityChange = onControlsVisibilityChange,
+                    onMenuVisibilityChange = onMenuVisibilityChange,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    onRetry = onRetry,
+                )
+
+                if (localConfiguration.orientation != Configuration.ORIENTATION_LANDSCAPE && !isInPipMode) {
+                    StreamInfoAndChatSection(
+                        modifier = Modifier.weight(1f),
+                        state = state,
+                        eventPublisher = eventPublisher,
+                        onZapClick = onZapClick,
+                        onInfoClick = onInfoClick,
+                        onProfileClick = callbacks.onProfileClick,
+                        onNostrUriClick = callbacks.onNostrUriClick,
+                        onChatMessageClick = onChatMessageClick,
+                        onZapMessageClick = onZapMessageClick,
+                        onChatSettingsClick = onChatSettingsClick,
+                    )
+                }
+            }
+
+            if (!isInPipMode) {
+                val isLandscape = localConfiguration.orientation == Configuration.ORIENTATION_LANDSCAPE
+                val seekBarModifier = if (isLandscape) {
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp, start = 32.dp, end = 32.dp)
+                } else {
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .padding(top = playerHeight - 16.dp)
+                }
+                StreamSeekBar(
+                    modifier = seekBarModifier,
+                    isVisible = controlsVisible,
+                    state = state,
+                    mediaController = mediaController,
+                    eventPublisher = eventPublisher,
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun StreamSeekBar(
+    modifier: Modifier = Modifier,
+    isVisible: Boolean,
+    state: LiveStreamContract.UiState,
+    mediaController: MediaController,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
+) {
+    AnimatedVisibility(
+        modifier = modifier,
+        visible = isVisible && !state.isStreamUnavailable,
+        enter = fadeIn(),
+        exit = fadeOut(),
+    ) {
+        val playerState = state.playerState
+        val isInteractive = playerState.totalDuration > 0 && (!playerState.isLive || !playerState.atLiveEdge)
+        val totalDuration = playerState.totalDuration.takeIf { it > 0L } ?: 1L
+
+        val progress = if (playerState.isLive && playerState.atLiveEdge) {
+            1f
+        } else {
+            (playerState.currentTime.toFloat() / totalDuration).coerceIn(0f, 1f)
+        }
+
+        PrimalSeekBar(
+            progress = progress,
+            isInteractive = isInteractive,
+            onScrub = { newProgress ->
+                if (isInteractive) {
+                    if (!playerState.isSeeking) {
+                        eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
+                    }
+                    val newPosition = (newProgress * totalDuration).toLong()
+                    mediaController.seekTo(newPosition)
+                    eventPublisher(LiveStreamContract.UiEvent.OnSeek(newPosition))
+                }
+            },
+            onScrubEnd = {
+                if (playerState.isSeeking) {
+                    val currentProgress = (playerState.currentTime.toFloat() / totalDuration).coerceIn(0f, 1f)
+                    val finalPosition = (currentProgress * totalDuration).toLong()
+                    mediaController.seekTo(finalPosition)
+                    eventPublisher(LiveStreamContract.UiEvent.OnSeek(finalPosition))
+                }
+            },
+            totalDurationMs = playerState.totalDuration,
+            currentTimeMs = playerState.currentTime,
+        )
     }
 }
 

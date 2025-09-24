@@ -121,7 +121,7 @@ fun PrimalSeekBar(
             }
             .fillMaxWidth()
             .height(touchableAreaHeight),
-        contentAlignment = Alignment.BottomCenter,
+        contentAlignment = Alignment.Center,
     ) {
         SeekBarTrack(
             visualProgress = visualProgress,
