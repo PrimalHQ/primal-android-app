@@ -13,17 +13,21 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 import net.primal.data.local.dao.streams.StreamFollowsCrossRef
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.stream.LiveStreamApi
+import net.primal.data.remote.api.stream.model.FindLiveStreamRequestBody
 import net.primal.data.remote.api.stream.model.LiveFeedResponse
 import net.primal.data.repository.mappers.local.asStreamDO
 import net.primal.data.repository.mappers.remote.asChatMessageDataDO
 import net.primal.data.repository.mappers.remote.asStreamData
 import net.primal.data.repository.mappers.remote.extractZapRequestOrNull
 import net.primal.data.repository.mappers.remote.mapAsEventZapDO
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.findFirstIdentifier
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.Stream
 import net.primal.domain.streams.StreamContentModerationMode
@@ -139,6 +143,31 @@ class StreamRepositoryImpl(
         database.streamFollows().observeStreamByOwnerId(ownerId = userId)
             .map { list -> list.map { it.asStreamDO() } }
             .distinctUntilChanged()
+
+    override suspend fun findStreamNaddr(hostPubkey: String, identifier: String): Result<Naddr> =
+        withContext(dispatcherProvider.io()) {
+            runCatching {
+                val response = liveStreamApi.findLiveStream(
+                    body = FindLiveStreamRequestBody(hostPubkey = hostPubkey, identifier = identifier),
+                )
+                val liveActivity = response.liveActivity ?: throw NetworkException("Live stream event not found.")
+                val dTag = liveActivity.tags.findFirstIdentifier()
+                    ?: throw NetworkException("Identifier not found in event.")
+
+                val streamData = liveActivity.asStreamData()
+                if (streamData != null) {
+                    database.withTransaction {
+                        database.streams().upsertStreamData(data = listOf(streamData))
+                    }
+                }
+
+                Naddr(
+                    kind = NostrEventKind.LiveActivity.value,
+                    userId = liveActivity.pubKey,
+                    identifier = dTag,
+                )
+            }
+        }
 
     private suspend fun processLiveStreamResponse(response: LiveFeedResponse) {
         val zapEvents = response.zaps
