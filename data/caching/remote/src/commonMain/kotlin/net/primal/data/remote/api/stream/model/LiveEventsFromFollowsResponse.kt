@@ -7,3 +7,7 @@ import net.primal.domain.nostr.NostrEvent
 data class LiveEventsFromFollowsResponse(
     val liveActivity: List<NostrEvent>,
 )
+
+data class FindLiveStreamResponse(
+    val liveActivity: NostrEvent?,
+)

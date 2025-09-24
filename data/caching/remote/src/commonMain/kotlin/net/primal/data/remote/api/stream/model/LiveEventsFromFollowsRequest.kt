@@ -7,3 +7,9 @@ import kotlinx.serialization.Serializable
 data class LiveEventsFromFollowsRequest(
     @SerialName("user_pubkey") val pubkey: String,
 )
+
+@Serializable
+data class FindLiveStreamRequestBody(
+    @SerialName("host_pubkey") val hostPubkey: String,
+    val identifier: String,
+)
