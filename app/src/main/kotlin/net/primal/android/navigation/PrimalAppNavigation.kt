@@ -2365,6 +2365,7 @@ private fun NavGraphBuilder.profileQrCodeViewer(
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
+    val streamState = LocalStreamState.current
     val viewModel = hiltViewModel<ProfileQrCodeViewModel>()
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
         ApplyEdgeToEdge(isDarkTheme = true)
@@ -2380,6 +2381,14 @@ private fun NavGraphBuilder.profileQrCodeViewer(
                 onNoteScan = { noteId ->
                     navController.popBackStack()
                     navController.navigateToThread(noteId)
+                },
+                onLiveStreamScan = { naddr ->
+                    streamState.start(naddr)
+                    navController.popBackStack()
+                },
+                onArticleScan = { naddr ->
+                    navController.popBackStack()
+                    navController.navigateToArticleDetails(naddr)
                 },
                 onDraftTxScan = { draftTx ->
                     navController.popBackStack()

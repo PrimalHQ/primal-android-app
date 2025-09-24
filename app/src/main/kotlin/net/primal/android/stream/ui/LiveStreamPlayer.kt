@@ -39,6 +39,7 @@ import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.recyclerview.widget.RecyclerView
 import net.primal.android.R
 import net.primal.android.core.compose.ShadowIcon
+import net.primal.android.core.compose.foundation.KeepScreenOn
 import net.primal.android.core.ext.onDragDownBeyond
 import net.primal.android.core.pip.LocalPiPManager
 import net.primal.android.core.pip.rememberIsInPipMode
@@ -75,6 +76,8 @@ fun LiveStreamPlayer(
     playerModifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
 ) {
+    KeepScreenOn(enabled = state.playerState.isPlaying)
+
     LaunchedEffect(streamUrl) {
         val currentMediaItemUri = mediaController.currentMediaItem?.localConfiguration?.uri?.toString()
 

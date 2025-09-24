@@ -33,5 +33,5 @@ jobs:
       - name: Publish to Zapstore
         env:
           SIGN_WITH: ${{ secrets.ZAPSTORE_SIGN_WITH }}
-        run: zapstore publish
+        run: zapstore publish --indexer-mode
 

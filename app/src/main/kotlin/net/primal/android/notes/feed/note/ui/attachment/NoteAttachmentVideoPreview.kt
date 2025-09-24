@@ -23,11 +23,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
+import androidx.lifecycle.Lifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.ui.PlayerView
+import androidx.media3.ui.compose.PlayerSurface
+import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -36,6 +37,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Mute
 import net.primal.android.core.compose.icons.primaliconpack.Play
 import net.primal.android.core.compose.icons.primaliconpack.Unmute
+import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.video.rememberPrimalExoPlayer
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
@@ -88,19 +90,25 @@ private fun AutoPlayVideo(
     var isMuted by remember(userPrefersSound) { mutableStateOf(!userPrefersSound) }
     var isBuffering by remember { mutableStateOf(true) }
 
+    DisposableLifecycleObserverEffect(key1 = exoPlayer) { event ->
+        when (event) {
+            Lifecycle.Event.ON_RESUME -> if (playing) exoPlayer.play()
+            Lifecycle.Event.ON_PAUSE -> exoPlayer.pause()
+            else -> Unit
+        }
+    }
+
     LaunchedEffect(eventUri.url) {
         val mediaUrl = eventUri.variants?.firstOrNull()?.mediaUrl ?: eventUri.url
-        exoPlayer.setMediaItem(MediaItem.fromUri(mediaUrl))
-        exoPlayer.repeatMode = Player.REPEAT_MODE_ALL
-        exoPlayer.playWhenReady = true
-        exoPlayer.prepare()
+        exoPlayer.apply {
+            setMediaItem(MediaItem.fromUri(mediaUrl))
+            repeatMode = Player.REPEAT_MODE_ALL
+            playWhenReady = true
+            prepare()
+        }
     }
 
-    LaunchedEffect(isMuted) {
-        exoPlayer.volume = if (isMuted) 0f else 1f
-    }
-
-    DisposableEffect(Unit) {
+    DisposableEffect(exoPlayer) {
         val listener = object : Player.Listener {
             override fun onPlaybackStateChanged(playbackState: Int) {
                 isBuffering = playbackState == Player.STATE_BUFFERING
@@ -121,27 +129,24 @@ private fun AutoPlayVideo(
         }
     }
 
+    LaunchedEffect(isMuted) {
+        exoPlayer.volume = if (isMuted) 0f else 1f
+    }
+
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        AndroidView(
+        PlayerSurface(
             modifier = Modifier
                 .fillMaxSize()
                 .clickable { onVideoClick(exoPlayer.currentPosition) },
-            factory = { ctx ->
-                PlayerView(ctx).apply {
-                    player = exoPlayer
-                    useController = false
-                    resizeMode = androidx.media3.ui.AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-                }
-            },
+            player = exoPlayer,
+            surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
         )
 
         if (isBuffering) {
-            PrimalLoadingSpinner(
-                size = 48.dp,
-            )
+            PrimalLoadingSpinner(size = 48.dp)
         }
 
         AudioButton(
