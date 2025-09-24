@@ -1,6 +1,7 @@
 package net.primal.android.signer
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -8,6 +9,7 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.core.net.toUri
+import net.primal.android.signer.utils.isCompatibleAmberVersionInstalled
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent
@@ -92,8 +94,14 @@ fun rememberAmberSignerLauncher(onFailure: ((ActivityResult) -> Unit)? = null, o
  * errors in the flow), use it together with [rememberAmberPubkeyLauncher].
  *
  * @see rememberAmberPubkeyLauncher
+ * @throws AmberNotInstalledException if Amber is not installed on the device.
  */
-fun AmberLauncher.launchGetPublicKey() {
+@Throws(AmberNotInstalledException::class)
+fun AmberLauncher.launchGetPublicKey(context: Context) {
+    if (!isCompatibleAmberVersionInstalled(context)) {
+        throw AmberNotInstalledException()
+    }
+
     val intent = Intent(Intent.ACTION_VIEW, URI_PREFIX.toUri())
     intent.`package` = AMBER_PACKAGE_NAME
     val permissions = listOf(
@@ -128,8 +136,14 @@ fun AmberLauncher.launchGetPublicKey() {
  * @param event The [NostrUnsignedEvent] that needs to be signed.
  *
  * @see rememberAmberSignerLauncher
+ * @throws AmberNotInstalledException if Amber is not installed on the device.
  */
-fun AmberLauncher.launchSignEvent(event: NostrUnsignedEvent) {
+@Throws(AmberNotInstalledException::class)
+fun AmberLauncher.launchSignEvent(context: Context, event: NostrUnsignedEvent) {
+    if (!isCompatibleAmberVersionInstalled(context)) {
+        throw AmberNotInstalledException()
+    }
+
     val intent = Intent(Intent.ACTION_VIEW, "$URI_PREFIX${event.encodeToJsonString()}".toUri())
     intent.`package` = AMBER_PACKAGE_NAME
 

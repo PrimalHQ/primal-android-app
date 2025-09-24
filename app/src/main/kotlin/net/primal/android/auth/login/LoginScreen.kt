@@ -68,6 +68,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.signer.AmberNotInstalledException
 import net.primal.android.signer.event.buildAppSpecificDataEvent
 import net.primal.android.signer.launchGetPublicKey
 import net.primal.android.signer.launchSignEvent
@@ -109,6 +110,7 @@ fun LoginScreen(
     eventPublisher: (LoginContract.UiEvent) -> Unit,
     callbacks: LoginContract.ScreenCallbacks,
 ) {
+    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val onClose = {
         keyboardController?.hide()
@@ -125,7 +127,11 @@ fun LoginScreen(
         onFailure = { eventPublisher(LoginContract.UiEvent.ResetLoginState) },
     ) { pubkey ->
         eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = pubkey, loginType = LoginType.ExternalSigner))
-        signLauncher.launchSignEvent(event = buildAppSpecificDataEvent(pubkey = pubkey))
+        try {
+            signLauncher.launchSignEvent(context = context, event = buildAppSpecificDataEvent(pubkey = pubkey))
+        } catch (error: AmberNotInstalledException) {
+            Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
+        }
     }
 
     BackHandler(enabled = state.loading) { }
@@ -163,7 +169,13 @@ fun LoginScreen(
             uiMode = uiMode,
             onLoginInputChanged = { eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = it)) },
             onLoginClick = { eventPublisher(LoginContract.UiEvent.LoginRequestEvent()) },
-            onLoginWithAmberClick = { pubkeyLauncher.launchGetPublicKey() },
+            onLoginWithAmberClick = {
+                try {
+                    pubkeyLauncher.launchGetPublicKey(context = context)
+                } catch (error: AmberNotInstalledException) {
+                    Toast.makeText(context, error.message, Toast.LENGTH_SHORT).show()
+                }
+            },
         )
     }
 }
