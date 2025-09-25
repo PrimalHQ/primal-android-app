@@ -4,7 +4,6 @@ plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
-    alias(libs.plugins.touchlab.skie)
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
 }
@@ -58,9 +57,6 @@ kotlin {
                 implementation(libs.ktorfit.light)
                 implementation(libs.ktorfit.converters.response)
                 implementation(libs.ktorfit.converters.call)
-
-                // Interop
-                implementation(libs.skie.configuration.annotations)
             }
         }
 

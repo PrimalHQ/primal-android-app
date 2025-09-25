@@ -57,9 +57,6 @@ kotlin {
 
                 // Logging
                 implementation(libs.napier)
-
-                // Swift interop
-                implementation(libs.skie.configuration.annotations)
             }
         }
 

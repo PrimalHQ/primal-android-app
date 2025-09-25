@@ -30,14 +30,20 @@ kotlin {
     iosTargets.forEach {
         it.binaries.framework {
             baseName = xcfName
+            isStatic = true
             xcfFramework.add(this)
+
             export(project(":domain:nostr"))
             export(project(":domain:primal"))
+            export(project(":domain:wallet"))
+
             export(project(":core:networking-primal"))
             export(project(":core:networking-upload"))
+
+            export(project(":data:caching:repository"))
+
             export(project(":data:wallet:remote-nwc"))
-//            export(project(":data:caching:repository"))
-//            export(project(":paging-runtime-ios"))
+            export(project(":data:wallet:repository"))
         }
     }
 
@@ -48,11 +54,15 @@ kotlin {
                 // Internal
                 api(project(":domain:nostr"))
                 api(project(":domain:primal"))
+                api(project(":domain:wallet"))
+
                 api(project(":core:networking-primal"))
                 api(project(":core:networking-upload"))
+
+                api(project(":data:caching:repository"))
+
                 api(project(":data:wallet:remote-nwc"))
-//                api(project(":data:caching:repository"))
-//                api(project(":paging-runtime-ios"))
+                api(project(":data:wallet:repository"))
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)

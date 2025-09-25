@@ -43,9 +43,6 @@ kotlin {
 
                 implementation(libs.okio)
                 implementation(libs.napier)
-
-                // Interop
-                implementation(libs.skie.configuration.annotations)
             }
         }
 
