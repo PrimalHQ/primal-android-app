@@ -11,10 +11,8 @@ import androidx.media3.exoplayer.LoadControl
 import javax.inject.Inject
 import net.primal.android.core.service.PlayerManager
 
-class AospPlayerManager
 @OptIn(UnstableApi::class)
-@Inject
-constructor(
+class AospPlayerManager @Inject constructor(
     private val loadControl: LoadControl,
 ) : PlayerManager {
 
@@ -31,6 +29,5 @@ constructor(
             .build()
     }
 
-    override fun cleanup() {
-    }
+    override fun cleanup() = Unit
 }
