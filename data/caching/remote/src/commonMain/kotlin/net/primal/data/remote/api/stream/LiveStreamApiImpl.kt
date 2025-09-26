@@ -14,6 +14,8 @@ import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.PrimalVerb
+import net.primal.data.remote.api.stream.model.FindLiveStreamRequestBody
+import net.primal.data.remote.api.stream.model.FindLiveStreamResponse
 import net.primal.data.remote.api.stream.model.LiveEventsFromFollowsRequest
 import net.primal.data.remote.api.stream.model.LiveFeedRequestBody
 import net.primal.data.remote.api.stream.model.LiveFeedResponse
@@ -72,5 +74,18 @@ class LiveStreamApiImpl(
                     else -> null
                 }?.takeIf { it.kind == NostrEventKind.LiveActivity.value }
             }
+    }
+
+    override suspend fun findLiveStream(body: FindLiveStreamRequestBody): FindLiveStreamResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.FIND_LIVE_EVENTS.id,
+                optionsJson = body.encodeToJsonString(),
+            ),
+        )
+
+        return FindLiveStreamResponse(
+            liveActivity = queryResult.findNostrEvent(NostrEventKind.LiveActivity),
+        )
     }
 }

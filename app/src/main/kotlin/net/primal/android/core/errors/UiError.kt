@@ -6,6 +6,7 @@ sealed class UiError {
 
     data object NostrSignUnauthorized : UiError()
 
+    data object StreamNotFound : UiError()
     data class MissingLightningAddress(val cause: Throwable) : UiError()
     data class InvalidZapRequest(val cause: Throwable? = null) : UiError()
 

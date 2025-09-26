@@ -28,15 +28,15 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.FeedsRepository
-import net.primal.domain.nostr.Naddr
-import net.primal.domain.nostr.Nip19TLV.toNaddrString
-import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
+import net.primal.domain.nostr.toNostrString
 import net.primal.domain.nostr.utils.npubToPubkey
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
@@ -88,7 +88,7 @@ class HomeFeedViewModel @Inject constructor(
 
             if (streamIdentifier == null) return@launch
 
-            val userId = when {
+            val hostPubkey = when {
                 hostNpub != null -> hostNpub.npubToPubkey()
 
                 hostPrimalName != null ->
@@ -97,14 +97,15 @@ class HomeFeedViewModel @Inject constructor(
                 else -> null
             }
 
-            if (userId != null) {
-                val naddr = Naddr(
-                    kind = NostrEventKind.LiveActivity.value,
-                    userId = userId,
-                    identifier = streamIdentifier,
-                )
-
-                setEffect(HomeFeedContract.SideEffect.StartStream(naddr = naddr.toNaddrString()))
+            if (hostPubkey != null) {
+                streamRepository.findStreamNaddr(hostPubkey = hostPubkey, identifier = streamIdentifier)
+                    .onSuccess { naddr ->
+                        setEffect(HomeFeedContract.SideEffect.StartStream(naddr = naddr.toNostrString()))
+                    }
+                    .onFailure {
+                        Timber.w(it)
+                        setState { copy(uiError = UiError.StreamNotFound) }
+                    }
             } else {
                 setState { copy(uiError = UiError.InvalidNaddr) }
             }

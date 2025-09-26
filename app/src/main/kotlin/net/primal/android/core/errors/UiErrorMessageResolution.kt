@@ -12,6 +12,8 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
 
         UiError.MissingPrivateKey -> context.getString(R.string.app_error_missing_private_key)
 
+        UiError.StreamNotFound -> context.getString(R.string.app_error_stream_not_found)
+
         is UiError.InvalidZapRequest -> context.getString(
             R.string.post_action_invalid_zap_request,
         )
