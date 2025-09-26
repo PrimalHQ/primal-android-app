@@ -44,7 +44,6 @@ kotlin {
                 implementation(project(":domain:wallet"))
 
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.kotlinx.datetime)
 
                 implementation(libs.okio)
                 implementation(libs.napier)
