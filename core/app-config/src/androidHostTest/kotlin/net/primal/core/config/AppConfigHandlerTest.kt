@@ -32,9 +32,9 @@ class AppConfigHandlerTest {
 
             val debounceTimeout = 1.minutes
 
-            appConfigHandler.updateAppConfigWithDebounce(debounceTimeout)
-            appConfigHandler.updateAppConfigWithDebounce(debounceTimeout)
-            appConfigHandler.updateAppConfigWithDebounce(debounceTimeout)
+            appConfigHandler.updateWithDebounce(debounceTimeout)
+            appConfigHandler.updateWithDebounce(debounceTimeout)
+            appConfigHandler.updateWithDebounce(debounceTimeout)
             advanceUntilIdle()
 
             coVerify(exactly = 1) {
@@ -59,7 +59,7 @@ class AppConfigHandlerTest {
                 wellKnownApi = wellKnownApi,
             )
 
-            appConfigHandler.updateAppConfigOrFailSilently()
+            appConfigHandler.updateImmediately()
         }
 
     @Test
@@ -87,7 +87,7 @@ class AppConfigHandlerTest {
                 wellKnownApi = wellKnownApi,
             )
 
-            appConfigHandler.updateAppConfigOrFailSilently()
+            appConfigHandler.updateImmediately()
             advanceUntilIdle()
 
             appConfigPersistence.latestData.cacheUrl shouldBe expectedTestCacheUrl
