@@ -1,6 +1,6 @@
 package net.primal.data.remote.api.notifications
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import net.primal.data.remote.api.notifications.model.NotificationsRequestBody
 import net.primal.data.remote.api.notifications.model.NotificationsResponse
 import net.primal.domain.nostr.NostrEvent

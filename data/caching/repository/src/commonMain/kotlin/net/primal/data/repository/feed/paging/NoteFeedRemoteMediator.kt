@@ -5,12 +5,12 @@ import androidx.paging.LoadType
 import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import io.github.aakira.napier.Napier
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.io.IOException
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.utils.retryNetworkCall

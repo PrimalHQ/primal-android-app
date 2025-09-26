@@ -19,7 +19,7 @@ kotlin {
     }
 
     // JVM Target
-//    jvm("desktop")
+    jvm("desktop")
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
@@ -82,9 +82,9 @@ kotlin {
             }
         }
 
-//        val desktopMain by getting
-//        desktopMain.dependencies {
-//        }
+        val desktopMain by getting
+        desktopMain.dependencies {
+        }
     }
 
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets

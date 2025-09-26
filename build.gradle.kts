@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask
 import org.jlleitschuh.gradle.ktlint.tasks.KtLintFormatTask
@@ -38,6 +39,13 @@ subprojects {
                 it.file.invariantSeparatorsPath.contains("/build/generated/ksp/")
             }
         }
+
+        tasks.withType<KotlinCompilationTask<*>>().configureEach {
+            compilerOptions {
+                freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+            }
+        }
+
         tasks.withType<KtLintFormatTask>().configureEach {
             exclude {
                 it.file.invariantSeparatorsPath.contains("/build/generated/ksp/")

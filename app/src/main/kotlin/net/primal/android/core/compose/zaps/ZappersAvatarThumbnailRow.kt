@@ -13,7 +13,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import java.util.*
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.events.ui.EventZapUiModel
