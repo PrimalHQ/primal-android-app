@@ -39,7 +39,6 @@ kotlin {
 
                 // Kotlin
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.json)
 
                 // Networking && Serialization

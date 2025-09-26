@@ -39,7 +39,6 @@ kotlin {
                 implementation(project(":domain:nostr"))
 
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.kotlinx.datetime)
 
                 implementation(libs.okio)
                 implementation(libs.napier)
