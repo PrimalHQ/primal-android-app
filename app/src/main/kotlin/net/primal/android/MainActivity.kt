@@ -3,6 +3,7 @@ package net.primal.android
 import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -16,6 +17,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
@@ -31,6 +33,7 @@ import net.primal.android.navigation.splash.SplashViewModel
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.NostrNotary.NotarySideEffect
 import net.primal.android.scanner.analysis.QrCodeResultDecoder
+import net.primal.android.signer.AmberNotInstalledException
 import net.primal.android.signer.launchSignEvent
 import net.primal.android.signer.rememberAmberSignerLauncher
 import net.primal.android.theme.AppTheme
@@ -70,6 +73,8 @@ class MainActivity : FragmentActivity() {
         primalTheme = savedInstanceState.restoreOrDefaultPrimalTheme()
 
         setContent {
+            val context = LocalContext.current
+
             val signLauncher = rememberAmberSignerLauncher(
                 onFailure = { nostrNotary.onFailure() },
                 onSuccess = nostrNotary::onSuccess,
@@ -77,8 +82,17 @@ class MainActivity : FragmentActivity() {
             LaunchedEffect(nostrNotary, nostrNotary.effects) {
                 nostrNotary.effects.collect {
                     when (it) {
-                        is NotarySideEffect.RequestSignature ->
-                            signLauncher.launchSignEvent(it.unsignedEvent)
+                        is NotarySideEffect.RequestSignature -> {
+                            try {
+                                signLauncher.launchSignEvent(context, it.unsignedEvent)
+                            } catch (error: AmberNotInstalledException) {
+                                Toast.makeText(
+                                    context,
+                                    error.message,
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            }
+                        }
                     }
                 }
             }
