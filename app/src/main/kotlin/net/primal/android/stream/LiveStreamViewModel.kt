@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import java.time.Instant
+import java.util.UUID
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -27,6 +29,7 @@ import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.NoteNostrUriUi
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.mention.UserMentionHandler
 import net.primal.android.profile.mention.appendUserTagAtSignAtCursorPosition
 import net.primal.android.stream.LiveStreamContract.SideEffect
@@ -38,6 +41,7 @@ import net.primal.android.stream.ui.ChatMessageUi
 import net.primal.android.stream.ui.StreamChatItem
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
+import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.handler.ProfileFollowsHandler
 import net.primal.android.user.handler.ProfileFollowsHandler.Companion.foldActions
 import net.primal.android.user.repository.UserRepository
@@ -572,6 +576,7 @@ class LiveStreamViewModel @AssistedInject constructor(
         val authorProfile = _state.value.streamInfo?.mainHostProfile ?: return
 
         viewModelScope.launch {
+            val activeAccount = activeAccountStore.activeUserAccount()
             val postAuthorProfileData = profileRepository.findProfileDataOrNull(profileId = authorProfile.pubkey)
             val lnUrlDecoded = postAuthorProfileData?.lnUrlDecoded
             if (lnUrlDecoded == null) {
@@ -581,6 +586,8 @@ class LiveStreamViewModel @AssistedInject constructor(
 
             val walletId = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())
                 ?.walletId ?: return@launch
+
+            val tempZapId = addTemporaryZapOptimistically(zapAction = zapAction, activeAccount = activeAccount)
 
             val result = zapHandler.zap(
                 userId = activeAccountStore.activeUserId(),
@@ -597,6 +604,8 @@ class LiveStreamViewModel @AssistedInject constructor(
             )
 
             if (result is ZapResult.Failure) {
+                zaps = zaps?.filterNot { it.uniqueId == tempZapId }
+                updateChatItems()
                 when (result.error) {
                     is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
                     is ZapError.FailedToFetchZapInvoice,
@@ -612,6 +621,28 @@ class LiveStreamViewModel @AssistedInject constructor(
                 }
             }
         }
+    }
+
+    private fun addTemporaryZapOptimistically(zapAction: UiEvent.ZapStream, activeAccount: UserAccount): String {
+        val zapAmount = zapAction.zapAmount ?: _state.value.zappingState.zapDefault.amount.toULong()
+        val tempZapId = "${UUID.randomUUID()}"
+        val temporaryZap = StreamChatItem.ZapMessageItem(
+            zap = EventZapUiModel(
+                id = tempZapId,
+                zappedAt = Instant.now().epochSecond,
+                amountInSats = zapAmount,
+                message = zapAction.zapDescription,
+                zapperId = activeAccount.pubkey,
+                zapperName = activeAccount.authorDisplayName,
+                zapperHandle = activeAccount.userDisplayName,
+                zapperAvatarCdnImage = activeAccount.avatarCdnImage,
+                zapperInternetIdentifier = activeAccount.internetIdentifier,
+                zapperLegendaryCustomization = activeAccount.primalLegendProfile?.asLegendaryCustomization(),
+            ),
+        )
+        zaps = listOf(temporaryZap) + (zaps ?: emptyList())
+        updateChatItems()
+        return tempZapId
     }
 
     private fun follow(profileId: String) =
