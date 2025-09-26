@@ -1,6 +1,6 @@
 package net.primal.data.repository.mappers.local
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import net.primal.data.local.dao.notifications.Notification as NotificationPO
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.notifications.Notification as NotificationDO

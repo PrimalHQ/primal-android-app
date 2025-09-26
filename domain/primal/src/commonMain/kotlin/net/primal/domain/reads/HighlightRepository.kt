@@ -1,8 +1,8 @@
 package net.primal.domain.reads
 
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.Clock
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.cryptography.SignatureException

@@ -1,6 +1,6 @@
 package net.primal.domain.posts
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.json.JsonArray
 import net.primal.domain.bookmarks.PublicBookmark
 import net.primal.domain.events.EventRelayHints

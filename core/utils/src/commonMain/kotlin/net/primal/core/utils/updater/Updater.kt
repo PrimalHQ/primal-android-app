@@ -1,8 +1,8 @@
 package net.primal.core.utils.updater
 
+import kotlin.time.Clock
 import kotlin.time.Duration
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import net.primal.core.utils.Result
 
 abstract class Updater {
