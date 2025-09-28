@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.approvals.FollowsApproval
+import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
 import net.primal.android.core.compose.profile.model.asProfileStatsUi
 import net.primal.android.core.errors.UiError
@@ -30,6 +31,7 @@ import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.NoteNostrUriUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.android.profile.mention.UserMentionHandler
 import net.primal.android.profile.mention.appendUserTagAtSignAtCursorPosition
 import net.primal.android.stream.LiveStreamContract.SideEffect
@@ -397,6 +399,8 @@ class LiveStreamViewModel @AssistedInject constructor(
     private fun sendMessage(text: String) {
         val streamInfo = state.value.streamInfo ?: return
         viewModelScope.launch {
+            val tempMessageId = addMessageOptimistically(text, activeAccountStore.activeUserAccount())
+
             setState { copy(sendingMessage = true) }
             try {
                 val content = userMentionHandler.replaceUserMentionsWithUserIds(
@@ -412,14 +416,42 @@ class LiveStreamViewModel @AssistedInject constructor(
                 setState { copy(comment = TextFieldValue(), taggedUsers = emptyList()) }
             } catch (error: NostrPublishException) {
                 Timber.w(error)
+                chatMessages = chatMessages?.filterNot { it.uniqueId == tempMessageId }
+                updateChatItems()
                 setState { copy(error = UiError.FailedToPublishZapEvent(error)) }
             } catch (error: SignatureException) {
                 Timber.w(error)
+                chatMessages = chatMessages?.filterNot { it.uniqueId == tempMessageId }
+                updateChatItems()
                 setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } finally {
                 setState { copy(sendingMessage = false) }
             }
         }
+    }
+
+    private fun addMessageOptimistically(text: String, activeAccount: UserAccount): String {
+        val tempMessageId = UUID.randomUUID().toString()
+        val temporaryMessage = StreamChatItem.ChatMessageItem(
+            message = ChatMessageUi(
+                messageId = tempMessageId,
+                authorProfile = ProfileDetailsUi(
+                    pubkey = activeAccount.pubkey,
+                    authorDisplayName = activeAccount.authorDisplayName,
+                    userDisplayName = activeAccount.userDisplayName,
+                    avatarCdnImage = activeAccount.avatarCdnImage,
+                    internetIdentifier = activeAccount.internetIdentifier,
+                    premiumDetails = PremiumProfileDataUi(
+                        legendaryCustomization = activeAccount.primalLegendProfile?.asLegendaryCustomization(),
+                    ),
+                ),
+                content = text,
+                timestamp = Instant.now().epochSecond,
+            ),
+        )
+        chatMessages = listOf(temporaryMessage) + (chatMessages ?: emptyList())
+        updateChatItems()
+        return tempMessageId
     }
 
     private fun observeStreamInfo() =
@@ -587,7 +619,7 @@ class LiveStreamViewModel @AssistedInject constructor(
             val walletId = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())
                 ?.walletId ?: return@launch
 
-            val tempZapId = addTemporaryZapOptimistically(zapAction = zapAction, activeAccount = activeAccount)
+            val tempZapId = addZapOptimistically(zapAction = zapAction, activeAccount = activeAccount)
 
             val result = zapHandler.zap(
                 userId = activeAccountStore.activeUserId(),
@@ -623,9 +655,9 @@ class LiveStreamViewModel @AssistedInject constructor(
         }
     }
 
-    private fun addTemporaryZapOptimistically(zapAction: UiEvent.ZapStream, activeAccount: UserAccount): String {
+    private fun addZapOptimistically(zapAction: UiEvent.ZapStream, activeAccount: UserAccount): String {
         val zapAmount = zapAction.zapAmount ?: _state.value.zappingState.zapDefault.amount.toULong()
-        val tempZapId = "${UUID.randomUUID()}"
+        val tempZapId = UUID.randomUUID().toString()
         val temporaryZap = StreamChatItem.ZapMessageItem(
             zap = EventZapUiModel(
                 id = tempZapId,
