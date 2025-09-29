@@ -18,10 +18,10 @@ import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.events.EventRepository
+import net.primal.domain.lightning.LightningRepository
 import net.primal.domain.nostr.InvoiceType
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstProfileId
-import net.primal.domain.nostr.lightning.LightningRepository
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.NostrWalletConnect
 import net.primal.domain.wallet.TxRequest

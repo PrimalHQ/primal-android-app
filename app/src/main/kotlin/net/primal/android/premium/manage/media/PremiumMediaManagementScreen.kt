@@ -138,10 +138,7 @@ fun PremiumMediaManagementScreen(
                 )
             }
 
-            items(
-                items = state.mediaItems,
-                key = { it.mediaId },
-            ) { item ->
+            items(items = state.mediaItems) { item ->
                 PrimalDivider()
                 MediaListItem(
                     item = item,

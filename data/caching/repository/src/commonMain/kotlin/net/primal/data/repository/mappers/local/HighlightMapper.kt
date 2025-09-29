@@ -1,6 +1,6 @@
 package net.primal.data.repository.mappers.local
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import net.primal.data.local.dao.reads.Highlight as HighlightPO
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.posts.FeedPost

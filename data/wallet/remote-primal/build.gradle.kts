@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.ktorfit)
 }
 
-private val xcfName = "PrimalDataCachingRemote"
+private val xcfName = "PrimalDataWalletRemotePrimal"
 
 kotlin {
     // Android target
@@ -46,7 +46,6 @@ kotlin {
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.kotlinx.datetime)
 
                 // Serialization
                 implementation(libs.kotlinx.serialization.json)

@@ -1,6 +1,6 @@
 package net.primal.data.repository.events
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.data.local.dao.events.EventStats
 import net.primal.data.local.dao.events.EventUserStats

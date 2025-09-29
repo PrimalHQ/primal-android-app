@@ -1,6 +1,6 @@
 package net.primal.data.remote.api.notifications
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.encodeToJsonString

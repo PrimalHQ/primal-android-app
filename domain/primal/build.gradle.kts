@@ -42,7 +42,6 @@ kotlin {
 
                 // Kotlin
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.json)
 
                 // Paging (for PagingData entity in repositories)
@@ -72,9 +71,9 @@ kotlin {
         }
     }
 
-    targets.withType<KotlinNativeTarget> {
-        compilations.all {
-            kotlinOptions.freeCompilerArgs += "-Xexport-kdoc"
+    targets.withType<KotlinNativeTarget>().configureEach {
+        compilerOptions {
+            freeCompilerArgs.add("-Xexport-kdoc")
         }
     }
 }

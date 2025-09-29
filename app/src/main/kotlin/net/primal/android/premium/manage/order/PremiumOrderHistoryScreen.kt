@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.sp
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import java.time.Instant
 import java.time.format.FormatStyle
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalScaffold

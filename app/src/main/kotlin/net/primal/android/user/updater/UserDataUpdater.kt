@@ -3,7 +3,6 @@ package net.primal.android.user.updater
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.repository.PremiumRepository
@@ -70,7 +69,6 @@ class UserDataUpdater @AssistedInject constructor(
         return Result.success(Unit)
     }
 
-    @OptIn(ExperimentalTime::class)
     private suspend fun migrateWalletData(userAccount: UserAccount) {
         when (userAccount.walletPreference) {
             WalletPreference.NostrWalletConnect -> {

@@ -43,7 +43,6 @@ kotlin {
 
                 // Kotlin
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.kotlinx.datetime)
                 implementation(libs.kotlinx.serialization.json)
 
                 // Data Store
@@ -57,9 +56,6 @@ kotlin {
 
                 // Logging
                 implementation(libs.napier)
-
-                // Swift interop
-                implementation(libs.skie.configuration.annotations)
             }
         }
 

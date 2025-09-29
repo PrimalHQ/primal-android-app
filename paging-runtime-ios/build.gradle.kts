@@ -57,7 +57,3 @@ kotlin {
         languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
     }
 }
-
-tasks.register("assembleXCFramework") {
-    dependsOn("assemble${xcfName}ReleaseXCFramework")
-}

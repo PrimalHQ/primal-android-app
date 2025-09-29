@@ -1,6 +1,6 @@
 package net.primal.data.repository.feed.processors
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.data.local.dao.notes.FeedPostDataCrossRef
 import net.primal.data.local.dao.notes.FeedPostRemoteKey

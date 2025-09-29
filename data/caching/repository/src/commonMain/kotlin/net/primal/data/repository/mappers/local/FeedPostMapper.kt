@@ -1,6 +1,6 @@
 package net.primal.data.repository.mappers.local
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import net.primal.data.local.dao.events.EventStats
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
 import net.primal.data.local.dao.notes.FeedPostUserStats

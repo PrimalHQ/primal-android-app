@@ -1,8 +1,8 @@
-package net.primal.domain.nostr.lightning
+package net.primal.domain.lightning
 
 import net.primal.core.utils.Result
-import net.primal.domain.nostr.lightning.model.InvoiceResponse
-import net.primal.domain.nostr.lightning.model.PayRequest
+import net.primal.domain.lightning.model.InvoiceResponse
+import net.primal.domain.lightning.model.PayRequest
 
 interface LightningRepository {
 

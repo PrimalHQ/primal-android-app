@@ -50,7 +50,6 @@ kotlin {
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
-                implementation(libs.kotlinx.datetime)
 
                 // Paging
                 implementation(libs.paging.common)
