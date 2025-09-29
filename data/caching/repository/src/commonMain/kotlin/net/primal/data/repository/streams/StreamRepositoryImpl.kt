@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 import net.primal.data.local.dao.streams.StreamFollowsCrossRef
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.stream.LiveStreamApi
@@ -143,28 +144,23 @@ class StreamRepositoryImpl(
 
     override suspend fun findStreamNaddr(hostPubkey: String, identifier: String): Result<Naddr> =
         withContext(dispatcherProvider.io()) {
-            try {
+            runCatching {
                 val response = liveStreamApi.findLiveStream(
                     body = FindLiveStreamRequestBody(hostPubkey = hostPubkey, identifier = identifier),
                 )
 
                 val streamData = response.liveActivity?.asStreamData()
-                if (streamData == null) {
-                    Result.failure(IllegalStateException("Live stream event not found or identifier tag is missing."))
-                } else {
-                    database.withTransaction {
-                        database.streams().upsertStreamData(data = listOf(streamData))
-                    }
+                    ?: throw IllegalStateException("Live stream event not found or identifier tag is missing.")
 
-                    val naddr = Naddr(
-                        kind = NostrEventKind.LiveActivity.value,
-                        userId = streamData.eventAuthorId,
-                        identifier = streamData.dTag,
-                    )
-                    Result.success(naddr)
+                database.withTransaction {
+                    database.streams().upsertStreamData(data = listOf(streamData))
                 }
-            } catch (e: Exception) {
-                Result.failure(e)
+
+                Naddr(
+                    kind = NostrEventKind.LiveActivity.value,
+                    userId = streamData.eventAuthorId,
+                    identifier = streamData.dTag,
+                )
             }
         }
 
