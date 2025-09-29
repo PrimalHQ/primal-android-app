@@ -38,4 +38,6 @@ interface StreamRepository {
     suspend fun startLiveEventsFromFollowsSubscription(userId: String)
 
     fun observeLiveEventsFromFollows(userId: String): Flow<List<Stream>>
+
+    suspend fun findStreamNaddr(hostPubkey: String, identifier: String): Result<Naddr>
 }

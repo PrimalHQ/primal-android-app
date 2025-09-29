@@ -13,9 +13,11 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 import net.primal.data.local.dao.streams.StreamFollowsCrossRef
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.stream.LiveStreamApi
+import net.primal.data.remote.api.stream.model.FindLiveStreamRequestBody
 import net.primal.data.remote.api.stream.model.LiveFeedResponse
 import net.primal.data.repository.mappers.local.asStreamDO
 import net.primal.data.repository.mappers.remote.asChatMessageDataDO
@@ -139,6 +141,28 @@ class StreamRepositoryImpl(
         database.streamFollows().observeStreamByOwnerId(ownerId = userId)
             .map { list -> list.map { it.asStreamDO() } }
             .distinctUntilChanged()
+
+    override suspend fun findStreamNaddr(hostPubkey: String, identifier: String): Result<Naddr> =
+        withContext(dispatcherProvider.io()) {
+            runCatching {
+                val response = liveStreamApi.findLiveStream(
+                    body = FindLiveStreamRequestBody(hostPubkey = hostPubkey, identifier = identifier),
+                )
+
+                val streamData = response.liveActivity?.asStreamData()
+                    ?: throw IllegalStateException("Live stream event not found or identifier tag is missing.")
+
+                database.withTransaction {
+                    database.streams().upsertStreamData(data = listOf(streamData))
+                }
+
+                Naddr(
+                    kind = NostrEventKind.LiveActivity.value,
+                    userId = streamData.eventAuthorId,
+                    identifier = streamData.dTag,
+                )
+            }
+        }
 
     private suspend fun processLiveStreamResponse(response: LiveFeedResponse) {
         val zapEvents = response.zaps
