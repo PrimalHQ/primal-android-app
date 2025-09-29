@@ -590,6 +590,9 @@ private fun StreamSeekBar(
         val isInteractive = playerState.totalDuration > 0 && (!playerState.isLive || !playerState.atLiveEdge)
         val totalDuration = playerState.totalDuration.takeIf { it > 0L } ?: 1L
 
+        var scrubPositionMs by remember { mutableStateOf<Long?>(null) }
+        var wasPlayingBeforeScrub by remember { mutableStateOf(false) }
+
         val progress = if (playerState.isLive && playerState.atLiveEdge) {
             1f
         } else {
@@ -601,24 +604,27 @@ private fun StreamSeekBar(
             isInteractive = isInteractive,
             onScrub = { newProgress ->
                 if (isInteractive) {
-                    if (!playerState.isSeeking) {
+                    if (scrubPositionMs == null) {
+                        wasPlayingBeforeScrub = mediaController.isPlaying
+                        mediaController.pause()
                         eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
                     }
-                    val newPosition = (newProgress * totalDuration).toLong()
-                    mediaController.seekTo(newPosition)
-                    eventPublisher(LiveStreamContract.UiEvent.OnSeek(newPosition))
+                    scrubPositionMs = (newProgress * totalDuration).toLong()
                 }
             },
             onScrubEnd = {
-                if (playerState.isSeeking) {
-                    val currentProgress = (playerState.currentTime.toFloat() / totalDuration).coerceIn(0f, 1f)
-                    val finalPosition = (currentProgress * totalDuration).toLong()
+                scrubPositionMs?.let { finalPosition ->
                     mediaController.seekTo(finalPosition)
                     eventPublisher(LiveStreamContract.UiEvent.OnSeek(finalPosition))
+                    if (wasPlayingBeforeScrub) {
+                        mediaController.play()
+                    }
+                    scrubPositionMs = null
+                    wasPlayingBeforeScrub = false
                 }
             },
             totalDurationMs = playerState.totalDuration,
-            currentTimeMs = playerState.currentTime,
+            currentTimeMs = scrubPositionMs ?: playerState.currentTime,
         )
     }
 }
