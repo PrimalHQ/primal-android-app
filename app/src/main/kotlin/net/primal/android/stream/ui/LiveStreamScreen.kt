@@ -591,6 +591,8 @@ private fun StreamSeekBar(
         val totalDuration = playerState.totalDuration.takeIf { it > 0L } ?: 1L
 
         var scrubPositionMs by remember { mutableStateOf<Long?>(null) }
+        var wasPlayingBeforeScrub by remember { mutableStateOf(false) }
+
         val progress = if (playerState.isLive && playerState.atLiveEdge) {
             1f
         } else {
@@ -603,6 +605,10 @@ private fun StreamSeekBar(
             onScrub = { newProgress ->
                 if (isInteractive) {
                     if (scrubPositionMs == null) {
+                        wasPlayingBeforeScrub = mediaController.isPlaying
+                        if (wasPlayingBeforeScrub) {
+                            mediaController.pause()
+                        }
                         eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
                     }
                     scrubPositionMs = (newProgress * totalDuration).toLong()
@@ -612,7 +618,11 @@ private fun StreamSeekBar(
                 scrubPositionMs?.let { finalPosition ->
                     mediaController.seekTo(finalPosition)
                     eventPublisher(LiveStreamContract.UiEvent.OnSeek(finalPosition))
+                    if (wasPlayingBeforeScrub) {
+                        mediaController.play()
+                    }
                     scrubPositionMs = null
+                    wasPlayingBeforeScrub = false
                 }
             },
             totalDurationMs = playerState.totalDuration,
