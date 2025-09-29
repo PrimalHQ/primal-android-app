@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
 import net.primal.data.local.db.PrimalDatabase
@@ -31,6 +32,7 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.supportsNoteReposts
 import net.primal.domain.posts.FeedPageSnapshot
 import net.primal.domain.posts.FeedPost as FeedPostDO
+import net.primal.domain.posts.FeedPostRepostInfo
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.posts.FeedRepository.Companion.DEFAULT_PAGE_SIZE
 import net.primal.shared.data.local.db.withTransaction
@@ -71,6 +73,36 @@ internal class FeedRepositoryImpl(
                 allowMutedThreads = allowMutedThreads,
             ).newestFeedPostsQuery(limit = limit),
         ).map { it.mapAsFeedPostDO() }
+    }
+
+    override suspend fun findRepostByPostId(postId: String, userId: String): Result<FeedPostRepostInfo> =
+        withContext(dispatcherProvider.io()) {
+            database.reposts().findByPostId(postId = postId, authorId = userId)?.let { repostData ->
+                Result.success(
+                    FeedPostRepostInfo(
+                        repostId = repostData.repostId,
+                        repostAuthorId = repostData.authorId,
+                        repostAuthorDisplayName = null,
+                        repostCreatedAt = repostData.createdAt,
+                    ),
+                )
+            } ?: Result.failure(IllegalArgumentException("User with given userId didn't repost target post."))
+        }
+
+    override suspend fun deleteRepostById(
+        postId: String,
+        repostId: String,
+        userId: String,
+    ) = withContext(dispatcherProvider.io()) {
+        database.withTransaction {
+            database.reposts().deleteById(repostId = repostId)
+            database.eventUserStats().reduceEventUserStats(eventId = postId, userId = userId) {
+                copy(reposted = false)
+            }
+            database.eventStats().reduceEventStats(eventId = postId) {
+                copy(reposts = (reposts - 1).coerceAtLeast(0))
+            }
+        }
     }
 
     override suspend fun deletePostById(postId: String, userId: String) =

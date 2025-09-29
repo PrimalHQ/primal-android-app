@@ -81,6 +81,7 @@ fun NotificationsScreen(
             Lifecycle.Event.ON_STOP -> viewModel.setEvent(
                 NotificationsContract.UiEvent.NotificationsSeen,
             )
+
             else -> Unit
         }
     }
@@ -207,6 +208,15 @@ fun NotificationsScreen(
                         ),
                     )
                 },
+                onDeleteRepostClick = {
+                    noteEventPublisher(
+                        NoteContract.UiEvent.DeleteRepostAction(
+                            postId = it.postId,
+                            repostId = it.repostId,
+                            repostAuthorId = it.repostAuthorId,
+                        ),
+                    )
+                },
                 onZapClick = { postData, amount, description ->
                     noteEventPublisher(
                         NoteContract.UiEvent.ZapAction(
@@ -246,6 +256,7 @@ private fun NotificationsList(
     onGoToWallet: () -> Unit,
     onPostLikeClick: (FeedPostUi) -> Unit,
     onRepostClick: (FeedPostUi) -> Unit,
+    onDeleteRepostClick: (FeedPostUi) -> Unit,
     onZapClick: (FeedPostUi, ULong?, String?) -> Unit,
     onPostQuoteClick: (FeedPostUi) -> Unit,
     onBookmarkClick: (FeedPostUi) -> Unit,
@@ -254,8 +265,10 @@ private fun NotificationsList(
     if (repostQuotePostConfirmation != null) {
         repostQuotePostConfirmation?.let { post ->
             NoteRepostOrQuoteBottomSheet(
+                isReposted = post.stats.userReposted,
                 onDismiss = { repostQuotePostConfirmation = null },
                 onRepostClick = { onRepostClick(post) },
+                onDeleteRepostClick = { onDeleteRepostClick(post) },
                 onPostQuoteClick = { onPostQuoteClick(post) },
             )
         }

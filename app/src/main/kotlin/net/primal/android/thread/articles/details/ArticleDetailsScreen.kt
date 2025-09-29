@@ -247,6 +247,8 @@ private fun ArticleDetailsScreen(
     var showRepostOrQuoteConfirmation by remember { mutableStateOf(false) }
     if (showRepostOrQuoteConfirmation) {
         NoteRepostOrQuoteBottomSheet(
+            isReposted = false,
+            onDeleteRepostClick = {},
             onDismiss = { showRepostOrQuoteConfirmation = false },
             onRepostClick = { detailsEventPublisher(UiEvent.RepostAction) },
             onPostQuoteClick = {
@@ -933,9 +935,11 @@ private fun List<ArticleContentSegment>.buildArticleRenderParts(
                             ?.let { ArticlePartRender.NoteRender(note = it) }
                             ?: ArticlePartRender.MarkdownRender(markdown = content)
                     }
+
                     else -> ArticlePartRender.MarkdownRender(markdown = content)
                 }
             }
+
             is ArticleContentSegment.Media -> {
                 if (part.mediaUrl.isValidHttpOrHttpsUrl()) {
                     if (part.mediaUrl.isVideoUrl()) {
