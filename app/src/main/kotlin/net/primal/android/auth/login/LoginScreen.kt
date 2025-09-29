@@ -109,7 +109,6 @@ fun LoginScreen(
     eventPublisher: (LoginContract.UiEvent) -> Unit,
     callbacks: LoginContract.ScreenCallbacks,
 ) {
-    val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
     val onClose = {
         keyboardController?.hide()
