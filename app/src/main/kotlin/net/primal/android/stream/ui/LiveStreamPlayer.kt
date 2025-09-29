@@ -21,10 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -40,8 +37,6 @@ import androidx.media3.session.MediaController
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import androidx.recyclerview.widget.RecyclerView
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.delay
 import net.primal.android.R
 import net.primal.android.core.compose.ShadowIcon
 import net.primal.android.core.compose.foundation.KeepScreenOn
@@ -61,13 +56,15 @@ fun LiveStreamPlayer(
     state: LiveStreamContract.UiState,
     mediaController: MediaController,
     streamUrl: String,
+    controlsVisible: Boolean,
+    menuVisible: Boolean,
     onPlayPauseClick: () -> Unit,
     onClose: () -> Unit,
     onRewind: () -> Unit,
     onForward: () -> Unit,
     onSoundClick: () -> Unit,
-    onSeek: (Long) -> Unit,
-    onSeekStarted: () -> Unit,
+    onControlsVisibilityChange: () -> Unit,
+    onMenuVisibilityChange: (Boolean) -> Unit,
     onQuoteClick: (String) -> Unit,
     onMuteUserClick: () -> Unit,
     onUnmuteUserClick: () -> Unit,
@@ -79,9 +76,6 @@ fun LiveStreamPlayer(
     playerModifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
 ) {
-    var controlsVisible by remember { mutableStateOf(false) }
-    var menuVisible by remember { mutableStateOf(false) }
-
     KeepScreenOn(enabled = state.playerState.isPlaying)
 
     LaunchedEffect(streamUrl) {
@@ -100,13 +94,6 @@ fun LiveStreamPlayer(
         mediaController.volume = if (state.playerState.isMuted) 0f else 1f
     }
 
-    LaunchedEffect(controlsVisible, menuVisible) {
-        if (controlsVisible && !menuVisible) {
-            delay(5.seconds)
-            controlsVisible = false
-        }
-    }
-
     PlayerBox(
         modifier = modifier,
         playerModifier = playerModifier,
@@ -116,13 +103,11 @@ fun LiveStreamPlayer(
         controlsVisible = controlsVisible,
         menuVisible = menuVisible,
         onClose = onClose,
-        onControlsVisibilityChange = { controlsVisible = !controlsVisible },
-        onMenuVisibilityChange = { menuVisible = it },
+        onControlsVisibilityChange = onControlsVisibilityChange,
+        onMenuVisibilityChange = onMenuVisibilityChange,
         onPlayPauseClick = onPlayPauseClick,
         onRewind = onRewind,
         onForward = onForward,
-        onSeek = onSeek,
-        onSeekStarted = onSeekStarted,
         onQuoteClick = onQuoteClick,
         onMuteUserClick = onMuteUserClick,
         onUnmuteUserClick = onUnmuteUserClick,
@@ -151,8 +136,6 @@ private fun PlayerBox(
     onPlayPauseClick: () -> Unit,
     onRewind: () -> Unit,
     onForward: () -> Unit,
-    onSeek: (Long) -> Unit,
-    onSeekStarted: () -> Unit,
     onQuoteClick: (String) -> Unit,
     onMuteUserClick: () -> Unit,
     onUnmuteUserClick: () -> Unit,
@@ -266,11 +249,6 @@ private fun PlayerBox(
                 onForward = onForward,
                 onGoToLive = { mediaController.seekToDefaultPosition() },
                 onClose = onClose,
-                onSeek = { positionMs ->
-                    mediaController.seekTo(positionMs)
-                    onSeek(positionMs)
-                },
-                onSeekStarted = onSeekStarted,
                 onQuoteClick = onQuoteClick,
                 onMuteUserClick = onMuteUserClick,
                 onUnmuteUserClick = onUnmuteUserClick,

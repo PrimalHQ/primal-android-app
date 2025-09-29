@@ -8,6 +8,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.cronet.CronetDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import java.util.concurrent.ExecutorService
@@ -21,7 +22,9 @@ import org.chromium.net.CronetEngine
 import timber.log.Timber
 
 @OptIn(UnstableApi::class)
-class GooglePlayerManager @Inject constructor() : PlayerManager {
+class GooglePlayerManager @Inject constructor(
+    private val loadControl: LoadControl,
+) : PlayerManager {
 
     private var cronetEngine: CronetEngine? = null
     private var cronetExecutor: ExecutorService? = null
@@ -39,6 +42,7 @@ class GooglePlayerManager @Inject constructor() : PlayerManager {
 
         val playerBuilder = ExoPlayer.Builder(context)
             .setAudioAttributes(audioAttributes, true)
+            .setLoadControl(loadControl)
 
         cronetEngine = runCatching {
             CronetEngine.Builder(context)

@@ -7,13 +7,17 @@ import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import javax.inject.Inject
 import net.primal.android.core.service.PlayerManager
 import net.primal.android.stream.player.LIVE_STREAM_MANIFEST_MIN_RETRY_COUNT
 
-class AospPlayerManager @Inject constructor() : PlayerManager {
+@OptIn(UnstableApi::class)
+class AospPlayerManager @Inject constructor(
+    private val loadControl: LoadControl,
+) : PlayerManager {
 
     @OptIn(UnstableApi::class)
     override fun createPlayer(context: Context): Player {
@@ -31,9 +35,9 @@ class AospPlayerManager @Inject constructor() : PlayerManager {
         return ExoPlayer.Builder(context)
             .setAudioAttributes(audioAttributes, true)
             .setMediaSourceFactory(mediaSourceFactory)
+            .setLoadControl(loadControl)
             .build()
     }
 
-    override fun cleanup() {
-    }
+    override fun cleanup() = Unit
 }
