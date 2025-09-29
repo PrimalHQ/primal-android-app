@@ -1,8 +1,10 @@
 package net.primal.android
 
+import android.content.ActivityNotFoundException
 import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -16,6 +18,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.produceState
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
@@ -70,15 +74,27 @@ class MainActivity : FragmentActivity() {
         primalTheme = savedInstanceState.restoreOrDefaultPrimalTheme()
 
         setContent {
+            val context = LocalContext.current
+
             val signLauncher = rememberAmberSignerLauncher(
                 onFailure = { nostrNotary.onFailure() },
                 onSuccess = nostrNotary::onSuccess,
             )
+            val amberUnavailableMessage = stringResource(id = R.string.app_error_amber_unavailable)
             LaunchedEffect(nostrNotary, nostrNotary.effects) {
                 nostrNotary.effects.collect {
                     when (it) {
-                        is NotarySideEffect.RequestSignature ->
-                            signLauncher.launchSignEvent(it.unsignedEvent)
+                        is NotarySideEffect.RequestSignature -> {
+                            try {
+                                signLauncher.launchSignEvent(it.unsignedEvent)
+                            } catch (_: ActivityNotFoundException) {
+                                Toast.makeText(
+                                    context,
+                                    amberUnavailableMessage,
+                                    Toast.LENGTH_SHORT,
+                                ).show()
+                            }
+                        }
                     }
                 }
             }

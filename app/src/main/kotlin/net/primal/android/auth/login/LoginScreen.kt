@@ -163,7 +163,9 @@ fun LoginScreen(
             uiMode = uiMode,
             onLoginInputChanged = { eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = it)) },
             onLoginClick = { eventPublisher(LoginContract.UiEvent.LoginRequestEvent()) },
-            onLoginWithAmberClick = { pubkeyLauncher.launchGetPublicKey() },
+            onLoginWithAmberClick = {
+                pubkeyLauncher.launchGetPublicKey()
+            },
         )
     }
 }

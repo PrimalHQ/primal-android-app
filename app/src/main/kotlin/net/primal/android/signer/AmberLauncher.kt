@@ -1,6 +1,7 @@
 package net.primal.android.signer
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -92,7 +93,9 @@ fun rememberAmberSignerLauncher(onFailure: ((ActivityResult) -> Unit)? = null, o
  * errors in the flow), use it together with [rememberAmberPubkeyLauncher].
  *
  * @see rememberAmberPubkeyLauncher
+ * @throws ActivityNotFoundException if Amber is not installed on the device.
  */
+@Throws(ActivityNotFoundException::class)
 fun AmberLauncher.launchGetPublicKey() {
     val intent = Intent(Intent.ACTION_VIEW, URI_PREFIX.toUri())
     intent.`package` = AMBER_PACKAGE_NAME
@@ -128,7 +131,9 @@ fun AmberLauncher.launchGetPublicKey() {
  * @param event The [NostrUnsignedEvent] that needs to be signed.
  *
  * @see rememberAmberSignerLauncher
+ * @throws ActivityNotFoundException if Amber is not installed on the device.
  */
+@Throws(ActivityNotFoundException::class)
 fun AmberLauncher.launchSignEvent(event: NostrUnsignedEvent) {
     val intent = Intent(Intent.ACTION_VIEW, "$URI_PREFIX${event.encodeToJsonString()}".toUri())
     intent.`package` = AMBER_PACKAGE_NAME
