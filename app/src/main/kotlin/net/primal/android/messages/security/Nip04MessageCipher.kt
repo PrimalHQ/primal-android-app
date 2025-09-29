@@ -1,13 +1,10 @@
 package net.primal.android.messages.security
 
 import android.content.ContentResolver
-import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlin.io.encoding.ExperimentalEncodingApi
 import net.primal.android.signer.decryptNip04WithAmber
 import net.primal.android.signer.encryptNip04WithAmber
-import net.primal.android.signer.utils.isCompatibleAmberVersionInstalled
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.MessageEncryptException
@@ -19,7 +16,6 @@ import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 class Nip04MessageCipher @Inject constructor(
     private val credentialsStore: CredentialsStore,
     private val contentResolver: ContentResolver,
-    @ApplicationContext private val context: Context,
 ) : MessageCipher {
 
     /**
@@ -48,9 +44,6 @@ class Nip04MessageCipher @Inject constructor(
     ): String {
         val npub = userId.hexToNpubHrp()
         return if (credentialsStore.isExternalSignerLogin(npub = npub)) {
-            if (!isCompatibleAmberVersionInstalled(context)) {
-                throw MessageEncryptException()
-            }
             contentResolver.encryptNip04WithAmber(
                 content = content,
                 participantId = participantId,
@@ -87,9 +80,6 @@ class Nip04MessageCipher @Inject constructor(
         val npub = userId.hexToNpubHrp()
 
         return if (credentialsStore.isExternalSignerLogin(npub = npub)) {
-            if (!isCompatibleAmberVersionInstalled(context)) {
-                return content
-            }
             contentResolver.decryptNip04WithAmber(
                 content = content,
                 participantId = participantId,
