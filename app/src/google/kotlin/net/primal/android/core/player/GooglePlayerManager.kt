@@ -6,6 +6,10 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
+import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.datasource.cronet.CronetDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.LoadControl
@@ -24,6 +28,7 @@ import timber.log.Timber
 @OptIn(UnstableApi::class)
 class GooglePlayerManager @Inject constructor(
     private val loadControl: LoadControl,
+    private val simpleCache: SimpleCache,
 ) : PlayerManager {
 
     private var cronetEngine: CronetEngine? = null
@@ -44,7 +49,7 @@ class GooglePlayerManager @Inject constructor(
             .setAudioAttributes(audioAttributes, true)
             .setLoadControl(loadControl)
 
-        cronetEngine = runCatching {
+        val upstreamDataSourceFactory: DataSource.Factory = runCatching {
             CronetEngine.Builder(context)
                 .enableHttp2(true)
                 .enableQuic(true)
@@ -52,23 +57,26 @@ class GooglePlayerManager @Inject constructor(
                 .setUserAgent("${UserAgentProvider.APP_NAME}/${AndroidBuildConfig.APP_VERSION}")
                 .build()
         }.onSuccess { engine ->
+            cronetEngine = engine
             val executor = Executors.newSingleThreadExecutor()
-            this.cronetExecutor = executor
-
-            val dataSourceFactory = CronetDataSource.Factory(engine, executor)
-            val mediaSourceFactory = DefaultMediaSourceFactory(context)
-                .setDataSourceFactory(dataSourceFactory)
-                .setLoadErrorHandlingPolicy(loadErrorHandlingPolicy)
-            playerBuilder.setMediaSourceFactory(mediaSourceFactory)
-
+            cronetExecutor = executor
             val version = runCatching { engine.versionString }.getOrElse { "unknown" }
             analyticsListener.setCronetInfo(version)
+        }.map { engine ->
+            CronetDataSource.Factory(engine, cronetExecutor!!)
         }.onFailure {
             Timber.w(it, "Cronet is not available. Using default HTTP stack for media playback.")
-            val mediaSourceFactory = DefaultMediaSourceFactory(context)
-                .setLoadErrorHandlingPolicy(loadErrorHandlingPolicy)
-            playerBuilder.setMediaSourceFactory(mediaSourceFactory)
-        }.getOrNull()
+        }.getOrNull() ?: DefaultDataSource.Factory(context)
+
+        val cacheDataSourceFactory = CacheDataSource.Factory()
+            .setCache(simpleCache)
+            .setUpstreamDataSourceFactory(upstreamDataSourceFactory)
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+
+        val mediaSourceFactory = DefaultMediaSourceFactory(context)
+            .setDataSourceFactory(cacheDataSourceFactory)
+            .setLoadErrorHandlingPolicy(loadErrorHandlingPolicy)
+        playerBuilder.setMediaSourceFactory(mediaSourceFactory)
 
         val player = playerBuilder.build()
         player.addAnalyticsListener(analyticsListener)

@@ -111,6 +111,7 @@ import net.primal.android.notes.feed.zaps.ZapHost
 import net.primal.android.notes.feed.zaps.ZapHostState
 import net.primal.android.notes.feed.zaps.rememberZapHostState
 import net.primal.android.stream.LiveStreamContract
+import net.primal.android.stream.player.PLAYER_STATE_UPDATE_INTERVAL
 import net.primal.android.stream.player.SEEK_BACK_MS
 import net.primal.android.stream.player.SEEK_FORWARD_MS
 import net.primal.android.stream.player.SHARED_TRANSITION_LOADING_PLAYER_KEY
@@ -142,6 +143,19 @@ fun LiveStreamScreen(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(state.playerState.isPlaying) {
+        while (state.playerState.isPlaying) {
+            eventPublisher(
+                LiveStreamContract.UiEvent.OnPlayerStateUpdate(
+                    currentTime = mediaController.currentPosition,
+                    bufferedPosition = mediaController.bufferedPosition,
+                    atLiveEdge = mediaController.isCurrentMediaItemLive && mediaController.currentLiveOffset < 5000L,
+                ),
+            )
+            delay(PLAYER_STATE_UPDATE_INTERVAL)
+        }
+    }
 
     val receiverName = when (val sheet = state.activeBottomSheet) {
         is ActiveBottomSheet.ZapDetails -> sheet.zap.zapperName
@@ -587,7 +601,7 @@ private fun StreamSeekBar(
         exit = fadeOut(),
     ) {
         val playerState = state.playerState
-        val isInteractive = playerState.totalDuration > 0 && (!playerState.isLive || !playerState.atLiveEdge)
+        val isInteractive = playerState.totalDuration > 0
         val totalDuration = playerState.totalDuration.takeIf { it > 0L } ?: 1L
 
         var scrubPositionMs by remember { mutableStateOf<Long?>(null) }
@@ -599,8 +613,11 @@ private fun StreamSeekBar(
             (playerState.currentTime.toFloat() / totalDuration).coerceIn(0f, 1f)
         }
 
+        val bufferedProgress = (playerState.bufferedPosition.toFloat() / totalDuration).coerceIn(0f, 1f)
+
         PrimalSeekBar(
             progress = progress,
+            bufferedProgress = bufferedProgress,
             isInteractive = isInteractive,
             onScrub = { newProgress ->
                 if (isInteractive) {

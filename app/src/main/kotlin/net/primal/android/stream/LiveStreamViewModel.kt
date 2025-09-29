@@ -239,6 +239,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                     isBuffering = it.isBuffering ?: playerState.isBuffering,
                                     atLiveEdge = it.atLiveEdge ?: playerState.atLiveEdge,
                                     currentTime = it.currentTime ?: playerState.currentTime,
+                                    bufferedPosition = it.bufferedPosition ?: playerState.bufferedPosition,
                                     totalDuration = it.totalDuration ?: playerState.totalDuration,
                                     isVideoFinished = if (it.isPlaying == true && playerState.isVideoFinished) {
                                         false

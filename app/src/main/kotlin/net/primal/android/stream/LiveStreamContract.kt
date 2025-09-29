@@ -52,6 +52,7 @@ interface LiveStreamContract {
         val atLiveEdge: Boolean = false,
         val isSeeking: Boolean = false,
         val currentTime: Long = 0L,
+        val bufferedPosition: Long = 0L,
         val totalDuration: Long = 0L,
         val isLive: Boolean = false,
         val isVideoFinished: Boolean = false,
@@ -80,6 +81,7 @@ interface LiveStreamContract {
             val isBuffering: Boolean? = null,
             val atLiveEdge: Boolean? = null,
             val currentTime: Long? = null,
+            val bufferedPosition: Long? = null,
             val totalDuration: Long? = null,
         ) : UiEvent()
 
