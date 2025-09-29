@@ -606,9 +606,7 @@ private fun StreamSeekBar(
                 if (isInteractive) {
                     if (scrubPositionMs == null) {
                         wasPlayingBeforeScrub = mediaController.isPlaying
-                        if (wasPlayingBeforeScrub) {
-                            mediaController.pause()
-                        }
+                        mediaController.pause()
                         eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
                     }
                     scrubPositionMs = (newProgress * totalDuration).toLong()
