@@ -1,18 +1,14 @@
 ## Changes
-- Implemented Picture-in-Picture support for live streams
-- Implemented playing live stream in background
-- Implemented proper chat and zap loading logic
-- Implemented breath animation on big streaming pills
-- Implemented updating stale live streams (#656)
-- Improved connectivity indicator to avoid false positives
-- Improved video unavailable handling on streams (#650)
-- Use cronet for streaming videos for Google builds (#658)
-- Fixed padding on summary in article details header
-- Fixed generating share stream & article links (#651)
-- Fixed deep-linking crashes
-- Fixed overlapping zap items when big amount gets zapped
-- Fixed performance issue with zap items in live streams
-- Fixed unable to publish profile metadata with Enhanced Privacy (#655)
-- Removed click indicator from stream chat messages
-- Reduced live stream stale threshold to 1 hour
-- Added ZapStore publish flow
+- Implemented Delete Repost for notes (#673)
+- Implemented seek bar functionality for recorded streams (#663)
+- Implemented deep link support for primal stream links (#668)
+- Implemented optimistic updates for zaps and messages in streams (#666)
+- Implemented keeping screen ON during stream playback (#665)
+- Implemented pausing autoplay videos when app enters background (#660)
+- Implemented support for NEVENT & NADDR QR code types in ProfileQrCodeScreen (#647 by @pedromvpg)
+- Improved stream chat scrolling logic on new message or zap (#664)
+- Improved live stream playback stability
+- Migrated to PlayerSurface from AndroidView in note video previews (#661)
+- Fixed crash when Amber signer is uninstalled (#669)
+- Fixed crash on Premium Media Management screen for some users
+- Upgraded to Kotlin 2.2
