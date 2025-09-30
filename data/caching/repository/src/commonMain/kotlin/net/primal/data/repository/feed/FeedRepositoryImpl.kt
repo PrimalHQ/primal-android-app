@@ -86,7 +86,7 @@ internal class FeedRepositoryImpl(
                         repostCreatedAt = repostData.createdAt,
                     ),
                 )
-            } ?: Result.failure(IllegalArgumentException("User with given userId didn't repost target post."))
+            } ?: Result.failure(NoSuchElementException("User with given userId didn't repost target post."))
         }
 
     override suspend fun deleteRepostById(

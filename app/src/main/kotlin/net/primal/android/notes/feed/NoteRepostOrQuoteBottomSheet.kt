@@ -17,19 +17,11 @@ import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.button.PrimalFilledButton
-import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.DeleteRepost
 import net.primal.android.core.compose.icons.primaliconpack.Quote
 import net.primal.android.core.compose.icons.primaliconpack.Repost
 import net.primal.android.theme.AppTheme
-
-private val DELETE_REPOST_COLOR
-    @Composable get() = if (isAppInDarkPrimalTheme()) {
-        Color(0xFFFA3C3C)
-    } else {
-        Color(0xFFC40000)
-    }
 
 @ExperimentalMaterial3Api
 @Composable
@@ -55,7 +47,7 @@ fun NoteRepostOrQuoteBottomSheet(
             if (isReposted) {
                 ActionButton(
                     text = stringResource(id = R.string.post_delete_repost_button_confirmation),
-                    contentColor = DELETE_REPOST_COLOR,
+                    contentColor = AppTheme.colorScheme.error,
                     leadingIcon = PrimalIcons.DeleteRepost,
                     onClick = {
                         onDismiss()
