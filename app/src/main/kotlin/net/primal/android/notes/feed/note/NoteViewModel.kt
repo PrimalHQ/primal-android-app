@@ -139,6 +139,11 @@ class NoteViewModel @AssistedInject constructor(
                     UiEvent.DismissError -> setState { copy(error = null) }
                     is UiEvent.UpdateAutoPlayVideoSoundPreference -> updateVideoSoundSettings(it.soundOn)
                     is UiEvent.RequestDeleteAction -> requestDelete(noteId = it.noteId, userId = it.userId)
+                    is UiEvent.DeleteRepostAction -> requestDeleteRepost(
+                        postId = it.postId,
+                        repostId = it.repostId,
+                        repostAuthorId = it.repostAuthorId,
+                    )
                 }
             }
         }
@@ -352,6 +357,49 @@ class NoteViewModel @AssistedInject constructor(
                 Timber.w(error)
             }
         }
+
+    private fun requestDeleteRepost(
+        postId: String,
+        repostId: String?,
+        repostAuthorId: String?,
+    ) = viewModelScope.launch {
+        val (resolvedRepostId, resolvedRepostAuthorId) = if (repostId == null || repostAuthorId == null) {
+            feedRepository.findRepostByPostId(postId = postId, userId = activeAccountStore.activeUserId())
+                .getOrNull()
+                ?.let {
+                    it.repostId to (it.repostAuthorId ?: activeAccountStore.activeUserId())
+                } ?: return@launch
+        } else {
+            repostId to repostAuthorId
+        }
+
+        try {
+            eventInteractionRepository.deleteEvent(
+                userId = resolvedRepostAuthorId,
+                eventIdentifier = resolvedRepostId,
+                eventKind = NostrEventKind.ShortTextNoteRepost,
+                relayHint = state.value.relayHints.firstOrNull(),
+            )
+
+            feedRepository.deleteRepostById(
+                postId = postId,
+                repostId = resolvedRepostId,
+                userId = resolvedRepostAuthorId,
+            )
+        } catch (error: NostrPublishException) {
+            Timber.w(error)
+            setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }
+        } catch (error: MissingRelaysException) {
+            Timber.w(error)
+            setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+        } catch (error: SigningKeyNotFoundException) {
+            setState { copy(error = UiError.MissingPrivateKey) }
+            Timber.w(error)
+        } catch (error: SigningRejectedException) {
+            setState { copy(error = UiError.NostrSignUnauthorized) }
+            Timber.w(error)
+        }
+    }
 
     private fun handleBookmark(event: UiEvent.BookmarkAction) =
         viewModelScope.launch {

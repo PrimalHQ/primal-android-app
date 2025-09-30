@@ -33,6 +33,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.icons.primaliconpack.CopyAlt
 import net.primal.android.core.compose.icons.primaliconpack.DarkMode
 import net.primal.android.core.compose.icons.primaliconpack.Delete
+import net.primal.android.core.compose.icons.primaliconpack.DeleteRepost
 import net.primal.android.core.compose.icons.primaliconpack.Directory
 import net.primal.android.core.compose.icons.primaliconpack.Discuss
 import net.primal.android.core.compose.icons.primaliconpack.Document
@@ -224,6 +225,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             UserFeedAdd,
             UserFeedRemove,
             Zap,
+            DeleteRepost,
             Repost,
             Quote,
             Highlight,

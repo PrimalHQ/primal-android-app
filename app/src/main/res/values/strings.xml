@@ -598,6 +598,7 @@
     <string name="feed_paywall_description">Buy a Subscription to become a Nostr power user and support our work:</string>
     <string name="feed_paywall_get_premium_button">Get Primal Premium</string>
 
+    <string name="post_delete_repost_button_confirmation">Delete Repost</string>
     <string name="post_repost_button_confirmation">Repost</string>
     <string name="post_quote_button_confirmation">Quote</string>
 

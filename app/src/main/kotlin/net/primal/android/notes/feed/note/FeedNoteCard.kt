@@ -252,6 +252,7 @@ private fun FeedNoteCard(
     var showRepostOrQuoteConfirmation by remember { mutableStateOf(false) }
     if (showRepostOrQuoteConfirmation) {
         NoteRepostOrQuoteBottomSheet(
+            isReposted = data.stats.userReposted,
             onDismiss = { showRepostOrQuoteConfirmation = false },
             onRepostClick = {
                 eventPublisher(
@@ -259,6 +260,15 @@ private fun FeedNoteCard(
                         postId = data.postId,
                         postAuthorId = data.authorId,
                         postNostrEvent = data.rawNostrEventJson,
+                    ),
+                )
+            },
+            onDeleteRepostClick = {
+                eventPublisher(
+                    UiEvent.DeleteRepostAction(
+                        postId = data.postId,
+                        repostId = data.repostId,
+                        repostAuthorId = data.repostAuthorId,
                     ),
                 )
             },
