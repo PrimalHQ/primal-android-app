@@ -53,8 +53,8 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     )
 }
 
-val appVersionCode = 2630
-val appVersionName = "2.5.11"
+val appVersionCode = 2631
+val appVersionName = "2.5.12"
 
 tasks.register("generateReleaseProperties") {
     doLast {
@@ -202,12 +202,12 @@ android {
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_17
-        targetCompatibility = JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
 
     kotlin {
-        jvmToolchain(17)
+        jvmToolchain(21)
     }
 
     hilt {
