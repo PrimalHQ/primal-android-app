@@ -19,8 +19,11 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
 import net.primal.android.core.service.PlayerManager
+import net.primal.android.core.service.PrimalCacheKeyFactory
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.stream.player.LIVE_STREAM_MANIFEST_MIN_RETRY_COUNT
+import net.primal.android.stream.player.SEEK_BACK_MS
+import net.primal.android.stream.player.SEEK_FORWARD_MS
 import net.primal.core.utils.AndroidBuildConfig
 import org.chromium.net.CronetEngine
 import timber.log.Timber
@@ -48,8 +51,8 @@ class GooglePlayerManager @Inject constructor(
         val playerBuilder = ExoPlayer.Builder(context)
             .setAudioAttributes(audioAttributes, true)
             .setLoadControl(loadControl)
-            .setSeekBackIncrement(SEEK_BACK_MS)
-            .setSeekForwardIncrement(SEEK_FORWARD_MS)
+            .setSeekBackIncrementMs(SEEK_BACK_MS)
+            .setSeekForwardIncrementMs(SEEK_FORWARD_MS)
 
         val upstreamDataSourceFactory: DataSource.Factory = runCatching {
             val engine = CronetEngine.Builder(context)
