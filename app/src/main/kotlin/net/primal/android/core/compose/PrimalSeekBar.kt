@@ -87,12 +87,17 @@ fun PrimalSeekBar(
                     }
                 }
             }
-            .primalSeekBarGestures(
-                isInteractive = isInteractive,
-                onScrub = onScrub,
-                onScrubEnd = onScrubEnd,
-                onDraggingStateChange = { isDragging = it },
-                onVisualTargetChange = { visualTarget = it },
+            .then(
+                if (isInteractive) {
+                    Modifier.primalSeekBarGestures(
+                        onScrub = onScrub,
+                        onScrubEnd = onScrubEnd,
+                        onDraggingStateChange = { isDragging = it },
+                        onVisualTargetChange = { visualTarget = it },
+                    )
+                } else {
+                    Modifier
+                },
             )
             .fillMaxWidth()
             .height(touchableAreaHeight),
@@ -100,7 +105,7 @@ fun PrimalSeekBar(
     ) {
         SeekBarTrack(
             visualProgress = visualProgress,
-            bufferedProgress = bufferedProgress,
+            bufferedProgress = if (isDragging) 0f else bufferedProgress,
             isInteractive = isInteractive,
             trackHeight = trackHeight,
             thumbRadius = thumbRadius,
@@ -111,14 +116,13 @@ fun PrimalSeekBar(
 }
 
 private fun Modifier.primalSeekBarGestures(
-    isInteractive: Boolean,
     onScrub: (Float) -> Unit,
     onScrubEnd: () -> Unit,
     onDraggingStateChange: (Boolean) -> Unit,
     onVisualTargetChange: (Float) -> Unit,
 ): Modifier =
     this
-        .pointerInput(isInteractive) {
+        .pointerInput(Unit) {
             detectTapGestures { offset ->
                 val newProgress = (offset.x / size.width).coerceIn(0f, 1f)
                 onDraggingStateChange(false)
@@ -127,7 +131,7 @@ private fun Modifier.primalSeekBarGestures(
                 onScrubEnd()
             }
         }
-        .pointerInput(isInteractive) {
+        .pointerInput(Unit) {
             detectDragGestures(
                 onDragStart = { offset ->
                     onDraggingStateChange(true)

@@ -48,30 +48,37 @@ class GooglePlayerManager @Inject constructor(
         val playerBuilder = ExoPlayer.Builder(context)
             .setAudioAttributes(audioAttributes, true)
             .setLoadControl(loadControl)
+            .setSeekBackIncrement(SEEK_BACK_MS)
+            .setSeekForwardIncrement(SEEK_FORWARD_MS)
 
         val upstreamDataSourceFactory: DataSource.Factory = runCatching {
-            CronetEngine.Builder(context)
+            val engine = CronetEngine.Builder(context)
                 .enableHttp2(true)
                 .enableQuic(true)
                 .enableBrotli(true)
                 .setUserAgent("${UserAgentProvider.APP_NAME}/${AndroidBuildConfig.APP_VERSION}")
                 .build()
-        }.onSuccess { engine ->
-            cronetEngine = engine
             val executor = Executors.newSingleThreadExecutor()
+            engine to executor
+        }.onSuccess { (engine, executor) ->
+            cronetEngine = engine
             cronetExecutor = executor
             val version = runCatching { engine.versionString }.getOrElse { "unknown" }
             analyticsListener.setCronetInfo(version)
-        }.map { engine ->
-            CronetDataSource.Factory(engine, cronetExecutor!!)
+        }.map { (engine, executor) ->
+            CronetDataSource.Factory(engine, executor)
         }.onFailure {
             Timber.w(it, "Cronet is not available. Using default HTTP stack for media playback.")
         }.getOrNull() ?: DefaultDataSource.Factory(context)
 
         val cacheDataSourceFactory = CacheDataSource.Factory()
             .setCache(simpleCache)
+            .setCacheKeyFactory(PrimalCacheKeyFactory)
             .setUpstreamDataSourceFactory(upstreamDataSourceFactory)
-            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+            .setFlags(
+                CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR or
+                    CacheDataSource.FLAG_IGNORE_CACHE_FOR_UNSET_LENGTH_REQUESTS,
+            )
 
         val mediaSourceFactory = DefaultMediaSourceFactory(context)
             .setDataSourceFactory(cacheDataSourceFactory)

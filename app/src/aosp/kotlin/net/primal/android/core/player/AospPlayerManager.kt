@@ -15,7 +15,10 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import javax.inject.Inject
 import net.primal.android.core.service.PlayerManager
+import net.primal.android.core.service.PrimalCacheKeyFactory
 import net.primal.android.stream.player.LIVE_STREAM_MANIFEST_MIN_RETRY_COUNT
+import net.primal.android.stream.player.SEEK_BACK_MS
+import net.primal.android.stream.player.SEEK_FORWARD_MS
 
 @OptIn(UnstableApi::class)
 class AospPlayerManager @Inject constructor(
@@ -36,8 +39,12 @@ class AospPlayerManager @Inject constructor(
         val upstreamDataSourceFactory = DefaultDataSource.Factory(context)
         val cacheDataSourceFactory = CacheDataSource.Factory()
             .setCache(simpleCache)
+            .setCacheKeyFactory(PrimalCacheKeyFactory)
             .setUpstreamDataSourceFactory(upstreamDataSourceFactory)
-            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+            .setFlags(
+                CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR or
+                    CacheDataSource.FLAG_IGNORE_CACHE_FOR_UNSET_LENGTH_REQUESTS,
+            )
 
         val mediaSourceFactory = DefaultMediaSourceFactory(context)
             .setLoadErrorHandlingPolicy(loadErrorHandlingPolicy)
@@ -47,6 +54,8 @@ class AospPlayerManager @Inject constructor(
             .setAudioAttributes(audioAttributes, true)
             .setMediaSourceFactory(mediaSourceFactory)
             .setLoadControl(loadControl)
+            .setSeekBackIncrementMs(SEEK_BACK_MS)
+            .setSeekForwardIncrementMs(SEEK_FORWARD_MS)
             .build()
     }
 

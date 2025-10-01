@@ -76,6 +76,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.media3.common.C
 import androidx.media3.session.MediaController
 import java.text.NumberFormat
 import kotlin.time.Duration.Companion.seconds
@@ -111,6 +112,7 @@ import net.primal.android.notes.feed.zaps.ZapHost
 import net.primal.android.notes.feed.zaps.ZapHostState
 import net.primal.android.notes.feed.zaps.rememberZapHostState
 import net.primal.android.stream.LiveStreamContract
+import net.primal.android.stream.player.LIVE_EDGE_THRESHOLD_MS
 import net.primal.android.stream.player.PLAYER_STATE_UPDATE_INTERVAL
 import net.primal.android.stream.player.SEEK_BACK_MS
 import net.primal.android.stream.player.SEEK_FORWARD_MS
@@ -146,11 +148,28 @@ fun LiveStreamScreen(
 
     LaunchedEffect(state.playerState.isPlaying) {
         while (state.playerState.isPlaying) {
+            val liveOffsetMs = mediaController.currentLiveOffset
+
+            val isAtLiveEdge = if (liveOffsetMs != C.TIME_UNSET) {
+                liveOffsetMs > LIVE_EDGE_THRESHOLD_MS
+            } else if (mediaController.isCurrentMediaItemLive) {
+                val duration = mediaController.duration
+                if (duration != C.TIME_UNSET) {
+                    val position = mediaController.currentPosition
+                    (duration - position) < LIVE_EDGE_THRESHOLD_MS
+                } else {
+                    true
+                }
+            } else {
+                false
+            }
+
             eventPublisher(
                 LiveStreamContract.UiEvent.OnPlayerStateUpdate(
                     currentTime = mediaController.currentPosition,
                     bufferedPosition = mediaController.bufferedPosition,
-                    atLiveEdge = mediaController.isCurrentMediaItemLive && mediaController.currentLiveOffset < 5000L,
+                    atLiveEdge = isAtLiveEdge,
+                    isPlaying = mediaController.isPlaying,
                 ),
             )
             delay(PLAYER_STATE_UPDATE_INTERVAL)
@@ -415,11 +434,22 @@ private fun StreamPlayer(
                 eventPublisher(LiveStreamContract.UiEvent.OnSeek(newPosition))
             },
             onForward = {
-                eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
-                val newPosition = (mediaController.currentPosition + SEEK_FORWARD_MS)
-                    .coerceAtMost(state.playerState.totalDuration)
-                mediaController.seekTo(newPosition)
-                eventPublisher(LiveStreamContract.UiEvent.OnSeek(newPosition))
+                val duration = mediaController.duration
+                if (duration != C.TIME_UNSET) {
+                    val currentPosition = mediaController.currentPosition
+                    val newPosition = currentPosition + SEEK_FORWARD_MS
+
+                    if (newPosition >= duration) {
+                        mediaController.seekToDefaultPosition()
+                        eventPublisher(LiveStreamContract.UiEvent.OnSeek(duration))
+                    } else {
+                        eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
+                        mediaController.seekTo(newPosition)
+                        eventPublisher(LiveStreamContract.UiEvent.OnSeek(newPosition))
+                    }
+                } else {
+                    mediaController.seekToDefaultPosition()
+                }
             },
             onSoundClick = {
                 eventPublisher(LiveStreamContract.UiEvent.ToggleMute)
@@ -601,7 +631,7 @@ private fun StreamSeekBar(
         exit = fadeOut(),
     ) {
         val playerState = state.playerState
-        val isInteractive = playerState.totalDuration > 0
+        val isInteractive = playerState.totalDuration > 0 && !playerState.isLive
         val totalDuration = playerState.totalDuration.takeIf { it > 0L } ?: 1L
 
         var scrubPositionMs by remember { mutableStateOf<Long?>(null) }
@@ -617,7 +647,7 @@ private fun StreamSeekBar(
 
         PrimalSeekBar(
             progress = progress,
-            bufferedProgress = bufferedProgress,
+            bufferedProgress = if (playerState.isLive) 0f else bufferedProgress,
             isInteractive = isInteractive,
             onScrub = { newProgress ->
                 if (isInteractive) {

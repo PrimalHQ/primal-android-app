@@ -1344,8 +1344,8 @@
     <string name="live_stream_stream_url_label">Stream URL</string>
 
     <string name="live_stream_live_indicator">Live</string>
-    <string name="accessibility_rewind_10_seconds">Rewind 10 seconds</string>
-    <string name="accessibility_forward_10_seconds">Forward 10 seconds</string>
+    <string name="accessibility_rewind_15_seconds">Rewind 15 seconds</string>
+    <string name="accessibility_forward_30_seconds">Forward 30 seconds</string>
     <string name="accessibility_play_pause">Play or Pause</string>
     <string name="live_stream_starting">Starting</string>
     <string name="live_stream_started_at">Started %1$s ago</string>

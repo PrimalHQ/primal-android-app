@@ -102,6 +102,7 @@ fun LiveStreamPlayerControls(
                         isPlaying = state.playerState.isPlaying,
                         isLive = state.playerState.isLive,
                         isBuffering = state.playerState.isBuffering,
+                        atLiveEdge = state.playerState.atLiveEdge,
                         onRewind = onRewind,
                         onPlayPauseClick = onPlayPauseClick,
                         onForward = onForward,
@@ -188,6 +189,7 @@ private fun CenterPlayerControls(
     isPlaying: Boolean,
     isLive: Boolean,
     isBuffering: Boolean,
+    atLiveEdge: Boolean,
     onRewind: () -> Unit,
     onPlayPauseClick: () -> Unit,
     onForward: () -> Unit,
@@ -203,18 +205,17 @@ private fun CenterPlayerControls(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (!isLive) {
-                IconButton(
-                    onClick = onRewind,
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
-                ) {
-                    Icon(
-                        modifier = Modifier.size(42.dp),
-                        imageVector = PrimalIcons.VideoBack,
-                        contentDescription = stringResource(id = R.string.accessibility_rewind_10_seconds),
-                    )
-                }
+            IconButton(
+                onClick = onRewind,
+                colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
+            ) {
+                Icon(
+                    modifier = Modifier.size(42.dp),
+                    imageVector = PrimalIcons.VideoBack,
+                    contentDescription = stringResource(id = R.string.accessibility_rewind_15_seconds),
+                )
             }
+
             IconButton(
                 onClick = onPlayPauseClick,
                 colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
@@ -225,17 +226,19 @@ private fun CenterPlayerControls(
                     contentDescription = stringResource(id = R.string.accessibility_play_pause),
                 )
             }
-            if (!isLive) {
-                IconButton(
-                    onClick = onForward,
-                    colors = IconButtonDefaults.iconButtonColors(contentColor = Color.White),
-                ) {
-                    Icon(
-                        modifier = Modifier.size(42.dp),
-                        imageVector = PrimalIcons.VideoForward,
-                        contentDescription = stringResource(id = R.string.accessibility_forward_10_seconds),
-                    )
-                }
+            IconButton(
+                onClick = onForward,
+                enabled = !(isLive && atLiveEdge),
+                colors = IconButtonDefaults.iconButtonColors(
+                    contentColor = Color.White,
+                    disabledContentColor = Color.White.copy(alpha = 0.5f),
+                ),
+            ) {
+                Icon(
+                    modifier = Modifier.size(42.dp),
+                    imageVector = PrimalIcons.VideoForward,
+                    contentDescription = stringResource(id = R.string.accessibility_forward_30_seconds),
+                )
             }
         }
     }
