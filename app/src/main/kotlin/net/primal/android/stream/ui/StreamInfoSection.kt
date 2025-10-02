@@ -33,7 +33,7 @@ fun StreamInfoSection(
     isKeyboardVisible: Boolean,
 ) {
     Column(
-        verticalArrangement = Arrangement.spacedBy(2.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         if (!isKeyboardVisible) {
             Row(
@@ -49,7 +49,7 @@ fun StreamInfoSection(
                         lineHeight = 20.sp,
                     ),
                     fontWeight = FontWeight.Bold,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
 
