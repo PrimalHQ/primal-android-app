@@ -24,6 +24,8 @@
 /.idea/deploymentTargetSelector.xml
 /.idea/runConfigurations.xml
 /.idea/AndroidProjectSystem.xml
+/.idea/vcs.xml
+/.idea/gradle.xml
 .DS_Store
 /build
 /core/build
