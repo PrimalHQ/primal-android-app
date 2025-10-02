@@ -482,6 +482,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                             ),
                             streamInfo = this.streamInfo?.copy(
                                 atag = stream.aTag,
+                                streamStatus = stream.resolvedStatus,
                                 eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
                                 streamUrl = streamUrlToPlay,
@@ -500,6 +501,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
                                 rawNostrEventJson = stream.rawNostrEventJson,
+                                streamStatus = stream.resolvedStatus,
                                 mainHostId = stream.mainHostId,
                             ),
                         )

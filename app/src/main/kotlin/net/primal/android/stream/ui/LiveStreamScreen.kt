@@ -7,11 +7,15 @@ import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.AnimatedVisibilityScope
+import androidx.compose.animation.BoundsTransform
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.animateBounds
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,12 +26,16 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -60,6 +68,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
@@ -72,8 +81,10 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.media3.common.C
@@ -101,6 +112,7 @@ import net.primal.android.core.compose.profile.approvals.FollowsApprovalAlertDia
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.core.compose.rememberFullScreenController
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.core.ext.onDragDownBeyond
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.pip.rememberIsInPipMode
 import net.primal.android.core.video.toggle
@@ -127,6 +139,7 @@ import net.primal.domain.links.ReferencedUser
 import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
 import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.streams.StreamContentModerationMode
+import net.primal.domain.streams.StreamStatus
 import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.DraftTx
 
@@ -334,7 +347,7 @@ private fun LiveStreamBottomSheet(
         activeSheet = state.activeBottomSheet,
         streamInfo = state.streamInfo,
         zaps = state.zaps,
-        isStreamLive = state.playerState.isLive,
+        isStreamLive = state.streamInfo?.streamStatus == StreamStatus.LIVE,
         activeUserId = state.activeUserId,
         mainHostStreamsMuted = state.mainHostStreamsMuted,
         contentModeration = state.contentModerationMode,
@@ -395,6 +408,7 @@ private fun LiveStreamBottomSheet(
 @Composable
 private fun StreamPlayer(
     state: LiveStreamContract.UiState,
+    isCollapsed: Boolean,
     streamInfo: LiveStreamContract.StreamInfoUi,
     mediaController: MediaController,
     controlsVisible: Boolean,
@@ -406,27 +420,44 @@ private fun StreamPlayer(
     onMenuVisibilityChange: (Boolean) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
+    lookaheadScope: LookaheadScope,
     onRetry: () -> Unit,
 ) {
     val fullScreenController = rememberFullScreenController()
 
     with(sharedTransitionScope) {
-        LiveStreamPlayer(
+        ExpandedLiveStreamPlayer(
+            modifier = Modifier
+                .run {
+                    if (isCollapsed) {
+                        this
+                            .fillMaxHeight()
+                            .aspectRatio(VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT)
+                            .clip(AppTheme.shapes.extraSmall)
+                    } else {
+                        this
+                    }
+                },
+
             playerModifier = Modifier
+                .animateBounds(lookaheadScope = lookaheadScope)
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_PLAYER_KEY),
                     animatedVisibilityScope = animatedVisibilityScope,
                 ),
             loadingModifier = Modifier
+                .animateBounds(lookaheadScope = lookaheadScope)
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_LOADING_PLAYER_KEY),
                     animatedVisibilityScope = animatedVisibilityScope,
                 ),
+            controlsModifier = Modifier.animateBounds(lookaheadScope = lookaheadScope),
             state = state,
             mediaController = mediaController,
             streamUrl = streamInfo.streamUrl,
             controlsVisible = controlsVisible,
             menuVisible = menuVisible,
+            isCollapsed = isCollapsed,
             onPlayPauseClick = { mediaController.toggle() },
             onRewind = {
                 eventPublisher(LiveStreamContract.UiEvent.OnSeekStarted)
@@ -478,50 +509,6 @@ private fun StreamPlayer(
 }
 
 @Composable
-private fun StreamInfoAndChatSection(
-    modifier: Modifier = Modifier,
-    state: LiveStreamContract.UiState,
-    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
-    onZapClick: () -> Unit,
-    onInfoClick: () -> Unit,
-    onChatSettingsClick: () -> Unit,
-    onProfileClick: (String) -> Unit,
-    onNostrUriClick: (String) -> Unit,
-    onChatMessageClick: (ChatMessageUi) -> Unit,
-    onZapMessageClick: (EventZapUiModel) -> Unit,
-) {
-    val chatListState = rememberSaveable(saver = LazyListState.Saver) {
-        LazyListState()
-    }
-    val isKeyboardVisible by keyboardVisibilityAsState()
-
-    Column(modifier = modifier.fillMaxSize()) {
-        StreamInfoDisplay(
-            state = state,
-            onZapClick = onZapClick,
-            isKeyboardVisible = isKeyboardVisible,
-            onInfoClick = onInfoClick,
-            onChatSettingsClick = onChatSettingsClick,
-            onTopZapsClick = {
-                eventPublisher(
-                    LiveStreamContract.UiEvent.ChangeActiveBottomSheet(ActiveBottomSheet.StreamZapLeaderboard),
-                )
-            },
-        )
-
-        LiveChatContent(
-            state = state,
-            listState = chatListState,
-            eventPublisher = eventPublisher,
-            onProfileClick = onProfileClick,
-            onNostrUriClick = onNostrUriClick,
-            onChatMessageClick = onChatMessageClick,
-            onZapMessageClick = onZapMessageClick,
-        )
-    }
-}
-
-@Composable
 private fun LiveStreamContent(
     state: LiveStreamContract.UiState,
     mediaController: MediaController,
@@ -544,8 +531,16 @@ private fun LiveStreamContent(
 ) {
     val isInPipMode = rememberIsInPipMode()
     val localConfiguration = LocalConfiguration.current
+    val isLandscape = localConfiguration.orientation == Configuration.ORIENTATION_LANDSCAPE
     if (state.streamInfoLoading) {
         PrimalLoadingSpinner()
+    }
+    val chatListState = rememberSaveable(saver = LazyListState.Saver) {
+        LazyListState()
+    }
+    val isKeyboardVisible by keyboardVisibilityAsState()
+    val isCollapsed by remember(chatListState.firstVisibleItemIndex) {
+        mutableStateOf(chatListState.firstVisibleItemIndex != 0)
     }
 
     val streamInfo = state.streamInfo
@@ -553,66 +548,177 @@ private fun LiveStreamContent(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(AppTheme.colorScheme.surface),
-            ) {
-                StreamPlayer(
-                    state = state,
-                    streamInfo = streamInfo,
-                    mediaController = mediaController,
-                    controlsVisible = controlsVisible,
-                    menuVisible = menuVisible,
-                    eventPublisher = eventPublisher,
-                    onClose = callbacks.onClose,
-                    onQuoteStreamClick = callbacks.onQuoteStreamClick,
-                    onControlsVisibilityChange = onControlsVisibilityChange,
-                    onMenuVisibilityChange = onMenuVisibilityChange,
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    onRetry = onRetry,
+                .background(
+                    if (isCollapsed) {
+                        AppTheme.extraColorScheme.surfaceVariantAlt3
+                    } else {
+                        Color.Transparent
+                    },
                 )
+                .padding(top = paddingValues.calculateTopPadding())
+                .background(AppTheme.colorScheme.surfaceVariant)
+                .padding(horizontal = paddingValues.calculateStartPadding(layoutDirection = LayoutDirection.Ltr))
+                .padding(bottom = paddingValues.calculateBottomPadding()),
+        ) {
+            val boundsTransform = remember { BoundsTransform { _, _ -> tween() } }
 
-                if (localConfiguration.orientation != Configuration.ORIENTATION_LANDSCAPE && !isInPipMode) {
-                    StreamInfoAndChatSection(
-                        modifier = Modifier.weight(1f),
+            LookaheadScope {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    BoxWithConstraints(
+                        modifier = Modifier
+                            .animateBounds(
+                                lookaheadScope = this@LookaheadScope,
+                                boundsTransform = boundsTransform,
+                            )
+                            .run {
+                                if (isCollapsed) {
+                                    this
+                                        .onDragDownBeyond(
+                                            threshold = 75.dp,
+                                            onTriggered = callbacks.onClose,
+                                        )
+                                        .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
+                                        .padding(8.dp)
+                                        .padding(end = 8.dp)
+                                        .height(96.dp)
+                                        .fillMaxWidth()
+                                } else {
+                                    this
+                                }
+                            },
+                    ) {
+                        val maxWidth = this.maxWidth
+                        val playerWidth = this.maxHeight * VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT
+                        val playerBoxWidth = playerWidth + 12.dp
+                        val streamInfoColumnWidth = maxWidth - playerBoxWidth - 6.dp
+                        StreamPlayer(
+                            state = state,
+                            isCollapsed = isCollapsed,
+                            streamInfo = streamInfo,
+                            mediaController = mediaController,
+                            controlsVisible = controlsVisible,
+                            menuVisible = menuVisible,
+                            eventPublisher = eventPublisher,
+                            onClose = callbacks.onClose,
+                            onQuoteStreamClick = callbacks.onQuoteStreamClick,
+                            onControlsVisibilityChange = onControlsVisibilityChange,
+                            onMenuVisibilityChange = onMenuVisibilityChange,
+                            sharedTransitionScope = sharedTransitionScope,
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            lookaheadScope = this@LookaheadScope,
+                            onRetry = onRetry,
+                        )
+
+                        CollapsedStreamInfoColumn(
+                            modifier = Modifier
+                                .padding(start = playerBoxWidth, top = 8.dp)
+                                .width(streamInfoColumnWidth),
+                            isCollapsed = isCollapsed,
+                            streamTitle = state.streamInfo.title,
+                            viewers = state.streamInfo.viewers,
+                            isLive = state.streamInfo.streamStatus == StreamStatus.LIVE,
+                        )
+                    }
+                    if (localConfiguration.orientation != Configuration.ORIENTATION_LANDSCAPE && !isInPipMode) {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxSize(),
+                        ) {
+                            AnimatedVisibility(visible = !isCollapsed) {
+                                StreamInfoDisplay(
+                                    state = state,
+                                    onZapClick = onZapClick,
+                                    isKeyboardVisible = isKeyboardVisible,
+                                    onInfoClick = onInfoClick,
+                                    onChatSettingsClick = onChatSettingsClick,
+                                    onTopZapsClick = {
+                                        eventPublisher(
+                                            LiveStreamContract.UiEvent.ChangeActiveBottomSheet(
+                                                ActiveBottomSheet.StreamZapLeaderboard,
+                                            ),
+                                        )
+                                    },
+                                )
+                            }
+
+                            LiveChatContent(
+                                state = state,
+                                listState = chatListState,
+                                eventPublisher = eventPublisher,
+                                onProfileClick = callbacks.onProfileClick,
+                                onNostrUriClick = callbacks.onNostrUriClick,
+                                onChatMessageClick = onChatMessageClick,
+                                onZapMessageClick = onZapMessageClick,
+                            )
+                        }
+                    }
+                }
+
+                AnimatedVisibility(
+                    visible = !isInPipMode && !isCollapsed,
+                    enter = fadeIn(animationSpec = tween(delayMillis = 250)),
+                ) {
+                    val seekBarModifier = if (isLandscape) {
+                        Modifier
+                            .align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .padding(bottom = 20.dp, start = 32.dp, end = 32.dp)
+                    } else {
+                        Modifier
+                            .align(Alignment.TopCenter)
+                            .fillMaxWidth()
+                            .padding(top = playerHeight - 16.dp)
+                    }
+                    StreamSeekBar(
+                        modifier = seekBarModifier,
+                        isVisible = controlsVisible,
                         state = state,
+                        mediaController = mediaController,
                         eventPublisher = eventPublisher,
-                        onZapClick = onZapClick,
-                        onInfoClick = onInfoClick,
-                        onProfileClick = callbacks.onProfileClick,
-                        onNostrUriClick = callbacks.onNostrUriClick,
-                        onChatMessageClick = onChatMessageClick,
-                        onZapMessageClick = onZapMessageClick,
-                        onChatSettingsClick = onChatSettingsClick,
                     )
                 }
             }
+        }
+    }
+}
 
-            if (!isInPipMode) {
-                val isLandscape = localConfiguration.orientation == Configuration.ORIENTATION_LANDSCAPE
-                val seekBarModifier = if (isLandscape) {
-                    Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .padding(bottom = 20.dp, start = 32.dp, end = 32.dp)
-                } else {
-                    Modifier
-                        .align(Alignment.TopCenter)
-                        .fillMaxWidth()
-                        .padding(top = playerHeight - 16.dp)
-                }
-                StreamSeekBar(
-                    modifier = seekBarModifier,
-                    isVisible = controlsVisible,
-                    state = state,
-                    mediaController = mediaController,
-                    eventPublisher = eventPublisher,
-                )
-            }
+@Composable
+private fun CollapsedStreamInfoColumn(
+    modifier: Modifier = Modifier,
+    isCollapsed: Boolean,
+    streamTitle: String,
+    isLive: Boolean,
+    viewers: Int,
+) {
+    AnimatedVisibility(
+        modifier = modifier,
+        visible = isCollapsed,
+        enter = slideInVertically(
+            animationSpec = tween(),
+            initialOffsetY = { it / 2 },
+        ) + fadeIn(animationSpec = tween()),
+    ) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        ) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = streamTitle,
+                style = AppTheme.typography.titleLarge.copy(
+                    fontSize = 18.sp,
+                    lineHeight = 20.sp,
+                ),
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+
+            StreamMetaData(
+                isLive = isLive,
+                viewers = viewers,
+                startedAt = null,
+            )
         }
     }
 }

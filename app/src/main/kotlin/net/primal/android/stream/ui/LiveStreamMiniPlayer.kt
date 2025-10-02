@@ -12,25 +12,21 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -50,13 +46,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
-import androidx.media3.ui.compose.PlayerSurface
-import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.KeyboardState
@@ -211,17 +204,26 @@ fun LiveStreamMiniPlayer(
                     .clip(AppTheme.shapes.large),
             ) {
                 with(sharedTransitionScope) {
-                    PlayerBox(
-                        modifier = Modifier.sharedElement(
-                            sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_PLAYER_KEY),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                        ),
-                        loadingModifier = Modifier.sharedElement(
-                            sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_LOADING_PLAYER_KEY),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                        ),
+                    LiveStreamPlayerBox(
                         mediaController = mediaController,
                         state = state,
+                        modifier = Modifier
+                            .clip(AppTheme.shapes.large)
+                            .fillMaxSize(),
+                        playerModifier = Modifier
+                            .sharedElement(
+                                sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_PLAYER_KEY),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                            )
+                            .clip(AppTheme.shapes.large),
+                        loadingModifier = Modifier
+                            .sharedElement(
+                                sharedContentState = rememberSharedContentState(
+                                    key = SHARED_TRANSITION_LOADING_PLAYER_KEY,
+                                ),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                            )
+                            .clip(AppTheme.shapes.large),
                     )
 
                     PlayerControls(
@@ -336,69 +338,4 @@ private fun adjustPositionWithKeyboard(
     }
 
     return keyboardState
-}
-
-@UnstableApi
-@Composable
-private fun PlayerBox(
-    mediaController: MediaController,
-    state: LiveStreamContract.UiState,
-    modifier: Modifier = Modifier,
-    loadingModifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = Modifier
-            .clip(AppTheme.shapes.large)
-            .fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        val showPlayerSurface = !state.streamInfo?.streamUrl.isNullOrEmpty() &&
-            !state.isStreamUnavailable &&
-            !state.playerState.isVideoFinished
-
-        if (showPlayerSurface) {
-            PlayerSurface(
-                modifier = modifier
-                    .clip(AppTheme.shapes.large)
-                    .matchParentSize(),
-                player = mediaController,
-                surfaceType = SURFACE_TYPE_TEXTURE_VIEW,
-            )
-
-            if (state.playerState.isLoading) {
-                StreamPlayerLoadingIndicator(
-                    modifier = loadingModifier
-                        .matchParentSize()
-                        .clip(AppTheme.shapes.large)
-                        .background(AppTheme.colorScheme.background),
-                )
-            }
-        } else {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(Color.Black),
-                contentAlignment = Alignment.Center,
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(4.dp),
-                ) {
-                    val messageText = if (state.playerState.isVideoFinished) {
-                        stringResource(id = R.string.live_stream_video_ended)
-                    } else {
-                        stringResource(id = R.string.live_stream_recording_not_available)
-                    }
-
-                    Text(
-                        text = messageText,
-                        color = Color.White,
-                        style = AppTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-        }
-    }
 }
