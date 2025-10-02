@@ -541,6 +541,7 @@ private fun LiveStreamContent(
                                     this
                                 }
                             },
+                        contentAlignment = Alignment.CenterStart,
                     ) {
                         val maxWidth = this.maxWidth
                         val playerWidth = this.maxHeight * VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT
@@ -566,7 +567,7 @@ private fun LiveStreamContent(
 
                         CollapsedStreamInfoColumn(
                             modifier = Modifier
-                                .padding(start = playerBoxWidth, top = 8.dp)
+                                .padding(start = playerBoxWidth)
                                 .width(streamInfoColumnWidth),
                             isCollapsed = isCollapsed,
                             streamTitle = state.streamInfo.title,
