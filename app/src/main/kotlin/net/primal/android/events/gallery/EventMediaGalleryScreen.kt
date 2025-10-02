@@ -93,7 +93,7 @@ import net.primal.android.core.compose.immersive.ImmersiveModeState
 import net.primal.android.core.compose.immersive.rememberImmersiveModeState
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
-import net.primal.android.core.video.initializePlayer
+import net.primal.android.core.video.rememberPrimalExoPlayer
 import net.primal.android.stream.player.PauseStreamMiniPlayer
 import net.primal.android.stream.player.hideStreamMiniPlayer
 import net.primal.android.theme.AppTheme
@@ -260,17 +260,17 @@ private fun MediaGalleryContent(
     immersiveMode: ImmersiveModeState?,
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
-    val context = LocalContext.current
     val videoAttachments = rememberSaveable(attachments) { attachments.filter { it.type == EventUriType.Video } }
 
+    val exoPlayerInstance = rememberPrimalExoPlayer()
     var exoPlayer by remember { mutableStateOf<ExoPlayer?>(null) }
     var currentPosition by rememberSaveable { mutableLongStateOf(0L) }
 
     LifecycleStartEffect(Unit) {
-        exoPlayer = initializePlayer(context = context)
+        exoPlayer = exoPlayerInstance
         onStopOrDispose {
             currentPosition = exoPlayer?.currentPosition ?: 0L
-            exoPlayer?.apply { release() }
+            exoPlayer?.release()
             exoPlayer = null
         }
     }
