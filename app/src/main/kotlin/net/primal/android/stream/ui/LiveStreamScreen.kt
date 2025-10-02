@@ -611,23 +611,24 @@ private fun LiveStreamContent(
                     }
                 }
 
+                val seekBarModifier = if (isLandscape) {
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp, start = 32.dp, end = 32.dp)
+                } else {
+                    Modifier
+                        .align(Alignment.TopCenter)
+                        .fillMaxWidth()
+                        .padding(top = playerHeight - 16.dp)
+                }
+
                 AnimatedVisibility(
+                    modifier = seekBarModifier,
                     visible = !isInPipMode && !isCollapsed,
                     enter = fadeIn(animationSpec = tween(delayMillis = 250)),
                 ) {
-                    val seekBarModifier = if (isLandscape) {
-                        Modifier
-                            .align(Alignment.BottomCenter)
-                            .fillMaxWidth()
-                            .padding(bottom = 20.dp, start = 32.dp, end = 32.dp)
-                    } else {
-                        Modifier
-                            .align(Alignment.TopCenter)
-                            .fillMaxWidth()
-                            .padding(top = playerHeight - 16.dp)
-                    }
                     StreamSeekBar(
-                        modifier = seekBarModifier,
                         isVisible = controlsVisible,
                         state = state,
                         mediaController = mediaController,
