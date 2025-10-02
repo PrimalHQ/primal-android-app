@@ -26,6 +26,7 @@
 /.idea/AndroidProjectSystem.xml
 /.idea/vcs.xml
 /.idea/gradle.xml
+/.idea/misc.xml
 .DS_Store
 /build
 /core/build
@@ -43,3 +44,17 @@ local.properties
 config.properties
 release.properties
 google-services.json
+
+# GitHub Copilot
+copilot*.xml
+.copilot/
+copilot-config.json
+.copilot-config
+copilot-settings.json
+.github-copilot/
+
+# Claude Code
+.claude/
+claude-*.json
+claude-config.json
+.claude-workspace
