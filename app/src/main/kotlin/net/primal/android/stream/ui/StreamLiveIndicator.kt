@@ -12,6 +12,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
@@ -26,6 +27,8 @@ private val NotLiveIndicatorColorLight = Color(0xFF666666)
 fun StreamLiveIndicator(
     modifier: Modifier = Modifier,
     isLive: Boolean,
+    fontSize: TextUnit = 14.sp,
+    lineHeight: TextUnit = 14.sp,
     hideTextIfNotLive: Boolean = false,
     textColor: Color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
 ) {
@@ -55,8 +58,8 @@ fun StreamLiveIndicator(
                 text = stringResource(id = R.string.live_stream_live_indicator),
                 color = textColor,
                 style = AppTheme.typography.bodyMedium.copy(
-                    fontSize = 14.sp,
-                    lineHeight = 14.sp,
+                    fontSize = fontSize,
+                    lineHeight = lineHeight,
                 ),
             )
         }

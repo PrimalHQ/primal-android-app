@@ -15,6 +15,7 @@ import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.ReactionType
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.streams.StreamContentModerationMode
+import net.primal.domain.streams.StreamStatus
 import net.primal.domain.wallet.DraftTx
 import net.primal.domain.zaps.ZappingState
 
@@ -65,6 +66,7 @@ interface LiveStreamContract {
         val title: String,
         val streamUrl: String,
         val viewers: Int,
+        val streamStatus: StreamStatus,
         val image: String?,
         val startedAt: Long?,
         val description: String?,

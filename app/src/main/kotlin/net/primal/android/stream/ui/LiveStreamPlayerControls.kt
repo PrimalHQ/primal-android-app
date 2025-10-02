@@ -2,6 +2,7 @@ package net.primal.android.stream.ui
 
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -53,6 +54,7 @@ fun LiveStreamPlayerControls(
     state: LiveStreamContract.UiState,
     menuVisible: Boolean,
     isStreamUnavailable: Boolean,
+    isCollapsed: Boolean,
     onMenuVisibilityChange: (Boolean) -> Unit,
     onPlayPauseClick: () -> Unit,
     onRewind: () -> Unit,
@@ -67,21 +69,29 @@ fun LiveStreamPlayerControls(
     onRequestDeleteClick: () -> Unit,
     onToggleFullScreenClick: () -> Unit,
 ) {
-    Box(modifier = modifier) {
-        AnimatedVisibility(
-            visible = isVisible,
-            enter = fadeIn(),
-            exit = fadeOut(),
+    val enterTransition = fadeIn(animationSpec = tween(delayMillis = 250))
+    val exitTransition = fadeOut(animationSpec = tween(durationMillis = 50))
+    AnimatedVisibility(
+        visible = isVisible,
+        enter = fadeIn(),
+        exit = fadeOut(),
+    ) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.5f)),
         ) {
-            Box(
+            AnimatedVisibility(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.5f)),
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter),
+                visible = !isCollapsed,
+                enter = enterTransition,
+                exit = exitTransition,
             ) {
                 TopPlayerControls(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .align(Alignment.TopCenter)
                         .padding(horizontal = 8.dp),
                     state = state,
                     menuVisible = menuVisible,
@@ -93,35 +103,46 @@ fun LiveStreamPlayerControls(
                     onReportContentClick = onReportContentClick,
                     onRequestDeleteClick = onRequestDeleteClick,
                 )
+            }
 
-                if (!isStreamUnavailable) {
-                    CenterPlayerControls(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.Center),
-                        isPlaying = state.playerState.isPlaying,
-                        isLive = state.playerState.isLive,
-                        isBuffering = state.playerState.isBuffering,
-                        onRewind = onRewind,
-                        onPlayPauseClick = onPlayPauseClick,
-                        onForward = onForward,
-                    )
-                }
+            AnimatedVisibility(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center),
+                visible = !isStreamUnavailable,
+                enter = enterTransition,
+                exit = exitTransition,
+            ) {
+                CenterPlayerControls(
+                    modifier = Modifier.fillMaxWidth(),
+                    isPlaying = state.playerState.isPlaying,
+                    isLive = state.playerState.isLive,
+                    isBuffering = state.playerState.isBuffering,
+                    onRewind = onRewind,
+                    onPlayPauseClick = onPlayPauseClick,
+                    onForward = onForward,
+                )
+            }
 
-                if (!isStreamUnavailable) {
-                    PlayerActionButtons(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.BottomCenter)
-                            .padding(horizontal = 16.dp),
-                        isLive = state.playerState.isLive,
-                        isAtLiveEdge = state.playerState.atLiveEdge,
-                        isMuted = state.playerState.isMuted,
-                        onGoToLive = onGoToLive,
-                        onSoundClick = onSoundClick,
-                        onFullscreenClick = onToggleFullScreenClick,
-                    )
-                }
+            AnimatedVisibility(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter),
+                visible = !isStreamUnavailable && !isCollapsed,
+                enter = enterTransition,
+                exit = exitTransition,
+            ) {
+                PlayerActionButtons(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    isLive = state.playerState.isLive,
+                    isAtLiveEdge = state.playerState.atLiveEdge,
+                    isMuted = state.playerState.isMuted,
+                    onGoToLive = onGoToLive,
+                    onSoundClick = onSoundClick,
+                    onFullscreenClick = onToggleFullScreenClick,
+                )
             }
         }
     }
