@@ -146,11 +146,11 @@ fun LiveStreamScreen(
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(state.playerState.isPlaying) {
-        while (state.playerState.isPlaying) {
+    val isAtLiveEdge = remember(mediaController) {
+        {
             val liveOffsetMs = mediaController.currentLiveOffset
 
-            val isAtLiveEdge = if (liveOffsetMs != C.TIME_UNSET) {
+            if (liveOffsetMs != C.TIME_UNSET) {
                 liveOffsetMs > LIVE_EDGE_THRESHOLD_MS
             } else if (mediaController.isCurrentMediaItemLive) {
                 val duration = mediaController.duration
@@ -163,12 +163,16 @@ fun LiveStreamScreen(
             } else {
                 false
             }
+        }
+    }
 
+    LaunchedEffect(state.playerState.isPlaying) {
+        while (state.playerState.isPlaying) {
             eventPublisher(
                 LiveStreamContract.UiEvent.OnPlayerStateUpdate(
                     currentTime = mediaController.currentPosition,
                     bufferedPosition = mediaController.bufferedPosition,
-                    atLiveEdge = isAtLiveEdge,
+                    atLiveEdge = isAtLiveEdge(),
                     isPlaying = mediaController.isPlaying,
                 ),
             )
@@ -182,10 +186,7 @@ fun LiveStreamScreen(
         else -> state.streamInfo?.mainHostProfile?.authorDisplayName
     }
 
-    val zapHostState = rememberZapHostState(
-        zappingState = state.zappingState,
-        receiverName = receiverName,
-    )
+    val zapHostState = rememberZapHostState(zappingState = state.zappingState, receiverName = receiverName)
 
     ZapHost(
         zapHostState = zapHostState,

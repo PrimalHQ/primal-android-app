@@ -190,9 +190,9 @@ private fun SeekBarTrack(
         val progressPx = (visualProgress * canvasWidth).coerceIn(0f, canvasWidth)
         val bufferedProgressPx = (bufferedProgress * canvasWidth).coerceIn(0f, canvasWidth)
         val (bufferedStartPx, bufferedEndPx) = if (isRtl) {
-            Pair(canvasWidth - progressPx, canvasWidth - bufferedProgressPx)
+            canvasWidth - progressPx to canvasWidth - bufferedProgressPx
         } else {
-            Pair(progressPx, bufferedProgressPx)
+            progressPx to bufferedProgressPx
         }
         drawLine(
             color = activeTrackColor.copy(alpha = 0.5f),
@@ -203,9 +203,9 @@ private fun SeekBarTrack(
         )
 
         val (startPx, endPx) = if (isRtl) {
-            Pair(canvasWidth, canvasWidth - progressPx)
+            canvasWidth to canvasWidth - progressPx
         } else {
-            Pair(0f, progressPx)
+            0f to progressPx
         }
         drawLine(
             color = activeTrackColor,
