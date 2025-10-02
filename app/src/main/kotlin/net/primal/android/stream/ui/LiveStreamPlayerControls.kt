@@ -119,11 +119,11 @@ fun LiveStreamPlayerControls(
                     isLive = state.playerState.isLive,
                     isBuffering = state.playerState.isBuffering,
                     atLiveEdge = state.playerState.atLiveEdge,
-                        onRewind = onRewind,
-                        onPlayPauseClick = onPlayPauseClick,
-                        onForward = onForward,
-                    )
-                }
+                    onRewind = onRewind,
+                    onPlayPauseClick = onPlayPauseClick,
+                    onForward = onForward,
+                )
+            }
 
             AnimatedVisibility(
                 modifier = Modifier

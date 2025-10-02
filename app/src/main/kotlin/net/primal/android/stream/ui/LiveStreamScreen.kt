@@ -483,9 +483,7 @@ private fun StreamPlayer(
                     mediaController.seekToDefaultPosition()
                 }
             },
-            onSoundClick = {
-                eventPublisher(LiveStreamContract.UiEvent.ToggleMute)
-            },
+            onSoundClick = { eventPublisher(LiveStreamContract.UiEvent.ToggleMute) },
             onClose = onClose,
             onControlsVisibilityChange = onControlsVisibilityChange,
             onMenuVisibilityChange = onMenuVisibilityChange,
@@ -499,9 +497,7 @@ private fun StreamPlayer(
             onReportContentClick = { reportType ->
                 eventPublisher(LiveStreamContract.UiEvent.ReportAbuse(reportType))
             },
-            onRequestDeleteClick = {
-                eventPublisher(LiveStreamContract.UiEvent.RequestDeleteStream)
-            },
+            onRequestDeleteClick = { eventPublisher(LiveStreamContract.UiEvent.RequestDeleteStream) },
             onToggleFullScreenClick = { fullScreenController.toggle() },
             onRetry = onRetry,
         )
