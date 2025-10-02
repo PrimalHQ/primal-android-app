@@ -39,7 +39,7 @@ fun StreamMetaData(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        StreamLiveIndicator(isLive = isLive, textColor = textColor)
+        StreamLiveIndicator(isLive = isLive, textColor = textColor, fontSize = 15.sp, lineHeight = 16.sp)
 
         if (startedAt != null) {
             Text(
@@ -49,18 +49,18 @@ fun StreamMetaData(
                 ),
                 color = textColor,
                 style = AppTheme.typography.bodyMedium.copy(
-                    fontSize = 14.sp,
-                    lineHeight = 14.sp,
+                    fontSize = 15.sp,
+                    lineHeight = 16.sp,
                 ),
             )
         }
         IconText(
             text = numberFormat.format(viewers),
             leadingIcon = PrimalIcons.Follow,
-            iconSize = 12.sp,
+            iconSize = 14.sp,
             color = textColor,
             style = AppTheme.typography.bodyMedium.copy(
-                fontSize = 14.sp,
+                fontSize = 15.sp,
                 lineHeight = 16.sp,
             ),
         )
