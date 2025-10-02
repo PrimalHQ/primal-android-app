@@ -1,14 +1,3 @@
 ## Changes
-- Implemented Delete Repost for notes (#673)
-- Implemented seek bar functionality for recorded streams (#663)
-- Implemented deep link support for primal stream links (#668)
-- Implemented optimistic updates for zaps and messages in streams (#666)
-- Implemented keeping screen ON during stream playback (#665)
-- Implemented pausing autoplay videos when app enters background (#660)
-- Implemented support for NEVENT & NADDR QR code types in ProfileQrCodeScreen (#647 by @pedromvpg)
-- Improved stream chat scrolling logic on new message or zap (#664)
-- Improved live stream playback stability
-- Migrated to PlayerSurface from AndroidView in note video previews (#661)
-- Fixed crash when Amber signer is uninstalled (#669)
-- Fixed crash on Premium Media Management screen for some users
-- Upgraded to Kotlin 2.2
+- Implement collapsing stream animation
+- Polish stream titles
