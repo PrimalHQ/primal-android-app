@@ -6,6 +6,7 @@ import androidx.paging.PagingState
 import androidx.paging.RemoteMediator
 import io.github.aakira.napier.Napier
 import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
@@ -13,14 +14,14 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.fold
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
-import net.primal.domain.wallet.SubWallet
+import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.WalletType
 import net.primal.wallet.data.handler.TransactionsHandler
 import net.primal.wallet.data.local.dao.WalletTransaction
 import net.primal.wallet.data.local.db.WalletDatabase
-import net.primal.wallet.data.model.TransactionsRequest
 import net.primal.wallet.data.repository.mappers.local.toDomain
 
+@ExperimentalTime
 @ExperimentalPagingApi
 class WalletTransactionsMediator internal constructor(
     private val walletId: String,
@@ -76,21 +77,16 @@ class WalletTransactionsMediator internal constructor(
             LoadType.APPEND -> null to timestamp
         }
 
-        val request = when (wallet.info.type) {
-            WalletType.PRIMAL -> TransactionsRequest.Primal(
-                subWallet = SubWallet.Open,
-                minAmountInBtc = walletSettings?.spamThresholdAmountInSats?.decrypted?.toBtc()?.formatAsString(),
-                limit = state.config.pageSize,
-                since = timestamps.first,
-                until = timestamps.second,
-            )
-
-            WalletType.NWC -> TransactionsRequest.NWC(
-                limit = state.config.pageSize,
-                since = timestamps.first,
-                until = timestamps.second,
-            )
-        }
+        val request = TransactionsRequest(
+            limit = state.config.pageSize,
+            since = timestamps.first,
+            until = timestamps.second,
+            minAmountInBtc = if (wallet.info.type == WalletType.PRIMAL) {
+                walletSettings?.spamThresholdAmountInSats?.decrypted?.toBtc()?.formatAsString()
+            } else {
+                null
+            },
+        )
 
         Napier.d { "Fetching $loadType with request: $request" }
         if (loadType != LoadType.REFRESH && lastRequests[loadType] == request) {

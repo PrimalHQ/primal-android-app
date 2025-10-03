@@ -37,6 +37,11 @@ include(":data:caching:repository")
 include(":data:wallet:local")
 include(":data:wallet:remote-primal")
 include(":data:wallet:remote-nwc")
+includeBuild("../primal-tsunami-sdk/bindings/kmp/primal-tsunami-kmp") {
+    dependencySubstitution {
+        substitute(module("net.primal:tsunami-sdk-kmp")).using(project(":sdk"))
+    }
+}
 include(":data:wallet:repository")
 
 include(":domain:nostr")
@@ -45,5 +50,3 @@ include(":domain:wallet")
 
 include(":paging-runtime-ios")
 include(":shared")
-
-include(":macrobenchmark")
