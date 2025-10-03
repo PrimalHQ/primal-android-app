@@ -97,7 +97,7 @@ class RedeemCodeViewModel @Inject constructor(
         val wallet = walletAccountRepository.getActiveWallet(userId = userAccount.pubkey)
 
         return when (wallet) {
-            is Wallet.NWC, null -> RedeemCodeContract.UserState.UserWithoutPrimalWallet
+            is Wallet.NWC, is Wallet.Tsunami, null -> RedeemCodeContract.UserState.UserWithoutPrimalWallet
             is Wallet.Primal -> RedeemCodeContract.UserState.UserWithPrimalWallet
         }
     }

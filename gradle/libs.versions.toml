@@ -64,6 +64,7 @@ okio = "3.12.0"
 placeholder = "2.0.0"
 play-publishing = "3.12.1"
 play-billing = "7.1.1"
+primal-tsunami-sdk-kmp = "1.0.0"
 qrcode-generator = "1.6.2"
 reorderable = "2.4.3"
 retrofit = "3.0.0"
@@ -277,6 +278,9 @@ skie-configuration-annotations = { module = "co.touchlab.skie:configuration-anno
 skie-configuration-annotations-iosarm64 = { module = "co.touchlab.skie:configuration-annotations-iosarm64", version.ref = "skie" }
 skie-configuration-annotations-iossimulatorarm64 = { module = "co.touchlab.skie:configuration-annotations-iossimulatorarm64", version.ref = "skie" }
 skie-configuration-annotations-iosx64  = { module = "co.touchlab.skie:configuration-annotation-iosx64", version.ref = "skie" }
+
+#Primal
+primal-tsunami-sdk-kmp = { module = "net.primal:tsunami-sdk-kmp", version.ref = "primal-tsunami-sdk-kmp" }
 
 # Tests libs
 junit = { group = "junit", name = "junit", version.ref = "junit" }
