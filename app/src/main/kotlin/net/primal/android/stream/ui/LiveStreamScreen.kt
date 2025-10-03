@@ -143,6 +143,7 @@ import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.DraftTx
 
 private const val URL_ANNOTATION_TAG = "url"
+private const val COLLAPSED_MODE_CHAT_ITEMS_THRESHOLD = 20
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -497,7 +498,11 @@ private fun LiveStreamContent(
     }
     val isKeyboardVisible by keyboardVisibilityAsState()
     val isCollapsed by remember(chatListState.firstVisibleItemIndex, localConfiguration.orientation) {
-        mutableStateOf(chatListState.firstVisibleItemIndex != 0 && !isLandscape)
+        mutableStateOf(
+            chatListState.firstVisibleItemIndex != 0 &&
+                !isLandscape &&
+                state.chatItems.size > COLLAPSED_MODE_CHAT_ITEMS_THRESHOLD,
+        )
     }
 
     val streamInfo = state.streamInfo
