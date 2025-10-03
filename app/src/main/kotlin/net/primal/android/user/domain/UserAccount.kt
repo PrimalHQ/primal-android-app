@@ -50,6 +50,7 @@ data class UserAccount(
     val lastAccessedAt: Long = Instant.now().epochSecond,
     val blossomServers: List<String> = emptyList(),
     val pushNotificationsEnabled: Boolean = false,
+    val shouldShowStreamControlPopup: Boolean = true,
 ) {
     companion object {
         val EMPTY = UserAccount(

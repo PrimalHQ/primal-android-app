@@ -103,6 +103,8 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSeekBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.bubble.AnchorHandle
+import net.primal.android.core.compose.bubble.AnchoredBubble
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -588,6 +590,9 @@ private fun LiveStreamContent(
                                     isKeyboardVisible = isKeyboardVisible,
                                     onInfoClick = onInfoClick,
                                     onChatSettingsClick = onChatSettingsClick,
+                                    onDismissStreamControlPopup = {
+                                        eventPublisher(LiveStreamContract.UiEvent.DismissStreamControlPopup)
+                                    },
                                     onTopZapsClick = {
                                         eventPublisher(
                                             LiveStreamContract.UiEvent.ChangeActiveBottomSheet(
@@ -740,6 +745,7 @@ private fun StreamSeekBar(
 @Composable
 private fun StreamInfoDisplay(
     state: LiveStreamContract.UiState,
+    onDismissStreamControlPopup: () -> Unit,
     onZapClick: () -> Unit,
     isKeyboardVisible: Boolean,
     onChatSettingsClick: () -> Unit,
@@ -748,46 +754,59 @@ private fun StreamInfoDisplay(
 ) {
     val streamInfo = state.streamInfo ?: return
     val bottomBorderColor = AppTheme.extraColorScheme.surfaceVariantAlt1
+    val anchor = remember { AnchorHandle() }
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .animateContentSize()
-            .background(
-                AppTheme.extraColorScheme.surfaceVariantAlt2,
+    Box(
+        contentAlignment = Alignment.TopEnd,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize()
+                .background(
+                    AppTheme.extraColorScheme.surfaceVariantAlt2,
+                )
+                .drawBehind {
+                    val strokeWidth = 1.dp.toPx()
+                    val y = size.height - strokeWidth / 2f
+                    drawLine(
+                        color = bottomBorderColor,
+                        start = Offset(0f, y),
+                        end = Offset(size.width, y),
+                        strokeWidth = strokeWidth,
+                    )
+                }
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            StreamInfoSection(
+                title = streamInfo.title,
+                viewers = streamInfo.viewers,
+                startedAt = streamInfo.startedAt,
+                isLive = state.playerState.isLive,
+                onInfoClick = onInfoClick,
+                onChatSettingsClick = onChatSettingsClick,
+                isKeyboardVisible = isKeyboardVisible,
+                streamControlAnchorHandle = anchor,
             )
-            .drawBehind {
-                val strokeWidth = 1.dp.toPx()
-                val y = size.height - strokeWidth / 2f
-                drawLine(
-                    color = bottomBorderColor,
-                    start = Offset(0f, y),
-                    end = Offset(size.width, y),
-                    strokeWidth = strokeWidth,
+
+            if (!isKeyboardVisible) {
+                StreamTopZapsSection(
+                    modifier = Modifier.fillMaxWidth(),
+                    chatLoading = state.chatLoading,
+                    topZaps = state.zaps,
+                    onZapClick = onZapClick,
+                    onTopZapsClick = onTopZapsClick,
                 )
             }
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        StreamInfoSection(
-            title = streamInfo.title,
-            viewers = streamInfo.viewers,
-            startedAt = streamInfo.startedAt,
-            isLive = state.playerState.isLive,
-            onInfoClick = onInfoClick,
-            onChatSettingsClick = onChatSettingsClick,
-            isKeyboardVisible = isKeyboardVisible,
-        )
-
-        if (!isKeyboardVisible) {
-            StreamTopZapsSection(
-                modifier = Modifier.fillMaxWidth(),
-                chatLoading = state.chatLoading,
-                topZaps = state.zaps,
-                onZapClick = onZapClick,
-                onTopZapsClick = onTopZapsClick,
-            )
         }
+
+        AnchoredBubble(
+            anchor = anchor,
+            text = stringResource(id = R.string.live_stream_stream_control_popup_text),
+            visible = state.showStreamControlPopup,
+            onDismiss = onDismissStreamControlPopup,
+        )
     }
 }
 

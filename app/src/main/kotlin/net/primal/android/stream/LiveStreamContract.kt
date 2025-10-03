@@ -43,6 +43,7 @@ interface LiveStreamContract {
         val profileIdToFollowerCount: Map<String, Int> = emptyMap(),
         val liveProfiles: Set<String> = emptySet(),
         val isStreamUnavailable: Boolean = false,
+        val showStreamControlPopup: Boolean = false,
         val activeBottomSheet: ActiveBottomSheet = ActiveBottomSheet.None,
     )
 
@@ -85,6 +86,7 @@ interface LiveStreamContract {
             val totalDuration: Long? = null,
         ) : UiEvent()
 
+        data object DismissStreamControlPopup : UiEvent()
         data object OnSeekStarted : UiEvent()
         data class OnSeek(val positionMs: Long) : UiEvent()
         data object ToggleMute : UiEvent()

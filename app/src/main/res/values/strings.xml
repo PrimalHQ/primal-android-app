@@ -1387,6 +1387,7 @@
     <string name="live_stream_zapped">zapped</string>
     <string name="live_stream_leaderboard_sats_suffix">sats</string>
     <string name="live_stream_retry_button">Retry</string>
+    <string name="live_stream_stream_control_popup_text">You can control live stream\nnotifications and chat settings</string>
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>
