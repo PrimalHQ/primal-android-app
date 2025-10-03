@@ -494,8 +494,8 @@ private fun LiveStreamContent(
         LazyListState()
     }
     val isKeyboardVisible by keyboardVisibilityAsState()
-    val isCollapsed by remember(chatListState.firstVisibleItemIndex) {
-        mutableStateOf(chatListState.firstVisibleItemIndex != 0)
+    val isCollapsed by remember(chatListState.firstVisibleItemIndex, localConfiguration.orientation) {
+        mutableStateOf(chatListState.firstVisibleItemIndex != 0 && !isLandscape)
     }
 
     val streamInfo = state.streamInfo
