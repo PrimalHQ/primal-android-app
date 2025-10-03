@@ -1,5 +1,6 @@
 package net.primal.android.stream.ui
 
+import android.content.res.Configuration
 import androidx.annotation.OptIn
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -39,6 +41,8 @@ fun LiveStreamPlayerBox(
     playerOverlay: @Composable () -> Unit = {},
     onRetryClick: (() -> Unit)? = null,
 ) {
+    val localConfiguration = LocalConfiguration.current
+
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,
@@ -60,7 +64,8 @@ fun LiveStreamPlayerBox(
                 StreamPlayerLoadingIndicator(
                     modifier = loadingModifier
                         .matchParentSize()
-                        .background(AppTheme.colorScheme.background),
+                        .background(Color.Black),
+                    isFullscreen = localConfiguration.orientation == Configuration.ORIENTATION_LANDSCAPE,
                 )
             }
         } else {

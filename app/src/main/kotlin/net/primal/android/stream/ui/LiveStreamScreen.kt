@@ -402,7 +402,7 @@ private fun StreamPlayer(
                             .aspectRatio(VIDEO_ASPECT_RATIO_WIDTH / VIDEO_ASPECT_RATIO_HEIGHT)
                             .clip(AppTheme.shapes.extraSmall)
                     } else {
-                        this
+                        this.skipToLookaheadSize()
                     }
                 },
 
