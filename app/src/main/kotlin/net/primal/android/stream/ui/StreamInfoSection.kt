@@ -16,6 +16,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import net.primal.android.core.compose.bubble.AnchorHandle
+import net.primal.android.core.compose.bubble.anchor
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
@@ -31,6 +33,7 @@ fun StreamInfoSection(
     onChatSettingsClick: () -> Unit,
     onInfoClick: () -> Unit,
     isKeyboardVisible: Boolean,
+    streamControlAnchorHandle: AnchorHandle,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -60,7 +63,9 @@ fun StreamInfoSection(
                 ) {
                     IconButton(
                         onClick = onChatSettingsClick,
-                        modifier = Modifier.size(24.dp),
+                        modifier = Modifier
+                            .size(24.dp)
+                            .anchor(handle = streamControlAnchorHandle),
                     ) {
                         Icon(
                             imageVector = PrimalIcons.AdvancedSearch,

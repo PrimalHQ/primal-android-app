@@ -7,7 +7,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -41,6 +41,7 @@ import net.primal.android.stream.LiveStreamContract.UiState
 import net.primal.android.stream.ui.ActiveBottomSheet
 import net.primal.android.stream.ui.ChatMessageUi
 import net.primal.android.stream.ui.StreamChatItem
+import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.android.user.domain.UserAccount
@@ -85,6 +86,7 @@ class LiveStreamViewModel @AssistedInject constructor(
     private val profileRepository: ProfileRepository,
     private val streamRepository: StreamRepository,
     private val liveStreamChatRepository: LiveStreamChatRepository,
+    private val accountsStore: UserAccountsStore,
     private val activeAccountStore: ActiveAccountStore,
     private val profileFollowsHandler: ProfileFollowsHandler,
     private val zapHandler: ZapHandler,
@@ -338,7 +340,16 @@ class LiveStreamViewModel @AssistedInject constructor(
                     }
 
                     is UiEvent.ChangeStreamMuted -> changeStreamMuted(it.isMuted)
+                    UiEvent.DismissStreamControlPopup -> dismissStreamControlPopup()
                 }
+            }
+        }
+
+    private fun dismissStreamControlPopup() =
+        viewModelScope.launch {
+            setState { copy(showStreamControlPopup = false) }
+            accountsStore.getAndUpdateAccount(userId = activeAccountStore.activeUserId()) {
+                copy(shouldShowStreamControlPopup = false)
             }
         }
 
@@ -599,6 +610,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 zapDefault = it.data.appSettings?.zapDefault ?: this.zappingState.zapDefault,
                                 zapsConfig = it.data.appSettings?.zapsConfig ?: this.zappingState.zapsConfig,
                             ),
+                            showStreamControlPopup = it.data.shouldShowStreamControlPopup,
                         )
                     }
                 }
