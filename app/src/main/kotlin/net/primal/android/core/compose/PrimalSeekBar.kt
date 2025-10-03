@@ -41,15 +41,18 @@ private const val SECONDS_IN_A_MINUTE = 60
 @Composable
 fun PrimalSeekBar(
     progress: Float,
-    totalDurationMs: Long,
-    currentTimeMs: Long,
     isInteractive: Boolean,
     onScrub: (Float) -> Unit,
     onScrubEnd: () -> Unit,
     modifier: Modifier = Modifier,
+    bufferedProgress: Float = 0f,
+    totalDurationMs: Long = 0L,
+    currentTimeMs: Long = 0L,
     touchableAreaHeight: Dp = 32.dp,
     trackHeight: Dp = 3.dp,
     thumbRadius: Dp = 8.dp,
+    activeTrackColor: Color = AppTheme.colorScheme.primary,
+    inactiveTrackColor: Color = Color.White.copy(alpha = 0.3f),
 ) {
     val accessibleDescription = stringResource(
         id = R.string.accessibility_primal_seek_bar,
@@ -61,9 +64,7 @@ fun PrimalSeekBar(
     var visualTarget by remember { mutableFloatStateOf(progress) }
 
     LaunchedEffect(progress, isDragging) {
-        if (!isDragging) {
-            visualTarget = progress
-        }
+        if (!isDragging) visualTarget = progress
     }
 
     val visualProgress by animateFloatAsState(
@@ -86,66 +87,88 @@ fun PrimalSeekBar(
                     }
                 }
             }
-            .pointerInput(isInteractive) {
-                if (!isInteractive) return@pointerInput
-                detectTapGestures { offset ->
-                    val newProgress = (offset.x / size.width).coerceIn(0f, 1f)
-                    isDragging = false
-                    visualTarget = newProgress
-                    onScrub(newProgress)
-                    onScrubEnd()
-                }
-            }
-            .pointerInput(isInteractive) {
-                if (!isInteractive) return@pointerInput
-                detectDragGestures(
-                    onDragStart = { offset ->
-                        isDragging = true
-                        val newProgress = (offset.x / size.width).coerceIn(0f, 1f)
-                        visualTarget = newProgress
-                        onScrub(newProgress)
-                    },
-                    onDrag = { change, _ ->
-                        change.consume()
-                        val newProgress = (change.position.x / size.width).coerceIn(0f, 1f)
-                        visualTarget = newProgress
-                        onScrub(newProgress)
-                    },
-                    onDragEnd = {
-                        isDragging = false
-                        onScrubEnd()
-                    },
-                    onDragCancel = {
-                        isDragging = false
-                        onScrubEnd()
-                    },
-                )
-            }
+            .then(
+                if (isInteractive) {
+                    Modifier.primalSeekBarGestures(
+                        onScrub = onScrub,
+                        onScrubEnd = onScrubEnd,
+                        onDraggingStateChange = { isDragging = it },
+                        onVisualTargetChange = { visualTarget = it },
+                    )
+                } else {
+                    Modifier
+                },
+            )
             .fillMaxWidth()
             .height(touchableAreaHeight),
         contentAlignment = Alignment.Center,
     ) {
         SeekBarTrack(
             visualProgress = visualProgress,
+            bufferedProgress = if (isDragging) 0f else bufferedProgress,
             isInteractive = isInteractive,
             trackHeight = trackHeight,
             thumbRadius = thumbRadius,
+            activeTrackColor = activeTrackColor,
+            inactiveTrackColor = inactiveTrackColor,
         )
     }
 }
+
+private fun Modifier.primalSeekBarGestures(
+    onScrub: (Float) -> Unit,
+    onScrubEnd: () -> Unit,
+    onDraggingStateChange: (Boolean) -> Unit,
+    onVisualTargetChange: (Float) -> Unit,
+): Modifier =
+    this
+        .pointerInput(Unit) {
+            detectTapGestures { offset ->
+                val newProgress = (offset.x / size.width).coerceIn(0f, 1f)
+                onDraggingStateChange(false)
+                onVisualTargetChange(newProgress)
+                onScrub(newProgress)
+                onScrubEnd()
+            }
+        }
+        .pointerInput(Unit) {
+            detectDragGestures(
+                onDragStart = { offset ->
+                    onDraggingStateChange(true)
+                    val newProgress = (offset.x / size.width).coerceIn(0f, 1f)
+                    onVisualTargetChange(newProgress)
+                    onScrub(newProgress)
+                },
+                onDrag = { change, _ ->
+                    change.consume()
+                    val newProgress = (change.position.x / size.width).coerceIn(0f, 1f)
+                    onVisualTargetChange(newProgress)
+                    onScrub(newProgress)
+                },
+                onDragEnd = {
+                    onDraggingStateChange(false)
+                    onScrubEnd()
+                },
+                onDragCancel = {
+                    onDraggingStateChange(false)
+                    onScrubEnd()
+                },
+            )
+        }
 
 @Composable
 private fun SeekBarTrack(
     modifier: Modifier = Modifier,
     visualProgress: Float,
+    bufferedProgress: Float,
     isInteractive: Boolean,
     trackHeight: Dp,
     thumbRadius: Dp,
-    inactiveTrackColor: Color = Color.White.copy(alpha = 0.3f),
-    activeTrackColor: Color = AppTheme.colorScheme.primary,
-    thumbColor: Color = AppTheme.colorScheme.primary,
+    inactiveTrackColor: Color,
+    activeTrackColor: Color,
 ) {
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val thumbColor = activeTrackColor
 
     Canvas(
         modifier = modifier
@@ -165,10 +188,24 @@ private fun SeekBarTrack(
         )
 
         val progressPx = (visualProgress * canvasWidth).coerceIn(0f, canvasWidth)
-        val (startPx, endPx) = if (isRtl) {
-            Pair(canvasWidth, canvasWidth - progressPx)
+        val bufferedProgressPx = (bufferedProgress * canvasWidth).coerceIn(0f, canvasWidth)
+        val (bufferedStartPx, bufferedEndPx) = if (isRtl) {
+            canvasWidth - progressPx to canvasWidth - bufferedProgressPx
         } else {
-            Pair(0f, progressPx)
+            progressPx to bufferedProgressPx
+        }
+        drawLine(
+            color = activeTrackColor.copy(alpha = 0.5f),
+            start = Offset(bufferedStartPx, trackY),
+            end = Offset(bufferedEndPx, trackY),
+            strokeWidth = trackStroke,
+            cap = StrokeCap.Round,
+        )
+
+        val (startPx, endPx) = if (isRtl) {
+            canvasWidth to canvasWidth - progressPx
+        } else {
+            0f to progressPx
         }
         drawLine(
             color = activeTrackColor,

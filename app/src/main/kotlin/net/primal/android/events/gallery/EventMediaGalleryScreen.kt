@@ -91,6 +91,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ContextCopyRawData
 import net.primal.android.core.compose.icons.primaliconpack.More
 import net.primal.android.core.compose.immersive.ImmersiveModeState
 import net.primal.android.core.compose.immersive.rememberImmersiveModeState
+import net.primal.android.core.di.rememberFeedVideoCache
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.video.initializePlayer
@@ -263,11 +264,12 @@ private fun MediaGalleryContent(
     val context = LocalContext.current
     val videoAttachments = rememberSaveable(attachments) { attachments.filter { it.type == EventUriType.Video } }
 
+    val feedVideoCache = rememberFeedVideoCache()
     var exoPlayer by remember { mutableStateOf<ExoPlayer?>(null) }
     var currentPosition by rememberSaveable { mutableLongStateOf(0L) }
 
-    LifecycleStartEffect(Unit) {
-        exoPlayer = initializePlayer(context = context)
+    LifecycleStartEffect(feedVideoCache) {
+        exoPlayer = initializePlayer(context = context, cache = feedVideoCache)
         onStopOrDispose {
             currentPosition = exoPlayer?.currentPosition ?: 0L
             exoPlayer?.apply { release() }
