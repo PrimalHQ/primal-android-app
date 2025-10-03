@@ -14,8 +14,8 @@ import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 
 @Composable
-fun StreamPlayerLoadingIndicator(modifier: Modifier = Modifier) {
-    val background by if (LocalPrimalTheme.current.isDarkTheme) {
+fun StreamPlayerLoadingIndicator(modifier: Modifier = Modifier, isFullscreen: Boolean) {
+    val background by if (LocalPrimalTheme.current.isDarkTheme || isFullscreen) {
         rememberLottieComposition(
             spec = LottieCompositionSpec.RawRes(R.raw.primal_stream_video_loader_background_dark),
         )

@@ -187,6 +187,7 @@ private fun PlayerBox(
         state = state,
         modifier = modifier
             .then(boxSizingModifier)
+            .background(playerBackgroundColor)
             .clickable(
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
