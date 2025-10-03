@@ -1,7 +1,6 @@
 package net.primal.android.core.video
 
 import android.content.Context
-import androidx.annotation.OptIn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -15,10 +14,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.session.MediaController
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
 import net.primal.android.core.video.PlaybackConstants.BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MSEC
 import net.primal.android.core.video.PlaybackConstants.BUFFER_FOR_PLAYBACK_MSEC
 import net.primal.android.core.video.PlaybackConstants.MAX_BITRATE
@@ -36,13 +32,6 @@ private object PlaybackConstants {
     const val MAX_BUFFER_MSEC = 30_000
     const val BUFFER_FOR_PLAYBACK_MSEC = 2_500
     const val BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MSEC = 5_000
-}
-
-@EntryPoint
-@InstallIn(SingletonComponent::class)
-interface PlayerEntryPoint {
-    @OptIn(UnstableApi::class)
-    fun simpleCache(): SimpleCache
 }
 
 @UnstableApi

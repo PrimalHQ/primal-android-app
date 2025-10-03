@@ -292,7 +292,7 @@ private fun PlayerActionButtons(
     ) {
         LiveIndicator(
             modifier = Modifier.clickable(
-                enabled = !isAtLiveEdge,
+                enabled = isLive && !isAtLiveEdge,
                 onClick = onGoToLive,
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,

@@ -160,23 +160,7 @@ fun LiveStreamScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val isAtLiveEdge = remember(mediaController) {
-        {
-            val liveOffsetMs = mediaController.currentLiveOffset
-
-            if (liveOffsetMs != C.TIME_UNSET) {
-                liveOffsetMs > LIVE_EDGE_THRESHOLD_MS
-            } else if (mediaController.isCurrentMediaItemLive) {
-                val duration = mediaController.duration
-                if (duration != C.TIME_UNSET) {
-                    val position = mediaController.currentPosition
-                    (duration - position) < LIVE_EDGE_THRESHOLD_MS
-                } else {
-                    true
-                }
-            } else {
-                false
-            }
-        }
+        { isPlaybackAtLiveEdge(mediaController) }
     }
 
     LaunchedEffect(state.playerState.isPlaying) {
@@ -1302,6 +1286,24 @@ private fun ZapMessageHeader(zap: EventZapUiModel) {
                 color = AppTheme.colorScheme.surface,
             )
         }
+    }
+}
+
+private fun isPlaybackAtLiveEdge(mediaController: MediaController): Boolean {
+    val liveOffsetMs = mediaController.currentLiveOffset
+
+    return if (liveOffsetMs != C.TIME_UNSET) {
+        liveOffsetMs > LIVE_EDGE_THRESHOLD_MS
+    } else if (mediaController.isCurrentMediaItemLive) {
+        val duration = mediaController.duration
+        if (duration != C.TIME_UNSET) {
+            val position = mediaController.currentPosition
+            (duration - position) < LIVE_EDGE_THRESHOLD_MS
+        } else {
+            true
+        }
+    } else {
+        false
     }
 }
 
