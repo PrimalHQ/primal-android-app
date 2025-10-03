@@ -1,4 +1,4 @@
-package net.primal.wallet.data.service.concrete
+package net.primal.wallet.data.service
 
 import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
@@ -8,27 +8,26 @@ import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.utils.ensureEncodedLnUrl
 import net.primal.domain.nostr.utils.stripLightningPrefix
+import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.SubWallet
+import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.model.WalletBalanceResult
-import net.primal.wallet.data.model.CreateLightningInvoiceRequest
 import net.primal.wallet.data.model.Transaction
-import net.primal.wallet.data.model.TransactionsRequest
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.DepositRequestBody
 import net.primal.wallet.data.remote.model.TransactionsRequestBody
 import net.primal.wallet.data.remote.model.WithdrawRequestBody
 import net.primal.wallet.data.repository.mappers.remote.asLightingInvoiceResultDO
 import net.primal.wallet.data.repository.mappers.remote.mapAsPrimalTransactions
-import net.primal.wallet.data.service.WalletService
 
 internal class PrimalWalletServiceImpl(
     private val primalWalletApi: PrimalWalletApi,
-) : WalletService {
+) : WalletService<Wallet.Primal> {
 
-    override suspend fun fetchWalletBalance(wallet: Wallet): Result<WalletBalanceResult> =
+    override suspend fun fetchWalletBalance(wallet: Wallet.Primal): Result<WalletBalanceResult> =
         runCatching {
             val response = primalWalletApi.getBalance(userId = wallet.walletId)
 
@@ -38,7 +37,10 @@ internal class PrimalWalletServiceImpl(
             )
         }
 
-    override suspend fun fetchTransactions(wallet: Wallet, request: TransactionsRequest): Result<List<Transaction>> =
+    override suspend fun fetchTransactions(
+        wallet: Wallet.Primal,
+        request: TransactionsRequest,
+    ): Result<List<Transaction>> =
         runCatching {
             val response = primalWalletApi.getTransactions(
                 userId = wallet.walletId,
@@ -46,7 +48,7 @@ internal class PrimalWalletServiceImpl(
                     subWallet = SubWallet.Open,
                     until = request.until,
                     since = request.since,
-                    minAmountInBtc = request.getIfTypeOrNull(TransactionsRequest.Primal::minAmountInBtc),
+                    minAmountInBtc = request.getIfTypeOrNull(TransactionsRequest::minAmountInBtc),
                     limit = request.limit,
                 ),
             )
@@ -59,15 +61,14 @@ internal class PrimalWalletServiceImpl(
         }
 
     override suspend fun createLightningInvoice(
-        wallet: Wallet,
-        request: CreateLightningInvoiceRequest,
+        wallet: Wallet.Primal,
+        request: LnInvoiceCreateRequest,
     ): Result<LnInvoiceCreateResult> =
         runCatching {
-            require(request is CreateLightningInvoiceRequest.Primal) { "Request was not of type Primal." }
             val response = primalWalletApi.createLightningInvoice(
                 userId = wallet.userId,
                 body = DepositRequestBody(
-                    subWallet = request.subWallet,
+                    subWallet = SubWallet.Open,
                     amountBtc = request.amountInBtc,
                     description = request.description,
                 ),
@@ -76,7 +77,7 @@ internal class PrimalWalletServiceImpl(
             response.asLightingInvoiceResultDO()
         }
 
-    override suspend fun pay(wallet: Wallet, request: TxRequest): Result<Unit> =
+    override suspend fun pay(wallet: Wallet.Primal, request: TxRequest): Result<Unit> =
         runCatching {
             primalWalletApi.withdraw(
                 userId = wallet.userId,

@@ -19,6 +19,7 @@ internal fun WalletTransactionPO.toDomain(otherProfile: ProfileData? = null): Tr
     when (this.info.walletType) {
         WalletType.PRIMAL -> fromPrimalTxToDomain(otherProfile = otherProfile)
         WalletType.NWC -> fromNostrTxToDomain(otherProfile = otherProfile)
+        WalletType.TSUNAMI -> throw NotImplementedError() // TODO Handler transactions for tsunami
     }
 
 private fun WalletTransactionPO.fromNostrTxToDomain(otherProfile: ProfileData?) =
