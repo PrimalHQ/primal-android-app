@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toAndroidRectF
@@ -23,6 +24,9 @@ import androidx.core.graphics.toRect
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.recyclerview.widget.RecyclerView
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.primal.android.core.compose.foundation.KeepScreenOn
 import net.primal.android.core.ext.onDragDownBeyond
 import net.primal.android.core.pip.LocalPiPManager
@@ -135,7 +139,10 @@ private fun PlayerBox(
     onToggleFullScreenClick: () -> Unit,
     onRetry: () -> Unit,
 ) {
+    val scope = rememberCoroutineScope()
     val localConfiguration = LocalConfiguration.current
+    val isLandscape = localConfiguration.orientation == ORIENTATION_LANDSCAPE
+
     val isInPipMode = rememberIsInPipMode()
     val pipManager = LocalPiPManager.current
 
@@ -157,12 +164,23 @@ private fun PlayerBox(
         Modifier.resolvePlayerSizingModifier(orientation = localConfiguration.orientation)
     }
 
-    val playerAndMessageModifier = playerModifier
+    val dragDownModifier = remember(isLandscape, isCollapsed) {
+        Modifier
+            .onDragDownBeyond(
+                threshold = if (isCollapsed) 75.dp else 100.dp,
+                onTriggered = {
+                    if (isLandscape) {
+                        onToggleFullScreenClick()
+                    } else {
+                        onClose()
+                    }
+                },
+            )
+    }
+
+    val playerAndMessageModifier = dragDownModifier
+        .then(playerModifier)
         .then(playerSizingModifier)
-        .onDragDownBeyond(
-            threshold = if (isCollapsed) 75.dp else 100.dp,
-            onTriggered = onClose,
-        )
 
     LiveStreamPlayerBox(
         mediaController = mediaController,
@@ -198,7 +216,15 @@ private fun PlayerBox(
                     onRewind = onRewind,
                     onForward = onForward,
                     onGoToLive = { mediaController.seekToDefaultPosition() },
-                    onClose = onClose,
+                    onClose = {
+                        scope.launch {
+                            if (isLandscape) {
+                                onToggleFullScreenClick()
+                                delay(100.milliseconds)
+                            }
+                            onClose()
+                        }
+                    },
                     onQuoteClick = onQuoteClick,
                     onMuteUserClick = onMuteUserClick,
                     onUnmuteUserClick = onUnmuteUserClick,

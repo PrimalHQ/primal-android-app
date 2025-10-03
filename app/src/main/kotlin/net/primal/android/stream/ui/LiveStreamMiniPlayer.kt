@@ -124,7 +124,7 @@ fun LiveStreamMiniPlayer(
         }
     }
 
-    val minSafeY by remember {
+    val minSafeY by remember(localConfiguration.orientation) {
         derivedStateOf {
             if (streamState.topBarHeight == 0) {
                 statusBarHeight + paddingPx
@@ -134,7 +134,7 @@ fun LiveStreamMiniPlayer(
         }
     }
 
-    val maxSafeY by remember {
+    val maxSafeY by remember(localConfiguration.orientation) {
         derivedStateOf { screenHeightPx - streamState.bottomBarHeight - playerHeight - paddingPx }
     }
 
