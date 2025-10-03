@@ -24,7 +24,7 @@ import net.primal.android.stream.player.SEEK_FORWARD_MS
 @OptIn(UnstableApi::class)
 class AospPlayerManager @Inject constructor(
     private val loadControl: LoadControl,
-    @param:StreamVideoCache private val simpleCache: SimpleCache,
+    @StreamVideoCache private val simpleCache: SimpleCache,
 ) : PlayerManager {
 
     @OptIn(UnstableApi::class)

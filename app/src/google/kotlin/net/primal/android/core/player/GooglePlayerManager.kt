@@ -32,7 +32,7 @@ import timber.log.Timber
 @OptIn(UnstableApi::class)
 class GooglePlayerManager @Inject constructor(
     private val loadControl: LoadControl,
-    @param:StreamVideoCache private val simpleCache: SimpleCache,
+    @StreamVideoCache private val simpleCache: SimpleCache,
 ) : PlayerManager {
 
     private var cronetEngine: CronetEngine? = null
