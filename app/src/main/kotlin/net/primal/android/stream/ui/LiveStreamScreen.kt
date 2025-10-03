@@ -160,7 +160,7 @@ fun LiveStreamScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     val isAtLiveEdge = remember(mediaController) {
-        { isPlaybackAtLiveEdge(mediaController) }
+        isPlaybackAtLiveEdge(mediaController)
     }
 
     LaunchedEffect(state.playerState.isPlaying) {
@@ -169,7 +169,7 @@ fun LiveStreamScreen(
                 LiveStreamContract.UiEvent.OnPlayerStateUpdate(
                     currentTime = mediaController.currentPosition,
                     bufferedPosition = mediaController.bufferedPosition,
-                    atLiveEdge = isAtLiveEdge(),
+                    atLiveEdge = isAtLiveEdge,
                     isPlaying = mediaController.isPlaying,
                 ),
             )
