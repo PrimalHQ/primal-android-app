@@ -21,6 +21,7 @@ class NostrZapperFactoryImpl @Inject constructor(
         return when (wallet) {
             is Wallet.NWC -> wallet.createNwcZapper()
             is Wallet.Primal -> wallet.createPrimalWalletZapper()
+            is Wallet.Tsunami -> null // TODO Implement TsunamiWalletZapper
         }
     }
 

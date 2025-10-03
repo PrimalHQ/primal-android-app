@@ -1,4 +1,4 @@
-package net.primal.wallet.data.service.concrete
+package net.primal.wallet.data.service
 
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -8,6 +8,7 @@ import net.primal.core.networking.nwc.nip47.ListTransactionsParams
 import net.primal.core.networking.nwc.nip47.LookupInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.MakeInvoiceParams
 import net.primal.core.networking.nwc.nip47.PayInvoiceParams
+import net.primal.core.utils.CurrencyConversionUtils.btcToMSats
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.msatsToBtc
 import net.primal.core.utils.CurrencyConversionUtils.satsToMSats
@@ -22,28 +23,25 @@ import net.primal.domain.lightning.LightningRepository
 import net.primal.domain.nostr.InvoiceType
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstProfileId
+import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.NostrWalletConnect
+import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletType
 import net.primal.domain.wallet.model.WalletBalanceResult
-import net.primal.wallet.data.model.CreateLightningInvoiceRequest
 import net.primal.wallet.data.model.Transaction
-import net.primal.wallet.data.model.TransactionsRequest
 import net.primal.wallet.data.repository.mappers.remote.toNostrEntity
-import net.primal.wallet.data.service.WalletService
 
 internal class NostrWalletServiceImpl(
     private val lightningRepository: LightningRepository,
     private val eventRepository: EventRepository,
-) : WalletService {
-    override suspend fun fetchWalletBalance(wallet: Wallet): Result<WalletBalanceResult> =
+) : WalletService<Wallet.NWC> {
+    override suspend fun fetchWalletBalance(wallet: Wallet.NWC): Result<WalletBalanceResult> =
         runCatching {
-            require(wallet is Wallet.NWC) { "Wallet is not type NWC but `NostrWalletService` called." }
-
             val client = createNwcApiClient(wallet = wallet)
             val response = client.getBalance().getOrThrow()
 
@@ -54,11 +52,11 @@ internal class NostrWalletServiceImpl(
         }
 
     @OptIn(ExperimentalUuidApi::class)
-    override suspend fun fetchTransactions(wallet: Wallet, request: TransactionsRequest): Result<List<Transaction>> =
+    override suspend fun fetchTransactions(
+        wallet: Wallet.NWC,
+        request: TransactionsRequest,
+    ): Result<List<Transaction>> =
         runCatching {
-            require(wallet is Wallet.NWC) { "Wallet is not type NWC but `NostrWalletService` called." }
-            require(request is TransactionsRequest.NWC) { "Request is not type NWC but `NostrWalletService` called." }
-
             val client = createNwcApiClient(wallet = wallet)
 
             client.listTransactions(
@@ -66,7 +64,6 @@ internal class NostrWalletServiceImpl(
                     from = request.since,
                     until = request.until,
                     limit = request.limit,
-                    offset = request.offset,
                     unpaid = request.unpaid,
                     type = request.type,
                 ),
@@ -118,20 +115,17 @@ internal class NostrWalletServiceImpl(
         }
 
     override suspend fun createLightningInvoice(
-        wallet: Wallet,
-        request: CreateLightningInvoiceRequest,
+        wallet: Wallet.NWC,
+        request: LnInvoiceCreateRequest,
     ): Result<LnInvoiceCreateResult> =
         runCatching {
-            require(wallet is Wallet.NWC) { "Wallet is not type NWC but `NostrWalletService` called." }
-            require(
-                request is CreateLightningInvoiceRequest.NWC,
-            ) { "Request is not type NWC but `NostrWalletService` called." }
+            val amountInBtc = request.amountInBtc
+            requireNotNull(amountInBtc) { "Amount is required for NWC lightning invoices." }
 
             val client = createNwcApiClient(wallet = wallet)
-
             client.makeInvoice(
                 params = MakeInvoiceParams(
-                    amount = request.amountInMSats,
+                    amount = amountInBtc.toDouble().btcToMSats().toLong(),
                     description = request.description,
                     descriptionHash = request.descriptionHash,
                     expiry = request.expiry,
@@ -144,9 +138,8 @@ internal class NostrWalletServiceImpl(
             }.getOrThrow()
         }
 
-    override suspend fun pay(wallet: Wallet, request: TxRequest): Result<Unit> =
+    override suspend fun pay(wallet: Wallet.NWC, request: TxRequest): Result<Unit> =
         runCatching {
-            require(wallet is Wallet.NWC) { "Wallet is not type NWC but `NostrWalletService` called." }
             require(request is TxRequest.Lightning) { "Only lightning transactions are supported through NWC wallet." }
 
             val client = createNwcApiClient(wallet = wallet)

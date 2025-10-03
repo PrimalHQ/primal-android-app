@@ -11,6 +11,7 @@ import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.domain.rates.fees.TransactionFeeRepository
 import net.primal.domain.wallet.WalletRepository
+import net.primal.tsunami.createTsunamiWalletSdk
 import net.primal.wallet.data.lightning.LightningRepositoryImpl
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
@@ -19,11 +20,15 @@ import net.primal.wallet.data.repository.ExchangeRateRepositoryImpl
 import net.primal.wallet.data.repository.TransactionFeeRepositoryImpl
 import net.primal.wallet.data.repository.WalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletRepositoryImpl
-import net.primal.wallet.data.service.factory.WalletServiceFactory
+import net.primal.wallet.data.service.factory.WalletServiceFactoryImpl
 
 abstract class RepositoryFactory {
 
     private val dispatcherProvider = createDispatcherProvider()
+
+    private val tsunamiWalletSdk = createTsunamiWalletSdk(
+        dispatcher = dispatcherProvider.io(),
+    )
 
     abstract fun resolveWalletDatabase(): WalletDatabase
 
@@ -41,16 +46,33 @@ abstract class RepositoryFactory {
                 nostrEventSignatureHandler = nostrEventSignatureHandler,
             ),
             profileRepository = profileRepository,
-            primalWalletService = WalletServiceFactory.createPrimalWalletService(
+            walletServiceFactory = createWalletServiceFactory(
+                primalWalletApiClient = primalWalletApiClient,
+                nostrEventSignatureHandler = nostrEventSignatureHandler,
+                eventRepository = eventRepository,
+            ),
+        )
+    }
+
+    private fun createWalletServiceFactory(
+        primalWalletApiClient: PrimalApiClient,
+        nostrEventSignatureHandler: NostrEventSignatureHandler,
+        eventRepository: EventRepository,
+    ): WalletServiceFactoryImpl {
+        return WalletServiceFactoryImpl(
+            primalWalletService = WalletServiceFactoryImpl.createPrimalWalletService(
                 primalWalletApiClient = primalWalletApiClient,
                 nostrEventSignatureHandler = nostrEventSignatureHandler,
             ),
-            nostrWalletService = WalletServiceFactory.createNostrWalletService(
+            nostrWalletService = WalletServiceFactoryImpl.createNostrWalletService(
                 lightningRepository = LightningRepositoryImpl(
                     dispatcherProvider = dispatcherProvider,
                     lightningApi = NwcApiServiceFactory.createLightningApi(),
                 ),
                 eventRepository = eventRepository,
+            ),
+            tsunamiWalletService = WalletServiceFactoryImpl.createTsunamiWalletService(
+                tsunamiWalletSdk = tsunamiWalletSdk,
             ),
         )
     }
