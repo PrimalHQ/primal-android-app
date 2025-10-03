@@ -7,13 +7,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
 import androidx.media3.session.MediaController
-import dagger.hilt.android.EntryPointAccessors
+import net.primal.android.core.di.rememberFeedVideoCache
 import net.primal.android.core.video.PlaybackConstants.BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MSEC
 import net.primal.android.core.video.PlaybackConstants.BUFFER_FOR_PLAYBACK_MSEC
 import net.primal.android.core.video.PlaybackConstants.MAX_BITRATE
@@ -37,16 +38,12 @@ private object PlaybackConstants {
 @Composable
 fun rememberPrimalExoPlayer(): ExoPlayer {
     val context = LocalContext.current
-    return remember { initializePlayer(context) }
+    val cache = rememberFeedVideoCache()
+    return remember(cache) { initializePlayer(context, cache) }
 }
 
 @UnstableApi
-fun initializePlayer(context: Context): ExoPlayer {
-    val hiltEntryPoint = EntryPointAccessors.fromApplication(
-        context.applicationContext,
-        PlayerEntryPoint::class.java,
-    )
-    val cache = hiltEntryPoint.simpleCache()
+fun initializePlayer(context: Context, cache: SimpleCache): ExoPlayer {
     val cacheDataSourceFactory = CacheDataSource.Factory()
         .setCache(cache)
         .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())
