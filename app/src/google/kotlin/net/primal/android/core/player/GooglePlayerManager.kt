@@ -18,6 +18,7 @@ import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
+import net.primal.android.core.di.StreamVideoCache
 import net.primal.android.core.service.PlayerManager
 import net.primal.android.core.service.PrimalCacheKeyFactory
 import net.primal.android.networking.UserAgentProvider
@@ -31,7 +32,7 @@ import timber.log.Timber
 @OptIn(UnstableApi::class)
 class GooglePlayerManager @Inject constructor(
     private val loadControl: LoadControl,
-    private val simpleCache: SimpleCache,
+    @param:StreamVideoCache private val simpleCache: SimpleCache,
 ) : PlayerManager {
 
     private var cronetEngine: CronetEngine? = null

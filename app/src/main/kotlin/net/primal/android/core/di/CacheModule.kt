@@ -24,8 +24,20 @@ object CacheModule {
     @OptIn(UnstableApi::class)
     @Provides
     @Singleton
-    fun provideSimpleCache(@ApplicationContext context: Context): SimpleCache {
-        val cacheDirectory = File(context.cacheDir, "primal_video_cache")
+    @FeedVideoCache
+    fun provideFeedVideoCache(@ApplicationContext context: Context): SimpleCache {
+        val cacheDirectory = File(context.cacheDir, "feed_video_cache")
+        val databaseProvider: DatabaseProvider = StandaloneDatabaseProvider(context)
+        val cacheEvictor = LeastRecentlyUsedCacheEvictor(MAX_CACHE_SIZE_BYTES)
+        return SimpleCache(cacheDirectory, cacheEvictor, databaseProvider)
+    }
+
+    @OptIn(UnstableApi::class)
+    @Provides
+    @Singleton
+    @StreamVideoCache
+    fun provideStreamVideoCache(@ApplicationContext context: Context): SimpleCache {
+        val cacheDirectory = File(context.cacheDir, "stream_video_cache")
         val databaseProvider: DatabaseProvider = StandaloneDatabaseProvider(context)
         val cacheEvictor = LeastRecentlyUsedCacheEvictor(MAX_CACHE_SIZE_BYTES)
         return SimpleCache(cacheDirectory, cacheEvictor, databaseProvider)

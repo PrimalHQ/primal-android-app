@@ -7,7 +7,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.cache.CacheDataSource
-import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
@@ -38,17 +37,16 @@ private object PlaybackConstants {
 @Composable
 fun rememberPrimalExoPlayer(): ExoPlayer {
     val context = LocalContext.current
-    val hiltEntryPoint = remember(context) {
-        EntryPointAccessors.fromApplication(
-            context.applicationContext,
-            PlayerEntryPoint::class.java,
-        )
-    }
-    return remember { initializePlayer(context, hiltEntryPoint.simpleCache()) }
+    return remember { initializePlayer(context) }
 }
 
 @UnstableApi
-fun initializePlayer(context: Context, cache: SimpleCache): ExoPlayer {
+fun initializePlayer(context: Context): ExoPlayer {
+    val hiltEntryPoint = EntryPointAccessors.fromApplication(
+        context.applicationContext,
+        PlayerEntryPoint::class.java,
+    )
+    val cache = hiltEntryPoint.simpleCache()
     val cacheDataSourceFactory = CacheDataSource.Factory()
         .setCache(cache)
         .setUpstreamDataSourceFactory(DefaultHttpDataSource.Factory())

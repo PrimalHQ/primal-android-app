@@ -14,6 +14,7 @@ import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import javax.inject.Inject
+import net.primal.android.core.di.StreamVideoCache
 import net.primal.android.core.service.PlayerManager
 import net.primal.android.core.service.PrimalCacheKeyFactory
 import net.primal.android.stream.player.LIVE_STREAM_MANIFEST_MIN_RETRY_COUNT
@@ -23,7 +24,7 @@ import net.primal.android.stream.player.SEEK_FORWARD_MS
 @OptIn(UnstableApi::class)
 class AospPlayerManager @Inject constructor(
     private val loadControl: LoadControl,
-    private val simpleCache: SimpleCache,
+    @param:StreamVideoCache private val simpleCache: SimpleCache,
 ) : PlayerManager {
 
     @OptIn(UnstableApi::class)
