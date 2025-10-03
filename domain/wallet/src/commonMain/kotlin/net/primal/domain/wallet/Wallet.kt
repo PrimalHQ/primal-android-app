@@ -48,4 +48,22 @@ sealed class Wallet(
         maxBalanceInBtc = maxBalanceInBtc,
         lastUpdatedAt = lastUpdatedAt,
     )
+
+    data class Tsunami(
+        override val walletId: String,
+        override val userId: String,
+        override val lightningAddress: String?,
+        override val spamThresholdAmountInSats: Long,
+        override val balanceInBtc: Double?,
+        override val maxBalanceInBtc: Double?,
+        override val lastUpdatedAt: Long?,
+    ) : Wallet(
+        walletId = walletId,
+        userId = userId,
+        lightningAddress = lightningAddress,
+        spamThresholdAmountInSats = spamThresholdAmountInSats,
+        balanceInBtc = balanceInBtc,
+        maxBalanceInBtc = maxBalanceInBtc,
+        lastUpdatedAt = lastUpdatedAt,
+    )
 }

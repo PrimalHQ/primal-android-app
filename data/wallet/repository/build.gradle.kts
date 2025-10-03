@@ -17,9 +17,6 @@ kotlin {
         minSdk = 26
     }
 
-    // JVM Target
-    jvm("desktop")
-
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
     val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
@@ -47,6 +44,8 @@ kotlin {
                 implementation(project(":data:wallet:local"))
                 implementation(project(":data:wallet:remote-primal"))
                 implementation(project(":data:wallet:remote-nwc"))
+
+                implementation(libs.primal.tsunami.sdk.kmp)
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
@@ -78,11 +77,6 @@ kotlin {
         iosMain {
             dependencies {
             }
-        }
-
-        val desktopMain by getting
-        desktopMain.dependencies {
-            // Add JVM-Desktop-specific dependencies here
         }
 
         commonTest {
