@@ -3,6 +3,8 @@ package net.primal.wallet.data.repository.factory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.remote.factory.NwcApiServiceFactory
+import net.primal.domain.account.PrimalWalletAccountRepository
+import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.events.EventRepository
@@ -17,7 +19,9 @@ import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.repository.BillingRepositoryImpl
 import net.primal.wallet.data.repository.ExchangeRateRepositoryImpl
+import net.primal.wallet.data.repository.PrimalWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.TransactionFeeRepositoryImpl
+import net.primal.wallet.data.repository.TsunamiWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletRepositoryImpl
 import net.primal.wallet.data.service.factory.WalletServiceFactoryImpl
@@ -116,11 +120,18 @@ abstract class RepositoryFactory {
         )
     }
 
-    fun createWalletAccountRepository(
+    fun createWalletAccountRepository(): WalletAccountRepository {
+        return WalletAccountRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            walletDatabase = resolveWalletDatabase(),
+        )
+    }
+
+    fun createPrimalWalletAccountRepository(
         primalWalletApiClient: PrimalApiClient,
         nostrEventSignatureHandler: NostrEventSignatureHandler,
-    ): WalletAccountRepository {
-        return WalletAccountRepositoryImpl(
+    ): PrimalWalletAccountRepository {
+        return PrimalWalletAccountRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             walletDatabase = resolveWalletDatabase(),
             primalWalletApi = WalletApiServiceFactory.createPrimalWalletApi(
@@ -128,6 +139,13 @@ abstract class RepositoryFactory {
                 nostrEventSignatureHandler = nostrEventSignatureHandler,
             ),
             signatureHandler = nostrEventSignatureHandler,
+        )
+    }
+
+    fun createTsunamiWalletAccountRepository(): TsunamiWalletAccountRepository {
+        return TsunamiWalletAccountRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            walletDatabase = resolveWalletDatabase(),
         )
     }
 }
