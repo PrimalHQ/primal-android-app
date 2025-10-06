@@ -138,8 +138,6 @@ class LiveStreamViewModel @AssistedInject constructor(
         observeStreamInfo()
         observeActiveWallet()
         observeActiveAccount()
-        observeChatMessages()
-        observeZaps()
         observeFollowState()
         observeMuteState()
     }
@@ -157,6 +155,8 @@ class LiveStreamViewModel @AssistedInject constructor(
                 userId = activeAccountStore.activeUserId(),
                 streamContentModerationMode = _state.value.contentModerationMode,
             )
+            observeChatMessages()
+            observeZaps()
         }
     }
 
