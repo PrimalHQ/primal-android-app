@@ -474,11 +474,6 @@ class LiveStreamViewModel @AssistedInject constructor(
                     val isLive = stream.isLive()
                     val streamUrlToPlay = if (isLive) stream.streamingUrl else stream.recordingUrl
 
-                    if (streamUrlToPlay == null) {
-                        setState { copy(streamInfoLoading = false, isStreamUnavailable = true) }
-                        return@collect
-                    }
-
                     if (authorObserversJob == null || state.value.streamInfo?.mainHostId != stream.mainHostId) {
                         initializeMainHostObservers(mainHostId = stream.mainHostId)
                     }
@@ -486,6 +481,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     setState {
                         copy(
                             streamInfoLoading = false,
+                            isStreamUnavailable = streamUrlToPlay == null,
                             playerState = playerState.copy(
                                 isLive = isLive,
                                 atLiveEdge = isLive,
