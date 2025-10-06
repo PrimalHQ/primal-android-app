@@ -7,10 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.res.stringResource
 import net.primal.android.R
+import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
 
 @Composable
 fun LogoutScreen(viewModel: LogoutViewModel, callbacks: LogoutContract.ScreenCallbacks) {
+    val streamState = LocalStreamState.current
     LaunchedEffect(viewModel, callbacks) {
         viewModel.effects.collect {
             when (it) {
@@ -18,10 +20,13 @@ fun LogoutScreen(viewModel: LogoutViewModel, callbacks: LogoutContract.ScreenCal
                     callbacks.onClose()
                     callbacks.navigateToHome()
                 }
-                LogoutContract.SideEffect.NavigateToWelcome -> {
+
+                LogoutContract.SideEffect.CleanupAndNavigateToWelcome -> {
+                    streamState.stop()
                     callbacks.onClose()
                     callbacks.navigateToWelcome()
                 }
+
                 LogoutContract.SideEffect.Close -> callbacks.onClose()
             }
         }

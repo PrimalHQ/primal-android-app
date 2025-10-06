@@ -54,7 +54,7 @@ class LogoutViewModel @Inject constructor(
             authRepository.logout(pubkey = profileId)
         }.onSuccess {
             when {
-                isActiveAccount && isLastAccount -> setEffect(SideEffect.NavigateToWelcome)
+                isActiveAccount && isLastAccount -> setEffect(SideEffect.CleanupAndNavigateToWelcome)
                 isActiveAccount && !isLastAccount -> setEffect(SideEffect.NavigateToHome)
                 else -> setEffect(SideEffect.Close)
             }

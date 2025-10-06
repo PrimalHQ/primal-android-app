@@ -8,7 +8,7 @@ interface LogoutContract {
 
     sealed class SideEffect {
         data object Close : SideEffect()
-        data object NavigateToWelcome : SideEffect()
+        data object CleanupAndNavigateToWelcome : SideEffect()
         data object NavigateToHome : SideEffect()
     }
 
