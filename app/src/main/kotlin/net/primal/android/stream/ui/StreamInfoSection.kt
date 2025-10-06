@@ -32,66 +32,63 @@ fun StreamInfoSection(
     isLive: Boolean,
     onChatSettingsClick: () -> Unit,
     onInfoClick: () -> Unit,
-    isKeyboardVisible: Boolean,
     streamControlAnchorHandle: AnchorHandle,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (!isKeyboardVisible) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                modifier = Modifier.weight(1f),
+                text = title,
+                style = AppTheme.typography.titleLarge.copy(
+                    fontSize = 18.sp,
+                    lineHeight = 20.sp,
+                ),
+                fontWeight = FontWeight.Bold,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.padding(start = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = title,
-                    style = AppTheme.typography.titleLarge.copy(
-                        fontSize = 18.sp,
-                        lineHeight = 20.sp,
-                    ),
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-
-                Row(
-                    modifier = Modifier.padding(start = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                IconButton(
+                    onClick = onChatSettingsClick,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .anchor(handle = streamControlAnchorHandle),
                 ) {
-                    IconButton(
-                        onClick = onChatSettingsClick,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .anchor(handle = streamControlAnchorHandle),
-                    ) {
-                        Icon(
-                            imageVector = PrimalIcons.AdvancedSearch,
-                            contentDescription = "Chat Settings",
-                            tint = if (isAppInDarkPrimalTheme()) {
-                                AppTheme.extraColorScheme.onSurfaceVariantAlt1
-                            } else {
-                                AppTheme.extraColorScheme.onSurfaceVariantAlt2
-                            },
-                        )
-                    }
+                    Icon(
+                        imageVector = PrimalIcons.AdvancedSearch,
+                        contentDescription = "Chat Settings",
+                        tint = if (isAppInDarkPrimalTheme()) {
+                            AppTheme.extraColorScheme.onSurfaceVariantAlt1
+                        } else {
+                            AppTheme.extraColorScheme.onSurfaceVariantAlt2
+                        },
+                    )
+                }
 
-                    IconButton(
-                        onClick = onInfoClick,
-                        modifier = Modifier.size(24.dp),
-                    ) {
-                        Icon(
-                            imageVector = PrimalIcons.Info,
-                            contentDescription = "Information",
-                            tint = if (isAppInDarkPrimalTheme()) {
-                                AppTheme.extraColorScheme.onSurfaceVariantAlt1
-                            } else {
-                                AppTheme.extraColorScheme.onSurfaceVariantAlt2
-                            },
-                        )
-                    }
+                IconButton(
+                    onClick = onInfoClick,
+                    modifier = Modifier.size(24.dp),
+                ) {
+                    Icon(
+                        imageVector = PrimalIcons.Info,
+                        contentDescription = "Information",
+                        tint = if (isAppInDarkPrimalTheme()) {
+                            AppTheme.extraColorScheme.onSurfaceVariantAlt1
+                        } else {
+                            AppTheme.extraColorScheme.onSurfaceVariantAlt2
+                        },
+                    )
                 }
             }
         }

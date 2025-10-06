@@ -516,11 +516,18 @@ private fun LiveStreamContent(
     }
     val chatListState = rememberLazyListState()
     val isKeyboardVisible by keyboardVisibilityAsState()
-    val isCollapsed by remember(chatListState.firstVisibleItemIndex, localConfiguration.orientation) {
+    val isCollapsed by remember(
+        chatListState.firstVisibleItemIndex,
+        localConfiguration.orientation,
+        isKeyboardVisible,
+    ) {
         mutableStateOf(
-            chatListState.firstVisibleItemIndex != 0 &&
-                !isLandscape &&
-                state.chatItems.size > COLLAPSED_MODE_CHAT_ITEMS_THRESHOLD,
+            (
+                chatListState.firstVisibleItemIndex != 0 &&
+                    !isLandscape &&
+                    state.chatItems.size > COLLAPSED_MODE_CHAT_ITEMS_THRESHOLD
+                ) ||
+                isKeyboardVisible,
         )
     }
 
@@ -611,7 +618,6 @@ private fun LiveStreamContent(
                                 StreamInfoDisplay(
                                     state = state,
                                     onZapClick = onZapClick,
-                                    isKeyboardVisible = isKeyboardVisible,
                                     onInfoClick = onInfoClick,
                                     onChatSettingsClick = onChatSettingsClick,
                                     onDismissStreamControlPopup = {
@@ -774,7 +780,6 @@ private fun StreamInfoDisplay(
     state: LiveStreamContract.UiState,
     onDismissStreamControlPopup: () -> Unit,
     onZapClick: () -> Unit,
-    isKeyboardVisible: Boolean,
     onChatSettingsClick: () -> Unit,
     onInfoClick: () -> Unit,
     onTopZapsClick: () -> Unit,
@@ -813,19 +818,16 @@ private fun StreamInfoDisplay(
                 isLive = state.playerState.isLive,
                 onInfoClick = onInfoClick,
                 onChatSettingsClick = onChatSettingsClick,
-                isKeyboardVisible = isKeyboardVisible,
                 streamControlAnchorHandle = anchor,
             )
 
-            if (!isKeyboardVisible) {
-                StreamTopZapsSection(
-                    modifier = Modifier.fillMaxWidth(),
-                    chatLoading = state.chatLoading,
-                    topZaps = state.zaps,
-                    onZapClick = onZapClick,
-                    onTopZapsClick = onTopZapsClick,
-                )
-            }
+            StreamTopZapsSection(
+                modifier = Modifier.fillMaxWidth(),
+                chatLoading = state.chatLoading,
+                topZaps = state.zaps,
+                onZapClick = onZapClick,
+                onTopZapsClick = onTopZapsClick,
+            )
         }
 
         AnchoredBubble(
@@ -1191,8 +1193,7 @@ fun ZapMessageListItem(
                 onClick = { onClick?.invoke() },
             )
             .background(
-                color =
-                if (LocalPrimalTheme.current.isDarkTheme) {
+                color = if (LocalPrimalTheme.current.isDarkTheme) {
                     Color.Black
                 } else {
                     Color.White
