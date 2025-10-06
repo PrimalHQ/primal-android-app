@@ -15,6 +15,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.Result
 import net.primal.core.utils.asSha256Hash
 import net.primal.core.utils.updater.Updater
+import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.mutes.MutedItemRepository
@@ -28,6 +29,7 @@ class UserDataUpdater @AssistedInject constructor(
     private val settingsRepository: SettingsRepository,
     private val userRepository: UserRepository,
     private val walletAccountRepository: WalletAccountRepository,
+    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val walletRepository: WalletRepository,
     private val relayRepository: RelayRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
@@ -61,7 +63,7 @@ class UserDataUpdater @AssistedInject constructor(
         runCatching { relayRepository.fetchAndUpdateUserRelays(userId = userId) }
         runCatching { userRepository.fetchAndUpdateUserAccount(userId = userId) }
         runCatching { bookmarksRepository.fetchAndPersistBookmarks(userId = userId) }
-        runCatching { walletAccountRepository.fetchWalletAccountInfo(userId = userId) }
+        runCatching { primalWalletAccountRepository.fetchWalletAccountInfo(userId = userId) }
         runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }
         runCatching { mutedItemRepository.fetchAndPersistMuteList(userId = userId) }
         mutedItemRepository.fetchAndPersistStreamMuteList(userId = userId)
@@ -95,7 +97,7 @@ class UserDataUpdater @AssistedInject constructor(
             }
 
             WalletPreference.Undefined, WalletPreference.PrimalWallet -> {
-                walletAccountRepository.fetchWalletAccountInfo(userId = userAccount.pubkey)
+                primalWalletAccountRepository.fetchWalletAccountInfo(userId = userAccount.pubkey)
 
                 walletRepository.updateWalletBalance(
                     walletId = userAccount.pubkey,

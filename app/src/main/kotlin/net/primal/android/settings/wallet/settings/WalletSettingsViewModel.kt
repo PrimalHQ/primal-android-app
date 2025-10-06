@@ -25,6 +25,7 @@ import net.primal.domain.parser.isNwcUrl
 import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
+import net.primal.domain.wallet.WalletType
 import net.primal.wallet.data.remote.model.PrimalNwcConnectionInfo
 import timber.log.Timber
 
@@ -146,7 +147,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
             if (preferPrimalWallet) {
                 walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
             } else {
-                val lastUsedNWC = walletAccountRepository.findLastUsedNostrWallet(userId = userId)
+                val lastUsedNWC = walletAccountRepository.findLastUsedWallet(userId = userId, type = WalletType.NWC)
                 if (lastUsedNWC != null) {
                     walletAccountRepository.setActiveWallet(userId = userId, walletId = lastUsedNWC.walletId)
                 } else {

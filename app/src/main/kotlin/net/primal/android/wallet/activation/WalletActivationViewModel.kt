@@ -26,6 +26,7 @@ import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.account.Country
+import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.Region
 import net.primal.domain.account.Regions
 import net.primal.domain.account.State
@@ -43,6 +44,7 @@ class WalletActivationViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val activeAccountStore: ActiveAccountStore,
     private val walletAccountRepository: WalletAccountRepository,
+    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val userRepository: UserRepository,
 ) : ViewModel() {
 
@@ -134,7 +136,7 @@ class WalletActivationViewModel @Inject constructor(
                 val country = data.country
                 checkNotNull(dateOfBirth)
                 checkNotNull(country)
-                walletAccountRepository.requestActivationCodeToEmail(
+                primalWalletAccountRepository.requestActivationCodeToEmail(
                     params = WalletActivationParams(
                         userId = userId,
                         firstName = data.firstName,
@@ -167,8 +169,8 @@ class WalletActivationViewModel @Inject constructor(
             setState { copy(working = true) }
             val userId = activeAccountStore.activeUserId()
 
-            walletAccountRepository.activateWallet(userId, code)
-                .alsoCatching { walletAccountRepository.fetchWalletAccountInfo(userId) }
+            primalWalletAccountRepository.activateWallet(userId, code)
+                .alsoCatching { primalWalletAccountRepository.fetchWalletAccountInfo(userId) }
                 .onSuccess { response ->
                     walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
                     setLightningAddress(userId, response.lightningAddress)
@@ -189,7 +191,7 @@ class WalletActivationViewModel @Inject constructor(
 
     private suspend fun redeemPromoCode(promoCode: String) =
         runCatching {
-            walletAccountRepository.redeemPromoCode(
+            primalWalletAccountRepository.redeemPromoCode(
                 userId = activeAccountStore.activeUserId(),
                 code = promoCode,
             )
