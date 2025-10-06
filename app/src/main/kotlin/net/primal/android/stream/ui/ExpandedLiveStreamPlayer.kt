@@ -43,7 +43,7 @@ import net.primal.domain.nostr.ReportType
 fun ExpandedLiveStreamPlayer(
     state: LiveStreamContract.UiState,
     mediaController: MediaController,
-    streamUrl: String,
+    streamUrl: String?,
     controlsVisible: Boolean,
     menuVisible: Boolean,
     isCollapsed: Boolean,
@@ -74,9 +74,11 @@ fun ExpandedLiveStreamPlayer(
         if (currentMediaItemUri != streamUrl) {
             mediaController.stop()
 
-            mediaController.setMediaItem(buildMediaItem(state.naddr, streamUrl, state.streamInfo))
-            mediaController.prepare()
-            mediaController.playWhenReady = true
+            if (streamUrl != null) {
+                mediaController.setMediaItem(buildMediaItem(state.naddr, streamUrl, state.streamInfo))
+                mediaController.prepare()
+                mediaController.playWhenReady = true
+            }
         }
     }
 
