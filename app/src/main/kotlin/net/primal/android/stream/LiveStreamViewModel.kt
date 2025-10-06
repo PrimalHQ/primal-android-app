@@ -927,12 +927,9 @@ class LiveStreamViewModel @AssistedInject constructor(
             val nprofile = Nip19TLV.parseUriAsNprofileOrNull(uriString)
             val pubkey = nprofile?.pubkey ?: uriString.extractProfileId()
             if (pubkey != null) {
-                val profileData = try {
+                val profileData = runCatching {
                     profileRepository.findProfileDataOrNull(profileId = pubkey)
-                } catch (error: NetworkException) {
-                    Timber.w(error, "Failed to resolve profile for $uriString")
-                    null
-                }
+                }.getOrNull()
 
                 val handle = usernameUiFriendly(
                     displayName = profileData?.displayName,
