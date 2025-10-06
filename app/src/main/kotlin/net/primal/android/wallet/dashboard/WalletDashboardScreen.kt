@@ -95,7 +95,7 @@ fun WalletDashboardScreen(
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
             Lifecycle.Event.ON_START -> {
-                if (uiState.value.wallet is Wallet.NWC) {
+                if (uiState.value.wallet !is Wallet.Primal) {
                     viewModel.setEvents(UiEvent.RequestWalletBalanceUpdate)
                 }
             }

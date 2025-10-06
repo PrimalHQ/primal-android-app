@@ -55,7 +55,7 @@ class PrimalWalletAccountRepositoryImpl(
         }
     }
 
-    override suspend fun fetchWalletAccountInfo(userId: String): Result<Unit> =
+    override suspend fun fetchWalletAccountInfo(userId: String): Result<String> =
         withContext(dispatcherProvider.io()) {
             runCatching {
                 val accountInfoResponse = primalWalletApi.getWalletUserInfo(userId)
@@ -86,6 +86,8 @@ class PrimalWalletAccountRepositoryImpl(
                         ),
                     )
                 }
+
+                userId
             }
         }
 
