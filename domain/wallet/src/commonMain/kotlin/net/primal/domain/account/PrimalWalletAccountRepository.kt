@@ -19,7 +19,7 @@ interface PrimalWalletAccountRepository {
         NetworkException::class,
         CancellationException::class,
     )
-    suspend fun fetchWalletAccountInfo(userId: String): Result<Unit>
+    suspend fun fetchWalletAccountInfo(userId: String): Result<String>
 
     @Throws(
         NetworkException::class,

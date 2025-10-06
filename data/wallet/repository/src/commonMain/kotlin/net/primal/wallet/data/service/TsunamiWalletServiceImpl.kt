@@ -1,6 +1,6 @@
 package net.primal.wallet.data.service
 
-import net.primal.core.utils.CurrencyConversionUtils.btcToMSats
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.Result
 import net.primal.core.utils.runCatching
 import net.primal.domain.wallet.LnInvoiceCreateRequest
@@ -43,7 +43,7 @@ internal class TsunamiWalletServiceImpl(
 
             val lnInvoice = tsunamiWalletSdk.createInvoice(
                 walletId = wallet.walletId,
-                amountSats = amountInBtc.toDouble().btcToMSats().toULong(),
+                amountSats = amountInBtc.toDouble().toSats().toULong(),
             ).getOrThrow()
 
             LnInvoiceCreateResult(
