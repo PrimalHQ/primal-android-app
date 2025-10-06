@@ -14,6 +14,8 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.settings.model.AppSettingsDescription
+import net.primal.domain.account.PrimalWalletAccountRepository
+import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -33,6 +35,8 @@ class CreateAccountHandler @Inject constructor(
     private val userRepository: UserRepository,
     private val settingsRepository: SettingsRepository,
     private val walletAccountRepository: WalletAccountRepository,
+    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
+    private val tsunamiWalletAccountRepository: TsunamiWalletAccountRepository,
 ) {
 
     suspend fun createNostrAccount(
@@ -46,8 +50,9 @@ class CreateAccountHandler @Inject constructor(
             blossomRepository.ensureBlossomServerList(userId)
             userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata)
             val contacts = setOf(userId) + interests.mapToContacts()
-            walletAccountRepository.fetchWalletAccountInfo(userId = userId)
+            primalWalletAccountRepository.fetchWalletAccountInfo(userId = userId)
             walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
+            tsunamiWalletAccountRepository.createWallet(userId = userId, walletKey = privateKey)
             userRepository.setFollowList(userId = userId, contacts = contacts)
             settingsRepository.fetchAndPersistAppSettings(
                 authorizationEvent = eventsSignatureHandler.signNostrEvent(

@@ -25,6 +25,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.UserAccount
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.PromoCodeDetails
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
@@ -35,6 +36,7 @@ import timber.log.Timber
 class RedeemCodeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val walletAccountRepository: WalletAccountRepository,
+    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
@@ -129,7 +131,10 @@ class RedeemCodeViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true, error = null) }
             try {
-                walletAccountRepository.redeemPromoCode(userId = activeAccountStore.activeUserId(), code = promoCode)
+                primalWalletAccountRepository.redeemPromoCode(
+                    userId = activeAccountStore.activeUserId(),
+                    code = promoCode,
+                )
                 setEffect(SideEffect.PromoCodeApplied)
             } catch (error: NetworkException) {
                 Timber.w(error)
@@ -150,7 +155,7 @@ class RedeemCodeViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true, error = null, showErrorBadge = false) }
             try {
-                val response = walletAccountRepository.getPromoCodeDetails(code = code)
+                val response = primalWalletAccountRepository.getPromoCodeDetails(code = code)
 
                 setState {
                     copy(

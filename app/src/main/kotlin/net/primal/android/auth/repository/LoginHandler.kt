@@ -8,6 +8,8 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.account.PrimalWalletAccountRepository
+import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.mutes.MutedItemRepository
@@ -22,6 +24,8 @@ class LoginHandler @Inject constructor(
     private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
     private val walletAccountRepository: WalletAccountRepository,
+    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
+    private val tsunamiWalletAccountRepository: TsunamiWalletAccountRepository,
     private val dispatchers: DispatcherProvider,
     private val credentialsStore: CredentialsStore,
     private val nostrNotary: NostrNotary,
@@ -44,8 +48,12 @@ class LoginHandler @Inject constructor(
             ).getOrNull()
 
             userRepository.fetchAndUpdateUserAccount(userId = userId)
-            walletAccountRepository.fetchWalletAccountInfo(userId = userId)
+            primalWalletAccountRepository.fetchWalletAccountInfo(userId = userId)
             walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
+            tsunamiWalletAccountRepository.createWallet(
+                userId = userId,
+                walletKey = if (loginType == LoginType.PrivateKey) nostrKey else userId,
+            )
             bookmarksRepository.fetchAndPersistBookmarks(userId = userId)
             authorizationEvent?.let {
                 settingsRepository.fetchAndPersistAppSettings(authorizationEvent)
