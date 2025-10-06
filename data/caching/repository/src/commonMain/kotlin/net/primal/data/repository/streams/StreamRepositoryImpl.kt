@@ -25,7 +25,10 @@ import net.primal.data.repository.mappers.remote.asStreamData
 import net.primal.data.repository.mappers.remote.extractZapRequestOrNull
 import net.primal.data.repository.mappers.remote.mapAsEventZapDO
 import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.utils.extractProfileId
+import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.Stream
 import net.primal.domain.streams.StreamContentModerationMode
@@ -172,7 +175,14 @@ class StreamRepositoryImpl(
         val chatMessages = response.chatMessages.mapNotNull { it.asChatMessageDataDO() }
         val chatAuthorPubkeys = chatMessages.map { it.authorId }.toSet()
 
-        val allProfileIds = zapperPubkeys + chatAuthorPubkeys
+        val mentionedPubkeys = chatMessages.flatMap {
+            it.content.parseNostrUris().mapNotNull { uri ->
+                val nprofile = Nip19TLV.parseUriAsNprofileOrNull(uri)
+                nprofile?.pubkey ?: uri.extractProfileId()
+            }
+        }.toSet()
+
+        val allProfileIds = zapperPubkeys + chatAuthorPubkeys + mentionedPubkeys
         profileRepository.fetchMissingProfiles(profileIds = allProfileIds.toList())
 
         val localProfiles = database.profiles().findProfileData(profileIds = allProfileIds.toList())

@@ -59,6 +59,7 @@ import net.primal.domain.links.EventUriNostrType
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.Naddr
+import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.asATagValue
@@ -67,6 +68,7 @@ import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.publisher.NostrPublishException as DomainNostrPublishException
 import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.nostr.utils.parseNostrUris
+import net.primal.domain.nostr.utils.usernameUiFriendly
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
@@ -928,34 +930,34 @@ class LiveStreamViewModel @AssistedInject constructor(
         val nostrUrisRaw = this.content.parseNostrUris()
         val nostrUrisUi = nostrUrisRaw.mapNotNull { uriString ->
             val position = this.content.indexOf(uriString)
-            val pubkey = uriString.extractProfileId()
+            val nprofile = Nip19TLV.parseUriAsNprofileOrNull(uriString)
+            val pubkey = nprofile?.pubkey ?: uriString.extractProfileId()
             if (pubkey != null) {
-                try {
-                    val profileData = profileRepository.findProfileDataOrNull(profileId = pubkey)
-                    val handle = profileData?.handle
-                    if (handle != null) {
-                        NoteNostrUriUi(
-                            uri = uriString,
-                            type = EventUriNostrType.Profile,
-                            referencedUser = ReferencedUser(
-                                userId = pubkey,
-                                handle = handle,
-                            ),
-                            referencedEventAlt = null,
-                            referencedNote = null,
-                            referencedArticle = null,
-                            referencedHighlight = null,
-                            referencedZap = null,
-                            referencedStream = null,
-                            position = position,
-                        )
-                    } else {
-                        null
-                    }
-                } catch (error: NetworkException) {
-                    Timber.w(error, "Failed to resolve profile for $uriString")
-                    null
-                }
+                val profileData = runCatching {
+                    profileRepository.findProfileDataOrNull(profileId = pubkey)
+                }.getOrNull()
+
+                val handle = usernameUiFriendly(
+                    displayName = profileData?.displayName,
+                    name = profileData?.handle,
+                    pubkey = pubkey,
+                )
+
+                NoteNostrUriUi(
+                    uri = uriString,
+                    type = EventUriNostrType.Profile,
+                    referencedUser = ReferencedUser(
+                        userId = pubkey,
+                        handle = handle,
+                    ),
+                    referencedEventAlt = null,
+                    referencedNote = null,
+                    referencedArticle = null,
+                    referencedHighlight = null,
+                    referencedZap = null,
+                    referencedStream = null,
+                    position = position,
+                )
             } else {
                 null
             }
