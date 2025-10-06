@@ -48,12 +48,13 @@ class LoginHandler @Inject constructor(
             ).getOrNull()
 
             userRepository.fetchAndUpdateUserAccount(userId = userId)
-            primalWalletAccountRepository.fetchWalletAccountInfo(userId = userId)
-            walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
-            tsunamiWalletAccountRepository.createWallet(
-                userId = userId,
-                walletKey = if (loginType == LoginType.PrivateKey) nostrKey else userId,
-            )
+
+            val primalWalletId = primalWalletAccountRepository.fetchWalletAccountInfo(userId = userId)
+            val tsunamiKey = if (loginType == LoginType.PrivateKey) nostrKey else userId
+            val tsunamiWalletId = tsunamiWalletAccountRepository.createWallet(userId = userId, walletKey = tsunamiKey)
+            val walletId = tsunamiWalletId.getOrNull() ?: primalWalletId.getOrNull()
+            walletId?.let { walletAccountRepository.setActiveWallet(userId = userId, walletId = it) }
+
             bookmarksRepository.fetchAndPersistBookmarks(userId = userId)
             authorizationEvent?.let {
                 settingsRepository.fetchAndPersistAppSettings(authorizationEvent)

@@ -145,6 +145,7 @@ abstract class RepositoryFactory {
     fun createTsunamiWalletAccountRepository(): TsunamiWalletAccountRepository {
         return TsunamiWalletAccountRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
+            tsunamiWalletSdk = tsunamiWalletSdk,
             walletDatabase = resolveWalletDatabase(),
         )
     }
