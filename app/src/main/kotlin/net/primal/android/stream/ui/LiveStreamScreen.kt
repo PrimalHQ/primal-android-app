@@ -868,6 +868,12 @@ private fun LiveChatListOrSearch(
                 items(
                     items = state.chatItems,
                     key = { it.uniqueId },
+                    contentType = {
+                        when (it) {
+                            is StreamChatItem.ChatMessageItem -> "chatMessage"
+                            is StreamChatItem.ZapMessageItem -> "chatZap"
+                        }
+                    },
                 ) { chatItem ->
                     when (chatItem) {
                         is StreamChatItem.ChatMessageItem -> ChatMessageListItem(
