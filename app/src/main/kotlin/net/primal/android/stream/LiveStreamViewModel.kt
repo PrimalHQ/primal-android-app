@@ -130,6 +130,7 @@ class LiveStreamViewModel @AssistedInject constructor(
     private var chatMessages: List<StreamChatItem.ChatMessageItem>? = null
 
     init {
+        fetchStreamInfo()
         startLiveStreamSubscription()
         observeEvents()
         observeFollowsResults()
@@ -142,6 +143,11 @@ class LiveStreamViewModel @AssistedInject constructor(
         observeFollowState()
         observeMuteState()
     }
+
+    private fun fetchStreamInfo() =
+        viewModelScope.launch {
+            eventRepository.fetchReplaceableEvent(naddr = streamNaddr)
+        }
 
     private fun startLiveStreamSubscription() {
         viewModelScope.launch {
