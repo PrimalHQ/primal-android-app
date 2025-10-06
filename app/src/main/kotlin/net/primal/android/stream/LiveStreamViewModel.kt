@@ -654,7 +654,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                 when (result.error) {
                     is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
                     is ZapError.FailedToFetchZapInvoice,
-                    -> setState { copy(error = UiError.InvalidZapRequest()) }
+                        -> setState { copy(error = UiError.InvalidZapRequest()) }
 
                     ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
                         setState { copy(error = UiError.FailedToPublishZapEvent()) }
@@ -929,7 +929,6 @@ class LiveStreamViewModel @AssistedInject constructor(
             if (pubkey != null) {
                 val profileData = try {
                     profileRepository.findProfileDataOrNull(profileId = pubkey)
-                        ?: profileRepository.fetchProfile(profileId = pubkey)
                 } catch (error: NetworkException) {
                     Timber.w(error, "Failed to resolve profile for $uriString")
                     null
