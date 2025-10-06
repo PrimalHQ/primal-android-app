@@ -32,6 +32,7 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.onFailure
+import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.common.exception.NetworkException
@@ -46,6 +47,7 @@ class WalletDashboardViewModel @Inject constructor(
     userRepository: UserRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val walletAccountRepository: WalletAccountRepository,
+    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val walletRepository: WalletRepository,
     private val primalBillingClient: PrimalBillingClient,
     private val billingRepository: BillingRepository,
@@ -184,7 +186,7 @@ class WalletDashboardViewModel @Inject constructor(
     private fun enablePrimalWallet() =
         viewModelScope.launch {
             try {
-                walletAccountRepository.fetchWalletAccountInfo(userId = activeUserId)
+                primalWalletAccountRepository.fetchWalletAccountInfo(userId = activeUserId)
                 walletAccountRepository.setActiveWallet(userId = activeUserId, walletId = activeUserId)
             } catch (error: NetworkException) {
                 Timber.w(error)
