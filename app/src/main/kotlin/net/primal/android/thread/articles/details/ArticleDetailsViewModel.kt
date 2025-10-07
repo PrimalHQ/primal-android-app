@@ -303,7 +303,7 @@ class ArticleDetailsViewModel @Inject constructor(
                     is ZapError.FailedToFetchZapInvoice,
                     -> setState { copy(error = UiError.InvalidZapRequest()) }
 
-                    ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
+                    is ZapError.FailedToPayZap, ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
                         setState { copy(error = UiError.FailedToPublishZapEvent()) }
                     }
 

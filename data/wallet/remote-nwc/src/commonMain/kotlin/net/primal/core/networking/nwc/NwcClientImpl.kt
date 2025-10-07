@@ -49,7 +49,7 @@ import net.primal.domain.wallet.NostrWalletConnect
 
 internal class NwcClientImpl(
     private val nwcData: NostrWalletConnect,
-    private val nwcZapHelper: NwcZapHelper,
+    private val nwcZapHelper: NwcZapHelper?,
 ) : NostrZapper, NwcApi, NostrEventPublisher {
 
     private companion object {
@@ -126,7 +126,12 @@ internal class NwcClientImpl(
         }
     }
 
-    override suspend fun zap(data: ZapRequestData): ZapResult {
+    override suspend fun zap(walletId: String, data: ZapRequestData): ZapResult {
+        val nwcZapHelper = nwcZapHelper ?: throw IllegalStateException(
+            "NwcZapHelper is required when using NwcClientImpl as a NostrZapper. " +
+                "Please provide NwcZapHelper instance in the constructor.",
+        )
+
         val zapPayRequest = runCatching {
             nwcZapHelper.fetchZapPayRequest(data.recipientLnUrlDecoded)
         }.getOrElse {

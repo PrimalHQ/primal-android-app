@@ -1,0 +1,55 @@
+package net.primal.wallet.data.zaps
+
+import io.github.aakira.napier.Napier
+import net.primal.core.networking.nwc.NwcZapHelper
+import net.primal.core.utils.MSATS_IN_SATS
+import net.primal.domain.nostr.zaps.NostrZapper
+import net.primal.domain.nostr.zaps.ZapError
+import net.primal.domain.nostr.zaps.ZapRequestData
+import net.primal.domain.nostr.zaps.ZapResult
+import net.primal.domain.wallet.TxRequest
+import net.primal.domain.wallet.WalletRepository
+
+class TsunamiWalletNostrZapper(
+    private val nwcZapHelper: NwcZapHelper,
+    private val walletRepository: WalletRepository,
+) : NostrZapper {
+
+    override suspend fun zap(walletId: String, data: ZapRequestData): ZapResult {
+        val zapPayRequest = runCatching {
+            nwcZapHelper.fetchZapPayRequest(data.recipientLnUrlDecoded)
+        }.getOrElse {
+            Napier.e(it) { "FailedToFetchZapPayRequest." }
+            return ZapResult.Failure(error = ZapError.FailedToFetchZapPayRequest(cause = it))
+        }
+
+        val invoice = runCatching {
+            nwcZapHelper.fetchInvoice(
+                zapPayRequest = zapPayRequest,
+                zapEvent = data.userZapRequestEvent,
+                satoshiAmountInMilliSats = data.zapAmountInSats * MSATS_IN_SATS.toULong(),
+                comment = data.zapComment,
+            )
+        }.getOrElse {
+            Napier.e(it) { "FailedToFetchZapInvoice." }
+            return ZapResult.Failure(error = ZapError.FailedToFetchZapInvoice(cause = it))
+        }
+
+        runCatching {
+            walletRepository.pay(
+                walletId = walletId,
+                request = TxRequest.Lightning.LnInvoice(
+                    amountSats = data.zapAmountInSats.toString(),
+                    noteRecipient = null,
+                    noteSelf = null,
+                    lnInvoice = invoice.pr,
+                ),
+            )
+        }.getOrElse {
+            Napier.e(it) { "FailedToPayInvoice." }
+            return ZapResult.Failure(error = ZapError.FailedToPayZap(cause = it))
+        }
+
+        return ZapResult.Success
+    }
+}

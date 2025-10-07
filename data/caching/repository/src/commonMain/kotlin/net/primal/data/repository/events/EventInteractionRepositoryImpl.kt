@@ -146,6 +146,7 @@ class EventInteractionRepositoryImpl(
             ?: return ZapResult.Failure(error = ZapError.Unknown())
 
         val result = nostrZapper.zap(
+            walletId = walletId,
             data = ZapRequestData(
                 zapperUserId = userId,
                 recipientUserId = target.recipientUserId,
