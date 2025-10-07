@@ -1,7 +1,6 @@
-package net.primal.android.wallet.repository
+package net.primal.wallet.data.zaps
 
 import io.github.aakira.napier.Napier
-import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
@@ -15,12 +14,12 @@ import net.primal.domain.wallet.SubWallet
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.WithdrawRequestBody
 
-class WalletNostrZapper @Inject constructor(
+class PrimalWalletNostrZapper(
     private val dispatcherProvider: DispatcherProvider,
     private val primalWalletApi: PrimalWalletApi,
 ) : NostrZapper {
 
-    override suspend fun zap(data: ZapRequestData): ZapResult =
+    override suspend fun zap(walletId: String, data: ZapRequestData): ZapResult =
         withContext(dispatcherProvider.io()) {
             runCatching {
                 primalWalletApi.withdraw(
