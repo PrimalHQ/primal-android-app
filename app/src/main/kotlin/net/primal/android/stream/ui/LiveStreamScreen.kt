@@ -41,6 +41,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -48,6 +49,7 @@ import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -927,11 +929,9 @@ private fun LiveChatContent(
 ) {
     val coroutineScope = rememberCoroutineScope()
 
-    val isChatShowingLatestContent by remember {
-        derivedStateOf {
-            listState.firstVisibleItemIndex < 2
-        }
-    }
+    val isAtBottom by remember { derivedStateOf { !listState.canScrollBackward } }
+
+    val isChatShowingLatestContent by remember { derivedStateOf { listState.firstVisibleItemIndex < 2 } }
 
     LaunchedEffect(state.chatItems) {
         if (isChatShowingLatestContent && state.chatItems.isNotEmpty()) {
@@ -947,18 +947,45 @@ private fun LiveChatContent(
             .background(ChatBackgroundHandleColor)
             .imePadding(),
     ) {
-        LiveChatListOrSearch(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .weight(1f),
-            state = state,
-            listState = listState,
-            eventPublisher = eventPublisher,
-            onProfileClick = onProfileClick,
-            onNostrUriClick = onNostrUriClick,
-            onChatMessageClick = onChatMessageClick,
-            onZapMessageClick = onZapMessageClick,
-        )
+        ) {
+            LiveChatListOrSearch(
+                modifier = Modifier.fillMaxWidth(),
+                state = state,
+                listState = listState,
+                eventPublisher = eventPublisher,
+                onProfileClick = onProfileClick,
+                onNostrUriClick = onNostrUriClick,
+                onChatMessageClick = onChatMessageClick,
+                onZapMessageClick = onZapMessageClick,
+            )
+
+            androidx.compose.animation.AnimatedVisibility(
+                modifier = Modifier.align(Alignment.BottomEnd),
+                visible = !isAtBottom && !state.userTaggingState.isUserTaggingActive,
+                enter = fadeIn() + slideInVertically { it / 2 },
+                exit = fadeOut(),
+            ) {
+                IconButton(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
+                    onClick = { coroutineScope.launch { listState.animateScrollToItem(index = 0) } },
+                ) {
+                    Icon(
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                        modifier = Modifier.padding(8.dp),
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = null,
+                    )
+                }
+            }
+        }
 
         if (!state.chatLoading) {
             LiveChatCommentInput(
