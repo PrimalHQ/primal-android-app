@@ -427,18 +427,16 @@ private fun StreamPlayer(
                 },
 
             playerModifier = Modifier
-                .animateBounds(lookaheadScope = lookaheadScope)
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_PLAYER_KEY),
                     animatedVisibilityScope = animatedVisibilityScope,
                 ),
             loadingModifier = Modifier
-                .animateBounds(lookaheadScope = lookaheadScope)
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_LOADING_PLAYER_KEY),
                     animatedVisibilityScope = animatedVisibilityScope,
                 ),
-            controlsModifier = Modifier.animateBounds(lookaheadScope = lookaheadScope),
+            lookaheadScope = lookaheadScope,
             state = state,
             mediaController = mediaController,
             streamUrl = streamInfo.streamUrl,
@@ -666,6 +664,7 @@ private fun LiveStreamContent(
                     modifier = seekBarModifier,
                     visible = !isInPipMode && !isCollapsed,
                     enter = fadeIn(animationSpec = tween(delayMillis = 250)),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 50)),
                 ) {
                     StreamSeekBar(
                         isVisible = controlsVisible,
@@ -729,7 +728,7 @@ private fun StreamSeekBar(
 ) {
     AnimatedVisibility(
         modifier = modifier,
-        visible = isVisible && !state.isStreamUnavailable,
+        visible = isVisible && state.playerState.isPlaying,
         enter = fadeIn(),
         exit = fadeOut(),
     ) {

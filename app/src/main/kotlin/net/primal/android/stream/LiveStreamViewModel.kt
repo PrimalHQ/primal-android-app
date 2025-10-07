@@ -75,6 +75,7 @@ import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamContentModerationMode
 import net.primal.domain.streams.StreamRepository
+import net.primal.domain.streams.StreamStatus
 import net.primal.domain.streams.chat.ChatMessage
 import net.primal.domain.streams.chat.LiveStreamChatRepository
 import net.primal.domain.utils.isConfigured
@@ -480,6 +481,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                 .filterNotNull()
                 .collect { stream ->
                     val isLive = stream.isLive()
+                    val isEnded = stream.resolvedStatus == StreamStatus.ENDED
                     val streamUrlToPlay = if (isLive) stream.streamingUrl else stream.recordingUrl
 
                     if (authorObserversJob == null || state.value.streamInfo?.mainHostId != stream.mainHostId) {
@@ -489,11 +491,11 @@ class LiveStreamViewModel @AssistedInject constructor(
                     setState {
                         copy(
                             streamInfoLoading = false,
-                            isStreamUnavailable = streamUrlToPlay == null,
+                            isStreamUnavailable = streamUrlToPlay == null && !isEnded,
                             playerState = playerState.copy(
                                 isLive = isLive,
                                 atLiveEdge = isLive,
-                                isVideoFinished = false,
+                                isVideoFinished = streamUrlToPlay == null && isEnded,
                             ),
                             streamInfo = this.streamInfo?.copy(
                                 atag = stream.aTag,

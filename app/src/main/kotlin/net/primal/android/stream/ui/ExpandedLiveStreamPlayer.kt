@@ -1,7 +1,11 @@
+@file:kotlin.OptIn(ExperimentalSharedTransitionApi::class)
+
 package net.primal.android.stream.ui
 
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import androidx.annotation.OptIn
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.animateBounds
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -16,6 +20,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toAndroidRectF
+import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
@@ -47,6 +52,7 @@ fun ExpandedLiveStreamPlayer(
     controlsVisible: Boolean,
     menuVisible: Boolean,
     isCollapsed: Boolean,
+    lookaheadScope: LookaheadScope,
     onPlayPauseClick: () -> Unit,
     onClose: () -> Unit,
     onRewind: () -> Unit,
@@ -64,7 +70,6 @@ fun ExpandedLiveStreamPlayer(
     modifier: Modifier = Modifier,
     playerModifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
-    controlsModifier: Modifier = Modifier,
 ) {
     KeepScreenOn(enabled = state.playerState.isPlaying)
 
@@ -90,9 +95,9 @@ fun ExpandedLiveStreamPlayer(
         modifier = modifier,
         playerModifier = playerModifier,
         loadingModifier = loadingModifier,
-        controlsModifier = controlsModifier,
         state = state,
         mediaController = mediaController,
+        lookaheadScope = lookaheadScope,
         controlsVisible = controlsVisible,
         menuVisible = menuVisible,
         isCollapsed = isCollapsed,
@@ -120,9 +125,9 @@ private fun PlayerBox(
     modifier: Modifier,
     playerModifier: Modifier,
     loadingModifier: Modifier,
-    controlsModifier: Modifier,
     state: LiveStreamContract.UiState,
     mediaController: MediaController,
+    lookaheadScope: LookaheadScope,
     controlsVisible: Boolean,
     menuVisible: Boolean,
     isCollapsed: Boolean,
@@ -180,7 +185,9 @@ private fun PlayerBox(
             )
     }
 
-    val playerAndMessageModifier = dragDownModifier
+    val playerAndMessageModifier = Modifier
+        .animateBounds(lookaheadScope = lookaheadScope)
+        .then(dragDownModifier)
         .then(playerModifier)
         .then(playerSizingModifier)
 
@@ -202,12 +209,15 @@ private fun PlayerBox(
                     pipManager.sourceRectHint = layoutCoordinates.boundsInWindow().toAndroidRectF().toRect()
                 },
             ),
-        loadingModifier = loadingModifier,
+        loadingModifier = Modifier
+            .animateBounds(lookaheadScope = lookaheadScope)
+            .then(loadingModifier),
+        fallbackModifier = Modifier.animateBounds(lookaheadScope = lookaheadScope),
         playerOverlay = {
             if (!isInPipMode) {
                 LiveStreamPlayerControls(
                     modifier = Modifier
-                        .then(controlsModifier)
+                        .animateBounds(lookaheadScope = lookaheadScope)
                         .fillMaxSize(),
                     isVisible = controlsVisible,
                     state = state,
