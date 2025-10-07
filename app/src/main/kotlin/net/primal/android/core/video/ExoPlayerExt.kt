@@ -13,7 +13,6 @@ import androidx.media3.exoplayer.DefaultRenderersFactory
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.trackselection.DefaultTrackSelector
-import androidx.media3.session.MediaController
 import net.primal.android.core.di.rememberFeedVideoCache
 import net.primal.android.core.video.PlaybackConstants.BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MSEC
 import net.primal.android.core.video.PlaybackConstants.BUFFER_FOR_PLAYBACK_MSEC
@@ -82,10 +81,3 @@ fun initializePlayer(context: Context, cache: SimpleCache): ExoPlayer {
         )
         .build()
 }
-
-fun MediaController.toggle() =
-    if (isPlaying) {
-        pause()
-    } else {
-        play()
-    }
