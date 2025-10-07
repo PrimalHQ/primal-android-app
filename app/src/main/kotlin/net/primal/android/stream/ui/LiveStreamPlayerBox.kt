@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,7 +29,6 @@ import androidx.media3.session.MediaController
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
 import net.primal.android.R
-import net.primal.android.core.compose.ShadowIcon
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.theme.AppTheme
 
@@ -95,7 +95,6 @@ private fun StreamFallbackContent(
         verticalArrangement = Arrangement.Center,
     ) {
         Text(
-            modifier = Modifier.padding(bottom = 10.dp),
             text = if (state.playerState.isVideoFinished) {
                 stringResource(id = R.string.live_stream_stream_ended)
             } else {
@@ -113,10 +112,9 @@ private fun StreamFallbackContent(
         onRetryClick?.let {
             if (state.isStreamUnavailable) {
                 IconButton(onClick = onRetryClick) {
-                    ShadowIcon(
+                    Icon(
                         modifier = Modifier.size(30.dp),
                         tint = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                        shadowTint = Color.LightGray,
                         imageVector = Icons.Default.Refresh,
                         contentDescription = stringResource(id = R.string.live_stream_retry_button),
                     )
