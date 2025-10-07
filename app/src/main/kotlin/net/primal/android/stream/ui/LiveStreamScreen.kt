@@ -40,10 +40,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.TextAutoSize
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -1177,9 +1179,10 @@ private fun rememberAnnotatedContent(message: ChatMessageUi): AnnotatedString {
 fun ZapMessageListItem(
     zap: EventZapUiModel,
     modifier: Modifier = Modifier,
+    isScrollable: Boolean = false,
     onClick: (() -> Unit)? = null,
 ) {
-    Box(
+    Row(
         modifier = modifier
             .fillMaxWidth()
             .border(
@@ -1201,26 +1204,30 @@ fun ZapMessageListItem(
             )
             .background(color = ZapMessageBackgroundColor.copy(alpha = 0.2f))
             .padding(horizontal = 8.dp, vertical = 10.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.Top,
-        ) {
-            UniversalAvatarThumbnail(
-                avatarCdnImage = zap.zapperAvatarCdnImage,
-                avatarSize = 24.dp,
-                legendaryCustomization = zap.zapperLegendaryCustomization,
-            )
-            ZapMessageContent(zap = zap, onClick = onClick)
-        }
+        UniversalAvatarThumbnail(
+            avatarCdnImage = zap.zapperAvatarCdnImage,
+            avatarSize = 24.dp,
+            legendaryCustomization = zap.zapperLegendaryCustomization,
+        )
+        ZapMessageContent(zap = zap, onClick = onClick, isScrollable = isScrollable)
     }
 }
 
 @Composable
-private fun ZapMessageContent(zap: EventZapUiModel, onClick: (() -> Unit)?) {
+private fun ZapMessageContent(
+    zap: EventZapUiModel,
+    onClick: (() -> Unit)?,
+    isScrollable: Boolean,
+) {
     val localUriHandler = LocalUriHandler.current
 
-    Column(modifier = Modifier.padding(top = 1.dp)) {
+    Column(
+        modifier = Modifier.padding(top = 1.dp),
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
         ZapMessageHeader(zap = zap)
 
         if (!zap.message.isNullOrBlank()) {
@@ -1235,7 +1242,15 @@ private fun ZapMessageContent(zap: EventZapUiModel, onClick: (() -> Unit)?) {
                 )
             }
             PrimalClickableText(
-                modifier = Modifier.padding(top = 5.dp),
+                modifier = Modifier
+                    .run {
+                        if (isScrollable) {
+                            this.verticalScroll(state = rememberScrollState())
+                        } else {
+                            this
+                        }
+                    }
+                    .padding(top = 5.dp),
                 text = contentText,
                 style = AppTheme.typography.bodyLarge.copy(fontSize = 15.sp),
                 onClick = { position, _ ->

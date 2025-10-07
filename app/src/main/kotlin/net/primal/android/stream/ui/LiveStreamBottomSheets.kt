@@ -204,8 +204,8 @@ private fun ProfileDetailsBottomSheetContent(
         }
 
         is ActiveBottomSheet.ChatDetails -> {
-            ChatDetailsSection(
-                message = activeSheet.message,
+            ChatMessageDetailsSection(
+                isScrollable = true,
                 onReport = { reportType ->
                     onReport(
                         reportType,
@@ -214,19 +214,30 @@ private fun ProfileDetailsBottomSheetContent(
                     )
                     onDismiss()
                 },
-            )
+            ) {
+                ChatMessageListItem(
+                    message = activeSheet.message,
+                    onProfileClick = {},
+                    onNostrUriClick = {},
+                )
+            }
         }
 
         is ActiveBottomSheet.ZapDetails -> {
-            ZapDetailsSection(
-                zap = activeSheet.zap,
+            ChatMessageDetailsSection(
                 onReport = { reportType ->
                     activeSheet.zap.zapperId.let { zapperId ->
                         onReport(reportType, activeSheet.zap.id, zapperId)
                     }
                     onDismiss()
                 },
-            )
+            ) {
+                ZapMessageListItem(
+                    modifier = Modifier.weight(1f, false),
+                    zap = activeSheet.zap,
+                    isScrollable = true,
+                )
+            }
         }
 
         else -> Unit
