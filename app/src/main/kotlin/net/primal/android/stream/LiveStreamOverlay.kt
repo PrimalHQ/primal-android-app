@@ -29,7 +29,7 @@ import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.animatableSaver
 import net.primal.android.core.pip.LocalPiPManager
 import net.primal.android.core.pip.rememberIsInPipMode
-import net.primal.android.core.service.rememberManagedMediaController
+import net.primal.android.core.video.rememberManagedMediaController
 import net.primal.android.navigation.navigateToChat
 import net.primal.android.navigation.navigateToProfileEditor
 import net.primal.android.navigation.navigateToProfileQrCodeViewer
