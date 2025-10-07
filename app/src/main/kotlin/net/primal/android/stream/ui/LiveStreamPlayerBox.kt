@@ -71,7 +71,7 @@ fun LiveStreamPlayerBox(
                 )
             }
         } else {
-            StreamUnavailableContent(
+            StreamFallbackContent(
                 modifier = modifier,
                 state = state,
                 onRetryClick = onRetryClick,
@@ -81,56 +81,45 @@ fun LiveStreamPlayerBox(
 }
 
 @Composable
-private fun StreamUnavailableContent(
+private fun StreamFallbackContent(
     modifier: Modifier,
     state: LiveStreamContract.UiState,
     onRetryClick: (() -> Unit)?,
 ) {
-    Box(
+    Column(
         modifier = modifier
             .fillMaxSize()
-            .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
-        contentAlignment = Alignment.Center,
+            .background(AppTheme.extraColorScheme.surfaceVariantAlt1)
+            .padding(4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            modifier = Modifier.padding(4.dp),
-        ) {
-            if (state.playerState.isVideoFinished) {
-                Text(
-                    text = stringResource(id = R.string.live_stream_stream_ended).uppercase(),
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                    style = AppTheme.typography.bodyLarge.copy(
-                        fontSize = 16.sp,
-                        lineHeight = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    textAlign = TextAlign.Center,
-                )
+        Text(
+            modifier = Modifier.padding(bottom = 10.dp),
+            text = if (state.playerState.isVideoFinished) {
+                stringResource(id = R.string.live_stream_stream_ended)
             } else {
-                Text(
-                    text = stringResource(id = R.string.live_stream_recording_not_available).uppercase(),
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                    style = AppTheme.typography.bodyLarge.copy(
-                        fontSize = 16.sp,
-                        lineHeight = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    textAlign = TextAlign.Center,
-                )
-                onRetryClick?.let {
-                    if (state.isStreamUnavailable) {
-                        IconButton(onClick = onRetryClick) {
-                            ShadowIcon(
-                                modifier = Modifier.size(30.dp),
-                                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                                shadowTint = Color.LightGray,
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = stringResource(id = R.string.live_stream_retry_button),
-                            )
-                        }
-                    }
+                stringResource(id = R.string.live_stream_recording_not_available)
+            }.uppercase(),
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+            style = AppTheme.typography.bodyLarge.copy(
+                fontSize = 16.sp,
+                lineHeight = 20.sp,
+                fontWeight = FontWeight.Bold,
+            ),
+            textAlign = TextAlign.Center,
+        )
+
+        onRetryClick?.let {
+            if (state.isStreamUnavailable) {
+                IconButton(onClick = onRetryClick) {
+                    ShadowIcon(
+                        modifier = Modifier.size(30.dp),
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                        shadowTint = Color.LightGray,
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = stringResource(id = R.string.live_stream_retry_button),
+                    )
                 }
             }
         }
