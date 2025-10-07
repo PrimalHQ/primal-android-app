@@ -6,11 +6,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,8 +22,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.ui.compose.PlayerSurface
@@ -69,43 +74,95 @@ fun LiveStreamPlayerBox(
                 )
             }
         } else {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-                    .background(Color.Black),
-                contentAlignment = Alignment.Center,
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp),
-                    modifier = Modifier.padding(4.dp),
-                ) {
-                    val messageText = if (state.playerState.isVideoFinished) {
-                        stringResource(id = R.string.live_stream_video_ended)
-                    } else {
-                        stringResource(id = R.string.live_stream_recording_not_available)
-                    }
+            StreamUnavailableContent(
+                modifier = modifier,
+                state = state,
+                onRetryClick = onRetryClick,
+            )
+        }
+    }
+}
 
-                    Text(
-                        text = messageText,
-                        color = Color.White,
-                        style = AppTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center,
-                    )
+@Composable
+private fun StreamUnavailableContent(
+    modifier: Modifier,
+    state: LiveStreamContract.UiState,
+    onRetryClick: (() -> Unit)?,
+) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(4.dp),
+        ) {
+            if (state.playerState.isVideoFinished) {
+                StreamFinishedContent(onRetryClick = onRetryClick)
+            } else {
+                StreamNotAvailableContent(
+                    isStreamUnavailable = state.isStreamUnavailable,
+                    onRetryClick = onRetryClick,
+                )
+            }
+        }
+    }
+}
 
-                    onRetryClick?.let {
-                        if (state.isStreamUnavailable && !state.playerState.isVideoFinished) {
-                            IconButton(onClick = onRetryClick) {
-                                ShadowIcon(
-                                    modifier = Modifier.size(30.dp),
-                                    tint = Color.White,
-                                    imageVector = Icons.Default.Refresh,
-                                    contentDescription = stringResource(id = R.string.live_stream_retry_button),
-                                )
-                            }
-                        }
-                    }
-                }
+@Composable
+private fun StreamFinishedContent(onRetryClick: (() -> Unit)?) {
+    Text(
+        text = stringResource(id = R.string.live_stream_stream_ended).uppercase(),
+        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+        style = AppTheme.typography.bodyLarge.copy(
+            fontSize = 16.sp,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Bold,
+        ),
+        textAlign = TextAlign.Center,
+    )
+    onRetryClick?.let {
+        Button(
+            onClick = it,
+            shape = AppTheme.shapes.extraLarge,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White,
+                contentColor = Color.Black,
+            ),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+        ) {
+            Text(
+                text = stringResource(id = R.string.live_stream_replay_button),
+                style = AppTheme.typography.bodyMedium.copy(
+                    fontSize = 14.sp,
+                    lineHeight = 18.sp,
+                ),
+                fontWeight = FontWeight.Bold,
+            )
+        }
+    }
+}
+
+@Composable
+private fun StreamNotAvailableContent(isStreamUnavailable: Boolean, onRetryClick: (() -> Unit)?) {
+    Text(
+        text = stringResource(id = R.string.live_stream_recording_not_available),
+        color = Color.White,
+        style = AppTheme.typography.bodySmall,
+        textAlign = TextAlign.Center,
+    )
+    onRetryClick?.let {
+        if (isStreamUnavailable) {
+            IconButton(onClick = onRetryClick) {
+                ShadowIcon(
+                    modifier = Modifier.size(30.dp),
+                    tint = Color.White,
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = stringResource(id = R.string.live_stream_retry_button),
+                )
             }
         }
     }
