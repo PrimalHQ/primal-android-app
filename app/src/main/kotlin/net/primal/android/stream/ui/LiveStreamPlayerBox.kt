@@ -125,6 +125,7 @@ private fun StreamUnavailableContent(
                             ShadowIcon(
                                 modifier = Modifier.size(30.dp),
                                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                                shadowTint = Color.LightGray,
                                 imageVector = Icons.Default.Refresh,
                                 contentDescription = stringResource(id = R.string.live_stream_retry_button),
                             )
