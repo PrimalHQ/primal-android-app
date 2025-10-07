@@ -666,6 +666,7 @@ private fun LiveStreamContent(
                     modifier = seekBarModifier,
                     visible = !isInPipMode && !isCollapsed && state.playerState.isPlaying,
                     enter = fadeIn(animationSpec = tween(delayMillis = 250)),
+                    exit = fadeOut(animationSpec = tween(durationMillis = 50)),
                 ) {
                     StreamSeekBar(
                         isVisible = controlsVisible,
