@@ -5,9 +5,11 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.builder.TxRequestBuilder
 import net.primal.domain.usecase.ConnectNwcUseCase
+import net.primal.domain.usecase.CreateTsunamiWalletUseCase
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.builder.factory.TxRequestBuilderFactory
 
@@ -28,5 +30,14 @@ object WalletUseCasesModule {
         ConnectNwcUseCase(
             walletRepository = walletRepository,
             walletAccountRepository = walletAccountRepository,
+        )
+
+    @Provides
+    @Singleton
+    fun providesCreateTsunamiWalletUseCase(
+        tsunamiWalletAccountRepository: TsunamiWalletAccountRepository,
+    ): CreateTsunamiWalletUseCase =
+        CreateTsunamiWalletUseCase(
+            tsunamiWalletAccountRepository = tsunamiWalletAccountRepository,
         )
 }

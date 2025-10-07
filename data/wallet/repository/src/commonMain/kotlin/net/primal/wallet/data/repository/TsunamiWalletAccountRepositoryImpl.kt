@@ -18,11 +18,16 @@ class TsunamiWalletAccountRepositoryImpl(
     private val tsunamiWalletSdk: TsunamiWalletSdk,
 ) : TsunamiWalletAccountRepository {
 
-    override suspend fun createWallet(userId: String, walletKey: String): Result<String> =
+    override suspend fun initializeWallet(userId: String, walletKey: String): Result<String> =
         withContext(dispatcherProvider.io()) {
             runCatching {
-                val walletId = tsunamiWalletSdk.createWallet(walletKey).getOrThrow()
+                tsunamiWalletSdk.createWallet(walletKey).getOrThrow()
+            }
+        }
 
+    override suspend fun fetchWalletAccountInfo(userId: String, walletId: String): Result<Unit> =
+        withContext(dispatcherProvider.io()) {
+            runCatching {
                 walletDatabase.withTransaction {
                     walletDatabase.wallet().insertOrIgnoreWalletInfo(
                         info = WalletInfo(
@@ -33,8 +38,13 @@ class TsunamiWalletAccountRepositoryImpl(
                         ),
                     )
                 }
+            }
+        }
 
-                walletId
+    override suspend fun terminateWallet(walletId: String): Result<Unit> =
+        withContext(dispatcherProvider.io()) {
+            runCatching {
+                tsunamiWalletSdk.destroyWallet(walletId).getOrThrow()
             }
         }
 }

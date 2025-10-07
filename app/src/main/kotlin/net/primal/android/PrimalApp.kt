@@ -4,6 +4,7 @@ import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import coil3.SingletonImageLoader
+import dagger.Lazy
 import dagger.hilt.android.HiltAndroidApp
 import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.Napier
@@ -11,6 +12,7 @@ import javax.inject.Inject
 import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.core.images.PrimalImageLoaderFactory
 import net.primal.android.core.utils.isGoogleBuild
+import net.primal.android.wallet.init.TsunamiWalletLifecycleInitializer
 import net.primal.core.config.store.AppConfigInitializer
 import net.primal.data.repository.factory.PrimalRepositoryFactory
 import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
@@ -30,6 +32,9 @@ class PrimalApp : Application() {
 
     @Inject
     lateinit var crashReporter: PrimalCrashReporter
+
+    @Inject
+    lateinit var tsunamiWalletLifecycleInitializer: Lazy<TsunamiWalletLifecycleInitializer>
 
     override fun onCreate() {
         super.onCreate()
@@ -53,6 +58,8 @@ class PrimalApp : Application() {
         if (isGoogleBuild()) {
             initNotificationChannels()
         }
+
+        tsunamiWalletLifecycleInitializer.get().start()
     }
 
     private fun initNotificationChannels() {

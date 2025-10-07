@@ -9,13 +9,13 @@ import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.account.PrimalWalletAccountRepository
-import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.getOrNull
+import net.primal.domain.usecase.CreateTsunamiWalletUseCase
 
 class LoginHandler @Inject constructor(
     private val settingsRepository: SettingsRepository,
@@ -25,7 +25,7 @@ class LoginHandler @Inject constructor(
     private val bookmarksRepository: PublicBookmarksRepository,
     private val walletAccountRepository: WalletAccountRepository,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
-    private val tsunamiWalletAccountRepository: TsunamiWalletAccountRepository,
+    private val createTsunamiWalletUseCase: CreateTsunamiWalletUseCase,
     private val dispatchers: DispatcherProvider,
     private val credentialsStore: CredentialsStore,
     private val nostrNotary: NostrNotary,
@@ -51,7 +51,7 @@ class LoginHandler @Inject constructor(
 
             val primalWalletId = primalWalletAccountRepository.fetchWalletAccountInfo(userId = userId)
             val tsunamiKey = if (loginType == LoginType.PrivateKey) nostrKey else userId
-            val tsunamiWalletId = tsunamiWalletAccountRepository.createWallet(userId = userId, walletKey = tsunamiKey)
+            val tsunamiWalletId = createTsunamiWalletUseCase.invoke(userId = userId, walletKey = tsunamiKey)
             val walletId = tsunamiWalletId.getOrNull() ?: primalWalletId.getOrNull()
             walletId?.let { walletAccountRepository.setActiveWallet(userId = userId, walletId = it) }
 
