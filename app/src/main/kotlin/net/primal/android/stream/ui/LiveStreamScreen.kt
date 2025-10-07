@@ -427,18 +427,16 @@ private fun StreamPlayer(
                 },
 
             playerModifier = Modifier
-                .animateBounds(lookaheadScope = lookaheadScope)
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_PLAYER_KEY),
                     animatedVisibilityScope = animatedVisibilityScope,
                 ),
             loadingModifier = Modifier
-                .animateBounds(lookaheadScope = lookaheadScope)
                 .sharedElement(
                     sharedContentState = rememberSharedContentState(key = SHARED_TRANSITION_LOADING_PLAYER_KEY),
                     animatedVisibilityScope = animatedVisibilityScope,
                 ),
-            controlsModifier = Modifier.animateBounds(lookaheadScope = lookaheadScope),
+            lookaheadScope = lookaheadScope,
             state = state,
             mediaController = mediaController,
             streamUrl = streamInfo.streamUrl,

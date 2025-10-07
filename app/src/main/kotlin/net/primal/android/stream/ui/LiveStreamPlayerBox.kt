@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -40,6 +39,7 @@ fun LiveStreamPlayerBox(
     modifier: Modifier = Modifier,
     playerModifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
+    fallbackModifier: Modifier = Modifier,
     playerOverlay: @Composable () -> Unit = {},
     onRetryClick: (() -> Unit)? = null,
 ) {
@@ -72,7 +72,7 @@ fun LiveStreamPlayerBox(
             }
         } else {
             StreamFallbackContent(
-                modifier = modifier,
+                modifier = fallbackModifier.matchParentSize(),
                 state = state,
                 onRetryClick = onRetryClick,
             )
@@ -82,17 +82,16 @@ fun LiveStreamPlayerBox(
 
 @Composable
 private fun StreamFallbackContent(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     state: LiveStreamContract.UiState,
     onRetryClick: (() -> Unit)?,
 ) {
     Column(
         modifier = modifier
-            .fillMaxSize()
             .background(AppTheme.extraColorScheme.surfaceVariantAlt1)
             .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
     ) {
         Text(
             text = if (state.playerState.isVideoFinished) {
