@@ -6,14 +6,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -101,68 +98,39 @@ private fun StreamUnavailableContent(
             modifier = Modifier.padding(4.dp),
         ) {
             if (state.playerState.isVideoFinished) {
-                StreamFinishedContent(onRetryClick = onRetryClick)
+                Text(
+                    text = stringResource(id = R.string.live_stream_stream_ended).uppercase(),
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    style = AppTheme.typography.bodyLarge.copy(
+                        fontSize = 16.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    textAlign = TextAlign.Center,
+                )
             } else {
-                StreamNotAvailableContent(
-                    isStreamUnavailable = state.isStreamUnavailable,
-                    onRetryClick = onRetryClick,
+                Text(
+                    text = stringResource(id = R.string.live_stream_recording_not_available).uppercase(),
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    style = AppTheme.typography.bodyLarge.copy(
+                        fontSize = 16.sp,
+                        lineHeight = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    textAlign = TextAlign.Center,
                 )
-            }
-        }
-    }
-}
-
-@Composable
-private fun StreamFinishedContent(onRetryClick: (() -> Unit)?) {
-    Text(
-        text = stringResource(id = R.string.live_stream_stream_ended).uppercase(),
-        color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-        style = AppTheme.typography.bodyLarge.copy(
-            fontSize = 16.sp,
-            lineHeight = 20.sp,
-            fontWeight = FontWeight.Bold,
-        ),
-        textAlign = TextAlign.Center,
-    )
-    onRetryClick?.let {
-        Button(
-            onClick = it,
-            shape = AppTheme.shapes.extraLarge,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White,
-                contentColor = Color.Black,
-            ),
-            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-        ) {
-            Text(
-                text = stringResource(id = R.string.live_stream_replay_button),
-                style = AppTheme.typography.bodyMedium.copy(
-                    fontSize = 14.sp,
-                    lineHeight = 18.sp,
-                ),
-                fontWeight = FontWeight.Bold,
-            )
-        }
-    }
-}
-
-@Composable
-private fun StreamNotAvailableContent(isStreamUnavailable: Boolean, onRetryClick: (() -> Unit)?) {
-    Text(
-        text = stringResource(id = R.string.live_stream_recording_not_available),
-        color = Color.White,
-        style = AppTheme.typography.bodySmall,
-        textAlign = TextAlign.Center,
-    )
-    onRetryClick?.let {
-        if (isStreamUnavailable) {
-            IconButton(onClick = onRetryClick) {
-                ShadowIcon(
-                    modifier = Modifier.size(30.dp),
-                    tint = Color.White,
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = stringResource(id = R.string.live_stream_retry_button),
-                )
+                onRetryClick?.let {
+                    if (state.isStreamUnavailable) {
+                        IconButton(onClick = onRetryClick) {
+                            ShadowIcon(
+                                modifier = Modifier.size(30.dp),
+                                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                                imageVector = Icons.Default.Refresh,
+                                contentDescription = stringResource(id = R.string.live_stream_retry_button),
+                            )
+                        }
+                    }
+                }
             }
         }
     }

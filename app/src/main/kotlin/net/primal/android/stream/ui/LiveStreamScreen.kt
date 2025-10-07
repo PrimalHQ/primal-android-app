@@ -662,17 +662,19 @@ private fun LiveStreamContent(
                         .padding(top = playerHeight - 16.dp)
                 }
 
-                AnimatedVisibility(
-                    modifier = seekBarModifier,
-                    visible = !isInPipMode && !isCollapsed,
-                    enter = fadeIn(animationSpec = tween(delayMillis = 250)),
-                ) {
-                    StreamSeekBar(
-                        isVisible = controlsVisible,
-                        state = state,
-                        mediaController = mediaController,
-                        eventPublisher = eventPublisher,
-                    )
+                if (!state.playerState.isVideoFinished && !state.isStreamUnavailable && !state.playerState.isLoading) {
+                    AnimatedVisibility(
+                        modifier = seekBarModifier,
+                        visible = !isInPipMode && !isCollapsed,
+                        enter = fadeIn(animationSpec = tween(delayMillis = 250)),
+                    ) {
+                        StreamSeekBar(
+                            isVisible = controlsVisible,
+                            state = state,
+                            mediaController = mediaController,
+                            eventPublisher = eventPublisher,
+                        )
+                    }
                 }
             }
         }
