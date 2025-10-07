@@ -2,12 +2,17 @@ package net.primal.android.stream.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -32,13 +37,25 @@ import net.primal.domain.nostr.ReportType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) -> Unit) {
+fun ChatMessageDetailsSection(
+    modifier: Modifier = Modifier,
+    onReport: (ReportType) -> Unit,
+    isScrollable: Boolean = false,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     var reportDialogVisible by remember { mutableStateOf(false) }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
+            .run {
+                if (isScrollable) {
+                    this.verticalScroll(rememberScrollState())
+                } else {
+                    this
+                }
+            }
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -55,28 +72,27 @@ fun ChatDetailsSection(message: ChatMessageUi, onReport: (ReportType) -> Unit) {
             },
         )
 
-        ChatMessageListItem(message = message, onProfileClick = {}, onNostrUriClick = {})
+        content()
 
         PrimalFilledButton(
-            modifier = Modifier.padding(start = 40.dp),
             containerColor = ReportButtonHandleColor,
             contentColor = AppTheme.colorScheme.onSurface,
             textStyle = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp, lineHeight = 20.sp),
             onClick = { reportDialogVisible = true },
-            contentPadding = PaddingValues(18.dp, vertical = 1.dp),
+            contentPadding = PaddingValues(18.dp, vertical = 0.dp),
             height = 37.dp,
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Icon(
                     modifier = Modifier.size(20.dp),
                     imageVector = PrimalIcons.ContextReportContent,
                     contentDescription = null,
                 )
+                Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    modifier = Modifier.padding(3.dp),
+                    modifier = Modifier.padding(top = 3.dp),
                     text = stringResource(id = R.string.live_stream_report_message_button),
                 )
             }
