@@ -17,7 +17,7 @@ class TsunamiWalletNostrZapper(
 
     override suspend fun zap(walletId: String, data: ZapRequestData): ZapResult {
         val zapPayRequest = runCatching {
-            lightningPayHelper.fetchZapPayRequest(data.lnUrlDecoded)
+            lightningPayHelper.fetchPayRequest(data.lnUrlDecoded)
         }.getOrElse {
             Napier.e(it) { "FailedToFetchZapPayRequest." }
             return ZapResult.Failure(error = ZapError.FailedToFetchZapPayRequest(cause = it))

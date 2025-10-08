@@ -24,9 +24,9 @@ class LightningPayHelper(
     private val dispatcherProvider: DispatcherProvider,
     private val httpClient: HttpClient = NwcClientFactory.nwcHttpClient,
 ) {
-    suspend fun fetchZapPayRequest(lnUrl: String): LightningPayRequest {
+    suspend fun fetchPayRequest(lnUrlDecoded: String): LightningPayRequest {
         val bodyString = withContext(dispatcherProvider.io()) {
-            httpClient.get(lnUrl) {
+            httpClient.get(lnUrlDecoded) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
             }.bodyAsText()
         }
