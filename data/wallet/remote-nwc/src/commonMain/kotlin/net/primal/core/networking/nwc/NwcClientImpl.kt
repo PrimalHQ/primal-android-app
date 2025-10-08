@@ -133,7 +133,7 @@ internal class NwcClientImpl(
         )
 
         val zapPayRequest = runCatching {
-            nwcZapHelper.fetchZapPayRequest(data.recipientLnUrlDecoded)
+            nwcZapHelper.fetchPayRequest(data.recipientLnUrlDecoded)
         }.getOrElse {
             Napier.e(it) { "FailedToFetchZapPayRequest." }
             return ZapResult.Failure(error = ZapError.FailedToFetchZapPayRequest(cause = it))
