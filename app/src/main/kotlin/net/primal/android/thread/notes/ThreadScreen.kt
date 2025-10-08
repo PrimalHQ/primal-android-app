@@ -120,6 +120,7 @@ fun ThreadScreen(
             Lifecycle.Event.ON_START -> viewModel.setEvent(
                 ThreadContract.UiEvent.UpdateConversation,
             )
+
             else -> Unit
         }
     }
@@ -351,9 +352,17 @@ private fun ThreadLazyColumn(
     var highlightPostHeightPx by remember { mutableIntStateOf(0) }
     var repliesHeightPx by remember { mutableStateOf(mapOf<Int, Int>()) }
 
-    var extraSpacing by remember { mutableStateOf(0.dp) }
-    extraSpacing = with(LocalDensity.current) {
-        threadListMaxHeightPx.toDp() - highlightPostHeightPx.toDp() - repliesHeightPx.values.sum().toDp()
+    val localDensity = LocalDensity.current
+    var extraSpacing by remember(threadListMaxHeightPx, highlightPostHeightPx, repliesHeightPx) {
+        mutableStateOf(
+            if (threadListMaxHeightPx != 0 && highlightPostHeightPx != 0) {
+                with(localDensity) {
+                    threadListMaxHeightPx.toDp() - highlightPostHeightPx.toDp() - repliesHeightPx.values.sum().toDp()
+                }
+            } else {
+                500.dp
+            },
+        )
     }
 
     LazyColumn(
