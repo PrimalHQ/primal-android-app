@@ -161,6 +161,7 @@ fun LiveStreamScreen(
     callbacks: LiveStreamContract.ScreenCallbacks,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
+    onReplay: () -> Unit,
     onRetry: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -227,6 +228,7 @@ fun LiveStreamScreen(
         zapHostState = zapHostState,
         sharedTransitionScope = sharedTransitionScope,
         animatedVisibilityScope = animatedVisibilityScope,
+        onReplay = onReplay,
         onRetry = onRetry,
     )
 }
@@ -241,6 +243,7 @@ private fun LiveStreamScaffold(
     callbacks: LiveStreamContract.ScreenCallbacks,
     snackbarHostState: SnackbarHostState,
     zapHostState: ZapHostState,
+    onReplay: () -> Unit,
     onRetry: () -> Unit,
 ) {
     if (state.activeBottomSheet != ActiveBottomSheet.None) {
@@ -304,6 +307,7 @@ private fun LiveStreamScaffold(
                     },
                     sharedTransitionScope = sharedTransitionScope,
                     animatedVisibilityScope = animatedVisibilityScope,
+                    onReplay = onReplay,
                     onRetry = onRetry,
                 )
 
@@ -408,6 +412,7 @@ private fun StreamPlayer(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
     lookaheadScope: LookaheadScope,
+    onReplay: () -> Unit,
     onRetry: () -> Unit,
 ) {
     val fullScreenController = rememberFullScreenController()
@@ -484,6 +489,7 @@ private fun StreamPlayer(
             },
             onRequestDeleteClick = { eventPublisher(LiveStreamContract.UiEvent.RequestDeleteStream) },
             onToggleFullScreenClick = { fullScreenController.toggle() },
+            onReplay = onReplay,
             onRetry = onRetry,
         )
     }
@@ -503,6 +509,7 @@ private fun LiveStreamContent(
     onMenuVisibilityChange: (Boolean) -> Unit,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
+    onReplay: () -> Unit,
     onZapClick: () -> Unit,
     onInfoClick: () -> Unit,
     onChatSettingsClick: () -> Unit,
@@ -598,6 +605,7 @@ private fun LiveStreamContent(
                             animatedVisibilityScope = animatedVisibilityScope,
                             lookaheadScope = this@LookaheadScope,
                             onRetry = onRetry,
+                            onReplay = onReplay,
                         )
 
                         CollapsedStreamInfoColumn(

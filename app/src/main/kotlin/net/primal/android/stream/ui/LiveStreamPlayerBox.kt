@@ -6,10 +6,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -42,6 +46,7 @@ fun LiveStreamPlayerBox(
     fallbackModifier: Modifier = Modifier,
     playerOverlay: @Composable () -> Unit = {},
     onRetryClick: (() -> Unit)? = null,
+    onReplayClick: (() -> Unit)? = null,
 ) {
     val localConfiguration = LocalConfiguration.current
 
@@ -75,6 +80,7 @@ fun LiveStreamPlayerBox(
                 modifier = fallbackModifier.matchParentSize(),
                 state = state,
                 onRetryClick = onRetryClick,
+                onReplayClick = onReplayClick,
             )
         }
     }
@@ -85,7 +91,11 @@ private fun StreamFallbackContent(
     modifier: Modifier = Modifier,
     state: LiveStreamContract.UiState,
     onRetryClick: (() -> Unit)?,
+    onReplayClick: (() -> Unit)?,
 ) {
+    val hasRecording = !state.streamInfo?.recordingUrl.isNullOrEmpty()
+    val isFinished = state.playerState.isVideoFinished
+
     Column(
         modifier = modifier
             .background(AppTheme.extraColorScheme.surfaceVariantAlt1)
@@ -108,16 +118,34 @@ private fun StreamFallbackContent(
             textAlign = TextAlign.Center,
         )
 
-        onRetryClick?.let {
-            if (state.isStreamUnavailable) {
-                IconButton(onClick = onRetryClick) {
-                    Icon(
-                        modifier = Modifier.size(30.dp),
-                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = stringResource(id = R.string.live_stream_retry_button),
-                    )
-                }
+        if (isFinished && hasRecording && onReplayClick != null) {
+            Button(
+                modifier = Modifier.height(26.dp),
+                onClick = onReplayClick,
+                shape = AppTheme.shapes.extraLarge,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color.Black,
+                ),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+            ) {
+                Text(
+                    text = stringResource(id = R.string.live_stream_replay_button),
+                    style = AppTheme.typography.bodyMedium.copy(
+                        fontSize = 14.sp,
+                        lineHeight = 18.sp,
+                    ),
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+        } else if (state.isStreamUnavailable && onRetryClick != null) {
+            IconButton(onClick = onRetryClick) {
+                Icon(
+                    modifier = Modifier.size(30.dp),
+                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = stringResource(id = R.string.live_stream_retry_button),
+                )
             }
         }
     }

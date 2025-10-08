@@ -207,6 +207,7 @@ private fun LiveStreamAnimatedContent(
                         callbacks = callbacks,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this,
+                        onReplay = { viewModel.setEvent(UiEvent.OnReplayStream) },
                         onRetry = {
                             viewModel.setEvent(UiEvent.OnRetryStream)
                             mediaController.prepare()

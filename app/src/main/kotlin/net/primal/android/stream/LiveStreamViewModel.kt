@@ -345,6 +345,8 @@ class LiveStreamViewModel @AssistedInject constructor(
                         startLiveStreamSubscription()
                     }
 
+                    UiEvent.OnReplayStream -> replayStream()
+
                     UiEvent.OnVideoEnded -> {
                         setState { copy(playerState = playerState.copy(isVideoFinished = true, isPlaying = false)) }
                     }
@@ -354,6 +356,18 @@ class LiveStreamViewModel @AssistedInject constructor(
                 }
             }
         }
+
+    private fun replayStream() {
+        val recordingUrl = state.value.streamInfo?.recordingUrl ?: return
+        viewModelScope.launch {
+            setState {
+                copy(
+                    playerState = playerState.copy(isVideoFinished = false),
+                    streamInfo = this.streamInfo?.copy(streamUrl = recordingUrl),
+                )
+            }
+        }
+    }
 
     private fun dismissStreamControlPopup() =
         viewModelScope.launch {
@@ -482,7 +496,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                 .collect { stream ->
                     val isLive = stream.isLive()
                     val isEnded = stream.resolvedStatus == StreamStatus.ENDED
-                    val streamUrlToPlay = if (isLive) stream.streamingUrl else stream.recordingUrl
+                    val streamUrlToPlay = if (isLive) stream.streamingUrl else null
 
                     if (authorObserversJob == null || state.value.streamInfo?.mainHostId != stream.mainHostId) {
                         initializeMainHostObservers(mainHostId = stream.mainHostId)
@@ -495,7 +509,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                             playerState = playerState.copy(
                                 isLive = isLive,
                                 atLiveEdge = isLive,
-                                isVideoFinished = streamUrlToPlay == null && isEnded,
+                                isVideoFinished = isEnded,
                             ),
                             streamInfo = this.streamInfo?.copy(
                                 atag = stream.aTag,
@@ -503,6 +517,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
                                 streamUrl = streamUrlToPlay,
+                                recordingUrl = stream.recordingUrl,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
@@ -514,6 +529,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 title = stream.title ?: "Live Stream",
                                 image = stream.imageUrl,
                                 streamUrl = streamUrlToPlay,
+                                recordingUrl = stream.recordingUrl,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,
                                 description = stream.summary,

@@ -69,6 +69,7 @@ fun ExpandedLiveStreamPlayer(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     playerModifier: Modifier = Modifier,
+    onReplay: () -> Unit,
     loadingModifier: Modifier = Modifier,
 ) {
     KeepScreenOn(enabled = state.playerState.isPlaying)
@@ -114,6 +115,7 @@ fun ExpandedLiveStreamPlayer(
         onRequestDeleteClick = onRequestDeleteClick,
         onSoundClick = onSoundClick,
         onToggleFullScreenClick = onToggleFullScreenClick,
+        onReplay = onReplay,
         onRetry = onRetry,
     )
 }
@@ -144,6 +146,7 @@ private fun PlayerBox(
     onRequestDeleteClick: () -> Unit,
     onSoundClick: () -> Unit,
     onToggleFullScreenClick: () -> Unit,
+    onReplay: () -> Unit,
     onRetry: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
@@ -248,6 +251,7 @@ private fun PlayerBox(
                 )
             }
         },
+        onReplayClick = onReplay,
         onRetryClick = onRetry,
     )
 }

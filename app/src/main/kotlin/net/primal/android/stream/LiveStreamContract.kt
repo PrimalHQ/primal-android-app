@@ -67,6 +67,7 @@ interface LiveStreamContract {
         val eventId: String,
         val title: String,
         val streamUrl: String?,
+        val recordingUrl: String?,
         val viewers: Int,
         val streamStatus: StreamStatus,
         val image: String?,
@@ -120,6 +121,7 @@ interface LiveStreamContract {
         data object OnVideoEnded : UiEvent()
         data class ChangeActiveBottomSheet(val sheet: ActiveBottomSheet) : UiEvent()
         data object OnRetryStream : UiEvent()
+        data object OnReplayStream : UiEvent()
     }
 
     sealed class SideEffect {
