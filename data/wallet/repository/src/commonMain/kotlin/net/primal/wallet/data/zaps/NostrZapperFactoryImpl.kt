@@ -1,7 +1,7 @@
 package net.primal.wallet.data.zaps
 
+import net.primal.core.networking.nwc.LightningPayHelper
 import net.primal.core.networking.nwc.NwcClientFactory
-import net.primal.core.networking.nwc.NwcZapHelper
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.NostrZapperFactory
@@ -15,7 +15,7 @@ internal class NostrZapperFactoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val walletRepository: WalletRepository,
     private val primalWalletApi: PrimalWalletApi,
-    private val nwcZapHelper: NwcZapHelper,
+    private val lightningPayHelper: LightningPayHelper,
 ) : NostrZapperFactory {
 
     override suspend fun createOrNull(walletId: String): NostrZapper? {
@@ -47,13 +47,13 @@ internal class NostrZapperFactoryImpl(
                 pubkey = this.pubkey,
                 keypair = this.keypair,
             ),
-            nwcZapHelper = nwcZapHelper,
+            lightningPayHelper = lightningPayHelper,
         )
     }
 
     private fun createTsunamiNostrZapper(): NostrZapper? {
         return TsunamiWalletNostrZapper(
-            nwcZapHelper = nwcZapHelper,
+            lightningPayHelper = lightningPayHelper,
             walletRepository = walletRepository,
         )
     }

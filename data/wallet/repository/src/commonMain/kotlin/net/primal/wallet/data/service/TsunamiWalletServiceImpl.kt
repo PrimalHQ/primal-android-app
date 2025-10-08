@@ -56,6 +56,7 @@ internal class TsunamiWalletServiceImpl(
         runCatching {
             when (request) {
                 is TxRequest.BitcoinOnChain -> throw NotImplementedError()
+
                 is TxRequest.Lightning.LnInvoice -> {
                     tsunamiWalletSdk.payInvoice(
                         walletId = wallet.walletId,
@@ -63,7 +64,8 @@ internal class TsunamiWalletServiceImpl(
                     ).getOrThrow()
                 }
 
-                is TxRequest.Lightning.LnUrl -> throw NotImplementedError()
+                is TxRequest.Lightning.LnUrl -> {
+                }
             }
         }
 }
