@@ -141,10 +141,10 @@ internal class NwcClientImpl(
 
         val invoice = runCatching {
             nwcZapHelper.fetchInvoice(
-                zapPayRequest = zapPayRequest,
-                zapEvent = data.userZapRequestEvent,
-                satoshiAmountInMilliSats = data.zapAmountInSats * MSATS_IN_SATS.toULong(),
+                payRequest = zapPayRequest,
+                amountInMilliSats = data.zapAmountInSats * MSATS_IN_SATS.toULong(),
                 comment = data.zapComment,
+                zapEvent = data.userZapRequestEvent,
             )
         }.getOrElse {
             Napier.e(it) { "FailedToFetchZapInvoice." }
