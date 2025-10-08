@@ -40,19 +40,20 @@ class LightningPayHelper(
     }
 
     suspend fun fetchInvoice(
-        zapPayRequest: LightningPayRequest,
-        zapEvent: NostrEvent,
-        satoshiAmountInMilliSats: ULong,
+        payRequest: LightningPayRequest,
+        amountInMilliSats: ULong,
         comment: String = "",
+        zapEvent: NostrEvent? = null,
     ): LightningPayResponse {
-        require(zapPayRequest.allowsNostr == true)
-        val nostrJson = zapEvent.toNostrJsonObject().toString()
+        if (zapEvent != null) require(payRequest.allowsNostr == true)
 
-        val rawUrl = URLBuilder(zapPayRequest.callback).apply {
-            parameters.append("nostr", nostrJson)
-            parameters.append("amount", satoshiAmountInMilliSats.toString())
+        val nostrQueryValue = zapEvent?.toNostrJsonObject()?.toString()
 
-            val maxComment = zapPayRequest.commentAllowed
+        val rawUrl = URLBuilder(payRequest.callback).apply {
+            nostrQueryValue?.let { parameters.append("nostr", it) }
+            parameters.append("amount", amountInMilliSats.toString())
+
+            val maxComment = payRequest.commentAllowed
             if (maxComment != null && comment.isNotBlank()) {
                 parameters.append("comment", comment.take(maxComment))
             }
@@ -65,10 +66,10 @@ class LightningPayHelper(
         val decoded = bodyString.decodeFromJsonStringOrNull<LightningPayResponse>()
             ?: throw IOException("Invalid invoice response (bad JSON).\n$bodyString")
 
-        val invoiceMsat = decoded.pr.extractInvoiceAmountInMilliSats()
-        val requestedMsat = satoshiAmountInMilliSats.toLong()
-        if (invoiceMsat != requestedMsat) {
-            throw IOException("Invoice amount mismatch ($invoiceMsat ≠ $requestedMsat).")
+        val invoiceMilliSats = decoded.pr.extractInvoiceAmountInMilliSats()
+        val requestedMilliSats = amountInMilliSats.toLong()
+        if (invoiceMilliSats != requestedMilliSats) {
+            throw IOException("Invoice amount mismatch ($invoiceMilliSats ≠ $requestedMilliSats).")
         }
 
         return decoded
