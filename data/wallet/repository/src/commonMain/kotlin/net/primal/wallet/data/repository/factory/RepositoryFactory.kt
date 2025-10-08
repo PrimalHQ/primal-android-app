@@ -1,5 +1,6 @@
 package net.primal.wallet.data.repository.factory
 
+import net.primal.core.networking.nwc.LightningPayHelper
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.remote.factory.NwcApiServiceFactory
@@ -77,6 +78,7 @@ abstract class RepositoryFactory {
             ),
             tsunamiWalletService = WalletServiceFactoryImpl.createTsunamiWalletService(
                 tsunamiWalletSdk = tsunamiWalletSdk,
+                lightningPayHelper = LightningPayHelper(dispatcherProvider),
             ),
         )
     }

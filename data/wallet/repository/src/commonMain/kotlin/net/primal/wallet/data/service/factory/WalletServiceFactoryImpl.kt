@@ -1,5 +1,6 @@
 package net.primal.wallet.data.service.factory
 
+import net.primal.core.networking.nwc.LightningPayHelper
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.domain.events.EventRepository
 import net.primal.domain.lightning.LightningRepository
@@ -43,9 +44,10 @@ internal class WalletServiceFactoryImpl(
                 eventRepository = eventRepository,
             )
 
-        fun createTsunamiWalletService(tsunamiWalletSdk: TsunamiWalletSdk) =
+        fun createTsunamiWalletService(tsunamiWalletSdk: TsunamiWalletSdk, lightningPayHelper: LightningPayHelper) =
             TsunamiWalletServiceImpl(
                 tsunamiWalletSdk = tsunamiWalletSdk,
+                lightningPayHelper = lightningPayHelper,
             )
     }
 }
