@@ -1,8 +1,11 @@
 package net.primal.wallet.data.service
 
+import net.primal.core.networking.nwc.LightningPayHelper
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.MSATS_IN_SATS
 import net.primal.core.utils.Result
 import net.primal.core.utils.runCatching
+import net.primal.domain.nostr.utils.decodeLNUrlOrNull
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.TransactionsRequest
@@ -14,6 +17,7 @@ import net.primal.wallet.data.model.Transaction
 
 internal class TsunamiWalletServiceImpl(
     private val tsunamiWalletSdk: TsunamiWalletSdk,
+    private val lightningPayHelper: LightningPayHelper,
 ) : WalletService<Wallet.Tsunami> {
 
     override suspend fun fetchWalletBalance(wallet: Wallet.Tsunami): Result<WalletBalanceResult> =
@@ -65,6 +69,22 @@ internal class TsunamiWalletServiceImpl(
                 }
 
                 is TxRequest.Lightning.LnUrl -> {
+                    val lnUrlDecoded = request.lnUrl.decodeLNUrlOrNull()
+                    require(lnUrlDecoded != null)
+
+                    val lnInvoice = runCatching {
+                        val lnPayRequest = lightningPayHelper.fetchPayRequest(lnUrlDecoded)
+                        lightningPayHelper.fetchInvoice(
+                            payRequest = lnPayRequest,
+                            amountInMilliSats = request.amountSats.toULong() * MSATS_IN_SATS.toULong(),
+                            comment = request.noteRecipient ?: "",
+                        )
+                    }.getOrThrow()
+
+                    tsunamiWalletSdk.payInvoice(
+                        walletId = wallet.walletId,
+                        invoice = lnInvoice.pr,
+                    ).getOrThrow()
                 }
             }
         }
