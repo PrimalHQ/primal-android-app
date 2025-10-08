@@ -20,7 +20,7 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.LnInvoiceUtils
 
-class NwcZapHelper(
+class LightningPayHelper(
     private val dispatcherProvider: DispatcherProvider,
     private val httpClient: HttpClient = NwcClientFactory.nwcHttpClient,
 ) {
