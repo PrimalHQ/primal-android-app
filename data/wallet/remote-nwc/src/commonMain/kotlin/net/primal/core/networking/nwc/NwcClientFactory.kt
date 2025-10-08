@@ -8,14 +8,14 @@ object NwcClientFactory {
 
     internal val nwcHttpClient by lazy { HttpClientFactory.createHttpClientWithDefaultConfig() }
 
-    private fun create(nwcData: NostrWalletConnect, nwcZapHelper: NwcZapHelper?) =
+    private fun create(nwcData: NostrWalletConnect, lightningPayHelper: LightningPayHelper?) =
         NwcClientImpl(
             nwcData = nwcData,
-            nwcZapHelper = nwcZapHelper,
+            lightningPayHelper = lightningPayHelper,
         )
 
-    fun createNwcApiClient(nwcData: NostrWalletConnect): NwcApi = create(nwcData = nwcData, nwcZapHelper = null)
+    fun createNwcApiClient(nwcData: NostrWalletConnect): NwcApi = create(nwcData = nwcData, lightningPayHelper = null)
 
-    fun createNwcNostrZapper(nwcData: NostrWalletConnect, nwcZapHelper: NwcZapHelper): NostrZapper =
-        create(nwcData = nwcData, nwcZapHelper = nwcZapHelper)
+    fun createNwcNostrZapper(nwcData: NostrWalletConnect, lightningPayHelper: LightningPayHelper): NostrZapper =
+        create(nwcData = nwcData, lightningPayHelper = lightningPayHelper)
 }
