@@ -96,6 +96,10 @@ private fun StreamFallbackContent(
     val hasRecording = !state.streamInfo?.recordingUrl.isNullOrEmpty()
     val isFinished = state.playerState.isVideoFinished
 
+    val wasPlayingRecording = isFinished &&
+        !state.streamInfo?.recordingUrl.isNullOrEmpty() &&
+        state.streamInfo.streamUrl == state.streamInfo.recordingUrl
+
     Column(
         modifier = modifier
             .background(AppTheme.extraColorScheme.surfaceVariantAlt1)
@@ -104,8 +108,12 @@ private fun StreamFallbackContent(
         verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
     ) {
         Text(
-            text = if (state.playerState.isVideoFinished) {
-                stringResource(id = R.string.live_stream_stream_ended)
+            text = if (isFinished) {
+                if (wasPlayingRecording) {
+                    stringResource(id = R.string.live_stream_video_ended)
+                } else {
+                    stringResource(id = R.string.live_stream_stream_ended)
+                }
             } else {
                 stringResource(id = R.string.live_stream_recording_not_available)
             }.uppercase(),

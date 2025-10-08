@@ -26,6 +26,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toRect
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.recyclerview.widget.RecyclerView
@@ -82,6 +83,7 @@ fun ExpandedLiveStreamPlayer(
 
             if (streamUrl != null) {
                 mediaController.setMediaItem(buildMediaItem(state.naddr, streamUrl, state.streamInfo))
+                mediaController.repeatMode = Player.REPEAT_MODE_OFF
                 mediaController.prepare()
                 mediaController.playWhenReady = true
             }

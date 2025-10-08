@@ -73,6 +73,7 @@ import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.streams.Stream
 import net.primal.domain.streams.StreamContentModerationMode
 import net.primal.domain.streams.StreamRepository
 import net.primal.domain.streams.StreamStatus
@@ -496,9 +497,18 @@ class LiveStreamViewModel @AssistedInject constructor(
                 .collect { stream ->
                     val isLive = stream.isLive()
                     val isEnded = stream.resolvedStatus == StreamStatus.ENDED
-                    val streamUrlToPlay = if (isLive) stream.streamingUrl else null
+                    val currentStreamInfo = state.value.streamInfo
 
-                    if (authorObserversJob == null || state.value.streamInfo?.mainHostId != stream.mainHostId) {
+                    val streamUrlToPlay = determineStreamUrl(
+                        isLive = isLive,
+                        isEnded = isEnded,
+                        currentStreamInfo = currentStreamInfo,
+                        stream = stream,
+                    )
+
+                    val isVideoFinished = isEnded && streamUrlToPlay == null
+
+                    if (authorObserversJob == null || currentStreamInfo?.mainHostId != stream.mainHostId) {
                         initializeMainHostObservers(mainHostId = stream.mainHostId)
                     }
 
@@ -509,7 +519,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                             playerState = playerState.copy(
                                 isLive = isLive,
                                 atLiveEdge = isLive,
-                                isVideoFinished = isEnded,
+                                isVideoFinished = isVideoFinished,
                             ),
                             streamInfo = this.streamInfo?.copy(
                                 atag = stream.aTag,
@@ -541,6 +551,19 @@ class LiveStreamViewModel @AssistedInject constructor(
                     }
                 }
         }
+
+    private fun determineStreamUrl(
+        isLive: Boolean,
+        isEnded: Boolean,
+        currentStreamInfo: StreamInfoUi?,
+        stream: Stream,
+    ): String? {
+        return when {
+            currentStreamInfo == null -> if (isLive) stream.streamingUrl else stream.recordingUrl
+            currentStreamInfo.streamStatus == StreamStatus.LIVE && isEnded -> null
+            else -> currentStreamInfo.streamUrl
+        }
+    }
 
     private fun initializeMainHostObservers(mainHostId: String) {
         authorObserversJob?.cancel()
