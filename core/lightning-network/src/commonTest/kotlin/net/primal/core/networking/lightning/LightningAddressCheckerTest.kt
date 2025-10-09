@@ -1,4 +1,4 @@
-package net.primal.core.networking.nwc
+package net.primal.core.networking.lightning
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -12,6 +12,8 @@ import kotlin.test.assertFailsWith
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import net.primal.core.lightning.InvalidLud16Exception
+import net.primal.core.lightning.LightningAddressChecker
 import net.primal.core.utils.coroutines.DispatcherProvider
 
 class LightningAddressCheckerTest {

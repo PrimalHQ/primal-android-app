@@ -1,6 +1,6 @@
 package net.primal.wallet.data.service
 
-import net.primal.core.networking.nwc.LightningPayHelper
+import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.MSATS_IN_SATS
 import net.primal.core.utils.Result

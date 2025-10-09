@@ -1,4 +1,4 @@
-package net.primal.data.remote.api.lightning
+package net.primal.core.lightning.api
 
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Query

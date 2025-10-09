@@ -1,12 +1,10 @@
 package net.primal.core.networking.nwc
 
-import net.primal.core.networking.factory.HttpClientFactory
+import net.primal.core.lightning.LightningPayHelper
 import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.wallet.NostrWalletConnect
 
 object NwcClientFactory {
-
-    internal val nwcHttpClient by lazy { HttpClientFactory.createHttpClientWithDefaultConfig() }
 
     private fun create(nwcData: NostrWalletConnect, lightningPayHelper: LightningPayHelper?) =
         NwcClientImpl(

@@ -7,7 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.nostr.notary.NostrNotary
-import net.primal.core.networking.nwc.LightningAddressChecker
+import net.primal.core.lightning.LightningAddressChecker
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.zaps.NostrZapperFactory

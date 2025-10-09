@@ -2,7 +2,7 @@ package net.primal.core.networking.nwc
 
 import fr.acinq.secp256k1.Hex
 import kotlin.io.encoding.ExperimentalEncodingApi
-import net.primal.core.networking.nwc.model.NwcWalletRequest
+import net.primal.core.networking.nwc.nip47.NwcWalletRequest
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent

@@ -1,4 +1,4 @@
-package net.primal.core.networking.nwc
+package net.primal.core.lightning
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import io.github.aakira.napier.Napier
@@ -11,8 +11,9 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import kotlinx.coroutines.withContext
 import kotlinx.io.IOException
-import net.primal.core.networking.nwc.model.LightningPayRequest
-import net.primal.core.networking.nwc.model.LightningPayResponse
+import net.primal.core.lightning.factory.LightningApiServiceFactory
+import net.primal.core.lightning.model.LightningPayRequest
+import net.primal.core.lightning.model.LightningPayResponse
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.toLong
@@ -22,7 +23,7 @@ import net.primal.domain.nostr.utils.LnInvoiceUtils
 
 class LightningPayHelper(
     private val dispatcherProvider: DispatcherProvider,
-    private val httpClient: HttpClient = NwcClientFactory.nwcHttpClient,
+    private val httpClient: HttpClient = LightningApiServiceFactory.defaultHttpClient,
 ) {
     suspend fun fetchPayRequest(lnUrlDecoded: String): LightningPayRequest {
         val bodyString = withContext(dispatcherProvider.io()) {

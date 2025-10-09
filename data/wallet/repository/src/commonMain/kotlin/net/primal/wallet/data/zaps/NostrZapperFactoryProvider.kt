@@ -1,6 +1,6 @@
 package net.primal.wallet.data.zaps
 
-import net.primal.core.networking.nwc.LightningPayHelper
+import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
