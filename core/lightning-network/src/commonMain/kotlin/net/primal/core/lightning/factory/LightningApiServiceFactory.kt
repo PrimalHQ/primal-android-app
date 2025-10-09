@@ -1,13 +1,13 @@
-package net.primal.data.remote.factory
+package net.primal.core.lightning.factory
 
 import de.jensklingenberg.ktorfit.Ktorfit
+import net.primal.core.lightning.api.LightningApi
+import net.primal.core.lightning.api.createLightningApi
 import net.primal.core.networking.factory.HttpClientFactory
-import net.primal.data.remote.api.lightning.LightningApi
-import net.primal.data.remote.api.lightning.createLightningApi
 
-object NwcApiServiceFactory {
+object LightningApiServiceFactory {
 
-    private val defaultHttpClient = HttpClientFactory.createHttpClientWithDefaultConfig()
+    internal val defaultHttpClient = HttpClientFactory.createHttpClientWithDefaultConfig()
 
     fun createLightningApi(): LightningApi =
         Ktorfit.Builder()

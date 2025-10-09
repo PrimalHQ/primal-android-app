@@ -1,7 +1,7 @@
 package net.primal.wallet.data.zaps
 
 import io.github.aakira.napier.Napier
-import net.primal.core.networking.nwc.LightningPayHelper
+import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.utils.MSATS_IN_SATS
 import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.ZapError

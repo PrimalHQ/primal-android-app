@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.ktorfit)
 }
 
-private val xcfName = "PrimalDataWalletRemoteNwc"
+private val xcfName = "PrimalCoreLightingNetwork"
 
 kotlin {
     // Android target
@@ -38,9 +38,6 @@ kotlin {
             dependencies {
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-http"))
-                implementation(project(":core:networking-primal"))
-                implementation(project(":core:lightning-network"))
-                implementation(project(":domain:primal"))
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:wallet"))
 
@@ -57,6 +54,8 @@ kotlin {
                 implementation(libs.ktorfit.light)
                 implementation(libs.ktorfit.converters.response)
                 implementation(libs.ktorfit.converters.call)
+
+                implementation(libs.bignum)
             }
         }
 

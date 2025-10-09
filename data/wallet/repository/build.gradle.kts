@@ -36,6 +36,7 @@ kotlin {
                 implementation(project(":core:app-config"))
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-primal"))
+                implementation(project(":core:lightning-network"))
 
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
@@ -44,7 +45,6 @@ kotlin {
                 implementation(project(":data:wallet:local"))
                 implementation(project(":data:wallet:remote-primal"))
                 implementation(project(":data:wallet:remote-nwc"))
-
                 implementation(libs.primal.tsunami.sdk.kmp)
 
                 // Core
