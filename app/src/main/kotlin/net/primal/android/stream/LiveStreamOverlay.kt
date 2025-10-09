@@ -207,16 +207,6 @@ private fun LiveStreamAnimatedContent(
                         callbacks = callbacks,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this,
-                        onReplay = {
-                            mediaController.seekTo(0L)
-                            mediaController.play()
-                            viewModel.setEvent(UiEvent.OnReplayStream)
-                        },
-                        onRetry = {
-                            viewModel.setEvent(UiEvent.OnRetryStream)
-                            mediaController.prepare()
-                            mediaController.play()
-                        },
                     )
                 }
 
@@ -224,6 +214,7 @@ private fun LiveStreamAnimatedContent(
                     LiveStreamMiniPlayer(
                         state = uiState.value,
                         mediaController = mediaController,
+                        eventPublisher = viewModel::setEvent,
                         offsetX = offsetX,
                         offsetY = offsetY,
                         isAtTop = isAtTop,

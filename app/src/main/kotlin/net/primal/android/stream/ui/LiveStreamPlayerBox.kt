@@ -31,8 +31,10 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
+import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.stream.LiveStreamContract
+import net.primal.android.stream.LiveStreamContract.UiEvent
 import net.primal.android.theme.AppTheme
 
 @OptIn(UnstableApi::class)
@@ -40,13 +42,12 @@ import net.primal.android.theme.AppTheme
 fun LiveStreamPlayerBox(
     mediaController: MediaController,
     state: LiveStreamContract.UiState,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     modifier: Modifier = Modifier,
     playerModifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
     fallbackModifier: Modifier = Modifier,
     playerOverlay: @Composable () -> Unit = {},
-    onRetryClick: (() -> Unit)? = null,
-    onReplayClick: (() -> Unit)? = null,
 ) {
     val localConfiguration = LocalConfiguration.current
 
@@ -54,7 +55,7 @@ fun LiveStreamPlayerBox(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        val showPlayerSurface = !state.streamInfo?.streamUrl.isNullOrEmpty() &&
+        val showPlayerSurface = !state.streamInfo?.playbackUrl.isNullOrEmpty() &&
             !state.isStreamUnavailable &&
             !state.playerState.isVideoFinished
 
@@ -79,12 +80,36 @@ fun LiveStreamPlayerBox(
             StreamFallbackContent(
                 modifier = fallbackModifier.matchParentSize(),
                 state = state,
-                onRetryClick = onRetryClick,
-                onReplayClick = onReplayClick,
+                onReplayClick = {
+                    mediaController.seekTo(0L)
+                    mediaController.play()
+                    eventPublisher(UiEvent.OnReplayStream)
+                },
+                onRetryClick = {
+                    eventPublisher(UiEvent.OnRetryStream)
+                    mediaController.prepare()
+                    mediaController.play()
+                },
             )
         }
     }
 }
+
+private val ReplayButtonContainerColor: Color
+    @Composable
+    get() = if (LocalPrimalTheme.current.isDarkTheme) {
+        Color(0xFFFFFFFF)
+    } else {
+        Color(0xFF121212)
+    }
+
+private val ReplayButtonContentColor: Color
+    @Composable
+    get() = if (LocalPrimalTheme.current.isDarkTheme) {
+        Color(0xFF121212)
+    } else {
+        Color(0xFFFFFFFF)
+    }
 
 @Composable
 private fun StreamFallbackContent(
@@ -98,7 +123,7 @@ private fun StreamFallbackContent(
 
     val wasPlayingRecording = isFinished &&
         !state.streamInfo?.recordingUrl.isNullOrEmpty() &&
-        state.streamInfo.streamUrl == state.streamInfo.recordingUrl
+        state.streamInfo.playbackUrl == state.streamInfo.recordingUrl
 
     Column(
         modifier = modifier
@@ -132,8 +157,8 @@ private fun StreamFallbackContent(
                 onClick = onReplayClick,
                 shape = AppTheme.shapes.extraLarge,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.White,
-                    contentColor = Color.Black,
+                    containerColor = ReplayButtonContainerColor,
+                    contentColor = ReplayButtonContentColor,
                 ),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
             ) {

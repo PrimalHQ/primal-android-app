@@ -73,7 +73,6 @@ import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
-import net.primal.domain.streams.Stream
 import net.primal.domain.streams.StreamContentModerationMode
 import net.primal.domain.streams.StreamRepository
 import net.primal.domain.streams.StreamStatus
@@ -364,7 +363,7 @@ class LiveStreamViewModel @AssistedInject constructor(
             setState {
                 copy(
                     playerState = playerState.copy(isVideoFinished = false),
-                    streamInfo = this.streamInfo?.copy(streamUrl = recordingUrl),
+                    streamInfo = this.streamInfo?.copy(playbackUrl = recordingUrl),
                 )
             }
         }
@@ -499,15 +498,16 @@ class LiveStreamViewModel @AssistedInject constructor(
                     val isEnded = stream.resolvedStatus == StreamStatus.ENDED
                     val currentStreamInfo = state.value.streamInfo
 
-                    val streamUrlToPlay = determineStreamUrl(
+                    val nextPlaybackUrl = determinePlaybackUrl(
+                        currentStreamInfo = currentStreamInfo,
                         isLive = isLive,
                         isEnded = isEnded,
-                        currentStreamInfo = currentStreamInfo,
-                        stream = stream,
+                        newStreamingUrl = stream.streamingUrl,
+                        newRecordingUrl = stream.recordingUrl,
                     )
 
                     val isVideoFinished = state.value.playerState.isVideoFinished ||
-                        (isEnded && streamUrlToPlay == null)
+                        (isEnded && nextPlaybackUrl == null)
 
                     if (authorObserversJob == null || currentStreamInfo?.mainHostId != stream.mainHostId) {
                         initializeMainHostObservers(mainHostId = stream.mainHostId)
@@ -516,7 +516,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     setState {
                         copy(
                             streamInfoLoading = false,
-                            isStreamUnavailable = streamUrlToPlay == null && !isEnded,
+                            isStreamUnavailable = nextPlaybackUrl == null && !isEnded,
                             playerState = playerState.copy(
                                 isLive = isLive,
                                 atLiveEdge = isLive,
@@ -527,7 +527,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 streamStatus = stream.resolvedStatus,
                                 eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
-                                streamUrl = streamUrlToPlay,
+                                playbackUrl = nextPlaybackUrl,
                                 recordingUrl = stream.recordingUrl,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,
@@ -539,7 +539,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
                                 image = stream.imageUrl,
-                                streamUrl = streamUrlToPlay,
+                                playbackUrl = nextPlaybackUrl,
                                 recordingUrl = stream.recordingUrl,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,
@@ -553,16 +553,17 @@ class LiveStreamViewModel @AssistedInject constructor(
                 }
         }
 
-    private fun determineStreamUrl(
+    private fun determinePlaybackUrl(
+        currentStreamInfo: StreamInfoUi?,
         isLive: Boolean,
         isEnded: Boolean,
-        currentStreamInfo: StreamInfoUi?,
-        stream: Stream,
+        newStreamingUrl: String?,
+        newRecordingUrl: String?,
     ): String? {
         return when {
-            currentStreamInfo == null -> if (isLive) stream.streamingUrl else stream.recordingUrl
+            currentStreamInfo == null -> if (isLive) newStreamingUrl else newRecordingUrl
             currentStreamInfo.streamStatus == StreamStatus.LIVE && isEnded -> null
-            else -> currentStreamInfo.streamUrl
+            else -> currentStreamInfo.playbackUrl
         }
     }
 

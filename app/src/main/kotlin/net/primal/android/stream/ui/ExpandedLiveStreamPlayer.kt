@@ -54,6 +54,7 @@ fun ExpandedLiveStreamPlayer(
     menuVisible: Boolean,
     isCollapsed: Boolean,
     lookaheadScope: LookaheadScope,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onPlayPauseClick: () -> Unit,
     onClose: () -> Unit,
     onRewind: () -> Unit,
@@ -67,10 +68,8 @@ fun ExpandedLiveStreamPlayer(
     onReportContentClick: (ReportType) -> Unit,
     onRequestDeleteClick: () -> Unit,
     onToggleFullScreenClick: () -> Unit,
-    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     playerModifier: Modifier = Modifier,
-    onReplay: () -> Unit,
     loadingModifier: Modifier = Modifier,
 ) {
     KeepScreenOn(enabled = state.playerState.isPlaying)
@@ -102,6 +101,7 @@ fun ExpandedLiveStreamPlayer(
         mediaController = mediaController,
         lookaheadScope = lookaheadScope,
         controlsVisible = controlsVisible,
+        eventPublisher = eventPublisher,
         menuVisible = menuVisible,
         isCollapsed = isCollapsed,
         onClose = onClose,
@@ -117,8 +117,6 @@ fun ExpandedLiveStreamPlayer(
         onRequestDeleteClick = onRequestDeleteClick,
         onSoundClick = onSoundClick,
         onToggleFullScreenClick = onToggleFullScreenClick,
-        onReplay = onReplay,
-        onRetry = onRetry,
     )
 }
 
@@ -130,6 +128,7 @@ private fun PlayerBox(
     playerModifier: Modifier,
     loadingModifier: Modifier,
     state: LiveStreamContract.UiState,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     mediaController: MediaController,
     lookaheadScope: LookaheadScope,
     controlsVisible: Boolean,
@@ -148,8 +147,6 @@ private fun PlayerBox(
     onRequestDeleteClick: () -> Unit,
     onSoundClick: () -> Unit,
     onToggleFullScreenClick: () -> Unit,
-    onReplay: () -> Unit,
-    onRetry: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val localConfiguration = LocalConfiguration.current
@@ -199,6 +196,7 @@ private fun PlayerBox(
     LiveStreamPlayerBox(
         mediaController = mediaController,
         state = state,
+        eventPublisher = eventPublisher,
         modifier = modifier
             .then(boxSizingModifier)
             .background(playerBackgroundColor)
@@ -253,8 +251,6 @@ private fun PlayerBox(
                 )
             }
         },
-        onReplayClick = onReplay,
-        onRetryClick = onRetry,
     )
 }
 

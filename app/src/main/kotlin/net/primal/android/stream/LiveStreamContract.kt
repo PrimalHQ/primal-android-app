@@ -66,7 +66,7 @@ interface LiveStreamContract {
         val atag: String,
         val eventId: String,
         val title: String,
-        val streamUrl: String?,
+        val playbackUrl: String?,
         val recordingUrl: String?,
         val viewers: Int,
         val streamStatus: StreamStatus,

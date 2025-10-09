@@ -48,6 +48,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import kotlinx.coroutines.launch
@@ -83,6 +84,7 @@ private val springSpec = spring<Float>(
 fun LiveStreamMiniPlayer(
     modifier: Modifier = Modifier,
     mediaController: MediaController,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     offsetX: Animatable<Float, AnimationVector1D>,
     offsetY: Animatable<Float, AnimationVector1D>,
     isAtBottom: MutableState<Boolean>,
@@ -111,13 +113,14 @@ fun LiveStreamMiniPlayer(
     val statusBarHeight = WindowInsets.statusBars.getTop(localDensity)
     val paddingPx = with(localDensity) { PADDING.toPx() }
 
-    LaunchedEffect(mediaController, state.streamInfo?.streamUrl) {
-        val newStreamUrl = state.streamInfo?.streamUrl
+    LaunchedEffect(mediaController, state.streamInfo?.playbackUrl) {
+        val newStreamUrl = state.streamInfo?.playbackUrl
         if (newStreamUrl != null) {
             val currentMediaItem = mediaController.currentMediaItem
             val currentMediaItemUri = currentMediaItem?.localConfiguration?.uri?.toString()
             if (newStreamUrl != currentMediaItemUri) {
                 mediaController.setMediaItem(buildMediaItem(state.naddr, newStreamUrl, state.streamInfo))
+                mediaController.repeatMode = Player.REPEAT_MODE_OFF
                 mediaController.prepare()
                 mediaController.playWhenReady = true
             }
@@ -207,6 +210,7 @@ fun LiveStreamMiniPlayer(
                     LiveStreamPlayerBox(
                         mediaController = mediaController,
                         state = state,
+                        eventPublisher = eventPublisher,
                         modifier = Modifier
                             .clip(AppTheme.shapes.large)
                             .fillMaxSize(),
