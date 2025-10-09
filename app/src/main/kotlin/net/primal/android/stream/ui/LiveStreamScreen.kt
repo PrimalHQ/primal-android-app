@@ -252,8 +252,8 @@ private fun LiveStreamScaffold(
     var controlsVisible by remember { mutableStateOf(false) }
     var menuVisible by remember { mutableStateOf(false) }
 
-    LaunchedEffect(controlsVisible, menuVisible) {
-        if (controlsVisible && !menuVisible) {
+    LaunchedEffect(controlsVisible, menuVisible, state.playerState.isSeeking) {
+        if (controlsVisible && !menuVisible && !state.playerState.isSeeking) {
             delay(5.seconds)
             controlsVisible = false
         }
@@ -728,7 +728,7 @@ private fun StreamSeekBar(
 ) {
     AnimatedVisibility(
         modifier = modifier,
-        visible = isVisible && state.playerState.isPlaying,
+        visible = isVisible && state.shouldShowSeekBar,
         enter = fadeIn(),
         exit = fadeOut(),
     ) {
