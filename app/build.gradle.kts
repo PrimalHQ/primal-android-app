@@ -245,6 +245,7 @@ dependencies {
     implementation(project(":core:app-config"))
     implementation(project(":core:networking-primal"))
     implementation(project(":core:networking-upload"))
+    implementation(project(":core:lightning-network"))
 
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))
