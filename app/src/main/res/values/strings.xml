@@ -768,6 +768,12 @@
     <string name="asearch_filters_custom">Custom</string>
 
     <string name="wallet_title">Wallet</string>
+    <string name="wallet_picker_title">Wallets</string>
+    <string name="wallet_picker_configure_wallets">Configure</string>
+    <string name="wallet_primal_title">Primal</string>
+    <string name="wallet_primal_description">Built-in wallet</string>
+    <string name="wallet_nwc_title">NWC</string>
+    <string name="wallet_nwc_description">Your external lightning wallet</string>
 
     <string name="notifications_title">Notifications</string>
     <string name="notifications_no_content">Your notifications will appear here.</string>
