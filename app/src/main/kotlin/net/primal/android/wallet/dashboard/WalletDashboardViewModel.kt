@@ -8,6 +8,7 @@ import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,6 +37,7 @@ import net.primal.domain.billing.BillingRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.transactions.Transaction
+import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import timber.log.Timber
 
@@ -62,6 +64,8 @@ class WalletDashboardViewModel @Inject constructor(
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvents(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private var userWalletsObserveJob: Job? = null
+
     init {
         observeUsdExchangeRate()
         subscribeToEvents()
@@ -81,8 +85,24 @@ class WalletDashboardViewModel @Inject constructor(
                     UiEvent.RequestWalletBalanceUpdate -> state.value.wallet?.let { wallet ->
                         fetchWalletBalance(walletId = wallet.walletId)
                     }
+
+                    is UiEvent.ChangeActiveWallet -> changeActiveWallet(wallet = it.wallet)
                 }
             }
+        }
+
+    private fun observeUserWallets(userId: String) {
+        userWalletsObserveJob?.cancel()
+        userWalletsObserveJob = viewModelScope.launch {
+            walletAccountRepository
+                .observeWalletsByUser(userId = userId)
+                .collect { setState { copy(userWallets = it) } }
+        }
+    }
+
+    private fun changeActiveWallet(wallet: Wallet) =
+        viewModelScope.launch {
+            walletAccountRepository.setActiveWallet(userId = activeUserId, walletId = wallet.walletId)
         }
 
     private fun subscribeToActiveWalletId() =
@@ -119,6 +139,7 @@ class WalletDashboardViewModel @Inject constructor(
                         activeAccountBlossoms = it.blossomServers,
                     )
                 }
+                observeUserWallets(userId = it.pubkey)
             }
         }
 

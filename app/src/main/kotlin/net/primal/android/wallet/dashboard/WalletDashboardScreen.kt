@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -65,6 +67,7 @@ import net.primal.android.wallet.dashboard.ui.WalletAction
 import net.primal.android.wallet.dashboard.ui.WalletCallToActionBox
 import net.primal.android.wallet.dashboard.ui.WalletDashboard
 import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
+import net.primal.android.wallet.dashboard.ui.WalletPickerBottomSheet
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
 import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
 import net.primal.domain.utils.isConfigured
@@ -84,6 +87,7 @@ fun WalletDashboardScreen(
     onSendClick: () -> Unit,
     onScanClick: () -> Unit,
     onReceiveClick: () -> Unit,
+    onConfigureWalletsClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -111,6 +115,7 @@ fun WalletDashboardScreen(
         onSendClick = onSendClick,
         onScanClick = onScanClick,
         onReceiveClick = onReceiveClick,
+        onConfigureWalletsClick = onConfigureWalletsClick,
         eventPublisher = { viewModel.setEvents(it) },
         accountSwitcherCallbacks = accountSwitcherCallbacks,
     )
@@ -129,6 +134,7 @@ fun WalletDashboardScreen(
     onSendClick: () -> Unit,
     onScanClick: () -> Unit,
     onReceiveClick: () -> Unit,
+    onConfigureWalletsClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
@@ -137,6 +143,20 @@ fun WalletDashboardScreen(
 
     val pagingItems = state.transactions.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
+
+    val canShowWalletPicker = state.userWallets.isNotEmpty() && state.userWallets.size > 1 && state.wallet != null
+    var walletPickerVisible by remember { mutableStateOf(false) }
+    if (walletPickerVisible && canShowWalletPicker) {
+        WalletPickerBottomSheet(
+            wallets = state.userWallets,
+            activeWallet = state.wallet,
+            onDismissRequest = { walletPickerVisible = false },
+            onConfigureWalletsClick = onConfigureWalletsClick,
+            onActiveWalletChanged = {
+                eventPublisher(UiEvent.ChangeActiveWallet(it))
+            },
+        )
+    }
 
     var inAppPurchaseVisible by remember { mutableStateOf(false) }
     if (inAppPurchaseVisible) {
@@ -200,10 +220,20 @@ fun WalletDashboardScreen(
         topAppBar = { scrollBehaviour ->
             PrimalTopAppBar(
                 modifier = Modifier.onSizeChanged { topBarHeight = it.height },
-                title = stringResource(id = R.string.wallet_title),
+                title = when (state.wallet) {
+                    is Wallet.NWC -> stringResource(id = R.string.wallet_nwc_title)
+                    is Wallet.Primal -> stringResource(id = R.string.wallet_primal_title)
+                    null -> stringResource(id = R.string.wallet_title)
+                },
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 legendaryCustomization = state.activeAccountLegendaryCustomization,
                 avatarBlossoms = state.activeAccountBlossoms,
+                titleTrailingIcon = if (canShowWalletPicker) {
+                    Icons.Default.ExpandMore
+                } else {
+                    null
+                },
+                onTitleClick = { walletPickerVisible = true },
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }

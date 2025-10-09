@@ -41,7 +41,7 @@ import net.primal.android.settings.zaps.ZapSettingsViewModel
 
 private fun NavController.navigateToAccountSettings() = navigate(route = "account_settings")
 private fun NavController.navigateToNetworkSettings() = navigate(route = "network")
-private fun NavController.navigateToWalletSettings() = navigate(route = "wallet_settings")
+fun NavController.navigateToWalletSettings() = navigate(route = "wallet_settings")
 private fun NavController.navigateToWalletScanNwcUrl() = navigate(route = "wallet_settings/scan_nwc_url")
 
 private fun NavController.navigateToCreateNewWalletConnection() = navigate(route = "wallet_settings/create_new_nwc")
