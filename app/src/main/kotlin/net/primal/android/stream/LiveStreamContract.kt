@@ -45,7 +45,10 @@ interface LiveStreamContract {
         val isStreamUnavailable: Boolean = false,
         val showStreamControlPopup: Boolean = false,
         val activeBottomSheet: ActiveBottomSheet = ActiveBottomSheet.None,
-    )
+    ) {
+        val shouldShowSeekBar: Boolean get() =
+            !playerState.isVideoFinished && !isStreamUnavailable
+    }
 
     data class PlayerState(
         val isPlaying: Boolean = false,
