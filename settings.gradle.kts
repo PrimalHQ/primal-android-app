@@ -24,7 +24,7 @@ include(":app")
 
 include(":core:utils")
 include(":core:app-config")
-include(":core:lightning-network")
+include(":core:networking-lightning")
 include(":core:networking-http")
 include(":core:networking-primal")
 include(":core:networking-upload")

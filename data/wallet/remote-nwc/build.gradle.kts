@@ -39,7 +39,7 @@ kotlin {
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-http"))
                 implementation(project(":core:networking-primal"))
-                implementation(project(":core:lightning-network"))
+                implementation(project(":core:networking-lightning"))
                 implementation(project(":domain:primal"))
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:wallet"))
