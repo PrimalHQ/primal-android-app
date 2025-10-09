@@ -157,7 +157,7 @@ internal class NwcClientImpl(
                 nwc = nwcData,
                 request = NwcWalletRequest(
                     method = "pay_invoice",
-                    params = PayInvoiceParams(invoice = invoice.pr),
+                    params = PayInvoiceParams(invoice = invoice.invoice),
                 ),
             ).unwrapOrThrow()
         }.getOrElse {

@@ -42,7 +42,7 @@ class TsunamiWalletNostrZapper(
                     amountSats = data.zapAmountInSats.toString(),
                     noteRecipient = null,
                     noteSelf = null,
-                    lnInvoice = invoice.pr,
+                    lnInvoice = invoice.invoice,
                 ),
             )
         }.getOrElse {
