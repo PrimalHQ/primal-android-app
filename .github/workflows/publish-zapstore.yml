@@ -1,11 +1,8 @@
-name: 'Manual: Publish to Zapstore'
+name: 'Manual: Publish latest release to Zapstore'
 
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'The git tag or ref to publish'
-        required: true
       zapstore-version:
         description: 'Zapstore CLI version to be used to publish the event'
         required: true
@@ -15,11 +12,6 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out at specified tag
-        uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.inputs.tag }}
-
       - name: Install SQLite dependency
         run: sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev
 
