@@ -392,7 +392,6 @@ private fun LiveStreamBottomSheet(
 private fun StreamPlayer(
     state: LiveStreamContract.UiState,
     isCollapsed: Boolean,
-    streamInfo: LiveStreamContract.StreamInfoUi,
     mediaController: MediaController,
     controlsVisible: Boolean,
     menuVisible: Boolean,
@@ -435,7 +434,7 @@ private fun StreamPlayer(
             state = state,
             eventPublisher = eventPublisher,
             mediaController = mediaController,
-            streamUrl = streamInfo.playbackUrl,
+            playbackUrl = state.playbackUrl,
             controlsVisible = controlsVisible,
             menuVisible = menuVisible,
             isCollapsed = isCollapsed,
@@ -579,7 +578,6 @@ private fun LiveStreamContent(
                         StreamPlayer(
                             state = state,
                             isCollapsed = isCollapsed,
-                            streamInfo = streamInfo,
                             mediaController = mediaController,
                             controlsVisible = controlsVisible,
                             menuVisible = menuVisible,

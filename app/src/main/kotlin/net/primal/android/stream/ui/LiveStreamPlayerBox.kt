@@ -55,7 +55,7 @@ fun LiveStreamPlayerBox(
         modifier = modifier,
         contentAlignment = Alignment.Center,
     ) {
-        val showPlayerSurface = !state.streamInfo?.playbackUrl.isNullOrEmpty() &&
+        val showPlayerSurface = !state.playbackUrl.isNullOrEmpty() &&
             !state.isStreamUnavailable &&
             !state.playerState.isVideoFinished
 
@@ -123,7 +123,7 @@ private fun StreamFallbackContent(
 
     val wasPlayingRecording = isFinished &&
         !state.streamInfo?.recordingUrl.isNullOrEmpty() &&
-        state.streamInfo.playbackUrl == state.streamInfo.recordingUrl
+        state.playbackUrl == state.streamInfo.recordingUrl
 
     Column(
         modifier = modifier

@@ -113,8 +113,8 @@ fun LiveStreamMiniPlayer(
     val statusBarHeight = WindowInsets.statusBars.getTop(localDensity)
     val paddingPx = with(localDensity) { PADDING.toPx() }
 
-    LaunchedEffect(mediaController, state.streamInfo?.playbackUrl) {
-        val newStreamUrl = state.streamInfo?.playbackUrl
+    LaunchedEffect(mediaController, state.playbackUrl) {
+        val newStreamUrl = state.playbackUrl
         if (newStreamUrl != null) {
             val currentMediaItem = mediaController.currentMediaItem
             val currentMediaItemUri = currentMediaItem?.localConfiguration?.uri?.toString()

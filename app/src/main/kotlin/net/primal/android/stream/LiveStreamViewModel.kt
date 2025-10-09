@@ -363,7 +363,7 @@ class LiveStreamViewModel @AssistedInject constructor(
             setState {
                 copy(
                     playerState = playerState.copy(isVideoFinished = false),
-                    streamInfo = this.streamInfo?.copy(playbackUrl = recordingUrl),
+                    playbackUrl = recordingUrl,
                 )
             }
         }
@@ -500,6 +500,7 @@ class LiveStreamViewModel @AssistedInject constructor(
 
                     val nextPlaybackUrl = determinePlaybackUrl(
                         currentStreamInfo = currentStreamInfo,
+                        currentPlaybackUrl = state.value.playbackUrl,
                         isLive = isLive,
                         isEnded = isEnded,
                         newStreamingUrl = stream.streamingUrl,
@@ -517,6 +518,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                         copy(
                             streamInfoLoading = false,
                             isStreamUnavailable = nextPlaybackUrl == null && !isEnded,
+                            playbackUrl = nextPlaybackUrl,
                             playerState = playerState.copy(
                                 isLive = isLive,
                                 atLiveEdge = isLive,
@@ -527,7 +529,6 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 streamStatus = stream.resolvedStatus,
                                 eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
-                                playbackUrl = nextPlaybackUrl,
                                 recordingUrl = stream.recordingUrl,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,
@@ -539,7 +540,6 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
                                 image = stream.imageUrl,
-                                playbackUrl = nextPlaybackUrl,
                                 recordingUrl = stream.recordingUrl,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,
@@ -555,6 +555,7 @@ class LiveStreamViewModel @AssistedInject constructor(
 
     private fun determinePlaybackUrl(
         currentStreamInfo: StreamInfoUi?,
+        currentPlaybackUrl: String?,
         isLive: Boolean,
         isEnded: Boolean,
         newStreamingUrl: String?,
@@ -563,7 +564,7 @@ class LiveStreamViewModel @AssistedInject constructor(
         return when {
             currentStreamInfo == null -> if (isLive) newStreamingUrl else newRecordingUrl
             currentStreamInfo.streamStatus == StreamStatus.LIVE && isEnded -> null
-            else -> currentStreamInfo.playbackUrl
+            else -> currentPlaybackUrl
         }
     }
 

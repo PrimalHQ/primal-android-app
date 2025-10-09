@@ -49,7 +49,7 @@ import net.primal.domain.nostr.ReportType
 fun ExpandedLiveStreamPlayer(
     state: LiveStreamContract.UiState,
     mediaController: MediaController,
-    streamUrl: String?,
+    playbackUrl: String?,
     controlsVisible: Boolean,
     menuVisible: Boolean,
     isCollapsed: Boolean,
@@ -74,14 +74,14 @@ fun ExpandedLiveStreamPlayer(
 ) {
     KeepScreenOn(enabled = state.playerState.isPlaying)
 
-    LaunchedEffect(streamUrl) {
+    LaunchedEffect(playbackUrl) {
         val currentMediaItemUri = mediaController.currentMediaItem?.localConfiguration?.uri?.toString()
 
-        if (currentMediaItemUri != streamUrl) {
+        if (currentMediaItemUri != playbackUrl) {
             mediaController.stop()
 
-            if (streamUrl != null) {
-                mediaController.setMediaItem(buildMediaItem(state.naddr, streamUrl, state.streamInfo))
+            if (playbackUrl != null) {
+                mediaController.setMediaItem(buildMediaItem(state.naddr, playbackUrl, state.streamInfo))
                 mediaController.repeatMode = Player.REPEAT_MODE_OFF
                 mediaController.prepare()
                 mediaController.playWhenReady = true
