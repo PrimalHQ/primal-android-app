@@ -11,7 +11,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.URLBuilder
 import kotlinx.coroutines.withContext
 import kotlinx.io.IOException
-import net.primal.core.lightning.factory.LightningApiServiceFactory
 import net.primal.core.lightning.model.LightningPayRequest
 import net.primal.core.lightning.model.LightningPayResponse
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -20,14 +19,21 @@ import net.primal.core.utils.toLong
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.LnInvoiceUtils
+import net.primal.domain.nostr.utils.decodeLNUrlOrNull
 
 class LightningPayHelper(
     private val dispatcherProvider: DispatcherProvider,
-    private val httpClient: HttpClient = LightningApiServiceFactory.defaultHttpClient,
+    private val httpClient: HttpClient = LightningHttpClient.defaultHttpClient,
 ) {
-    suspend fun fetchPayRequest(lnUrlDecoded: String): LightningPayRequest {
+    suspend fun fetchPayRequest(lnUrl: String): LightningPayRequest {
+        val decodedLnUrl = if (lnUrl.startsWith("http://") || lnUrl.startsWith("https://")) {
+            lnUrl
+        } else {
+            lnUrl.decodeLNUrlOrNull()
+        } ?: throw IllegalArgumentException("Couldn't decode '$lnUrl'.")
+
         val bodyString = withContext(dispatcherProvider.io()) {
-            httpClient.get(lnUrlDecoded) {
+            httpClient.get(decodedLnUrl) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
             }.bodyAsText()
         }
@@ -55,7 +61,7 @@ class LightningPayHelper(
             parameters.append("amount", amountInMilliSats.toString())
 
             val maxComment = payRequest.commentAllowed
-            if (maxComment != null && comment.isNotBlank()) {
+            if (maxComment > 0 && comment.isNotBlank()) {
                 parameters.append("comment", comment.take(maxComment))
             }
         }.buildString()
@@ -67,7 +73,7 @@ class LightningPayHelper(
         val decoded = bodyString.decodeFromJsonStringOrNull<LightningPayResponse>()
             ?: throw IOException("Invalid invoice response (bad JSON).\n$bodyString")
 
-        val invoiceMilliSats = decoded.pr.extractInvoiceAmountInMilliSats()
+        val invoiceMilliSats = decoded.invoice.extractInvoiceAmountInMilliSats()
         val requestedMilliSats = amountInMilliSats.toLong()
         if (invoiceMilliSats != requestedMilliSats) {
             throw IOException("Invoice amount mismatch ($invoiceMilliSats ≠ $requestedMilliSats).")

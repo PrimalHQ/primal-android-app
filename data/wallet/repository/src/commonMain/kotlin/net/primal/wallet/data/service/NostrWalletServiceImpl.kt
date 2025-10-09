@@ -3,6 +3,7 @@ package net.primal.wallet.data.service
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.serialization.json.jsonObject
+import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.networking.nwc.NwcClientFactory
 import net.primal.core.networking.nwc.nip47.ListTransactionsParams
 import net.primal.core.networking.nwc.nip47.LookupInvoiceResponsePayload
@@ -19,7 +20,6 @@ import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.events.EventRepository
-import net.primal.domain.lightning.LightningRepository
 import net.primal.domain.nostr.InvoiceType
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstProfileId
@@ -37,8 +37,8 @@ import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.repository.mappers.remote.toNostrEntity
 
 internal class NostrWalletServiceImpl(
-    private val lightningRepository: LightningRepository,
     private val eventRepository: EventRepository,
+    private val lightningPayHelper: LightningPayHelper,
 ) : WalletService<Wallet.NWC> {
     override suspend fun fetchWalletBalance(wallet: Wallet.NWC): Result<WalletBalanceResult> =
         runCatching {
@@ -144,12 +144,12 @@ internal class NostrWalletServiceImpl(
 
             val client = createNwcApiClient(wallet = wallet)
 
-            val amountMSats = request.amountSats.toLong().satsToMSats()
+            val amountInMilliSats = request.amountSats.toLong().satsToMSats().toULong()
             val lnInvoice = when (request) {
                 is TxRequest.Lightning.LnInvoice -> request.lnInvoice
                 is TxRequest.Lightning.LnUrl -> resolveLnInvoice(
                     lnUrl = request.lnUrl,
-                    amountMSats = amountMSats,
+                    amountInMilliSats = amountInMilliSats,
                     comment = request.noteRecipient,
                 ).getOrThrow()
             }
@@ -157,27 +157,25 @@ internal class NostrWalletServiceImpl(
             return client.payInvoice(
                 params = PayInvoiceParams(
                     invoice = lnInvoice,
-                    amount = amountMSats,
+                    amount = amountInMilliSats.toLong(),
                 ),
             ).map { }
         }
 
     private suspend fun resolveLnInvoice(
         lnUrl: String,
-        amountMSats: Long,
+        amountInMilliSats: ULong,
         comment: String?,
     ): Result<String> =
-        lightningRepository.getPayRequest(lnUrl = lnUrl)
-            .mapCatching {
-                lightningRepository
-                    .getInvoice(
-                        callbackUrl = it.callback,
-                        amountMSats = amountMSats,
-                        comment = comment?.take(it.commentAllowed)?.ifBlank { null },
-                    )
-                    .getOrThrow()
-            }
-            .map { it.invoice }
+        runCatching {
+            lightningPayHelper.fetchPayRequest(lnUrl = lnUrl)
+        }.mapCatching {
+            lightningPayHelper.fetchInvoice(
+                payRequest = it,
+                amountInMilliSats = amountInMilliSats,
+                comment = comment?.take(it.commentAllowed) ?: "",
+            )
+        }.map { it.invoice }
 
     private fun LookupInvoiceResponsePayload.resolveState(): TxState =
         when {

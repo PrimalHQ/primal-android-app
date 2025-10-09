@@ -9,9 +9,9 @@ data class LightningPayRequest(
     val minSendable: ULong,
     val maxSendable: ULong,
     val tag: String,
+    val commentAllowed: Int = 0,
     val allowsNostr: Boolean? = null,
     val nostrPubkey: String? = null,
-    val commentAllowed: Int? = null,
     val disposable: Boolean? = null,
     val payerData: PayerData? = null,
 )

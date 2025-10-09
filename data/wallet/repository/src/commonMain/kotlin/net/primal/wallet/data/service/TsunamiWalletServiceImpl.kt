@@ -83,7 +83,7 @@ internal class TsunamiWalletServiceImpl(
 
                     tsunamiWalletSdk.payInvoice(
                         walletId = wallet.walletId,
-                        invoice = lnInvoice.pr,
+                        invoice = lnInvoice.invoice,
                     ).getOrThrow()
                 }
             }
