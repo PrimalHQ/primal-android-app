@@ -1,15 +1,16 @@
-package net.primal.core.networking.nwc
+package net.primal.core.lightning
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import kotlinx.coroutines.withContext
 import kotlinx.io.IOException
+import net.primal.core.lightning.factory.LightningApiServiceFactory
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 
 class LightningAddressChecker(
     private val dispatcherProvider: DispatcherProvider,
-    private val httpClient: HttpClient = NwcClientFactory.nwcHttpClient,
+    private val httpClient: HttpClient = LightningApiServiceFactory.defaultHttpClient,
 ) {
 
     private fun String.parseAsLnUrlOrThrow(): String {

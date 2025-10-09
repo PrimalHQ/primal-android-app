@@ -1,10 +1,10 @@
 package net.primal.wallet.data.lightning
 
 import kotlinx.coroutines.withContext
+import net.primal.core.lightning.api.LightningApi
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
-import net.primal.data.remote.api.lightning.LightningApi
 import net.primal.domain.lightning.LightningRepository
 import net.primal.domain.lightning.model.InvoiceResponse
 import net.primal.domain.lightning.model.PayRequest

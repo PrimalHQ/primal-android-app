@@ -1,9 +1,9 @@
 package net.primal.wallet.data.repository.factory
 
-import net.primal.core.networking.nwc.LightningPayHelper
+import net.primal.core.lightning.LightningPayHelper
+import net.primal.core.lightning.factory.LightningApiServiceFactory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
-import net.primal.data.remote.factory.NwcApiServiceFactory
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
@@ -72,7 +72,7 @@ abstract class RepositoryFactory {
             nostrWalletService = WalletServiceFactoryImpl.createNostrWalletService(
                 lightningRepository = LightningRepositoryImpl(
                     dispatcherProvider = dispatcherProvider,
-                    lightningApi = NwcApiServiceFactory.createLightningApi(),
+                    lightningApi = LightningApiServiceFactory.createLightningApi(),
                 ),
                 eventRepository = eventRepository,
             ),

@@ -12,7 +12,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
-import net.primal.core.networking.nwc.model.NwcWalletRequest
+import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
 import net.primal.core.networking.nwc.nip47.ListTransactionsParams
@@ -23,6 +23,7 @@ import net.primal.core.networking.nwc.nip47.MakeInvoiceParams
 import net.primal.core.networking.nwc.nip47.MakeInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.nip47.NwcResponseContent
+import net.primal.core.networking.nwc.nip47.NwcWalletRequest
 import net.primal.core.networking.nwc.nip47.PayInvoiceParams
 import net.primal.core.networking.nwc.nip47.PayInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.PayKeysendParams
@@ -154,7 +155,10 @@ internal class NwcClientImpl(
         val nostrEvent = runCatching {
             signNwcRequestNostrEvent(
                 nwc = nwcData,
-                request = invoice.toWalletPayRequest(),
+                request = NwcWalletRequest(
+                    method = "pay_invoice",
+                    params = PayInvoiceParams(invoice = invoice.pr),
+                ),
             ).unwrapOrThrow()
         }.getOrElse {
             Napier.e(it) { "FailedToSignEvent." }
