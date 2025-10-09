@@ -1,7 +1,6 @@
 package net.primal.wallet.data.repository.factory
 
 import net.primal.core.lightning.LightningPayHelper
-import net.primal.core.lightning.factory.LightningApiServiceFactory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.account.PrimalWalletAccountRepository
@@ -15,7 +14,6 @@ import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.domain.rates.fees.TransactionFeeRepository
 import net.primal.domain.wallet.WalletRepository
 import net.primal.tsunami.createTsunamiWalletSdk
-import net.primal.wallet.data.lightning.LightningRepositoryImpl
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.repository.BillingRepositoryImpl
@@ -30,6 +28,8 @@ import net.primal.wallet.data.service.factory.WalletServiceFactoryImpl
 abstract class RepositoryFactory {
 
     private val dispatcherProvider = createDispatcherProvider()
+
+    private val lightningPayHelper = LightningPayHelper(dispatcherProvider)
 
     private val tsunamiWalletSdk = createTsunamiWalletSdk(
         dispatcher = dispatcherProvider.io(),
@@ -70,15 +70,12 @@ abstract class RepositoryFactory {
                 nostrEventSignatureHandler = nostrEventSignatureHandler,
             ),
             nostrWalletService = WalletServiceFactoryImpl.createNostrWalletService(
-                lightningRepository = LightningRepositoryImpl(
-                    dispatcherProvider = dispatcherProvider,
-                    lightningApi = LightningApiServiceFactory.createLightningApi(),
-                ),
                 eventRepository = eventRepository,
+                lightningPayHelper = lightningPayHelper,
             ),
             tsunamiWalletService = WalletServiceFactoryImpl.createTsunamiWalletService(
                 tsunamiWalletSdk = tsunamiWalletSdk,
-                lightningPayHelper = LightningPayHelper(dispatcherProvider),
+                lightningPayHelper = lightningPayHelper,
             ),
         )
     }
