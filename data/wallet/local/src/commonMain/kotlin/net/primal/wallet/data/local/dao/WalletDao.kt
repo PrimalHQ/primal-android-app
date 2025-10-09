@@ -31,6 +31,9 @@ interface WalletDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrIgnoreWalletInfo(info: WalletInfo)
 
+    @Query("SELECT * FROM WalletInfo WHERE userId = :userId")
+    fun observeWalletsByUserId(userId: Encryptable<String>): Flow<List<Wallet>>
+
     @Query("UPDATE WalletInfo SET lightningAddress = :lightningAddress WHERE walletId = :walletId")
     suspend fun updateWalletLightningAddress(walletId: String, lightningAddress: Encryptable<String>?)
 

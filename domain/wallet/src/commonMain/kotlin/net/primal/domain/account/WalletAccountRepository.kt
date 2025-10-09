@@ -12,6 +12,8 @@ interface WalletAccountRepository {
 
     suspend fun clearActiveWallet(userId: String)
 
+    fun observeWalletsByUser(userId: String): Flow<List<Wallet>>
+
     suspend fun findLastUsedNostrWallet(userId: String): Wallet?
 
     suspend fun getActiveWallet(userId: String): Wallet?

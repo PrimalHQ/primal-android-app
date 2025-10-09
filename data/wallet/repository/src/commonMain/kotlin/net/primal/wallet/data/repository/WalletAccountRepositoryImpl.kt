@@ -53,6 +53,11 @@ class WalletAccountRepositoryImpl(
             walletDatabase.wallet().clearActiveWallet(userId = userId)
         }
 
+    override fun observeWalletsByUser(userId: String): Flow<List<Wallet>> =
+        walletDatabase.wallet()
+            .observeWalletsByUserId(userId = userId.asEncryptable())
+            .map { list -> list.map { it.toDomain() } }
+
     override suspend fun getActiveWallet(userId: String): Wallet? =
         withContext(dispatcherProvider.io()) {
             walletDatabase.wallet().getActiveWallet(userId = userId)?.toDomain()
