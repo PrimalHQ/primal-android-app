@@ -506,7 +506,8 @@ class LiveStreamViewModel @AssistedInject constructor(
                         stream = stream,
                     )
 
-                    val isVideoFinished = isEnded && streamUrlToPlay == null
+                    val isVideoFinished = state.value.playerState.isVideoFinished ||
+                        (isEnded && streamUrlToPlay == null)
 
                     if (authorObserversJob == null || currentStreamInfo?.mainHostId != stream.mainHostId) {
                         initializeMainHostObservers(mainHostId = stream.mainHostId)
