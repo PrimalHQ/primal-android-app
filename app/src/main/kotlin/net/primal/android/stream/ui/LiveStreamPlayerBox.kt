@@ -31,7 +31,6 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.LiveStreamContract.UiEvent
@@ -95,22 +94,6 @@ fun LiveStreamPlayerBox(
     }
 }
 
-private val ReplayButtonContainerColor: Color
-    @Composable
-    get() = if (LocalPrimalTheme.current.isDarkTheme) {
-        Color(0xFFFFFFFF)
-    } else {
-        AppTheme.colorScheme.onSurface
-    }
-
-private val ReplayButtonContentColor: Color
-    @Composable
-    get() = if (LocalPrimalTheme.current.isDarkTheme) {
-        Color(0xFF121212)
-    } else {
-        AppTheme.extraColorScheme.surfaceVariantAlt2
-    }
-
 @Composable
 private fun StreamFallbackContent(
     modifier: Modifier = Modifier,
@@ -157,8 +140,8 @@ private fun StreamFallbackContent(
                 onClick = onReplayClick,
                 shape = AppTheme.shapes.extraLarge,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = ReplayButtonContainerColor,
-                    contentColor = ReplayButtonContentColor,
+                    containerColor = AppTheme.colorScheme.onSurface,
+                    contentColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
                 ),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
             ) {
