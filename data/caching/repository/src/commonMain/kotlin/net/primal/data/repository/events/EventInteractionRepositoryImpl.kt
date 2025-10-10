@@ -20,8 +20,6 @@ import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapRequestData
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
-import net.primal.domain.nostr.zaps.lnUrlDecoded
-import net.primal.domain.nostr.zaps.userId
 import net.primal.domain.publisher.PrimalPublisher
 
 class EventInteractionRepositoryImpl(
@@ -137,7 +135,6 @@ class EventInteractionRepositoryImpl(
         target: ZapTarget,
         zapRequestEvent: NostrEvent,
     ): ZapResult {
-        val targetLnUrlDecoded = target.lnUrlDecoded()
         val statsUpdater = target.buildPostStatsUpdaterIfApplicable(userId = userId)
 
         statsUpdater?.increaseZapStats(
@@ -151,8 +148,8 @@ class EventInteractionRepositoryImpl(
         val result = nostrZapper.zap(
             data = ZapRequestData(
                 zapperUserId = userId,
-                targetUserId = target.userId(),
-                lnUrlDecoded = targetLnUrlDecoded,
+                recipientUserId = target.recipientUserId,
+                recipientLnUrlDecoded = target.recipientLnUrlDecoded,
                 zapAmountInSats = amountInSats,
                 zapComment = comment,
                 userZapRequestEvent = zapRequestEvent,
@@ -177,14 +174,14 @@ class EventInteractionRepositoryImpl(
             is ZapTarget.Event -> EventStatsUpdater(
                 userId = userId,
                 eventId = this.eventId,
-                eventAuthorId = this.eventAuthorId,
+                eventAuthorId = this.recipientUserId,
                 database = database,
             )
 
             is ZapTarget.ReplaceableEvent -> EventStatsUpdater(
                 userId = userId,
                 eventId = this.eventId,
-                eventAuthorId = this.eventAuthorId,
+                eventAuthorId = this.recipientUserId,
                 database = database,
             )
 

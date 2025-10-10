@@ -183,8 +183,8 @@ class ProfileDetailsViewModel @Inject constructor(
             userId = activeAccountStore.activeUserId(),
             walletId = walletId,
             target = ZapTarget.Profile(
-                profileId = profileId,
-                profileLnUrlDecoded = profileLnUrlDecoded,
+                recipientUserId = profileId,
+                recipientLnUrlDecoded = profileLnUrlDecoded,
             ),
             amountInSats = zapAmount,
             comment = zapDescription,

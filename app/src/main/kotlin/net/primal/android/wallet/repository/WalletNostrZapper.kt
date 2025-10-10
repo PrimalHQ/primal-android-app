@@ -27,8 +27,8 @@ class WalletNostrZapper @Inject constructor(
                     userId = data.zapperUserId,
                     body = WithdrawRequestBody(
                         subWallet = SubWallet.Open,
-                        targetLnUrl = data.lnUrlDecoded.urlToLnUrlHrp(),
-                        targetPubKey = data.targetUserId,
+                        targetLnUrl = data.recipientLnUrlDecoded.urlToLnUrlHrp(),
+                        targetPubKey = data.recipientUserId,
                         amountBtc = data.zapAmountInSats.toBtc().formatAsString(),
                         noteRecipient = data.zapComment.ifBlank { null },
                         noteSelf = data.zapComment.ifBlank { null },

@@ -5,58 +5,51 @@ import net.primal.domain.nostr.asEventIdTag
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.asReplaceableEventTag
 
-sealed class ZapTarget {
+sealed class ZapTarget(
+    open val recipientUserId: String,
+    open val recipientLnUrlDecoded: String,
+) {
     data class Profile(
-        val profileId: String,
-        val profileLnUrlDecoded: String,
-    ) : ZapTarget()
+        override val recipientUserId: String,
+        override val recipientLnUrlDecoded: String,
+    ) : ZapTarget(
+        recipientUserId = recipientUserId,
+        recipientLnUrlDecoded = recipientLnUrlDecoded,
+    )
 
     data class Event(
         val eventId: String,
-        val eventAuthorId: String,
-        val eventAuthorLnUrlDecoded: String,
-    ) : ZapTarget()
+        override val recipientUserId: String,
+        override val recipientLnUrlDecoded: String,
+    ) : ZapTarget(
+        recipientUserId = recipientUserId,
+        recipientLnUrlDecoded = recipientLnUrlDecoded,
+    )
 
     data class ReplaceableEvent(
-        val kind: Int,
-        val identifier: String,
+        val naddr: String,
         val eventId: String,
-        val eventAuthorId: String,
-        val eventAuthorLnUrlDecoded: String,
-    ) : ZapTarget()
-}
-
-fun ZapTarget.userId(): String {
-    return when (this) {
-        is ZapTarget.Event -> this.eventAuthorId
-        is ZapTarget.Profile -> this.profileId
-        is ZapTarget.ReplaceableEvent -> this.eventAuthorId
-    }
-}
-
-fun ZapTarget.lnUrlDecoded(): String {
-    return when (this) {
-        is ZapTarget.Event -> this.eventAuthorLnUrlDecoded
-        is ZapTarget.Profile -> this.profileLnUrlDecoded
-        is ZapTarget.ReplaceableEvent -> this.eventAuthorLnUrlDecoded
-    }
+        override val recipientUserId: String,
+        override val recipientLnUrlDecoded: String,
+    ) : ZapTarget(
+        recipientUserId = recipientUserId,
+        recipientLnUrlDecoded = recipientLnUrlDecoded,
+    )
 }
 
 fun ZapTarget.toTags(): List<JsonArray> {
     val tags = mutableListOf<JsonArray>()
-
+    tags.add(recipientUserId.asPubkeyTag())
     when (this) {
-        is ZapTarget.Profile -> tags.add(profileId.asPubkeyTag())
+        is ZapTarget.Profile -> Unit
 
         is ZapTarget.Event -> {
             tags.add(eventId.asEventIdTag())
-            tags.add(eventAuthorId.asPubkeyTag())
         }
 
         is ZapTarget.ReplaceableEvent -> {
+            tags.add(naddr.asReplaceableEventTag())
             tags.add(eventId.asEventIdTag())
-            tags.add(eventAuthorId.asPubkeyTag())
-            tags.add("$kind:$eventAuthorId:$identifier".asReplaceableEventTag())
         }
     }
 

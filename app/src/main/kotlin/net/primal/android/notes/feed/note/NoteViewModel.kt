@@ -215,8 +215,8 @@ class NoteViewModel @AssistedInject constructor(
                 amountInSats = zapAction.zapAmount,
                 target = ZapTarget.Event(
                     eventId = zapAction.postId,
-                    eventAuthorId = zapAction.postAuthorId,
-                    eventAuthorLnUrlDecoded = lnUrlDecoded,
+                    recipientUserId = zapAction.postAuthorId,
+                    recipientLnUrlDecoded = lnUrlDecoded,
                 ),
             )
 
