@@ -48,7 +48,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import kotlinx.coroutines.launch
@@ -67,7 +66,6 @@ import net.primal.android.stream.player.SHARED_TRANSITION_LOADING_PLAYER_KEY
 import net.primal.android.stream.player.SHARED_TRANSITION_PLAYER_KEY
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
-import net.primal.android.stream.utils.buildMediaItem
 import net.primal.android.theme.AppTheme
 
 internal val PADDING = 16.dp
@@ -113,19 +111,12 @@ fun LiveStreamMiniPlayer(
     val statusBarHeight = WindowInsets.statusBars.getTop(localDensity)
     val paddingPx = with(localDensity) { PADDING.toPx() }
 
-    LaunchedEffect(mediaController, state.playbackUrl) {
-        val newStreamUrl = state.playbackUrl
-        if (newStreamUrl != null) {
-            val currentMediaItem = mediaController.currentMediaItem
-            val currentMediaItemUri = currentMediaItem?.localConfiguration?.uri?.toString()
-            if (newStreamUrl != currentMediaItemUri) {
-                mediaController.setMediaItem(buildMediaItem(state.naddr, newStreamUrl, state.streamInfo))
-                mediaController.repeatMode = Player.REPEAT_MODE_OFF
-                mediaController.prepare()
-                mediaController.playWhenReady = true
-            }
-        }
-    }
+    StreamPlaybackController(
+        mediaController = mediaController,
+        playbackUrl = state.playbackUrl,
+        naddr = state.naddr,
+        streamInfo = state.streamInfo,
+    )
 
     val minSafeY by remember(localConfiguration.orientation) {
         derivedStateOf {

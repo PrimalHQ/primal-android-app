@@ -26,7 +26,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.toRect
-import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaController
 import androidx.recyclerview.widget.RecyclerView
@@ -40,7 +39,6 @@ import net.primal.android.core.pip.rememberIsInPipMode
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
-import net.primal.android.stream.utils.buildMediaItem
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
 
@@ -49,7 +47,6 @@ import net.primal.domain.nostr.ReportType
 fun ExpandedLiveStreamPlayer(
     state: LiveStreamContract.UiState,
     mediaController: MediaController,
-    playbackUrl: String?,
     controlsVisible: Boolean,
     menuVisible: Boolean,
     isCollapsed: Boolean,
@@ -74,20 +71,12 @@ fun ExpandedLiveStreamPlayer(
 ) {
     KeepScreenOn(enabled = state.playerState.isPlaying)
 
-    LaunchedEffect(playbackUrl) {
-        val currentMediaItemUri = mediaController.currentMediaItem?.localConfiguration?.uri?.toString()
-
-        if (currentMediaItemUri != playbackUrl) {
-            mediaController.stop()
-
-            if (playbackUrl != null) {
-                mediaController.setMediaItem(buildMediaItem(state.naddr, playbackUrl, state.streamInfo))
-                mediaController.repeatMode = Player.REPEAT_MODE_OFF
-                mediaController.prepare()
-                mediaController.playWhenReady = true
-            }
-        }
-    }
+    StreamPlaybackController(
+        mediaController = mediaController,
+        playbackUrl = state.playbackUrl,
+        naddr = state.naddr,
+        streamInfo = state.streamInfo,
+    )
 
     LaunchedEffect(state.playerState.isMuted) {
         mediaController.volume = if (state.playerState.isMuted) 0f else 1f

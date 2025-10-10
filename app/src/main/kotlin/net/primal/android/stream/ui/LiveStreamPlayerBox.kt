@@ -100,7 +100,7 @@ private val ReplayButtonContainerColor: Color
     get() = if (LocalPrimalTheme.current.isDarkTheme) {
         Color(0xFFFFFFFF)
     } else {
-        Color(0xFF121212)
+        AppTheme.colorScheme.onSurface
     }
 
 private val ReplayButtonContentColor: Color
@@ -108,7 +108,7 @@ private val ReplayButtonContentColor: Color
     get() = if (LocalPrimalTheme.current.isDarkTheme) {
         Color(0xFF121212)
     } else {
-        Color(0xFFFFFFFF)
+        AppTheme.extraColorScheme.surfaceVariantAlt2
     }
 
 @Composable

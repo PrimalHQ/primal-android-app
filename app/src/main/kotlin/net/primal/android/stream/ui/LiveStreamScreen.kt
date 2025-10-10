@@ -434,7 +434,6 @@ private fun StreamPlayer(
             state = state,
             eventPublisher = eventPublisher,
             mediaController = mediaController,
-            playbackUrl = state.playbackUrl,
             controlsVisible = controlsVisible,
             menuVisible = menuVisible,
             isCollapsed = isCollapsed,

@@ -73,6 +73,7 @@ import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.streams.Stream
 import net.primal.domain.streams.StreamContentModerationMode
 import net.primal.domain.streams.StreamRepository
 import net.primal.domain.streams.StreamStatus
@@ -500,11 +501,7 @@ class LiveStreamViewModel @AssistedInject constructor(
 
                     val nextPlaybackUrl = determinePlaybackUrl(
                         currentStreamInfo = currentStreamInfo,
-                        currentPlaybackUrl = state.value.playbackUrl,
-                        isLive = isLive,
-                        isEnded = isEnded,
-                        newStreamingUrl = stream.streamingUrl,
-                        newRecordingUrl = stream.recordingUrl,
+                        updatedStreamInfo = stream,
                     )
 
                     val isVideoFinished = state.value.playerState.isVideoFinished ||
@@ -553,18 +550,14 @@ class LiveStreamViewModel @AssistedInject constructor(
                 }
         }
 
-    private fun determinePlaybackUrl(
-        currentStreamInfo: StreamInfoUi?,
-        currentPlaybackUrl: String?,
-        isLive: Boolean,
-        isEnded: Boolean,
-        newStreamingUrl: String?,
-        newRecordingUrl: String?,
-    ): String? {
+    private fun determinePlaybackUrl(currentStreamInfo: StreamInfoUi?, updatedStreamInfo: Stream): String? {
+        val isLive = updatedStreamInfo.isLive()
+        val isEnded = updatedStreamInfo.resolvedStatus == StreamStatus.ENDED
+
         return when {
-            currentStreamInfo == null -> if (isLive) newStreamingUrl else newRecordingUrl
+            currentStreamInfo == null -> if (isLive) updatedStreamInfo.streamingUrl else updatedStreamInfo.recordingUrl
             currentStreamInfo.streamStatus == StreamStatus.LIVE && isEnded -> null
-            else -> currentPlaybackUrl
+            else -> state.value.playbackUrl
         }
     }
 
