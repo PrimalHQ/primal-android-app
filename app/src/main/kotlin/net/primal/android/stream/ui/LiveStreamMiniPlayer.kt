@@ -66,7 +66,6 @@ import net.primal.android.stream.player.SHARED_TRANSITION_LOADING_PLAYER_KEY
 import net.primal.android.stream.player.SHARED_TRANSITION_PLAYER_KEY
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
-import net.primal.android.stream.utils.buildMediaItem
 import net.primal.android.theme.AppTheme
 
 internal val PADDING = 16.dp
@@ -83,6 +82,7 @@ private val springSpec = spring<Float>(
 fun LiveStreamMiniPlayer(
     modifier: Modifier = Modifier,
     mediaController: MediaController,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     offsetX: Animatable<Float, AnimationVector1D>,
     offsetY: Animatable<Float, AnimationVector1D>,
     isAtBottom: MutableState<Boolean>,
@@ -111,18 +111,12 @@ fun LiveStreamMiniPlayer(
     val statusBarHeight = WindowInsets.statusBars.getTop(localDensity)
     val paddingPx = with(localDensity) { PADDING.toPx() }
 
-    LaunchedEffect(mediaController, state.streamInfo?.streamUrl) {
-        val newStreamUrl = state.streamInfo?.streamUrl
-        if (newStreamUrl != null) {
-            val currentMediaItem = mediaController.currentMediaItem
-            val currentMediaItemUri = currentMediaItem?.localConfiguration?.uri?.toString()
-            if (newStreamUrl != currentMediaItemUri) {
-                mediaController.setMediaItem(buildMediaItem(state.naddr, newStreamUrl, state.streamInfo))
-                mediaController.prepare()
-                mediaController.playWhenReady = true
-            }
-        }
-    }
+    StreamPlaybackController(
+        mediaController = mediaController,
+        playbackUrl = state.playbackUrl,
+        naddr = state.naddr,
+        streamInfo = state.streamInfo,
+    )
 
     val minSafeY by remember(localConfiguration.orientation) {
         derivedStateOf {
@@ -207,6 +201,7 @@ fun LiveStreamMiniPlayer(
                     LiveStreamPlayerBox(
                         mediaController = mediaController,
                         state = state,
+                        eventPublisher = eventPublisher,
                         modifier = Modifier
                             .clip(AppTheme.shapes.large)
                             .fillMaxSize(),

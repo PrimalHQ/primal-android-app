@@ -73,6 +73,7 @@ import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.streams.Stream
 import net.primal.domain.streams.StreamContentModerationMode
 import net.primal.domain.streams.StreamRepository
 import net.primal.domain.streams.StreamStatus
@@ -345,6 +346,8 @@ class LiveStreamViewModel @AssistedInject constructor(
                         startLiveStreamSubscription()
                     }
 
+                    UiEvent.OnReplayStream -> replayStream()
+
                     UiEvent.OnVideoEnded -> {
                         setState { copy(playerState = playerState.copy(isVideoFinished = true, isPlaying = false)) }
                     }
@@ -354,6 +357,18 @@ class LiveStreamViewModel @AssistedInject constructor(
                 }
             }
         }
+
+    private fun replayStream() {
+        val recordingUrl = state.value.streamInfo?.recordingUrl ?: return
+        viewModelScope.launch {
+            setState {
+                copy(
+                    playerState = playerState.copy(isVideoFinished = false),
+                    playbackUrl = recordingUrl,
+                )
+            }
+        }
+    }
 
     private fun dismissStreamControlPopup() =
         viewModelScope.launch {
@@ -482,27 +497,36 @@ class LiveStreamViewModel @AssistedInject constructor(
                 .collect { stream ->
                     val isLive = stream.isLive()
                     val isEnded = stream.resolvedStatus == StreamStatus.ENDED
-                    val streamUrlToPlay = if (isLive) stream.streamingUrl else stream.recordingUrl
+                    val currentStreamInfo = state.value.streamInfo
 
-                    if (authorObserversJob == null || state.value.streamInfo?.mainHostId != stream.mainHostId) {
+                    val nextPlaybackUrl = determinePlaybackUrl(
+                        currentStreamInfo = currentStreamInfo,
+                        updatedStreamInfo = stream,
+                    )
+
+                    val isVideoFinished = state.value.playerState.isVideoFinished ||
+                        (isEnded && nextPlaybackUrl == null)
+
+                    if (authorObserversJob == null || currentStreamInfo?.mainHostId != stream.mainHostId) {
                         initializeMainHostObservers(mainHostId = stream.mainHostId)
                     }
 
                     setState {
                         copy(
                             streamInfoLoading = false,
-                            isStreamUnavailable = streamUrlToPlay == null && !isEnded,
+                            isStreamUnavailable = nextPlaybackUrl == null && !isEnded,
+                            playbackUrl = nextPlaybackUrl,
                             playerState = playerState.copy(
                                 isLive = isLive,
                                 atLiveEdge = isLive,
-                                isVideoFinished = streamUrlToPlay == null && isEnded,
+                                isVideoFinished = isVideoFinished,
                             ),
                             streamInfo = this.streamInfo?.copy(
                                 atag = stream.aTag,
                                 streamStatus = stream.resolvedStatus,
                                 eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
-                                streamUrl = streamUrlToPlay,
+                                recordingUrl = stream.recordingUrl,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
@@ -513,7 +537,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                                 eventId = stream.eventId,
                                 title = stream.title ?: "Live Stream",
                                 image = stream.imageUrl,
-                                streamUrl = streamUrlToPlay,
+                                recordingUrl = stream.recordingUrl,
                                 viewers = stream.currentParticipants ?: 0,
                                 startedAt = stream.startsAt,
                                 description = stream.summary,
@@ -525,6 +549,17 @@ class LiveStreamViewModel @AssistedInject constructor(
                     }
                 }
         }
+
+    private fun determinePlaybackUrl(currentStreamInfo: StreamInfoUi?, updatedStreamInfo: Stream): String? {
+        val isLive = updatedStreamInfo.isLive()
+        val isEnded = updatedStreamInfo.resolvedStatus == StreamStatus.ENDED
+
+        return when {
+            currentStreamInfo == null -> if (isLive) updatedStreamInfo.streamingUrl else updatedStreamInfo.recordingUrl
+            currentStreamInfo.streamStatus == StreamStatus.LIVE && isEnded -> null
+            else -> state.value.playbackUrl
+        }
+    }
 
     private fun initializeMainHostObservers(mainHostId: String) {
         authorObserversJob?.cancel()

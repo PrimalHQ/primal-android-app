@@ -39,7 +39,6 @@ import net.primal.android.core.pip.rememberIsInPipMode
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_HEIGHT
 import net.primal.android.stream.player.VIDEO_ASPECT_RATIO_WIDTH
-import net.primal.android.stream.utils.buildMediaItem
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.ReportType
 
@@ -48,11 +47,11 @@ import net.primal.domain.nostr.ReportType
 fun ExpandedLiveStreamPlayer(
     state: LiveStreamContract.UiState,
     mediaController: MediaController,
-    streamUrl: String?,
     controlsVisible: Boolean,
     menuVisible: Boolean,
     isCollapsed: Boolean,
     lookaheadScope: LookaheadScope,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     onPlayPauseClick: () -> Unit,
     onClose: () -> Unit,
     onRewind: () -> Unit,
@@ -66,26 +65,18 @@ fun ExpandedLiveStreamPlayer(
     onReportContentClick: (ReportType) -> Unit,
     onRequestDeleteClick: () -> Unit,
     onToggleFullScreenClick: () -> Unit,
-    onRetry: () -> Unit,
     modifier: Modifier = Modifier,
     playerModifier: Modifier = Modifier,
     loadingModifier: Modifier = Modifier,
 ) {
     KeepScreenOn(enabled = state.playerState.isPlaying)
 
-    LaunchedEffect(streamUrl) {
-        val currentMediaItemUri = mediaController.currentMediaItem?.localConfiguration?.uri?.toString()
-
-        if (currentMediaItemUri != streamUrl) {
-            mediaController.stop()
-
-            if (streamUrl != null) {
-                mediaController.setMediaItem(buildMediaItem(state.naddr, streamUrl, state.streamInfo))
-                mediaController.prepare()
-                mediaController.playWhenReady = true
-            }
-        }
-    }
+    StreamPlaybackController(
+        mediaController = mediaController,
+        playbackUrl = state.playbackUrl,
+        naddr = state.naddr,
+        streamInfo = state.streamInfo,
+    )
 
     LaunchedEffect(state.playerState.isMuted) {
         mediaController.volume = if (state.playerState.isMuted) 0f else 1f
@@ -99,6 +90,7 @@ fun ExpandedLiveStreamPlayer(
         mediaController = mediaController,
         lookaheadScope = lookaheadScope,
         controlsVisible = controlsVisible,
+        eventPublisher = eventPublisher,
         menuVisible = menuVisible,
         isCollapsed = isCollapsed,
         onClose = onClose,
@@ -114,7 +106,6 @@ fun ExpandedLiveStreamPlayer(
         onRequestDeleteClick = onRequestDeleteClick,
         onSoundClick = onSoundClick,
         onToggleFullScreenClick = onToggleFullScreenClick,
-        onRetry = onRetry,
     )
 }
 
@@ -126,6 +117,7 @@ private fun PlayerBox(
     playerModifier: Modifier,
     loadingModifier: Modifier,
     state: LiveStreamContract.UiState,
+    eventPublisher: (LiveStreamContract.UiEvent) -> Unit,
     mediaController: MediaController,
     lookaheadScope: LookaheadScope,
     controlsVisible: Boolean,
@@ -144,7 +136,6 @@ private fun PlayerBox(
     onRequestDeleteClick: () -> Unit,
     onSoundClick: () -> Unit,
     onToggleFullScreenClick: () -> Unit,
-    onRetry: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
     val localConfiguration = LocalConfiguration.current
@@ -194,6 +185,7 @@ private fun PlayerBox(
     LiveStreamPlayerBox(
         mediaController = mediaController,
         state = state,
+        eventPublisher = eventPublisher,
         modifier = modifier
             .then(boxSizingModifier)
             .background(playerBackgroundColor)
@@ -248,7 +240,6 @@ private fun PlayerBox(
                 )
             }
         },
-        onRetryClick = onRetry,
     )
 }
 

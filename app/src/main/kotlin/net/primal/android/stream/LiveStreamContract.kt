@@ -26,6 +26,7 @@ interface LiveStreamContract {
         val chatLoading: Boolean = true,
         val activeUserId: String? = null,
         val streamInfo: StreamInfoUi? = null,
+        val playbackUrl: String? = null,
         val playerState: PlayerState = PlayerState(),
         val comment: TextFieldValue = TextFieldValue(),
         val shouldApproveProfileAction: FollowsApproval? = null,
@@ -69,7 +70,7 @@ interface LiveStreamContract {
         val atag: String,
         val eventId: String,
         val title: String,
-        val streamUrl: String?,
+        val recordingUrl: String?,
         val viewers: Int,
         val streamStatus: StreamStatus,
         val image: String?,
@@ -123,6 +124,7 @@ interface LiveStreamContract {
         data object OnVideoEnded : UiEvent()
         data class ChangeActiveBottomSheet(val sheet: ActiveBottomSheet) : UiEvent()
         data object OnRetryStream : UiEvent()
+        data object OnReplayStream : UiEvent()
     }
 
     sealed class SideEffect {
