@@ -647,11 +647,10 @@ class LiveStreamViewModel @AssistedInject constructor(
                 comment = zapAction.zapDescription,
                 amountInSats = zapAction.zapAmount,
                 target = ZapTarget.ReplaceableEvent(
-                    kind = NostrEventKind.LiveActivity.value,
-                    identifier = naddr.identifier,
+                    naddr = naddr.asATagValue(),
                     eventId = streamInfo.eventId,
-                    eventAuthorId = naddr.userId,
-                    eventAuthorLnUrlDecoded = lnUrlDecoded,
+                    recipientUserId = authorProfile.pubkey,
+                    recipientLnUrlDecoded = lnUrlDecoded,
                 ),
                 walletId = walletId,
             )

@@ -285,11 +285,10 @@ class ArticleDetailsViewModel @Inject constructor(
                 comment = zapAction.zapDescription,
                 amountInSats = zapAction.zapAmount,
                 target = ZapTarget.ReplaceableEvent(
-                    kind = NostrEventKind.LongFormContent.value,
-                    identifier = article.articleId,
+                    naddr = article.aTag,
                     eventId = article.eventId,
-                    eventAuthorId = article.authorId,
-                    eventAuthorLnUrlDecoded = lnUrlDecoded,
+                    recipientUserId = article.authorId,
+                    recipientLnUrlDecoded = lnUrlDecoded,
                 ),
             )
 

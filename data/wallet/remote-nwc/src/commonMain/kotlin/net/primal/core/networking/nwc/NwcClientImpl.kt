@@ -128,7 +128,7 @@ internal class NwcClientImpl(
 
     override suspend fun zap(data: ZapRequestData): ZapResult {
         val zapPayRequest = runCatching {
-            nwcZapHelper.fetchZapPayRequest(data.lnUrlDecoded)
+            nwcZapHelper.fetchZapPayRequest(data.recipientLnUrlDecoded)
         }.getOrElse {
             Napier.e(it) { "FailedToFetchZapPayRequest." }
             return ZapResult.Failure(error = ZapError.FailedToFetchZapPayRequest(cause = it))
