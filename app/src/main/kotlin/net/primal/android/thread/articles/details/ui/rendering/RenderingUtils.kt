@@ -11,7 +11,7 @@ private const val LINK_URL_GROUP_INDEX = 2
 private const val SIMPLE_IMAGE_URL_GROUP_INDEX = 3
 private val nostrNpub1Regex = Regex("""\b(nostr:)?npub1(\w+)\b""")
 private val nostrNprofile1Regex = Regex("""\b(nostr:)?nprofile1(\w+)\b""")
-private val nostrNote1Regex = Regex("\\b(nostr:|@)((note)1\\w+)\\b|#\\[(\\d+)]")
+private val nostrNote1Regex = Regex("\\b(nostr:|@)((note|nevent)1\\w+)\\b|#\\[(\\d+)]")
 private val rawImageUrlRegex =
     Regex("""(https?://\S+\.(?:png|jpg|jpeg|gif|webp|avif))""", RegexOption.IGNORE_CASE)
 

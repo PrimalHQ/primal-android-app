@@ -47,14 +47,16 @@ import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.nostr.publisher.MissingRelaysException
+import net.primal.domain.nostr.utils.extractNoteId
 import net.primal.domain.nostr.utils.extractProfileId
+import net.primal.domain.nostr.utils.isNEvent
+import net.primal.domain.nostr.utils.isNEventUri
 import net.primal.domain.nostr.utils.isNProfile
 import net.primal.domain.nostr.utils.isNProfileUri
 import net.primal.domain.nostr.utils.isNPub
 import net.primal.domain.nostr.utils.isNPubUri
 import net.primal.domain.nostr.utils.isNote
 import net.primal.domain.nostr.utils.isNoteUri
-import net.primal.domain.nostr.utils.nostrUriToNoteId
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
@@ -174,11 +176,14 @@ class ArticleDetailsViewModel @Inject constructor(
             var referencedProfileUris: Set<String> = emptySet()
             articleRepository.observeArticle(articleId = naddr.identifier, articleAuthorId = naddr.userId)
                 .collect { article ->
-                    val nostrNoteUris = article.uris.filter { it.isNoteUri() || it.isNote() }.toSet()
+                    val nostrNoteUris = article.uris
+                        .filter { it.isNoteUri() || it.isNote() || it.isNEventUri() || it.isNEvent() }
+                        .toSet()
+
                     if (nostrNoteUris != referencedNotesUris) {
                         referencedNotesUris = nostrNoteUris
                         val referencedNotes = feedRepository.findAllPostsByIds(
-                            postIds = nostrNoteUris.mapNotNull { it.nostrUriToNoteId() },
+                            postIds = nostrNoteUris.mapNotNull { it.extractNoteId() },
                         )
                         setState {
                             copy(
