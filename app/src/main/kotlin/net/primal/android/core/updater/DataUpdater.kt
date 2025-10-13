@@ -5,6 +5,9 @@ import javax.inject.Singleton
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.updater.UserDataUpdater
@@ -22,7 +25,8 @@ class DataUpdater @Inject constructor(
     private val updateStaleStreamDataUseCase: UpdateStaleStreamDataUseCase,
 ) {
     private val scope = CoroutineScope(dispatcherProvider.io() + SupervisorJob())
-    private var userDataUpdater: UserDataUpdater? = null
+    private val _userDataUpdater = MutableStateFlow<UserDataUpdater?>(null)
+    private val userDataUpdater = _userDataUpdater.asStateFlow()
 
     init {
         observeActiveAccount()
@@ -30,7 +34,9 @@ class DataUpdater @Inject constructor(
 
     fun updateData() =
         scope.launch {
-            userDataUpdater?.updateWithDebounce(30.minutes)
+            val updater = userDataUpdater.first { it != null }
+
+            updater?.updateWithDebounce(30.minutes)
             appConfigHandler.updateWithDebounce(30.minutes)
             updateStaleStreamDataUseCase.updateWithDebounce(30.minutes)
         }
@@ -41,10 +47,13 @@ class DataUpdater @Inject constructor(
         }
 
     private fun initUserUpdater(activeUserId: String) {
-        userDataUpdater = if (userDataUpdater?.userId != activeUserId) {
-            userDataSyncerFactory.create(userId = activeUserId)
-        } else {
-            userDataUpdater
+        if (activeUserId.isBlank()) {
+            _userDataUpdater.value = null
+            return
+        }
+
+        if (_userDataUpdater.value?.userId != activeUserId) {
+            _userDataUpdater.value = userDataSyncerFactory.create(userId = activeUserId)
         }
     }
 }

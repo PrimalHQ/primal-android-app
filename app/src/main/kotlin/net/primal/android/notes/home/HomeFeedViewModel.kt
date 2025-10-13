@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -114,7 +115,8 @@ class HomeFeedViewModel @Inject constructor(
     @OptIn(FlowPreview::class)
     private fun observeLiveEventsFromFollows() =
         viewModelScope.launch {
-            streamRepository.observeLiveEventsFromFollows(userId = activeAccountStore.activeUserId())
+            val userId = activeAccountStore.activeUserId.first { it.isNotEmpty() }
+            streamRepository.observeLiveEventsFromFollows(userId = userId)
                 .collectLatest { streams -> setState { copy(streams = streams.map { it.asStreamPillUi() }) } }
         }
 
@@ -135,7 +137,7 @@ class HomeFeedViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 setState { copy(loading = true) }
-                val userId = activeAccountStore.activeUserId()
+                val userId = activeAccountStore.activeUserId.first { it.isNotEmpty() }
                 feedsRepository.fetchAndPersistDefaultFeeds(
                     userId = userId,
                     specKind = FeedSpecKind.Notes,
@@ -154,7 +156,7 @@ class HomeFeedViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
-                val userId = activeAccountStore.activeUserId()
+                val userId = activeAccountStore.activeUserId.first { it.isNotEmpty() }
                 retryNetworkCall {
                     feedsRepository.fetchAndPersistNoteFeeds(userId = userId)
                 }
