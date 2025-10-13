@@ -18,7 +18,7 @@ data class DvmFeed(
     val isPrimalFeed: Boolean? = null,
     val actionUserIds: List<String> = emptyList(),
 ) {
-    val dvmNaddr = "${NostrEventKind.AppHandler.value}:${this.dvmPubkey}:${this.dvmId}"
+    val dvmATag = "${NostrEventKind.AppHandler.value}:${this.dvmPubkey}:${this.dvmId}"
 }
 
 fun DvmFeed.buildSpec(specKind: FeedSpecKind): String {

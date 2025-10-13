@@ -647,7 +647,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                 comment = zapAction.zapDescription,
                 amountInSats = zapAction.zapAmount,
                 target = ZapTarget.ReplaceableEvent(
-                    naddr = naddr.asATagValue(),
+                    aTag = naddr.asATagValue(),
                     eventId = streamInfo.eventId,
                     recipientUserId = authorProfile.pubkey,
                     recipientLnUrlDecoded = lnUrlDecoded,

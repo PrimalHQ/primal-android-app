@@ -132,7 +132,7 @@ class DvmFeedListItemViewModel @Inject constructor(
                 comment = zapAction.zapDescription,
                 amountInSats = zapAction.zapAmount,
                 target = ZapTarget.ReplaceableEvent(
-                    naddr = zapAction.dvmFeed.data.dvmNaddr,
+                    aTag = zapAction.dvmFeed.data.dvmATag,
                     eventId = zapAction.dvmFeed.data.eventId,
                     recipientUserId = zapAction.dvmFeed.data.dvmPubkey,
                     recipientLnUrlDecoded = dvmLnUrlDecoded,

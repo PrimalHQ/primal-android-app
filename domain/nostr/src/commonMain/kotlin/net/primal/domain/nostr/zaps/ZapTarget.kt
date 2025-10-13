@@ -27,7 +27,7 @@ sealed class ZapTarget(
     )
 
     data class ReplaceableEvent(
-        val naddr: String,
+        val aTag: String,
         val eventId: String,
         override val recipientUserId: String,
         override val recipientLnUrlDecoded: String,
@@ -48,7 +48,7 @@ fun ZapTarget.toTags(): List<JsonArray> {
         }
 
         is ZapTarget.ReplaceableEvent -> {
-            tags.add(naddr.asReplaceableEventTag())
+            tags.add(aTag.asReplaceableEventTag())
             tags.add(eventId.asEventIdTag())
         }
     }
