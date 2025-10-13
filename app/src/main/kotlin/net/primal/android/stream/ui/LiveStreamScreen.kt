@@ -161,7 +161,6 @@ fun LiveStreamScreen(
     callbacks: LiveStreamContract.ScreenCallbacks,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
-    onRetry: () -> Unit,
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -227,7 +226,6 @@ fun LiveStreamScreen(
         zapHostState = zapHostState,
         sharedTransitionScope = sharedTransitionScope,
         animatedVisibilityScope = animatedVisibilityScope,
-        onRetry = onRetry,
     )
 }
 
@@ -241,7 +239,6 @@ private fun LiveStreamScaffold(
     callbacks: LiveStreamContract.ScreenCallbacks,
     snackbarHostState: SnackbarHostState,
     zapHostState: ZapHostState,
-    onRetry: () -> Unit,
 ) {
     if (state.activeBottomSheet != ActiveBottomSheet.None) {
         BackHandler {
@@ -304,7 +301,6 @@ private fun LiveStreamScaffold(
                     },
                     sharedTransitionScope = sharedTransitionScope,
                     animatedVisibilityScope = animatedVisibilityScope,
-                    onRetry = onRetry,
                 )
 
                 LiveStreamBottomSheet(
@@ -396,7 +392,6 @@ private fun LiveStreamBottomSheet(
 private fun StreamPlayer(
     state: LiveStreamContract.UiState,
     isCollapsed: Boolean,
-    streamInfo: LiveStreamContract.StreamInfoUi,
     mediaController: MediaController,
     controlsVisible: Boolean,
     menuVisible: Boolean,
@@ -408,7 +403,6 @@ private fun StreamPlayer(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
     lookaheadScope: LookaheadScope,
-    onRetry: () -> Unit,
 ) {
     val fullScreenController = rememberFullScreenController()
 
@@ -438,8 +432,8 @@ private fun StreamPlayer(
                 ),
             lookaheadScope = lookaheadScope,
             state = state,
+            eventPublisher = eventPublisher,
             mediaController = mediaController,
-            streamUrl = streamInfo.streamUrl,
             controlsVisible = controlsVisible,
             menuVisible = menuVisible,
             isCollapsed = isCollapsed,
@@ -484,7 +478,6 @@ private fun StreamPlayer(
             },
             onRequestDeleteClick = { eventPublisher(LiveStreamContract.UiEvent.RequestDeleteStream) },
             onToggleFullScreenClick = { fullScreenController.toggle() },
-            onRetry = onRetry,
         )
     }
 }
@@ -508,7 +501,6 @@ private fun LiveStreamContent(
     onChatSettingsClick: () -> Unit,
     onChatMessageClick: (ChatMessageUi) -> Unit,
     onZapMessageClick: (EventZapUiModel) -> Unit,
-    onRetry: () -> Unit,
 ) {
     val isInPipMode = rememberIsInPipMode()
     val localConfiguration = LocalConfiguration.current
@@ -585,7 +577,6 @@ private fun LiveStreamContent(
                         StreamPlayer(
                             state = state,
                             isCollapsed = isCollapsed,
-                            streamInfo = streamInfo,
                             mediaController = mediaController,
                             controlsVisible = controlsVisible,
                             menuVisible = menuVisible,
@@ -597,7 +588,6 @@ private fun LiveStreamContent(
                             sharedTransitionScope = sharedTransitionScope,
                             animatedVisibilityScope = animatedVisibilityScope,
                             lookaheadScope = this@LookaheadScope,
-                            onRetry = onRetry,
                         )
 
                         CollapsedStreamInfoColumn(
