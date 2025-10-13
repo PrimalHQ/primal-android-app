@@ -12,6 +12,8 @@ private const val SIMPLE_IMAGE_URL_GROUP_INDEX = 3
 private val nostrNpub1Regex = Regex("""\b(nostr:)?npub1(\w+)\b""")
 private val nostrNprofile1Regex = Regex("""\b(nostr:)?nprofile1(\w+)\b""")
 private val nostrNote1Regex = Regex("\\b(nostr:|@)((note)1\\w+)\\b|#\\[(\\d+)]")
+private val rawImageUrlRegex =
+    Regex("""(https?://\S+\.(?:png|jpg|jpeg|gif|webp|avif))""", RegexOption.IGNORE_CASE)
 
 fun String.replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap: Map<String, String>): String {
     val replacedPart = nostrNpub1Regex.replace(this) { matchResult ->
@@ -111,4 +113,36 @@ fun String.isValidHttpOrHttpsUrl(): Boolean {
         val url = URL(this)
         url.protocol == "http" || url.protocol == "https"
     }.getOrNull() == true
+}
+
+fun String.splitByRawImageUrls(): List<ArticleContentSegment> {
+    val segments = mutableListOf<ArticleContentSegment>()
+    var lastIndex = 0
+
+    rawImageUrlRegex.findAll(this).forEach { matchResult ->
+        if (matchResult.range.first > lastIndex) {
+            val textSegment = this.substring(lastIndex, matchResult.range.first)
+            if (textSegment.isNotBlank()) {
+                segments.add(ArticleContentSegment.Text(textSegment))
+            }
+        }
+
+        val imageUrl = matchResult.value
+        segments.add(ArticleContentSegment.Media(mediaUrl = imageUrl))
+
+        lastIndex = matchResult.range.last + 1
+    }
+
+    if (lastIndex < this.length) {
+        val remainingText = this.substring(lastIndex)
+        if (remainingText.isNotBlank()) {
+            segments.add(ArticleContentSegment.Text(remainingText))
+        }
+    }
+
+    if (segments.isEmpty() && this.isNotBlank()) {
+        segments.add(ArticleContentSegment.Text(this))
+    }
+
+    return segments
 }

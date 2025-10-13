@@ -108,6 +108,7 @@ import net.primal.android.thread.articles.details.ui.rendering.handleArticleLink
 import net.primal.android.thread.articles.details.ui.rendering.isValidHttpOrHttpsUrl
 import net.primal.android.thread.articles.details.ui.rendering.rememberPrimalMarkwon
 import net.primal.android.thread.articles.details.ui.rendering.replaceProfileNostrUrisWithMarkdownLinks
+import net.primal.android.thread.articles.details.ui.rendering.splitByRawImageUrls
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByInlineImages
 import net.primal.android.thread.articles.details.ui.rendering.splitMarkdownByNostrUris
 import net.primal.domain.links.EventUriType
@@ -196,11 +197,17 @@ private fun ArticleDetailsScreen(
     val listState = rememberLazyListState()
     val scrolledToTop by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
 
-    val articleParts by remember(detailsState.article?.content) {
+    val articleParts by remember(detailsState.article?.content, detailsState.npubToDisplayNameMap) {
         mutableStateOf(
             (detailsState.article?.content ?: "")
                 .splitMarkdownByNostrUris()
                 .flatMap { it.splitMarkdownByInlineImages() }
+                .flatMap { segment ->
+                    when (segment) {
+                        is ArticleContentSegment.Text -> segment.content.splitByRawImageUrls()
+                        is ArticleContentSegment.Media -> listOf(segment)
+                    }
+                }
                 .replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap = detailsState.npubToDisplayNameMap)
                 .buildArticleRenderParts(referencedNotes = detailsState.referencedNotes),
         )
