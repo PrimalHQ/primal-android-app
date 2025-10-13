@@ -14,7 +14,7 @@ fun StreamPlaybackController(
     naddr: Naddr?,
     streamInfo: LiveStreamContract.StreamInfoUi?,
 ) {
-    LaunchedEffect(playbackUrl) {
+    LaunchedEffect(mediaController, playbackUrl) {
         val currentMediaItemUri = mediaController.currentMediaItem?.localConfiguration?.uri?.toString()
 
         if (currentMediaItemUri != playbackUrl) {
