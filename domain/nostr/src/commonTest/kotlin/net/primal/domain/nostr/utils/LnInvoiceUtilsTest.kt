@@ -30,6 +30,11 @@ class LnInvoiceUtilsTest {
             "6twvus8g6rfwvs8qun0dfjkxaq8rkx3yf5tcsyz3d73gafnh3cax9rn449d9p5uxz9ezhhypd0elx87sjle52x86fux2ypatgddc6k6" +
             "3n7erqz25le42c4u4ecky03ylcqca784w"
 
+    private val invoiceWithDescription =
+        "lnbc420n1p5wuahxpp50qwkd9hn5qdxgeh67ce9qxgdre0vw0rrtr2hnhujp8ahr7rmukuqdq2fah8wctjvscqzzsxqrrs0sp53k2h0f33" +
+            "gfpdw3tnm9qr5kelgg6tkh2uknmja3djl5p2gh6kvsjs9qxpqysgqh0m7qkzc0xqm30qdm2arg9qlpkn20gnr49enmfxdjy9qzt6sm" +
+            "lwpyt69v6zyjnheyqp8wlh7a3gn53qjzyzs6s44zjpd9sj8dp69uaspam64w2"
+
     @Test
     fun getAmountInSatsValidInvoice() {
         val expectedValue = 12345
@@ -60,5 +65,14 @@ class LnInvoiceUtilsTest {
         assertFailsWith(IllegalArgumentException::class) {
             LnInvoiceUtils.getAmountInSats(invoiceInvalidCharacter)
         }
+    }
+
+    @Test
+    fun getDescriptionReturnsCorrectValue() {
+        val expectedDescription = "Onward"
+
+        val description = LnInvoiceUtils.getDescription(invoiceWithDescription)
+
+        description shouldBe expectedDescription
     }
 }
