@@ -37,7 +37,7 @@ class DataUpdater @Inject constructor(
 
     private fun observeActiveAccount() =
         scope.launch {
-            activeAccountStore.activeUserAccount.collect { initUserUpdater(activeUserId = it.pubkey) }
+            activeAccountStore.activeUserId.collect { initUserUpdater(activeUserId = it) }
         }
 
     private fun initUserUpdater(activeUserId: String) {
