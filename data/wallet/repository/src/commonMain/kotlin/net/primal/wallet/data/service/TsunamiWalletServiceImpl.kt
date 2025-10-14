@@ -14,11 +14,17 @@ import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.tsunami.TsunamiWalletSdk
 import net.primal.wallet.data.model.Transaction
+import net.primal.wallet.data.repository.mappers.remote.mapAsWalletTransaction
 
 internal class TsunamiWalletServiceImpl(
     private val tsunamiWalletSdk: TsunamiWalletSdk,
     private val lightningPayHelper: LightningPayHelper,
 ) : WalletService<Wallet.Tsunami> {
+
+    private companion object {
+        private const val DEFAULT_OFFSET = 0
+        private const val DEFAULT_LIMIT = 100
+    }
 
     override suspend fun fetchWalletBalance(wallet: Wallet.Tsunami): Result<WalletBalanceResult> =
         runCatching {
@@ -34,7 +40,19 @@ internal class TsunamiWalletServiceImpl(
         request: TransactionsRequest,
     ): Result<List<Transaction>> =
         runCatching {
-            emptyList()
+            tsunamiWalletSdk.getTransfers(
+                walletId = wallet.walletId,
+                offset = (request.offset ?: DEFAULT_OFFSET).toULong(),
+                limit = (request.limit ?: DEFAULT_LIMIT).toULong(),
+            ).map { transfers ->
+                transfers.map {
+                    it.mapAsWalletTransaction(
+                        userId = wallet.userId,
+                        walletId = wallet.walletId,
+                        walletAddress = wallet.lightningAddress,
+                    )
+                }
+            }.getOrThrow()
         }
 
     override suspend fun createLightningInvoice(

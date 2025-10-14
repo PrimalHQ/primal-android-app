@@ -23,7 +23,7 @@ import net.primal.wallet.data.repository.mappers.local.toDomain
 
 @ExperimentalTime
 @ExperimentalPagingApi
-class WalletTransactionsMediator internal constructor(
+class TimestampBasedWalletTransactionsMediator internal constructor(
     private val walletId: String,
     private val dispatcherProvider: DispatcherProvider,
     private val transactionsHandler: TransactionsHandler,
@@ -38,6 +38,8 @@ class WalletTransactionsMediator internal constructor(
                 Napier.d { "No wallet found. Exiting." }
                 return MediatorResult.Success(endOfPaginationReached = true)
             }
+
+        val walletSettings = walletDatabase.walletSettings().findWalletSettings(walletId = wallet.info.walletId)
 
         val timestamp: Long? = when (loadType) {
             LoadType.REFRESH -> null
@@ -68,8 +70,6 @@ class WalletTransactionsMediator internal constructor(
             Napier.d { "Remote key not found. Exiting with Error." }
             return MediatorResult.Error(IllegalStateException("Remote key not found."))
         }
-
-        val walletSettings = walletDatabase.walletSettings().findWalletSettings(walletId = wallet.info.walletId)
 
         val timestamps = when (loadType) {
             LoadType.REFRESH -> null to null

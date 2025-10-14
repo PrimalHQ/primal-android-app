@@ -10,7 +10,7 @@ import net.primal.domain.wallet.WalletType
 internal sealed class Transaction(
     open val transactionId: String,
     open val walletId: String,
-    open val walletType: WalletType,
+    private val _walletType: WalletType,
     open val type: TxType,
     open val state: TxState,
     open val createdAt: Long,
@@ -26,10 +26,12 @@ internal sealed class Transaction(
     open val zappedByUserId: String?,
     open val otherUserProfile: ProfileData?,
 ) {
+
+    val walletType: WalletType get() = _walletType
+
     data class Primal(
         override val transactionId: String,
         override val walletId: String,
-        override val walletType: WalletType,
         override val type: TxType,
         override val state: TxState,
         override val createdAt: Long,
@@ -57,7 +59,7 @@ internal sealed class Transaction(
     ) : Transaction(
         transactionId = transactionId,
         walletId = walletId,
-        walletType = walletType,
+        _walletType = WalletType.PRIMAL,
         type = type,
         state = state,
         createdAt = createdAt,
@@ -77,7 +79,6 @@ internal sealed class Transaction(
     data class NWC(
         override val transactionId: String,
         override val walletId: String,
-        override val walletType: WalletType,
         override val type: TxType,
         override val state: TxState,
         override val createdAt: Long,
@@ -99,7 +100,44 @@ internal sealed class Transaction(
     ) : Transaction(
         transactionId = transactionId,
         walletId = walletId,
-        walletType = walletType,
+        _walletType = WalletType.NWC,
+        type = type,
+        state = state,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+        completedAt = completedAt,
+        userId = userId,
+        note = note,
+        invoice = invoice,
+        amountInBtc = amountInBtc,
+        totalFeeInBtc = totalFeeInBtc,
+        zappedEntity = zappedEntity,
+        otherUserId = otherUserId,
+        zappedByUserId = zappedByUserId,
+        otherUserProfile = otherUserProfile,
+    )
+
+    data class Tsunami(
+        override val transactionId: String,
+        override val walletId: String,
+        override val type: TxType,
+        override val state: TxState,
+        override val createdAt: Long,
+        override val updatedAt: Long,
+        override val completedAt: Long?,
+        override val userId: String,
+        override val note: String?,
+        override val invoice: String?,
+        override val amountInBtc: Double,
+        override val totalFeeInBtc: String?,
+        override val otherUserId: String?,
+        override val zappedEntity: NostrEntity?,
+        override val zappedByUserId: String?,
+        override val otherUserProfile: ProfileData?,
+    ) : Transaction(
+        transactionId = transactionId,
+        walletId = walletId,
+        _walletType = WalletType.TSUNAMI,
         type = type,
         state = state,
         createdAt = createdAt,

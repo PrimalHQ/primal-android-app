@@ -2,6 +2,7 @@ package net.primal.domain.wallet
 
 sealed class Wallet(
     open val walletId: String,
+    private val walletType: WalletType,
     open val userId: String,
     open val lightningAddress: String?,
     open val spamThresholdAmountInSats: Long,
@@ -9,6 +10,8 @@ sealed class Wallet(
     open val maxBalanceInBtc: Double? = null,
     open val lastUpdatedAt: Long? = null,
 ) {
+    val type: WalletType get() = walletType
+
     data class NWC(
         override val walletId: String,
         override val userId: String,
@@ -22,6 +25,7 @@ sealed class Wallet(
         val keypair: NostrWalletKeypair,
     ) : Wallet(
         walletId = walletId,
+        walletType = WalletType.NWC,
         userId = userId,
         lightningAddress = lightningAddress,
         spamThresholdAmountInSats = spamThresholdAmountInSats,
@@ -41,6 +45,7 @@ sealed class Wallet(
         val kycLevel: WalletKycLevel,
     ) : Wallet(
         walletId = walletId,
+        walletType = WalletType.PRIMAL,
         userId = userId,
         lightningAddress = lightningAddress,
         spamThresholdAmountInSats = spamThresholdAmountInSats,
@@ -59,6 +64,7 @@ sealed class Wallet(
         override val lastUpdatedAt: Long?,
     ) : Wallet(
         walletId = walletId,
+        walletType = WalletType.TSUNAMI,
         userId = userId,
         lightningAddress = lightningAddress,
         spamThresholdAmountInSats = spamThresholdAmountInSats,
