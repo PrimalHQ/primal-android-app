@@ -35,21 +35,21 @@ internal fun TsunamiTransfer.mapAsWalletTransaction(
         userId = userId,
         note = when (txType) {
             TxType.DEPOSIT ->
-                this.userRequest.lightningReceiveRequest?.invoice
+                this.userRequest?.lightningReceiveRequest?.invoice
                     ?.encodedInvoice?.let(LnInvoiceUtils::getDescription)
 
             TxType.WITHDRAW ->
-                this.userRequest.lightningSendRequest
+                this.userRequest?.lightningSendRequest
                     ?.encodedInvoice?.let(LnInvoiceUtils::getDescription)
         },
         invoice = when (txType) {
-            TxType.DEPOSIT -> this.userRequest.lightningReceiveRequest?.invoice?.encodedInvoice
-            TxType.WITHDRAW -> this.userRequest.lightningSendRequest?.encodedInvoice
+            TxType.DEPOSIT -> this.userRequest?.lightningReceiveRequest?.invoice?.encodedInvoice
+            TxType.WITHDRAW -> this.userRequest?.lightningSendRequest?.encodedInvoice
         },
         amountInBtc = this.totalValueSat.toBtc(),
         totalFeeInBtc = when (txType) {
             TxType.DEPOSIT -> null
-            TxType.WITHDRAW -> this.userRequest.lightningSendRequest?.fee?.originalValue?.msatsToBtc()?.toString()
+            TxType.WITHDRAW -> this.userRequest?.lightningSendRequest?.fee?.originalValue?.msatsToBtc()?.toString()
         },
         otherUserId = when (txType) {
             TxType.DEPOSIT -> zapRequest?.pubKey
