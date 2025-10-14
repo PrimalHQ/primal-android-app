@@ -43,10 +43,14 @@ internal class WalletServiceFactoryImpl(
                 lightningPayHelper = lightningPayHelper,
             )
 
-        fun createTsunamiWalletService(tsunamiWalletSdk: TsunamiWalletSdk, lightningPayHelper: LightningPayHelper) =
-            TsunamiWalletServiceImpl(
-                tsunamiWalletSdk = tsunamiWalletSdk,
-                lightningPayHelper = lightningPayHelper,
-            )
+        fun createTsunamiWalletService(
+            tsunamiWalletSdk: TsunamiWalletSdk,
+            lightningPayHelper: LightningPayHelper,
+            eventRepository: EventRepository,
+        ) = TsunamiWalletServiceImpl(
+            tsunamiWalletSdk = tsunamiWalletSdk,
+            lightningPayHelper = lightningPayHelper,
+            eventRepository = eventRepository,
+        )
     }
 }

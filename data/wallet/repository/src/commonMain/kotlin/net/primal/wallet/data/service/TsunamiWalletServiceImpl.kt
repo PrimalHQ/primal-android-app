@@ -5,6 +5,7 @@ import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.MSATS_IN_SATS
 import net.primal.core.utils.Result
 import net.primal.core.utils.runCatching
+import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.utils.decodeLNUrlOrNull
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
@@ -13,12 +14,14 @@ import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.tsunami.TsunamiWalletSdk
+import net.primal.tsunami.model.TsunamiTransfer
 import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.repository.mappers.remote.mapAsWalletTransaction
 
 internal class TsunamiWalletServiceImpl(
     private val tsunamiWalletSdk: TsunamiWalletSdk,
     private val lightningPayHelper: LightningPayHelper,
+    private val eventRepository: EventRepository,
 ) : WalletService<Wallet.Tsunami> {
 
     private companion object {
@@ -45,15 +48,29 @@ internal class TsunamiWalletServiceImpl(
                 offset = (request.offset ?: DEFAULT_OFFSET).toULong(),
                 limit = (request.limit ?: DEFAULT_LIMIT).toULong(),
             ).map { transfers ->
+                val invoices = transfers.extractAllLnInvoices()
+                val zapReceiptsMap = eventRepository.getZapReceipts(invoices = invoices).getOrNull()
+
                 transfers.map {
+                    val txInvoice = it.userRequest.lightningSendRequest?.encodedInvoice
+                        ?: it.userRequest.lightningReceiveRequest?.invoice?.encodedInvoice
+                    val zapRequest = zapReceiptsMap?.get(txInvoice)
+
                     it.mapAsWalletTransaction(
                         userId = wallet.userId,
                         walletId = wallet.walletId,
                         walletAddress = wallet.lightningAddress,
+                        zapRequest = zapRequest,
                     )
                 }
             }.getOrThrow()
         }
+
+    private fun List<TsunamiTransfer>.extractAllLnInvoices(): List<String> {
+        val outgoingInvoices = this.mapNotNull { it.userRequest.lightningSendRequest?.encodedInvoice }
+        val incomingInvoices = this.mapNotNull { it.userRequest.lightningReceiveRequest?.invoice?.encodedInvoice }
+        return outgoingInvoices + incomingInvoices
+    }
 
     override suspend fun createLightningInvoice(
         wallet: Wallet.Tsunami,
