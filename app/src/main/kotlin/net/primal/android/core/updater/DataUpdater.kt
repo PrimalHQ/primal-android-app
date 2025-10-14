@@ -5,9 +5,6 @@ import javax.inject.Singleton
 import kotlin.time.Duration.Companion.minutes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.updater.UserDataUpdater
@@ -25,8 +22,7 @@ class DataUpdater @Inject constructor(
     private val updateStaleStreamDataUseCase: UpdateStaleStreamDataUseCase,
 ) {
     private val scope = CoroutineScope(dispatcherProvider.io() + SupervisorJob())
-    private val _userDataUpdater = MutableStateFlow<UserDataUpdater?>(null)
-    private val userDataUpdater = _userDataUpdater.asStateFlow()
+    private var userDataUpdater: UserDataUpdater? = null
 
     init {
         observeActiveAccount()
@@ -34,26 +30,21 @@ class DataUpdater @Inject constructor(
 
     fun updateData() =
         scope.launch {
-            val updater = userDataUpdater.first { it != null }
-
-            updater?.updateWithDebounce(30.minutes)
+            userDataUpdater?.updateWithDebounce(30.minutes)
             appConfigHandler.updateWithDebounce(30.minutes)
             updateStaleStreamDataUseCase.updateWithDebounce(30.minutes)
         }
 
     private fun observeActiveAccount() =
         scope.launch {
-            activeAccountStore.activeUserAccount.collect { initUserUpdater(activeUserId = it.pubkey) }
+            activeAccountStore.activeUserId.collect { initUserUpdater(activeUserId = it) }
         }
 
     private fun initUserUpdater(activeUserId: String) {
-        if (activeUserId.isBlank()) {
-            _userDataUpdater.value = null
-            return
-        }
-
-        if (_userDataUpdater.value?.userId != activeUserId) {
-            _userDataUpdater.value = userDataSyncerFactory.create(userId = activeUserId)
+        userDataUpdater = if (userDataUpdater?.userId != activeUserId) {
+            userDataSyncerFactory.create(userId = activeUserId)
+        } else {
+            userDataUpdater
         }
     }
 }
