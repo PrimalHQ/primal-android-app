@@ -1,5 +1,6 @@
 import java.net.URI
 
+
 pluginManagement {
     repositories {
         gradlePluginPortal()
@@ -41,9 +42,14 @@ include(":data:wallet:remote-nwc")
 include(":data:wallet:remote-tsunami")
 include(":data:wallet:repository")
 
+include(":data:account:local")
+include(":data:account:remote")
+include(":data:account:repository")
+
 include(":domain:nostr")
 include(":domain:primal")
 include(":domain:wallet")
+include(":domain:account")
 
 include(":paging-runtime-ios")
 include(":shared")
