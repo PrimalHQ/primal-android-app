@@ -13,8 +13,10 @@ private val nostrNpub1Regex = Regex("""\b(nostr:)?npub1(\w+)\b""")
 private val nostrNprofile1Regex = Regex("""\b(nostr:)?nprofile1(\w+)\b""")
 private val nostrNote1Regex = Regex("""\b(nostr:|@)?((note)1\w+)\b""")
 private val nostrNevent1Regex = Regex("""\b(nostr:|@)?((nevent)1\w+)\b""")
-private val rawImageUrlRegex =
-    Regex("""(https?://\S+\.(?:png|jpg|jpeg|gif|webp|avif))""", RegexOption.IGNORE_CASE)
+private val rawImageUrlRegex = Regex(
+    """(https?://\S+\.(?:png|jpg|jpeg|gif|webp|avif))""",
+    RegexOption.IGNORE_CASE,
+)
 
 fun String.replaceProfileNostrUrisWithMarkdownLinks(npubToDisplayNameMap: Map<String, String>): String {
     val replacedPart = nostrNpub1Regex.replace(this) { matchResult ->
@@ -123,7 +125,7 @@ fun String.isValidHttpOrHttpsUrl(): Boolean {
     }.getOrNull() == true
 }
 
-fun String.splitByRawImageUrls(): List<ArticleContentSegment> {
+private fun String.splitByRawImageUrls(): List<ArticleContentSegment> {
     val segments = mutableListOf<ArticleContentSegment>()
     var lastIndex = 0
 
