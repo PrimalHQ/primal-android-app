@@ -76,6 +76,7 @@ abstract class RepositoryFactory {
             tsunamiWalletService = WalletServiceFactoryImpl.createTsunamiWalletService(
                 tsunamiWalletSdk = tsunamiWalletSdk,
                 lightningPayHelper = lightningPayHelper,
+                eventRepository = eventRepository,
             ),
         )
     }

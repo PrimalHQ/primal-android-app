@@ -1,9 +1,9 @@
 package net.primal.wallet.data.repository.mappers.local
 
-import io.github.aakira.napier.Napier
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.NostrEntity
+import net.primal.domain.nostr.Nprofile
 import net.primal.domain.nostr.toNostrString
 import net.primal.domain.nostr.utils.asNostrEntity
 import net.primal.domain.profile.ProfileData
@@ -91,27 +91,55 @@ private fun WalletTransactionPO.fromPrimalTxToDomain(otherProfile: ProfileData?)
 
 private fun WalletTransactionPO.fromTsunamiTxToDomain(otherProfile: ProfileData?): TransactionDO {
     val zappedEntity = this.info.zappedEntity?.decrypted?.asNostrEntity()?.getOrNull()
-    Napier.i { zappedEntity.toString() }
-    return TransactionDO.Lightning(
-        transactionId = this.info.transactionId,
-        walletId = this.info.walletId,
-        walletType = this.info.walletType,
-        type = this.info.type,
-        state = this.info.state,
-        createdAt = this.info.createdAt.decrypted,
-        updatedAt = this.info.updatedAt,
-        completedAt = this.info.completedAt?.decrypted,
-        userId = this.info.userId.decrypted,
-        note = this.info.note?.decrypted,
-        invoice = this.info.invoice?.decrypted,
-        amountInBtc = this.info.amountInBtc.decrypted,
-        amountInUsd = this.primal?.amountInUsd?.decrypted,
-        exchangeRate = this.primal?.exchangeRate?.decrypted,
-        totalFeeInBtc = this.info.totalFeeInBtc?.decrypted,
-        otherUserId = this.info.otherUserId?.decrypted,
-        otherLightningAddress = this.primal?.otherLightningAddress?.decrypted,
-        otherUserProfile = otherProfile,
-    )
+    return when (zappedEntity) {
+        is Naddr, is Nevent, is Nprofile -> {
+            TransactionDO.Zap(
+                transactionId = this.info.transactionId,
+                walletId = this.info.walletId,
+                walletType = this.info.walletType,
+                type = this.info.type,
+                state = this.info.state,
+                createdAt = this.info.createdAt.decrypted,
+                updatedAt = this.info.updatedAt,
+                completedAt = this.info.completedAt?.decrypted,
+                userId = this.info.userId.decrypted,
+                note = this.info.note?.decrypted,
+                invoice = this.info.invoice?.decrypted,
+                amountInBtc = this.info.amountInBtc.decrypted,
+                amountInUsd = this.primal?.amountInUsd?.decrypted,
+                exchangeRate = this.primal?.exchangeRate?.decrypted,
+                totalFeeInBtc = this.info.totalFeeInBtc?.decrypted,
+                otherUserId = this.info.otherUserId?.decrypted,
+                otherLightningAddress = this.primal?.otherLightningAddress?.decrypted,
+                zappedEntity = zappedEntity,
+                zappedByUserId = this.info.zappedByUserId?.decrypted,
+                otherUserProfile = otherProfile,
+            )
+        }
+
+        null -> {
+            TransactionDO.Lightning(
+                transactionId = this.info.transactionId,
+                walletId = this.info.walletId,
+                walletType = this.info.walletType,
+                type = this.info.type,
+                state = this.info.state,
+                createdAt = this.info.createdAt.decrypted,
+                updatedAt = this.info.updatedAt,
+                completedAt = this.info.completedAt?.decrypted,
+                userId = this.info.userId.decrypted,
+                note = this.info.note?.decrypted,
+                invoice = this.info.invoice?.decrypted,
+                amountInBtc = this.info.amountInBtc.decrypted,
+                amountInUsd = this.primal?.amountInUsd?.decrypted,
+                exchangeRate = this.primal?.exchangeRate?.decrypted,
+                totalFeeInBtc = this.info.totalFeeInBtc?.decrypted,
+                otherUserId = this.info.otherUserId?.decrypted,
+                otherLightningAddress = this.primal?.otherLightningAddress?.decrypted,
+                otherUserProfile = otherProfile,
+            )
+        }
+    }
 }
 
 internal fun TransactionDto.toWalletTransactionData() =

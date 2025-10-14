@@ -2,6 +2,8 @@ package net.primal.wallet.data.repository.mappers.remote
 
 import net.primal.core.utils.CurrencyConversionUtils.msatsToBtc
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.utils.LnInvoiceUtils
 import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
@@ -13,7 +15,9 @@ internal fun TsunamiTransfer.mapAsWalletTransaction(
     userId: String,
     walletId: String,
     walletAddress: String?,
+    zapRequest: NostrEvent?,
 ): Transaction {
+    val zappedEntity = zapRequest?.toNostrEntity()
     val txType = if (this.direction.equals(TRANSFER_DIRECTION_INCOMING, ignoreCase = true)) {
         TxType.DEPOSIT
     } else {
@@ -47,9 +51,12 @@ internal fun TsunamiTransfer.mapAsWalletTransaction(
             TxType.DEPOSIT -> null
             TxType.WITHDRAW -> this.userRequest.lightningSendRequest?.fee?.originalValue?.msatsToBtc()?.toString()
         },
-        otherUserId = null,
-        zappedEntity = null,
-        zappedByUserId = null,
+        otherUserId = when (txType) {
+            TxType.DEPOSIT -> zapRequest?.pubKey
+            TxType.WITHDRAW -> zapRequest?.tags?.findFirstProfileId()
+        },
+        zappedByUserId = zapRequest?.pubKey,
+        zappedEntity = zappedEntity,
         otherUserProfile = null,
     )
 }
