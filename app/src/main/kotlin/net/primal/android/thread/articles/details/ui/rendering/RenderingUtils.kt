@@ -89,7 +89,8 @@ fun String.splitMarkdownByInlineImages(): List<ArticleContentSegment> {
 
     imageRegex.findAll(this).forEach { match ->
         if (match.range.first > lastEndIndex) {
-            result.add(ArticleContentSegment.Text(this.substring(lastEndIndex, match.range.first)))
+            val textSegment = this.substring(lastEndIndex, match.range.first)
+            result.addAll(textSegment.splitByRawImageUrls())
         }
 
         val linkedImageUrl = match.groups[LINKED_IMAGE_URL_GROUP_INDEX]?.value
@@ -106,7 +107,8 @@ fun String.splitMarkdownByInlineImages(): List<ArticleContentSegment> {
     }
 
     if (lastEndIndex < this.length) {
-        result.add(ArticleContentSegment.Text(this.substring(lastEndIndex)))
+        val remainingText = this.substring(lastEndIndex)
+        result.addAll(remainingText.splitByRawImageUrls())
     }
 
     return result
