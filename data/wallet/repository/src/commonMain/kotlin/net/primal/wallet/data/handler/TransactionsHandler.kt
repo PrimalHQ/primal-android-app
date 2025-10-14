@@ -23,8 +23,10 @@ internal class TransactionsHandler(
 ) {
     suspend fun fetchAndPersistLatestTransactions(wallet: Wallet, request: TransactionsRequest): Result<Unit> =
         runCatching {
-            val service = walletServiceFactory.getServiceForWallet(wallet)
-            val transactions = service.fetchTransactions(wallet = wallet, request = request).getOrThrow()
+            val transactions = withContext(dispatchers.io()) {
+                val service = walletServiceFactory.getServiceForWallet(wallet)
+                service.fetchTransactions(wallet = wallet, request = request).getOrThrow()
+            }
 
             val otherUserIds = transactions
                 .filterIsInstance<Transaction.Primal>()
