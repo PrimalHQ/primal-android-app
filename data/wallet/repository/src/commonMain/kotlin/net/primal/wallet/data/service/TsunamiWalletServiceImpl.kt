@@ -52,8 +52,8 @@ internal class TsunamiWalletServiceImpl(
                 val zapReceiptsMap = eventRepository.getZapReceipts(invoices = invoices).getOrNull()
 
                 transfers.map {
-                    val txInvoice = it.userRequest.lightningSendRequest?.encodedInvoice
-                        ?: it.userRequest.lightningReceiveRequest?.invoice?.encodedInvoice
+                    val txInvoice = it.userRequest?.lightningSendRequest?.encodedInvoice
+                        ?: it.userRequest?.lightningReceiveRequest?.invoice?.encodedInvoice
                     val zapRequest = zapReceiptsMap?.get(txInvoice)
 
                     it.mapAsWalletTransaction(
@@ -67,8 +67,8 @@ internal class TsunamiWalletServiceImpl(
         }
 
     private fun List<TsunamiTransfer>.extractAllLnInvoices(): List<String> {
-        val outgoingInvoices = this.mapNotNull { it.userRequest.lightningSendRequest?.encodedInvoice }
-        val incomingInvoices = this.mapNotNull { it.userRequest.lightningReceiveRequest?.invoice?.encodedInvoice }
+        val outgoingInvoices = this.mapNotNull { it.userRequest?.lightningSendRequest?.encodedInvoice }
+        val incomingInvoices = this.mapNotNull { it.userRequest?.lightningReceiveRequest?.invoice?.encodedInvoice }
         return outgoingInvoices + incomingInvoices
     }
 
