@@ -518,7 +518,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                             playbackUrl = nextPlaybackUrl,
                             playerState = playerState.copy(
                                 isLive = isLive,
-                                atLiveEdge = isLive,
+                                atLiveEdge = isLive && (!playerState.isLive || playerState.atLiveEdge),
                                 isVideoFinished = isVideoFinished,
                             ),
                             streamInfo = this.streamInfo?.copy(
