@@ -79,6 +79,8 @@ fun String.splitMarkdownByNostrUris(): List<String> {
  * - **Group 1**: URL of the inner image when wrapped in a link.
  * - **Group 2**: URL of the link wrapping the image.
  * - **Group 3**: URL of a standalone image.
+ *
+ * After splitting by markdown images, it also splits the resulting text segments by raw image URLs.
  */
 fun String.splitMarkdownByInlineImages(): List<ArticleContentSegment> {
     val imageRegex =
