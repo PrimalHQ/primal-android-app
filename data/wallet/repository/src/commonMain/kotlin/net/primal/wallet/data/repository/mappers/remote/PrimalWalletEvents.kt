@@ -2,7 +2,6 @@ package net.primal.wallet.data.repository.mappers.remote
 
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.wallet.WalletType
 import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.remote.nostr.ContentWalletTransaction
 
@@ -22,7 +21,6 @@ internal fun ContentWalletTransaction.asPrimalTransactionDO(
     return Transaction.Primal(
         transactionId = this.id,
         walletId = walletId,
-        walletType = WalletType.PRIMAL,
         type = this.type,
         state = this.state,
         createdAt = this.createdAt,

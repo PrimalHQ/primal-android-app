@@ -1,5 +1,6 @@
 package net.primal.wallet.data.repository.mappers.local
 
+import io.github.aakira.napier.Napier
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.NostrEntity
@@ -19,7 +20,7 @@ internal fun WalletTransactionPO.toDomain(otherProfile: ProfileData? = null): Tr
     when (this.info.walletType) {
         WalletType.PRIMAL -> fromPrimalTxToDomain(otherProfile = otherProfile)
         WalletType.NWC -> fromNostrTxToDomain(otherProfile = otherProfile)
-        WalletType.TSUNAMI -> throw NotImplementedError() // TODO Handler transactions for tsunami
+        WalletType.TSUNAMI -> fromTsunamiTxToDomain(otherProfile = otherProfile)
     }
 
 private fun WalletTransactionPO.fromNostrTxToDomain(otherProfile: ProfileData?) =
@@ -86,6 +87,31 @@ private fun WalletTransactionPO.fromPrimalTxToDomain(otherProfile: ProfileData?)
 
         else -> this.asLightningTransaction(otherProfile = otherProfile)
     }
+}
+
+private fun WalletTransactionPO.fromTsunamiTxToDomain(otherProfile: ProfileData?): TransactionDO {
+    val zappedEntity = this.info.zappedEntity?.decrypted?.asNostrEntity()?.getOrNull()
+    Napier.i { zappedEntity.toString() }
+    return TransactionDO.Lightning(
+        transactionId = this.info.transactionId,
+        walletId = this.info.walletId,
+        walletType = this.info.walletType,
+        type = this.info.type,
+        state = this.info.state,
+        createdAt = this.info.createdAt.decrypted,
+        updatedAt = this.info.updatedAt,
+        completedAt = this.info.completedAt?.decrypted,
+        userId = this.info.userId.decrypted,
+        note = this.info.note?.decrypted,
+        invoice = this.info.invoice?.decrypted,
+        amountInBtc = this.info.amountInBtc.decrypted,
+        amountInUsd = this.primal?.amountInUsd?.decrypted,
+        exchangeRate = this.primal?.exchangeRate?.decrypted,
+        totalFeeInBtc = this.info.totalFeeInBtc?.decrypted,
+        otherUserId = this.info.otherUserId?.decrypted,
+        otherLightningAddress = this.primal?.otherLightningAddress?.decrypted,
+        otherUserProfile = otherProfile,
+    )
 }
 
 internal fun TransactionDto.toWalletTransactionData() =

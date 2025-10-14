@@ -31,7 +31,6 @@ import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
 import net.primal.domain.wallet.Wallet
-import net.primal.domain.wallet.WalletType
 import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.repository.mappers.remote.toNostrEntity
@@ -83,7 +82,6 @@ internal class NostrWalletServiceImpl(
                     Transaction.NWC(
                         transactionId = transaction.paymentHash ?: transaction.invoice ?: Uuid.random().toString(),
                         walletId = wallet.walletId,
-                        walletType = WalletType.NWC,
                         type = when (transaction.type) {
                             InvoiceType.Incoming -> TxType.DEPOSIT
                             InvoiceType.Outgoing -> TxType.WITHDRAW

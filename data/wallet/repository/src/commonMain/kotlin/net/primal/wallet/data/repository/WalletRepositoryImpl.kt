@@ -39,7 +39,8 @@ import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.DepositRequestBody
 import net.primal.wallet.data.repository.mappers.local.toDomain
-import net.primal.wallet.data.repository.transactions.WalletTransactionsMediator
+import net.primal.wallet.data.repository.transactions.OffsetBasedWalletTransactionsMediator
+import net.primal.wallet.data.repository.transactions.TimestampBasedWalletTransactionsMediator
 import net.primal.wallet.data.service.WalletService
 import net.primal.wallet.data.service.factory.WalletServiceFactory
 
@@ -51,6 +52,13 @@ internal class WalletRepositoryImpl(
     private val walletDatabase: WalletDatabase,
     private val profileRepository: ProfileRepository,
 ) : WalletRepository {
+
+    private val transactionsHandler = TransactionsHandler(
+        dispatchers = dispatcherProvider,
+        walletServiceFactory = walletServiceFactory,
+        walletDatabase = walletDatabase,
+        profileRepository = profileRepository,
+    )
 
     override suspend fun upsertWalletSettings(walletId: String, spamThresholdAmountInSats: Long) =
         withContext(dispatcherProvider.io()) {
@@ -101,8 +109,8 @@ internal class WalletRepositoryImpl(
             }
         }
 
-    override fun latestTransactions(walletId: String): Flow<PagingData<Transaction>> {
-        return createTransactionsPager(walletId) {
+    override fun latestTransactions(walletId: String, walletType: WalletType): Flow<PagingData<Transaction>> {
+        return createTransactionsPager(walletId, walletType) {
             walletDatabase.walletTransactions().latestTransactionsPagedByWalletId(walletId = walletId)
         }.flow.mapNotNull {
             it.map { txData ->
@@ -239,6 +247,7 @@ internal class WalletRepositoryImpl(
 
     private fun createTransactionsPager(
         walletId: String,
+        walletType: WalletType,
         pagingSourceFactory: () -> PagingSource<Int, WalletTransaction>,
     ) = Pager(
         config = PagingConfig(
@@ -247,17 +256,20 @@ internal class WalletRepositoryImpl(
             initialLoadSize = 200,
             enablePlaceholders = true,
         ),
-        remoteMediator = WalletTransactionsMediator(
-            walletId = walletId,
-            dispatcherProvider = dispatcherProvider,
-            transactionsHandler = TransactionsHandler(
-                dispatchers = dispatcherProvider,
-                walletServiceFactory = walletServiceFactory,
+        remoteMediator = when (walletType) {
+            WalletType.TSUNAMI -> OffsetBasedWalletTransactionsMediator(
+                walletId = walletId,
+                dispatcherProvider = dispatcherProvider,
+                transactionsHandler = transactionsHandler,
                 walletDatabase = walletDatabase,
-                profileRepository = profileRepository,
-            ),
-            walletDatabase = walletDatabase,
-        ),
+            )
+            WalletType.PRIMAL, WalletType.NWC -> TimestampBasedWalletTransactionsMediator(
+                walletId = walletId,
+                dispatcherProvider = dispatcherProvider,
+                transactionsHandler = transactionsHandler,
+                walletDatabase = walletDatabase,
+            )
+        },
         pagingSourceFactory = pagingSourceFactory,
     )
 }
