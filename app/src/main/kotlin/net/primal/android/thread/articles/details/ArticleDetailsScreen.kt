@@ -196,7 +196,7 @@ private fun ArticleDetailsScreen(
     val listState = rememberLazyListState()
     val scrolledToTop by remember { derivedStateOf { listState.firstVisibleItemIndex == 0 } }
 
-    val articleParts by remember(detailsState.article?.content) {
+    val articleParts by remember(detailsState.article?.content, detailsState.npubToDisplayNameMap) {
         mutableStateOf(
             (detailsState.article?.content ?: "")
                 .splitMarkdownByNostrUris()
