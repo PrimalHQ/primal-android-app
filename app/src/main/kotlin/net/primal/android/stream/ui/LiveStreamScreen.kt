@@ -75,6 +75,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -503,6 +504,7 @@ private fun LiveStreamContent(
     onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
     val isInPipMode = rememberIsInPipMode()
+    val focusManager = LocalFocusManager.current
     val localConfiguration = LocalConfiguration.current
     val isLandscape = localConfiguration.orientation == Configuration.ORIENTATION_LANDSCAPE
     if (state.streamInfoLoading) {
@@ -601,39 +603,53 @@ private fun LiveStreamContent(
                         )
                     }
                     if (localConfiguration.orientation != Configuration.ORIENTATION_LANDSCAPE && !isInPipMode) {
-                        Column(
+                        Box(
                             modifier = Modifier
                                 .weight(1f)
                                 .fillMaxSize(),
                         ) {
-                            AnimatedVisibility(visible = !isCollapsed) {
-                                StreamInfoDisplay(
+                            Column(modifier = Modifier.fillMaxSize()) {
+                                AnimatedVisibility(visible = !isCollapsed) {
+                                    StreamInfoDisplay(
+                                        state = state,
+                                        onZapClick = onZapClick,
+                                        onInfoClick = onInfoClick,
+                                        onChatSettingsClick = onChatSettingsClick,
+                                        onDismissStreamControlPopup = {
+                                            eventPublisher(LiveStreamContract.UiEvent.DismissStreamControlPopup)
+                                        },
+                                        onTopZapsClick = {
+                                            eventPublisher(
+                                                LiveStreamContract.UiEvent.ChangeActiveBottomSheet(
+                                                    ActiveBottomSheet.StreamZapLeaderboard,
+                                                ),
+                                            )
+                                        },
+                                    )
+                                }
+
+                                LiveChatContent(
                                     state = state,
-                                    onZapClick = onZapClick,
-                                    onInfoClick = onInfoClick,
-                                    onChatSettingsClick = onChatSettingsClick,
-                                    onDismissStreamControlPopup = {
-                                        eventPublisher(LiveStreamContract.UiEvent.DismissStreamControlPopup)
-                                    },
-                                    onTopZapsClick = {
-                                        eventPublisher(
-                                            LiveStreamContract.UiEvent.ChangeActiveBottomSheet(
-                                                ActiveBottomSheet.StreamZapLeaderboard,
-                                            ),
-                                        )
-                                    },
+                                    listState = chatListState,
+                                    eventPublisher = eventPublisher,
+                                    onProfileClick = callbacks.onProfileClick,
+                                    onNostrUriClick = callbacks.onNostrUriClick,
+                                    onChatMessageClick = onChatMessageClick,
+                                    onZapMessageClick = onZapMessageClick,
                                 )
                             }
 
-                            LiveChatContent(
-                                state = state,
-                                listState = chatListState,
-                                eventPublisher = eventPublisher,
-                                onProfileClick = callbacks.onProfileClick,
-                                onNostrUriClick = callbacks.onNostrUriClick,
-                                onChatMessageClick = onChatMessageClick,
-                                onZapMessageClick = onZapMessageClick,
-                            )
+                            if (isKeyboardVisible) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .clickable(
+                                            interactionSource = remember { MutableInteractionSource() },
+                                            indication = null,
+                                            onClick = { focusManager.clearFocus() },
+                                        ),
+                                )
+                            }
                         }
                     }
                 }
