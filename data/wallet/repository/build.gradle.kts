@@ -45,7 +45,33 @@ kotlin {
                 implementation(project(":data:wallet:local"))
                 implementation(project(":data:wallet:remote-primal"))
                 implementation(project(":data:wallet:remote-nwc"))
-                implementation(libs.primal.tsunami.sdk.kmp)
+
+                val tsunamiSdkDependencyProvider = libs.primal.tsunami.sdk.kmp
+                val hasTsunamiSdkCompositeBuild = gradle.includedBuilds.any { it.name.contains("tsunami") }
+
+                if (hasTsunamiSdkCompositeBuild) {
+                    implementation(tsunamiSdkDependencyProvider)
+                    println("✓️ Using composite build for tsunami sdk.")
+                } else {
+                    val isTsunamiSdkPubliclyAvailable = providers.provider {
+                        try {
+                            configurations.detachedConfiguration(
+                                dependencies.create(tsunamiSdkDependencyProvider),
+                            ).resolve()
+                            true
+                        } catch (e: Exception) {
+                            false
+                        }
+                    }.get()
+
+                    if (isTsunamiSdkPubliclyAvailable) {
+                        implementation(tsunamiSdkDependencyProvider)
+                        println("✓️ Using tsunami sdk maven artifact.")
+                    } else {
+                        implementation(project(":data:wallet:remote-tsunami"))
+                        println("⚠️ Using stub for tsunami sdk.")
+                    }
+                }
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)

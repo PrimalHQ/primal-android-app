@@ -14,7 +14,7 @@ import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.tsunami.TsunamiWalletSdk
-import net.primal.tsunami.model.TsunamiTransfer
+import net.primal.tsunami.model.Transfer
 import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.repository.mappers.remote.mapAsWalletTransaction
 
@@ -52,8 +52,8 @@ internal class TsunamiWalletServiceImpl(
                 val zapReceiptsMap = eventRepository.getZapReceipts(invoices = invoices).getOrNull()
 
                 transfers.map {
-                    val txInvoice = it.userRequest?.lightningSendRequest?.encodedInvoice
-                        ?: it.userRequest?.lightningReceiveRequest?.invoice?.encodedInvoice
+                    val txInvoice = it.lightningSendRequest?.encodedInvoice
+                        ?: it.lightningReceiveRequest?.encodedInvoice
                     val zapRequest = zapReceiptsMap?.get(txInvoice)
 
                     it.mapAsWalletTransaction(
@@ -66,9 +66,9 @@ internal class TsunamiWalletServiceImpl(
             }.getOrThrow()
         }
 
-    private fun List<TsunamiTransfer>.extractAllLnInvoices(): List<String> {
-        val outgoingInvoices = this.mapNotNull { it.userRequest?.lightningSendRequest?.encodedInvoice }
-        val incomingInvoices = this.mapNotNull { it.userRequest?.lightningReceiveRequest?.invoice?.encodedInvoice }
+    private fun List<Transfer>.extractAllLnInvoices(): List<String> {
+        val outgoingInvoices = this.mapNotNull { it.lightningSendRequest?.encodedInvoice }
+        val incomingInvoices = this.mapNotNull { it.lightningReceiveRequest?.encodedInvoice }
         return outgoingInvoices + incomingInvoices
     }
 
