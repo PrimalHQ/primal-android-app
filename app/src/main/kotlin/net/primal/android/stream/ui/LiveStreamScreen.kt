@@ -76,6 +76,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -918,6 +919,8 @@ private fun LiveChatContent(
     onZapMessageClick: (EventZapUiModel) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
+    val isKeyboardVisible by keyboardVisibilityAsState()
+    val focusManager = LocalFocusManager.current
 
     val isAtBottom by remember { derivedStateOf { !listState.canScrollBackward } }
 
@@ -943,14 +946,32 @@ private fun LiveChatContent(
                 .weight(1f),
         ) {
             LiveChatListOrSearch(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { if (isKeyboardVisible) focusManager.clearFocus() },
+                    ),
                 state = state,
                 listState = listState,
                 eventPublisher = eventPublisher,
                 onProfileClick = onProfileClick,
                 onNostrUriClick = onNostrUriClick,
-                onChatMessageClick = onChatMessageClick,
-                onZapMessageClick = onZapMessageClick,
+                onChatMessageClick = {
+                    if (isKeyboardVisible) {
+                        focusManager.clearFocus()
+                    } else {
+                        onChatMessageClick(it)
+                    }
+                },
+                onZapMessageClick = {
+                    if (isKeyboardVisible) {
+                        focusManager.clearFocus()
+                    } else {
+                        onZapMessageClick(it)
+                    }
+                },
             )
 
             ScrollToBottomButton(
