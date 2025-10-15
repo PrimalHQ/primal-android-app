@@ -139,6 +139,7 @@ private fun NotificationListItem(
     onPostLongPressAction: ((FeedPostAction) -> Unit)? = null,
 ) {
     val firstNotification = notifications.first()
+    val shouldDisplayIcon = firstNotification.notificationType.shouldDisplayIcon()
 
     Row(
         modifier = Modifier
@@ -158,12 +159,15 @@ private fun NotificationListItem(
                 },
             ),
     ) {
-        NotificationIconAndExtraStats(
-            icon = imagePainter,
-            notifications = notifications,
-        )
+        if (shouldDisplayIcon) {
+            NotificationIconAndExtraStats(
+                icon = imagePainter,
+                notifications = notifications,
+            )
+        }
 
         NotificationContent(
+            modifier = if (!shouldDisplayIcon) Modifier.padding(start = 16.dp) else Modifier,
             notifications = notifications,
             isSeen = isSeen,
             suffixText = suffixText,
@@ -176,6 +180,7 @@ private fun NotificationListItem(
 
 @Composable
 private fun NotificationContent(
+    modifier: Modifier = Modifier,
     notifications: List<NotificationUi>,
     isSeen: Boolean,
     suffixText: String,
@@ -186,7 +191,7 @@ private fun NotificationContent(
     val firstNotification = notifications.first()
     val actionPost = firstNotification.actionPost
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
     ) {
         if (notifications.size == 1) {
             val bottomPadding = if (firstNotification.referencedStream != null) 5.dp else 12.dp
@@ -455,6 +460,13 @@ private fun HeaderContent(
         },
         legendaryCustomization = firstNotification.actionUserLegendaryCustomization,
     )
+}
+
+private fun NotificationType.shouldDisplayIcon(): Boolean {
+    return when (this) {
+        NotificationType.YOUR_POST_WAS_REPLIED_TO -> false
+        else -> true
+    }
 }
 
 @Composable
