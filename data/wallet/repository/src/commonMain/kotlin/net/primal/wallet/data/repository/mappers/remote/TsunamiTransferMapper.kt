@@ -7,21 +7,20 @@ import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.utils.LnInvoiceUtils
 import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
-import net.primal.tsunami.model.TRANSFER_DIRECTION_INCOMING
-import net.primal.tsunami.model.TsunamiTransfer
+import net.primal.tsunami.model.Transfer
+import net.primal.tsunami.model.TransferDirection
 import net.primal.wallet.data.model.Transaction
 
-internal fun TsunamiTransfer.mapAsWalletTransaction(
+internal fun Transfer.mapAsWalletTransaction(
     userId: String,
     walletId: String,
     walletAddress: String?,
     zapRequest: NostrEvent?,
 ): Transaction {
     val zappedEntity = zapRequest?.toNostrEntity()
-    val txType = if (this.direction.equals(TRANSFER_DIRECTION_INCOMING, ignoreCase = true)) {
-        TxType.DEPOSIT
-    } else {
-        TxType.WITHDRAW
+    val txType = when (this.direction) {
+        TransferDirection.Incoming -> TxType.DEPOSIT
+        TransferDirection.Outgoing -> TxType.WITHDRAW
     }
 
     return Transaction.Tsunami(
@@ -29,27 +28,23 @@ internal fun TsunamiTransfer.mapAsWalletTransaction(
         walletId = walletId,
         type = txType,
         state = TxState.SUCCEEDED,
-        createdAt = this.createdAt.secsSinceEpoch,
-        updatedAt = this.updatedAt.secsSinceEpoch,
-        completedAt = this.updatedAt.secsSinceEpoch,
+        createdAt = this.createdAt,
+        updatedAt = this.updatedAt,
+        completedAt = this.updatedAt,
         userId = userId,
         note = when (txType) {
-            TxType.DEPOSIT ->
-                this.userRequest?.lightningReceiveRequest?.invoice
-                    ?.encodedInvoice?.let(LnInvoiceUtils::getDescription)
-
-            TxType.WITHDRAW ->
-                this.userRequest?.lightningSendRequest
-                    ?.encodedInvoice?.let(LnInvoiceUtils::getDescription)
+            TxType.DEPOSIT -> this.lightningReceiveRequest?.encodedInvoice?.let(LnInvoiceUtils::getDescription)
+            TxType.WITHDRAW -> this.lightningSendRequest?.encodedInvoice?.let(LnInvoiceUtils::getDescription)
         },
         invoice = when (txType) {
-            TxType.DEPOSIT -> this.userRequest?.lightningReceiveRequest?.invoice?.encodedInvoice
-            TxType.WITHDRAW -> this.userRequest?.lightningSendRequest?.encodedInvoice
+            TxType.DEPOSIT -> this.lightningReceiveRequest?.encodedInvoice
+            TxType.WITHDRAW -> this.lightningSendRequest?.encodedInvoice
         },
-        amountInBtc = this.totalValueSat.toBtc(),
+        amountInBtc = this.totalAmountInSats.toBtc(),
         totalFeeInBtc = when (txType) {
             TxType.DEPOSIT -> null
-            TxType.WITHDRAW -> this.userRequest?.lightningSendRequest?.fee?.originalValue?.msatsToBtc()?.toString()
+            TxType.WITHDRAW -> this.lightningSendRequest?.feeInMillisats?.msatsToBtc()
+                ?.toString()
         },
         otherUserId = when (txType) {
             TxType.DEPOSIT -> zapRequest?.pubKey
