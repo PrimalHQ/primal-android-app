@@ -22,6 +22,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -952,28 +953,11 @@ private fun LiveChatContent(
                 onZapMessageClick = onZapMessageClick,
             )
 
-            androidx.compose.animation.AnimatedVisibility(
-                modifier = Modifier.align(Alignment.BottomEnd),
-                visible = !isAtBottom && !state.userTaggingState.isUserTaggingActive,
-                enter = fadeIn() + slideInVertically { it / 2 },
-                exit = fadeOut(),
-            ) {
-                IconButton(
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
-                    onClick = { coroutineScope.launch { listState.animateScrollToItem(index = 0) } },
-                ) {
-                    Icon(
-                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                        modifier = Modifier.padding(8.dp),
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                    )
-                }
-            }
+            ScrollToBottomButton(
+                isAtBottom = isAtBottom,
+                isUserTaggingActive = state.userTaggingState.isUserTaggingActive,
+                onClick = { coroutineScope.launch { listState.animateScrollToItem(index = 0) } },
+            )
         }
 
         if (!state.chatLoading) {
@@ -991,6 +975,36 @@ private fun LiveChatContent(
                 onUserTagSearch = { query ->
                     eventPublisher(LiveStreamContract.UiEvent.SearchUsers(query = query))
                 },
+            )
+        }
+    }
+}
+
+@Composable
+private fun BoxScope.ScrollToBottomButton(
+    isAtBottom: Boolean,
+    isUserTaggingActive: Boolean,
+    onClick: () -> Unit,
+) {
+    AnimatedVisibility(
+        modifier = Modifier.align(Alignment.BottomEnd),
+        visible = !isAtBottom && !isUserTaggingActive,
+        enter = fadeIn() + slideInVertically { it / 2 },
+        exit = fadeOut(),
+    ) {
+        IconButton(
+            modifier = Modifier
+                .padding(16.dp)
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
+            onClick = onClick,
+        ) {
+            Icon(
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                modifier = Modifier.padding(8.dp),
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
             )
         }
     }
