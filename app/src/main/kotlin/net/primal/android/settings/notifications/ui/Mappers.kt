@@ -21,7 +21,7 @@ fun ContentAppSettings.mapAsPushNotificationSwitchUi() =
             PushNotifications.WalletTransactions,
             PushNotifications.LiveEvents,
         ).map { pushNotificationType ->
-            val enabled = remoteMap[pushNotificationType.id]?.jsonPrimitive?.booleanOrNull ?: false
+            val enabled = remoteMap[pushNotificationType.id]?.jsonPrimitive?.booleanOrNull ?: true
             NotificationSwitchUi<PushNotifications>(settingsType = pushNotificationType, enabled = enabled)
         }
     }
@@ -67,7 +67,11 @@ fun ContentAppSettings.mapAsNotificationsPreferences() =
             Preferences.DMsFromFollows,
             Preferences.ReactionsFromFollows,
         ).map { preferenceType ->
-            val enabled = remoteMap[preferenceType.id]?.jsonPrimitive?.booleanOrNull ?: false
+            val enabled = remoteMap[preferenceType.id]?.jsonPrimitive?.booleanOrNull
+                ?: when (preferenceType) {
+                    is Preferences.ReactionsFromFollows -> false
+                    else -> true
+                }
             NotificationSwitchUi(settingsType = preferenceType, enabled = enabled)
         }
     }
