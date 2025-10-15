@@ -25,6 +25,7 @@ private fun ContentPrimalNotification.parseActionUserId(type: NotificationType):
         NotificationType.YOUR_POST_WAS_HIGHLIGHTED -> this.whoHighlightedIt
         NotificationType.YOUR_POST_WAS_BOOKMARKED -> this.whoBookmarkedIt
         NotificationType.LIVE_EVENT_HAPPENING -> this.host
+        NotificationType.REPLY_TO_REPLY -> this.whoRepliedToIt
     }
 }
 

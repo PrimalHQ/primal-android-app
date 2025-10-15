@@ -384,6 +384,10 @@ private fun NotificationSettingsSection.toTitle(): String =
 @Composable
 private fun NotificationSettingsType.toTitle(): String =
     when (this) {
+        NotificationSettingsType.Preferences.ReplyRoReply -> stringResource(
+            R.string.settings_notifications_group_preferences_reply_to_reply,
+        )
+
         NotificationSettingsType.Preferences.DMsFromFollows -> stringResource(
             R.string.settings_notifications_group_preferences_DMS_from_follows,
         )
@@ -447,12 +451,16 @@ private fun NotificationSettingsType.toTitle(): String =
 
         NotificationSettingsType.TabNotifications.Zaps -> stringResource(R.string.settings_notifications_group_zaps)
 
-//        NotificationSettingsType.TabNotifications.LiveEvents -> stringResource(
-//            id = R.string.settings_notifications_live_streams,
-//        )
+        NotificationSettingsType.TabNotifications.LiveEvents -> stringResource(
+            id = R.string.settings_notifications_live_streams,
+        )
+
+        NotificationSettingsType.PushNotifications.LiveEvents -> stringResource(
+            id = R.string.settings_notifications_live_streams,
+        )
     }
 
-@Suppress("CyclomaticComplexMethod")
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 private fun NotificationSettingsType.toImagePainter(): Painter? =
     when (this) {
@@ -541,11 +549,17 @@ private fun NotificationSettingsType.toImagePainter(): Painter? =
                 lightResId = R.drawable.notification_type_your_post_was_zapped_light,
             )
 
-//        NotificationSettingsType.TabNotifications.LiveEvents ->
-//            painterResource(
-//                darkResId = R.drawable.notification_type_live_stream_dark,
-//                lightResId = R.drawable.notification_type_live_stream_light,
-//            )
+        NotificationSettingsType.TabNotifications.LiveEvents ->
+            painterResource(
+                darkResId = R.drawable.notification_type_live_stream_dark,
+                lightResId = R.drawable.notification_type_live_stream_light,
+            )
+
+        NotificationSettingsType.PushNotifications.LiveEvents ->
+            painterResource(
+                darkResId = R.drawable.notification_type_live_stream_dark,
+                lightResId = R.drawable.notification_type_live_stream_light,
+            )
     }
 
 @Preview
