@@ -98,4 +98,9 @@ fun NotificationType.toImagePainter(): Painter =
             darkResId = R.drawable.notification_type_live_stream_dark,
             lightResId = R.drawable.notification_type_live_stream_light,
         )
+
+        NotificationType.REPLY_TO_REPLY -> painterResource(
+            darkResId = R.drawable.notification_type_your_post_was_replied_to_dark,
+            lightResId = R.drawable.notification_type_your_post_was_replied_to_light,
+        )
     }

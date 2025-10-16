@@ -103,6 +103,11 @@ enum class NotificationType(
         type = 501,
         collapsable = false,
     ),
+    REPLY_TO_REPLY(
+        id = "REPLY_TO_REPLY",
+        type = 601,
+        collapsable = false,
+    ),
     ;
 
     companion object {

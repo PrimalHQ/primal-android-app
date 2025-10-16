@@ -593,6 +593,10 @@ private fun NotificationType.toSuffixText(
                 id = R.string.notification_list_item_was_live,
             )
         }
+
+        NotificationType.REPLY_TO_REPLY -> stringResource(
+            id = R.string.notification_list_item_replied_to_reply,
+        )
     }
 
 private val PreviewExamplePost = FeedPostUi(

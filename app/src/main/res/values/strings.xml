@@ -807,6 +807,7 @@
     <string name="notification_list_item_is_live">is live</string>
     <string name="notification_list_item_was_live">was live</string>
     <string name="notification_list_item_highlighted_your_article">highlighted your article</string>
+    <string name="notification_list_item_replied_to_reply">replied to a reply</string>
     <string name="notification_list_button_jump_to_start">New notifications</string>
 
     <string name="messages_title">Messages</string>
@@ -925,6 +926,7 @@
     <string name="settings_notifications_group_mentions">Mentions</string>
     <string name="settings_notifications_group_direct_messages">Direct Messages</string>
     <string name="settings_notifications_group_wallet_txs">Wallet Transactions</string>
+    <string name="settings_notifications_group_preferences_reply_to_reply">Include replies to replies</string>
     <string name="settings_notifications_group_preferences_hell_thread">Ignore notes with more than 10 user mentions</string>
     <string name="settings_notifications_group_preferences_DMS_from_follows">Only show DM notifications from users I follow</string>
     <string name="settings_notifications_group_preferences_reactions_from_follows">Only show reactions from users I follow</string>

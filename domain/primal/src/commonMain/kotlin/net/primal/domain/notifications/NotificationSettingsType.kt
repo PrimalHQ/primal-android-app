@@ -29,6 +29,7 @@ sealed class NotificationSettingsType(val id: String, val order: Int) {
         data object Mentions : PushNotifications(id = MENTIONS, order = 6)
         data object DirectMessages : PushNotifications(id = DIRECT_MESSAGES, order = 7)
         data object WalletTransactions : PushNotifications(id = WALLET_TRANSACTIONS, order = 8)
+        data object LiveEvents : PushNotifications(id = LIVE_EVENTS, order = 9)
 
         companion object {
             private const val NEW_FOLLOWS = "NEW_FOLLOWS"
@@ -39,9 +40,11 @@ sealed class NotificationSettingsType(val id: String, val order: Int) {
             private const val MENTIONS = "MENTIONS"
             private const val DIRECT_MESSAGES = "DIRECT_MESSAGES"
             private const val WALLET_TRANSACTIONS = "WALLET_TRANSACTIONS"
+            private const val LIVE_EVENTS = "LIVE_EVENT_HAPPENING"
 
             fun valueOf(id: String): PushNotifications? {
                 return when (id) {
+                    LIVE_EVENTS -> LiveEvents
                     NEW_FOLLOWS -> NewFollows
                     ZAPS -> Zaps
                     REACTIONS -> Reactions
@@ -57,17 +60,20 @@ sealed class NotificationSettingsType(val id: String, val order: Int) {
     }
 
     sealed class Preferences(id: String, order: Int) : NotificationSettingsType(id = id, order = order) {
+        data object ReplyRoReply : Preferences(id = REPLY_TO_REPLY, order = 0)
         data object HellThread : Preferences(id = HELL_THREAD, order = 1)
         data object DMsFromFollows : Preferences(id = DMS_FROM_FOLLOWS, order = 2)
         data object ReactionsFromFollows : Preferences(id = REACTIONS_FROM_FOLLOWS, order = 3)
 
         companion object {
+            private const val REPLY_TO_REPLY = "include_deep_replies"
             private const val HELL_THREAD = "ignore_events_with_too_many_mentions"
             private const val DMS_FROM_FOLLOWS = "only_show_dm_notifications_from_users_i_follow"
             private const val REACTIONS_FROM_FOLLOWS = "only_show_reactions_from_users_i_follow"
 
             fun valueOf(id: String): Preferences? {
                 return when (id) {
+                    REPLY_TO_REPLY -> ReplyRoReply
                     HELL_THREAD -> HellThread
                     DMS_FROM_FOLLOWS -> DMsFromFollows
                     REACTIONS_FROM_FOLLOWS -> ReactionsFromFollows
@@ -142,12 +148,12 @@ sealed class NotificationSettingsType(val id: String, val order: Int) {
             order = 6,
         )
 
-//        data object LiveEvents : TabNotifications(
-//            id = "LIVE_EVENTS",
-//            types = listOf(
-//                NotificationType.LIVE_EVENT_HAPPENING,
-//            ),
-//            order = 7,
-//        )
+        data object LiveEvents : TabNotifications(
+            id = "LIVE_EVENTS",
+            types = listOf(
+                NotificationType.LIVE_EVENT_HAPPENING,
+            ),
+            order = 7,
+        )
     }
 }

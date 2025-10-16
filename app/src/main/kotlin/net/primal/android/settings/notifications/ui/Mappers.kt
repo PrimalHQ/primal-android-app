@@ -9,16 +9,22 @@ import net.primal.domain.notifications.NotificationSettingsType.TabNotifications
 import net.primal.domain.notifications.NotificationType
 
 fun ContentAppSettings.mapAsPushNotificationSwitchUi() =
-    pushNotifications.toMap()
-        .mapNotNull {
-            val type = PushNotifications.valueOf(id = it.key)
-            val enabled = it.value.jsonPrimitive.booleanOrNull
-            if (type != null && enabled != null) {
-                NotificationSwitchUi<PushNotifications>(settingsType = type, enabled = enabled)
-            } else {
-                null
-            }
+    pushNotifications.toMap().let { remoteMap ->
+        listOf(
+            PushNotifications.NewFollows,
+            PushNotifications.Zaps,
+            PushNotifications.Reactions,
+            PushNotifications.Replies,
+            PushNotifications.Reposts,
+            PushNotifications.Mentions,
+            PushNotifications.DirectMessages,
+            PushNotifications.WalletTransactions,
+            PushNotifications.LiveEvents,
+        ).map { pushNotificationType ->
+            val enabled = remoteMap[pushNotificationType.id]?.jsonPrimitive?.booleanOrNull ?: true
+            NotificationSwitchUi<PushNotifications>(settingsType = pushNotificationType, enabled = enabled)
         }
+    }
         .sortedBy { it.settingsType.order }
 
 private fun TabNotifications.resolveIfEnabled(
@@ -47,19 +53,25 @@ fun ContentAppSettings.mapAsTabNotificationSwitchUi() =
                 TabNotifications.Replies.resolveIfEnabled(remoteMap),
                 TabNotifications.Reposts.resolveIfEnabled(remoteMap),
                 TabNotifications.Mentions.resolveIfEnabled(remoteMap),
+                TabNotifications.LiveEvents.resolveIfEnabled(remoteMap),
             )
         }.map {
             NotificationSwitchUi<TabNotifications>(settingsType = it.first, enabled = it.second)
         }
 
 fun ContentAppSettings.mapAsNotificationsPreferences() =
-    notificationsAdditional.toMap()
-        .mapNotNull {
-            val type = Preferences.valueOf(id = it.key)
-            val enabled = it.value.jsonPrimitive.booleanOrNull
-            if (type != null && enabled != null) {
-                NotificationSwitchUi<Preferences>(settingsType = type, enabled = enabled)
-            } else {
-                null
-            }
+    notificationsAdditional.toMap().let { remoteMap ->
+        listOf(
+            Preferences.ReplyRoReply,
+            Preferences.HellThread,
+            Preferences.DMsFromFollows,
+            Preferences.ReactionsFromFollows,
+        ).map { preferenceType ->
+            val enabled = remoteMap[preferenceType.id]?.jsonPrimitive?.booleanOrNull
+                ?: when (preferenceType) {
+                    is Preferences.ReactionsFromFollows -> false
+                    else -> true
+                }
+            NotificationSwitchUi(settingsType = preferenceType, enabled = enabled)
         }
+    }

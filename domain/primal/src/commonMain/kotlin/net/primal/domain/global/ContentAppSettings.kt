@@ -21,11 +21,13 @@ data class ContentAppSettings(
         put("MENTIONS", JsonPrimitive(true))
         put("DIRECT_MESSAGES", JsonPrimitive(true))
         put("WALLET_TRANSACTIONS", JsonPrimitive(true))
+        put("LIVE_EVENT_HAPPENING", JsonPrimitive(true))
     },
     val notificationsAdditional: JsonObject = buildJsonObject {
         put("ignore_events_with_too_many_mentions", JsonPrimitive(true))
         put("only_show_dm_notifications_from_users_i_follow", JsonPrimitive(true))
         put("only_show_reactions_from_users_i_follow", JsonPrimitive(false))
+        put("include_deep_replies", JsonPrimitive(true))
     },
     @Deprecated("Replaced with zapDefault.") val defaultZapAmount: ULong? = null,
     @Deprecated("Replaced with zapsConfig.") val zapOptions: List<ULong> = emptyList(),
