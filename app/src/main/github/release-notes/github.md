@@ -1,6 +1,14 @@
 ## Changes
-- Implemented Stream Ended state (#689)
-- Implemented scroll to bottom floating button for stream chat
-- Fixed stream chat messages scrollable in message details
-- Fixed not being able to switch stream
-- Fixed thread screen "jumping" issue
+- Implemented replay button on stream and recording ended state (#691)
+- Added live stream and reply-to-reply notification settings (#703)
+- Replies in Notifications are now full width (#702)
+- Improved article content parser for Images and Notes (#696)
+- Fixed zap receipts to use main host as recipient user id (#695)
+- Fixed `Started now ago` timestamp on streams (#705)
+- Fixed player line visible at the top on light theme
+- Fixed keyboard dismiss on stream chat click
+- Fixed stream rewinding to live when stream data updates (#699)
+- Fixed data fetches with empty pubkey on login (#697)
+- Improve seekbar and player controls visibility for streams
+- Fixed wallet data leftovers when user logs out (#704)
+- Upgraded acinq libs to fix 16KB issue with Google Play
