@@ -19,11 +19,11 @@ private const val MONTH = DAY * 30
 private const val YEAR = DAY * 365
 
 @Composable
-fun Instant.asBeforeNowFormat(shortFormat: Boolean = true): String {
+fun Instant.asBeforeNowFormat(shortFormat: Boolean = true, agoSuffixOnShortFormat: Boolean = false): String {
     val now = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
     val diff = ChronoUnit.SECONDS.between(this, now)
 
-    return when {
+    val timeText = when {
         diff < MINUTE -> stringResource(R.string.timestamp_since_just_now)
 
         diff < HOUR -> (diff / MINUTE).format(
@@ -61,6 +61,12 @@ fun Instant.asBeforeNowFormat(shortFormat: Boolean = true): String {
             longResId = R.plurals.timestamp_since_years,
             shortFormat = shortFormat,
         )
+    }
+
+    return if (shortFormat && agoSuffixOnShortFormat && diff >= MINUTE) {
+        stringResource(R.string.timestamp_ago_format, timeText)
+    } else {
+        timeText
     }
 }
 

@@ -44,8 +44,11 @@ fun StreamMetaData(
         if (startedAt != null) {
             Text(
                 text = stringResource(
-                    id = R.string.live_stream_started_at,
-                    Instant.ofEpochSecond(startedAt).asBeforeNowFormat(),
+                    id = R.string.live_stream_started_at_prefix,
+                    Instant.ofEpochSecond(startedAt).asBeforeNowFormat(
+                        shortFormat = true,
+                        agoSuffixOnShortFormat = true,
+                    ),
                 ),
                 color = textColor,
                 style = AppTheme.typography.bodyMedium.copy(
