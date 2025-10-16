@@ -133,7 +133,7 @@ class UserRepository @Inject constructor(
     suspend fun clearAllUserRelatedData(userId: String) =
         withContext(dispatchers.io()) {
             userDataCleanupRepository.clearUserData(userId)
-            walletRepository.deleteAllTransactions(userId)
+            walletRepository.deleteAllUserData(userId)
             usersDatabase.withTransaction {
                 usersDatabase.userProfileInteractions().deleteAllByOwnerId(ownerId = userId)
                 usersDatabase.relays().deleteAll(userId = userId)

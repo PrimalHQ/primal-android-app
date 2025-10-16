@@ -31,8 +31,12 @@ interface WalletDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrIgnoreWalletInfo(info: WalletInfo)
 
+    @Transaction
     @Query("SELECT * FROM WalletInfo WHERE userId = :userId")
     fun observeWalletsByUserId(userId: Encryptable<String>): Flow<List<Wallet>>
+
+    @Query("SELECT * FROM WalletInfo WHERE userId = :userId")
+    suspend fun findWalletInfosByUserId(userId: Encryptable<String>): List<WalletInfo>
 
     @Query("UPDATE WalletInfo SET lightningAddress = :lightningAddress WHERE walletId = :walletId")
     suspend fun updateWalletLightningAddress(walletId: String, lightningAddress: Encryptable<String>?)
@@ -79,9 +83,11 @@ interface WalletDao {
     @Query("SELECT * FROM WalletInfo WHERE walletId = :walletId")
     suspend fun findWalletInfo(walletId: String): WalletInfo?
 
+    @Transaction
     @Query("SELECT * FROM WalletInfo WHERE walletId = :walletId")
     suspend fun findWallet(walletId: String): Wallet?
 
+    @Transaction
     @Query(
         """
         SELECT * FROM WalletInfo

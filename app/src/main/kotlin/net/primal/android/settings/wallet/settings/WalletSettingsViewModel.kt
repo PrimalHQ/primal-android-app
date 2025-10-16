@@ -161,7 +161,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 walletId = state.value.wallet?.walletId ?: activeAccountStore.activeUserId(),
                 spamThresholdAmountInSats = amountInSats,
             )
-            walletRepository.deleteAllTransactions(userId = activeAccountStore.activeUserId())
+            walletRepository.deleteAllUserData(userId = activeAccountStore.activeUserId())
         }
 
     private fun PrimalNwcConnectionInfo.mapAsConnectedAppUi(): NwcConnectionInfo {

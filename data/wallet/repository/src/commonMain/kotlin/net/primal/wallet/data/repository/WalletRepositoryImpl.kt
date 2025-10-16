@@ -126,6 +126,24 @@ internal class WalletRepositoryImpl(
             transaction.toDomain(otherProfile = profile)
         }
 
+    override suspend fun deleteAllUserData(userId: String) =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.withTransaction {
+                val wallets = walletDatabase.wallet().findWalletInfosByUserId(userId.asEncryptable())
+                val walletIds = wallets.map { it.walletId }
+
+                if (walletIds.isNotEmpty()) {
+                    walletDatabase.walletSettings().deleteWalletSettings(walletIds)
+                    walletIds.forEach { walletId ->
+                        walletDatabase.wallet().deleteWalletById(walletId)
+                    }
+                }
+
+                walletDatabase.walletTransactions().deleteAllUserTransactions(userId.asEncryptable())
+                walletDatabase.wallet().clearActiveWallet(userId)
+            }
+        }
+
     override suspend fun pay(walletId: String, request: TxRequest): Result<Unit> =
         withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
@@ -248,11 +266,6 @@ internal class WalletRepositoryImpl(
             )
         }
     }
-
-    override suspend fun deleteAllTransactions(userId: String) =
-        withContext(dispatcherProvider.io()) {
-            walletDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId.asEncryptable())
-        }
 
     private fun createTransactionsPager(
         walletId: String,

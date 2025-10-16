@@ -27,7 +27,7 @@ interface WalletRepository {
 
     suspend fun findTransactionByIdOrNull(txId: String): Transaction?
 
-    suspend fun deleteAllTransactions(userId: String)
+    suspend fun deleteAllUserData(userId: String)
 
     suspend fun pay(walletId: String, request: TxRequest): Result<Unit>
 

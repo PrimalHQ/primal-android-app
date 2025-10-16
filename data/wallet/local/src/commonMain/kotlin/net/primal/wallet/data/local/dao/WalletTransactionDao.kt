@@ -20,6 +20,7 @@ interface WalletTransactionDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertAllNostrTransactions(data: List<NostrTransactionData>)
 
+    @Transaction
     @Query(
         """
             SELECT * FROM WalletTransactionData 
@@ -41,4 +42,23 @@ interface WalletTransactionDao {
 
     @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
     suspend fun deleteAllTransactionsByUserId(userId: Encryptable<String>)
+
+    @Query("SELECT transactionId FROM WalletTransactionData WHERE userId = :userId")
+    suspend fun findTransactionIdsByUserId(userId: Encryptable<String>): List<String>
+
+    @Query("DELETE FROM PrimalTransactionData WHERE transactionId IN (:transactionIds)")
+    suspend fun deletePrimalTransactionsByIds(transactionIds: List<String>)
+
+    @Query("DELETE FROM NostrTransactionData WHERE transactionId IN (:transactionIds)")
+    suspend fun deleteNostrTransactionsByIds(transactionIds: List<String>)
+
+    @Transaction
+    suspend fun deleteAllUserTransactions(userId: Encryptable<String>) {
+        val txIds = findTransactionIdsByUserId(userId)
+        if (txIds.isNotEmpty()) {
+            deletePrimalTransactionsByIds(txIds)
+            deleteNostrTransactionsByIds(txIds)
+        }
+        deleteAllTransactionsByUserId(userId)
+    }
 }
