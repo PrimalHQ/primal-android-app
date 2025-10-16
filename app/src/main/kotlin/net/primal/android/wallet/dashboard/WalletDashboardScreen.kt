@@ -144,12 +144,12 @@ fun WalletDashboardScreen(
     val pagingItems = state.transactions.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
-    val canShowWalletPicker = state.userWallets.isNotEmpty() && state.userWallets.size > 1 && state.wallet != null
+    val canShowWalletPicker = false
     var walletPickerVisible by remember { mutableStateOf(false) }
     if (walletPickerVisible && canShowWalletPicker) {
         WalletPickerBottomSheet(
             wallets = state.userWallets,
-            activeWallet = state.wallet,
+            activeWallet = state.wallet!!,
             onDismissRequest = { walletPickerVisible = false },
             onConfigureWalletsClick = onConfigureWalletsClick,
             onActiveWalletChanged = {
@@ -220,11 +220,7 @@ fun WalletDashboardScreen(
         topAppBar = { scrollBehaviour ->
             PrimalTopAppBar(
                 modifier = Modifier.onSizeChanged { topBarHeight = it.height },
-                title = when (state.wallet) {
-                    is Wallet.NWC -> stringResource(id = R.string.wallet_nwc_title)
-                    is Wallet.Primal -> stringResource(id = R.string.wallet_primal_title)
-                    null -> stringResource(id = R.string.wallet_title)
-                },
+                title = stringResource(id = R.string.wallet_title),
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 legendaryCustomization = state.activeAccountLegendaryCustomization,
                 avatarBlossoms = state.activeAccountBlossoms,
