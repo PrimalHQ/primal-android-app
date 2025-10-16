@@ -15,7 +15,6 @@ import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.getOrNull
-import net.primal.domain.usecase.CreateTsunamiWalletUseCase
 
 class LoginHandler @Inject constructor(
     private val settingsRepository: SettingsRepository,
@@ -25,7 +24,6 @@ class LoginHandler @Inject constructor(
     private val bookmarksRepository: PublicBookmarksRepository,
     private val walletAccountRepository: WalletAccountRepository,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
-    private val createTsunamiWalletUseCase: CreateTsunamiWalletUseCase,
     private val dispatchers: DispatcherProvider,
     private val credentialsStore: CredentialsStore,
     private val nostrNotary: NostrNotary,
@@ -50,10 +48,7 @@ class LoginHandler @Inject constructor(
             userRepository.fetchAndUpdateUserAccount(userId = userId)
 
             val primalWalletId = primalWalletAccountRepository.fetchWalletAccountInfo(userId = userId)
-            val tsunamiKey = if (loginType == LoginType.PrivateKey) nostrKey else userId
-            val tsunamiWalletId = createTsunamiWalletUseCase.invoke(userId = userId, walletKey = tsunamiKey)
-            val walletId = tsunamiWalletId.getOrNull() ?: primalWalletId.getOrNull()
-            walletId?.let { walletAccountRepository.setActiveWallet(userId = userId, walletId = it) }
+            primalWalletId.getOrNull()?.let { walletAccountRepository.setActiveWallet(userId = userId, walletId = it) }
 
             bookmarksRepository.fetchAndPersistBookmarks(userId = userId)
             authorizationEvent?.let {
