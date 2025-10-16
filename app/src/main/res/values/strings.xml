@@ -1357,6 +1357,7 @@
     <string name="live_stream_starting">Starting</string>
     <string name="live_stream_started_at">Started %1$s ago</string>
     <string name="live_stream_streamed">Streamed %1$s ago</string>
+    <string name="live_stream_started_now">Started now</string>
     <string name="live_stream_viewers_count">%1$s watching</string>
     <string name="live_stream_followers_count">%1$s followers</string>
     <string name="live_stream_join_chat">Join the chat…</string>

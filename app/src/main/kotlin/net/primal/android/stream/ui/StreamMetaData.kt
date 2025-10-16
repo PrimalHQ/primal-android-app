@@ -42,11 +42,14 @@ fun StreamMetaData(
         StreamLiveIndicator(isLive = isLive, textColor = textColor, fontSize = 15.sp, lineHeight = 16.sp)
 
         if (startedAt != null) {
+            val timeAgo = Instant.ofEpochSecond(startedAt).asBeforeNowFormat()
+            val startedAtText = if (timeAgo.equals("now", ignoreCase = true)) {
+                stringResource(id = R.string.live_stream_started_now)
+            } else {
+                stringResource(id = R.string.live_stream_started_at, timeAgo)
+            }
             Text(
-                text = stringResource(
-                    id = R.string.live_stream_started_at,
-                    Instant.ofEpochSecond(startedAt).asBeforeNowFormat(),
-                ),
+                text = startedAtText,
                 color = textColor,
                 style = AppTheme.typography.bodyMedium.copy(
                     fontSize = 15.sp,
