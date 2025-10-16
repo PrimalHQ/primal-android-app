@@ -13,4 +13,7 @@ interface WalletSettingsDao {
 
     @Query("SELECT * FROM WalletSettings WHERE walletId = :walletId")
     suspend fun findWalletSettings(walletId: String): WalletSettings?
+
+    @Query("DELETE FROM WalletSettings WHERE walletId IN (:walletIds)")
+    suspend fun deleteWalletSettings(walletIds: List<String>)
 }

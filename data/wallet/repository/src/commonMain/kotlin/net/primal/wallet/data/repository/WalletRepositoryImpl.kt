@@ -71,7 +71,7 @@ internal class WalletRepositoryImpl(
 
     override suspend fun deleteWalletById(walletId: String) =
         withContext(dispatcherProvider.io()) {
-            walletDatabase.wallet().deleteWalletById(walletId = walletId)
+            walletDatabase.wallet().deleteWalletsByIds(walletIds = listOf(walletId))
         }
 
     override suspend fun upsertNostrWallet(userId: String, wallet: Wallet.NWC) =
@@ -124,6 +124,27 @@ internal class WalletRepositoryImpl(
                 ?.let { profileRepository.findProfileDataOrNull(profileId = it.decrypted) }
 
             transaction.toDomain(otherProfile = profile)
+        }
+
+    override suspend fun deleteAllTransactions(userId: String) =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.walletTransactions().deleteAllTransactions(userId = userId.asEncryptable())
+        }
+
+    override suspend fun deleteAllUserData(userId: String) =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.withTransaction {
+                val wallets = walletDatabase.wallet().findWalletInfosByUserId(userId = userId.asEncryptable())
+                val walletIds = wallets.map { it.walletId }
+
+                if (walletIds.isNotEmpty()) {
+                    walletDatabase.walletSettings().deleteWalletSettings(walletIds)
+                    walletDatabase.wallet().deleteWalletsByIds(walletIds)
+                }
+
+                walletDatabase.walletTransactions().deleteAllTransactions(userId = userId.asEncryptable())
+                walletDatabase.wallet().clearActiveWallet(userId)
+            }
         }
 
     override suspend fun pay(walletId: String, request: TxRequest): Result<Unit> =
@@ -248,11 +269,6 @@ internal class WalletRepositoryImpl(
             )
         }
     }
-
-    override suspend fun deleteAllTransactions(userId: String) =
-        withContext(dispatcherProvider.io()) {
-            walletDatabase.walletTransactions().deleteAllTransactionsByUserId(userId = userId.asEncryptable())
-        }
 
     private fun createTransactionsPager(
         walletId: String,
