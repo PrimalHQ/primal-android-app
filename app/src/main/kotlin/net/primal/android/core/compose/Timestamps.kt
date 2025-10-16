@@ -120,3 +120,15 @@ private fun Long.format(
 } else {
     pluralStringResource(longResId, this.toInt(), "$this")
 }
+
+@Composable
+fun Instant.asStreamStartedAtText(): String {
+    val now = LocalDateTime.now().atZone(ZoneId.systemDefault()).toInstant()
+    val diff = ChronoUnit.SECONDS.between(this, now)
+
+    return if (diff < MINUTE) {
+        stringResource(id = R.string.live_stream_started_now)
+    } else {
+        stringResource(id = R.string.live_stream_started_at, this.asBeforeNowFormat())
+    }
+}
