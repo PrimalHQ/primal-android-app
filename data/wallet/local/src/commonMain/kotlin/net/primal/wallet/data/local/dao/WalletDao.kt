@@ -35,9 +35,6 @@ interface WalletDao {
     @Query("SELECT * FROM WalletInfo WHERE userId = :userId")
     fun observeWalletsByUserId(userId: Encryptable<String>): Flow<List<Wallet>>
 
-    @Query("SELECT * FROM WalletInfo WHERE userId = :userId")
-    suspend fun findWalletInfosByUserId(userId: Encryptable<String>): List<WalletInfo>
-
     @Query("UPDATE WalletInfo SET lightningAddress = :lightningAddress WHERE walletId = :walletId")
     suspend fun updateWalletLightningAddress(walletId: String, lightningAddress: Encryptable<String>?)
 
@@ -64,24 +61,27 @@ interface WalletDao {
         maxBalanceInBtc: Encryptable<Double>?,
     )
 
-    @Query("DELETE FROM WalletInfo WHERE walletId = :walletId")
-    suspend fun deleteWalletInfoById(walletId: String)
+    @Query("DELETE FROM WalletInfo WHERE walletId IN (:walletIds)")
+    suspend fun deleteWalletInfosByIds(walletIds: List<String>)
 
-    @Query("DELETE FROM PrimalWalletData WHERE walletId = :walletId")
-    suspend fun deletePrimalWalletById(walletId: String)
+    @Query("DELETE FROM PrimalWalletData WHERE walletId IN (:walletIds)")
+    suspend fun deletePrimalWalletsByIds(walletIds: List<String>)
 
-    @Query("DELETE FROM NostrWalletData WHERE walletId = :walletId")
-    suspend fun deleteNostrWalletById(walletId: String)
+    @Query("DELETE FROM NostrWalletData WHERE walletId IN (:walletIds)")
+    suspend fun deleteNostrWalletsByIds(walletIds: List<String>)
 
     @Transaction
-    suspend fun deleteWalletById(walletId: String) {
-        deleteWalletInfoById(walletId = walletId)
-        deleteNostrWalletById(walletId = walletId)
-        deletePrimalWalletById(walletId = walletId)
+    suspend fun deleteWalletsByIds(walletIds: List<String>) {
+        deleteWalletInfosByIds(walletIds = walletIds)
+        deleteNostrWalletsByIds(walletIds = walletIds)
+        deletePrimalWalletsByIds(walletIds = walletIds)
     }
 
     @Query("SELECT * FROM WalletInfo WHERE walletId = :walletId")
     suspend fun findWalletInfo(walletId: String): WalletInfo?
+
+    @Query("SELECT * FROM WalletInfo WHERE userId = :userId")
+    suspend fun findWalletInfosByUserId(userId: Encryptable<String>): List<WalletInfo>
 
     @Transaction
     @Query("SELECT * FROM WalletInfo WHERE walletId = :walletId")

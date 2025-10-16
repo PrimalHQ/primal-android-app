@@ -71,7 +71,7 @@ internal class WalletRepositoryImpl(
 
     override suspend fun deleteWalletById(walletId: String) =
         withContext(dispatcherProvider.io()) {
-            walletDatabase.wallet().deleteWalletById(walletId = walletId)
+            walletDatabase.wallet().deleteWalletsByIds(walletIds = listOf(walletId))
         }
 
     override suspend fun upsertNostrWallet(userId: String, wallet: Wallet.NWC) =
@@ -126,6 +126,11 @@ internal class WalletRepositoryImpl(
             transaction.toDomain(otherProfile = profile)
         }
 
+    override suspend fun deleteAllTransactions(userId: String) =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.walletTransactions().deleteAllUserTransactions(userId = userId.asEncryptable())
+        }
+
     override suspend fun deleteAllUserData(userId: String) =
         withContext(dispatcherProvider.io()) {
             walletDatabase.withTransaction {
@@ -134,9 +139,7 @@ internal class WalletRepositoryImpl(
 
                 if (walletIds.isNotEmpty()) {
                     walletDatabase.walletSettings().deleteWalletSettings(walletIds)
-                    walletIds.forEach { walletId ->
-                        walletDatabase.wallet().deleteWalletById(walletId)
-                    }
+                    walletDatabase.wallet().deleteWalletsByIds(walletIds)
                 }
 
                 walletDatabase.walletTransactions().deleteAllUserTransactions(userId.asEncryptable())

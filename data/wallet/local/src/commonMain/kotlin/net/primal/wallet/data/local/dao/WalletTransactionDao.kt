@@ -40,6 +40,16 @@ interface WalletTransactionDao {
     @Query("SELECT * FROM WalletTransactionData WHERE transactionId IS :txId")
     suspend fun findTransactionById(txId: String): WalletTransaction?
 
+    @Transaction
+    suspend fun deleteAllUserTransactions(userId: Encryptable<String>) {
+        val txIds = findTransactionIdsByUserId(userId)
+        if (txIds.isNotEmpty()) {
+            deletePrimalTransactionsByIds(txIds)
+            deleteNostrTransactionsByIds(txIds)
+        }
+        deleteAllTransactionsByUserId(userId)
+    }
+
     @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
     suspend fun deleteAllTransactionsByUserId(userId: Encryptable<String>)
 
@@ -51,14 +61,4 @@ interface WalletTransactionDao {
 
     @Query("DELETE FROM NostrTransactionData WHERE transactionId IN (:transactionIds)")
     suspend fun deleteNostrTransactionsByIds(transactionIds: List<String>)
-
-    @Transaction
-    suspend fun deleteAllUserTransactions(userId: Encryptable<String>) {
-        val txIds = findTransactionIdsByUserId(userId)
-        if (txIds.isNotEmpty()) {
-            deletePrimalTransactionsByIds(txIds)
-            deleteNostrTransactionsByIds(txIds)
-        }
-        deleteAllTransactionsByUserId(userId)
-    }
 }
