@@ -61,20 +61,23 @@ interface WalletDao {
         maxBalanceInBtc: Encryptable<Double>?,
     )
 
+    @Suppress("FunctionName")
     @Query("DELETE FROM WalletInfo WHERE walletId IN (:walletIds)")
-    suspend fun deleteWalletInfosByIds(walletIds: List<String>)
+    suspend fun _deleteWalletInfosByIds(walletIds: List<String>)
 
+    @Suppress("FunctionName")
     @Query("DELETE FROM PrimalWalletData WHERE walletId IN (:walletIds)")
-    suspend fun deletePrimalWalletsByIds(walletIds: List<String>)
+    suspend fun _deletePrimalWalletsByIds(walletIds: List<String>)
 
+    @Suppress("FunctionName")
     @Query("DELETE FROM NostrWalletData WHERE walletId IN (:walletIds)")
-    suspend fun deleteNostrWalletsByIds(walletIds: List<String>)
+    suspend fun _deleteNostrWalletsByIds(walletIds: List<String>)
 
     @Transaction
     suspend fun deleteWalletsByIds(walletIds: List<String>) {
-        deleteWalletInfosByIds(walletIds = walletIds)
-        deleteNostrWalletsByIds(walletIds = walletIds)
-        deletePrimalWalletsByIds(walletIds = walletIds)
+        _deleteWalletInfosByIds(walletIds = walletIds)
+        _deleteNostrWalletsByIds(walletIds = walletIds)
+        _deletePrimalWalletsByIds(walletIds = walletIds)
     }
 
     @Query("SELECT * FROM WalletInfo WHERE walletId = :walletId")
