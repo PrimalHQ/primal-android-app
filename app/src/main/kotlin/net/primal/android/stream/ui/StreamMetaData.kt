@@ -7,12 +7,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import java.time.Instant
+import net.primal.android.R
 import net.primal.android.core.compose.IconText
-import net.primal.android.core.compose.asStreamStartedAtText
+import net.primal.android.core.compose.asBeforeNowFormat
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Follow
@@ -41,7 +43,13 @@ fun StreamMetaData(
 
         if (startedAt != null) {
             Text(
-                text = Instant.ofEpochSecond(startedAt).asStreamStartedAtText(),
+                text = stringResource(
+                    id = R.string.live_stream_started_at_prefix,
+                    Instant.ofEpochSecond(startedAt).asBeforeNowFormat(
+                        shortFormat = true,
+                        agoSuffixOnShortFormat = true,
+                    ),
+                ),
                 color = textColor,
                 style = AppTheme.typography.bodyMedium.copy(
                     fontSize = 15.sp,

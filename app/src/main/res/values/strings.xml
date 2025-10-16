@@ -467,6 +467,7 @@
     <string name="timestamp_since_weeks">%1$sw</string>
     <string name="timestamp_since_months">%1$smo</string>
     <string name="timestamp_since_years">%1$sy</string>
+    <string name="timestamp_ago_format">%1$s ago</string>
     <plurals name="timestamp_since_minutes">
         <item quantity="one">%1$s minute ago</item>
         <item quantity="other">%1$s minutes ago</item>
@@ -1355,7 +1356,7 @@
     <string name="accessibility_forward_30_seconds">Forward 30 seconds</string>
     <string name="accessibility_play_pause">Play or Pause</string>
     <string name="live_stream_starting">Starting</string>
-    <string name="live_stream_started_at">Started %1$s ago</string>
+    <string name="live_stream_started_at_prefix">Started %1$s</string>
     <string name="live_stream_streamed">Streamed %1$s ago</string>
     <string name="live_stream_started_now">Started now</string>
     <string name="live_stream_viewers_count">%1$s watching</string>
