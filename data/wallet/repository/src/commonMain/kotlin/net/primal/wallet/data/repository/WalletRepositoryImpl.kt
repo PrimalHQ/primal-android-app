@@ -128,13 +128,13 @@ internal class WalletRepositoryImpl(
 
     override suspend fun deleteAllTransactions(userId: String) =
         withContext(dispatcherProvider.io()) {
-            walletDatabase.walletTransactions().deleteAllUserTransactions(userId = userId.asEncryptable())
+            walletDatabase.walletTransactions().deleteAllTransactions(userId = userId.asEncryptable())
         }
 
     override suspend fun deleteAllUserData(userId: String) =
         withContext(dispatcherProvider.io()) {
             walletDatabase.withTransaction {
-                val wallets = walletDatabase.wallet().findWalletInfosByUserId(userId.asEncryptable())
+                val wallets = walletDatabase.wallet().findWalletInfosByUserId(userId = userId.asEncryptable())
                 val walletIds = wallets.map { it.walletId }
 
                 if (walletIds.isNotEmpty()) {
@@ -142,7 +142,7 @@ internal class WalletRepositoryImpl(
                     walletDatabase.wallet().deleteWalletsByIds(walletIds)
                 }
 
-                walletDatabase.walletTransactions().deleteAllUserTransactions(userId.asEncryptable())
+                walletDatabase.walletTransactions().deleteAllTransactions(userId = userId.asEncryptable())
                 walletDatabase.wallet().clearActiveWallet(userId)
             }
         }

@@ -41,24 +41,28 @@ interface WalletTransactionDao {
     suspend fun findTransactionById(txId: String): WalletTransaction?
 
     @Transaction
-    suspend fun deleteAllUserTransactions(userId: Encryptable<String>) {
-        val txIds = findTransactionIdsByUserId(userId)
+    suspend fun deleteAllTransactions(userId: Encryptable<String>) {
+        val txIds = _findTransactionIdsByUserId(userId)
         if (txIds.isNotEmpty()) {
-            deletePrimalTransactionsByIds(txIds)
-            deleteNostrTransactionsByIds(txIds)
+            _deletePrimalTransactionDataByIds(txIds)
+            _deleteNostrTransactionDataByIds(txIds)
         }
-        deleteAllTransactionsByUserId(userId)
+        _deleteAllTransactionDataByUserId(userId)
     }
 
-    @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
-    suspend fun deleteAllTransactionsByUserId(userId: Encryptable<String>)
-
+    @Suppress("FunctionName")
     @Query("SELECT transactionId FROM WalletTransactionData WHERE userId = :userId")
-    suspend fun findTransactionIdsByUserId(userId: Encryptable<String>): List<String>
+    suspend fun _findTransactionIdsByUserId(userId: Encryptable<String>): List<String>
 
+    @Suppress("FunctionName")
+    @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
+    suspend fun _deleteAllTransactionDataByUserId(userId: Encryptable<String>)
+
+    @Suppress("FunctionName")
     @Query("DELETE FROM PrimalTransactionData WHERE transactionId IN (:transactionIds)")
-    suspend fun deletePrimalTransactionsByIds(transactionIds: List<String>)
+    suspend fun _deletePrimalTransactionDataByIds(transactionIds: List<String>)
 
+    @Suppress("FunctionName")
     @Query("DELETE FROM NostrTransactionData WHERE transactionId IN (:transactionIds)")
-    suspend fun deleteNostrTransactionsByIds(transactionIds: List<String>)
+    suspend fun _deleteNostrTransactionDataByIds(transactionIds: List<String>)
 }
