@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import net.primal.shared.data.local.encryption.Encryptable
 
 @Entity
-data class ConnectionData(
+data class AppConnectionData(
     @PrimaryKey
     val connectionId: String,
     val relays: Encryptable<List<String>>,

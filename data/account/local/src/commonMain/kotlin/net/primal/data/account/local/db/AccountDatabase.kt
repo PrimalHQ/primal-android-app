@@ -5,17 +5,17 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
-import net.primal.data.account.local.dao.ConnectionData
-import net.primal.data.account.local.dao.ConnectionDataDao
-import net.primal.data.account.local.dao.PermissionData
-import net.primal.data.account.local.dao.PermissionDataDao
+import net.primal.data.account.local.dao.AppConnectionData
+import net.primal.data.account.local.dao.AppConnectionDataDao
+import net.primal.data.account.local.dao.AppPermissionData
+import net.primal.data.account.local.dao.AppPermissionDataDao
 import net.primal.shared.data.local.serialization.EncryptableTypeConverters
 import net.primal.shared.data.local.serialization.ListsTypeConverters
 
 @Database(
     entities = [
-        ConnectionData::class,
-        PermissionData::class,
+        AppConnectionData::class,
+        AppPermissionData::class,
     ],
     version = 1,
     exportSchema = true,
@@ -23,8 +23,8 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
 @TypeConverters(ListsTypeConverters::class, EncryptableTypeConverters::class)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AccountDatabase : RoomDatabase() {
-    abstract fun connections(): ConnectionDataDao
-    abstract fun permissions(): PermissionDataDao
+    abstract fun connections(): AppConnectionDataDao
+    abstract fun permissions(): AppPermissionDataDao
 
     companion object {
         fun setEncryption(enableEncryption: Boolean) {

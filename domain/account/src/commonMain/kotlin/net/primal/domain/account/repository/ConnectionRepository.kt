@@ -2,7 +2,7 @@ package net.primal.domain.account.repository
 
 import net.primal.domain.account.model.Connection
 
-interface AccountRepository {
+interface ConnectionRepository {
     suspend fun getAllConnections(): List<Connection>
 
     suspend fun deleteConnection(connectionId: String)

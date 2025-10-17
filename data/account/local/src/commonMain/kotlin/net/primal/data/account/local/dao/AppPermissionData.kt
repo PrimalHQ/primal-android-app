@@ -5,7 +5,7 @@ import androidx.room.PrimaryKey
 import net.primal.shared.data.local.encryption.Encryptable
 
 @Entity
-data class PermissionData(
+data class AppPermissionData(
     @PrimaryKey
     val permissionId: String,
     val connectionId: String,

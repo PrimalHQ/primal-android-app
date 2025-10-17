@@ -2,12 +2,12 @@ package net.primal.data.account.local.dao
 
 import androidx.room.Relation
 
-data class Connection(
-    val data: ConnectionData,
+data class AppConnection(
+    val data: AppConnectionData,
 
     @Relation(
         parentColumn = "connectionId",
         entityColumn = "connectionId",
     )
-    val permissions: List<PermissionData>,
+    val permissions: List<AppPermissionData>,
 )

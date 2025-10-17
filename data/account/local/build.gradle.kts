@@ -35,7 +35,7 @@ kotlin {
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
-    val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
+    val iosTargets = listOf(iosArm64(), iosSimulatorArm64())
 
     iosTargets.forEach {
         it.binaries.framework {
@@ -101,7 +101,6 @@ dependencies {
         "kspAndroid",
         "kspDesktop",
         "kspIosSimulatorArm64",
-        "kspIosX64",
         "kspIosArm64",
     ).forEach {
         add(it, libs.room.compiler)

@@ -9,7 +9,7 @@ interface RemoteSignerService {
      * - Should process `NostrEvent`s using `NostrCommandParser` and `NostrCommandHandler`.
      * - Should sign and publish handlers result.
      */
-    fun start(nostrEventSignatureHandler: NostrEventSignatureHandler)
+    fun start()
 
     /**
      * Terminates connection to all relays.
