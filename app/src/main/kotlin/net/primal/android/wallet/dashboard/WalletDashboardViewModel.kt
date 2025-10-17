@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
@@ -112,7 +111,7 @@ class WalletDashboardViewModel @Inject constructor(
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeUserId)
                 .filterNotNull()
-                .distinctUntilChanged()
+                .distinctUntilWalletIdChanged()
                 .collect { wallet ->
                     fetchWalletBalance(walletId = wallet.walletId)
                     setState {
