@@ -61,7 +61,7 @@ fun WalletDashboard(
                 BtcAmountText(
                     modifier = Modifier
                         .wrapContentWidth()
-                        .padding(start = if (walletBalance != null) 32.dp else 0.dp)
+                        .padding(start = 32.dp)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
