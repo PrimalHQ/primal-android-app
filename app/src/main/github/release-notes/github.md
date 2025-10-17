@@ -11,4 +11,5 @@
 - Fixed data fetches with empty pubkey on login (#697)
 - Improve seekbar and player controls visibility for streams
 - Fixed wallet data leftovers when user logs out (#704)
+- Fixed wallet `0 sats` text not centered in some cases (#708)
 - Upgraded acinq libs to fix 16KB issue with Google Play
