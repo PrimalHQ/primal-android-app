@@ -65,6 +65,7 @@ placeholder = "2.0.0"
 play-publishing = "3.12.1"
 play-billing = "7.1.1"
 qrcode-generator = "1.6.2"
+quartz = "1.03.0"
 reorderable = "2.4.3"
 retrofit = "3.0.0"
 roboelectric = "4.14.1"
@@ -121,6 +122,7 @@ compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayou
 androidx-emoji2 = { group = "androidx.emoji2", name = "emoji2", version.ref = "emoji2" }
 androidx-emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 flippable = { module = "com.wajahatkarim:flippable", version.ref = "flippable" }
+quartz = { module = "com.vitorpamplona.quartz:quartz", version.ref = "quartz" }
 reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 
 markwon-core = { module = "io.noties.markwon:core", version.ref = "markwon" }
