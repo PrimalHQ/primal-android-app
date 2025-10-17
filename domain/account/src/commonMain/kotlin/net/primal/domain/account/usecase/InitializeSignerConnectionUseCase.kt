@@ -1,4 +1,4 @@
-package net.primal.data.account.repository.usecase
+package net.primal.domain.account.usecase
 
 import net.primal.core.utils.Result
 

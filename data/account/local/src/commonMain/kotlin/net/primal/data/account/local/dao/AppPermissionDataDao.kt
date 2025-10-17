@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Upsert
 
 @Dao
-interface PermissionDataDao {
+interface AppPermissionDataDao {
     @Upsert
-    fun upsertAll(data: List<PermissionData>)
+    fun upsertAll(data: List<AppPermissionData>)
 }

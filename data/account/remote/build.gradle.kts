@@ -35,7 +35,7 @@ kotlin {
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
-    val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
+    val iosTargets = listOf(iosArm64(), iosSimulatorArm64())
 
     iosTargets.forEach {
         it.binaries.framework {
@@ -57,6 +57,8 @@ kotlin {
                 // Serialization
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.io)
+
+                implementation(libs.quartz)
             }
         }
 

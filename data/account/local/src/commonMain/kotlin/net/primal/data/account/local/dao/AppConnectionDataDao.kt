@@ -4,7 +4,7 @@ import androidx.room.Dao
 import androidx.room.Upsert
 
 @Dao
-interface ConnectionDataDao {
+interface AppConnectionDataDao {
     @Upsert
-    fun upsertAll(data: List<ConnectionData>)
+    fun upsertAll(data: List<AppConnectionData>)
 }
