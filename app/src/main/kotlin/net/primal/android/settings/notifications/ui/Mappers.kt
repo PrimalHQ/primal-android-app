@@ -32,7 +32,7 @@ private fun TabNotifications.resolveIfEnabled(
 ): Pair<TabNotifications, Boolean> {
     return this to remoteMap.run {
         this@resolveIfEnabled.types.any {
-            remoteMap[it] == true
+            remoteMap[it] != false
         }
     }
 }
