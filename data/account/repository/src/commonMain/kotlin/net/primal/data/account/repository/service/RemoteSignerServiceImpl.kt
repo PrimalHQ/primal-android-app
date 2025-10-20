@@ -7,19 +7,25 @@ import kotlinx.coroutines.launch
 import net.primal.data.account.remote.command.model.NostrCommand
 import net.primal.data.account.repository.handler.NostrCommandHandler
 import net.primal.data.account.repository.manager.NostrRelayManager
-import net.primal.domain.account.model.Connection
+import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.service.RemoteSignerService
+import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 
 class RemoteSignerServiceImpl internal constructor(
-    private val eventSignatureHandler: NostrEventSignatureHandler,
+    eventSignatureHandler: NostrEventSignatureHandler,
+    nostrEncryptionHandler: NostrEncryptionHandler,
     private val connectionRepository: ConnectionRepository,
     private val nostrRelayManager: NostrRelayManager,
-    private val nostrCommandHandler: NostrCommandHandler,
 ) : RemoteSignerService {
 
     private val scope = CoroutineScope(SupervisorJob())
+    private val nostrCommandHandler: NostrCommandHandler = NostrCommandHandler(
+        nostrEventSignatureHandler = eventSignatureHandler,
+        nostrEncryptionHandler = nostrEncryptionHandler,
+        connectionRepository = connectionRepository,
+    )
 
     /*
     TODO(marko): rethink this. Should we keep connections in memory?
@@ -27,13 +33,13 @@ class RemoteSignerServiceImpl internal constructor(
          Alternative would be to query db each time we want to respond to event. This might be heavy.
          Another alternative would be some smart caching but that would be overkill imo.
       */
-    private var connections: List<Connection> = emptyList()
+    private var appConnections: List<AppConnection> = emptyList()
 
     override fun start() {
         scope.launch {
             /* TODO(marko): this should be observable, good enough for now. */
             connectionRepository.getAllConnections()
-                .also { connections = it }
+                .also { appConnections = it }
                 .flatMap { it.relays }
                 .toSet()
                 .let { relays ->
@@ -56,7 +62,7 @@ class RemoteSignerServiceImpl internal constructor(
             val response = nostrCommandHandler.handle(command)
 
             nostrRelayManager.sendResponse(
-                relays = connections
+                relays = appConnections
                     .firstOrNull { it.clientPubKey == command.clientPubKey }?.relays
                     ?: return@launch,
                 clientPubKey = command.clientPubKey,

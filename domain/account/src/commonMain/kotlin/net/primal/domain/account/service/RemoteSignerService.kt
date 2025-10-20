@@ -1,7 +1,5 @@
 package net.primal.domain.account.service
 
-import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
-
 interface RemoteSignerService {
     /**
      * Starts continuous observation and interaction with the necessary nostr relays.

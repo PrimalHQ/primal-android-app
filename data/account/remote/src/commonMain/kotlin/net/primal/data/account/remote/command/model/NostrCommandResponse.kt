@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class NostrCommandResponse(
     val id: String,
     val result: String,
-    val error: String?,
+    val error: String? = null,
 )
