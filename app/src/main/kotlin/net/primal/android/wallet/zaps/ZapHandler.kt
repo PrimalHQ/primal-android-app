@@ -3,8 +3,9 @@ package net.primal.android.wallet.zaps
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.withTimeout
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.UserAccountsStore
@@ -32,38 +33,48 @@ class ZapHandler @Inject constructor(
         target: ZapTarget,
         amountInSats: ULong? = null,
         comment: String? = null,
-    ): ZapResult =
-        withContext(dispatcherProvider.io() + NonCancellable) {
-            withTimeoutOrNull(30.seconds) {
-                val userAccount = accountsStore.findByIdOrNull(userId = userId)
+    ) = withContext(dispatcherProvider.io()) {
+        val userAccount = accountsStore.findByIdOrNull(userId = userId)
 
-                val defaultZapOptions = userAccount?.appSettings?.zapDefault
-                val zapComment = comment ?: defaultZapOptions?.message ?: ""
-                val zapAmountInSats = amountInSats
-                    ?: defaultZapOptions?.amount?.toULong()
-                    ?: return@withTimeoutOrNull ZapResult.Failure(
-                        error = ZapError.InvalidZap(message = "Missing zap amount."),
+        val defaultZapOptions = userAccount?.appSettings?.zapDefault
+        val zapComment = comment ?: defaultZapOptions?.message ?: ""
+        val zapAmountInSats = amountInSats
+            ?: defaultZapOptions?.amount?.toULong()
+            ?: return@withContext ZapResult.Failure(error = ZapError.InvalidZap(message = "Missing zap amount."))
+
+        val userRelays = relayRepository.findRelays(userId, RelayKind.UserRelay)
+            .map { it.mapToRelayDO() }
+            .ifEmpty { FALLBACK_RELAYS }
+
+        val userZapRequestEvent = notary.signZapRequestNostrEvent(
+            userId = userId,
+            comment = zapComment,
+            target = target,
+            relays = userRelays,
+        ).getOrNull() ?: return@withContext ZapResult.Failure(error = ZapError.FailedToSignEvent)
+
+        runCatching {
+            withContext(NonCancellable) {
+                withTimeout(30.seconds) {
+                    eventInteractionRepository.zapEvent(
+                        userId = userId,
+                        walletId = walletId,
+                        amountInSats = zapAmountInSats,
+                        comment = zapComment,
+                        target = target,
+                        zapRequestEvent = userZapRequestEvent,
                     )
-
-                val userRelays = relayRepository.findRelays(userId, RelayKind.UserRelay)
-                    .map { it.mapToRelayDO() }
-                    .ifEmpty { FALLBACK_RELAYS }
-
-                val userZapRequestEvent = notary.signZapRequestNostrEvent(
-                    userId = userId,
-                    comment = zapComment,
-                    target = target,
-                    relays = userRelays,
-                ).getOrNull() ?: return@withTimeoutOrNull ZapResult.Failure(ZapError.FailedToSignEvent)
-
-                eventInteractionRepository.zapEvent(
-                    userId = userId,
-                    walletId = walletId,
-                    amountInSats = zapAmountInSats,
-                    comment = zapComment,
-                    target = target,
-                    zapRequestEvent = userZapRequestEvent,
-                )
-            } ?: ZapResult.Failure(error = ZapError.Unknown())
+                }
+            }
+        }.getOrElse { error ->
+            when (error) {
+                is TimeoutCancellationException -> {
+                    ZapResult.Failure(error = ZapError.Timeout(error))
+                }
+                else -> {
+                    ZapResult.Failure(error = ZapError.Unknown(error))
+                }
+            }
         }
+    }
 }
