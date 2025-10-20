@@ -464,7 +464,9 @@ private fun HeaderContent(
 
 private fun NotificationType.shouldDisplayIcon(): Boolean {
     return when (this) {
-        NotificationType.YOUR_POST_WAS_REPLIED_TO -> false
+        NotificationType.YOUR_POST_WAS_REPLIED_TO,
+        NotificationType.REPLY_TO_REPLY,
+        -> false
         else -> true
     }
 }
@@ -595,7 +597,7 @@ private fun NotificationType.toSuffixText(
         }
 
         NotificationType.REPLY_TO_REPLY -> stringResource(
-            id = R.string.notification_list_item_replied_to_reply,
+            id = R.string.notification_list_item_replied_in_your_thread,
         )
     }
 
