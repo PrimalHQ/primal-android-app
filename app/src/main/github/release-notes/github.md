@@ -8,6 +8,7 @@
 - Fixed player line visible at the top on light theme
 - Fixed keyboard dismiss on stream chat click
 - Fixed stream rewinding to live when stream data updates (#699)
+- Fixed stream player starting on non-stream deep links (#714)
 - Fixed data fetches with empty pubkey on login (#697)
 - Improve seekbar and player controls visibility for streams
 - Fixed wallet data leftovers when user logs out (#704)
