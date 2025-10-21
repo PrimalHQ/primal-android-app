@@ -14,6 +14,7 @@ import net.primal.android.core.images.PrimalImageLoaderFactory
 import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.wallet.init.TsunamiWalletLifecycleInitializer
 import net.primal.core.config.store.AppConfigInitializer
+import net.primal.data.account.repository.repository.factory.AccountRepositoryFactory
 import net.primal.data.repository.factory.PrimalRepositoryFactory
 import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
 import timber.log.Timber
@@ -41,6 +42,7 @@ class PrimalApp : Application() {
         AppConfigInitializer.init(this@PrimalApp)
         PrimalRepositoryFactory.init(this@PrimalApp)
         WalletRepositoryFactory.init(context = this@PrimalApp, enableDbEncryption = !BuildConfig.DEBUG)
+        AccountRepositoryFactory.init(context = this@PrimalApp, enableDbEncryption = !BuildConfig.DEBUG)
 
         loggers.forEach {
             Timber.plant(it)

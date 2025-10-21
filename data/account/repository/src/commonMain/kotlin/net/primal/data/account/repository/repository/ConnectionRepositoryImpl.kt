@@ -15,15 +15,22 @@ class ConnectionRepositoryImpl(
     private val database: AccountDatabase,
     private val dispatchers: DispatcherProvider,
 ) : ConnectionRepository {
-    override suspend fun getAllConnections(): List<AppConnection> =
+    override suspend fun getAllConnections(signerPubKey: String): List<AppConnection> =
         withContext(dispatchers.io()) {
-            database.connections().getAll()
+            database.connections().getAll(signerPubKey = signerPubKey)
                 .map { it.asDomain() }
         }
 
     override suspend fun deleteConnection(connectionId: String) =
         withContext(dispatchers.io()) {
             database.connections().deleteConnection(connectionId = connectionId)
+        }
+
+    override suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<AppConnection> =
+        withContext(dispatchers.io()) {
+            database.connections().getConnectionByClientPubKey(clientPubKey = clientPubKey)
+                ?.asDomain()?.asSuccess()
+                ?: Result.failure(NoSuchElementException("Couldn't locate connection with given `clientPubKey`."))
         }
 
     override suspend fun deleteConnectionsByUser(userPubKey: String) =
@@ -43,12 +50,7 @@ class ConnectionRepositoryImpl(
                         url = connection.url?.asEncryptable(),
                         image = connection.image?.asEncryptable(),
                         clientPubKey = connection.clientPubKey.asEncryptable(),
-                        /*
-                        TODO(marko): how to handle signer key pair?
-                             It would be best if this was generated once and reused across connections.
-                          */
-                        signerPubKey = TODO(),
-                        signerPrivateKey = TODO(),
+                        signerPubKey = connection.signerPubKey.asEncryptable(),
                         userPubKey = connection.userPubKey.asEncryptable(),
                     ),
                 ),

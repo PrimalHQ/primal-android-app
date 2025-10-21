@@ -1,4 +1,4 @@
-package net.primal.domain.account.cryptography
+package net.primal.domain.account.service
 
 import net.primal.core.utils.Result
 

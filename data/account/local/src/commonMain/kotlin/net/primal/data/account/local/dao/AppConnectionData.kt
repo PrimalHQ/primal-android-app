@@ -1,10 +1,17 @@
 package net.primal.data.account.local.dao
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import net.primal.shared.data.local.encryption.Encryptable
 
-@Entity
+@Entity(
+    indices = [
+        Index(value = ["signerPubKey"]),
+        Index(value = ["clientPubKey"]),
+        Index(value = ["userPubKey"]),
+    ]
+)
 data class AppConnectionData(
     @PrimaryKey
     val connectionId: String,
@@ -15,6 +22,5 @@ data class AppConnectionData(
     val image: Encryptable<String>?,
     val clientPubKey: Encryptable<String>,
     val signerPubKey: Encryptable<String>,
-    val signerPrivateKey: Encryptable<String>,
     val userPubKey: Encryptable<String>,
 )

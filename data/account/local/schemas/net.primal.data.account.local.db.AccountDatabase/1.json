@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "ea26b021f21ea134ae8c01ccdf2b8e03",
+    "identityHash": "c2469da41150b8a39836292e6911122c",
     "entities": [
       {
-        "tableName": "ConnectionData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`connectionId` TEXT NOT NULL, `relays` TEXT NOT NULL, `secret` TEXT NOT NULL, `name` TEXT, `url` TEXT, `image` TEXT, `clientPubKey` TEXT NOT NULL, `signerPubKey` TEXT NOT NULL, `signerPrivateKey` TEXT NOT NULL, `userPubKey` TEXT NOT NULL, PRIMARY KEY(`connectionId`))",
+        "tableName": "AppConnectionData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`connectionId` TEXT NOT NULL, `relays` TEXT NOT NULL, `secret` TEXT NOT NULL, `name` TEXT, `url` TEXT, `image` TEXT, `clientPubKey` TEXT NOT NULL, `signerPubKey` TEXT NOT NULL, `userPubKey` TEXT NOT NULL, PRIMARY KEY(`connectionId`))",
         "fields": [
           {
             "fieldPath": "connectionId",
@@ -54,12 +54,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "signerPrivateKey",
-            "columnName": "signerPrivateKey",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
             "fieldPath": "userPubKey",
             "columnName": "userPubKey",
             "affinity": "TEXT",
@@ -71,10 +65,39 @@
           "columnNames": [
             "connectionId"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "index_AppConnectionData_signerPubKey",
+            "unique": false,
+            "columnNames": [
+              "signerPubKey"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AppConnectionData_signerPubKey` ON `${TABLE_NAME}` (`signerPubKey`)"
+          },
+          {
+            "name": "index_AppConnectionData_clientPubKey",
+            "unique": false,
+            "columnNames": [
+              "clientPubKey"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AppConnectionData_clientPubKey` ON `${TABLE_NAME}` (`clientPubKey`)"
+          },
+          {
+            "name": "index_AppConnectionData_userPubKey",
+            "unique": false,
+            "columnNames": [
+              "userPubKey"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AppConnectionData_userPubKey` ON `${TABLE_NAME}` (`userPubKey`)"
+          }
+        ]
       },
       {
-        "tableName": "PermissionData",
+        "tableName": "AppPermissionData",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`permissionId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `permissionName` TEXT NOT NULL, `defaultAction` TEXT NOT NULL, PRIMARY KEY(`permissionId`))",
         "fields": [
           {
@@ -112,7 +135,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ea26b021f21ea134ae8c01ccdf2b8e03')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c2469da41150b8a39836292e6911122c')"
     ]
   }
 }

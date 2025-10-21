@@ -13,6 +13,7 @@ fun AppConnectionPO.asDomain() =
         connectionId = this.data.connectionId,
         userPubKey = this.data.userPubKey.decrypted,
         clientPubKey = this.data.clientPubKey.decrypted,
+        signerPubKey = this.data.signerPubKey.decrypted,
         relays = this.data.relays.decrypted,
         name = this.data.name?.decrypted,
         url = this.data.url?.decrypted,

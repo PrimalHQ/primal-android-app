@@ -1,9 +1,8 @@
 package net.primal.data.account.remote.client
 
 import com.vitorpamplona.quartz.nip44Encryption.Nip44v2
+import io.github.aakira.napier.Napier
 import io.ktor.utils.io.core.toByteArray
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -19,6 +18,7 @@ import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
@@ -31,7 +31,13 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 import net.primal.domain.nostr.cryptography.signOrThrow
+import net.primal.domain.nostr.cryptography.utils.assureValidNpub
+import net.primal.domain.nostr.cryptography.utils.assureValidNsec
+import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
 import net.primal.domain.nostr.serialization.toNostrJsonObject
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import net.primal.domain.nostr.cryptography.utils.assureValidPubKeyHex
 
 @OptIn(ExperimentalUuidApi::class)
 class RemoteSignerClient(
@@ -68,7 +74,7 @@ class RemoteSignerClient(
                 subscriptionId = listenerId,
                 data = buildJsonObject {
                     put("kinds", buildJsonArray { add(NostrEventKind.NostrConnect.value) })
-                    put("#p", buildJsonArray { add(signerKeyPair.pubKey) })
+                    put("#p", buildJsonArray { add(signerKeyPair.pubKey.assureValidPubKeyHex()) })
                 },
             )
 
@@ -91,21 +97,28 @@ class RemoteSignerClient(
             nostrSocketClient.close()
         }
 
-    suspend fun publishResponse(clientPubKey: String, response: NostrCommandResponse): Result<Unit> =
+    suspend fun publishResponse(
+        clientPubKey: String,
+        response: NostrCommandResponse
+    ): Result<Unit> =
         runCatching {
+            Napier.d(tag = "Signer") { "Sending response: $response" }
             nostrSocketClient.sendEVENT(
                 signedEvent = NostrUnsignedEvent(
-                    pubKey = signerKeyPair.pubKey,
+                    pubKey = signerKeyPair.pubKey.assureValidPubKeyHex(),
                     tags = listOf(clientPubKey.asPubkeyTag()),
                     kind = NostrEventKind.NostrConnect.value,
                     content = nip44.encrypt(
                         msg = CommonJsonImplicitNulls.encodeToString(response),
-                        privateKey = signerKeyPair.privateKey.toByteArray(),
-                        pubKey = clientPubKey.toByteArray(),
+                        privateKey = signerKeyPair.privateKey.assureValidNsec()
+                            .bechToBytesOrThrow(),
+                        pubKey = clientPubKey.assureValidNpub().bechToBytesOrThrow(),
                     ).encodePayload(),
                 ).signOrThrow(nsec = signerKeyPair.privateKey)
                     .toNostrJsonObject(),
             )
+        }.onFailure {
+            Napier.w(tag = "Signer", throwable = it) { "Failed to publish event." }
         }
 
     private fun processEvent(event: NostrEvent) =
@@ -115,13 +128,15 @@ class RemoteSignerClient(
             nostrCommandParser.parse(clientPubkey = event.pubKey, content = decryptedContent)
                 .onSuccess { command ->
                     _incomingCommands.send(command)
+                }.onFailure {
+                    Napier.w(throwable = it) { "Couldn't parse received event." }
                 }
         }
 
     private fun NostrEvent.decryptContent(): String =
         nip44.decrypt(
             payload = this.content,
-            privateKey = signerKeyPair.privateKey.toByteArray(),
-            pubKey = this.pubKey.toByteArray(),
+            privateKey = signerKeyPair.privateKey.assureValidNsec().bechToBytesOrThrow(),
+            pubKey = this.pubKey.assureValidNpub().bechToBytesOrThrow(),
         )
 }

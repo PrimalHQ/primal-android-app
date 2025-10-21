@@ -1,40 +1,59 @@
-package net.primal.domain.account.usecase
+package net.primal.data.account.repository.repository
 
 import io.ktor.http.Url
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import net.primal.core.utils.Result
 import net.primal.core.utils.runCatching
+import net.primal.data.account.remote.command.model.NostrCommandResponse
+import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.repository.ConnectionRepository
 
 @OptIn(ExperimentalUuidApi::class)
-class InitializeSignerConnectionUseCase(
+class SignerConnectionInitializer internal constructor(
     private val connectionRepository: ConnectionRepository,
+    private val nostrRelayManager: NostrRelayManager,
 ) {
-    /**
-     * Use case should perform following actions in order, failure of one fails the process:
-     * - Parse `connectionUrl` and retrieve necessary data.
-     * - Send `connect` response event to relays from the `connectionUrl`.
-     * - Save the data to the db.
-     */
-    suspend fun invoke(userPubKey: String, connectionUrl: String): Result<Unit> =
+    suspend fun initialize(
+        signerPubKey: String,
+        userPubKey: String,
+        connectionUrl: String,
+    ): Result<Unit> =
         runCatching {
             val (appConnection, secret) = parseConnectionUrlOrThrow(
+                signerPubKey = signerPubKey,
                 userPubKey = userPubKey,
                 connectionUrl = connectionUrl,
             )
 
-            /* TODO(marko): send connect response with secret.
-                We need to communicate with relays now. Does this conform us to `repository` module?
-                    Or should we expose communication layer to the outside world? Perhaps not.
+            nostrRelayManager.connectToRelays(relays = appConnection.relays.toSet())
+            nostrRelayManager.sendResponse(
+                relays = appConnection.relays,
+                clientPubKey = appConnection.clientPubKey,
+                response = NostrCommandResponse(
+                    /*
+                        TODO(marko): what should be the `id`? Nip doesn't define this.
+                         Can it be some random value? I don't see why not.
+                     */
+                    id = Uuid.random().toString(),
+                    result = secret,
+                ),
+            )
+            /*
+            TODO(marko): if sending the event fails, we shouldn't persist do db.
+                right now we have no idea if it was successful so this should be addressed first.
              */
 
             connectionRepository.saveConnection(secret = secret, connection = appConnection)
         }
 
-    private fun parseConnectionUrlOrThrow(userPubKey: String, connectionUrl: String): Pair<AppConnection, String> {
+    private fun parseConnectionUrlOrThrow(
+        signerPubKey: String,
+        userPubKey: String,
+        connectionUrl: String,
+    ): Pair<AppConnection, String> {
         if (!connectionUrl.startsWith(prefix = "nostrconnect://", ignoreCase = true)) {
             throw IllegalArgumentException("Invalid `connectionUrl`. It should start with `nostrconnect://`.")
         }
@@ -51,6 +70,7 @@ class InitializeSignerConnectionUseCase(
         return AppConnection(
             connectionId = Uuid.random().toString(),
             userPubKey = userPubKey,
+            signerPubKey = signerPubKey,
             clientPubKey = clientPubKey,
             relays = relays,
             name = name,
@@ -63,13 +83,13 @@ class InitializeSignerConnectionUseCase(
     private fun extractRelaysOrThrow(url: Url): List<String> =
         url.parameters.getAll("relay")
             ?: throw IllegalArgumentException(
-                message = "No `relay` fields found in provided `connectionUrl`. This is a mandatory field.",
+                "No `relay` fields found in provided `connectionUrl`. This is a mandatory field.",
             )
 
     private fun extractSecretOrThrow(url: Url): String =
         url.parameters["secret"]
             ?: throw IllegalArgumentException(
-                message = "No `secret` field found in provided `connectionUrl`. This is a mandatory field.",
+                "No `secret` field found in provided `connectionUrl`. This is a mandatory field.",
             )
 
     private fun extractPermsOrEmpty(url: Url): List<AppPermission> {

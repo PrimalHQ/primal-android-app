@@ -49,6 +49,7 @@ kotlin {
             dependencies {
                 // Internal
                 implementation(project(":core:utils"))
+                implementation(project(":core:app-config"))
 
                 implementation(project(":data:account:local"))
                 implementation(project(":data:account:remote"))
@@ -56,8 +57,12 @@ kotlin {
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:account"))
 
+                implementation(libs.ktor.http)
+
                 // Logging
                 implementation(libs.napier)
+
+                implementation(libs.quartz)
             }
         }
 

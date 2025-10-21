@@ -5,8 +5,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,6 +16,8 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.core.di.RemoteSignerServiceFactory
+import net.primal.android.core.di.SignerConnectionInitializerFactory
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.updater.DataUpdater
 import net.primal.android.feeds.list.ui.model.asFeedUi
@@ -26,6 +30,7 @@ import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.notes.home.HomeFeedContract.UiState
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.onFailure
@@ -33,6 +38,7 @@ import net.primal.core.utils.onSuccess
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.nostr.cryptography.NostrKeyPair
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
@@ -51,6 +57,9 @@ class HomeFeedViewModel @Inject constructor(
     private val feedsRepository: FeedsRepository,
     private val profileRepository: ProfileRepository,
     private val streamRepository: StreamRepository,
+    private val credentialsStore: CredentialsStore,
+    private val remoteSignerServiceFactory: RemoteSignerServiceFactory,
+    private val connectionInitializerFactory: SignerConnectionInitializerFactory,
 ) : ViewModel() {
 
     private val hostNpub = savedStateHandle.npub
@@ -70,6 +79,7 @@ class HomeFeedViewModel @Inject constructor(
     private fun setEffect(effect: HomeFeedContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
+        startSigner()
         resolveStreamParams()
         observeLiveEventsFromFollows()
         observeEvents()
@@ -78,6 +88,27 @@ class HomeFeedViewModel @Inject constructor(
         observeFeeds()
         fetchAndPersistNoteFeeds()
     }
+
+    private fun startSigner() =
+        viewModelScope.launch {
+            credentialsStore.saveNsec("nsec1mtydyr59yfsudd8kstkue4dakvcqdjm6jmkvvwmp08cfjm7e9r2sucawh7")
+            val keypair = NostrKeyPair(
+                pubKey = "npub1ng4zmxu622hgw0uv35tq28gxaycph58vfnu0a5gdlhkwxaeyaddq4mx5sf",
+                privateKey = "nsec1mtydyr59yfsudd8kstkue4dakvcqdjm6jmkvvwmp08cfjm7e9r2sucawh7",
+            )
+
+            val signer = remoteSignerServiceFactory.create(keypair)
+            signer.start()
+
+            delay(3.seconds)
+
+            val initializer = connectionInitializerFactory.create(signerKeyPair = keypair)
+            initializer.initialize(
+                signerPubKey = keypair.pubKey,
+                userPubKey = activeAccountStore.activeUserId(),
+                connectionUrl = "nostrconnect://b6dced16cbd00ace8e28066d0f966942a20736d8d6e10c9ab1d4ce10349b4057?relay=ws%3A%2F%2F10.0.2.2%3A10547&secret=supersecretcode",
+            )
+        }
 
     private fun resolveStreamParams() =
         viewModelScope.launch {

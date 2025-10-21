@@ -52,7 +52,18 @@ kotlin {
                 implementation(project(":core:networking-http"))
                 implementation(project(":core:networking-primal"))
 
+                implementation(project(":domain:nostr"))
+
                 implementation(libs.kotlinx.coroutines.core)
+
+                implementation(libs.okio)
+
+                // Logging
+                implementation(libs.napier)
+
+                implementation(libs.ktorfit.light)
+                implementation(libs.ktorfit.converters.response)
+                implementation(libs.ktorfit.converters.call)
 
                 // Serialization
                 implementation(libs.kotlinx.serialization.json)

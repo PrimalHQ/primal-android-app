@@ -12,7 +12,7 @@ internal class NostrCommandParser {
 
     fun parse(clientPubkey: String, content: String): Result<NostrCommand> {
         val request = content.decodeFromJsonStringOrNull<NostrCommandRequest>()
-            ?: return Result.failure(IllegalArgumentException("Failed to parse given content as `NostrCommandRequest`."))
+            ?: return Result.failure(IllegalArgumentException("Failed to parse given content as `NostrCommandRequest`. Raw: $content"))
 
         return runCatching {
             when (request.method) {

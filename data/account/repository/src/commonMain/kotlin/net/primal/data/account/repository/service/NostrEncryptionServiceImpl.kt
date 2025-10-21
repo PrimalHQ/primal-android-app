@@ -1,13 +1,13 @@
-package net.primal.data.account.repository.cryptography
+package net.primal.data.account.repository.service
 
 import com.vitorpamplona.quartz.nip04Dm.crypto.Nip04
 import com.vitorpamplona.quartz.nip44Encryption.Nip44v2
 import net.primal.core.utils.Result
 import net.primal.core.utils.runCatching
-import net.primal.domain.account.cryptography.NostrEncryptionService
+import net.primal.domain.account.service.NostrEncryptionService
+import net.primal.domain.nostr.cryptography.utils.assureValidNpub
+import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
-import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
-import net.primal.domain.nostr.cryptography.utils.hexToNsecHrp
 
 class NostrEncryptionServiceImpl : NostrEncryptionService {
     val nip44 = Nip44v2()
@@ -19,8 +19,8 @@ class NostrEncryptionServiceImpl : NostrEncryptionService {
     ): Result<String> =
         runCatching {
             Nip04.encrypt(
-                privateKey = privateKey.hexToNsecHrp().bechToBytesOrThrow(),
-                pubKey = pubKey.hexToNpubHrp().bechToBytesOrThrow(),
+                privateKey = privateKey.assureValidNsec().bechToBytesOrThrow(),
+                pubKey = pubKey.assureValidNpub().bechToBytesOrThrow(),
                 msg = plaintext,
             )
         }
@@ -32,8 +32,8 @@ class NostrEncryptionServiceImpl : NostrEncryptionService {
     ): Result<String> =
         runCatching {
             Nip04.decrypt(
-                privateKey = privateKey.hexToNsecHrp().bechToBytesOrThrow(),
-                pubKey = pubKey.hexToNpubHrp().bechToBytesOrThrow(),
+                privateKey = privateKey.assureValidNsec().bechToBytesOrThrow(),
+                pubKey = pubKey.assureValidNpub().bechToBytesOrThrow(),
                 msg = ciphertext,
             )
         }
@@ -45,8 +45,8 @@ class NostrEncryptionServiceImpl : NostrEncryptionService {
     ): Result<String> =
         runCatching {
             nip44.encrypt(
-                privateKey = privateKey.hexToNsecHrp().bechToBytesOrThrow(),
-                pubKey = pubKey.hexToNpubHrp().bechToBytesOrThrow(),
+                privateKey = privateKey.assureValidNsec().bechToBytesOrThrow(),
+                pubKey = pubKey.assureValidNpub().bechToBytesOrThrow(),
                 msg = plaintext,
             ).encodePayload()
         }
@@ -58,8 +58,8 @@ class NostrEncryptionServiceImpl : NostrEncryptionService {
     ): Result<String> =
         runCatching {
             nip44.decrypt(
-                pubKey = pubKey.hexToNpubHrp().bechToBytesOrThrow(),
-                privateKey = privateKey.hexToNsecHrp().bechToBytesOrThrow(),
+                pubKey = pubKey.assureValidNpub().bechToBytesOrThrow(),
+                privateKey = privateKey.assureValidNsec().bechToBytesOrThrow(),
                 payload = ciphertext,
             )
         }

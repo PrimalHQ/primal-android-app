@@ -30,6 +30,7 @@ internal class NostrRelayManager(
     val incomingCommands: Flow<NostrCommand> = _incomingCommands.asSharedFlow()
 
     fun connectToRelays(relays: Set<String>) {
+        Napier.d(tag = "Signer") { "Connecting to relays: $relays" }
         (relays - clients.keys).forEach { connectToRelay(relay = it) }
     }
 

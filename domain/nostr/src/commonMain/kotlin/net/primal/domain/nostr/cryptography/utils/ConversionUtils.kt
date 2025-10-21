@@ -5,6 +5,8 @@ import io.github.aakira.napier.Napier
 import io.ktor.utils.io.core.toByteArray
 
 fun String.assureValidNsec() = if (startsWith("nsec")) this else this.hexToNsecHrp()
+fun String.assureValidNpub() = if (startsWith("npub")) this else this.hexToNpubHrp()
+fun String.assureValidPubKeyHex() = if (startsWith("npub")) this.bech32ToHexOrThrow() else this
 
 fun String.hexToNoteHrp() =
     Bech32.encodeBytes(

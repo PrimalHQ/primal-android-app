@@ -1,5 +1,6 @@
 package net.primal.data.account.repository.service
 
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -7,39 +8,24 @@ import kotlinx.coroutines.launch
 import net.primal.data.account.remote.command.model.NostrCommand
 import net.primal.data.account.repository.handler.NostrCommandHandler
 import net.primal.data.account.repository.manager.NostrRelayManager
-import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.service.RemoteSignerService
-import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
-import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.cryptography.NostrKeyPair
 
 class RemoteSignerServiceImpl internal constructor(
-    eventSignatureHandler: NostrEventSignatureHandler,
-    nostrEncryptionHandler: NostrEncryptionHandler,
+    private val signerKeyPair: NostrKeyPair,
     private val connectionRepository: ConnectionRepository,
     private val nostrRelayManager: NostrRelayManager,
+    private val nostrCommandHandler: NostrCommandHandler,
 ) : RemoteSignerService {
 
     private val scope = CoroutineScope(SupervisorJob())
-    private val nostrCommandHandler: NostrCommandHandler = NostrCommandHandler(
-        nostrEventSignatureHandler = eventSignatureHandler,
-        nostrEncryptionHandler = nostrEncryptionHandler,
-        connectionRepository = connectionRepository,
-    )
-
-    /*
-    TODO(marko): rethink this. Should we keep connections in memory?
-         There are a few and could decrease db queries.
-         Alternative would be to query db each time we want to respond to event. This might be heavy.
-         Another alternative would be some smart caching but that would be overkill imo.
-      */
-    private var appConnections: List<AppConnection> = emptyList()
 
     override fun start() {
         scope.launch {
+            Napier.d(tag = "Signer") { "RemoteSignerService started." }
             /* TODO(marko): this should be observable, good enough for now. */
-            connectionRepository.getAllConnections()
-                .also { appConnections = it }
+            connectionRepository.getAllConnections(signerPubKey = signerKeyPair.pubKey)
                 .flatMap { it.relays }
                 .toSet()
                 .let { relays ->
@@ -62,8 +48,9 @@ class RemoteSignerServiceImpl internal constructor(
             val response = nostrCommandHandler.handle(command)
 
             nostrRelayManager.sendResponse(
-                relays = appConnections
-                    .firstOrNull { it.clientPubKey == command.clientPubKey }?.relays
+                relays = connectionRepository
+                    .getConnectionByClientPubKey(clientPubKey = command.clientPubKey)
+                    .getOrNull()?.relays
                     ?: return@launch,
                 clientPubKey = command.clientPubKey,
                 response = response,
