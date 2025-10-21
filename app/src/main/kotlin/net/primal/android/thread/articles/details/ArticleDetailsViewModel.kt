@@ -20,7 +20,7 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.articleId
-import net.primal.android.navigation.naddr
+import net.primal.android.navigation.articleNaddr
 import net.primal.android.navigation.primalName
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.asFeedPostUi
@@ -527,7 +527,7 @@ class ArticleDetailsViewModel @Inject constructor(
     }
 
     private suspend fun parseAndResolveNaddr() =
-        savedStateHandle.naddr?.let { Nip19TLV.parseUriAsNaddrOrNull(it) }
+        savedStateHandle.articleNaddr?.let { Nip19TLV.parseUriAsNaddrOrNull(it) }
             ?: run {
                 val identifier = savedStateHandle.articleId
                 val userId = savedStateHandle.primalName?.let {

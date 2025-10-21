@@ -288,7 +288,7 @@ private fun NavController.navigateToSettings() = navigate(route = "settings")
 
 fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
 
-fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$NADDR=$naddr")
+fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$ARTICLE_NADDR=$naddr")
 
 fun NavController.navigateToReactions(
     eventId: String,
@@ -585,7 +585,7 @@ private fun PrimalAppNavigation(
                     nullable = true
                     defaultValue = null
                 },
-                navArgument(NADDR) {
+                navArgument(STREAM_NADDR) {
                     type = NavType.StringType
                     nullable = true
                     defaultValue = null
@@ -605,7 +605,7 @@ private fun PrimalAppNavigation(
                     uriPattern = "https://primal.net/{$PRIMAL_NAME}/live/{$IDENTIFIER}"
                 },
                 navDeepLink {
-                    uriPattern = "primal://live/{$NADDR}"
+                    uriPattern = "primal://live/{$STREAM_NADDR}"
                 },
             ),
         )
@@ -909,9 +909,9 @@ private fun PrimalAppNavigation(
         )
 
         articleDetails(
-            route = "article?$NADDR={$NADDR}&$PRIMAL_NAME={$PRIMAL_NAME}&$ARTICLE_ID={$ARTICLE_ID}",
+            route = "article?$ARTICLE_NADDR={$ARTICLE_NADDR}&$PRIMAL_NAME={$PRIMAL_NAME}&$ARTICLE_ID={$ARTICLE_ID}",
             arguments = listOf(
-                navArgument(NADDR) {
+                navArgument(ARTICLE_NADDR) {
                     type = NavType.StringType
                     nullable = true
                 },
@@ -926,7 +926,7 @@ private fun PrimalAppNavigation(
             ),
             deepLinks = listOf(
                 navDeepLink {
-                    uriPattern = "https://primal.net/a/{$NADDR}"
+                    uriPattern = "https://primal.net/a/{$ARTICLE_NADDR}"
                 },
                 navDeepLink {
                     uriPattern = "https://primal.net/{$PRIMAL_NAME}/{$ARTICLE_ID}"

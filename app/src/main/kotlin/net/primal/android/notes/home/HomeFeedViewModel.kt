@@ -18,9 +18,9 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.core.updater.DataUpdater
 import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.navigation.identifier
-import net.primal.android.navigation.naddr
 import net.primal.android.navigation.npub
 import net.primal.android.navigation.primalName
+import net.primal.android.navigation.streamNaddr
 import net.primal.android.notes.feed.model.asStreamPillUi
 import net.primal.android.notes.home.HomeFeedContract.UiEvent
 import net.primal.android.notes.home.HomeFeedContract.UiState
@@ -56,7 +56,7 @@ class HomeFeedViewModel @Inject constructor(
     private val hostNpub = savedStateHandle.npub
     private val streamIdentifier = savedStateHandle.identifier
     private val hostPrimalName = savedStateHandle.primalName
-    private val streamNaddr = savedStateHandle.naddr
+    private val streamNaddr = savedStateHandle.streamNaddr
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
