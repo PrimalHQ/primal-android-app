@@ -43,6 +43,11 @@ class RemoteSignerServiceImpl internal constructor(
             }
         }
 
+    /*
+        TODO(marko): we should make sure we ALWAYS send back some kind of response.
+            Whatever happens in this chain before this, should be propagated.
+            Maybe we should have another flow for observing errors across clients? food for thought.
+      */
     private fun processCommand(command: NostrCommand) =
         scope.launch {
             val response = nostrCommandHandler.handle(command)

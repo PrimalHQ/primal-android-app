@@ -35,11 +35,23 @@ internal class NostrCommandHandler(
         )
     }
 
-    private fun connect(command: NostrCommand.Connect): NostrCommandResponse {
-        return NostrCommandResponse(
-            id = command.id,
-            result = command.secret,
-        )
+    private suspend fun connect(command: NostrCommand.Connect): NostrCommandResponse {
+        return connectionRepository.getConnectionByClientPubKey(clientPubKey = command.clientPubKey)
+            .fold(
+                onSuccess = {
+                    NostrCommandResponse(
+                        id = command.id,
+                        result = "",
+                        error = "There is already a connection with this `clientPubKey`. Please use that connection or make a new one.",
+                    )
+                },
+                onFailure = {
+                    NostrCommandResponse(
+                        id = command.id,
+                        result = command.secret,
+                    )
+                },
+            )
     }
 
     private suspend fun signEvent(command: NostrCommand.SignEvent): NostrCommandResponse {

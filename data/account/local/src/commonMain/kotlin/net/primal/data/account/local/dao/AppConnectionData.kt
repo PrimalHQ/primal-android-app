@@ -8,7 +8,7 @@ import net.primal.shared.data.local.encryption.Encryptable
 @Entity(
     indices = [
         Index(value = ["signerPubKey"]),
-        Index(value = ["clientPubKey"]),
+        Index(value = ["clientPubKey"], unique = true),
         Index(value = ["userPubKey"]),
     ]
 )

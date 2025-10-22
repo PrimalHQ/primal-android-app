@@ -17,7 +17,7 @@ class ConnectionRepositoryImpl(
 ) : ConnectionRepository {
     override suspend fun getAllConnections(signerPubKey: String): List<AppConnection> =
         withContext(dispatchers.io()) {
-            database.connections().getAll(signerPubKey = signerPubKey)
+            database.connections().getAll(signerPubKey = signerPubKey.asEncryptable())
                 .map { it.asDomain() }
         }
 
@@ -28,14 +28,14 @@ class ConnectionRepositoryImpl(
 
     override suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<AppConnection> =
         withContext(dispatchers.io()) {
-            database.connections().getConnectionByClientPubKey(clientPubKey = clientPubKey)
+            database.connections().getConnectionByClientPubKey(clientPubKey = clientPubKey.asEncryptable())
                 ?.asDomain()?.asSuccess()
                 ?: Result.failure(NoSuchElementException("Couldn't locate connection with given `clientPubKey`."))
         }
 
     override suspend fun deleteConnectionsByUser(userPubKey: String) =
         withContext(dispatchers.io()) {
-            database.connections().deleteConnectionsByUser(userPubKey = userPubKey)
+            database.connections().deleteConnectionsByUser(userPubKey = userPubKey.asEncryptable())
         }
 
     override suspend fun saveConnection(secret: String, connection: AppConnection) =
@@ -59,7 +59,7 @@ class ConnectionRepositoryImpl(
 
     override suspend fun getUserPubKey(clientPubKey: String): Result<String> =
         withContext(dispatchers.io()) {
-            database.connections().getUserPubKey(clientPubKey = clientPubKey)?.asSuccess()
+            database.connections().getUserPubKey(clientPubKey = clientPubKey.asEncryptable())?.asSuccess()
                 ?: Result.failure(NoSuchElementException("Couldn't locate user pubkey for client pubkey."))
         }
 }

@@ -8,12 +8,21 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.account.remote.client.RemoteSignerClient
 import net.primal.data.account.remote.command.model.NostrCommand
 import net.primal.data.account.remote.command.model.NostrCommandResponse
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
+private const val MAX_CACHE_SIZE = 20
+
+/*
+    TODO(marko): This is a long running service. Bad network conditions must be considered.
+     We should have a way of detecting disconnect from some relay and some kind of fallback logic should be implemented?
+     Right now we are assuming happy path. We connected and are staying connected to relays.
+     What happens when we suddenly get disconnected?
+ */
 internal class NostrRelayManager(
     private val dispatcherProvider: DispatcherProvider,
     private val signerKeyPair: NostrKeyPair,
@@ -22,6 +31,8 @@ internal class NostrRelayManager(
 
     private val clients: MutableMap<String, RemoteSignerClient> = mutableMapOf()
     private val clientJobs: MutableMap<String, Job> = mutableMapOf()
+
+    private val cache: LruSeenCache<String> = LruSeenCache(maxEntries = MAX_CACHE_SIZE)
 
     private val _incomingCommands = MutableSharedFlow<NostrCommand>(
         replay = 0,
@@ -76,10 +87,13 @@ internal class NostrRelayManager(
         clientJobs[relay] = scope.launch {
             runCatching {
                 client.incomingCommands.collect { cmd ->
-                    /* TODO(marko): we should pay attention for already seen commands by `id`. LRUCache? */
+                    if (cache.seen(cmd.id)) return@collect
+
                     if (!_incomingCommands.tryEmit(cmd)) {
                         _incomingCommands.emit(cmd)
                     }
+
+                    cache.mark(cmd.id)
                 }
             }.onFailure { error ->
                 Napier.d(throwable = error) {

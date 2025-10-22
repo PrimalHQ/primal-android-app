@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "c2469da41150b8a39836292e6911122c",
+    "identityHash": "a8f5a447bf14360116c3eab6a6d86bec",
     "entities": [
       {
         "tableName": "AppConnectionData",
@@ -78,12 +78,12 @@
           },
           {
             "name": "index_AppConnectionData_clientPubKey",
-            "unique": false,
+            "unique": true,
             "columnNames": [
               "clientPubKey"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_AppConnectionData_clientPubKey` ON `${TABLE_NAME}` (`clientPubKey`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_AppConnectionData_clientPubKey` ON `${TABLE_NAME}` (`clientPubKey`)"
           },
           {
             "name": "index_AppConnectionData_userPubKey",
@@ -135,7 +135,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c2469da41150b8a39836292e6911122c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a8f5a447bf14360116c3eab6a6d86bec')"
     ]
   }
 }
