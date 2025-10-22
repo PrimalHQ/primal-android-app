@@ -6,6 +6,7 @@ import java.util.*
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.articles.highlights.HighlightUi
 import net.primal.android.core.errors.UiError
+import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -34,6 +35,9 @@ interface NoteEditorContract {
         val taggedUsers: List<NoteTaggedUser> = emptyList(),
         val referencedNostrUris: List<ReferencedUri<*>> = emptyList(),
         val userTaggingState: UserTaggingState = UserTaggingState(),
+        val showAccountSwitcher: Boolean = false,
+        val availableAccounts: List<UserAccountUi> = emptyList(),
+        val selectedAccountId: String? = null,
     ) {
         val isReply: Boolean get() = replyToConversation.isNotEmpty()
         val replyToNote: FeedPostUi? = replyToConversation.lastOrNull()
@@ -53,6 +57,9 @@ interface NoteEditorContract {
         data class SearchUsers(val query: String) : UiEvent()
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
         data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
+        data object ShowAccountSwitcher : UiEvent()
+        data object HideAccountSwitcher : UiEvent()
+        data class AccountSelected(val accountId: String) : UiEvent()
         data object DismissError : UiEvent()
     }
 
