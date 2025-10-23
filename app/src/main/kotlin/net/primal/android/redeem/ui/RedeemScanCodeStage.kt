@@ -10,6 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
@@ -34,13 +35,25 @@ fun RedeemScanCodeStage(
             cameraVisible = true,
             onQrCodeDetected = onQrCodeDetected,
         ) {
-            Text(
-                modifier = Modifier.padding(top = 16.dp),
-                text = stringResource(id = R.string.redeem_code_scan_hint),
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                style = AppTheme.typography.bodyLarge,
-            )
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    modifier = Modifier.padding(top = 24.dp),
+                    text = stringResource(id = R.string.scan_anything_title),
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    style = AppTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    modifier = Modifier.padding(top = 8.dp),
+                    text = stringResource(id = R.string.scan_anything_subtitle),
+                    color = Color.White,
+                    textAlign = TextAlign.Center,
+                    style = AppTheme.typography.bodyLarge,
+                )
+            }
         }
 
         PrimalLoadingButton(

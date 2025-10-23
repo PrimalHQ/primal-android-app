@@ -124,7 +124,8 @@
     </plurals>
     <string name="redeem_code_to_redeem_code_notice">To redeem your code, onboard to Primal by\ncreating your Nostr account and activating\nyour Primal Wallet.</string>
     <string name="redeem_code_no_wallet_notice">To redeem your code,\nactivate your Primal Wallet.</string>
-    <string name="redeem_code_scan_hint">Scan your Invite Code,\nor a Primal Gift Card.</string>
+    <string name="scan_anything_title">Scan Anything:</string>
+    <string name="scan_anything_subtitle">Invite code, payment invoice, login string, user link, content link, primal gift card</string>
 
     <string name="logout_title">Sign out</string>
     <string name="logout_description">If you didn\'t save your private key, it will be irretrievably lost. Do you really want to sign out?</string>
