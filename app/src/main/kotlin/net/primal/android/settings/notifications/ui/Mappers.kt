@@ -22,27 +22,17 @@ fun ContentAppSettings.mapAsPushNotificationSwitchUi() =
             PushNotifications.LiveEvents,
         ).map { pushNotificationType ->
             val enabled = remoteMap[pushNotificationType.id]?.jsonPrimitive?.booleanOrNull ?: true
-            NotificationSwitchUi<PushNotifications>(settingsType = pushNotificationType, enabled = enabled)
+            NotificationSwitchUi(settingsType = pushNotificationType, enabled = enabled)
         }
     }
         .sortedBy { it.settingsType.order }
-
-private fun TabNotifications.resolveIfEnabled(
-    remoteMap: Map<NotificationType, Boolean>,
-): Pair<TabNotifications, Boolean> {
-    return this to remoteMap.run {
-        this@resolveIfEnabled.types.any {
-            remoteMap[it] == true
-        }
-    }
-}
 
 fun ContentAppSettings.mapAsTabNotificationSwitchUi() =
     notifications.toMap()
         .mapNotNull {
             val type = NotificationType.valueOf(id = it.key)
-            val enabled = it.value.jsonPrimitive.booleanOrNull
-            if (type != null && enabled != null) type to enabled else null
+            val enabled = it.value.jsonPrimitive.booleanOrNull ?: true
+            if (type != null) type to enabled else null
         }
         .associate { it.first to it.second }
         .let { remoteMap ->
@@ -56,8 +46,18 @@ fun ContentAppSettings.mapAsTabNotificationSwitchUi() =
                 TabNotifications.LiveEvents.resolveIfEnabled(remoteMap),
             )
         }.map {
-            NotificationSwitchUi<TabNotifications>(settingsType = it.first, enabled = it.second)
+            NotificationSwitchUi(settingsType = it.first, enabled = it.second)
         }
+
+private fun TabNotifications.resolveIfEnabled(
+    remoteMap: Map<NotificationType, Boolean>,
+): Pair<TabNotifications, Boolean> {
+    return this to remoteMap.run {
+        this@resolveIfEnabled.types.any {
+            remoteMap[it] == true
+        }
+    }
+}
 
 fun ContentAppSettings.mapAsNotificationsPreferences() =
     notificationsAdditional.toMap().let { remoteMap ->
