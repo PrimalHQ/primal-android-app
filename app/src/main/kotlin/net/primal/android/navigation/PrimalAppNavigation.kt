@@ -12,6 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
@@ -50,6 +51,7 @@ import net.primal.android.bookmarks.list.BookmarksScreen
 import net.primal.android.bookmarks.list.BookmarksViewModel
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
+import net.primal.android.core.compose.NostrConnectBottomSheet
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.UnlockScreenOrientation
 import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorOverlay
@@ -365,6 +367,23 @@ private fun NavController.navigateToPremiumChangePrimalName() = navigate(route =
 private fun NavController.navigateToPremiumOrderHistory() = navigate(route = "premium/manage/order")
 private fun NavController.navigateToPremiumRelay() = navigate(route = "premium/manage/relay")
 
+private fun NavController.navigateToNostrConnectBottomSheet(
+    name: String?,
+    url: String?,
+    imageUrl: String?,
+) {
+    val safeName = name?.asUrlEncoded() ?: ""
+    val safeUrl = url?.asUrlEncoded() ?: ""
+    val safeImageUrl = imageUrl?.asUrlEncoded() ?: ""
+
+    navigate(
+        route = "nostrConnectBottomSheet" +
+            "?$NOSTR_CONNECT_NAME=$safeName" +
+            "&$NOSTR_CONNECT_URL=$safeUrl" +
+            "&$NOSTR_CONNECT_IMAGE_URL=$safeImageUrl",
+    )
+}
+
 fun accountSwitcherCallbacksHandler(navController: NavController) =
     AccountSwitcherCallbacks(
         onActiveAccountChanged = { navController.navigateToHome() },
@@ -547,6 +566,28 @@ private fun PrimalAppNavigation(
             deepLinks = listOf(
                 navDeepLink {
                     uriPattern = "https://primal.net/rc/{$PROMO_CODE}"
+                },
+            ),
+            navController = navController,
+        )
+
+        nostrConnectDialog(
+            route = "nostrConnectBottomSheet" +
+                "?$NOSTR_CONNECT_NAME={$NOSTR_CONNECT_NAME}" +
+                "&$NOSTR_CONNECT_URL={$NOSTR_CONNECT_URL}" +
+                "&$NOSTR_CONNECT_IMAGE_URL={$NOSTR_CONNECT_IMAGE_URL}",
+            arguments = listOf(
+                navArgument(NOSTR_CONNECT_NAME) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(NOSTR_CONNECT_URL) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(NOSTR_CONNECT_IMAGE_URL) {
+                    type = NavType.StringType
+                    nullable = true
                 },
             ),
             navController = navController,
@@ -1248,7 +1289,13 @@ private fun NavGraphBuilder.scanCode(
                 onClose = navController::navigateUp,
                 navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
                 navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },
-                onNostrConnectRequest = { one, two, three ->
+                onNostrConnectRequest = { name, url, imageUrl ->
+                    navController.popBackStack()
+                    navController.navigateToNostrConnectBottomSheet(
+                        name = name,
+                        url = url,
+                        imageUrl = imageUrl,
+                    )
                 },
             ),
         )
@@ -1302,6 +1349,32 @@ private fun NavGraphBuilder.home(
             onNewPostClick = { navController.navigateToNoteEditor(null) },
         ),
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+private fun NavGraphBuilder.nostrConnectDialog(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) {
+    dialog(
+        route = route,
+        arguments = arguments,
+        dialogProperties = DialogProperties(
+            usePlatformDefaultWidth = false,
+        ),
+    ) { backStackEntry ->
+        val name = backStackEntry.arguments?.getString(NOSTR_CONNECT_NAME)?.asUrlDecoded()
+        val url = backStackEntry.arguments?.getString(NOSTR_CONNECT_URL)?.asUrlDecoded()
+        val imageUrl = backStackEntry.arguments?.getString(NOSTR_CONNECT_IMAGE_URL)?.asUrlDecoded()
+
+        NostrConnectBottomSheet(
+            name = name,
+            url = url,
+            imageUrl = imageUrl,
+            onDismissRequest = { navController.popBackStack() },
+        )
+    }
 }
 
 private fun NavGraphBuilder.reads(
