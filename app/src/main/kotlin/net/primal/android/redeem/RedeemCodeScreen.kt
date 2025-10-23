@@ -40,6 +40,9 @@ fun RedeemCodeScreen(viewModel: RedeemCodeViewModel, callbacks: RedeemCodeContra
         viewModel.effects.collect {
             when (it) {
                 RedeemCodeContract.SideEffect.PromoCodeApplied -> callbacks.onClose()
+                is RedeemCodeContract.SideEffect.NostrConnectRequest -> {
+                    callbacks.onNostrConnectRequest(it.name, it.url, it.imageUrl)
+                }
             }
         }
     }

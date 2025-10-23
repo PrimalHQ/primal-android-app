@@ -1248,6 +1248,8 @@ private fun NavGraphBuilder.scanCode(
                 onClose = navController::navigateUp,
                 navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
                 navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },
+                onNostrConnectRequest = { one, two, three ->
+                },
             ),
         )
     }

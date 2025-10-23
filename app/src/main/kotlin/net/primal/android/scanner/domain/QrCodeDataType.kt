@@ -1,5 +1,6 @@
 package net.primal.android.scanner.domain
 
+import net.primal.android.redeem.utils.isNostrConnectUrl // <-- DODAJ OVAJ IMPORT
 import net.primal.android.redeem.utils.isPromoCodeUrl
 import net.primal.domain.nostr.utils.isNAddr
 import net.primal.domain.nostr.utils.isNAddrUri
@@ -35,6 +36,7 @@ enum class QrCodeDataType(val validator: (String) -> Boolean) {
     BITCOIN_URI(validator = { it.isBitcoinUri() }),
     BITCOIN_ADDRESS(validator = { it.isBitcoinAddress() }),
     NWC_URL(validator = { it.isNwcUrl() }),
+    NOSTR_CONNECT(validator = { it.isNostrConnectUrl() }),
     PROMO_CODE(validator = { it.isPromoCodeUrl() }),
     ;
 

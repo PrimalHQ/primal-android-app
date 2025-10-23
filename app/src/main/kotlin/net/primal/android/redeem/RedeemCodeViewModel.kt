@@ -18,6 +18,9 @@ import net.primal.android.redeem.RedeemCodeContract.RedeemCodeStage
 import net.primal.android.redeem.RedeemCodeContract.SideEffect
 import net.primal.android.redeem.RedeemCodeContract.UiEvent
 import net.primal.android.redeem.RedeemCodeContract.UiState
+import net.primal.android.redeem.utils.getNostrConnectImage
+import net.primal.android.redeem.utils.getNostrConnectName
+import net.primal.android.redeem.utils.getNostrConnectUrl
 import net.primal.android.redeem.utils.getPromoCodeFromUrl
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
@@ -120,6 +123,16 @@ class RedeemCodeViewModel @Inject constructor(
                                 )
                             }
                         },
+                    )
+                }
+                QrCodeDataType.NOSTR_CONNECT -> {
+                    val nostrConnectUrl = result.value
+                    setEffect(
+                        SideEffect.NostrConnectRequest(
+                            name = nostrConnectUrl.getNostrConnectName(),
+                            url = nostrConnectUrl.getNostrConnectUrl(),
+                            imageUrl = nostrConnectUrl.getNostrConnectImage(),
+                        ),
                     )
                 }
 
