@@ -16,3 +16,8 @@ val CommonJsonImplicitNulls = Json {
     defaultJsonBuilder()
     explicitNulls = false
 }
+
+val CommonJsonEncodeDefaults = Json {
+    defaultJsonBuilder()
+    encodeDefaults = true
+}

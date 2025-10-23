@@ -9,6 +9,8 @@ import androidx.paging.map
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
@@ -27,6 +29,7 @@ import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
+import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.handler.TransactionsHandler
@@ -218,6 +221,23 @@ internal class WalletRepositoryImpl(
                 }
         }
 
+    override suspend fun subscribeToWalletBalance(walletId: String): Flow<WalletBalanceResult> =
+        flow {
+            val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
+                ?: throw IllegalArgumentException("Couldn't find wallet with the given walletId.")
+
+            wallet.resolveWalletService()
+                .subscribeToWalletBalance(wallet = wallet.toDomain())
+                .collect { balanceResult ->
+                    updateWalletBalance(
+                        walletId = walletId,
+                        balanceInBtc = balanceResult.balanceInBtc,
+                        maxBalanceInBtc = balanceResult.maxBalanceInBtc,
+                    )
+                    emit(balanceResult)
+                }
+        }.flowOn(dispatcherProvider.io())
+
     override suspend fun updateWalletBalance(
         walletId: String,
         balanceInBtc: Double,
@@ -279,6 +299,7 @@ internal class WalletRepositoryImpl(
                 transactionsHandler = transactionsHandler,
                 walletDatabase = walletDatabase,
             )
+
             WalletType.PRIMAL, WalletType.NWC -> TimestampBasedWalletTransactionsMediator(
                 walletId = walletId,
                 dispatcherProvider = dispatcherProvider,

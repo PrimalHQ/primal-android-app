@@ -1,11 +1,18 @@
 package net.primal.wallet.data.remote.api
 
 import io.github.aakira.napier.Napier
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.decodeFromJsonElement
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.utils.serialization.CommonJson
+import net.primal.core.utils.serialization.CommonJsonEncodeDefaults
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.common.PrimalEvent
@@ -13,7 +20,9 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.common.util.takeContentOrNull
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.wallet.SubWallet
 import net.primal.wallet.data.remote.PrimalWalletVerb
 import net.primal.wallet.data.remote.WalletOperationVerb
@@ -41,6 +50,7 @@ import net.primal.wallet.data.remote.model.PromoCodeRequestBody
 import net.primal.wallet.data.remote.model.TransactionsRequestBody
 import net.primal.wallet.data.remote.model.TransactionsResponse
 import net.primal.wallet.data.remote.model.UserWalletInfoRequestBody
+import net.primal.wallet.data.remote.model.WalletRequestBody
 import net.primal.wallet.data.remote.model.WalletUserInfoResponse
 import net.primal.wallet.data.remote.model.WithdrawRequestBody
 import net.primal.wallet.data.remote.nostr.ContentWalletExchangeRate
@@ -136,6 +146,34 @@ class PrimalWalletApiImpl(
         return queryResult.findPrimalEvent(NostrEventKind.PrimalWalletBalance)
             ?.takeContentOrNull<BalanceResponse>()
             ?: throw NetworkException("Missing or invalid content in response.")
+    }
+
+    @OptIn(ExperimentalUuidApi::class)
+    override suspend fun subscribeToBalance(userId: String): Flow<BalanceResponse> {
+        val subscriptionId = Uuid.random().toPrimalSubscriptionId()
+        return primalApiClient
+            .subscribeBufferedOnInactivity(
+                subscriptionId = subscriptionId,
+                message = PrimalCacheFilter(
+                    primalVerb = PrimalWalletVerb.WALLET_MONITOR.id,
+                    optionsJson = CommonJsonEncodeDefaults.encodeToString(
+                        WalletRequestBody(
+                            event = signatureHandler.signNostrEvent(
+                                unsignedNostrEvent = NostrUnsignedEvent(
+                                    pubKey = userId,
+                                    content = BalanceRequestBody(subWallet = SubWallet.Open).encodeToJsonString(),
+                                    kind = NostrEventKind.PrimalWalletOperation.value,
+                                    tags = listOf(),
+                                ),
+                            ).unwrapOrThrow(),
+                        ),
+                    ),
+                ),
+                inactivityTimeout = 300.milliseconds,
+            ).mapNotNull {
+                val primalEvent = it.findPrimalEvent(NostrEventKind.PrimalWalletBalance)
+                primalEvent.takeContentOrNull<BalanceResponse>()
+            }
     }
 
     override suspend fun withdraw(userId: String, body: WithdrawRequestBody) {

@@ -1,5 +1,7 @@
 package net.primal.wallet.data.service
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.MSATS_IN_SATS
@@ -37,6 +39,10 @@ internal class TsunamiWalletServiceImpl(
                 maxBalanceInBtc = null,
             )
         }
+
+    override suspend fun subscribeToWalletBalance(wallet: Wallet.Tsunami): Flow<WalletBalanceResult> {
+        return emptyFlow()
+    }
 
     override suspend fun fetchTransactions(
         wallet: Wallet.Tsunami,

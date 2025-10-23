@@ -40,6 +40,7 @@ import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
+import net.primal.domain.wallet.distinctUntilWalletIdChanged
 import timber.log.Timber
 
 @HiltViewModel
@@ -110,8 +111,8 @@ class WalletDashboardViewModel @Inject constructor(
     private fun subscribeToActiveWalletId() =
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeUserId)
-                .filterNotNull()
                 .distinctUntilWalletIdChanged()
+                .filterNotNull()
                 .collect { wallet ->
                     fetchWalletBalance(walletId = wallet.walletId)
                     setState {

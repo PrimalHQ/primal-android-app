@@ -1,6 +1,6 @@
 package net.primal.android.settings.wallet.settings
 
-import net.primal.android.settings.wallet.domain.NwcConnectionInfo
+import net.primal.domain.connections.model.NwcConnectionInfo
 import net.primal.domain.wallet.Wallet
 
 interface WalletSettingsContract {
