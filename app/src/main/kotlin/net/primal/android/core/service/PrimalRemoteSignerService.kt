@@ -14,12 +14,12 @@ import androidx.core.app.ServiceCompat
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.di.RemoteSignerServiceFactory
-import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.account.service.RemoteSignerService
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
@@ -28,9 +28,6 @@ class PrimalRemoteSignerService : Service() {
 
     @Inject
     lateinit var remoteSignerServiceFactory: RemoteSignerServiceFactory
-
-    @Inject
-    lateinit var dispatcherProvider: DispatcherProvider
 
     private var signer: RemoteSignerService? = null
 
@@ -49,7 +46,7 @@ class PrimalRemoteSignerService : Service() {
         }
     }
 
-    private val scope = CoroutineScope(dispatcherProvider.io() + SupervisorJob())
+    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     inner class RemoteSignerBinder : Binder() {
         val service: PrimalRemoteSignerService get() = this@PrimalRemoteSignerService
