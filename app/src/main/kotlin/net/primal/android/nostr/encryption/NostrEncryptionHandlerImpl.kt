@@ -17,8 +17,10 @@ class NostrEncryptionHandlerImpl(
         plaintext: String,
     ): Result<String> =
         runCatching {
-            nostrEncryptionService.nip04Encrypt(                                         /* i know :) */
-                privateKey = credentialsStore.findOrThrow(npub = userId.assureValidNpub()).nsec!!,
+            val nsec = credentialsStore.findOrThrow(npub = userId.assureValidNpub()).nsec
+            requireNotNull(nsec) { "No nsec was found for given user." }
+            nostrEncryptionService.nip04Encrypt(
+                privateKey = nsec,
                 pubKey = participantId,
                 plaintext = plaintext,
             ).getOrThrow()
@@ -30,8 +32,10 @@ class NostrEncryptionHandlerImpl(
         ciphertext: String,
     ): Result<String> =
         runCatching {
-            nostrEncryptionService.nip04Decrypt(                                         /* i know :) */
-                privateKey = credentialsStore.findOrThrow(npub = userId.assureValidNpub()).nsec!!,
+            val nsec = credentialsStore.findOrThrow(npub = userId.assureValidNpub()).nsec
+            requireNotNull(nsec) { "No nsec was found for given user." }
+            nostrEncryptionService.nip04Decrypt(
+                privateKey = nsec,
                 pubKey = participantId,
                 ciphertext = ciphertext,
             ).getOrThrow()
@@ -43,8 +47,10 @@ class NostrEncryptionHandlerImpl(
         plaintext: String,
     ): Result<String> =
         runCatching {
-            nostrEncryptionService.nip44Encrypt(                                         /* i know :) */
-                privateKey = credentialsStore.findOrThrow(npub = userId.assureValidNpub()).nsec!!,
+            val nsec = credentialsStore.findOrThrow(npub = userId.assureValidNpub()).nsec
+            requireNotNull(nsec) { "No nsec was found for given user." }
+            nostrEncryptionService.nip44Encrypt(
+                privateKey = nsec,
                 pubKey = participantId,
                 plaintext = plaintext,
             ).getOrThrow()
@@ -56,8 +62,10 @@ class NostrEncryptionHandlerImpl(
         ciphertext: String,
     ): Result<String> =
         runCatching {
-            nostrEncryptionService.nip44Decrypt(                                         /* i know :) */
-                privateKey = credentialsStore.findOrThrow(npub = userId.assureValidNpub()).nsec!!,
+            val nsec = credentialsStore.findOrThrow(npub = userId.assureValidNpub()).nsec
+            requireNotNull(nsec) { "No nsec was found for given user." }
+            nostrEncryptionService.nip44Decrypt(
+                privateKey = nsec,
                 pubKey = participantId,
                 ciphertext = ciphertext,
             ).getOrThrow()

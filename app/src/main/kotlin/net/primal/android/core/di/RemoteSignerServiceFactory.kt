@@ -1,5 +1,7 @@
 package net.primal.android.core.di
 
+import javax.inject.Inject
+import javax.inject.Singleton
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.account.repository.service.factory.AccountServiceFactory
 import net.primal.domain.account.repository.ConnectionRepository
@@ -8,7 +10,8 @@ import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
-class RemoteSignerServiceFactory(
+@Singleton
+class RemoteSignerServiceFactory @Inject constructor(
     private val eventSignatureHandler: NostrEventSignatureHandler,
     private val nostrEncryptionHandler: NostrEncryptionHandler,
     private val connectionRepository: ConnectionRepository,

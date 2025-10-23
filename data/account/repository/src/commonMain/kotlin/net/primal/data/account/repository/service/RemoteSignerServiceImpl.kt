@@ -4,9 +4,10 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.data.account.remote.command.model.NostrCommand
-import net.primal.data.account.repository.handler.NostrCommandHandler
+import net.primal.data.account.remote.method.model.RemoteSignerMethod
+import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.service.RemoteSignerService
@@ -16,48 +17,43 @@ class RemoteSignerServiceImpl internal constructor(
     private val signerKeyPair: NostrKeyPair,
     private val connectionRepository: ConnectionRepository,
     private val nostrRelayManager: NostrRelayManager,
-    private val nostrCommandHandler: NostrCommandHandler,
+    private val remoteSignerMethodResponseBuilder: RemoteSignerMethodResponseBuilder,
 ) : RemoteSignerService {
 
     private val scope = CoroutineScope(SupervisorJob())
 
     override fun start() {
-        scope.launch {
-            Napier.d(tag = "Signer") { "RemoteSignerService started." }
-            /* TODO(marko): this should be observable, good enough for now. */
-            connectionRepository.getAllConnections(signerPubKey = signerKeyPair.pubKey)
-                .flatMap { it.relays }
-                .toSet()
-                .let { relays ->
-                    nostrRelayManager.connectToRelays(relays)
-                }
-
-            observeEvents()
-        }
+        Napier.d(tag = "Signer") { "RemoteSignerService started." }
+        observeConnections()
+        observeMethods()
     }
 
-    private fun observeEvents() =
+    private fun observeConnections() =
         scope.launch {
-            nostrRelayManager.incomingCommands.collect { command ->
-                processCommand(command = command)
+            connectionRepository.observeAllConnections(signerPubKey = signerKeyPair.pubKey)
+                .map { connections -> connections.flatMap { it.relays }.toSet() }
+                .collect { relays ->
+                    nostrRelayManager.connectToRelays(relays)
+                }
+        }
+
+    private fun observeMethods() =
+        scope.launch {
+            nostrRelayManager.incomingMethods.collect { method ->
+                processMethod(method = method)
             }
         }
 
-    /*
-        TODO(marko): we should make sure we ALWAYS send back some kind of response.
-            Whatever happens in this chain before this, should be propagated.
-            Maybe we should have another flow for observing errors across clients? food for thought.
-      */
-    private fun processCommand(command: NostrCommand) =
+    private fun processMethod(method: RemoteSignerMethod) =
         scope.launch {
-            val response = nostrCommandHandler.handle(command)
+            val response = remoteSignerMethodResponseBuilder.build(method)
 
             nostrRelayManager.sendResponse(
                 relays = connectionRepository
-                    .getConnectionByClientPubKey(clientPubKey = command.clientPubKey)
+                    .getConnectionByClientPubKey(clientPubKey = method.clientPubKey)
                     .getOrNull()?.relays
                     ?: return@launch,
-                clientPubKey = command.clientPubKey,
+                clientPubKey = method.clientPubKey,
                 response = response,
             )
         }

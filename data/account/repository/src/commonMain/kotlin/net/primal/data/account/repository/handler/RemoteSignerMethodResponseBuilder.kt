@@ -3,73 +3,61 @@ package net.primal.data.account.repository.handler
 import net.primal.core.utils.alsoCatching
 import net.primal.core.utils.fold
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.account.remote.command.model.NostrCommand
-import net.primal.data.account.remote.command.model.NostrCommandResponse
+import net.primal.data.account.remote.method.model.RemoteSignerMethod
+import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.utils.getOrNull
 
-internal class NostrCommandHandler(
+internal class RemoteSignerMethodResponseBuilder(
     private val connectionRepository: ConnectionRepository,
     private val nostrEventSignatureHandler: NostrEventSignatureHandler,
     private val nostrEncryptionHandler: NostrEncryptionHandler,
 ) {
-    suspend fun handle(command: NostrCommand): NostrCommandResponse {
+    suspend fun build(command: RemoteSignerMethod): RemoteSignerMethodResponse {
         return when (command) {
-            is NostrCommand.Connect -> connect(command)
-            is NostrCommand.GetPublicKey -> getPublicKey(command)
-            is NostrCommand.Nip04Decrypt -> nip04Decrypt(command)
-            is NostrCommand.Nip04Encrypt -> nip04Encrypt(command)
-            is NostrCommand.Nip44Decrypt -> nip44Decrypt(command)
-            is NostrCommand.Nip44Encrypt -> nip44Encrypt(command)
-            is NostrCommand.Ping -> ping(command)
-            is NostrCommand.SignEvent -> signEvent(command)
+            is RemoteSignerMethod.Connect -> connect(command)
+            is RemoteSignerMethod.GetPublicKey -> getPublicKey(command)
+            is RemoteSignerMethod.Nip04Decrypt -> nip04Decrypt(command)
+            is RemoteSignerMethod.Nip04Encrypt -> nip04Encrypt(command)
+            is RemoteSignerMethod.Nip44Decrypt -> nip44Decrypt(command)
+            is RemoteSignerMethod.Nip44Encrypt -> nip44Encrypt(command)
+            is RemoteSignerMethod.Ping -> ping(command)
+            is RemoteSignerMethod.SignEvent -> signEvent(command)
         }
     }
 
-    private fun ping(command: NostrCommand.Ping): NostrCommandResponse {
-        return NostrCommandResponse(
+    private fun ping(command: RemoteSignerMethod.Ping): RemoteSignerMethodResponse {
+        return RemoteSignerMethodResponse(
             id = command.id,
             result = "pong",
         )
     }
 
-    private suspend fun connect(command: NostrCommand.Connect): NostrCommandResponse {
-        return connectionRepository.getConnectionByClientPubKey(clientPubKey = command.clientPubKey)
-            .fold(
-                onSuccess = {
-                    NostrCommandResponse(
-                        id = command.id,
-                        result = "",
-                        error = "There is already a connection with this `clientPubKey`. Please use that connection or make a new one.",
-                    )
-                },
-                onFailure = {
-                    NostrCommandResponse(
-                        id = command.id,
-                        result = command.secret,
-                    )
-                },
-            )
-    }
+    private fun connect(command: RemoteSignerMethod.Connect): RemoteSignerMethodResponse =
+        RemoteSignerMethodResponse(
+            id = command.id,
+            result = "",
+            error = "We don't accept incoming connection requests. Please scan or enter `nostrconnect://` url to initiate a connection.",
+        )
 
-    private suspend fun signEvent(command: NostrCommand.SignEvent): NostrCommandResponse {
+    private suspend fun signEvent(command: RemoteSignerMethod.SignEvent): RemoteSignerMethodResponse {
         return nostrEventSignatureHandler.signNostrEvent(
             unsignedNostrEvent = command.unsignedEvent,
         ).getOrNull()?.let {
-            NostrCommandResponse(
+            RemoteSignerMethodResponse(
                 id = command.id,
                 result = it.encodeToJsonString(),
             )
-        } ?: NostrCommandResponse(
+        } ?: RemoteSignerMethodResponse(
             id = command.id,
             result = "",
             error = "Couldn't sign event.",
         )
     }
 
-    private suspend fun nip44Encrypt(command: NostrCommand.Nip44Encrypt): NostrCommandResponse {
+    private suspend fun nip44Encrypt(command: RemoteSignerMethod.Nip44Encrypt): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = command.clientPubKey)
             .alsoCatching { userPubKey ->
                 nostrEncryptionHandler.nip44Encrypt(
@@ -79,13 +67,13 @@ internal class NostrCommandHandler(
                 )
             }.fold(
                 onSuccess = {
-                    NostrCommandResponse(
+                    RemoteSignerMethodResponse(
                         id = command.id,
                         result = it,
                     )
                 },
                 onFailure = {
-                    NostrCommandResponse(
+                    RemoteSignerMethodResponse(
                         id = command.id,
                         result = "",
                         error = "Failed to run nip44 encryption. Reason: ${it.message}",
@@ -94,7 +82,7 @@ internal class NostrCommandHandler(
             )
     }
 
-    private suspend fun nip44Decrypt(command: NostrCommand.Nip44Decrypt): NostrCommandResponse {
+    private suspend fun nip44Decrypt(command: RemoteSignerMethod.Nip44Decrypt): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = command.clientPubKey)
             .alsoCatching { userPubKey ->
                 nostrEncryptionHandler.nip44Decrypt(
@@ -104,13 +92,13 @@ internal class NostrCommandHandler(
                 )
             }.fold(
                 onSuccess = {
-                    NostrCommandResponse(
+                    RemoteSignerMethodResponse(
                         id = command.id,
                         result = it,
                     )
                 },
                 onFailure = {
-                    NostrCommandResponse(
+                    RemoteSignerMethodResponse(
                         id = command.id,
                         result = "",
                         error = "Failed to run nip44 decryption. Reason: ${it.message}",
@@ -119,7 +107,7 @@ internal class NostrCommandHandler(
             )
     }
 
-    private suspend fun nip04Encrypt(command: NostrCommand.Nip04Encrypt): NostrCommandResponse {
+    private suspend fun nip04Encrypt(command: RemoteSignerMethod.Nip04Encrypt): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = command.clientPubKey)
             .alsoCatching { userPubKey ->
                 nostrEncryptionHandler.nip04Encrypt(
@@ -129,13 +117,13 @@ internal class NostrCommandHandler(
                 )
             }.fold(
                 onSuccess = {
-                    NostrCommandResponse(
+                    RemoteSignerMethodResponse(
                         id = command.id,
                         result = it,
                     )
                 },
                 onFailure = {
-                    NostrCommandResponse(
+                    RemoteSignerMethodResponse(
                         id = command.id,
                         result = "",
                         error = "Failed to run nip04 encryption. Reason: ${it.message}",
@@ -144,7 +132,7 @@ internal class NostrCommandHandler(
             )
     }
 
-    private suspend fun nip04Decrypt(command: NostrCommand.Nip04Decrypt): NostrCommandResponse {
+    private suspend fun nip04Decrypt(command: RemoteSignerMethod.Nip04Decrypt): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = command.clientPubKey)
             .alsoCatching { userPubKey ->
                 nostrEncryptionHandler.nip04Decrypt(
@@ -154,13 +142,13 @@ internal class NostrCommandHandler(
                 )
             }.fold(
                 onSuccess = {
-                    NostrCommandResponse(
+                    RemoteSignerMethodResponse(
                         id = command.id,
                         result = it,
                     )
                 },
                 onFailure = {
-                    NostrCommandResponse(
+                    RemoteSignerMethodResponse(
                         id = command.id,
                         result = "",
                         error = "Failed to run nip04 decryption. Reason: ${it.message}",
@@ -169,17 +157,17 @@ internal class NostrCommandHandler(
             )
     }
 
-    private suspend fun getPublicKey(command: NostrCommand.GetPublicKey): NostrCommandResponse {
+    private suspend fun getPublicKey(command: RemoteSignerMethod.GetPublicKey): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = command.clientPubKey)
             .fold(
                 onSuccess = {
-                    NostrCommandResponse(
+                    RemoteSignerMethodResponse(
                         id = command.id,
                         result = it,
                     )
                 },
                 onFailure = {
-                    NostrCommandResponse(
+                    RemoteSignerMethodResponse(
                         id = command.id,
                         result = "",
                         error = "Failed to process command: ${it.message}",

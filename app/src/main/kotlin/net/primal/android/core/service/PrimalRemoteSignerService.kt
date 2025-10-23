@@ -2,7 +2,6 @@ package net.primal.android.core.service
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -15,11 +14,12 @@ import androidx.core.app.ServiceCompat
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.di.RemoteSignerServiceFactory
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.account.service.RemoteSignerService
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
@@ -29,14 +29,14 @@ class PrimalRemoteSignerService : Service() {
     @Inject
     lateinit var remoteSignerServiceFactory: RemoteSignerServiceFactory
 
+    @Inject
+    lateinit var dispatcherProvider: DispatcherProvider
+
     private var signer: RemoteSignerService? = null
 
     companion object {
         private const val CHANNEL_ID = "remote_signer"
         private const val NOTIF_ID = 42
-
-        /* TODO(marko): actually handle action stop. */
-        private const val ACTION_STOP = "net.primal.signer.STOP"
 
         fun start(context: Context) {
             val i = Intent(context, PrimalRemoteSignerService::class.java)
@@ -44,13 +44,12 @@ class PrimalRemoteSignerService : Service() {
         }
 
         fun stop(context: Context) {
-            val i = Intent(context, PrimalRemoteSignerService::class.java).apply { action = ACTION_STOP }
-            context.startService(i)
+            val i = Intent(context, PrimalRemoteSignerService::class.java)
+            context.stopService(i)
         }
     }
 
-    private val job = SupervisorJob()
-    private val scope = CoroutineScope(Dispatchers.IO + job)
+    private val scope = CoroutineScope(dispatcherProvider.io() + SupervisorJob())
 
     inner class RemoteSignerBinder : Binder() {
         val service: PrimalRemoteSignerService get() = this@PrimalRemoteSignerService
@@ -65,33 +64,27 @@ class PrimalRemoteSignerService : Service() {
         createNotificationChannel()
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_STOP) {
-            stopSelf()
-            return START_NOT_STICKY
-        }
-
-        val stopPi = PendingIntent.getService(
-            this, 0,
-            Intent(this, RemoteSignerService::class.java).apply { action = ACTION_STOP },
-            PendingIntent.FLAG_IMMUTABLE,
-        )
-
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.primal_wave_logo_summer)
             .setContentTitle("Primal Remote Signer")
             .setContentText("Listening for signing requests...")
             .setOngoing(true)
-            .addAction(0, "Stop", stopPi)
             .build()
 
         ServiceCompat.startForeground(
             this,
             NOTIF_ID,
             notification,
-            if (Build.VERSION.SDK_INT >= 34)
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-            else 0,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
+            } else {
+                0
+            },
         )
 
         scope.launch {
@@ -108,8 +101,8 @@ class PrimalRemoteSignerService : Service() {
     }
 
     override fun onDestroy() {
-        job.cancel()
         signer?.stop()
+        scope.cancel()
         super.onDestroy()
     }
 

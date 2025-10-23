@@ -2,7 +2,8 @@ package net.primal.data.account.remote.client
 
 import com.vitorpamplona.quartz.nip44Encryption.Nip44v2
 import io.github.aakira.napier.Napier
-import io.ktor.utils.io.core.toByteArray
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -22,9 +23,9 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
-import net.primal.data.account.remote.command.model.NostrCommand
-import net.primal.data.account.remote.command.model.NostrCommandResponse
-import net.primal.data.account.remote.command.parser.NostrCommandParser
+import net.primal.data.account.remote.method.model.RemoteSignerMethod
+import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.method.parser.RemoteSignerMethodParser
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -33,11 +34,9 @@ import net.primal.domain.nostr.cryptography.NostrKeyPair
 import net.primal.domain.nostr.cryptography.signOrThrow
 import net.primal.domain.nostr.cryptography.utils.assureValidNpub
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
+import net.primal.domain.nostr.cryptography.utils.assureValidPubKeyHex
 import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
 import net.primal.domain.nostr.serialization.toNostrJsonObject
-import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
-import net.primal.domain.nostr.cryptography.utils.assureValidPubKeyHex
 
 @OptIn(ExperimentalUuidApi::class)
 class RemoteSignerClient(
@@ -45,15 +44,14 @@ class RemoteSignerClient(
     dispatchers: DispatcherProvider,
     private val signerKeyPair: NostrKeyPair,
 ) {
-    /* TODO(marko): does this leak? */
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
     private val nostrSocketClient = NostrSocketClientFactory.create(wssUrl = relayUrl)
 
-    private val nostrCommandParser = NostrCommandParser()
+    private val remoteSignerMethodParser = RemoteSignerMethodParser()
     private val nip44 = Nip44v2()
 
-    private val _incomingCommands: Channel<NostrCommand> = Channel()
-    val incomingCommands = _incomingCommands.receiveAsFlow()
+    private val _incomingMethods: Channel<RemoteSignerMethod> = Channel()
+    val incomingMethods = _incomingMethods.receiveAsFlow()
 
     private var listenerJob: Job? = null
 
@@ -68,7 +66,7 @@ class RemoteSignerClient(
     private fun startSubscription() {
         listenerJob?.cancel()
         listenerJob = scope.launch {
-            val listenerId = Uuid.Companion.random().toPrimalSubscriptionId()
+            val listenerId = Uuid.random().toPrimalSubscriptionId()
 
             nostrSocketClient.sendREQ(
                 subscriptionId = listenerId,
@@ -93,14 +91,11 @@ class RemoteSignerClient(
 
     fun close() =
         scope.launch {
-            listenerJob?.cancel()
             nostrSocketClient.close()
+            listenerJob?.cancel()
         }
 
-    suspend fun publishResponse(
-        clientPubKey: String,
-        response: NostrCommandResponse
-    ): Result<Unit> =
+    suspend fun publishResponse(clientPubKey: String, response: RemoteSignerMethodResponse): Result<Unit> =
         runCatching {
             Napier.d(tag = "Signer") { "Sending response: $response" }
             nostrSocketClient.sendEVENT(
@@ -125,9 +120,9 @@ class RemoteSignerClient(
         scope.launch {
             val decryptedContent = event.decryptContent()
 
-            nostrCommandParser.parse(clientPubkey = event.pubKey, content = decryptedContent)
+            remoteSignerMethodParser.parse(clientPubkey = event.pubKey, content = decryptedContent)
                 .onSuccess { command ->
-                    _incomingCommands.send(command)
+                    _incomingMethods.send(command)
                 }.onFailure {
                     Napier.w(throwable = it) { "Couldn't parse received event." }
                 }

@@ -1,23 +1,23 @@
-package net.primal.data.account.remote.command.parser
+package net.primal.data.account.remote.method.parser
 
 import net.primal.core.utils.Result
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.data.account.remote.command.model.NostrCommand
-import net.primal.data.account.remote.command.model.NostrCommandMethod
-import net.primal.data.account.remote.command.model.NostrCommandRequest
+import net.primal.data.account.remote.method.model.RemoteSignerMethod
+import net.primal.data.account.remote.method.model.RemoteSignerMethodRequest
+import net.primal.data.account.remote.method.model.RemoteSignerMethodType
 import net.primal.domain.nostr.NostrUnsignedEvent
 
-internal class NostrCommandParser {
+internal class RemoteSignerMethodParser {
 
-    fun parse(clientPubkey: String, content: String): Result<NostrCommand> {
-        val request = content.decodeFromJsonStringOrNull<NostrCommandRequest>()
+    fun parse(clientPubkey: String, content: String): Result<RemoteSignerMethod> {
+        val request = content.decodeFromJsonStringOrNull<RemoteSignerMethodRequest>()
             ?: return Result.failure(IllegalArgumentException("Failed to parse given content as `NostrCommandRequest`. Raw: $content"))
 
         return runCatching {
             when (request.method) {
-                NostrCommandMethod.Connect ->
-                    NostrCommand.Connect(
+                RemoteSignerMethodType.Connect ->
+                    RemoteSignerMethod.Connect(
                         id = request.id,
                         clientPubKey = clientPubkey,
                         remoteSignerPubkey = request.params[0],
@@ -25,14 +25,14 @@ internal class NostrCommandParser {
                         requestedPermissions = request.params[2].split(","),
                     )
 
-                NostrCommandMethod.Ping ->
-                    NostrCommand.Ping(
+                RemoteSignerMethodType.Ping ->
+                    RemoteSignerMethod.Ping(
                         id = request.id,
                         clientPubKey = clientPubkey,
                     )
 
-                NostrCommandMethod.SignEvent ->
-                    NostrCommand.SignEvent(
+                RemoteSignerMethodType.SignEvent ->
+                    RemoteSignerMethod.SignEvent(
                         id = request.id,
                         clientPubKey = clientPubkey,
                         unsignedEvent = request.params[0].decodeFromJsonStringOrNull<NostrUnsignedEvent>()
@@ -41,38 +41,38 @@ internal class NostrCommandParser {
                             ),
                     )
 
-                NostrCommandMethod.GetPublicKey ->
-                    NostrCommand.GetPublicKey(
+                RemoteSignerMethodType.GetPublicKey ->
+                    RemoteSignerMethod.GetPublicKey(
                         id = request.id,
                         clientPubKey = clientPubkey,
                     )
 
-                NostrCommandMethod.Nip04Encrypt ->
-                    NostrCommand.Nip04Encrypt(
+                RemoteSignerMethodType.Nip04Encrypt ->
+                    RemoteSignerMethod.Nip04Encrypt(
                         id = request.id,
                         clientPubKey = clientPubkey,
                         thirdPartyPubKey = request.params[0],
                         plaintext = request.params[1],
                     )
 
-                NostrCommandMethod.Nip04Decrypt ->
-                    NostrCommand.Nip04Decrypt(
+                RemoteSignerMethodType.Nip04Decrypt ->
+                    RemoteSignerMethod.Nip04Decrypt(
                         id = request.id,
                         clientPubKey = clientPubkey,
                         thirdPartyPubKey = request.params[0],
                         ciphertext = request.params[1],
                     )
 
-                NostrCommandMethod.Nip44Encrypt ->
-                    NostrCommand.Nip44Encrypt(
+                RemoteSignerMethodType.Nip44Encrypt ->
+                    RemoteSignerMethod.Nip44Encrypt(
                         id = request.id,
                         clientPubKey = clientPubkey,
                         thirdPartyPubKey = request.params[0],
                         plaintext = request.params[1],
                     )
 
-                NostrCommandMethod.Nip44Decrypt ->
-                    NostrCommand.Nip44Decrypt(
+                RemoteSignerMethodType.Nip44Decrypt ->
+                    RemoteSignerMethod.Nip44Decrypt(
                         id = request.id,
                         clientPubKey = clientPubkey,
                         thirdPartyPubKey = request.params[0],

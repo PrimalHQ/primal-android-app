@@ -16,5 +16,4 @@ object IosRepositoryFactory : RepositoryFactory() {
     }
 
     override fun resolveAccountDatabase(): AccountDatabase = accountDatabase
-
 }

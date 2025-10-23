@@ -10,7 +10,7 @@ import net.primal.shared.data.local.encryption.Encryptable
         Index(value = ["signerPubKey"]),
         Index(value = ["clientPubKey"], unique = true),
         Index(value = ["userPubKey"]),
-    ]
+    ],
 )
 data class AppConnectionData(
     @PrimaryKey

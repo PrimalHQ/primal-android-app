@@ -35,8 +35,9 @@ object NostrModule {
     fun provideNostrEncryptionHandler(
         nostrEncryptionService: NostrEncryptionService,
         credentialsStore: CredentialsStore,
-    ): NostrEncryptionHandler = NostrEncryptionHandlerImpl(
-        nostrEncryptionService = nostrEncryptionService,
-        credentialsStore = credentialsStore,
-    )
+    ): NostrEncryptionHandler =
+        NostrEncryptionHandlerImpl(
+            nostrEncryptionService = nostrEncryptionService,
+            credentialsStore = credentialsStore,
+        )
 }

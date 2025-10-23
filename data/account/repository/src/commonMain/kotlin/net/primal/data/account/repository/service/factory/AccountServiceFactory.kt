@@ -2,7 +2,7 @@ package net.primal.data.account.repository.service.factory
 
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.account.repository.service.NostrEncryptionServiceImpl
-import net.primal.data.account.repository.handler.NostrCommandHandler
+import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.factory.AccountManagerFactory
 import net.primal.data.account.repository.service.RemoteSignerServiceImpl
 import net.primal.domain.account.service.NostrEncryptionService
@@ -27,7 +27,7 @@ object AccountServiceFactory {
                 dispatcherProvider = dispatcherProvider,
                 signerKeyPair = signerKeyPair,
             ),
-            nostrCommandHandler = NostrCommandHandler(
+            remoteSignerMethodResponseBuilder = RemoteSignerMethodResponseBuilder(
                 nostrEventSignatureHandler = eventSignatureHandler,
                 nostrEncryptionHandler = nostrEncryptionHandler,
                 connectionRepository = connectionRepository,

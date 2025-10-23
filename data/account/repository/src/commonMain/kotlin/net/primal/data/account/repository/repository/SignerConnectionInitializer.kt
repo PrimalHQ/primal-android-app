@@ -5,11 +5,18 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import net.primal.core.utils.Result
 import net.primal.core.utils.runCatching
-import net.primal.data.account.remote.command.model.NostrCommandResponse
+import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.repository.ConnectionRepository
+
+private const val NOSTR_CONNECT_PREFIX = "nostrconnect://"
+private const val NAME_PARAM = "name"
+private const val IMAGE_PARAM = "image"
+private const val URL_PARAM = "url"
+private const val RELAY_PARAM = "relay"
+private const val SECRET_PARAM = "secret"
 
 @OptIn(ExperimentalUuidApi::class)
 class SignerConnectionInitializer internal constructor(
@@ -32,19 +39,11 @@ class SignerConnectionInitializer internal constructor(
             nostrRelayManager.sendResponse(
                 relays = appConnection.relays,
                 clientPubKey = appConnection.clientPubKey,
-                response = NostrCommandResponse(
-                    /*
-                        TODO(marko): what should be the `id`? Nip doesn't define this.
-                         Can it be some random value? I don't see why not.
-                     */
+                response = RemoteSignerMethodResponse(
                     id = Uuid.random().toString(),
                     result = secret,
                 ),
             )
-            /*
-            TODO(marko): if sending the event fails, we shouldn't persist do db.
-                right now we have no idea if it was successful so this should be addressed first.
-             */
 
             connectionRepository.saveConnection(secret = secret, connection = appConnection)
         }
@@ -54,8 +53,8 @@ class SignerConnectionInitializer internal constructor(
         userPubKey: String,
         connectionUrl: String,
     ): Pair<AppConnection, String> {
-        if (!connectionUrl.startsWith(prefix = "nostrconnect://", ignoreCase = true)) {
-            throw IllegalArgumentException("Invalid `connectionUrl`. It should start with `nostrconnect://`.")
+        if (!connectionUrl.startsWith(prefix = NOSTR_CONNECT_PREFIX, ignoreCase = true)) {
+            throw IllegalArgumentException("Invalid `connectionUrl`. It should start with `$NOSTR_CONNECT_PREFIX`.")
         }
 
         val parsedUrl = Url(urlString = connectionUrl)
@@ -63,9 +62,9 @@ class SignerConnectionInitializer internal constructor(
         val relays = extractRelaysOrThrow(parsedUrl)
         val secret = extractSecretOrThrow(parsedUrl)
         val perms = extractPermsOrEmpty(parsedUrl)
-        val name = parsedUrl.parameters["name"]
-        val url = parsedUrl.parameters["url"]
-        val image = parsedUrl.parameters["image"]
+        val name = parsedUrl.parameters[NAME_PARAM]
+        val url = parsedUrl.parameters[URL_PARAM]
+        val image = parsedUrl.parameters[IMAGE_PARAM]
 
         return AppConnection(
             connectionId = Uuid.random().toString(),
@@ -81,19 +80,18 @@ class SignerConnectionInitializer internal constructor(
     }
 
     private fun extractRelaysOrThrow(url: Url): List<String> =
-        url.parameters.getAll("relay")
+        url.parameters.getAll(RELAY_PARAM)
             ?: throw IllegalArgumentException(
-                "No `relay` fields found in provided `connectionUrl`. This is a mandatory field.",
+                "No `$RELAY_PARAM` fields found in provided `connectionUrl`. This is a mandatory field.",
             )
 
     private fun extractSecretOrThrow(url: Url): String =
-        url.parameters["secret"]
+        url.parameters[SECRET_PARAM]
             ?: throw IllegalArgumentException(
-                "No `secret` field found in provided `connectionUrl`. This is a mandatory field.",
+                "No `$SECRET_PARAM` field found in provided `connectionUrl`. This is a mandatory field.",
             )
 
     private fun extractPermsOrEmpty(url: Url): List<AppPermission> {
-        /* TODO(marko): actually parse permissions */
         return emptyList()
     }
 }

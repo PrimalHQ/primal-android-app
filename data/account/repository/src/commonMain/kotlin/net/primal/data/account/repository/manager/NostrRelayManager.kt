@@ -11,18 +11,12 @@ import kotlinx.coroutines.launch
 import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.account.remote.client.RemoteSignerClient
-import net.primal.data.account.remote.command.model.NostrCommand
-import net.primal.data.account.remote.command.model.NostrCommandResponse
+import net.primal.data.account.remote.method.model.RemoteSignerMethod
+import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
 private const val MAX_CACHE_SIZE = 20
 
-/*
-    TODO(marko): This is a long running service. Bad network conditions must be considered.
-     We should have a way of detecting disconnect from some relay and some kind of fallback logic should be implemented?
-     Right now we are assuming happy path. We connected and are staying connected to relays.
-     What happens when we suddenly get disconnected?
- */
 internal class NostrRelayManager(
     private val dispatcherProvider: DispatcherProvider,
     private val signerKeyPair: NostrKeyPair,
@@ -34,11 +28,11 @@ internal class NostrRelayManager(
 
     private val cache: LruSeenCache<String> = LruSeenCache(maxEntries = MAX_CACHE_SIZE)
 
-    private val _incomingCommands = MutableSharedFlow<NostrCommand>(
+    private val _incomingMethods = MutableSharedFlow<RemoteSignerMethod>(
         replay = 0,
         extraBufferCapacity = 64,
     )
-    val incomingCommands: Flow<NostrCommand> = _incomingCommands.asSharedFlow()
+    val incomingMethods: Flow<RemoteSignerMethod> = _incomingMethods.asSharedFlow()
 
     fun connectToRelays(relays: Set<String>) {
         Napier.d(tag = "Signer") { "Connecting to relays: $relays" }
@@ -54,7 +48,7 @@ internal class NostrRelayManager(
 
         client.connect()
 
-        addClient(
+        observeClientMethods(
             relay = relay,
             client = client,
         )
@@ -69,10 +63,9 @@ internal class NostrRelayManager(
         clients.clear()
     }
 
-    fun sendResponse(relays: List<String>, clientPubKey: String, response: NostrCommandResponse) {
+    fun sendResponse(relays: List<String>, clientPubKey: String, response: RemoteSignerMethodResponse) {
         relays.mapNotNull { relay -> clients[relay] }
             .forEach { client ->
-                /* TODO(marko): we should pay attention to errors here and propagate them. */
                 scope.launch {
                     client.publishResponse(clientPubKey = clientPubKey, response = response)
                 }
@@ -80,24 +73,24 @@ internal class NostrRelayManager(
 
     }
 
-    private fun addClient(relay: String, client: RemoteSignerClient) {
+    private fun observeClientMethods(relay: String, client: RemoteSignerClient) {
         removeClient(relay)
 
         clients[relay] = client
         clientJobs[relay] = scope.launch {
             runCatching {
-                client.incomingCommands.collect { cmd ->
+                client.incomingMethods.collect { cmd ->
                     if (cache.seen(cmd.id)) return@collect
 
-                    if (!_incomingCommands.tryEmit(cmd)) {
-                        _incomingCommands.emit(cmd)
+                    if (!_incomingMethods.tryEmit(cmd)) {
+                        _incomingMethods.emit(cmd)
                     }
 
                     cache.mark(cmd.id)
                 }
             }.onFailure { error ->
                 Napier.d(throwable = error) {
-                    "Failed to emit event to joined `incomingCommands`. Something must have gone horribly wrong."
+                    "Failed to emit event to joined `incomingMethods`. Something must have gone horribly wrong."
                 }
             }
         }

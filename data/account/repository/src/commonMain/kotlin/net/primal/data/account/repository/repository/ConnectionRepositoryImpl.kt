@@ -1,5 +1,7 @@
 package net.primal.data.account.repository.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.asSuccess
@@ -15,6 +17,10 @@ class ConnectionRepositoryImpl(
     private val database: AccountDatabase,
     private val dispatchers: DispatcherProvider,
 ) : ConnectionRepository {
+    override fun observeAllConnections(signerPubKey: String): Flow<List<AppConnection>> =
+        database.connections().observeAllConnections(signerPubKey = signerPubKey.asEncryptable())
+            .map { connections -> connections.map { it.asDomain() } }
+
     override suspend fun getAllConnections(signerPubKey: String): List<AppConnection> =
         withContext(dispatchers.io()) {
             database.connections().getAll(signerPubKey = signerPubKey.asEncryptable())
