@@ -63,7 +63,11 @@ class NwcQrCodeScannerViewModel @Inject constructor(
 
     private fun connectWallet(nwcUrl: String) =
         viewModelScope.launch {
-            connectNwcUseCase.invoke(userId = activeAccountStore.activeUserId(), nwcUrl = nwcUrl)
+            connectNwcUseCase.invoke(
+                userId = activeAccountStore.activeUserId(),
+                nwcUrl = nwcUrl,
+                autoSetAsDefaultWallet = true,
+            )
                 .onFailure { Timber.w(it) }
                 .onSuccess { setEffect(NwcQrCodeScannerContract.SideEffect.NwcConnected) }
         }

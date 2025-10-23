@@ -13,10 +13,13 @@ class ConnectNwcUseCase(
     private val walletRepository: WalletRepository,
     private val walletAccountRepository: WalletAccountRepository,
 ) {
-    suspend fun invoke(userId: String, nwcUrl: String): Result<Unit> =
+    suspend fun invoke(
+        userId: String,
+        nwcUrl: String,
+        autoSetAsDefaultWallet: Boolean = true,
+    ): Result<String> =
         runCatching {
             val nostrWalletConnect = nwcUrl.parseNWCUrl()
-
             val walletId = nostrWalletConnect.keypair.privateKey.asSha256Hash()
 
             walletRepository.upsertNostrWallet(
@@ -38,9 +41,13 @@ class ConnectNwcUseCase(
                 ),
             )
 
-            walletAccountRepository.setActiveWallet(
-                userId = userId,
-                walletId = walletId,
-            )
+            if (autoSetAsDefaultWallet) {
+                walletAccountRepository.setActiveWallet(
+                    userId = userId,
+                    walletId = walletId,
+                )
+            }
+
+            walletId
         }
 }
