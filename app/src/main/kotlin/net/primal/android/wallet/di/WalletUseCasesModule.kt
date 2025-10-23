@@ -1,4 +1,4 @@
-package net.primal.android.core.di
+package net.primal.android.wallet.di
 
 import dagger.Module
 import dagger.Provides

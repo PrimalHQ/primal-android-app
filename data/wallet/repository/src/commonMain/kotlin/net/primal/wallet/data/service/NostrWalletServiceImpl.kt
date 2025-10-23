@@ -2,6 +2,8 @@ package net.primal.wallet.data.service
 
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.serialization.json.jsonObject
 import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.networking.nwc.NwcClientFactory
@@ -49,6 +51,10 @@ internal class NostrWalletServiceImpl(
                 maxBalanceInBtc = null,
             )
         }
+
+    override suspend fun subscribeToWalletBalance(wallet: Wallet.NWC): Flow<WalletBalanceResult> {
+        return emptyFlow()
+    }
 
     @OptIn(ExperimentalUuidApi::class)
     override suspend fun fetchTransactions(

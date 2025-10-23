@@ -1,5 +1,7 @@
 package net.primal.wallet.data.service
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
@@ -36,6 +38,15 @@ internal class PrimalWalletServiceImpl(
                 maxBalanceInBtc = response.maxAmount?.toDouble(),
             )
         }
+
+    override suspend fun subscribeToWalletBalance(wallet: Wallet.Primal): Flow<WalletBalanceResult> {
+        return primalWalletApi.subscribeToBalance(userId = wallet.walletId).map {
+            WalletBalanceResult(
+                balanceInBtc = it.amount.toDouble(),
+                maxBalanceInBtc = it.maxAmount?.toDouble(),
+            )
+        }
+    }
 
     override suspend fun fetchTransactions(
         wallet: Wallet.Primal,

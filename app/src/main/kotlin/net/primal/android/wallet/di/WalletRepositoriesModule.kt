@@ -1,4 +1,4 @@
-package net.primal.android.core.di
+package net.primal.android.wallet.di
 
 import dagger.Module
 import dagger.Provides
@@ -12,6 +12,7 @@ import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
+import net.primal.domain.connections.PrimalWalletNwcRepository
 import net.primal.domain.events.EventRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.exchange.ExchangeRateRepository
@@ -91,4 +92,15 @@ object WalletRepositoriesModule {
     @Singleton
     fun providesTsunamiWalletAccountRepository(): TsunamiWalletAccountRepository =
         WalletRepositoryFactory.createTsunamiWalletAccountRepository()
+
+    @Provides
+    @Singleton
+    fun providePrimalWalletNwcRepository(
+        @PrimalWalletApiClient primalApiClient: PrimalApiClient,
+        nostrNotary: NostrNotary,
+    ): PrimalWalletNwcRepository =
+        WalletRepositoryFactory.createPrimalWalletNwcRepository(
+            primalWalletApiClient = primalApiClient,
+            nostrEventSignatureHandler = nostrNotary,
+        )
 }

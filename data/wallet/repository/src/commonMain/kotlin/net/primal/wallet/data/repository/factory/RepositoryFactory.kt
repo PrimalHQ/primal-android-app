@@ -7,6 +7,7 @@ import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
+import net.primal.domain.connections.PrimalWalletNwcRepository
 import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.profile.ProfileRepository
@@ -19,6 +20,7 @@ import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.repository.BillingRepositoryImpl
 import net.primal.wallet.data.repository.ExchangeRateRepositoryImpl
 import net.primal.wallet.data.repository.PrimalWalletAccountRepositoryImpl
+import net.primal.wallet.data.repository.PrimalWalletNwcRepositoryImpl
 import net.primal.wallet.data.repository.TransactionFeeRepositoryImpl
 import net.primal.wallet.data.repository.TsunamiWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletAccountRepositoryImpl
@@ -147,6 +149,19 @@ abstract class RepositoryFactory {
             dispatcherProvider = dispatcherProvider,
             tsunamiWalletSdk = tsunamiWalletSdk,
             walletDatabase = resolveWalletDatabase(),
+        )
+    }
+
+    fun createPrimalWalletNwcRepository(
+        primalWalletApiClient: PrimalApiClient,
+        nostrEventSignatureHandler: NostrEventSignatureHandler,
+    ): PrimalWalletNwcRepository {
+        return PrimalWalletNwcRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            primalWalletNwcApi = WalletApiServiceFactory.createPrimalWalletNwcApi(
+                primalApiClient = primalWalletApiClient,
+                nostrEventSignatureHandler = nostrEventSignatureHandler,
+            ),
         )
     }
 }

@@ -13,16 +13,16 @@ import kotlinx.coroutines.launch
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiEvent
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.connections.PrimalWalletNwcRepository
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
 
 @HiltViewModel
 class CreateNewWalletConnectionViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val nwcWalletRepository: NwcWalletRepository,
+    private val primalWalletNwcRepository: PrimalWalletNwcRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -74,7 +74,7 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                         .toPlainString()
                 }
 
-                val response = nwcWalletRepository.createNewWalletConnection(
+                val response = primalWalletNwcRepository.createNewWalletConnection(
                     userId = activeAccountStore.activeUserId(),
                     appName = appName,
                     dailyBudget = formattedDailyBudgetBtc,

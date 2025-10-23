@@ -254,8 +254,6 @@ dependencies {
     implementation(project(":data:caching:remote"))
     implementation(project(":data:caching:repository"))
 
-    implementation(project(":data:wallet:remote-primal"))
-    implementation(project(":data:wallet:remote-nwc"))
     implementation(project(":data:wallet:repository"))
 
     implementation(libs.bignum)

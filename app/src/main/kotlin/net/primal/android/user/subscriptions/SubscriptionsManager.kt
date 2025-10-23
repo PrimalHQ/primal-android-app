@@ -16,42 +16,30 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.messages.domain.MessagesUnreadCount
 import net.primal.android.networking.di.PrimalCacheApiClient
-import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.nostr.ext.asMessagesTotalCount
 import net.primal.android.nostr.ext.asNotificationSummary
-import net.primal.android.nostr.ext.takeContentOrNull
-import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notifications.domain.NotificationsSummary
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.Badges
+import net.primal.android.wallet.di.ActiveWalletBalanceSyncerFactory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.api.notifications.model.PubkeyRequestBody
-import net.primal.domain.common.PrimalEvent
-import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.streams.StreamRepository
-import net.primal.domain.wallet.SubWallet
-import net.primal.domain.wallet.WalletRepository
-import net.primal.wallet.data.remote.model.BalanceRequestBody
-import net.primal.wallet.data.remote.model.BalanceResponse
-import net.primal.wallet.data.remote.model.WalletRequestBody
+import net.primal.domain.wallet.sync.WalletDataSyncer
 
 @Singleton
 class SubscriptionsManager @Inject constructor(
     dispatcherProvider: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
-    private val walletRepository: WalletRepository,
     private val streamRepository: StreamRepository,
-    private val nostrNotary: NostrNotary,
     @PrimalCacheApiClient private val cacheApiClient: PrimalApiClient,
-    @PrimalWalletApiClient private val walletApiClient: PrimalApiClient,
+    private val activeWalletBalanceSyncerFactory: ActiveWalletBalanceSyncerFactory,
 ) {
 
     private val lifecycle: Lifecycle = ProcessLifecycleOwner.get().lifecycle
@@ -61,7 +49,8 @@ class SubscriptionsManager @Inject constructor(
     private var streamsFromFollowsSubscription: Job? = null
     private var notificationsSummarySubscription: PrimalSocketSubscription<NotificationsSummary>? = null
     private var messagesUnreadCountSubscription: PrimalSocketSubscription<MessagesUnreadCount>? = null
-    private var walletBalanceSubscription: PrimalSocketSubscription<PrimalEvent>? = null
+
+    private var activeWalletBalanceSyncer: WalletDataSyncer? = null
 
     private val _badges = MutableSharedFlow<Badges>(
         replay = 1,
@@ -122,12 +111,12 @@ class SubscriptionsManager @Inject constructor(
 
     private suspend fun pauseSubscriptions() = unsubscribeAll()
 
-    private suspend fun subscribeAll(userId: String) {
+    private fun subscribeAll(userId: String) {
         subscriptionsActive = true
         streamsFromFollowsSubscription = launchStreamsFromFollowsSubscription(userId = userId)
         notificationsSummarySubscription = launchNotificationsSummarySubscription(userId = userId)
         messagesUnreadCountSubscription = launchMessagesUnreadCountSubscription(userId = userId)
-        walletBalanceSubscription = launchWalletMonitorSubscription(userId = userId)
+        activeWalletBalanceSyncer = activeWalletBalanceSyncerFactory.create(userId = userId).also { it.start() }
     }
 
     private suspend fun unsubscribeAll() {
@@ -135,7 +124,7 @@ class SubscriptionsManager @Inject constructor(
         streamsFromFollowsSubscription?.cancel()
         notificationsSummarySubscription?.unsubscribe()
         messagesUnreadCountSubscription?.unsubscribe()
-        walletBalanceSubscription?.unsubscribe()
+        activeWalletBalanceSyncer?.stop()
     }
 
     private fun launchStreamsFromFollowsSubscription(userId: String) =
@@ -172,36 +161,4 @@ class SubscriptionsManager @Inject constructor(
                 currentState.copy(unreadMessagesCount = it.count)
             }
         }
-
-    private suspend fun launchWalletMonitorSubscription(userId: String) =
-        runCatching {
-            PrimalSocketSubscription.launch(
-                scope = scope,
-                primalApiClient = walletApiClient,
-                cacheFilter = PrimalCacheFilter(
-                    primalVerb = net.primal.data.remote.PrimalVerb.WALLET_MONITOR.id,
-                    optionsJson = NostrJsonEncodeDefaults.encodeToString(
-                        WalletRequestBody(
-                            event = nostrNotary.signPrimalWalletOperationNostrEvent(
-                                userId = userId,
-                                content = BalanceRequestBody(subWallet = SubWallet.Open).encodeToJsonString(),
-                            ).unwrapOrThrow(),
-                        ),
-                    ),
-                ),
-                transformer = { this.primalEvent },
-            ) { event ->
-                when (event.kind) {
-                    NostrEventKind.PrimalWalletBalance.value -> {
-                        event.takeContentOrNull<BalanceResponse>()?.let { response ->
-                            walletRepository.updateWalletBalance(
-                                walletId = userId,
-                                balanceInBtc = response.amount.toDouble(),
-                                maxBalanceInBtc = response.maxAmount?.toDouble(),
-                            )
-                        }
-                    }
-                }
-            }
-        }.getOrNull()
 }

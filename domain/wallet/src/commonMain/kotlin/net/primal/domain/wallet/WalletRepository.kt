@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.core.utils.Result
 import net.primal.domain.transactions.Transaction
+import net.primal.domain.wallet.model.WalletBalanceResult
 
 interface WalletRepository {
 
@@ -16,6 +17,8 @@ interface WalletRepository {
     suspend fun upsertWalletSettings(walletId: String, spamThresholdAmountInSats: Long)
 
     suspend fun fetchWalletBalance(walletId: String): Result<Unit>
+
+    suspend fun subscribeToWalletBalance(walletId: String): Flow<WalletBalanceResult>
 
     suspend fun updateWalletBalance(
         walletId: String,

@@ -1,5 +1,6 @@
 package net.primal.wallet.data.remote.api
 
+import kotlinx.coroutines.flow.Flow
 import net.primal.domain.nostr.NostrEvent
 import net.primal.wallet.data.remote.model.BalanceResponse
 import net.primal.wallet.data.remote.model.DepositRequestBody
@@ -27,6 +28,8 @@ interface PrimalWalletApi {
     suspend fun activateWallet(userId: String, code: String): String
 
     suspend fun getBalance(userId: String): BalanceResponse
+
+    suspend fun subscribeToBalance(userId: String): Flow<BalanceResponse>
 
     suspend fun withdraw(userId: String, body: WithdrawRequestBody)
 
