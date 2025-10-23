@@ -7,9 +7,13 @@ import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.notes.PostData
 import net.primal.data.local.dao.reads.ArticleData
 import net.primal.domain.links.CdnResource
+import net.primal.domain.links.CdnResourceVariant
 import net.primal.domain.links.EventLink
 import net.primal.domain.links.EventLinkPreviewData
 import net.primal.domain.links.EventUriType
+import net.primal.domain.nostr.extractDimension
+import net.primal.domain.nostr.extractMimeType
+import net.primal.domain.nostr.findIMetaTagForUrl
 import net.primal.domain.nostr.utils.isNostrUri
 import net.primal.shared.data.local.encryption.map
 
@@ -24,14 +28,44 @@ fun List<PostData>.flatMapPostsAsEventUriPO(
     videoThumbnails: Map<String, String>,
 ): List<EventUri> =
     flatMap { postData ->
-        postData.uris.map { uri -> EventIdUriPair(eventId = postData.postId, uri = uri) }
+        postData.uris
+            .filterNot { it.isNostrUri() }
+            .map { uri ->
+                val imetaTag = postData.tags.findIMetaTagForUrl(uri)
+                val imetaDim = imetaTag?.extractDimension()
+                val imetaMime = imetaTag?.extractMimeType()
+
+                val uriCdnResource = cdnResources[uri]
+                val linkPreview = linkPreviews[uri]
+                val linkThumbnailCdnResource = linkPreview?.thumbnailUrl?.let { cdnResources[it] }
+                val videoThumbnail = videoThumbnails[uri]
+                val mimeType = uri.detectMimeType() ?: uriCdnResource?.contentType ?: linkPreview?.mimeType ?: imetaMime
+                val type = detectEventUriType(url = uri, mimeType = mimeType)
+
+                var variants = uriCdnResource?.variants ?: emptyList()
+                if (variants.isEmpty() && imetaDim != null) {
+                    variants = listOf(
+                        CdnResourceVariant(
+                            width = imetaDim.first,
+                            height = imetaDim.second,
+                            mediaUrl = uri,
+                        ),
+                    )
+                }
+
+                EventUri(
+                    eventId = postData.postId,
+                    url = uri,
+                    type = type,
+                    mimeType = mimeType,
+                    variants = variants + (linkThumbnailCdnResource?.variants ?: emptyList()),
+                    title = linkPreview?.title?.ifBlank { null },
+                    description = linkPreview?.description?.ifBlank { null },
+                    thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null } ?: videoThumbnail,
+                    authorAvatarUrl = linkPreview?.authorAvatarUrl?.ifBlank { null },
+                )
+            }
     }
-        .filterNot { it.uri.isNostrUri() }
-        .mapToEventUri(
-            cdnResources = cdnResources,
-            linkPreviews = linkPreviews,
-            videoThumbnails = videoThumbnails,
-        )
 
 fun List<EventUri>.mapEventUriAsNoteLinkDO(): List<EventLink> =
     map { eventUri ->

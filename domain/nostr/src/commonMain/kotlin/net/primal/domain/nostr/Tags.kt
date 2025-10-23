@@ -309,3 +309,33 @@ fun JsonArray.removeTrailingEmptyStrings(): JsonArray {
         this
     }
 }
+
+fun List<JsonArray>.findIMetaTagForUrl(url: String): JsonArray? {
+    return this.find {
+        it.isIMetaTag() && it.any { element ->
+            element.jsonPrimitive.content == "url $url"
+        }
+    }
+}
+
+fun JsonArray.extractDimension(): Pair<Int, Int>? {
+    val dimElement = this.find { it.jsonPrimitive.content.startsWith("dim ") }
+    return dimElement?.jsonPrimitive?.content?.substring(4)?.split('x')?.let {
+        if (it.size == 2) {
+            val width = it[0].toIntOrNull()
+            val height = it[1].toIntOrNull()
+            if (width != null && height != null) {
+                width to height
+            } else {
+                null
+            }
+        } else {
+            null
+        }
+    }
+}
+
+fun JsonArray.extractMimeType(): String? {
+    val mimeElement = this.find { it.jsonPrimitive.content.startsWith("m ") }
+    return mimeElement?.jsonPrimitive?.content?.substring(2)
+}
