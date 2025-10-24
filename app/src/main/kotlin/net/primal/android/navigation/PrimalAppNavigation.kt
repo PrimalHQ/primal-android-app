@@ -51,7 +51,6 @@ import net.primal.android.bookmarks.list.BookmarksScreen
 import net.primal.android.bookmarks.list.BookmarksViewModel
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
-import net.primal.android.core.compose.NostrConnectBottomSheet
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.UnlockScreenOrientation
 import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorOverlay
@@ -93,6 +92,7 @@ import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationContract
 import net.primal.android.messages.conversation.create.NewConversationScreen
+import net.primal.android.nostrconnect.NostrConnectBottomSheet
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract
 import net.primal.android.notes.home.HomeFeedScreen
@@ -1363,17 +1363,8 @@ private fun NavGraphBuilder.nostrConnectDialog(
         dialogProperties = DialogProperties(
             usePlatformDefaultWidth = false,
         ),
-    ) { backStackEntry ->
-        val name = backStackEntry.arguments?.getString(NOSTR_CONNECT_NAME)?.asUrlDecoded()
-        val url = backStackEntry.arguments?.getString(NOSTR_CONNECT_URL)?.asUrlDecoded()
-        val imageUrl = backStackEntry.arguments?.getString(NOSTR_CONNECT_IMAGE_URL)?.asUrlDecoded()
-
-        NostrConnectBottomSheet(
-            name = name,
-            url = url,
-            imageUrl = imageUrl,
-            onDismissRequest = { navController.popBackStack() },
-        )
+    ) {
+        NostrConnectBottomSheet(onDismissRequest = { navController.popBackStack() })
     }
 }
 

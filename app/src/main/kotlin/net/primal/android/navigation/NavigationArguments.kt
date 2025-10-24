@@ -151,5 +151,10 @@ inline val SavedStateHandle.reactionTypeOrThrow: ReactionType
         ?: throw IllegalArgumentException("Missing required $INITIAL_REACTION_TYPE argument.")
 
 const val NOSTR_CONNECT_NAME = "nostrConnectName"
+inline val SavedStateHandle.nostrConnectName: String? get() = get<String>(NOSTR_CONNECT_NAME)?.asUrlDecoded()
+
 const val NOSTR_CONNECT_URL = "nostrConnectUrl"
+inline val SavedStateHandle.nostrConnectUrl: String? get() = get<String>(NOSTR_CONNECT_URL)?.asUrlDecoded()
+
 const val NOSTR_CONNECT_IMAGE_URL = "nostrConnectImageUrl"
+inline val SavedStateHandle.nostrConnectImageUrl: String? get() = get<String>(NOSTR_CONNECT_IMAGE_URL)?.asUrlDecoded()

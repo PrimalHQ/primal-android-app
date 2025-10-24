@@ -105,7 +105,13 @@ fun RedeemCodeScreen(
                         RedeemScanCodeStage(
                             modifier = Modifier.padding(bottom = 64.dp),
                             onQrCodeDetected = { eventPublisher(UiEvent.QrCodeDetected(it)) },
-                            onEnterCodeClick = { eventPublisher(UiEvent.GoToEnterCodeStage) },
+                            onEnterCodeClick = {
+                                callbacks.onNostrConnectRequest(
+                                    "Following Space",
+                                    "https://following.space/",
+                                    "https://primal.net/assets/favicon-51789dff.ico",
+                                )
+                            },
                         )
                     }
 

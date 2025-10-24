@@ -1404,4 +1404,26 @@
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>
+
+    <string name="nostr_connect_primal_web_app">Primal Web App</string>
+    <string name="nostr_connect_login_tab">Login</string>
+    <string name="nostr_connect_permissions_tab">Permissions</string>
+    <string name="nostr_connect_full_trust_title">Full Trust</string>
+    <string name="nostr_connect_full_trust_subtitle">I fully trust this app; auto-sign all requests</string>
+    <string name="nostr_connect_medium_trust_title">Medium Trust</string>
+    <string name="nostr_connect_medium_trust_subtitle">Auto-approve most common requests</string>
+    <string name="nostr_connect_low_trust_title">Low Trust</string>
+    <string name="nostr_connect_low_trust_subtitle">Ask me to approve each request</string>
+    <string name="nostr_connect_daily_budget_title">Daily budget</string>
+    <string name="nostr_connect_cancel_button">Cancel</string>
+    <string name="nostr_connect_connect_button">Connect</string>
+    <string name="nostr_connect_toast_connected">Connected!</string>
+    <string name="nostr_connect_toast_connection_failed">Connection failed: %1$s</string>
+    <string name="nostr_connect_apply_button">Apply</string>
+    <string name="nostr_connect_primal_web_app_url">https://www.primal.net</string>
+    <string name="nostr_connect_sats_unit">sats</string>
+    <string name="nostr_connect_daily_spending_budget_title">Daily spending budget for this app:</string>
+    <string name="nostr_connect_usd_amount_approx">~%1$s</string>
+    <string name="nostr_connect_no_limit">No limit</string>
+    <string name="nostr_connect_no_nsec_accounts_warning">No accounts with a private key (nsec) found. Only accounts with a private key can be used with Nostr Connect.</string>
 </resources>
