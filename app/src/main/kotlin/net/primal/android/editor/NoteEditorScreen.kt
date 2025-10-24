@@ -86,6 +86,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.drawer.multiaccount.ui.AccountSwitcherBottomSheet
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.ui.NoteAttachmentPreview
@@ -134,6 +135,26 @@ fun NoteEditorScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+
+    if (state.showAccountSwitcher) {
+        val activeAccount = remember(state.selectedAccountId, state.availableAccounts) {
+            state.availableAccounts.find { it.pubkey == state.selectedAccountId }
+        }
+        if (activeAccount != null) {
+            AccountSwitcherBottomSheet(
+                accounts = state.availableAccounts,
+                activeAccount = activeAccount,
+                onAccountClick = {
+                    eventPublisher(UiEvent.AccountSelected(it))
+                },
+                onDismissRequest = {
+                    eventPublisher(UiEvent.HideAccountSwitcher)
+                },
+                showAddAccountButtons = false,
+                showEditButton = false,
+            )
+        }
+    }
 
     SnackbarErrorHandler(
         error = state.error,
@@ -543,12 +564,12 @@ private fun NoteEditor(
                             }
                         }
                     }
-                    .padding(start = 16.dp)
-                    .padding(top = 8.dp),
+                    .padding(start = 16.dp, top = 8.dp),
                 avatarSize = avatarSizeDp,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 avatarBlossoms = state.activeAccountBlossoms,
                 legendaryCustomization = state.activeAccountLegendaryCustomization,
+                onClick = { eventPublisher(UiEvent.ShowAccountSwitcher) },
             )
 
             NoteOutlinedTextField(
