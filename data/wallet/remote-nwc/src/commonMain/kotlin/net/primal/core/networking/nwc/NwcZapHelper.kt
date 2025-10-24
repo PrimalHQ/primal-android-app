@@ -1,7 +1,6 @@
 package net.primal.core.networking.nwc
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import io.github.aakira.napier.Napier
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -77,11 +76,6 @@ internal class NwcZapHelper(
     private val thousandAsBigDecimal = BigDecimal.fromInt(1_000)
 
     private fun String.extractInvoiceAmountInMilliSats(): Long? {
-        return try {
-            LnInvoiceUtils.getAmountInSats(this).multiply(thousandAsBigDecimal).toLong()
-        } catch (error: LnInvoiceUtils.AddressFormatException) {
-            Napier.w(error) { "Cannot parse amount from LN invoice: \"$this\" — ${error.message}" }
-            null
-        }
+        return LnInvoiceUtils.getAmountInSatsOrNull(this)?.multiply(thousandAsBigDecimal)?.toLong()
     }
 }

@@ -32,7 +32,7 @@ fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
             ?: return@mapNotNull null
 
         val amountInSats = (zapReceipt.tags.findFirstBolt11() ?: zapRequest.tags.findFirstZapAmount())
-            ?.let(LnInvoiceUtils::getAmountInSats)
+            ?.let(LnInvoiceUtils::getAmountInSatsOrNull)
             ?: return@mapNotNull null
 
         val profile = profilesMap[senderId]

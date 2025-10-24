@@ -140,8 +140,8 @@ object LnInvoiceUtils {
         return amount.multiply(multiplier(multiplierGroup))
     }
 
-    fun getAmountInSats(invoice: String): BigDecimal {
-        return getAmount(invoice).multiply(BigDecimal.fromInt(100_000_000))
+    fun getAmountInSatsOrNull(invoice: String): BigDecimal? {
+        return runCatching { getAmount(invoice).multiply(BigDecimal.fromInt(100_000_000)) }.getOrNull()
     }
 
     private fun multiplier(multiplier: String): BigDecimal {
