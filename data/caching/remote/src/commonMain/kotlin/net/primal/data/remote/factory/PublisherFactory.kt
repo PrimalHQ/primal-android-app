@@ -8,5 +8,4 @@ object PublisherFactory {
 
     fun createNostrEventImporter(primalApiClient: PrimalApiClient): NostrEventImporter =
         PrimalImportApiImpl(primalApiClient)
-
 }
