@@ -73,7 +73,7 @@ ksp {
 
 android {
     namespace = "net.primal.android"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "net.primal.android"
@@ -250,11 +250,14 @@ dependencies {
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))
     implementation(project(":domain:wallet"))
+    implementation(project(":domain:account"))
 
     implementation(project(":data:caching:remote"))
     implementation(project(":data:caching:repository"))
 
     implementation(project(":data:wallet:repository"))
+
+    implementation(project(":data:account:repository"))
 
     implementation(libs.bignum)
     implementation(libs.core.ktx)

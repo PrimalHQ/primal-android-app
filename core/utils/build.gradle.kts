@@ -79,6 +79,8 @@ kotlin {
                 implementation(libs.secp256k1.kmp)
 
                 implementation(libs.okio)
+
+                implementation(libs.androidx.collection)
             }
         }
 
