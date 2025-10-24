@@ -2,7 +2,7 @@ package net.primal.domain.nostr.utils
 
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
+import kotlin.test.assertNull
 import net.primal.core.utils.toInt
 
 class LnInvoiceUtilsTest {
@@ -36,35 +36,31 @@ class LnInvoiceUtilsTest {
             "lwpyt69v6zyjnheyqp8wlh7a3gn53qjzyzs6s44zjpd9sj8dp69uaspam64w2"
 
     @Test
-    fun getAmountInSatsValidInvoice() {
+    fun getAmountInSatsOrNullValidInvoice() {
         val expectedValue = 12345
 
-        val amount = LnInvoiceUtils.getAmountInSats(validLnInvoice)
+        val amount = LnInvoiceUtils.getAmountInSatsOrNull(validLnInvoice)
 
-        amount.toInt() shouldBe expectedValue
+        amount?.toInt() shouldBe expectedValue
     }
 
     @Test
-    fun getAmountInSatsValidInvoiceNoAmount() {
+    fun getAmountInSatsOrNullValidInvoiceNoAmount() {
         val expectedValue = 0
 
-        val amount = LnInvoiceUtils.getAmountInSats(validLnInvoiceNoAmount)
+        val amount = LnInvoiceUtils.getAmountInSatsOrNull(validLnInvoiceNoAmount)
 
-        amount.toInt() shouldBe expectedValue
+        amount?.toInt() shouldBe expectedValue
     }
 
     @Test
-    fun getAmountInSatsInvalidInvoice() {
-        assertFailsWith(IllegalArgumentException::class) {
-            LnInvoiceUtils.getAmountInSats(invalidLnInvoice)
-        }
+    fun getAmountInSatsOrNullInvalidInvoice() {
+        assertNull(LnInvoiceUtils.getAmountInSatsOrNull(invalidLnInvoice))
     }
 
     @Test
-    fun getAmountInSatsInvalidCharacter() {
-        assertFailsWith(IllegalArgumentException::class) {
-            LnInvoiceUtils.getAmountInSats(invoiceInvalidCharacter)
-        }
+    fun getAmountInSatsOrNullInvalidCharacter() {
+        assertNull(LnInvoiceUtils.getAmountInSatsOrNull(invoiceInvalidCharacter))
     }
 
     @Test
