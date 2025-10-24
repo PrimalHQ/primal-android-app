@@ -11,5 +11,6 @@ sealed class ZapError {
     data class FailedToFetchZapInvoice(val cause: Throwable? = null) : ZapError()
     data object FailedToSignEvent : ZapError()
     data object FailedToPublishEvent : ZapError()
+    data class Timeout(val cause: Throwable? = null) : ZapError()
     data class Unknown(val cause: Throwable? = null) : ZapError()
 }
