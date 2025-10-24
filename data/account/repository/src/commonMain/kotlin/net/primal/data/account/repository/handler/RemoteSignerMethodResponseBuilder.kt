@@ -39,7 +39,8 @@ internal class RemoteSignerMethodResponseBuilder(
         RemoteSignerMethodResponse(
             id = command.id,
             result = "",
-            error = "We don't accept incoming connection requests. Please scan or enter `nostrconnect://` url to initiate a connection.",
+            error = "We don't accept incoming connection requests. " +
+                "Please scan or enter `nostrconnect://` url to initiate a connection.",
         )
 
     private suspend fun signEvent(command: RemoteSignerMethod.SignEvent): RemoteSignerMethodResponse {

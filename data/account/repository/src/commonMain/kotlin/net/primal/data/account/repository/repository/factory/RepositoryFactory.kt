@@ -8,7 +8,6 @@ import net.primal.data.account.repository.repository.SignerConnectionInitializer
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
-
 abstract class RepositoryFactory {
     private val dispatcherProvider = createDispatcherProvider()
 

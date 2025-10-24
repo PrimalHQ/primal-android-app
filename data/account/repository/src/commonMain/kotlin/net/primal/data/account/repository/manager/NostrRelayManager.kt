@@ -63,14 +63,17 @@ internal class NostrRelayManager(
         clients.clear()
     }
 
-    fun sendResponse(relays: List<String>, clientPubKey: String, response: RemoteSignerMethodResponse) {
+    fun sendResponse(
+        relays: List<String>,
+        clientPubKey: String,
+        response: RemoteSignerMethodResponse,
+    ) {
         relays.mapNotNull { relay -> clients[relay] }
             .forEach { client ->
                 scope.launch {
                     client.publishResponse(clientPubKey = clientPubKey, response = response)
                 }
             }
-
     }
 
     private fun observeClientMethods(relay: String, client: RemoteSignerClient) {

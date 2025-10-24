@@ -12,7 +12,11 @@ internal class RemoteSignerMethodParser {
 
     fun parse(clientPubkey: String, content: String): Result<RemoteSignerMethod> {
         val request = content.decodeFromJsonStringOrNull<RemoteSignerMethodRequest>()
-            ?: return Result.failure(IllegalArgumentException("Failed to parse given content as `NostrCommandRequest`. Raw: $content"))
+            ?: return Result.failure(
+                IllegalArgumentException(
+                    "Failed to parse given content as `NostrCommandRequest`. Raw: $content",
+                ),
+            )
 
         return runCatching {
             when (request.method) {

@@ -7,7 +7,6 @@ import net.primal.domain.account.model.AppConnection as AppConnectionDO
 import net.primal.domain.account.model.AppPermission as AppPermissionDO
 import net.primal.domain.account.model.PermissionAction as PermissionActionDO
 
-
 fun AppConnectionPO.asDomain() =
     AppConnectionDO(
         connectionId = this.data.connectionId,

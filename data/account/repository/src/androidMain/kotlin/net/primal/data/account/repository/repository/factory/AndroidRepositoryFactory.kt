@@ -28,5 +28,4 @@ object AndroidRepositoryFactory : RepositoryFactory() {
     }
 
     override fun resolveAccountDatabase(): AccountDatabase = accountDatabase
-
 }

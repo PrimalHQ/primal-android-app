@@ -6,5 +6,5 @@ import androidx.room.Upsert
 @Dao
 interface AppPermissionDataDao {
     @Upsert
-    fun upsertAll(data: List<AppPermissionData>)
+    suspend fun upsertAll(data: List<AppPermissionData>)
 }
