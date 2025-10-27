@@ -36,16 +36,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -63,14 +65,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import java.text.NumberFormat
-import java.util.Currency
+import java.util.*
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.PrimalLogo
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -78,6 +79,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.HighSecurity
 import net.primal.android.core.compose.icons.primaliconpack.LowSecurity
 import net.primal.android.core.compose.icons.primaliconpack.MediumSecurity
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.navigation.primalSlideInHorizontallyFromEnd
@@ -92,12 +94,20 @@ private val DISABLED_ICON_TINT = Color(0xFF808080)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NostrConnectBottomSheet(
-    viewModel: NostrConnectViewModel = hiltViewModel(),
+    viewModel: NostrConnectViewModel,
     onDismissRequest: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context) },
+        onErrorDismiss = { viewModel.setEvent(NostrConnectContract.UiEvent.DismissError) },
+    )
 
     LaunchedEffect(viewModel, onDismissRequest) {
         viewModel.effects.collect {
@@ -110,14 +120,6 @@ fun NostrConnectBottomSheet(
                     ).show()
                     onDismissRequest()
                 }
-                is NostrConnectContract.SideEffect.ConnectionFailed -> {
-                    val errorMessage = context.getString(
-                        R.string.nostr_connect_toast_connection_failed,
-                        it.error.message,
-                    )
-                    Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
-                    onDismissRequest()
-                }
             }
         }
     }
@@ -125,18 +127,40 @@ fun NostrConnectBottomSheet(
     ModalBottomSheet(
         sheetState = sheetState,
         onDismissRequest = onDismissRequest,
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
         dragHandle = { NostrConnectBottomSheetDragHandle() },
     ) {
-        BackHandler {
-            val isBudgetPickerVisible =
-                state.selectedTab == NostrConnectContract.Tab.PERMISSIONS && state.showDailyBudgetPicker
-            if (isBudgetPickerVisible) {
-                viewModel.setEvent(NostrConnectContract.UiEvent.DailyBudgetCancelled)
-            } else {
-                onDismissRequest()
-            }
-        }
+        NostrConnectSheetContent(
+            state = state,
+            onDismissRequest = onDismissRequest,
+            eventPublisher = { viewModel.setEvent(it) },
+            snackbarHostState = snackbarHostState,
+        )
+    }
+}
 
+@Composable
+private fun NostrConnectSheetContent(
+    state: NostrConnectContract.UiState,
+    onDismissRequest: () -> Unit,
+    eventPublisher: (NostrConnectContract.UiEvent) -> Unit,
+    snackbarHostState: SnackbarHostState,
+) {
+    val isBudgetPickerVisible by remember(state.selectedTab, state.showDailyBudgetPicker) {
+        derivedStateOf {
+            state.selectedTab == NostrConnectContract.Tab.PERMISSIONS && state.showDailyBudgetPicker
+        }
+    }
+
+    BackHandler {
+        if (isBudgetPickerVisible) {
+            eventPublisher(NostrConnectContract.UiEvent.CancelDailyBudget)
+        } else {
+            onDismissRequest()
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -146,48 +170,50 @@ fun NostrConnectBottomSheet(
             HeaderSection(
                 imageUrl = state.appImageUrl,
                 appName = state.appName,
-                appUrl = state.appUrl,
+                appWebUrl = state.appWebUrl,
             )
 
             NostrConnectTabNavigation(
                 selectedTab = state.selectedTab,
-                onTabChange = { viewModel.setEvent(NostrConnectContract.UiEvent.TabChanged(it)) },
+                onTabChange = { eventPublisher(NostrConnectContract.UiEvent.ChangeTab(it)) },
                 permissionsTabEnabled = state.accounts.isNotEmpty(),
             )
 
             NostrConnectPages(
                 state = state,
-                eventPublisher = { viewModel.setEvent(it) },
+                eventPublisher = eventPublisher,
             )
-
-            val showDailyBudgetPicker =
-                state.selectedTab == NostrConnectContract.Tab.PERMISSIONS && state.showDailyBudgetPicker
 
             ActionButtons(
                 primaryButtonEnabled = state.selectedAccount != null,
                 primaryButtonLoading = state.connecting,
-                primaryButtonText = if (showDailyBudgetPicker) {
+                primaryButtonText = if (isBudgetPickerVisible) {
                     stringResource(id = R.string.nostr_connect_apply_button)
                 } else {
                     stringResource(id = R.string.nostr_connect_connect_button)
                 },
                 onPrimaryClick = {
-                    if (showDailyBudgetPicker) {
-                        viewModel.setEvent(NostrConnectContract.UiEvent.DailyBudgetApplied)
+                    if (isBudgetPickerVisible) {
+                        eventPublisher(NostrConnectContract.UiEvent.ApplyDailyBudget)
                     } else {
-                        viewModel.setEvent(NostrConnectContract.UiEvent.ConnectClicked)
+                        eventPublisher(NostrConnectContract.UiEvent.ClickConnect)
                     }
                 },
                 secondaryButtonText = stringResource(id = R.string.nostr_connect_cancel_button),
                 onSecondaryClick = {
-                    if (showDailyBudgetPicker) {
-                        viewModel.setEvent(NostrConnectContract.UiEvent.DailyBudgetCancelled)
+                    if (isBudgetPickerVisible) {
+                        eventPublisher(NostrConnectContract.UiEvent.CancelDailyBudget)
                     } else {
                         onDismissRequest()
                     }
                 },
             )
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
     }
 }
 
@@ -208,26 +234,22 @@ private fun NostrConnectBottomSheetDragHandle() {
 private fun HeaderSection(
     imageUrl: String?,
     appName: String?,
-    appUrl: String?,
+    appWebUrl: String?,
 ) {
     Column(
         modifier = Modifier.padding(vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        if (imageUrl != null) {
+        imageUrl?.let {
             UniversalAvatarThumbnail(
                 avatarCdnImage = CdnImage(sourceUrl = imageUrl),
                 avatarSize = 48.dp,
             )
-        } else {
-            PrimalLogo(
-                modifier = Modifier.size(80.dp),
-            )
         }
 
         Text(
-            text = appName ?: stringResource(id = R.string.nostr_connect_primal_web_app),
+            text = appName ?: stringResource(id = R.string.nostr_connect_unknown_web_app),
             style = AppTheme.typography.titleLarge.copy(
                 fontSize = 18.sp,
                 lineHeight = 24.sp,
@@ -236,14 +258,16 @@ private fun HeaderSection(
             color = AppTheme.colorScheme.onPrimary,
         )
 
-        Text(
-            text = appUrl ?: stringResource(id = R.string.nostr_connect_primal_web_app_url),
-            style = AppTheme.typography.bodyMedium.copy(
-                fontSize = 15.sp,
-                lineHeight = 24.sp,
-            ),
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-        )
+        appWebUrl?.let { url ->
+            Text(
+                text = url,
+                style = AppTheme.typography.bodyMedium.copy(
+                    fontSize = 15.sp,
+                    lineHeight = 24.sp,
+                ),
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            )
+        }
     }
 }
 
@@ -253,22 +277,21 @@ private fun NostrConnectTabNavigation(
     onTabChange: (NostrConnectContract.Tab) -> Unit,
     permissionsTabEnabled: Boolean,
 ) {
-    TabRow(
-        selectedTabIndex = selectedTab.ordinal,
+    val selectedTabIndex = selectedTab.ordinal
+    PrimaryTabRow(
+        selectedTabIndex = selectedTabIndex,
         containerColor = Color.Transparent,
         contentColor = AppTheme.colorScheme.onSurface,
-        indicator = { tabPositions ->
-            if (selectedTab.ordinal < tabPositions.size) {
-                Box(
-                    modifier = Modifier
-                        .tabIndicatorOffset(tabPositions[selectedTab.ordinal])
-                        .height(6.dp)
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 2.dp)
-                        .clip(CircleShape)
-                        .background(color = AppTheme.colorScheme.primary),
-                )
-            }
+        indicator = {
+            Box(
+                modifier = Modifier
+                    .tabIndicatorOffset(selectedTabIndex)
+                    .height(6.dp)
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 2.dp)
+                    .clip(CircleShape)
+                    .background(color = AppTheme.colorScheme.primary),
+            )
         },
         divider = {
             PrimalDivider()
@@ -351,16 +374,16 @@ private fun NostrConnectPages(
             NostrConnectContract.Tab.LOGIN -> LoginContent(
                 accounts = state.accounts,
                 selectedAccountPubkey = state.selectedAccount?.pubkey,
-                onAccountClick = { eventPublisher(NostrConnectContract.UiEvent.AccountSelected(it)) },
+                onAccountClick = { eventPublisher(NostrConnectContract.UiEvent.SelectAccount(it)) },
             )
             NostrConnectContract.Tab.PERMISSIONS -> PermissionsContent(
                 trustLevel = state.trustLevel,
                 dailyBudget = state.dailyBudget,
-                onTrustLevelClick = { eventPublisher(NostrConnectContract.UiEvent.TrustLevelSelected(it)) },
-                onDailyBudgetClick = { eventPublisher(NostrConnectContract.UiEvent.DailyBudgetClicked) },
+                onTrustLevelClick = { eventPublisher(NostrConnectContract.UiEvent.SelectTrustLevel(it)) },
+                onDailyBudgetClick = { eventPublisher(NostrConnectContract.UiEvent.ClickDailyBudget) },
                 showDailyBudgetPicker = state.showDailyBudgetPicker,
                 selectedDailyBudget = state.selectedDailyBudget,
-                onDailyBudgetChange = { eventPublisher(NostrConnectContract.UiEvent.DailyBudgetChanged(it)) },
+                onDailyBudgetChange = { eventPublisher(NostrConnectContract.UiEvent.ChangeDailyBudget(it)) },
                 budgetToUsdMap = state.budgetToUsdMap,
             )
         }
@@ -387,21 +410,20 @@ private fun LoginContent(
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
         }
-        return
-    }
-
-    LazyColumn(
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .padding(top = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        items(accounts, key = { it.pubkey }) { account ->
-            AccountListItem(
-                account = account,
-                isSelected = account.pubkey == selectedAccountPubkey,
-                onClick = { onAccountClick(account.pubkey) },
-            )
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(accounts, key = { it.pubkey }) { account ->
+                AccountListItem(
+                    account = account,
+                    isSelected = account.pubkey == selectedAccountPubkey,
+                    onClick = { onAccountClick(account.pubkey) },
+                )
+            }
         }
     }
 }
@@ -516,59 +538,67 @@ private fun PermissionsList(
 
         PrimalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-        ListItem(
-            modifier = Modifier
-                .clip(AppTheme.shapes.medium)
-                .clickable(onClick = onDailyBudgetClick)
-                .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
-            colors = ListItemDefaults.colors(
-                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-            ),
-            headlineContent = {
-                Text(
-                    text = stringResource(id = R.string.nostr_connect_daily_budget_title),
-                    color = AppTheme.colorScheme.onPrimary,
-                    style = AppTheme.typography.bodyLarge.copy(
-                        fontSize = 16.sp,
-                        lineHeight = 20.sp,
-                    ),
-                )
-            },
-            trailingContent = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    Row(
-                        modifier = Modifier.padding(top = 2.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        val style = AppTheme.typography.bodyMedium.copy(
-                            fontSize = 16.sp,
-                            lineHeight = 20.sp,
-                        )
-                        Text(
-                            text = NumberFormat.getNumberInstance().format(dailyBudget ?: 0),
-                            color = AppTheme.colorScheme.onPrimary,
-                            style = style,
-                        )
-                        Text(
-                            text = stringResource(id = R.string.nostr_connect_sats_unit),
-                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                            style = style,
-                        )
-                    }
-                    Icon(
-                        modifier = Modifier.size(16.dp),
-                        imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                        contentDescription = null,
-                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    )
-                }
-            },
+        DailyBudgetListItem(
+            dailyBudget = dailyBudget,
+            onClick = onDailyBudgetClick,
         )
     }
+}
+
+@Composable
+private fun DailyBudgetListItem(dailyBudget: Long?, onClick: () -> Unit) {
+    ListItem(
+        modifier = Modifier
+            .clip(AppTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+        ),
+        headlineContent = {
+            Text(
+                text = stringResource(id = R.string.nostr_connect_daily_budget_title),
+                color = AppTheme.colorScheme.onPrimary,
+                style = AppTheme.typography.bodyLarge.copy(
+                    fontSize = 16.sp,
+                    lineHeight = 20.sp,
+                ),
+            )
+        },
+        trailingContent = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Row(
+                    modifier = Modifier.padding(top = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    val style = AppTheme.typography.bodyMedium.copy(
+                        fontSize = 16.sp,
+                        lineHeight = 20.sp,
+                    )
+                    Text(
+                        text = NumberFormat.getNumberInstance().format(dailyBudget ?: 0),
+                        color = AppTheme.colorScheme.onPrimary,
+                        style = style,
+                    )
+                    Text(
+                        text = stringResource(id = R.string.nostr_connect_sats_unit),
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        style = style,
+                    )
+                }
+                Icon(
+                    modifier = Modifier.size(16.dp),
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                    contentDescription = null,
+                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                )
+            }
+        },
+    )
 }
 
 @Composable

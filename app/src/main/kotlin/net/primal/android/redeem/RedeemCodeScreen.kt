@@ -41,7 +41,7 @@ fun RedeemCodeScreen(viewModel: RedeemCodeViewModel, callbacks: RedeemCodeContra
             when (it) {
                 RedeemCodeContract.SideEffect.PromoCodeApplied -> callbacks.onClose()
                 is RedeemCodeContract.SideEffect.NostrConnectRequest -> {
-                    callbacks.onNostrConnectRequest(it.name, it.url, it.imageUrl)
+                    callbacks.onNostrConnectRequest(it.url)
                 }
             }
         }
@@ -105,13 +105,7 @@ fun RedeemCodeScreen(
                         RedeemScanCodeStage(
                             modifier = Modifier.padding(bottom = 64.dp),
                             onQrCodeDetected = { eventPublisher(UiEvent.QrCodeDetected(it)) },
-                            onEnterCodeClick = {
-                                callbacks.onNostrConnectRequest(
-                                    "Following Space",
-                                    "https://following.space/",
-                                    "https://primal.net/assets/favicon-51789dff.ico",
-                                )
-                            },
+                            onEnterCodeClick = { eventPublisher(UiEvent.GoToEnterCodeStage) },
                         )
                     }
 

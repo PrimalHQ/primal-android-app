@@ -93,6 +93,7 @@ import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationContract
 import net.primal.android.messages.conversation.create.NewConversationScreen
 import net.primal.android.nostrconnect.NostrConnectBottomSheet
+import net.primal.android.nostrconnect.NostrConnectViewModel
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract
 import net.primal.android.notes.home.HomeFeedScreen
@@ -367,21 +368,9 @@ private fun NavController.navigateToPremiumChangePrimalName() = navigate(route =
 private fun NavController.navigateToPremiumOrderHistory() = navigate(route = "premium/manage/order")
 private fun NavController.navigateToPremiumRelay() = navigate(route = "premium/manage/relay")
 
-private fun NavController.navigateToNostrConnectBottomSheet(
-    name: String?,
-    url: String?,
-    imageUrl: String?,
-) {
-    val safeName = name?.asUrlEncoded() ?: ""
-    val safeUrl = url?.asUrlEncoded() ?: ""
-    val safeImageUrl = imageUrl?.asUrlEncoded() ?: ""
-
-    navigate(
-        route = "nostrConnectBottomSheet" +
-            "?$NOSTR_CONNECT_NAME=$safeName" +
-            "&$NOSTR_CONNECT_URL=$safeUrl" +
-            "&$NOSTR_CONNECT_IMAGE_URL=$safeImageUrl",
-    )
+private fun NavController.navigateToNostrConnectBottomSheet(url: String) {
+    val safeUrl = url.asUrlEncoded()
+    navigate(route = "nostrConnectBottomSheet?$NOSTR_CONNECT_URI=$safeUrl")
 }
 
 fun accountSwitcherCallbacksHandler(navController: NavController) =
@@ -572,20 +561,9 @@ private fun PrimalAppNavigation(
         )
 
         nostrConnectDialog(
-            route = "nostrConnectBottomSheet" +
-                "?$NOSTR_CONNECT_NAME={$NOSTR_CONNECT_NAME}" +
-                "&$NOSTR_CONNECT_URL={$NOSTR_CONNECT_URL}" +
-                "&$NOSTR_CONNECT_IMAGE_URL={$NOSTR_CONNECT_IMAGE_URL}",
+            route = "nostrConnectBottomSheet?$NOSTR_CONNECT_URI={$NOSTR_CONNECT_URI}",
             arguments = listOf(
-                navArgument(NOSTR_CONNECT_NAME) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(NOSTR_CONNECT_URL) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-                navArgument(NOSTR_CONNECT_IMAGE_URL) {
+                navArgument(NOSTR_CONNECT_URI) {
                     type = NavType.StringType
                     nullable = true
                 },
@@ -1289,13 +1267,9 @@ private fun NavGraphBuilder.scanCode(
                 onClose = navController::navigateUp,
                 navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
                 navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },
-                onNostrConnectRequest = { name, url, imageUrl ->
+                onNostrConnectRequest = { url ->
                     navController.popBackStack()
-                    navController.navigateToNostrConnectBottomSheet(
-                        name = name,
-                        url = url,
-                        imageUrl = imageUrl,
-                    )
+                    navController.navigateToNostrConnectBottomSheet(url = url)
                 },
             ),
         )
@@ -1364,7 +1338,13 @@ private fun NavGraphBuilder.nostrConnectDialog(
             usePlatformDefaultWidth = false,
         ),
     ) {
-        NostrConnectBottomSheet(onDismissRequest = { navController.popBackStack() })
+        val viewModel = hiltViewModel<NostrConnectViewModel>()
+        ApplyEdgeToEdge(isDarkTheme = true)
+        LockToOrientationPortrait()
+        NostrConnectBottomSheet(
+            viewModel = viewModel,
+            onDismissRequest = { navController.popBackStack() },
+        )
     }
 }
 

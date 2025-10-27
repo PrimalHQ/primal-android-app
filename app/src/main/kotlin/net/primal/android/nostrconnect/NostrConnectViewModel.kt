@@ -8,18 +8,20 @@ import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.core.di.SignerConnectionInitializerFactory
+import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
-import net.primal.android.navigation.nostrConnectImageUrl
-import net.primal.android.navigation.nostrConnectName
-import net.primal.android.navigation.nostrConnectUrl
+import net.primal.android.navigation.nostrConnectUri
 import net.primal.android.nostrconnect.NostrConnectContract.Companion.DAILY_BUDGET_OPTIONS
+import net.primal.android.nostrconnect.utils.getNostrConnectImage
+import net.primal.android.nostrconnect.utils.getNostrConnectName
+import net.primal.android.nostrconnect.utils.getNostrConnectUrl
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
@@ -27,6 +29,7 @@ import net.primal.android.user.domain.LoginType
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.domain.nostr.cryptography.NostrKeyPair
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import timber.log.Timber
 
@@ -37,17 +40,17 @@ class NostrConnectViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val exchangeRateHandler: ExchangeRateHandler,
     private val credentialsStore: CredentialsStore,
+    private val signerConnectionInitializerFactory: SignerConnectionInitializerFactory,
 ) : ViewModel() {
 
-    private val name = savedStateHandle.nostrConnectName
-    private val url = savedStateHandle.nostrConnectUrl
-    private val imageUrl = savedStateHandle.nostrConnectImageUrl
+    private val connectionUrl = savedStateHandle.nostrConnectUri
 
     private val _state = MutableStateFlow(
         NostrConnectContract.UiState(
-            appName = name,
-            appUrl = url,
-            appImageUrl = imageUrl,
+            appName = connectionUrl?.getNostrConnectName(),
+            appWebUrl = connectionUrl?.getNostrConnectUrl(),
+            appImageUrl = connectionUrl?.getNostrConnectImage(),
+            connectionUrl = connectionUrl,
         ),
     )
     val state = _state.asStateFlow()
@@ -71,28 +74,28 @@ class NostrConnectViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is NostrConnectContract.UiEvent.TabChanged -> setState { copy(selectedTab = it.tab) }
-                    is NostrConnectContract.UiEvent.AccountSelected ->
+                    is NostrConnectContract.UiEvent.ChangeTab -> setState { copy(selectedTab = it.tab) }
+                    is NostrConnectContract.UiEvent.SelectAccount ->
                         setState { copy(selectedAccount = accounts.find { acc -> acc.pubkey == it.pubkey }) }
-                    is NostrConnectContract.UiEvent.TrustLevelSelected -> setState { copy(trustLevel = it.level) }
-                    is NostrConnectContract.UiEvent.ConnectClicked -> connect()
-                    is NostrConnectContract.UiEvent.DailyBudgetClicked -> setState {
+                    is NostrConnectContract.UiEvent.SelectTrustLevel -> setState { copy(trustLevel = it.level) }
+                    is NostrConnectContract.UiEvent.ClickConnect -> connect()
+                    is NostrConnectContract.UiEvent.ClickDailyBudget -> setState {
                         copy(showDailyBudgetPicker = true, selectedDailyBudget = this.dailyBudget)
                     }
-                    is NostrConnectContract.UiEvent.DailyBudgetChanged -> setState {
+                    is NostrConnectContract.UiEvent.ChangeDailyBudget -> setState {
                         copy(
                             selectedDailyBudget = it.budget,
                         )
                     }
-                    is NostrConnectContract.UiEvent.DailyBudgetApplied -> setState {
+                    is NostrConnectContract.UiEvent.ApplyDailyBudget -> setState {
                         copy(dailyBudget = this.selectedDailyBudget, showDailyBudgetPicker = false)
                     }
-                    is NostrConnectContract.UiEvent.DailyBudgetCancelled -> setState {
+                    is NostrConnectContract.UiEvent.CancelDailyBudget -> setState {
                         copy(
                             showDailyBudgetPicker = false,
                         )
                     }
-                    else -> Unit
+                    NostrConnectContract.UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
@@ -155,35 +158,37 @@ class NostrConnectViewModel @Inject constructor(
     private fun connect() {
         viewModelScope.launch {
             setState { copy(connecting = true) }
-            try {
-                val selectedAccount = state.value.selectedAccount
-                    ?: throw IllegalStateException("No account selected.")
-                val connectionUrl = state.value.appUrl
-                    ?: throw IllegalStateException("No connection URL found.")
+            val selectedAccount = state.value.selectedAccount ?: return@launch
+            val connectionUrl = state.value.connectionUrl ?: return@launch
 
-                initialize(
-                    signerPubKey = selectedAccount.pubkey,
-                    userPubKey = selectedAccount.pubkey,
-                    connectionUrl = connectionUrl,
-                )
+            runCatching {
+                val npub = selectedAccount.pubkey.hexToNpubHrp()
+                val credential = credentialsStore.credentials.value.find { it.npub == npub }
+
+                if (credential?.nsec != null) {
+                    val keyPair = NostrKeyPair(
+                        privateKey = credential.nsec,
+                        pubKey = selectedAccount.pubkey,
+                    )
+
+                    val initializer = signerConnectionInitializerFactory.create(signerKeyPair = keyPair)
+
+                    initializer.initialize(
+                        signerPubKey = keyPair.pubKey,
+                        userPubKey = selectedAccount.pubkey,
+                        connectionUrl = connectionUrl,
+                    ).getOrThrow()
+                } else {
+                    setState { copy(error = UiError.MissingPrivateKey) }
+                }
+            }.onSuccess {
                 setEffect(NostrConnectContract.SideEffect.ConnectionSuccess)
-            } catch (e: Exception) {
-                Timber.e(e)
-                setEffect(NostrConnectContract.SideEffect.ConnectionFailed(e))
-            } finally {
-                setState { copy(connecting = false) }
+            }.onFailure { error ->
+                Timber.e(error)
+                setState { copy(error = UiError.GenericError()) }
             }
-        }
-    }
 
-    @Suppress("UNUSED_PARAMETER")
-    private suspend fun initialize(
-        signerPubKey: String,
-        userPubKey: String,
-        connectionUrl: String,
-    ): Result<Unit> {
-        val mockDelay = 1500L
-        delay(mockDelay)
-        return Result.success(Unit)
+            setState { copy(connecting = false) }
+        }
     }
 }

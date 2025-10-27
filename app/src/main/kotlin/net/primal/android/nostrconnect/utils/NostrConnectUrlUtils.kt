@@ -1,4 +1,4 @@
-package net.primal.android.redeem.utils
+package net.primal.android.nostrconnect.utils
 
 import androidx.core.net.toUri
 
@@ -10,11 +10,7 @@ fun String.isNostrConnectUrl(): Boolean {
 
 private fun String.getNostrConnectQueryParameter(key: String): String? {
     if (!this.isNostrConnectUrl()) return null
-    return try {
-        this.toUri().getQueryParameter(key)
-    } catch (_: Exception) {
-        null
-    }
+    return runCatching { this.toUri().getQueryParameter(key) }.getOrNull()
 }
 
 fun String.getNostrConnectName(): String? = this.getNostrConnectQueryParameter("name")

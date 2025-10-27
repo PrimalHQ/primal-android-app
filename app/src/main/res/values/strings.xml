@@ -1405,7 +1405,7 @@
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>
 
-    <string name="nostr_connect_primal_web_app">Primal Web App</string>
+    <string name="nostr_connect_unknown_web_app">Unknown Web App</string>
     <string name="nostr_connect_login_tab">Login</string>
     <string name="nostr_connect_permissions_tab">Permissions</string>
     <string name="nostr_connect_full_trust_title">Full Trust</string>
@@ -1420,7 +1420,6 @@
     <string name="nostr_connect_toast_connected">Connected!</string>
     <string name="nostr_connect_toast_connection_failed">Connection failed: %1$s</string>
     <string name="nostr_connect_apply_button">Apply</string>
-    <string name="nostr_connect_primal_web_app_url">https://www.primal.net</string>
     <string name="nostr_connect_sats_unit">sats</string>
     <string name="nostr_connect_daily_spending_budget_title">Daily spending budget for this app:</string>
     <string name="nostr_connect_usd_amount_approx">~%1$s</string>

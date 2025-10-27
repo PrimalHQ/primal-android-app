@@ -1,6 +1,6 @@
 package net.primal.android.scanner.domain
 
-import net.primal.android.redeem.utils.isNostrConnectUrl // <-- DODAJ OVAJ IMPORT
+import net.primal.android.nostrconnect.utils.isNostrConnectUrl
 import net.primal.android.redeem.utils.isPromoCodeUrl
 import net.primal.domain.nostr.utils.isNAddr
 import net.primal.domain.nostr.utils.isNAddrUri

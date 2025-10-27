@@ -1,13 +1,15 @@
 package net.primal.android.nostrconnect
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
 
 interface NostrConnectContract {
     data class UiState(
         val appName: String?,
-        val appUrl: String?,
+        val appWebUrl: String?,
         val appImageUrl: String?,
+        val connectionUrl: String?,
         val accounts: List<UserAccountUi> = emptyList(),
         val selectedTab: Tab = Tab.LOGIN,
         val selectedAccount: UserAccountUi? = null,
@@ -17,6 +19,7 @@ interface NostrConnectContract {
         val showDailyBudgetPicker: Boolean = false,
         val selectedDailyBudget: Long? = null,
         val budgetToUsdMap: Map<Long, BigDecimal?> = emptyMap(),
+        val error: UiError? = null,
     )
 
     enum class Tab {
@@ -31,20 +34,19 @@ interface NostrConnectContract {
     }
 
     sealed class UiEvent {
-        data class TabChanged(val tab: Tab) : UiEvent()
-        data class AccountSelected(val pubkey: String) : UiEvent()
-        data class TrustLevelSelected(val level: TrustLevel) : UiEvent()
-        data object DailyBudgetClicked : UiEvent()
-        data class DailyBudgetChanged(val budget: Long?) : UiEvent()
-        data object DailyBudgetApplied : UiEvent()
-        data object DailyBudgetCancelled : UiEvent()
-        data object ConnectClicked : UiEvent()
-        data object CancelClicked : UiEvent()
+        data class ChangeTab(val tab: Tab) : UiEvent()
+        data class SelectAccount(val pubkey: String) : UiEvent()
+        data class SelectTrustLevel(val level: TrustLevel) : UiEvent()
+        data object ClickDailyBudget : UiEvent()
+        data class ChangeDailyBudget(val budget: Long?) : UiEvent()
+        data object ApplyDailyBudget : UiEvent()
+        data object CancelDailyBudget : UiEvent()
+        data object ClickConnect : UiEvent()
+        data object DismissError : UiEvent()
     }
 
     sealed class SideEffect {
         data object ConnectionSuccess : SideEffect()
-        data class ConnectionFailed(val error: Throwable) : SideEffect()
     }
 
     companion object {

@@ -31,11 +31,7 @@ interface RedeemCodeContract {
 
     sealed class SideEffect {
         data object PromoCodeApplied : SideEffect()
-        data class NostrConnectRequest(
-            val name: String?,
-            val url: String?,
-            val imageUrl: String?,
-        ) : SideEffect()
+        data class NostrConnectRequest(val url: String) : SideEffect()
     }
 
     enum class RedeemCodeStage {
@@ -59,6 +55,6 @@ interface RedeemCodeContract {
         val onClose: () -> Unit,
         val navigateToOnboarding: (String?) -> Unit,
         val navigateToWalletOnboarding: (String?) -> Unit,
-        val onNostrConnectRequest: (name: String?, url: String?, imageUrl: String?) -> Unit,
+        val onNostrConnectRequest: (url: String) -> Unit,
     )
 }
