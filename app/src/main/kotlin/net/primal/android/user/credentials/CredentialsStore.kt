@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.runBlocking
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.CredentialType
+import net.primal.android.user.domain.asCredential
+import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.cryptography.utils.extractKeyPairFromPrivateKeyOrThrow
 
@@ -32,9 +34,16 @@ class CredentialsStore @Inject constructor(
 
     suspend fun clearCredentials() = persistence.updateData { emptySet() }
 
-    fun isExternalSignerCredential(npub: String) = checkCredentialType(npub = npub, credentialType = CredentialType.ExternalSigner)
+    fun isExternalSignerCredential(npub: String) =
+        checkCredentialType(npub = npub, credentialType = CredentialType.ExternalSigner)
 
     fun isNpubCredential(npub: String) = checkCredentialType(npub = npub, credentialType = CredentialType.PublicKey)
+
+    suspend fun getOrCreateInternalSignerCredentials() =
+        credentials.value.find { it.type == CredentialType.InternalSigner }
+            ?: CryptoUtils.generateHexEncodedKeypair()
+                .asCredential(type = CredentialType.InternalSigner)
+                .also { runCatching { addCredential(it) } }
 
     private fun checkCredentialType(npub: String, credentialType: CredentialType) =
         credentials.value.find { it.npub == npub }?.type == credentialType
