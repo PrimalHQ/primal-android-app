@@ -77,7 +77,7 @@ import net.primal.android.signer.utils.isCompatibleAmberVersionInstalled
 import net.primal.android.stream.player.hideStreamMiniPlayer
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.user.domain.LoginType
+import net.primal.android.user.domain.CredentialType
 import net.primal.domain.nostr.utils.isValidNostrPrivateKey
 import net.primal.domain.nostr.utils.isValidNostrPublicKey
 
@@ -124,7 +124,9 @@ fun LoginScreen(
     val pubkeyLauncher = rememberAmberPubkeyLauncher(
         onFailure = { eventPublisher(LoginContract.UiEvent.ResetLoginState) },
     ) { pubkey ->
-        eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = pubkey, loginType = LoginType.ExternalSigner))
+        eventPublisher(
+            LoginContract.UiEvent.UpdateLoginInput(newInput = pubkey, credentialType = CredentialType.ExternalSigner),
+        )
         signLauncher.launchSignEvent(event = buildAppSpecificDataEvent(pubkey = pubkey))
     }
 

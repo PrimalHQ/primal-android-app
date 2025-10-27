@@ -43,7 +43,7 @@ class Nip04MessageCipher @Inject constructor(
         content: String,
     ): String {
         val npub = userId.hexToNpubHrp()
-        return if (credentialsStore.isExternalSignerLogin(npub = npub)) {
+        return if (credentialsStore.isExternalSignerCredential(npub = npub)) {
             contentResolver.encryptNip04WithAmber(
                 content = content,
                 participantId = participantId,
@@ -79,7 +79,7 @@ class Nip04MessageCipher @Inject constructor(
     ): String {
         val npub = userId.hexToNpubHrp()
 
-        return if (credentialsStore.isExternalSignerLogin(npub = npub)) {
+        return if (credentialsStore.isExternalSignerCredential(npub = npub)) {
             contentResolver.decryptNip04WithAmber(
                 content = content,
                 participantId = participantId,

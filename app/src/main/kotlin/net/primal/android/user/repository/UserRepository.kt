@@ -68,7 +68,7 @@ class UserRepository @Inject constructor(
         }
 
     fun isNpubLogin(userId: String) =
-        runCatching { credentialsStore.isNpubLogin(npub = userId.hexToNpubHrp()) }.getOrDefault(false)
+        runCatching { credentialsStore.isNpubCredential(npub = userId.hexToNpubHrp()) }.getOrDefault(false)
 
     suspend fun clearWalletData(userId: String) =
         withContext(dispatchers.io()) {

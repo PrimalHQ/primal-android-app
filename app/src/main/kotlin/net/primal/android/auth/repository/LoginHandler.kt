@@ -5,7 +5,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.credentials.CredentialsStore
-import net.primal.android.user.domain.LoginType
+import net.primal.android.user.domain.CredentialType
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.account.PrimalWalletAccountRepository
@@ -30,15 +30,17 @@ class LoginHandler @Inject constructor(
 ) {
     suspend fun login(
         nostrKey: String,
-        loginType: LoginType,
+        credentialType: CredentialType,
         authorizationEvent: NostrEvent?,
     ) = withContext(dispatchers.io()) {
         runCatching {
-            val userId = when (loginType) {
-                LoginType.PublicKey, LoginType.ExternalSigner ->
-                    credentialsStore.saveNpub(npub = nostrKey, loginType = loginType)
+            val userId = when (credentialType) {
+                CredentialType.PublicKey, CredentialType.ExternalSigner ->
+                    credentialsStore.saveNpub(npub = nostrKey, credentialType = credentialType)
 
-                LoginType.PrivateKey -> credentialsStore.saveNsec(nostrKey = nostrKey)
+                CredentialType.PrivateKey -> credentialsStore.saveNsec(nostrKey = nostrKey)
+
+                CredentialType.InternalSigner -> error("Can't login with InternalSigner key.")
             }
             val authorizationEvent = authorizationEvent ?: nostrNotary.signAuthorizationNostrEvent(
                 userId = userId,
@@ -56,20 +58,24 @@ class LoginHandler @Inject constructor(
             }
             mutedItemRepository.fetchAndPersistMuteList(userId = userId)
         }.onFailure { exception ->
-            when (loginType) {
-                LoginType.PublicKey, LoginType.ExternalSigner ->
+            when (credentialType) {
+                CredentialType.PublicKey, CredentialType.ExternalSigner ->
                     credentialsStore.removeCredentialByNpub(npub = nostrKey)
 
-                LoginType.PrivateKey -> credentialsStore.removeCredentialByNsec(nsec = nostrKey.assureValidNsec())
+                CredentialType.PrivateKey -> credentialsStore.removeCredentialByNsec(nsec = nostrKey.assureValidNsec())
+
+                CredentialType.InternalSigner -> Unit
             }
 
             throw exception
         }.onSuccess {
-            when (loginType) {
-                LoginType.PublicKey, LoginType.ExternalSigner ->
-                    authRepository.loginWithNpub(npub = nostrKey, loginType = loginType)
+            when (credentialType) {
+                CredentialType.PublicKey, CredentialType.ExternalSigner ->
+                    authRepository.loginWithNpub(npub = nostrKey, credentialType = credentialType)
 
-                LoginType.PrivateKey -> authRepository.loginWithNsec(nostrKey = nostrKey)
+                CredentialType.PrivateKey -> authRepository.loginWithNsec(nostrKey = nostrKey)
+
+                CredentialType.InternalSigner -> Unit
             }
         }
     }

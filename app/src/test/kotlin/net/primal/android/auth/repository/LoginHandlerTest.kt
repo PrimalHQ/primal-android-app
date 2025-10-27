@@ -14,7 +14,7 @@ import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Credential
-import net.primal.android.user.domain.LoginType
+import net.primal.android.user.domain.CredentialType
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.Result
 import net.primal.domain.account.PrimalWalletAccountRepository
@@ -87,7 +87,7 @@ class LoginHandlerTest {
             val loginHandler = createLoginHandler(authRepository = authRepository)
             loginHandler.login(
                 nostrKey = expectedKey,
-                loginType = LoginType.PrivateKey,
+                credentialType = CredentialType.PrivateKey,
                 authorizationEvent = null,
             )
 
@@ -109,7 +109,7 @@ class LoginHandlerTest {
             )
             loginHandler.login(
                 nostrKey = nsec,
-                loginType = LoginType.PrivateKey,
+                credentialType = CredentialType.PrivateKey,
                 authorizationEvent = null,
             )
 
@@ -139,7 +139,7 @@ class LoginHandlerTest {
 
             loginHandler.login(
                 nostrKey = nsec,
-                loginType = LoginType.PrivateKey,
+                credentialType = CredentialType.PrivateKey,
                 authorizationEvent = null,
             )
             advanceUntilIdle()
@@ -164,7 +164,7 @@ class LoginHandlerTest {
             )
             loginHandler.login(
                 nostrKey = nsec,
-                loginType = LoginType.PrivateKey,
+                credentialType = CredentialType.PrivateKey,
                 authorizationEvent = null,
             )
 
@@ -188,7 +188,7 @@ class LoginHandlerTest {
             )
             loginHandler.login(
                 nostrKey = nsec,
-                loginType = LoginType.PrivateKey,
+                credentialType = CredentialType.PrivateKey,
                 authorizationEvent = null,
             )
 
@@ -210,7 +210,7 @@ class LoginHandlerTest {
             )
             loginHandler.login(
                 nostrKey = nsec,
-                loginType = LoginType.PrivateKey,
+                credentialType = CredentialType.PrivateKey,
                 authorizationEvent = null,
             )
 
@@ -250,7 +250,7 @@ class LoginHandlerTest {
             try {
                 loginHandler.login(
                     nostrKey = nsec,
-                    loginType = LoginType.PrivateKey,
+                    credentialType = CredentialType.PrivateKey,
                     authorizationEvent = null,
                 )
             } catch (_: NetworkException) {
