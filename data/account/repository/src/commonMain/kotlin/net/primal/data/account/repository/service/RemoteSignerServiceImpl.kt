@@ -7,6 +7,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
+import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.domain.account.repository.ConnectionRepository
@@ -26,6 +27,7 @@ class RemoteSignerServiceImpl internal constructor(
         Napier.d(tag = "Signer") { "RemoteSignerService started." }
         observeConnections()
         observeMethods()
+        observeErrors()
     }
 
     private fun observeConnections() =
@@ -44,19 +46,29 @@ class RemoteSignerServiceImpl internal constructor(
             }
         }
 
+    private fun observeErrors() =
+        scope.launch {
+            nostrRelayManager.errors.collect { error ->
+                sendResponse(response = error)
+            }
+        }
+
     private fun processMethod(method: RemoteSignerMethod) =
         scope.launch {
             val response = remoteSignerMethodResponseBuilder.build(method)
 
-            nostrRelayManager.sendResponse(
-                relays = connectionRepository
-                    .getConnectionByClientPubKey(clientPubKey = method.clientPubKey)
-                    .getOrNull()?.relays
-                    ?: return@launch,
-                clientPubKey = method.clientPubKey,
-                response = response,
-            )
+            sendResponse(response = response)
         }
+
+    private suspend fun sendResponse(response: RemoteSignerMethodResponse) {
+        nostrRelayManager.sendResponse(
+            relays = connectionRepository
+                .getConnectionByClientPubKey(clientPubKey = response.clientPubKey)
+                .getOrNull()?.relays
+                ?: return,
+            response = response,
+        )
+    }
 
     override fun stop() {
         nostrRelayManager.disconnectFromAll()
