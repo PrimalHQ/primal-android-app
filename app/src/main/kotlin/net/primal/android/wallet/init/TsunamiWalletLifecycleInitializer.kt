@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
-import net.primal.android.user.domain.LoginType
+import net.primal.android.user.domain.CredentialType
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
@@ -46,7 +46,7 @@ class TsunamiWalletLifecycleInitializer @Inject constructor(
                     val walletKey = runCatching {
                         val userPublicKey = userId.hexToNpubHrp()
                         val credential = credentialsStore.findOrThrow(npub = userPublicKey)
-                        if (credential.type == LoginType.PrivateKey && credential.nsec != null) {
+                        if (credential.type == CredentialType.PrivateKey && credential.nsec != null) {
                             credential.nsec
                         } else {
                             userId

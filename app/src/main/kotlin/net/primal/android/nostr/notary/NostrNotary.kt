@@ -95,7 +95,7 @@ class NostrNotary @Inject constructor(
 
     private fun signNostrEvent(userId: String, event: NostrUnsignedEvent): NostrEvent? {
         val isExternalSignerLogin = runCatching {
-            credentialsStore.isExternalSignerLogin(npub = userId.hexToNpubHrp())
+            credentialsStore.isExternalSignerCredential(npub = userId.hexToNpubHrp())
         }.getOrDefault(false)
 
         if (isExternalSignerLogin) {
