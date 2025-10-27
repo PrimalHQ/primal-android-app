@@ -20,14 +20,18 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.di.RemoteSignerServiceFactory
+import net.primal.android.user.credentials.CredentialsStore
+import net.primal.android.user.domain.asKeyPair
 import net.primal.domain.account.service.RemoteSignerService
-import net.primal.domain.nostr.cryptography.NostrKeyPair
 
 @AndroidEntryPoint
 class PrimalRemoteSignerService : Service() {
 
     @Inject
     lateinit var remoteSignerServiceFactory: RemoteSignerServiceFactory
+
+    @Inject
+    lateinit var credentialsStore: CredentialsStore
 
     private var signer: RemoteSignerService? = null
 
@@ -85,12 +89,10 @@ class PrimalRemoteSignerService : Service() {
         )
 
         scope.launch {
-            val keypair = NostrKeyPair(
-                pubKey = "npub1ng4zmxu622hgw0uv35tq28gxaycph58vfnu0a5gdlhkwxaeyaddq4mx5sf",
-                privateKey = "nsec1mtydyr59yfsudd8kstkue4dakvcqdjm6jmkvvwmp08cfjm7e9r2sucawh7",
+            signer = remoteSignerServiceFactory.create(
+                credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair(),
             )
 
-            signer = remoteSignerServiceFactory.create(keypair)
             signer?.start()
         }
 
