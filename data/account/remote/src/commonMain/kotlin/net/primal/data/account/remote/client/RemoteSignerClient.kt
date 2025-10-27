@@ -23,7 +23,9 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
+import net.primal.data.account.remote.method.model.RemoteSignerMethodRequest
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.remote.method.parser.RemoteSignerMethodParser
 import net.primal.domain.nostr.NostrEvent
@@ -52,6 +54,9 @@ class RemoteSignerClient(
 
     private val _incomingMethods: Channel<RemoteSignerMethod> = Channel()
     val incomingMethods = _incomingMethods.receiveAsFlow()
+
+    private val _errors: Channel<RemoteSignerMethodResponse.Error> = Channel()
+    val errors = _errors.receiveAsFlow()
 
     private var listenerJob: Job? = null
 
@@ -95,19 +100,19 @@ class RemoteSignerClient(
             listenerJob?.cancel()
         }
 
-    suspend fun publishResponse(clientPubKey: String, response: RemoteSignerMethodResponse): Result<Unit> =
+    suspend fun publishResponse(response: RemoteSignerMethodResponse): Result<Unit> =
         runCatching {
             Napier.d(tag = "Signer") { "Sending response: $response" }
             nostrSocketClient.sendEVENT(
                 signedEvent = NostrUnsignedEvent(
                     pubKey = signerKeyPair.pubKey.assureValidPubKeyHex(),
-                    tags = listOf(clientPubKey.asPubkeyTag()),
+                    tags = listOf(response.clientPubKey.asPubkeyTag()),
                     kind = NostrEventKind.NostrConnect.value,
                     content = nip44.encrypt(
                         msg = CommonJsonImplicitNulls.encodeToString(response),
                         privateKey = signerKeyPair.privateKey.assureValidNsec()
                             .bechToBytesOrThrow(),
-                        pubKey = clientPubKey.assureValidNpub().bechToBytesOrThrow(),
+                        pubKey = response.clientPubKey.assureValidNpub().bechToBytesOrThrow(),
                     ).encodePayload(),
                 ).signOrThrow(nsec = signerKeyPair.privateKey)
                     .toNostrJsonObject(),
@@ -118,13 +123,33 @@ class RemoteSignerClient(
 
     private fun processEvent(event: NostrEvent) =
         scope.launch {
-            val decryptedContent = event.decryptContent()
+            val decryptedContent = runCatching { event.decryptContent() }
+                .onFailure {
+                    val message = "Failed to decrypt content."
+                    Napier.w(throwable = it) { message }
+                    _errors.send(
+                        RemoteSignerMethodResponse.Error(
+                            id = event.id,
+                            error = message,
+                            clientPubKey = event.pubKey,
+                        ),
+                    )
+                }.getOrNull() ?: return@launch
 
             remoteSignerMethodParser.parse(clientPubkey = event.pubKey, content = decryptedContent)
                 .onSuccess { command ->
                     _incomingMethods.send(command)
                 }.onFailure {
-                    Napier.w(throwable = it) { "Couldn't parse received event." }
+                    val message = it.message ?: "There was an error while parsing method."
+                    Napier.w(throwable = it) { message }
+                    val id = decryptedContent.decodeFromJsonStringOrNull<RemoteSignerMethodRequest>()?.id
+                    _errors.send(
+                        RemoteSignerMethodResponse.Error(
+                            id = id ?: event.id,
+                            error = message,
+                            clientPubKey = event.pubKey,
+                        ),
+                    )
                 }
         }
 

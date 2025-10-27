@@ -38,10 +38,10 @@ class SignerConnectionInitializer internal constructor(
             nostrRelayManager.connectToRelays(relays = appConnection.relays.toSet())
             nostrRelayManager.sendResponse(
                 relays = appConnection.relays,
-                clientPubKey = appConnection.clientPubKey,
-                response = RemoteSignerMethodResponse(
+                response = RemoteSignerMethodResponse.Success(
                     id = Uuid.random().toString(),
                     result = secret,
+                    clientPubKey = appConnection.clientPubKey,
                 ),
             )
 
