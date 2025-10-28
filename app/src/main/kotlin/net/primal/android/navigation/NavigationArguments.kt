@@ -149,3 +149,6 @@ inline val SavedStateHandle.reactionTypeOrThrow: ReactionType
     get() = get<String>(INITIAL_REACTION_TYPE)
         ?.let { ReactionType.valueOf(it) }
         ?: throw IllegalArgumentException("Missing required $INITIAL_REACTION_TYPE argument.")
+
+const val NOSTR_CONNECT_URI = "nostrConnectUri"
+inline val SavedStateHandle.nostrConnectUri: String? get() = get<String>(NOSTR_CONNECT_URI)?.asUrlDecoded()

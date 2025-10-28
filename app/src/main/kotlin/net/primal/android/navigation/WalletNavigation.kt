@@ -196,7 +196,7 @@ private fun NavGraphBuilder.send(
         onClose = { navController.navigateUp() },
         onPromoCodeScan = {
             navController.popBackStack()
-            navController.navigateToRedeemCode(it)
+            navController.navigateToScanCode(it)
         },
         onCreateTransaction = { draft ->
             navController.navigateToWalletCreateTransaction(draftTransaction = draft)

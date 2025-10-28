@@ -122,6 +122,9 @@ class RedeemCodeViewModel @Inject constructor(
                         },
                     )
                 }
+                QrCodeDataType.NOSTR_CONNECT -> {
+                    setEffect(SideEffect.NostrConnectRequest(url = result.value))
+                }
 
                 else -> Unit
             }

@@ -395,7 +395,7 @@ sealed class DrawerScreenDestination {
     data class Premium(val hasPremium: Boolean) : DrawerScreenDestination()
     data object Messages : DrawerScreenDestination()
     data class Bookmarks(val userId: String) : DrawerScreenDestination()
-    data object RedeemCode : DrawerScreenDestination()
+    data object ScanCode : DrawerScreenDestination()
     data object Settings : DrawerScreenDestination()
     data class SignOut(val userId: String) : DrawerScreenDestination()
 }
@@ -407,7 +407,7 @@ private fun DrawerScreenDestination.label(): String {
         is DrawerScreenDestination.Premium -> stringResource(id = R.string.drawer_destination_premium)
         DrawerScreenDestination.Messages -> stringResource(R.string.drawer_destination_messages)
         is DrawerScreenDestination.Bookmarks -> stringResource(R.string.drawer_destination_bookmarks)
-        DrawerScreenDestination.RedeemCode -> stringResource(id = R.string.drawer_destination_redeem_code)
+        DrawerScreenDestination.ScanCode -> stringResource(id = R.string.drawer_destination_scan_code)
         DrawerScreenDestination.Settings -> stringResource(R.string.drawer_destination_settings)
         is DrawerScreenDestination.SignOut -> stringResource(R.string.drawer_destination_sign_out)
     }
@@ -420,7 +420,7 @@ private fun DrawerScreenDestination.icon(): ImageVector {
         is DrawerScreenDestination.Premium -> PrimalIcons.DrawerPremium
         DrawerScreenDestination.Messages -> PrimalIcons.DrawerMessages
         is DrawerScreenDestination.Bookmarks -> PrimalIcons.DrawerBookmarks
-        DrawerScreenDestination.RedeemCode -> PrimalIcons.QrCode
+        DrawerScreenDestination.ScanCode -> PrimalIcons.QrCode
         DrawerScreenDestination.Settings -> PrimalIcons.DrawerSettings
         is DrawerScreenDestination.SignOut -> PrimalIcons.DrawerSignOut
     }
@@ -436,7 +436,7 @@ fun PrimalDrawerPreview() {
                     DrawerScreenDestination.Profile(userId = "none"),
                     DrawerScreenDestination.Messages,
                     DrawerScreenDestination.Bookmarks(userId = "none"),
-                    DrawerScreenDestination.RedeemCode,
+                    DrawerScreenDestination.ScanCode,
                     DrawerScreenDestination.Settings,
                     DrawerScreenDestination.SignOut(userId = "none"),
                 ),

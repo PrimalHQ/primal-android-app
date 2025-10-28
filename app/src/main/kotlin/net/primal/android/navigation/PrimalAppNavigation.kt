@@ -12,6 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
@@ -91,6 +92,8 @@ import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationContract
 import net.primal.android.messages.conversation.create.NewConversationScreen
+import net.primal.android.nostrconnect.NostrConnectBottomSheet
+import net.primal.android.nostrconnect.NostrConnectViewModel
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract
 import net.primal.android.notes.home.HomeFeedScreen
@@ -262,8 +265,7 @@ fun NavController.navigateToExplore() =
 fun NavController.navigateToFollowPack(profileId: String, followPackId: String) =
     navigate(route = "explore/followPack/$profileId/$followPackId")
 
-fun NavController.navigateToRedeemCode(promoCode: String? = null) =
-    navigate(route = "redeemCode?$PROMO_CODE=$promoCode")
+fun NavController.navigateToScanCode(promoCode: String? = null) = navigate(route = "scanCode?$PROMO_CODE=$promoCode")
 
 private fun NavController.navigateToMessages() = navigate(route = "messages")
 
@@ -365,6 +367,11 @@ private fun NavController.navigateToPremiumContentBackup() = navigate(route = "p
 private fun NavController.navigateToPremiumChangePrimalName() = navigate(route = "premium/manage/changePrimalName")
 private fun NavController.navigateToPremiumOrderHistory() = navigate(route = "premium/manage/order")
 private fun NavController.navigateToPremiumRelay() = navigate(route = "premium/manage/relay")
+
+private fun NavController.navigateToNostrConnectBottomSheet(url: String) {
+    val safeUrl = url.asUrlEncoded()
+    navigate(route = "nostrConnectBottomSheet?$NOSTR_CONNECT_URI=$safeUrl")
+}
 
 fun accountSwitcherCallbacksHandler(navController: NavController) =
     AccountSwitcherCallbacks(
@@ -473,7 +480,7 @@ fun PrimalAppNavigation(startDestination: String) {
 
             DrawerScreenDestination.Messages -> navController.navigateToMessages()
             is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
-            DrawerScreenDestination.RedeemCode -> navController.navigateToRedeemCode()
+            DrawerScreenDestination.ScanCode -> navController.navigateToScanCode()
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
             is DrawerScreenDestination.SignOut -> navController.navigateToLogout(profileId = it.userId)
         }
@@ -537,8 +544,8 @@ private fun PrimalAppNavigation(
             navController = navController,
         )
 
-        redeemCode(
-            route = "redeemCode?$PROMO_CODE={$PROMO_CODE}",
+        scanCode(
+            route = "scanCode?$PROMO_CODE={$PROMO_CODE}",
             arguments = listOf(
                 navArgument(PROMO_CODE) {
                     type = NavType.StringType
@@ -548,6 +555,17 @@ private fun PrimalAppNavigation(
             deepLinks = listOf(
                 navDeepLink {
                     uriPattern = "https://primal.net/rc/{$PROMO_CODE}"
+                },
+            ),
+            navController = navController,
+        )
+
+        nostrConnectDialog(
+            route = "nostrConnectBottomSheet?$NOSTR_CONNECT_URI={$NOSTR_CONNECT_URI}",
+            arguments = listOf(
+                navArgument(NOSTR_CONNECT_URI) {
+                    type = NavType.StringType
+                    nullable = true
                 },
             ),
             navController = navController,
@@ -1104,7 +1122,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
                 callbacks = WelcomeContract.ScreenCallbacks(
                     onSignInClick = { navController.navigateToLogin() },
                     onCreateAccountClick = { navController.navigateToOnboarding() },
-                    onRedeemCodeClick = { navController.navigateToRedeemCode() },
+                    onRedeemCodeClick = { navController.navigateToScanCode() },
                 ),
             )
         }
@@ -1205,7 +1223,7 @@ private fun NavGraphBuilder.onboardingWalletActivation(
     }
 }
 
-private fun NavGraphBuilder.redeemCode(
+private fun NavGraphBuilder.scanCode(
     route: String,
     arguments: List<NamedNavArgument>,
     deepLinks: List<NavDeepLink>,
@@ -1249,6 +1267,10 @@ private fun NavGraphBuilder.redeemCode(
                 onClose = navController::navigateUp,
                 navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
                 navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },
+                onNostrConnectRequest = { url ->
+                    navController.popBackStack()
+                    navController.navigateToNostrConnectBottomSheet(url = url)
+                },
             ),
         )
     }
@@ -1301,6 +1323,29 @@ private fun NavGraphBuilder.home(
             onNewPostClick = { navController.navigateToNoteEditor(null) },
         ),
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+private fun NavGraphBuilder.nostrConnectDialog(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) {
+    dialog(
+        route = route,
+        arguments = arguments,
+        dialogProperties = DialogProperties(
+            usePlatformDefaultWidth = false,
+        ),
+    ) {
+        val viewModel = hiltViewModel<NostrConnectViewModel>()
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        NostrConnectBottomSheet(
+            viewModel = viewModel,
+            onDismissRequest = { navController.popBackStack() },
+        )
+    }
 }
 
 private fun NavGraphBuilder.reads(
@@ -2396,7 +2441,7 @@ private fun NavGraphBuilder.profileQrCodeViewer(
                 },
                 onPromoCodeScan = {
                     navController.popBackStack()
-                    navController.navigateToRedeemCode(it)
+                    navController.navigateToScanCode(it)
                 },
             ),
         )
