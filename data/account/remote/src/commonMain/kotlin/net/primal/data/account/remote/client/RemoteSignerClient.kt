@@ -22,7 +22,6 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
-import net.primal.core.utils.serialization.CommonJsonImplicitNulls
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodRequest
@@ -30,10 +29,7 @@ import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.remote.method.parser.RemoteSignerMethodParser
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.NostrUnsignedEvent
-import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.cryptography.NostrKeyPair
-import net.primal.domain.nostr.cryptography.signOrThrow
 import net.primal.domain.nostr.cryptography.utils.assureValidNpub
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.assureValidPubKeyHex
@@ -100,23 +96,9 @@ class RemoteSignerClient(
             listenerJob?.cancel()
         }
 
-    suspend fun publishResponse(response: RemoteSignerMethodResponse): Result<Unit> =
+    suspend fun publishEvent(event: NostrEvent): Result<Unit> =
         runCatching {
-            Napier.d(tag = "Signer") { "Sending response: $response" }
-            nostrSocketClient.sendEVENT(
-                signedEvent = NostrUnsignedEvent(
-                    pubKey = signerKeyPair.pubKey.assureValidPubKeyHex(),
-                    tags = listOf(response.clientPubKey.asPubkeyTag()),
-                    kind = NostrEventKind.NostrConnect.value,
-                    content = nip44.encrypt(
-                        msg = CommonJsonImplicitNulls.encodeToString(response),
-                        privateKey = signerKeyPair.privateKey.assureValidNsec()
-                            .bechToBytesOrThrow(),
-                        pubKey = response.clientPubKey.assureValidNpub().bechToBytesOrThrow(),
-                    ).encodePayload(),
-                ).signOrThrow(nsec = signerKeyPair.privateKey)
-                    .toNostrJsonObject(),
-            )
+            nostrSocketClient.sendEVENT(signedEvent = event.toNostrJsonObject())
         }.onFailure {
             Napier.w(tag = "Signer", throwable = it) { "Failed to publish event." }
         }
