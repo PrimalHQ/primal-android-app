@@ -1,2 +1,2 @@
 ## Changes
-- Fixed UI switch glitch on notifications settings screen
+- Fixed crash when parsing invalid LN invoice
