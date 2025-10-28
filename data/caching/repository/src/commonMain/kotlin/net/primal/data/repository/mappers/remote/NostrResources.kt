@@ -348,7 +348,7 @@ private fun takeAsReferencedZapOrNull(
         ?: zapRequest?.tags?.findFirstEventId()
 
     val amountInSats = (event?.tags?.findFirstBolt11() ?: zapRequest?.tags?.findFirstZapAmount())
-        ?.let(LnInvoiceUtils::getAmountInSats)
+        ?.let(LnInvoiceUtils::getAmountInSatsOrNull)
 
     if (receiverId == null || senderId == null || amountInSats == null) return null
 

@@ -32,6 +32,7 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.onFailure
+import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.common.exception.NetworkException
@@ -39,6 +40,7 @@ import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
+import net.primal.domain.wallet.distinctUntilWalletIdChanged
 import timber.log.Timber
 
 @HiltViewModel
@@ -46,6 +48,7 @@ class WalletDashboardViewModel @Inject constructor(
     userRepository: UserRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val walletAccountRepository: WalletAccountRepository,
+    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val walletRepository: WalletRepository,
     private val primalBillingClient: PrimalBillingClient,
     private val billingRepository: BillingRepository,
@@ -107,14 +110,15 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun subscribeToActiveWalletId() =
         viewModelScope.launch {
-            walletAccountRepository.observeActiveWalletId(userId = activeUserId)
+            walletAccountRepository.observeActiveWallet(userId = activeUserId)
+                .distinctUntilWalletIdChanged()
                 .filterNotNull()
-                .collect { walletId ->
-                    fetchWalletBalance(walletId = walletId)
+                .collect { wallet ->
+                    fetchWalletBalance(walletId = wallet.walletId)
                     setState {
                         copy(
                             transactions = walletRepository
-                                .latestTransactions(walletId = walletId)
+                                .latestTransactions(walletId = wallet.walletId, walletType = wallet.type)
                                 .mapAsPagingDataOfTransactionUi(),
                         )
                     }
@@ -184,7 +188,7 @@ class WalletDashboardViewModel @Inject constructor(
     private fun enablePrimalWallet() =
         viewModelScope.launch {
             try {
-                walletAccountRepository.fetchWalletAccountInfo(userId = activeUserId)
+                primalWalletAccountRepository.fetchWalletAccountInfo(userId = activeUserId)
                 walletAccountRepository.setActiveWallet(userId = activeUserId, walletId = activeUserId)
             } catch (error: NetworkException) {
                 Timber.w(error)

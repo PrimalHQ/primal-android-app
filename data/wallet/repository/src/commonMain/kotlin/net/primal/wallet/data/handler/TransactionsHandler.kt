@@ -5,31 +5,31 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.Wallet
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.model.Transaction
-import net.primal.wallet.data.model.TransactionsRequest
 import net.primal.wallet.data.repository.mappers.local.toNostrTransactionData
 import net.primal.wallet.data.repository.mappers.local.toPrimalTransactionData
 import net.primal.wallet.data.repository.mappers.local.toWalletTransactionData
-import net.primal.wallet.data.service.WalletService
+import net.primal.wallet.data.service.factory.WalletServiceFactory
 
 internal class TransactionsHandler(
     val dispatchers: DispatcherProvider,
-    val primalWalletService: WalletService,
-    val nostrWalletService: WalletService,
+    val walletServiceFactory: WalletServiceFactory,
     val walletDatabase: WalletDatabase,
     val profileRepository: ProfileRepository,
 ) {
     suspend fun fetchAndPersistLatestTransactions(wallet: Wallet, request: TransactionsRequest): Result<Unit> =
         runCatching {
-            val transactions = when (wallet) {
-                is Wallet.NWC -> nostrWalletService.fetchTransactions(wallet = wallet, request = request)
-                is Wallet.Primal -> primalWalletService.fetchTransactions(wallet = wallet, request = request)
-            }.getOrThrow()
+            val transactions = withContext(dispatchers.io()) {
+                val service = walletServiceFactory.getServiceForWallet(wallet)
+                service.fetchTransactions(wallet = wallet, request = request).getOrThrow()
+            }
 
-            val otherUserIds = transactions.filterIsInstance<Transaction.Primal>()
+            val otherUserIds = transactions
+                .filterIsInstance<Transaction.Primal>()
                 .mapNotNull { it.otherUserId }
 
             persistTransactions(transactions = transactions)

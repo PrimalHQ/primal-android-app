@@ -95,7 +95,7 @@ fun WalletDashboardScreen(
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
             Lifecycle.Event.ON_START -> {
-                if (uiState.value.wallet is Wallet.NWC) {
+                if (uiState.value.wallet !is Wallet.Primal) {
                     viewModel.setEvents(UiEvent.RequestWalletBalanceUpdate)
                 }
             }
@@ -144,12 +144,12 @@ fun WalletDashboardScreen(
     val pagingItems = state.transactions.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
-    val canShowWalletPicker = false
+    val canShowWalletPicker = state.userWallets.isNotEmpty() && state.userWallets.size > 1 && state.wallet != null
     var walletPickerVisible by remember { mutableStateOf(false) }
     if (walletPickerVisible && canShowWalletPicker) {
         WalletPickerBottomSheet(
             wallets = state.userWallets,
-            activeWallet = state.wallet!!,
+            activeWallet = state.wallet,
             onDismissRequest = { walletPickerVisible = false },
             onConfigureWalletsClick = onConfigureWalletsClick,
             onActiveWalletChanged = {
@@ -220,7 +220,12 @@ fun WalletDashboardScreen(
         topAppBar = { scrollBehaviour ->
             PrimalTopAppBar(
                 modifier = Modifier.onSizeChanged { topBarHeight = it.height },
-                title = stringResource(id = R.string.wallet_title),
+                title = when (state.wallet) {
+                    is Wallet.NWC -> stringResource(id = R.string.wallet_nwc_title)
+                    is Wallet.Primal -> stringResource(id = R.string.wallet_primal_title)
+                    is Wallet.Tsunami -> stringResource(id = R.string.wallet_tsunami_title)
+                    null -> stringResource(id = R.string.wallet_title)
+                },
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 legendaryCustomization = state.activeAccountLegendaryCustomization,
                 avatarBlossoms = state.activeAccountBlossoms,

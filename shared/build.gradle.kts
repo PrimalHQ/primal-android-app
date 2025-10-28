@@ -39,10 +39,9 @@ kotlin {
 
             export(project(":core:networking-primal"))
             export(project(":core:networking-upload"))
+            export(project(":core:networking-lightning"))
 
             export(project(":data:caching:repository"))
-
-            export(project(":data:wallet:remote-nwc"))
             export(project(":data:wallet:repository"))
         }
     }
@@ -58,10 +57,9 @@ kotlin {
 
                 api(project(":core:networking-primal"))
                 api(project(":core:networking-upload"))
+                api(project(":core:networking-lightning"))
 
                 api(project(":data:caching:repository"))
-
-                api(project(":data:wallet:remote-nwc"))
                 api(project(":data:wallet:repository"))
 
                 // Core

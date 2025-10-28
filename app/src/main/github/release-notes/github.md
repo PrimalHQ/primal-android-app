@@ -1,15 +1,2 @@
 ## Changes
-- Implemented replay button on stream and recording ended state (#691)
-- Added live stream and reply-to-reply notification settings (#703)
-- Replies in Notifications are now full width (#702)
-- Improved article content parser for Images and Notes (#696)
-- Fixed zap receipts to use main host as recipient user id (#695)
-- Fixed `Started now ago` timestamp on streams (#705)
-- Fixed player line visible at the top on light theme
-- Fixed keyboard dismiss on stream chat click
-- Fixed stream rewinding to live when stream data updates (#699)
-- Fixed data fetches with empty pubkey on login (#697)
-- Improve seekbar and player controls visibility for streams
-- Fixed wallet data leftovers when user logs out (#704)
-- Fixed wallet `0 sats` text not centered in some cases (#708)
-- Upgraded acinq libs to fix 16KB issue with Google Play
+- Fixed UI switch glitch on notifications settings screen

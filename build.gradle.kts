@@ -40,12 +40,6 @@ subprojects {
             }
         }
 
-        tasks.withType<KotlinCompilationTask<*>>().configureEach {
-            compilerOptions {
-                freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
-            }
-        }
-
         tasks.withType<KtLintFormatTask>().configureEach {
             exclude {
                 it.file.invariantSeparatorsPath.contains("/build/generated/ksp/")
@@ -70,6 +64,12 @@ subprojects {
             buildUponDefaultConfig = true
             allRules = false
             config.setFrom("$rootDir/detekt.yml")
+        }
+    }
+
+    tasks.withType<KotlinCompilationTask<*>>().configureEach {
+        compilerOptions {
+            freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
         }
     }
 

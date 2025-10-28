@@ -1,10 +1,13 @@
 package net.primal.wallet.data.repository.factory
 
+import kotlin.experimental.ExperimentalObjCName
 import net.primal.shared.data.local.db.LocalDatabaseFactory
 import net.primal.wallet.data.local.db.WalletDatabase
 
 typealias WalletRepositoryFactory = IosRepositoryFactory
 
+@OptIn(ExperimentalObjCName::class)
+@ObjCName("WalletRepositoryFactory")
 object IosRepositoryFactory : RepositoryFactory() {
 
     private val walletDatabase by lazy {

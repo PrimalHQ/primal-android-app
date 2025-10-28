@@ -53,8 +53,8 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     )
 }
 
-val appVersionCode = 2638
-val appVersionName = "2.5.19"
+val appVersionCode = 2640
+val appVersionName = "2.5.21"
 
 tasks.register("generateReleaseProperties") {
     doLast {
@@ -73,7 +73,7 @@ ksp {
 
 android {
     namespace = "net.primal.android"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "net.primal.android"
@@ -245,17 +245,19 @@ dependencies {
     implementation(project(":core:app-config"))
     implementation(project(":core:networking-primal"))
     implementation(project(":core:networking-upload"))
+    implementation(project(":core:networking-lightning"))
 
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))
     implementation(project(":domain:wallet"))
+    implementation(project(":domain:account"))
 
     implementation(project(":data:caching:remote"))
     implementation(project(":data:caching:repository"))
 
-    implementation(project(":data:wallet:remote-primal"))
-    implementation(project(":data:wallet:remote-nwc"))
     implementation(project(":data:wallet:repository"))
+
+    implementation(project(":data:account:repository"))
 
     implementation(libs.bignum)
     implementation(libs.core.ktx)

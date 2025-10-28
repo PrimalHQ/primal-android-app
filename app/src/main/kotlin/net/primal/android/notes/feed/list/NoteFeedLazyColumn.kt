@@ -1,6 +1,5 @@
 package net.primal.android.notes.feed.list
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -11,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -46,8 +44,6 @@ import timber.log.Timber
 internal const val FEED_NESTED_NOTES_CUT_OFF_LIMIT = 2
 internal const val STREAM_PILLS_ROW_KEY = "streamPillsRow"
 
-@ExperimentalMaterial3Api
-@ExperimentalFoundationApi
 @Composable
 fun NoteFeedLazyColumn(
     modifier: Modifier = Modifier,
