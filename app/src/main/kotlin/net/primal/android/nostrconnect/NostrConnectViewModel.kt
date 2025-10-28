@@ -25,11 +25,11 @@ import net.primal.android.nostrconnect.utils.getNostrConnectUrl
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
-import net.primal.android.user.domain.LoginType
+import net.primal.android.user.domain.CredentialType
+import net.primal.android.user.domain.asKeyPair
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.domain.nostr.cryptography.NostrKeyPair
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import timber.log.Timber
 
@@ -109,7 +109,7 @@ class NostrConnectViewModel @Inject constructor(
                     val credential = allCredentials.find { credential ->
                         credential.npub == userAccount.pubkey.hexToNpubHrp()
                     }
-                    credential?.type == LoginType.PrivateKey
+                    credential?.type == CredentialType.PrivateKey
                 }
 
                 val accounts = nsecOnlyUserAccounts.map { it.asUserAccountUi() }
@@ -162,25 +162,14 @@ class NostrConnectViewModel @Inject constructor(
             val connectionUrl = state.value.connectionUrl ?: return@launch
 
             runCatching {
-                val npub = selectedAccount.pubkey.hexToNpubHrp()
-                val credential = credentialsStore.credentials.value.find { it.npub == npub }
+                val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
+                val initializer = signerConnectionInitializerFactory.create(signerKeyPair = signerKeyPair)
 
-                if (credential?.nsec != null) {
-                    val keyPair = NostrKeyPair(
-                        privateKey = credential.nsec,
-                        pubKey = selectedAccount.pubkey,
-                    )
-
-                    val initializer = signerConnectionInitializerFactory.create(signerKeyPair = keyPair)
-
-                    initializer.initialize(
-                        signerPubKey = keyPair.pubKey,
-                        userPubKey = selectedAccount.pubkey,
-                        connectionUrl = connectionUrl,
-                    ).getOrThrow()
-                } else {
-                    setState { copy(error = UiError.MissingPrivateKey) }
-                }
+                initializer.initialize(
+                    signerPubKey = signerKeyPair.pubKey,
+                    userPubKey = selectedAccount.pubkey,
+                    connectionUrl = connectionUrl,
+                ).getOrThrow()
             }.onSuccess {
                 setEffect(NostrConnectContract.SideEffect.ConnectionSuccess)
             }.onFailure { error ->
