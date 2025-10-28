@@ -19,7 +19,7 @@ import net.primal.android.auth.login.LoginContract.UiEvent
 import net.primal.android.auth.login.LoginContract.UiState
 import net.primal.android.auth.repository.LoginHandler
 import net.primal.android.core.compose.profile.model.asProfileDetailsUi
-import net.primal.android.user.domain.LoginType
+import net.primal.android.user.domain.CredentialType
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
@@ -59,7 +59,10 @@ class LoginViewModel @Inject constructor(
                     is UiEvent.LoginRequestEvent ->
                         login(nostrKey = _state.value.loginInput, authorizationEvent = it.nostrEvent)
 
-                    is UiEvent.UpdateLoginInput -> changeLoginInput(input = it.newInput, loginType = it.loginType)
+                    is UiEvent.UpdateLoginInput -> changeLoginInput(
+                        input = it.newInput,
+                        credentialType = it.credentialType,
+                    )
                     UiEvent.ResetLoginState -> resetLoginState()
                 }
             }
@@ -69,10 +72,10 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             try {
-                state.value.loginType?.let { loginType ->
+                state.value.credentialType?.let { loginType ->
                     loginHandler.login(
                         nostrKey = nostrKey,
-                        loginType = loginType,
+                        credentialType = loginType,
                         authorizationEvent = authorizationEvent,
                     )
                     setEffect(SideEffect.LoginSuccess)
@@ -80,7 +83,7 @@ class LoginViewModel @Inject constructor(
             } catch (error: NetworkException) {
                 Timber.w(error)
                 setErrorState(error = UiState.LoginError.GenericError(error))
-                if (state.value.loginType == LoginType.ExternalSigner) {
+                if (state.value.credentialType == CredentialType.ExternalSigner) {
                     resetLoginState()
                 }
             } finally {
@@ -100,18 +103,18 @@ class LoginViewModel @Inject constructor(
 
     private fun resetLoginState() = changeLoginInput(input = "")
 
-    private fun changeLoginInput(input: String, loginType: LoginType? = null) {
+    private fun changeLoginInput(input: String, credentialType: CredentialType? = null) {
         setState { copy(loginInput = input) }
         viewModelScope.launch {
             when {
                 input.isValidNostrPrivateKey() -> {
-                    setState { copy(isValidKey = true, loginType = loginType ?: LoginType.PrivateKey) }
+                    setState { copy(isValidKey = true, credentialType = credentialType ?: CredentialType.PrivateKey) }
                     val (_, npub) = input.extractKeyPairFromPrivateKeyOrThrow()
                     fetchProfileDetails(npub = npub)
                 }
 
                 input.isValidNostrPublicKey() -> {
-                    setState { copy(isValidKey = true, loginType = loginType ?: LoginType.PublicKey) }
+                    setState { copy(isValidKey = true, credentialType = credentialType ?: CredentialType.PublicKey) }
                     fetchProfileDetails(npub = input)
                 }
 
@@ -121,7 +124,7 @@ class LoginViewModel @Inject constructor(
                             fetchingProfileDetails = false,
                             profileDetails = null,
                             isValidKey = false,
-                            loginType = null,
+                            credentialType = null,
                         )
                     }
                 }

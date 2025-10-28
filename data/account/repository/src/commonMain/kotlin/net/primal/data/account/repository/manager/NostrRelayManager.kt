@@ -34,6 +34,12 @@ internal class NostrRelayManager(
     )
     val incomingMethods: Flow<RemoteSignerMethod> = _incomingMethods.asSharedFlow()
 
+    private val _errors = MutableSharedFlow<RemoteSignerMethodResponse.Error>(
+        replay = 0,
+        extraBufferCapacity = 64,
+    )
+    val errors = _errors.asSharedFlow()
+
     fun connectToRelays(relays: Set<String>) {
         Napier.d(tag = "Signer") { "Connecting to relays: $relays" }
         (relays - clients.keys).forEach { connectToRelay(relay = it) }
@@ -63,15 +69,11 @@ internal class NostrRelayManager(
         clients.clear()
     }
 
-    fun sendResponse(
-        relays: List<String>,
-        clientPubKey: String,
-        response: RemoteSignerMethodResponse,
-    ) {
+    fun sendResponse(relays: List<String>, response: RemoteSignerMethodResponse) {
         relays.mapNotNull { relay -> clients[relay] }
             .forEach { client ->
                 scope.launch {
-                    client.publishResponse(clientPubKey = clientPubKey, response = response)
+                    client.publishResponse(response = response)
                 }
             }
     }
@@ -81,27 +83,34 @@ internal class NostrRelayManager(
 
         clients[relay] = client
         clientJobs[relay] = scope.launch {
-            runCatching {
-                client.incomingMethods.collect { cmd ->
-                    if (cache.seen(cmd.id)) return@collect
+            scope.launch {
+                client.incomingMethods.collect { method ->
+                    if (cache.seen(method.id)) return@collect
 
-                    if (!_incomingMethods.tryEmit(cmd)) {
-                        _incomingMethods.emit(cmd)
+                    if (!_incomingMethods.tryEmit(method)) {
+                        _incomingMethods.emit(method)
                     }
 
-                    cache.mark(cmd.id)
+                    cache.mark(method.id)
                 }
-            }.onFailure { error ->
-                Napier.d(throwable = error) {
-                    "Failed to emit event to joined `incomingMethods`. Something must have gone horribly wrong."
+            }
+
+            scope.launch {
+                client.errors.collect { error ->
+                    if (cache.seen(error.id)) return@collect
+
+                    if (!_errors.tryEmit(error)) {
+                        _errors.emit(error)
+                    }
+
+                    cache.mark(error.id)
                 }
             }
         }
     }
 
     private fun removeClient(relay: String) {
-        clients[relay]?.close()
+        clients.remove(relay)?.close()
         clientJobs.remove(relay)?.cancel()
-        clients.remove(relay)
     }
 }

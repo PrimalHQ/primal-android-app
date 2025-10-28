@@ -15,163 +15,170 @@ internal class RemoteSignerMethodResponseBuilder(
     private val nostrEventSignatureHandler: NostrEventSignatureHandler,
     private val nostrEncryptionHandler: NostrEncryptionHandler,
 ) {
-    suspend fun build(command: RemoteSignerMethod): RemoteSignerMethodResponse {
-        return when (command) {
-            is RemoteSignerMethod.Connect -> connect(command)
-            is RemoteSignerMethod.GetPublicKey -> getPublicKey(command)
-            is RemoteSignerMethod.Nip04Decrypt -> nip04Decrypt(command)
-            is RemoteSignerMethod.Nip04Encrypt -> nip04Encrypt(command)
-            is RemoteSignerMethod.Nip44Decrypt -> nip44Decrypt(command)
-            is RemoteSignerMethod.Nip44Encrypt -> nip44Encrypt(command)
-            is RemoteSignerMethod.Ping -> ping(command)
-            is RemoteSignerMethod.SignEvent -> signEvent(command)
+    suspend fun build(method: RemoteSignerMethod): RemoteSignerMethodResponse {
+        return when (method) {
+            is RemoteSignerMethod.Connect -> connect(method)
+            is RemoteSignerMethod.GetPublicKey -> getPublicKey(method)
+            is RemoteSignerMethod.Nip04Decrypt -> nip04Decrypt(method)
+            is RemoteSignerMethod.Nip04Encrypt -> nip04Encrypt(method)
+            is RemoteSignerMethod.Nip44Decrypt -> nip44Decrypt(method)
+            is RemoteSignerMethod.Nip44Encrypt -> nip44Encrypt(method)
+            is RemoteSignerMethod.Ping -> ping(method)
+            is RemoteSignerMethod.SignEvent -> signEvent(method)
         }
     }
 
-    private fun ping(command: RemoteSignerMethod.Ping): RemoteSignerMethodResponse {
-        return RemoteSignerMethodResponse(
-            id = command.id,
+    private fun ping(method: RemoteSignerMethod.Ping): RemoteSignerMethodResponse {
+        return RemoteSignerMethodResponse.Success(
+            id = method.id,
             result = "pong",
+            clientPubKey = method.clientPubKey,
         )
     }
 
-    private fun connect(command: RemoteSignerMethod.Connect): RemoteSignerMethodResponse =
-        RemoteSignerMethodResponse(
-            id = command.id,
-            result = "",
+    private fun connect(method: RemoteSignerMethod.Connect): RemoteSignerMethodResponse =
+        RemoteSignerMethodResponse.Error(
+            id = method.id,
             error = "We don't accept incoming connection requests. " +
                 "Please scan or enter `nostrconnect://` url to initiate a connection.",
+            clientPubKey = method.clientPubKey,
         )
 
-    private suspend fun signEvent(command: RemoteSignerMethod.SignEvent): RemoteSignerMethodResponse {
+    private suspend fun signEvent(method: RemoteSignerMethod.SignEvent): RemoteSignerMethodResponse {
         return nostrEventSignatureHandler.signNostrEvent(
-            unsignedNostrEvent = command.unsignedEvent,
+            unsignedNostrEvent = method.unsignedEvent,
         ).getOrNull()?.let {
-            RemoteSignerMethodResponse(
-                id = command.id,
+            RemoteSignerMethodResponse.Success(
+                id = method.id,
                 result = it.encodeToJsonString(),
+                clientPubKey = method.clientPubKey,
             )
-        } ?: RemoteSignerMethodResponse(
-            id = command.id,
-            result = "",
+        } ?: RemoteSignerMethodResponse.Error(
+            id = method.id,
             error = "Couldn't sign event.",
+            clientPubKey = method.clientPubKey,
         )
     }
 
-    private suspend fun nip44Encrypt(command: RemoteSignerMethod.Nip44Encrypt): RemoteSignerMethodResponse {
-        return connectionRepository.getUserPubKey(clientPubKey = command.clientPubKey)
+    private suspend fun nip44Encrypt(method: RemoteSignerMethod.Nip44Encrypt): RemoteSignerMethodResponse {
+        return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
             .alsoCatching { userPubKey ->
                 nostrEncryptionHandler.nip44Encrypt(
                     userId = userPubKey,
-                    participantId = command.thirdPartyPubKey,
-                    plaintext = command.plaintext,
+                    participantId = method.thirdPartyPubKey,
+                    plaintext = method.plaintext,
                 )
             }.fold(
                 onSuccess = {
-                    RemoteSignerMethodResponse(
-                        id = command.id,
+                    RemoteSignerMethodResponse.Success(
+                        id = method.id,
                         result = it,
+                        clientPubKey = method.clientPubKey,
                     )
                 },
                 onFailure = {
-                    RemoteSignerMethodResponse(
-                        id = command.id,
-                        result = "",
+                    RemoteSignerMethodResponse.Error(
+                        id = method.id,
                         error = "Failed to run nip44 encryption. Reason: ${it.message}",
+                        clientPubKey = method.clientPubKey,
                     )
                 },
             )
     }
 
-    private suspend fun nip44Decrypt(command: RemoteSignerMethod.Nip44Decrypt): RemoteSignerMethodResponse {
-        return connectionRepository.getUserPubKey(clientPubKey = command.clientPubKey)
+    private suspend fun nip44Decrypt(method: RemoteSignerMethod.Nip44Decrypt): RemoteSignerMethodResponse {
+        return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
             .alsoCatching { userPubKey ->
                 nostrEncryptionHandler.nip44Decrypt(
                     userId = userPubKey,
-                    participantId = command.thirdPartyPubKey,
-                    ciphertext = command.ciphertext,
+                    participantId = method.thirdPartyPubKey,
+                    ciphertext = method.ciphertext,
                 )
             }.fold(
                 onSuccess = {
-                    RemoteSignerMethodResponse(
-                        id = command.id,
+                    RemoteSignerMethodResponse.Success(
+                        id = method.id,
                         result = it,
+                        clientPubKey = method.clientPubKey,
                     )
                 },
                 onFailure = {
-                    RemoteSignerMethodResponse(
-                        id = command.id,
-                        result = "",
+                    RemoteSignerMethodResponse.Error(
+                        id = method.id,
                         error = "Failed to run nip44 decryption. Reason: ${it.message}",
+                        clientPubKey = method.clientPubKey,
                     )
                 },
             )
     }
 
-    private suspend fun nip04Encrypt(command: RemoteSignerMethod.Nip04Encrypt): RemoteSignerMethodResponse {
-        return connectionRepository.getUserPubKey(clientPubKey = command.clientPubKey)
+    private suspend fun nip04Encrypt(method: RemoteSignerMethod.Nip04Encrypt): RemoteSignerMethodResponse {
+        return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
             .alsoCatching { userPubKey ->
                 nostrEncryptionHandler.nip04Encrypt(
                     userId = userPubKey,
-                    participantId = command.thirdPartyPubKey,
-                    plaintext = command.plaintext,
+                    participantId = method.thirdPartyPubKey,
+                    plaintext = method.plaintext,
                 )
             }.fold(
                 onSuccess = {
-                    RemoteSignerMethodResponse(
-                        id = command.id,
+                    RemoteSignerMethodResponse.Success(
+                        id = method.id,
                         result = it,
+                        clientPubKey = method.clientPubKey,
                     )
                 },
                 onFailure = {
-                    RemoteSignerMethodResponse(
-                        id = command.id,
-                        result = "",
+                    RemoteSignerMethodResponse.Error(
+                        id = method.id,
                         error = "Failed to run nip04 encryption. Reason: ${it.message}",
+                        clientPubKey = method.clientPubKey,
                     )
                 },
             )
     }
 
-    private suspend fun nip04Decrypt(command: RemoteSignerMethod.Nip04Decrypt): RemoteSignerMethodResponse {
-        return connectionRepository.getUserPubKey(clientPubKey = command.clientPubKey)
+    private suspend fun nip04Decrypt(method: RemoteSignerMethod.Nip04Decrypt): RemoteSignerMethodResponse {
+        return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
             .alsoCatching { userPubKey ->
                 nostrEncryptionHandler.nip04Decrypt(
                     userId = userPubKey,
-                    participantId = command.thirdPartyPubKey,
-                    ciphertext = command.ciphertext,
+                    participantId = method.thirdPartyPubKey,
+                    ciphertext = method.ciphertext,
                 )
             }.fold(
                 onSuccess = {
-                    RemoteSignerMethodResponse(
-                        id = command.id,
+                    RemoteSignerMethodResponse.Success(
+                        id = method.id,
                         result = it,
+                        clientPubKey = method.clientPubKey,
                     )
                 },
                 onFailure = {
-                    RemoteSignerMethodResponse(
-                        id = command.id,
-                        result = "",
+                    RemoteSignerMethodResponse.Error(
+                        id = method.id,
                         error = "Failed to run nip04 decryption. Reason: ${it.message}",
+                        clientPubKey = method.clientPubKey,
                     )
                 },
             )
     }
 
-    private suspend fun getPublicKey(command: RemoteSignerMethod.GetPublicKey): RemoteSignerMethodResponse {
-        return connectionRepository.getUserPubKey(clientPubKey = command.clientPubKey)
+    private suspend fun getPublicKey(method: RemoteSignerMethod.GetPublicKey): RemoteSignerMethodResponse {
+        return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
             .fold(
                 onSuccess = {
-                    RemoteSignerMethodResponse(
-                        id = command.id,
+                    RemoteSignerMethodResponse.Success(
+                        id = method.id,
                         result = it,
+                        clientPubKey = method.clientPubKey,
                     )
                 },
                 onFailure = {
-                    RemoteSignerMethodResponse(
-                        id = command.id,
-                        result = "",
+                    RemoteSignerMethodResponse.Error(
+                        id = method.id,
                         error = "Failed to process command: ${it.message}",
+                        clientPubKey = method.clientPubKey,
                     )
                 },
             )
