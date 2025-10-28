@@ -1339,7 +1339,7 @@ private fun NavGraphBuilder.nostrConnectDialog(
         ),
     ) {
         val viewModel = hiltViewModel<NostrConnectViewModel>()
-        ApplyEdgeToEdge(isDarkTheme = true)
+        ApplyEdgeToEdge()
         LockToOrientationPortrait()
         NostrConnectBottomSheet(
             viewModel = viewModel,

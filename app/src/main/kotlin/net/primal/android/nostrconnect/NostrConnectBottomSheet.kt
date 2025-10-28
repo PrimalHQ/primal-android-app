@@ -5,9 +5,6 @@ package net.primal.android.nostrconnect
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -16,6 +13,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +25,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
@@ -50,6 +51,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,6 +70,7 @@ import androidx.compose.ui.unit.sp
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import java.text.NumberFormat
 import java.util.Currency
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
@@ -82,14 +85,14 @@ import net.primal.android.core.compose.icons.primaliconpack.MediumSecurity
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
-import net.primal.android.navigation.primalSlideInHorizontallyFromEnd
-import net.primal.android.navigation.primalSlideOutHorizontallyToEnd
 import net.primal.android.nostrconnect.NostrConnectContract.Companion.DAILY_BUDGET_PICKER_OPTIONS
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.toDouble
 import net.primal.domain.links.CdnImage
 
 private val DISABLED_ICON_TINT = Color(0xFF808080)
+private const val LOGIN_PAGE_INDEX = 0
+private const val PERMISSIONS_PAGE_INDEX = 1
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -147,8 +150,22 @@ private fun NostrConnectSheetContent(
     snackbarHostState: SnackbarHostState,
 ) {
     val isBudgetPickerVisible by remember(state.selectedTab, state.showDailyBudgetPicker) {
-        derivedStateOf {
-            state.selectedTab == NostrConnectContract.Tab.PERMISSIONS && state.showDailyBudgetPicker
+        derivedStateOf { state.selectedTab == NostrConnectContract.Tab.PERMISSIONS && state.showDailyBudgetPicker }
+    }
+
+    val pagerState = rememberPagerState(pageCount = { NostrConnectContract.Tab.entries.size })
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(state.selectedTab) {
+        if (state.selectedTab.ordinal != pagerState.currentPage) {
+            pagerState.animateScrollToPage(state.selectedTab.ordinal)
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        val newTab = NostrConnectContract.Tab.entries[pagerState.currentPage]
+        if (newTab != state.selectedTab) {
+            eventPublisher(NostrConnectContract.UiEvent.ChangeTab(newTab))
         }
     }
 
@@ -174,13 +191,15 @@ private fun NostrConnectSheetContent(
             )
 
             NostrConnectTabNavigation(
-                selectedTab = state.selectedTab,
-                onTabChange = { eventPublisher(NostrConnectContract.UiEvent.ChangeTab(it)) },
+                selectedTabIndex = pagerState.currentPage,
+                onLoginTabClick = { scope.launch { pagerState.animateScrollToPage(LOGIN_PAGE_INDEX) } },
+                onPermissionsTabClick = { scope.launch { pagerState.animateScrollToPage(PERMISSIONS_PAGE_INDEX) } },
                 permissionsTabEnabled = state.accounts.isNotEmpty(),
             )
 
             NostrConnectPages(
                 state = state,
+                pagerState = pagerState,
                 eventPublisher = eventPublisher,
             )
 
@@ -249,7 +268,7 @@ private fun HeaderSection(
         }
 
         Text(
-            text = appName ?: stringResource(id = R.string.nostr_connect_unknown_web_app),
+            text = appName ?: stringResource(id = R.string.nostr_connect_unknown_app),
             style = AppTheme.typography.titleLarge.copy(
                 fontSize = 18.sp,
                 lineHeight = 24.sp,
@@ -273,11 +292,11 @@ private fun HeaderSection(
 
 @Composable
 private fun NostrConnectTabNavigation(
-    selectedTab: NostrConnectContract.Tab,
-    onTabChange: (NostrConnectContract.Tab) -> Unit,
+    selectedTabIndex: Int,
+    onLoginTabClick: () -> Unit,
+    onPermissionsTabClick: () -> Unit,
     permissionsTabEnabled: Boolean,
 ) {
-    val selectedTabIndex = selectedTab.ordinal
     PrimaryTabRow(
         selectedTabIndex = selectedTabIndex,
         containerColor = Color.Transparent,
@@ -297,86 +316,74 @@ private fun NostrConnectTabNavigation(
             PrimalDivider()
         },
     ) {
-        Tab(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            selected = selectedTab == NostrConnectContract.Tab.LOGIN,
-            onClick = { onTabChange(NostrConnectContract.Tab.LOGIN) },
-            text = {
-                Text(
-                    text = stringResource(id = R.string.nostr_connect_login_tab).uppercase(),
-                    style = AppTheme.typography.bodySmall.copy(
-                        fontSize = 14.sp,
-                        lineHeight = 14.sp,
-                    ),
-                    fontWeight = if (selectedTab == NostrConnectContract.Tab.LOGIN) {
-                        FontWeight.SemiBold
-                    } else {
-                        FontWeight.Normal
-                    },
-                    color = AppTheme.colorScheme.onPrimary,
-                )
-            },
+        NostrConnectAppTab(
+            text = stringResource(id = R.string.nostr_connect_login_tab).uppercase(),
+            selected = selectedTabIndex == LOGIN_PAGE_INDEX,
+            onClick = onLoginTabClick,
         )
-        Tab(
-            modifier = Modifier.padding(horizontal = 16.dp),
-            selected = selectedTab == NostrConnectContract.Tab.PERMISSIONS,
+
+        NostrConnectAppTab(
+            text = stringResource(id = R.string.nostr_connect_permissions_tab).uppercase(),
+            selected = selectedTabIndex == PERMISSIONS_PAGE_INDEX,
+            onClick = onPermissionsTabClick,
             enabled = permissionsTabEnabled,
-            onClick = { onTabChange(NostrConnectContract.Tab.PERMISSIONS) },
-            text = {
-                Text(
-                    text = stringResource(id = R.string.nostr_connect_permissions_tab).uppercase(),
-                    style = AppTheme.typography.bodySmall.copy(
-                        fontSize = 14.sp,
-                        lineHeight = 14.sp,
-                    ),
-                    fontWeight = if (selectedTab == NostrConnectContract.Tab.PERMISSIONS) {
-                        FontWeight.SemiBold
-                    } else {
-                        FontWeight.Normal
-                    },
-                    color = if (permissionsTabEnabled) {
-                        AppTheme.colorScheme.onPrimary
-                    } else {
-                        AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                    },
-                )
-            },
         )
     }
 }
 
 @Composable
+private fun NostrConnectAppTab(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    Tab(
+        modifier = modifier.padding(horizontal = 16.dp),
+        selected = selected,
+        enabled = enabled,
+        onClick = onClick,
+        text = {
+            Text(
+                text = text,
+                style = AppTheme.typography.bodySmall.copy(
+                    fontSize = 14.sp,
+                    lineHeight = 14.sp,
+                ),
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                color = if (enabled) {
+                    AppTheme.colorScheme.onPrimary
+                } else {
+                    AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                },
+            )
+        },
+    )
+}
+
+@Composable
 private fun NostrConnectPages(
     state: NostrConnectContract.UiState,
+    pagerState: PagerState,
     eventPublisher: (NostrConnectContract.UiEvent) -> Unit,
 ) {
-    AnimatedContent(
+    HorizontalPager(
         modifier = Modifier
             .background(color = AppTheme.extraColorScheme.surfaceVariantAlt3)
             .height(400.dp),
-        targetState = state.selectedTab,
-        transitionSpec = {
-            val slideIn = if (targetState.ordinal > initialState.ordinal) {
-                primalSlideInHorizontallyFromEnd
-            } else {
-                slideInHorizontally { -it }
-            }
-            val slideOut = if (targetState.ordinal > initialState.ordinal) {
-                primalSlideOutHorizontallyToEnd
-            } else {
-                slideOutHorizontally { it }
-            }
-            slideIn.togetherWith(slideOut)
-        },
-        label = "TabAnimation",
-    ) { tab ->
-        when (tab) {
-            NostrConnectContract.Tab.LOGIN -> LoginContent(
+        contentPadding = PaddingValues(top = 24.dp),
+        state = pagerState,
+        verticalAlignment = Alignment.Top,
+        userScrollEnabled = state.accounts.isNotEmpty(),
+    ) { page ->
+        when (page) {
+            LOGIN_PAGE_INDEX -> LoginContent(
                 accounts = state.accounts,
                 selectedAccountPubkey = state.selectedAccount?.pubkey,
                 onAccountClick = { eventPublisher(NostrConnectContract.UiEvent.SelectAccount(it)) },
             )
-            NostrConnectContract.Tab.PERMISSIONS -> PermissionsContent(
+            PERMISSIONS_PAGE_INDEX -> PermissionsContent(
                 trustLevel = state.trustLevel,
                 dailyBudget = state.dailyBudget,
                 onTrustLevelClick = { eventPublisher(NostrConnectContract.UiEvent.SelectTrustLevel(it)) },
@@ -413,8 +420,7 @@ private fun LoginContent(
     } else {
         LazyColumn(
             modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .padding(top = 24.dp),
+                .padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             items(accounts, key = { it.pubkey }) { account ->
@@ -465,7 +471,6 @@ private fun AccountListItem(
                 )
             }
         },
-        trailingContent = null,
     )
 }
 
@@ -510,8 +515,7 @@ private fun PermissionsList(
 ) {
     Column(
         modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .padding(top = 24.dp),
+            .padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         PermissionsListItem(
@@ -618,8 +622,7 @@ private fun DailyBudgetPicker(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .padding(top = 24.dp),
+            .padding(horizontal = 16.dp),
     ) {
         Text(
             modifier = Modifier

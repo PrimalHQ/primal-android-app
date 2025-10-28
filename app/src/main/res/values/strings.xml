@@ -1405,7 +1405,7 @@
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>
 
-    <string name="nostr_connect_unknown_web_app">Unknown Web App</string>
+    <string name="nostr_connect_unknown_app">Unknown App</string>
     <string name="nostr_connect_login_tab">Login</string>
     <string name="nostr_connect_permissions_tab">Permissions</string>
     <string name="nostr_connect_full_trust_title">Full Trust</string>
