@@ -34,14 +34,7 @@ class LoginHandler @Inject constructor(
         authorizationEvent: NostrEvent?,
     ) = withContext(dispatchers.io()) {
         runCatching {
-            val userId = when (credentialType) {
-                CredentialType.PublicKey, CredentialType.ExternalSigner ->
-                    credentialsStore.saveNpub(npub = nostrKey, credentialType = credentialType)
-
-                CredentialType.PrivateKey -> credentialsStore.saveNsec(nostrKey = nostrKey)
-
-                CredentialType.InternalSigner -> error("Can't login with InternalSigner key.")
-            }
+            val userId = saveCredentials(credentialType = credentialType, nostrKey = nostrKey)
             val authorizationEvent = authorizationEvent ?: nostrNotary.signAuthorizationNostrEvent(
                 userId = userId,
                 description = "Sync app settings",
@@ -58,25 +51,42 @@ class LoginHandler @Inject constructor(
             }
             mutedItemRepository.fetchAndPersistMuteList(userId = userId)
         }.onFailure { exception ->
-            when (credentialType) {
-                CredentialType.PublicKey, CredentialType.ExternalSigner ->
-                    credentialsStore.removeCredentialByNpub(npub = nostrKey)
-
-                CredentialType.PrivateKey -> credentialsStore.removeCredentialByNsec(nsec = nostrKey.assureValidNsec())
-
-                CredentialType.InternalSigner -> Unit
-            }
+            removeCredentials(credentialType = credentialType, nostrKey = nostrKey)
 
             throw exception
         }.onSuccess {
             when (credentialType) {
-                CredentialType.PublicKey, CredentialType.ExternalSigner ->
-                    authRepository.loginWithNpub(npub = nostrKey, credentialType = credentialType)
+                CredentialType.ExternalSigner -> authRepository.loginWithExternalSignerNpub(npub = nostrKey)
+
+                CredentialType.PublicKey -> authRepository.loginWithNpub(npub = nostrKey)
 
                 CredentialType.PrivateKey -> authRepository.loginWithNsec(nostrKey = nostrKey)
 
                 CredentialType.InternalSigner -> Unit
             }
+        }
+    }
+
+    private suspend fun saveCredentials(credentialType: CredentialType, nostrKey: String): String {
+        return when (credentialType) {
+            CredentialType.ExternalSigner -> credentialsStore.saveExternalSignerNpub(npub = nostrKey)
+
+            CredentialType.PublicKey -> credentialsStore.saveNpub(npub = nostrKey)
+
+            CredentialType.PrivateKey -> credentialsStore.saveNsec(nostrKey = nostrKey)
+
+            CredentialType.InternalSigner -> error("Can't login with InternalSigner key.")
+        }
+    }
+
+    private suspend fun removeCredentials(credentialType: CredentialType, nostrKey: String) {
+        when (credentialType) {
+            CredentialType.PublicKey, CredentialType.ExternalSigner ->
+                credentialsStore.removeCredentialByNpub(npub = nostrKey)
+
+            CredentialType.PrivateKey -> credentialsStore.removeCredentialByNsec(nsec = nostrKey.assureValidNsec())
+
+            CredentialType.InternalSigner -> Unit
         }
     }
 }

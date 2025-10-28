@@ -54,8 +54,13 @@ class CredentialsStore @Inject constructor(
         return pubkey.bech32ToHexOrThrow()
     }
 
-    suspend fun saveNpub(npub: String, credentialType: CredentialType): String {
-        addCredential(Credential(nsec = null, npub = npub, type = credentialType))
+    suspend fun saveExternalSignerNpub(npub: String): String {
+        addCredential(Credential(nsec = null, npub = npub, type = CredentialType.ExternalSigner))
+        return npub.bech32ToHexOrThrow()
+    }
+
+    suspend fun saveNpub(npub: String): String {
+        addCredential(Credential(nsec = null, npub = npub, type = CredentialType.PublicKey))
         return npub.bech32ToHexOrThrow()
     }
 
