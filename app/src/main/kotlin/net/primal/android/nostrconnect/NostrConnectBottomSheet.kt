@@ -817,7 +817,7 @@ private fun ActionButtons(
 }
 
 @Composable
-private fun Modifier.selectableItem(selected: Boolean, onClick: () -> Unit) =
+fun Modifier.selectableItem(selected: Boolean, onClick: () -> Unit) =
     this
         .border(
             width = 1.dp,

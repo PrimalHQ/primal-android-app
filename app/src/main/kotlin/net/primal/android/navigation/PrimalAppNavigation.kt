@@ -14,6 +14,10 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -94,6 +98,8 @@ import net.primal.android.messages.conversation.create.NewConversationContract
 import net.primal.android.messages.conversation.create.NewConversationScreen
 import net.primal.android.nostrconnect.NostrConnectBottomSheet
 import net.primal.android.nostrconnect.NostrConnectViewModel
+import net.primal.android.nostrconnect.list.ActiveSessionsBottomSheet
+import net.primal.android.nostrconnect.list.ActiveSessionsViewModel
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract
 import net.primal.android.notes.home.HomeFeedScreen
@@ -1276,6 +1282,7 @@ private fun NavGraphBuilder.scanCode(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 private fun NavGraphBuilder.home(
     route: String,
     arguments: List<NamedNavArgument>,
@@ -1308,6 +1315,8 @@ private fun NavGraphBuilder.home(
     },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<HomeFeedViewModel>(navBackEntry)
+    var showActiveSessions by remember { mutableStateOf(false) }
+
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
     HomeFeedScreen(
@@ -1318,10 +1327,16 @@ private fun NavGraphBuilder.home(
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
         callbacks = HomeFeedContract.ScreenCallbacks(
             onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-            onGoToWallet = { navController.navigateToWallet() },
+            onGoToWallet = { showActiveSessions = true },
             onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
             onNewPostClick = { navController.navigateToNoteEditor(null) },
         ),
+    )
+
+    val sessionsViewModel: ActiveSessionsViewModel = hiltViewModel()
+    ActiveSessionsBottomSheet(
+        viewModel = sessionsViewModel,
+        onDismissRequest = { showActiveSessions = false },
     )
 }
 
