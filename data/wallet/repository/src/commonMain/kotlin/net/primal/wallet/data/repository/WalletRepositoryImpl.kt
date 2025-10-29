@@ -22,9 +22,7 @@ import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.LnInvoiceParseResult
 import net.primal.domain.wallet.LnUrlParseResult
-import net.primal.domain.wallet.Network
 import net.primal.domain.wallet.OnChainAddressResult
-import net.primal.domain.wallet.SubWallet
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
@@ -40,7 +38,6 @@ import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletTransaction
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
-import net.primal.wallet.data.remote.model.DepositRequestBody
 import net.primal.wallet.data.repository.mappers.local.toDomain
 import net.primal.wallet.data.repository.transactions.OffsetBasedWalletTransactionsMediator
 import net.primal.wallet.data.repository.transactions.TimestampBasedWalletTransactionsMediator
@@ -193,13 +190,14 @@ internal class WalletRepositoryImpl(
         }
     }
 
-    override suspend fun createOnChainAddress(userId: String): OnChainAddressResult {
+    override suspend fun createOnChainAddress(walletId: String): Result<OnChainAddressResult> {
         return withContext(dispatcherProvider.io()) {
-            val response = primalWalletApi.createOnChainAddress(
-                userId = userId,
-                body = DepositRequestBody(subWallet = SubWallet.Open, network = Network.Bitcoin),
-            )
-            OnChainAddressResult(address = response.onChainAddress)
+            val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
+                ?: return@withContext Result.failure(
+                    exception = IllegalArgumentException("Couldn't find wallet with the given walletId."),
+                )
+
+            wallet.resolveWalletService().createOnChainAddress(wallet = wallet.toDomain())
         }
     }
 

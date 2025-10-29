@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
@@ -30,9 +31,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.hideAndRun
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.CurrencyConversionUtils.toSats
@@ -138,6 +141,8 @@ private fun WalletPickerBottomBar(onConfigureWalletsClick: () -> Unit) {
     }
 }
 
+private const val LightningAddressEllipsizeThreshold = 55
+
 @Composable
 private fun WalletListItem(
     modifier: Modifier = Modifier,
@@ -170,13 +175,21 @@ private fun WalletListItem(
         supportingContent = {
             Text(
                 modifier = Modifier.padding(top = 4.dp),
-                text = wallet.lightningAddress ?: when (wallet) {
+                text = wallet.lightningAddress?.let {
+                    if (it.length >= LightningAddressEllipsizeThreshold) {
+                        it.ellipsizeMiddle(size = 20)
+                    } else {
+                        it
+                    }
+                } ?: when (wallet) {
                     is Wallet.NWC -> stringResource(id = R.string.wallet_nwc_description)
                     is Wallet.Primal -> stringResource(id = R.string.wallet_primal_description)
                     is Wallet.Tsunami -> stringResource(id = R.string.wallet_primal_description)
                 },
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                maxLines = 1,
+                autoSize = TextAutoSize.StepBased(minFontSize = 12.sp, maxFontSize = 15.sp),
             )
         },
         trailingContent = {
