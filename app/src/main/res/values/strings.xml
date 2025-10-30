@@ -1011,6 +1011,12 @@
     <string name="settings_media_uploads_restore_default_blossom_server_description">Are you sure you want to restore default mirror server?</string>
     <string name="settings_version_title">Version</string>
 
+    <string name="settings_connected_apps_title">Connected Apps</string>
+    <string name="settings_connected_app_details_title">App Details</string>
+    <string name="settings_connected_app_details_not_found">Connection details not found.</string>
+    <string name="settings_connected_app_details_for_app">Details for %1$s</string>
+    <string name="settings_connected_app_details_permissions_and_sessions">Permissions and recent sessions will be shown here.</string>
+
     <string name="biometric_prompt_title">Authenticate</string>
     <string name="biometric_prompt_description">This ensures that only you can access the private key.</string>
 
