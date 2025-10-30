@@ -159,13 +159,11 @@ private fun ActiveSessionsContent(
             }
         },
         bottomBar = {
-            if (hasActiveSessions) {
-                ActionButtons(
-                    disconnecting = state.disconnecting,
-                    disconnectEnabled = state.selectedSessions.isNotEmpty(),
-                    onDisconnectClick = { eventPublisher(ActiveSessionsContract.UiEvent.DisconnectClick) },
-                )
-            }
+            ActionButtons(
+                disconnecting = state.disconnecting,
+                disconnectEnabled = state.selectedSessions.isNotEmpty(),
+                onDisconnectClick = { eventPublisher(ActiveSessionsContract.UiEvent.DisconnectClick) },
+            )
         },
         snackbarHost = {
             SnackbarHost(
