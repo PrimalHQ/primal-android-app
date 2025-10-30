@@ -4,18 +4,17 @@ import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.SheetState
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -46,11 +45,7 @@ import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActiveSessionsBottomSheet(
-    viewModel: ActiveSessionsViewModel,
-    onDismissRequest: () -> Unit,
-    sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false),
-) {
+fun ActiveSessionsBottomSheet(viewModel: ActiveSessionsViewModel, onDismissRequest: () -> Unit) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -77,7 +72,7 @@ fun ActiveSessionsBottomSheet(
     }
 
     ModalBottomSheet(
-        sheetState = sheetState,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
         onDismissRequest = onDismissRequest,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
     ) {
@@ -89,49 +84,59 @@ fun ActiveSessionsBottomSheet(
     }
 }
 
+private val SessionListItemHeight = 60.dp
+private val SessionListItemsSpacedBy = 12.dp
+
 @Composable
 private fun ActiveNwcSessionsContent(
     state: UiState,
     eventPublisher: (ActiveSessionsContract.UiEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
-    Box(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
+    val activeSessions = state.sessions.size
+    Scaffold(
+        modifier = Modifier.height(
+            height = 124.dp + (SessionListItemHeight + SessionListItemsSpacedBy).times(activeSessions),
+        ),
+        topBar = {
             HeaderSection(
                 allSelected = state.allSessionsSelected,
                 onSelectAllClick = { eventPublisher(ActiveSessionsContract.UiEvent.SelectAllClick) },
             )
-
+        },
+        content = { paddingValues ->
             LazyColumn(
                 modifier = Modifier
+                    .padding(paddingValues)
                     .padding(horizontal = 16.dp, vertical = 16.dp)
-                    .height(140.dp),
+                    .navigationBarsPadding(),
+                verticalArrangement = Arrangement.spacedBy(SessionListItemsSpacedBy),
             ) {
-                items(state.sessions, key = { it.connectionId }) { session ->
+                items(
+                    items = state.sessions,
+                    key = { it.connectionId },
+                ) { session ->
                     SessionListItem(
                         session = session,
                         isSelected = state.selectedSessions.contains(session.connectionId),
                         onClick = { eventPublisher(ActiveSessionsContract.UiEvent.SessionClick(session.connectionId)) },
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
-
+        },
+        bottomBar = {
             ActionButtons(
                 disconnecting = state.disconnecting,
                 disconnectEnabled = state.selectedSessions.isNotEmpty(),
                 onDisconnectClick = { eventPublisher(ActiveSessionsContract.UiEvent.DisconnectClick) },
             )
-        }
-
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter),
-        )
-    }
+        },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+            )
+        },
+    )
 }
 
 @Composable
@@ -175,7 +180,7 @@ private fun SessionListItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp)
+            .height(SessionListItemHeight)
             .selectableItem(selected = isSelected, onClick = onClick)
             .background(
                 color = AppTheme.extraColorScheme.surfaceVariantAlt1,
@@ -227,11 +232,15 @@ private fun ActionButtons(
     onDisconnectClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         PrimalFilledButton(
-            modifier = Modifier.weight(1f).height(50.dp),
+            modifier = Modifier
+                .weight(weight = 1f)
+                .height(50.dp),
             containerColor = Color.Transparent,
             contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             border = BorderStroke(width = 1.dp, color = AppTheme.colorScheme.outline),
@@ -243,7 +252,9 @@ private fun ActionButtons(
         }
 
         PrimalLoadingButton(
-            modifier = Modifier.weight(1f).height(50.dp),
+            modifier = Modifier
+                .weight(weight = 1f)
+                .height(50.dp),
             loading = disconnecting,
             enabled = disconnectEnabled,
             text = stringResource(id = R.string.nostr_connect_disconnect_button),
