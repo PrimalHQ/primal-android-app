@@ -96,7 +96,6 @@ internal class NostrRelayManager(
                     "Failed to sign event. Something must have gone horribly wrong."
                 }
             }
-
     }
 
     private fun buildSignedEvent(response: RemoteSignerMethodResponse): Result<NostrEvent> =

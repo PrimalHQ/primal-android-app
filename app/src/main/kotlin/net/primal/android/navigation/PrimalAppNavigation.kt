@@ -14,10 +14,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -379,6 +375,8 @@ private fun NavController.navigateToNostrConnectBottomSheet(url: String) {
     navigate(route = "nostrConnectBottomSheet?$NOSTR_CONNECT_URI=$safeUrl")
 }
 
+private fun NavController.navigateToActiveSessions() = navigate(route = "activeSessions")
+
 fun accountSwitcherCallbacksHandler(navController: NavController) =
     AccountSwitcherCallbacks(
         onActiveAccountChanged = { navController.navigateToHome() },
@@ -576,6 +574,8 @@ private fun PrimalAppNavigation(
             ),
             navController = navController,
         )
+
+        activeSessions(navController = navController)
 
         logout(
             route = "logout?$PROFILE_ID={$PROFILE_ID}",
@@ -1282,7 +1282,6 @@ private fun NavGraphBuilder.scanCode(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 private fun NavGraphBuilder.home(
     route: String,
     arguments: List<NamedNavArgument>,
@@ -1315,8 +1314,6 @@ private fun NavGraphBuilder.home(
     },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<HomeFeedViewModel>(navBackEntry)
-    var showActiveSessions by remember { mutableStateOf(false) }
-
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
     HomeFeedScreen(
@@ -1327,16 +1324,10 @@ private fun NavGraphBuilder.home(
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
         callbacks = HomeFeedContract.ScreenCallbacks(
             onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-            onGoToWallet = { showActiveSessions = true },
-            onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
+            onGoToWallet = { navController.navigateToWallet() },
+            onSearchClick = { navController.navigateToActiveSessions() },
             onNewPostClick = { navController.navigateToNoteEditor(null) },
         ),
-    )
-
-    val sessionsViewModel: ActiveSessionsViewModel = hiltViewModel()
-    ActiveSessionsBottomSheet(
-        viewModel = sessionsViewModel,
-        onDismissRequest = { showActiveSessions = false },
     )
 }
 
@@ -1358,6 +1349,21 @@ private fun NavGraphBuilder.nostrConnectDialog(
         LockToOrientationPortrait()
         NostrConnectBottomSheet(
             viewModel = viewModel,
+            onDismissRequest = { navController.popBackStack() },
+        )
+    }
+}
+
+private fun NavGraphBuilder.activeSessions(navController: NavController) {
+    dialog(
+        route = "activeSessions",
+        dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        val sessionsViewModel = hiltViewModel<ActiveSessionsViewModel>()
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        ActiveSessionsBottomSheet(
+            viewModel = sessionsViewModel,
             onDismissRequest = { navController.popBackStack() },
         )
     }

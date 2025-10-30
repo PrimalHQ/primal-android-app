@@ -5,7 +5,7 @@ import net.primal.android.drawer.multiaccount.model.UserAccountUi
 
 interface ActiveSessionsContract {
     data class UiState(
-        val sessions: List<NwcSessionUi> = emptyList(),
+        val sessions: List<ActiveSessionUi> = emptyList(),
         val selectedSessions: Set<String> = emptySet(),
         val disconnecting: Boolean = false,
         val error: UiError? = null,
@@ -13,7 +13,7 @@ interface ActiveSessionsContract {
         val allSessionsSelected: Boolean get() = sessions.isNotEmpty() && selectedSessions.size == sessions.size
     }
 
-    data class NwcSessionUi(
+    data class ActiveSessionUi(
         val connectionId: String,
         val appName: String?,
         val appUrl: String?,

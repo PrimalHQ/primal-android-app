@@ -51,35 +51,35 @@ class ActiveSessionsViewModel @Inject constructor(
             if (userAccounts.isEmpty()) return@launch
 
             val mockSessions = buildList {
+//                add(
+//                    ActiveSessionsContract.ActiveSessionUi(
+//                        connectionId = "mock1",
+//                        appName = "Primal Web App",
+//                        appUrl = "https://www.primal.net",
+//                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
+//                        userAccount = userAccounts.first().asUserAccountUi(),
+//                    ),
+//                )
+//                add(
+//                    ActiveSessionsContract.ActiveSessionUi(
+//                        connectionId = "mock2",
+//                        appName = "Highlighter",
+//                        appUrl = "https://highlighter.com",
+//                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
+//                        userAccount = userAccounts.getOrElse(1) { userAccounts.first() }.asUserAccountUi(),
+//                    ),
+//                )
+//                add(
+//                    ActiveSessionsContract.ActiveSessionUi(
+//                        connectionId = "mock3",
+//                        appName = "Nostrarious",
+//                        appUrl = "https://nostrarious.io",
+//                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
+//                        userAccount = userAccounts.first().asUserAccountUi(),
+//                    ),
+//                )
                 add(
-                    ActiveSessionsContract.NwcSessionUi(
-                        connectionId = "mock1",
-                        appName = "Primal Web App",
-                        appUrl = "https://www.primal.net",
-                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
-                        userAccount = userAccounts.first().asUserAccountUi(),
-                    ),
-                )
-                add(
-                    ActiveSessionsContract.NwcSessionUi(
-                        connectionId = "mock2",
-                        appName = "Highlighter",
-                        appUrl = "https://highlighter.com",
-                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
-                        userAccount = userAccounts.getOrElse(1) { userAccounts.first() }.asUserAccountUi(),
-                    ),
-                )
-                add(
-                    ActiveSessionsContract.NwcSessionUi(
-                        connectionId = "mock3",
-                        appName = "Nostrarious",
-                        appUrl = "https://nostrarious.io",
-                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
-                        userAccount = userAccounts.first().asUserAccountUi(),
-                    ),
-                )
-                add(
-                    ActiveSessionsContract.NwcSessionUi(
+                    ActiveSessionsContract.ActiveSessionUi(
                         connectionId = "mock4",
                         appName = "Purple Palace",
                         appUrl = "https://purplepalace.com",
@@ -88,7 +88,7 @@ class ActiveSessionsViewModel @Inject constructor(
                     ),
                 )
                 add(
-                    ActiveSessionsContract.NwcSessionUi(
+                    ActiveSessionsContract.ActiveSessionUi(
                         connectionId = "mock5",
                         appName = "Birdcage web app",
                         appUrl = "https://www.birdcage.biz",
@@ -97,7 +97,7 @@ class ActiveSessionsViewModel @Inject constructor(
                     ),
                 )
                 add(
-                    ActiveSessionsContract.NwcSessionUi(
+                    ActiveSessionsContract.ActiveSessionUi(
                         connectionId = "mock6",
                         appName = "Lamirp app",
                         appUrl = "https://www.primal.net",
@@ -106,7 +106,7 @@ class ActiveSessionsViewModel @Inject constructor(
                     ),
                 )
                 add(
-                    ActiveSessionsContract.NwcSessionUi(
+                    ActiveSessionsContract.ActiveSessionUi(
                         connectionId = "mock7",
                         appName = "Lighterhigh",
                         appUrl = "https://www.lighterhigh.com",
