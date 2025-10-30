@@ -26,7 +26,7 @@ class TsunamiWalletSdkStubImpl : TsunamiWalletSdk {
         throw NotImplementedError()
     }
 
-    override suspend fun payInvoice(walletId: String, invoice: String): Result<String> {
+    override suspend fun payLightning(walletId: String, invoice: String): Result<String> {
         throw NotImplementedError()
     }
 
@@ -38,6 +38,7 @@ class TsunamiWalletSdkStubImpl : TsunamiWalletSdk {
         walletId: String,
         offset: ULong,
         limit: ULong,
+        order: String,
     ): Result<List<Transfer>> {
         throw NotImplementedError()
     }
