@@ -1,5 +1,6 @@
 package net.primal.tsunami
 
+import net.primal.tsunami.model.OnChainTransactionFeePriority
 import net.primal.tsunami.model.OnChainWithdrawalFees
 import net.primal.tsunami.model.Transfer
 import net.primal.tsunami.model.WalletInfo
@@ -25,4 +26,10 @@ interface TsunamiWalletSdk {
         withdrawalAddress: String,
         amountSats: ULong?,
     ): Result<OnChainWithdrawalFees>
+    suspend fun payOnChain(
+        walletId: String,
+        withdrawalAddress: String,
+        feePriority: OnChainTransactionFeePriority,
+        amountSats: ULong?,
+    ): Result<String>
 }

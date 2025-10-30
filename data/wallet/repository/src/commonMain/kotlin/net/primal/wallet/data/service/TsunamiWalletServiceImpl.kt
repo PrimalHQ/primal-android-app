@@ -17,6 +17,7 @@ import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.tsunami.TsunamiWalletSdk
+import net.primal.tsunami.model.OnChainTransactionFeePriority
 import net.primal.tsunami.model.Transfer
 import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.repository.mappers.remote.mapAsWalletTransaction
@@ -109,7 +110,14 @@ internal class TsunamiWalletServiceImpl(
     override suspend fun pay(wallet: Wallet.Tsunami, request: TxRequest): Result<Unit> =
         runCatching {
             when (request) {
-                is TxRequest.BitcoinOnChain -> throw NotImplementedError()
+                is TxRequest.BitcoinOnChain -> {
+                    tsunamiWalletSdk.payOnChain(
+                        walletId = wallet.walletId,
+                        withdrawalAddress = request.onChainAddress,
+                        feePriority = OnChainTransactionFeePriority.Medium,
+                        amountSats = request.amountSats.toULong(),
+                    )
+                }
 
                 is TxRequest.Lightning.LnInvoice -> {
                     tsunamiWalletSdk.payLightning(

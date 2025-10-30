@@ -2,6 +2,7 @@ package net.primal.tsunami
 
 import kotlinx.coroutines.CoroutineDispatcher
 import net.primal.core.utils.coroutines.createDispatcherProvider
+import net.primal.tsunami.model.OnChainTransactionFeePriority
 import net.primal.tsunami.model.OnChainWithdrawalFees
 import net.primal.tsunami.model.Transfer
 import net.primal.tsunami.model.WalletInfo
@@ -53,6 +54,15 @@ class TsunamiWalletSdkStubImpl : TsunamiWalletSdk {
         withdrawalAddress: String,
         amountSats: ULong?,
     ): Result<OnChainWithdrawalFees> {
+        throw NotImplementedError()
+    }
+
+    override suspend fun payOnChain(
+        walletId: String,
+        withdrawalAddress: String,
+        feePriority: OnChainTransactionFeePriority,
+        amountSats: ULong?,
+    ): Result<String> {
         throw NotImplementedError()
     }
 }
