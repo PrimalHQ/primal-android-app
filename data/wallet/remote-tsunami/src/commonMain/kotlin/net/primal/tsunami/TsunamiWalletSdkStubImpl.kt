@@ -2,6 +2,7 @@ package net.primal.tsunami
 
 import kotlinx.coroutines.CoroutineDispatcher
 import net.primal.core.utils.coroutines.createDispatcherProvider
+import net.primal.tsunami.model.OnChainWithdrawalFees
 import net.primal.tsunami.model.Transfer
 import net.primal.tsunami.model.WalletInfo
 
@@ -44,6 +45,14 @@ class TsunamiWalletSdkStubImpl : TsunamiWalletSdk {
     }
 
     override suspend fun createOnChainDepositAddress(walletId: String): Result<String> {
+        throw NotImplementedError()
+    }
+
+    override suspend fun estimateOnChainWithdrawalFees(
+        walletId: String,
+        withdrawalAddress: String,
+        amountSats: ULong?,
+    ): Result<OnChainWithdrawalFees> {
         throw NotImplementedError()
     }
 }
