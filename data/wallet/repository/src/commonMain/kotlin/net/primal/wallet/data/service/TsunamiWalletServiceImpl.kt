@@ -11,6 +11,7 @@ import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.utils.decodeLNUrlOrNull
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
+import net.primal.domain.wallet.OnChainAddressResult
 import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
@@ -29,6 +30,7 @@ internal class TsunamiWalletServiceImpl(
     private companion object {
         private const val DEFAULT_OFFSET = 0
         private const val DEFAULT_LIMIT = 100
+        private const val DEFAULT_ORDER = "descending"
     }
 
     override suspend fun fetchWalletBalance(wallet: Wallet.Tsunami): Result<WalletBalanceResult> =
@@ -53,6 +55,7 @@ internal class TsunamiWalletServiceImpl(
                 walletId = wallet.walletId,
                 offset = (request.offset ?: DEFAULT_OFFSET).toULong(),
                 limit = (request.limit ?: DEFAULT_LIMIT).toULong(),
+                order = DEFAULT_ORDER,
             ).map { transfers ->
                 val invoices = transfers.extractAllLnInvoices()
                 val zapReceiptsMap = eventRepository.getZapReceipts(invoices = invoices).getOrNull()
@@ -97,13 +100,19 @@ internal class TsunamiWalletServiceImpl(
             )
         }
 
+    override suspend fun createOnChainAddress(wallet: Wallet.Tsunami): Result<OnChainAddressResult> =
+        runCatching {
+            val address = tsunamiWalletSdk.createOnChainDepositAddress(walletId = wallet.walletId).getOrThrow()
+            OnChainAddressResult(address = address)
+        }
+
     override suspend fun pay(wallet: Wallet.Tsunami, request: TxRequest): Result<Unit> =
         runCatching {
             when (request) {
                 is TxRequest.BitcoinOnChain -> throw NotImplementedError()
 
                 is TxRequest.Lightning.LnInvoice -> {
-                    tsunamiWalletSdk.payInvoice(
+                    tsunamiWalletSdk.payLightning(
                         walletId = wallet.walletId,
                         invoice = request.lnInvoice,
                     ).getOrThrow()
@@ -122,7 +131,7 @@ internal class TsunamiWalletServiceImpl(
                         )
                     }.getOrThrow()
 
-                    tsunamiWalletSdk.payInvoice(
+                    tsunamiWalletSdk.payLightning(
                         walletId = wallet.walletId,
                         invoice = lnInvoice.invoice,
                     ).getOrThrow()

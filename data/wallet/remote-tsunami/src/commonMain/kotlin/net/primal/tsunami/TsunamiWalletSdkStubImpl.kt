@@ -3,13 +3,14 @@ package net.primal.tsunami
 import kotlinx.coroutines.CoroutineDispatcher
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.tsunami.model.Transfer
+import net.primal.tsunami.model.WalletInfo
 
 class TsunamiWalletSdkStubImpl : TsunamiWalletSdk {
     override suspend fun createWallet(nsecStr: String): Result<String> {
         throw NotImplementedError()
     }
 
-    override suspend fun getWalletInfo(walletId: String): Result<String?> {
+    override suspend fun getWalletInfo(walletId: String): Result<WalletInfo> {
         throw NotImplementedError()
     }
 
@@ -38,6 +39,10 @@ class TsunamiWalletSdkStubImpl : TsunamiWalletSdk {
         offset: ULong,
         limit: ULong,
     ): Result<List<Transfer>> {
+        throw NotImplementedError()
+    }
+
+    override suspend fun createOnChainDepositAddress(walletId: String): Result<String> {
         throw NotImplementedError()
     }
 }

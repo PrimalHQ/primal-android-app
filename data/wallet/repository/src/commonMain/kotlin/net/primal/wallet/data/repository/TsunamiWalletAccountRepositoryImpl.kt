@@ -28,12 +28,14 @@ class TsunamiWalletAccountRepositoryImpl(
     override suspend fun fetchWalletAccountInfo(userId: String, walletId: String): Result<Unit> =
         withContext(dispatcherProvider.io()) {
             runCatching {
+                val walletInfo = tsunamiWalletSdk.getWalletInfo(walletId = walletId).getOrNull()
+                val lud16Address = walletInfo?.let { "${it.publicKey}+tsunami@primal.net" }
                 walletDatabase.withTransaction {
                     walletDatabase.wallet().insertOrIgnoreWalletInfo(
                         info = WalletInfo(
                             walletId = walletId,
                             userId = userId.asEncryptable(),
-                            lightningAddress = null,
+                            lightningAddress = lud16Address?.asEncryptable(),
                             type = WalletType.TSUNAMI,
                         ),
                     )

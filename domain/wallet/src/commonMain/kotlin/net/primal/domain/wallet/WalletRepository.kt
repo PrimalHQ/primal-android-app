@@ -42,7 +42,7 @@ interface WalletRepository {
         comment: String?,
     ): Result<LnInvoiceCreateResult>
 
-    suspend fun createOnChainAddress(userId: String): OnChainAddressResult
+    suspend fun createOnChainAddress(walletId: String): Result<OnChainAddressResult>
 
     suspend fun parseLnUrl(userId: String, lnurl: String): LnUrlParseResult
 

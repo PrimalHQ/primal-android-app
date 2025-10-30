@@ -12,6 +12,8 @@ import net.primal.domain.nostr.utils.ensureEncodedLnUrl
 import net.primal.domain.nostr.utils.stripLightningPrefix
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
+import net.primal.domain.wallet.Network
+import net.primal.domain.wallet.OnChainAddressResult
 import net.primal.domain.wallet.SubWallet
 import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
@@ -86,6 +88,15 @@ internal class PrimalWalletServiceImpl(
             )
 
             response.asLightingInvoiceResultDO()
+        }
+
+    override suspend fun createOnChainAddress(wallet: Wallet.Primal): Result<OnChainAddressResult> =
+        runCatching {
+            val response = primalWalletApi.createOnChainAddress(
+                userId = wallet.userId,
+                body = DepositRequestBody(subWallet = SubWallet.Open, network = Network.Bitcoin),
+            )
+            OnChainAddressResult(address = response.onChainAddress)
         }
 
     override suspend fun pay(wallet: Wallet.Primal, request: TxRequest): Result<Unit> =
