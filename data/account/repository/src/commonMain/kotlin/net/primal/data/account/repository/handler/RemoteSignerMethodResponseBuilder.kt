@@ -1,7 +1,7 @@
 package net.primal.data.account.repository.handler
 
-import net.primal.core.utils.alsoCatching
 import net.primal.core.utils.fold
+import net.primal.core.utils.mapCatching
 import net.primal.core.utils.serialization.CommonJsonEncodeDefaults
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
@@ -91,12 +91,12 @@ internal class RemoteSignerMethodResponseBuilder(
 
     private suspend fun nip44Encrypt(method: RemoteSignerMethod.Nip44Encrypt): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
-            .alsoCatching { userPubKey ->
+            .mapCatching { userPubKey ->
                 nostrEncryptionHandler.nip44Encrypt(
                     userId = userPubKey,
                     participantId = method.thirdPartyPubKey,
                     plaintext = method.plaintext,
-                )
+                ).getOrThrow()
             }.fold(
                 onSuccess = {
                     RemoteSignerMethodResponse.Success(
@@ -117,12 +117,12 @@ internal class RemoteSignerMethodResponseBuilder(
 
     private suspend fun nip44Decrypt(method: RemoteSignerMethod.Nip44Decrypt): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
-            .alsoCatching { userPubKey ->
+            .mapCatching { userPubKey ->
                 nostrEncryptionHandler.nip44Decrypt(
                     userId = userPubKey,
                     participantId = method.thirdPartyPubKey,
                     ciphertext = method.ciphertext,
-                )
+                ).getOrThrow()
             }.fold(
                 onSuccess = {
                     RemoteSignerMethodResponse.Success(
@@ -143,12 +143,12 @@ internal class RemoteSignerMethodResponseBuilder(
 
     private suspend fun nip04Encrypt(method: RemoteSignerMethod.Nip04Encrypt): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
-            .alsoCatching { userPubKey ->
+            .mapCatching { userPubKey ->
                 nostrEncryptionHandler.nip04Encrypt(
                     userId = userPubKey,
                     participantId = method.thirdPartyPubKey,
                     plaintext = method.plaintext,
-                )
+                ).getOrThrow()
             }.fold(
                 onSuccess = {
                     RemoteSignerMethodResponse.Success(
@@ -169,12 +169,12 @@ internal class RemoteSignerMethodResponseBuilder(
 
     private suspend fun nip04Decrypt(method: RemoteSignerMethod.Nip04Decrypt): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
-            .alsoCatching { userPubKey ->
+            .mapCatching { userPubKey ->
                 nostrEncryptionHandler.nip04Decrypt(
                     userId = userPubKey,
                     participantId = method.thirdPartyPubKey,
                     ciphertext = method.ciphertext,
-                )
+                ).getOrThrow()
             }.fold(
                 onSuccess = {
                     RemoteSignerMethodResponse.Success(
