@@ -15,6 +15,7 @@ import net.primal.android.theme.AppTheme
 fun RemoteSessionIndicatorOverlay(
     viewModel: RemoteSessionIndicatorViewModel,
     isNetworkUnavailable: Boolean,
+    onClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
@@ -27,6 +28,7 @@ fun RemoteSessionIndicatorOverlay(
         floatingIcon = PrimalIcons.NostrConnectSession,
         floatingIconTint = AppTheme.colorScheme.onPrimary,
         floatingIconTopPadding = if (isNetworkUnavailable) 64.dp else 16.dp,
+        onClick = onClick,
         content = content,
     )
 }

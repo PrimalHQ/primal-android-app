@@ -93,6 +93,8 @@ import net.primal.android.messages.conversation.create.NewConversationContract
 import net.primal.android.messages.conversation.create.NewConversationScreen
 import net.primal.android.nostrconnect.NostrConnectBottomSheet
 import net.primal.android.nostrconnect.NostrConnectViewModel
+import net.primal.android.nostrconnect.list.ActiveSessionsBottomSheet
+import net.primal.android.nostrconnect.list.ActiveSessionsViewModel
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract
 import net.primal.android.notes.home.HomeFeedScreen
@@ -372,6 +374,8 @@ private fun NavController.navigateToNostrConnectBottomSheet(url: String) {
     navigate(route = "nostrConnectBottomSheet?$NOSTR_CONNECT_URI=$safeUrl")
 }
 
+private fun NavController.navigateToActiveSessions() = navigate(route = "activeSessions")
+
 fun accountSwitcherCallbacksHandler(navController: NavController) =
     AccountSwitcherCallbacks(
         onActiveAccountChanged = { navController.navigateToHome() },
@@ -486,7 +490,9 @@ fun PrimalAppNavigation(startDestination: String) {
     }
 
     SharedTransitionLayout {
-        AppOverlays {
+        AppOverlays(
+            onRemoteSessionClick = { navController.navigateToActiveSessions() },
+        ) {
             PiPManagerProvider {
                 LiveStreamOverlay(
                     navController = navController,
@@ -569,6 +575,8 @@ private fun PrimalAppNavigation(
             ),
             navController = navController,
         )
+
+        activeSessions(navController = navController)
 
         logout(
             route = "logout?$PROFILE_ID={$PROFILE_ID}",
@@ -1342,6 +1350,21 @@ private fun NavGraphBuilder.nostrConnectDialog(
         LockToOrientationPortrait()
         NostrConnectBottomSheet(
             viewModel = viewModel,
+            onDismissRequest = { navController.popBackStack() },
+        )
+    }
+}
+
+private fun NavGraphBuilder.activeSessions(navController: NavController) {
+    dialog(
+        route = "activeSessions",
+        dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        val sessionsViewModel = hiltViewModel<ActiveSessionsViewModel>()
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        ActiveSessionsBottomSheet(
+            viewModel = sessionsViewModel,
             onDismissRequest = { navController.popBackStack() },
         )
     }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -80,6 +79,7 @@ import net.primal.android.core.compose.icons.primaliconpack.HighSecurity
 import net.primal.android.core.compose.icons.primaliconpack.LowSecurity
 import net.primal.android.core.compose.icons.primaliconpack.MediumSecurity
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.core.ext.selectableItem
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.navigation.primalSlideInHorizontallyFromEnd
@@ -815,18 +815,3 @@ private fun ActionButtons(
         )
     }
 }
-
-@Composable
-private fun Modifier.selectableItem(selected: Boolean, onClick: () -> Unit) =
-    this
-        .border(
-            width = 1.dp,
-            color = if (selected) AppTheme.colorScheme.primary else Color.Transparent,
-            shape = AppTheme.shapes.medium,
-        )
-        .clip(AppTheme.shapes.medium)
-        .clickable(
-            indication = null,
-            interactionSource = remember { MutableInteractionSource() },
-            onClick = onClick,
-        )

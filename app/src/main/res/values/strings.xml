@@ -1426,4 +1426,11 @@
     <string name="nostr_connect_usd_amount_approx">~%1$s</string>
     <string name="nostr_connect_no_limit">No limit</string>
     <string name="nostr_connect_no_nsec_accounts_warning">No accounts with a private key (nsec) found. Only accounts with a private key can be used with Nostr Connect.</string>
+    <string name="nostr_connect_active_sessions_title">Active Sessions</string>
+    <string name="nostr_connect_select_all_button">Select All</string>
+    <string name="nostr_connect_deselect_all_button">Deselect All</string>
+    <string name="nostr_connect_settings_button">Settings</string>
+    <string name="nostr_connect_disconnect_button">Disconnect</string>
+    <string name="nostr_connect_sessions_disconnected_toast">Sessions disconnected.</string>
+    <string name="nostr_connect_no_active_sessions">No active Nostr Connect sessions found.</string>
 </resources>
