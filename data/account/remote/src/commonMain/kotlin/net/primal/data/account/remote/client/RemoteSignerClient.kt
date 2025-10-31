@@ -107,7 +107,7 @@ class RemoteSignerClient(
         scope.launch {
             val decryptedContent = runCatching { event.decryptContent() }
                 .onFailure {
-                    val message = "Failed to decrypt content."
+                    val message = "Failed to decrypt content. Raw: $event"
                     Napier.w(throwable = it) { message }
                     _errors.send(
                         RemoteSignerMethodResponse.Error(
@@ -120,6 +120,7 @@ class RemoteSignerClient(
 
             remoteSignerMethodParser.parse(clientPubkey = event.pubKey, content = decryptedContent)
                 .onSuccess { command ->
+                    Napier.d(tag = "Signer") { "Received command: $command" }
                     _incomingMethods.send(command)
                 }.onFailure {
                     val message = it.message ?: "There was an error while parsing method."
