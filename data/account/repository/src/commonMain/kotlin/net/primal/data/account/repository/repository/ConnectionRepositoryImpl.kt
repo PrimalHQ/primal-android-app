@@ -65,7 +65,9 @@ class ConnectionRepositoryImpl(
 
     override suspend fun getUserPubKey(clientPubKey: String): Result<String> =
         withContext(dispatchers.io()) {
-            database.connections().getUserPubKey(clientPubKey = clientPubKey.asEncryptable())?.asSuccess()
+            database.connections()
+                .getConnectionByClientPubKey(clientPubKey = clientPubKey.asEncryptable())
+                ?.data?.userPubKey?.decrypted?.asSuccess()
                 ?: Result.failure(NoSuchElementException("Couldn't locate user pubkey for client pubkey."))
         }
 }
