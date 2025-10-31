@@ -25,7 +25,7 @@ kotlin {
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
-    val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
+    val iosTargets = listOf(iosArm64(), iosSimulatorArm64())
 
     iosTargets.forEach {
         it.binaries.framework {
@@ -36,11 +36,13 @@ kotlin {
             export(project(":domain:nostr"))
             export(project(":domain:primal"))
             export(project(":domain:wallet"))
+            export(project(":domain:account"))
 
             export(project(":core:networking-primal"))
             export(project(":core:networking-upload"))
             export(project(":core:networking-lightning"))
 
+            export(project(":data:account:repository"))
             export(project(":data:caching:repository"))
             export(project(":data:wallet:repository"))
         }
@@ -54,11 +56,13 @@ kotlin {
                 api(project(":domain:nostr"))
                 api(project(":domain:primal"))
                 api(project(":domain:wallet"))
+                api(project(":domain:account"))
 
                 api(project(":core:networking-primal"))
                 api(project(":core:networking-upload"))
                 api(project(":core:networking-lightning"))
 
+                api(project(":data:account:repository"))
                 api(project(":data:caching:repository"))
                 api(project(":data:wallet:repository"))
 
