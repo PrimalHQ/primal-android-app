@@ -8,15 +8,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.user.credentials.CredentialsStore
-import net.primal.android.user.domain.asKeyPair
-import net.primal.domain.account.repository.ConnectionRepository
+import net.primal.android.core.service.PrimalRemoteSignerService
 
 @HiltViewModel
-class RemoteSessionIndicatorViewModel @Inject constructor(
-    private val credentialsStore: CredentialsStore,
-    private val connectionRepository: ConnectionRepository,
-) : ViewModel() {
+class RemoteSessionIndicatorViewModel @Inject constructor() : ViewModel() {
 
     private val _state = MutableStateFlow(RemoteSessionIndicatorContract.UiState())
     val state = _state.asStateFlow()
@@ -24,15 +19,13 @@ class RemoteSessionIndicatorViewModel @Inject constructor(
         _state.getAndUpdate(reducer)
 
     init {
-        observeRemoteSignerConnections()
+        observeRemoteSignerServiceState()
     }
 
-    private fun observeRemoteSignerConnections() =
+    private fun observeRemoteSignerServiceState() =
         viewModelScope.launch {
-            val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
-            connectionRepository.observeAllConnections(signerPubKey = signerKeyPair.pubKey)
-                .collect { connections ->
-                    setState { copy(isRemoteSessionActive = connections.isNotEmpty()) }
-                }
+            PrimalRemoteSignerService.isServiceRunning.collect { isRunning ->
+                setState { copy(isRemoteSessionActive = isRunning) }
+            }
         }
 }
