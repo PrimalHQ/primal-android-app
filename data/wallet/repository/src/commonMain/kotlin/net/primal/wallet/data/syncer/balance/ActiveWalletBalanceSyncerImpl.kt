@@ -1,8 +1,10 @@
 package net.primal.wallet.data.syncer.balance
 
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -37,7 +39,12 @@ class ActiveWalletBalanceSyncerImpl(
                     walletSyncerJob?.cancel()
                     if (wallet?.walletId != null) {
                         walletSyncerJob = scope.launch {
-                            walletRepository.subscribeToWalletBalance(walletId = wallet.walletId).collect()
+                            repeat(times = 10) {
+                                runCatching {
+                                    walletRepository.subscribeToWalletBalance(walletId = wallet.walletId).collect()
+                                }
+                                delay(5.seconds)
+                            }
                         }
                     }
                 }

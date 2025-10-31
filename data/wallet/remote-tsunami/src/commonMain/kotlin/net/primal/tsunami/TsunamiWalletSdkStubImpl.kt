@@ -2,14 +2,17 @@ package net.primal.tsunami
 
 import kotlinx.coroutines.CoroutineDispatcher
 import net.primal.core.utils.coroutines.createDispatcherProvider
+import net.primal.tsunami.model.OnChainTransactionFeePriority
+import net.primal.tsunami.model.OnChainWithdrawalFees
 import net.primal.tsunami.model.Transfer
+import net.primal.tsunami.model.WalletInfo
 
 class TsunamiWalletSdkStubImpl : TsunamiWalletSdk {
     override suspend fun createWallet(nsecStr: String): Result<String> {
         throw NotImplementedError()
     }
 
-    override suspend fun getWalletInfo(walletId: String): Result<String?> {
+    override suspend fun getWalletInfo(walletId: String): Result<WalletInfo> {
         throw NotImplementedError()
     }
 
@@ -25,7 +28,7 @@ class TsunamiWalletSdkStubImpl : TsunamiWalletSdk {
         throw NotImplementedError()
     }
 
-    override suspend fun payInvoice(walletId: String, invoice: String): Result<String> {
+    override suspend fun payLightning(walletId: String, invoice: String): Result<String> {
         throw NotImplementedError()
     }
 
@@ -37,7 +40,29 @@ class TsunamiWalletSdkStubImpl : TsunamiWalletSdk {
         walletId: String,
         offset: ULong,
         limit: ULong,
+        order: String,
     ): Result<List<Transfer>> {
+        throw NotImplementedError()
+    }
+
+    override suspend fun createOnChainDepositAddress(walletId: String): Result<String> {
+        throw NotImplementedError()
+    }
+
+    override suspend fun estimateOnChainWithdrawalFees(
+        walletId: String,
+        withdrawalAddress: String,
+        amountSats: ULong?,
+    ): Result<OnChainWithdrawalFees> {
+        throw NotImplementedError()
+    }
+
+    override suspend fun payOnChain(
+        walletId: String,
+        withdrawalAddress: String,
+        feePriority: OnChainTransactionFeePriority,
+        amountSats: ULong?,
+    ): Result<String> {
         throw NotImplementedError()
     }
 }

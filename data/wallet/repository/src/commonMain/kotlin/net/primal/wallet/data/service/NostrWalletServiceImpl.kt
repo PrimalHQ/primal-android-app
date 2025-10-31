@@ -28,6 +28,7 @@ import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.NostrWalletConnect
+import net.primal.domain.wallet.OnChainAddressResult
 import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.TxState
@@ -141,6 +142,10 @@ internal class NostrWalletServiceImpl(
                 )
             }.getOrThrow()
         }
+
+    override suspend fun createOnChainAddress(wallet: Wallet.NWC): Result<OnChainAddressResult> {
+        throw IllegalStateException("createOnChainAddress is not supported with NWC.")
+    }
 
     override suspend fun pay(wallet: Wallet.NWC, request: TxRequest): Result<Unit> =
         runCatching {
