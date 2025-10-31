@@ -37,13 +37,33 @@ internal class RemoteSignerMethodResponseBuilder(
         )
     }
 
-    private fun connect(method: RemoteSignerMethod.Connect): RemoteSignerMethodResponse =
-        RemoteSignerMethodResponse.Error(
-            id = method.id,
-            error = "We don't accept incoming connection requests. " +
-                "Please scan or enter `nostrconnect://` url to initiate a connection.",
-            clientPubKey = method.clientPubKey,
-        )
+    private suspend fun connect(method: RemoteSignerMethod.Connect): RemoteSignerMethodResponse =
+        connectionRepository.getConnectionByClientPubKey(clientPubKey = method.clientPubKey)
+            .fold(
+                onSuccess = { connection ->
+                    if (method.secret.isNullOrEmpty()) {
+                        RemoteSignerMethodResponse.Success(
+                            id = method.id,
+                            result = "ack",
+                            clientPubKey = method.clientPubKey,
+                        )
+                    } else {
+                        RemoteSignerMethodResponse.Error(
+                            id = method.id,
+                            error = "We don't accept connect requests with new secret.",
+                            clientPubKey = method.clientPubKey,
+                        )
+                    }
+                },
+                onFailure = {
+                    RemoteSignerMethodResponse.Error(
+                        id = method.id,
+                        error = "We don't accept incoming connection requests. " +
+                            "Please scan or enter `nostrconnect://` url to initiate a connection.",
+                        clientPubKey = method.clientPubKey,
+                    )
+                },
+            )
 
     private suspend fun signEvent(method: RemoteSignerMethod.SignEvent): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
