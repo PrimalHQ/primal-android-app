@@ -17,6 +17,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.di.RemoteSignerServiceFactory
@@ -38,6 +40,9 @@ class PrimalRemoteSignerService : Service() {
     companion object {
         private const val CHANNEL_ID = "remote_signer"
         private const val NOTIF_ID = 42
+
+        private val _isServiceRunning = MutableStateFlow(false)
+        val isServiceRunning = _isServiceRunning.asStateFlow()
 
         fun start(context: Context) {
             val i = Intent(context, PrimalRemoteSignerService::class.java)
@@ -62,6 +67,7 @@ class PrimalRemoteSignerService : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        _isServiceRunning.value = true
         createNotificationChannel()
     }
 
@@ -100,6 +106,7 @@ class PrimalRemoteSignerService : Service() {
     }
 
     override fun onDestroy() {
+        _isServiceRunning.value = false
         signer?.stop()
         scope.cancel()
         super.onDestroy()

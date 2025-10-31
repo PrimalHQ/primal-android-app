@@ -44,6 +44,7 @@
     <string name="app_error_invalid_promo_code_try_later">Sorry, we couldn’t find a match for that promo code. Don\'t worry, you can proceed and try to redeem your code again.</string>
     <string name="app_no_connection_notice">Unable to connect</string>
     <string name="app_error_stream_not_found">Unable to find stream.</string>
+    <string name="app_nostr_connect_session_active">Remote Session Active</string>
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>

@@ -3,10 +3,10 @@ package net.primal.data.account.remote.method.parser
 import net.primal.core.utils.Result
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.data.account.remote.method.model.NostrUnsignedEventNoPubkey
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodRequest
 import net.primal.data.account.remote.method.model.RemoteSignerMethodType
-import net.primal.domain.nostr.NostrUnsignedEvent
 
 internal class RemoteSignerMethodParser {
 
@@ -25,8 +25,8 @@ internal class RemoteSignerMethodParser {
                         id = request.id,
                         clientPubKey = clientPubkey,
                         remoteSignerPubkey = request.params[0],
-                        secret = request.params[1],
-                        requestedPermissions = request.params[2].split(","),
+                        secret = request.params.getOrNull(1),
+                        requestedPermissions = request.params.getOrNull(2)?.split(",") ?: emptyList(),
                     )
 
                 RemoteSignerMethodType.Ping ->
@@ -39,9 +39,10 @@ internal class RemoteSignerMethodParser {
                     RemoteSignerMethod.SignEvent(
                         id = request.id,
                         clientPubKey = clientPubkey,
-                        unsignedEvent = request.params[0].decodeFromJsonStringOrNull<NostrUnsignedEvent>()
+                        unsignedEvent = request.params[0].decodeFromJsonStringOrNull<NostrUnsignedEventNoPubkey>()
                             ?: throw IllegalArgumentException(
-                                "Couldn't parse `NostrUnsignedEvent` from received SignEvent request.",
+                                "Couldn't parse `NostrUnsignedEvent` from received SignEvent request." +
+                                    " Raw: ${request.params[0]}",
                             ),
                     )
 

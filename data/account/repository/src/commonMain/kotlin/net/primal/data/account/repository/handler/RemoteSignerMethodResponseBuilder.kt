@@ -1,14 +1,15 @@
 package net.primal.data.account.repository.handler
 
-import net.primal.core.utils.alsoCatching
 import net.primal.core.utils.fold
-import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.core.utils.mapCatching
+import net.primal.core.utils.serialization.CommonJsonEncodeDefaults
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.method.model.withPubKey
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
-import net.primal.domain.nostr.cryptography.utils.getOrNull
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 
 internal class RemoteSignerMethodResponseBuilder(
     private val connectionRepository: ConnectionRepository,
@@ -36,38 +37,66 @@ internal class RemoteSignerMethodResponseBuilder(
         )
     }
 
-    private fun connect(method: RemoteSignerMethod.Connect): RemoteSignerMethodResponse =
-        RemoteSignerMethodResponse.Error(
-            id = method.id,
-            error = "We don't accept incoming connection requests. " +
-                "Please scan or enter `nostrconnect://` url to initiate a connection.",
-            clientPubKey = method.clientPubKey,
-        )
+    private suspend fun connect(method: RemoteSignerMethod.Connect): RemoteSignerMethodResponse =
+        connectionRepository.getConnectionByClientPubKey(clientPubKey = method.clientPubKey)
+            .fold(
+                onSuccess = { connection ->
+                    if (method.secret.isNullOrEmpty()) {
+                        RemoteSignerMethodResponse.Success(
+                            id = method.id,
+                            result = "ack",
+                            clientPubKey = method.clientPubKey,
+                        )
+                    } else {
+                        RemoteSignerMethodResponse.Error(
+                            id = method.id,
+                            error = "We don't accept connect requests with new secret.",
+                            clientPubKey = method.clientPubKey,
+                        )
+                    }
+                },
+                onFailure = {
+                    RemoteSignerMethodResponse.Error(
+                        id = method.id,
+                        error = "We don't accept incoming connection requests. " +
+                            "Please scan or enter `nostrconnect://` url to initiate a connection.",
+                        clientPubKey = method.clientPubKey,
+                    )
+                },
+            )
 
     private suspend fun signEvent(method: RemoteSignerMethod.SignEvent): RemoteSignerMethodResponse {
-        return nostrEventSignatureHandler.signNostrEvent(
-            unsignedNostrEvent = method.unsignedEvent,
-        ).getOrNull()?.let {
-            RemoteSignerMethodResponse.Success(
-                id = method.id,
-                result = it.encodeToJsonString(),
-                clientPubKey = method.clientPubKey,
+        return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
+            .mapCatching { userPubKey ->
+                nostrEventSignatureHandler.signNostrEvent(
+                    unsignedNostrEvent = method.unsignedEvent.withPubKey(pubkey = userPubKey),
+                ).unwrapOrThrow()
+            }.fold(
+                onSuccess = {
+                    RemoteSignerMethodResponse.Success(
+                        id = method.id,
+                        result = CommonJsonEncodeDefaults.encodeToString(it),
+                        clientPubKey = method.clientPubKey,
+                    )
+                },
+                onFailure = {
+                    RemoteSignerMethodResponse.Error(
+                        id = method.id,
+                        error = "Couldn't sign event.",
+                        clientPubKey = method.clientPubKey,
+                    )
+                },
             )
-        } ?: RemoteSignerMethodResponse.Error(
-            id = method.id,
-            error = "Couldn't sign event.",
-            clientPubKey = method.clientPubKey,
-        )
     }
 
     private suspend fun nip44Encrypt(method: RemoteSignerMethod.Nip44Encrypt): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
-            .alsoCatching { userPubKey ->
+            .mapCatching { userPubKey ->
                 nostrEncryptionHandler.nip44Encrypt(
                     userId = userPubKey,
                     participantId = method.thirdPartyPubKey,
                     plaintext = method.plaintext,
-                )
+                ).getOrThrow()
             }.fold(
                 onSuccess = {
                     RemoteSignerMethodResponse.Success(
@@ -88,12 +117,12 @@ internal class RemoteSignerMethodResponseBuilder(
 
     private suspend fun nip44Decrypt(method: RemoteSignerMethod.Nip44Decrypt): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
-            .alsoCatching { userPubKey ->
+            .mapCatching { userPubKey ->
                 nostrEncryptionHandler.nip44Decrypt(
                     userId = userPubKey,
                     participantId = method.thirdPartyPubKey,
                     ciphertext = method.ciphertext,
-                )
+                ).getOrThrow()
             }.fold(
                 onSuccess = {
                     RemoteSignerMethodResponse.Success(
@@ -114,12 +143,12 @@ internal class RemoteSignerMethodResponseBuilder(
 
     private suspend fun nip04Encrypt(method: RemoteSignerMethod.Nip04Encrypt): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
-            .alsoCatching { userPubKey ->
+            .mapCatching { userPubKey ->
                 nostrEncryptionHandler.nip04Encrypt(
                     userId = userPubKey,
                     participantId = method.thirdPartyPubKey,
                     plaintext = method.plaintext,
-                )
+                ).getOrThrow()
             }.fold(
                 onSuccess = {
                     RemoteSignerMethodResponse.Success(
@@ -140,12 +169,12 @@ internal class RemoteSignerMethodResponseBuilder(
 
     private suspend fun nip04Decrypt(method: RemoteSignerMethod.Nip04Decrypt): RemoteSignerMethodResponse {
         return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
-            .alsoCatching { userPubKey ->
+            .mapCatching { userPubKey ->
                 nostrEncryptionHandler.nip04Decrypt(
                     userId = userPubKey,
                     participantId = method.thirdPartyPubKey,
                     ciphertext = method.ciphertext,
-                )
+                ).getOrThrow()
             }.fold(
                 onSuccess = {
                     RemoteSignerMethodResponse.Success(

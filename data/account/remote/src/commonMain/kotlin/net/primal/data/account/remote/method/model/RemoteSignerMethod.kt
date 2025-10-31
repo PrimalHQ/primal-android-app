@@ -1,20 +1,18 @@
 package net.primal.data.account.remote.method.model
 
-import net.primal.domain.nostr.NostrUnsignedEvent
-
 sealed class RemoteSignerMethod(open val id: String, open val clientPubKey: String) {
     data class Connect(
         override val id: String,
         override val clientPubKey: String,
         val remoteSignerPubkey: String,
-        val secret: String,
+        val secret: String?,
         val requestedPermissions: List<String>,
     ) : RemoteSignerMethod(id = id, clientPubKey = clientPubKey)
 
     data class SignEvent(
         override val id: String,
         override val clientPubKey: String,
-        val unsignedEvent: NostrUnsignedEvent,
+        val unsignedEvent: NostrUnsignedEventNoPubkey,
     ) : RemoteSignerMethod(id = id, clientPubKey = clientPubKey)
 
     data class Ping(

@@ -26,9 +26,6 @@ interface AppConnectionDataDao {
     @Query("DELETE FROM AppConnectionData WHERE userPubKey = :userPubKey")
     suspend fun deleteConnectionsByUser(userPubKey: Encryptable<String>)
 
-    @Query("SELECT userPubKey FROM AppConnectionData WHERE clientPubKey = :clientPubKey")
-    suspend fun getUserPubKey(clientPubKey: Encryptable<String>): String?
-
     @Transaction
     @Query("SELECT * FROM AppConnectionData WHERE clientPubKey = :clientPubKey")
     suspend fun getConnectionByClientPubKey(clientPubKey: Encryptable<String>): AppConnection?
