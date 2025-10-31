@@ -1,12 +1,11 @@
 package net.primal.data.account.remote.method.model
 
-
 sealed class RemoteSignerMethod(open val id: String, open val clientPubKey: String) {
     data class Connect(
         override val id: String,
         override val clientPubKey: String,
         val remoteSignerPubkey: String,
-        val secret: String,
+        val secret: String?,
         val requestedPermissions: List<String>,
     ) : RemoteSignerMethod(id = id, clientPubKey = clientPubKey)
 

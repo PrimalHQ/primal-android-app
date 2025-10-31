@@ -25,8 +25,8 @@ internal class RemoteSignerMethodParser {
                         id = request.id,
                         clientPubKey = clientPubkey,
                         remoteSignerPubkey = request.params[0],
-                        secret = request.params[1],
-                        requestedPermissions = request.params[2].split(","),
+                        secret = request.params.getOrNull(1),
+                        requestedPermissions = request.params.getOrNull(2)?.split(",") ?: emptyList(),
                     )
 
                 RemoteSignerMethodType.Ping ->
