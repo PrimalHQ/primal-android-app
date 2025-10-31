@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -192,15 +194,26 @@ private fun FloatingIndicatorIcon(
         label = "AnimatedTopPadding",
     )
 
+    val horizontalPaddingPx = with(LocalDensity.current) { 16.dp.toPx() }
+
     Box(
         modifier = modifier
             .offset { IntOffset(offsetX.value.toInt(), offsetY.value.toInt()) }
+            .padding(top = WindowInsets.safeContent.asPaddingValues().calculateTopPadding())
+            .padding(WindowInsets.statusBars.asPaddingValues())
+            .padding(top = animatedTopPadding, end = 16.dp)
+            .size(40.dp)
+            .onGloballyPositioned { coordinates ->
+                overlaySize = coordinates.size
+            }
+            .systemGestureExclusion()
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragEnd = {
                         val overlayWidth = overlaySize.width.toFloat()
                         val overlayHeight = overlaySize.height.toFloat()
-                        val maxOffsetX = (screenWidthPx - overlayWidth).coerceAtLeast(0f)
+                        val maxOffsetX = (screenWidthPx - overlayWidth - (2 * horizontalPaddingPx))
+                            .coerceAtLeast(0f)
 
                         val currentRightEdge = screenWidthPx + offsetX.value
                         val snapToRight = currentRightEdge > screenWidthPx / 2
@@ -220,13 +233,6 @@ private fun FloatingIndicatorIcon(
                     },
                 )
             }
-            .onGloballyPositioned { coordinates ->
-                overlaySize = coordinates.size
-            }
-            .padding(top = WindowInsets.safeContent.asPaddingValues().calculateTopPadding())
-            .padding(WindowInsets.statusBars.asPaddingValues())
-            .padding(top = animatedTopPadding, end = 16.dp)
-            .size(40.dp)
             .clip(CircleShape)
             .background(AppTheme.extraColorScheme.surfaceVariantAlt1)
             .padding(10.dp),
