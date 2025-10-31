@@ -89,3 +89,11 @@
 
 # With R8 full mode generic signatures are stripped for classes that are not kept.
 -keep,allowobfuscation,allowshrinking class retrofit2.Response
+
+# OkHttp
+-dontwarn okhttp3.internal.**
+-keep class okhttp3.internal.** { *; }
+-keepnames class okhttp3.internal.** { *; }
+
+# OkHttp EventSource
+-keep class okhttp3.internal.sse.** { *; }
