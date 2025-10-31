@@ -490,7 +490,9 @@ fun PrimalAppNavigation(startDestination: String) {
     }
 
     SharedTransitionLayout {
-        AppOverlays {
+        AppOverlays(
+            onRemoteSessionClick = { navController.navigateToActiveSessions() },
+        ) {
             PiPManagerProvider {
                 LiveStreamOverlay(
                     navController = navController,
@@ -1324,7 +1326,7 @@ private fun NavGraphBuilder.home(
         callbacks = HomeFeedContract.ScreenCallbacks(
             onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
             onGoToWallet = { navController.navigateToWallet() },
-            onSearchClick = { navController.navigateToActiveSessions() },
+            onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
             onNewPostClick = { navController.navigateToNoteEditor(null) },
         ),
     )

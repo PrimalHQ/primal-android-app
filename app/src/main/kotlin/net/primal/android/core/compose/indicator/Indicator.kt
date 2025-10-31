@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -64,6 +65,7 @@ fun IndicatorOverlay(
     floatingIcon: ImageVector,
     floatingIconTint: Color = AppTheme.colorScheme.onPrimary,
     floatingIconTopPadding: Dp,
+    onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit,
 ) {
     var showFloatingIcon by rememberSaveable(showIndicator) { mutableStateOf(false) }
@@ -101,6 +103,7 @@ fun IndicatorOverlay(
                 icon = floatingIcon,
                 iconTint = floatingIconTint,
                 topPadding = floatingIconTopPadding,
+                onClick = onClick,
             )
         }
     }
@@ -173,6 +176,7 @@ private fun FloatingIndicatorIcon(
     icon: ImageVector,
     iconTint: Color,
     topPadding: Dp,
+    onClick: (() -> Unit)? = null,
 ) {
     val scope = rememberCoroutineScope()
     val displayMetrics = LocalResources.current.displayMetrics
@@ -234,6 +238,10 @@ private fun FloatingIndicatorIcon(
                 )
             }
             .clip(CircleShape)
+            .clickable(
+                enabled = onClick != null,
+                onClick = { onClick?.invoke() },
+            )
             .background(AppTheme.extraColorScheme.surfaceVariantAlt1)
             .padding(10.dp),
     ) {

@@ -10,7 +10,7 @@ import net.primal.android.core.compose.session.RemoteSessionIndicatorOverlay
 import net.primal.android.core.compose.session.RemoteSessionIndicatorViewModel
 
 @Composable
-fun AppOverlays(content: @Composable () -> Unit) {
+fun AppOverlays(onRemoteSessionClick: () -> Unit, content: @Composable () -> Unit) {
     val connectionIndicatorViewModel = hiltViewModel<ConnectionIndicatorViewModel>()
     val remoteSessionIndicatorViewModel = hiltViewModel<RemoteSessionIndicatorViewModel>()
     val connectionState by connectionIndicatorViewModel.state.collectAsState()
@@ -19,6 +19,7 @@ fun AppOverlays(content: @Composable () -> Unit) {
         RemoteSessionIndicatorOverlay(
             viewModel = remoteSessionIndicatorViewModel,
             isNetworkUnavailable = !connectionState.hasConnection,
+            onClick = onRemoteSessionClick,
             content = content,
         )
     }
