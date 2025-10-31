@@ -2,13 +2,14 @@ package net.primal.data.account.repository.handler
 
 import net.primal.core.utils.alsoCatching
 import net.primal.core.utils.fold
-import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.core.utils.serialization.CommonJsonEncodeDefaults
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.method.model.withPubKey
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
-import net.primal.domain.nostr.cryptography.utils.getOrNull
+import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 
 internal class RemoteSignerMethodResponseBuilder(
     private val connectionRepository: ConnectionRepository,
@@ -45,19 +46,27 @@ internal class RemoteSignerMethodResponseBuilder(
         )
 
     private suspend fun signEvent(method: RemoteSignerMethod.SignEvent): RemoteSignerMethodResponse {
-        return nostrEventSignatureHandler.signNostrEvent(
-            unsignedNostrEvent = method.unsignedEvent,
-        ).getOrNull()?.let {
-            RemoteSignerMethodResponse.Success(
-                id = method.id,
-                result = it.encodeToJsonString(),
-                clientPubKey = method.clientPubKey,
+        return connectionRepository.getUserPubKey(clientPubKey = method.clientPubKey)
+            .mapCatching { userPubKey ->
+                nostrEventSignatureHandler.signNostrEvent(
+                    unsignedNostrEvent = method.unsignedEvent.withPubKey(pubkey = userPubKey),
+                ).unwrapOrThrow()
+            }.fold(
+                onSuccess = {
+                    RemoteSignerMethodResponse.Success(
+                        id = method.id,
+                        result = CommonJsonEncodeDefaults.encodeToString(it),
+                        clientPubKey = method.clientPubKey,
+                    )
+                },
+                onFailure = {
+                    RemoteSignerMethodResponse.Error(
+                        id = method.id,
+                        error = "Couldn't sign event.",
+                        clientPubKey = method.clientPubKey,
+                    )
+                },
             )
-        } ?: RemoteSignerMethodResponse.Error(
-            id = method.id,
-            error = "Couldn't sign event.",
-            clientPubKey = method.clientPubKey,
-        )
     }
 
     private suspend fun nip44Encrypt(method: RemoteSignerMethod.Nip44Encrypt): RemoteSignerMethodResponse {
