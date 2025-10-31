@@ -17,15 +17,15 @@ enum class RemoteSignerMethodType {
     @SerialName("get_public_key")
     GetPublicKey,
 
-    @SerialName("nip_04_encrypt")
+    @SerialName("nip04_encrypt")
     Nip04Encrypt,
 
-    @SerialName("nip_04_decrypt")
+    @SerialName("nip04_decrypt")
     Nip04Decrypt,
 
-    @SerialName("nip_44_encrypt")
+    @SerialName("nip44_encrypt")
     Nip44Encrypt,
 
-    @SerialName("nip_44_decrypt")
+    @SerialName("nip44_decrypt")
     Nip44Decrypt,
 }
