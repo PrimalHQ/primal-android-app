@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -15,10 +14,7 @@ import net.primal.android.core.compose.icons.primaliconpack.NoConnectionWhite
 import net.primal.android.core.compose.indicator.IndicatorOverlay
 
 @Composable
-fun ConnectionIndicatorOverlay(
-    viewModel: ConnectionIndicatorViewModel = hiltViewModel(),
-    content: @Composable () -> Unit,
-) {
+fun ConnectionIndicatorOverlay(viewModel: ConnectionIndicatorViewModel, content: @Composable () -> Unit) {
     val uiState by viewModel.state.collectAsState()
     val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
 

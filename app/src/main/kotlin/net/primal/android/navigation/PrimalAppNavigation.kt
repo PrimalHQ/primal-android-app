@@ -14,8 +14,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -55,9 +53,6 @@ import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.UnlockScreenOrientation
-import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorOverlay
-import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorViewModel
-import net.primal.android.core.compose.session.RemoteSessionIndicatorOverlay
 import net.primal.android.core.pip.PiPManagerProvider
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
@@ -490,24 +485,19 @@ fun PrimalAppNavigation(startDestination: String) {
         }
     }
 
-    val connectionViewModel: ConnectionIndicatorViewModel = hiltViewModel()
-    val connectionState by connectionViewModel.state.collectAsState()
-
     SharedTransitionLayout {
-        ConnectionIndicatorOverlay(viewModel = connectionViewModel) {
-            RemoteSessionIndicatorOverlay(isConnectionUnavailable = !connectionState.hasConnection) {
-                PiPManagerProvider {
-                    LiveStreamOverlay(
+        AppOverlays {
+            PiPManagerProvider {
+                LiveStreamOverlay(
+                    navController = navController,
+                    noteCallbacks = noteCallbacksHandler(navController = navController),
+                ) {
+                    PrimalAppNavigation(
                         navController = navController,
-                        noteCallbacks = noteCallbacksHandler(navController = navController),
-                    ) {
-                        PrimalAppNavigation(
-                            navController = navController,
-                            startDestination = startDestination,
-                            drawerDestinationHandler = drawerDestinationHandler,
-                            topLevelDestinationHandler = topLevelDestinationHandler,
-                        )
-                    }
+                        startDestination = startDestination,
+                        drawerDestinationHandler = drawerDestinationHandler,
+                        topLevelDestinationHandler = topLevelDestinationHandler,
+                    )
                 }
             }
         }

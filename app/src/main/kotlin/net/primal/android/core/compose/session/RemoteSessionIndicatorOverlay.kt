@@ -5,7 +5,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.R
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NostrConnectSession
@@ -14,8 +13,8 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 fun RemoteSessionIndicatorOverlay(
-    viewModel: RemoteSessionIndicatorViewModel = hiltViewModel(),
-    isConnectionUnavailable: Boolean,
+    viewModel: RemoteSessionIndicatorViewModel,
+    isNetworkUnavailable: Boolean,
     content: @Composable () -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
@@ -27,7 +26,7 @@ fun RemoteSessionIndicatorOverlay(
         indicatorIconTint = AppTheme.colorScheme.surfaceVariant,
         floatingIcon = PrimalIcons.NostrConnectSession,
         floatingIconTint = AppTheme.colorScheme.onPrimary,
-        floatingIconTopPadding = if (isConnectionUnavailable) 64.dp else 16.dp,
+        floatingIconTopPadding = if (isNetworkUnavailable) 64.dp else 16.dp,
         content = content,
     )
 }
