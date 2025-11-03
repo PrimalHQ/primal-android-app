@@ -15,6 +15,7 @@ import net.primal.core.utils.serialization.CommonJsonImplicitNulls
 import net.primal.data.account.remote.client.RemoteSignerClient
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -40,28 +41,32 @@ internal class NostrRelayManager(
 
     private val cache: LruSeenCache<String> = LruSeenCache(maxEntries = MAX_CACHE_SIZE)
 
-    private val _incomingMethods = MutableSharedFlow<RemoteSignerMethod>(
-        replay = 0,
-        extraBufferCapacity = 64,
-    )
+    private val _incomingMethods = MutableSharedFlow<RemoteSignerMethod>(extraBufferCapacity = 64)
     val incomingMethods: Flow<RemoteSignerMethod> = _incomingMethods.asSharedFlow()
 
-    private val _errors = MutableSharedFlow<RemoteSignerMethodResponse.Error>(
-        replay = 0,
-        extraBufferCapacity = 64,
-    )
+    private val _errors = MutableSharedFlow<RemoteSignerMethodResponse.Error>(extraBufferCapacity = 64)
     val errors = _errors.asSharedFlow()
 
-    fun connectToRelays(relays: Set<String>) {
+    private val _relayEvents = MutableSharedFlow<RelayEvent>(extraBufferCapacity = 64)
+    val relayEvents = _relayEvents.asSharedFlow()
+
+    suspend fun connectToRelays(relays: Set<String>) {
         Napier.d(tag = "Signer") { "Connecting to relays: $relays" }
+        (clients.keys - relays).forEach { disconnectFromRelay(relay = it) }
         (relays - clients.keys).forEach { connectToRelay(relay = it) }
     }
 
-    fun connectToRelay(relay: String) {
+    suspend fun connectToRelay(relay: String) {
         val client = RemoteSignerClient(
             relayUrl = relay,
             dispatchers = dispatcherProvider,
             signerKeyPair = signerKeyPair,
+            onSocketConnectionOpened = { url ->
+                scope.launch { _relayEvents.emit(RelayEvent.Connected(relayUrl = url)) }
+            },
+            onSocketConnectionClosed = { url, _ ->
+                scope.launch { _relayEvents.emit(RelayEvent.Disconnected(relayUrl = url)) }
+            },
         )
 
         client.connect()
@@ -114,8 +119,6 @@ internal class NostrRelayManager(
         }
 
     private fun observeClientMethods(relay: String, client: RemoteSignerClient) {
-        removeClient(relay)
-
         clients[relay] = client
         clientJobs[relay] = scope.launch {
             scope.launch {
@@ -145,7 +148,12 @@ internal class NostrRelayManager(
     }
 
     private fun removeClient(relay: String) {
-        clients.remove(relay)?.close()
+        clients.remove(relay)
+            ?.close()
+            ?.invokeOnCompletion {
+                scope.launch { _relayEvents.emit(RelayEvent.Disconnected(relayUrl = relay)) }
+            }
+
         clientJobs.remove(relay)?.cancel()
     }
 }

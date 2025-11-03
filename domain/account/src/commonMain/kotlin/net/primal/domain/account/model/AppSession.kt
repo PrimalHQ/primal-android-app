@@ -1,0 +1,17 @@
+package net.primal.domain.account.model
+
+data class AppSession(
+    val sessionId: String,
+    val connectionId: String,
+    val userPubKey: String,
+    val clientPubKey: String,
+    val signerPubKey: String,
+    val relays: List<String>,
+    val name: String?,
+    val url: String?,
+    val image: String?,
+    val permissions: List<AppPermission>,
+    val sessionStartedAt: Long,
+    val sessionEndedAt: Long?,
+    val sessionState: AppSessionState,
+)
