@@ -1,0 +1,67 @@
+package net.primal.data.account.local.dao
+
+import androidx.room.Dao
+import androidx.room.Query
+import androidx.room.Transaction
+import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
+import net.primal.shared.data.local.encryption.Encryptable
+
+@Dao
+interface AppSessionDataDao {
+    @Upsert
+    suspend fun upsertAll(data: List<AppSessionData>)
+
+    @Transaction
+    @Query("SELECT * FROM AppSessionData WHERE connectionId = :connectionId AND endedAt IS NULL")
+    suspend fun findActiveSessionByConnectionId(connectionId: String): AppSession?
+
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM AppSessionData s 
+        JOIN AppConnectionData c ON s.connectionId = c.connectionId
+        WHERE activeRelayCount > 0 AND c.signerPubKey = :signerPubKey
+    """,
+    )
+    fun observeActiveSessions(signerPubKey: Encryptable<String>): Flow<List<AppSession>>
+
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM AppSessionData s 
+        JOIN AppConnectionData c ON s.connectionId = c.connectionId
+        WHERE endedAt IS NULL AND c.signerPubKey = :signerPubKey
+    """,
+    )
+    fun observeNonEndedSessions(signerPubKey: Encryptable<String>): Flow<List<AppSession>>
+
+    @Query("UPDATE AppSessionData SET endedAt = :endedAt, activeRelayCount = 0 WHERE sessionId = :sessionId")
+    suspend fun endSession(sessionId: String, endedAt: Long)
+
+    @Query(
+        """
+        UPDATE AppSessionData
+        SET endedAt = :endedAt, activeRelayCount = 0
+        WHERE endedAt IS NULL
+    """,
+    )
+    suspend fun endAllActiveSessions(endedAt: Long)
+
+    @Query("UPDATE AppSessionData SET activeRelayCount = activeRelayCount + 1 WHERE sessionId = :sessionId")
+    suspend fun incrementActiveRelayCount(sessionId: String)
+
+    @Query(
+        """
+        UPDATE AppSessionData 
+        SET activeRelayCount = activeRelayCount - 1,
+            endedAt = CASE
+                WHEN activeRelayCount - 1 = 0 
+                    THEN strftime('%s', 'now')
+                    ELSE endedAt
+            END
+        WHERE sessionId = :sessionId
+    """,
+    )
+    suspend fun decrementActiveRelayCountOrEnd(sessionId: String)
+}

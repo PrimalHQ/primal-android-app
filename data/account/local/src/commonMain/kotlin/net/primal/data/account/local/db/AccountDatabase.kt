@@ -9,6 +9,8 @@ import net.primal.data.account.local.dao.AppConnectionData
 import net.primal.data.account.local.dao.AppConnectionDataDao
 import net.primal.data.account.local.dao.AppPermissionData
 import net.primal.data.account.local.dao.AppPermissionDataDao
+import net.primal.data.account.local.dao.AppSessionData
+import net.primal.data.account.local.dao.AppSessionDataDao
 import net.primal.shared.data.local.serialization.EncryptableTypeConverters
 import net.primal.shared.data.local.serialization.ListsTypeConverters
 
@@ -16,8 +18,9 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
     entities = [
         AppConnectionData::class,
         AppPermissionData::class,
+        AppSessionData::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @TypeConverters(ListsTypeConverters::class, EncryptableTypeConverters::class)
@@ -25,6 +28,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
 abstract class AccountDatabase : RoomDatabase() {
     abstract fun connections(): AppConnectionDataDao
     abstract fun permissions(): AppPermissionDataDao
+    abstract fun sessions(): AppSessionDataDao
 
     companion object {
         fun setEncryption(enableEncryption: Boolean) {

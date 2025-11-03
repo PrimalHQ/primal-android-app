@@ -15,6 +15,8 @@ import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.NostrSocketClientFactory
+import net.primal.core.networking.sockets.SocketConnectionClosedCallback
+import net.primal.core.networking.sockets.SocketConnectionOpenedCallback
 import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.utils.Result
@@ -41,9 +43,15 @@ class RemoteSignerClient(
     relayUrl: String,
     dispatchers: DispatcherProvider,
     private val signerKeyPair: NostrKeyPair,
+    onSocketConnectionOpened: SocketConnectionOpenedCallback? = null,
+    onSocketConnectionClosed: SocketConnectionClosedCallback? = null,
 ) {
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
-    private val nostrSocketClient = NostrSocketClientFactory.create(wssUrl = relayUrl)
+    private val nostrSocketClient = NostrSocketClientFactory.create(
+        wssUrl = relayUrl,
+        onSocketConnectionOpened = onSocketConnectionOpened,
+        onSocketConnectionClosed = onSocketConnectionClosed,
+    )
 
     private val remoteSignerMethodParser = RemoteSignerMethodParser()
     private val nip44 = Nip44v2()
@@ -56,12 +64,10 @@ class RemoteSignerClient(
 
     private var listenerJob: Job? = null
 
-    fun connect() =
-        scope.launch {
-            runCatching {
-                nostrSocketClient.ensureSocketConnectionOrThrow()
-                startSubscription()
-            }
+    suspend fun connect() =
+        runCatching {
+            nostrSocketClient.ensureSocketConnectionOrThrow()
+            startSubscription()
         }
 
     private fun startSubscription() {
