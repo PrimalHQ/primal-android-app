@@ -27,8 +27,8 @@ class SessionRepositoryImpl(
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
-    override fun observeNonEndedSessions(signerPubKey: String): Flow<List<AppSession>> =
-        database.sessions().observeNonEndedSessions(signerPubKey = signerPubKey.asEncryptable())
+    override fun observeOngoingSessions(signerPubKey: String): Flow<List<AppSession>> =
+        database.sessions().observeOngoingSessions(signerPubKey = signerPubKey.asEncryptable())
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 

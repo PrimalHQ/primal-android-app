@@ -7,7 +7,7 @@ import net.primal.domain.account.model.AppSession
 interface SessionRepository {
     fun observeActiveSessions(signerPubKey: String): Flow<List<AppSession>>
 
-    fun observeNonEndedSessions(signerPubKey: String): Flow<List<AppSession>>
+    fun observeOngoingSessions(signerPubKey: String): Flow<List<AppSession>>
 
     suspend fun startSession(connectionId: String): Result<String>
 

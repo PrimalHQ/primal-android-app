@@ -30,15 +30,15 @@ class RemoteSignerServiceImpl internal constructor(
 
     override fun start() {
         Napier.d(tag = "Signer") { "RemoteSignerService started." }
-        observeNonEndedSessions()
+        observeOngoingSessions()
         observeRelayEvents()
         observeMethods()
         observeErrors()
     }
 
-    private fun observeNonEndedSessions() =
+    private fun observeOngoingSessions() =
         scope.launch {
-            sessionRepository.observeNonEndedSessions(signerPubKey = signerKeyPair.pubKey)
+            sessionRepository.observeOngoingSessions(signerPubKey = signerKeyPair.pubKey)
                 .collect { sessions ->
                     relaySessionMap = sessions
                         .flatMap { session ->

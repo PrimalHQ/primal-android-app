@@ -34,7 +34,7 @@ interface AppSessionDataDao {
         WHERE endedAt IS NULL AND c.signerPubKey = :signerPubKey
     """,
     )
-    fun observeNonEndedSessions(signerPubKey: Encryptable<String>): Flow<List<AppSession>>
+    fun observeOngoingSessions(signerPubKey: Encryptable<String>): Flow<List<AppSession>>
 
     @Query("UPDATE AppSessionData SET endedAt = :endedAt, activeRelayCount = 0 WHERE sessionId = :sessionId")
     suspend fun endSession(sessionId: String, endedAt: Long)
