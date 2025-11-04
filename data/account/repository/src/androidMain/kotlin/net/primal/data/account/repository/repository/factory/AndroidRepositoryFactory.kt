@@ -17,6 +17,7 @@ object AndroidRepositoryFactory : RepositoryFactory() {
         LocalDatabaseFactory.createDatabase<AccountDatabase>(
             context = appContext,
             databaseName = "account_database.db",
+            callback = AccountDatabase.provideDatabaseCallback(),
         )
     }
 

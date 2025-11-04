@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import androidx.room.TypeConverters
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 import net.primal.data.account.local.dao.AppConnectionData
 import net.primal.data.account.local.dao.AppConnectionDataDao
 import net.primal.data.account.local.dao.AppPermissionData
@@ -31,6 +33,19 @@ abstract class AccountDatabase : RoomDatabase() {
     abstract fun sessions(): AppSessionDataDao
 
     companion object {
+        fun provideDatabaseCallback() =
+            object : Callback() {
+                override fun onOpen(connection: SQLiteConnection) {
+                    connection.execSQL(
+                        """
+                    UPDATE AppSessionData
+                        SET endedAt = strftime('%s', 'now'), activeRelayCount = 0
+                        WHERE endedAt IS NULL
+                        """.trimIndent(),
+                    )
+                }
+            }
+
         fun setEncryption(enableEncryption: Boolean) {
             EncryptableTypeConverters.enableEncryption = enableEncryption
         }
