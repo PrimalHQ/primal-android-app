@@ -36,6 +36,14 @@ interface AppSessionDataDao {
     )
     fun observeOngoingSessions(signerPubKey: Encryptable<String>): Flow<List<AppSession>>
 
+    @Transaction
+    @Query("SELECT * FROM AppSessionData WHERE connectionId = :connectionId AND endedAt IS NULL")
+    fun observeActiveSessionForConnection(connectionId: String): Flow<AppSession?>
+
+    @Transaction
+    @Query("SELECT * FROM AppSessionData WHERE connectionId = :connectionId ORDER BY startedAt DESC")
+    fun observeSessionsByConnectionId(connectionId: String): Flow<List<AppSession>>
+
     @Query("UPDATE AppSessionData SET endedAt = :endedAt, activeRelayCount = 0 WHERE sessionId = :sessionId")
     suspend fun endSession(sessionId: String, endedAt: Long)
 

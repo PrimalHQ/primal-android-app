@@ -20,4 +20,8 @@ interface ConnectionRepository {
     suspend fun saveConnection(secret: String, connection: AppConnection)
 
     suspend fun getUserPubKey(clientPubKey: String): Result<String>
+
+    suspend fun updateConnectionName(connectionId: String, name: String)
+
+    suspend fun updateConnectionAutoStart(connectionId: String, autoStart: Boolean)
 }

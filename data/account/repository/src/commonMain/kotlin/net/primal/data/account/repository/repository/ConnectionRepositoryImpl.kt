@@ -63,6 +63,7 @@ class ConnectionRepositoryImpl(
                         clientPubKey = connection.clientPubKey.asEncryptable(),
                         signerPubKey = connection.signerPubKey.asEncryptable(),
                         userPubKey = connection.userPubKey.asEncryptable(),
+                        autoStart = connection.autoStart,
                     ),
                 ),
             )
@@ -75,4 +76,16 @@ class ConnectionRepositoryImpl(
                 ?.data?.userPubKey?.decrypted?.asSuccess()
                 ?: Result.failure(NoSuchElementException("Couldn't locate user pubkey for client pubkey."))
         }
+
+    override suspend fun updateConnectionName(connectionId: String, name: String) {
+        withContext(dispatchers.io()) {
+            database.connections().updateConnectionName(connectionId, name.asEncryptable())
+        }
+    }
+
+    override suspend fun updateConnectionAutoStart(connectionId: String, autoStart: Boolean) {
+        withContext(dispatchers.io()) {
+            database.connections().updateConnectionAutoStart(connectionId, autoStart)
+        }
+    }
 }

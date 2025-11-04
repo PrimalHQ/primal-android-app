@@ -33,4 +33,10 @@ interface AppConnectionDataDao {
     @Transaction
     @Query("SELECT * FROM AppConnectionData WHERE clientPubKey = :clientPubKey")
     suspend fun getConnectionByClientPubKey(clientPubKey: Encryptable<String>): AppConnection?
+
+    @Query("UPDATE AppConnectionData SET name = :name WHERE connectionId = :connectionId")
+    suspend fun updateConnectionName(connectionId: String, name: Encryptable<String>)
+
+    @Query("UPDATE AppConnectionData SET autoStart = :autoStart WHERE connectionId = :connectionId")
+    suspend fun updateConnectionAutoStart(connectionId: String, autoStart: Boolean)
 }

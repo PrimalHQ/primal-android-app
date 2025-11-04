@@ -22,7 +22,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         AppPermissionData::class,
         AppSessionData::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 @TypeConverters(ListsTypeConverters::class, EncryptableTypeConverters::class)
