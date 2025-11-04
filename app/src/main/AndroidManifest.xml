@@ -303,8 +303,13 @@
 
         <service
             android:name=".core.service.PrimalRemoteSignerService"
+            android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="specialUse"></service>
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Run a foreground service to keep remote signer operational." />
+        </service>
 
         <provider
             android:name="androidx.core.content.FileProvider"
