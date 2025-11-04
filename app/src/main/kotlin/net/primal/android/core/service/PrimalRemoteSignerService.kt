@@ -24,6 +24,7 @@ import net.primal.android.R
 import net.primal.android.core.di.RemoteSignerServiceFactory
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
+import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
 
 @AndroidEntryPoint
@@ -34,6 +35,9 @@ class PrimalRemoteSignerService : Service() {
 
     @Inject
     lateinit var credentialsStore: CredentialsStore
+
+    @Inject
+    lateinit var sessionRepository: SessionRepository
 
     private var signer: RemoteSignerService? = null
 
@@ -102,6 +106,8 @@ class PrimalRemoteSignerService : Service() {
             signer?.start()
         }
 
+        observeOngoingSessions()
+
         return START_STICKY
     }
 
@@ -111,6 +117,17 @@ class PrimalRemoteSignerService : Service() {
         scope.cancel()
         super.onDestroy()
     }
+
+    private fun observeOngoingSessions() =
+        scope.launch {
+            val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
+            sessionRepository.observeOngoingSessions(signerPubKey = signerKeyPair.pubKey)
+                .collect {
+                    if (it.isEmpty()) {
+                        stopSelf()
+                    }
+                }
+        }
 
     private fun createNotificationChannel() {
         val nm = getSystemService(NotificationManager::class.java)
