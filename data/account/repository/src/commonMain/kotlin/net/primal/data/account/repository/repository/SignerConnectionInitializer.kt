@@ -27,7 +27,7 @@ class SignerConnectionInitializer internal constructor(
         signerPubKey: String,
         userPubKey: String,
         connectionUrl: String,
-    ): Result<Unit> =
+    ): Result<AppConnection> =
         runCatching {
             val (appConnection, secret) = parseConnectionUrlOrThrow(
                 signerPubKey = signerPubKey,
@@ -46,6 +46,8 @@ class SignerConnectionInitializer internal constructor(
             )
 
             connectionRepository.saveConnection(secret = secret, connection = appConnection)
+
+            appConnection
         }
 
     private fun parseConnectionUrlOrThrow(
