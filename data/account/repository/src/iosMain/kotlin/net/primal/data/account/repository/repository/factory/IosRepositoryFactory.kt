@@ -11,7 +11,10 @@ typealias AccountRepositoryFactory = IosRepositoryFactory
 object IosRepositoryFactory : RepositoryFactory() {
 
     private val accountDatabase by lazy {
-        LocalDatabaseFactory.createDatabase<AccountDatabase>(databaseName = "account_database.db")
+        LocalDatabaseFactory.createDatabase<AccountDatabase>(
+            databaseName = "account_database.db",
+            callback = AccountDatabase.provideDatabaseCallback(),
+        )
     }
 
     fun init(enableDbEncryption: Boolean) {
