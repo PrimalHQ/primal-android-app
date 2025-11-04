@@ -17,6 +17,10 @@ interface AppConnectionDataDao {
     fun observeAllConnections(signerPubKey: Encryptable<String>): Flow<List<AppConnection>>
 
     @Transaction
+    @Query("SELECT * FROM AppConnectionData WHERE connectionId = :connectionId")
+    fun observeConnection(connectionId: String): Flow<AppConnection?>
+
+    @Transaction
     @Query("SELECT * FROM AppConnectionData WHERE signerPubKey = :signerPubKey")
     suspend fun getAll(signerPubKey: Encryptable<String>): List<AppConnection>
 

@@ -21,6 +21,11 @@ class ConnectionRepositoryImpl(
         database.connections().observeAllConnections(signerPubKey = signerPubKey.asEncryptable())
             .map { connections -> connections.map { it.asDomain() } }
 
+    override fun observeConnection(connectionId: String): Flow<AppConnection?> {
+        return database.connections().observeConnection(connectionId = connectionId)
+            .map { it?.asDomain() }
+    }
+
     override suspend fun getAllConnections(signerPubKey: String): List<AppConnection> =
         withContext(dispatchers.io()) {
             database.connections().getAll(signerPubKey = signerPubKey.asEncryptable())

@@ -9,17 +9,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.core.service.PrimalRemoteSignerService
 import net.primal.android.settings.connected.model.asAppConnectionUi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
 import net.primal.domain.account.repository.ConnectionRepository
+import net.primal.domain.account.repository.SessionRepository
 import timber.log.Timber
 
 @HiltViewModel
 class ConnectedAppsViewModel @Inject constructor(
     private val connectionRepository: ConnectionRepository,
+    private val sessionRepository: SessionRepository,
     private val credentialsStore: CredentialsStore,
     private val accountsStore: UserAccountsStore,
 ) : ViewModel() {
@@ -37,7 +38,7 @@ class ConnectedAppsViewModel @Inject constructor(
 
     init {
         observeConnections()
-        observeRemoteSignerStatus()
+        observeActiveSessions()
     }
 
     private fun observeConnections() {
@@ -48,11 +49,17 @@ class ConnectedAppsViewModel @Inject constructor(
                     .collect { connections ->
                         val userAccounts = accountsStore.userAccounts.value
                         val userAccountMap = userAccounts.associateBy { it.pubkey }
-                        val isRemoteSignerActive = PrimalRemoteSignerService.isServiceRunning.value
+                        val currentActiveIds = state.value.connections
+                            .filter { it.isActive }
+                            .map { it.connectionId }
+                            .toSet()
 
                         val uiConnections = connections.map { connection ->
                             val userAccount = userAccountMap[connection.userPubKey]
-                            connection.asAppConnectionUi(userAccount, isActive = isRemoteSignerActive)
+                            connection.asAppConnectionUi(
+                                userAccount = userAccount,
+                                isActive = connection.connectionId in currentActiveIds,
+                            )
                         }
                         setState { copy(connections = uiConnections, loading = false) }
                     }
@@ -63,14 +70,19 @@ class ConnectedAppsViewModel @Inject constructor(
         }
     }
 
-    private fun observeRemoteSignerStatus() {
+    private fun observeActiveSessions() {
         viewModelScope.launch {
-            PrimalRemoteSignerService.isServiceRunning.collect { isRemoteSignerActive ->
-                setState {
-                    val updatedConnections = this.connections.map { it.copy(isActive = isRemoteSignerActive) }
-                    copy(connections = updatedConnections)
+            val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
+            sessionRepository.observeActiveSessions(signerPubKey = signerKeyPair.pubKey)
+                .collect { activeSessions ->
+                    val activeConnectionIds = activeSessions.map { it.connectionId }.toSet()
+                    setState {
+                        val updatedConnections = this.connections.map {
+                            it.copy(isActive = it.connectionId in activeConnectionIds)
+                        }
+                        copy(connections = updatedConnections)
+                    }
                 }
-            }
         }
     }
 }
