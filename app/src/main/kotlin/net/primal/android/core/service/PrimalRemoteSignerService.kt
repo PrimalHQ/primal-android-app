@@ -1,5 +1,6 @@
 package net.primal.android.core.service
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
@@ -24,6 +25,7 @@ import net.primal.android.R
 import net.primal.android.core.di.RemoteSignerServiceFactory
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
+import net.primal.domain.account.model.AppSession
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
 
@@ -41,9 +43,13 @@ class PrimalRemoteSignerService : Service() {
 
     private var signer: RemoteSignerService? = null
 
+    private var shownSessionIds = emptySet<String>()
+
     companion object {
+        private const val GROUP_ID = "net.primal.CONNECTED_APPS"
         private const val CHANNEL_ID = "remote_signer"
-        private const val NOTIF_ID = 42
+        private const val SUMMARY_NOTIFICATION_ID = 42
+        private const val CHILD_NOTIFICATION_ID = 43
 
         private val _isServiceRunning = MutableStateFlow(false)
         val isServiceRunning = _isServiceRunning.asStateFlow()
@@ -80,17 +86,16 @@ class PrimalRemoteSignerService : Service() {
         flags: Int,
         startId: Int,
     ): Int {
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.primal_wave_logo_summer)
-            .setContentTitle("Primal Remote Signer")
-            .setContentText("Listening for signing requests...")
-            .setOngoing(true)
-            .build()
+        val notificationManager = getSystemService(NotificationManager::class.java)
+
+        val summaryNotification = buildSummaryNotification()
+
+        notificationManager.notify(SUMMARY_NOTIFICATION_ID, summaryNotification)
 
         ServiceCompat.startForeground(
             this,
-            NOTIF_ID,
-            notification,
+            CHILD_NOTIFICATION_ID,
+            summaryNotification,
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
             } else {
@@ -111,6 +116,40 @@ class PrimalRemoteSignerService : Service() {
         return START_STICKY
     }
 
+    private fun showSessionNotification(session: AppSession) {
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(
+            session.sessionId,
+            CHILD_NOTIFICATION_ID,
+            buildChildNotification(session = session),
+        )
+    }
+
+    private fun hideSessionNotification(sessionId: String) {
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.cancel(sessionId, CHILD_NOTIFICATION_ID)
+        notificationManager.notify(SUMMARY_NOTIFICATION_ID, buildSummaryNotification())
+    }
+
+    private fun buildSummaryNotification(): Notification =
+        NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.primal_wave_logo_summer)
+            .setContentTitle("Active Apps")
+            .setOngoing(true)
+            .setGroup(GROUP_ID)
+            .setGroupSummary(true)
+            .build()
+
+    private fun buildChildNotification(session: AppSession): Notification =
+        NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.default_avatar)
+            .setContentTitle(session.name ?: "Unknown App")
+            .setContentText(session.sessionState.name)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setGroup(GROUP_ID)
+            .build()
+
     override fun onDestroy() {
         _isServiceRunning.value = false
         signer?.stop()
@@ -122,10 +161,25 @@ class PrimalRemoteSignerService : Service() {
         scope.launch {
             val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
             sessionRepository.observeOngoingSessions(signerPubKey = signerKeyPair.pubKey)
-                .collect {
-                    if (it.isEmpty()) {
+                .collect { sessions ->
+                    if (sessions.isEmpty()) {
                         stopSelf()
+                        return@collect
                     }
+
+                    val sessionMap = sessions.associateBy { it.sessionId }
+                    val sessionIds = sessions.map { it.sessionId }.toSet()
+                    val endedSessions = shownSessionIds - sessionIds
+
+                    sessionIds.forEach { sessionId ->
+                        sessionMap[sessionId]?.let { showSessionNotification(it) }
+                    }
+
+                    endedSessions.forEach { sessionId ->
+                        hideSessionNotification(sessionId = sessionId)
+                    }
+
+                    shownSessionIds = sessionIds
                 }
         }
 
@@ -135,7 +189,7 @@ class PrimalRemoteSignerService : Service() {
             NotificationChannel(
                 CHANNEL_ID,
                 "Remote Signer",
-                NotificationManager.IMPORTANCE_LOW,
+                NotificationManager.IMPORTANCE_DEFAULT,
             ),
         )
     }
