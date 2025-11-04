@@ -19,6 +19,7 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.navigation.nostrConnectUri
 import net.primal.android.nostrconnect.NostrConnectContract.Companion.DAILY_BUDGET_OPTIONS
+import net.primal.android.nostrconnect.handler.RemoteSignerSessionHandler
 import net.primal.android.nostrconnect.utils.getNostrConnectImage
 import net.primal.android.nostrconnect.utils.getNostrConnectName
 import net.primal.android.nostrconnect.utils.getNostrConnectUrl
@@ -30,6 +31,8 @@ import net.primal.android.user.domain.asKeyPair
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import timber.log.Timber
 
@@ -41,6 +44,7 @@ class NostrConnectViewModel @Inject constructor(
     private val exchangeRateHandler: ExchangeRateHandler,
     private val credentialsStore: CredentialsStore,
     private val signerConnectionInitializerFactory: SignerConnectionInitializerFactory,
+    private val signerSessionHandler: RemoteSignerSessionHandler,
 ) : ViewModel() {
 
     private val connectionUrl = savedStateHandle.nostrConnectUri
@@ -77,24 +81,29 @@ class NostrConnectViewModel @Inject constructor(
                     is NostrConnectContract.UiEvent.ChangeTab -> setState { copy(selectedTab = it.tab) }
                     is NostrConnectContract.UiEvent.SelectAccount ->
                         setState { copy(selectedAccount = accounts.find { acc -> acc.pubkey == it.pubkey }) }
+
                     is NostrConnectContract.UiEvent.SelectTrustLevel -> setState { copy(trustLevel = it.level) }
                     is NostrConnectContract.UiEvent.ClickConnect -> connect()
                     is NostrConnectContract.UiEvent.ClickDailyBudget -> setState {
                         copy(showDailyBudgetPicker = true, selectedDailyBudget = this.dailyBudget)
                     }
+
                     is NostrConnectContract.UiEvent.ChangeDailyBudget -> setState {
                         copy(
                             selectedDailyBudget = it.budget,
                         )
                     }
+
                     is NostrConnectContract.UiEvent.ApplyDailyBudget -> setState {
                         copy(dailyBudget = this.selectedDailyBudget, showDailyBudgetPicker = false)
                     }
+
                     is NostrConnectContract.UiEvent.CancelDailyBudget -> setState {
                         copy(
                             showDailyBudgetPicker = false,
                         )
                     }
+
                     NostrConnectContract.UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
@@ -161,16 +170,15 @@ class NostrConnectViewModel @Inject constructor(
             val selectedAccount = state.value.selectedAccount ?: return@launch
             val connectionUrl = state.value.connectionUrl ?: return@launch
 
-            runCatching {
-                val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
-                val initializer = signerConnectionInitializerFactory.create(signerKeyPair = signerKeyPair)
+            val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
+            val initializer = signerConnectionInitializerFactory.create(signerKeyPair = signerKeyPair)
 
-                initializer.initialize(
-                    signerPubKey = signerKeyPair.pubKey,
-                    userPubKey = selectedAccount.pubkey,
-                    connectionUrl = connectionUrl,
-                ).getOrThrow()
-            }.onSuccess {
+            initializer.initialize(
+                signerPubKey = signerKeyPair.pubKey,
+                userPubKey = selectedAccount.pubkey,
+                connectionUrl = connectionUrl,
+            ).onSuccess {
+                signerSessionHandler.startSession(connectionId = it.connectionId)
                 setEffect(NostrConnectContract.SideEffect.ConnectionSuccess)
             }.onFailure { error ->
                 Timber.e(error)
