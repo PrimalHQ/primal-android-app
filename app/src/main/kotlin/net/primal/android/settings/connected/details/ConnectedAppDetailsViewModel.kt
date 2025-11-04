@@ -8,11 +8,13 @@ import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.navigation.connectionIdOrThrow
+import net.primal.android.nostrconnect.handler.RemoteSignerSessionHandler
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SessionUi
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SideEffect
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiEvent
@@ -31,6 +33,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
     private val connectionRepository: ConnectionRepository,
     private val sessionRepository: SessionRepository,
     private val activeAccountStore: ActiveAccountStore,
+    private val sessionHandler: RemoteSignerSessionHandler,
 ) : ViewModel() {
 
     private val connectionId: String = savedStateHandle.connectionIdOrThrow
@@ -58,8 +61,8 @@ class ConnectedAppDetailsViewModel @Inject constructor(
                 UiEvent.EditName -> setState { copy(editingName = true) }
                 is UiEvent.NameChange -> updateAppName(event.name)
                 UiEvent.DismissEditNameDialog -> setState { copy(editingName = false) }
-                UiEvent.StartSession -> { }
-                UiEvent.EndSession -> { }
+                UiEvent.StartSession -> startSession()
+                UiEvent.EndSession -> endSession()
                 UiEvent.DismissError -> setState { copy(error = null) }
             }
         }
@@ -124,7 +127,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
             setEffect(SideEffect.ConnectionDelete)
         }.onFailure {
             Timber.e(it)
-            setState { copy(error = UiError.GenericError()) }
+            setState { copy(error = UiError.GenericError(message = it.message)) }
         }
         setState { copy(confirmingDeletion = false) }
     }
@@ -135,7 +138,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
                 connectionRepository.updateConnectionName(connectionId, name)
             }.onFailure {
                 Timber.e(it)
-                setState { copy(error = UiError.GenericError()) }
+                setState { copy(error = UiError.GenericError(message = it.message)) }
             }
             setState { copy(editingName = false) }
         }
@@ -147,7 +150,32 @@ class ConnectedAppDetailsViewModel @Inject constructor(
                 connectionRepository.updateConnectionAutoStart(connectionId, enabled)
             }.onFailure {
                 Timber.e(it)
-                setState { copy(error = UiError.GenericError()) }
+                setState { copy(error = UiError.GenericError(message = it.message)) }
+            }
+        }
+    }
+
+    private fun startSession() {
+        viewModelScope.launch {
+            runCatching {
+                sessionHandler.startSession(connectionId)
+            }.onFailure {
+                Timber.e(it)
+                setState { copy(error = UiError.GenericError(message = it.message)) }
+            }
+        }
+    }
+
+    private fun endSession() {
+        viewModelScope.launch {
+            runCatching {
+                val activeSession = sessionRepository.observeActiveSessionForConnection(connectionId).firstOrNull()
+                if (activeSession != null) {
+                    sessionHandler.endSession(activeSession.sessionId)
+                }
+            }.onFailure {
+                Timber.e(it)
+                setState { copy(error = UiError.GenericError(message = it.message)) }
             }
         }
     }
