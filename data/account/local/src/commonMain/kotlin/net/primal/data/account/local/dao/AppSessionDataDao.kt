@@ -56,7 +56,7 @@ interface AppSessionDataDao {
         UPDATE AppSessionData 
         SET activeRelayCount = activeRelayCount - 1,
             endedAt = CASE
-                WHEN activeRelayCount - 1 = 0 
+                WHEN activeRelayCount - 1 <= 0 
                     THEN strftime('%s', 'now')
                     ELSE endedAt
             END
