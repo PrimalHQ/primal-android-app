@@ -1,21 +1,17 @@
 package net.primal.android.settings.connected.details
 
-import net.primal.android.core.errors.UiError
-import net.primal.domain.links.CdnImage
-
 interface ConnectedAppDetailsContract {
     data class UiState(
         val loading: Boolean = true,
         val appName: String? = null,
         val appIconUrl: String? = null,
-        val userAvatarCdnImage: CdnImage? = null,
         val isSessionActive: Boolean = false,
-        val lastSession: Long? = null,
+        val lastSessionStartedAt: Long? = null,
         val autoStartSession: Boolean = false,
         val recentSessions: List<SessionUi> = emptyList(),
-        val error: UiError? = null,
         val confirmingDeletion: Boolean = false,
         val editingName: Boolean = false,
+        val activeSessionId: String? = null,
     )
 
     data class SessionUi(
@@ -33,7 +29,6 @@ interface ConnectedAppDetailsContract {
         data class NameChange(val name: String) : UiEvent()
         data object DismissEditNameDialog : UiEvent()
         data class AutoStartSessionChange(val enabled: Boolean) : UiEvent()
-        data object DismissError : UiEvent()
     }
 
     sealed class SideEffect {

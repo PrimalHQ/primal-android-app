@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -47,7 +48,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.compositeOver
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -66,12 +66,10 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SessionUi
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SideEffect
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiEvent
@@ -113,14 +111,6 @@ fun ConnectedAppDetailsScreen(
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
-    val context = LocalContext.current
-
-    SnackbarErrorHandler(
-        error = state.error,
-        snackbarHostState = snackbarHostState,
-        errorMessageResolver = { it.resolveUiErrorMessage(context) },
-        onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
-    )
 
     Scaffold(
         topBar = {
@@ -160,7 +150,7 @@ fun ConnectedAppDetailsContent(
                 modifier = Modifier.padding(vertical = 16.dp),
                 iconUrl = state.appIconUrl,
                 appName = state.appName,
-                lastSession = state.lastSession,
+                lastSession = state.lastSessionStartedAt,
                 isSessionActive = state.isSessionActive,
                 autoStartSession = state.autoStartSession,
                 onAutoStartSessionChange = { eventPublisher(UiEvent.AutoStartSessionChange(it)) },
@@ -391,6 +381,7 @@ private fun AppActionButtons(onEditNameClick: () -> Unit, onDeleteConnectionClic
             contentColor = AppTheme.colorScheme.onSurface,
             onClick = onEditNameClick,
             shape = AppTheme.shapes.extraLarge,
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
         ) {
             Text(
                 text = stringResource(id = R.string.settings_connected_app_details_edit_name),
@@ -415,6 +406,7 @@ private fun AppActionButtons(onEditNameClick: () -> Unit, onDeleteConnectionClic
                 containerColor = blendedContainerColor,
                 contentColor = DangerSecondaryColor,
             ),
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
         ) {
             Text(
                 text = stringResource(id = R.string.settings_connected_app_details_delete_connection),
@@ -531,7 +523,7 @@ fun PreviewConnectedAppDetailsScreen() {
             state = UiState(
                 loading = false,
                 appName = "Highlighter",
-                lastSession = mockRecentSessionsForPreview.first().startedAt,
+                lastSessionStartedAt = mockRecentSessionsForPreview.first().startedAt,
                 recentSessions = mockRecentSessionsForPreview,
             ),
             onClose = {},

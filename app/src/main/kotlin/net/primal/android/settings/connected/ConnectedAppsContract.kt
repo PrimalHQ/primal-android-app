@@ -8,8 +8,4 @@ interface ConnectedAppsContract {
         val activeConnectionIds: Set<String> = emptySet(),
         val loading: Boolean = true,
     )
-
-    sealed class UiEvent {
-        data class ConnectionClick(val connectionId: String) : UiEvent()
-    }
 }

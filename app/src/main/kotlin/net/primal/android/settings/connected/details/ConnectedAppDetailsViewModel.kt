@@ -8,7 +8,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -18,7 +17,6 @@ import net.primal.android.settings.connected.details.ConnectedAppDetailsContract
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SideEffect
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiEvent
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiState
-import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 
@@ -27,7 +25,6 @@ class ConnectedAppDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val connectionRepository: ConnectionRepository,
     private val sessionRepository: SessionRepository,
-    private val activeAccountStore: ActiveAccountStore,
     private val sessionHandler: RemoteSignerSessionHandler,
 ) : ViewModel() {
 
@@ -53,7 +50,6 @@ class ConnectedAppDetailsViewModel @Inject constructor(
                 UiEvent.DismissEditNameDialog -> setState { copy(editingName = false) }
                 UiEvent.StartSession -> startSession()
                 UiEvent.EndSession -> endSession()
-                UiEvent.DismissError -> setState { copy(error = null) }
             }
         }
     }
@@ -62,7 +58,6 @@ class ConnectedAppDetailsViewModel @Inject constructor(
         observeConnection()
         observeActiveSession()
         observeRecentSessions()
-        observeUserAccount()
     }
 
     private fun observeConnection() =
@@ -81,8 +76,13 @@ class ConnectedAppDetailsViewModel @Inject constructor(
 
     private fun observeActiveSession() =
         viewModelScope.launch {
-            sessionRepository.observeActiveSessionForConnection(connectionId).collect {
-                setState { copy(isSessionActive = it != null) }
+            sessionRepository.observeActiveSessionForConnection(connectionId).collect { session ->
+                setState {
+                    copy(
+                        isSessionActive = session != null,
+                        activeSessionId = session?.sessionId,
+                    )
+                }
             }
         }
 
@@ -97,16 +97,9 @@ class ConnectedAppDetailsViewModel @Inject constructor(
                                 startedAt = it.sessionStartedAt,
                             )
                         },
-                        lastSession = sessions.firstOrNull()?.sessionStartedAt,
+                        lastSessionStartedAt = sessions.firstOrNull()?.sessionStartedAt,
                     )
                 }
-            }
-        }
-
-    private fun observeUserAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                setState { copy(userAvatarCdnImage = it.avatarCdnImage) }
             }
         }
 
@@ -137,9 +130,9 @@ class ConnectedAppDetailsViewModel @Inject constructor(
 
     private fun endSession() {
         viewModelScope.launch {
-            val activeSession = sessionRepository.observeActiveSessionForConnection(connectionId).firstOrNull()
-            if (activeSession != null) {
-                sessionHandler.endSession(activeSession.sessionId)
+            val activeSessionId = state.value.activeSessionId
+            if (activeSessionId != null) {
+                sessionHandler.endSession(activeSessionId)
             }
         }
     }
