@@ -1013,6 +1013,7 @@
 
     <string name="settings_connected_apps_title">Connected Apps</string>
     <string name="settings_connected_apps_unknown">Unknown App</string>
+    <string name="settings_no_connected_apps">No connected apps.</string>
     <string name="settings_connected_app_details_title">Connected App Details</string>
     <string name="settings_connected_app_details_not_found">Connection details not found.</string>
     <string name="settings_connected_app_details_for_app">Details for %1$s</string>
@@ -1030,6 +1031,7 @@
     <string name="settings_connected_app_details_edit_name">Edit Name</string>
     <string name="settings_connected_app_details_delete_connection">Delete Connection</string>
     <string name="settings_connected_app_details_auto_start_session">Auto start session</string>
+    <string name="settings_connected_app_details_last_session">Last Session: %1$s</string>
 
     <string name="biometric_prompt_title">Authenticate</string>
     <string name="biometric_prompt_description">This ensures that only you can access the private key.</string>

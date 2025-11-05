@@ -11,6 +11,7 @@ import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.repository.ConnectionRepository
+import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
 
 class ConnectionRepositoryImpl(
@@ -34,7 +35,11 @@ class ConnectionRepositoryImpl(
 
     override suspend fun deleteConnection(connectionId: String) =
         withContext(dispatchers.io()) {
-            database.connections().deleteConnection(connectionId = connectionId)
+            database.withTransaction {
+                database.sessions().deleteSessionsByConnectionId(connectionId = connectionId)
+                database.permissions().deletePermissionsByConnectionId(connectionId = connectionId)
+                database.connections().deleteConnection(connectionId = connectionId)
+            }
         }
 
     override suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<AppConnection> =

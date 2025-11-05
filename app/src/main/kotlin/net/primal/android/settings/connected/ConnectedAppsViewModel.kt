@@ -15,7 +15,6 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ConnectedAppsViewModel @Inject constructor(
@@ -43,30 +42,18 @@ class ConnectedAppsViewModel @Inject constructor(
 
     private fun observeConnections() {
         viewModelScope.launch {
-            runCatching {
-                val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
-                connectionRepository.observeAllConnections(signerPubKey = signerKeyPair.pubKey)
-                    .collect { connections ->
-                        val userAccounts = accountsStore.userAccounts.value
-                        val userAccountMap = userAccounts.associateBy { it.pubkey }
-                        val currentActiveIds = state.value.connections
-                            .filter { it.isActive }
-                            .map { it.connectionId }
-                            .toSet()
+            val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
+            connectionRepository.observeAllConnections(signerPubKey = signerKeyPair.pubKey)
+                .collect { connections ->
+                    val userAccounts = accountsStore.userAccounts.value
+                    val userAccountMap = userAccounts.associateBy { it.pubkey }
 
-                        val uiConnections = connections.map { connection ->
-                            val userAccount = userAccountMap[connection.userPubKey]
-                            connection.asAppConnectionUi(
-                                userAccount = userAccount,
-                                isActive = connection.connectionId in currentActiveIds,
-                            )
-                        }
-                        setState { copy(connections = uiConnections, loading = false) }
+                    val uiConnections = connections.map { connection ->
+                        val userAccount = userAccountMap[connection.userPubKey]
+                        connection.asAppConnectionUi(userAccount = userAccount)
                     }
-            }.onFailure {
-                Timber.w(it)
-                setState { copy(loading = false) }
-            }
+                    setState { copy(connections = uiConnections, loading = false) }
+                }
         }
     }
 
@@ -76,12 +63,7 @@ class ConnectedAppsViewModel @Inject constructor(
             sessionRepository.observeActiveSessions(signerPubKey = signerKeyPair.pubKey)
                 .collect { activeSessions ->
                     val activeConnectionIds = activeSessions.map { it.connectionId }.toSet()
-                    setState {
-                        val updatedConnections = this.connections.map {
-                            it.copy(isActive = it.connectionId in activeConnectionIds)
-                        }
-                        copy(connections = updatedConnections)
-                    }
+                    setState { copy(activeConnectionIds = activeConnectionIds) }
                 }
         }
     }

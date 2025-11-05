@@ -6,7 +6,7 @@ import net.primal.domain.links.CdnImage
 interface ConnectedAppDetailsContract {
     data class UiState(
         val loading: Boolean = true,
-        val appName: String = "",
+        val appName: String? = null,
         val appIconUrl: String? = null,
         val userAvatarCdnImage: CdnImage? = null,
         val isSessionActive: Boolean = false,
@@ -37,6 +37,6 @@ interface ConnectedAppDetailsContract {
     }
 
     sealed class SideEffect {
-        data object ConnectionDelete : SideEffect()
+        data object ConnectionDeleted : SideEffect()
     }
 }

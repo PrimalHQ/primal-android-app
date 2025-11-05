@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.core.errors.UiError
 import net.primal.android.navigation.connectionIdOrThrow
 import net.primal.android.nostrconnect.handler.RemoteSignerSessionHandler
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SessionUi
@@ -20,12 +19,8 @@ import net.primal.android.settings.connected.details.ConnectedAppDetailsContract
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiEvent
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.utils.onFailure
-import net.primal.core.utils.onSuccess
-import net.primal.core.utils.runCatching
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ConnectedAppDetailsViewModel @Inject constructor(
@@ -46,10 +41,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
 
     private val _effect = Channel<SideEffect>()
     val effect = _effect.receiveAsFlow()
-    private fun setEffect(effect: SideEffect) =
-        viewModelScope.launch {
-            _effect.send(effect)
-        }
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
     fun setEvent(event: UiEvent) {
         viewModelScope.launch {
@@ -80,7 +72,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
             connectionRepository.observeConnection(connectionId = connectionId).collect { connection ->
                 setState {
                     copy(
-                        appName = connection?.name ?: "",
+                        appName = connection?.name,
                         appIconUrl = connection?.image,
                         autoStartSession = connection?.autoStart ?: false,
                         loading = false,
@@ -121,61 +113,35 @@ class ConnectedAppDetailsViewModel @Inject constructor(
         }
 
     private suspend fun deleteConnection() {
-        runCatching {
-            connectionRepository.deleteConnection(connectionId)
-        }.onSuccess {
-            setEffect(SideEffect.ConnectionDelete)
-        }.onFailure {
-            Timber.e(it)
-            setState { copy(error = UiError.GenericError(message = it.message)) }
-        }
+        connectionRepository.deleteConnection(connectionId)
         setState { copy(confirmingDeletion = false) }
+        setEffect(SideEffect.ConnectionDeleted)
     }
 
     private fun updateAppName(name: String) {
         viewModelScope.launch {
-            runCatching {
-                connectionRepository.updateConnectionName(connectionId, name)
-            }.onFailure {
-                Timber.e(it)
-                setState { copy(error = UiError.GenericError(message = it.message)) }
-            }
+            connectionRepository.updateConnectionName(connectionId, name)
             setState { copy(editingName = false) }
         }
     }
 
     private fun updateAutoStartSession(enabled: Boolean) {
         viewModelScope.launch {
-            runCatching {
-                connectionRepository.updateConnectionAutoStart(connectionId, enabled)
-            }.onFailure {
-                Timber.e(it)
-                setState { copy(error = UiError.GenericError(message = it.message)) }
-            }
+            connectionRepository.updateConnectionAutoStart(connectionId, enabled)
         }
     }
 
     private fun startSession() {
         viewModelScope.launch {
-            runCatching {
-                sessionHandler.startSession(connectionId)
-            }.onFailure {
-                Timber.e(it)
-                setState { copy(error = UiError.GenericError(message = it.message)) }
-            }
+            sessionHandler.startSession(connectionId)
         }
     }
 
     private fun endSession() {
         viewModelScope.launch {
-            runCatching {
-                val activeSession = sessionRepository.observeActiveSessionForConnection(connectionId).firstOrNull()
-                if (activeSession != null) {
-                    sessionHandler.endSession(activeSession.sessionId)
-                }
-            }.onFailure {
-                Timber.e(it)
-                setState { copy(error = UiError.GenericError(message = it.message)) }
+            val activeSession = sessionRepository.observeActiveSessionForConnection(connectionId).firstOrNull()
+            if (activeSession != null) {
+                sessionHandler.endSession(activeSession.sessionId)
             }
         }
     }

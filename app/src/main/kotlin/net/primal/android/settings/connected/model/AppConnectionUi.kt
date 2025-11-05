@@ -9,15 +9,13 @@ data class AppConnectionUi(
     val appName: String,
     val appImage: CdnImage?,
     val userAvatarCdnImage: CdnImage?,
-    val isActive: Boolean,
 )
 
-fun AppConnection.asAppConnectionUi(userAccount: UserAccount?, isActive: Boolean): AppConnectionUi {
+fun AppConnection.asAppConnectionUi(userAccount: UserAccount?): AppConnectionUi {
     return AppConnectionUi(
         connectionId = this.connectionId,
         appName = this.name ?: "Unknown App",
         appImage = this.image?.let { CdnImage(it) },
         userAvatarCdnImage = userAccount?.avatarCdnImage,
-        isActive = isActive,
     )
 }

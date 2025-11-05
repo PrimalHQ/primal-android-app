@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -45,12 +45,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,7 +70,6 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.compose.icons.primaliconpack.NostrConnectSession
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SessionUi
@@ -79,7 +80,8 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.links.CdnImage
 
-private val DangerColor = Color(0xFFFA3C3C)
+private val DangerPrimaryColor = Color(0xFFFF2121)
+private val DangerSecondaryColor = Color(0xFFFA3C3C)
 private val EditButtonContainerColorDark = Color(0xFF333333)
 private val EditButtonContainerColorLight = Color(0xFFD5D5D5)
 private const val SECONDS_TO_MILLIS = 1000L
@@ -91,7 +93,7 @@ fun ConnectedAppDetailsScreen(viewModel: ConnectedAppDetailsViewModel, onClose: 
     LaunchedEffect(viewModel, onClose) {
         viewModel.effect.collect {
             when (it) {
-                SideEffect.ConnectionDelete -> onClose()
+                SideEffect.ConnectionDeleted -> onClose()
             }
         }
     }
@@ -153,7 +155,7 @@ fun ConnectedAppDetailsContent(
     eventPublisher: (UiEvent) -> Unit,
 ) {
     LazyColumn(modifier = modifier) {
-        item {
+        item(key = "Header", contentType = "Header") {
             HeaderSection(
                 modifier = Modifier.padding(vertical = 16.dp),
                 iconUrl = state.appIconUrl,
@@ -169,14 +171,14 @@ fun ConnectedAppDetailsContent(
             )
         }
 
-        item {
+        item(key = "Spacer", contentType = "Spacer") {
             Spacer(modifier = Modifier.height(24.dp))
         }
 
         if (state.recentSessions.isNotEmpty()) {
-            item {
+            item(key = "RecentSessionsTitle", contentType = "Title") {
                 Text(
-                    modifier = Modifier.padding(bottom = 8.dp),
+                    modifier = Modifier.padding(bottom = 16.dp),
                     text = stringResource(id = R.string.settings_connected_app_details_recent_sessions).uppercase(),
                     style = AppTheme.typography.titleMedium.copy(lineHeight = 20.sp),
                     fontWeight = FontWeight.SemiBold,
@@ -184,15 +186,29 @@ fun ConnectedAppDetailsContent(
                 )
             }
 
-            item {
-                Column(
-                    modifier = Modifier.clip(RoundedCornerShape(size = 12.dp)),
-                ) {
-                    state.recentSessions.forEachIndexed { index, session ->
-                        RecentSessionItem(session = session)
-                        if (index < state.recentSessions.size - 1) {
-                            PrimalDivider()
-                        }
+            itemsIndexed(
+                items = state.recentSessions,
+                key = { _, session -> session.sessionId },
+                contentType = { _, _ -> "SessionItem" },
+            ) { index, session ->
+                val isFirst = index == 0
+                val isLast = index == state.recentSessions.lastIndex
+
+                val shape = when {
+                    isFirst && isLast -> RoundedCornerShape(size = 12.dp)
+                    isFirst -> RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
+                    isLast -> RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
+                    else -> RectangleShape
+                }
+
+                Column(modifier = Modifier.clip(shape)) {
+                    RecentSessionItem(
+                        session = session,
+                        iconUrl = state.appIconUrl,
+                        appName = state.appName,
+                    )
+                    if (!isLast) {
+                        PrimalDivider()
                     }
                 }
             }
@@ -223,7 +239,7 @@ fun ConnectedAppDetailsContent(
 private fun HeaderSection(
     modifier: Modifier = Modifier,
     iconUrl: String?,
-    appName: String,
+    appName: String?,
     lastSession: Long?,
     isSessionActive: Boolean,
     autoStartSession: Boolean,
@@ -275,9 +291,7 @@ private fun HeaderSection(
             ) {
                 Text(
                     text = stringResource(id = R.string.settings_connected_app_details_auto_start_session),
-                    style = AppTheme.typography.titleMedium.copy(
-                        lineHeight = 20.sp,
-                    ),
+                    style = AppTheme.typography.bodyLarge,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     fontWeight = FontWeight.Normal,
                 )
@@ -293,7 +307,7 @@ private fun HeaderSection(
 @Composable
 private fun AppSummarySection(
     iconUrl: String?,
-    appName: String,
+    appName: String?,
     lastSession: Long?,
 ) {
     Column(
@@ -301,21 +315,24 @@ private fun AppSummarySection(
         verticalArrangement = Arrangement.spacedBy(3.dp),
     ) {
         AppIconThumbnail(
-            modifier = Modifier.padding(bottom = 10.dp),
+            modifier = Modifier.padding(bottom = 12.dp),
             avatarCdnImage = iconUrl?.let { CdnImage(it) },
-            appName = appName,
+            appName = appName ?: stringResource(id = R.string.settings_connected_apps_unknown),
             avatarSize = 48.dp,
         )
 
         Text(
-            text = appName.ifEmpty { stringResource(id = R.string.settings_connected_apps_unknown) },
+            text = appName ?: stringResource(id = R.string.settings_connected_apps_unknown),
             style = AppTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
             fontWeight = FontWeight.Bold,
         )
         if (lastSession != null) {
             val formattedLastSession = rememberFormattedDateTime(timestamp = lastSession)
             Text(
-                text = "Last Session: $formattedLastSession",
+                text = stringResource(
+                    id = R.string.settings_connected_app_details_last_session,
+                    formattedLastSession,
+                ),
                 style = AppTheme.typography.bodyMedium.copy(lineHeight = 24.sp),
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
@@ -350,7 +367,7 @@ private fun SessionControlButton(
         Text(
             textAlign = TextAlign.Center,
             text = text,
-            style = AppTheme.typography.bodySmall,
+            style = AppTheme.typography.bodyMedium,
             color = AppTheme.colorScheme.surface,
         )
     }
@@ -360,7 +377,7 @@ private fun SessionControlButton(
 private fun AppActionButtons(onEditNameClick: () -> Unit, onDeleteConnectionClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         PrimalFilledButton(
             modifier = Modifier
@@ -377,13 +394,13 @@ private fun AppActionButtons(onEditNameClick: () -> Unit, onDeleteConnectionClic
         ) {
             Text(
                 text = stringResource(id = R.string.settings_connected_app_details_edit_name),
-                style = AppTheme.typography.bodySmall,
+                style = AppTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
 
-        Spacer(modifier = Modifier.width(16.dp))
-
-        val blendedContainerColor = DangerColor.copy(
+        val blendedContainerColor = DangerPrimaryColor.copy(
             alpha = 0.12f,
         ).compositeOver(AppTheme.colorScheme.surface)
 
@@ -393,22 +410,28 @@ private fun AppActionButtons(onEditNameClick: () -> Unit, onDeleteConnectionClic
                 .height(40.dp),
             onClick = onDeleteConnectionClick,
             shape = AppTheme.shapes.extraLarge,
-            border = BorderStroke(1.dp, DangerColor),
+            border = BorderStroke(1.dp, DangerSecondaryColor.copy(alpha = 0.2f)),
             colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = blendedContainerColor,
-                contentColor = DangerColor,
+                contentColor = DangerSecondaryColor,
             ),
         ) {
             Text(
                 text = stringResource(id = R.string.settings_connected_app_details_delete_connection),
-                style = AppTheme.typography.bodySmall,
+                style = AppTheme.typography.bodyMedium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
         }
     }
 }
 
 @Composable
-private fun RecentSessionItem(session: SessionUi) {
+private fun RecentSessionItem(
+    session: SessionUi,
+    iconUrl: String?,
+    appName: String?,
+) {
     val formattedDate = rememberFormattedDateTime(timestamp = session.startedAt)
 
     ListItem(
@@ -417,10 +440,10 @@ private fun RecentSessionItem(session: SessionUi) {
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
         ),
         leadingContent = {
-            Icon(
-                imageVector = PrimalIcons.NostrConnectSession,
-                contentDescription = null,
-                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            AppIconThumbnail(
+                avatarCdnImage = iconUrl?.let { CdnImage(it) },
+                appName = appName ?: stringResource(id = R.string.settings_connected_apps_unknown),
+                avatarSize = 24.dp,
             )
         },
         headlineContent = {
@@ -441,11 +464,11 @@ private fun RecentSessionItem(session: SessionUi) {
 
 @Composable
 private fun EditNameAlertDialog(
-    currentName: String,
+    currentName: String?,
     onDismiss: () -> Unit,
     onNameChange: (String) -> Unit,
 ) {
-    var newName by remember { mutableStateOf(currentName) }
+    var newName by remember { mutableStateOf(currentName ?: "") }
     AlertDialog(
         containerColor = AppTheme.colorScheme.surfaceVariant,
         title = {

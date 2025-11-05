@@ -6,12 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalScaffold
@@ -78,26 +78,47 @@ fun ConnectedAppsScreen(
             )
         },
     ) { paddingValues ->
-        if (state.loading) {
-            PrimalLoadingSpinner()
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-            ) {
-                item {
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp, vertical = 12.dp)
-                            .clip(RoundedCornerShape(size = 12.dp)),
-                    ) {
-                        state.connections.forEachIndexed { index, connection ->
+        when {
+            state.loading -> PrimalLoadingSpinner()
+            state.connections.isEmpty() -> {
+                ListNoContent(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    noContentText = stringResource(id = R.string.settings_no_connected_apps),
+                    refreshButtonVisible = false,
+                )
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 12.dp, vertical = 12.dp),
+                ) {
+                    itemsIndexed(
+                        items = state.connections,
+                        key = { _, connection -> connection.connectionId },
+                        contentType = { _, _ -> "ConnectionItem" },
+                    ) { index, connection ->
+                        val isFirst = index == 0
+                        val isLast = index == state.connections.lastIndex
+                        val isActive = connection.connectionId in state.activeConnectionIds
+
+                        val shape = when {
+                            isFirst && isLast -> RoundedCornerShape(size = 12.dp)
+                            isFirst -> RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
+                            isLast -> RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
+                            else -> AppTheme.shapes.extraSmall
+                        }
+
+                        Column(modifier = Modifier.clip(shape)) {
                             ConnectedAppListItem(
                                 connection = connection,
+                                isActive = isActive,
                                 onClick = { onConnectedAppClick(connection.connectionId) },
                             )
-                            if (index < state.connections.size - 1) {
+                            if (!isLast) {
                                 PrimalDivider()
                             }
                         }
@@ -109,7 +130,11 @@ fun ConnectedAppsScreen(
 }
 
 @Composable
-private fun ConnectedAppListItem(connection: AppConnectionUi, onClick: () -> Unit) {
+private fun ConnectedAppListItem(
+    connection: AppConnectionUi,
+    isActive: Boolean,
+    onClick: () -> Unit,
+) {
     ListItem(
         modifier = Modifier.clickable { onClick() },
         colors = ListItemDefaults.colors(
@@ -120,7 +145,7 @@ private fun ConnectedAppListItem(connection: AppConnectionUi, onClick: () -> Uni
                 modifier = Modifier
                     .size(8.dp)
                     .background(
-                        color = if (connection.isActive) {
+                        color = if (isActive) {
                             AppTheme.extraColorScheme.successBright
                         } else {
                             AppTheme.extraColorScheme.onSurfaceVariantAlt4
@@ -150,12 +175,12 @@ private fun ConnectedAppListItem(connection: AppConnectionUi, onClick: () -> Uni
         trailingContent = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 UniversalAvatarThumbnail(
                     avatarCdnImage = connection.userAvatarCdnImage,
                     avatarSize = 22.dp,
                 )
-                Spacer(modifier = Modifier.width(16.dp))
                 Icon(
                     modifier = Modifier.size(24.dp),
                     imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
@@ -181,30 +206,27 @@ fun PreviewConnectedAppsScreen() {
                             appName = "Primal web app",
                             appImage = CdnImage("https://primal.net/assets/favicon-51789dff.ico"),
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
-                            isActive = true,
                         ),
                         AppConnectionUi(
                             connectionId = "2",
                             appName = "Nostr 1",
                             appImage = null,
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
-                            isActive = true,
                         ),
                         AppConnectionUi(
                             connectionId = "3",
                             appName = "Primal",
                             appImage = null,
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
-                            isActive = false,
                         ),
                         AppConnectionUi(
                             connectionId = "4",
                             appName = "",
                             appImage = null,
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
-                            isActive = false,
                         ),
                     ),
+                    activeConnectionIds = setOf("1", "2"),
                 ),
                 onClose = {},
                 onConnectedAppClick = {},
