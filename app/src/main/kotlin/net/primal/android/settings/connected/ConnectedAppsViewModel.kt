@@ -9,6 +9,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.settings.connected.ConnectedAppsContract.UiEvent
+import net.primal.android.settings.connected.ConnectedAppsContract.UiState
 import net.primal.android.settings.connected.model.asAppConnectionUi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
@@ -24,16 +26,12 @@ class ConnectedAppsViewModel @Inject constructor(
     private val accountsStore: UserAccountsStore,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(ConnectedAppsContract.UiState())
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: ConnectedAppsContract.UiState.() -> ConnectedAppsContract.UiState) {
-        _state.getAndUpdate(reducer)
-    }
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
-    private val events = MutableSharedFlow<ConnectedAppsContract.UiEvent>()
-    fun setEvent(event: ConnectedAppsContract.UiEvent) {
-        viewModelScope.launch { events.emit(event) }
-    }
+    private val events = MutableSharedFlow<UiEvent>()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
         observeConnections()

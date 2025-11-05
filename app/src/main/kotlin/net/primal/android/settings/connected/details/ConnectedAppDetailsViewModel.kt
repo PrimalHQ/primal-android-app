@@ -35,9 +35,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) {
-        _state.getAndUpdate(reducer)
-    }
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
     private val _effect = Channel<SideEffect>()
     val effect = _effect.receiveAsFlow()
