@@ -128,14 +128,14 @@ private fun ActiveSessionsContent(
                 ) {
                     items(
                         items = state.sessions,
-                        key = { it.connectionId },
+                        key = { it.sessionId },
                     ) { session ->
                         SessionListItem(
                             session = session,
-                            isSelected = state.selectedSessions.contains(session.connectionId),
+                            isSelected = state.selectedSessions.contains(session.sessionId),
                             onClick = {
                                 eventPublisher(
-                                    ActiveSessionsContract.UiEvent.SessionClick(session.connectionId),
+                                    ActiveSessionsContract.UiEvent.SessionClick(session.sessionId),
                                 )
                             },
                         )
@@ -255,6 +255,7 @@ private fun SessionListItem(
 
         UniversalAvatarThumbnail(
             avatarCdnImage = session.userAccount.avatarCdnImage,
+            legendaryCustomization = session.userAccount.legendaryCustomization,
             avatarSize = 28.dp,
         )
     }

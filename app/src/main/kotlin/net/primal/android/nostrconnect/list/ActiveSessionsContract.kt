@@ -14,6 +14,7 @@ interface ActiveSessionsContract {
     }
 
     data class ActiveSessionUi(
+        val sessionId: String,
         val connectionId: String,
         val appName: String?,
         val appUrl: String?,
@@ -22,7 +23,7 @@ interface ActiveSessionsContract {
     )
 
     sealed class UiEvent {
-        data class SessionClick(val connectionId: String) : UiEvent()
+        data class SessionClick(val sessionId: String) : UiEvent()
         data object SelectAllClick : UiEvent()
         data object DisconnectClick : UiEvent()
         data object DismissError : UiEvent()
