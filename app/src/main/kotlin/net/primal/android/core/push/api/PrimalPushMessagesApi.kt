@@ -5,4 +5,6 @@ import net.primal.domain.nostr.NostrEvent
 interface PrimalPushMessagesApi {
 
     suspend fun updateNotificationsToken(authorizationEvents: List<NostrEvent>, token: String)
+
+    suspend fun updateNotificationTokenForNip46(authorizationEvent: NostrEvent, token: String)
 }
