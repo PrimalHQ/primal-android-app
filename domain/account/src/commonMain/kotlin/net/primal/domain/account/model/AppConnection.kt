@@ -10,5 +10,5 @@ data class AppConnection(
     val url: String?,
     val image: String?,
     val permissions: List<AppPermission>,
-    val autoStart: Boolean = false,
+    val autoStart: Boolean,
 )

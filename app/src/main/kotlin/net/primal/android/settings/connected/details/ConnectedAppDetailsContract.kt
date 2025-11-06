@@ -1,5 +1,8 @@
 package net.primal.android.settings.connected.details
 
+import net.primal.android.core.errors.UiError
+import net.primal.android.settings.connected.model.SessionUi
+
 interface ConnectedAppDetailsContract {
     data class UiState(
         val loading: Boolean = true,
@@ -11,12 +14,7 @@ interface ConnectedAppDetailsContract {
         val recentSessions: List<SessionUi> = emptyList(),
         val confirmingDeletion: Boolean = false,
         val editingName: Boolean = false,
-        val activeSessionId: String? = null,
-    )
-
-    data class SessionUi(
-        val sessionId: String,
-        val startedAt: Long,
+        val error: UiError? = null,
     )
 
     sealed class UiEvent {
@@ -29,6 +27,7 @@ interface ConnectedAppDetailsContract {
         data class NameChange(val name: String) : UiEvent()
         data object DismissEditNameDialog : UiEvent()
         data class AutoStartSessionChange(val enabled: Boolean) : UiEvent()
+        data object DismissError : UiEvent()
     }
 
     sealed class SideEffect {

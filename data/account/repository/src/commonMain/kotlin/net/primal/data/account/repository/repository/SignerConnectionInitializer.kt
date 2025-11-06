@@ -76,6 +76,7 @@ class SignerConnectionInitializer internal constructor(
             url = url,
             image = image,
             permissions = perms,
+            autoStart = true,
         ) to secret
     }
 

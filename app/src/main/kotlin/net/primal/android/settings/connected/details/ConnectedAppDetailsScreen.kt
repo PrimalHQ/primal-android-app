@@ -48,6 +48,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.compositeOver
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -66,14 +67,16 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SessionUi
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SideEffect
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiEvent
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiState
+import net.primal.android.settings.connected.model.SessionUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.links.CdnImage
@@ -111,6 +114,14 @@ fun ConnectedAppDetailsScreen(
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
+
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context) },
+        onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
+    )
 
     Scaffold(
         topBar = {
