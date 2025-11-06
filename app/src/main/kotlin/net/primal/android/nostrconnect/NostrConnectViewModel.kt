@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.di.SignerConnectionInitializerFactory
 import net.primal.android.core.errors.UiError
+import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.navigation.nostrConnectUri
 import net.primal.android.nostrconnect.NostrConnectContract.Companion.DAILY_BUDGET_OPTIONS
@@ -45,6 +46,7 @@ class NostrConnectViewModel @Inject constructor(
     private val credentialsStore: CredentialsStore,
     private val signerConnectionInitializerFactory: SignerConnectionInitializerFactory,
     private val signerSessionHandler: RemoteSignerSessionHandler,
+    private val tokenUpdater: PushNotificationsTokenUpdater,
 ) : ViewModel() {
 
     private val connectionUrl = savedStateHandle.nostrConnectUri
@@ -178,6 +180,7 @@ class NostrConnectViewModel @Inject constructor(
                 userPubKey = selectedAccount.pubkey,
                 connectionUrl = connectionUrl,
             ).onSuccess {
+                runCatching { tokenUpdater.updateTokenForRemoteSigner() }
                 signerSessionHandler.startSession(connectionId = it.connectionId)
                 setEffect(NostrConnectContract.SideEffect.ConnectionSuccess)
             }.onFailure { error ->

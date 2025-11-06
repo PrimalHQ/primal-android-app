@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
+import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.navigation.connectionIdOrThrow
 import net.primal.android.nostrconnect.handler.RemoteSignerSessionHandler
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SideEffect
@@ -27,6 +28,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
     private val connectionRepository: ConnectionRepository,
     private val sessionRepository: SessionRepository,
     private val sessionHandler: RemoteSignerSessionHandler,
+    private val tokenUpdater: PushNotificationsTokenUpdater,
 ) : ViewModel() {
 
     private val connectionId: String = savedStateHandle.connectionIdOrThrow
@@ -110,6 +112,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 connectionRepository.deleteConnection(connectionId)
+                runCatching { tokenUpdater.updateTokenForRemoteSigner() }
             }.onSuccess {
                 setState { copy(confirmingDeletion = false) }
                 setEffect(SideEffect.ConnectionDeleted)

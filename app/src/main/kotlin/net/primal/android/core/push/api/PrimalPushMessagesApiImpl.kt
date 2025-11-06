@@ -24,4 +24,17 @@ class PrimalPushMessagesApiImpl @Inject constructor(
             ),
         )
     }
+
+    override suspend fun updateNotificationTokenForNip46(authorizationEvent: NostrEvent, token: String) {
+        primalCacheApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.UPDATE_PUSH_NOTIFICATION_TOKEN_FOR_NIP46.id,
+                optionsJson = UpdateNotificationTokenRequest(
+                    authorizationEvents = listOf(authorizationEvent),
+                    platform = "android",
+                    token = token,
+                ).encodeToJsonString(),
+            ),
+        )
+    }
 }
