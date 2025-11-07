@@ -77,6 +77,9 @@ interface AppSessionDataDao {
     )
     suspend fun decrementActiveRelayCountOrEnd(sessionId: String)
 
+    @Query("UPDATE AppSessionData SET activeRelayCount = :activeRelayCount WHERE sessionId = :sessionId")
+    suspend fun setActiveRelayCount(sessionId: String, activeRelayCount: Int)
+
     @Query("DELETE FROM AppSessionData WHERE connectionId = :connectionId")
     suspend fun deleteSessionsByConnectionId(connectionId: String)
 }

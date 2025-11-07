@@ -87,4 +87,9 @@ class SessionRepositoryImpl(
                 }
             }
         }
+
+    override suspend fun setActiveRelayCount(sessionId: String, activeRelayCount: Int) =
+        withContext(dispatchers.io()) {
+            database.sessions().setActiveRelayCount(sessionId = sessionId, activeRelayCount = activeRelayCount)
+        }
 }
