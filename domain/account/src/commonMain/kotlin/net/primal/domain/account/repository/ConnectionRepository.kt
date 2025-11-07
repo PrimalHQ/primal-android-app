@@ -7,6 +7,8 @@ import net.primal.domain.account.model.AppConnection
 interface ConnectionRepository {
     fun observeAllConnections(signerPubKey: String): Flow<List<AppConnection>>
 
+    fun observeConnection(connectionId: String): Flow<AppConnection?>
+
     suspend fun getAllConnections(signerPubKey: String): List<AppConnection>
 
     suspend fun deleteConnection(connectionId: String)
@@ -18,4 +20,8 @@ interface ConnectionRepository {
     suspend fun saveConnection(secret: String, connection: AppConnection)
 
     suspend fun getUserPubKey(clientPubKey: String): Result<String>
+
+    suspend fun updateConnectionName(connectionId: String, name: String)
+
+    suspend fun updateConnectionAutoStart(connectionId: String, autoStart: Boolean)
 }

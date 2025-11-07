@@ -10,7 +10,9 @@ import net.primal.core.utils.serialization.encodeToJsonString
 @ExperimentalEncodingApi
 internal object CryptoManager {
 
-    private val rawKey: ByteArray = createPlatformKeyStore().getOrCreateKey()
+    private val rawKey: ByteArray by lazy {
+        createPlatformKeyStore().getOrCreateKey()
+    }
 
     private val gcmKey by lazy {
         CryptographyProvider.Default
