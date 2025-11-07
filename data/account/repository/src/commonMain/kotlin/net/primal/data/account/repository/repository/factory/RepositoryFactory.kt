@@ -6,8 +6,10 @@ import net.primal.data.account.repository.manager.factory.AccountManagerFactory
 import net.primal.data.account.repository.repository.ConnectionRepositoryImpl
 import net.primal.data.account.repository.repository.SessionRepositoryImpl
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
+import net.primal.data.account.repository.repository.SignerLogRepositoryImpl
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
+import net.primal.domain.account.repository.SignerLogRepository
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
 abstract class RepositoryFactory {
@@ -23,6 +25,12 @@ abstract class RepositoryFactory {
 
     fun createSessionRepository(): SessionRepository =
         SessionRepositoryImpl(
+            database = resolveAccountDatabase(),
+            dispatchers = dispatcherProvider,
+        )
+
+    fun createSignerLogRepository(): SignerLogRepository =
+        SignerLogRepositoryImpl(
             database = resolveAccountDatabase(),
             dispatchers = dispatcherProvider,
         )

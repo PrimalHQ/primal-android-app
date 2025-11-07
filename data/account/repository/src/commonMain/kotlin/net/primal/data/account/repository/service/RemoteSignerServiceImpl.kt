@@ -10,6 +10,7 @@ import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.model.RelayEvent
+import net.primal.data.account.repository.processor.SignerLogProcessor
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
@@ -21,12 +22,14 @@ class RemoteSignerServiceImpl internal constructor(
     private val sessionRepository: SessionRepository,
     private val nostrRelayManager: NostrRelayManager,
     private val remoteSignerMethodResponseBuilder: RemoteSignerMethodResponseBuilder,
+    private val signerLogProcessor: SignerLogProcessor,
 ) : RemoteSignerService {
 
     private val scope = CoroutineScope(SupervisorJob())
 
     private var relaySessionMap = emptyMap<String, List<String>>()
     private var activeClientPubKeys = HashSet<String>()
+    private var clientSessionMap = emptyMap<String, String>()
 
     override fun start() {
         Napier.d(tag = "Signer") { "RemoteSignerService started." }
@@ -49,6 +52,7 @@ class RemoteSignerServiceImpl internal constructor(
                             valueTransform = { it.second },
                         )
 
+                    clientSessionMap = sessions.associate { it.clientPubKey to it.sessionId }
                     activeClientPubKeys = sessions.map { it.clientPubKey }.toHashSet()
                     nostrRelayManager.connectToRelays(relays = sessions.flatMap { it.relays }.toSet())
                 }
@@ -92,6 +96,13 @@ class RemoteSignerServiceImpl internal constructor(
             if (!activeClientPubKeys.contains(method.clientPubKey)) return@launch
 
             val response = remoteSignerMethodResponseBuilder.build(method)
+            clientSessionMap[method.clientPubKey]?.let { sessionId ->
+                signerLogProcessor.processAndLog(
+                    sessionId = sessionId,
+                    method = method,
+                    response = response,
+                )
+            }
 
             sendResponse(response = response)
         }

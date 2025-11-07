@@ -3,10 +3,12 @@ package net.primal.data.account.repository.service.factory
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.factory.AccountManagerFactory
+import net.primal.data.account.repository.processor.SignerLogProcessor
 import net.primal.data.account.repository.service.NostrEncryptionServiceImpl
 import net.primal.data.account.repository.service.RemoteSignerServiceImpl
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
+import net.primal.domain.account.repository.SignerLogRepository
 import net.primal.domain.account.service.NostrEncryptionService
 import net.primal.domain.account.service.RemoteSignerService
 import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
@@ -20,6 +22,7 @@ object AccountServiceFactory {
         nostrEncryptionHandler: NostrEncryptionHandler,
         connectionRepository: ConnectionRepository,
         sessionRepository: SessionRepository,
+        signerLogRepository: SignerLogRepository,
     ): RemoteSignerService =
         RemoteSignerServiceImpl(
             signerKeyPair = signerKeyPair,
@@ -33,6 +36,9 @@ object AccountServiceFactory {
                 nostrEventSignatureHandler = eventSignatureHandler,
                 nostrEncryptionHandler = nostrEncryptionHandler,
                 connectionRepository = connectionRepository,
+            ),
+            signerLogProcessor = SignerLogProcessor(
+                signerLogRepository = signerLogRepository,
             ),
         )
 
