@@ -2,7 +2,7 @@ package net.primal.data.account.repository.service.factory
 
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
-import net.primal.data.account.repository.manager.factory.AccountManagerFactory
+import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.service.NostrEncryptionServiceImpl
 import net.primal.data.account.repository.service.RemoteSignerServiceImpl
 import net.primal.domain.account.repository.ConnectionRepository
@@ -25,7 +25,7 @@ object AccountServiceFactory {
             signerKeyPair = signerKeyPair,
             connectionRepository = connectionRepository,
             sessionRepository = sessionRepository,
-            nostrRelayManager = AccountManagerFactory.createNostrRelayManager(
+            nostrRelayManager = NostrRelayManager(
                 dispatcherProvider = createDispatcherProvider(),
                 signerKeyPair = signerKeyPair,
             ),
