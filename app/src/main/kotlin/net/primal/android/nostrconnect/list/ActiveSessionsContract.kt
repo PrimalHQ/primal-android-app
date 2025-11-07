@@ -1,7 +1,7 @@
 package net.primal.android.nostrconnect.list
 
 import net.primal.android.core.errors.UiError
-import net.primal.android.drawer.multiaccount.model.UserAccountUi
+import net.primal.android.nostrconnect.model.ActiveSessionUi
 
 interface ActiveSessionsContract {
     data class UiState(
@@ -12,15 +12,6 @@ interface ActiveSessionsContract {
     ) {
         val allSessionsSelected: Boolean get() = sessions.isNotEmpty() && selectedSessions.size == sessions.size
     }
-
-    data class ActiveSessionUi(
-        val sessionId: String,
-        val connectionId: String,
-        val appName: String?,
-        val appUrl: String?,
-        val appImageUrl: String?,
-        val userAccount: UserAccountUi,
-    )
 
     sealed class UiEvent {
         data class SessionClick(val sessionId: String) : UiEvent()

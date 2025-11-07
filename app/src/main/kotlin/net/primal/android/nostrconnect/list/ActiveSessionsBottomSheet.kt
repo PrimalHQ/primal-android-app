@@ -44,6 +44,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.selectableItem
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiState
+import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
 
@@ -211,7 +212,7 @@ private fun HeaderSection(
 
 @Composable
 private fun SessionListItem(
-    session: ActiveSessionsContract.ActiveSessionUi,
+    session: ActiveSessionUi,
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
