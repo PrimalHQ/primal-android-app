@@ -135,6 +135,7 @@ internal class NostrSocketClientImpl(
                 message = "Closed by client.",
             ),
         )
+        onSocketConnectionClosed?.invoke(socketUrl, RuntimeException("Closed by client."))
         wsSession = null
     }
 
