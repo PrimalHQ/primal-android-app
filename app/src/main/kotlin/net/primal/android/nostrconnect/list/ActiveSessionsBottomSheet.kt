@@ -44,6 +44,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.selectableItem
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiState
+import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
 
@@ -128,14 +129,14 @@ private fun ActiveSessionsContent(
                 ) {
                     items(
                         items = state.sessions,
-                        key = { it.connectionId },
+                        key = { it.sessionId },
                     ) { session ->
                         SessionListItem(
                             session = session,
-                            isSelected = state.selectedSessions.contains(session.connectionId),
+                            isSelected = state.selectedSessions.contains(session.sessionId),
                             onClick = {
                                 eventPublisher(
-                                    ActiveSessionsContract.UiEvent.SessionClick(session.connectionId),
+                                    ActiveSessionsContract.UiEvent.SessionClick(session.sessionId),
                                 )
                             },
                         )
@@ -211,7 +212,7 @@ private fun HeaderSection(
 
 @Composable
 private fun SessionListItem(
-    session: ActiveSessionsContract.ActiveSessionUi,
+    session: ActiveSessionUi,
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
@@ -255,6 +256,7 @@ private fun SessionListItem(
 
         UniversalAvatarThumbnail(
             avatarCdnImage = session.userAccount.avatarCdnImage,
+            legendaryCustomization = session.userAccount.legendaryCustomization,
             avatarSize = 28.dp,
         )
     }
