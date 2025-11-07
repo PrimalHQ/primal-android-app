@@ -62,9 +62,11 @@ internal class NostrRelayManager(
             dispatchers = dispatcherProvider,
             signerKeyPair = signerKeyPair,
             onSocketConnectionOpened = { url ->
+                Napier.d(tag = "SignerNostrRelayManager") { "Connected to relay: $url" }
                 scope.launch { _relayEvents.emit(RelayEvent.Connected(relayUrl = url)) }
             },
             onSocketConnectionClosed = { url, _ ->
+                Napier.d(tag = "SignerNostrRelayManager") { "Disconnected from relay: $url" }
                 scope.launch { _relayEvents.emit(RelayEvent.Disconnected(relayUrl = url)) }
             },
         )
@@ -123,12 +125,15 @@ internal class NostrRelayManager(
         clientJobs[relay] = scope.launch {
             scope.launch {
                 client.incomingMethods.collect { method ->
+                    Napier.d(tag = "Signer") { "Got method in `NostrRelayManager`: $method" }
                     if (cache.seen(method.id)) return@collect
+                    Napier.d(tag = "Signer") { "We didn't previously see this method." }
 
                     if (!_incomingMethods.tryEmit(method)) {
                         _incomingMethods.emit(method)
                     }
 
+                    Napier.d(tag = "Signer") { "Emitted method: $method" }
                     cache.mark(method.id)
                 }
             }

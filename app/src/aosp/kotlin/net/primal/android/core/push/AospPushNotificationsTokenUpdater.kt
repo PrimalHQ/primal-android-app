@@ -4,4 +4,5 @@ import javax.inject.Inject
 
 class AospPushNotificationsTokenUpdater @Inject constructor() : PushNotificationsTokenUpdater {
     override suspend fun updateTokenForAllUsers() = Unit
+    override suspend fun updateTokenForRemoteSigner() = Unit
 }

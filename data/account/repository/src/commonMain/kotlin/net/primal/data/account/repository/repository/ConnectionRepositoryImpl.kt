@@ -11,6 +11,7 @@ import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.repository.ConnectionRepository
+import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
 
 class ConnectionRepositoryImpl(
@@ -21,6 +22,11 @@ class ConnectionRepositoryImpl(
         database.connections().observeAllConnections(signerPubKey = signerPubKey.asEncryptable())
             .map { connections -> connections.map { it.asDomain() } }
 
+    override fun observeConnection(connectionId: String): Flow<AppConnection?> {
+        return database.connections().observeConnection(connectionId = connectionId)
+            .map { it?.asDomain() }
+    }
+
     override suspend fun getAllConnections(signerPubKey: String): List<AppConnection> =
         withContext(dispatchers.io()) {
             database.connections().getAll(signerPubKey = signerPubKey.asEncryptable())
@@ -29,7 +35,11 @@ class ConnectionRepositoryImpl(
 
     override suspend fun deleteConnection(connectionId: String) =
         withContext(dispatchers.io()) {
-            database.connections().deleteConnection(connectionId = connectionId)
+            database.withTransaction {
+                database.sessions().deleteSessionsByConnectionId(connectionId = connectionId)
+                database.permissions().deletePermissionsByConnectionId(connectionId = connectionId)
+                database.connections().deleteConnection(connectionId = connectionId)
+            }
         }
 
     override suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<AppConnection> =
@@ -58,6 +68,7 @@ class ConnectionRepositoryImpl(
                         clientPubKey = connection.clientPubKey.asEncryptable(),
                         signerPubKey = connection.signerPubKey.asEncryptable(),
                         userPubKey = connection.userPubKey.asEncryptable(),
+                        autoStart = connection.autoStart,
                     ),
                 ),
             )
@@ -70,4 +81,16 @@ class ConnectionRepositoryImpl(
                 ?.data?.userPubKey?.decrypted?.asSuccess()
                 ?: Result.failure(NoSuchElementException("Couldn't locate user pubkey for client pubkey."))
         }
+
+    override suspend fun updateConnectionName(connectionId: String, name: String) {
+        withContext(dispatchers.io()) {
+            database.connections().updateConnectionName(connectionId, name.asEncryptable())
+        }
+    }
+
+    override suspend fun updateConnectionAutoStart(connectionId: String, autoStart: Boolean) {
+        withContext(dispatchers.io()) {
+            database.connections().updateConnectionAutoStart(connectionId, autoStart)
+        }
+    }
 }

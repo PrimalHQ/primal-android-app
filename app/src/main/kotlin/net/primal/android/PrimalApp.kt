@@ -42,7 +42,7 @@ class PrimalApp : Application() {
         AppConfigInitializer.init(this@PrimalApp)
         PrimalRepositoryFactory.init(this@PrimalApp)
         WalletRepositoryFactory.init(context = this@PrimalApp, enableDbEncryption = !BuildConfig.DEBUG)
-        AccountRepositoryFactory.init(context = this@PrimalApp, enableDbEncryption = !BuildConfig.DEBUG)
+        AccountRepositoryFactory.init(context = this@PrimalApp, enableDbEncryption = false)
 
         loggers.forEach {
             Timber.plant(it)

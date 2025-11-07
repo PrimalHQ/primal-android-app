@@ -80,6 +80,7 @@ class RemoteSignerServiceImpl internal constructor(
     private fun observeMethods() =
         scope.launch {
             nostrRelayManager.incomingMethods.collect { method ->
+                Napier.d(tag = "Signer") { "Observing methods: $method" }
                 processMethod(method = method)
             }
         }
@@ -103,21 +104,27 @@ class RemoteSignerServiceImpl internal constructor(
                     response = response,
                 )
             }
+            Napier.d(tag = "Signer") { "Response $response" }
 
             sendResponse(response = response)
         }
 
     private suspend fun sendResponse(response: RemoteSignerMethodResponse) {
+        Napier.d(tag = "Signer") { "Sending response: $response" }
+        val relays = connectionRepository
+            .getConnectionByClientPubKey(clientPubKey = response.clientPubKey)
+            .getOrNull()?.relays
+
+        Napier.d(tag = "Signer") { "Relays: $relays" }
+
         nostrRelayManager.sendResponse(
-            relays = connectionRepository
-                .getConnectionByClientPubKey(clientPubKey = response.clientPubKey)
-                .getOrNull()?.relays
-                ?: return,
+            relays = relays ?: return,
             response = response,
         )
     }
 
     override fun stop() {
+        Napier.d(tag = "Signer") { "RemoteSignerService stopped." }
         scope.launch { sessionRepository.endAllActiveSessions() }
             .invokeOnCompletion { scope.cancel() }
         nostrRelayManager.disconnectFromAll()

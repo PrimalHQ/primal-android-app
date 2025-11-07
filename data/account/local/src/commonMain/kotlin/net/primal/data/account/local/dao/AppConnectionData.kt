@@ -23,4 +23,5 @@ data class AppConnectionData(
     val clientPubKey: Encryptable<String>,
     val signerPubKey: Encryptable<String>,
     val userPubKey: Encryptable<String>,
+    val autoStart: Boolean,
 )

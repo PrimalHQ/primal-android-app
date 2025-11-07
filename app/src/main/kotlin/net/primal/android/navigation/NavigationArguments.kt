@@ -152,3 +152,7 @@ inline val SavedStateHandle.reactionTypeOrThrow: ReactionType
 
 const val NOSTR_CONNECT_URI = "nostrConnectUri"
 inline val SavedStateHandle.nostrConnectUri: String? get() = get<String>(NOSTR_CONNECT_URI)?.asUrlDecoded()
+
+const val CONNECTION_ID = "connectionId"
+inline val SavedStateHandle.connectionIdOrThrow: String
+    get() = get(CONNECTION_ID) ?: throw IllegalArgumentException("Missing required connectionId argument.")

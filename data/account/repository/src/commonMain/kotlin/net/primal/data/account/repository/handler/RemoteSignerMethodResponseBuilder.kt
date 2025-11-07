@@ -41,7 +41,7 @@ internal class RemoteSignerMethodResponseBuilder(
         connectionRepository.getConnectionByClientPubKey(clientPubKey = method.clientPubKey)
             .fold(
                 onSuccess = { connection ->
-                    if (method.secret.isNullOrEmpty()) {
+                    if (method.secret.isNullOrBlank()) {
                         RemoteSignerMethodResponse.Success(
                             id = method.id,
                             result = "ack",

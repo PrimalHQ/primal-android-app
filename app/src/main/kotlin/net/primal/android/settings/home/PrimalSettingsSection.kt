@@ -5,6 +5,7 @@ enum class PrimalSettingsSection {
     Wallet,
     Network,
     Appearance,
+    ConnectedApps,
     ContentDisplay,
     MutedAccounts,
     MediaUploads,

@@ -16,6 +16,11 @@ class PrimalFirebaseMessagingService : FirebaseMessagingService() {
     @OptIn(DelicateCoroutinesApi::class)
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        GlobalScope.launch { tokenUpdater.updateTokenForAllUsers() }
+        GlobalScope.launch {
+            runCatching { tokenUpdater.updateTokenForAllUsers() }
+        }
+        GlobalScope.launch {
+            runCatching { tokenUpdater.updateTokenForRemoteSigner() }
+        }
     }
 }

@@ -14,6 +14,7 @@ import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.Result
 import net.primal.core.utils.asSha256Hash
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.updater.Updater
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
@@ -65,6 +66,7 @@ class UserDataUpdater @AssistedInject constructor(
         runCatching { bookmarksRepository.fetchAndPersistBookmarks(userId = userId) }
         runCatching { primalWalletAccountRepository.fetchWalletAccountInfo(userId = userId) }
         runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }
+        runCatching { pushNotificationsTokenUpdater.updateTokenForRemoteSigner() }
         runCatching { mutedItemRepository.fetchAndPersistMuteList(userId = userId) }
         mutedItemRepository.fetchAndPersistStreamMuteList(userId = userId)
 

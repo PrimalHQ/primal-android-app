@@ -17,6 +17,10 @@ interface AppConnectionDataDao {
     fun observeAllConnections(signerPubKey: Encryptable<String>): Flow<List<AppConnection>>
 
     @Transaction
+    @Query("SELECT * FROM AppConnectionData WHERE connectionId = :connectionId")
+    fun observeConnection(connectionId: String): Flow<AppConnection?>
+
+    @Transaction
     @Query("SELECT * FROM AppConnectionData WHERE signerPubKey = :signerPubKey")
     suspend fun getAll(signerPubKey: Encryptable<String>): List<AppConnection>
 
@@ -29,4 +33,10 @@ interface AppConnectionDataDao {
     @Transaction
     @Query("SELECT * FROM AppConnectionData WHERE clientPubKey = :clientPubKey")
     suspend fun getConnectionByClientPubKey(clientPubKey: Encryptable<String>): AppConnection?
+
+    @Query("UPDATE AppConnectionData SET name = :name WHERE connectionId = :connectionId")
+    suspend fun updateConnectionName(connectionId: String, name: Encryptable<String>)
+
+    @Query("UPDATE AppConnectionData SET autoStart = :autoStart WHERE connectionId = :connectionId")
+    suspend fun updateConnectionAutoStart(connectionId: String, autoStart: Boolean)
 }

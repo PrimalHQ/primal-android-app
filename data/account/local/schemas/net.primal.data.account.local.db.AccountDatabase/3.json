@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "cdc732b66b323f122b9e5b038250d474",
+    "identityHash": "9e7c55551778c28e460d56f049e59e22",
     "entities": [
       {
         "tableName": "AppConnectionData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`connectionId` TEXT NOT NULL, `relays` TEXT NOT NULL, `secret` TEXT NOT NULL, `name` TEXT, `url` TEXT, `image` TEXT, `clientPubKey` TEXT NOT NULL, `signerPubKey` TEXT NOT NULL, `userPubKey` TEXT NOT NULL, PRIMARY KEY(`connectionId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`connectionId` TEXT NOT NULL, `relays` TEXT NOT NULL, `secret` TEXT NOT NULL, `name` TEXT, `url` TEXT, `image` TEXT, `clientPubKey` TEXT NOT NULL, `signerPubKey` TEXT NOT NULL, `userPubKey` TEXT NOT NULL, `autoStart` INTEGER NOT NULL, PRIMARY KEY(`connectionId`))",
         "fields": [
           {
             "fieldPath": "connectionId",
@@ -57,6 +57,12 @@
             "fieldPath": "userPubKey",
             "columnName": "userPubKey",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "autoStart",
+            "columnName": "autoStart",
+            "affinity": "INTEGER",
             "notNull": true
           }
         ],
@@ -172,96 +178,11 @@
             "sessionId"
           ]
         }
-      },
-      {
-        "tableName": "SessionLogData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`logId` TEXT NOT NULL, `sessionId` TEXT NOT NULL, `clientPubKey` TEXT NOT NULL, `methodType` TEXT NOT NULL, `eventKind` TEXT, `isSuccess` TEXT NOT NULL, `requestPayload` TEXT NOT NULL, `responsePayload` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`logId`))",
-        "fields": [
-          {
-            "fieldPath": "logId",
-            "columnName": "logId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sessionId",
-            "columnName": "sessionId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "clientPubKey",
-            "columnName": "clientPubKey",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "methodType",
-            "columnName": "methodType",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "eventKind",
-            "columnName": "eventKind",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "isSuccess",
-            "columnName": "isSuccess",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "requestPayload",
-            "columnName": "requestPayload",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "responsePayload",
-            "columnName": "responsePayload",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "createdAt",
-            "columnName": "createdAt",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "logId"
-          ]
-        },
-        "indices": [
-          {
-            "name": "index_SessionLogData_sessionId",
-            "unique": false,
-            "columnNames": [
-              "sessionId"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SessionLogData_sessionId` ON `${TABLE_NAME}` (`sessionId`)"
-          },
-          {
-            "name": "index_SessionLogData_clientPubKey",
-            "unique": false,
-            "columnNames": [
-              "clientPubKey"
-            ],
-            "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SessionLogData_clientPubKey` ON `${TABLE_NAME}` (`clientPubKey`)"
-          }
-        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cdc732b66b323f122b9e5b038250d474')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9e7c55551778c28e460d56f049e59e22')"
     ]
   }
 }

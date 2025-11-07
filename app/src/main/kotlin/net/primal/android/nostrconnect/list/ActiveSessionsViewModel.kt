@@ -15,11 +15,17 @@ import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.SideEffect
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiEvent
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiState
+import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.credentials.CredentialsStore
+import net.primal.android.user.domain.asKeyPair
+import net.primal.domain.account.repository.SessionRepository
 import timber.log.Timber
 
 @HiltViewModel
 class ActiveSessionsViewModel @Inject constructor(
+    private val sessionRepository: SessionRepository,
+    private val credentialsStore: CredentialsStore,
     private val userAccountsStore: UserAccountsStore,
 ) : ViewModel() {
 
@@ -41,81 +47,31 @@ class ActiveSessionsViewModel @Inject constructor(
     }
 
     init {
-        loadMockSessions()
+        observeActiveSessions()
         observeEvents()
     }
 
-    private fun loadMockSessions() {
+    private fun observeActiveSessions() {
         viewModelScope.launch {
-            val userAccounts = userAccountsStore.userAccounts.value
-            if (userAccounts.isEmpty()) return@launch
-
-            val mockSessions = buildList {
-//                add(
-//                    ActiveSessionsContract.ActiveSessionUi(
-//                        connectionId = "mock1",
-//                        appName = "Primal Web App",
-//                        appUrl = "https://www.primal.net",
-//                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
-//                        userAccount = userAccounts.first().asUserAccountUi(),
-//                    ),
-//                )
-//                add(
-//                    ActiveSessionsContract.ActiveSessionUi(
-//                        connectionId = "mock2",
-//                        appName = "Highlighter",
-//                        appUrl = "https://highlighter.com",
-//                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
-//                        userAccount = userAccounts.getOrElse(1) { userAccounts.first() }.asUserAccountUi(),
-//                    ),
-//                )
-//                add(
-//                    ActiveSessionsContract.ActiveSessionUi(
-//                        connectionId = "mock3",
-//                        appName = "Nostrarious",
-//                        appUrl = "https://nostrarious.io",
-//                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
-//                        userAccount = userAccounts.first().asUserAccountUi(),
-//                    ),
-//                )
-                add(
-                    ActiveSessionsContract.ActiveSessionUi(
-                        connectionId = "mock4",
-                        appName = "Purple Palace",
-                        appUrl = "https://purplepalace.com",
-                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
-                        userAccount = userAccounts.first().asUserAccountUi(),
-                    ),
-                )
-                add(
-                    ActiveSessionsContract.ActiveSessionUi(
-                        connectionId = "mock5",
-                        appName = "Birdcage web app",
-                        appUrl = "https://www.birdcage.biz",
-                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
-                        userAccount = userAccounts.getOrElse(1) { userAccounts.first() }.asUserAccountUi(),
-                    ),
-                )
-                add(
-                    ActiveSessionsContract.ActiveSessionUi(
-                        connectionId = "mock6",
-                        appName = "Lamirp app",
-                        appUrl = "https://www.primal.net",
-                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
-                        userAccount = userAccounts.first().asUserAccountUi(),
-                    ),
-                )
-                add(
-                    ActiveSessionsContract.ActiveSessionUi(
-                        connectionId = "mock7",
-                        appName = "Lighterhigh",
-                        appUrl = "https://www.lighterhigh.com",
-                        appImageUrl = "https://primal.net/assets/favicon-51789dff.ico",
-                        userAccount = userAccounts.first().asUserAccountUi(),
-                    ),
-                )
-            }
-            setState { copy(sessions = mockSessions) }
+            val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
+            sessionRepository.observeActiveSessions(signerPubKey = signerKeyPair.pubKey)
+                .collect { appSessions ->
+                    val userAccounts = userAccountsStore.userAccounts.value
+                    val userAccountsMap = userAccounts.associateBy { it.pubkey }
+                    val uiSessions = appSessions.mapNotNull { appSession ->
+                        userAccountsMap[appSession.userPubKey]?.let { userAccount ->
+                            ActiveSessionUi(
+                                sessionId = appSession.sessionId,
+                                connectionId = appSession.connectionId,
+                                appName = appSession.name,
+                                appUrl = appSession.url,
+                                appImageUrl = appSession.image,
+                                userAccount = userAccount.asUserAccountUi(),
+                            )
+                        }
+                    }
+                    setState { copy(sessions = uiSessions) }
+                }
         }
     }
 
@@ -123,7 +79,7 @@ class ActiveSessionsViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.SessionClick -> handleSessionClick(it.connectionId)
+                    is UiEvent.SessionClick -> handleSessionClick(it.sessionId)
                     is UiEvent.SelectAllClick -> handleSelectAllClick()
                     is UiEvent.DisconnectClick -> handleDisconnectClick()
                     is UiEvent.DismissError -> setState { copy(error = null) }
@@ -132,13 +88,13 @@ class ActiveSessionsViewModel @Inject constructor(
         }
     }
 
-    private fun handleSessionClick(connectionId: String) {
+    private fun handleSessionClick(sessionId: String) {
         setState {
             val selected = this.selectedSessions.toMutableSet()
-            if (selected.contains(connectionId)) {
-                selected.remove(connectionId)
+            if (selected.contains(sessionId)) {
+                selected.remove(sessionId)
             } else {
-                selected.add(connectionId)
+                selected.add(sessionId)
             }
             copy(selectedSessions = selected)
         }
@@ -149,7 +105,7 @@ class ActiveSessionsViewModel @Inject constructor(
             if (allSessionsSelected) {
                 copy(selectedSessions = emptySet())
             } else {
-                copy(selectedSessions = sessions.map { it.connectionId }.toSet())
+                copy(selectedSessions = sessions.map { it.sessionId }.toSet())
             }
         }
     }
@@ -158,17 +114,20 @@ class ActiveSessionsViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(disconnecting = true) }
             runCatching {
-                Timber.d("Disconnecting sessions: ${state.value.selectedSessions}")
-                setState {
-                    val remainingSessions = sessions.filterNot { it.connectionId in selectedSessions }
-                    copy(sessions = remainingSessions, selectedSessions = emptySet())
-                }
-                setEffect(SideEffect.SessionsDisconnected)
-            }.onFailure { e ->
-                Timber.e(e, "Error disconnecting sessions")
-            }.also {
-                setState { copy(disconnecting = false) }
+                val selectedSessions = state.value.selectedSessions
+                Timber.d("Disconnecting sessions: $selectedSessions")
+                selectedSessions.forEach { sessionId -> sessionRepository.endSession(sessionId) }
             }
+                .onSuccess {
+                    setEffect(SideEffect.SessionsDisconnected)
+                    setState { copy(selectedSessions = emptySet()) }
+                }
+                .onFailure {
+                    Timber.e(it, "Error disconnecting sessions")
+                }
+                .also {
+                    setState { copy(disconnecting = false) }
+                }
         }
     }
 }

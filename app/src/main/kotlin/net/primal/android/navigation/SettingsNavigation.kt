@@ -5,13 +5,19 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.settings.appearance.AppearanceSettingsScreen
 import net.primal.android.settings.appearance.di.appearanceSettingsViewModel
+import net.primal.android.settings.connected.ConnectedAppsScreen
+import net.primal.android.settings.connected.ConnectedAppsViewModel
+import net.primal.android.settings.connected.details.ConnectedAppDetailsScreen
+import net.primal.android.settings.connected.details.ConnectedAppDetailsViewModel
 import net.primal.android.settings.content.ContentDisplaySettingsScreen
 import net.primal.android.settings.content.ContentDisplaySettingsViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
@@ -51,6 +57,10 @@ fun NavController.navigateToNotificationsSettings() = navigate(route = "notifica
 private fun NavController.navigateToZapsSettings() = navigate(route = "zaps_settings")
 private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_accounts_settings")
 private fun NavController.navigateToMediaUploads() = navigate(route = "media_uploads_settings")
+private fun NavController.navigateToConnectedApps() = navigate(route = "connected_apps")
+private fun NavController.navigateToConnectedAppDetails(connectionId: String) =
+    navigate(route = "connected_apps/$connectionId")
+
 fun NavController.navigateToLinkPrimalWallet(
     appName: String? = null,
     appIcon: String? = null,
@@ -78,6 +88,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
                     PrimalSettingsSection.Zaps -> navController.navigateToZapsSettings()
                     PrimalSettingsSection.MutedAccounts -> navController.navigateToMutedAccounts()
                     PrimalSettingsSection.MediaUploads -> navController.navigateToMediaUploads()
+                    PrimalSettingsSection.ConnectedApps -> navController.navigateToConnectedApps()
                 }
             },
         )
@@ -116,6 +127,8 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         mediaUploads(route = "media_uploads_settings", navController = navController)
         notifications(route = "notifications_settings", navController = navController)
         zaps(route = "zaps_settings", navController = navController)
+        connectedApps(route = "connected_apps", navController = navController)
+        connectedAppDetails(route = "connected_apps/{$CONNECTION_ID}", navController = navController)
     }
 
 private fun NavGraphBuilder.home(
@@ -354,6 +367,44 @@ private fun NavGraphBuilder.mediaUploads(route: String, navController: NavContro
         val viewModel = hiltViewModel<MediaUploadsSettingsViewModel>(it)
         LockToOrientationPortrait()
         MediaUploadsSettingsScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+        )
+    }
+
+private fun NavGraphBuilder.connectedApps(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<ConnectedAppsViewModel>()
+        LockToOrientationPortrait()
+        ConnectedAppsScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onConnectedAppClick = { connectionId -> navController.navigateToConnectedAppDetails(connectionId) },
+        )
+    }
+
+private fun NavGraphBuilder.connectedAppDetails(route: String, navController: NavController) =
+    composable(
+        route = route,
+        arguments = listOf(
+            navArgument(CONNECTION_ID) {
+                type = NavType.StringType
+            },
+        ),
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<ConnectedAppDetailsViewModel>()
+        LockToOrientationPortrait()
+        ConnectedAppDetailsScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )
