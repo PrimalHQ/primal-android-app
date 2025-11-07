@@ -83,7 +83,7 @@ class SignerConnectionInitializer internal constructor(
     }
 
     private fun extractRelaysOrThrow(url: Url): List<String> =
-        url.parameters.getAll(RELAY_PARAM)
+        url.parameters.getAll(RELAY_PARAM)?.map { it.dropLastWhile { c -> c == '/' } }
             ?: throw IllegalArgumentException(
                 "No `$RELAY_PARAM` fields found in provided `connectionUrl`. This is a mandatory field.",
             )
