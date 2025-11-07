@@ -25,7 +25,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         AppSessionData::class,
         SessionLogData::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 @TypeConverters(
