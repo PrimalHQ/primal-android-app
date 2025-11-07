@@ -3,13 +3,14 @@ package net.primal.data.account.repository.repository.factory
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.manager.factory.AccountManagerFactory
+import net.primal.data.account.repository.processor.SessionLogger
 import net.primal.data.account.repository.repository.ConnectionRepositoryImpl
+import net.primal.data.account.repository.repository.SessionLogRepositoryImpl
 import net.primal.data.account.repository.repository.SessionRepositoryImpl
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
-import net.primal.data.account.repository.repository.SignerLogRepositoryImpl
 import net.primal.domain.account.repository.ConnectionRepository
+import net.primal.domain.account.repository.SessionLogRepository
 import net.primal.domain.account.repository.SessionRepository
-import net.primal.domain.account.repository.SignerLogRepository
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
 abstract class RepositoryFactory {
@@ -29,10 +30,15 @@ abstract class RepositoryFactory {
             dispatchers = dispatcherProvider,
         )
 
-    fun createSignerLogRepository(): SignerLogRepository =
-        SignerLogRepositoryImpl(
+    fun createSessionLogRepository(): SessionLogRepository =
+        SessionLogRepositoryImpl(
             database = resolveAccountDatabase(),
             dispatchers = dispatcherProvider,
+        )
+
+    fun createSessionLogger(): SessionLogger =
+        SessionLogger(
+            accountDatabase = resolveAccountDatabase(),
         )
 
     fun createSignerConnectionInitializer(

@@ -57,4 +57,12 @@ object EncryptableTypeConverters {
     @TypeConverter
     fun toInt(value: String?): Encryptable<Int>? =
         value?.let { CryptoManager.decrypt<Int>(value, encryptionType)?.asEncryptable() }
+
+    @TypeConverter
+    fun fromBoolean(value: Encryptable<Boolean>?): String? =
+        value?.let { CryptoManager.encrypt(value.decrypted, encryptionType) }
+
+    @TypeConverter
+    fun toBoolean(value: String?): Encryptable<Boolean>? =
+        value?.let { CryptoManager.decrypt<Boolean>(value, encryptionType)?.asEncryptable() }
 }

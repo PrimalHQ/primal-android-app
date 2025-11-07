@@ -13,8 +13,8 @@ import net.primal.data.account.local.dao.AppPermissionData
 import net.primal.data.account.local.dao.AppPermissionDataDao
 import net.primal.data.account.local.dao.AppSessionData
 import net.primal.data.account.local.dao.AppSessionDataDao
-import net.primal.data.account.local.dao.SignerLogData
-import net.primal.data.account.local.dao.SignerLogDataDao
+import net.primal.data.account.local.dao.SessionLogData
+import net.primal.data.account.local.dao.SessionLogDataDao
 import net.primal.shared.data.local.serialization.EncryptableTypeConverters
 import net.primal.shared.data.local.serialization.ListsTypeConverters
 
@@ -23,18 +23,22 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         AppConnectionData::class,
         AppPermissionData::class,
         AppSessionData::class,
-        SignerLogData::class,
+        SessionLogData::class,
     ],
     version = 3,
     exportSchema = true,
 )
-@TypeConverters(ListsTypeConverters::class, EncryptableTypeConverters::class)
+@TypeConverters(
+    ListsTypeConverters::class,
+    EncryptableTypeConverters::class,
+    AccountTypeConverters::class,
+)
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AccountDatabase : RoomDatabase() {
     abstract fun connections(): AppConnectionDataDao
     abstract fun permissions(): AppPermissionDataDao
     abstract fun sessions(): AppSessionDataDao
-    abstract fun signerLogs(): SignerLogDataDao
+    abstract fun sessionLogs(): SessionLogDataDao
 
     companion object {
         fun provideDatabaseCallback() =

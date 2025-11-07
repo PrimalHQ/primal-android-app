@@ -53,6 +53,7 @@ kotlin {
 
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:wallet"))
+                implementation(project(":domain:account"))
 
                 api(project(":data:shared:local"))
 

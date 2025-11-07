@@ -10,7 +10,7 @@ import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.model.RelayEvent
-import net.primal.data.account.repository.processor.SignerLogProcessor
+import net.primal.data.account.repository.processor.SessionLogger
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
@@ -22,7 +22,7 @@ class RemoteSignerServiceImpl internal constructor(
     private val sessionRepository: SessionRepository,
     private val nostrRelayManager: NostrRelayManager,
     private val remoteSignerMethodResponseBuilder: RemoteSignerMethodResponseBuilder,
-    private val signerLogProcessor: SignerLogProcessor,
+    private val sessionLogger: SessionLogger,
 ) : RemoteSignerService {
 
     private val scope = CoroutineScope(SupervisorJob())
@@ -97,7 +97,7 @@ class RemoteSignerServiceImpl internal constructor(
 
             val response = remoteSignerMethodResponseBuilder.build(method)
             clientSessionMap[method.clientPubKey]?.let { sessionId ->
-                signerLogProcessor.processAndLog(
+                sessionLogger.processAndLog(
                     sessionId = sessionId,
                     method = method,
                     response = response,
