@@ -18,6 +18,7 @@ fun AppConnectionPO.asDomain() =
         url = this.data.url?.decrypted,
         image = this.data.image?.decrypted,
         permissions = this.permissions.map { it.asDomain() },
+        autoStart = this.data.autoStart,
     )
 
 fun AppPermissionDataPO.asDomain() =

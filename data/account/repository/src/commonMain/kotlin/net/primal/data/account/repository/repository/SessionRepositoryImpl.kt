@@ -32,6 +32,16 @@ class SessionRepositoryImpl(
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
+    override fun observeActiveSessionForConnection(connectionId: String): Flow<AppSession?> =
+        database.sessions().observeActiveSessionForConnection(connectionId)
+            .map { it?.asDomain() }
+            .distinctUntilChanged()
+
+    override fun observeSessionsByConnectionId(connectionId: String): Flow<List<AppSession>> =
+        database.sessions().observeSessionsByConnectionId(connectionId)
+            .map { list -> list.map { it.asDomain() } }
+            .distinctUntilChanged()
+
     override suspend fun startSession(connectionId: String): Result<String> =
         withContext(dispatchers.io()) {
             val existingSession = database.sessions().findActiveSessionByConnectionId(connectionId = connectionId)
