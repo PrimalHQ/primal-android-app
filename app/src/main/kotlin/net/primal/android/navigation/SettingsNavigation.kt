@@ -57,7 +57,7 @@ fun NavController.navigateToNotificationsSettings() = navigate(route = "notifica
 private fun NavController.navigateToZapsSettings() = navigate(route = "zaps_settings")
 private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_accounts_settings")
 private fun NavController.navigateToMediaUploads() = navigate(route = "media_uploads_settings")
-private fun NavController.navigateToConnectedApps() = navigate(route = "connected_apps")
+fun NavController.navigateToConnectedApps() = navigate(route = "connected_apps")
 private fun NavController.navigateToConnectedAppDetails(connectionId: String) =
     navigate(route = "connected_apps/$connectionId")
 

@@ -1366,6 +1366,7 @@ private fun NavGraphBuilder.activeSessions(navController: NavController) {
         ActiveSessionsBottomSheet(
             viewModel = sessionsViewModel,
             onDismissRequest = { navController.popBackStack() },
+            onSettingsClick = { navController.navigateToConnectedApps() },
         )
     }
 }
