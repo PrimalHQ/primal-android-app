@@ -108,7 +108,7 @@ class PrimalRemoteSignerService : Service() {
                 credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair(),
             )
 
-            signer?.start()
+            signer?.initialize()
         }
 
         observeOngoingSessions()
@@ -152,7 +152,7 @@ class PrimalRemoteSignerService : Service() {
 
     override fun onDestroy() {
         _isServiceRunning.value = false
-        signer?.stop()
+        signer?.destroy()
         scope.cancel()
         super.onDestroy()
     }

@@ -30,7 +30,7 @@ class RemoteSignerServiceImpl internal constructor(
     private var relaySessionMap = emptyMap<String, List<String>>()
     private var activeClientPubKeys = HashSet<String>()
 
-    override fun start() {
+    override fun initialize() {
         Napier.d(tag = "Signer") { "RemoteSignerService started." }
         observeOngoingSessions()
         observeRelayEvents()
@@ -124,7 +124,7 @@ class RemoteSignerServiceImpl internal constructor(
         )
     }
 
-    override fun stop() {
+    override fun destroy() {
         Napier.d(tag = "Signer") { "RemoteSignerService stopped." }
         scope.launch { sessionRepository.endAllActiveSessions() }
             .invokeOnCompletion { scope.cancel() }
