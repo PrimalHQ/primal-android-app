@@ -1,5 +1,6 @@
 package net.primal.data.account.repository.repository
 
+import io.github.aakira.napier.Napier
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.flow.Flow
@@ -44,12 +45,15 @@ class SessionRepositoryImpl(
 
     override suspend fun startSession(connectionId: String): Result<String> =
         withContext(dispatchers.io()) {
+            Napier.d(tag = "Signer") { "Starting session for $connectionId" }
             val existingSession = database.sessions().findActiveSessionByConnectionId(connectionId = connectionId)
             if (existingSession == null) {
                 val newSession = AppSessionData(connectionId = connectionId)
                 database.sessions().upsertAll(data = listOf(newSession))
+                Napier.d(tag = "Signer") { "Successfully started session." }
                 newSession.sessionId.asSuccess()
             } else {
+                Napier.d(tag = "Signer") { "Starting session failed." }
                 Result.failure(
                     IllegalStateException("There is an already active session for this connection."),
                 )
