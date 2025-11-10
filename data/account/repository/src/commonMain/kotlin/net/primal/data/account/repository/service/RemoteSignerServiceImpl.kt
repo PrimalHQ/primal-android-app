@@ -11,7 +11,7 @@ import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.model.RelayEvent
-import net.primal.data.account.repository.repository.InternalSessionEventRepositoryImpl
+import net.primal.data.account.repository.repository.InternalSessionEventRepository
 import net.primal.domain.account.model.AppSession
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
@@ -24,7 +24,7 @@ class RemoteSignerServiceImpl internal constructor(
     private val sessionRepository: SessionRepository,
     private val nostrRelayManager: NostrRelayManager,
     private val remoteSignerMethodResponseBuilder: RemoteSignerMethodResponseBuilder,
-    private val internalSessionEventRepository: InternalSessionEventRepositoryImpl,
+    private val internalSessionEventRepository: InternalSessionEventRepository,
 ) : RemoteSignerService {
 
     private val scope = CoroutineScope(SupervisorJob())

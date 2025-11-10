@@ -9,7 +9,7 @@ import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.buildSessionEventData
 
 @OptIn(ExperimentalTime::class)
-internal class InternalSessionEventRepositoryImpl(
+internal class InternalSessionEventRepository(
     private val accountDatabase: AccountDatabase,
     private val dispatchers: DispatcherProvider,
 ) {
