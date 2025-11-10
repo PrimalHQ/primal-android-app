@@ -1,6 +1,7 @@
 package net.primal.data.account.repository.service
 
 import io.github.aakira.napier.Napier
+import kotlin.time.Clock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -10,6 +11,7 @@ import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.model.RelayEvent
+import net.primal.data.account.repository.repository.InternalSessionEventRepository
 import net.primal.domain.account.model.AppSession
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
@@ -22,6 +24,7 @@ class RemoteSignerServiceImpl internal constructor(
     private val sessionRepository: SessionRepository,
     private val nostrRelayManager: NostrRelayManager,
     private val remoteSignerMethodResponseBuilder: RemoteSignerMethodResponseBuilder,
+    private val internalSessionEventRepository: InternalSessionEventRepository,
 ) : RemoteSignerService {
 
     private val scope = CoroutineScope(SupervisorJob())
@@ -29,6 +32,7 @@ class RemoteSignerServiceImpl internal constructor(
     private var activeRelays = emptySet<String>()
     private var relaySessionMap = emptyMap<String, List<String>>()
     private var activeClientPubKeys = HashSet<String>()
+    private var clientSessionMap = emptyMap<String, String>()
 
     override fun initialize() {
         Napier.d(tag = "Signer") { "RemoteSignerService started." }
@@ -52,6 +56,7 @@ class RemoteSignerServiceImpl internal constructor(
                         )
 
                     sessions.forEach { setActiveRelays(it) }
+                    clientSessionMap = sessions.associate { it.clientPubKey to it.sessionId }
                     activeClientPubKeys = sessions.map { it.clientPubKey }.toHashSet()
                     nostrRelayManager.connectToRelays(relays = sessions.flatMap { it.relays }.toSet())
                 }
@@ -102,9 +107,18 @@ class RemoteSignerServiceImpl internal constructor(
 
     private fun processMethod(method: RemoteSignerMethod) =
         scope.launch {
+            val requestedAt = Clock.System.now().epochSeconds
             if (!activeClientPubKeys.contains(method.clientPubKey)) return@launch
 
             val response = remoteSignerMethodResponseBuilder.build(method)
+            clientSessionMap[method.clientPubKey]?.let { sessionId ->
+                internalSessionEventRepository.saveSessionEvent(
+                    sessionId = sessionId,
+                    requestedAt = requestedAt,
+                    method = method,
+                    response = response,
+                )
+            }
             Napier.d(tag = "Signer") { "Response $response" }
 
             sendResponse(response = response)

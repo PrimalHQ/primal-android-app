@@ -7,6 +7,7 @@ class Encryptable<T> private constructor(val decrypted: T) {
         fun of(value: List<String>) = Encryptable(decrypted = value)
         fun of(value: Double) = Encryptable(decrypted = value)
         fun of(value: Long) = Encryptable(decrypted = value)
+        fun of(value: Boolean) = Encryptable(decrypted = value)
     }
 }
 
@@ -15,6 +16,7 @@ fun String.asEncryptable() = Encryptable.of(this)
 fun List<String>.asEncryptable() = Encryptable.of(this)
 fun Double.asEncryptable() = Encryptable.of(this)
 fun Long.asEncryptable() = Encryptable.of(this)
+fun Boolean.asEncryptable() = Encryptable.of(this)
 
 inline fun <E, R> Encryptable<out Iterable<E>>.map(transform: (E) -> R) = this.decrypted.map(transform = transform)
 inline fun <E, R> Encryptable<out Iterable<E>>.mapNotNull(transform: (E) -> R) =

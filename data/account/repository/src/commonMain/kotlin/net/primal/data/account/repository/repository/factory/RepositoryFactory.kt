@@ -4,9 +4,11 @@ import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.repository.ConnectionRepositoryImpl
+import net.primal.data.account.repository.repository.SessionEventRepositoryImpl
 import net.primal.data.account.repository.repository.SessionRepositoryImpl
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
 import net.primal.domain.account.repository.ConnectionRepository
+import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
@@ -27,6 +29,12 @@ abstract class RepositoryFactory {
             dispatchers = dispatcherProvider,
         )
 
+    fun createSessionEventRepository(): SessionEventRepository =
+        SessionEventRepositoryImpl(
+            database = resolveAccountDatabase(),
+            dispatchers = dispatcherProvider,
+        )
+
     fun createSignerConnectionInitializer(
         signerKeyPair: NostrKeyPair,
         connectionRepository: ConnectionRepository,
@@ -39,3 +47,5 @@ abstract class RepositoryFactory {
             ),
         )
 }
+
+internal expect fun provideAccountDatabase(): AccountDatabase
