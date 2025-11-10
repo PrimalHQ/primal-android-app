@@ -152,6 +152,8 @@ class PrimalRemoteSignerService : Service() {
 
     override fun onDestroy() {
         _isServiceRunning.value = false
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.cancel(SUMMARY_NOTIFICATION_ID)
         signer?.destroy()
         scope.cancel()
         super.onDestroy()
