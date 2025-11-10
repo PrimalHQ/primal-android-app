@@ -2,7 +2,6 @@ package net.primal.data.account.repository.service
 
 import io.github.aakira.napier.Napier
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -12,21 +11,20 @@ import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.model.RelayEvent
-import net.primal.data.account.repository.repository.InternalSessionEventRepository
+import net.primal.data.account.repository.repository.InternalSessionEventRepositoryImpl
 import net.primal.domain.account.model.AppSession
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
-@OptIn(ExperimentalTime::class)
 class RemoteSignerServiceImpl internal constructor(
     private val signerKeyPair: NostrKeyPair,
     private val connectionRepository: ConnectionRepository,
     private val sessionRepository: SessionRepository,
     private val nostrRelayManager: NostrRelayManager,
     private val remoteSignerMethodResponseBuilder: RemoteSignerMethodResponseBuilder,
-    private val internalSessionEventRepository: InternalSessionEventRepository,
+    private val internalSessionEventRepository: InternalSessionEventRepositoryImpl,
 ) : RemoteSignerService {
 
     private val scope = CoroutineScope(SupervisorJob())

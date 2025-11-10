@@ -1,4 +1,4 @@
-package net.primal.domain.account.model
+package net.primal.data.account.local.dao
 
 enum class RequestState {
     Pending,

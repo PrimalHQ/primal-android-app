@@ -1,10 +1,11 @@
 package net.primal.data.account.repository.mappers
 
-import net.primal.data.account.local.dao.RemoteSignerMethodDataType
+import net.primal.data.account.local.dao.RequestState as RequestStatePO
 import net.primal.data.account.local.dao.SessionEventData
+import net.primal.data.account.local.dao.SignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
-import net.primal.domain.account.model.RequestState
+import net.primal.domain.account.model.RequestState as RequestStateDO
 import net.primal.domain.account.model.SessionEvent
 import net.primal.shared.data.local.encryption.asEncryptable
 
@@ -25,15 +26,17 @@ fun buildSessionEventData(
     val requestTypeId = method.toRequestTypeId() ?: return null
     val requestType = method.toDataType()
 
+    val domainRequestState = if (response is RemoteSignerMethodResponse.Success) {
+        RequestStateDO.Approved
+    } else {
+        RequestStateDO.Rejected
+    }
+
     val baseData = SessionEventData(
         eventId = method.id,
         sessionId = sessionId,
         clientPubKey = method.clientPubKey.asEncryptable(),
-        requestState = if (response is RemoteSignerMethodResponse.Success) {
-            RequestState.APPROVED
-        } else {
-            RequestState.REJECTED
-        },
+        requestState = domainRequestState.asPersistence(),
         requestedAt = requestedAt,
         completedAt = completedAt,
         requestType = requestType,
@@ -83,78 +86,80 @@ fun SessionEventData.asDomain(): SessionEvent? {
     val responsePayload = this.responsePayload?.decrypted
 
     return when (this.requestType) {
-        RemoteSignerMethodDataType.GET_PUBLIC_KEY -> SessionEvent.GetPublicKey(
+        SignerMethodType.GetPublicKey -> SessionEvent.GetPublicKey(
             eventId = this.eventId,
             sessionId = this.sessionId,
-            requestState = this.requestState,
+            requestState = this.requestState.asDomain(),
             requestedAt = this.requestedAt,
             completedAt = this.completedAt,
-            publicKey = if (this.requestState == RequestState.APPROVED) responsePayload else null,
+            publicKey = if (this.requestState == RequestStatePO.Approved) responsePayload else null,
         )
 
-        RemoteSignerMethodDataType.NIP04_ENCRYPT,
-        RemoteSignerMethodDataType.NIP44_ENCRYPT,
+        SignerMethodType.Nip04Encrypt,
+        SignerMethodType.Nip44Encrypt,
         -> {
             val thirdPartyPubKey = this.thirdPartyPubKey?.decrypted ?: return null
             val plaintext = this.plaintext?.decrypted ?: return null
+            val requestTypeId = this.requestTypeId.decrypted ?: return null
             SessionEvent.Encrypt(
                 eventId = this.eventId,
                 sessionId = this.sessionId,
-                requestState = this.requestState,
+                requestState = this.requestState.asDomain(),
                 requestedAt = this.requestedAt,
                 completedAt = this.completedAt,
-                requestTypeId = this.requestTypeId.decrypted,
+                requestTypeId = requestTypeId,
                 thirdPartyPubKey = thirdPartyPubKey,
                 plaintext = plaintext,
-                encryptedPayload = if (this.requestState == RequestState.APPROVED) responsePayload else null,
+                encryptedPayload = if (this.requestState == RequestStatePO.Approved) responsePayload else null,
             )
         }
 
-        RemoteSignerMethodDataType.NIP04_DECRYPT,
-        RemoteSignerMethodDataType.NIP44_DECRYPT,
+        SignerMethodType.Nip04Decrypt,
+        SignerMethodType.Nip44Decrypt,
         -> {
             val thirdPartyPubKey = this.thirdPartyPubKey?.decrypted ?: return null
             val ciphertext = this.ciphertext?.decrypted ?: return null
+            val requestTypeId = this.requestTypeId.decrypted ?: return null
             SessionEvent.Decrypt(
                 eventId = this.eventId,
                 sessionId = this.sessionId,
-                requestState = this.requestState,
+                requestState = this.requestState.asDomain(),
                 requestedAt = this.requestedAt,
                 completedAt = this.completedAt,
-                requestTypeId = this.requestTypeId.decrypted,
+                requestTypeId = requestTypeId,
                 thirdPartyPubKey = thirdPartyPubKey,
                 ciphertext = ciphertext,
-                decryptedPayload = if (this.requestState == RequestState.APPROVED) responsePayload else null,
+                decryptedPayload = if (this.requestState == RequestStatePO.Approved) responsePayload else null,
             )
         }
 
-        RemoteSignerMethodDataType.SIGN_EVENT -> {
+        SignerMethodType.SignEvent -> {
             val eventKind = this.eventKind?.decrypted ?: return null
             SessionEvent.SignEvent(
                 eventId = this.eventId,
                 sessionId = this.sessionId,
-                requestState = this.requestState,
+                requestState = this.requestState.asDomain(),
                 requestedAt = this.requestedAt,
                 completedAt = this.completedAt,
                 eventKind = eventKind,
-                signedNostrEventJson = if (this.requestState == RequestState.APPROVED) responsePayload else null,
+                signedNostrEventJson = if (this.requestState == RequestStatePO.Approved) responsePayload else null,
             )
         }
 
-        RemoteSignerMethodDataType.CONNECT, RemoteSignerMethodDataType.PING -> null
+        SignerMethodType.Connect, SignerMethodType.Ping -> null
     }
 }
 
-private fun RemoteSignerMethod.toDataType(): RemoteSignerMethodDataType {
+private fun RemoteSignerMethod.toDataType(): SignerMethodType {
     return when (this) {
-        is RemoteSignerMethod.Connect -> RemoteSignerMethodDataType.CONNECT
-        is RemoteSignerMethod.GetPublicKey -> RemoteSignerMethodDataType.GET_PUBLIC_KEY
-        is RemoteSignerMethod.Nip04Decrypt -> RemoteSignerMethodDataType.NIP04_DECRYPT
-        is RemoteSignerMethod.Nip04Encrypt -> RemoteSignerMethodDataType.NIP04_ENCRYPT
-        is RemoteSignerMethod.Nip44Decrypt -> RemoteSignerMethodDataType.NIP44_DECRYPT
-        is RemoteSignerMethod.Nip44Encrypt -> RemoteSignerMethodDataType.NIP44_ENCRYPT
-        is RemoteSignerMethod.Ping -> RemoteSignerMethodDataType.PING
-        is RemoteSignerMethod.SignEvent -> RemoteSignerMethodDataType.SIGN_EVENT
+        is RemoteSignerMethod.Connect -> SignerMethodType.Connect
+        is RemoteSignerMethod.GetPublicKey -> SignerMethodType.GetPublicKey
+        is RemoteSignerMethod.Nip04Decrypt -> SignerMethodType.Nip04Decrypt
+        is RemoteSignerMethod.Nip04Encrypt -> SignerMethodType.Nip04Encrypt
+        is RemoteSignerMethod.Nip44Decrypt -> SignerMethodType.Nip44Decrypt
+        is RemoteSignerMethod.Nip44Encrypt -> SignerMethodType.Nip44Encrypt
+        is RemoteSignerMethod.Ping -> SignerMethodType.Ping
+        is RemoteSignerMethod.SignEvent -> SignerMethodType.SignEvent
     }
 }
 
@@ -169,3 +174,17 @@ private fun RemoteSignerMethod.toRequestTypeId(): String? {
         is RemoteSignerMethod.Connect, is RemoteSignerMethod.Ping -> null
     }
 }
+
+private fun RequestStateDO.asPersistence(): RequestStatePO =
+    when (this) {
+        RequestStateDO.Pending -> RequestStatePO.Pending
+        RequestStateDO.Approved -> RequestStatePO.Approved
+        RequestStateDO.Rejected -> RequestStatePO.Rejected
+    }
+
+private fun RequestStatePO.asDomain(): RequestStateDO =
+    when (this) {
+        RequestStatePO.Pending -> RequestStateDO.Pending
+        RequestStatePO.Approved -> RequestStateDO.Approved
+        RequestStatePO.Rejected -> RequestStateDO.Rejected
+    }

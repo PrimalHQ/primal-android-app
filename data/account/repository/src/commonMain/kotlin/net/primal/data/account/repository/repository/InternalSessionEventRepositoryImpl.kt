@@ -12,9 +12,8 @@ import net.primal.data.account.repository.mappers.buildSessionEventData
 internal class InternalSessionEventRepositoryImpl(
     private val accountDatabase: AccountDatabase,
     private val dispatchers: DispatcherProvider,
-) : InternalSessionEventRepository {
-
-    override suspend fun saveSessionEvent(
+) {
+    suspend fun saveSessionEvent(
         sessionId: String,
         requestedAt: Long,
         method: RemoteSignerMethod,

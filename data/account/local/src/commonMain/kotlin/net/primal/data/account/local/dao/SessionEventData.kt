@@ -2,7 +2,6 @@ package net.primal.data.account.local.dao
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import net.primal.domain.account.model.RequestState
 import net.primal.shared.data.local.encryption.Encryptable
 
 @Entity
@@ -14,7 +13,7 @@ data class SessionEventData(
     val requestState: RequestState,
     val requestedAt: Long,
     val completedAt: Long?,
-    val requestType: RemoteSignerMethodDataType,
+    val requestType: SignerMethodType,
     val requestTypeId: Encryptable<String>,
     val eventKind: Encryptable<Int>?,
     val thirdPartyPubKey: Encryptable<String>?,
