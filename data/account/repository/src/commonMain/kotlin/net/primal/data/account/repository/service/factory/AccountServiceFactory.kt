@@ -36,7 +36,7 @@ object AccountServiceFactory {
                 nostrEncryptionHandler = nostrEncryptionHandler,
                 connectionRepository = connectionRepository,
             ),
-            sessionEventProcessor = repositoryFactory.createSessionEventProcessor(),
+            internalSessionEventRepository = repositoryFactory.createInternalSessionEventRepository(),
         )
 
     fun createNostrEncryptionService(): NostrEncryptionService = NostrEncryptionServiceImpl()

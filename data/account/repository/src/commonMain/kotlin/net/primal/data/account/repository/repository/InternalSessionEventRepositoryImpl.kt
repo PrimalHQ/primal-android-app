@@ -1,17 +1,20 @@
-package net.primal.data.account.repository.processor
+package net.primal.data.account.repository.repository
 
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.buildSessionEventData
 
-class SessionEventProcessor(
+@OptIn(ExperimentalTime::class)
+internal class InternalSessionEventRepositoryImpl(
     private val accountDatabase: AccountDatabase,
-) {
-    @OptIn(ExperimentalTime::class)
-    suspend fun processAndPersist(
+    private val dispatchers: DispatcherProvider,
+) : InternalSessionEventRepository {
+
+    override suspend fun saveSessionEvent(
         sessionId: String,
         requestedAt: Long,
         method: RemoteSignerMethod,

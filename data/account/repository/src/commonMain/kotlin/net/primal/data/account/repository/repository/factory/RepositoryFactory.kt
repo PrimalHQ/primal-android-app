@@ -3,8 +3,9 @@ package net.primal.data.account.repository.repository.factory
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.manager.factory.AccountManagerFactory
-import net.primal.data.account.repository.processor.SessionEventProcessor
 import net.primal.data.account.repository.repository.ConnectionRepositoryImpl
+import net.primal.data.account.repository.repository.InternalSessionEventRepository
+import net.primal.data.account.repository.repository.InternalSessionEventRepositoryImpl
 import net.primal.data.account.repository.repository.SessionEventRepositoryImpl
 import net.primal.data.account.repository.repository.SessionRepositoryImpl
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
@@ -36,9 +37,10 @@ abstract class RepositoryFactory {
             dispatchers = dispatcherProvider,
         )
 
-    fun createSessionEventProcessor(): SessionEventProcessor =
-        SessionEventProcessor(
+    internal fun createInternalSessionEventRepository(): InternalSessionEventRepository =
+        InternalSessionEventRepositoryImpl(
             accountDatabase = resolveAccountDatabase(),
+            dispatchers = dispatcherProvider,
         )
 
     fun createSignerConnectionInitializer(
