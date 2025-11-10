@@ -124,22 +124,25 @@ class RemoteSignerClient(
                     )
                 }.getOrNull() ?: return@launch
 
-            remoteSignerMethodParser.parse(clientPubkey = event.pubKey, content = decryptedContent)
-                .onSuccess { command ->
-                    Napier.d(tag = "Signer") { "Received command: $command" }
-                    _incomingMethods.send(command)
-                }.onFailure {
-                    val message = it.message ?: "There was an error while parsing method."
-                    Napier.w(throwable = it) { message }
-                    val id = decryptedContent.decodeFromJsonStringOrNull<RemoteSignerMethodRequest>()?.id
-                    _errors.send(
-                        RemoteSignerMethodResponse.Error(
-                            id = id ?: event.id,
-                            error = message,
-                            clientPubKey = event.pubKey,
-                        ),
-                    )
-                }
+            remoteSignerMethodParser.parse(
+                clientPubkey = event.pubKey,
+                content = decryptedContent,
+                requestedAt = event.createdAt,
+            ).onSuccess { command ->
+                Napier.d(tag = "Signer") { "Received command: $command" }
+                _incomingMethods.send(command)
+            }.onFailure {
+                val message = it.message ?: "There was an error while parsing method."
+                Napier.w(throwable = it) { message }
+                val id = decryptedContent.decodeFromJsonStringOrNull<RemoteSignerMethodRequest>()?.id
+                _errors.send(
+                    RemoteSignerMethodResponse.Error(
+                        id = id ?: event.id,
+                        error = message,
+                        clientPubKey = event.pubKey,
+                    ),
+                )
+            }
         }
 
     private fun NostrEvent.decryptContent(): String =

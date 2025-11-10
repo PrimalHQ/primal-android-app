@@ -24,3 +24,5 @@ fun String.isEmailAddress() =
             "[a-zA-Z0-9][a-zA-Z0-9\\-]{0,25}" +
             ")+",
     ).matches(this)
+
+operator fun Regex.contains(text: CharSequence): Boolean = this.matches(text)

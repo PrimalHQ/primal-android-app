@@ -21,6 +21,8 @@ interface ConnectionRepository {
 
     suspend fun getUserPubKey(clientPubKey: String): Result<String>
 
+    suspend fun canProcessMethod(permissionId: String, clientPubKey: String): Boolean
+
     suspend fun updateConnectionName(connectionId: String, name: String)
 
     suspend fun updateConnectionAutoStart(connectionId: String, autoStart: Boolean)
