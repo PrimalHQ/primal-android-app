@@ -12,8 +12,8 @@ import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.model.RelayEvent
-import net.primal.domain.account.model.AppSession
 import net.primal.data.account.repository.repository.InternalSessionEventRepository
+import net.primal.domain.account.model.AppSession
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService

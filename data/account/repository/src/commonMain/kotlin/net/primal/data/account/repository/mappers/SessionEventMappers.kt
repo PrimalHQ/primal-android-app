@@ -8,6 +8,13 @@ import net.primal.domain.account.model.RequestState
 import net.primal.domain.account.model.SessionEvent
 import net.primal.shared.data.local.encryption.asEncryptable
 
+private const val REQ_ID_GET_PUBLIC_KEY = "get_public_key"
+private const val REQ_ID_NIP04_DECRYPT = "nip04_decrypt"
+private const val REQ_ID_NIP04_ENCRYPT = "nip04_encrypt"
+private const val REQ_ID_NIP44_DECRYPT = "nip44_decrypt"
+private const val REQ_ID_NIP44_ENCRYPT = "nip44_encrypt"
+private const val REQ_ID_PREFIX_SIGN_EVENT = "sign_event:"
+
 fun buildSessionEventData(
     sessionId: String,
     requestedAt: Long,
@@ -153,12 +160,12 @@ private fun RemoteSignerMethod.toDataType(): RemoteSignerMethodDataType {
 
 private fun RemoteSignerMethod.toRequestTypeId(): String? {
     return when (this) {
-        is RemoteSignerMethod.GetPublicKey -> "get_public_key"
-        is RemoteSignerMethod.Nip04Decrypt -> "nip04_decrypt"
-        is RemoteSignerMethod.Nip04Encrypt -> "nip04_encrypt"
-        is RemoteSignerMethod.Nip44Decrypt -> "nip44_decrypt"
-        is RemoteSignerMethod.Nip44Encrypt -> "nip44_encrypt"
-        is RemoteSignerMethod.SignEvent -> "sign_event:${this.unsignedEvent.kind}"
+        is RemoteSignerMethod.GetPublicKey -> REQ_ID_GET_PUBLIC_KEY
+        is RemoteSignerMethod.Nip04Decrypt -> REQ_ID_NIP04_DECRYPT
+        is RemoteSignerMethod.Nip04Encrypt -> REQ_ID_NIP04_ENCRYPT
+        is RemoteSignerMethod.Nip44Decrypt -> REQ_ID_NIP44_DECRYPT
+        is RemoteSignerMethod.Nip44Encrypt -> REQ_ID_NIP44_ENCRYPT
+        is RemoteSignerMethod.SignEvent -> "$REQ_ID_PREFIX_SIGN_EVENT${this.unsignedEvent.kind}"
         is RemoteSignerMethod.Connect, is RemoteSignerMethod.Ping -> null
     }
 }
