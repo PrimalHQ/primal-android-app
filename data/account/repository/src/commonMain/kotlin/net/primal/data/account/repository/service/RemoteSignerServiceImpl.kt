@@ -108,7 +108,16 @@ class RemoteSignerServiceImpl internal constructor(
     private fun processMethod(method: RemoteSignerMethod) =
         scope.launch {
             val requestedAt = Clock.System.now().epochSeconds
-            if (!activeClientPubKeys.contains(method.clientPubKey)) return@launch
+            if (!activeClientPubKeys.contains(method.clientPubKey)) {
+                val connection = connectionRepository
+                    .getConnectionByClientPubKey(clientPubKey = method.clientPubKey).getOrNull() ?: return@launch
+
+                if (connection.autoStart) {
+                    sessionRepository.startSession(connectionId = connection.connectionId)
+                } else {
+                    return@launch
+                }
+            }
 
             val response = remoteSignerMethodResponseBuilder.build(method)
             clientSessionMap[method.clientPubKey]?.let { sessionId ->
