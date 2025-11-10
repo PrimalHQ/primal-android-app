@@ -30,3 +30,5 @@ object AndroidRepositoryFactory : RepositoryFactory() {
 
     override fun resolveAccountDatabase(): AccountDatabase = accountDatabase
 }
+
+actual fun provideAccountDatabase(): AccountDatabase = AndroidRepositoryFactory.resolveAccountDatabase()

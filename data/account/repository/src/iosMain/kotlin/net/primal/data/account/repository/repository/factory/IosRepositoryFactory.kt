@@ -23,3 +23,5 @@ object IosRepositoryFactory : RepositoryFactory() {
 
     override fun resolveAccountDatabase(): AccountDatabase = accountDatabase
 }
+
+actual fun provideAccountDatabase(): AccountDatabase = IosRepositoryFactory.resolveAccountDatabase()

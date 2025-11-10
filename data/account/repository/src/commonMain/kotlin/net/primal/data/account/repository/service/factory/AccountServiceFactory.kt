@@ -3,7 +3,8 @@ package net.primal.data.account.repository.service.factory
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
-import net.primal.data.account.repository.repository.factory.RepositoryFactory
+import net.primal.data.account.repository.repository.InternalSessionEventRepositoryImpl
+import net.primal.data.account.repository.repository.factory.provideAccountDatabase
 import net.primal.data.account.repository.service.NostrEncryptionServiceImpl
 import net.primal.data.account.repository.service.RemoteSignerServiceImpl
 import net.primal.domain.account.repository.ConnectionRepository
@@ -21,7 +22,6 @@ object AccountServiceFactory {
         nostrEncryptionHandler: NostrEncryptionHandler,
         connectionRepository: ConnectionRepository,
         sessionRepository: SessionRepository,
-        repositoryFactory: RepositoryFactory,
     ): RemoteSignerService =
         RemoteSignerServiceImpl(
             signerKeyPair = signerKeyPair,
@@ -36,7 +36,10 @@ object AccountServiceFactory {
                 nostrEncryptionHandler = nostrEncryptionHandler,
                 connectionRepository = connectionRepository,
             ),
-            internalSessionEventRepository = repositoryFactory.createInternalSessionEventRepository(),
+            internalSessionEventRepository = InternalSessionEventRepositoryImpl(
+                dispatchers = createDispatcherProvider(),
+                accountDatabase = provideAccountDatabase(),
+            ),
         )
 
     fun createNostrEncryptionService(): NostrEncryptionService = NostrEncryptionServiceImpl()
