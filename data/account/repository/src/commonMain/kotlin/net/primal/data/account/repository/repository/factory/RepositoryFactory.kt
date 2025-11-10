@@ -2,7 +2,7 @@ package net.primal.data.account.repository.repository.factory
 
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.local.db.AccountDatabase
-import net.primal.data.account.repository.manager.factory.AccountManagerFactory
+import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.repository.ConnectionRepositoryImpl
 import net.primal.data.account.repository.repository.InternalSessionEventRepository
 import net.primal.data.account.repository.repository.InternalSessionEventRepositoryImpl
@@ -49,7 +49,7 @@ abstract class RepositoryFactory {
     ): SignerConnectionInitializer =
         SignerConnectionInitializer(
             connectionRepository = connectionRepository,
-            nostrRelayManager = AccountManagerFactory.createNostrRelayManager(
+            nostrRelayManager = NostrRelayManager(
                 dispatcherProvider = dispatcherProvider,
                 signerKeyPair = signerKeyPair,
             ),

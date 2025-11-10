@@ -68,6 +68,8 @@ internal class NostrRelayManager(
             onSocketConnectionClosed = { url, _ ->
                 Napier.d(tag = "SignerNostrRelayManager") { "Disconnected from relay: $url" }
                 scope.launch { _relayEvents.emit(RelayEvent.Disconnected(relayUrl = url)) }
+                clients.remove(relay)
+                clientJobs.remove(relay)?.cancel()
             },
         )
 
@@ -153,12 +155,7 @@ internal class NostrRelayManager(
     }
 
     private fun removeClient(relay: String) {
-        clients.remove(relay)
-            ?.close()
-            ?.invokeOnCompletion {
-                scope.launch { _relayEvents.emit(RelayEvent.Disconnected(relayUrl = relay)) }
-            }
-
+        clients.remove(relay)?.close()
         clientJobs.remove(relay)?.cancel()
     }
 }

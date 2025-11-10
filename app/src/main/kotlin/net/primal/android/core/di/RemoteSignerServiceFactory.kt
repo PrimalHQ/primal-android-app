@@ -19,15 +19,13 @@ class RemoteSignerServiceFactory @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val repositoryFactory: RepositoryFactory,
 ) {
-    private val instances: MutableMap<NostrKeyPair, RemoteSignerService> = mutableMapOf()
-
     fun create(signerKeyPair: NostrKeyPair): RemoteSignerService =
-        instances[signerKeyPair] ?: AccountServiceFactory.createRemoteSignerService(
+        AccountServiceFactory.createRemoteSignerService(
             signerKeyPair = signerKeyPair,
             eventSignatureHandler = eventSignatureHandler,
             nostrEncryptionHandler = nostrEncryptionHandler,
             connectionRepository = connectionRepository,
             sessionRepository = sessionRepository,
             repositoryFactory = repositoryFactory,
-        ).also { instances.put(signerKeyPair, it) }
+        )
 }

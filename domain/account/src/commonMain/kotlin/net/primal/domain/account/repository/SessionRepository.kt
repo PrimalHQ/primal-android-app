@@ -22,4 +22,6 @@ interface SessionRepository {
     suspend fun incrementActiveRelayCount(sessionIds: List<String>)
 
     suspend fun decrementActiveRelayCountOrEnd(sessionIds: List<String>)
+
+    suspend fun setActiveRelayCount(sessionId: String, activeRelayCount: Int)
 }

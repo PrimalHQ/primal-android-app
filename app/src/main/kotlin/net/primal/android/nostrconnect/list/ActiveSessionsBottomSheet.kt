@@ -50,7 +50,11 @@ import net.primal.domain.links.CdnImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ActiveSessionsBottomSheet(viewModel: ActiveSessionsViewModel, onDismissRequest: () -> Unit) {
+fun ActiveSessionsBottomSheet(
+    viewModel: ActiveSessionsViewModel,
+    onDismissRequest: () -> Unit,
+    onSettingsClick: () -> Unit,
+) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -85,6 +89,7 @@ fun ActiveSessionsBottomSheet(viewModel: ActiveSessionsViewModel, onDismissReque
             state = state,
             eventPublisher = { viewModel.setEvent(it) },
             snackbarHostState = snackbarHostState,
+            onSettingsClick = onSettingsClick,
         )
     }
 }
@@ -97,6 +102,7 @@ private fun ActiveSessionsContent(
     state: UiState,
     eventPublisher: (ActiveSessionsContract.UiEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
+    onSettingsClick: () -> Unit,
 ) {
     val activeSessions = state.sessions.size
     val hasActiveSessions = activeSessions > 0
@@ -164,6 +170,7 @@ private fun ActiveSessionsContent(
                 disconnecting = state.disconnecting,
                 disconnectEnabled = state.selectedSessions.isNotEmpty(),
                 onDisconnectClick = { eventPublisher(ActiveSessionsContract.UiEvent.DisconnectClick) },
+                onSettingsClick = onSettingsClick,
             )
         },
         snackbarHost = {
@@ -267,6 +274,7 @@ private fun ActionButtons(
     disconnecting: Boolean,
     disconnectEnabled: Boolean,
     onDisconnectClick: () -> Unit,
+    onSettingsClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -280,8 +288,7 @@ private fun ActionButtons(
             contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             border = BorderStroke(width = 1.dp, color = AppTheme.colorScheme.outline),
             textStyle = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, lineHeight = 20.sp),
-            enabled = false,
-            onClick = { },
+            onClick = onSettingsClick,
         ) {
             Text(text = stringResource(id = R.string.nostr_connect_settings_button))
         }
