@@ -8,7 +8,7 @@ import net.primal.data.account.repository.repository.factory.AccountRepositoryFa
 import net.primal.data.account.repository.repository.factory.RepositoryFactory
 import net.primal.data.account.repository.service.factory.AccountServiceFactory
 import net.primal.domain.account.repository.ConnectionRepository
-import net.primal.domain.account.repository.SessionLogRepository
+import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.NostrEncryptionService
 
@@ -25,7 +25,8 @@ object AccountRepositoriesModule {
     fun provideSessionRepository(): SessionRepository = AccountRepositoryFactory.createSessionRepository()
 
     @Provides
-    fun provideSessionLogRepository(): SessionLogRepository = AccountRepositoryFactory.createSessionLogRepository()
+    fun provideSessionEventRepository(): SessionEventRepository =
+        AccountRepositoryFactory.createSessionEventRepository()
 
     @Provides
     fun provideNostrEncryptionService(): NostrEncryptionService = AccountServiceFactory.createNostrEncryptionService()

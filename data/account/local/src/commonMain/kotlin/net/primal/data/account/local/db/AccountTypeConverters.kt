@@ -1,12 +1,13 @@
 package net.primal.data.account.local.db
 
 import androidx.room.TypeConverter
-import net.primal.domain.account.model.SignerMethodType
+import net.primal.data.account.local.dao.RemoteSignerMethodDataType
 
 class AccountTypeConverters {
     @TypeConverter
-    fun fromSignerMethodType(type: SignerMethodType): String = type.name
+    fun fromRemoteSignerMethodDataType(type: RemoteSignerMethodDataType): String = type.name
 
     @TypeConverter
-    fun toSignerMethodType(name: String): SignerMethodType = SignerMethodType.valueOf(name)
+    fun toRemoteSignerMethodDataType(name: String): RemoteSignerMethodDataType =
+        RemoteSignerMethodDataType.valueOf(name)
 }
