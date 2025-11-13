@@ -9,15 +9,13 @@ data class SessionEventData(
     @PrimaryKey
     val eventId: String,
     val sessionId: String,
+    val signerPubKey: Encryptable<String>,
     val clientPubKey: Encryptable<String>,
     val requestState: RequestState,
     val requestedAt: Long,
     val completedAt: Long?,
     val requestType: SignerMethodType,
-    val requestTypeId: Encryptable<String>,
     val eventKind: Encryptable<Int>?,
-    val thirdPartyPubKey: Encryptable<String>?,
-    val plaintext: Encryptable<String>?,
-    val ciphertext: Encryptable<String>?,
+    val requestPayload: Encryptable<String>?,
     val responsePayload: Encryptable<String>?,
 )

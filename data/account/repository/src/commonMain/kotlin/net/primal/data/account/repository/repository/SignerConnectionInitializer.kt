@@ -9,6 +9,8 @@ import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.model.AppPermission
+import net.primal.domain.account.model.PermissionAction
+import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository
 
 private const val NOSTR_CONNECT_PREFIX = "nostrconnect://"
@@ -17,6 +19,17 @@ private const val IMAGE_PARAM = "image"
 private const val URL_PARAM = "url"
 private const val RELAY_PARAM = "relay"
 private const val SECRET_PARAM = "secret"
+private const val PERMS_PARAM = "perms"
+
+private const val GET_PUBLIC_KEY = "get_public_key"
+private const val SIGN_EVENT = "sign_event"
+private const val NIP04_DECRYPT = "nip04_decrypt"
+private const val NIP44_DECRYPT = "nip44_decrypt"
+private const val NIP04_ENCRYPT = "nip04_encrypt"
+private const val NIP44_ENCRYPT = "nip44_encrypt"
+
+private const val VALID_PERMISSION_STRING_REGEX =
+    "$GET_PUBLIC_KEY|$NIP04_DECRYPT|$NIP04_ENCRYPT|$NIP44_DECRYPT|$NIP44_ENCRYPT|($SIGN_EVENT:\\d+)"
 
 @OptIn(ExperimentalUuidApi::class)
 class SignerConnectionInitializer internal constructor(
@@ -27,12 +40,14 @@ class SignerConnectionInitializer internal constructor(
         signerPubKey: String,
         userPubKey: String,
         connectionUrl: String,
+        trustLevel: TrustLevel,
     ): Result<AppConnection> =
         runCatching {
             val (appConnection, secret) = parseConnectionUrlOrThrow(
                 signerPubKey = signerPubKey,
                 userPubKey = userPubKey,
                 connectionUrl = connectionUrl,
+                trustLevel = trustLevel,
             )
 
             nostrRelayManager.connectToRelays(relays = appConnection.relays.toSet())
@@ -54,22 +69,25 @@ class SignerConnectionInitializer internal constructor(
         signerPubKey: String,
         userPubKey: String,
         connectionUrl: String,
+        trustLevel: TrustLevel,
     ): Pair<AppConnection, String> {
         if (!connectionUrl.startsWith(prefix = NOSTR_CONNECT_PREFIX, ignoreCase = true)) {
             throw IllegalArgumentException("Invalid `connectionUrl`. It should start with `$NOSTR_CONNECT_PREFIX`.")
         }
 
+        val connectionId = Uuid.random().toString()
+
         val parsedUrl = Url(urlString = connectionUrl)
         val clientPubKey = parsedUrl.host
         val relays = extractRelaysOrThrow(parsedUrl)
         val secret = extractSecretOrThrow(parsedUrl)
-        val perms = extractPermsOrEmpty(parsedUrl)
+        val perms = extractPermsOrEmpty(url = parsedUrl, connectionId = connectionId)
         val name = parsedUrl.parameters[NAME_PARAM]
         val url = parsedUrl.parameters[URL_PARAM]
         val image = parsedUrl.parameters[IMAGE_PARAM]
 
         return AppConnection(
-            connectionId = Uuid.random().toString(),
+            connectionId = connectionId,
             userPubKey = userPubKey,
             signerPubKey = signerPubKey,
             clientPubKey = clientPubKey,
@@ -79,6 +97,7 @@ class SignerConnectionInitializer internal constructor(
             image = image,
             permissions = perms,
             autoStart = true,
+            trustLevel = trustLevel,
         ) to secret
     }
 
@@ -94,7 +113,16 @@ class SignerConnectionInitializer internal constructor(
                 "No `$SECRET_PARAM` field found in provided `connectionUrl`. This is a mandatory field.",
             )
 
-    private fun extractPermsOrEmpty(url: Url): List<AppPermission> {
-        return emptyList()
+    private fun extractPermsOrEmpty(url: Url, connectionId: String): List<AppPermission> {
+        return url.parameters[PERMS_PARAM]
+            ?.split(",")
+            ?.filter { permString -> Regex(VALID_PERMISSION_STRING_REGEX).matches(permString) }
+            ?.map {
+                AppPermission(
+                    permissionId = it,
+                    connectionId = connectionId,
+                    action = PermissionAction.Approve,
+                )
+            } ?: emptyList()
     }
 }

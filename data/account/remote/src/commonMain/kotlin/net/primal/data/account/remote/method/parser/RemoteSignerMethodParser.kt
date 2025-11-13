@@ -10,7 +10,11 @@ import net.primal.data.account.remote.method.model.RemoteSignerMethodType
 
 internal class RemoteSignerMethodParser {
 
-    fun parse(clientPubkey: String, content: String): Result<RemoteSignerMethod> {
+    fun parse(
+        clientPubkey: String,
+        content: String,
+        requestedAt: Long,
+    ): Result<RemoteSignerMethod> {
         val request = content.decodeFromJsonStringOrNull<RemoteSignerMethodRequest>()
             ?: return Result.failure(
                 IllegalArgumentException(
@@ -24,6 +28,7 @@ internal class RemoteSignerMethodParser {
                     RemoteSignerMethod.Connect(
                         id = request.id,
                         clientPubKey = clientPubkey,
+                        requestedAt = requestedAt,
                         remoteSignerPubkey = request.params[0],
                         secret = request.params.getOrNull(1),
                         requestedPermissions = request.params.getOrNull(2)?.split(",") ?: emptyList(),
@@ -33,12 +38,14 @@ internal class RemoteSignerMethodParser {
                     RemoteSignerMethod.Ping(
                         id = request.id,
                         clientPubKey = clientPubkey,
+                        requestedAt = requestedAt,
                     )
 
                 RemoteSignerMethodType.SignEvent ->
                     RemoteSignerMethod.SignEvent(
                         id = request.id,
                         clientPubKey = clientPubkey,
+                        requestedAt = requestedAt,
                         unsignedEvent = request.params[0].decodeFromJsonStringOrNull<NostrUnsignedEventNoPubkey>()
                             ?: throw IllegalArgumentException(
                                 "Couldn't parse `NostrUnsignedEvent` from received SignEvent request." +
@@ -50,12 +57,14 @@ internal class RemoteSignerMethodParser {
                     RemoteSignerMethod.GetPublicKey(
                         id = request.id,
                         clientPubKey = clientPubkey,
+                        requestedAt = requestedAt,
                     )
 
                 RemoteSignerMethodType.Nip04Encrypt ->
                     RemoteSignerMethod.Nip04Encrypt(
                         id = request.id,
                         clientPubKey = clientPubkey,
+                        requestedAt = requestedAt,
                         thirdPartyPubKey = request.params[0],
                         plaintext = request.params[1],
                     )
@@ -64,6 +73,7 @@ internal class RemoteSignerMethodParser {
                     RemoteSignerMethod.Nip04Decrypt(
                         id = request.id,
                         clientPubKey = clientPubkey,
+                        requestedAt = requestedAt,
                         thirdPartyPubKey = request.params[0],
                         ciphertext = request.params[1],
                     )
@@ -72,6 +82,7 @@ internal class RemoteSignerMethodParser {
                     RemoteSignerMethod.Nip44Encrypt(
                         id = request.id,
                         clientPubKey = clientPubkey,
+                        requestedAt = requestedAt,
                         thirdPartyPubKey = request.params[0],
                         plaintext = request.params[1],
                     )
@@ -80,6 +91,7 @@ internal class RemoteSignerMethodParser {
                     RemoteSignerMethod.Nip44Decrypt(
                         id = request.id,
                         clientPubKey = clientPubkey,
+                        requestedAt = requestedAt,
                         thirdPartyPubKey = request.params[0],
                         ciphertext = request.params[1],
                     )

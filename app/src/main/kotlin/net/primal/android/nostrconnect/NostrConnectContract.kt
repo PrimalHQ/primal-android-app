@@ -3,6 +3,7 @@ package net.primal.android.nostrconnect
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
+import net.primal.domain.account.model.TrustLevel
 
 interface NostrConnectContract {
     data class UiState(
@@ -13,7 +14,7 @@ interface NostrConnectContract {
         val accounts: List<UserAccountUi> = emptyList(),
         val selectedTab: Tab = Tab.LOGIN,
         val selectedAccount: UserAccountUi? = null,
-        val trustLevel: TrustLevel = TrustLevel.MEDIUM,
+        val trustLevel: TrustLevel = TrustLevel.Medium,
         val dailyBudget: Long? = null,
         val connecting: Boolean = false,
         val showDailyBudgetPicker: Boolean = false,
@@ -25,12 +26,6 @@ interface NostrConnectContract {
     enum class Tab {
         LOGIN,
         PERMISSIONS,
-    }
-
-    enum class TrustLevel {
-        LOW,
-        MEDIUM,
-        FULL,
     }
 
     sealed class UiEvent {

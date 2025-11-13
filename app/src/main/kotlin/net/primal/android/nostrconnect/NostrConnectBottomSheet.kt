@@ -87,6 +87,7 @@ import net.primal.android.navigation.primalSlideOutHorizontallyToEnd
 import net.primal.android.nostrconnect.NostrConnectContract.Companion.DAILY_BUDGET_PICKER_OPTIONS
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.toDouble
+import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.links.CdnImage
 
 private val DISABLED_ICON_TINT = Color(0xFF808080)
@@ -468,9 +469,9 @@ private fun AccountListItem(
 
 @Composable
 private fun PermissionsContent(
-    trustLevel: NostrConnectContract.TrustLevel,
+    trustLevel: TrustLevel,
     dailyBudget: Long?,
-    onTrustLevelClick: (NostrConnectContract.TrustLevel) -> Unit,
+    onTrustLevelClick: (TrustLevel) -> Unit,
     onDailyBudgetClick: () -> Unit,
     showDailyBudgetPicker: Boolean,
     selectedDailyBudget: Long?,
@@ -500,8 +501,8 @@ private fun PermissionsContent(
 
 @Composable
 private fun PermissionsList(
-    trustLevel: NostrConnectContract.TrustLevel,
-    onTrustLevelClick: (NostrConnectContract.TrustLevel) -> Unit,
+    trustLevel: TrustLevel,
+    onTrustLevelClick: (TrustLevel) -> Unit,
     onDailyBudgetClick: () -> Unit,
     dailyBudget: Long?,
 ) {
@@ -515,22 +516,22 @@ private fun PermissionsList(
             icon = PrimalIcons.HighSecurity,
             title = stringResource(id = R.string.nostr_connect_full_trust_title),
             subtitle = stringResource(id = R.string.nostr_connect_full_trust_subtitle),
-            isSelected = trustLevel == NostrConnectContract.TrustLevel.FULL,
-            onClick = { onTrustLevelClick(NostrConnectContract.TrustLevel.FULL) },
+            isSelected = trustLevel == TrustLevel.Full,
+            onClick = { onTrustLevelClick(TrustLevel.Full) },
         )
         PermissionsListItem(
             icon = PrimalIcons.MediumSecurity,
             title = stringResource(id = R.string.nostr_connect_medium_trust_title),
             subtitle = stringResource(id = R.string.nostr_connect_medium_trust_subtitle),
-            isSelected = trustLevel == NostrConnectContract.TrustLevel.MEDIUM,
-            onClick = { onTrustLevelClick(NostrConnectContract.TrustLevel.MEDIUM) },
+            isSelected = trustLevel == TrustLevel.Medium,
+            onClick = { onTrustLevelClick(TrustLevel.Medium) },
         )
         PermissionsListItem(
             icon = PrimalIcons.LowSecurity,
             title = stringResource(id = R.string.nostr_connect_low_trust_title),
             subtitle = stringResource(id = R.string.nostr_connect_low_trust_subtitle),
-            isSelected = trustLevel == NostrConnectContract.TrustLevel.LOW,
-            onClick = { onTrustLevelClick(NostrConnectContract.TrustLevel.LOW) },
+            isSelected = trustLevel == TrustLevel.Low,
+            onClick = { onTrustLevelClick(TrustLevel.Low) },
         )
 
         PrimalDivider(modifier = Modifier.padding(vertical = 8.dp))
