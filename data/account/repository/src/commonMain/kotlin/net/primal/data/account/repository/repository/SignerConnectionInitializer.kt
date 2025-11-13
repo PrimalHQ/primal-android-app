@@ -81,7 +81,6 @@ class SignerConnectionInitializer internal constructor(
         val clientPubKey = parsedUrl.host
         val relays = extractRelaysOrThrow(parsedUrl)
         val secret = extractSecretOrThrow(parsedUrl)
-        /* TODO(marko): if medium trust, add some default permissions */
         val perms = extractPermsOrEmpty(url = parsedUrl, connectionId = connectionId)
         val name = parsedUrl.parameters[NAME_PARAM]
         val url = parsedUrl.parameters[URL_PARAM]

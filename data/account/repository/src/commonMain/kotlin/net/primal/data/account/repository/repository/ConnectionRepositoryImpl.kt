@@ -110,11 +110,6 @@ class ConnectionRepositoryImpl(
 
     private suspend fun resolvePermissionAction(permissionId: String, connectionId: String) =
         when (permissionId) {
-            /* TODO(marko): should we auto approve connect and ping requests?
-                 - Connect requests have proven to be client's way of starting up "session".
-                      If our user has started the session he doesn't need to get prompted to approve it again...
-                 - Ping requests shouldn't be known to user. This is client's way of checking if we are alive.
-             */
             in Regex(PERM_ID_CONNECT), in Regex(PERM_ID_PING) -> PermissionAction.Approve
             else -> database.permissions()
                 .findPermission(permissionId = permissionId, connectionId = connectionId)
