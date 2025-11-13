@@ -1,6 +1,5 @@
 package net.primal.android.settings.connected.details
 
-import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -57,8 +56,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.Date
-import java.util.Locale
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
@@ -73,6 +70,8 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.core.utils.PrimalDateFormats
+import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SideEffect
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiEvent
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiState
@@ -85,7 +84,6 @@ private val DangerPrimaryColor = Color(0xFFFF2121)
 private val DangerSecondaryColor = Color(0xFFFA3C3C)
 private val EditButtonContainerColorDark = Color(0xFF333333)
 private val EditButtonContainerColorLight = Color(0xFFD5D5D5)
-private const val SECONDS_TO_MILLIS = 1000L
 
 @Composable
 fun ConnectedAppDetailsScreen(
@@ -337,7 +335,10 @@ private fun AppSummarySection(
             fontWeight = FontWeight.Bold,
         )
         if (lastSession != null) {
-            val formattedLastSession = rememberFormattedDateTime(timestamp = lastSession)
+            val formattedLastSession = rememberPrimalFormattedDateTime(
+                timestamp = lastSession,
+                format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_A,
+            )
             Text(
                 text = stringResource(
                     id = R.string.settings_connected_app_details_last_session,
@@ -445,7 +446,10 @@ private fun RecentSessionItem(
     appName: String?,
     onClick: () -> Unit,
 ) {
-    val formattedDate = rememberFormattedDateTime(timestamp = session.startedAt)
+    val formattedDate = rememberPrimalFormattedDateTime(
+        timestamp = session.startedAt,
+        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_A,
+    )
 
     ListItem(
         modifier = Modifier.clickable { onClick() },
@@ -507,14 +511,6 @@ private fun EditNameAlertDialog(
             }
         },
     )
-}
-
-@Composable
-private fun rememberFormattedDateTime(timestamp: Long): String {
-    return remember(timestamp) {
-        val simpleDateFormat = SimpleDateFormat("MMM dd, yyyy h:mm a", Locale.getDefault())
-        simpleDateFormat.format(Date(timestamp * SECONDS_TO_MILLIS))
-    }
 }
 
 private val mockRecentSessionsForPreview = listOf(

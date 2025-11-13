@@ -37,6 +37,12 @@ class SessionEventRepositoryImpl(
             .distinctUntilChanged()
     }
 
+    override fun observeEvent(eventId: String): Flow<SessionEvent?> {
+        return database.sessionEvents().observeEvent(eventId = eventId)
+            .map { it?.asDomain() }
+            .distinctUntilChanged()
+    }
+
     override suspend fun respondToEvent(eventId: String, userChoice: UserChoice): Result<Unit> =
         withContext(dispatchers.io()) {
             runCatching {

@@ -10,6 +10,8 @@ interface SessionEventRepository {
 
     fun observeEventsForSession(sessionId: String): Flow<List<SessionEvent>>
 
+    fun observeEvent(eventId: String): Flow<SessionEvent?>
+
     suspend fun respondToEvent(eventId: String, userChoice: UserChoice): Result<Unit>
 
     suspend fun respondToEvents(eventIdToUserChoice: List<Pair<String, UserChoice>>): Result<Unit>

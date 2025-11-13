@@ -18,6 +18,8 @@ import net.primal.android.settings.connected.ConnectedAppsScreen
 import net.primal.android.settings.connected.ConnectedAppsViewModel
 import net.primal.android.settings.connected.details.ConnectedAppDetailsScreen
 import net.primal.android.settings.connected.details.ConnectedAppDetailsViewModel
+import net.primal.android.settings.connected.event.EventDetailsScreen
+import net.primal.android.settings.connected.event.EventDetailsViewModel
 import net.primal.android.settings.connected.session.SessionDetailsScreen
 import net.primal.android.settings.connected.session.SessionDetailsViewModel
 import net.primal.android.settings.content.ContentDisplaySettingsScreen
@@ -63,6 +65,12 @@ fun NavController.navigateToConnectedApps() = navigate(route = "connected_apps")
 
 private fun NavController.navigateToSessionDetails(connectionId: String, sessionId: String) =
     navigate(route = "connected_apps/$connectionId/$sessionId")
+
+private fun NavController.navigateToEventDetails(
+    connectionId: String,
+    sessionId: String,
+    eventId: String,
+) = navigate(route = "connected_apps/$connectionId/$sessionId/$eventId")
 
 private fun NavController.navigateToConnectedAppDetails(connectionId: String) =
     navigate(route = "connected_apps/$connectionId")
@@ -136,6 +144,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         connectedApps(route = "connected_apps", navController = navController)
         connectedAppDetails(route = "connected_apps/{$CONNECTION_ID}", navController = navController)
         sessionDetails(route = "connected_apps/{$CONNECTION_ID}/{$SESSION_ID}", navController = navController)
+        eventDetails(route = "connected_apps/{$CONNECTION_ID}/{$SESSION_ID}/{$EVENT_ID}", navController = navController)
     }
 
 private fun NavGraphBuilder.home(
@@ -432,10 +441,36 @@ private fun NavGraphBuilder.sessionDetails(route: String, navController: NavCont
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
         popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
+    ) { navBackStackEntry ->
         val viewModel = hiltViewModel<SessionDetailsViewModel>()
         LockToOrientationPortrait()
         SessionDetailsScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onEventClick = { eventId ->
+                val connectionId = navBackStackEntry.arguments?.getString(CONNECTION_ID)!!
+                val sessionId = navBackStackEntry.arguments?.getString(SESSION_ID)!!
+                navController.navigateToEventDetails(connectionId, sessionId, eventId)
+            },
+        )
+    }
+
+private fun NavGraphBuilder.eventDetails(route: String, navController: NavController) =
+    composable(
+        route = route,
+        arguments = listOf(
+            navArgument(CONNECTION_ID) { type = NavType.StringType },
+            navArgument(SESSION_ID) { type = NavType.StringType },
+            navArgument(EVENT_ID) { type = NavType.StringType },
+        ),
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<EventDetailsViewModel>()
+        LockToOrientationPortrait()
+        EventDetailsScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )

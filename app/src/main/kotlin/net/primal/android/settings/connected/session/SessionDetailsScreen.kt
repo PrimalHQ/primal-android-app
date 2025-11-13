@@ -1,6 +1,5 @@
 package net.primal.android.settings.connected.session
 
-import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,15 +21,12 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.Date
-import java.util.Locale
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.PrimalDivider
@@ -39,24 +35,33 @@ import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.utils.PrimalDateFormats
+import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.settings.connected.model.SessionEventUi
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
 
-private const val SECONDS_TO_MILLIS = 1000L
-
 @Composable
-fun SessionDetailsScreen(viewModel: SessionDetailsViewModel, onClose: () -> Unit) {
+fun SessionDetailsScreen(
+    viewModel: SessionDetailsViewModel,
+    onClose: () -> Unit,
+    onEventClick: (String) -> Unit,
+) {
     val uiState = viewModel.state.collectAsState()
     SessionDetailsScreen(
         state = uiState.value,
         onClose = onClose,
+        onEventClick = onEventClick,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SessionDetailsScreen(state: SessionDetailsContract.UiState, onClose: () -> Unit) {
+fun SessionDetailsScreen(
+    state: SessionDetailsContract.UiState,
+    onClose: () -> Unit,
+    onEventClick: (String) -> Unit,
+) {
     PrimalScaffold(
         topBar = {
             PrimalTopAppBar(
@@ -78,7 +83,7 @@ fun SessionDetailsScreen(state: SessionDetailsContract.UiState, onClose: () -> U
             ) {
                 item(key = "Header") {
                     HeaderSection(
-                        modifier = Modifier.padding(vertical = 16.dp),
+                        modifier = Modifier.padding(vertical = 16.dp).padding(bottom = 10.dp),
                         appName = state.appName,
                         appIconUrl = state.appIconUrl,
                         startedAt = state.sessionStartedAt,
@@ -100,7 +105,7 @@ fun SessionDetailsScreen(state: SessionDetailsContract.UiState, onClose: () -> U
                     }
 
                     Column(modifier = Modifier.clip(shape)) {
-                        SessionEventListItem(event = event, onClick = { })
+                        SessionEventListItem(event = event, onClick = { onEventClick(event.id) })
                         if (!isLast) {
                             PrimalDivider()
                         }
@@ -143,9 +148,9 @@ private fun HeaderSection(
                 ),
             )
             if (startedAt != null) {
-                val formattedStartedAt = rememberFormattedDateTime(
+                val formattedStartedAt = rememberPrimalFormattedDateTime(
                     timestamp = startedAt,
-                    format = "MMM dd, yyyy h:mm a",
+                    format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_A,
                 )
                 Text(
                     text = stringResource(id = R.string.settings_session_details_started_on, formattedStartedAt),
@@ -159,9 +164,9 @@ private fun HeaderSection(
 
 @Composable
 private fun SessionEventListItem(event: SessionEventUi, onClick: () -> Unit) {
-    val formattedTimestamp = rememberFormattedDateTime(
+    val formattedTimestamp = rememberPrimalFormattedDateTime(
         timestamp = event.timestamp,
-        format = "MMM dd, yyyy h:mm:ss a",
+        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
     )
     ListItem(
         modifier = Modifier.clickable { onClick() },
@@ -170,7 +175,7 @@ private fun SessionEventListItem(event: SessionEventUi, onClick: () -> Unit) {
             Text(
                 modifier = Modifier.padding(top = 2.dp),
                 text = formattedTimestamp,
-                style = AppTheme.typography.titleSmall,
+                style = AppTheme.typography.labelMedium.copy(fontSize = 14.sp),
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
         },
@@ -185,12 +190,4 @@ private fun SessionEventListItem(event: SessionEventUi, onClick: () -> Unit) {
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
         ),
     )
-}
-
-@Composable
-private fun rememberFormattedDateTime(timestamp: Long, format: String): String {
-    return remember(timestamp, format) {
-        val simpleDateFormat = SimpleDateFormat(format, Locale.getDefault())
-        simpleDateFormat.format(Date(timestamp * SECONDS_TO_MILLIS))
-    }
 }

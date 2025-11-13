@@ -14,6 +14,9 @@ interface SessionEventDataDao {
     @Query("SELECT * FROM SessionEventData WHERE sessionId = :sessionId ORDER BY requestedAt DESC")
     fun observeEventsBySessionId(sessionId: String): Flow<List<SessionEventData>>
 
+    @Query("SELECT * FROM SessionEventData WHERE eventId = :eventId")
+    fun observeEvent(eventId: String): Flow<SessionEventData?>
+
     @Query("SELECT * FROM SessionEventData WHERE signerPubKey = :signerPubKey AND requestState = :requestState")
     fun observeEventsByRequestState(
         signerPubKey: Encryptable<String>,

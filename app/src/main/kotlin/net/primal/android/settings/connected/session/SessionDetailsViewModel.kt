@@ -49,7 +49,7 @@ class SessionDetailsViewModel @Inject constructor(
 
     private fun observeEvents() =
         viewModelScope.launch {
-            sessionEventRepository.getEventsForSession(sessionId = sessionId).collect { events ->
+            sessionEventRepository.observeEventsForSession(sessionId = sessionId).collect { events ->
                 setState {
                     copy(sessionEvents = events.map { it.asSessionEventUi() })
                 }
