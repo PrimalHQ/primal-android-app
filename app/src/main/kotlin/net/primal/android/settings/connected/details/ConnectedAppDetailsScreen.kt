@@ -88,7 +88,11 @@ private val EditButtonContainerColorLight = Color(0xFFD5D5D5)
 private const val SECONDS_TO_MILLIS = 1000L
 
 @Composable
-fun ConnectedAppDetailsScreen(viewModel: ConnectedAppDetailsViewModel, onClose: () -> Unit) {
+fun ConnectedAppDetailsScreen(
+    viewModel: ConnectedAppDetailsViewModel,
+    onClose: () -> Unit,
+    onSessionClick: (String) -> Unit,
+) {
     val uiState = viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel, onClose) {
@@ -103,6 +107,7 @@ fun ConnectedAppDetailsScreen(viewModel: ConnectedAppDetailsViewModel, onClose: 
         state = uiState.value,
         onClose = onClose,
         eventPublisher = viewModel::setEvent,
+        onSessionClick = onSessionClick,
     )
 }
 
@@ -112,6 +117,7 @@ fun ConnectedAppDetailsScreen(
     state: UiState,
     onClose: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
+    onSessionClick: (String) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -143,6 +149,7 @@ fun ConnectedAppDetailsScreen(
                         .padding(horizontal = 12.dp),
                     state = state,
                     eventPublisher = eventPublisher,
+                    onSessionClick = onSessionClick,
                 )
             }
         },
@@ -154,6 +161,7 @@ fun ConnectedAppDetailsContent(
     modifier: Modifier = Modifier,
     state: UiState,
     eventPublisher: (UiEvent) -> Unit,
+    onSessionClick: (String) -> Unit,
 ) {
     LazyColumn(modifier = modifier) {
         item(key = "Header", contentType = "Header") {
@@ -207,6 +215,7 @@ fun ConnectedAppDetailsContent(
                         session = session,
                         iconUrl = state.appIconUrl,
                         appName = state.appName,
+                        onClick = { onSessionClick(session.sessionId) },
                     )
                     if (!isLast) {
                         PrimalDivider()
@@ -434,11 +443,12 @@ private fun RecentSessionItem(
     session: SessionUi,
     iconUrl: String?,
     appName: String?,
+    onClick: () -> Unit,
 ) {
     val formattedDate = rememberFormattedDateTime(timestamp = session.startedAt)
 
     ListItem(
-        modifier = Modifier.clickable { },
+        modifier = Modifier.clickable { onClick() },
         colors = ListItemDefaults.colors(
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
         ),
@@ -539,6 +549,7 @@ fun PreviewConnectedAppDetailsScreen() {
             ),
             onClose = {},
             eventPublisher = {},
+            onSessionClick = {},
         )
     }
 }

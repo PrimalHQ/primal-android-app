@@ -18,6 +18,8 @@ import net.primal.android.settings.connected.ConnectedAppsScreen
 import net.primal.android.settings.connected.ConnectedAppsViewModel
 import net.primal.android.settings.connected.details.ConnectedAppDetailsScreen
 import net.primal.android.settings.connected.details.ConnectedAppDetailsViewModel
+import net.primal.android.settings.connected.session.SessionDetailsScreen
+import net.primal.android.settings.connected.session.SessionDetailsViewModel
 import net.primal.android.settings.content.ContentDisplaySettingsScreen
 import net.primal.android.settings.content.ContentDisplaySettingsViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
@@ -58,6 +60,10 @@ private fun NavController.navigateToZapsSettings() = navigate(route = "zaps_sett
 private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_accounts_settings")
 private fun NavController.navigateToMediaUploads() = navigate(route = "media_uploads_settings")
 fun NavController.navigateToConnectedApps() = navigate(route = "connected_apps")
+
+private fun NavController.navigateToSessionDetails(connectionId: String, sessionId: String) =
+    navigate(route = "connected_apps/$connectionId/$sessionId")
+
 private fun NavController.navigateToConnectedAppDetails(connectionId: String) =
     navigate(route = "connected_apps/$connectionId")
 
@@ -129,6 +135,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         zaps(route = "zaps_settings", navController = navController)
         connectedApps(route = "connected_apps", navController = navController)
         connectedAppDetails(route = "connected_apps/{$CONNECTION_ID}", navController = navController)
+        sessionDetails(route = "connected_apps/{$CONNECTION_ID}/{$SESSION_ID}", navController = navController)
     }
 
 private fun NavGraphBuilder.home(
@@ -401,10 +408,34 @@ private fun NavGraphBuilder.connectedAppDetails(route: String, navController: Na
         exitTransition = { primalScaleOut },
         popEnterTransition = { primalScaleIn },
         popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
+    ) { navBackStackEntry ->
         val viewModel = hiltViewModel<ConnectedAppDetailsViewModel>()
         LockToOrientationPortrait()
         ConnectedAppDetailsScreen(
+            viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+            onSessionClick = { sessionId ->
+                val connectionId = navBackStackEntry.arguments?.getString(CONNECTION_ID)!!
+                navController.navigateToSessionDetails(connectionId, sessionId)
+            },
+        )
+    }
+
+private fun NavGraphBuilder.sessionDetails(route: String, navController: NavController) =
+    composable(
+        route = route,
+        arguments = listOf(
+            navArgument(CONNECTION_ID) { type = NavType.StringType },
+            navArgument(SESSION_ID) { type = NavType.StringType },
+        ),
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<SessionDetailsViewModel>()
+        LockToOrientationPortrait()
+        SessionDetailsScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )

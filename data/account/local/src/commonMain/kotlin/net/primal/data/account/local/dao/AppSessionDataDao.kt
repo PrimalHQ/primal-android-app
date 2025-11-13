@@ -48,6 +48,10 @@ interface AppSessionDataDao {
     @Query("SELECT * FROM AppSessionData WHERE connectionId = :connectionId ORDER BY startedAt DESC")
     fun observeSessionsByConnectionId(connectionId: String): Flow<List<AppSession>>
 
+    @Transaction
+    @Query("SELECT * FROM AppSessionData WHERE sessionId = :sessionId")
+    fun observeSession(sessionId: String): Flow<AppSession?>
+
     @Query("UPDATE AppSessionData SET endedAt = :endedAt, activeRelayCount = 0 WHERE sessionId = :sessionId")
     suspend fun endSession(sessionId: String, endedAt: Long)
 

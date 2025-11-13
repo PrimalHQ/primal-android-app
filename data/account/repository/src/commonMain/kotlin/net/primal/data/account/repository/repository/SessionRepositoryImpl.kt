@@ -43,6 +43,11 @@ class SessionRepositoryImpl(
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
+    override fun observeSession(sessionId: String): Flow<AppSession?> =
+        database.sessions().observeSession(sessionId = sessionId)
+            .map { it?.asDomain() }
+            .distinctUntilChanged()
+
     override suspend fun startSession(connectionId: String): Result<String> =
         withContext(dispatchers.io()) {
             Napier.d(tag = "Signer") { "Starting session for $connectionId" }
