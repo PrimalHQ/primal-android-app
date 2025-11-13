@@ -28,6 +28,8 @@ interface WalletRepository {
 
     fun latestTransactions(walletId: String, walletType: WalletType): Flow<PagingData<Transaction>>
 
+    suspend fun latestTransactions(walletId: String, limit: Int): List<Transaction>
+
     suspend fun findTransactionByIdOrNull(txId: String): Transaction?
 
     suspend fun deleteAllTransactions(userId: String)

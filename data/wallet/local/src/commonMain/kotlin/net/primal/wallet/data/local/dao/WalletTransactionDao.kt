@@ -30,6 +30,16 @@ interface WalletTransactionDao {
     )
     fun latestTransactionsPagedByWalletId(walletId: String): PagingSource<Int, WalletTransaction>
 
+    @Transaction
+    @Query(
+        """
+            SELECT * FROM WalletTransactionData 
+            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED") AND walletId IS :walletId
+            ORDER BY updatedAt DESC LIMIT :limit
+        """,
+    )
+    suspend fun latestTransactionsByWalletId(walletId: String, limit: Int): List<WalletTransaction>
+
     @Query("SELECT * FROM WalletTransactionData WHERE walletId IS :walletId ORDER BY updatedAt ASC LIMIT 1")
     suspend fun firstByWalletId(walletId: String): WalletTransactionData?
 

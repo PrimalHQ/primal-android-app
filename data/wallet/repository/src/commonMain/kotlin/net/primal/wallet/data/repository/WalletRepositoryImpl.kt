@@ -123,6 +123,19 @@ internal class WalletRepositoryImpl(
         }
     }
 
+    override suspend fun latestTransactions(walletId: String, limit: Int): List<Transaction> =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.walletTransactions()
+                .latestTransactionsByWalletId(walletId = walletId, limit = limit)
+                .map { txData ->
+                    val otherProfile = txData.info.otherUserId?.let { profileId ->
+                        profileRepository.findProfileDataOrNull(profileId.decrypted)
+                    }
+
+                    txData.toDomain(otherProfile = otherProfile)
+                }
+        }
+
     override suspend fun findTransactionByIdOrNull(txId: String): Transaction? =
         withContext(dispatcherProvider.io()) {
             val transaction = walletDatabase.walletTransactions().findTransactionById(txId = txId)
