@@ -35,6 +35,7 @@ import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.utils.PrimalDateFormats
+import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.NostrEvent
@@ -42,7 +43,6 @@ import net.primal.domain.nostr.NostrEventKind
 
 private const val CONTENT_MAX_LINES_COLLAPSED = 10
 private const val MAX_TAGS_TO_SHOW_IN_DETAILS = 10
-private const val KEY_ELLIPSIZE_COUNT = 12
 
 private sealed interface EventDetailRow {
     data class Detail(
@@ -57,13 +57,6 @@ private sealed interface EventDetailRow {
         val label: String,
         val tags: List<JsonArray>,
     ) : EventDetailRow
-}
-
-private fun String.ellipsizeMiddle(): String {
-    if (this.length <= KEY_ELLIPSIZE_COUNT * 2) return this
-    val start = this.take(KEY_ELLIPSIZE_COUNT)
-    val end = this.takeLast(KEY_ELLIPSIZE_COUNT)
-    return "$start...$end"
 }
 
 @Composable
@@ -236,7 +229,7 @@ private fun EventDetailListItem(
     var showToggle by remember { mutableStateOf(false) }
 
     val displayValue = remember(value, isKey) {
-        if (isKey) value.ellipsizeMiddle() else value
+        if (isKey) value.ellipsizeMiddle(size = 12) else value
     }
 
     val maxLines = if (singleLine) 1 else if (expandable && !isExpanded) CONTENT_MAX_LINES_COLLAPSED else Int.MAX_VALUE
