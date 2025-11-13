@@ -3,19 +3,108 @@ package net.primal.data.account.repository.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
+import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
+import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.account.local.dao.PermissionAction
+import net.primal.data.account.local.dao.RequestState
 import net.primal.data.account.local.db.AccountDatabase
+import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.asDomain
+import net.primal.data.account.repository.mappers.getRequestTypeId
 import net.primal.domain.account.model.SessionEvent
+import net.primal.domain.account.model.UserChoice
 import net.primal.domain.account.repository.SessionEventRepository
+import net.primal.shared.data.local.db.withTransaction
+import net.primal.shared.data.local.encryption.asEncryptable
 
 class SessionEventRepositoryImpl(
     private val database: AccountDatabase,
     private val dispatchers: DispatcherProvider,
 ) : SessionEventRepository {
-    override fun getEventsForSession(sessionId: String): Flow<List<SessionEvent>> {
+    override fun observeEventsPendingUserAction(signerPubKey: String): Flow<List<SessionEvent>> =
+        database.sessionEvents().observeEventsByRequestState(
+            signerPubKey = signerPubKey.asEncryptable(),
+            requestState = RequestState.PendingUserAction,
+        ).map { events -> events.mapNotNull { it.asDomain() } }
+            .distinctUntilChanged()
+
+    override fun observeEventsForSession(sessionId: String): Flow<List<SessionEvent>> {
         return database.sessionEvents().observeEventsBySessionId(sessionId = sessionId)
             .map { list -> list.mapNotNull { it.asDomain() } }
             .distinctUntilChanged()
     }
+
+    override suspend fun respondToEvent(eventId: String, userChoice: UserChoice): Result<Unit> =
+        withContext(dispatchers.io()) {
+            runCatching {
+                when (userChoice) {
+                    UserChoice.Allow -> allowEvent(eventId = eventId)
+
+                    UserChoice.Reject -> rejectEvent(eventId = eventId)
+
+                    UserChoice.AlwaysAllow -> {
+                        allowEvent(eventId = eventId)
+                        updatePermissionPreference(eventId = eventId, action = PermissionAction.Approve)
+                    }
+
+                    UserChoice.AlwaysReject -> {
+                        rejectEvent(eventId = eventId)
+                        updatePermissionPreference(eventId = eventId, action = PermissionAction.Deny)
+                    }
+                }
+            }
+        }
+
+    override suspend fun respondToEvents(eventIdToUserChoice: List<Pair<String, UserChoice>>): Result<Unit> =
+        withContext(dispatchers.io()) {
+            database.withTransaction {
+                runCatching {
+                    eventIdToUserChoice.forEach {
+                        respondToEvent(eventId = it.first, userChoice = it.second).getOrThrow()
+                    }
+                }
+            }
+        }
+
+    private suspend fun updatePermissionPreference(eventId: String, action: PermissionAction) =
+        withContext(dispatchers.io()) {
+            database.withTransaction {
+                val sessionEvent = database.sessionEvents().getSessionEvent(eventId = eventId) ?: return@withTransaction
+                val connection = database.connections()
+                    .getConnectionByClientPubKey(clientPubKey = sessionEvent.clientPubKey) ?: return@withTransaction
+                database.permissions().updatePreference(
+                    permissionId = sessionEvent.getRequestTypeId(),
+                    connectionId = connection.data.connectionId,
+                    action = action,
+                )
+            }
+        }
+
+    private suspend fun allowEvent(eventId: String) =
+        withContext(dispatchers.io()) {
+            database.sessionEvents().updateSessionEventRequestState(
+                eventId = eventId,
+                requestState = RequestState.PendingResponse,
+                responsePayload = null,
+            )
+        }
+
+    private suspend fun rejectEvent(eventId: String) =
+        withContext(dispatchers.io()) {
+            val clientPubKey = database.sessionEvents().getSessionEvent(eventId = eventId)?.clientPubKey?.decrypted
+            if (clientPubKey != null) {
+                database.sessionEvents().updateSessionEventRequestState(
+                    eventId = eventId,
+                    requestState = RequestState.PendingResponse,
+                    responsePayload = RemoteSignerMethodResponse.Error(
+                        id = eventId,
+                        clientPubKey = clientPubKey,
+                        error = "User rejected this request.",
+                    ).encodeToJsonString().asEncryptable(),
+                )
+            }
+        }
 }

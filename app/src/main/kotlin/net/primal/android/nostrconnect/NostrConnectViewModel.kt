@@ -179,6 +179,7 @@ class NostrConnectViewModel @Inject constructor(
                 signerPubKey = signerKeyPair.pubKey,
                 userPubKey = selectedAccount.pubkey,
                 connectionUrl = connectionUrl,
+                trustLevel = state.value.trustLevel,
             ).onSuccess {
                 runCatching { tokenUpdater.updateTokenForRemoteSigner() }
                 signerSessionHandler.startSession(connectionId = it.connectionId)

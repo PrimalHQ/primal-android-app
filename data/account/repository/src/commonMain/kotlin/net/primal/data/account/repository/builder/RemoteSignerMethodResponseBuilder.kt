@@ -1,4 +1,4 @@
-package net.primal.data.account.repository.handler
+package net.primal.data.account.repository.builder
 
 import net.primal.core.utils.fold
 import net.primal.core.utils.mapCatching

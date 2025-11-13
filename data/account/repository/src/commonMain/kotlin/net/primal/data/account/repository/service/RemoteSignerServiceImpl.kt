@@ -1,17 +1,20 @@
 package net.primal.data.account.repository.service
 
 import io.github.aakira.napier.Napier
-import kotlin.time.Clock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.account.local.dao.RequestState
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
-import net.primal.data.account.repository.handler.RemoteSignerMethodResponseBuilder
+import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.data.account.repository.repository.InternalSessionEventRepository
+import net.primal.data.account.repository.repository.model.UpdateSessionEventRequest
 import net.primal.domain.account.model.AppSession
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
@@ -37,6 +40,7 @@ class RemoteSignerServiceImpl internal constructor(
     override fun initialize() {
         Napier.d(tag = "Signer") { "RemoteSignerService started." }
         observeOngoingSessions()
+        observePendingResponseEvents()
         observeRelayEvents()
         observeMethods()
         observeErrors()
@@ -59,6 +63,37 @@ class RemoteSignerServiceImpl internal constructor(
                     clientSessionMap = sessions.associate { it.clientPubKey to it.sessionId }
                     activeClientPubKeys = sessions.map { it.clientPubKey }.toHashSet()
                     nostrRelayManager.connectToRelays(relays = sessions.flatMap { it.relays }.toSet())
+                }
+        }
+
+    private fun observePendingResponseEvents() =
+        scope.launch {
+            internalSessionEventRepository.observePendingResponseEvents(signerPubKey = signerKeyPair.pubKey)
+                .collect { events ->
+                    val alreadyResponded = events.mapNotNull {
+                        it.responsePayload?.decrypted?.decodeFromJsonStringOrNull<RemoteSignerMethodResponse>()
+                    }
+
+                    val toRespond = events.filter { it.responsePayload == null }
+                        .mapNotNull { it.requestPayload?.decrypted?.decodeFromJsonStringOrNull<RemoteSignerMethod>() }
+                        .map { remoteSignerMethodResponseBuilder.build(method = it) }
+
+                    (alreadyResponded + toRespond)
+                        .onEach { sendResponse(it) }
+                        .also { responses ->
+                            internalSessionEventRepository.updateSessionEventState(
+                                requests = responses.map { response ->
+                                    UpdateSessionEventRequest(
+                                        eventId = response.id,
+                                        responsePayload = response.encodeToJsonString(),
+                                        requestState = when (response) {
+                                            is RemoteSignerMethodResponse.Error -> RequestState.Rejected
+                                            is RemoteSignerMethodResponse.Success -> RequestState.Approved
+                                        },
+                                    )
+                                },
+                            )
+                        }
                 }
         }
 
@@ -107,7 +142,6 @@ class RemoteSignerServiceImpl internal constructor(
 
     private fun processMethod(method: RemoteSignerMethod) =
         scope.launch {
-            val requestedAt = Clock.System.now().epochSeconds
             if (!activeClientPubKeys.contains(method.clientPubKey)) {
                 val connection = connectionRepository
                     .getConnectionByClientPubKey(clientPubKey = method.clientPubKey).getOrNull() ?: return@launch
@@ -119,18 +153,31 @@ class RemoteSignerServiceImpl internal constructor(
                 }
             }
 
-            val response = remoteSignerMethodResponseBuilder.build(method)
+            val canProcessMethod = connectionRepository.canProcessMethod(
+                permissionId = method.getPermissionId(),
+                clientPubKey = method.clientPubKey,
+            )
+
+            val response = if (canProcessMethod) {
+                remoteSignerMethodResponseBuilder.build(method = method)
+            } else {
+                null
+            }
+
             clientSessionMap[method.clientPubKey]?.let { sessionId ->
                 internalSessionEventRepository.saveSessionEvent(
                     sessionId = sessionId,
-                    requestedAt = requestedAt,
                     method = method,
+                    signerPubKey = signerKeyPair.pubKey,
                     response = response,
                 )
             }
+
             Napier.d(tag = "Signer") { "Response $response" }
 
-            sendResponse(response = response)
+            if (response != null) {
+                sendResponse(response = response)
+            }
         }
 
     private suspend fun sendResponse(response: RemoteSignerMethodResponse) {

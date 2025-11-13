@@ -11,4 +11,5 @@ data class AppConnection(
     val image: String?,
     val permissions: List<AppPermission>,
     val autoStart: Boolean,
+    val trustLevel: TrustLevel,
 )
