@@ -7,6 +7,7 @@ interface EventDetailsContract {
         val loading: Boolean = true,
         val event: NostrEvent? = null,
         val rawJson: String? = null,
+        val eventNotSupported: Boolean = false,
     )
 
     sealed class UiEvent {

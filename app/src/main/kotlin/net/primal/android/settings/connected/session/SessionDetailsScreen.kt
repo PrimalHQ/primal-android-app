@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material3.Card
@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
@@ -33,6 +34,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.PrimalDateFormats
@@ -79,11 +81,11 @@ fun SessionDetailsScreen(
                     .fillMaxSize()
                     .background(AppTheme.colorScheme.surfaceVariant)
                     .padding(paddingValues)
-                    .padding(horizontal = 12.dp),
+                    .padding(horizontal = 16.dp),
             ) {
                 item(key = "Header") {
                     HeaderSection(
-                        modifier = Modifier.padding(vertical = 16.dp).padding(bottom = 10.dp),
+                        modifier = Modifier.padding(vertical = 16.dp),
                         appName = state.appName,
                         appIconUrl = state.appIconUrl,
                         startedAt = state.sessionStartedAt,
@@ -94,15 +96,8 @@ fun SessionDetailsScreen(
                     items = state.sessionEvents,
                     key = { _, event -> event.id },
                 ) { index, event ->
-                    val isFirst = index == 0
+                    val shape = getListItemShape(index = index, listSize = state.sessionEvents.size)
                     val isLast = index == state.sessionEvents.lastIndex
-
-                    val shape = when {
-                        isFirst && isLast -> RoundedCornerShape(size = 12.dp)
-                        isFirst -> RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
-                        isLast -> RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
-                        else -> AppTheme.shapes.extraSmall
-                    }
 
                     Column(modifier = Modifier.clip(shape)) {
                         SessionEventListItem(event = event, onClick = { onEventClick(event.id) })
@@ -137,6 +132,7 @@ private fun HeaderSection(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             AppIconThumbnail(
+                modifier = Modifier.padding(bottom = 6.dp),
                 avatarCdnImage = appIconUrl?.let { CdnImage(it) },
                 appName = appName,
                 avatarSize = 48.dp,
@@ -146,6 +142,7 @@ private fun HeaderSection(
                 style = AppTheme.typography.bodyLarge.copy(
                     color = AppTheme.colorScheme.onPrimary,
                 ),
+                fontWeight = FontWeight.Bold,
             )
             if (startedAt != null) {
                 val formattedStartedAt = rememberPrimalFormattedDateTime(
@@ -175,7 +172,7 @@ private fun SessionEventListItem(event: SessionEventUi, onClick: () -> Unit) {
             Text(
                 modifier = Modifier.padding(top = 2.dp),
                 text = formattedTimestamp,
-                style = AppTheme.typography.labelMedium.copy(fontSize = 14.sp),
+                style = AppTheme.typography.labelMedium,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
         },

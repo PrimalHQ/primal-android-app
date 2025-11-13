@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -45,7 +44,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -66,6 +64,7 @@ import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -198,15 +197,8 @@ fun ConnectedAppDetailsContent(
                 key = { _, session -> session.sessionId },
                 contentType = { _, _ -> "SessionItem" },
             ) { index, session ->
-                val isFirst = index == 0
+                val shape = getListItemShape(index = index, listSize = state.recentSessions.size)
                 val isLast = index == state.recentSessions.lastIndex
-
-                val shape = when {
-                    isFirst && isLast -> RoundedCornerShape(size = 12.dp)
-                    isFirst -> RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
-                    isLast -> RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
-                    else -> RectangleShape
-                }
 
                 Column(modifier = Modifier.clip(shape)) {
                     RecentSessionItem(

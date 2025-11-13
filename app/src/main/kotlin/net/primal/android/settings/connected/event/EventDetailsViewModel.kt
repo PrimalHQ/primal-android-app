@@ -62,7 +62,7 @@ class EventDetailsViewModel @Inject constructor(
                         )
                     }
                 } else {
-                    setState { copy(loading = false) }
+                    setState { copy(loading = false, eventNotSupported = true) }
                 }
             }
         }

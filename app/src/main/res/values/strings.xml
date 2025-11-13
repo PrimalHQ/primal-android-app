@@ -1039,6 +1039,7 @@
     <string name="settings_event_details_copied_toast">%1$s copied.</string>
     <string name="settings_event_details_show_more">Show more</string>
     <string name="settings_event_details_show_less">Show less</string>
+    <string name="settings_event_details_not_supported">Details for this event type are not available.</string>
 
     <string name="settings_event_details_id_label">ID:</string>
     <string name="settings_event_details_pubkey_label">Pubkey:</string>
