@@ -31,7 +31,7 @@ kotlin {
     }
 
     // JVM Target
-    jvm("desktop")
+//    jvm("desktop")
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
