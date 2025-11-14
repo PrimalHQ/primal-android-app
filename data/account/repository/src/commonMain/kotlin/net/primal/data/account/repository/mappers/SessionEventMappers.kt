@@ -23,7 +23,7 @@ fun buildSessionEventData(
     sessionId: String,
     signerPubKey: String,
     requestedAt: Long,
-    completedAt: Long,
+    completedAt: Long?,
     method: RemoteSignerMethod,
     response: RemoteSignerMethodResponse?,
 ): SessionEventData? {

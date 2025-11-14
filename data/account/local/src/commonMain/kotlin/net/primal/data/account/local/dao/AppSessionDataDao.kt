@@ -19,6 +19,10 @@ interface AppSessionDataDao {
     suspend fun findActiveSessionByConnectionId(connectionId: String): AppSession?
 
     @Transaction
+    @Query("SELECT * FROM AppSessionData WHERE sessionId = :sessionId")
+    suspend fun findSession(sessionId: String): AppSession?
+
+    @Transaction
     @Query(
         """
         SELECT * FROM AppSessionData s 

@@ -48,6 +48,13 @@ class SessionRepositoryImpl(
             .map { it?.asDomain() }
             .distinctUntilChanged()
 
+    override suspend fun getSession(sessionId: String): Result<AppSession> =
+        withContext(dispatchers.io()) {
+            database.sessions().findSession(sessionId = sessionId)
+                ?.asDomain()?.asSuccess()
+                ?: Result.failure(NoSuchElementException("Couldn't find session for given sessionId."))
+        }
+
     override suspend fun startSession(connectionId: String): Result<String> =
         withContext(dispatchers.io()) {
             Napier.d(tag = "Signer") { "Starting session for $connectionId" }

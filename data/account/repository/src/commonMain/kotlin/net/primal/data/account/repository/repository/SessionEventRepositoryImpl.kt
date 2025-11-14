@@ -8,6 +8,7 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.account.local.dao.AppPermissionData
 import net.primal.data.account.local.dao.PermissionAction
 import net.primal.data.account.local.dao.RequestState
 import net.primal.data.account.local.db.AccountDatabase
@@ -81,10 +82,12 @@ class SessionEventRepositoryImpl(
                 val sessionEvent = database.sessionEvents().getSessionEvent(eventId = eventId) ?: return@withTransaction
                 val connection = database.connections()
                     .getConnectionByClientPubKey(clientPubKey = sessionEvent.clientPubKey) ?: return@withTransaction
-                database.permissions().updatePreference(
-                    permissionId = sessionEvent.getRequestTypeId(),
-                    connectionId = connection.data.connectionId,
-                    action = action,
+                database.permissions().upsert(
+                    data = AppPermissionData(
+                        permissionId = sessionEvent.getRequestTypeId(),
+                        connectionId = connection.data.connectionId,
+                        action = action,
+                    ),
                 )
             }
         }
@@ -95,6 +98,7 @@ class SessionEventRepositoryImpl(
                 eventId = eventId,
                 requestState = RequestState.PendingResponse,
                 responsePayload = null,
+                completedAt = null,
             )
         }
 
@@ -105,6 +109,7 @@ class SessionEventRepositoryImpl(
                 database.sessionEvents().updateSessionEventRequestState(
                     eventId = eventId,
                     requestState = RequestState.PendingResponse,
+                    completedAt = null,
                     responsePayload = RemoteSignerMethodResponse.Error(
                         id = eventId,
                         clientPubKey = clientPubKey,

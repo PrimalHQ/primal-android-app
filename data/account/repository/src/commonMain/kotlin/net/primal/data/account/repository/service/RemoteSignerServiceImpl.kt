@@ -1,6 +1,7 @@
 package net.primal.data.account.repository.service
 
 import io.github.aakira.napier.Napier
+import kotlin.time.Clock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
@@ -90,6 +91,7 @@ class RemoteSignerServiceImpl internal constructor(
                                             is RemoteSignerMethodResponse.Error -> RequestState.Rejected
                                             is RemoteSignerMethodResponse.Success -> RequestState.Approved
                                         },
+                                        completedAt = Clock.System.now().epochSeconds,
                                     )
                                 },
                             )

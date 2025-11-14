@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -68,6 +67,7 @@ import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.navigation.primalSlideInHorizontallyFromEnd
 import net.primal.android.navigation.primalSlideOutHorizontallyToEnd
+import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.links.CdnImage
@@ -207,19 +207,6 @@ private fun NostrConnectSheetContent(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
-    }
-}
-
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun NostrConnectBottomSheetDragHandle() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        BottomSheetDefaults.DragHandle()
     }
 }
 
@@ -367,6 +354,7 @@ private fun NostrConnectPages(
                 selectedAccountPubkey = state.selectedAccount?.pubkey,
                 onAccountClick = { eventPublisher(NostrConnectContract.UiEvent.SelectAccount(it)) },
             )
+
             NostrConnectContract.Tab.PERMISSIONS -> PermissionsContent(
                 trustLevel = state.trustLevel,
                 // dailyBudget = state.dailyBudget,
@@ -796,7 +784,7 @@ private fun ActionButtons(
         PrimalFilledButton(
             modifier = Modifier.weight(1f),
             height = 50.dp,
-            containerColor = Color.Transparent,
+            containerColor = AppTheme.colorScheme.outline,
             contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             border = BorderStroke(width = 1.dp, color = AppTheme.colorScheme.outline),
             textStyle = AppTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold, fontSize = 16.sp),

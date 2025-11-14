@@ -262,8 +262,8 @@ private fun SessionListItem(
         }
 
         UniversalAvatarThumbnail(
-            avatarCdnImage = session.userAccount.avatarCdnImage,
-            legendaryCustomization = session.userAccount.legendaryCustomization,
+            avatarCdnImage = session.userAccount?.avatarCdnImage,
+            legendaryCustomization = session.userAccount?.legendaryCustomization,
             avatarSize = 28.dp,
         )
     }
