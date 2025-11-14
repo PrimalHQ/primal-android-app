@@ -28,7 +28,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.PrimalDivider
@@ -94,7 +93,7 @@ fun SessionDetailsScreen(
                     .fillMaxSize()
                     .background(AppTheme.colorScheme.surfaceVariant)
                     .padding(paddingValues)
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 12.dp),
             ) {
                 item(key = "Header") {
                     HeaderSection(
@@ -140,7 +139,7 @@ private fun HeaderSection(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
+                .padding(vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
@@ -152,10 +151,9 @@ private fun HeaderSection(
             )
             Text(
                 text = appName ?: stringResource(id = R.string.settings_connected_apps_unknown),
-                style = AppTheme.typography.bodyLarge.copy(
-                    color = AppTheme.colorScheme.onPrimary,
-                ),
+                style = AppTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
+                color = AppTheme.colorScheme.onPrimary,
             )
             if (startedAt != null) {
                 val formattedStartedAt = rememberPrimalFormattedDateTime(
@@ -163,6 +161,7 @@ private fun HeaderSection(
                     format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_A,
                 )
                 Text(
+                    modifier = Modifier.padding(top = 2.dp),
                     text = stringResource(id = R.string.settings_session_details_started_on, formattedStartedAt),
                     style = AppTheme.typography.bodyMedium,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
@@ -180,17 +179,18 @@ private fun SessionEventListItem(event: SessionEventUi, onClick: () -> Unit) {
     )
     ListItem(
         modifier = Modifier.clickable { onClick() },
-        headlineContent = { Text(text = event.title, style = AppTheme.typography.labelMedium.copy(fontSize = 16.sp)) },
+        headlineContent = { Text(text = event.title, style = AppTheme.typography.bodyLarge) },
         supportingContent = {
             Text(
-                modifier = Modifier.padding(top = 2.dp),
+                modifier = Modifier.padding(top = 5.dp),
                 text = formattedTimestamp,
-                style = AppTheme.typography.labelMedium,
+                style = AppTheme.typography.bodyMedium,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
         },
         trailingContent = {
             Icon(
+                modifier = Modifier.size(28.dp),
                 imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
                 contentDescription = null,
                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt3,

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Icon
@@ -33,11 +34,12 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.Copy
+import net.primal.android.core.compose.icons.primaliconpack.CopyAlt
 import net.primal.android.core.utils.PrimalDateFormats
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.CourierPrimeFontFamily
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 
@@ -204,13 +206,13 @@ private fun EventDetailsHeader(eventKind: Int, timestamp: Long) {
     ) {
         Text(
             text = eventKind.toKindTitle(),
-            style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+            style = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp),
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
         Text(
             modifier = Modifier.padding(top = 4.dp),
             text = formattedTimestamp,
-            style = AppTheme.typography.bodySmall.copy(lineHeight = 20.sp),
+            style = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
     }
@@ -239,19 +241,22 @@ private fun EventDetailListItem(
             .fillMaxWidth()
             .padding(16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = if (singleLine) Alignment.CenterVertically else Alignment.Top,
+        verticalAlignment = Alignment.Top,
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = label,
-                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp, lineHeight = 20.sp),
+                style = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp, lineHeight = 20.sp),
                 fontWeight = FontWeight.SemiBold,
                 color = AppTheme.colorScheme.onSurface,
             )
             Text(
-                modifier = Modifier.padding(top = 10.dp),
+                modifier = Modifier.padding(top = 12.dp),
                 text = displayValue,
-                style = AppTheme.typography.bodySmall.copy(lineHeight = 24.sp),
+                style = AppTheme.typography.bodyMedium.copy(
+                    fontFamily = CourierPrimeFontFamily,
+                    lineHeight = 24.sp,
+                ),
                 maxLines = maxLines,
                 overflow = if (maxLines == Int.MAX_VALUE) TextOverflow.Clip else TextOverflow.Ellipsis,
                 onTextLayout = {
@@ -270,8 +275,9 @@ private fun EventDetailListItem(
                     } else {
                         stringResource(id = R.string.settings_event_details_show_more)
                     },
-                    style = AppTheme.typography.bodySmall.copy(
+                    style = AppTheme.typography.bodyMedium.copy(
                         color = AppTheme.colorScheme.primary,
+                        fontFamily = CourierPrimeFontFamily,
                     ),
                     modifier = Modifier
                         .padding(top = 4.dp)
@@ -280,11 +286,12 @@ private fun EventDetailListItem(
             }
         }
         Icon(
-            imageVector = PrimalIcons.Copy,
-            contentDescription = stringResource(id = R.string.accessibility_copy_content),
             modifier = Modifier
-                .padding(start = 16.dp)
+                .size(16.dp)
                 .clickable { onCopy() },
+            imageVector = PrimalIcons.CopyAlt,
+            contentDescription = stringResource(id = R.string.accessibility_copy_content),
+            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
     }
 }
@@ -317,22 +324,25 @@ private fun TagsListItem(
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = label,
-                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp, lineHeight = 20.sp),
+                style = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp, lineHeight = 20.sp),
                 fontWeight = FontWeight.SemiBold,
                 color = AppTheme.colorScheme.onSurface,
             )
             if (tags.isNotEmpty()) {
                 Column(
-                    modifier = Modifier.padding(top = 10.dp),
+                    modifier = Modifier.padding(top = 12.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     tagsToShow.forEach { tag ->
-                        val formattedTag = tag.joinToString(separator = " ") {
+                        val formattedTag = tag.joinToString(separator = ", ") {
                             "\"${it.jsonPrimitive.content}\""
                         }
                         Text(
                             text = formattedTag,
-                            style = AppTheme.typography.bodySmall.copy(lineHeight = 24.sp),
+                            style = AppTheme.typography.bodyMedium.copy(
+                                fontFamily = CourierPrimeFontFamily,
+                                lineHeight = 24.sp,
+                            ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
@@ -343,7 +353,10 @@ private fun TagsListItem(
                     if (moreCount > 0) {
                         Text(
                             text = stringResource(id = R.string.settings_event_details_tags_more, moreCount),
-                            style = AppTheme.typography.bodySmall.copy(lineHeight = 24.sp),
+                            style = AppTheme.typography.bodyMedium.copy(
+                                lineHeight = 24.sp,
+                                fontFamily = CourierPrimeFontFamily,
+                            ),
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                             fontWeight = FontWeight.Bold,
                         )
@@ -352,11 +365,12 @@ private fun TagsListItem(
             }
         }
         Icon(
-            imageVector = PrimalIcons.Copy,
-            contentDescription = stringResource(id = R.string.accessibility_copy_content),
             modifier = Modifier
-                .padding(start = 16.dp)
+                .size(16.dp)
                 .clickable { onCopy(tagsAsStringForCopy) },
+            imageVector = PrimalIcons.CopyAlt,
+            contentDescription = stringResource(id = R.string.accessibility_copy_content),
+            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
     }
 }
