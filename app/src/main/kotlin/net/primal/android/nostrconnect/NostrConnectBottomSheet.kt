@@ -10,8 +10,6 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,13 +20,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -39,14 +32,12 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -56,17 +47,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import java.text.NumberFormat
-import java.util.Currency
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
@@ -84,9 +68,7 @@ import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.navigation.primalSlideInHorizontallyFromEnd
 import net.primal.android.navigation.primalSlideOutHorizontallyToEnd
-import net.primal.android.nostrconnect.NostrConnectContract.Companion.DAILY_BUDGET_PICKER_OPTIONS
 import net.primal.android.theme.AppTheme
-import net.primal.core.utils.toDouble
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.links.CdnImage
 
@@ -147,18 +129,24 @@ private fun NostrConnectSheetContent(
     eventPublisher: (NostrConnectContract.UiEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
+    /*
     val isBudgetPickerVisible by remember(state.selectedTab, state.showDailyBudgetPicker) {
         derivedStateOf {
             state.selectedTab == NostrConnectContract.Tab.PERMISSIONS && state.showDailyBudgetPicker
         }
     }
+     */
 
     BackHandler {
+        /*
         if (isBudgetPickerVisible) {
             eventPublisher(NostrConnectContract.UiEvent.CancelDailyBudget)
         } else {
-            onDismissRequest()
+         */
+        onDismissRequest()
+        /*
         }
+         */
     }
 
     Box(modifier = Modifier.fillMaxWidth()) {
@@ -188,25 +176,29 @@ private fun NostrConnectSheetContent(
             ActionButtons(
                 primaryButtonEnabled = state.selectedAccount != null,
                 primaryButtonLoading = state.connecting,
-                primaryButtonText = if (isBudgetPickerVisible) {
-                    stringResource(id = R.string.nostr_connect_apply_button)
-                } else {
-                    stringResource(id = R.string.nostr_connect_connect_button)
-                },
+                primaryButtonText = stringResource(id = R.string.nostr_connect_connect_button),
                 onPrimaryClick = {
+                    /*
                     if (isBudgetPickerVisible) {
                         eventPublisher(NostrConnectContract.UiEvent.ApplyDailyBudget)
                     } else {
-                        eventPublisher(NostrConnectContract.UiEvent.ClickConnect)
+                     */
+                    eventPublisher(NostrConnectContract.UiEvent.ClickConnect)
+                    /*
                     }
+                     */
                 },
                 secondaryButtonText = stringResource(id = R.string.nostr_connect_cancel_button),
                 onSecondaryClick = {
+                    /*
                     if (isBudgetPickerVisible) {
                         eventPublisher(NostrConnectContract.UiEvent.CancelDailyBudget)
                     } else {
-                        onDismissRequest()
+                     */
+                    onDismissRequest()
+                    /*
                     }
+                     */
                 },
             )
         }
@@ -377,13 +369,13 @@ private fun NostrConnectPages(
             )
             NostrConnectContract.Tab.PERMISSIONS -> PermissionsContent(
                 trustLevel = state.trustLevel,
-                dailyBudget = state.dailyBudget,
+                // dailyBudget = state.dailyBudget,
                 onTrustLevelClick = { eventPublisher(NostrConnectContract.UiEvent.SelectTrustLevel(it)) },
-                onDailyBudgetClick = { eventPublisher(NostrConnectContract.UiEvent.ClickDailyBudget) },
-                showDailyBudgetPicker = state.showDailyBudgetPicker,
-                selectedDailyBudget = state.selectedDailyBudget,
-                onDailyBudgetChange = { eventPublisher(NostrConnectContract.UiEvent.ChangeDailyBudget(it)) },
-                budgetToUsdMap = state.budgetToUsdMap,
+                // onDailyBudgetClick = { eventPublisher(NostrConnectContract.UiEvent.ClickDailyBudget) },
+                // showDailyBudgetPicker = state.showDailyBudgetPicker,
+                // selectedDailyBudget = state.selectedDailyBudget,
+                // onDailyBudgetChange = { eventPublisher(NostrConnectContract.UiEvent.ChangeDailyBudget(it)) },
+                // budgetToUsdMap = state.budgetToUsdMap,
             )
         }
     }
@@ -470,14 +462,15 @@ private fun AccountListItem(
 @Composable
 private fun PermissionsContent(
     trustLevel: TrustLevel,
-    dailyBudget: Long?,
+    // dailyBudget: Long?,
     onTrustLevelClick: (TrustLevel) -> Unit,
-    onDailyBudgetClick: () -> Unit,
-    showDailyBudgetPicker: Boolean,
-    selectedDailyBudget: Long?,
-    onDailyBudgetChange: (Long?) -> Unit,
-    budgetToUsdMap: Map<Long, BigDecimal?>,
+    // onDailyBudgetClick: () -> Unit,
+    // showDailyBudgetPicker: Boolean,
+    // selectedDailyBudget: Long?,
+    // onDailyBudgetChange: (Long?) -> Unit,
+    // budgetToUsdMap: Map<Long, BigDecimal?>,
 ) {
+    /*
     AnimatedContent(
         targetState = showDailyBudgetPicker,
         label = "PermissionsPickerAnimation",
@@ -489,22 +482,25 @@ private fun PermissionsContent(
                 budgetToUsdMap = budgetToUsdMap,
             )
         } else {
-            PermissionsList(
-                trustLevel = trustLevel,
-                onTrustLevelClick = onTrustLevelClick,
-                onDailyBudgetClick = onDailyBudgetClick,
-                dailyBudget = dailyBudget,
-            )
+     */
+    PermissionsList(
+        trustLevel = trustLevel,
+        onTrustLevelClick = onTrustLevelClick,
+        // onDailyBudgetClick = onDailyBudgetClick,
+        // dailyBudget = dailyBudget,
+    )
+    /*
         }
     }
+     */
 }
 
 @Composable
 private fun PermissionsList(
     trustLevel: TrustLevel,
     onTrustLevelClick: (TrustLevel) -> Unit,
-    onDailyBudgetClick: () -> Unit,
-    dailyBudget: Long?,
+    // onDailyBudgetClick: () -> Unit,
+    // dailyBudget: Long?,
 ) {
     Column(
         modifier = Modifier
@@ -534,15 +530,18 @@ private fun PermissionsList(
             onClick = { onTrustLevelClick(TrustLevel.Low) },
         )
 
+        /*
         PrimalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
         DailyBudgetListItem(
             dailyBudget = dailyBudget,
             onClick = onDailyBudgetClick,
         )
+         */
     }
 }
 
+/*
 @Composable
 private fun DailyBudgetListItem(dailyBudget: Long?, onClick: () -> Unit) {
     ListItem(
@@ -728,7 +727,7 @@ private fun BudgetOption(
         }
     }
 }
-
+*/
 @Composable
 private fun PermissionsListItem(
     icon: ImageVector,

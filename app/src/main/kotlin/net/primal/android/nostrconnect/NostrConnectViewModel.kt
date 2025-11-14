@@ -3,8 +3,6 @@ package net.primal.android.nostrconnect
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -19,7 +17,6 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.navigation.nostrConnectUri
-import net.primal.android.nostrconnect.NostrConnectContract.Companion.DAILY_BUDGET_OPTIONS
 import net.primal.android.nostrconnect.handler.RemoteSignerSessionHandler
 import net.primal.android.nostrconnect.utils.getNostrConnectImage
 import net.primal.android.nostrconnect.utils.getNostrConnectName
@@ -29,9 +26,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.CredentialType
 import net.primal.android.user.domain.asKeyPair
-import net.primal.android.wallet.repository.ExchangeRateHandler
-import net.primal.android.wallet.repository.isValidExchangeRate
-import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
@@ -42,7 +36,7 @@ class NostrConnectViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val accountsStore: UserAccountsStore,
     private val activeAccountStore: ActiveAccountStore,
-    private val exchangeRateHandler: ExchangeRateHandler,
+    // private val exchangeRateHandler: ExchangeRateHandler,
     private val credentialsStore: CredentialsStore,
     private val signerConnectionInitializerFactory: SignerConnectionInitializerFactory,
     private val signerSessionHandler: RemoteSignerSessionHandler,
@@ -73,7 +67,7 @@ class NostrConnectViewModel @Inject constructor(
     init {
         observeEvents()
         observeAccounts()
-        observeUsdExchangeRate()
+        // observeUsdExchangeRate()
     }
 
     private fun observeEvents() {
@@ -86,6 +80,7 @@ class NostrConnectViewModel @Inject constructor(
 
                     is NostrConnectContract.UiEvent.SelectTrustLevel -> setState { copy(trustLevel = it.level) }
                     is NostrConnectContract.UiEvent.ClickConnect -> connect()
+                    /*
                     is NostrConnectContract.UiEvent.ClickDailyBudget -> setState {
                         copy(showDailyBudgetPicker = true, selectedDailyBudget = this.dailyBudget)
                     }
@@ -105,7 +100,7 @@ class NostrConnectViewModel @Inject constructor(
                             showDailyBudgetPicker = false,
                         )
                     }
-
+                     */
                     NostrConnectContract.UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
@@ -139,6 +134,7 @@ class NostrConnectViewModel @Inject constructor(
         }
     }
 
+    /*
     private fun observeUsdExchangeRate() {
         viewModelScope.launch {
             fetchExchangeRate()
@@ -165,6 +161,7 @@ class NostrConnectViewModel @Inject constructor(
             sats.toBigDecimal().fromSatsToUsd(exchangeRate)
         }
     }
+     */
 
     private fun connect() {
         viewModelScope.launch {
