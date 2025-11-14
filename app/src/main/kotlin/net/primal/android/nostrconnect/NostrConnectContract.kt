@@ -1,6 +1,5 @@
 package net.primal.android.nostrconnect
 
-import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.domain.account.model.TrustLevel
@@ -15,11 +14,11 @@ interface NostrConnectContract {
         val selectedTab: Tab = Tab.LOGIN,
         val selectedAccount: UserAccountUi? = null,
         val trustLevel: TrustLevel = TrustLevel.Medium,
-        val dailyBudget: Long? = null,
+        // val dailyBudget: Long? = null,
         val connecting: Boolean = false,
-        val showDailyBudgetPicker: Boolean = false,
-        val selectedDailyBudget: Long? = null,
-        val budgetToUsdMap: Map<Long, BigDecimal?> = emptyMap(),
+        // val showDailyBudgetPicker: Boolean = false,
+        // val selectedDailyBudget: Long? = null,
+        // val budgetToUsdMap: Map<Long, BigDecimal?> = emptyMap(),
         val error: UiError? = null,
     )
 
@@ -32,10 +31,11 @@ interface NostrConnectContract {
         data class ChangeTab(val tab: Tab) : UiEvent()
         data class SelectAccount(val pubkey: String) : UiEvent()
         data class SelectTrustLevel(val level: TrustLevel) : UiEvent()
-        data object ClickDailyBudget : UiEvent()
-        data class ChangeDailyBudget(val budget: Long?) : UiEvent()
-        data object ApplyDailyBudget : UiEvent()
-        data object CancelDailyBudget : UiEvent()
+
+        // data object ClickDailyBudget : UiEvent()
+        // data class ChangeDailyBudget(val budget: Long?) : UiEvent()
+        // data object ApplyDailyBudget : UiEvent()
+        // data object CancelDailyBudget : UiEvent()
         data object ClickConnect : UiEvent()
         data object DismissError : UiEvent()
     }
@@ -44,8 +44,10 @@ interface NostrConnectContract {
         data object ConnectionSuccess : SideEffect()
     }
 
+    /*
     companion object {
         val DAILY_BUDGET_OPTIONS = listOf(0L, 1000L, 5000L, 10_000L, 20_000L, 50_000L, 100_000L)
         val DAILY_BUDGET_PICKER_OPTIONS = DAILY_BUDGET_OPTIONS + listOf(null)
     }
+     */
 }
