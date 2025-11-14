@@ -65,14 +65,9 @@ private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_ac
 private fun NavController.navigateToMediaUploads() = navigate(route = "media_uploads_settings")
 fun NavController.navigateToConnectedApps() = navigate(route = "connected_apps")
 
-private fun NavController.navigateToSessionDetails(connectionId: String, sessionId: String) =
-    navigate(route = "connected_apps/$connectionId/$sessionId")
+private fun NavController.navigateToSessionDetails(sessionId: String) = navigate(route = "session_details/$sessionId")
 
-private fun NavController.navigateToEventDetails(
-    connectionId: String,
-    sessionId: String,
-    eventId: String,
-) = navigate(route = "connected_apps/$connectionId/$sessionId/$eventId")
+private fun NavController.navigateToEventDetails(eventId: String) = navigate(route = "event_details/$eventId")
 
 private fun NavController.navigateToConnectedAppDetails(connectionId: String) =
     navigate(route = "connected_apps/$connectionId")
@@ -146,19 +141,16 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         connectedApps(route = "connected_apps", navController = navController)
         connectedAppDetails(route = "connected_apps/{$CONNECTION_ID}", navController = navController)
         sessionDetails(
-            route = "connected_apps/{$CONNECTION_ID}/{$SESSION_ID}",
+            route = "session_details/{$SESSION_ID}",
             navController = navController,
             arguments = listOf(
-                navArgument(CONNECTION_ID) { type = NavType.StringType },
                 navArgument(SESSION_ID) { type = NavType.StringType },
             ),
         )
         eventDetails(
-            route = "connected_apps/{$CONNECTION_ID}/{$SESSION_ID}/{$EVENT_ID}",
+            route = "event_details/{$EVENT_ID}",
             navController = navController,
             arguments = listOf(
-                navArgument(CONNECTION_ID) { type = NavType.StringType },
-                navArgument(SESSION_ID) { type = NavType.StringType },
                 navArgument(EVENT_ID) { type = NavType.StringType },
             ),
         )
@@ -440,8 +432,8 @@ private fun NavGraphBuilder.connectedAppDetails(route: String, navController: Na
         ConnectedAppDetailsScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
-            onSessionClick = { connectionId, sessionId ->
-                navController.navigateToSessionDetails(connectionId, sessionId)
+            onSessionClick = { sessionId ->
+                navController.navigateToSessionDetails(sessionId)
             },
         )
     }
@@ -464,12 +456,8 @@ private fun NavGraphBuilder.sessionDetails(
     SessionDetailsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onEventClick = { connectionId, sessionId, eventId ->
-            navController.navigateToEventDetails(
-                connectionId = connectionId,
-                sessionId = sessionId,
-                eventId = eventId,
-            )
+        onEventClick = { eventId ->
+            navController.navigateToEventDetails(eventId = eventId)
         },
     )
 }

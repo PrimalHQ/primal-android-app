@@ -46,7 +46,7 @@ import net.primal.domain.links.CdnImage
 fun SessionDetailsScreen(
     viewModel: SessionDetailsViewModel,
     onClose: () -> Unit,
-    onEventClick: (connectionId: String, sessionId: String, eventId: String) -> Unit,
+    onEventClick: (eventId: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -62,7 +62,7 @@ fun SessionDetailsScreen(
 fun SessionDetailsScreen(
     state: SessionDetailsContract.UiState,
     onClose: () -> Unit,
-    onEventClick: (connectionId: String, sessionId: String, eventId: String) -> Unit,
+    onEventClick: (eventId: String) -> Unit,
 ) {
     PrimalScaffold(
         topBar = {
@@ -102,13 +102,7 @@ fun SessionDetailsScreen(
                     Column(modifier = Modifier.clip(shape)) {
                         SessionEventListItem(
                             event = event,
-                            onClick = {
-                                onEventClick(
-                                    state.connectionId,
-                                    state.sessionId,
-                                    event.id,
-                                )
-                            },
+                            onClick = { onEventClick(event.id) },
                         )
                         if (!isLast) {
                             PrimalDivider()

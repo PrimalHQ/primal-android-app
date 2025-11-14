@@ -28,11 +28,9 @@ interface ConnectedAppDetailsContract {
         data object DismissEditNameDialog : UiEvent()
         data class AutoStartSessionChange(val enabled: Boolean) : UiEvent()
         data object DismissError : UiEvent()
-        data class SessionClick(val sessionId: String) : UiEvent()
     }
 
     sealed class SideEffect {
         data object ConnectionDeleted : SideEffect()
-        data class NavigateToSessionDetails(val connectionId: String, val sessionId: String) : SideEffect()
     }
 }

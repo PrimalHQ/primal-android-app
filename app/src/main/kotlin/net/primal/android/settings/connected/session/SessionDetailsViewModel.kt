@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.navigation.connectionIdOrThrow
 import net.primal.android.navigation.sessionIdOrThrow
 import net.primal.android.settings.connected.model.asSessionEventUi
 import net.primal.domain.account.repository.SessionEventRepository
@@ -22,12 +21,10 @@ class SessionDetailsViewModel @Inject constructor(
     private val sessionEventRepository: SessionEventRepository,
 ) : ViewModel() {
 
-    private val connectionId: String = savedStateHandle.connectionIdOrThrow
     private val sessionId: String = savedStateHandle.sessionIdOrThrow
 
     private val _state = MutableStateFlow(
         SessionDetailsContract.UiState(
-            connectionId = connectionId,
             sessionId = sessionId,
         ),
     )

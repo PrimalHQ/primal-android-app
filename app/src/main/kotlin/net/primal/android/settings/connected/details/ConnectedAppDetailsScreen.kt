@@ -88,15 +88,14 @@ private val EditButtonContainerColorLight = Color(0xFFD5D5D5)
 fun ConnectedAppDetailsScreen(
     viewModel: ConnectedAppDetailsViewModel,
     onClose: () -> Unit,
-    onSessionClick: (connectionId: String, sessionId: String) -> Unit,
+    onSessionClick: (sessionId: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
-    LaunchedEffect(viewModel, onClose, onSessionClick) {
+    LaunchedEffect(viewModel, onClose) {
         viewModel.effect.collect {
             when (it) {
                 SideEffect.ConnectionDeleted -> onClose()
-                is SideEffect.NavigateToSessionDetails -> onSessionClick(it.connectionId, it.sessionId)
             }
         }
     }
@@ -105,6 +104,7 @@ fun ConnectedAppDetailsScreen(
         state = uiState.value,
         onClose = onClose,
         eventPublisher = viewModel::setEvent,
+        onSessionClick = onSessionClick,
     )
 }
 
@@ -114,6 +114,7 @@ fun ConnectedAppDetailsScreen(
     state: UiState,
     onClose: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
+    onSessionClick: (sessionId: String) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -145,6 +146,7 @@ fun ConnectedAppDetailsScreen(
                         .padding(horizontal = 12.dp),
                     state = state,
                     eventPublisher = eventPublisher,
+                    onSessionClick = onSessionClick,
                 )
             }
         },
@@ -156,6 +158,7 @@ fun ConnectedAppDetailsContent(
     modifier: Modifier = Modifier,
     state: UiState,
     eventPublisher: (UiEvent) -> Unit,
+    onSessionClick: (sessionId: String) -> Unit,
 ) {
     LazyColumn(modifier = modifier) {
         item(key = "Header", contentType = "Header") {
@@ -202,7 +205,7 @@ fun ConnectedAppDetailsContent(
                         session = session,
                         iconUrl = state.appIconUrl,
                         appName = state.appName,
-                        onClick = { eventPublisher(UiEvent.SessionClick(session.sessionId)) },
+                        onClick = { onSessionClick(session.sessionId) },
                     )
                     if (!isLast) {
                         PrimalDivider()
@@ -534,6 +537,7 @@ fun PreviewConnectedAppDetailsScreen() {
             ),
             onClose = {},
             eventPublisher = {},
+            onSessionClick = {},
         )
     }
 }
