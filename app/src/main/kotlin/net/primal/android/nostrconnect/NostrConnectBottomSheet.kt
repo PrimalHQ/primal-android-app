@@ -505,7 +505,7 @@ private fun PermissionsList(
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp)
-            .padding(top = 24.dp),
+            .padding(vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         PermissionsListItem(
