@@ -1,6 +1,5 @@
 package net.primal.android.settings.connected.details
 
-import android.icu.text.SimpleDateFormat
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -30,7 +28,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -46,7 +43,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -57,22 +53,24 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import java.util.Date
-import java.util.Locale
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.core.utils.PrimalDateFormats
+import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SideEffect
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiEvent
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiState
@@ -85,10 +83,13 @@ private val DangerPrimaryColor = Color(0xFFFF2121)
 private val DangerSecondaryColor = Color(0xFFFA3C3C)
 private val EditButtonContainerColorDark = Color(0xFF333333)
 private val EditButtonContainerColorLight = Color(0xFFD5D5D5)
-private const val SECONDS_TO_MILLIS = 1000L
 
 @Composable
-fun ConnectedAppDetailsScreen(viewModel: ConnectedAppDetailsViewModel, onClose: () -> Unit) {
+fun ConnectedAppDetailsScreen(
+    viewModel: ConnectedAppDetailsViewModel,
+    onClose: () -> Unit,
+    onSessionClick: (sessionId: String) -> Unit,
+) {
     val uiState = viewModel.state.collectAsState()
 
     LaunchedEffect(viewModel, onClose) {
@@ -103,6 +104,7 @@ fun ConnectedAppDetailsScreen(viewModel: ConnectedAppDetailsViewModel, onClose: 
         state = uiState.value,
         onClose = onClose,
         eventPublisher = viewModel::setEvent,
+        onSessionClick = onSessionClick,
     )
 }
 
@@ -112,6 +114,7 @@ fun ConnectedAppDetailsScreen(
     state: UiState,
     onClose: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
+    onSessionClick: (sessionId: String) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -123,7 +126,7 @@ fun ConnectedAppDetailsScreen(
         onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
     )
 
-    Scaffold(
+    PrimalScaffold(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_connected_app_details_title),
@@ -143,6 +146,7 @@ fun ConnectedAppDetailsScreen(
                         .padding(horizontal = 12.dp),
                     state = state,
                     eventPublisher = eventPublisher,
+                    onSessionClick = onSessionClick,
                 )
             }
         },
@@ -154,6 +158,7 @@ fun ConnectedAppDetailsContent(
     modifier: Modifier = Modifier,
     state: UiState,
     eventPublisher: (UiEvent) -> Unit,
+    onSessionClick: (sessionId: String) -> Unit,
 ) {
     LazyColumn(modifier = modifier) {
         item(key = "Header", contentType = "Header") {
@@ -192,21 +197,15 @@ fun ConnectedAppDetailsContent(
                 key = { _, session -> session.sessionId },
                 contentType = { _, _ -> "SessionItem" },
             ) { index, session ->
-                val isFirst = index == 0
+                val shape = getListItemShape(index = index, listSize = state.recentSessions.size)
                 val isLast = index == state.recentSessions.lastIndex
-
-                val shape = when {
-                    isFirst && isLast -> RoundedCornerShape(size = 12.dp)
-                    isFirst -> RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
-                    isLast -> RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
-                    else -> RectangleShape
-                }
 
                 Column(modifier = Modifier.clip(shape)) {
                     RecentSessionItem(
                         session = session,
                         iconUrl = state.appIconUrl,
                         appName = state.appName,
+                        onClick = { onSessionClick(session.sessionId) },
                     )
                     if (!isLast) {
                         PrimalDivider()
@@ -328,7 +327,10 @@ private fun AppSummarySection(
             fontWeight = FontWeight.Bold,
         )
         if (lastSession != null) {
-            val formattedLastSession = rememberFormattedDateTime(timestamp = lastSession)
+            val formattedLastSession = rememberPrimalFormattedDateTime(
+                timestamp = lastSession,
+                format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_A,
+            )
             Text(
                 text = stringResource(
                     id = R.string.settings_connected_app_details_last_session,
@@ -434,11 +436,15 @@ private fun RecentSessionItem(
     session: SessionUi,
     iconUrl: String?,
     appName: String?,
+    onClick: () -> Unit,
 ) {
-    val formattedDate = rememberFormattedDateTime(timestamp = session.startedAt)
+    val formattedDate = rememberPrimalFormattedDateTime(
+        timestamp = session.startedAt,
+        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_A,
+    )
 
     ListItem(
-        modifier = Modifier.clickable { },
+        modifier = Modifier.clickable { onClick() },
         colors = ListItemDefaults.colors(
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
         ),
@@ -499,14 +505,6 @@ private fun EditNameAlertDialog(
     )
 }
 
-@Composable
-private fun rememberFormattedDateTime(timestamp: Long): String {
-    return remember(timestamp) {
-        val simpleDateFormat = SimpleDateFormat("MMM dd, yyyy h:mm a", Locale.getDefault())
-        simpleDateFormat.format(Date(timestamp * SECONDS_TO_MILLIS))
-    }
-}
-
 private val mockRecentSessionsForPreview = listOf(
     // Oct 28, 2025 12:34 PM
     SessionUi("1", 1730169240L),
@@ -539,6 +537,7 @@ fun PreviewConnectedAppDetailsScreen() {
             ),
             onClose = {},
             eventPublisher = {},
+            onSessionClick = {},
         )
     }
 }

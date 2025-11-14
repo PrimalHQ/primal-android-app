@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,6 +37,7 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -101,16 +101,9 @@ fun ConnectedAppsScreen(
                         key = { _, connection -> connection.connectionId },
                         contentType = { _, _ -> "ConnectionItem" },
                     ) { index, connection ->
-                        val isFirst = index == 0
+                        val shape = getListItemShape(index = index, listSize = state.connections.size)
                         val isLast = index == state.connections.lastIndex
                         val isActive = connection.connectionId in state.activeConnectionIds
-
-                        val shape = when {
-                            isFirst && isLast -> RoundedCornerShape(size = 12.dp)
-                            isFirst -> RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
-                            isLast -> RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
-                            else -> AppTheme.shapes.extraSmall
-                        }
 
                         Column(modifier = Modifier.clip(shape)) {
                             ConnectedAppListItem(

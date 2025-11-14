@@ -13,6 +13,8 @@ interface SessionRepository {
 
     fun observeSessionsByConnectionId(connectionId: String): Flow<List<AppSession>>
 
+    fun observeSession(sessionId: String): Flow<AppSession?>
+
     suspend fun startSession(connectionId: String): Result<String>
 
     suspend fun endSession(sessionId: String)
