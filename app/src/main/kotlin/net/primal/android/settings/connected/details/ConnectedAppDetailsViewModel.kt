@@ -55,6 +55,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
                 UiEvent.StartSession -> startSession()
                 UiEvent.EndSession -> endSession()
                 UiEvent.DismissError -> setState { copy(error = null) }
+                is UiEvent.SessionClick -> setEffect(SideEffect.NavigateToSessionDetails(connectionId, event.sessionId))
             }
         }
     }

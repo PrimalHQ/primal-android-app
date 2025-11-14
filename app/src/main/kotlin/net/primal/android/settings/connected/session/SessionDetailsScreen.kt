@@ -20,6 +20,7 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,6 +41,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.PrimalDateFormats
 import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.settings.connected.model.SessionEventUi
+import net.primal.android.settings.connected.session.SessionDetailsContract.UiEvent
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
 
@@ -47,13 +49,24 @@ import net.primal.domain.links.CdnImage
 fun SessionDetailsScreen(
     viewModel: SessionDetailsViewModel,
     onClose: () -> Unit,
-    onEventClick: (String) -> Unit,
+    onEventClick: (connectionId: String, sessionId: String, eventId: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
+
+    LaunchedEffect(viewModel, onEventClick) {
+        viewModel.effect.collect {
+            when (it) {
+                is SessionDetailsContract.SideEffect.NavigateToEventDetails -> {
+                    onEventClick(it.connectionId, it.sessionId, it.eventId)
+                }
+            }
+        }
+    }
+
     SessionDetailsScreen(
         state = uiState.value,
         onClose = onClose,
-        onEventClick = onEventClick,
+        eventPublisher = viewModel::setEvent,
     )
 }
 
@@ -62,7 +75,7 @@ fun SessionDetailsScreen(
 fun SessionDetailsScreen(
     state: SessionDetailsContract.UiState,
     onClose: () -> Unit,
-    onEventClick: (String) -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
 ) {
     PrimalScaffold(
         topBar = {
@@ -100,7 +113,7 @@ fun SessionDetailsScreen(
                     val isLast = index == state.sessionEvents.lastIndex
 
                     Column(modifier = Modifier.clip(shape)) {
-                        SessionEventListItem(event = event, onClick = { onEventClick(event.id) })
+                        SessionEventListItem(event = event, onClick = { eventPublisher(UiEvent.EventClick(event.id)) })
                         if (!isLast) {
                             PrimalDivider()
                         }

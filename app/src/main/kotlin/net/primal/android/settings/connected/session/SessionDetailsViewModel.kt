@@ -5,12 +5,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.navigation.connectionIdOrThrow
 import net.primal.android.navigation.sessionIdOrThrow
 import net.primal.android.settings.connected.model.asSessionEventUi
+import net.primal.android.settings.connected.session.SessionDetailsContract.SideEffect
+import net.primal.android.settings.connected.session.SessionDetailsContract.UiEvent
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
 
@@ -21,6 +26,7 @@ class SessionDetailsViewModel @Inject constructor(
     private val sessionEventRepository: SessionEventRepository,
 ) : ViewModel() {
 
+    private val connectionId: String = savedStateHandle.connectionIdOrThrow
     private val sessionId: String = savedStateHandle.sessionIdOrThrow
 
     private val _state = MutableStateFlow(SessionDetailsContract.UiState())
@@ -28,9 +34,27 @@ class SessionDetailsViewModel @Inject constructor(
     private fun setState(reducer: SessionDetailsContract.UiState.() -> SessionDetailsContract.UiState) =
         _state.getAndUpdate(reducer)
 
+    private val _effect = Channel<SideEffect>()
+    val effect = _effect.receiveAsFlow()
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
+
     init {
         observeSession()
         observeEvents()
+    }
+
+    fun setEvent(event: UiEvent) {
+        when (event) {
+            is UiEvent.EventClick -> {
+                setEffect(
+                    SideEffect.NavigateToEventDetails(
+                        connectionId = this.connectionId,
+                        sessionId = this.sessionId,
+                        eventId = event.eventId,
+                    ),
+                )
+            }
+        }
     }
 
     private fun observeSession() =

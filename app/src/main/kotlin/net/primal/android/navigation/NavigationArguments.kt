@@ -156,7 +156,12 @@ inline val SavedStateHandle.nostrConnectUri: String? get() = get<String>(NOSTR_C
 const val CONNECTION_ID = "connectionId"
 inline val SavedStateHandle.connectionIdOrThrow: String
     get() = get(CONNECTION_ID) ?: throw IllegalArgumentException("Missing required connectionId argument.")
+inline val NavBackStackEntry.connectionIdOrThrow: String
+    get() = arguments?.getString(CONNECTION_ID)
+        ?: throw IllegalArgumentException("Missing required connectionId argument.")
 
 const val SESSION_ID = "sessionId"
 inline val SavedStateHandle.sessionIdOrThrow: String
     get() = get(SESSION_ID) ?: throw IllegalArgumentException("Missing required sessionId argument.")
+inline val NavBackStackEntry.sessionIdOrThrow: String
+    get() = arguments?.getString(SESSION_ID) ?: throw IllegalArgumentException("Missing required sessionId argument.")
