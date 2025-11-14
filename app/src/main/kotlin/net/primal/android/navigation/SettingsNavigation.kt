@@ -2,6 +2,7 @@ package net.primal.android.navigation
 
 import androidx.activity.compose.LocalActivity
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
@@ -11,6 +12,7 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import net.primal.android.LocalPrimalTheme
+import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.settings.appearance.AppearanceSettingsScreen
 import net.primal.android.settings.appearance.di.appearanceSettingsViewModel
@@ -143,8 +145,23 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         zaps(route = "zaps_settings", navController = navController)
         connectedApps(route = "connected_apps", navController = navController)
         connectedAppDetails(route = "connected_apps/{$CONNECTION_ID}", navController = navController)
-        sessionDetails(route = "connected_apps/{$CONNECTION_ID}/{$SESSION_ID}", navController = navController)
-        eventDetails(route = "connected_apps/{$CONNECTION_ID}/{$SESSION_ID}/{$EVENT_ID}", navController = navController)
+        sessionDetails(
+            route = "connected_apps/{$CONNECTION_ID}/{$SESSION_ID}",
+            navController = navController,
+            arguments = listOf(
+                navArgument(CONNECTION_ID) { type = NavType.StringType },
+                navArgument(SESSION_ID) { type = NavType.StringType },
+            ),
+        )
+        eventDetails(
+            route = "connected_apps/{$CONNECTION_ID}/{$SESSION_ID}/{$EVENT_ID}",
+            navController = navController,
+            arguments = listOf(
+                navArgument(CONNECTION_ID) { type = NavType.StringType },
+                navArgument(SESSION_ID) { type = NavType.StringType },
+                navArgument(EVENT_ID) { type = NavType.StringType },
+            ),
+        )
     }
 
 private fun NavGraphBuilder.home(
@@ -429,50 +446,51 @@ private fun NavGraphBuilder.connectedAppDetails(route: String, navController: Na
         )
     }
 
-private fun NavGraphBuilder.sessionDetails(route: String, navController: NavController) =
-    composable(
-        route = route,
-        arguments = listOf(
-            navArgument(CONNECTION_ID) { type = NavType.StringType },
-            navArgument(SESSION_ID) { type = NavType.StringType },
-        ),
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<SessionDetailsViewModel>()
-        LockToOrientationPortrait()
-        SessionDetailsScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onEventClick = { connectionId, sessionId, eventId ->
-                navController.navigateToEventDetails(
-                    connectionId = connectionId,
-                    sessionId = sessionId,
-                    eventId = eventId,
-                )
-            },
-        )
-    }
+private fun NavGraphBuilder.sessionDetails(
+    route: String,
+    navController: NavController,
+    arguments: List<NamedNavArgument>,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<SessionDetailsViewModel>()
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    SessionDetailsScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onEventClick = { connectionId, sessionId, eventId ->
+            navController.navigateToEventDetails(
+                connectionId = connectionId,
+                sessionId = sessionId,
+                eventId = eventId,
+            )
+        },
+    )
+}
 
-private fun NavGraphBuilder.eventDetails(route: String, navController: NavController) =
-    composable(
-        route = route,
-        arguments = listOf(
-            navArgument(CONNECTION_ID) { type = NavType.StringType },
-            navArgument(SESSION_ID) { type = NavType.StringType },
-            navArgument(EVENT_ID) { type = NavType.StringType },
-        ),
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<EventDetailsViewModel>()
-        LockToOrientationPortrait()
-        EventDetailsScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-        )
-    }
+private fun NavGraphBuilder.eventDetails(
+    route: String,
+    navController: NavController,
+    arguments: List<NamedNavArgument>,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<EventDetailsViewModel>()
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    EventDetailsScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+    )
+}

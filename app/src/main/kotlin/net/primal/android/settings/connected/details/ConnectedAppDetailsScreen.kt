@@ -28,7 +28,6 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -60,6 +59,7 @@ import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -125,7 +125,7 @@ fun ConnectedAppDetailsScreen(
         onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
     )
 
-    Scaffold(
+    PrimalScaffold(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_connected_app_details_title),

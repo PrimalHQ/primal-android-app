@@ -5,11 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.navigation.eventIdOrThrow
@@ -30,23 +28,11 @@ class EventDetailsViewModel @Inject constructor(
     private fun setState(reducer: EventDetailsContract.UiState.() -> EventDetailsContract.UiState) =
         _state.getAndUpdate(reducer)
 
-    private val _effect = Channel<EventDetailsContract.SideEffect>()
-    val effect = _effect.receiveAsFlow()
-    private fun setEffect(effect: EventDetailsContract.SideEffect) = viewModelScope.launch { _effect.send(effect) }
-
-    fun setEvent(event: EventDetailsContract.UiEvent) {
-        when (event) {
-            is EventDetailsContract.UiEvent.CopyToClipboard -> {
-                setEffect(EventDetailsContract.SideEffect.TextCopied(label = event.label))
-            }
-        }
-    }
-
     init {
-        observeEvent()
+        observeSessionEvent()
     }
 
-    private fun observeEvent() =
+    private fun observeSessionEvent() =
         viewModelScope.launch {
             sessionEventRepository.observeEvent(eventId = eventId).collect { sessionEvent ->
                 if (sessionEvent is SessionEvent.SignEvent) {

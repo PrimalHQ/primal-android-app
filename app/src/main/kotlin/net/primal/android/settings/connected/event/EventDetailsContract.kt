@@ -9,12 +9,4 @@ interface EventDetailsContract {
         val rawJson: String? = null,
         val eventNotSupported: Boolean = false,
     )
-
-    sealed class UiEvent {
-        data class CopyToClipboard(val text: String, val label: String) : UiEvent()
-    }
-
-    sealed class SideEffect {
-        data class TextCopied(val label: String) : SideEffect()
-    }
 }
