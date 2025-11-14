@@ -15,7 +15,7 @@ import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.SideEffect
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiEvent
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiState
-import net.primal.android.nostrconnect.model.ActiveSessionUi
+import net.primal.android.nostrconnect.model.asUi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
@@ -60,14 +60,7 @@ class ActiveSessionsViewModel @Inject constructor(
                     val userAccountsMap = userAccounts.associateBy { it.pubkey }
                     val uiSessions = appSessions.mapNotNull { appSession ->
                         userAccountsMap[appSession.userPubKey]?.let { userAccount ->
-                            ActiveSessionUi(
-                                sessionId = appSession.sessionId,
-                                connectionId = appSession.connectionId,
-                                appName = appSession.name,
-                                appUrl = appSession.url,
-                                appImageUrl = appSession.image,
-                                userAccount = userAccount.asUserAccountUi(),
-                            )
+                            appSession.asUi(userAccount = userAccount.asUserAccountUi())
                         }
                     }
                     setState { copy(sessions = uiSessions) }

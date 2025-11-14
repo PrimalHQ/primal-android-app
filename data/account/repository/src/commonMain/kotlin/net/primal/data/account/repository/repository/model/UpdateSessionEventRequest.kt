@@ -6,4 +6,5 @@ internal data class UpdateSessionEventRequest(
     val eventId: String,
     val requestState: RequestState,
     val responsePayload: String?,
+    val completedAt: Long?,
 )

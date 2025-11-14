@@ -15,6 +15,8 @@ interface SessionRepository {
 
     fun observeSession(sessionId: String): Flow<AppSession?>
 
+    suspend fun getSession(sessionId: String): Result<AppSession>
+
     suspend fun startSession(connectionId: String): Result<String>
 
     suspend fun endSession(sessionId: String)

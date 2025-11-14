@@ -31,7 +31,7 @@ internal class InternalSessionEventRepository(
             sessionId = sessionId,
             signerPubKey = signerPubKey,
             requestedAt = method.requestedAt,
-            completedAt = completedAt,
+            completedAt = if (response != null) completedAt else null,
             method = method,
             response = response,
         )?.let { sessionEventData ->
@@ -53,6 +53,7 @@ internal class InternalSessionEventRepository(
                         eventId = request.eventId,
                         requestState = request.requestState,
                         responsePayload = request.responsePayload?.asEncryptable(),
+                        completedAt = request.completedAt,
                     )
                 }
             }

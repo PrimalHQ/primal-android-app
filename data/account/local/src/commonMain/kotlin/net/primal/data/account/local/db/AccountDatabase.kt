@@ -31,7 +31,6 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
 @TypeConverters(
     ListsTypeConverters::class,
     EncryptableTypeConverters::class,
-    AccountTypeConverters::class,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AccountDatabase : RoomDatabase() {
@@ -49,6 +48,13 @@ abstract class AccountDatabase : RoomDatabase() {
                     UPDATE AppSessionData
                         SET endedAt = strftime('%s', 'now'), activeRelayCount = 0
                         WHERE endedAt IS NULL
+                        """.trimIndent(),
+                    )
+                    connection.execSQL(
+                        """
+                    UPDATE SessionEventData
+                        SET completedAt = strftime('%s', 'now'), requestState = 'Rejected'
+                        WHERE requestState = 'PendingUserAction'
                         """.trimIndent(),
                     )
                 }

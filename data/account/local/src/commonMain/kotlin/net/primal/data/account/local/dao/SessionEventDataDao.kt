@@ -26,7 +26,7 @@ interface SessionEventDataDao {
     @Query(
         """
         UPDATE SessionEventData
-        SET requestState = :requestState, responsePayload = :responsePayload
+        SET requestState = :requestState, responsePayload = :responsePayload, completedAt = :completedAt
         WHERE eventId = :eventId
         """,
     )
@@ -34,6 +34,7 @@ interface SessionEventDataDao {
         eventId: String,
         requestState: RequestState,
         responsePayload: Encryptable<String>?,
+        completedAt: Long?,
     )
 
     @Query("SELECT * FROM SessionEventData WHERE eventId = :eventId")
