@@ -1265,22 +1265,41 @@ private fun NavGraphBuilder.scanCode(
     },
 ) {
     val viewModel = hiltViewModel<RedeemCodeViewModel>()
-    PrimalTheme(PrimalTheme.Sunset) {
-        ApplyEdgeToEdge(isDarkTheme = true)
-        LockToOrientationPortrait()
-        RedeemCodeScreen(
-            viewModel = viewModel,
-            callbacks = RedeemCodeContract.ScreenCallbacks(
-                onClose = navController::navigateUp,
-                navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
-                navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },
-                onNostrConnectRequest = { url ->
-                    navController.popBackStack()
-                    navController.navigateToNostrConnectBottomSheet(url = url)
-                },
-            ),
-        )
-    }
+    val streamState = LocalStreamState.current
+    ApplyEdgeToEdge(isDarkTheme = true)
+    LockToOrientationPortrait()
+    RedeemCodeScreen(
+        viewModel = viewModel,
+        callbacks = RedeemCodeContract.ScreenCallbacks(
+            onClose = navController::navigateUp,
+            navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
+            navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },
+            onNostrConnectRequest = { url ->
+                navController.popBackStack()
+                navController.navigateToNostrConnectBottomSheet(url = url)
+            },
+            onDraftTransactionReady = { draft ->
+                navController.popBackStack()
+                navController.navigateToWalletCreateTransaction(draftTransaction = draft)
+            },
+            onProfileScan = { profileId ->
+                navController.popBackStack()
+                navController.navigateToProfile(profileId)
+            },
+            onNoteScan = { noteId ->
+                navController.popBackStack()
+                navController.navigateToThread(noteId)
+            },
+            onArticleScan = { naddr ->
+                navController.popBackStack()
+                navController.navigateToArticleDetails(naddr)
+            },
+            onLiveStreamScan = { naddr ->
+                navController.popBackStack()
+                streamState.start(naddr)
+            },
+        ),
+    )
 }
 
 private fun NavGraphBuilder.home(

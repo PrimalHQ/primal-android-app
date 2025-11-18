@@ -2,6 +2,10 @@ package net.primal.android.redeem
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,12 +19,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -31,6 +35,7 @@ import net.primal.android.redeem.RedeemCodeContract.UiEvent
 import net.primal.android.redeem.ui.RedeemCodeSuccessStage
 import net.primal.android.redeem.ui.RedeemEnterCodeStage
 import net.primal.android.redeem.ui.RedeemScanCodeStage
+import net.primal.android.theme.AppTheme
 
 @Composable
 fun RedeemCodeScreen(viewModel: RedeemCodeViewModel, callbacks: RedeemCodeContract.ScreenCallbacks) {
@@ -42,6 +47,21 @@ fun RedeemCodeScreen(viewModel: RedeemCodeViewModel, callbacks: RedeemCodeContra
                 RedeemCodeContract.SideEffect.PromoCodeApplied -> callbacks.onClose()
                 is RedeemCodeContract.SideEffect.NostrConnectRequest -> {
                     callbacks.onNostrConnectRequest(it.url)
+                }
+                is RedeemCodeContract.SideEffect.DraftTransactionReady -> {
+                    callbacks.onDraftTransactionReady(it.draft)
+                }
+                is RedeemCodeContract.SideEffect.NostrNoteDetected -> {
+                    callbacks.onNoteScan(it.noteId)
+                }
+                is RedeemCodeContract.SideEffect.NostrProfileDetected -> {
+                    callbacks.onProfileScan(it.profileId)
+                }
+                is RedeemCodeContract.SideEffect.NostrArticleDetected -> {
+                    callbacks.onArticleScan(it.naddr)
+                }
+                is RedeemCodeContract.SideEffect.NostrLiveStreamDetected -> {
+                    callbacks.onLiveStreamScan(it.naddr)
                 }
             }
         }
@@ -74,78 +94,82 @@ fun RedeemCodeScreen(
         eventPublisher(UiEvent.PreviousStage)
     }
 
-    ColumnWithBackground(
-        backgroundPainter = painterResource(id = R.drawable.onboarding_spot2),
-    ) { size ->
-        PrimalScaffold(
-            containerColor = Color.Transparent,
-            topBar = {
-                RedeemCodeTopAppBar(
-                    stage = state.getStage(),
-                    onClose = {
-                        if (state.stageStack.size > 1) {
-                            eventPublisher(UiEvent.PreviousStage)
-                        } else {
-                            callbacks.onClose()
-                        }
-                    },
-                )
-            },
-            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        ) { paddingValues ->
-            AnimatedContent(
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(top = 32.dp)
-                    .padding(horizontal = 24.dp),
-                targetState = state.getStage(),
-            ) { stage ->
-                when (stage) {
-                    RedeemCodeContract.RedeemCodeStage.ScanCode -> {
-                        RedeemScanCodeStage(
-                            modifier = Modifier.padding(bottom = 64.dp),
-                            onQrCodeDetected = { eventPublisher(UiEvent.QrCodeDetected(it)) },
-                            onEnterCodeClick = { eventPublisher(UiEvent.GoToEnterCodeStage) },
-                        )
-                    }
+    val currentStage = state.getStage()
 
-                    RedeemCodeContract.RedeemCodeStage.EnterCode -> {
+    PrimalScaffold(
+        containerColor = Color.Transparent,
+        topBar = {
+            RedeemCodeTopAppBar(
+                stage = currentStage,
+                onClose = {
+                    if (state.stageStack.size > 1) {
+                        eventPublisher(UiEvent.PreviousStage)
+                    } else {
+                        callbacks.onClose()
+                    }
+                },
+            )
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    ) { paddingValues ->
+        AnimatedContent(
+            modifier = Modifier.fillMaxSize(),
+            targetState = currentStage,
+            label = "RedeemStage",
+        ) { stage ->
+            when (stage) {
+                RedeemCodeContract.RedeemCodeStage.ScanCode -> {
+                    RedeemScanCodeStage(
+                        modifier = Modifier.fillMaxSize(),
+                        onQrCodeDetected = { eventPublisher(UiEvent.QrCodeDetected(it)) },
+                        onEnterCodeClick = { eventPublisher(UiEvent.GoToEnterCodeStage) },
+                    )
+                }
+                RedeemCodeContract.RedeemCodeStage.EnterCode -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(AppTheme.colorScheme.background),
+                    ) {
                         RedeemEnterCodeStage(
-                            modifier = Modifier.padding(top = 96.dp, bottom = 64.dp),
+                            modifier = Modifier
+                                .padding(paddingValues)
+                                .padding(horizontal = 24.dp)
+                                .padding(bottom = 16.dp),
                             promoCode = state.promoCode,
                             isError = state.showErrorBadge,
                             isLoading = state.loading,
                             onApplyCodeClick = { eventPublisher(UiEvent.GetCodeDetails(it)) },
                         )
                     }
-
-                    RedeemCodeContract.RedeemCodeStage.Success -> {
+                }
+                RedeemCodeContract.RedeemCodeStage.Success -> {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        Image(
+                            modifier = Modifier.fillMaxSize(),
+                            painter = painterResource(id = R.drawable.onboarding_spot2),
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                        )
                         state.welcomeMessage?.let {
                             RedeemCodeSuccessStage(
                                 modifier = Modifier
-                                    .padding(bottom = 64.dp)
-                                    .padding(horizontal = 12.dp),
-                                title = state.welcomeMessage,
+                                    .padding(paddingValues)
+                                    .padding(top = 32.dp, bottom = 64.dp)
+                                    .padding(horizontal = 36.dp),
+                                title = it,
                                 userState = state.userState,
                                 requiresPrimalWallet = state.requiresPrimalWallet,
                                 isLoading = state.loading,
                                 benefits = state.promoCodeBenefits,
                                 onApplyCodeClick = {
-                                    state.promoCode?.let { eventPublisher(UiEvent.ApplyCode(it)) }
+                                    state.promoCode?.let { code -> eventPublisher(UiEvent.ApplyCode(code)) }
                                 },
                                 onOnboardToPrimalClick = {
-                                    state.promoCode?.let {
-                                        callbacks.navigateToOnboarding(
-                                            it,
-                                        )
-                                    }
+                                    state.promoCode?.let { code -> callbacks.navigateToOnboarding(code) }
                                 },
                                 onActivateWalletClick = {
-                                    state.promoCode?.let {
-                                        callbacks.navigateToWalletOnboarding(
-                                            it,
-                                        )
-                                    }
+                                    state.promoCode?.let { code -> callbacks.navigateToWalletOnboarding(code) }
                                 },
                             )
                         }
@@ -163,12 +187,13 @@ fun RedeemCodeTopAppBar(
     stage: RedeemCodeContract.RedeemCodeStage,
     modifier: Modifier = Modifier,
 ) {
+    val isEnterCodeStage = stage == RedeemCodeContract.RedeemCodeStage.EnterCode
     CenterAlignedTopAppBar(
         modifier = modifier,
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = Color.Transparent,
-            titleContentColor = Color.White,
-            navigationIconContentColor = Color.White,
+            containerColor = if (isEnterCodeStage) AppTheme.colorScheme.background else Color.Transparent,
+            titleContentColor = if (isEnterCodeStage) AppTheme.colorScheme.onPrimary else Color.White,
+            navigationIconContentColor = if (isEnterCodeStage) AppTheme.colorScheme.onPrimary else Color.White,
         ),
         title = {
             Text(text = stage.toTitle())

@@ -20,15 +20,21 @@ import net.primal.android.redeem.RedeemCodeContract.UiEvent
 import net.primal.android.redeem.RedeemCodeContract.UiState
 import net.primal.android.redeem.utils.getPromoCodeFromUrl
 import net.primal.android.scanner.domain.QrCodeDataType
-import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.UserAccount
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.PromoCodeDetails
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.utils.extractNoteId
+import net.primal.domain.nostr.utils.extractProfileId
+import net.primal.domain.nostr.utils.takeAsNaddrOrNull
+import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.wallet.Wallet
 import timber.log.Timber
 
@@ -38,6 +44,7 @@ class RedeemCodeViewModel @Inject constructor(
     private val walletAccountRepository: WalletAccountRepository,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val activeAccountStore: ActiveAccountStore,
+    private val walletTextParser: WalletTextParser,
 ) : ViewModel() {
 
     private val preFilledPromoCode = savedStateHandle.promoCode
@@ -61,8 +68,7 @@ class RedeemCodeViewModel @Inject constructor(
                     stageStack = listOf(RedeemCodeStage.EnterCode),
                 )
             }
-
-            getCodeDetails(code = preFilledPromoCode)
+            processCode(code = preFilledPromoCode)
         }
         observeEvents()
         observeActiveAccount()
@@ -72,16 +78,14 @@ class RedeemCodeViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.GetCodeDetails -> getCodeDetails(it.code)
-
+                    is UiEvent.GetCodeDetails -> processCode(it.code)
                     UiEvent.GoToEnterCodeStage ->
                         setState { copy(stageStack = stageStack.pushStage(RedeemCodeStage.EnterCode)) }
 
                     is UiEvent.ApplyCode -> applyCode(it.code)
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.PreviousStage -> setState { copy(stageStack = stageStack.popStage()) }
-
-                    is UiEvent.QrCodeDetected -> qrCodeDetected(it.result)
+                    is UiEvent.QrCodeDetected -> processCode(it.result.value)
                 }
             }
         }
@@ -104,31 +108,70 @@ class RedeemCodeViewModel @Inject constructor(
         }
     }
 
-    private fun qrCodeDetected(result: QrCodeResult) =
+    private fun processCode(code: String) =
         viewModelScope.launch {
-            when (result.type) {
-                QrCodeDataType.PROMO_CODE -> {
-                    val promoCode = result.value.getPromoCodeFromUrl()
+            setState { copy(loading = true, error = null, showErrorBadge = false) }
 
-                    getCodeDetails(
-                        code = promoCode,
-                        onFailure = {
-                            setState {
-                                copy(
-                                    promoCode = promoCode,
-                                    stageStack = stageStack.pushStage(RedeemCodeStage.EnterCode),
-                                )
+            val type = QrCodeDataType.from(code)
+            when (type) {
+                QrCodeDataType.NPUB, QrCodeDataType.NPUB_URI,
+                QrCodeDataType.NPROFILE, QrCodeDataType.NPROFILE_URI,
+                ->
+                    code.extractProfileId()?.let {
+                        setEffect(SideEffect.NostrProfileDetected(profileId = it))
+                    }
+
+                QrCodeDataType.NOTE, QrCodeDataType.NOTE_URI,
+                QrCodeDataType.NEVENT, QrCodeDataType.NEVENT_URI,
+                ->
+                    code.extractNoteId()?.let {
+                        setEffect(SideEffect.NostrNoteDetected(noteId = it))
+                    }
+
+                QrCodeDataType.NADDR, QrCodeDataType.NADDR_URI -> {
+                    val naddrObject = code.takeAsNaddrOrNull()
+                    if (naddrObject != null) {
+                        when (naddrObject.kind) {
+                            NostrEventKind.LongFormContent.value -> {
+                                setEffect(SideEffect.NostrArticleDetected(code))
                             }
-                        },
-                    )
+                            NostrEventKind.LiveActivity.value -> {
+                                setEffect(SideEffect.NostrLiveStreamDetected(code))
+                            }
+                        }
+                        setState { copy(loading = false) }
+                    }
                 }
+
+                QrCodeDataType.LNBC, QrCodeDataType.LNURL, QrCodeDataType.LIGHTNING_URI,
+                QrCodeDataType.BITCOIN_ADDRESS, QrCodeDataType.BITCOIN_URI,
+                -> processAsPayment(code)
+
                 QrCodeDataType.NOSTR_CONNECT -> {
-                    setEffect(SideEffect.NostrConnectRequest(url = result.value))
+                    setEffect(SideEffect.NostrConnectRequest(url = code))
+                    setState { copy(loading = false) }
+                }
+
+                QrCodeDataType.PROMO_CODE -> {
+                    val promoCode = code.getPromoCodeFromUrl()
+                    getCodeDetails(promoCode)
                 }
 
                 else -> Unit
             }
         }
+
+    private suspend fun processAsPayment(code: String) {
+        walletTextParser.parseAndQueryText(userId = activeAccountStore.activeUserId(), text = code)
+            .onSuccess {
+                setEffect(SideEffect.DraftTransactionReady(draft = it))
+                setState { copy(loading = false) }
+            }
+            .onFailure {
+                Timber.w(it)
+                setState { copy(loading = false, error = UiError.GenericError()) }
+            }
+    }
 
     private fun applyCode(promoCode: String) =
         viewModelScope.launch {

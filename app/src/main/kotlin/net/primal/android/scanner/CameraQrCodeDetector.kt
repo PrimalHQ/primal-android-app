@@ -1,11 +1,5 @@
 package net.primal.android.scanner
 
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.resolutionselector.ResolutionSelector
-import androidx.camera.core.resolutionselector.ResolutionStrategy
-import androidx.camera.view.LifecycleCameraController
-import androidx.camera.view.PreviewView
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,19 +14,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.compose.LocalLifecycleOwner
-import java.util.concurrent.Executors
-import net.primal.android.LocalQrCodeDecoder
-import net.primal.android.scanner.analysis.QrCodeAnalyzer
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.theme.AppTheme
 
@@ -43,46 +29,6 @@ fun CameraQrCodeDetector(
     torchEnabled: Boolean = false,
     onQrCodeDetected: (QrCodeResult) -> Unit,
 ) {
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    val previewView = remember { PreviewView(context) }
-
-    val cameraSelector = remember {
-        CameraSelector.Builder()
-            .requireLensFacing(CameraSelector.LENS_FACING_BACK)
-            .build()
-    }
-
-    val decoder = LocalQrCodeDecoder.current
-    val cameraController = remember {
-        val qrCodeAnalyzer = QrCodeAnalyzer(decoder = decoder) { onQrCodeDetected(it) }
-
-        LifecycleCameraController(context).apply {
-            this.cameraSelector = cameraSelector
-            imageAnalysisBackpressureStrategy = ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST
-            setImageAnalysisResolutionSelector(
-                ResolutionSelector.Builder()
-                    .setResolutionStrategy(
-                        ResolutionStrategy(
-                            QrCodeAnalyzer.AnalysisTargetSize,
-                            ResolutionStrategy.FALLBACK_RULE_CLOSEST_HIGHER_THEN_LOWER,
-                        ),
-                    )
-                    .build(),
-            )
-            setImageAnalysisAnalyzer(Executors.newSingleThreadExecutor(), qrCodeAnalyzer)
-        }
-    }
-
-    LaunchedEffect(cameraController, previewView, lifecycleOwner) {
-        cameraController.unbind()
-        cameraController.bindToLifecycle(lifecycleOwner)
-        previewView.controller = cameraController
-    }
-
-    cameraController.enableTorch(torchEnabled)
-
     val cameraAlpha: Float by animateFloatAsState(
         targetValue = if (cameraVisible) 0.0f else 1.0f,
         label = "cameraAlpha",
@@ -97,9 +43,10 @@ fun CameraQrCodeDetector(
                 .background(color = AppTheme.colorScheme.scrim.copy(alpha = cameraAlpha)),
         ) {
             if (cameraVisible) {
-                AndroidView(
+                CameraPreview(
                     modifier = Modifier.fillMaxSize(),
-                    factory = { previewView },
+                    torchEnabled = torchEnabled,
+                    onQrCodeDetected = onQrCodeDetected,
                 )
             }
         }

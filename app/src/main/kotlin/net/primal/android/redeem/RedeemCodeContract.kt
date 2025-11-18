@@ -2,6 +2,7 @@ package net.primal.android.redeem
 
 import net.primal.android.core.errors.UiError
 import net.primal.android.scanner.domain.QrCodeResult
+import net.primal.domain.wallet.DraftTx
 
 interface RedeemCodeContract {
     data class UiState(
@@ -32,6 +33,11 @@ interface RedeemCodeContract {
     sealed class SideEffect {
         data object PromoCodeApplied : SideEffect()
         data class NostrConnectRequest(val url: String) : SideEffect()
+        data class DraftTransactionReady(val draft: DraftTx) : SideEffect()
+        data class NostrProfileDetected(val profileId: String) : SideEffect()
+        data class NostrNoteDetected(val noteId: String) : SideEffect()
+        data class NostrArticleDetected(val naddr: String) : SideEffect()
+        data class NostrLiveStreamDetected(val naddr: String) : SideEffect()
     }
 
     enum class RedeemCodeStage {
@@ -56,5 +62,10 @@ interface RedeemCodeContract {
         val navigateToOnboarding: (String?) -> Unit,
         val navigateToWalletOnboarding: (String?) -> Unit,
         val onNostrConnectRequest: (url: String) -> Unit,
+        val onDraftTransactionReady: (draft: DraftTx) -> Unit,
+        val onProfileScan: (profileId: String) -> Unit,
+        val onNoteScan: (noteId: String) -> Unit,
+        val onArticleScan: (naddr: String) -> Unit,
+        val onLiveStreamScan: (naddr: String) -> Unit,
     )
 }
