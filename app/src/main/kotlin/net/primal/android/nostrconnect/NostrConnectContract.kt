@@ -13,7 +13,7 @@ interface NostrConnectContract {
         val accounts: List<UserAccountUi> = emptyList(),
         val selectedTab: Tab = Tab.LOGIN,
         val selectedAccount: UserAccountUi? = null,
-        val trustLevel: TrustLevel = TrustLevel.Medium,
+        val trustLevel: TrustLevel = TrustLevel.Full,
         // val dailyBudget: Long? = null,
         val connecting: Boolean = false,
         // val showDailyBudgetPicker: Boolean = false,
