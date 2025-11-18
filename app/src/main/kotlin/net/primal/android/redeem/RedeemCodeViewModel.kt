@@ -29,7 +29,6 @@ import net.primal.core.utils.onSuccess
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.PromoCodeDetails
 import net.primal.domain.account.WalletAccountRepository
-import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.utils.extractNoteId
 import net.primal.domain.nostr.utils.extractProfileId
@@ -111,53 +110,54 @@ class RedeemCodeViewModel @Inject constructor(
     private fun processCode(code: String) =
         viewModelScope.launch {
             setState { copy(loading = true, error = null, showErrorBadge = false) }
+            try {
+                val type = QrCodeDataType.from(code)
+                when (type) {
+                    QrCodeDataType.NPUB, QrCodeDataType.NPUB_URI,
+                    QrCodeDataType.NPROFILE, QrCodeDataType.NPROFILE_URI,
+                    ->
+                        code.extractProfileId()?.let {
+                            setEffect(SideEffect.NostrProfileDetected(profileId = it))
+                        }
 
-            val type = QrCodeDataType.from(code)
-            when (type) {
-                QrCodeDataType.NPUB, QrCodeDataType.NPUB_URI,
-                QrCodeDataType.NPROFILE, QrCodeDataType.NPROFILE_URI,
-                ->
-                    code.extractProfileId()?.let {
-                        setEffect(SideEffect.NostrProfileDetected(profileId = it))
-                    }
+                    QrCodeDataType.NOTE, QrCodeDataType.NOTE_URI,
+                    QrCodeDataType.NEVENT, QrCodeDataType.NEVENT_URI,
+                    ->
+                        code.extractNoteId()?.let {
+                            setEffect(SideEffect.NostrNoteDetected(noteId = it))
+                        }
 
-                QrCodeDataType.NOTE, QrCodeDataType.NOTE_URI,
-                QrCodeDataType.NEVENT, QrCodeDataType.NEVENT_URI,
-                ->
-                    code.extractNoteId()?.let {
-                        setEffect(SideEffect.NostrNoteDetected(noteId = it))
-                    }
-
-                QrCodeDataType.NADDR, QrCodeDataType.NADDR_URI -> {
-                    val naddrObject = code.takeAsNaddrOrNull()
-                    if (naddrObject != null) {
-                        when (naddrObject.kind) {
-                            NostrEventKind.LongFormContent.value -> {
-                                setEffect(SideEffect.NostrArticleDetected(code))
-                            }
-                            NostrEventKind.LiveActivity.value -> {
-                                setEffect(SideEffect.NostrLiveStreamDetected(code))
+                    QrCodeDataType.NADDR, QrCodeDataType.NADDR_URI -> {
+                        val naddrObject = code.takeAsNaddrOrNull()
+                        if (naddrObject != null) {
+                            when (naddrObject.kind) {
+                                NostrEventKind.LongFormContent.value -> {
+                                    setEffect(SideEffect.NostrArticleDetected(code))
+                                }
+                                NostrEventKind.LiveActivity.value -> {
+                                    setEffect(SideEffect.NostrLiveStreamDetected(code))
+                                }
                             }
                         }
-                        setState { copy(loading = false) }
                     }
+
+                    QrCodeDataType.LNBC, QrCodeDataType.LNURL, QrCodeDataType.LIGHTNING_URI,
+                    QrCodeDataType.BITCOIN_ADDRESS, QrCodeDataType.BITCOIN_URI,
+                    -> processAsPayment(code)
+
+                    QrCodeDataType.NOSTR_CONNECT -> {
+                        setEffect(SideEffect.NostrConnectRequest(url = code))
+                    }
+
+                    QrCodeDataType.PROMO_CODE -> {
+                        val promoCode = code.getPromoCodeFromUrl()
+                        getCodeDetails(promoCode)
+                    }
+
+                    else -> getCodeDetails(code)
                 }
-
-                QrCodeDataType.LNBC, QrCodeDataType.LNURL, QrCodeDataType.LIGHTNING_URI,
-                QrCodeDataType.BITCOIN_ADDRESS, QrCodeDataType.BITCOIN_URI,
-                -> processAsPayment(code)
-
-                QrCodeDataType.NOSTR_CONNECT -> {
-                    setEffect(SideEffect.NostrConnectRequest(url = code))
-                    setState { copy(loading = false) }
-                }
-
-                QrCodeDataType.PROMO_CODE -> {
-                    val promoCode = code.getPromoCodeFromUrl()
-                    getCodeDetails(promoCode)
-                }
-
-                else -> Unit
+            } finally {
+                setState { copy(loading = false) }
             }
         }
 
@@ -165,24 +165,24 @@ class RedeemCodeViewModel @Inject constructor(
         walletTextParser.parseAndQueryText(userId = activeAccountStore.activeUserId(), text = code)
             .onSuccess {
                 setEffect(SideEffect.DraftTransactionReady(draft = it))
-                setState { copy(loading = false) }
             }
             .onFailure {
                 Timber.w(it)
-                setState { copy(loading = false, error = UiError.GenericError()) }
+                setState { copy(error = UiError.GenericError()) }
             }
     }
 
     private fun applyCode(promoCode: String) =
         viewModelScope.launch {
             setState { copy(loading = true, error = null) }
-            try {
+            runCatching {
                 primalWalletAccountRepository.redeemPromoCode(
                     userId = activeAccountStore.activeUserId(),
                     code = promoCode,
                 )
+            }.onSuccess {
                 setEffect(SideEffect.PromoCodeApplied)
-            } catch (error: NetworkException) {
+            }.onFailure { error ->
                 Timber.w(error)
 
                 val uiError = if (error.cause is NostrNoticeException) {
@@ -192,17 +192,16 @@ class RedeemCodeViewModel @Inject constructor(
                 }
 
                 setState { copy(error = uiError) }
-            } finally {
-                setState { copy(loading = false) }
             }
+            setState { copy(loading = false) }
         }
 
-    private fun getCodeDetails(code: String, onFailure: (() -> Unit)? = null) =
+    private fun getCodeDetails(code: String) =
         viewModelScope.launch {
             setState { copy(loading = true, error = null, showErrorBadge = false) }
-            try {
-                val response = primalWalletAccountRepository.getPromoCodeDetails(code = code)
-
+            runCatching {
+                primalWalletAccountRepository.getPromoCodeDetails(code = code)
+            }.onSuccess { response ->
                 setState {
                     copy(
                         promoCode = code,
@@ -212,17 +211,15 @@ class RedeemCodeViewModel @Inject constructor(
                         stageStack = listOf(RedeemCodeStage.Success),
                     )
                 }
-            } catch (error: NetworkException) {
-                onFailure?.invoke()
+            }.onFailure { error ->
                 Timber.w(error)
                 if (error.cause is NostrNoticeException) {
                     setState { copy(showErrorBadge = true) }
                 } else {
                     setState { copy(error = UiError.NetworkError(error)) }
                 }
-            } finally {
-                setState { copy(loading = false) }
             }
+            setState { copy(loading = false) }
         }
 
     private fun PromoCodeDetails.toBenefitsList() =
