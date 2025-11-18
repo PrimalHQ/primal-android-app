@@ -32,6 +32,8 @@ import net.primal.android.scanner.RedeemCameraDetector
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.theme.AppTheme
 
+private val UseKeyboardButtonContentColor = Color(0xFFAAAAAA)
+
 @Composable
 fun RedeemScanCodeStage(
     modifier: Modifier = Modifier,
@@ -67,7 +69,7 @@ fun RedeemScanCodeStage(
                     text = stringResource(id = R.string.redeem_code_use_keyboard_button),
                     leadingIcon = PrimalIcons.Keyboard,
                     containerColor = Color.Black,
-                    contentColor = Color(0xFFAAAAAA),
+                    contentColor = UseKeyboardButtonContentColor,
                     onClick = onEnterCodeClick,
                     fontWeight = FontWeight.Normal,
                     fontSize = 15.sp,

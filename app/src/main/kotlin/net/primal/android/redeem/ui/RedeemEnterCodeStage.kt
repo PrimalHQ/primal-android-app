@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -32,8 +33,12 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.CheckCircleOutline
 import net.primal.android.core.compose.icons.primaliconpack.Paste
+import net.primal.android.nostrconnect.utils.isNostrConnectUrl
 import net.primal.android.theme.AppTheme
+
+private val NOSTR_CONNECT_SUCCESS_COLOR = Color(0xFF52CE0A)
 
 @Composable
 internal fun RedeemEnterCodeStage(
@@ -47,10 +52,10 @@ internal fun RedeemEnterCodeStage(
     val clipboardManager = LocalClipboardManager.current
     var code by remember { mutableStateOf(promoCode ?: "") }
 
+    val isNostrConnect = remember(code) { code.isNostrConnectUrl() }
+
     ConstraintLayout(
-        modifier = modifier
-            .fillMaxSize()
-            .imePadding(),
+        modifier = modifier.fillMaxSize().imePadding(),
     ) {
         val (content, applyButton) = createRefs()
 
@@ -60,7 +65,7 @@ internal fun RedeemEnterCodeStage(
                 bottom.linkTo(applyButton.top)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
-            }.background(color = AppTheme.colorScheme.background),
+            },
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
@@ -76,6 +81,7 @@ internal fun RedeemEnterCodeStage(
                 code = code,
                 onCodeChange = { code = it },
                 isError = isError,
+                isNostrConnect = isNostrConnect,
             )
 
             TextButton(
@@ -133,10 +139,12 @@ private fun PromoCodeTextField(
     code: String,
     onCodeChange: (String) -> Unit,
     isError: Boolean,
+    isNostrConnect: Boolean,
 ) {
+    val borderColor = if (isNostrConnect) NOSTR_CONNECT_SUCCESS_COLOR else Color.Transparent
     val colors = PrimalDefaults.outlinedTextFieldColors(
-        focusedBorderColor = Color.Transparent,
-        unfocusedBorderColor = Color.Transparent,
+        focusedBorderColor = borderColor,
+        unfocusedBorderColor = borderColor,
     )
 
     OutlinedTextField(
@@ -148,7 +156,7 @@ private fun PromoCodeTextField(
         singleLine = true,
         textStyle = AppTheme.typography.bodyLarge.copy(
             fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
         ),
         isError = isError,
         placeholder = {
@@ -161,6 +169,18 @@ private fun PromoCodeTextField(
                 ),
                 textAlign = TextAlign.Center,
             )
+        },
+        trailingIcon = if (isNostrConnect) {
+            {
+                Icon(
+                    modifier = Modifier.size(22.dp),
+                    imageVector = PrimalIcons.CheckCircleOutline,
+                    contentDescription = null,
+                    tint = NOSTR_CONNECT_SUCCESS_COLOR,
+                )
+            }
+        } else {
+            null
         },
     )
 }
