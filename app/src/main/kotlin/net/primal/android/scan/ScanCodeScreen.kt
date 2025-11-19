@@ -157,6 +157,11 @@ private fun ScanCodeMainContent(
                         value = state.scannedValue,
                         isError = state.showErrorBadge,
                         isLoading = state.loading,
+                        onValueChanged = {
+                            if (state.showErrorBadge) {
+                                eventPublisher(UiEvent.DismissError)
+                            }
+                        },
                         onApplyClick = { eventPublisher(UiEvent.ProcessCode(it)) },
                     )
                 }

@@ -19,6 +19,7 @@ import net.primal.android.scan.ScanCodeContract.SideEffect
 import net.primal.android.scan.ScanCodeContract.UiEvent
 import net.primal.android.scan.ScanCodeContract.UiState
 import net.primal.android.scan.utils.getPromoCodeFromUrl
+import net.primal.android.scan.utils.isValidPromoCode
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.UserAccount
@@ -82,7 +83,7 @@ class ScanCodeViewModel @Inject constructor(
                         setState { copy(stageStack = stageStack.pushStage(ScanCodeStage.ManualInput)) }
 
                     is UiEvent.ApplyPromoCode -> applyPromoCode(it.code)
-                    UiEvent.DismissError -> setState { copy(error = null) }
+                    UiEvent.DismissError -> setState { copy(error = null, showErrorBadge = false) }
                     UiEvent.PreviousStage -> setState { copy(stageStack = stageStack.popStage()) }
                     is UiEvent.QrCodeDetected -> processCode(it.result.value)
                 }
@@ -127,19 +128,7 @@ class ScanCodeViewModel @Inject constructor(
                             setEffect(SideEffect.NostrNoteDetected(noteId = it))
                         }
 
-                    QrCodeDataType.NADDR, QrCodeDataType.NADDR_URI -> {
-                        val naddrObject = code.takeAsNaddrOrNull()
-                        if (naddrObject != null) {
-                            when (naddrObject.kind) {
-                                NostrEventKind.LongFormContent.value -> {
-                                    setEffect(SideEffect.NostrArticleDetected(code))
-                                }
-                                NostrEventKind.LiveActivity.value -> {
-                                    setEffect(SideEffect.NostrLiveStreamDetected(code))
-                                }
-                            }
-                        }
-                    }
+                    QrCodeDataType.NADDR, QrCodeDataType.NADDR_URI -> processNaddr(code)
 
                     QrCodeDataType.LNBC, QrCodeDataType.LNURL, QrCodeDataType.LIGHTNING_URI,
                     QrCodeDataType.BITCOIN_ADDRESS, QrCodeDataType.BITCOIN_URI,
@@ -150,16 +139,37 @@ class ScanCodeViewModel @Inject constructor(
                     }
 
                     QrCodeDataType.PROMO_CODE -> {
-                        val promoCode = code.getPromoCodeFromUrl()
-                        getPromoCodeDetails(promoCode)
+                        getPromoCodeDetails(code.getPromoCodeFromUrl())
                     }
 
-                    else -> Unit
+                    null -> processUnknownCode(code)
+
+                    else -> setState { copy(showErrorBadge = true) }
                 }
             } finally {
                 setState { copy(loading = false) }
             }
         }
+
+    private fun processNaddr(code: String) {
+        val naddrObject = code.takeAsNaddrOrNull() ?: return
+        when (naddrObject.kind) {
+            NostrEventKind.LongFormContent.value -> {
+                setEffect(SideEffect.NostrArticleDetected(code))
+            }
+            NostrEventKind.LiveActivity.value -> {
+                setEffect(SideEffect.NostrLiveStreamDetected(code))
+            }
+        }
+    }
+
+    private fun processUnknownCode(code: String) {
+        if (code.isValidPromoCode()) {
+            getPromoCodeDetails(code)
+        } else {
+            setState { copy(showErrorBadge = true) }
+        }
+    }
 
     private suspend fun processAsPayment(code: String) {
         walletTextParser.parseAndQueryText(userId = activeAccountStore.activeUserId(), text = code)

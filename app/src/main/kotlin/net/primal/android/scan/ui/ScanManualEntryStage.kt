@@ -36,10 +36,11 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.CheckCircleOutline
 import net.primal.android.core.compose.icons.primaliconpack.Paste
-import net.primal.android.nostrconnect.utils.isNostrConnectUrl
+import net.primal.android.scan.utils.isValidPromoCode
+import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.theme.AppTheme
 
-private val NOSTR_CONNECT_SUCCESS_COLOR = Color(0xFF52CE0A)
+private val SUCCESS_COLOR = Color(0xFF52CE0A)
 
 @Composable
 internal fun ScanManualEntryStage(
@@ -47,16 +48,13 @@ internal fun ScanManualEntryStage(
     isError: Boolean,
     isLoading: Boolean,
     value: String?,
+    onValueChanged: () -> Unit,
     onApplyClick: (code: String) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val context = LocalContext.current
-    val clipboardManager = remember(context) {
-        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    }
     var text by remember { mutableStateOf(value ?: "") }
 
-    val isNostrConnect = remember(text) { text.isNostrConnectUrl() }
+    val isValidInput = remember(text) { text.trim().isValidScanInput() }
 
     Column(
         modifier = modifier
@@ -79,12 +77,15 @@ internal fun ScanManualEntryStage(
             ParsingInputTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = text,
-                onValueChange = { text = it },
+                onValueChange = {
+                    text = it
+                    onValueChanged()
+                },
                 isError = isError,
-                isNostrConnect = isNostrConnect,
+                isValidInput = isValidInput,
             )
 
-            TextButton(
+            PasteCodeButton(
                 modifier = Modifier
                     .background(
                         color = AppTheme.colorScheme.background,
@@ -94,27 +95,13 @@ internal fun ScanManualEntryStage(
                         width = 1.dp,
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
                         shape = AppTheme.shapes.extraLarge,
-                    ).padding(horizontal = 16.dp),
-                onClick = {
-                    val clipData = clipboardManager.primaryClip
-
-                    if (clipData != null && clipData.itemCount > 0) {
-                        val clipText = clipData.getItemAt(0).coerceToText(context).toString()
-                        text = clipText.trim()
-                    }
+                    )
+                    .padding(horizontal = 16.dp),
+                onPaste = { pastedText ->
+                    text = pastedText
+                    onValueChanged()
                 },
-            ) {
-                Icon(
-                    imageVector = PrimalIcons.Paste,
-                    contentDescription = null,
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                )
-                Text(
-                    modifier = Modifier.padding(start = 7.dp),
-                    text = stringResource(id = R.string.scan_code_paste),
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                )
-            }
+            )
         }
 
         PrimalLoadingButton(
@@ -133,14 +120,49 @@ internal fun ScanManualEntryStage(
 }
 
 @Composable
+private fun PasteCodeButton(modifier: Modifier, onPaste: (String) -> Unit) {
+    val context = LocalContext.current
+    val clipboardManager = remember(context) {
+        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    }
+
+    TextButton(
+        modifier = modifier,
+        onClick = {
+            val clipData = clipboardManager.primaryClip
+            if (clipData != null && clipData.itemCount > 0) {
+                val clipText = clipData.getItemAt(0).coerceToText(context).toString()
+                onPaste(clipText.trim())
+            }
+        },
+    ) {
+        Icon(
+            imageVector = PrimalIcons.Paste,
+            contentDescription = null,
+            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        )
+        Text(
+            modifier = Modifier.padding(start = 7.dp),
+            text = stringResource(id = R.string.scan_code_paste),
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        )
+    }
+}
+
+@Composable
 private fun ParsingInputTextField(
     modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
     isError: Boolean,
-    isNostrConnect: Boolean,
+    isValidInput: Boolean,
 ) {
-    val borderColor = if (isNostrConnect) NOSTR_CONNECT_SUCCESS_COLOR else Color.Transparent
+    val borderColor = when {
+        isError -> AppTheme.colorScheme.error
+        isValidInput -> SUCCESS_COLOR
+        else -> Color.Transparent
+    }
+
     val colors = PrimalDefaults.outlinedTextFieldColors(
         focusedBorderColor = borderColor,
         unfocusedBorderColor = borderColor,
@@ -169,17 +191,21 @@ private fun ParsingInputTextField(
                 textAlign = TextAlign.Center,
             )
         },
-        trailingIcon = if (isNostrConnect) {
+        trailingIcon = if (isValidInput && !isError) {
             {
                 Icon(
                     modifier = Modifier.size(22.dp),
                     imageVector = PrimalIcons.CheckCircleOutline,
                     contentDescription = null,
-                    tint = NOSTR_CONNECT_SUCCESS_COLOR,
+                    tint = SUCCESS_COLOR,
                 )
             }
         } else {
             null
         },
     )
+}
+
+private fun String.isValidScanInput(): Boolean {
+    return QrCodeDataType.from(this) != null || isValidPromoCode()
 }
