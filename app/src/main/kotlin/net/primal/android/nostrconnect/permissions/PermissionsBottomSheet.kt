@@ -32,7 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -46,7 +46,9 @@ import net.primal.android.core.compose.PrimalCheckBox
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.button.PrimalFilledButton
-import net.primal.android.core.compose.rememberFormattedDateTime
+import net.primal.android.core.compose.getListItemShape
+import net.primal.android.core.utils.PrimalDateFormats
+import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiState
@@ -235,12 +237,12 @@ private fun AppRequestsList(
             key = { _, item -> item.eventId },
         ) { index, event ->
             AppRequestListItem(
-                isLast = index == events.size - 1,
-                isFirst = index == 0,
+                shape = getListItemShape(index = index, listSize = events.size),
                 event = event,
                 isSelected = event.eventId in selectedEventIds,
                 onSelectClick = { onSelectEventClick(event.eventId) },
                 onDeselectClick = { onDeselectEventClick(event.eventId) },
+                showDivider = index < events.lastIndex,
             )
         }
     }
@@ -250,19 +252,12 @@ private fun AppRequestsList(
 fun AppRequestListItem(
     modifier: Modifier = Modifier,
     event: SessionEvent,
-    isLast: Boolean,
-    isFirst: Boolean,
+    shape: Shape,
     isSelected: Boolean,
     onSelectClick: () -> Unit,
     onDeselectClick: () -> Unit,
+    showDivider: Boolean,
 ) {
-    val shape = when {
-        isFirst && isLast -> RoundedCornerShape(size = 12.dp)
-        isFirst -> RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp)
-        isLast -> RoundedCornerShape(bottomStart = 12.dp, bottomEnd = 12.dp)
-        else -> RectangleShape
-    }
-
     Row(
         modifier = modifier
             .clip(shape)
@@ -286,14 +281,17 @@ fun AppRequestListItem(
         SessionEventMetadata(requestTypeId = event.requestTypeId, requestedAt = event.requestedAt)
     }
 
-    if (!isLast) {
+    if (showDivider) {
         PrimalDivider()
     }
 }
 
 @Composable
 private fun SessionEventMetadata(requestTypeId: String, requestedAt: Long) {
-    val formattedDateTime = rememberFormattedDateTime(timestamp = requestedAt)
+    val formattedDateTime = rememberPrimalFormattedDateTime(
+        timestamp = requestedAt,
+        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_A,
+    )
 
     Row(
         modifier = Modifier.fillMaxWidth(),
