@@ -1,5 +1,6 @@
 package net.primal.android.scan.ui
 
+import PasteAlt
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.compose.foundation.background
@@ -35,7 +36,6 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.CheckCircleOutline
-import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.scan.utils.isValidPromoCode
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.theme.AppTheme
@@ -127,7 +127,7 @@ private fun PasteCodeButton(modifier: Modifier, onPaste: (String) -> Unit) {
     }
 
     TextButton(
-        modifier = modifier,
+        modifier = modifier.height(40.dp),
         onClick = {
             val clipData = clipboardManager.primaryClip
             if (clipData != null && clipData.itemCount > 0) {
@@ -137,12 +137,12 @@ private fun PasteCodeButton(modifier: Modifier, onPaste: (String) -> Unit) {
         },
     ) {
         Icon(
-            imageVector = PrimalIcons.Paste,
+            imageVector = PrimalIcons.PasteAlt,
             contentDescription = null,
             tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         )
         Text(
-            modifier = Modifier.padding(start = 7.dp),
+            modifier = Modifier.padding(start = 11.dp, top = 3.dp),
             text = stringResource(id = R.string.scan_code_paste),
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         )
