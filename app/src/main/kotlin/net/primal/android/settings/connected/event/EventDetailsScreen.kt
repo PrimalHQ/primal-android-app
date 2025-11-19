@@ -15,8 +15,8 @@ import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.compose.nostr.NostrEventDetails
 import net.primal.android.core.utils.copyText
+import net.primal.android.nostrconnect.ui.NostrEventDetails
 
 @Composable
 fun EventDetailsScreen(viewModel: EventDetailsViewModel, onClose: () -> Unit) {
