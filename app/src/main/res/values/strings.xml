@@ -115,7 +115,6 @@
     <string name="scan_code_use_keyboard_button">Use Keyboard instead</string>
     <string name="scan_code_enter_placeholder">Enter code…</string>
     <string name="scan_code_paste">Paste</string>
-    <string name="scan_code_incorrect_code">Incorrect code. Please try again.</string>
     <string name="scan_code_loaded_with">This code is loaded with:</string>
     <string name="scan_code_get_zapping">Get Zapping!</string>
     <string name="scan_code_sats">sats</string>
