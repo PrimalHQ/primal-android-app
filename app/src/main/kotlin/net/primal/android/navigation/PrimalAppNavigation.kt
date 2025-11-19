@@ -163,9 +163,9 @@ import net.primal.android.profile.follows.ProfileFollowsViewModel
 import net.primal.android.profile.qr.ProfileQrCodeContract
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
-import net.primal.android.redeem.RedeemCodeContract
-import net.primal.android.redeem.RedeemCodeScreen
-import net.primal.android.redeem.RedeemCodeViewModel
+import net.primal.android.scan.ScanCodeContract
+import net.primal.android.scan.ScanCodeScreen
+import net.primal.android.scan.ScanCodeViewModel
 import net.primal.android.stream.LiveStreamOverlay
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
@@ -1264,13 +1264,13 @@ private fun NavGraphBuilder.scanCode(
         }
     },
 ) {
-    val viewModel = hiltViewModel<RedeemCodeViewModel>()
+    val viewModel = hiltViewModel<ScanCodeViewModel>()
     val streamState = LocalStreamState.current
-    ApplyEdgeToEdge(isDarkTheme = true)
+    ApplyEdgeToEdge()
     LockToOrientationPortrait()
-    RedeemCodeScreen(
+    ScanCodeScreen(
         viewModel = viewModel,
-        callbacks = RedeemCodeContract.ScreenCallbacks(
+        callbacks = ScanCodeContract.ScreenCallbacks(
             onClose = navController::navigateUp,
             navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
             navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },

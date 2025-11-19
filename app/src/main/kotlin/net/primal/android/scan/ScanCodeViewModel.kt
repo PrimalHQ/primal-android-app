@@ -1,4 +1,4 @@
-package net.primal.android.redeem
+package net.primal.android.scan
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -14,11 +14,11 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.navigation.promoCode
-import net.primal.android.redeem.RedeemCodeContract.RedeemCodeStage
-import net.primal.android.redeem.RedeemCodeContract.SideEffect
-import net.primal.android.redeem.RedeemCodeContract.UiEvent
-import net.primal.android.redeem.RedeemCodeContract.UiState
-import net.primal.android.redeem.utils.getPromoCodeFromUrl
+import net.primal.android.scan.ScanCodeContract.ScanCodeStage
+import net.primal.android.scan.ScanCodeContract.SideEffect
+import net.primal.android.scan.ScanCodeContract.UiEvent
+import net.primal.android.scan.ScanCodeContract.UiState
+import net.primal.android.scan.utils.getPromoCodeFromUrl
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.UserAccount
@@ -38,7 +38,7 @@ import net.primal.domain.wallet.Wallet
 import timber.log.Timber
 
 @HiltViewModel
-class RedeemCodeViewModel @Inject constructor(
+class ScanCodeViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val walletAccountRepository: WalletAccountRepository,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
@@ -46,7 +46,7 @@ class RedeemCodeViewModel @Inject constructor(
     private val walletTextParser: WalletTextParser,
 ) : ViewModel() {
 
-    private val preFilledPromoCode = savedStateHandle.promoCode
+    private val preFilledCode = savedStateHandle.promoCode
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -60,14 +60,14 @@ class RedeemCodeViewModel @Inject constructor(
     private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
-        if (preFilledPromoCode != null) {
+        if (preFilledCode != null) {
             setState {
                 copy(
-                    promoCode = preFilledPromoCode,
-                    stageStack = listOf(RedeemCodeStage.EnterCode),
+                    scannedValue = preFilledCode,
+                    stageStack = listOf(ScanCodeStage.ManualInput),
                 )
             }
-            processCode(code = preFilledPromoCode)
+            processCode(code = preFilledCode)
         }
         observeEvents()
         observeActiveAccount()
@@ -77,11 +77,11 @@ class RedeemCodeViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.GetCodeDetails -> processCode(it.code)
-                    UiEvent.GoToEnterCodeStage ->
-                        setState { copy(stageStack = stageStack.pushStage(RedeemCodeStage.EnterCode)) }
+                    is UiEvent.ProcessCode -> processCode(it.value)
+                    UiEvent.GoToManualInput ->
+                        setState { copy(stageStack = stageStack.pushStage(ScanCodeStage.ManualInput)) }
 
-                    is UiEvent.ApplyCode -> applyCode(it.code)
+                    is UiEvent.ApplyPromoCode -> applyPromoCode(it.code)
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.PreviousStage -> setState { copy(stageStack = stageStack.popStage()) }
                     is UiEvent.QrCodeDetected -> processCode(it.result.value)
@@ -97,13 +97,13 @@ class RedeemCodeViewModel @Inject constructor(
             }
         }
 
-    private suspend fun resolveUserState(userAccount: UserAccount): RedeemCodeContract.UserState {
-        if (userAccount == UserAccount.EMPTY) return RedeemCodeContract.UserState.NoUser
+    private suspend fun resolveUserState(userAccount: UserAccount): ScanCodeContract.UserState {
+        if (userAccount == UserAccount.EMPTY) return ScanCodeContract.UserState.NoUser
         val wallet = walletAccountRepository.getActiveWallet(userId = userAccount.pubkey)
 
         return when (wallet) {
-            is Wallet.NWC, is Wallet.Tsunami, null -> RedeemCodeContract.UserState.UserWithoutPrimalWallet
-            is Wallet.Primal -> RedeemCodeContract.UserState.UserWithPrimalWallet
+            is Wallet.NWC, is Wallet.Tsunami, null -> ScanCodeContract.UserState.UserWithoutPrimalWallet
+            is Wallet.Primal -> ScanCodeContract.UserState.UserWithPrimalWallet
         }
     }
 
@@ -151,10 +151,10 @@ class RedeemCodeViewModel @Inject constructor(
 
                     QrCodeDataType.PROMO_CODE -> {
                         val promoCode = code.getPromoCodeFromUrl()
-                        getCodeDetails(promoCode)
+                        getPromoCodeDetails(promoCode)
                     }
 
-                    else -> getCodeDetails(code)
+                    else -> Unit
                 }
             } finally {
                 setState { copy(loading = false) }
@@ -172,7 +172,7 @@ class RedeemCodeViewModel @Inject constructor(
             }
     }
 
-    private fun applyCode(promoCode: String) =
+    private fun applyPromoCode(promoCode: String) =
         viewModelScope.launch {
             setState { copy(loading = true, error = null) }
             runCatching {
@@ -196,7 +196,7 @@ class RedeemCodeViewModel @Inject constructor(
             setState { copy(loading = false) }
         }
 
-    private fun getCodeDetails(code: String) =
+    private fun getPromoCodeDetails(code: String) =
         viewModelScope.launch {
             setState { copy(loading = true, error = null, showErrorBadge = false) }
             runCatching {
@@ -204,11 +204,11 @@ class RedeemCodeViewModel @Inject constructor(
             }.onSuccess { response ->
                 setState {
                     copy(
-                        promoCode = code,
+                        scannedValue = code,
                         welcomeMessage = response.welcomeMessage,
                         promoCodeBenefits = response.toBenefitsList(),
                         requiresPrimalWallet = response.preloadedBtc != null,
-                        stageStack = listOf(RedeemCodeStage.Success),
+                        stageStack = listOf(ScanCodeStage.Success),
                     )
                 }
             }.onFailure { error ->
@@ -225,16 +225,16 @@ class RedeemCodeViewModel @Inject constructor(
     private fun PromoCodeDetails.toBenefitsList() =
         listOfNotNull(
             this.preloadedBtc?.toSats()?.let {
-                RedeemCodeContract.PromoCodeBenefit.WalletBalance(sats = it)
+                ScanCodeContract.PromoCodeBenefit.WalletBalance(sats = it)
             },
         )
 
-    private fun List<RedeemCodeStage>.popStage() =
+    private fun List<ScanCodeStage>.popStage() =
         if (this.size > 1) {
             this.dropLast(1)
         } else {
             this
         }
 
-    private fun List<RedeemCodeStage>.pushStage(stage: RedeemCodeStage) = this + listOf(stage)
+    private fun List<ScanCodeStage>.pushStage(stage: ScanCodeStage) = this + listOf(stage)
 }

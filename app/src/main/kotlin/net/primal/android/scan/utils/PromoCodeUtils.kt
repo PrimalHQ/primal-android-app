@@ -1,4 +1,4 @@
-package net.primal.android.redeem.utils
+package net.primal.android.scan.utils
 
 private const val PROMO_CODE_URL_PREFIX = "https://primal.net/rc/"
 

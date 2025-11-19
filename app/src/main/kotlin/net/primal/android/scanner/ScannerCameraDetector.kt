@@ -30,7 +30,7 @@ import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun RedeemCameraDetector(
+fun ScannerCameraDetector(
     cameraVisible: Boolean,
     modifier: Modifier = Modifier,
     torchEnabled: Boolean = false,
@@ -62,7 +62,7 @@ fun RedeemCameraDetector(
         }
 
         if (cameraVisible) {
-            RedeemCameraOverlay(
+            ScannerCameraOverlay(
                 modifier = Modifier.fillMaxSize(),
                 viewPortSize = this.maxWidth.times(other = 0.7f),
             )
@@ -72,7 +72,7 @@ fun RedeemCameraDetector(
 }
 
 @Composable
-private fun RedeemCameraOverlay(modifier: Modifier, viewPortSize: Dp) {
+private fun ScannerCameraOverlay(modifier: Modifier, viewPortSize: Dp) {
     val cornerRadius = 6.dp
     val bracketLength = 32.dp
     val bracketWidth = 2.dp

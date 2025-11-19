@@ -1,5 +1,7 @@
-package net.primal.android.redeem.ui
+package net.primal.android.scan.ui
 
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -22,13 +24,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.constraintlayout.compose.ConstraintLayout
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -41,45 +42,44 @@ import net.primal.android.theme.AppTheme
 private val NOSTR_CONNECT_SUCCESS_COLOR = Color(0xFF52CE0A)
 
 @Composable
-internal fun RedeemEnterCodeStage(
+internal fun ScanManualEntryStage(
     modifier: Modifier = Modifier,
     isError: Boolean,
     isLoading: Boolean,
-    promoCode: String?,
-    onApplyCodeClick: (code: String) -> Unit,
+    value: String?,
+    onApplyClick: (code: String) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
-    val clipboardManager = LocalClipboardManager.current
-    var code by remember { mutableStateOf(promoCode ?: "") }
+    val context = LocalContext.current
+    val clipboardManager = remember(context) {
+        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    }
+    var text by remember { mutableStateOf(value ?: "") }
 
-    val isNostrConnect = remember(code) { code.isNostrConnectUrl() }
+    val isNostrConnect = remember(text) { text.isNostrConnectUrl() }
 
-    ConstraintLayout(
-        modifier = modifier.fillMaxSize().imePadding(),
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .imePadding(),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        val (content, applyButton) = createRefs()
-
         Column(
-            modifier = Modifier.constrainAs(content) {
-                top.linkTo(parent.top)
-                bottom.linkTo(applyButton.top)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-            },
+            modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(24.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp, Alignment.CenterVertically),
         ) {
             Text(
                 textAlign = TextAlign.Center,
-                text = stringResource(id = R.string.redeem_code_scan_anything_subtitle),
+                text = stringResource(id = R.string.scan_anything_subtitle),
                 color = AppTheme.colorScheme.onPrimary,
                 style = AppTheme.typography.bodyLarge,
             )
 
-            PromoCodeTextField(
+            ParsingInputTextField(
                 modifier = Modifier.fillMaxWidth(),
-                code = code,
-                onCodeChange = { code = it },
+                value = text,
+                onValueChange = { text = it },
                 isError = isError,
                 isNostrConnect = isNostrConnect,
             )
@@ -96,8 +96,12 @@ internal fun RedeemEnterCodeStage(
                         shape = AppTheme.shapes.extraLarge,
                     ).padding(horizontal = 16.dp),
                 onClick = {
-                    val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
-                    code = clipboardText
+                    val clipData = clipboardManager.primaryClip
+
+                    if (clipData != null && clipData.itemCount > 0) {
+                        val clipText = clipData.getItemAt(0).coerceToText(context).toString()
+                        text = clipText.trim()
+                    }
                 },
             ) {
                 Icon(
@@ -107,37 +111,32 @@ internal fun RedeemEnterCodeStage(
                 )
                 Text(
                     modifier = Modifier.padding(start = 7.dp),
-                    text = stringResource(id = R.string.redeem_code_paste),
+                    text = stringResource(id = R.string.scan_code_paste),
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 )
             }
         }
 
         PrimalLoadingButton(
-            text = stringResource(id = R.string.redeem_code_apply_code_button),
+            text = stringResource(id = R.string.scan_code_apply_button),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp)
-                .constrainAs(applyButton) {
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                },
+                .height(56.dp),
             loading = isLoading,
-            enabled = !isLoading && code.isNotBlank(),
+            enabled = !isLoading && text.isNotBlank(),
             onClick = {
                 keyboardController?.hide()
-                onApplyCodeClick(code)
+                onApplyClick(text)
             },
         )
     }
 }
 
 @Composable
-private fun PromoCodeTextField(
+private fun ParsingInputTextField(
     modifier: Modifier = Modifier,
-    code: String,
-    onCodeChange: (String) -> Unit,
+    value: String,
+    onValueChange: (String) -> Unit,
     isError: Boolean,
     isNostrConnect: Boolean,
 ) {
@@ -149,8 +148,8 @@ private fun PromoCodeTextField(
 
     OutlinedTextField(
         modifier = modifier,
-        value = code,
-        onValueChange = onCodeChange,
+        value = value,
+        onValueChange = onValueChange,
         colors = colors,
         shape = AppTheme.shapes.extraLarge,
         singleLine = true,
@@ -162,7 +161,7 @@ private fun PromoCodeTextField(
         placeholder = {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.redeem_code_enter_code_placeholder),
+                text = stringResource(id = R.string.scan_code_enter_placeholder),
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                 style = AppTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.SemiBold,

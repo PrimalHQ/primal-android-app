@@ -1,4 +1,4 @@
-package net.primal.android.redeem.ui
+package net.primal.android.scan.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,14 +28,14 @@ import net.primal.android.R
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Keyboard
-import net.primal.android.scanner.RedeemCameraDetector
+import net.primal.android.scanner.ScannerCameraDetector
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.theme.AppTheme
 
 private val UseKeyboardButtonContentColor = Color(0xFFAAAAAA)
 
 @Composable
-fun RedeemScanCodeStage(
+fun ScanCameraStage(
     modifier: Modifier = Modifier,
     onQrCodeDetected: (QrCodeResult) -> Unit,
     onEnterCodeClick: () -> Unit,
@@ -46,7 +46,7 @@ fun RedeemScanCodeStage(
         cameraVisible = true
     }
 
-    RedeemCameraDetector(
+    ScannerCameraDetector(
         cameraVisible = cameraVisible,
         modifier = modifier.fillMaxSize(),
         onQrCodeDetected = onQrCodeDetected,
@@ -66,7 +66,7 @@ fun RedeemScanCodeStage(
                         .align(Alignment.TopCenter)
                         .padding(top = topPaddingForButton)
                         .height(40.dp),
-                    text = stringResource(id = R.string.redeem_code_use_keyboard_button),
+                    text = stringResource(id = R.string.scan_code_use_keyboard_button),
                     leadingIcon = PrimalIcons.Keyboard,
                     containerColor = Color.Black,
                     contentColor = UseKeyboardButtonContentColor,
@@ -84,14 +84,14 @@ fun RedeemScanCodeStage(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     Text(
-                        text = stringResource(id = R.string.redeem_code_scan_anything_title),
+                        text = stringResource(id = R.string.scan_anything_title),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         style = AppTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center,
                     )
                     Text(
-                        text = stringResource(id = R.string.redeem_code_scan_anything_subtitle),
+                        text = stringResource(id = R.string.scan_anything_subtitle),
                         color = Color.White.copy(alpha = 0.75f),
                         style = AppTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,

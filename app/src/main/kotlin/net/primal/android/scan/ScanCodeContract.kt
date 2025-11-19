@@ -1,20 +1,20 @@
-package net.primal.android.redeem
+package net.primal.android.scan
 
 import net.primal.android.core.errors.UiError
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.domain.wallet.DraftTx
 
-interface RedeemCodeContract {
+interface ScanCodeContract {
     data class UiState(
         val userState: UserState = UserState.NoUser,
         val requiresPrimalWallet: Boolean = false,
-        val promoCode: String? = null,
+        val scannedValue: String? = null,
         val welcomeMessage: String? = null,
         val loading: Boolean = false,
         val showErrorBadge: Boolean = false,
         val error: UiError? = null,
-        val stageStack: List<RedeemCodeStage> = listOf(
-            RedeemCodeStage.ScanCode,
+        val stageStack: List<ScanCodeStage> = listOf(
+            ScanCodeStage.ScanCamera,
         ),
         val promoCodeBenefits: List<PromoCodeBenefit> = emptyList(),
     ) {
@@ -24,10 +24,10 @@ interface RedeemCodeContract {
     sealed class UiEvent {
         data object DismissError : UiEvent()
         data object PreviousStage : UiEvent()
-        data object GoToEnterCodeStage : UiEvent()
+        data object GoToManualInput : UiEvent()
         data class QrCodeDetected(val result: QrCodeResult) : UiEvent()
-        data class GetCodeDetails(val code: String) : UiEvent()
-        data class ApplyCode(val code: String) : UiEvent()
+        data class ProcessCode(val value: String) : UiEvent()
+        data class ApplyPromoCode(val code: String) : UiEvent()
     }
 
     sealed class SideEffect {
@@ -40,9 +40,9 @@ interface RedeemCodeContract {
         data class NostrLiveStreamDetected(val naddr: String) : SideEffect()
     }
 
-    enum class RedeemCodeStage {
-        ScanCode,
-        EnterCode,
+    enum class ScanCodeStage {
+        ScanCamera,
+        ManualInput,
         Success,
     }
 
