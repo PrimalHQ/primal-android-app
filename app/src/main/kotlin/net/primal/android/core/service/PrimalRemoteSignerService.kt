@@ -3,6 +3,7 @@ package net.primal.android.core.service
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -12,6 +13,10 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -21,16 +26,18 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import net.primal.android.MainActivity
 import net.primal.android.R
 import net.primal.android.core.di.RemoteSignerServiceFactory
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
 import net.primal.domain.account.model.AppSession
+import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
 
 @AndroidEntryPoint
-class PrimalRemoteSignerService : Service() {
+class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
 
     @Inject
     lateinit var remoteSignerServiceFactory: RemoteSignerServiceFactory
@@ -41,6 +48,9 @@ class PrimalRemoteSignerService : Service() {
     @Inject
     lateinit var sessionRepository: SessionRepository
 
+    @Inject
+    lateinit var sessionEventRepository: SessionEventRepository
+
     private var signer: RemoteSignerService? = null
 
     private var shownSessionIds = emptySet<String>()
@@ -50,6 +60,7 @@ class PrimalRemoteSignerService : Service() {
         private const val CHANNEL_ID = "remote_signer"
         private const val SUMMARY_NOTIFICATION_ID = 42
         private const val CHILD_NOTIFICATION_ID = 43
+        private const val RESPOND_NOTIFICATION_ID = 44
 
         private val _isServiceRunning = MutableStateFlow(false)
         val isServiceRunning = _isServiceRunning.asStateFlow()
@@ -76,7 +87,8 @@ class PrimalRemoteSignerService : Service() {
     override fun onBind(intent: Intent?): IBinder = binder
 
     override fun onCreate() {
-        super.onCreate()
+        super<Service>.onCreate()
+        ProcessLifecycleOwner.get().lifecycle.addObserver(this)
         _isServiceRunning.value = true
         createNotificationChannel()
     }
@@ -112,6 +124,7 @@ class PrimalRemoteSignerService : Service() {
         }
 
         observeOngoingSessions()
+        observeSessionEventsPendingUserAction()
 
         return START_STICKY
     }
@@ -129,6 +142,24 @@ class PrimalRemoteSignerService : Service() {
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.cancel(sessionId, CHILD_NOTIFICATION_ID)
         notificationManager.notify(SUMMARY_NOTIFICATION_ID, buildSummaryNotification())
+    }
+
+    private fun showRespondNotification(eventsCount: Int) {
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.notify(
+            RESPOND_NOTIFICATION_ID,
+            buildRespondNotification(eventsCount = eventsCount),
+        )
+    }
+
+    private fun hideRespondNotification() {
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.cancel(RESPOND_NOTIFICATION_ID)
+    }
+
+    override fun onStart(owner: LifecycleOwner) {
+        hideRespondNotification()
+        super<DefaultLifecycleObserver>.onStart(owner)
     }
 
     private fun buildSummaryNotification(): Notification =
@@ -150,13 +181,34 @@ class PrimalRemoteSignerService : Service() {
             .setGroup(GROUP_ID)
             .build()
 
+    private fun buildRespondNotification(eventsCount: Int): Notification {
+        val openAppIntent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+
+        val contentPendingIntent = PendingIntent.getActivity(
+            this,
+            0,
+            openAppIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.primal_wave_logo_summer)
+            .setContentTitle("You have $eventsCount new signer request(s).")
+            .setContentIntent(contentPendingIntent)
+            .build()
+    }
+
     override fun onDestroy() {
         _isServiceRunning.value = false
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.cancel(SUMMARY_NOTIFICATION_ID)
+        hideRespondNotification()
         signer?.destroy()
         scope.cancel()
-        super.onDestroy()
+        ProcessLifecycleOwner.get().lifecycle.removeObserver(this)
+        super<Service>.onDestroy()
     }
 
     private fun observeOngoingSessions() =
@@ -184,6 +236,25 @@ class PrimalRemoteSignerService : Service() {
                     shownSessionIds = sessionIds
                 }
         }
+
+    private fun observeSessionEventsPendingUserAction() =
+        scope.launch {
+            val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
+            sessionEventRepository.observeEventsPendingUserAction(signerPubKey = signerKeyPair.pubKey)
+                .collect { events ->
+                    if (events.isNotEmpty() && isAppInBackground()) {
+                        showRespondNotification(eventsCount = events.size)
+                    }
+                }
+        }
+
+    private fun isAppInBackground() =
+        ProcessLifecycleOwner
+            .get()
+            .lifecycle
+            .currentState
+            .isAtLeast(Lifecycle.State.STARTED)
+            .not()
 
     private fun createNotificationChannel() {
         val nm = getSystemService(NotificationManager::class.java)
