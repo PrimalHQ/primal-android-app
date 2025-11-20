@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.navigation.sendPaymentTab
-import net.primal.android.redeem.utils.getPromoCodeFromUrl
+import net.primal.android.scan.utils.getPromoCodeFromUrl
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore
