@@ -191,17 +191,21 @@ private fun ParsingInputTextField(
                 textAlign = TextAlign.Center,
             )
         },
-        trailingIcon = if (isValidInput && !isError) {
-            {
-                Icon(
-                    modifier = Modifier.size(22.dp),
-                    imageVector = PrimalIcons.CheckCircleOutline,
-                    contentDescription = null,
-                    tint = SUCCESS_COLOR,
-                )
-            }
-        } else {
-            null
+        leadingIcon = {
+            Icon(
+                modifier = Modifier.size(22.dp),
+                imageVector = PrimalIcons.CheckCircleOutline,
+                contentDescription = null,
+                tint = Color.Transparent,
+            )
+        },
+        trailingIcon = {
+            Icon(
+                modifier = Modifier.size(22.dp),
+                imageVector = PrimalIcons.CheckCircleOutline,
+                contentDescription = null,
+                tint = if (isValidInput && !isError) SUCCESS_COLOR else Color.Transparent,
+            )
         },
     )
 }
