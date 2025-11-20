@@ -97,14 +97,14 @@ fun ScanCameraStage(
                         verticalArrangement = Arrangement.spacedBy(10.dp),
                     ) {
                         Text(
-                            text = stringResource(id = R.string.scan_anything_title),
+                            text = stringResource(id = R.string.scan_code_scan_anything_title),
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             style = AppTheme.typography.bodyLarge,
                             textAlign = TextAlign.Center,
                         )
                         Text(
-                            text = stringResource(id = R.string.scan_anything_subtitle),
+                            text = stringResource(id = R.string.scan_code_scan_anything_subtitle),
                             color = Color.White.copy(alpha = 0.75f),
                             style = AppTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,

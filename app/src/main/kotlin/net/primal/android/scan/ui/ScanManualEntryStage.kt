@@ -1,8 +1,6 @@
 package net.primal.android.scan.ui
 
 import PasteAlt
-import android.content.ClipboardManager
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -21,16 +19,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -69,7 +70,7 @@ internal fun ScanManualEntryStage(
         ) {
             Text(
                 textAlign = TextAlign.Center,
-                text = stringResource(id = R.string.scan_anything_subtitle),
+                text = stringResource(id = R.string.scan_code_scan_anything_subtitle),
                 color = AppTheme.colorScheme.onPrimary,
                 style = AppTheme.typography.bodyLarge,
             )
@@ -121,18 +122,20 @@ internal fun ScanManualEntryStage(
 
 @Composable
 private fun PasteCodeButton(modifier: Modifier, onPaste: (String) -> Unit) {
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val clipboardManager = remember(context) {
-        context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    }
 
     TextButton(
         modifier = modifier.height(40.dp),
         onClick = {
-            val clipData = clipboardManager.primaryClip
-            if (clipData != null && clipData.itemCount > 0) {
-                val clipText = clipData.getItemAt(0).coerceToText(context).toString()
-                onPaste(clipText.trim())
+            scope.launch {
+                val clipEntry = clipboard.getClipEntry()
+                val clipData = clipEntry?.clipData
+                if (clipData != null && clipData.itemCount > 0) {
+                    val clipText = clipData.getItemAt(0).coerceToText(context).toString()
+                    onPaste(clipText.trim())
+                }
             }
         },
     ) {

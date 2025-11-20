@@ -80,7 +80,7 @@ fun ScanCodeScreen(viewModel: ScanCodeViewModel, callbacks: ScanCodeContract.Scr
 fun ScanCodeScreen(
     state: ScanCodeContract.UiState,
     callbacks: ScanCodeContract.ScreenCallbacks,
-    eventPublisher: (ScanCodeContract.UiEvent) -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
