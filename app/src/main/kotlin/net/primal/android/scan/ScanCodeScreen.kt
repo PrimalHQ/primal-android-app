@@ -17,7 +17,10 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -84,6 +87,7 @@ fun ScanCodeScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    var isCameraPermissionGranted by remember { mutableStateOf(true) }
 
     SnackbarErrorHandler(
         error = state.error,
@@ -102,6 +106,7 @@ fun ScanCodeScreen(
         topBar = {
             ScanCodeTopAppBar(
                 stage = currentStage,
+                isCameraPermissionGranted = isCameraPermissionGranted,
                 onClose = {
                     if (state.stageStack.size > 1) {
                         eventPublisher(UiEvent.PreviousStage)
@@ -118,6 +123,7 @@ fun ScanCodeScreen(
             state = state,
             callbacks = callbacks,
             eventPublisher = eventPublisher,
+            onCameraPermissionChange = { isCameraPermissionGranted = it },
         )
     }
 }
@@ -127,7 +133,8 @@ private fun ScanCodeMainContent(
     paddingValues: PaddingValues,
     state: ScanCodeContract.UiState,
     callbacks: ScanCodeContract.ScreenCallbacks,
-    eventPublisher: (ScanCodeContract.UiEvent) -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
+    onCameraPermissionChange: (Boolean) -> Unit,
 ) {
     val currentStage = state.getStage()
     AnimatedContent(
@@ -141,6 +148,7 @@ private fun ScanCodeMainContent(
                     modifier = Modifier.fillMaxSize(),
                     onQrCodeDetected = { eventPublisher(UiEvent.QrCodeDetected(it)) },
                     onEnterCodeClick = { eventPublisher(UiEvent.GoToManualInput) },
+                    onCameraPermissionChange = onCameraPermissionChange,
                 )
             }
             ScanCodeContract.ScanCodeStage.ManualInput -> {
@@ -207,15 +215,19 @@ private fun ScanCodeMainContent(
 fun ScanCodeTopAppBar(
     onClose: () -> Unit,
     stage: ScanCodeContract.ScanCodeStage,
+    isCameraPermissionGranted: Boolean,
     modifier: Modifier = Modifier,
 ) {
     val isEnterCodeStage = stage == ScanCodeContract.ScanCodeStage.ManualInput
+    val useThemeColors = isEnterCodeStage ||
+        (!isCameraPermissionGranted && stage == ScanCodeContract.ScanCodeStage.ScanCamera)
+
     CenterAlignedTopAppBar(
         modifier = modifier,
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = if (isEnterCodeStage) AppTheme.colorScheme.background else Color.Transparent,
-            titleContentColor = if (isEnterCodeStage) AppTheme.colorScheme.onPrimary else Color.White,
-            navigationIconContentColor = if (isEnterCodeStage) AppTheme.colorScheme.onPrimary else Color.White,
+            containerColor = if (useThemeColors) AppTheme.colorScheme.background else Color.Transparent,
+            titleContentColor = if (useThemeColors) AppTheme.colorScheme.onPrimary else Color.White,
+            navigationIconContentColor = if (useThemeColors) AppTheme.colorScheme.onPrimary else Color.White,
         ),
         title = {
             Text(text = stage.toTitle())

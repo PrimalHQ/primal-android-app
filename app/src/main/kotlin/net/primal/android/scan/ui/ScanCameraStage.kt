@@ -2,6 +2,7 @@ package net.primal.android.scan.ui
 
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -45,6 +46,7 @@ fun ScanCameraStage(
     modifier: Modifier = Modifier,
     onQrCodeDetected: (QrCodeResult) -> Unit,
     onEnterCodeClick: () -> Unit,
+    onCameraPermissionChange: (Boolean) -> Unit,
 ) {
     val context = LocalContext.current
     var hasCameraPermission by remember {
@@ -52,78 +54,97 @@ fun ScanCameraStage(
         mutableStateOf(permission == PackageManager.PERMISSION_GRANTED)
     }
 
+    LaunchedEffect(hasCameraPermission) {
+        onCameraPermissionChange(hasCameraPermission)
+    }
+
     if (hasCameraPermission) {
-        var cameraVisible by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) {
-            delay(100.milliseconds)
-            cameraVisible = true
-        }
-
-        ScannerCameraDetector(
-            cameraVisible = cameraVisible,
-            modifier = modifier.fillMaxSize(),
+        ScanCameraAccessGranted(
+            modifier = modifier,
             onQrCodeDetected = onQrCodeDetected,
-            overlayContent = {
-                val density = LocalDensity.current
-                val viewPortSizeDp = maxWidth * 0.7f
-                val viewPortSizePx = with(density) { viewPortSizeDp.toPx() }
-                val topPaddingForButton = with(density) {
-                    ((constraints.maxHeight - viewPortSizePx) / 2 + viewPortSizePx).toDp() + 50.dp
-                }
-
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    PrimalLoadingButton(
-                        modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .padding(top = topPaddingForButton)
-                            .height(40.dp),
-                        text = stringResource(id = R.string.scan_code_use_keyboard_button),
-                        leadingIcon = PrimalIcons.Keyboard,
-                        containerColor = Color.Black,
-                        contentColor = UseKeyboardButtonContentColor,
-                        onClick = onEnterCodeClick,
-                        fontWeight = FontWeight.Normal,
-                        fontSize = 15.sp,
-                    )
-
-                    Column(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(horizontal = 32.dp)
-                            .padding(bottom = 64.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        Text(
-                            text = stringResource(id = R.string.scan_code_scan_anything_title),
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            style = AppTheme.typography.bodyLarge,
-                            textAlign = TextAlign.Center,
-                        )
-                        Text(
-                            text = stringResource(id = R.string.scan_code_scan_anything_subtitle),
-                            color = Color.White.copy(alpha = 0.75f),
-                            style = AppTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-            },
+            onEnterCodeClick = onEnterCodeClick,
         )
     } else {
         MissingCameraPermissionContent(
-            modifier = modifier,
+            modifier = modifier
+                .fillMaxSize()
+                .background(color = AppTheme.colorScheme.background),
             colors = missingCameraPermissionColors(
-                textColor = AppTheme.colorScheme.onPrimary,
+                textColor = AppTheme.colorScheme.onSurface,
                 iconContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                iconContentColor = AppTheme.colorScheme.onPrimary,
+                iconContentColor = AppTheme.colorScheme.onSurface,
             ),
             onPermissionChange = { allowed ->
                 hasCameraPermission = allowed
             },
         )
     }
+}
+
+@Composable
+private fun ScanCameraAccessGranted(
+    modifier: Modifier,
+    onQrCodeDetected: (QrCodeResult) -> Unit,
+    onEnterCodeClick: () -> Unit,
+) {
+    var cameraVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(100.milliseconds)
+        cameraVisible = true
+    }
+
+    ScannerCameraDetector(
+        cameraVisible = cameraVisible,
+        modifier = modifier.fillMaxSize(),
+        onQrCodeDetected = onQrCodeDetected,
+        overlayContent = {
+            val density = LocalDensity.current
+            val viewPortSizeDp = maxWidth * 0.7f
+            val viewPortSizePx = with(density) { viewPortSizeDp.toPx() }
+            val topPaddingForButton = with(density) {
+                ((constraints.maxHeight - viewPortSizePx) / 2 + viewPortSizePx).toDp() + 50.dp
+            }
+
+            Box(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                PrimalLoadingButton(
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = topPaddingForButton)
+                        .height(40.dp),
+                    text = stringResource(id = R.string.scan_code_use_keyboard_button),
+                    leadingIcon = PrimalIcons.Keyboard,
+                    containerColor = Color.Black,
+                    contentColor = UseKeyboardButtonContentColor,
+                    onClick = onEnterCodeClick,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 15.sp,
+                )
+
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(horizontal = 32.dp)
+                        .padding(bottom = 64.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    Text(
+                        text = stringResource(id = R.string.scan_code_scan_anything_title),
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = AppTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        text = stringResource(id = R.string.scan_code_scan_anything_subtitle),
+                        color = Color.White.copy(alpha = 0.75f),
+                        style = AppTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                    )
+                }
+            }
+        },
+    )
 }
