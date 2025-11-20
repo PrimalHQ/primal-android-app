@@ -64,9 +64,10 @@ private sealed interface EventDetailRow {
 @Composable
 fun NostrEventDetails(
     event: NostrEvent,
-    rawJson: String?,
     modifier: Modifier = Modifier,
     onCopy: (text: String, label: String) -> Unit,
+    rawJson: String? = null,
+    footerContent: (@Composable () -> Unit)? = null,
 ) {
     val eventDetailRows = buildEventDetailRows(event = event)
 
@@ -119,8 +120,10 @@ fun NostrEventDetails(
             }
         }
 
-        if (rawJson != null) {
-            item(key = "CopyRawJsonButton", contentType = "Button") {
+        item(key = "Footer", contentType = "Button") {
+            if (footerContent != null) {
+                footerContent()
+            } else if (rawJson != null) {
                 val rawJsonLabel = stringResource(id = R.string.settings_event_details_raw_json_label)
                 PrimalFilledButton(
                     modifier = Modifier
@@ -139,13 +142,15 @@ fun NostrEventDetails(
 @Composable
 private fun buildEventDetailRows(event: NostrEvent): List<EventDetailRow> {
     return buildList {
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_id_label),
-                value = event.id,
-                isKey = true,
-            ),
-        )
+        if (event.id.isNotBlank()) {
+            add(
+                EventDetailRow.Detail(
+                    label = stringResource(id = R.string.settings_event_details_id_label),
+                    value = event.id,
+                    isKey = true,
+                ),
+            )
+        }
         add(
             EventDetailRow.Detail(
                 label = stringResource(id = R.string.settings_event_details_pubkey_label),
@@ -183,13 +188,15 @@ private fun buildEventDetailRows(event: NostrEvent): List<EventDetailRow> {
                 ),
             )
         }
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_signature_label),
-                value = event.sig,
-                isKey = true,
-            ),
-        )
+        if (event.sig.isNotBlank()) {
+            add(
+                EventDetailRow.Detail(
+                    label = stringResource(id = R.string.settings_event_details_signature_label),
+                    value = event.sig,
+                    isKey = true,
+                ),
+            )
+        }
     }
 }
 

@@ -7,6 +7,7 @@ import net.primal.data.account.local.dao.SessionEventData
 import net.primal.data.account.local.dao.SignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.method.model.withPubKey
 import net.primal.data.account.remote.utils.PERM_ID_CONNECT
 import net.primal.data.account.remote.utils.PERM_ID_GET_PUBLIC_KEY
 import net.primal.data.account.remote.utils.PERM_ID_NIP04_DECRYPT
@@ -17,6 +18,7 @@ import net.primal.data.account.remote.utils.PERM_ID_PING
 import net.primal.data.account.remote.utils.PERM_ID_PREFIX_SIGN_EVENT
 import net.primal.domain.account.model.RequestState as RequestStateDO
 import net.primal.domain.account.model.SessionEvent
+import net.primal.domain.nostr.NostrEvent
 import net.primal.shared.data.local.encryption.asEncryptable
 
 fun buildSessionEventData(
@@ -67,6 +69,7 @@ fun buildSessionEventData(
 
 fun SessionEventData.asDomain(): SessionEvent? {
     val responsePayload = this.responsePayload?.decrypted
+    val requestPayload = this.requestPayload?.decrypted
 
     return when (this.requestType) {
         SignerMethodType.GetPublicKey -> SessionEvent.GetPublicKey(
@@ -105,6 +108,24 @@ fun SessionEventData.asDomain(): SessionEvent? {
 
         SignerMethodType.SignEvent -> {
             val eventKind = this.eventKind?.decrypted ?: return null
+            val requestMethod = requestPayload?.decodeFromJsonStringOrNull<RemoteSignerMethod>()
+
+            val unsignedEventJson = if (requestMethod is RemoteSignerMethod.SignEvent) {
+                val unsignedEvent = requestMethod.unsignedEvent.withPubKey(this.signerPubKey.decrypted)
+                val dummyEvent = NostrEvent(
+                    id = "",
+                    pubKey = unsignedEvent.pubKey,
+                    createdAt = unsignedEvent.createdAt,
+                    kind = unsignedEvent.kind,
+                    tags = unsignedEvent.tags,
+                    content = unsignedEvent.content,
+                    sig = "",
+                )
+                dummyEvent.encodeToJsonString()
+            } else {
+                ""
+            }
+
             SessionEvent.SignEvent(
                 eventId = this.eventId,
                 sessionId = this.sessionId,
@@ -113,6 +134,7 @@ fun SessionEventData.asDomain(): SessionEvent? {
                 completedAt = this.completedAt,
                 eventKind = eventKind,
                 signedNostrEventJson = getResponseBody(responsePayload),
+                unsignedNostrEventJson = unsignedEventJson,
             )
         }
 

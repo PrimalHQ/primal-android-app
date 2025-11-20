@@ -9,15 +9,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.nostrconnect.model.asUi
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiState
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
 import net.primal.core.utils.onSuccess
+import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.UserChoice
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
+import net.primal.domain.nostr.NostrEvent
 
 @HiltViewModel
 class PermissionsViewModel @Inject constructor(
@@ -60,9 +63,41 @@ class PermissionsViewModel @Inject constructor(
                         eventIds = state.value.selectedEventIds,
                         choice = if (event.alwaysReject) UserChoice.AlwaysReject else UserChoice.Reject,
                     )
+
+                    is UiEvent.OpenEventDetails -> handleOpenEventDetails(event.eventId)
+
+                    UiEvent.CloseEventDetails -> setState {
+                        copy(
+                            eventDetails = null,
+                            eventDetailsNostrEvent = null,
+                        )
+                    }
                 }
             }
         }
+
+    private fun handleOpenEventDetails(eventId: String) {
+        val sessionEvent = state.value.sessionEvents.find { it.eventId == eventId }
+        var nostrEvent: NostrEvent? = null
+
+        if (sessionEvent is SessionEvent.SignEvent) {
+            val rawJson = sessionEvent.signedNostrEventJson?.ifEmpty { null }
+                ?: sessionEvent.unsignedNostrEventJson
+
+            nostrEvent = rawJson.let {
+                runCatching {
+                    NostrJsonEncodeDefaults.decodeFromString<NostrEvent>(it)
+                }.getOrNull()
+            }
+        }
+
+        setState {
+            copy(
+                eventDetails = sessionEvent,
+                eventDetailsNostrEvent = nostrEvent,
+            )
+        }
+    }
 
     private fun respondToEvents(eventIds: Set<String>, choice: UserChoice) =
         viewModelScope.launch {

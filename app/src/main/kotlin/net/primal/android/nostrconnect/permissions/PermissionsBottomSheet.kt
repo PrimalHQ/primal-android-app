@@ -1,14 +1,23 @@
 package net.primal.android.nostrconnect.permissions
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,10 +42,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.uuid.ExperimentalUuidApi
@@ -46,7 +58,9 @@ import net.primal.android.core.compose.PrimalCheckBox
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.nostr.NostrEventDetails
 import net.primal.android.core.compose.rememberFormattedDateTime
+import net.primal.android.core.utils.copyText
 import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiState
@@ -54,6 +68,7 @@ import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.links.CdnImage
+import net.primal.domain.nostr.NostrEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,15 +99,57 @@ fun PermissionsBottomSheet(
 
 @Composable
 fun PermissionsBottomSheetContent(uiState: UiState, eventPublisher: (UiEvent) -> Unit) {
-    var alwaysHandleRequestsLikeThis by remember { mutableStateOf(true) }
     Column(
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         uiState.session?.let {
             SessionDetailsColumn(session = it)
         }
 
+        AnimatedContent(
+            targetState = uiState.eventDetails,
+            contentAlignment = Alignment.TopCenter,
+            transitionSpec = {
+                val animationSpec = tween<IntOffset>(durationMillis = 300)
+
+                val transition = if (targetState != null) {
+                    slideInHorizontally(animationSpec = animationSpec) { it } togetherWith
+                        slideOutHorizontally(animationSpec = animationSpec) { -it }
+                } else {
+                    slideInHorizontally(animationSpec = animationSpec) { -it } togetherWith
+                        slideOutHorizontally(animationSpec = animationSpec) { it }
+                }
+
+                transition.using(
+                    SizeTransform(clip = false),
+                )
+            },
+            label = "PermissionsContent",
+        ) { sessionEvent ->
+            if (sessionEvent != null) {
+                EventDetailsContent(
+                    nostrEvent = uiState.eventDetailsNostrEvent,
+                    onClose = { eventPublisher(UiEvent.CloseEventDetails) },
+                )
+            } else {
+                PermissionsListContent(
+                    uiState = uiState,
+                    eventPublisher = eventPublisher,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PermissionsListContent(uiState: UiState, eventPublisher: (UiEvent) -> Unit) {
+    var alwaysHandleRequestsLikeThis by remember { mutableStateOf(true) }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         AppRequestsHeader(
             modifier = Modifier.padding(start = 24.dp, end = 16.dp),
             showSelectAll = uiState.selectedEventIds.size != uiState.sessionEvents.size,
@@ -108,6 +165,7 @@ fun PermissionsBottomSheetContent(uiState: UiState, eventPublisher: (UiEvent) ->
             selectedEventIds = uiState.selectedEventIds,
             onSelectEventClick = { eventPublisher(UiEvent.SelectEvent(it)) },
             onDeselectEventClick = { eventPublisher(UiEvent.DeselectEvent(it)) },
+            onOpenDetailsClick = { eventPublisher(UiEvent.OpenEventDetails(it)) },
         )
 
         AlwaysHandleRequestsSwitch(
@@ -127,6 +185,64 @@ fun PermissionsBottomSheetContent(uiState: UiState, eventPublisher: (UiEvent) ->
             onAllowClick = {
                 eventPublisher(UiEvent.AllowSelected(alwaysAllow = alwaysHandleRequestsLikeThis))
             },
+        )
+    }
+}
+
+@Composable
+private fun EventDetailsContent(nostrEvent: NostrEvent?, onClose: () -> Unit) {
+    BackHandler(onBack = onClose)
+    val context = LocalContext.current
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        if (nostrEvent != null) {
+            NostrEventDetails(
+                event = nostrEvent,
+                rawJson = null,
+                onCopy = { text, label ->
+                    copyText(context = context, text = text, label = label)
+                },
+                footerContent = {
+                    EventDetailsBackButton(onClick = onClose)
+                },
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(32.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = stringResource(id = R.string.permissions_bottom_sheet_event_details_unavailable),
+                    style = AppTheme.typography.bodyMedium,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    textAlign = TextAlign.Center,
+                )
+            }
+
+            EventDetailsBackButton(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                onClick = onClose,
+            )
+        }
+    }
+}
+
+@Composable
+private fun EventDetailsBackButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
+    PrimalFilledButton(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+            .height(50.dp),
+        onClick = onClick,
+    ) {
+        Text(
+            text = stringResource(id = R.string.permissions_bottom_sheet_back_button),
+            fontWeight = FontWeight.SemiBold,
         )
     }
 }
@@ -228,6 +344,7 @@ private fun AppRequestsList(
     selectedEventIds: Set<String>,
     onSelectEventClick: (String) -> Unit,
     onDeselectEventClick: (String) -> Unit,
+    onOpenDetailsClick: (String) -> Unit,
 ) {
     LazyColumn(modifier = modifier) {
         itemsIndexed(
@@ -241,6 +358,7 @@ private fun AppRequestsList(
                 isSelected = event.eventId in selectedEventIds,
                 onSelectClick = { onSelectEventClick(event.eventId) },
                 onDeselectClick = { onDeselectEventClick(event.eventId) },
+                onDetailsClick = { onOpenDetailsClick(event.eventId) },
             )
         }
     }
@@ -255,6 +373,7 @@ fun AppRequestListItem(
     isSelected: Boolean,
     onSelectClick: () -> Unit,
     onDeselectClick: () -> Unit,
+    onDetailsClick: () -> Unit,
 ) {
     val shape = when {
         isFirst && isLast -> RoundedCornerShape(size = 12.dp)
@@ -267,6 +386,7 @@ fun AppRequestListItem(
         modifier = modifier
             .clip(shape)
             .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
+            .clickable(onClick = onDetailsClick)
             .fillMaxWidth()
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
