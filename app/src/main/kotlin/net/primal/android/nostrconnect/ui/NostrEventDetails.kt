@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.nostr
+package net.primal.android.nostrconnect.ui
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
