@@ -1,5 +1,6 @@
 package net.primal.android.core.service
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -8,15 +9,23 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Icon
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import coil.ImageLoader
+import coil.request.ImageRequest
+import coil.transform.CircleCropTransformation
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +38,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.MainActivity
 import net.primal.android.R
 import net.primal.android.core.di.RemoteSignerServiceFactory
+import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
 import net.primal.domain.account.model.AppSession
@@ -50,6 +60,9 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
 
     @Inject
     lateinit var sessionEventRepository: SessionEventRepository
+
+    @Inject
+    lateinit var accountsStore: UserAccountsStore
 
     private var signer: RemoteSignerService? = null
 
@@ -129,16 +142,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
         return START_STICKY
     }
 
-    private fun showSessionNotification(session: AppSession) {
-        val notificationManager = getSystemService(NotificationManager::class.java)
-        notificationManager.notify(
-            session.sessionId,
-            CHILD_NOTIFICATION_ID,
-            buildChildNotification(session = session),
-        )
-    }
-
-    private fun hideSessionNotification(sessionId: String) {
+    private fun hideActiveAppNotification(sessionId: String) {
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.cancel(sessionId, CHILD_NOTIFICATION_ID)
         notificationManager.notify(SUMMARY_NOTIFICATION_ID, buildSummaryNotification())
@@ -169,16 +173,6 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
             .setOngoing(true)
             .setGroup(GROUP_ID)
             .setGroupSummary(true)
-            .build()
-
-    private fun buildChildNotification(session: AppSession): Notification =
-        NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.default_avatar)
-            .setContentTitle(session.name ?: "Unknown App")
-            .setContentText(session.sessionState.name)
-            .setOngoing(true)
-            .setOnlyAlertOnce(true)
-            .setGroup(GROUP_ID)
             .build()
 
     private fun buildRespondNotification(eventsCount: Int): Notification {
@@ -226,11 +220,13 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
                     val endedSessions = shownSessionIds - sessionIds
 
                     sessionIds.forEach { sessionId ->
-                        sessionMap[sessionId]?.let { showSessionNotification(it) }
+                        sessionMap[sessionId]?.let {
+                            showActiveAppNotification(it)
+                        }
                     }
 
                     endedSessions.forEach { sessionId ->
-                        hideSessionNotification(sessionId = sessionId)
+                        hideActiveAppNotification(sessionId = sessionId)
                     }
 
                     shownSessionIds = sessionIds
@@ -265,5 +261,80 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
                 NotificationManager.IMPORTANCE_DEFAULT,
             ),
         )
+    }
+
+    suspend fun loadBitmapFromUrl(url: String): Bitmap? {
+        val loader = ImageLoader(this)
+
+        val requestBuilder = ImageRequest.Builder(this)
+            .data(url)
+            .allowHardware(false)
+
+        requestBuilder.transformations(CircleCropTransformation())
+
+        val drawable = loader.execute(requestBuilder.build()).drawable ?: return null
+        return (drawable as? BitmapDrawable)?.bitmap
+    }
+
+    private fun buildActiveAppRemoteViews(
+        appName: String,
+        appIcon: Bitmap?,
+        avatar: Bitmap?,
+        onRowClick: PendingIntent?,
+        onEndSessionClick: PendingIntent?,
+    ): RemoteViews {
+        val rv = RemoteViews(this.packageName, R.layout.notification_active_app_item)
+
+        rv.setTextViewText(R.id.text_app_name, appName)
+
+        if (appIcon != null) {
+            rv.setImageViewBitmap(R.id.image_app_icon, appIcon)
+        }
+
+        if (avatar != null) {
+            rv.setImageViewBitmap(R.id.image_avatar, avatar)
+        } else {
+            rv.setImageViewIcon(R.id.image_avatar, Icon.createWithResource(this, R.drawable.default_avatar))
+        }
+
+        if (onRowClick != null) {
+            rv.setOnClickPendingIntent(R.id.root, onRowClick)
+        }
+
+        rv.setOnClickPendingIntent(R.id.button_end_session, onEndSessionClick)
+
+        return rv
+    }
+
+    @SuppressLint("MissingPermission")
+    suspend fun showActiveAppNotification(session: AppSession) {
+        val appIconBitmap = loadBitmapFromUrl(session.image ?: "")
+        val avatarBitmap = accountsStore
+            .findByIdOrNull(session.userPubKey)
+            ?.avatarCdnImage
+            ?.variants
+            ?.minByOrNull { it.width }
+            ?.mediaUrl
+            ?.let { loadBitmapFromUrl(it) }
+
+        val remoteViews = buildActiveAppRemoteViews(
+            appName = session.name ?: "Unknown App",
+            appIcon = appIconBitmap,
+            avatar = avatarBitmap,
+            onRowClick = null,
+            onEndSessionClick = null,
+        )
+
+        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+            .setSmallIcon(R.drawable.primal_wave_logo_summer)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setGroup(GROUP_ID)
+            .setCustomContentView(remoteViews)
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .build()
+
+        NotificationManagerCompat.from(this)
+            .notify(session.sessionId, CHILD_NOTIFICATION_ID, notification)
     }
 }
