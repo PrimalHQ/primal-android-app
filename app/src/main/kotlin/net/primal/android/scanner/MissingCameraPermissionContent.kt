@@ -65,6 +65,7 @@ fun MissingCameraPermissionContent(
                     .align(Alignment.Center),
                 imageVector = PrimalIcons.ImportPhotoFromCamera,
                 contentDescription = null,
+                tint = colors.iconContentColor,
             )
         }
 
@@ -105,6 +106,7 @@ fun MissingCameraPermissionContent(
 data class MissingCameraPermissionColors(
     val textColor: Color,
     val iconContainerColor: Color,
+    val iconContentColor: Color,
     val buttonContainerColor: Color,
     val buttonContentColor: Color,
 )
@@ -113,11 +115,13 @@ data class MissingCameraPermissionColors(
 fun missingCameraPermissionColors(
     textColor: Color = Color.Unspecified,
     iconContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    iconContentColor: Color = AppTheme.colorScheme.onPrimary,
     buttonContainerColor: Color = AppTheme.colorScheme.primary,
     buttonContentColor: Color = Color.White,
 ) = MissingCameraPermissionColors(
     textColor = textColor,
     iconContainerColor = iconContainerColor,
+    iconContentColor = iconContentColor,
     buttonContainerColor = buttonContainerColor,
     buttonContentColor = buttonContentColor,
 )

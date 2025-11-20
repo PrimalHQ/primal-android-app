@@ -18,7 +18,7 @@ import net.primal.android.navigation.profileId
 import net.primal.android.profile.qr.ProfileQrCodeContract.SideEffect
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiEvent
 import net.primal.android.profile.qr.ProfileQrCodeContract.UiState
-import net.primal.android.redeem.utils.getPromoCodeFromUrl
+import net.primal.android.scan.utils.getPromoCodeFromUrl
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.user.accounts.active.ActiveAccountStore

@@ -163,9 +163,9 @@ import net.primal.android.profile.follows.ProfileFollowsViewModel
 import net.primal.android.profile.qr.ProfileQrCodeContract
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
-import net.primal.android.redeem.RedeemCodeContract
-import net.primal.android.redeem.RedeemCodeScreen
-import net.primal.android.redeem.RedeemCodeViewModel
+import net.primal.android.scan.ScanCodeContract
+import net.primal.android.scan.ScanCodeScreen
+import net.primal.android.scan.ScanCodeViewModel
 import net.primal.android.stream.LiveStreamOverlay
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
@@ -1264,23 +1264,42 @@ private fun NavGraphBuilder.scanCode(
         }
     },
 ) {
-    val viewModel = hiltViewModel<RedeemCodeViewModel>()
-    PrimalTheme(PrimalTheme.Sunset) {
-        ApplyEdgeToEdge(isDarkTheme = true)
-        LockToOrientationPortrait()
-        RedeemCodeScreen(
-            viewModel = viewModel,
-            callbacks = RedeemCodeContract.ScreenCallbacks(
-                onClose = navController::navigateUp,
-                navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
-                navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },
-                onNostrConnectRequest = { url ->
-                    navController.popBackStack()
-                    navController.navigateToNostrConnectBottomSheet(url = url)
-                },
-            ),
-        )
-    }
+    val viewModel = hiltViewModel<ScanCodeViewModel>()
+    val streamState = LocalStreamState.current
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    ScanCodeScreen(
+        viewModel = viewModel,
+        callbacks = ScanCodeContract.ScreenCallbacks(
+            onClose = navController::navigateUp,
+            navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
+            navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },
+            onNostrConnectRequest = { url ->
+                navController.popBackStack()
+                navController.navigateToNostrConnectBottomSheet(url = url)
+            },
+            onDraftTransactionReady = { draft ->
+                navController.popBackStack()
+                navController.navigateToWalletCreateTransaction(draftTransaction = draft)
+            },
+            onProfileScan = { profileId ->
+                navController.popBackStack()
+                navController.navigateToProfile(profileId)
+            },
+            onNoteScan = { noteId ->
+                navController.popBackStack()
+                navController.navigateToThread(noteId)
+            },
+            onArticleScan = { naddr ->
+                navController.popBackStack()
+                navController.navigateToArticleDetails(naddr)
+            },
+            onLiveStreamScan = { naddr ->
+                navController.popBackStack()
+                streamState.start(naddr)
+            },
+        ),
+    )
 }
 
 private fun NavGraphBuilder.home(

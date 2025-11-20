@@ -1,4 +1,4 @@
-package net.primal.android.redeem.ui
+package net.primal.android.scan.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +30,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.VerifiedFilled
-import net.primal.android.redeem.RedeemCodeContract
+import net.primal.android.scan.ScanCodeContract
 import net.primal.android.theme.AppTheme
 
 private val LIGHTNING_COLOR = Color(0xFFFF9F2F)
@@ -38,13 +38,13 @@ private val MUTED_TEXT_COLOR = Color(0xFF808080)
 private val DIVIDER_COLOR = Color(0x26111111)
 
 @Composable
-internal fun RedeemCodeSuccessStage(
+internal fun ScanSuccessStage(
     modifier: Modifier = Modifier,
     title: String,
-    userState: RedeemCodeContract.UserState,
+    userState: ScanCodeContract.UserState,
     requiresPrimalWallet: Boolean,
     isLoading: Boolean,
-    benefits: List<RedeemCodeContract.PromoCodeBenefit>,
+    benefits: List<ScanCodeContract.PromoCodeBenefit>,
     onOnboardToPrimalClick: () -> Unit,
     onActivateWalletClick: () -> Unit,
     onApplyCodeClick: () -> Unit,
@@ -74,13 +74,13 @@ internal fun RedeemCodeSuccessStage(
             verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             when {
-                userState == RedeemCodeContract.UserState.NoUser ->
+                userState == ScanCodeContract.UserState.NoUser ->
                     NoUserContent(
                         isLoading = isLoading,
                         onOnboardToPrimalClick = onOnboardToPrimalClick,
                     )
 
-                userState == RedeemCodeContract.UserState.UserWithoutPrimalWallet && requiresPrimalWallet ->
+                userState == ScanCodeContract.UserState.UserWithoutPrimalWallet && requiresPrimalWallet ->
                     UserWithoutWalletContent(
                         isLoading = isLoading,
                         onActivateWalletClick = onActivateWalletClick,
@@ -99,7 +99,7 @@ internal fun RedeemCodeSuccessStage(
 @Composable
 fun NoUserContent(isLoading: Boolean, onOnboardToPrimalClick: () -> Unit) {
     Text(
-        text = stringResource(id = R.string.redeem_code_to_redeem_code_notice),
+        text = stringResource(id = R.string.scan_code_to_redeem_notice),
         style = AppTheme.typography.bodyMedium,
         textAlign = TextAlign.Center,
         color = Color.White,
@@ -107,7 +107,7 @@ fun NoUserContent(isLoading: Boolean, onOnboardToPrimalClick: () -> Unit) {
 
     OnboardingButton(
         loading = isLoading,
-        text = stringResource(id = R.string.redeem_code_onboard_to_primal_button),
+        text = stringResource(id = R.string.scan_code_onboard_button),
         onClick = onOnboardToPrimalClick,
     )
 }
@@ -116,7 +116,7 @@ fun NoUserContent(isLoading: Boolean, onOnboardToPrimalClick: () -> Unit) {
 fun UserWithWalletContent(isLoading: Boolean, onApplyCodeClick: () -> Unit) {
     OnboardingButton(
         loading = isLoading,
-        text = stringResource(id = R.string.redeem_code_redeem_code_button),
+        text = stringResource(id = R.string.scan_code_redeem_button),
         onClick = onApplyCodeClick,
     )
 }
@@ -124,7 +124,7 @@ fun UserWithWalletContent(isLoading: Boolean, onApplyCodeClick: () -> Unit) {
 @Composable
 fun UserWithoutWalletContent(isLoading: Boolean, onActivateWalletClick: () -> Unit) {
     Text(
-        text = stringResource(id = R.string.redeem_code_no_wallet_notice),
+        text = stringResource(id = R.string.scan_code_no_wallet_notice),
         style = AppTheme.typography.bodyMedium,
         textAlign = TextAlign.Center,
         color = Color.White,
@@ -132,13 +132,13 @@ fun UserWithoutWalletContent(isLoading: Boolean, onActivateWalletClick: () -> Un
 
     OnboardingButton(
         loading = isLoading,
-        text = stringResource(id = R.string.redeem_code_active_wallet_button),
+        text = stringResource(id = R.string.scan_code_activate_wallet_button),
         onClick = onActivateWalletClick,
     )
 }
 
 @Composable
-fun PromoCodeBenefitsList(modifier: Modifier = Modifier, benefits: List<RedeemCodeContract.PromoCodeBenefit>) {
+fun PromoCodeBenefitsList(modifier: Modifier = Modifier, benefits: List<ScanCodeContract.PromoCodeBenefit>) {
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -149,20 +149,20 @@ fun PromoCodeBenefitsList(modifier: Modifier = Modifier, benefits: List<RedeemCo
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Top),
     ) {
         Text(
-            text = stringResource(id = R.string.redeem_code_this_code_is_loaded),
+            text = stringResource(id = R.string.scan_code_loaded_with),
             color = MUTED_TEXT_COLOR,
             style = AppTheme.typography.bodyMedium,
         )
         benefits.mapIndexed { index, item ->
             when (item) {
-                is RedeemCodeContract.PromoCodeBenefit.PrimalPremium -> {
+                is ScanCodeContract.PromoCodeBenefit.PrimalPremium -> {
                     PrimalPremiumBenefit(
                         modifier = Modifier.padding(top = 16.dp),
                         benefit = item,
                     )
                 }
 
-                is RedeemCodeContract.PromoCodeBenefit.WalletBalance -> {
+                is ScanCodeContract.PromoCodeBenefit.WalletBalance -> {
                     WalletBalanceBenefit(
                         modifier = Modifier.padding(top = 16.dp),
                         benefit = item,
@@ -183,7 +183,7 @@ fun PromoCodeBenefitsList(modifier: Modifier = Modifier, benefits: List<RedeemCo
 }
 
 @Composable
-fun PrimalPremiumBenefit(modifier: Modifier = Modifier, benefit: RedeemCodeContract.PromoCodeBenefit.PrimalPremium) {
+fun PrimalPremiumBenefit(modifier: Modifier = Modifier, benefit: ScanCodeContract.PromoCodeBenefit.PrimalPremium) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -200,13 +200,13 @@ fun PrimalPremiumBenefit(modifier: Modifier = Modifier, benefit: RedeemCodeContr
                 modifier = Modifier.size(32.dp),
             )
             Text(
-                text = stringResource(id = R.string.redeem_code_primal_premium),
+                text = stringResource(id = R.string.scan_code_primal_premium),
                 style = AppTheme.typography.headlineSmall,
             )
         }
 
         Text(
-            text = pluralStringResource(id = R.plurals.redeem_code_premium_months, benefit.durationInMonths),
+            text = pluralStringResource(id = R.plurals.scan_code_premium_months, benefit.durationInMonths),
             color = MUTED_TEXT_COLOR,
             style = AppTheme.typography.bodyMedium,
         )
@@ -214,7 +214,7 @@ fun PrimalPremiumBenefit(modifier: Modifier = Modifier, benefit: RedeemCodeContr
 }
 
 @Composable
-fun WalletBalanceBenefit(modifier: Modifier = Modifier, benefit: RedeemCodeContract.PromoCodeBenefit.WalletBalance) {
+fun WalletBalanceBenefit(modifier: Modifier = Modifier, benefit: ScanCodeContract.PromoCodeBenefit.WalletBalance) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
 
     Column(
@@ -238,14 +238,14 @@ fun WalletBalanceBenefit(modifier: Modifier = Modifier, benefit: RedeemCodeContr
                 style = AppTheme.typography.headlineLarge,
             )
             Text(
-                text = stringResource(id = R.string.redeem_code_sats),
+                text = stringResource(id = R.string.scan_code_sats),
                 style = AppTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Normal,
             )
         }
 
         Text(
-            text = stringResource(id = R.string.redeem_code_get_zapping),
+            text = stringResource(id = R.string.scan_code_get_zapping),
             color = MUTED_TEXT_COLOR,
             style = AppTheme.typography.bodyMedium,
         )
