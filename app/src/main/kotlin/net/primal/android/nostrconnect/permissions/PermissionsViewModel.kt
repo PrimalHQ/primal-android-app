@@ -20,7 +20,7 @@ import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.UserChoice
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
-import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrUnsignedEvent
 
 @HiltViewModel
 class PermissionsViewModel @Inject constructor(
@@ -68,8 +68,7 @@ class PermissionsViewModel @Inject constructor(
 
                     UiEvent.CloseEventDetails -> setState {
                         copy(
-                            eventDetails = null,
-                            eventDetailsNostrEvent = null,
+                            eventDetailsUnsignedEvent = null,
                         )
                     }
                 }
@@ -78,23 +77,20 @@ class PermissionsViewModel @Inject constructor(
 
     private fun handleOpenEventDetails(eventId: String) {
         val sessionEvent = state.value.sessionEvents.find { it.eventId == eventId }
-        var nostrEvent: NostrEvent? = null
+        var nostrUnsignedEvent: NostrUnsignedEvent? = null
 
         if (sessionEvent is SessionEvent.SignEvent) {
-            val rawJson = sessionEvent.signedNostrEventJson?.ifEmpty { null }
-                ?: sessionEvent.unsignedNostrEventJson
-
-            nostrEvent = rawJson.let {
+            val rawJson = sessionEvent.unsignedNostrEventJson
+            nostrUnsignedEvent = rawJson.let {
                 runCatching {
-                    NostrJsonEncodeDefaults.decodeFromString<NostrEvent>(it)
+                    NostrJsonEncodeDefaults.decodeFromString<NostrUnsignedEvent>(it)
                 }.getOrNull()
             }
         }
 
         setState {
             copy(
-                eventDetails = sessionEvent,
-                eventDetailsNostrEvent = nostrEvent,
+                eventDetailsUnsignedEvent = nostrUnsignedEvent,
             )
         }
     }

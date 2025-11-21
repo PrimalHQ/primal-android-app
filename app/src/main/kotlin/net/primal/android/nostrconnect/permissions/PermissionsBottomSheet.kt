@@ -12,7 +12,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -45,7 +44,6 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
@@ -67,10 +65,11 @@ import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiState
 import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.nostrconnect.ui.NostrEventDetails
+import net.primal.android.nostrconnect.ui.asEventDetailRows
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.links.CdnImage
-import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrUnsignedEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -110,7 +109,7 @@ fun PermissionsBottomSheetContent(uiState: UiState, eventPublisher: (UiEvent) ->
         }
 
         AnimatedContent(
-            targetState = uiState.eventDetails,
+            targetState = uiState.eventDetailsUnsignedEvent,
             contentAlignment = Alignment.TopCenter,
             transitionSpec = {
                 val animationSpec = tween<IntOffset>(durationMillis = 300)
@@ -128,10 +127,10 @@ fun PermissionsBottomSheetContent(uiState: UiState, eventPublisher: (UiEvent) ->
                 )
             },
             label = "PermissionsContent",
-        ) { sessionEvent ->
-            if (sessionEvent != null) {
+        ) { nostrUnsignedEvent ->
+            if (nostrUnsignedEvent != null) {
                 EventDetailsContent(
-                    nostrEvent = uiState.eventDetailsNostrEvent,
+                    nostrUnsignedEvent = nostrUnsignedEvent,
                     onClose = { eventPublisher(UiEvent.CloseEventDetails) },
                 )
             } else {
@@ -192,44 +191,24 @@ private fun PermissionsListContent(uiState: UiState, eventPublisher: (UiEvent) -
 }
 
 @Composable
-private fun EventDetailsContent(nostrEvent: NostrEvent?, onClose: () -> Unit) {
+private fun EventDetailsContent(nostrUnsignedEvent: NostrUnsignedEvent, onClose: () -> Unit) {
     BackHandler(onBack = onClose)
     val context = LocalContext.current
 
     Column(
         modifier = Modifier.fillMaxWidth(),
     ) {
-        if (nostrEvent != null) {
-            NostrEventDetails(
-                event = nostrEvent,
-                rawJson = null,
-                onCopy = { text, label ->
-                    copyText(context = context, text = text, label = label)
-                },
-                footerContent = {
-                    EventDetailsBackButton(onClick = onClose)
-                },
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(32.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = stringResource(id = R.string.permissions_bottom_sheet_event_details_unavailable),
-                    style = AppTheme.typography.bodyMedium,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    textAlign = TextAlign.Center,
-                )
-            }
-
-            EventDetailsBackButton(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                onClick = onClose,
-            )
-        }
+        NostrEventDetails(
+            kind = nostrUnsignedEvent.kind,
+            createdAt = nostrUnsignedEvent.createdAt,
+            eventRows = nostrUnsignedEvent.asEventDetailRows(),
+            onCopy = { text, label ->
+                copyText(context = context, text = text, label = label)
+            },
+            footerContent = {
+                EventDetailsBackButton(onClick = onClose)
+            },
+        )
     }
 }
 

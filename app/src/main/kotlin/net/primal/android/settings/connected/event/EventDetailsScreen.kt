@@ -1,22 +1,28 @@
 package net.primal.android.settings.connected.event
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.copyText
 import net.primal.android.nostrconnect.ui.NostrEventDetails
+import net.primal.android.nostrconnect.ui.asEventDetailRows
 
 @Composable
 fun EventDetailsScreen(viewModel: EventDetailsViewModel, onClose: () -> Unit) {
@@ -47,10 +53,27 @@ fun EventDetailsScreen(state: EventDetailsContract.UiState, onClose: () -> Unit)
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
-                        event = state.event,
-                        rawJson = state.rawJson,
+                        kind = state.event.kind,
+                        createdAt = state.event.createdAt,
+                        eventRows = state.event.asEventDetailRows(),
                         onCopy = { text, label ->
-                            copyText(context = context, text = text, label = label)
+                            copyText(text = text, context = context, label = label)
+                        },
+                        footerContent = {
+                            if (state.rawJson != null) {
+                                val rawJsonLabel = stringResource(id = R.string.settings_event_details_raw_json_label)
+                                PrimalFilledButton(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 16.dp)
+                                        .height(50.dp),
+                                    onClick = {
+                                        copyText(text = state.rawJson, context = context, label = rawJsonLabel)
+                                    },
+                                ) {
+                                    Text(text = stringResource(id = R.string.settings_event_details_copy_raw_json))
+                                }
+                            }
                         },
                     )
                 }

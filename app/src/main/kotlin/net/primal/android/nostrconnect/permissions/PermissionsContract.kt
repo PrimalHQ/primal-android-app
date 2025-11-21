@@ -2,7 +2,7 @@ package net.primal.android.nostrconnect.permissions
 
 import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.domain.account.model.SessionEvent
-import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrUnsignedEvent
 
 interface PermissionsContract {
     data class UiState(
@@ -11,8 +11,7 @@ interface PermissionsContract {
         val requestQueue: List<Pair<ActiveSessionUi, List<SessionEvent>>> = emptyList(),
         val activeSessions: Map<String, ActiveSessionUi> = emptyMap(),
         val responding: Boolean = false,
-        val eventDetails: SessionEvent? = null,
-        val eventDetailsNostrEvent: NostrEvent? = null,
+        val eventDetailsUnsignedEvent: NostrUnsignedEvent? = null,
     ) {
         val session = requestQueue.firstOrNull()?.first
         val sessionEvents = requestQueue.firstOrNull()?.second ?: emptyList()

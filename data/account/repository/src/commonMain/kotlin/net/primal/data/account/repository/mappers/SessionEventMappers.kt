@@ -18,7 +18,6 @@ import net.primal.data.account.remote.utils.PERM_ID_PING
 import net.primal.data.account.remote.utils.PERM_ID_PREFIX_SIGN_EVENT
 import net.primal.domain.account.model.RequestState as RequestStateDO
 import net.primal.domain.account.model.SessionEvent
-import net.primal.domain.nostr.NostrEvent
 import net.primal.shared.data.local.encryption.asEncryptable
 
 fun buildSessionEventData(
@@ -112,16 +111,7 @@ fun SessionEventData.asDomain(): SessionEvent? {
 
             val unsignedEventJson = if (requestMethod is RemoteSignerMethod.SignEvent) {
                 val unsignedEvent = requestMethod.unsignedEvent.withPubKey(this.signerPubKey.decrypted)
-                val dummyEvent = NostrEvent(
-                    id = "",
-                    pubKey = unsignedEvent.pubKey,
-                    createdAt = unsignedEvent.createdAt,
-                    kind = unsignedEvent.kind,
-                    tags = unsignedEvent.tags,
-                    content = unsignedEvent.content,
-                    sig = "",
-                )
-                dummyEvent.encodeToJsonString()
+                unsignedEvent.encodeToJsonString()
             } else {
                 ""
             }
