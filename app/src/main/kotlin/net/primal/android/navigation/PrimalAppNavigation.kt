@@ -27,7 +27,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
@@ -459,9 +458,7 @@ fun noteCallbacksHandler(navController: NavController) =
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun PrimalAppNavigation(startDestination: String) {
-    val navController = rememberNavController()
-
+fun PrimalAppNavigation(navController: NavHostController, startDestination: String) {
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
         when (it) {
             PrimalTopLevelDestination.Home -> navController.popBackStack()

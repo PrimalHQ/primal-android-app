@@ -48,6 +48,10 @@
         tools:replace="android:allowBackup"
         tools:targetApi="33">
 
+        <receiver
+            android:name=".core.receiver.EndSessionReceiver"
+            android:exported="false" />
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|layoutDirection|screenLayout|smallestScreenSize"
@@ -67,6 +71,16 @@
 
                 <data
                     android:host="live"
+                    android:scheme="primal" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="signer"
                     android:scheme="primal" />
             </intent-filter>
             <intent-filter

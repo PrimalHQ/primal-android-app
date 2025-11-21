@@ -1,6 +1,7 @@
 package net.primal.android
 
 import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
@@ -24,8 +25,11 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.compose.rememberNavController
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -63,6 +67,11 @@ class MainActivity : FragmentActivity() {
     private lateinit var primalTheme: PrimalTheme
 
     private val splashViewModel: SplashViewModel by viewModels()
+
+    private val deepLinkIntents = MutableSharedFlow<Intent>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST,
+    )
 
     @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -112,6 +121,13 @@ class MainActivity : FragmentActivity() {
                 color = AppTheme.colorScheme.outline,
                 rippleAlpha = RippleDefaults.RippleAlpha,
             )
+            val navController = rememberNavController()
+
+            LaunchedEffect(navController) {
+                deepLinkIntents.collect { intent ->
+                    navController.handleDeepLink(intent)
+                }
+            }
 
             PrimalTheme(
                 primalTheme = primalTheme,
@@ -125,10 +141,18 @@ class MainActivity : FragmentActivity() {
                     ApplyEdgeToEdge()
 
                     val isLoggedIn = splashViewModel.isLoggedIn.collectAsState()
-                    PrimalAppNavigation(startDestination = if (isLoggedIn.value) "home" else "welcome")
+                    PrimalAppNavigation(
+                        navController = navController,
+                        startDestination = if (isLoggedIn.value) "home" else "welcome",
+                    )
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        deepLinkIntents.tryEmit(intent)
     }
 
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: Configuration) {
