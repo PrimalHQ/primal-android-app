@@ -50,6 +50,7 @@ kotlin {
                 // Internal
                 implementation(project(":core:utils"))
                 implementation(project(":core:app-config"))
+                implementation(project(":core:networking-http"))
 
                 implementation(project(":data:account:local"))
                 implementation(project(":data:account:remote"))
@@ -58,6 +59,12 @@ kotlin {
                 implementation(project(":domain:account"))
 
                 implementation(libs.ktor.http)
+
+                // Networking && Serialization
+                implementation(libs.okio)
+                implementation(libs.ktorfit.light)
+                implementation(libs.ktorfit.converters.response)
+                implementation(libs.ktorfit.converters.call)
 
                 // Logging
                 implementation(libs.napier)

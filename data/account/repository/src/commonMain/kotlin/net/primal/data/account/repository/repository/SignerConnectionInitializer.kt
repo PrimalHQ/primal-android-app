@@ -35,6 +35,7 @@ private const val VALID_PERMISSION_STRING_REGEX =
 class SignerConnectionInitializer internal constructor(
     private val connectionRepository: ConnectionRepository,
     private val nostrRelayManager: NostrRelayManager,
+    private val internalPermissionsRepository: InternalPermissionsRepository,
 ) {
     suspend fun initialize(
         signerPubKey: String,
@@ -65,7 +66,7 @@ class SignerConnectionInitializer internal constructor(
             appConnection
         }
 
-    private fun parseConnectionUrlOrThrow(
+    private suspend fun parseConnectionUrlOrThrow(
         signerPubKey: String,
         userPubKey: String,
         connectionUrl: String,
@@ -86,6 +87,12 @@ class SignerConnectionInitializer internal constructor(
         val url = parsedUrl.parameters[URL_PARAM]
         val image = parsedUrl.parameters[IMAGE_PARAM]
 
+        val defaultPermissions = if (trustLevel == TrustLevel.Medium) {
+            getMediumTrustPermissions(connectionId = connectionId)
+        } else {
+            emptyList()
+        }
+
         return AppConnection(
             connectionId = connectionId,
             userPubKey = userPubKey,
@@ -95,7 +102,7 @@ class SignerConnectionInitializer internal constructor(
             name = name,
             url = url,
             image = image,
-            permissions = perms,
+            permissions = (perms + defaultPermissions).distinctBy(AppPermission::permissionId),
             autoStart = true,
             trustLevel = trustLevel,
         ) to secret
@@ -125,4 +132,16 @@ class SignerConnectionInitializer internal constructor(
                 )
             } ?: emptyList()
     }
+
+    private suspend fun getMediumTrustPermissions(connectionId: String): List<AppPermission> =
+        internalPermissionsRepository
+            .getMediumTrustPermissions()
+            .getOrNull()
+            ?.map {
+                AppPermission(
+                    permissionId = it,
+                    connectionId = connectionId,
+                    action = PermissionAction.Approve,
+                )
+            } ?: emptyList()
 }
