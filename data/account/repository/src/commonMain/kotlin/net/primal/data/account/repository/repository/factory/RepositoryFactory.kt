@@ -1,9 +1,14 @@
 package net.primal.data.account.repository.repository.factory
 
+import de.jensklingenberg.ktorfit.Ktorfit
+import net.primal.core.networking.factory.HttpClientFactory
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.local.db.AccountDatabase
+import net.primal.data.account.remote.api.WellKnownApi
+import net.primal.data.account.remote.api.createWellKnownApi
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.repository.ConnectionRepositoryImpl
+import net.primal.data.account.repository.repository.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.SessionEventRepositoryImpl
 import net.primal.data.account.repository.repository.SessionRepositoryImpl
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
@@ -14,6 +19,16 @@ import net.primal.domain.nostr.cryptography.NostrKeyPair
 
 abstract class RepositoryFactory {
     private val dispatcherProvider = createDispatcherProvider()
+
+    private val httpClient = HttpClientFactory.createHttpClientWithDefaultConfig()
+
+    private val wellKnownApi: WellKnownApi by lazy {
+        Ktorfit.Builder()
+            .baseUrl("https://primal.net/")
+            .httpClient(client = httpClient)
+            .build()
+            .createWellKnownApi()
+    }
 
     abstract fun resolveAccountDatabase(): AccountDatabase
 
@@ -41,6 +56,10 @@ abstract class RepositoryFactory {
     ): SignerConnectionInitializer =
         SignerConnectionInitializer(
             connectionRepository = connectionRepository,
+            internalPermissionsRepository = InternalPermissionsRepository(
+                dispatchers = dispatcherProvider,
+                wellKnownApi = wellKnownApi,
+            ),
             nostrRelayManager = NostrRelayManager(
                 dispatcherProvider = dispatcherProvider,
                 signerKeyPair = signerKeyPair,
