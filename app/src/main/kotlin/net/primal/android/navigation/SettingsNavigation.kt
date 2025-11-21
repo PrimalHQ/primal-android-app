@@ -80,6 +80,7 @@ fun NavController.navigateToLinkPrimalWallet(
     route = "wallet_settings/link_primal_wallet?appName=$appName&appIcon=$appIcon&callback=$callback",
 )
 
+@Suppress("LongMethod")
 fun NavGraphBuilder.settingsNavigation(route: String, navController: NavController) =
     navigation(
         route = route,
@@ -139,7 +140,20 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         notifications(route = "notifications_settings", navController = navController)
         zaps(route = "zaps_settings", navController = navController)
         connectedApps(route = "connected_apps", navController = navController)
-        connectedAppDetails(route = "connected_apps/{$CONNECTION_ID}", navController = navController)
+        connectedAppDetails(
+            route = "connected_apps/{$CONNECTION_ID}",
+            arguments = listOf(
+                navArgument(CONNECTION_ID) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "primal://signer/{$CONNECTION_ID}"
+                },
+            ),
+        )
         sessionDetails(
             route = "session_details/{$SESSION_ID}",
             navController = navController,
@@ -414,29 +428,30 @@ private fun NavGraphBuilder.connectedApps(route: String, navController: NavContr
         )
     }
 
-private fun NavGraphBuilder.connectedAppDetails(route: String, navController: NavController) =
-    composable(
-        route = route,
-        arguments = listOf(
-            navArgument(CONNECTION_ID) {
-                type = NavType.StringType
-            },
-        ),
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<ConnectedAppDetailsViewModel>()
-        LockToOrientationPortrait()
-        ConnectedAppDetailsScreen(
-            viewModel = viewModel,
-            onClose = { navController.navigateUp() },
-            onSessionClick = { sessionId ->
-                navController.navigateToSessionDetails(sessionId)
-            },
-        )
-    }
+private fun NavGraphBuilder.connectedAppDetails(
+    route: String,
+    navController: NavController,
+    arguments: List<NamedNavArgument>,
+    deepLinks: List<NavDeepLink>,
+) = composable(
+    route = route,
+    arguments = arguments,
+    deepLinks = deepLinks,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<ConnectedAppDetailsViewModel>()
+    LockToOrientationPortrait()
+    ConnectedAppDetailsScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onSessionClick = { sessionId ->
+            navController.navigateToSessionDetails(sessionId)
+        },
+    )
+}
 
 private fun NavGraphBuilder.sessionDetails(
     route: String,

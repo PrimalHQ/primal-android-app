@@ -156,7 +156,7 @@ fun SessionEventData.getRequestTypeId() =
     when (this.requestType) {
         SignerMethodType.Connect -> PERM_ID_CONNECT
         SignerMethodType.Ping -> PERM_ID_PING
-        SignerMethodType.SignEvent -> "$PERM_ID_PREFIX_SIGN_EVENT:${this.eventKind?.decrypted}"
+        SignerMethodType.SignEvent -> "$PERM_ID_PREFIX_SIGN_EVENT${this.eventKind?.decrypted}"
         SignerMethodType.GetPublicKey -> PERM_ID_GET_PUBLIC_KEY
         SignerMethodType.Nip04Encrypt -> PERM_ID_NIP04_ENCRYPT
         SignerMethodType.Nip04Decrypt -> PERM_ID_NIP04_DECRYPT
