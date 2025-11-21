@@ -1,5 +1,6 @@
 package net.primal.data.account.repository.mappers
 
+import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.RequestState as RequestStatePO
@@ -109,12 +110,11 @@ fun SessionEventData.asDomain(): SessionEvent? {
             val eventKind = this.eventKind?.decrypted ?: return null
             val requestMethod = requestPayload?.decodeFromJsonStringOrNull<RemoteSignerMethod>()
 
-            val unsignedEventJson = if (requestMethod is RemoteSignerMethod.SignEvent) {
-                val unsignedEvent = requestMethod.unsignedEvent.withPubKey(this.signerPubKey.decrypted)
-                unsignedEvent.encodeToJsonString()
-            } else {
-                ""
-            }
+            val unsignedEventJson = requestMethod
+                .getIfTypeOrNull(RemoteSignerMethod.SignEvent::unsignedEvent)
+                ?.withPubKey(this.signerPubKey.decrypted)
+                ?.encodeToJsonString()
+                ?: ""
 
             SessionEvent.SignEvent(
                 eventId = this.eventId,

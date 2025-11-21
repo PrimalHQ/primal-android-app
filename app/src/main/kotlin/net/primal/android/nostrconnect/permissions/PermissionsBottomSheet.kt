@@ -195,9 +195,7 @@ private fun EventDetailsContent(nostrUnsignedEvent: NostrUnsignedEvent, onClose:
     BackHandler(onBack = onClose)
     val context = LocalContext.current
 
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-    ) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         NostrEventDetails(
             kind = nostrUnsignedEvent.kind,
             createdAt = nostrUnsignedEvent.createdAt,
@@ -221,10 +219,7 @@ private fun EventDetailsBackButton(modifier: Modifier = Modifier, onClick: () ->
             .height(50.dp),
         onClick = onClick,
     ) {
-        Text(
-            text = stringResource(id = R.string.permissions_bottom_sheet_back_button),
-            fontWeight = FontWeight.SemiBold,
-        )
+        Text(text = stringResource(id = R.string.permissions_bottom_sheet_back_button))
     }
 }
 

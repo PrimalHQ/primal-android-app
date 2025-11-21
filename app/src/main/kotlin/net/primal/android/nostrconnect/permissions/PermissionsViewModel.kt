@@ -15,6 +15,7 @@ import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiState
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
+import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.UserChoice
@@ -66,33 +67,20 @@ class PermissionsViewModel @Inject constructor(
 
                     is UiEvent.OpenEventDetails -> handleOpenEventDetails(event.eventId)
 
-                    UiEvent.CloseEventDetails -> setState {
-                        copy(
-                            eventDetailsUnsignedEvent = null,
-                        )
-                    }
+                    UiEvent.CloseEventDetails -> setState { copy(eventDetailsUnsignedEvent = null) }
                 }
             }
         }
 
     private fun handleOpenEventDetails(eventId: String) {
         val sessionEvent = state.value.sessionEvents.find { it.eventId == eventId }
-        var nostrUnsignedEvent: NostrUnsignedEvent? = null
 
-        if (sessionEvent is SessionEvent.SignEvent) {
-            val rawJson = sessionEvent.unsignedNostrEventJson
-            nostrUnsignedEvent = rawJson.let {
-                runCatching {
-                    NostrJsonEncodeDefaults.decodeFromString<NostrUnsignedEvent>(it)
-                }.getOrNull()
+        val nostrUnsignedEvent = sessionEvent.getIfTypeOrNull(SessionEvent.SignEvent::unsignedNostrEventJson)
+            ?.let {
+                runCatching { NostrJsonEncodeDefaults.decodeFromString<NostrUnsignedEvent>(it) }.getOrNull()
             }
-        }
 
-        setState {
-            copy(
-                eventDetailsUnsignedEvent = nostrUnsignedEvent,
-            )
-        }
+        setState { copy(eventDetailsUnsignedEvent = nostrUnsignedEvent) }
     }
 
     private fun respondToEvents(eventIds: Set<String>, choice: UserChoice) =
