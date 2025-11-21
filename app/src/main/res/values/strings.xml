@@ -1500,6 +1500,8 @@
     <string name="permissions_bottom_sheet_always_handle">Always handle requests like this</string>
     <string name="permissions_bottom_sheet_reject_selected">Reject Selected</string>
     <string name="permissions_bottom_sheet_allow_selected">Allow Selected</string>
+    <string name="permissions_bottom_sheet_event_details_unavailable">Event details unavailable</string>
+    <string name="permissions_bottom_sheet_back_button">Back</string>
 
     <string name="signer_notification_end_session">end session</string>
     <string name="signer_notification_avatar">User Avatar</string>

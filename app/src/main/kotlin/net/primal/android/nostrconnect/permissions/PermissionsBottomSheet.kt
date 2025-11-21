@@ -1,5 +1,12 @@
 package net.primal.android.nostrconnect.permissions
 
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -9,6 +16,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,10 +41,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.uuid.ExperimentalUuidApi
@@ -48,14 +58,18 @@ import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.utils.PrimalDateFormats
+import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiState
 import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
+import net.primal.android.nostrconnect.ui.NostrEventDetails
+import net.primal.android.nostrconnect.ui.asEventDetailRows
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.links.CdnImage
+import net.primal.domain.nostr.NostrUnsignedEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -86,15 +100,57 @@ fun PermissionsBottomSheet(
 
 @Composable
 fun PermissionsBottomSheetContent(uiState: UiState, eventPublisher: (UiEvent) -> Unit) {
-    var alwaysHandleRequestsLikeThis by remember { mutableStateOf(true) }
     Column(
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         uiState.session?.let {
             SessionDetailsColumn(session = it)
         }
 
+        AnimatedContent(
+            targetState = uiState.eventDetailsUnsignedEvent,
+            contentAlignment = Alignment.TopCenter,
+            transitionSpec = {
+                val animationSpec = tween<IntOffset>(durationMillis = 300)
+
+                val transition = if (targetState != null) {
+                    slideInHorizontally(animationSpec = animationSpec) { it } togetherWith
+                        slideOutHorizontally(animationSpec = animationSpec) { -it }
+                } else {
+                    slideInHorizontally(animationSpec = animationSpec) { -it } togetherWith
+                        slideOutHorizontally(animationSpec = animationSpec) { it }
+                }
+
+                transition.using(
+                    SizeTransform(clip = false),
+                )
+            },
+            label = "PermissionsContent",
+        ) { nostrUnsignedEvent ->
+            if (nostrUnsignedEvent != null) {
+                EventDetailsContent(
+                    nostrUnsignedEvent = nostrUnsignedEvent,
+                    onClose = { eventPublisher(UiEvent.CloseEventDetails) },
+                )
+            } else {
+                PermissionsListContent(
+                    uiState = uiState,
+                    eventPublisher = eventPublisher,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PermissionsListContent(uiState: UiState, eventPublisher: (UiEvent) -> Unit) {
+    var alwaysHandleRequestsLikeThis by remember { mutableStateOf(true) }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
         AppRequestsHeader(
             modifier = Modifier.padding(start = 24.dp, end = 16.dp),
             showSelectAll = uiState.selectedEventIds.size != uiState.sessionEvents.size,
@@ -110,6 +166,7 @@ fun PermissionsBottomSheetContent(uiState: UiState, eventPublisher: (UiEvent) ->
             selectedEventIds = uiState.selectedEventIds,
             onSelectEventClick = { eventPublisher(UiEvent.SelectEvent(it)) },
             onDeselectEventClick = { eventPublisher(UiEvent.DeselectEvent(it)) },
+            onOpenDetailsClick = { eventPublisher(UiEvent.OpenEventDetails(it)) },
         )
 
         AlwaysHandleRequestsSwitch(
@@ -130,6 +187,39 @@ fun PermissionsBottomSheetContent(uiState: UiState, eventPublisher: (UiEvent) ->
                 eventPublisher(UiEvent.AllowSelected(alwaysAllow = alwaysHandleRequestsLikeThis))
             },
         )
+    }
+}
+
+@Composable
+private fun EventDetailsContent(nostrUnsignedEvent: NostrUnsignedEvent, onClose: () -> Unit) {
+    BackHandler(onBack = onClose)
+    val context = LocalContext.current
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        NostrEventDetails(
+            kind = nostrUnsignedEvent.kind,
+            createdAt = nostrUnsignedEvent.createdAt,
+            eventRows = nostrUnsignedEvent.asEventDetailRows(),
+            onCopy = { text, label ->
+                copyText(context = context, text = text, label = label)
+            },
+            footerContent = {
+                EventDetailsBackButton(onClick = onClose)
+            },
+        )
+    }
+}
+
+@Composable
+private fun EventDetailsBackButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
+    PrimalFilledButton(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 16.dp)
+            .height(50.dp),
+        onClick = onClick,
+    ) {
+        Text(text = stringResource(id = R.string.permissions_bottom_sheet_back_button))
     }
 }
 
@@ -230,6 +320,7 @@ private fun AppRequestsList(
     selectedEventIds: Set<String>,
     onSelectEventClick: (String) -> Unit,
     onDeselectEventClick: (String) -> Unit,
+    onOpenDetailsClick: (String) -> Unit,
 ) {
     LazyColumn(modifier = modifier) {
         itemsIndexed(
@@ -243,6 +334,7 @@ private fun AppRequestsList(
                 onSelectClick = { onSelectEventClick(event.eventId) },
                 onDeselectClick = { onDeselectEventClick(event.eventId) },
                 showDivider = index < events.lastIndex,
+                onDetailsClick = { onOpenDetailsClick(event.eventId) },
             )
         }
     }
@@ -257,11 +349,13 @@ fun AppRequestListItem(
     onSelectClick: () -> Unit,
     onDeselectClick: () -> Unit,
     showDivider: Boolean,
+    onDetailsClick: () -> Unit,
 ) {
     Row(
         modifier = modifier
             .clip(shape)
             .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
+            .clickable(onClick = onDetailsClick)
             .fillMaxWidth()
             .padding(16.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),

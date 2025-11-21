@@ -44,6 +44,7 @@ sealed class SessionEvent {
         override val completedAt: Long?,
         val eventKind: Int,
         val signedNostrEventJson: String?,
+        val unsignedNostrEventJson: String,
     ) : SessionEvent() {
         override val requestTypeId: String = "sign_event:$eventKind"
     }

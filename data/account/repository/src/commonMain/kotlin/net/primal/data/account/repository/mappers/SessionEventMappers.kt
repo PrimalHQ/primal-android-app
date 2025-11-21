@@ -1,5 +1,6 @@
 package net.primal.data.account.repository.mappers
 
+import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.RequestState as RequestStatePO
@@ -7,6 +8,7 @@ import net.primal.data.account.local.dao.SessionEventData
 import net.primal.data.account.local.dao.SignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.method.model.withPubKey
 import net.primal.data.account.remote.utils.PERM_ID_CONNECT
 import net.primal.data.account.remote.utils.PERM_ID_GET_PUBLIC_KEY
 import net.primal.data.account.remote.utils.PERM_ID_NIP04_DECRYPT
@@ -67,6 +69,7 @@ fun buildSessionEventData(
 
 fun SessionEventData.asDomain(): SessionEvent? {
     val responsePayload = this.responsePayload?.decrypted
+    val requestPayload = this.requestPayload?.decrypted
 
     return when (this.requestType) {
         SignerMethodType.GetPublicKey -> SessionEvent.GetPublicKey(
@@ -105,6 +108,14 @@ fun SessionEventData.asDomain(): SessionEvent? {
 
         SignerMethodType.SignEvent -> {
             val eventKind = this.eventKind?.decrypted ?: return null
+            val requestMethod = requestPayload?.decodeFromJsonStringOrNull<RemoteSignerMethod>()
+
+            val unsignedEventJson = requestMethod
+                .getIfTypeOrNull(RemoteSignerMethod.SignEvent::unsignedEvent)
+                ?.withPubKey(this.signerPubKey.decrypted)
+                ?.encodeToJsonString()
+                ?: ""
+
             SessionEvent.SignEvent(
                 eventId = this.eventId,
                 sessionId = this.sessionId,
@@ -113,6 +124,7 @@ fun SessionEventData.asDomain(): SessionEvent? {
                 completedAt = this.completedAt,
                 eventKind = eventKind,
                 signedNostrEventJson = getResponseBody(responsePayload),
+                unsignedNostrEventJson = unsignedEventJson,
             )
         }
 

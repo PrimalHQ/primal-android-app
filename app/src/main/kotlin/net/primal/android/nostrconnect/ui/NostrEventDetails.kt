@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -31,7 +30,6 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.CopyAlt
@@ -42,11 +40,12 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.CourierPrimeFontFamily
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrUnsignedEvent
 
 private const val CONTENT_MAX_LINES_COLLAPSED = 10
 private const val MAX_TAGS_TO_SHOW_IN_DETAILS = 10
 
-private sealed interface EventDetailRow {
+sealed interface EventDetailRow {
     data class Detail(
         val label: String,
         val value: String,
@@ -63,25 +62,25 @@ private sealed interface EventDetailRow {
 
 @Composable
 fun NostrEventDetails(
-    event: NostrEvent,
-    rawJson: String?,
+    kind: Int,
+    createdAt: Long,
+    eventRows: List<EventDetailRow>,
     modifier: Modifier = Modifier,
     onCopy: (text: String, label: String) -> Unit,
+    footerContent: (@Composable () -> Unit)? = null,
 ) {
-    val eventDetailRows = buildEventDetailRows(event = event)
-
     LazyColumn(
         modifier = modifier.padding(horizontal = 16.dp),
     ) {
         item(key = "Header", contentType = "Header") {
             EventDetailsHeader(
-                eventKind = event.kind,
-                timestamp = event.createdAt,
+                eventKind = kind,
+                timestamp = createdAt,
             )
         }
 
         itemsIndexed(
-            items = eventDetailRows,
+            items = eventRows,
             key = { _, item ->
                 when (item) {
                     is EventDetailRow.Detail -> item.label
@@ -89,8 +88,8 @@ fun NostrEventDetails(
                 }
             },
         ) { index, item ->
-            val shape = getListItemShape(index = index, listSize = eventDetailRows.size)
-            val isLast = index == eventDetailRows.lastIndex
+            val shape = getListItemShape(index = index, listSize = eventRows.size)
+            val isLast = index == eventRows.lastIndex
 
             Column(
                 modifier = Modifier
@@ -119,77 +118,11 @@ fun NostrEventDetails(
             }
         }
 
-        if (rawJson != null) {
-            item(key = "CopyRawJsonButton", contentType = "Button") {
-                val rawJsonLabel = stringResource(id = R.string.settings_event_details_raw_json_label)
-                PrimalFilledButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 16.dp)
-                        .height(50.dp),
-                    onClick = { onCopy(rawJson, rawJsonLabel) },
-                ) {
-                    Text(text = stringResource(id = R.string.settings_event_details_copy_raw_json))
-                }
+        if (footerContent != null) {
+            item(key = "Footer", contentType = "Button") {
+                footerContent()
             }
         }
-    }
-}
-
-@Composable
-private fun buildEventDetailRows(event: NostrEvent): List<EventDetailRow> {
-    return buildList {
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_id_label),
-                value = event.id,
-                isKey = true,
-            ),
-        )
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_pubkey_label),
-                value = event.pubKey,
-                isKey = true,
-            ),
-        )
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_event_kind_label),
-                value = "${event.kind} - ${event.kind.toKindName()}",
-            ),
-        )
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_created_at_label),
-                value = event.createdAt.toString(),
-            ),
-        )
-        if (event.tags.isNotEmpty()) {
-            add(
-                EventDetailRow.Tags(
-                    label = stringResource(id = R.string.settings_event_details_tags_label),
-                    tags = event.tags,
-                ),
-            )
-        }
-        if (event.content.isNotBlank()) {
-            add(
-                EventDetailRow.Detail(
-                    label = stringResource(id = R.string.settings_event_details_content_label),
-                    value = event.content,
-                    singleLine = false,
-                    expandable = true,
-                ),
-            )
-        }
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_signature_label),
-                value = event.sig,
-                isKey = true,
-            ),
-        )
     }
 }
 
@@ -215,6 +148,110 @@ private fun EventDetailsHeader(eventKind: Int, timestamp: Long) {
             style = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
+    }
+}
+
+@Composable
+fun NostrEvent.asEventDetailRows(): List<EventDetailRow> {
+    return buildList {
+        add(
+            EventDetailRow.Detail(
+                label = stringResource(id = R.string.settings_event_details_event_kind_label),
+                value = "$kind - ${kind.toKindName()}",
+            ),
+        )
+        add(
+            EventDetailRow.Detail(
+                label = stringResource(id = R.string.settings_event_details_created_at_label),
+                value = createdAt.toString(),
+            ),
+        )
+        if (id.isNotBlank()) {
+            add(
+                EventDetailRow.Detail(
+                    label = stringResource(id = R.string.settings_event_details_id_label),
+                    value = id,
+                    isKey = true,
+                ),
+            )
+        }
+        add(
+            EventDetailRow.Detail(
+                label = stringResource(id = R.string.settings_event_details_pubkey_label),
+                value = pubKey,
+                isKey = true,
+            ),
+        )
+        if (tags.isNotEmpty()) {
+            add(
+                EventDetailRow.Tags(
+                    label = stringResource(id = R.string.settings_event_details_tags_label),
+                    tags = tags,
+                ),
+            )
+        }
+        if (content.isNotBlank()) {
+            add(
+                EventDetailRow.Detail(
+                    label = stringResource(id = R.string.settings_event_details_content_label),
+                    value = content,
+                    singleLine = false,
+                    expandable = true,
+                ),
+            )
+        }
+        if (sig.isNotBlank()) {
+            add(
+                EventDetailRow.Detail(
+                    label = stringResource(id = R.string.settings_event_details_signature_label),
+                    value = sig,
+                    isKey = true,
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+fun NostrUnsignedEvent.asEventDetailRows(): List<EventDetailRow> {
+    return buildList {
+        add(
+            EventDetailRow.Detail(
+                label = stringResource(id = R.string.settings_event_details_event_kind_label),
+                value = "$kind - ${kind.toKindName()}",
+            ),
+        )
+        add(
+            EventDetailRow.Detail(
+                label = stringResource(id = R.string.settings_event_details_created_at_label),
+                value = createdAt.toString(),
+            ),
+        )
+        add(
+            EventDetailRow.Detail(
+                label = stringResource(id = R.string.settings_event_details_pubkey_label),
+                value = pubKey,
+                isKey = true,
+            ),
+        )
+        if (tags.isNotEmpty()) {
+            add(
+                EventDetailRow.Tags(
+                    label = stringResource(id = R.string.settings_event_details_tags_label),
+                    tags = tags,
+                ),
+            )
+        }
+        if (content.isNotBlank()) {
+            add(
+                EventDetailRow.Detail(
+                    label = stringResource(id = R.string.settings_event_details_content_label),
+                    value = content,
+                    singleLine = false,
+                    expandable = true,
+                ),
+            )
+        }
     }
 }
 
