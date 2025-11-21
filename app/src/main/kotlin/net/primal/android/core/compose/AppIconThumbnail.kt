@@ -26,10 +26,13 @@ fun AppIconThumbnail(
     avatarSize: Dp,
 ) {
     if (!avatarCdnImage?.sourceUrl.isNullOrBlank()) {
+        val context = LocalContext.current
+
         PrimalAsyncImage(
             modifier = modifier
                 .size(avatarSize)
                 .clip(CircleShape),
+            imageLoader = AvatarCoilImageLoader.provideNoGifsImageLoader(context = context),
             model = avatarCdnImage.sourceUrl,
             contentScale = ContentScale.Crop,
         )
