@@ -41,6 +41,7 @@ import net.primal.android.MainActivity
 import net.primal.android.R
 import net.primal.android.core.di.RemoteSignerServiceFactory
 import net.primal.android.core.receiver.EndSessionReceiver
+import net.primal.android.core.receiver.RECEIVER_SESSION_ID
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
@@ -73,6 +74,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
 
     companion object {
         private const val GROUP_ID = "net.primal.CONNECTED_APPS"
+        private const val END_SESSION_ACTION_INTENT = "net.primal.END_SESSION"
         private const val CHANNEL_ID = "remote_signer"
         private const val SUMMARY_NOTIFICATION_ID = 42
         private const val CHILD_NOTIFICATION_ID = 43
@@ -370,8 +372,8 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
 
     private fun endSessionPendingIntent(sessionId: String): PendingIntent {
         val intent = Intent(this, EndSessionReceiver::class.java).apply {
-            action = "net.primal.android.END_SESSION"
-            putExtra("sessionId", sessionId)
+            action = END_SESSION_ACTION_INTENT
+            putExtra(RECEIVER_SESSION_ID, sessionId)
         }
 
         return PendingIntent.getBroadcast(
