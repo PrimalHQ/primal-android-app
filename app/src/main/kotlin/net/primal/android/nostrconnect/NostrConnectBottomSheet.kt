@@ -51,6 +51,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -221,12 +222,11 @@ private fun HeaderSection(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        imageUrl?.let {
-            UniversalAvatarThumbnail(
-                avatarCdnImage = CdnImage(sourceUrl = imageUrl),
-                avatarSize = 48.dp,
-            )
-        }
+        AppIconThumbnail(
+            avatarCdnImage = imageUrl?.let { CdnImage(sourceUrl = it) },
+            avatarSize = 48.dp,
+            appName = appName,
+        )
 
         Text(
             text = appName ?: stringResource(id = R.string.nostr_connect_unknown_app),

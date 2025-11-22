@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
@@ -240,8 +241,9 @@ private fun SessionListItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            UniversalAvatarThumbnail(
+            AppIconThumbnail(
                 avatarCdnImage = session.appImageUrl?.let { CdnImage(sourceUrl = it) },
+                appName = session.appName,
                 avatarSize = 40.dp,
             )
             Column(
