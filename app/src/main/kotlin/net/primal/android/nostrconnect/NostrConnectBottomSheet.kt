@@ -18,12 +18,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.ModalBottomSheet
@@ -43,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,6 +59,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.HighSecurity
 import net.primal.android.core.compose.icons.primaliconpack.LowSecurity
 import net.primal.android.core.compose.icons.primaliconpack.MediumSecurity
+import net.primal.android.core.compose.nostrconnect.PermissionsListItem
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.selectableItem
 import net.primal.android.core.utils.formatNip05Identifier
@@ -72,8 +70,6 @@ import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.links.CdnImage
-
-private val DISABLED_ICON_TINT = Color(0xFF808080)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -716,52 +712,6 @@ private fun BudgetOption(
     }
 }
 */
-@Composable
-private fun PermissionsListItem(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-) {
-    ListItem(
-        modifier = Modifier.selectableItem(
-            selected = isSelected,
-            onClick = onClick,
-        ),
-        colors = ListItemDefaults.colors(containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1),
-        leadingContent = {
-            Icon(
-                modifier = Modifier.size(28.dp),
-                imageVector = icon,
-                contentDescription = null,
-                tint = if (isSelected) AppTheme.colorScheme.onPrimary else DISABLED_ICON_TINT,
-            )
-        },
-        headlineContent = {
-            Text(
-                text = title,
-                fontWeight = FontWeight.SemiBold,
-                color = AppTheme.colorScheme.onSurface,
-                style = AppTheme.typography.bodyLarge.copy(
-                    fontSize = 16.sp,
-                    lineHeight = 20.sp,
-                ),
-            )
-        },
-        supportingContent = {
-            Text(
-                modifier = Modifier.padding(top = 3.dp),
-                text = subtitle,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                style = AppTheme.typography.bodyMedium.copy(
-                    fontSize = 14.sp,
-                    lineHeight = 20.sp,
-                ),
-            )
-        },
-    )
-}
 
 @Composable
 private fun ActionButtons(

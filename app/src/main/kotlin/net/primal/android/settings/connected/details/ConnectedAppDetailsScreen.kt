@@ -67,6 +67,10 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.HighSecurity
+import net.primal.android.core.compose.icons.primaliconpack.LowSecurity
+import net.primal.android.core.compose.icons.primaliconpack.MediumSecurity
+import net.primal.android.core.compose.nostrconnect.PermissionsListItem
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.utils.PrimalDateFormats
@@ -77,6 +81,7 @@ import net.primal.android.settings.connected.details.ConnectedAppDetailsContract
 import net.primal.android.settings.connected.model.SessionUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.links.CdnImage
 
 private val DangerPrimaryColor = Color(0xFFFF2121)
@@ -89,6 +94,7 @@ fun ConnectedAppDetailsScreen(
     viewModel: ConnectedAppDetailsViewModel,
     onClose: () -> Unit,
     onSessionClick: (sessionId: String) -> Unit,
+    onPermissionDetailsClick: (connectionId: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -105,6 +111,7 @@ fun ConnectedAppDetailsScreen(
         onClose = onClose,
         eventPublisher = viewModel::setEvent,
         onSessionClick = onSessionClick,
+        onPermissionDetailsClick = onPermissionDetailsClick,
     )
 }
 
@@ -115,6 +122,7 @@ fun ConnectedAppDetailsScreen(
     onClose: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     onSessionClick: (sessionId: String) -> Unit,
+    onPermissionDetailsClick: (connectionId: String) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -147,6 +155,7 @@ fun ConnectedAppDetailsScreen(
                     state = state,
                     eventPublisher = eventPublisher,
                     onSessionClick = onSessionClick,
+                    onPermissionDetailsClick = { onPermissionDetailsClick(state.connectionId) },
                 )
             }
         },
@@ -159,6 +168,7 @@ fun ConnectedAppDetailsContent(
     state: UiState,
     eventPublisher: (UiEvent) -> Unit,
     onSessionClick: (sessionId: String) -> Unit,
+    onPermissionDetailsClick: () -> Unit,
 ) {
     LazyColumn(modifier = modifier) {
         item(key = "Header", contentType = "Header") {
@@ -174,6 +184,14 @@ fun ConnectedAppDetailsContent(
                 onEndSessionClick = { eventPublisher(UiEvent.EndSession) },
                 onEditNameClick = { eventPublisher(UiEvent.EditName) },
                 onDeleteConnectionClick = { eventPublisher(UiEvent.DeleteConnection) },
+            )
+        }
+
+        item(key = "Permissions", contentType = "Permissions") {
+            ConnectedAppPermissionsSection(
+                trustLevel = state.trustLevel,
+                onTrustLevelChange = { eventPublisher(UiEvent.UpdateTrustLevel(it)) },
+                onPermissionDetailsClick = onPermissionDetailsClick,
             )
         }
 
@@ -377,6 +395,64 @@ private fun SessionControlButton(
 }
 
 @Composable
+fun ConnectedAppPermissionsSection(
+    trustLevel: TrustLevel,
+    onTrustLevelChange: (TrustLevel) -> Unit,
+    onPermissionDetailsClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.padding(vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Text(
+            text = stringResource(id = R.string.settings_connected_app_permissions_subtitle).uppercase(),
+            style = AppTheme.typography.titleMedium.copy(lineHeight = 20.sp),
+            fontWeight = FontWeight.SemiBold,
+            color = AppTheme.colorScheme.onPrimary,
+        )
+
+        Column(
+            modifier = Modifier.clip(AppTheme.shapes.medium),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            PermissionsListItem(
+                icon = PrimalIcons.HighSecurity,
+                title = stringResource(id = R.string.nostr_connect_full_trust_title),
+                subtitle = stringResource(id = R.string.nostr_connect_full_trust_subtitle),
+                isSelected = trustLevel == TrustLevel.Full,
+                onClick = { onTrustLevelChange(TrustLevel.Full) },
+            )
+            PermissionsListItem(
+                icon = PrimalIcons.MediumSecurity,
+                title = stringResource(id = R.string.nostr_connect_medium_trust_title),
+                subtitle = stringResource(id = R.string.nostr_connect_medium_trust_subtitle),
+                isSelected = trustLevel == TrustLevel.Medium,
+                onClick = { onTrustLevelChange(TrustLevel.Medium) },
+            )
+            PermissionsListItem(
+                icon = PrimalIcons.LowSecurity,
+                title = stringResource(id = R.string.nostr_connect_low_trust_title),
+                subtitle = stringResource(id = R.string.nostr_connect_low_trust_subtitle),
+                isSelected = trustLevel == TrustLevel.Low,
+                onClick = { onTrustLevelChange(TrustLevel.Low) },
+            )
+        }
+
+        if (trustLevel == TrustLevel.Medium) {
+            Text(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .clickable { onPermissionDetailsClick() },
+                text = stringResource(id = R.string.settings_connected_app_permission_details_link),
+                style = AppTheme.typography.bodyLarge,
+                color = AppTheme.colorScheme.secondary,
+            )
+        }
+    }
+}
+
+@Composable
 private fun AppActionButtons(onEditNameClick: () -> Unit, onDeleteConnectionClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -538,6 +614,7 @@ fun PreviewConnectedAppDetailsScreen() {
             onClose = {},
             eventPublisher = {},
             onSessionClick = {},
+            onPermissionDetailsClick = {},
         )
     }
 }

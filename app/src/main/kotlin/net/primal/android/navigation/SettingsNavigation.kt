@@ -22,6 +22,8 @@ import net.primal.android.settings.connected.details.ConnectedAppDetailsScreen
 import net.primal.android.settings.connected.details.ConnectedAppDetailsViewModel
 import net.primal.android.settings.connected.event.EventDetailsScreen
 import net.primal.android.settings.connected.event.EventDetailsViewModel
+import net.primal.android.settings.connected.permissions.AppPermissionsScreen
+import net.primal.android.settings.connected.permissions.AppPermissionsViewModel
 import net.primal.android.settings.connected.session.SessionDetailsScreen
 import net.primal.android.settings.connected.session.SessionDetailsViewModel
 import net.primal.android.settings.content.ContentDisplaySettingsScreen
@@ -71,6 +73,9 @@ private fun NavController.navigateToEventDetails(eventId: String) = navigate(rou
 
 private fun NavController.navigateToConnectedAppDetails(connectionId: String) =
     navigate(route = "connected_apps/$connectionId")
+
+private fun NavController.navigateToAppPermissions(connectionId: String) =
+    navigate(route = "connected_apps/$connectionId/permissions")
 
 fun NavController.navigateToLinkPrimalWallet(
     appName: String? = null,
@@ -153,6 +158,15 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
                     uriPattern = "primal://signer/{$CONNECTION_ID}"
                 },
             ),
+        )
+        appPermissions(
+            route = "connected_apps/{$CONNECTION_ID}/permissions",
+            arguments = listOf(
+                navArgument(CONNECTION_ID) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
         )
         sessionDetails(
             route = "session_details/{$SESSION_ID}",
@@ -450,6 +464,30 @@ private fun NavGraphBuilder.connectedAppDetails(
         onSessionClick = { sessionId ->
             navController.navigateToSessionDetails(sessionId)
         },
+        onPermissionDetailsClick = { connectionId ->
+            navController.navigateToAppPermissions(connectionId)
+        },
+    )
+}
+
+private fun NavGraphBuilder.appPermissions(
+    route: String,
+    navController: NavController,
+    arguments: List<NamedNavArgument>,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<AppPermissionsViewModel>()
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    AppPermissionsScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
     )
 }
 

@@ -19,6 +19,7 @@ import net.primal.android.settings.connected.details.ConnectedAppDetailsContract
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiEvent
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiState
 import net.primal.android.settings.connected.model.SessionUi
+import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 
@@ -34,7 +35,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
     private val connectionId: String = savedStateHandle.connectionIdOrThrow
     private var activeSessionId: String? = null
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(connectionId = connectionId))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
@@ -55,6 +56,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
                 UiEvent.StartSession -> startSession()
                 UiEvent.EndSession -> endSession()
                 UiEvent.DismissError -> setState { copy(error = null) }
+                is UiEvent.UpdateTrustLevel -> updateTrustLevel(event.trustLevel)
             }
         }
     }
@@ -73,11 +75,22 @@ class ConnectedAppDetailsViewModel @Inject constructor(
                         appName = connection?.name,
                         appIconUrl = connection?.image,
                         autoStartSession = connection?.autoStart ?: false,
+                        trustLevel = connection?.trustLevel ?: TrustLevel.Low,
                         loading = false,
                     )
                 }
             }
         }
+
+    private fun updateTrustLevel(trustLevel: TrustLevel) {
+        viewModelScope.launch {
+            runCatching {
+                connectionRepository.updateTrustLevel(connectionId, trustLevel)
+            }.onFailure {
+                setState { copy(error = UiError.GenericError(it.message)) }
+            }
+        }
+    }
 
     private fun observeActiveSession() =
         viewModelScope.launch {
