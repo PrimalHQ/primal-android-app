@@ -62,3 +62,9 @@ if (primalTsunamiSdkRepoPath.exists()) {
         }
     }
 }
+
+includeBuild("../bugstr") {
+    dependencySubstitution {
+        substitute(module("com.bugstr:bugstr-nostr-crypto")).using(project(":bugstr-nostr-crypto"))
+    }
+}

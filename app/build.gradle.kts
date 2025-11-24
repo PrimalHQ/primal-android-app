@@ -404,4 +404,6 @@ dependencies {
     androidTestImplementation(libs.kotest.assertions.core)
     androidTestImplementation(libs.kotest.assertions.json)
     androidTestImplementation(libs.mockk.android)
+
+    implementation("com.bugstr:bugstr-nostr-crypto:0.1.0-SNAPSHOT")
 }
