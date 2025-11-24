@@ -119,7 +119,7 @@ android {
         buildConfigField(
             type = "int",
             name = "BUGSTR_EXPIRATION_DAYS",
-            value = "${project.findProperty("bugstrExpirationDays") ?: 30}",
+            value = "${project.findProperty("bugstrExpirationDays") ?: 90}",
         )
     }
 
