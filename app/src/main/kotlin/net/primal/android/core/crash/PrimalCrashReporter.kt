@@ -11,13 +11,15 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.primal.android.BuildConfig
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import net.primal.android.BuildConfig
+import net.primal.android.bugstr.BugstrNip17CrashService
 
 class PrimalCrashReporter @Inject constructor(
     okHttpClient: OkHttpClient,
+    private val bugstrCrashService: BugstrNip17CrashService,
 ) {
 
     private val scope = CoroutineScope(Dispatchers.IO)
@@ -32,7 +34,9 @@ class PrimalCrashReporter @Inject constructor(
         Thread.setDefaultUncaughtExceptionHandler { thread, error ->
             val errorReport = error.generateErrorReport(thread)
             scope.launch {
-                uploadCrashReport(report = errorReport.prependCrashReportHeader())
+                if (!sendBugstr(report = errorReport)) {
+                    uploadCrashReport(report = errorReport.prependCrashReportHeader())
+                }
 
                 if (defaultUncaughtExceptionHandler != null) {
                     defaultUncaughtExceptionHandler.uncaughtException(thread, error)
@@ -46,7 +50,9 @@ class PrimalCrashReporter @Inject constructor(
     fun log(throwable: Throwable? = null, message: String? = null) {
         val errorReport = throwable?.generateErrorReport(thread = Thread.currentThread()) ?: ""
         scope.launch {
-            uploadCrashReport(report = errorReport.prependLogReportHeader(message = message))
+            if (!sendBugstr(report = errorReport, subject = message)) {
+                uploadCrashReport(report = errorReport.prependLogReportHeader(message = message))
+            }
         }
     }
 
@@ -97,5 +103,26 @@ class PrimalCrashReporter @Inject constructor(
                 .post(report.toRequestBody(contentType = "text/plain".toMediaType()))
                 .build(),
         ).execute()
+    }
+
+    private suspend fun sendBugstr(
+        report: String,
+        subject: String? = null,
+    ): Boolean {
+        val featureDisabled = !BuildConfig.FEATURE_BUGSTR_NIP17
+        val devPubKey = BuildConfig.BUGSTR_DEV_PUBKEY
+        if (featureDisabled || devPubKey.isBlank()) return false
+
+        val expirationSeconds =
+            BuildConfig.BUGSTR_EXPIRATION_DAYS.takeIf { it > 0 }?.toLong()?.let { it * 24L * 60L * 60L }
+
+        val result = bugstrCrashService.sendCrashReport(
+            developerPubKey = devPubKey,
+            crashReport = report,
+            expirationSeconds = expirationSeconds,
+            subject = subject,
+        )
+
+        return result.isSuccess
     }
 }

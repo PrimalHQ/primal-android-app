@@ -22,6 +22,7 @@ import com.bugstr.nostr.crypto.Nip17CrashSender
 import com.bugstr.nostr.crypto.Nip17PayloadBuilder
 import com.bugstr.nostr.crypto.Nip59GiftWrapper
 import net.primal.android.bugstr.BugstrGiftWrapPublisher
+import net.primal.android.bugstr.BugstrNip17CrashService
 import net.primal.android.bugstr.BugstrNostrSigner
 
 @Module
@@ -60,4 +61,15 @@ object CoreModule {
         signer: BugstrNostrSigner,
         publisher: BugstrGiftWrapPublisher,
     ): Nip17CrashSender = Nip17CrashSender(payloadBuilder = payloadBuilder, signer = signer, publisher = publisher)
+
+    @Provides
+    fun provideBugstrCrashService(
+        activeAccountStore: net.primal.android.user.accounts.active.ActiveAccountStore,
+        credentialsStore: net.primal.android.user.credentials.CredentialsStore,
+        nip17CrashSender: Nip17CrashSender,
+    ): BugstrNip17CrashService = BugstrNip17CrashService(
+        activeAccountStore = activeAccountStore,
+        credentialsStore = credentialsStore,
+        sender = nip17CrashSender,
+    )
 }

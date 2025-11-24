@@ -99,6 +99,28 @@ android {
                 "false"
             },
         )
+
+        buildConfigField(
+            type = "boolean",
+            name = "FEATURE_BUGSTR_NIP17",
+            value = if (project.hasProperty("enableBugstrNip17")) {
+                project.properties["enableBugstrNip17"] as String
+            } else {
+                "false"
+            },
+        )
+
+        buildConfigField(
+            type = "String",
+            name = "BUGSTR_DEV_PUBKEY",
+            value = "\"${project.findProperty("bugstrDevPubkey") ?: ""}\"",
+        )
+
+        buildConfigField(
+            type = "int",
+            name = "BUGSTR_EXPIRATION_DAYS",
+            value = "${project.findProperty("bugstrExpirationDays") ?: 30}",
+        )
     }
 
     ksp {
