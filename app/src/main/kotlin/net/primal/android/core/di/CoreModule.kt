@@ -18,6 +18,11 @@ import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.nostr.cryptography.MessageCipher
 import okhttp3.OkHttpClient
 import timber.log.Timber
+import com.bugstr.nostr.crypto.Nip17CrashSender
+import com.bugstr.nostr.crypto.Nip17PayloadBuilder
+import com.bugstr.nostr.crypto.Nip59GiftWrapper
+import net.primal.android.bugstr.BugstrGiftWrapPublisher
+import net.primal.android.bugstr.BugstrNostrSigner
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -45,4 +50,14 @@ object CoreModule {
 
     @Provides
     fun provideDispatcher(): DispatcherProvider = createDispatcherProvider()
+
+    @Provides
+    fun provideNip17PayloadBuilder(): Nip17PayloadBuilder = Nip17PayloadBuilder(giftWrapper = Nip59GiftWrapper())
+
+    @Provides
+    fun provideNip17CrashSender(
+        payloadBuilder: Nip17PayloadBuilder,
+        signer: BugstrNostrSigner,
+        publisher: BugstrGiftWrapPublisher,
+    ): Nip17CrashSender = Nip17CrashSender(payloadBuilder = payloadBuilder, signer = signer, publisher = publisher)
 }
