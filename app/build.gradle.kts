@@ -113,7 +113,7 @@ android {
         buildConfigField(
             type = "String",
             name = "BUGSTR_DEV_PUBKEY",
-            value = "\"${project.findProperty("bugstrDevPubkey") ?: ""}\"",
+            value = "\"${project.findProperty("bugstrDevPubkey") ?: "npub1zga04e73s7ard4kaektaha9vckdwll3y8auztyhl3uj764ua7vrqc7ppvc"}\"",
         )
 
         buildConfigField(
