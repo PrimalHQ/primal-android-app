@@ -323,5 +323,4 @@ android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.
 jetpack-room = { id = "androidx.room", version.ref = "jetpack-room" }
 ktorfit = { id = "de.jensklingenberg.ktorfit", version.ref = "ktorfit" }
 touchlab-skie = { id = "co.touchlab.skie", version.ref = "skie" }
-google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 android-test = { id = "com.android.test", version.ref = "agp" }

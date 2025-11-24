@@ -8,7 +8,6 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.play.publishing)
-    alias(libs.plugins.google.services)
 }
 
 val configProperties by lazy {
