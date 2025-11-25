@@ -11,6 +11,7 @@ interface PermissionsContract {
         val requestQueue: List<Pair<ActiveSessionUi, List<SessionEvent>>> = emptyList(),
         val activeSessions: Map<String, ActiveSessionUi> = emptyMap(),
         val responding: Boolean = false,
+        val permissionsMap: Map<String, String> = emptyMap(),
         val eventDetailsUnsignedEvent: NostrUnsignedEvent? = null,
     ) {
         val session = requestQueue.firstOrNull()?.first

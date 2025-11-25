@@ -19,6 +19,7 @@ import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.UserChoice
+import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -27,6 +28,7 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 class PermissionsViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val sessionEventRepository: SessionEventRepository,
+    private val permissionsRepository: PermissionsRepository,
     private val credentialsStore: CredentialsStore,
 ) : ViewModel() {
     private val _state = MutableStateFlow(UiState())
@@ -38,6 +40,7 @@ class PermissionsViewModel @Inject constructor(
 
     init {
         observeEvents()
+        fetchPermissionsNamingMap()
         observeActiveSessions()
         observeSessionEventsPendingUserAction()
     }
@@ -70,6 +73,12 @@ class PermissionsViewModel @Inject constructor(
                     UiEvent.CloseEventDetails -> setState { copy(eventDetailsUnsignedEvent = null) }
                 }
             }
+        }
+
+    private fun fetchPermissionsNamingMap() =
+        viewModelScope.launch {
+            permissionsRepository.getNamingMap()
+                .onSuccess { setState { copy(permissionsMap = it) } }
         }
 
     private fun handleOpenEventDetails(eventId: String) {
