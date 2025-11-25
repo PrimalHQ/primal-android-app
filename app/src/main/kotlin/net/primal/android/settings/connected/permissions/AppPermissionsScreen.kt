@@ -1,6 +1,5 @@
 package net.primal.android.settings.connected.permissions
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -23,7 +22,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -36,6 +34,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.settings.connected.model.PermissionUi
@@ -46,6 +45,7 @@ import net.primal.domain.account.model.PermissionAction
 
 private val ToggleIndicatorColorDark = Color(0xFF757575)
 private val ToggleIndicatorColorLight = Color(0xFF666666)
+private const val PERMISSION_OPTION_COUNT = 3
 
 @Composable
 fun AppPermissionsScreen(viewModel: AppPermissionsViewModel, onClose: () -> Unit) {
@@ -53,9 +53,7 @@ fun AppPermissionsScreen(viewModel: AppPermissionsViewModel, onClose: () -> Unit
     AppPermissionsScreen(
         state = state.value,
         onClose = onClose,
-        onPermissionChange = { id, action ->
-            viewModel.setEvent(UiEvent.ChangePermission(id, action))
-        },
+        eventPublisher = viewModel::setEvent,
     )
 }
 
@@ -63,21 +61,9 @@ fun AppPermissionsScreen(viewModel: AppPermissionsViewModel, onClose: () -> Unit
 @Composable
 fun AppPermissionsScreen(
     state: AppPermissionsContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
     onClose: () -> Unit,
-    onPermissionChange: (String, PermissionAction) -> Unit,
 ) {
-    val allowText = stringResource(id = R.string.settings_connected_app_permissions_allow)
-    val denyText = stringResource(id = R.string.settings_connected_app_permissions_deny)
-    val askText = stringResource(id = R.string.settings_connected_app_permissions_ask)
-
-    val permissionOptions = remember(allowText, denyText, askText) {
-        listOf(
-            PermissionOption(label = allowText, action = PermissionAction.Approve, index = 0),
-            PermissionOption(label = denyText, action = PermissionAction.Deny, index = 1),
-            PermissionOption(label = askText, action = PermissionAction.Ask, index = 2),
-        )
-    }
-
     PrimalScaffold(
         topBar = {
             PrimalTopAppBar(
@@ -87,50 +73,53 @@ fun AppPermissionsScreen(
             )
         },
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 12.dp),
         ) {
-            ConnectedAppHeader(
-                modifier = Modifier.padding(vertical = 16.dp),
-                appName = state.appName,
-                appIconUrl = state.appIconUrl,
-                startedAt = state.appLastSessionAt,
-            )
+            item {
+                ConnectedAppHeader(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    appName = state.appName,
+                    appIconUrl = state.appIconUrl,
+                    startedAt = state.appLastSessionAt,
+                )
+            }
 
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(AppTheme.extraColorScheme.surfaceVariantAlt3, AppTheme.shapes.large)
-                    .clip(AppTheme.shapes.large),
-            ) {
-                itemsIndexed(
-                    items = state.permissions,
-                    key = { _, permission -> permission.permissionId },
-                ) { index, permission ->
+            itemsIndexed(
+                items = state.permissions,
+                key = { _, permission -> permission.permissionId },
+            ) { index, permission ->
+                val shape = getListItemShape(index = index, listSize = state.permissions.size)
+
+                Column(
+                    modifier = Modifier
+                        .clip(shape)
+                        .background(AppTheme.extraColorScheme.surfaceVariantAlt3),
+                ) {
                     PermissionRow(
                         permission = permission,
-                        options = permissionOptions,
-                        onActionChange = { onPermissionChange(permission.permissionId, it) },
+                        onActionChange = {
+                            eventPublisher(UiEvent.ChangePermission(permission.permissionId, it))
+                        },
                     )
                     if (index < state.permissions.lastIndex) {
                         PrimalDivider()
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(24.dp))
+
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
         }
     }
 }
 
 @Composable
-private fun PermissionRow(
-    permission: PermissionUi,
-    options: List<PermissionOption>,
-    onActionChange: (PermissionAction) -> Unit,
-) {
+private fun PermissionRow(permission: PermissionUi, onActionChange: (PermissionAction) -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,29 +139,34 @@ private fun PermissionRow(
 
         PermissionToggle(
             currentAction = permission.action,
-            options = options,
             onActionChange = onActionChange,
         )
     }
 }
 
 @Composable
-private fun PermissionToggle(
-    currentAction: PermissionAction,
-    options: List<PermissionOption>,
-    onActionChange: (PermissionAction) -> Unit,
-) {
-    val selectedIndex = options.find { it.action == currentAction }?.index ?: 0
+private fun PermissionToggle(currentAction: PermissionAction, onActionChange: (PermissionAction) -> Unit) {
+    val allowText = stringResource(id = R.string.settings_connected_app_permissions_allow)
+    val denyText = stringResource(id = R.string.settings_connected_app_permissions_deny)
+    val askText = stringResource(id = R.string.settings_connected_app_permissions_ask)
+
+    val selectedIndex = when (currentAction) {
+        PermissionAction.Approve -> 0
+        PermissionAction.Deny -> 1
+        PermissionAction.Ask -> 2
+    }
 
     val fixedSegmentWidth = 55.dp
-    val totalWidth = fixedSegmentWidth * options.size
+    val padding = 2.dp
+    val totalWidth = (fixedSegmentWidth * PERMISSION_OPTION_COUNT) + (padding * 2)
 
     Box(
         modifier = Modifier
             .width(totalWidth)
             .height(32.dp)
-            .background(AppTheme.colorScheme.background, AppTheme.shapes.small)
-            .padding(2.dp),
+            .clip(AppTheme.shapes.extraSmall)
+            .background(AppTheme.colorScheme.background)
+            .padding(padding),
     ) {
         val indicatorOffset by animateDpAsState(
             targetValue = fixedSegmentWidth * selectedIndex,
@@ -192,14 +186,24 @@ private fun PermissionToggle(
         )
 
         Row(modifier = Modifier.fillMaxSize()) {
-            options.forEach { (text, action, _) ->
-                ToggleOption(
-                    text = text,
-                    isSelected = currentAction == action,
-                    modifier = Modifier.width(fixedSegmentWidth),
-                    onClick = { onActionChange(action) },
-                )
-            }
+            ToggleOption(
+                text = allowText,
+                isSelected = currentAction == PermissionAction.Approve,
+                modifier = Modifier.width(fixedSegmentWidth),
+                onClick = { onActionChange(PermissionAction.Approve) },
+            )
+            ToggleOption(
+                text = denyText,
+                isSelected = currentAction == PermissionAction.Deny,
+                modifier = Modifier.width(fixedSegmentWidth),
+                onClick = { onActionChange(PermissionAction.Deny) },
+            )
+            ToggleOption(
+                text = askText,
+                isSelected = currentAction == PermissionAction.Ask,
+                modifier = Modifier.width(fixedSegmentWidth),
+                onClick = { onActionChange(PermissionAction.Ask) },
+            )
         }
     }
 }
@@ -211,29 +215,17 @@ private fun ToggleOption(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    val textColor by animateColorAsState(
-        targetValue = if (isSelected) Color.White else AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-        animationSpec = tween(durationMillis = 200),
-        label = "textColor",
-    )
-
     Box(
         modifier = modifier
             .fillMaxHeight()
-            .clip(AppTheme.shapes.small)
+            .clip(AppTheme.shapes.extraSmall)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = text,
             style = AppTheme.typography.bodyMedium,
-            color = textColor,
+            color = if (isSelected) Color.White else AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
     }
 }
-
-private data class PermissionOption(
-    val label: String,
-    val action: PermissionAction,
-    val index: Int,
-)
