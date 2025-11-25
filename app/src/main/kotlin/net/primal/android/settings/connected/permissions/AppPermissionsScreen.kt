@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -95,11 +96,10 @@ fun AppPermissionsScreen(
                 val shape = getListItemShape(index = index, listSize = state.permissions.size)
 
                 Column(
-                    modifier = Modifier
-                        .clip(shape)
-                        .background(AppTheme.extraColorScheme.surfaceVariantAlt3),
+                    modifier = Modifier.clip(shape),
                 ) {
                     PermissionRow(
+                        modifier = Modifier.background(AppTheme.extraColorScheme.surfaceVariantAlt3),
                         permission = permission,
                         onActionChange = {
                             eventPublisher(UiEvent.ChangePermission(permission.permissionId, it))
@@ -119,9 +119,13 @@ fun AppPermissionsScreen(
 }
 
 @Composable
-private fun PermissionRow(permission: PermissionUi, onActionChange: (PermissionAction) -> Unit) {
+private fun PermissionRow(
+    permission: PermissionUi,
+    modifier: Modifier = Modifier,
+    onActionChange: (PermissionAction) -> Unit,
+) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -164,7 +168,7 @@ private fun PermissionToggle(currentAction: PermissionAction, onActionChange: (P
         modifier = Modifier
             .width(totalWidth)
             .height(32.dp)
-            .clip(AppTheme.shapes.extraSmall)
+            .clip(RoundedCornerShape(6.dp))
             .background(AppTheme.colorScheme.background)
             .padding(padding),
     ) {
@@ -179,7 +183,7 @@ private fun PermissionToggle(currentAction: PermissionAction, onActionChange: (P
                 .offset(x = indicatorOffset)
                 .width(fixedSegmentWidth)
                 .fillMaxHeight()
-                .clip(AppTheme.shapes.extraSmall)
+                .clip(RoundedCornerShape(4.dp))
                 .background(
                     if (LocalPrimalTheme.current.isDarkTheme) ToggleIndicatorColorDark else ToggleIndicatorColorLight,
                 ),
@@ -218,7 +222,7 @@ private fun ToggleOption(
     Box(
         modifier = modifier
             .fillMaxHeight()
-            .clip(AppTheme.shapes.extraSmall)
+            .clip(RoundedCornerShape(4.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
