@@ -163,6 +163,7 @@ private fun PermissionsListContent(uiState: UiState, eventPublisher: (UiEvent) -
                 .weight(weight = 1f, fill = false)
                 .padding(horizontal = 24.dp),
             events = uiState.sessionEvents,
+            permissionsMap = uiState.permissionsMap,
             selectedEventIds = uiState.selectedEventIds,
             onSelectEventClick = { eventPublisher(UiEvent.SelectEvent(it)) },
             onDeselectEventClick = { eventPublisher(UiEvent.DeselectEvent(it)) },
@@ -317,6 +318,7 @@ private fun AlwaysHandleRequestsSwitch(
 private fun AppRequestsList(
     modifier: Modifier = Modifier,
     events: List<SessionEvent>,
+    permissionsMap: Map<String, String>,
     selectedEventIds: Set<String>,
     onSelectEventClick: (String) -> Unit,
     onDeselectEventClick: (String) -> Unit,
@@ -330,6 +332,7 @@ private fun AppRequestsList(
             AppRequestListItem(
                 shape = getListItemShape(index = index, listSize = events.size),
                 event = event,
+                permissionsMap = permissionsMap,
                 isSelected = event.eventId in selectedEventIds,
                 onSelectClick = { onSelectEventClick(event.eventId) },
                 onDeselectClick = { onDeselectEventClick(event.eventId) },
@@ -346,6 +349,7 @@ fun AppRequestListItem(
     event: SessionEvent,
     shape: Shape,
     isSelected: Boolean,
+    permissionsMap: Map<String, String>,
     onSelectClick: () -> Unit,
     onDeselectClick: () -> Unit,
     showDivider: Boolean,
@@ -372,7 +376,10 @@ fun AppRequestListItem(
             },
         )
 
-        SessionEventMetadata(requestTypeId = event.requestTypeId, requestedAt = event.requestedAt)
+        SessionEventMetadata(
+            name = permissionsMap[event.requestTypeId] ?: event.requestTypeId,
+            requestedAt = event.requestedAt,
+        )
     }
 
     if (showDivider) {
@@ -381,7 +388,7 @@ fun AppRequestListItem(
 }
 
 @Composable
-private fun SessionEventMetadata(requestTypeId: String, requestedAt: Long) {
+private fun SessionEventMetadata(name: String, requestedAt: Long) {
     val formattedDateTime = rememberPrimalFormattedDateTime(
         timestamp = requestedAt,
         format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_A,
@@ -396,7 +403,7 @@ private fun SessionEventMetadata(requestTypeId: String, requestedAt: Long) {
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Text(
-                text = requestTypeId,
+                text = name,
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.colorScheme.onPrimary,
             )
