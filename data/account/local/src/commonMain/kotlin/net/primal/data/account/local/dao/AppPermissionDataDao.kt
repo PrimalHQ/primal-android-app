@@ -3,6 +3,7 @@ package net.primal.data.account.local.dao
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AppPermissionDataDao {
@@ -17,4 +18,7 @@ interface AppPermissionDataDao {
 
     @Query("SELECT * FROM AppPermissionData WHERE permissionId = :permissionId AND connectionId = :connectionId")
     suspend fun findPermission(permissionId: String, connectionId: String): AppPermissionData?
+
+    @Query("SELECT * FROM AppPermissionData WHERE connectionId = :connectionId")
+    fun observePermissions(connectionId: String): Flow<List<AppPermissionData>>
 }
