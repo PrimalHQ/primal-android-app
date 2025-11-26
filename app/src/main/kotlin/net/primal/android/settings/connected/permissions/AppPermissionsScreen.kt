@@ -93,18 +93,18 @@ fun AppPermissionsScreen(
 
             itemsIndexed(
                 items = state.permissions,
-                key = { _, permission -> permission.groupId },
-            ) { index, permission ->
+                key = { _, group -> group.groupId },
+            ) { index, permissionGroup ->
                 val shape = getListItemShape(index = index, listSize = state.permissions.size)
 
                 Column(
                     modifier = Modifier.clip(shape),
                 ) {
-                    PermissionRow(
+                    PermissionGroupRow(
                         modifier = Modifier.background(AppTheme.extraColorScheme.surfaceVariantAlt3),
-                        permission = permission,
+                        permissionGroup = permissionGroup,
                         onActionChange = {
-                            eventPublisher(UiEvent.ChangePermission(permission.groupId, it))
+                            eventPublisher(UiEvent.ChangePermission(permissionGroup.groupId, it))
                         },
                     )
                     if (index < state.permissions.lastIndex) {
@@ -121,8 +121,8 @@ fun AppPermissionsScreen(
 }
 
 @Composable
-private fun PermissionRow(
-    permission: PermissionGroupUi,
+private fun PermissionGroupRow(
+    permissionGroup: PermissionGroupUi,
     modifier: Modifier = Modifier,
     onActionChange: (PermissionAction) -> Unit,
 ) {
@@ -136,7 +136,7 @@ private fun PermissionRow(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 16.dp),
-            text = permission.title,
+            text = permissionGroup.title,
             style = AppTheme.typography.bodyLarge,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             maxLines = 1,
@@ -144,7 +144,7 @@ private fun PermissionRow(
         )
 
         PermissionToggle(
-            currentAction = permission.action,
+            currentAction = permissionGroup.action,
             onActionChange = onActionChange,
         )
     }
