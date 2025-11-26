@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
@@ -19,6 +20,7 @@ import net.primal.android.settings.connected.details.ConnectedAppDetailsContract
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiEvent
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiState
 import net.primal.android.settings.connected.model.SessionUi
+import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 
@@ -34,7 +36,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
     private val connectionId: String = savedStateHandle.connectionIdOrThrow
     private var activeSessionId: String? = null
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(connectionId = connectionId))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
@@ -42,28 +44,34 @@ class ConnectedAppDetailsViewModel @Inject constructor(
     val effect = _effect.receiveAsFlow()
     private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effect.send(effect) }
 
-    fun setEvent(event: UiEvent) {
-        viewModelScope.launch {
-            when (event) {
-                is UiEvent.AutoStartSessionChange -> updateAutoStartSession(event.enabled)
-                UiEvent.DeleteConnection -> setState { copy(confirmingDeletion = true) }
-                UiEvent.ConfirmDeletion -> deleteConnection()
-                UiEvent.DismissDeletionConfirmation -> setState { copy(confirmingDeletion = false) }
-                UiEvent.EditName -> setState { copy(editingName = true) }
-                is UiEvent.NameChange -> updateAppName(event.name)
-                UiEvent.DismissEditNameDialog -> setState { copy(editingName = false) }
-                UiEvent.StartSession -> startSession()
-                UiEvent.EndSession -> endSession()
-                UiEvent.DismissError -> setState { copy(error = null) }
-            }
-        }
-    }
+    private val events = MutableSharedFlow<UiEvent>()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
+        observeEvents()
         observeConnection()
         observeActiveSession()
         observeRecentSessions()
     }
+
+    private fun observeEvents() =
+        viewModelScope.launch {
+            events.collect { event ->
+                when (event) {
+                    is UiEvent.AutoStartSessionChange -> updateAutoStartSession(event.enabled)
+                    UiEvent.DeleteConnection -> setState { copy(confirmingDeletion = true) }
+                    UiEvent.ConfirmDeletion -> deleteConnection()
+                    UiEvent.DismissDeletionConfirmation -> setState { copy(confirmingDeletion = false) }
+                    UiEvent.EditName -> setState { copy(editingName = true) }
+                    is UiEvent.NameChange -> updateAppName(event.name)
+                    UiEvent.DismissEditNameDialog -> setState { copy(editingName = false) }
+                    UiEvent.StartSession -> startSession()
+                    UiEvent.EndSession -> endSession()
+                    UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.UpdateTrustLevel -> updateTrustLevel(event.trustLevel)
+                }
+            }
+        }
 
     private fun observeConnection() =
         viewModelScope.launch {
@@ -73,11 +81,22 @@ class ConnectedAppDetailsViewModel @Inject constructor(
                         appName = connection?.name,
                         appIconUrl = connection?.image,
                         autoStartSession = connection?.autoStart ?: false,
+                        trustLevel = connection?.trustLevel ?: TrustLevel.Low,
                         loading = false,
                     )
                 }
             }
         }
+
+    private fun updateTrustLevel(trustLevel: TrustLevel) {
+        viewModelScope.launch {
+            runCatching {
+                connectionRepository.updateTrustLevel(connectionId, trustLevel)
+            }.onFailure {
+                setState { copy(error = UiError.GenericError(it.message)) }
+            }
+        }
+    }
 
     private fun observeActiveSession() =
         viewModelScope.launch {

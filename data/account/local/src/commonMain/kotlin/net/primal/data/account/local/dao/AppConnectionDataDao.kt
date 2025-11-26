@@ -39,4 +39,7 @@ interface AppConnectionDataDao {
 
     @Query("UPDATE AppConnectionData SET autoStart = :autoStart WHERE connectionId = :connectionId")
     suspend fun updateConnectionAutoStart(connectionId: String, autoStart: Boolean)
+
+    @Query("UPDATE AppConnectionData SET trustLevel = :trustLevel WHERE connectionId = :connectionId")
+    suspend fun updateTrustLevel(connectionId: String, trustLevel: TrustLevel)
 }

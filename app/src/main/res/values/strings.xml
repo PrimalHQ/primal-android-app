@@ -1032,6 +1032,12 @@
     <string name="settings_connected_app_details_delete_connection">Delete Connection</string>
     <string name="settings_connected_app_details_auto_start_session">Auto start session</string>
     <string name="settings_connected_app_details_last_session">Last Session: %1$s</string>
+    <string name="settings_connected_app_permissions_allow">Allow</string>
+    <string name="settings_connected_app_permissions_deny">Deny</string>
+    <string name="settings_connected_app_permissions_ask">Ask</string>
+    <string name="settings_connected_app_permissions_title">App Permissions</string>
+    <string name="settings_connected_app_permissions_subtitle">Permissions</string>
+    <string name="settings_connected_app_permission_details_link">Permission Details</string>
     <string name="settings_session_details_title">Session Details</string>
     <string name="settings_session_details_started_on">Started on: %1$s</string>
     <string name="settings_event_details_title">Event Details</string>
