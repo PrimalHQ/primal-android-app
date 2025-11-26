@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
@@ -30,19 +31,24 @@ class AppPermissionsViewModel @Inject constructor(
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
+    private val events = MutableSharedFlow<UiEvent>()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
     init {
         loadPermissions()
         observeLastSession()
+        observeEvents()
     }
 
-    fun setEvent(event: UiEvent) {
+    private fun observeEvents() =
         viewModelScope.launch {
-            when (event) {
-                is UiEvent.ChangePermission -> updatePermission(event.permissionId, event.action)
-                UiEvent.DismissError -> setState { copy(error = null) }
+            events.collect { event ->
+                when (event) {
+                    is UiEvent.ChangePermission -> updatePermission(event.permissionId, event.action)
+                    UiEvent.DismissError -> setState { copy(error = null) }
+                }
             }
         }
-    }
 
     private fun observeLastSession() {
         viewModelScope.launch {

@@ -49,7 +49,7 @@ fun ConnectedAppHeader(
 
             Text(
                 text = appName ?: stringResource(id = R.string.settings_connected_apps_unknown),
-                style = AppTheme.typography.titleLarge,
+                style = AppTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 color = AppTheme.colorScheme.onPrimary,
             )
@@ -62,7 +62,7 @@ fun ConnectedAppHeader(
                 Text(
                     modifier = Modifier.padding(top = 2.dp),
                     text = stringResource(id = R.string.settings_session_details_started_on, formattedStartedAt),
-                    style = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.Normal),
+                    style = AppTheme.typography.bodyMedium,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 )
             }

@@ -1,5 +1,6 @@
 package net.primal.android.settings.connected.permissions
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -136,7 +137,7 @@ private fun PermissionRow(
                 .padding(end = 16.dp),
             text = permission.title,
             style = AppTheme.typography.bodyLarge,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
@@ -219,6 +220,12 @@ private fun ToggleOption(
     modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
+    val textColor by animateColorAsState(
+        targetValue = if (isSelected) Color.White else AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+        animationSpec = tween(durationMillis = 200),
+        label = "textColor",
+    )
+
     Box(
         modifier = modifier
             .fillMaxHeight()
@@ -229,7 +236,7 @@ private fun ToggleOption(
         Text(
             text = text,
             style = AppTheme.typography.bodyMedium,
-            color = if (isSelected) Color.White else AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            color = textColor,
         )
     }
 }
