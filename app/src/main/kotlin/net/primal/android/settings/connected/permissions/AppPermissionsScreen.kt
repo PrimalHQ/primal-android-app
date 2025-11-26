@@ -67,6 +67,7 @@ fun AppPermissionsScreen(
     onClose: () -> Unit,
 ) {
     PrimalScaffold(
+        containerColor = AppTheme.colorScheme.surfaceVariant,
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_connected_app_permissions_title),
@@ -221,7 +222,7 @@ private fun ToggleOption(
     onClick: () -> Unit,
 ) {
     val textColor by animateColorAsState(
-        targetValue = if (isSelected) Color.White else AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+        targetValue = if (isSelected) Color.White else AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         animationSpec = tween(durationMillis = 200),
         label = "textColor",
     )

@@ -610,6 +610,7 @@ fun PreviewConnectedAppDetailsScreen() {
                 appName = "Highlighter",
                 lastSessionStartedAt = mockRecentSessionsForPreview.first().startedAt,
                 recentSessions = mockRecentSessionsForPreview,
+                connectionId = "",
             ),
             onClose = {},
             eventPublisher = {},
