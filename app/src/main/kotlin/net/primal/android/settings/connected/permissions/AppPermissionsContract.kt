@@ -1,7 +1,7 @@
 package net.primal.android.settings.connected.permissions
 
 import net.primal.android.core.errors.UiError
-import net.primal.android.settings.connected.model.PermissionUi
+import net.primal.android.settings.connected.model.PermissionGroupUi
 import net.primal.domain.account.model.PermissionAction
 
 interface AppPermissionsContract {
@@ -10,12 +10,12 @@ interface AppPermissionsContract {
         val appIconUrl: String? = null,
         val appLastSessionAt: Long? = null,
         val loading: Boolean = true,
-        val permissions: List<PermissionUi> = emptyList(),
+        val permissions: List<PermissionGroupUi> = emptyList(),
         val error: UiError? = null,
     )
 
     sealed class UiEvent {
-        data class ChangePermission(val permissionId: String, val action: PermissionAction) : UiEvent()
+        data class ChangePermission(val groupPermissionId: String, val action: PermissionAction) : UiEvent()
         data object DismissError : UiEvent()
     }
 }

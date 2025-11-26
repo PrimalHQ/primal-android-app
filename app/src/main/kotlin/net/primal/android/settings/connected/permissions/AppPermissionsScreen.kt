@@ -39,7 +39,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.settings.connected.model.PermissionUi
+import net.primal.android.settings.connected.model.PermissionGroupUi
 import net.primal.android.settings.connected.permissions.AppPermissionsContract.UiEvent
 import net.primal.android.settings.connected.ui.ConnectedAppHeader
 import net.primal.android.theme.AppTheme
@@ -93,7 +93,7 @@ fun AppPermissionsScreen(
 
             itemsIndexed(
                 items = state.permissions,
-                key = { _, permission -> permission.permissionId },
+                key = { _, permission -> permission.groupId },
             ) { index, permission ->
                 val shape = getListItemShape(index = index, listSize = state.permissions.size)
 
@@ -104,7 +104,7 @@ fun AppPermissionsScreen(
                         modifier = Modifier.background(AppTheme.extraColorScheme.surfaceVariantAlt3),
                         permission = permission,
                         onActionChange = {
-                            eventPublisher(UiEvent.ChangePermission(permission.permissionId, it))
+                            eventPublisher(UiEvent.ChangePermission(permission.groupId, it))
                         },
                     )
                     if (index < state.permissions.lastIndex) {
@@ -122,7 +122,7 @@ fun AppPermissionsScreen(
 
 @Composable
 private fun PermissionRow(
-    permission: PermissionUi,
+    permission: PermissionGroupUi,
     modifier: Modifier = Modifier,
     onActionChange: (PermissionAction) -> Unit,
 ) {
