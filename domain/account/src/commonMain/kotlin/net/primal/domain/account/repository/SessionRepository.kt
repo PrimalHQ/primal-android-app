@@ -17,7 +17,11 @@ interface SessionRepository {
 
     suspend fun getSession(sessionId: String): Result<AppSession>
 
+    suspend fun findActiveSessionForConnection(connectionId: String): Result<AppSession>
+
     suspend fun startSession(connectionId: String): Result<String>
+
+    suspend fun startSessionForClient(clientPubKey: String): Result<String>
 
     suspend fun endSession(sessionId: String)
 

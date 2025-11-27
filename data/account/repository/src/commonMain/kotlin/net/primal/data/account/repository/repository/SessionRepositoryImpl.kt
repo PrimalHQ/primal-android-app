@@ -10,6 +10,8 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.asSuccess
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.mapCatching
+import net.primal.core.utils.runCatching
 import net.primal.data.account.local.dao.AppSessionData
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
@@ -69,6 +71,16 @@ class SessionRepositoryImpl(
                 Result.failure(
                     IllegalStateException("There is an already active session for this connection."),
                 )
+            }
+        }
+
+    override suspend fun startSessionForClient(clientPubKey: String): Result<String> =
+        withContext(dispatchers.io()) {
+            runCatching {
+                database.connections().getConnectionByClientPubKey(clientPubKey = clientPubKey.asEncryptable())
+                    ?: throw NoSuchElementException("Couldn't find connection for given clientPubKey")
+            }.mapCatching {
+                startSession(connectionId = it.data.connectionId).getOrThrow()
             }
         }
 

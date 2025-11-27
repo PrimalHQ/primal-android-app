@@ -16,14 +16,21 @@ class RemoteSignerSessionHandler @Inject constructor(
 
     suspend fun startSession(connectionId: String) {
         sessionRepository.startSession(connectionId = connectionId)
-            .onSuccess {
-                if (!PrimalRemoteSignerService.isServiceRunning.value) {
-                    PrimalRemoteSignerService.start(context = context)
-                }
-            }
+            .onSuccess { ensureServiceStarted() }
+    }
+
+    suspend fun startSessionForClient(clientPubKey: String) {
+        sessionRepository.startSessionForClient(clientPubKey = clientPubKey)
+            .onSuccess { ensureServiceStarted() }
     }
 
     suspend fun endSession(sessionId: String) {
         sessionRepository.endSession(sessionId = sessionId)
+    }
+
+    private fun ensureServiceStarted() {
+        if (!PrimalRemoteSignerService.isServiceRunning.value) {
+            PrimalRemoteSignerService.start(context = context)
+        }
     }
 }
