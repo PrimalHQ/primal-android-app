@@ -64,7 +64,7 @@ class FcmPushNotificationsTokenUpdater @Inject constructor(
                 FirebaseMessaging.getInstance().token.await()
             }.mapCatching { token ->
                 val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
-                val connections = connectionRepository.getAllConnections(signerPubKey = signerKeyPair.pubKey)
+                val connections = connectionRepository.getAllAutoStartConnections(signerPubKey = signerKeyPair.pubKey)
 
                 signAuthorizationEventOrNull(
                     userId = signerKeyPair.pubKey,

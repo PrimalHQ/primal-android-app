@@ -157,6 +157,8 @@ class ConnectedAppDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 connectionRepository.updateConnectionAutoStart(connectionId, enabled)
+            }.onSuccess {
+                runCatching { tokenUpdater.updateTokenForRemoteSigner() }
             }.onFailure {
                 setState { copy(error = UiError.GenericError(it.message)) }
             }

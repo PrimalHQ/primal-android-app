@@ -24,6 +24,10 @@ interface AppConnectionDataDao {
     @Query("SELECT * FROM AppConnectionData WHERE signerPubKey = :signerPubKey")
     suspend fun getAll(signerPubKey: Encryptable<String>): List<AppConnection>
 
+    @Transaction
+    @Query("SELECT * FROM AppConnectionData WHERE signerPubKey = :signerPubKey AND autoStart = true")
+    suspend fun getAllAutoStartConnections(signerPubKey: Encryptable<String>): List<AppConnection>
+
     @Query("DELETE FROM AppConnectionData WHERE connectionId = :connectionId")
     suspend fun deleteConnection(connectionId: String)
 

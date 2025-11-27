@@ -40,6 +40,12 @@ class ConnectionRepositoryImpl(
                 .map { it.asDomain() }
         }
 
+    override suspend fun getAllAutoStartConnections(signerPubKey: String): List<AppConnection> =
+        withContext(dispatchers.io()) {
+            database.connections().getAllAutoStartConnections(signerPubKey = signerPubKey.asEncryptable())
+                .map { it.asDomain() }
+        }
+
     override suspend fun deleteConnection(connectionId: String) =
         withContext(dispatchers.io()) {
             database.withTransaction {
