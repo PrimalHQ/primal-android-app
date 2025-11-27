@@ -22,12 +22,16 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.SubcomposeAsyncImage
+import coil3.imageLoader
+import coil3.memory.MemoryCache
+import coil3.request.ImageRequest
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -74,27 +78,10 @@ fun ArticleDetailsHeader(
             ),
         )
 
-        if (cover != null) {
-            Spacer(modifier = Modifier.height(12.dp))
-            BoxWithConstraints(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(shape = AppTheme.shapes.small),
-            ) {
-                val maxWidthPx = with(LocalDensity.current) { this@BoxWithConstraints.maxWidth.roundToPx() }
-                val variant = cover.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
-                val maxWidth = maxWidth.value.toInt()
-
-                SubcomposeAsyncImage(
-                    modifier = Modifier
-                        .size(variant.findImageSize(maxWidth))
-                        .clickable { onMediaClick(variant?.mediaUrl ?: cover.sourceUrl) },
-                    model = variant?.mediaUrl ?: cover.sourceUrl,
-                    contentScale = ContentScale.FillWidth,
-                    contentDescription = null,
-                )
-            }
-        }
+        ArticleCoverImage(
+            cover = cover,
+            onMediaClick = onMediaClick,
+        )
 
         if (summary != null) {
             val density = LocalDensity.current
@@ -125,6 +112,46 @@ fun ArticleDetailsHeader(
                     },
                 markdown = summary,
                 markwon = markwon,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ArticleCoverImage(cover: CdnImage?, onMediaClick: (String) -> Unit) {
+    if (cover != null) {
+        val memoryCache = LocalContext.current.imageLoader.memoryCache
+
+        val keys = cover.variants
+            .sortedBy { it.width }
+            .map { MemoryCache.Key(it.mediaUrl) }
+            .filter { memoryCache?.get(it) != null }
+
+        val highestResMirrorImage = keys.firstOrNull()?.let { memoryCache?.get(it) }?.image
+        val placeholderKey = keys.lastOrNull()
+
+        Spacer(modifier = Modifier.height(12.dp))
+        BoxWithConstraints(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(shape = AppTheme.shapes.small),
+        ) {
+            val maxWidthPx = with(LocalDensity.current) { this@BoxWithConstraints.maxWidth.roundToPx() }
+            val variant = cover.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+            val maxWidth = maxWidth.value.toInt()
+
+            SubcomposeAsyncImage(
+                modifier = Modifier
+                    .size(variant.findImageSize(maxWidth))
+                    .clickable { onMediaClick(variant?.mediaUrl ?: cover.sourceUrl) },
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(variant?.mediaUrl ?: cover.sourceUrl)
+                    .placeholderMemoryCacheKey(placeholderKey)
+                    .error(highestResMirrorImage)
+                    .fallback(highestResMirrorImage)
+                    .build(),
+                contentScale = ContentScale.FillWidth,
+                contentDescription = null,
             )
         }
     }
