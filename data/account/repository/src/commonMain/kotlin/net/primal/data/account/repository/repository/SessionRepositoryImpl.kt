@@ -57,6 +57,14 @@ class SessionRepositoryImpl(
                 ?: Result.failure(NoSuchElementException("Couldn't find session for given sessionId."))
         }
 
+    override suspend fun findActiveSessionForConnection(connectionId: String): Result<AppSession> =
+        withContext(dispatchers.io()) {
+            runCatching {
+                database.sessions().findActiveSessionByConnectionId(connectionId = connectionId)?.asDomain()
+                    ?: throw NoSuchElementException("Couldn't find active session for connection.")
+            }
+        }
+
     override suspend fun startSession(connectionId: String): Result<String> =
         withContext(dispatchers.io()) {
             Napier.d(tag = "Signer") { "Starting session for $connectionId" }

@@ -14,6 +14,7 @@ import net.primal.data.account.repository.repository.PermissionsRepositoryImpl
 import net.primal.data.account.repository.repository.SessionEventRepositoryImpl
 import net.primal.data.account.repository.repository.SessionRepositoryImpl
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
+import net.primal.domain.account.handler.Nip46EventsHandler
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
@@ -49,10 +50,11 @@ abstract class RepositoryFactory {
             dispatchers = dispatcherProvider,
         )
 
-    fun createSessionEventRepository(): SessionEventRepository =
+    fun createSessionEventRepository(nip46EventsHandler: Nip46EventsHandler): SessionEventRepository =
         SessionEventRepositoryImpl(
             database = resolveAccountDatabase(),
             dispatchers = dispatcherProvider,
+            nip46EventsHandler = nip46EventsHandler,
         )
 
     fun createSignerConnectionInitializer(

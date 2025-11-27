@@ -9,21 +9,25 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.AppPermissionData
+import net.primal.data.account.local.dao.PendingNostrEvent
 import net.primal.data.account.local.dao.PermissionAction
 import net.primal.data.account.local.dao.RequestState
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.getRequestTypeId
+import net.primal.domain.account.handler.Nip46EventsHandler
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.UserChoice
 import net.primal.domain.account.repository.SessionEventRepository
+import net.primal.domain.nostr.cryptography.NostrKeyPair
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
 
 class SessionEventRepositoryImpl(
     private val database: AccountDatabase,
     private val dispatchers: DispatcherProvider,
+    private val nip46EventsHandler: Nip46EventsHandler,
 ) : SessionEventRepository {
     override fun observeEventsPendingUserAction(signerPubKey: String): Flow<List<SessionEvent>> =
         database.sessionEvents().observeEventsByRequestState(
@@ -43,6 +47,24 @@ class SessionEventRepositoryImpl(
             .map { it?.asDomain() }
             .distinctUntilChanged()
     }
+
+    override suspend fun processMissedEvents(signerKeyPair: NostrKeyPair, eventIds: List<String>): Result<Unit> =
+        withContext(dispatchers.io()) {
+            runCatching {
+                val events = nip46EventsHandler.fetchNip46Events(eventIds = eventIds).getOrThrow()
+
+                database.pendingNostrEvents().upsertAll(
+                    data = events.map {
+                        PendingNostrEvent(
+                            eventId = it.id,
+                            clientPubKey = it.pubKey.asEncryptable(),
+                            signerPubKey = signerKeyPair.pubKey.asEncryptable(),
+                            rawNostrEventJson = it.encodeToJsonString().asEncryptable(),
+                        )
+                    },
+                )
+            }
+        }
 
     override suspend fun respondToEvent(eventId: String, userChoice: UserChoice): Result<Unit> =
         withContext(dispatchers.io()) {
