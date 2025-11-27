@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
@@ -15,6 +16,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.viewpager.widget.ViewPager.LayoutParams
 import io.noties.markwon.Markwon
 import net.primal.android.R
+import net.primal.android.theme.AppTheme
 
 @Composable
 fun MarkdownRenderer(
@@ -30,6 +32,7 @@ fun MarkdownRenderer(
     val menuItemLabelQuote = stringResource(R.string.article_details_highlight_toolbar_quote)
     val menuItemLabelComment = stringResource(R.string.article_details_highlight_toolbar_comment)
     val menuItemLabelCopy = stringResource(R.string.article_details_highlight_toolbar_copy)
+    val defaultTextColor = AppTheme.extraColorScheme.onBrand.toArgb()
     AndroidView(
         modifier = modifier,
         factory = { context ->
@@ -96,6 +99,7 @@ fun MarkdownRenderer(
             }
         },
         update = { textView ->
+            textView.setTextColor(defaultTextColor)
             markwon.setMarkdown(textView, markdown)
         },
     )
