@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -20,26 +21,34 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.settings.connected.model.PermissionUi
+import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.settings.connected.model.PermissionGroupUi
 import net.primal.android.settings.connected.permissions.AppPermissionsContract.UiEvent
 import net.primal.android.settings.connected.ui.ConnectedAppHeader
 import net.primal.android.theme.AppTheme
@@ -66,7 +75,18 @@ fun AppPermissionsScreen(
     eventPublisher: (UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    SnackbarErrorHandler(
+        error = if (state.permissions.isNotEmpty()) state.error else null,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context = context) },
+        onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
+    )
+
     PrimalScaffold(
+        modifier = Modifier.imePadding(),
         containerColor = AppTheme.colorScheme.surfaceVariant,
         topBar = {
             PrimalTopAppBar(
@@ -75,54 +95,71 @@ fun AppPermissionsScreen(
                 onNavigationIconClick = onClose,
             )
         },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 12.dp),
-        ) {
-            item {
-                ConnectedAppHeader(
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    appName = state.appName,
-                    appIconUrl = state.appIconUrl,
-                    startedAt = state.appLastSessionAt,
-                )
-            }
-
-            itemsIndexed(
-                items = state.permissions,
-                key = { _, permission -> permission.permissionId },
-            ) { index, permission ->
-                val shape = getListItemShape(index = index, listSize = state.permissions.size)
-
-                Column(
-                    modifier = Modifier.clip(shape),
-                ) {
-                    PermissionRow(
-                        modifier = Modifier.background(AppTheme.extraColorScheme.surfaceVariantAlt3),
-                        permission = permission,
-                        onActionChange = {
-                            eventPublisher(UiEvent.ChangePermission(permission.permissionId, it))
-                        },
+        if (state.permissions.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 12.dp),
+            ) {
+                item {
+                    ConnectedAppHeader(
+                        modifier = Modifier.padding(vertical = 16.dp),
+                        appName = state.appName,
+                        appIconUrl = state.appIconUrl,
+                        startedAt = state.appLastSessionAt,
                     )
-                    if (index < state.permissions.lastIndex) {
-                        PrimalDivider()
+                }
+
+                itemsIndexed(
+                    items = state.permissions,
+                    key = { _, group -> group.groupId },
+                ) { index, permissionGroup ->
+                    val shape = getListItemShape(index = index, listSize = state.permissions.size)
+
+                    Column(modifier = Modifier.clip(shape)) {
+                        PermissionGroupRow(
+                            modifier = Modifier.background(AppTheme.extraColorScheme.surfaceVariantAlt3),
+                            permissionGroup = permissionGroup,
+                            onActionChange = { action ->
+                                eventPublisher(
+                                    UiEvent.UpdatePermission(
+                                        permissionIds = permissionGroup.permissionIds,
+                                        action = action,
+                                    ),
+                                )
+                            },
+                        )
+                        if (index < state.permissions.lastIndex) {
+                            PrimalDivider()
+                        }
                     }
                 }
-            }
 
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
+                item {
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
             }
+        } else if (state.loading) {
+            PrimalLoadingSpinner()
+        } else {
+            ListNoContent(
+                modifier = Modifier.fillMaxSize(),
+                noContentText = stringResource(id = R.string.settings_connected_app_permissions_error_loading),
+                refreshButtonVisible = true,
+                onRefresh = { eventPublisher(UiEvent.Retry) },
+            )
         }
     }
 }
 
 @Composable
-private fun PermissionRow(
-    permission: PermissionUi,
+private fun PermissionGroupRow(
+    permissionGroup: PermissionGroupUi,
     modifier: Modifier = Modifier,
     onActionChange: (PermissionAction) -> Unit,
 ) {
@@ -136,7 +173,7 @@ private fun PermissionRow(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 16.dp),
-            text = permission.title,
+            text = permissionGroup.title,
             style = AppTheme.typography.bodyLarge,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             maxLines = 1,
@@ -144,7 +181,7 @@ private fun PermissionRow(
         )
 
         PermissionToggle(
-            currentAction = permission.action,
+            currentAction = permissionGroup.action,
             onActionChange = onActionChange,
         )
     }

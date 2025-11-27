@@ -1038,6 +1038,7 @@
     <string name="settings_connected_app_permissions_title">App Permissions</string>
     <string name="settings_connected_app_permissions_subtitle">Permissions</string>
     <string name="settings_connected_app_permission_details_link">Permission Details</string>
+    <string name="settings_connected_app_permissions_error_loading">We couldn\'t load permissions. Please try again.</string>
     <string name="settings_session_details_title">Session Details</string>
     <string name="settings_session_details_started_on">Started on: %1$s</string>
     <string name="settings_event_details_title">Event Details</string>
