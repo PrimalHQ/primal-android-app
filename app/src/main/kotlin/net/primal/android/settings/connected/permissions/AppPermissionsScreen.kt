@@ -104,7 +104,7 @@ fun AppPermissionsScreen(
         } else if (state.permissions.isEmpty() && state.error != null) {
             ListNoContent(
                 modifier = Modifier.fillMaxSize(),
-                noContentText = state.error.resolveUiErrorMessage(context),
+                noContentText = stringResource(id = R.string.settings_connected_app_permissions_error_loading),
                 refreshButtonVisible = true,
                 onRefresh = { eventPublisher(UiEvent.Retry) },
             )
