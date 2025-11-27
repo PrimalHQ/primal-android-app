@@ -38,7 +38,9 @@ class EventDetailsViewModel @Inject constructor(
                 if (sessionEvent is SessionEvent.SignEvent) {
                     val rawJson = sessionEvent.signedNostrEventJson
                     val nostrEvent = rawJson?.let {
-                        NostrJsonEncodeDefaults.decodeFromString<NostrEvent>(it)
+                        runCatching {
+                            NostrJsonEncodeDefaults.decodeFromString<NostrEvent>(it)
+                        }.getOrNull()
                     }
                     setState {
                         copy(
