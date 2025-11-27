@@ -99,16 +99,7 @@ fun AppPermissionsScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
     ) { paddingValues ->
-        if (state.loading) {
-            PrimalLoadingSpinner()
-        } else if (state.permissions.isEmpty() && state.error != null) {
-            ListNoContent(
-                modifier = Modifier.fillMaxSize(),
-                noContentText = stringResource(id = R.string.settings_connected_app_permissions_error_loading),
-                refreshButtonVisible = true,
-                onRefresh = { eventPublisher(UiEvent.Retry) },
-            )
-        } else {
+        if (state.permissions.isNotEmpty()) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
@@ -130,9 +121,7 @@ fun AppPermissionsScreen(
                 ) { index, permissionGroup ->
                     val shape = getListItemShape(index = index, listSize = state.permissions.size)
 
-                    Column(
-                        modifier = Modifier.clip(shape),
-                    ) {
+                    Column(modifier = Modifier.clip(shape)) {
                         PermissionGroupRow(
                             modifier = Modifier.background(AppTheme.extraColorScheme.surfaceVariantAlt3),
                             permissionGroup = permissionGroup,
@@ -155,6 +144,15 @@ fun AppPermissionsScreen(
                     Spacer(modifier = Modifier.height(24.dp))
                 }
             }
+        } else if (state.loading) {
+            PrimalLoadingSpinner()
+        } else {
+            ListNoContent(
+                modifier = Modifier.fillMaxSize(),
+                noContentText = stringResource(id = R.string.settings_connected_app_permissions_error_loading),
+                refreshButtonVisible = true,
+                onRefresh = { eventPublisher(UiEvent.Retry) },
+            )
         }
     }
 }
