@@ -50,7 +50,11 @@ class AppPermissionsViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect { event ->
                 when (event) {
-                    is UiEvent.ChangePermission -> updatePermission(event.groupPermissionId, event.action)
+                    is UiEvent.UpdatePermission -> updatePermission(
+                        permissionIds = event.permissionIds,
+                        action = event.action,
+                    )
+                    UiEvent.Retry -> observePermissions()
                     UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
@@ -69,13 +73,11 @@ class AppPermissionsViewModel @Inject constructor(
     private fun observeAppConnection() {
         viewModelScope.launch {
             connectionRepository.observeConnection(connectionId).collect { connection ->
-                if (connection != null) {
-                    setState {
-                        copy(
-                            appName = connection.name,
-                            appIconUrl = connection.image,
-                        )
-                    }
+                setState {
+                    copy(
+                        appName = connection?.name,
+                        appIconUrl = connection?.image,
+                    )
                 }
             }
         }
@@ -83,6 +85,7 @@ class AppPermissionsViewModel @Inject constructor(
 
     private fun observePermissions() {
         viewModelScope.launch {
+            setState { copy(loading = true, error = null) }
             permissionsRepository.observePermissions(connectionId).fold(
                 onSuccess = { permissionsFlow ->
                     permissionsFlow.collect { groups ->
@@ -95,26 +98,21 @@ class AppPermissionsViewModel @Inject constructor(
                     }
                 },
                 onFailure = {
-                    setState { copy(error = UiError.GenericError(it.message)) }
+                    setState {
+                        copy(
+                            error = UiError.GenericError(it.message),
+                            loading = false,
+                        )
+                    }
                 },
             )
         }
     }
 
-    private fun updatePermission(groupPermissionId: String, action: PermissionAction) {
-        val group = state.value.permissions.find { it.groupId == groupPermissionId } ?: return
-
-        setState {
-            copy(
-                permissions = permissions.map {
-                    if (it.groupId == groupPermissionId) it.copy(action = action) else it
-                },
-            )
-        }
-
+    private fun updatePermission(permissionIds: List<String>, action: PermissionAction) {
         viewModelScope.launch {
             permissionsRepository.updatePermissionsAction(
-                permissionIds = group.permissionIds,
+                permissionIds = permissionIds,
                 connectionId = connectionId,
                 action = action,
             ).onFailure {

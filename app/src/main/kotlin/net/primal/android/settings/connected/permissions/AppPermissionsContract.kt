@@ -15,7 +15,11 @@ interface AppPermissionsContract {
     )
 
     sealed class UiEvent {
-        data class ChangePermission(val groupPermissionId: String, val action: PermissionAction) : UiEvent()
+        data class UpdatePermission(
+            val permissionIds: List<String>,
+            val action: PermissionAction,
+        ) : UiEvent()
+        data object Retry : UiEvent()
         data object DismissError : UiEvent()
     }
 }
