@@ -4,8 +4,13 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import net.primal.android.networking.di.PrimalCacheApiClient
+import net.primal.android.nostrconnect.handler.Nip46EventsHandlerImpl
+import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.account.repository.repository.factory.AccountRepositoryFactory
 import net.primal.data.account.repository.service.factory.AccountServiceFactory
+import net.primal.data.remote.factory.PrimalApiServiceFactory
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
@@ -22,8 +27,16 @@ object AccountRepositoriesModule {
     fun provideSessionRepository(): SessionRepository = AccountRepositoryFactory.createSessionRepository()
 
     @Provides
-    fun provideSessionEventRepository(): SessionEventRepository =
-        AccountRepositoryFactory.createSessionEventRepository()
+    fun provideSessionEventRepository(
+        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
+        dispatchers: DispatcherProvider,
+    ): SessionEventRepository =
+        AccountRepositoryFactory.createSessionEventRepository(
+            nip46EventsHandler = Nip46EventsHandlerImpl(
+                eventStatsApi = PrimalApiServiceFactory.createEventsApi(primalApiClient = primalApiClient),
+                dispatchers = dispatchers,
+            ),
+        )
 
     @Provides
     fun providePermissionsRepository(): PermissionsRepository = AccountRepositoryFactory.createPermissionsRepository()

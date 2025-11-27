@@ -11,6 +11,7 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.RequestState
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.method.processor.RemoteSignerMethodProcessor
 import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.model.RelayEvent
@@ -31,6 +32,8 @@ class RemoteSignerServiceImpl internal constructor(
     private val internalSessionEventRepository: InternalSessionEventRepository,
 ) : RemoteSignerService {
 
+    private val methodProcessor = RemoteSignerMethodProcessor()
+
     private val scope = CoroutineScope(SupervisorJob())
 
     private var activeRelays = emptySet<String>()
@@ -42,6 +45,7 @@ class RemoteSignerServiceImpl internal constructor(
         Napier.d(tag = "Signer") { "RemoteSignerService started." }
         observeOngoingSessions()
         observePendingResponseEvents()
+        observePendingNostrEvents()
         observeRelayEvents()
         observeMethods()
         observeErrors()
@@ -64,6 +68,25 @@ class RemoteSignerServiceImpl internal constructor(
                     clientSessionMap = sessions.associate { it.clientPubKey to it.sessionId }
                     activeClientPubKeys = sessions.map { it.clientPubKey }.toHashSet()
                     nostrRelayManager.connectToRelays(relays = sessions.flatMap { it.relays }.toSet())
+                }
+        }
+
+    private fun observePendingNostrEvents() =
+        scope.launch {
+            internalSessionEventRepository.observePendingNostrEvents(signerPubKey = signerKeyPair.pubKey)
+                .collect { nostrEvents ->
+                    if (nostrEvents.isEmpty()) return@collect
+
+                    nostrEvents.forEach { event ->
+                        methodProcessor.processNostrEvent(
+                            event = event,
+                            signerKeyPair = signerKeyPair,
+                            onFailure = { scope.launch { sendResponse(response = it) } },
+                            onSuccess = { scope.launch { processMethod(method = it) } },
+                        )
+                    }
+
+                    internalSessionEventRepository.deletePendingNostrEvents(eventIds = nostrEvents.map { it.id })
                 }
         }
 
@@ -166,7 +189,7 @@ class RemoteSignerServiceImpl internal constructor(
                 null
             }
 
-            clientSessionMap[method.clientPubKey]?.let { sessionId ->
+            findActiveSessionId(clientPubKey = method.clientPubKey)?.let { sessionId ->
                 internalSessionEventRepository.saveSessionEvent(
                     sessionId = sessionId,
                     method = method,
@@ -181,6 +204,12 @@ class RemoteSignerServiceImpl internal constructor(
                 sendResponse(response = response)
             }
         }
+
+    private suspend fun findActiveSessionId(clientPubKey: String): String? =
+        clientSessionMap[clientPubKey]
+            ?: connectionRepository.getConnectionByClientPubKey(clientPubKey = clientPubKey).getOrNull()
+                ?.let { sessionRepository.findActiveSessionForConnection(connectionId = it.connectionId) }
+                ?.getOrNull()?.sessionId
 
     private suspend fun sendResponse(response: RemoteSignerMethodResponse) {
         Napier.d(tag = "Signer") { "Sending response: $response" }

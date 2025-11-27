@@ -13,6 +13,8 @@ import net.primal.data.account.local.dao.AppPermissionData
 import net.primal.data.account.local.dao.AppPermissionDataDao
 import net.primal.data.account.local.dao.AppSessionData
 import net.primal.data.account.local.dao.AppSessionDataDao
+import net.primal.data.account.local.dao.PendingNostrEvent
+import net.primal.data.account.local.dao.PendingNostrEventDao
 import net.primal.data.account.local.dao.SessionEventData
 import net.primal.data.account.local.dao.SessionEventDataDao
 import net.primal.shared.data.local.serialization.EncryptableTypeConverters
@@ -24,8 +26,9 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         AppPermissionData::class,
         AppSessionData::class,
         SessionEventData::class,
+        PendingNostrEvent::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
 )
 @TypeConverters(
@@ -38,6 +41,7 @@ abstract class AccountDatabase : RoomDatabase() {
     abstract fun permissions(): AppPermissionDataDao
     abstract fun sessions(): AppSessionDataDao
     abstract fun sessionEvents(): SessionEventDataDao
+    abstract fun pendingNostrEvents(): PendingNostrEventDao
 
     companion object {
         fun provideDatabaseCallback() =
@@ -57,6 +61,7 @@ abstract class AccountDatabase : RoomDatabase() {
                         WHERE requestState = 'PendingUserAction'
                         """.trimIndent(),
                     )
+                    connection.execSQL("DELETE FROM PendingNostrEvent")
                 }
             }
 

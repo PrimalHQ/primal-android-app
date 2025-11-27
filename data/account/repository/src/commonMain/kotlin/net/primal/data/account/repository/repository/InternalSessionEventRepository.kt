@@ -1,20 +1,22 @@
 package net.primal.data.account.repository.repository
 
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.account.local.dao.RequestState
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.buildSessionEventData
 import net.primal.data.account.repository.repository.model.UpdateSessionEventRequest
+import net.primal.domain.nostr.NostrEvent
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
 
-@OptIn(ExperimentalTime::class)
 internal class InternalSessionEventRepository(
     private val accountDatabase: AccountDatabase,
     private val dispatchers: DispatcherProvider,
@@ -25,17 +27,19 @@ internal class InternalSessionEventRepository(
         method: RemoteSignerMethod,
         response: RemoteSignerMethodResponse?,
     ) = withContext(dispatchers.io()) {
-        val completedAt = Clock.System.now().epochSeconds
+        runCatching {
+            val completedAt = Clock.System.now().epochSeconds
 
-        buildSessionEventData(
-            sessionId = sessionId,
-            signerPubKey = signerPubKey,
-            requestedAt = method.requestedAt,
-            completedAt = if (response != null) completedAt else null,
-            method = method,
-            response = response,
-        )?.let { sessionEventData ->
-            accountDatabase.sessionEvents().upsert(data = sessionEventData)
+            buildSessionEventData(
+                sessionId = sessionId,
+                signerPubKey = signerPubKey,
+                requestedAt = method.requestedAt,
+                completedAt = if (response != null) completedAt else null,
+                method = method,
+                response = response,
+            )?.let { sessionEventData ->
+                accountDatabase.sessionEvents().insert(data = sessionEventData)
+            } ?: throw IllegalArgumentException("Couldn't build session event data.")
         }
     }
 
@@ -44,6 +48,19 @@ internal class InternalSessionEventRepository(
             signerPubKey = signerPubKey.asEncryptable(),
             requestState = RequestState.PendingResponse,
         ).distinctUntilChanged()
+
+    fun observePendingNostrEvents(signerPubKey: String) =
+        accountDatabase.pendingNostrEvents().observeAllBySignerPubKey(
+            signerPubKey = signerPubKey.asEncryptable(),
+        ).map { list -> list.mapNotNull { it.rawNostrEventJson.decrypted.decodeFromJsonStringOrNull<NostrEvent>() } }
+            .distinctUntilChanged()
+
+    suspend fun deletePendingNostrEvents(eventIds: List<String>) =
+        withContext(dispatchers.io()) {
+            runCatching {
+                accountDatabase.pendingNostrEvents().deleteByIds(eventIds = eventIds)
+            }
+        }
 
     suspend fun updateSessionEventState(requests: List<UpdateSessionEventRequest>) =
         withContext(dispatchers.io()) {
