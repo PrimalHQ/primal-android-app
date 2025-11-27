@@ -13,6 +13,8 @@ interface ConnectionRepository {
 
     suspend fun getAllConnections(signerPubKey: String): List<AppConnection>
 
+    suspend fun getAllAutoStartConnections(signerPubKey: String): List<AppConnection>
+
     suspend fun deleteConnection(connectionId: String)
 
     suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<AppConnection>
