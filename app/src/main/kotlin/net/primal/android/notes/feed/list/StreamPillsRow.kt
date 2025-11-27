@@ -203,26 +203,24 @@ private fun StreamPill(
             fontWeight = FontWeight.Bold,
         )
 
-        streamPill.title?.let {
-            Text(
-                modifier = Modifier
-                    .padding(start = 8.dp)
-                    .fadingEdge(
-                        edge = FadingEdge.End,
-                        color = AppTheme.colorScheme.primary,
-                        length = 24.dp,
-                    )
-                    .basicMarquee(
-                        iterations = Int.MAX_VALUE,
-                        velocity = 64.dp,
-                    )
-                    .weight(1f),
-                maxLines = 1,
-                text = streamPill.title,
-                style = AppTheme.typography.bodyLarge,
-                color = Color.White,
-            )
-        }
+        Text(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .fadingEdge(
+                    edge = FadingEdge.End,
+                    color = AppTheme.colorScheme.primary,
+                    length = 24.dp,
+                )
+                .basicMarquee(
+                    iterations = Int.MAX_VALUE,
+                    velocity = 64.dp,
+                )
+                .weight(1f),
+            maxLines = 1,
+            text = streamPill.title,
+            style = AppTheme.typography.bodyLarge,
+            color = Color.White,
+        )
 
         LottieAnimation(
             modifier = Modifier.size(24.dp),
