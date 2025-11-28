@@ -13,12 +13,12 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -29,6 +29,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
@@ -117,30 +118,40 @@ fun NotificationsScreen(
     val seenNotificationsPagingItems = state.seenNotifications.collectAsLazyPagingItems()
     val notificationsListState = seenNotificationsPagingItems.rememberLazyListStatePagingWorkaround()
 
-    val canScrollUp by remember(notificationsListState) {
-        derivedStateOf {
-            notificationsListState.firstVisibleItemIndex > 0
-        }
-    }
-
     LaunchedEffect(seenNotificationsPagingItems, state.badges) {
         if (state.badges.unreadNotificationsCount > 0) {
             seenNotificationsPagingItems.refresh()
         }
     }
 
+    var hasUserEverScrolled by remember { mutableStateOf(false) }
+    var isAutoScrolling by remember { mutableStateOf(false) }
+
     var previousUnseenNotificationIds by remember {
         mutableStateOf<List<String>>(emptyList())
     }
 
-    LaunchedEffect(canScrollUp, state.unseenNotifications) {
+    LaunchedEffect(notificationsListState) {
+        snapshotFlow {
+            notificationsListState.isScrollInProgress to notificationsListState.interactionSource.interactions
+        }.first { (isScrolling, _) ->
+            isScrolling && !isAutoScrolling
+        }
+        hasUserEverScrolled = true
+    }
+
+    LaunchedEffect(state.unseenNotifications) {
         val currentIds = state.unseenNotifications.flatten().map { it.notificationId }
 
-        if (canScrollUp && currentIds != previousUnseenNotificationIds) {
-            previousUnseenNotificationIds = currentIds
-            uiScope.launch {
-                notificationsListState.animateScrollToItem(0)
+        if (currentIds != previousUnseenNotificationIds) {
+            if (!hasUserEverScrolled) {
+                isAutoScrolling = true
+                uiScope.launch {
+                    notificationsListState.animateScrollToItem(0)
+                    isAutoScrolling = false
+                }
             }
+            previousUnseenNotificationIds = currentIds
         }
     }
 
