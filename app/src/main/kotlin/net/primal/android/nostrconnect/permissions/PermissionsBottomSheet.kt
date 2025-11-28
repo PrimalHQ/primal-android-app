@@ -180,7 +180,7 @@ private fun PermissionsListContent(uiState: UiState, eventPublisher: (UiEvent) -
             modifier = Modifier
                 .padding(top = 8.dp)
                 .padding(horizontal = 24.dp, vertical = 12.dp),
-            responding = uiState.responding,
+            enabled = !uiState.responding && uiState.selectedEventIds.isNotEmpty(),
             onRejectClick = {
                 eventPublisher(UiEvent.RejectSelected(alwaysReject = alwaysHandleRequestsLikeThis))
             },
@@ -227,7 +227,7 @@ private fun EventDetailsBackButton(modifier: Modifier = Modifier, onClick: () ->
 @Composable
 private fun ActionButtons(
     modifier: Modifier = Modifier,
-    responding: Boolean,
+    enabled: Boolean,
     onRejectClick: () -> Unit,
     onAllowClick: () -> Unit,
 ) {
@@ -247,7 +247,7 @@ private fun ActionButtons(
                 fontWeight = FontWeight.SemiBold,
             ),
             onClick = onRejectClick,
-            enabled = !responding,
+            enabled = enabled,
         ) {
             Text(
                 text = stringResource(id = R.string.permissions_bottom_sheet_reject_selected),
@@ -265,7 +265,7 @@ private fun ActionButtons(
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
             ),
-            enabled = !responding,
+            enabled = enabled,
         ) {
             Text(
                 text = stringResource(id = R.string.permissions_bottom_sheet_allow_selected),
