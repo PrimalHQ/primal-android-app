@@ -29,6 +29,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
@@ -133,11 +134,10 @@ fun NotificationsScreen(
     LaunchedEffect(notificationsListState) {
         snapshotFlow {
             notificationsListState.isScrollInProgress to notificationsListState.interactionSource.interactions
-        }.collect { (isScrolling, _) ->
-            if (isScrolling && !isAutoScrolling) {
-                hasUserEverScrolled = true
-            }
+        }.first { (isScrolling, _) ->
+            isScrolling && !isAutoScrolling
         }
+        hasUserEverScrolled = true
     }
 
     LaunchedEffect(state.unseenNotifications) {
