@@ -129,7 +129,7 @@ class PermissionsViewModel @Inject constructor(
 
                 setState {
                     copy(
-                        bottomSheetVisibility = events.isNotEmpty(),
+                        bottomSheetVisibility = requestsQueue.isNotEmpty(),
                         requestQueue = requestsQueue,
                     )
                 }
