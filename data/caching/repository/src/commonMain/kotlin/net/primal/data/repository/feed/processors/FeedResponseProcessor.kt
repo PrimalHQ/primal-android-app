@@ -124,6 +124,14 @@ internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String,
                 )
             },
         )
+        database.threadConversations().connectNoteWithReply(
+            data = allPosts.mapNotNull {
+                NoteConversationCrossRef(
+                    noteId = it.replyToPostId ?: return@mapNotNull null,
+                    replyNoteId = it.postId,
+                )
+            },
+        )
 
         val eventHintsDao = database.eventHints()
         val hintsMap = eventHints.associateBy { it.eventId }
