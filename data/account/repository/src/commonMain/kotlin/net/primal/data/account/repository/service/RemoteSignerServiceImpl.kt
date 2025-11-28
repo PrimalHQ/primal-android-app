@@ -227,8 +227,9 @@ class RemoteSignerServiceImpl internal constructor(
 
     override fun destroy() {
         Napier.d(tag = "Signer") { "RemoteSignerService stopped." }
-        scope.launch { sessionRepository.endAllActiveSessions() }
-            .invokeOnCompletion { scope.cancel() }
-        nostrRelayManager.disconnectFromAll()
+        scope.launch {
+            sessionRepository.endAllActiveSessions()
+            nostrRelayManager.disconnectFromAll()
+        }.invokeOnCompletion { scope.cancel() }
     }
 }
