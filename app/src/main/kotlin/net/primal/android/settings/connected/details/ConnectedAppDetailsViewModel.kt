@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.time.withTimeout
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.navigation.connectionIdOrThrow
@@ -20,6 +23,7 @@ import net.primal.android.settings.connected.details.ConnectedAppDetailsContract
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiEvent
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiState
 import net.primal.android.settings.connected.model.SessionUi
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
@@ -27,6 +31,7 @@ import net.primal.domain.account.repository.SessionRepository
 @HiltViewModel
 class ConnectedAppDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val dispatcherProvider: DispatcherProvider,
     private val connectionRepository: ConnectionRepository,
     private val sessionRepository: SessionRepository,
     private val sessionHandler: RemoteSignerSessionHandler,
@@ -131,7 +136,10 @@ class ConnectedAppDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 connectionRepository.deleteConnection(connectionId)
-                runCatching { tokenUpdater.updateTokenForRemoteSigner() }
+                // Launching in a new scope to survive view model destruction
+                CoroutineScope(dispatcherProvider.io()).launch {
+                    runCatching { tokenUpdater.updateTokenForRemoteSigner() }
+                }
             }.onSuccess {
                 setState { copy(confirmingDeletion = false) }
                 setEffect(SideEffect.ConnectionDeleted)
