@@ -6,6 +6,7 @@ import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -93,11 +94,10 @@ class RemoteSignerClient(
         }
     }
 
-    fun close() =
-        scope.launch {
-            nostrSocketClient.close()
-            listenerJob?.cancel()
-        }
+    suspend fun destroy() {
+        nostrSocketClient.close()
+        scope.cancel()
+    }
 
     suspend fun publishEvent(event: NostrEvent): Result<Unit> =
         runCatching {

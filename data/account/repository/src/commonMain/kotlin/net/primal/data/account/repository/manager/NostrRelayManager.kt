@@ -5,6 +5,7 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -83,11 +84,12 @@ internal class NostrRelayManager(
 
     fun disconnectFromRelay(relay: String) = scope.launch { removeClient(relay) }
 
-    fun disconnectFromAll() {
+    suspend fun disconnectFromAll() {
         clientJobs.values.forEach { it.cancel() }
         clientJobs.clear()
-        clients.values.forEach { it.close() }
+        clients.values.forEach { it.destroy() }
         clients.clear()
+        scope.cancel()
     }
 
     fun sendResponse(relays: List<String>, response: RemoteSignerMethodResponse) {
@@ -125,7 +127,7 @@ internal class NostrRelayManager(
     private fun observeClientMethods(relay: String, client: RemoteSignerClient) {
         clients[relay] = client
         clientJobs[relay] = scope.launch {
-            scope.launch {
+            launch {
                 client.incomingMethods.collect { method ->
                     Napier.d(tag = "Signer") { "Got method in `NostrRelayManager`: $method" }
                     if (cache.seen(method.id)) return@collect
@@ -140,7 +142,7 @@ internal class NostrRelayManager(
                 }
             }
 
-            scope.launch {
+            launch {
                 client.errors.collect { error ->
                     if (cache.seen(error.id)) return@collect
 
@@ -154,8 +156,8 @@ internal class NostrRelayManager(
         }
     }
 
-    private fun removeClient(relay: String) {
-        clients.remove(relay)?.close()
+    private suspend fun removeClient(relay: String) {
+        clients.remove(relay)?.destroy()
         clientJobs.remove(relay)?.cancel()
     }
 }
