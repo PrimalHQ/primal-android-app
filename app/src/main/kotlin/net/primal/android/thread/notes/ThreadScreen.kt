@@ -80,6 +80,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.TakePhotoIconButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
+import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
@@ -106,6 +107,8 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.nostr.ReactionType
+
+private const val REPLIES_LOADING_PLACEHOLDER_MAX_COUNT = 10
 
 @Composable
 fun ThreadScreen(
@@ -481,6 +484,18 @@ private fun ThreadLazyColumn(
                     PrimalDivider()
                 }
             }
+        }
+
+        if (
+            state.conversation.size < 2 &&
+            (state.highlightNote?.stats?.repliesCount?.takeIf { it > 0 } != null) &&
+            state.fetching
+        ) {
+            heightAdjustableLoadingLazyListPlaceholder(
+                height = 100.dp,
+                repeat = state.highlightNote.stats.repliesCount.toInt()
+                    .coerceAtMost(REPLIES_LOADING_PLACEHOLDER_MAX_COUNT),
+            )
         }
 
         if (state.conversation.isNotEmpty()) {
