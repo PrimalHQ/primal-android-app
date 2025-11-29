@@ -43,13 +43,16 @@ internal class ProxyPrimalApiClient(
         _connectionStatus.getAndUpdate(reducer)
     }
 
+    private var observeApiUrlJob: Job? = null
+
     init {
         scope.launch { appConfigHandler.updateImmediately() }
         observeApiUrlAndInitializeSocketClient()
     }
 
-    private fun observeApiUrlAndInitializeSocketClient() =
-        scope.launch {
+    private fun observeApiUrlAndInitializeSocketClient() {
+        observeApiUrlJob?.cancel()
+        observeApiUrlJob = scope.launch {
             appConfigProvider.observeApiUrlByType(type = serverType).collect { apiUrl ->
                 clientMutex.withLock {
                     updateStatus { copy(url = apiUrl) }
@@ -71,6 +74,7 @@ internal class ProxyPrimalApiClient(
                 }
             }
         }
+    }
 
     private fun Job.isSuccessfullyCompleted() = this.isCompleted && !this.isCancelled
 
@@ -127,6 +131,7 @@ internal class ProxyPrimalApiClient(
 
     override suspend fun closeSubscription(subscriptionId: String): Boolean {
         clientInitialized.await()
+        observeApiUrlJob?.cancel()?.also { observeApiUrlJob = null }
         return primalClient.closeSubscription(subscriptionId = subscriptionId)
     }
 }

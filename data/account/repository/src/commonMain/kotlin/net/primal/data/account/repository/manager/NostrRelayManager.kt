@@ -5,6 +5,7 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -37,7 +38,7 @@ internal class NostrRelayManager(
     private val nip44 = Nip44v2()
 
     private val clients: MutableMap<String, RemoteSignerClient> = mutableMapOf()
-    private val clientJobs: MutableMap<String, Job> = mutableMapOf()
+    private val clientJobs: MutableMap<String, MutableList<Job>> = mutableMapOf()
 
     private val cache: LruSeenCache<String> = LruSeenCache(maxEntries = MAX_CACHE_SIZE)
 
@@ -69,7 +70,7 @@ internal class NostrRelayManager(
                 Napier.d(tag = "SignerNostrRelayManager") { "Disconnected from relay: $url" }
                 scope.launch { _relayEvents.emit(RelayEvent.Disconnected(relayUrl = url)) }
                 clients.remove(relay)
-                clientJobs.remove(relay)?.cancel()
+                clientJobs.remove(relay)?.forEach { it.cancel() }
             },
         )
 
@@ -83,11 +84,12 @@ internal class NostrRelayManager(
 
     fun disconnectFromRelay(relay: String) = scope.launch { removeClient(relay) }
 
-    fun disconnectFromAll() {
-        clientJobs.values.forEach { it.cancel() }
+    suspend fun disconnectFromAll() {
+        clientJobs.values.forEach { lists -> lists.forEach { it.cancel() } }
         clientJobs.clear()
         clients.values.forEach { it.close() }
         clients.clear()
+        scope.cancel()
     }
 
     fun sendResponse(relays: List<String>, response: RemoteSignerMethodResponse) {
@@ -124,8 +126,11 @@ internal class NostrRelayManager(
 
     private fun observeClientMethods(relay: String, client: RemoteSignerClient) {
         clients[relay] = client
-        clientJobs[relay] = scope.launch {
-            scope.launch {
+
+        var methodsJob: Job? = null
+        var errorsJob: Job? = null
+        val parentJob = scope.launch {
+            methodsJob = scope.launch {
                 client.incomingMethods.collect { method ->
                     Napier.d(tag = "Signer") { "Got method in `NostrRelayManager`: $method" }
                     if (cache.seen(method.id)) return@collect
@@ -140,7 +145,7 @@ internal class NostrRelayManager(
                 }
             }
 
-            scope.launch {
+            errorsJob = scope.launch {
                 client.errors.collect { error ->
                     if (cache.seen(error.id)) return@collect
 
@@ -152,10 +157,13 @@ internal class NostrRelayManager(
                 }
             }
         }
+
+        clientJobs.getOrPut(relay) { mutableListOf() }
+            .addAll(listOfNotNull(parentJob, methodsJob, errorsJob))
     }
 
-    private fun removeClient(relay: String) {
+    private suspend fun removeClient(relay: String) {
         clients.remove(relay)?.close()
-        clientJobs.remove(relay)?.cancel()
+        clientJobs.remove(relay)?.forEach { it.cancel() }
     }
 }
