@@ -3,7 +3,6 @@ package net.primal.domain.account.repository
 import kotlinx.coroutines.flow.Flow
 import net.primal.core.utils.Result
 import net.primal.domain.account.model.AppConnection
-import net.primal.domain.account.model.PermissionAction
 import net.primal.domain.account.model.TrustLevel
 
 interface ConnectionRepository {
@@ -32,10 +31,4 @@ interface ConnectionRepository {
     suspend fun updateConnectionAutoStart(connectionId: String, autoStart: Boolean)
 
     suspend fun updateTrustLevel(connectionId: String, trustLevel: TrustLevel)
-
-    suspend fun updatePermission(
-        connectionId: String,
-        permissionId: String,
-        action: PermissionAction,
-    )
 }

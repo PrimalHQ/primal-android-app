@@ -8,7 +8,6 @@ import net.primal.core.utils.asSuccess
 import net.primal.core.utils.contains
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.account.local.dao.AppConnectionData
-import net.primal.data.account.local.dao.AppPermissionData
 import net.primal.data.account.local.dao.PermissionAction
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.utils.PERM_ID_CONNECT
@@ -147,18 +146,4 @@ class ConnectionRepositoryImpl(
         withContext(dispatchers.io()) {
             database.connections().updateTrustLevel(connectionId, trustLevel.asPO())
         }
-
-    override suspend fun updatePermission(
-        connectionId: String,
-        permissionId: String,
-        action: net.primal.domain.account.model.PermissionAction,
-    ) = withContext(dispatchers.io()) {
-        database.permissions().upsert(
-            AppPermissionData(
-                permissionId = permissionId,
-                connectionId = connectionId,
-                action = action.asPO(),
-            ),
-        )
-    }
 }
