@@ -12,6 +12,7 @@ import net.primal.data.account.local.dao.AppPermissionData
 import net.primal.data.account.local.dao.PendingNostrEvent
 import net.primal.data.account.local.dao.PermissionAction
 import net.primal.data.account.local.dao.RequestState
+import net.primal.data.account.local.dao.TrustLevel
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.asDomain
@@ -104,6 +105,12 @@ class SessionEventRepositoryImpl(
                 val sessionEvent = database.sessionEvents().getSessionEvent(eventId = eventId) ?: return@withTransaction
                 val connection = database.connections()
                     .getConnectionByClientPubKey(clientPubKey = sessionEvent.clientPubKey) ?: return@withTransaction
+
+                if (connection.data.trustLevel == TrustLevel.Low && action == PermissionAction.Approve) {
+                    database.connections()
+                        .updateTrustLevel(connectionId = connection.data.connectionId, trustLevel = TrustLevel.Medium)
+                }
+
                 database.permissions().upsert(
                     data = AppPermissionData(
                         permissionId = sessionEvent.getRequestTypeId(),
