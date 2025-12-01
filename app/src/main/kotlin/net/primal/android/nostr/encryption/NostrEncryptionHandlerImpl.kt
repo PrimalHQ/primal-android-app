@@ -1,9 +1,9 @@
 package net.primal.android.nostr.encryption
 
 import net.primal.android.user.credentials.CredentialsStore
+import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.Result
 import net.primal.core.utils.runCatching
-import net.primal.domain.account.service.NostrEncryptionService
 import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
 import net.primal.domain.nostr.cryptography.utils.assureValidNpub
 

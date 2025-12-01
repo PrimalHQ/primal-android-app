@@ -3,6 +3,7 @@ package net.primal.data.account.repository.repository.factory
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.plugins.cache.HttpCache
 import net.primal.core.networking.factory.HttpClientFactory
+import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.api.WellKnownApi
@@ -60,6 +61,7 @@ abstract class RepositoryFactory {
     fun createSignerConnectionInitializer(
         signerKeyPair: NostrKeyPair,
         connectionRepository: ConnectionRepository,
+        nostrEncryptionService: NostrEncryptionService,
     ): SignerConnectionInitializer =
         SignerConnectionInitializer(
             connectionRepository = connectionRepository,
@@ -70,6 +72,7 @@ abstract class RepositoryFactory {
             nostrRelayManager = NostrRelayManager(
                 dispatcherProvider = dispatcherProvider,
                 signerKeyPair = signerKeyPair,
+                nostrEncryptionService = nostrEncryptionService,
             ),
         )
 

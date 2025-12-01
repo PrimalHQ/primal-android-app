@@ -49,6 +49,7 @@ kotlin {
             dependencies {
                 // Internal
                 implementation(project(":core:utils"))
+                implementation(project(":core:nips"))
                 implementation(project(":core:app-config"))
                 implementation(project(":core:networking-http"))
 
@@ -68,8 +69,6 @@ kotlin {
 
                 // Logging
                 implementation(libs.napier)
-
-                implementation(libs.quartz)
             }
         }
 

@@ -1,4 +1,4 @@
-package net.primal.domain.account.service
+package net.primal.core.nips.encryption.service
 
 import net.primal.core.utils.Result
 
