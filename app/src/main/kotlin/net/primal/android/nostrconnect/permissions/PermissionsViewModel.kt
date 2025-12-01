@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
+import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.nostrconnect.model.asUi
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiState
@@ -130,9 +131,33 @@ class PermissionsViewModel @Inject constructor(
                 setState {
                     copy(
                         bottomSheetVisibility = requestsQueue.isNotEmpty(),
+                        selectedEventIds = resolveSelectedEventIds(requestsQueue),
                         requestQueue = requestsQueue,
                     )
                 }
             }
         }
+
+    private fun UiState.resolveSelectedEventIds(
+        newRequestQueue: List<Pair<ActiveSessionUi, List<SessionEvent>>>,
+    ): Set<String> {
+        val newSessionId = newRequestQueue.firstOrNull()?.first?.sessionId
+        val oldSessionId = this.requestQueue.firstOrNull()?.first?.sessionId
+        val newSessionEvents = newRequestQueue.firstOrNull()?.second ?: emptyList()
+
+        return if (newSessionId != oldSessionId) {
+            newSessionEvents.map { it.eventId }.toSet()
+        } else {
+            val oldEventIds = this.sessionEvents.map { it.eventId }.toSet()
+
+            newSessionEvents.filter { event ->
+                val isOldEvent = event.eventId in oldEventIds
+                if (isOldEvent) {
+                    event.eventId in this.selectedEventIds
+                } else {
+                    true
+                }
+            }.map { it.eventId }.toSet()
+        }
+    }
 }
