@@ -56,6 +56,9 @@ class AppPermissionsViewModel @Inject constructor(
                     )
                     UiEvent.Retry -> observePermissions()
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    UiEvent.RequestResetPermissions -> setState { copy(confirmingReset = true) }
+                    UiEvent.DismissResetConfirmation -> setState { copy(confirmingReset = false) }
+                    UiEvent.ConfirmResetPermissions -> resetPermissions()
                 }
             }
         }
@@ -118,6 +121,16 @@ class AppPermissionsViewModel @Inject constructor(
             ).onFailure {
                 setState { copy(error = UiError.GenericError(it.message)) }
             }
+        }
+    }
+
+    private fun resetPermissions() {
+        viewModelScope.launch {
+            setState { copy(confirmingReset = false, loading = true) }
+            permissionsRepository.resetPermissionsToDefault(connectionId = connectionId)
+                .onFailure {
+                    setState { copy(error = UiError.GenericError(it.message), loading = false) }
+                }
         }
     }
 }

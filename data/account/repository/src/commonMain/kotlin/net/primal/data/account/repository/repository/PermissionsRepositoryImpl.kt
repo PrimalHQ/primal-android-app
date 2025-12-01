@@ -8,6 +8,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
 import net.primal.core.utils.runCatching
 import net.primal.data.account.local.dao.AppPermissionData
+import net.primal.data.account.local.dao.PermissionAction as PermissionActionPO
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.api.WellKnownApi
 import net.primal.data.account.remote.api.model.PermissionsResponse
@@ -65,6 +66,35 @@ class PermissionsRepositoryImpl(
                 groups.map { group -> group.permissionIds.associateWith { group.title } }
                     .reduce { acc, map -> acc + map }
                     .run { permissions.associate { it.id to it.title } + this }
+            }
+        }
+
+    override suspend fun resetPermissionsToDefault(connectionId: String): Result<Unit> =
+        withContext(dispatchers.io()) {
+            runCatching {
+                val mediumTrustPermissions = wellKnownApi.getMediumTrustPermissions().allowPermissions.toSet()
+                val allDefinitions = wellKnownApi.getSignerPermissions()
+
+                val allPossiblePermissionIds = (
+                    allDefinitions.groups.flatMap { it.permissionIds } +
+                        allDefinitions.permissions.map { it.id }
+                    ).toSet()
+
+                val resetPermissions = allPossiblePermissionIds.map { permissionId ->
+                    val action = if (mediumTrustPermissions.contains(permissionId)) {
+                        PermissionActionPO.Approve
+                    } else {
+                        PermissionActionPO.Ask
+                    }
+
+                    AppPermissionData(
+                        permissionId = permissionId,
+                        connectionId = connectionId,
+                        action = action,
+                    )
+                }
+
+                database.permissions().upsertAll(resetPermissions)
             }
         }
 

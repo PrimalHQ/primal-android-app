@@ -15,4 +15,6 @@ interface PermissionsRepository {
     suspend fun observePermissions(connectionId: String): Result<Flow<List<AppPermissionGroup>>>
 
     suspend fun getNamingMap(): Result<Map<String, String>>
+
+    suspend fun resetPermissionsToDefault(connectionId: String): Result<Unit>
 }
