@@ -96,13 +96,16 @@ class ConnectionRepositoryImpl(
             val connection = getConnectionByClientPubKey(clientPubKey = clientPubKey).getOrNull()
                 ?: return@withContext false
 
+            if (permissionId in Regex(PERM_ID_CONNECT) || permissionId in Regex(PERM_ID_PING)) {
+                return@withContext true
+            }
+
             when (connection.trustLevel) {
                 TrustLevel.Full -> true
                 TrustLevel.Medium -> {
-                    val action = resolvePermissionAction(
-                        permissionId = permissionId,
-                        connectionId = connection.connectionId,
-                    )
+                    val action = database.permissions()
+                        .findPermission(permissionId = permissionId, connectionId = connection.connectionId)
+                        ?.action
 
                     when (action) {
                         PermissionAction.Approve -> true
@@ -112,14 +115,6 @@ class ConnectionRepositoryImpl(
 
                 TrustLevel.Low -> false
             }
-        }
-
-    private suspend fun resolvePermissionAction(permissionId: String, connectionId: String) =
-        when (permissionId) {
-            in Regex(PERM_ID_CONNECT), in Regex(PERM_ID_PING) -> PermissionAction.Approve
-            else -> database.permissions()
-                .findPermission(permissionId = permissionId, connectionId = connectionId)
-                ?.action
         }
 
     override suspend fun getUserPubKey(clientPubKey: String): Result<String> =
