@@ -81,9 +81,21 @@ class ActiveSessionsViewModel @Inject constructor(
                     is UiEvent.SessionClick -> handleSessionClick(it.sessionId)
                     is UiEvent.SelectAllClick -> handleSelectAllClick()
                     is UiEvent.DisconnectClick -> handleDisconnectClick()
+                    is UiEvent.SettingsClick -> handleSettingsClick()
                     is UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
+        }
+    }
+
+    private fun handleSettingsClick() {
+        val selectedSessionIds = state.value.selectedSessions
+        if (selectedSessionIds.size == 1) {
+            val sessionId = selectedSessionIds.first()
+            val session = state.value.sessions.find { it.sessionId == sessionId }
+            setEffect(SideEffect.NavigateToConnectedApps(connectionId = session?.connectionId))
+        } else {
+            setEffect(SideEffect.NavigateToConnectedApps(connectionId = null))
         }
     }
 

@@ -17,10 +17,12 @@ interface ActiveSessionsContract {
         data class SessionClick(val sessionId: String) : UiEvent()
         data object SelectAllClick : UiEvent()
         data object DisconnectClick : UiEvent()
+        data object SettingsClick : UiEvent()
         data object DismissError : UiEvent()
     }
 
     sealed class SideEffect {
         data object SessionsDisconnected : SideEffect()
+        data class NavigateToConnectedApps(val connectionId: String? = null) : SideEffect()
     }
 }
