@@ -30,10 +30,8 @@ class RemoteSignerServiceImpl internal constructor(
     private val nostrRelayManager: NostrRelayManager,
     private val remoteSignerMethodResponseBuilder: RemoteSignerMethodResponseBuilder,
     private val internalSessionEventRepository: InternalSessionEventRepository,
+    private val methodProcessor: RemoteSignerMethodProcessor,
 ) : RemoteSignerService {
-
-    private val methodProcessor = RemoteSignerMethodProcessor()
-
     private val scope = CoroutineScope(SupervisorJob())
 
     private var activeRelays = emptySet<String>()

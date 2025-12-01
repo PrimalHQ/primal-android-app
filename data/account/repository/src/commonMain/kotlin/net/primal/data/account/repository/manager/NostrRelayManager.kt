@@ -1,6 +1,5 @@
 package net.primal.data.account.repository.manager
 
-import com.vitorpamplona.quartz.nip44Encryption.Nip44v2
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -10,12 +9,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
 import net.primal.data.account.remote.client.RemoteSignerClient
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.method.processor.RemoteSignerMethodProcessor
 import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -23,19 +24,17 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 import net.primal.domain.nostr.cryptography.signOrThrow
-import net.primal.domain.nostr.cryptography.utils.assureValidNpub
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.assureValidPubKeyHex
-import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow
 
 private const val MAX_CACHE_SIZE = 20
 
 internal class NostrRelayManager(
     private val dispatcherProvider: DispatcherProvider,
     private val signerKeyPair: NostrKeyPair,
+    private val nostrEncryptionService: NostrEncryptionService,
 ) {
     private val scope = CoroutineScope(dispatcherProvider.io() + SupervisorJob())
-    private val nip44 = Nip44v2()
 
     private val clients: MutableMap<String, RemoteSignerClient> = mutableMapOf()
     private val clientJobs: MutableMap<String, Job> = mutableMapOf()
@@ -62,6 +61,7 @@ internal class NostrRelayManager(
             relayUrl = relay,
             dispatchers = dispatcherProvider,
             signerKeyPair = signerKeyPair,
+            remoteSignerMethodProcessor = RemoteSignerMethodProcessor(nostrEncryptionService),
             onSocketConnectionOpened = { url ->
                 Napier.d(tag = "SignerNostrRelayManager") { "Connected to relay: $url" }
                 scope.launch { _relayEvents.emit(RelayEvent.Connected(relayUrl = url)) }
@@ -115,12 +115,11 @@ internal class NostrRelayManager(
                 pubKey = signerKeyPair.pubKey.assureValidPubKeyHex(),
                 tags = listOf(response.clientPubKey.asPubkeyTag()),
                 kind = NostrEventKind.NostrConnect.value,
-                content = nip44.encrypt(
-                    msg = CommonJsonImplicitNulls.encodeToString(response),
-                    privateKey = signerKeyPair.privateKey.assureValidNsec()
-                        .bechToBytesOrThrow(),
-                    pubKey = response.clientPubKey.assureValidNpub().bechToBytesOrThrow(),
-                ).encodePayload(),
+                content = nostrEncryptionService.nip44Encrypt(
+                    plaintext = CommonJsonImplicitNulls.encodeToString(response),
+                    privateKey = signerKeyPair.privateKey,
+                    pubKey = response.clientPubKey,
+                ).getOrThrow(),
             ).signOrThrow(nsec = signerKeyPair.privateKey.assureValidNsec())
         }
 

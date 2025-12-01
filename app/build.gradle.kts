@@ -242,6 +242,7 @@ android {
 
 dependencies {
     implementation(project(":core:utils"))
+    implementation(project(":core:nips"))
     implementation(project(":core:app-config"))
     implementation(project(":core:networking-primal"))
     implementation(project(":core:networking-upload"))

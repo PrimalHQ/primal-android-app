@@ -1,10 +1,9 @@
-package net.primal.data.account.repository.service
+package net.primal.core.nips.encryption.service
 
 import com.vitorpamplona.quartz.nip04Dm.crypto.Nip04
 import com.vitorpamplona.quartz.nip44Encryption.Nip44v2
 import net.primal.core.utils.Result
 import net.primal.core.utils.runCatching
-import net.primal.domain.account.service.NostrEncryptionService
 import net.primal.domain.nostr.cryptography.utils.assureValidNpub
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.bechToBytesOrThrow

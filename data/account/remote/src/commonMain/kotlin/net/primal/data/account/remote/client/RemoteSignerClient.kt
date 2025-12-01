@@ -37,6 +37,7 @@ class RemoteSignerClient(
     relayUrl: String,
     dispatchers: DispatcherProvider,
     private val signerKeyPair: NostrKeyPair,
+    private val remoteSignerMethodProcessor: RemoteSignerMethodProcessor,
     onSocketConnectionOpened: SocketConnectionOpenedCallback? = null,
     onSocketConnectionClosed: SocketConnectionClosedCallback? = null,
 ) {
@@ -46,8 +47,6 @@ class RemoteSignerClient(
         onSocketConnectionOpened = onSocketConnectionOpened,
         onSocketConnectionClosed = onSocketConnectionClosed,
     )
-
-    private val remoteSignerMethodProcessor = RemoteSignerMethodProcessor()
 
     private val _incomingMethods: Channel<RemoteSignerMethod> = Channel()
     val incomingMethods = _incomingMethods.receiveAsFlow()
