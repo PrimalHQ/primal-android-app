@@ -29,6 +29,7 @@ include(":core:networking-lightning")
 include(":core:networking-http")
 include(":core:networking-primal")
 include(":core:networking-upload")
+include(":core:caching")
 
 include(":data:shared:local")
 
