@@ -43,6 +43,7 @@ abstract class RepositoryFactory {
         ConnectionRepositoryImpl(
             database = resolveAccountDatabase(),
             dispatchers = dispatcherProvider,
+            wellKnownApi = wellKnownApi,
         )
 
     fun createSessionRepository(): SessionRepository =

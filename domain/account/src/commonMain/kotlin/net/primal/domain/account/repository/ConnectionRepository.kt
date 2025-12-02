@@ -30,5 +30,5 @@ interface ConnectionRepository {
 
     suspend fun updateConnectionAutoStart(connectionId: String, autoStart: Boolean)
 
-    suspend fun updateTrustLevel(connectionId: String, trustLevel: TrustLevel)
+    suspend fun updateTrustLevel(connectionId: String, trustLevel: TrustLevel): Result<Unit>
 }

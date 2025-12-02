@@ -21,4 +21,7 @@ interface AppPermissionDataDao {
 
     @Query("SELECT * FROM AppPermissionData WHERE connectionId = :connectionId")
     fun observePermissions(connectionId: String): Flow<List<AppPermissionData>>
+
+    @Query("SELECT * FROM AppPermissionData WHERE connectionId = :connectionId")
+    suspend fun findPermissionsByConnectionId(connectionId: String): List<AppPermissionData>
 }

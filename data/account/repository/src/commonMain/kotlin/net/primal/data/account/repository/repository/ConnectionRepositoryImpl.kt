@@ -7,9 +7,12 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.asSuccess
 import net.primal.core.utils.contains
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 import net.primal.data.account.local.dao.AppConnectionData
+import net.primal.data.account.local.dao.AppPermissionData
 import net.primal.data.account.local.dao.PermissionAction
 import net.primal.data.account.local.db.AccountDatabase
+import net.primal.data.account.remote.api.WellKnownApi
 import net.primal.data.account.remote.utils.PERM_ID_CONNECT
 import net.primal.data.account.remote.utils.PERM_ID_PING
 import net.primal.data.account.repository.mappers.asDomain
@@ -23,6 +26,7 @@ import net.primal.shared.data.local.encryption.asEncryptable
 class ConnectionRepositoryImpl(
     private val database: AccountDatabase,
     private val dispatchers: DispatcherProvider,
+    private val wellKnownApi: WellKnownApi,
 ) : ConnectionRepository {
     override fun observeAllConnections(signerPubKey: String): Flow<List<AppConnection>> =
         database.connections().observeAllConnections(signerPubKey = signerPubKey.asEncryptable())
@@ -139,6 +143,29 @@ class ConnectionRepositoryImpl(
 
     override suspend fun updateTrustLevel(connectionId: String, trustLevel: TrustLevel) =
         withContext(dispatchers.io()) {
-            database.connections().updateTrustLevel(connectionId, trustLevel.asPO())
+            runCatching {
+                database.withTransaction {
+                    if (trustLevel == TrustLevel.Medium) {
+                        val existingPermissions = database.permissions()
+                            .findPermissionsByConnectionId(connectionId = connectionId)
+
+                        if (existingPermissions.isEmpty()) {
+                            val newPermissions = wellKnownApi
+                                .getMediumTrustPermissions().allowPermissions
+                                .map {
+                                    AppPermissionData(
+                                        permissionId = it,
+                                        connectionId = connectionId,
+                                        action = PermissionAction.Approve,
+                                    )
+                                }
+
+                            database.permissions().upsertAll(data = newPermissions)
+                        }
+                    }
+
+                    database.connections().updateTrustLevel(connectionId, trustLevel.asPO())
+                }
+            }
         }
 }
