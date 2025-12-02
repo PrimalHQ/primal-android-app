@@ -72,43 +72,33 @@ class PermissionsRepositoryImpl(
         response: PermissionsResponse,
         permissions: List<AppPermission>,
     ): List<AppPermissionGroup> {
-        val permissionsMap = permissions.associateBy { it.permissionId }
-        val permissionsInGroups = response.groups.flatMap { it.permissionIds }.toHashSet()
-        val singlePermissionGroups = response.permissions.filterNot { it.id in permissionsInGroups }
+        val permissionsMap = response.permissions.associateBy { it.id }
+        val permissionsInGroupMap = response.groups.flatMap { group ->
+            group.permissionIds.map { permissionId -> permissionId to group }
+        }.toMap()
 
-        val singlePermissionGroupsSet = singlePermissionGroups.map { it.id }.toSet()
-
-        val noNamePermissions = permissions
-            .filterNot { it.permissionId in singlePermissionGroupsSet }
-            .filterNot { it.permissionId in permissionsInGroups }
-
-        return response.groups.map { group ->
-            val action = group.permissionIds
-                .firstOrNull { permissionsMap[it] != null }
-                ?.let { permissionsMap[it]?.action }
-                ?: PermissionAction.Ask
-            AppPermissionGroup(
-                groupId = group.id,
-                title = group.title,
-                action = action,
-                permissionIds = group.permissionIds,
-            )
-        } + singlePermissionGroups.map { permission ->
-            val action = permissionsMap[permission.id]?.action ?: PermissionAction.Ask
-
-            AppPermissionGroup(
-                groupId = permission.id,
-                title = permission.title,
-                action = action,
-                permissionIds = listOf(permission.id),
-            )
-        } + noNamePermissions.map {
-            AppPermissionGroup(
-                groupId = it.permissionId,
-                action = it.action,
-                title = it.permissionId,
-                permissionIds = listOf(it.permissionId),
-            )
-        }
+        return permissions
+            .map { permission ->
+                permissionsInGroupMap[permission.permissionId]?.let {
+                    AppPermissionGroup(
+                        groupId = it.id,
+                        title = it.title,
+                        action = permission.action,
+                        permissionIds = it.permissionIds,
+                    )
+                } ?: permissionsMap[permission.permissionId]?.let {
+                    AppPermissionGroup(
+                        groupId = it.id,
+                        title = it.title,
+                        action = permission.action,
+                        permissionIds = listOf(permission.permissionId),
+                    )
+                } ?: AppPermissionGroup(
+                    groupId = permission.permissionId,
+                    title = permission.permissionId,
+                    action = permission.action,
+                    permissionIds = listOf(permission.permissionId),
+                )
+            }.distinctBy { it.groupId }
     }
 }
