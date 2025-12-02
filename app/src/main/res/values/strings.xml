@@ -1023,6 +1023,13 @@
     <string name="settings_connected_app_details_delete_connection_dialog_text">Are you sure you want to delete this connection? All data will be lost.</string>
     <string name="settings_connected_app_details_delete_connection_confirm">Delete</string>
     <string name="settings_connected_app_details_delete_connection_dismiss">Cancel</string>
+    <string name="settings_connected_app_details_update_trust_level_dialog_title">Switch Trust Level?</string>
+    <string name="settings_connected_app_details_update_trust_level_dialog_text">Are you sure you want to switch permissions level to %s?</string>
+    <string name="settings_connected_app_details_update_trust_level_confirm">Yes</string>
+    <string name="settings_connected_app_details_update_trust_level_dismiss">Cancel</string>
+    <string name="settings_connected_app_details_full_trust">Full Trust</string>
+    <string name="settings_connected_app_details_medium_trust">Medium Trust</string>
+    <string name="settings_connected_app_details_low_trust">Low Trust</string>
     <string name="settings_connected_app_details_edit_name_dialog_title">Edit App Name</string>
     <string name="settings_connected_app_details_edit_name_confirm">Save</string>
     <string name="settings_connected_app_details_edit_name_dismiss">Cancel</string>

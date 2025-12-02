@@ -198,6 +198,24 @@ fun ConnectedAppDetailsContent(
         )
     }
 
+    var pendingTrustLevelValue by remember { mutableStateOf<TrustLevel?>(null) }
+    pendingTrustLevelValue?.let { trustLevel ->
+        ConfirmActionAlertDialog(
+            dialogTitle = stringResource(id = R.string.settings_connected_app_details_update_trust_level_dialog_title),
+            dialogText = stringResource(
+                id = R.string.settings_connected_app_details_update_trust_level_dialog_text,
+                trustLevel.toUserFriendlyText(),
+            ),
+            confirmText = stringResource(id = R.string.settings_connected_app_details_update_trust_level_confirm),
+            dismissText = stringResource(id = R.string.settings_connected_app_details_update_trust_level_dismiss),
+            onConfirmation = {
+                eventPublisher(UiEvent.UpdateTrustLevel(trustLevel))
+                pendingTrustLevelValue = null
+            },
+            onDismissRequest = { pendingTrustLevelValue = null },
+        )
+    }
+
     LazyColumn(modifier = modifier) {
         item(key = "Header", contentType = "Header") {
             HeaderSection(
@@ -218,7 +236,11 @@ fun ConnectedAppDetailsContent(
         item(key = "Permissions", contentType = "Permissions") {
             ConnectedAppPermissionsSection(
                 trustLevel = state.trustLevel,
-                onTrustLevelChange = { eventPublisher(UiEvent.UpdateTrustLevel(it)) },
+                onTrustLevelChange = {
+                    if (state.trustLevel != it) {
+                        pendingTrustLevelValue = it
+                    }
+                },
                 onPermissionDetailsClick = onPermissionDetailsClick,
             )
         }
@@ -596,6 +618,14 @@ private fun EditNameAlertDialog(
         },
     )
 }
+
+@Composable
+private fun TrustLevel.toUserFriendlyText() =
+    when (this) {
+        TrustLevel.Full -> stringResource(id = R.string.settings_connected_app_details_full_trust)
+        TrustLevel.Medium -> stringResource(id = R.string.settings_connected_app_details_medium_trust)
+        TrustLevel.Low -> stringResource(id = R.string.settings_connected_app_details_low_trust)
+    }
 
 private val mockRecentSessionsForPreview = listOf(
     // Oct 28, 2025 12:34 PM
