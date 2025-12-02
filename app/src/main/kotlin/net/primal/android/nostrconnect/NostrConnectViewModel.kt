@@ -118,7 +118,10 @@ class NostrConnectViewModel @Inject constructor(
                     credential?.type == CredentialType.PrivateKey
                 }
 
-                val accounts = nsecOnlyUserAccounts.map { it.asUserAccountUi() }
+                val accounts = nsecOnlyUserAccounts
+                    .sortedByDescending { it.lastAccessedAt }
+                    .map { it.asUserAccountUi() }
+
                 val activeAccount = activeAccountStore.activeUserAccount().asUserAccountUi()
 
                 val selectedAccount = accounts.find { it.pubkey == activeAccount.pubkey }
