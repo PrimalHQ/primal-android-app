@@ -1037,6 +1037,9 @@
     <string name="settings_connected_app_permissions_ask">Ask</string>
     <string name="settings_connected_app_permissions_title">App Permissions</string>
     <string name="settings_connected_app_permissions_subtitle">Permissions</string>
+    <string name="settings_connected_app_permissions_full_trust_subtitle">I fully trust this app; auto-sign all requests</string>
+    <string name="settings_connected_app_permissions_medium_trust_subtitle">Auto-approve specified requests</string>
+    <string name="settings_connected_app_permissions_low_trust_subtitle">Ask me to approve each request</string>
     <string name="settings_connected_app_permission_details_link">Permission Details</string>
     <string name="settings_connected_app_permissions_error_loading">We couldn\'t load permissions. Please try again.</string>
     <string name="settings_session_details_title">Session Details</string>
