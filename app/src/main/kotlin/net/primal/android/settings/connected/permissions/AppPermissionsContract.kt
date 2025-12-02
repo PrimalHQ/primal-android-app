@@ -12,7 +12,6 @@ interface AppPermissionsContract {
         val loading: Boolean = true,
         val permissions: List<PermissionGroupUi> = emptyList(),
         val error: UiError? = null,
-        val confirmingReset: Boolean = false,
     )
 
     sealed class UiEvent {
@@ -22,8 +21,6 @@ interface AppPermissionsContract {
         ) : UiEvent()
         data object Retry : UiEvent()
         data object DismissError : UiEvent()
-        data object RequestResetPermissions : UiEvent()
-        data object ConfirmResetPermissions : UiEvent()
-        data object DismissResetConfirmation : UiEvent()
+        data object ResetPermissions : UiEvent()
     }
 }

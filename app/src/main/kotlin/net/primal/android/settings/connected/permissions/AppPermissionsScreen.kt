@@ -27,7 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -78,6 +80,7 @@ fun AppPermissionsScreen(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    var resetConfirmationVisible by remember { mutableStateOf(false) }
 
     SnackbarErrorHandler(
         error = if (state.permissions.isNotEmpty()) state.error else null,
@@ -108,6 +111,7 @@ fun AppPermissionsScreen(
                     .padding(horizontal = 12.dp),
                 state = state,
                 eventPublisher = eventPublisher,
+                onResetClick = { resetConfirmationVisible = true },
             )
         } else if (state.loading) {
             PrimalLoadingSpinner()
@@ -121,14 +125,17 @@ fun AppPermissionsScreen(
         }
     }
 
-    if (state.confirmingReset) {
+    if (resetConfirmationVisible) {
         ConfirmActionAlertDialog(
             dialogTitle = stringResource(id = R.string.settings_connected_app_permissions_reset_dialog_title),
             dialogText = stringResource(id = R.string.settings_connected_app_permissions_reset_dialog_text),
             confirmText = stringResource(id = R.string.settings_connected_app_permissions_reset_dialog_confirm),
-            onConfirmation = { eventPublisher(UiEvent.ConfirmResetPermissions) },
+            onConfirmation = {
+                eventPublisher(UiEvent.ResetPermissions)
+                resetConfirmationVisible = false
+            },
             dismissText = stringResource(id = R.string.settings_connected_app_permissions_reset_dialog_dismiss),
-            onDismissRequest = { eventPublisher(UiEvent.DismissResetConfirmation) },
+            onDismissRequest = { resetConfirmationVisible = false },
         )
     }
 }
@@ -137,6 +144,7 @@ fun AppPermissionsScreen(
 private fun AppPermissionsList(
     state: AppPermissionsContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
+    onResetClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(modifier = modifier) {
@@ -177,7 +185,7 @@ private fun AppPermissionsList(
         item {
             Text(
                 modifier = Modifier
-                    .clickable { eventPublisher(UiEvent.RequestResetPermissions) }
+                    .clickable { onResetClick() }
                     .padding(vertical = 16.dp, horizontal = 4.dp),
                 text = stringResource(id = R.string.settings_connected_app_permissions_reset),
                 style = AppTheme.typography.bodyLarge,
