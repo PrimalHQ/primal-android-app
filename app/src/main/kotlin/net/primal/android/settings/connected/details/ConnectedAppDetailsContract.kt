@@ -15,7 +15,6 @@ interface ConnectedAppDetailsContract {
         val autoStartSession: Boolean = false,
         val trustLevel: TrustLevel = TrustLevel.Low,
         val recentSessions: List<SessionUi> = emptyList(),
-        val editingName: Boolean = false,
         val error: UiError? = null,
     )
 
@@ -23,9 +22,7 @@ interface ConnectedAppDetailsContract {
         data object StartSession : UiEvent()
         data object EndSession : UiEvent()
         data object DeleteConnection : UiEvent()
-        data object EditName : UiEvent()
-        data class NameChange(val name: String) : UiEvent()
-        data object DismissEditNameDialog : UiEvent()
+        data class EditName(val name: String) : UiEvent()
         data class AutoStartSessionChange(val enabled: Boolean) : UiEvent()
         data class UpdateTrustLevel(val trustLevel: TrustLevel) : UiEvent()
         data object DismissError : UiEvent()

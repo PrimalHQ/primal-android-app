@@ -186,6 +186,18 @@ fun ConnectedAppDetailsContent(
         )
     }
 
+    var editingNameDialogVisibility by remember { mutableStateOf(false) }
+    if (editingNameDialogVisibility) {
+        EditNameAlertDialog(
+            currentName = state.appName,
+            onNameChange = {
+                eventPublisher(UiEvent.EditName(it))
+                editingNameDialogVisibility = false
+            },
+            onDismiss = { editingNameDialogVisibility = false },
+        )
+    }
+
     LazyColumn(modifier = modifier) {
         item(key = "Header", contentType = "Header") {
             HeaderSection(
@@ -198,7 +210,7 @@ fun ConnectedAppDetailsContent(
                 onAutoStartSessionChange = { eventPublisher(UiEvent.AutoStartSessionChange(it)) },
                 onStartSessionClick = { eventPublisher(UiEvent.StartSession) },
                 onEndSessionClick = { eventPublisher(UiEvent.EndSession) },
-                onEditNameClick = { eventPublisher(UiEvent.EditName) },
+                onEditNameClick = { editingNameDialogVisibility = true },
                 onDeleteConnectionClick = { confirmDeletionDialogVisibility = true },
             )
         }
@@ -254,14 +266,6 @@ private fun LazyListScope.recentSessionsSection(state: UiState, onSessionClick: 
                 }
             }
         }
-    }
-
-    if (state.editingName) {
-        EditNameAlertDialog(
-            currentName = state.appName,
-            onNameChange = { eventPublisher(UiEvent.NameChange(it)) },
-            onDismiss = { eventPublisher(UiEvent.DismissEditNameDialog) },
-        )
     }
 }
 
