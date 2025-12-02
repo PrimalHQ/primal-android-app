@@ -76,6 +76,12 @@ class PermissionsRepositoryImpl(
         val permissionsInGroups = response.groups.flatMap { it.permissionIds }.toHashSet()
         val singlePermissionGroups = response.permissions.filterNot { it.id in permissionsInGroups }
 
+        val singlePermissionGroupsSet = singlePermissionGroups.map { it.id }.toSet()
+
+        val noNamePermissions = permissions
+            .filterNot { it.permissionId in singlePermissionGroupsSet }
+            .filterNot { it.permissionId in permissionsInGroups }
+
         return response.groups.map { group ->
             val action = group.permissionIds
                 .firstOrNull { permissionsMap[it] != null }
@@ -95,6 +101,13 @@ class PermissionsRepositoryImpl(
                 title = permission.title,
                 action = action,
                 permissionIds = listOf(permission.id),
+            )
+        } + noNamePermissions.map {
+            AppPermissionGroup(
+                groupId = it.permissionId,
+                action = it.action,
+                title = it.permissionId,
+                permissionIds = listOf(it.permissionId),
             )
         }
     }
