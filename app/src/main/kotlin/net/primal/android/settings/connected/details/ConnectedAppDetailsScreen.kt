@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -199,35 +200,42 @@ fun ConnectedAppDetailsContent(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        if (state.recentSessions.isNotEmpty()) {
-            item(key = "RecentSessionsTitle", contentType = "Title") {
-                Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = stringResource(id = R.string.settings_connected_app_details_recent_sessions).uppercase(),
-                    style = AppTheme.typography.titleMedium.copy(lineHeight = 20.sp),
-                    fontWeight = FontWeight.SemiBold,
-                    color = AppTheme.colorScheme.onPrimary,
+        recentSessionsSection(
+            state = state,
+            onSessionClick = onSessionClick,
+        )
+    }
+}
+
+private fun LazyListScope.recentSessionsSection(state: UiState, onSessionClick: (String) -> Unit) {
+    if (state.recentSessions.isNotEmpty()) {
+        item(key = "RecentSessionsTitle", contentType = "Title") {
+            Text(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = stringResource(id = R.string.settings_connected_app_details_recent_sessions).uppercase(),
+                style = AppTheme.typography.titleMedium.copy(lineHeight = 20.sp),
+                fontWeight = FontWeight.SemiBold,
+                color = AppTheme.colorScheme.onPrimary,
+            )
+        }
+
+        itemsIndexed(
+            items = state.recentSessions,
+            key = { _, session -> session.sessionId },
+            contentType = { _, _ -> "SessionItem" },
+        ) { index, session ->
+            val shape = getListItemShape(index = index, listSize = state.recentSessions.size)
+            val isLast = index == state.recentSessions.lastIndex
+
+            Column(modifier = Modifier.clip(shape)) {
+                RecentSessionItem(
+                    session = session,
+                    iconUrl = state.appIconUrl,
+                    appName = state.appName,
+                    onClick = { onSessionClick(session.sessionId) },
                 )
-            }
-
-            itemsIndexed(
-                items = state.recentSessions,
-                key = { _, session -> session.sessionId },
-                contentType = { _, _ -> "SessionItem" },
-            ) { index, session ->
-                val shape = getListItemShape(index = index, listSize = state.recentSessions.size)
-                val isLast = index == state.recentSessions.lastIndex
-
-                Column(modifier = Modifier.clip(shape)) {
-                    RecentSessionItem(
-                        session = session,
-                        iconUrl = state.appIconUrl,
-                        appName = state.appName,
-                        onClick = { onSessionClick(session.sessionId) },
-                    )
-                    if (!isLast) {
-                        PrimalDivider()
-                    }
+                if (!isLast) {
+                    PrimalDivider()
                 }
             }
         }
