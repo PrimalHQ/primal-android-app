@@ -18,6 +18,7 @@ import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.AppPermissionGroup
 import net.primal.domain.account.model.PermissionAction
 import net.primal.domain.account.repository.PermissionsRepository
+import net.primal.shared.data.local.db.withTransaction
 
 class PermissionsRepositoryImpl(
     private val database: AccountDatabase,
@@ -72,29 +73,20 @@ class PermissionsRepositoryImpl(
     override suspend fun resetPermissionsToDefault(connectionId: String): Result<Unit> =
         withContext(dispatchers.io()) {
             runCatching {
-                val mediumTrustPermissions = wellKnownApi.getMediumTrustPermissions().allowPermissions.toSet()
-                val allDefinitions = wellKnownApi.getSignerPermissions()
+                val mediumTrustPermissions = wellKnownApi.getMediumTrustPermissions().allowPermissions
 
-                val allPossiblePermissionIds = (
-                    allDefinitions.groups.flatMap { it.permissionIds } +
-                        allDefinitions.permissions.map { it.id }
-                    ).toSet()
-
-                val resetPermissions = allPossiblePermissionIds.map { permissionId ->
-                    val action = if (mediumTrustPermissions.contains(permissionId)) {
-                        PermissionActionPO.Approve
-                    } else {
-                        PermissionActionPO.Ask
-                    }
-
-                    AppPermissionData(
-                        permissionId = permissionId,
-                        connectionId = connectionId,
-                        action = action,
+                database.withTransaction {
+                    database.permissions().deletePermissionsByConnectionId(connectionId)
+                    database.permissions().upsertAll(
+                        data = mediumTrustPermissions.map { permissionId ->
+                            AppPermissionData(
+                                permissionId = permissionId,
+                                connectionId = connectionId,
+                                action = PermissionActionPO.Approve,
+                            )
+                        },
                     )
                 }
-
-                database.permissions().upsertAll(resetPermissions)
             }
         }
 
