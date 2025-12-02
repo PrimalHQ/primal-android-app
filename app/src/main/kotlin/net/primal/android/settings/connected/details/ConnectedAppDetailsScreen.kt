@@ -171,6 +171,21 @@ fun ConnectedAppDetailsContent(
     onSessionClick: (sessionId: String) -> Unit,
     onPermissionDetailsClick: () -> Unit,
 ) {
+    var confirmDeletionDialogVisibility by remember { mutableStateOf(false) }
+    if (confirmDeletionDialogVisibility) {
+        ConfirmActionAlertDialog(
+            dialogTitle = stringResource(id = R.string.settings_connected_app_details_delete_connection_dialog_title),
+            dialogText = stringResource(id = R.string.settings_connected_app_details_delete_connection_dialog_text),
+            confirmText = stringResource(id = R.string.settings_connected_app_details_delete_connection_confirm),
+            onConfirmation = {
+                confirmDeletionDialogVisibility = false
+                eventPublisher(UiEvent.DeleteConnection)
+            },
+            dismissText = stringResource(id = R.string.settings_connected_app_details_delete_connection_dismiss),
+            onDismissRequest = { confirmDeletionDialogVisibility = false },
+        )
+    }
+
     LazyColumn(modifier = modifier) {
         item(key = "Header", contentType = "Header") {
             HeaderSection(
@@ -184,7 +199,7 @@ fun ConnectedAppDetailsContent(
                 onStartSessionClick = { eventPublisher(UiEvent.StartSession) },
                 onEndSessionClick = { eventPublisher(UiEvent.EndSession) },
                 onEditNameClick = { eventPublisher(UiEvent.EditName) },
-                onDeleteConnectionClick = { eventPublisher(UiEvent.DeleteConnection) },
+                onDeleteConnectionClick = { confirmDeletionDialogVisibility = true },
             )
         }
 
@@ -239,17 +254,6 @@ private fun LazyListScope.recentSessionsSection(state: UiState, onSessionClick: 
                 }
             }
         }
-    }
-
-    if (state.confirmingDeletion) {
-        ConfirmActionAlertDialog(
-            dialogTitle = stringResource(id = R.string.settings_connected_app_details_delete_connection_dialog_title),
-            dialogText = stringResource(id = R.string.settings_connected_app_details_delete_connection_dialog_text),
-            confirmText = stringResource(id = R.string.settings_connected_app_details_delete_connection_confirm),
-            onConfirmation = { eventPublisher(UiEvent.ConfirmDeletion) },
-            dismissText = stringResource(id = R.string.settings_connected_app_details_delete_connection_dismiss),
-            onDismissRequest = { eventPublisher(UiEvent.DismissDeletionConfirmation) },
-        )
     }
 
     if (state.editingName) {
