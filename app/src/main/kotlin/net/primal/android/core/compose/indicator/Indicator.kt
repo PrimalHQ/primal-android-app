@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContent
@@ -151,12 +152,13 @@ private fun IndicatorNotice(
             .padding(top = 16.dp, end = 16.dp)
             .clip(CircleShape)
             .background(AppTheme.colorScheme.onPrimary)
-            .padding(vertical = 16.dp, horizontal = 24.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+            .height(40.dp)
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            modifier = Modifier.size(24.dp),
+            modifier = Modifier.size(20.dp),
             imageVector = icon,
             contentDescription = null,
             tint = iconTint,
@@ -164,7 +166,7 @@ private fun IndicatorNotice(
         Text(
             text = text,
             fontWeight = FontWeight.Bold,
-            style = AppTheme.typography.bodyMedium,
+            style = AppTheme.typography.bodySmall,
             color = AppTheme.colorScheme.surfaceVariant,
         )
     }
