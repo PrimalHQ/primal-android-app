@@ -77,9 +77,6 @@ fun ActiveSessionsBottomSheet(
                         Toast.LENGTH_SHORT,
                     ).show()
                 }
-                is ActiveSessionsContract.SideEffect.NavigateToConnectedApps -> {
-                    onSettingsClick(it.connectionId)
-                }
             }
         }
     }
@@ -93,6 +90,16 @@ fun ActiveSessionsBottomSheet(
             state = state,
             eventPublisher = { viewModel.setEvent(it) },
             snackbarHostState = snackbarHostState,
+            onSettingsClick = {
+                val selectedSessionIds = state.selectedSessions
+                val connectionId = if (selectedSessionIds.size == 1) {
+                    val sessionId = selectedSessionIds.first()
+                    state.sessions.find { it.sessionId == sessionId }?.connectionId
+                } else {
+                    null
+                }
+                onSettingsClick(connectionId)
+            },
         )
     }
 }
@@ -105,6 +112,7 @@ private fun ActiveSessionsContent(
     state: UiState,
     eventPublisher: (ActiveSessionsContract.UiEvent) -> Unit,
     snackbarHostState: SnackbarHostState,
+    onSettingsClick: () -> Unit,
 ) {
     val activeSessions = state.sessions.size
     val hasActiveSessions = activeSessions > 0
@@ -172,7 +180,7 @@ private fun ActiveSessionsContent(
                 disconnecting = state.disconnecting,
                 disconnectEnabled = state.selectedSessions.isNotEmpty(),
                 onDisconnectClick = { eventPublisher(ActiveSessionsContract.UiEvent.DisconnectClick) },
-                onSettingsClick = { eventPublisher(ActiveSessionsContract.UiEvent.SettingsClick) },
+                onSettingsClick = onSettingsClick,
             )
         },
         snackbarHost = {
