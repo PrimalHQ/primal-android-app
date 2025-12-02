@@ -22,6 +22,7 @@ import net.primal.android.settings.connected.details.ConnectedAppDetailsContract
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiState
 import net.primal.android.settings.connected.model.SessionUi
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.onFailure
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
@@ -93,11 +94,10 @@ class ConnectedAppDetailsViewModel @Inject constructor(
 
     private fun updateTrustLevel(trustLevel: TrustLevel) {
         viewModelScope.launch {
-            runCatching {
-                connectionRepository.updateTrustLevel(connectionId, trustLevel)
-            }.onFailure {
-                setState { copy(error = UiError.GenericError(it.message)) }
-            }
+            connectionRepository.updateTrustLevel(connectionId, trustLevel)
+                .onFailure {
+                    setState { copy(error = UiError.GenericError(it.message)) }
+                }
         }
     }
 
