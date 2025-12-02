@@ -109,6 +109,9 @@ class SessionEventRepositoryImpl(
                 if (connection.data.trustLevel == TrustLevel.Low && action == PermissionAction.Approve) {
                     database.connections()
                         .updateTrustLevel(connectionId = connection.data.connectionId, trustLevel = TrustLevel.Medium)
+                    database.permissions().deletePermissionsByConnectionId(
+                        connectionId = connection.data.connectionId,
+                    )
                 }
 
                 database.permissions().upsert(
