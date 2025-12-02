@@ -21,5 +21,6 @@ interface AppPermissionsContract {
         ) : UiEvent()
         data object Retry : UiEvent()
         data object DismissError : UiEvent()
+        data object ResetPermissions : UiEvent()
     }
 }

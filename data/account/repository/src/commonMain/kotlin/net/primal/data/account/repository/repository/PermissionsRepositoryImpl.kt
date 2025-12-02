@@ -8,6 +8,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
 import net.primal.core.utils.runCatching
 import net.primal.data.account.local.dao.AppPermissionData
+import net.primal.data.account.local.dao.PermissionAction as PermissionActionPO
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.api.WellKnownApi
 import net.primal.data.account.remote.api.model.PermissionsResponse
@@ -17,6 +18,7 @@ import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.AppPermissionGroup
 import net.primal.domain.account.model.PermissionAction
 import net.primal.domain.account.repository.PermissionsRepository
+import net.primal.shared.data.local.db.withTransaction
 
 class PermissionsRepositoryImpl(
     private val database: AccountDatabase,
@@ -65,6 +67,26 @@ class PermissionsRepositoryImpl(
                 groups.map { group -> group.permissionIds.associateWith { group.title } }
                     .reduce { acc, map -> acc + map }
                     .run { permissions.associate { it.id to it.title } + this }
+            }
+        }
+
+    override suspend fun resetPermissionsToDefault(connectionId: String): Result<Unit> =
+        withContext(dispatchers.io()) {
+            runCatching {
+                val mediumTrustPermissions = wellKnownApi.getMediumTrustPermissions().allowPermissions
+
+                database.withTransaction {
+                    database.permissions().deletePermissionsByConnectionId(connectionId)
+                    database.permissions().upsertAll(
+                        data = mediumTrustPermissions.map { permissionId ->
+                            AppPermissionData(
+                                permissionId = permissionId,
+                                connectionId = connectionId,
+                                action = PermissionActionPO.Approve,
+                            )
+                        },
+                    )
+                }
             }
         }
 
