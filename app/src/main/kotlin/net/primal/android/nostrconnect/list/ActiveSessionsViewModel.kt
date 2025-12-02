@@ -15,6 +15,7 @@ import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.SideEffect
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiEvent
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiState
+import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.nostrconnect.model.asUi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
@@ -63,7 +64,12 @@ class ActiveSessionsViewModel @Inject constructor(
                             appSession.asUi(userAccount = userAccount.asUserAccountUi())
                         }
                     }
-                    setState { copy(sessions = uiSessions) }
+                    setState {
+                        copy(
+                            sessions = uiSessions,
+                            selectedSessions = resolveSelectedSessions(this.selectedSessions, uiSessions),
+                        )
+                    }
                 }
         }
     }
@@ -113,7 +119,6 @@ class ActiveSessionsViewModel @Inject constructor(
             }
                 .onSuccess {
                     setEffect(SideEffect.SessionsDisconnected)
-                    setState { copy(selectedSessions = emptySet()) }
                 }
                 .onFailure {
                     Timber.e(it, "Error disconnecting sessions")
@@ -121,6 +126,18 @@ class ActiveSessionsViewModel @Inject constructor(
                 .also {
                     setState { copy(disconnecting = false) }
                 }
+        }
+    }
+
+    private fun resolveSelectedSessions(
+        currentSelection: Set<String>,
+        newSessions: List<ActiveSessionUi>,
+    ): Set<String> {
+        val validSelection = currentSelection.intersect(newSessions.map { it.sessionId }.toSet())
+        return if (validSelection.isEmpty() && newSessions.isNotEmpty()) {
+            setOf(newSessions.first().sessionId)
+        } else {
+            validSelection
         }
     }
 }

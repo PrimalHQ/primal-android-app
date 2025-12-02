@@ -71,8 +71,7 @@ private fun NavController.navigateToSessionDetails(sessionId: String) = navigate
 
 private fun NavController.navigateToEventDetails(eventId: String) = navigate(route = "event_details/$eventId")
 
-private fun NavController.navigateToConnectedAppDetails(connectionId: String) =
-    navigate(route = "connected_apps/$connectionId")
+fun NavController.navigateToConnectedAppDetails(connectionId: String) = navigate(route = "connected_apps/$connectionId")
 
 private fun NavController.navigateToAppPermissions(connectionId: String) =
     navigate(route = "connected_apps/$connectionId/permissions")

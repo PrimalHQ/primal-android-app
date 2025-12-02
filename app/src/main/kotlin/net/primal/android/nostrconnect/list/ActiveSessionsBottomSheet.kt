@@ -54,7 +54,7 @@ import net.primal.domain.links.CdnImage
 fun ActiveSessionsBottomSheet(
     viewModel: ActiveSessionsViewModel,
     onDismissRequest: () -> Unit,
-    onSettingsClick: () -> Unit,
+    onSettingsClick: (String?) -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
@@ -90,7 +90,16 @@ fun ActiveSessionsBottomSheet(
             state = state,
             eventPublisher = { viewModel.setEvent(it) },
             snackbarHostState = snackbarHostState,
-            onSettingsClick = onSettingsClick,
+            onSettingsClick = {
+                val selectedSessionIds = state.selectedSessions
+                val connectionId = if (selectedSessionIds.size == 1) {
+                    val sessionId = selectedSessionIds.first()
+                    state.sessions.find { it.sessionId == sessionId }?.connectionId
+                } else {
+                    null
+                }
+                onSettingsClick(connectionId)
+            },
         )
     }
 }

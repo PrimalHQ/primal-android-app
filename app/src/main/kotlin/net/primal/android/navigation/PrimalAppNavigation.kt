@@ -1382,7 +1382,14 @@ private fun NavGraphBuilder.activeSessions(navController: NavController) {
         ActiveSessionsBottomSheet(
             viewModel = sessionsViewModel,
             onDismissRequest = { navController.popBackStack() },
-            onSettingsClick = { navController.navigateToConnectedApps() },
+            onSettingsClick = { connectionId ->
+                navController.popBackStack()
+                if (connectionId != null) {
+                    navController.navigateToConnectedAppDetails(connectionId = connectionId)
+                } else {
+                    navController.navigateToConnectedApps()
+                }
+            },
         )
     }
 }
