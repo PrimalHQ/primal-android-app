@@ -64,9 +64,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
                 when (event) {
                     is UiEvent.AutoStartSessionChange -> updateAutoStartSession(event.enabled)
                     UiEvent.DeleteConnection -> deleteConnection()
-                    UiEvent.EditName -> setState { copy(editingName = true) }
-                    is UiEvent.NameChange -> updateAppName(event.name)
-                    UiEvent.DismissEditNameDialog -> setState { copy(editingName = false) }
+                    is UiEvent.EditName -> updateAppName(event.name)
                     UiEvent.StartSession -> startSession()
                     UiEvent.EndSession -> endSession()
                     UiEvent.DismissError -> setState { copy(error = null) }
@@ -148,8 +146,6 @@ class ConnectedAppDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 connectionRepository.updateConnectionName(connectionId, name)
-            }.onSuccess {
-                setState { copy(editingName = false) }
             }.onFailure {
                 setState { copy(error = UiError.GenericError(it.message)) }
             }
