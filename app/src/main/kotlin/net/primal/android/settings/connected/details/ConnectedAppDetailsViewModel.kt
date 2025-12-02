@@ -63,9 +63,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
             events.collect { event ->
                 when (event) {
                     is UiEvent.AutoStartSessionChange -> updateAutoStartSession(event.enabled)
-                    UiEvent.DeleteConnection -> setState { copy(confirmingDeletion = true) }
-                    UiEvent.ConfirmDeletion -> deleteConnection()
-                    UiEvent.DismissDeletionConfirmation -> setState { copy(confirmingDeletion = false) }
+                    UiEvent.DeleteConnection -> deleteConnection()
                     UiEvent.EditName -> setState { copy(editingName = true) }
                     is UiEvent.NameChange -> updateAppName(event.name)
                     UiEvent.DismissEditNameDialog -> setState { copy(editingName = false) }
@@ -139,7 +137,6 @@ class ConnectedAppDetailsViewModel @Inject constructor(
                     runCatching { tokenUpdater.updateTokenForRemoteSigner() }
                 }
             }.onSuccess {
-                setState { copy(confirmingDeletion = false) }
                 setEffect(SideEffect.ConnectionDeleted)
             }.onFailure {
                 setState { copy(error = UiError.GenericError(it.message)) }
