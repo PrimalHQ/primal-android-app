@@ -131,6 +131,8 @@ fun PermissionsBottomSheetContent(uiState: UiState, eventPublisher: (UiEvent) ->
             if (nostrUnsignedEvent != null) {
                 EventDetailsContent(
                     nostrUnsignedEvent = nostrUnsignedEvent,
+                    requestTypeId = uiState.eventDetailsRequestTypeId,
+                    permissionsMap = uiState.permissionsMap,
                     onClose = { eventPublisher(UiEvent.CloseEventDetails) },
                 )
             } else {
@@ -192,15 +194,25 @@ private fun PermissionsListContent(uiState: UiState, eventPublisher: (UiEvent) -
 }
 
 @Composable
-private fun EventDetailsContent(nostrUnsignedEvent: NostrUnsignedEvent, onClose: () -> Unit) {
+private fun EventDetailsContent(
+    nostrUnsignedEvent: NostrUnsignedEvent,
+    requestTypeId: String?,
+    permissionsMap: Map<String, String>,
+    onClose: () -> Unit,
+) {
     BackHandler(onBack = onClose)
     val context = LocalContext.current
+    val actionName = requestTypeId?.let { permissionsMap[it] } ?: requestTypeId ?: ""
+    val formattedTimestamp = rememberPrimalFormattedDateTime(
+        timestamp = nostrUnsignedEvent.createdAt,
+        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
+    )
 
     Column(modifier = Modifier.fillMaxWidth()) {
         NostrEventDetails(
-            kind = nostrUnsignedEvent.kind,
-            createdAt = nostrUnsignedEvent.createdAt,
-            eventRows = nostrUnsignedEvent.asEventDetailRows(),
+            title = actionName,
+            subtitle = formattedTimestamp,
+            eventRows = nostrUnsignedEvent.asEventDetailRows(kindName = actionName),
             onCopy = { text, label ->
                 copyText(context = context, text = text, label = label)
             },

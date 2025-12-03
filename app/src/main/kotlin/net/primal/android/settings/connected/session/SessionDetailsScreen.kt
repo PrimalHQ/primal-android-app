@@ -95,6 +95,7 @@ fun SessionDetailsScreen(
                     Column(modifier = Modifier.clip(shape)) {
                         SessionEventListItem(
                             event = event,
+                            namingMap = state.namingMap,
                             onClick = { onEventClick(event.id) },
                         )
                         if (!isLast) {
@@ -108,14 +109,19 @@ fun SessionDetailsScreen(
 }
 
 @Composable
-private fun SessionEventListItem(event: SessionEventUi, onClick: () -> Unit) {
+private fun SessionEventListItem(
+    event: SessionEventUi,
+    namingMap: Map<String, String>,
+    onClick: () -> Unit,
+) {
     val formattedTimestamp = rememberPrimalFormattedDateTime(
         timestamp = event.timestamp,
         format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
     )
+    val title = namingMap[event.requestTypeId] ?: event.requestTypeId
     ListItem(
         modifier = Modifier.clickable { onClick() },
-        headlineContent = { Text(text = event.title, style = AppTheme.typography.bodyLarge) },
+        headlineContent = { Text(text = title, style = AppTheme.typography.bodyLarge) },
         supportingContent = {
             Text(
                 modifier = Modifier.padding(top = 5.dp),
