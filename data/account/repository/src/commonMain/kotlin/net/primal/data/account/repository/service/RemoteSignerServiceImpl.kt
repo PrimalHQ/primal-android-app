@@ -2,9 +2,14 @@ package net.primal.data.account.repository.service
 
 import io.github.aakira.napier.Napier
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
@@ -38,6 +43,11 @@ class RemoteSignerServiceImpl internal constructor(
     private var relaySessionMap = emptyMap<String, List<String>>()
     private var activeClientPubKeys = HashSet<String>()
     private var clientSessionMap = emptyMap<String, String>()
+    private val sessionActivityMap = mutableMapOf<String, Instant>()
+
+    companion object {
+        private val SESSION_INACTIVITY_TIMEOUT = 15.minutes
+    }
 
     override fun initialize() {
         Napier.d(tag = "Signer") { "RemoteSignerService started." }
@@ -47,7 +57,23 @@ class RemoteSignerServiceImpl internal constructor(
         observeRelayEvents()
         observeMethods()
         observeErrors()
+        startInactivityLoop()
     }
+
+    private fun startInactivityLoop() =
+        scope.launch {
+            while (isActive) {
+                delay(45.seconds)
+
+                val now = Clock.System.now()
+
+                sessionActivityMap.forEach { (sessionId, lastActiveAt) ->
+                    if ((lastActiveAt + SESSION_INACTIVITY_TIMEOUT) < now) {
+                        sessionRepository.endSession(sessionId = sessionId)
+                    }
+                }
+            }
+        }
 
     private fun observeOngoingSessions() =
         scope.launch {
@@ -62,7 +88,10 @@ class RemoteSignerServiceImpl internal constructor(
                             valueTransform = { it.second },
                         )
 
-                    sessions.forEach { setActiveRelays(it) }
+                    sessions.forEach {
+                        setActiveRelays(it)
+                        sessionActivityMap.getOrPut(it.sessionId) { Clock.System.now() }
+                    }
                     clientSessionMap = sessions.associate { it.clientPubKey to it.sessionId }
                     activeClientPubKeys = sessions.map { it.clientPubKey }.toHashSet()
                     nostrRelayManager.connectToRelays(relays = sessions.flatMap { it.relays }.toSet())
@@ -188,6 +217,8 @@ class RemoteSignerServiceImpl internal constructor(
             }
 
             findActiveSessionId(clientPubKey = method.clientPubKey)?.let { sessionId ->
+                sessionActivityMap[sessionId] = Clock.System.now()
+
                 internalSessionEventRepository.saveSessionEvent(
                     sessionId = sessionId,
                     method = method,
