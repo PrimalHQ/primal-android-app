@@ -8,6 +8,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.account.local.dao.RequestState
+import net.primal.data.account.local.dao.SignerMethodType
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
@@ -24,8 +25,10 @@ internal class InternalSessionEventRepository(
     suspend fun saveSessionEvent(
         sessionId: String,
         signerPubKey: String,
-        method: RemoteSignerMethod,
+        requestType: SignerMethodType,
+        method: RemoteSignerMethod?,
         response: RemoteSignerMethodResponse?,
+        requestState: RequestState? = null,
     ) = withContext(dispatchers.io()) {
         runCatching {
             val completedAt = Clock.System.now().epochSeconds
@@ -33,10 +36,12 @@ internal class InternalSessionEventRepository(
             buildSessionEventData(
                 sessionId = sessionId,
                 signerPubKey = signerPubKey,
-                requestedAt = method.requestedAt,
+                requestedAt = method?.requestedAt ?: completedAt,
                 completedAt = if (response != null) completedAt else null,
                 method = method,
+                requestType = requestType,
                 response = response,
+                requestState = requestState,
             )?.let { sessionEventData ->
                 accountDatabase.sessionEvents().insert(data = sessionEventData)
             } ?: throw IllegalArgumentException("Couldn't build session event data.")

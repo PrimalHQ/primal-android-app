@@ -106,7 +106,8 @@ fun SessionDetailsScreen(
                         Column(modifier = Modifier.clip(shape)) {
                             SessionEventListItem(
                                 event = event,
-                                namingMap = state.namingMap,onClick = { onEventClick(event.id) },
+                                namingMap = state.namingMap,
+                                onClick = { onEventClick(event.id) },
                             )
                             if (!isLast) {
                                 PrimalDivider()

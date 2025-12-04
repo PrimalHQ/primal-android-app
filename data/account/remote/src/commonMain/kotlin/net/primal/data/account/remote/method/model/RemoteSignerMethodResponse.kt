@@ -21,4 +21,10 @@ sealed class RemoteSignerMethodResponse {
         override val clientPubKey: String,
         val error: String,
     ) : RemoteSignerMethodResponse()
+
+    fun assignClientPubKey(clientPubKey: String) =
+        when (this) {
+            is Error -> copy(clientPubKey = clientPubKey)
+            is Success -> copy(clientPubKey = clientPubKey)
+        }
 }
