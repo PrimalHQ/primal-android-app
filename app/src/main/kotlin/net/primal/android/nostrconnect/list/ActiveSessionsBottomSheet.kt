@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -264,19 +266,23 @@ private fun SessionListItem(
                     style = AppTheme.typography.titleMedium.copy(lineHeight = 20.sp),
                     color = AppTheme.colorScheme.onPrimary,
                 )
-                Text(
-                    text = session.appUrl ?: "",
-                    style = AppTheme.typography.bodySmall.copy(lineHeight = 20.sp),
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                )
+                if (!session.appUrl.isNullOrEmpty()) {
+                    Text(
+                        text = session.appUrl,
+                        style = AppTheme.typography.bodySmall.copy(lineHeight = 20.sp),
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    )
+                }
             }
         }
 
-        UniversalAvatarThumbnail(
-            avatarCdnImage = session.userAccount?.avatarCdnImage,
-            legendaryCustomization = session.userAccount?.legendaryCustomization,
-            avatarSize = 28.dp,
-        )
+        CompositionLocalProvider(LocalContentColor provides AppTheme.colorScheme.onPrimary) {
+            UniversalAvatarThumbnail(
+                avatarCdnImage = session.userAccount?.avatarCdnImage,
+                legendaryCustomization = session.userAccount?.legendaryCustomization,
+                avatarSize = 28.dp,
+            )
+        }
     }
 }
 
