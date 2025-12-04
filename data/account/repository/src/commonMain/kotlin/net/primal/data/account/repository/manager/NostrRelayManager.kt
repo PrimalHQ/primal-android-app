@@ -1,6 +1,7 @@
 package net.primal.data.account.repository.manager
 
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -50,10 +51,13 @@ internal class NostrRelayManager(
     private val _relayEvents = MutableSharedFlow<RelayEvent>(extraBufferCapacity = 64)
     val relayEvents = _relayEvents.asSharedFlow()
 
+    private val firstConnect = CompletableDeferred<Unit>()
+
     suspend fun connectToRelays(relays: Set<String>) {
         Napier.d(tag = "Signer") { "Connecting to relays: $relays" }
         (clients.keys - relays).forEach { disconnectFromRelay(relay = it) }
         (relays - clients.keys).forEach { connectToRelay(relay = it) }
+        firstConnect.complete(Unit)
     }
 
     suspend fun connectToRelay(relay: String) {
@@ -92,22 +96,31 @@ internal class NostrRelayManager(
         scope.cancel()
     }
 
-    fun sendResponse(relays: List<String>, response: RemoteSignerMethodResponse) {
-        Napier.d(tag = "Signer") { "Sending response: $response" }
-        buildSignedEvent(response = response)
-            .onSuccess { event ->
-                relays.mapNotNull { relay -> clients[relay] }
-                    .forEach { client ->
-                        scope.launch {
-                            client.publishEvent(event = event)
-                        }
+    suspend fun sendResponse(relays: List<String>, response: RemoteSignerMethodResponse) =
+        runCatching {
+            firstConnect.await()
+            Napier.d(tag = "Signer") { "Sending response: $response" }
+            val event = buildSignedEvent(response = response)
+                .onFailure {
+                    Napier.w(tag = "Signer", throwable = it) {
+                        "Failed to sign event. Something must have gone horribly wrong."
                     }
-            }.onFailure {
-                Napier.w(tag = "Signer", throwable = it) {
-                    "Failed to sign event. Something must have gone horribly wrong."
+                }.getOrThrow()
+
+            relays.mapNotNull { relay -> clients[relay] }
+                .also { clients ->
+                    if (clients.isEmpty()) {
+                        throw IllegalStateException(
+                            "We don't have active connection to any of the following relays: $relays",
+                        )
+                    }
                 }
-            }
-    }
+                .forEach { client ->
+                    scope.launch {
+                        client.publishEvent(event = event)
+                    }
+                }
+        }
 
     private fun buildSignedEvent(response: RemoteSignerMethodResponse): Result<NostrEvent> =
         runCatching {

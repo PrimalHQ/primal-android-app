@@ -4,14 +4,17 @@ import io.ktor.http.Url
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import net.primal.core.utils.Result
+import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
+import net.primal.data.account.local.dao.RequestState
+import net.primal.data.account.local.dao.SignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
-import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.PermissionAction
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository
+import net.primal.domain.account.repository.SessionRepository
 
 private const val NOSTR_CONNECT_PREFIX = "nostrconnect://"
 private const val NAME_PARAM = "name"
@@ -34,7 +37,8 @@ private const val VALID_PERMISSION_STRING_REGEX =
 @OptIn(ExperimentalUuidApi::class)
 class SignerConnectionInitializer internal constructor(
     private val connectionRepository: ConnectionRepository,
-    private val nostrRelayManager: NostrRelayManager,
+    private val sessionRepository: SessionRepository,
+    private val internalSessionEventRepository: InternalSessionEventRepository,
     private val internalPermissionsRepository: InternalPermissionsRepository,
 ) {
     suspend fun initialize(
@@ -51,17 +55,22 @@ class SignerConnectionInitializer internal constructor(
                 trustLevel = trustLevel,
             )
 
-            nostrRelayManager.connectToRelays(relays = appConnection.relays.toSet())
-            nostrRelayManager.sendResponse(
-                relays = appConnection.relays,
-                response = RemoteSignerMethodResponse.Success(
-                    id = Uuid.random().toString(),
-                    result = secret,
-                    clientPubKey = appConnection.clientPubKey,
-                ),
-            )
-
             connectionRepository.saveConnection(secret = secret, connection = appConnection)
+            sessionRepository.startSession(connectionId = appConnection.connectionId)
+                .onSuccess { sessionId ->
+                    internalSessionEventRepository.saveSessionEvent(
+                        sessionId = sessionId,
+                        signerPubKey = signerPubKey,
+                        requestType = SignerMethodType.Connect,
+                        method = null,
+                        requestState = RequestState.PendingResponse,
+                        response = RemoteSignerMethodResponse.Success(
+                            id = Uuid.random().toString(),
+                            clientPubKey = appConnection.clientPubKey,
+                            result = secret,
+                        ),
+                    )
+                }
 
             appConnection
         }

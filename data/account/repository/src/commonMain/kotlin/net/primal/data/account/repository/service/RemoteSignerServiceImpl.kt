@@ -20,6 +20,7 @@ import net.primal.data.account.remote.method.processor.RemoteSignerMethodProcess
 import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.model.RelayEvent
+import net.primal.data.account.repository.mappers.getRequestType
 import net.primal.data.account.repository.repository.InternalSessionEventRepository
 import net.primal.data.account.repository.repository.model.UpdateSessionEventRequest
 import net.primal.domain.account.model.AppSession
@@ -121,8 +122,11 @@ class RemoteSignerServiceImpl internal constructor(
         scope.launch {
             internalSessionEventRepository.observePendingResponseEvents(signerPubKey = signerKeyPair.pubKey)
                 .collect { events ->
-                    val alreadyResponded = events.mapNotNull {
-                        it.responsePayload?.decrypted?.decodeFromJsonStringOrNull<RemoteSignerMethodResponse>()
+                    val alreadyResponded = events.mapNotNull { sessionEvent ->
+                        sessionEvent.responsePayload
+                            ?.decrypted
+                            ?.decodeFromJsonStringOrNull<RemoteSignerMethodResponse>()
+                            ?.assignClientPubKey(clientPubKey = sessionEvent.clientPubKey.decrypted)
                     }
 
                     val toRespond = events.filter { it.responsePayload == null }
@@ -221,6 +225,7 @@ class RemoteSignerServiceImpl internal constructor(
 
                 internalSessionEventRepository.saveSessionEvent(
                     sessionId = sessionId,
+                    requestType = method.getRequestType(),
                     method = method,
                     signerPubKey = signerKeyPair.pubKey,
                     response = response,
@@ -240,7 +245,7 @@ class RemoteSignerServiceImpl internal constructor(
                 ?.let { sessionRepository.findActiveSessionForConnection(connectionId = it.connectionId) }
                 ?.getOrNull()?.sessionId
 
-    private suspend fun sendResponse(response: RemoteSignerMethodResponse) {
+    private suspend fun sendResponse(response: RemoteSignerMethodResponse): Result<Unit> {
         Napier.d(tag = "Signer") { "Sending response: $response" }
         val relays = connectionRepository
             .getConnectionByClientPubKey(clientPubKey = response.clientPubKey)
@@ -248,10 +253,12 @@ class RemoteSignerServiceImpl internal constructor(
 
         Napier.d(tag = "Signer") { "Relays: $relays" }
 
-        nostrRelayManager.sendResponse(
-            relays = relays ?: return,
+        return nostrRelayManager.sendResponse(
+            relays = relays ?: return Result.failure(IllegalStateException("No relays found.")),
             response = response,
-        )
+        ).onFailure {
+            Napier.d(tag = "Signer") { "Something went wrong while sending response: ${it.message}" }
+        }
     }
 
     override fun destroy() {
