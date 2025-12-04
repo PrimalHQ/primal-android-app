@@ -13,6 +13,7 @@ interface PermissionsContract {
         val responding: Boolean = false,
         val permissionsMap: Map<String, String> = emptyMap(),
         val eventDetailsUnsignedEvent: NostrUnsignedEvent? = null,
+        val eventDetailsRequestTypeId: String? = null,
     ) {
         val session = requestQueue.firstOrNull()?.first
         val sessionEvents = requestQueue.firstOrNull()?.second ?: emptyList()

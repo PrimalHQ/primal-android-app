@@ -33,13 +33,10 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.CopyAlt
-import net.primal.android.core.utils.PrimalDateFormats
 import net.primal.android.core.utils.ellipsizeMiddle
-import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.CourierPrimeFontFamily
 import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 
 private const val CONTENT_MAX_LINES_COLLAPSED = 10
@@ -62,8 +59,8 @@ sealed interface EventDetailRow {
 
 @Composable
 fun NostrEventDetails(
-    kind: Int,
-    createdAt: Long,
+    title: String,
+    subtitle: String,
     eventRows: List<EventDetailRow>,
     modifier: Modifier = Modifier,
     onCopy: (text: String, label: String) -> Unit,
@@ -74,8 +71,8 @@ fun NostrEventDetails(
     ) {
         item(key = "Header", contentType = "Header") {
             EventDetailsHeader(
-                eventKind = kind,
-                timestamp = createdAt,
+                title = title,
+                subtitle = subtitle,
             )
         }
 
@@ -127,24 +124,20 @@ fun NostrEventDetails(
 }
 
 @Composable
-private fun EventDetailsHeader(eventKind: Int, timestamp: Long) {
-    val formattedTimestamp = rememberPrimalFormattedDateTime(
-        timestamp = timestamp,
-        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
-    )
+private fun EventDetailsHeader(title: String, subtitle: String) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp),
     ) {
         Text(
-            text = eventKind.toKindTitle(),
+            text = title,
             style = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp),
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
         Text(
             modifier = Modifier.padding(top = 4.dp),
-            text = formattedTimestamp,
+            text = subtitle,
             style = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
@@ -152,12 +145,12 @@ private fun EventDetailsHeader(eventKind: Int, timestamp: Long) {
 }
 
 @Composable
-fun NostrEvent.asEventDetailRows(): List<EventDetailRow> {
+fun NostrEvent.asEventDetailRows(kindName: String): List<EventDetailRow> {
     return buildList {
         add(
             EventDetailRow.Detail(
                 label = stringResource(id = R.string.settings_event_details_event_kind_label),
-                value = "$kind - ${kind.toKindName()}",
+                value = "$kind - $kindName",
             ),
         )
         add(
@@ -213,12 +206,12 @@ fun NostrEvent.asEventDetailRows(): List<EventDetailRow> {
 }
 
 @Composable
-fun NostrUnsignedEvent.asEventDetailRows(): List<EventDetailRow> {
+fun NostrUnsignedEvent.asEventDetailRows(kindName: String): List<EventDetailRow> {
     return buildList {
         add(
             EventDetailRow.Detail(
                 label = stringResource(id = R.string.settings_event_details_event_kind_label),
-                value = "$kind - ${kind.toKindName()}",
+                value = "$kind - $kindName",
             ),
         )
         add(
@@ -409,36 +402,5 @@ private fun TagsListItem(
             contentDescription = stringResource(id = R.string.accessibility_copy_content),
             tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
-    }
-}
-
-@Composable
-fun Int.toKindTitle(): String {
-    return when (this) {
-        NostrEventKind.ShortTextNote.value -> stringResource(id = R.string.settings_event_details_kind_publish_note)
-        NostrEventKind.Metadata.value -> stringResource(id = R.string.settings_event_details_kind_update_profile)
-        NostrEventKind.GenericRepost.value -> stringResource(id = R.string.settings_event_details_kind_repost)
-        NostrEventKind.ZapRequest.value -> stringResource(id = R.string.settings_event_details_kind_zap_request)
-        NostrEventKind.Zap.value -> stringResource(id = R.string.settings_event_details_kind_zap)
-        NostrEventKind.Reaction.value -> stringResource(id = R.string.settings_event_details_kind_react_to_note)
-        NostrEventKind.FollowList.value -> stringResource(id = R.string.settings_event_details_kind_update_follow_list)
-        NostrEventKind.RelayListMetadata.value -> stringResource(
-            id = R.string.settings_event_details_kind_update_relay_list,
-        )
-        else -> stringResource(id = R.string.settings_event_details_kind_sign_event, this)
-    }
-}
-
-private fun Int.toKindName(): String {
-    return when (this) {
-        NostrEventKind.ShortTextNote.value -> "short note"
-        NostrEventKind.Metadata.value -> "metadata"
-        NostrEventKind.GenericRepost.value -> "generic repost"
-        NostrEventKind.ZapRequest.value -> "zap request"
-        NostrEventKind.Zap.value -> "zap"
-        NostrEventKind.Reaction.value -> "reaction"
-        NostrEventKind.FollowList.value -> "contacts"
-        NostrEventKind.RelayListMetadata.value -> "relay list"
-        else -> "unknown"
     }
 }

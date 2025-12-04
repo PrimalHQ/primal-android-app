@@ -11,6 +11,8 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.navigation.sessionIdOrThrow
 import net.primal.android.settings.connected.model.asSessionEventUi
+import net.primal.core.utils.onSuccess
+import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
 
@@ -19,6 +21,7 @@ class SessionDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val sessionRepository: SessionRepository,
     private val sessionEventRepository: SessionEventRepository,
+    private val permissionsRepository: PermissionsRepository,
 ) : ViewModel() {
 
     private val sessionId: String = savedStateHandle.sessionIdOrThrow
@@ -33,9 +36,18 @@ class SessionDetailsViewModel @Inject constructor(
         _state.getAndUpdate(reducer)
 
     init {
+        fetchPermissionsNamingMap()
         observeSession()
         observeSessionEvents()
     }
+
+    private fun fetchPermissionsNamingMap() =
+        viewModelScope.launch {
+            permissionsRepository.getNamingMap()
+                .onSuccess { namingMap ->
+                    setState { copy(namingMap = namingMap) }
+                }
+        }
 
     private fun observeSession() =
         viewModelScope.launch {

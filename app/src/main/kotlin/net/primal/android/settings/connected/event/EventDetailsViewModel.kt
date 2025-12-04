@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.navigation.eventIdOrThrow
+import net.primal.core.utils.onSuccess
 import net.primal.domain.account.model.SessionEvent
+import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.nostr.NostrEvent
 
@@ -19,6 +21,7 @@ import net.primal.domain.nostr.NostrEvent
 class EventDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val sessionEventRepository: SessionEventRepository,
+    private val permissionsRepository: PermissionsRepository,
 ) : ViewModel() {
 
     private val eventId: String = savedStateHandle.eventIdOrThrow
@@ -29,8 +32,15 @@ class EventDetailsViewModel @Inject constructor(
         _state.getAndUpdate(reducer)
 
     init {
+        fetchPermissionsNamingMap()
         observeSessionEvent()
     }
+
+    private fun fetchPermissionsNamingMap() =
+        viewModelScope.launch {
+            permissionsRepository.getNamingMap()
+                .onSuccess { setState { copy(namingMap = it) } }
+        }
 
     private fun observeSessionEvent() =
         viewModelScope.launch {
@@ -47,6 +57,7 @@ class EventDetailsViewModel @Inject constructor(
                             loading = false,
                             event = nostrEvent,
                             rawJson = rawJson,
+                            requestTypeId = sessionEvent.requestTypeId,
                         )
                     }
                 } else {
