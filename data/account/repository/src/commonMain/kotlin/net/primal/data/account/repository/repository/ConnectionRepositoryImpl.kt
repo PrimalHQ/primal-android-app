@@ -73,6 +73,16 @@ class ConnectionRepositoryImpl(
     override suspend fun saveConnection(secret: String, connection: AppConnection) =
         withContext(dispatchers.io()) {
             database.withTransaction {
+                val existing = database.connections().getConnectionByClientPubKey(
+                    clientPubKey = connection.clientPubKey.asEncryptable(),
+                )
+                if (existing != null && existing.data.connectionId != connection.connectionId) {
+                    val connectionId = existing.data.connectionId
+                    database.sessions().deleteSessionsByConnectionId(connectionId)
+                    database.permissions().deletePermissionsByConnectionId(connectionId)
+                    database.connections().deleteConnection(connectionId)
+                }
+
                 database.connections().upsertAll(
                     data = listOf(
                         AppConnectionData(
