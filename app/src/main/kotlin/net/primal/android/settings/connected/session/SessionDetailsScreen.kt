@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalScaffold
@@ -84,21 +85,32 @@ fun SessionDetailsScreen(
                         startedAt = state.sessionStartedAt,
                     )
                 }
-
-                itemsIndexed(
-                    items = state.sessionEvents,
-                    key = { _, event -> event.id },
-                ) { index, event ->
-                    val shape = getListItemShape(index = index, listSize = state.sessionEvents.size)
-                    val isLast = index == state.sessionEvents.lastIndex
-
-                    Column(modifier = Modifier.clip(shape)) {
-                        SessionEventListItem(
-                            event = event,
-                            onClick = { onEventClick(event.id) },
+                if (state.sessionEvents.isEmpty()) {
+                    item(key = "NoContent") {
+                        ListNoContent(
+                            modifier = Modifier
+                                .fillParentMaxWidth()
+                                .padding(vertical = 32.dp),
+                            noContentText = stringResource(id = R.string.settings_session_no_events),
+                            refreshButtonVisible = false,
                         )
-                        if (!isLast) {
-                            PrimalDivider()
+                    }
+                } else {
+                    itemsIndexed(
+                        items = state.sessionEvents,
+                        key = { _, event -> event.id },
+                    ) { index, event ->
+                        val shape = getListItemShape(index = index, listSize = state.sessionEvents.size)
+                        val isLast = index == state.sessionEvents.lastIndex
+
+                        Column(modifier = Modifier.clip(shape)) {
+                            SessionEventListItem(
+                                event = event,
+                                onClick = { onEventClick(event.id) },
+                            )
+                            if (!isLast) {
+                                PrimalDivider()
+                            }
                         }
                     }
                 }
