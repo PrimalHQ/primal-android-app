@@ -10,5 +10,6 @@ interface SessionDetailsContract {
         val appIconUrl: String? = null,
         val sessionStartedAt: Long? = null,
         val sessionEvents: List<SessionEventUi> = emptyList(),
+        val namingMap: Map<String, String> = emptyMap(),
     )
 }

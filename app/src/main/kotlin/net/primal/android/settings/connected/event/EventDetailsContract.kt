@@ -8,5 +8,7 @@ interface EventDetailsContract {
         val event: NostrEvent? = null,
         val rawJson: String? = null,
         val eventNotSupported: Boolean = false,
+        val requestTypeId: String? = null,
+        val namingMap: Map<String, String> = emptyMap(),
     )
 }

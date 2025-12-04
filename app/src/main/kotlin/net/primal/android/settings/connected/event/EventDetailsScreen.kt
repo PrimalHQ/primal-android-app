@@ -20,7 +20,9 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.utils.PrimalDateFormats
 import net.primal.android.core.utils.copyText
+import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.nostrconnect.ui.NostrEventDetails
 import net.primal.android.nostrconnect.ui.asEventDetailRows
 
@@ -49,13 +51,19 @@ fun EventDetailsScreen(state: EventDetailsContract.UiState, onClose: () -> Unit)
             when {
                 state.loading -> PrimalLoadingSpinner()
                 state.event != null -> {
+                    val formattedTimestamp = rememberPrimalFormattedDateTime(
+                        timestamp = state.event.createdAt,
+                        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
+                    )
+                    val actionName = state.requestTypeId?.let { state.namingMap[it] }
+                        ?: state.requestTypeId ?: ""
                     NostrEventDetails(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
-                        kind = state.event.kind,
-                        createdAt = state.event.createdAt,
-                        eventRows = state.event.asEventDetailRows(),
+                        title = actionName,
+                        subtitle = formattedTimestamp,
+                        eventRows = state.event.asEventDetailRows(kindName = actionName),
                         onCopy = { text, label ->
                             copyText(text = text, context = context, label = label)
                         },

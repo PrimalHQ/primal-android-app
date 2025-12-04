@@ -90,7 +90,12 @@ class PermissionsViewModel @Inject constructor(
                 runCatching { NostrJsonEncodeDefaults.decodeFromString<NostrUnsignedEvent>(it) }.getOrNull()
             }
 
-        setState { copy(eventDetailsUnsignedEvent = nostrUnsignedEvent) }
+        setState {
+            copy(
+                eventDetailsUnsignedEvent = nostrUnsignedEvent,
+                eventDetailsRequestTypeId = sessionEvent?.requestTypeId,
+            )
+        }
     }
 
     private fun respondToEvents(eventIds: Set<String>, choice: UserChoice) =
