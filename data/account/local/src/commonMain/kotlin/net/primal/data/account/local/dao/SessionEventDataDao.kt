@@ -11,8 +11,14 @@ interface SessionEventDataDao {
     @Insert
     suspend fun insert(data: SessionEventData)
 
-    @Query("SELECT * FROM SessionEventData WHERE sessionId = :sessionId ORDER BY requestedAt DESC")
-    fun observeEventsBySessionId(sessionId: String): Flow<List<SessionEventData>>
+    @Query(
+        """
+        SELECT * FROM SessionEventData
+        WHERE sessionId = :sessionId AND (requestState = 'Approved' OR requestState = 'Rejected')
+        ORDER BY requestedAt DESC
+    """,
+    )
+    fun observeCompletedEventsBySessionId(sessionId: String): Flow<List<SessionEventData>>
 
     @Query("SELECT * FROM SessionEventData WHERE eventId = :eventId")
     fun observeEvent(eventId: String): Flow<SessionEventData?>
