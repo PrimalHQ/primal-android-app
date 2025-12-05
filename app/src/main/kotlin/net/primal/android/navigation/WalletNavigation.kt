@@ -11,6 +11,7 @@ import androidx.navigation.navigation
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.DrawerScreenDestination
+import net.primal.android.scan.ScanCodeContract.ScanMode
 import net.primal.android.wallet.activation.WalletActivationViewModel
 import net.primal.android.wallet.activation.ui.WalletActivationScreen
 import net.primal.android.wallet.dashboard.WalletDashboardScreen
@@ -194,9 +195,9 @@ private fun NavGraphBuilder.send(
     SendPaymentScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        onPromoCodeScan = {
+        onPromoCodeScan = { promoCode ->
             navController.popBackStack()
-            navController.navigateToScanCode(it)
+            navController.navigateToScanCode(ScanMode.Anything, promoCode)
         },
         onCreateTransaction = { draft ->
             navController.navigateToWalletCreateTransaction(draftTransaction = draft)

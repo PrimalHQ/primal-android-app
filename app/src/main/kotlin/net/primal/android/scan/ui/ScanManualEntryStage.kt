@@ -37,6 +37,7 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.CheckCircleOutline
+import net.primal.android.scan.ScanCodeContract
 import net.primal.android.scan.utils.isValidPromoCode
 import net.primal.android.scanner.domain.QrCodeDataType
 import net.primal.android.theme.AppTheme
@@ -46,6 +47,7 @@ private val SUCCESS_COLOR = Color(0xFF52CE0A)
 @Composable
 internal fun ScanManualEntryStage(
     modifier: Modifier = Modifier,
+    scanMode: ScanCodeContract.ScanMode,
     isError: Boolean,
     isLoading: Boolean,
     value: String?,
@@ -55,7 +57,7 @@ internal fun ScanManualEntryStage(
     val keyboardController = LocalSoftwareKeyboardController.current
     var text by remember { mutableStateOf(value ?: "") }
 
-    val isValidInput = remember(text) { text.trim().isValidScanInput() }
+    val isValidInput = remember(text) { text.trim().isValidScanInput(scanMode) }
 
     Column(
         modifier = modifier
@@ -70,7 +72,11 @@ internal fun ScanManualEntryStage(
         ) {
             Text(
                 textAlign = TextAlign.Center,
-                text = stringResource(id = R.string.scan_code_scan_anything_subtitle),
+                text = if (scanMode == ScanCodeContract.ScanMode.RemoteLogin) {
+                    stringResource(id = R.string.scan_code_remote_login_manual_entry_subtitle)
+                } else {
+                    stringResource(id = R.string.scan_code_scan_anything_subtitle)
+                },
                 color = AppTheme.colorScheme.onPrimary,
                 style = AppTheme.typography.bodyLarge,
             )
@@ -78,6 +84,7 @@ internal fun ScanManualEntryStage(
             ParsingInputTextField(
                 modifier = Modifier.fillMaxWidth(),
                 value = text,
+                scanMode = scanMode,
                 onValueChange = {
                     text = it
                     onValueChanged()
@@ -111,7 +118,7 @@ internal fun ScanManualEntryStage(
                 .fillMaxWidth()
                 .height(56.dp),
             loading = isLoading,
-            enabled = !isLoading && text.isNotBlank(),
+            enabled = !isLoading && text.isNotBlank() && isValidInput,
             onClick = {
                 keyboardController?.hide()
                 onApplyClick(text)
@@ -156,6 +163,7 @@ private fun PasteCodeButton(modifier: Modifier, onPaste: (String) -> Unit) {
 private fun ParsingInputTextField(
     modifier: Modifier = Modifier,
     value: String,
+    scanMode: ScanCodeContract.ScanMode,
     onValueChange: (String) -> Unit,
     isError: Boolean,
     isValidInput: Boolean,
@@ -186,7 +194,11 @@ private fun ParsingInputTextField(
         placeholder = {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.scan_code_enter_placeholder),
+                text = if (scanMode == ScanCodeContract.ScanMode.RemoteLogin) {
+                    stringResource(id = R.string.scan_code_remote_login_manual_entry_placeholder)
+                } else {
+                    stringResource(id = R.string.scan_code_enter_placeholder)
+                },
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                 style = AppTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.SemiBold,
@@ -213,6 +225,9 @@ private fun ParsingInputTextField(
     )
 }
 
-private fun String.isValidScanInput(): Boolean {
-    return QrCodeDataType.from(this) != null || isValidPromoCode()
+private fun String.isValidScanInput(scanMode: ScanCodeContract.ScanMode): Boolean {
+    return when (scanMode) {
+        ScanCodeContract.ScanMode.Anything -> QrCodeDataType.from(this) != null || isValidPromoCode()
+        ScanCodeContract.ScanMode.RemoteLogin -> QrCodeDataType.from(this) == QrCodeDataType.NOSTR_CONNECT
+    }
 }

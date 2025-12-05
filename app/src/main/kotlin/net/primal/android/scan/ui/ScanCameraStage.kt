@@ -33,6 +33,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Keyboard
+import net.primal.android.scan.ScanCodeContract
 import net.primal.android.scanner.MissingCameraPermissionContent
 import net.primal.android.scanner.ScannerCameraDetector
 import net.primal.android.scanner.domain.QrCodeResult
@@ -43,6 +44,7 @@ private val UseKeyboardButtonContentColor = Color(0xFFAAAAAA)
 
 @Composable
 fun ScanCameraStage(
+    scanMode: ScanCodeContract.ScanMode,
     modifier: Modifier = Modifier,
     onQrCodeDetected: (QrCodeResult) -> Unit,
     onEnterCodeClick: () -> Unit,
@@ -60,6 +62,7 @@ fun ScanCameraStage(
 
     if (hasCameraPermission) {
         ScanCameraAccessGranted(
+            scanMode = scanMode,
             modifier = modifier,
             onQrCodeDetected = onQrCodeDetected,
             onEnterCodeClick = onEnterCodeClick,
@@ -83,6 +86,7 @@ fun ScanCameraStage(
 
 @Composable
 private fun ScanCameraAccessGranted(
+    scanMode: ScanCodeContract.ScanMode,
     modifier: Modifier,
     onQrCodeDetected: (QrCodeResult) -> Unit,
     onEnterCodeClick: () -> Unit,
@@ -130,15 +134,25 @@ private fun ScanCameraAccessGranted(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
+                    val (titleRes, subtitleRes) = when (scanMode) {
+                        ScanCodeContract.ScanMode.Anything ->
+                            R.string.scan_code_scan_anything_title to
+                                R.string.scan_code_scan_anything_subtitle
+
+                        ScanCodeContract.ScanMode.RemoteLogin ->
+                            R.string.scan_code_remote_login_camera_title to
+                                R.string.scan_code_remote_login_camera_subtitle
+                    }
+
                     Text(
-                        text = stringResource(id = R.string.scan_code_scan_anything_title),
+                        text = stringResource(id = titleRes),
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
                         style = AppTheme.typography.bodyLarge,
                         textAlign = TextAlign.Center,
                     )
                     Text(
-                        text = stringResource(id = R.string.scan_code_scan_anything_subtitle),
+                        text = stringResource(id = subtitleRes),
                         color = Color.White.copy(alpha = 0.75f),
                         style = AppTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.navigation.promoCode
+import net.primal.android.navigation.scanMode
 import net.primal.android.scan.ScanCodeContract.ScanCodeStage
 import net.primal.android.scan.ScanCodeContract.SideEffect
 import net.primal.android.scan.ScanCodeContract.UiEvent
@@ -48,8 +49,9 @@ class ScanCodeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val preFilledCode = savedStateHandle.promoCode
+    private val scanMode = savedStateHandle.scanMode
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(scanMode = scanMode))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -112,44 +114,62 @@ class ScanCodeViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true, error = null, showErrorBadge = false) }
             try {
-                val type = QrCodeDataType.from(code)
-                when (type) {
-                    QrCodeDataType.NPUB, QrCodeDataType.NPUB_URI,
-                    QrCodeDataType.NPROFILE, QrCodeDataType.NPROFILE_URI,
-                    ->
-                        code.extractProfileId()?.let {
-                            setEffect(SideEffect.NostrProfileDetected(profileId = it))
-                        }
-
-                    QrCodeDataType.NOTE, QrCodeDataType.NOTE_URI,
-                    QrCodeDataType.NEVENT, QrCodeDataType.NEVENT_URI,
-                    ->
-                        code.extractNoteId()?.let {
-                            setEffect(SideEffect.NostrNoteDetected(noteId = it))
-                        }
-
-                    QrCodeDataType.NADDR, QrCodeDataType.NADDR_URI -> processNaddr(code)
-
-                    QrCodeDataType.LNBC, QrCodeDataType.LNURL, QrCodeDataType.LIGHTNING_URI,
-                    QrCodeDataType.BITCOIN_ADDRESS, QrCodeDataType.BITCOIN_URI,
-                    -> processAsPayment(code)
-
-                    QrCodeDataType.NOSTR_CONNECT -> {
-                        setEffect(SideEffect.NostrConnectRequest(url = code))
-                    }
-
-                    QrCodeDataType.PROMO_CODE -> {
-                        getPromoCodeDetails(code.getPromoCodeFromUrl())
-                    }
-
-                    null -> processUnknownCode(code)
-
-                    else -> setState { copy(showErrorBadge = true) }
+                when (state.value.scanMode) {
+                    ScanCodeContract.ScanMode.RemoteLogin -> processCodeForRemoteLogin(code)
+                    ScanCodeContract.ScanMode.Anything -> processCodeForAnything(code)
                 }
             } finally {
                 setState { copy(loading = false) }
             }
         }
+
+    private fun processCodeForRemoteLogin(code: String) {
+        val type = QrCodeDataType.from(code)
+        if (type == QrCodeDataType.NOSTR_CONNECT) {
+            setEffect(SideEffect.NostrConnectRequest(url = code))
+        } else {
+            setState {
+                copy(showErrorBadge = true, error = UiError.GenericError())
+            }
+        }
+    }
+
+    private suspend fun processCodeForAnything(code: String) {
+        val type = QrCodeDataType.from(code)
+        when (type) {
+            QrCodeDataType.NPUB, QrCodeDataType.NPUB_URI,
+            QrCodeDataType.NPROFILE, QrCodeDataType.NPROFILE_URI,
+            ->
+                code.extractProfileId()?.let {
+                    setEffect(SideEffect.NostrProfileDetected(profileId = it))
+                }
+
+            QrCodeDataType.NOTE, QrCodeDataType.NOTE_URI,
+            QrCodeDataType.NEVENT, QrCodeDataType.NEVENT_URI,
+            ->
+                code.extractNoteId()?.let {
+                    setEffect(SideEffect.NostrNoteDetected(noteId = it))
+                }
+
+            QrCodeDataType.NADDR, QrCodeDataType.NADDR_URI -> processNaddr(code)
+
+            QrCodeDataType.LNBC, QrCodeDataType.LNURL, QrCodeDataType.LIGHTNING_URI,
+            QrCodeDataType.BITCOIN_ADDRESS, QrCodeDataType.BITCOIN_URI,
+            -> processAsPayment(code)
+
+            QrCodeDataType.NOSTR_CONNECT -> {
+                setEffect(SideEffect.NostrConnectRequest(url = code))
+            }
+
+            QrCodeDataType.PROMO_CODE -> {
+                getPromoCodeDetails(code.getPromoCodeFromUrl())
+            }
+
+            null -> processUnknownCode(code)
+
+            else -> setState { copy(showErrorBadge = true) }
+        }
+    }
 
     private fun processNaddr(code: String) {
         val naddrObject = code.takeAsNaddrOrNull() ?: return
