@@ -14,19 +14,15 @@ class RemoteSignerSessionHandler @Inject constructor(
     private val sessionRepository: SessionRepository,
 ) {
 
-    suspend fun startSession(connectionId: String) {
+    suspend fun startSession(connectionId: String) =
         sessionRepository.startSession(connectionId = connectionId)
             .onSuccess { ensureServiceStarted() }
-    }
 
-    suspend fun startSessionForClient(clientPubKey: String) {
+    suspend fun startSessionForClient(clientPubKey: String) =
         sessionRepository.startSessionForClient(clientPubKey = clientPubKey)
             .onSuccess { ensureServiceStarted() }
-    }
 
-    suspend fun endSession(sessionId: String) {
-        sessionRepository.endSession(sessionId = sessionId)
-    }
+    suspend fun endSessions(sessionIds: List<String>) = sessionRepository.endSessions(sessionIds = sessionIds)
 
     private fun ensureServiceStarted() {
         if (!PrimalRemoteSignerService.isServiceRunning.value) {

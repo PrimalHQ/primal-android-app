@@ -21,7 +21,7 @@ class EndSessionReceiver : BroadcastReceiver() {
         val sessionId = intent.getStringExtra(RECEIVER_SESSION_ID) ?: return
 
         CoroutineScope(Dispatchers.IO).launch {
-            sessionHandler.endSession(sessionId)
+            sessionHandler.endSessions(listOf(sessionId))
         }
     }
 }

@@ -166,22 +166,20 @@ class ConnectedAppDetailsViewModel @Inject constructor(
 
     private fun startSession() {
         viewModelScope.launch {
-            runCatching {
-                sessionHandler.startSession(connectionId)
-            }.onFailure {
-                setState { copy(error = UiError.GenericError(it.message)) }
-            }
+            sessionHandler.startSession(connectionId)
+                .onFailure {
+                    setState { copy(error = UiError.GenericError(it.message)) }
+                }
         }
     }
 
     private fun endSession() {
         viewModelScope.launch {
             activeSessionId?.let {
-                runCatching {
-                    sessionHandler.endSession(it)
-                }.onFailure {
-                    setState { copy(error = UiError.GenericError(it.message)) }
-                }
+                sessionHandler.endSessions(listOf(it))
+                    .onFailure {
+                        setState { copy(error = UiError.GenericError(it.message)) }
+                    }
             }
         }
     }
