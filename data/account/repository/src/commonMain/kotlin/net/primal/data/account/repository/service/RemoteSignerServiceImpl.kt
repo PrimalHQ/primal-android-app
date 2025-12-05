@@ -67,11 +67,11 @@ class RemoteSignerServiceImpl internal constructor(
 
                 val now = Clock.System.now()
 
-                sessionActivityMap.forEach { (sessionId, lastActiveAt) ->
-                    if ((lastActiveAt + SESSION_INACTIVITY_TIMEOUT) < now) {
-                        sessionRepository.endSession(sessionId = sessionId)
-                    }
+                val inactiveSessions = sessionActivityMap.filter { (_, lastActiveAt) ->
+                    (lastActiveAt + SESSION_INACTIVITY_TIMEOUT) < now
                 }
+
+                sessionRepository.endSessions(sessionIds = inactiveSessions.keys.toList())
             }
         }
 
