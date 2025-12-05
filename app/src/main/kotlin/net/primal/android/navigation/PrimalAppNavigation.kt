@@ -94,6 +94,7 @@ import net.primal.android.nostrconnect.NostrConnectBottomSheet
 import net.primal.android.nostrconnect.NostrConnectViewModel
 import net.primal.android.nostrconnect.list.ActiveSessionsBottomSheet
 import net.primal.android.nostrconnect.list.ActiveSessionsViewModel
+import net.primal.android.nostrconnect.utils.NOSTR_CONNECT_SCHEME
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract
 import net.primal.android.notes.home.HomeFeedScreen
@@ -178,6 +179,7 @@ import net.primal.android.thread.notes.ThreadScreen
 import net.primal.android.thread.notes.ThreadViewModel
 import net.primal.android.wallet.activation.WalletActivationContract
 import net.primal.android.wallet.activation.WalletActivationViewModel
+import net.primal.core.utils.asUrlDecoded
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.feeds.buildAdvancedSearchNotesFeedSpec
 import net.primal.domain.feeds.buildAdvancedSearchNotificationsFeedSpec
@@ -628,6 +630,9 @@ private fun PrimalAppNavigation(
                 },
                 navDeepLink {
                     uriPattern = "primal://live/{$STREAM_NADDR}"
+                },
+                navDeepLink {
+                    uriPattern = "$NOSTR_CONNECT_SCHEME://.*"
                 },
             ),
         )
@@ -1330,6 +1335,13 @@ private fun NavGraphBuilder.home(
         }
     },
 ) { navBackEntry ->
+    val activity = LocalActivity.current
+    val nostrConnectUri = activity?.intent?.data?.toString()
+    if (nostrConnectUri?.startsWith(NOSTR_CONNECT_SCHEME) == true) {
+        navController.navigateToNostrConnectBottomSheet(url = nostrConnectUri.asUrlDecoded())
+        activity.intent = null
+    }
+
     val viewModel = hiltViewModel<HomeFeedViewModel>(navBackEntry)
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
