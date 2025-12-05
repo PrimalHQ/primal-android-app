@@ -94,13 +94,13 @@ fun ActiveSessionsBottomSheet(
             snackbarHostState = snackbarHostState,
             onSettingsClick = {
                 val selectedSessionIds = state.selectedSessions
-                val connectionId = if (selectedSessionIds.size == 1) {
+                val clientPubKey = if (selectedSessionIds.size == 1) {
                     val sessionId = selectedSessionIds.first()
-                    state.sessions.find { it.sessionId == sessionId }?.connectionId
+                    state.sessions.find { it.sessionId == sessionId }?.clientPubKey
                 } else {
                     null
                 }
-                onSettingsClick(connectionId)
+                onSettingsClick(clientPubKey)
             },
         )
     }

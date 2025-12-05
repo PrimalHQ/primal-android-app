@@ -2,7 +2,6 @@ package net.primal.domain.account.model
 
 data class AppSession(
     val sessionId: String,
-    val connectionId: String,
     val userPubKey: String,
     val clientPubKey: String,
     val signerPubKey: String,

@@ -7,9 +7,8 @@ import net.primal.domain.account.model.AppSessionState
 fun AppSessionPO.asDomain() =
     AppSessionDO(
         sessionId = this.data.sessionId,
-        connectionId = this.connection.connectionId,
         userPubKey = this.connection.userPubKey.decrypted,
-        clientPubKey = this.connection.clientPubKey.decrypted,
+        clientPubKey = this.connection.clientPubKey,
         signerPubKey = this.connection.signerPubKey.decrypted,
         relays = this.connection.relays.decrypted,
         name = this.connection.name?.decrypted,

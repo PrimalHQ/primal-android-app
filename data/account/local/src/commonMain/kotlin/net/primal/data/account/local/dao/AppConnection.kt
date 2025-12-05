@@ -8,8 +8,8 @@ data class AppConnection(
     val data: AppConnectionData,
 
     @Relation(
-        parentColumn = "connectionId",
-        entityColumn = "connectionId",
+        parentColumn = "clientPubKey",
+        entityColumn = "clientPubKey",
     )
     val permissions: List<AppPermissionData>,
 )

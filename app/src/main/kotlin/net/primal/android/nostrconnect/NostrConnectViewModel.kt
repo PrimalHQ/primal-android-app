@@ -182,7 +182,7 @@ class NostrConnectViewModel @Inject constructor(
                 trustLevel = state.value.trustLevel,
             ).onSuccess {
                 runCatching { tokenUpdater.updateTokenForRemoteSigner() }
-                signerSessionHandler.startSession(connectionId = it.connectionId)
+                signerSessionHandler.startSession(clientPubKey = it.clientPubKey)
                 setEffect(NostrConnectContract.SideEffect.ConnectionSuccess)
             }.onFailure { error ->
                 Timber.e(error)

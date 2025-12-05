@@ -9,8 +9,8 @@ data class SessionEventData(
     @PrimaryKey
     val eventId: String,
     val sessionId: String,
+    val clientPubKey: String,
     val signerPubKey: Encryptable<String>,
-    val clientPubKey: Encryptable<String>,
     val requestState: RequestState,
     val requestedAt: Long,
     val completedAt: Long?,

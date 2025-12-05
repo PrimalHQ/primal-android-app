@@ -2,9 +2,9 @@ package net.primal.data.account.local.dao
 
 import androidx.room.Entity
 
-@Entity(primaryKeys = ["permissionId", "connectionId"])
+@Entity(primaryKeys = ["permissionId", "clientPubKey"])
 data class AppPermissionData(
     val permissionId: String,
-    val connectionId: String,
+    val clientPubKey: String,
     val action: PermissionAction,
 )

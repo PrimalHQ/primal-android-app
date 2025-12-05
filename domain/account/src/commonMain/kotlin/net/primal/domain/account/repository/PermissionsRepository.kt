@@ -8,13 +8,13 @@ import net.primal.domain.account.model.PermissionAction
 interface PermissionsRepository {
     suspend fun updatePermissionsAction(
         permissionIds: List<String>,
-        connectionId: String,
+        clientPubKey: String,
         action: PermissionAction,
     ): Result<Unit>
 
-    suspend fun observePermissions(connectionId: String): Result<Flow<List<AppPermissionGroup>>>
+    suspend fun observePermissions(clientPubKey: String): Result<Flow<List<AppPermissionGroup>>>
 
     suspend fun getNamingMap(): Result<Map<String, String>>
 
-    suspend fun resetPermissionsToDefault(connectionId: String): Result<Unit>
+    suspend fun resetPermissionsToDefault(clientPubKey: String): Result<Unit>
 }

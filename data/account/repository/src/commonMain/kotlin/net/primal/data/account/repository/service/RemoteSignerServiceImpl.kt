@@ -199,7 +199,7 @@ class RemoteSignerServiceImpl internal constructor(
                     .getConnectionByClientPubKey(clientPubKey = method.clientPubKey).getOrNull() ?: return@launch
 
                 if (connection.autoStart) {
-                    sessionRepository.startSession(connectionId = connection.connectionId)
+                    sessionRepository.startSession(clientPubKey = connection.clientPubKey)
                 } else {
                     return@launch
                 }
@@ -237,7 +237,7 @@ class RemoteSignerServiceImpl internal constructor(
     private suspend fun findActiveSessionId(clientPubKey: String): String? =
         clientSessionMap[clientPubKey]
             ?: connectionRepository.getConnectionByClientPubKey(clientPubKey = clientPubKey).getOrNull()
-                ?.let { sessionRepository.findActiveSessionForConnection(connectionId = it.connectionId) }
+                ?.let { sessionRepository.findActiveSessionForConnection(clientPubKey = it.clientPubKey) }
                 ?.getOrNull()?.sessionId
 
     private suspend fun sendResponse(response: RemoteSignerMethodResponse) {

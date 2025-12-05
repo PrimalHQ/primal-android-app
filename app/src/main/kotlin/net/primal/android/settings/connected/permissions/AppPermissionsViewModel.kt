@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
-import net.primal.android.navigation.connectionIdOrThrow
+import net.primal.android.navigation.clientPubKeyOrThrow
 import net.primal.android.settings.connected.model.asPermissionGroupUi
 import net.primal.android.settings.connected.permissions.AppPermissionsContract.UiEvent
 import net.primal.android.settings.connected.permissions.AppPermissionsContract.UiState
@@ -30,7 +30,7 @@ class AppPermissionsViewModel @Inject constructor(
     private val permissionsRepository: PermissionsRepository,
 ) : ViewModel() {
 
-    private val connectionId: String = savedStateHandle.connectionIdOrThrow
+    private val clientPubKey: String = savedStateHandle.clientPubKeyOrThrow
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -54,6 +54,7 @@ class AppPermissionsViewModel @Inject constructor(
                         permissionIds = event.permissionIds,
                         action = event.action,
                     )
+
                     UiEvent.Retry -> observePermissions()
                     UiEvent.DismissError -> setState { copy(error = null) }
                     UiEvent.ResetPermissions -> resetPermissions()
@@ -63,7 +64,7 @@ class AppPermissionsViewModel @Inject constructor(
 
     private fun observeLastSession() {
         viewModelScope.launch {
-            sessionRepository.observeSessionsByConnectionId(connectionId).collect { sessions ->
+            sessionRepository.observeSessionsByClientPubKey(clientPubKey).collect { sessions ->
                 setState {
                     copy(appLastSessionAt = sessions.firstOrNull()?.sessionStartedAt)
                 }
@@ -73,7 +74,7 @@ class AppPermissionsViewModel @Inject constructor(
 
     private fun observeAppConnection() {
         viewModelScope.launch {
-            connectionRepository.observeConnection(connectionId).collect { connection ->
+            connectionRepository.observeConnection(clientPubKey).collect { connection ->
                 setState {
                     copy(
                         appName = connection?.name,
@@ -87,7 +88,7 @@ class AppPermissionsViewModel @Inject constructor(
     private fun observePermissions() {
         viewModelScope.launch {
             setState { copy(loading = true, error = null) }
-            permissionsRepository.observePermissions(connectionId).fold(
+            permissionsRepository.observePermissions(clientPubKey).fold(
                 onSuccess = { permissionsFlow ->
                     permissionsFlow.collect { groups ->
                         setState {
@@ -114,7 +115,7 @@ class AppPermissionsViewModel @Inject constructor(
         viewModelScope.launch {
             permissionsRepository.updatePermissionsAction(
                 permissionIds = permissionIds,
-                connectionId = connectionId,
+                clientPubKey = clientPubKey,
                 action = action,
             ).onFailure {
                 setState { copy(error = UiError.GenericError(it.message)) }
@@ -125,7 +126,7 @@ class AppPermissionsViewModel @Inject constructor(
     private fun resetPermissions() {
         viewModelScope.launch {
             setState { copy(loading = true) }
-            permissionsRepository.resetPermissionsToDefault(connectionId = connectionId)
+            permissionsRepository.resetPermissionsToDefault(clientPubKey = clientPubKey)
                 .onFailure {
                     setState { copy(error = UiError.GenericError(it.message), loading = false) }
                 }

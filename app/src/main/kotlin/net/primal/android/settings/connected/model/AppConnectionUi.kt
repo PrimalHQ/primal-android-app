@@ -5,7 +5,7 @@ import net.primal.domain.account.model.AppConnection
 import net.primal.domain.links.CdnImage
 
 data class AppConnectionUi(
-    val connectionId: String,
+    val clientPubKey: String,
     val appName: String,
     val appImage: CdnImage?,
     val userAvatarCdnImage: CdnImage?,
@@ -13,7 +13,7 @@ data class AppConnectionUi(
 
 fun AppConnection.asAppConnectionUi(userAccount: UserAccount?): AppConnectionUi {
     return AppConnectionUi(
-        connectionId = this.connectionId,
+        clientPubKey = this.clientPubKey,
         appName = this.name ?: "Unknown App",
         appImage = this.image?.let { CdnImage(it) },
         userAvatarCdnImage = userAccount?.avatarCdnImage,

@@ -95,7 +95,7 @@ fun ConnectedAppDetailsScreen(
     viewModel: ConnectedAppDetailsViewModel,
     onClose: () -> Unit,
     onSessionClick: (sessionId: String) -> Unit,
-    onPermissionDetailsClick: (connectionId: String) -> Unit,
+    onPermissionDetailsClick: (clientPubKey: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -123,7 +123,7 @@ fun ConnectedAppDetailsScreen(
     onClose: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     onSessionClick: (sessionId: String) -> Unit,
-    onPermissionDetailsClick: (connectionId: String) -> Unit,
+    onPermissionDetailsClick: (clientPubKey: String) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -156,7 +156,7 @@ fun ConnectedAppDetailsScreen(
                     state = state,
                     eventPublisher = eventPublisher,
                     onSessionClick = onSessionClick,
-                    onPermissionDetailsClick = { onPermissionDetailsClick(state.connectionId) },
+                    onPermissionDetailsClick = { onPermissionDetailsClick(state.clientPubKey) },
                 )
             }
         },
@@ -656,7 +656,7 @@ fun PreviewConnectedAppDetailsScreen() {
                 appName = "Highlighter",
                 lastSessionStartedAt = mockRecentSessionsForPreview.first().startedAt,
                 recentSessions = mockRecentSessionsForPreview,
-                connectionId = "",
+                clientPubKey = "",
             ),
             onClose = {},
             eventPublisher = {},
