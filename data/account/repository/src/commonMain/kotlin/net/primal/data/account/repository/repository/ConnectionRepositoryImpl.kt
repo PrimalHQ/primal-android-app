@@ -64,11 +64,6 @@ class ConnectionRepositoryImpl(
                 ?: Result.failure(NoSuchElementException("Couldn't locate connection with given `clientPubKey`."))
         }
 
-    override suspend fun deleteConnectionsByUser(userPubKey: String) =
-        withContext(dispatchers.io()) {
-            database.connections().deleteConnectionsByUser(userPubKey = userPubKey.asEncryptable())
-        }
-
     override suspend fun saveConnection(secret: String, connection: AppConnection) =
         withContext(dispatchers.io()) {
             try {
@@ -186,6 +181,6 @@ class ConnectionRepositoryImpl(
         database.sessionEvents().deleteEventsByConnectionId(connectionId = connectionId)
         database.sessions().deleteSessionsByConnectionId(connectionId = connectionId)
         database.permissions().deletePermissionsByConnectionId(connectionId = connectionId)
-        database.connections().deleteConnection(connectionId = connectionId)
+        database.connections().deleteConnectionById(connectionId = connectionId)
     }
 }

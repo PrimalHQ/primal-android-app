@@ -18,8 +18,6 @@ interface ConnectionRepository {
 
     suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<AppConnection>
 
-    suspend fun deleteConnectionsByUser(userPubKey: String)
-
     suspend fun saveConnection(secret: String, connection: AppConnection)
 
     suspend fun getUserPubKey(clientPubKey: String): Result<String>
