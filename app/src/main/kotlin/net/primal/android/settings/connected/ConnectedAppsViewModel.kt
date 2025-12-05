@@ -55,8 +55,8 @@ class ConnectedAppsViewModel @Inject constructor(
             val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
             sessionRepository.observeActiveSessions(signerPubKey = signerKeyPair.pubKey)
                 .collect { activeSessions ->
-                    val activeConnectionIds = activeSessions.map { it.connectionId }.toSet()
-                    setState { copy(activeConnectionIds = activeConnectionIds) }
+                    val activeClientPubKeys = activeSessions.map { it.clientPubKey }.toSet()
+                    setState { copy(activeClientPubKeys = activeClientPubKeys) }
                 }
         }
     }

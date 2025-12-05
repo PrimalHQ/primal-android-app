@@ -14,9 +14,9 @@ interface AppSessionDataDao {
 
     @Transaction
     @Query(
-        "SELECT * FROM AppSessionData WHERE connectionId = :connectionId AND endedAt IS NULL AND activeRelayCount > 0",
+        "SELECT * FROM AppSessionData WHERE clientPubKey = :clientPubKey AND endedAt IS NULL AND activeRelayCount > 0",
     )
-    suspend fun findActiveSessionByConnectionId(connectionId: String): AppSession?
+    suspend fun findActiveSessionByClientPubKey(clientPubKey: String): AppSession?
 
     @Transaction
     @Query("SELECT * FROM AppSessionData WHERE sessionId = :sessionId")
@@ -26,7 +26,7 @@ interface AppSessionDataDao {
     @Query(
         """
         SELECT * FROM AppSessionData s 
-        JOIN AppConnectionData c ON s.connectionId = c.connectionId
+        JOIN AppConnectionData c ON s.clientPubKey = c.clientPubKey
         WHERE activeRelayCount > 0 AND c.signerPubKey = :signerPubKey
     """,
     )
@@ -36,7 +36,7 @@ interface AppSessionDataDao {
     @Query(
         """
         SELECT * FROM AppSessionData s 
-        JOIN AppConnectionData c ON s.connectionId = c.connectionId
+        JOIN AppConnectionData c ON s.clientPubKey = c.clientPubKey
         WHERE endedAt IS NULL AND c.signerPubKey = :signerPubKey
     """,
     )
@@ -44,13 +44,13 @@ interface AppSessionDataDao {
 
     @Transaction
     @Query(
-        "SELECT * FROM AppSessionData WHERE connectionId = :connectionId AND endedAt IS NULL AND activeRelayCount > 0",
+        "SELECT * FROM AppSessionData WHERE clientPubKey = :clientPubKey AND endedAt IS NULL AND activeRelayCount > 0",
     )
-    fun observeActiveSessionForConnection(connectionId: String): Flow<AppSession?>
+    fun observeActiveSessionForConnection(clientPubKey: String): Flow<AppSession?>
 
     @Transaction
-    @Query("SELECT * FROM AppSessionData WHERE connectionId = :connectionId ORDER BY startedAt DESC")
-    fun observeSessionsByConnectionId(connectionId: String): Flow<List<AppSession>>
+    @Query("SELECT * FROM AppSessionData WHERE clientPubKey = :clientPubKey ORDER BY startedAt DESC")
+    fun observeSessionsByClientPubKey(clientPubKey: String): Flow<List<AppSession>>
 
     @Transaction
     @Query("SELECT * FROM AppSessionData WHERE sessionId = :sessionId")
@@ -88,6 +88,6 @@ interface AppSessionDataDao {
     @Query("UPDATE AppSessionData SET activeRelayCount = :activeRelayCount WHERE sessionId = :sessionId")
     suspend fun setActiveRelayCount(sessionId: String, activeRelayCount: Int)
 
-    @Query("DELETE FROM AppSessionData WHERE connectionId = :connectionId")
-    suspend fun deleteSessionsByConnectionId(connectionId: String)
+    @Query("DELETE FROM AppSessionData WHERE clientPubKey = :clientPubKey")
+    suspend fun deleteSessions(clientPubKey: String)
 }

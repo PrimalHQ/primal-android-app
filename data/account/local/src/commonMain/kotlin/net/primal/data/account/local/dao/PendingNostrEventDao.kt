@@ -14,6 +14,9 @@ interface PendingNostrEventDao {
     @Query("DELETE FROM PendingNostrEvent WHERE eventId IN (:eventIds)")
     suspend fun deleteByIds(eventIds: List<String>)
 
+    @Query("DELETE FROM PendingNostrEvent WHERE clientPubKey = :clientPubKey")
+    suspend fun deleteByClientPubKey(clientPubKey: String)
+
     @Query("SELECT * FROM PendingNostrEvent WHERE signerPubKey = :signerPubKey")
     fun observeAllBySignerPubKey(signerPubKey: Encryptable<String>): Flow<List<PendingNostrEvent>>
 }

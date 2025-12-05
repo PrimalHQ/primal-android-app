@@ -9,17 +9,17 @@ interface SessionRepository {
 
     fun observeOngoingSessions(signerPubKey: String): Flow<List<AppSession>>
 
-    fun observeActiveSessionForConnection(connectionId: String): Flow<AppSession?>
+    fun observeActiveSessionForConnection(clientPubKey: String): Flow<AppSession?>
 
-    fun observeSessionsByConnectionId(connectionId: String): Flow<List<AppSession>>
+    fun observeSessionsByClientPubKey(clientPubKey: String): Flow<List<AppSession>>
 
     fun observeSession(sessionId: String): Flow<AppSession?>
 
     suspend fun getSession(sessionId: String): Result<AppSession>
 
-    suspend fun findActiveSessionForConnection(connectionId: String): Result<AppSession>
+    suspend fun findActiveSessionForConnection(clientPubKey: String): Result<AppSession>
 
-    suspend fun startSession(connectionId: String): Result<String>
+    suspend fun startSession(clientPubKey: String): Result<String>
 
     suspend fun startSessionForClient(clientPubKey: String): Result<String>
 

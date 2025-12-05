@@ -5,7 +5,7 @@ import net.primal.domain.account.model.AppSession
 
 data class ActiveSessionUi(
     val sessionId: String,
-    val connectionId: String,
+    val clientPubKey: String,
     val appName: String?,
     val appUrl: String?,
     val appImageUrl: String?,
@@ -15,7 +15,7 @@ data class ActiveSessionUi(
 fun AppSession.asUi(userAccount: UserAccountUi?) =
     ActiveSessionUi(
         sessionId = sessionId,
-        connectionId = connectionId,
+        clientPubKey = clientPubKey,
         appName = name,
         appUrl = url,
         appImageUrl = image,

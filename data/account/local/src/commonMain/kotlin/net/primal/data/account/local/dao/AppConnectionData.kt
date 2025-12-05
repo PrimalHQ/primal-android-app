@@ -8,21 +8,19 @@ import net.primal.shared.data.local.encryption.Encryptable
 @Entity(
     indices = [
         Index(value = ["signerPubKey"]),
-        Index(value = ["clientPubKey"], unique = true),
         Index(value = ["userPubKey"]),
     ],
 )
 data class AppConnectionData(
     @PrimaryKey
-    val connectionId: String,
+    val clientPubKey: String,
+    val signerPubKey: Encryptable<String>,
+    val userPubKey: Encryptable<String>,
     val relays: Encryptable<List<String>>,
     val secret: Encryptable<String>,
     val name: Encryptable<String>?,
     val url: Encryptable<String>?,
     val image: Encryptable<String>?,
-    val clientPubKey: Encryptable<String>,
-    val signerPubKey: Encryptable<String>,
-    val userPubKey: Encryptable<String>,
     val trustLevel: TrustLevel,
     val autoStart: Boolean,
 )

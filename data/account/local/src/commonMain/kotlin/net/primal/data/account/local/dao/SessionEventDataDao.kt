@@ -49,7 +49,7 @@ interface SessionEventDataDao {
     @Query(
         """
         DELETE FROM SessionEventData 
-        WHERE sessionId IN (SELECT sessionId FROM AppSessionData WHERE connectionId = :connectionId)""",
+        WHERE sessionId IN (SELECT sessionId FROM AppSessionData WHERE clientPubKey = :clientPubKey)""",
     )
-    suspend fun deleteEventsByConnectionId(connectionId: String)
+    suspend fun deleteEvents(clientPubKey: String)
 }

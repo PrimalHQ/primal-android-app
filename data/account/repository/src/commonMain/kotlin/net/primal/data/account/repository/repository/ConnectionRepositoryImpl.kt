@@ -29,12 +29,13 @@ class ConnectionRepositoryImpl(
     private val dispatchers: DispatcherProvider,
     private val wellKnownApi: WellKnownApi,
 ) : ConnectionRepository {
+
     override fun observeAllConnections(signerPubKey: String): Flow<List<AppConnection>> =
         database.connections().observeAllConnections(signerPubKey = signerPubKey.asEncryptable())
             .map { connections -> connections.map { it.asDomain() } }
 
-    override fun observeConnection(connectionId: String): Flow<AppConnection?> {
-        return database.connections().observeConnection(connectionId = connectionId)
+    override fun observeConnection(clientPubKey: String): Flow<AppConnection?> {
+        return database.connections().observeConnection(clientPubKey = clientPubKey)
             .map { it?.asDomain() }
     }
 
@@ -50,36 +51,28 @@ class ConnectionRepositoryImpl(
                 .map { it.asDomain() }
         }
 
-    override suspend fun deleteConnection(connectionId: String) =
+    override suspend fun deleteConnectionAndData(clientPubKey: String) =
         withContext(dispatchers.io()) {
             database.withTransaction {
-                deleteConnectionInternal(connectionId)
+                deleteEverythingForClientPubKey(clientPubKey)
             }
         }
 
     override suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<AppConnection> =
         withContext(dispatchers.io()) {
-            database.connections().getConnectionByClientPubKey(clientPubKey = clientPubKey.asEncryptable())
+            database.connections().getConnection(clientPubKey = clientPubKey)
                 ?.asDomain()?.asSuccess()
                 ?: Result.failure(NoSuchElementException("Couldn't locate connection with given `clientPubKey`."))
         }
 
-    override suspend fun saveConnection(secret: String, connection: AppConnection) =
+    override suspend fun insertOrReplaceConnection(secret: String, connection: AppConnection) =
         withContext(dispatchers.io()) {
-            try {
-                database.withTransaction {
-                    saveConnectionInternal(secret, connection)
-                }
-            } catch (_: SQLiteException) {
-                database.withTransaction {
-                    val existing = database.connections().getConnectionByClientPubKey(
-                        clientPubKey = connection.clientPubKey.asEncryptable(),
-                    )
-
-                    if (existing != null) {
-                        deleteConnectionInternal(existing.data.connectionId)
-                        saveConnectionInternal(secret, connection)
-                    }
+            database.withTransaction {
+                try {
+                    insertAppConnection(secret = secret, connection = connection)
+                } catch (_: SQLiteException) {
+                    deleteEverythingForClientPubKey(clientPubKey = connection.clientPubKey)
+                    insertAppConnection(secret = secret, connection = connection)
                 }
             }
         }
@@ -97,7 +90,7 @@ class ConnectionRepositoryImpl(
                 TrustLevel.Full -> true
                 TrustLevel.Medium -> {
                     val action = database.permissions()
-                        .findPermission(permissionId = permissionId, connectionId = connection.connectionId)
+                        .findPermission(permissionId = permissionId, clientPubKey = connection.clientPubKey)
                         ?.action
 
                     when (action) {
@@ -112,31 +105,30 @@ class ConnectionRepositoryImpl(
 
     override suspend fun getUserPubKey(clientPubKey: String): Result<String> =
         withContext(dispatchers.io()) {
-            database.connections()
-                .getConnectionByClientPubKey(clientPubKey = clientPubKey.asEncryptable())
+            database.connections().getConnection(clientPubKey = clientPubKey)
                 ?.data?.userPubKey?.decrypted?.asSuccess()
                 ?: Result.failure(NoSuchElementException("Couldn't locate user pubkey for client pubkey."))
         }
 
-    override suspend fun updateConnectionName(connectionId: String, name: String) {
+    override suspend fun updateConnectionName(clientPubKey: String, name: String) {
         withContext(dispatchers.io()) {
-            database.connections().updateConnectionName(connectionId, name.asEncryptable())
+            database.connections().updateConnectionName(clientPubKey, name.asEncryptable())
         }
     }
 
-    override suspend fun updateConnectionAutoStart(connectionId: String, autoStart: Boolean) {
+    override suspend fun updateConnectionAutoStart(clientPubKey: String, autoStart: Boolean) {
         withContext(dispatchers.io()) {
-            database.connections().updateConnectionAutoStart(connectionId, autoStart)
+            database.connections().updateConnectionAutoStart(clientPubKey, autoStart)
         }
     }
 
-    override suspend fun updateTrustLevel(connectionId: String, trustLevel: TrustLevel) =
+    override suspend fun updateTrustLevel(clientPubKey: String, trustLevel: TrustLevel) =
         withContext(dispatchers.io()) {
             runCatching {
                 database.withTransaction {
                     if (trustLevel == TrustLevel.Medium) {
                         val existingPermissions = database.permissions()
-                            .findPermissionsByConnectionId(connectionId = connectionId)
+                            .findPermissionsByClientPubKey(clientPubKey = clientPubKey)
 
                         if (existingPermissions.isEmpty()) {
                             val newPermissions = wellKnownApi
@@ -144,7 +136,7 @@ class ConnectionRepositoryImpl(
                                 .map {
                                     AppPermissionData(
                                         permissionId = it,
-                                        connectionId = connectionId,
+                                        clientPubKey = clientPubKey,
                                         action = PermissionAction.Approve,
                                     )
                                 }
@@ -153,23 +145,22 @@ class ConnectionRepositoryImpl(
                         }
                     }
 
-                    database.connections().updateTrustLevel(connectionId, trustLevel.asPO())
+                    database.connections().updateTrustLevel(clientPubKey, trustLevel.asPO())
                 }
             }
         }
 
-    private suspend fun saveConnectionInternal(secret: String, connection: AppConnection) {
+    private suspend inline fun insertAppConnection(secret: String, connection: AppConnection) {
         database.connections().insert(
             data = AppConnectionData(
-                connectionId = connection.connectionId,
+                clientPubKey = connection.clientPubKey,
+                signerPubKey = connection.signerPubKey.asEncryptable(),
+                userPubKey = connection.userPubKey.asEncryptable(),
                 relays = connection.relays.asEncryptable(),
                 secret = secret.asEncryptable(),
                 name = connection.name?.asEncryptable(),
                 url = connection.url?.asEncryptable(),
                 image = connection.image?.asEncryptable(),
-                clientPubKey = connection.clientPubKey.asEncryptable(),
-                signerPubKey = connection.signerPubKey.asEncryptable(),
-                userPubKey = connection.userPubKey.asEncryptable(),
                 autoStart = connection.autoStart,
                 trustLevel = connection.trustLevel.asPO(),
             ),
@@ -177,10 +168,11 @@ class ConnectionRepositoryImpl(
         database.permissions().upsertAll(data = connection.permissions.map { it.asPO() })
     }
 
-    private suspend fun deleteConnectionInternal(connectionId: String) {
-        database.sessionEvents().deleteEventsByConnectionId(connectionId = connectionId)
-        database.sessions().deleteSessionsByConnectionId(connectionId = connectionId)
-        database.permissions().deletePermissionsByConnectionId(connectionId = connectionId)
-        database.connections().deleteConnectionById(connectionId = connectionId)
+    private suspend inline fun deleteEverythingForClientPubKey(clientPubKey: String) {
+        database.pendingNostrEvents().deleteByClientPubKey(clientPubKey = clientPubKey)
+        database.sessionEvents().deleteEvents(clientPubKey = clientPubKey)
+        database.sessions().deleteSessions(clientPubKey = clientPubKey)
+        database.permissions().deletePermissions(clientPubKey = clientPubKey)
+        database.connections().deleteConnection(clientPubKey = clientPubKey)
     }
 }

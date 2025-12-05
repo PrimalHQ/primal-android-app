@@ -153,9 +153,9 @@ inline val SavedStateHandle.reactionTypeOrThrow: ReactionType
 const val NOSTR_CONNECT_URI = "nostrConnectUri"
 inline val SavedStateHandle.nostrConnectUri: String? get() = get<String>(NOSTR_CONNECT_URI)?.asUrlDecoded()
 
-const val CONNECTION_ID = "connectionId"
-inline val SavedStateHandle.connectionIdOrThrow: String
-    get() = get(CONNECTION_ID) ?: throw IllegalArgumentException("Missing required connectionId argument.")
+const val REMOTE_LOGIN_CLIENT_PUBKEY = "remoteLoginClientPubKey"
+inline val SavedStateHandle.clientPubKeyOrThrow: String
+    get() = get(REMOTE_LOGIN_CLIENT_PUBKEY) ?: throw IllegalArgumentException("Missing required clientPubKey argument.")
 
 const val SESSION_ID = "sessionId"
 inline val SavedStateHandle.sessionIdOrThrow: String
