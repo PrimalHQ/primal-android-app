@@ -2,7 +2,7 @@ package net.primal.android.nostrconnect.utils
 
 import androidx.core.net.toUri
 
-private const val NOSTR_CONNECT_SCHEME = "nostrconnect"
+const val NOSTR_CONNECT_SCHEME = "nostrconnect"
 
 fun String.isNostrConnectUrl(): Boolean {
     return this.startsWith("$NOSTR_CONNECT_SCHEME://", ignoreCase = true)
