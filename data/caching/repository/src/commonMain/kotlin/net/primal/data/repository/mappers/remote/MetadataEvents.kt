@@ -5,6 +5,8 @@ import net.primal.core.utils.detectUrls
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.profiles.ProfileData
+import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
+import net.primal.domain.common.PrimalEvent
 import net.primal.domain.links.CdnImage
 import net.primal.domain.links.CdnResource
 import net.primal.domain.membership.ContentProfilePremiumInfo
@@ -116,4 +118,22 @@ fun NostrEvent.asProfileDataPO(
         ),
         blossoms = blossoms ?: emptyList(),
     )
+}
+
+fun List<NostrEvent>.mapAsAvatarUrls(cdnResources: List<PrimalEvent>): List<String> {
+    val cdnMap = cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
+
+    return this.mapNotNull { event ->
+        val metadata = event.content.decodeFromJsonStringOrNull<ContentMetadata>()
+        val originalAvatarUrl = metadata?.picture
+
+        if (originalAvatarUrl != null) {
+            val cdnResource = cdnMap[originalAvatarUrl]
+            val bestVariantUrl = cdnResource?.variants?.minByOrNull { it.width }?.mediaUrl
+
+            bestVariantUrl ?: originalAvatarUrl
+        } else {
+            null
+        }
+    }
 }

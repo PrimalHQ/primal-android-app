@@ -12,6 +12,7 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
 import kotlinx.io.IOException
+import net.primal.core.caching.MediaCacher
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -22,6 +23,7 @@ import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.repository.feed.processors.FeedProcessor
+import net.primal.data.repository.mappers.remote.mapAsAvatarUrls
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.isNotesBookmarkFeedSpec
 import net.primal.domain.feeds.isProfileAuthoredNoteRepliesFeedSpec
@@ -35,6 +37,7 @@ internal class NoteFeedRemoteMediator(
     private val userId: String,
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
+    private val mediaCacher: MediaCacher,
 ) : RemoteMediator<Int, FeedPost>() {
 
     private val lastRequests: MutableMap<LoadType, Pair<FeedBySpecRequestBody, Long>> = mutableMapOf()
@@ -160,6 +163,10 @@ internal class NoteFeedRemoteMediator(
         ) {
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             response.paging ?: throw NetworkException("PagingEvent not found.")
+
+            val avatarUrls = response.metadata.mapAsAvatarUrls(cdnResources = response.cdnResources)
+            mediaCacher.preCacheUserAvatars(avatarUrls)
+
             response
         }
         return requestBody to response
@@ -188,6 +195,10 @@ internal class NoteFeedRemoteMediator(
         ) {
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             if (response.paging == null) throw NetworkException("PagingEvent not found.")
+
+            val avatarUrls = response.metadata.mapAsAvatarUrls(cdnResources = response.cdnResources)
+            mediaCacher.preCacheUserAvatars(avatarUrls)
+
             response
         }
 
@@ -216,6 +227,10 @@ internal class NoteFeedRemoteMediator(
         ) {
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             if (response.paging == null) throw NetworkException("PagingEvent not found.")
+
+            val avatarUrls = response.metadata.mapAsAvatarUrls(cdnResources = response.cdnResources)
+            mediaCacher.preCacheUserAvatars(avatarUrls)
+
             response
         }
 

@@ -3,6 +3,7 @@ package net.primal.data.repository.profile
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.caching.MediaCacher
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.Result
 import net.primal.core.utils.asMapByKey
@@ -18,6 +19,7 @@ import net.primal.data.repository.mappers.local.asProfileDataDO
 import net.primal.data.repository.mappers.local.asProfileStatsDO
 import net.primal.data.repository.mappers.remote.asProfileDataPO
 import net.primal.data.repository.mappers.remote.asProfileStatsPO
+import net.primal.data.repository.mappers.remote.mapAsAvatarUrls
 import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsStreamDataPO
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
@@ -43,6 +45,7 @@ class ProfileRepositoryImpl(
     private val usersApi: UsersApi,
     private val wellKnownApi: UserWellKnownApi,
     private val primalPublisher: PrimalPublisher,
+    private val mediaCacher: MediaCacher,
 ) : ProfileRepository {
 
     override suspend fun fetchProfileId(primalName: String): String? =
@@ -173,6 +176,8 @@ class ProfileRepositoryImpl(
                 )
             }
 
+            val avatarUrls = response.metadataEvents.mapAsAvatarUrls(cdnResources = response.cdnResources)
+            mediaCacher.preCacheUserAvatars(avatarUrls)
             database.profiles().insertOrUpdateAll(data = profiles)
 
             profiles.map { it.asProfileDataDO() }

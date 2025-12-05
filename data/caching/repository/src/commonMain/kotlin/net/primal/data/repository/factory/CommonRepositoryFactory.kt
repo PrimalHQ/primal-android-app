@@ -1,5 +1,6 @@
 package net.primal.data.repository.factory
 
+import net.primal.core.caching.MediaCacher
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
@@ -98,11 +99,12 @@ abstract class CommonRepositoryFactory {
         )
     }
 
-    fun createFeedRepository(cachingPrimalApiClient: PrimalApiClient): FeedRepository {
+    fun createFeedRepository(cachingPrimalApiClient: PrimalApiClient, mediaCacher: MediaCacher): FeedRepository {
         return FeedRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             feedApi = PrimalApiServiceFactory.createFeedApi(cachingPrimalApiClient),
             database = resolveCachingDatabase(),
+            mediaCacher = mediaCacher,
         )
     }
 
@@ -184,6 +186,7 @@ abstract class CommonRepositoryFactory {
     fun createProfileRepository(
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
+        mediaCacher: MediaCacher,
     ): ProfileRepository {
         return ProfileRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
@@ -191,6 +194,7 @@ abstract class CommonRepositoryFactory {
             usersApi = PrimalApiServiceFactory.createUsersApi(cachingPrimalApiClient),
             wellKnownApi = PrimalApiServiceFactory.createUserWellKnownApi(),
             primalPublisher = primalPublisher,
+            mediaCacher = mediaCacher,
         )
     }
 
@@ -215,11 +219,12 @@ abstract class CommonRepositoryFactory {
     fun createStreamRepository(
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
+        mediaCacher: MediaCacher,
     ): StreamRepository =
         StreamRepositoryImpl(
             database = resolveCachingDatabase(),
             dispatcherProvider = dispatcherProvider,
-            profileRepository = createProfileRepository(cachingPrimalApiClient, primalPublisher),
+            profileRepository = createProfileRepository(cachingPrimalApiClient, primalPublisher, mediaCacher),
             liveStreamApi = PrimalApiServiceFactory.createStreamMonitor(cachingPrimalApiClient),
         )
 

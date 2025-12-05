@@ -247,6 +247,7 @@ dependencies {
     implementation(project(":core:networking-primal"))
     implementation(project(":core:networking-upload"))
     implementation(project(":core:networking-lightning"))
+    implementation(project(":core:caching"))
 
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))

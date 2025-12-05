@@ -6,6 +6,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.core.caching.MediaCacher
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.data.repository.factory.PrimalRepositoryFactory
 import net.primal.domain.bookmarks.PublicBookmarksRepository
@@ -69,8 +70,14 @@ object CachingRepositoriesModule {
         )
 
     @Provides
-    fun provideFeedRepository(@PrimalCacheApiClient primalApiClient: PrimalApiClient): FeedRepository =
-        PrimalRepositoryFactory.createFeedRepository(cachingPrimalApiClient = primalApiClient)
+    fun provideFeedRepository(
+        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
+        mediaCacher: MediaCacher,
+    ): FeedRepository =
+        PrimalRepositoryFactory.createFeedRepository(
+            cachingPrimalApiClient = primalApiClient,
+            mediaCacher = mediaCacher,
+        )
 
     @Provides
     fun provideFeedsRepository(
@@ -110,8 +117,13 @@ object CachingRepositoriesModule {
     fun provideProfileRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
+        mediaCacher: MediaCacher,
     ): ProfileRepository =
-        PrimalRepositoryFactory.createProfileRepository(cachingPrimalApiClient = primalApiClient, primalPublisher)
+        PrimalRepositoryFactory.createProfileRepository(
+            cachingPrimalApiClient = primalApiClient,
+            primalPublisher = primalPublisher,
+            mediaCacher = mediaCacher,
+        )
 
     @Provides
     fun provideMutedItemRepository(
@@ -148,10 +160,12 @@ object CachingRepositoriesModule {
     fun provideStreamRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
+        mediaCacher: MediaCacher,
     ): StreamRepository =
         PrimalRepositoryFactory.createStreamRepository(
             cachingPrimalApiClient = primalApiClient,
             primalPublisher = primalPublisher,
+            mediaCacher = mediaCacher,
         )
 
     @Provides

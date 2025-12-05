@@ -39,6 +39,7 @@ kotlin {
                 implementation(project(":core:app-config"))
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-primal"))
+                implementation(project(":core:caching"))
 
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
