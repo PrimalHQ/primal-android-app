@@ -1,5 +1,6 @@
 package net.primal.data.account.repository.repository
 
+import androidx.sqlite.SQLiteException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -52,9 +53,7 @@ class ConnectionRepositoryImpl(
     override suspend fun deleteConnection(connectionId: String) =
         withContext(dispatchers.io()) {
             database.withTransaction {
-                database.sessions().deleteSessionsByConnectionId(connectionId = connectionId)
-                database.permissions().deletePermissionsByConnectionId(connectionId = connectionId)
-                database.connections().deleteConnection(connectionId = connectionId)
+                deleteConnectionInternal(connectionId)
             }
         }
 
@@ -72,36 +71,21 @@ class ConnectionRepositoryImpl(
 
     override suspend fun saveConnection(secret: String, connection: AppConnection) =
         withContext(dispatchers.io()) {
-            database.withTransaction {
-                val existing = database.connections().getConnectionByClientPubKey(
-                    clientPubKey = connection.clientPubKey.asEncryptable(),
-                )
-                if (existing != null && existing.data.connectionId != connection.connectionId) {
-                    val connectionId = existing.data.connectionId
-                    database.sessions().deleteSessionsByConnectionId(connectionId)
-                    database.permissions().deletePermissionsByConnectionId(connectionId)
-                    database.connections().deleteConnection(connectionId)
+            try {
+                database.withTransaction {
+                    saveConnectionInternal(secret, connection)
                 }
+            } catch (_: SQLiteException) {
+                database.withTransaction {
+                    val existing = database.connections().getConnectionByClientPubKey(
+                        clientPubKey = connection.clientPubKey.asEncryptable(),
+                    )
 
-                database.connections().upsertAll(
-                    data = listOf(
-                        AppConnectionData(
-                            connectionId = connection.connectionId,
-                            relays = connection.relays.asEncryptable(),
-                            secret = secret.asEncryptable(),
-                            name = connection.name?.asEncryptable(),
-                            url = connection.url?.asEncryptable(),
-                            image = connection.image?.asEncryptable(),
-                            clientPubKey = connection.clientPubKey.asEncryptable(),
-                            signerPubKey = connection.signerPubKey.asEncryptable(),
-                            userPubKey = connection.userPubKey.asEncryptable(),
-                            autoStart = connection.autoStart,
-                            trustLevel = connection.trustLevel.asPO(),
-                        ),
-                    ),
-                )
-
-                database.permissions().upsertAll(data = connection.permissions.map { it.asPO() })
+                    if (existing != null) {
+                        deleteConnectionInternal(existing.data.connectionId)
+                        saveConnectionInternal(secret, connection)
+                    }
+                }
             }
         }
 
@@ -178,4 +162,30 @@ class ConnectionRepositoryImpl(
                 }
             }
         }
+
+    private suspend fun saveConnectionInternal(secret: String, connection: AppConnection) {
+        database.connections().insert(
+            data = AppConnectionData(
+                connectionId = connection.connectionId,
+                relays = connection.relays.asEncryptable(),
+                secret = secret.asEncryptable(),
+                name = connection.name?.asEncryptable(),
+                url = connection.url?.asEncryptable(),
+                image = connection.image?.asEncryptable(),
+                clientPubKey = connection.clientPubKey.asEncryptable(),
+                signerPubKey = connection.signerPubKey.asEncryptable(),
+                userPubKey = connection.userPubKey.asEncryptable(),
+                autoStart = connection.autoStart,
+                trustLevel = connection.trustLevel.asPO(),
+            ),
+        )
+        database.permissions().upsertAll(data = connection.permissions.map { it.asPO() })
+    }
+
+    private suspend fun deleteConnectionInternal(connectionId: String) {
+        database.sessionEvents().deleteEventsByConnectionId(connectionId = connectionId)
+        database.sessions().deleteSessionsByConnectionId(connectionId = connectionId)
+        database.permissions().deletePermissionsByConnectionId(connectionId = connectionId)
+        database.connections().deleteConnection(connectionId = connectionId)
+    }
 }

@@ -39,4 +39,11 @@ interface SessionEventDataDao {
 
     @Query("SELECT * FROM SessionEventData WHERE eventId = :eventId")
     suspend fun getSessionEvent(eventId: String): SessionEventData?
+
+    @Query(
+        """
+        DELETE FROM SessionEventData 
+        WHERE sessionId IN (SELECT sessionId FROM AppSessionData WHERE connectionId = :connectionId)""",
+    )
+    suspend fun deleteEventsByConnectionId(connectionId: String)
 }

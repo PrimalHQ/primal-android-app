@@ -1,16 +1,16 @@
 package net.primal.data.account.local.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
-import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 import net.primal.shared.data.local.encryption.Encryptable
 
 @Dao
 interface AppConnectionDataDao {
-    @Upsert
-    suspend fun upsertAll(data: List<AppConnectionData>)
+    @Insert
+    suspend fun insert(data: AppConnectionData)
 
     @Transaction
     @Query("SELECT * FROM AppConnectionData WHERE signerPubKey = :signerPubKey")
