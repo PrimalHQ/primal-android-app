@@ -131,7 +131,7 @@
     <string name="scan_code_scan_anything_title">Scan Anything:</string>
     <string name="scan_code_scan_anything_subtitle">Invite code, payment invoice, login string, user link, content link, primal gift card</string>
     <string name="scan_code_remote_login_camera_title">Login to Any Nostr App</string>
-    <string name="scan_code_remote_login_camera_subtitle">Use your Primal account to login to anyy\nNostr app that supports remote sign in.</string>
+    <string name="scan_code_remote_login_camera_subtitle">Use your Primal account to login to any\nNostr app that supports remote sign in.</string>
     <string name="scan_code_remote_login_manual_entry_subtitle">Use your Primal account to login to any Nostr app that supports remote sign in. Paste the connection string below:</string>
 
     <string name="logout_title">Sign out</string>
