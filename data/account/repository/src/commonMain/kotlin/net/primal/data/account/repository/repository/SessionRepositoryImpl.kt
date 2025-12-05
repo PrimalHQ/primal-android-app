@@ -92,13 +92,6 @@ class SessionRepositoryImpl(
             }
         }
 
-    override suspend fun endSession(sessionId: String) =
-        withContext(dispatchers.io()) {
-            runCatching {
-                database.sessions().endSession(sessionId = sessionId, endedAt = Clock.System.now().epochSeconds)
-            }
-        }
-
     override suspend fun endSessions(sessionIds: List<String>) =
         withContext(dispatchers.io()) {
             runCatching {

@@ -176,7 +176,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
     private fun endSession() {
         viewModelScope.launch {
             activeSessionId?.let {
-                sessionHandler.endSession(it)
+                sessionHandler.endSessions(listOf(it))
                     .onFailure {
                         setState { copy(error = UiError.GenericError(it.message)) }
                     }
