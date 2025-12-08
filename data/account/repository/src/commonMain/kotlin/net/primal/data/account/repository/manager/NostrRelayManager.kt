@@ -1,7 +1,6 @@
 package net.primal.data.account.repository.manager
 
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -51,13 +50,10 @@ internal class NostrRelayManager(
     private val _relayEvents = MutableSharedFlow<RelayEvent>(extraBufferCapacity = 64)
     val relayEvents = _relayEvents.asSharedFlow()
 
-    private val firstConnect = CompletableDeferred<Unit>()
-
     suspend fun connectToRelays(relays: Set<String>) {
         Napier.d(tag = "Signer") { "Connecting to relays: $relays" }
         (clients.keys - relays).forEach { disconnectFromRelay(relay = it) }
         (relays - clients.keys).forEach { connectToRelay(relay = it) }
-        firstConnect.complete(Unit)
     }
 
     suspend fun connectToRelay(relay: String) {
@@ -98,7 +94,6 @@ internal class NostrRelayManager(
 
     suspend fun sendResponse(relays: List<String>, response: RemoteSignerMethodResponse) =
         runCatching {
-            firstConnect.await()
             Napier.d(tag = "Signer") { "Sending response: $response" }
             val event = buildSignedEvent(response = response)
                 .onFailure {
