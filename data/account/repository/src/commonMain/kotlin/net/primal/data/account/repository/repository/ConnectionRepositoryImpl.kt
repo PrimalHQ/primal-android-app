@@ -67,10 +67,12 @@ class ConnectionRepositoryImpl(
 
     override suspend fun insertOrReplaceConnection(secret: String, connection: AppConnection) =
         withContext(dispatchers.io()) {
-            database.withTransaction {
-                try {
+            try {
+                database.withTransaction {
                     insertAppConnection(secret = secret, connection = connection)
-                } catch (_: SQLiteException) {
+                }
+            } catch (_: SQLiteException) {
+                database.withTransaction {
                     deleteEverythingForClientPubKey(clientPubKey = connection.clientPubKey)
                     insertAppConnection(secret = secret, connection = connection)
                 }
