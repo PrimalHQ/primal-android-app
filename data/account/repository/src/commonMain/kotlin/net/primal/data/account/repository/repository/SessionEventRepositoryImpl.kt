@@ -59,7 +59,7 @@ class SessionEventRepositoryImpl(
                     data = events.map {
                         PendingNostrEvent(
                             eventId = it.id,
-                            clientPubKey = it.pubKey.asEncryptable(),
+                            clientPubKey = it.pubKey,
                             signerPubKey = signerKeyPair.pubKey.asEncryptable(),
                             rawNostrEventJson = it.encodeToJsonString().asEncryptable(),
                         )

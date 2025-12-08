@@ -9,5 +9,5 @@ data class PendingNostrEvent(
     @PrimaryKey val eventId: String,
     val rawNostrEventJson: Encryptable<String>,
     val signerPubKey: Encryptable<String>,
-    val clientPubKey: Encryptable<String>,
+    val clientPubKey: String,
 )
