@@ -45,4 +45,7 @@ interface SessionEventDataDao {
 
     @Query("SELECT * FROM SessionEventData WHERE eventId = :eventId")
     suspend fun getSessionEvent(eventId: String): SessionEventData?
+
+    @Query("DELETE FROM SessionEventData WHERE clientPubKey = :clientPubKey")
+    suspend fun deleteEvents(clientPubKey: String)
 }

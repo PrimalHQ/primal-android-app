@@ -6,7 +6,7 @@ import net.primal.domain.account.model.TrustLevel
 
 interface ConnectedAppDetailsContract {
     data class UiState(
-        val connectionId: String,
+        val clientPubKey: String,
         val loading: Boolean = true,
         val appName: String? = null,
         val appIconUrl: String? = null,

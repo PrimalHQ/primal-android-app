@@ -41,7 +41,7 @@ fun buildSessionEventData(
         eventId = method.id,
         sessionId = sessionId,
         signerPubKey = signerPubKey.asEncryptable(),
-        clientPubKey = method.clientPubKey.asEncryptable(),
+        clientPubKey = method.clientPubKey,
         requestState = requestState,
         requestedAt = requestedAt,
         completedAt = completedAt,

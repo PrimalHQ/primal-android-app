@@ -14,12 +14,8 @@ class RemoteSignerSessionHandler @Inject constructor(
     private val sessionRepository: SessionRepository,
 ) {
 
-    suspend fun startSession(connectionId: String) =
-        sessionRepository.startSession(connectionId = connectionId)
-            .onSuccess { ensureServiceStarted() }
-
-    suspend fun startSessionForClient(clientPubKey: String) =
-        sessionRepository.startSessionForClient(clientPubKey = clientPubKey)
+    suspend fun startSession(clientPubKey: String) =
+        sessionRepository.startSession(clientPubKey = clientPubKey)
             .onSuccess { ensureServiceStarted() }
 
     suspend fun endSessions(sessionIds: List<String>) = sessionRepository.endSessions(sessionIds = sessionIds)
