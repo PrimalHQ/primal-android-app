@@ -105,9 +105,7 @@ internal class NostrRelayManager(
             relays.mapNotNull { relay -> clients[relay] }
                 .also { clients ->
                     if (clients.isEmpty()) {
-                        throw IllegalStateException(
-                            "We don't have active connection to any of the following relays: $relays",
-                        )
+                        error("We don't have active connection to any of the following relays: $relays")
                     }
                 }
                 .forEach { client ->

@@ -48,7 +48,7 @@ class RemoteSignerServiceImpl internal constructor(
     private var activeClientPubKeys = HashSet<String>()
     private var clientSessionMap = emptyMap<String, String>()
     private val sessionActivityMap = mutableMapOf<String, Instant>()
-    private val failedMethodResponseQueue = MutableSharedFlow<RemoteSignerMethodResponse>()
+    private val retrySendMethodResponseQueue = MutableSharedFlow<RemoteSignerMethodResponse>()
 
     companion object {
         private val SESSION_INACTIVITY_TIMEOUT = 15.minutes
@@ -62,7 +62,7 @@ class RemoteSignerServiceImpl internal constructor(
         observeRelayEvents()
         observeMethods()
         observeErrors()
-        observeFailedQueue()
+        observeRetryMethodResponseQueue()
         startInactivityLoop()
     }
 
@@ -202,9 +202,9 @@ class RemoteSignerServiceImpl internal constructor(
         }
 
     @OptIn(FlowPreview::class)
-    private fun observeFailedQueue() =
+    private fun observeRetryMethodResponseQueue() =
         scope.launch {
-            failedMethodResponseQueue
+            retrySendMethodResponseQueue
                 .batchOnInactivity(inactivityTimeout = 3.seconds)
                 .collect { batchedResponses ->
                     batchedResponses.forEach {
@@ -264,8 +264,8 @@ class RemoteSignerServiceImpl internal constructor(
 
     private suspend fun sendResponseOrAddToFailedQueue(response: RemoteSignerMethodResponse): Result<Unit> {
         return sendResponse(response).onFailure {
-            Napier.d(tag = "Signer") { "Adding response to failed queue: $response" }
-            failedMethodResponseQueue.emit(response)
+            Napier.d(tag = "Signer") { "Adding response to retry queue: $response" }
+            retrySendMethodResponseQueue.emit(response)
         }
     }
 
