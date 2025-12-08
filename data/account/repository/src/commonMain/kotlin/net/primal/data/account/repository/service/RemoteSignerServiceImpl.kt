@@ -90,7 +90,7 @@ class RemoteSignerServiceImpl internal constructor(
                         )
 
                     sessions.forEach {
-                        setActiveRelays(it)
+                        setActiveRelayCount(it)
                         sessionActivityMap.getOrPut(it.sessionId) { Clock.System.now() }
                     }
                     clientSessionMap = sessions.associate { it.clientPubKey to it.sessionId }
@@ -153,7 +153,7 @@ class RemoteSignerServiceImpl internal constructor(
                 }
         }
 
-    private suspend fun setActiveRelays(session: AppSession) {
+    private suspend fun setActiveRelayCount(session: AppSession) {
         sessionRepository.setActiveRelayCount(
             sessionId = session.sessionId,
             activeRelayCount = session.relays.map { activeRelays.contains(it) }.count { it },
