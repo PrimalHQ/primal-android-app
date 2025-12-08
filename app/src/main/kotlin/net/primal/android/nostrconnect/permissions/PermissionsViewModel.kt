@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.nostrconnect.model.asUi
@@ -16,13 +17,14 @@ import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiState
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
-import net.primal.core.utils.getIfTypeOrNull
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.UserChoice
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
+import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 
 @HiltViewModel
@@ -31,6 +33,7 @@ class PermissionsViewModel @Inject constructor(
     private val sessionEventRepository: SessionEventRepository,
     private val permissionsRepository: PermissionsRepository,
     private val credentialsStore: CredentialsStore,
+    private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -71,7 +74,7 @@ class PermissionsViewModel @Inject constructor(
 
                     is UiEvent.OpenEventDetails -> handleOpenEventDetails(event.eventId)
 
-                    UiEvent.CloseEventDetails -> setState { copy(eventDetailsUnsignedEvent = null) }
+                    UiEvent.CloseEventDetails -> setState { copy(eventDetailsSessionEvent = null) }
                 }
             }
         }
@@ -84,17 +87,33 @@ class PermissionsViewModel @Inject constructor(
 
     private fun handleOpenEventDetails(eventId: String) {
         val sessionEvent = state.value.sessionEvents.find { it.eventId == eventId }
+        viewModelScope.launch {
+            var parsedSigned: NostrEvent? = null
+            var parsedUnsigned: NostrUnsignedEvent? = null
 
-        val nostrUnsignedEvent = sessionEvent.getIfTypeOrNull(SessionEvent.SignEvent::unsignedNostrEventJson)
-            ?.let {
-                runCatching { NostrJsonEncodeDefaults.decodeFromString<NostrUnsignedEvent>(it) }.getOrNull()
+            if (sessionEvent is SessionEvent.SignEvent) {
+                withContext(dispatcherProvider.io()) {
+                    sessionEvent.signedNostrEventJson?.let { json ->
+                        parsedSigned = runCatching {
+                            NostrJsonEncodeDefaults.decodeFromString<NostrEvent>(json)
+                        }.getOrNull()
+                    }
+
+                    parsedUnsigned = runCatching {
+                        NostrJsonEncodeDefaults.decodeFromString<NostrUnsignedEvent>(
+                            sessionEvent.unsignedNostrEventJson,
+                        )
+                    }.getOrNull()
+                }
             }
 
-        setState {
-            copy(
-                eventDetailsUnsignedEvent = nostrUnsignedEvent,
-                eventDetailsRequestTypeId = sessionEvent?.requestTypeId,
-            )
+            setState {
+                copy(
+                    eventDetailsSessionEvent = sessionEvent,
+                    parsedSignedEvent = parsedSigned,
+                    parsedUnsignedEvent = parsedUnsigned,
+                )
+            }
         }
     }
 

@@ -8,6 +8,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -23,8 +24,8 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.PrimalDateFormats
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.rememberPrimalFormattedDateTime
+import net.primal.android.nostrconnect.ui.EventDetailsUiHelper
 import net.primal.android.nostrconnect.ui.NostrEventDetails
-import net.primal.android.nostrconnect.ui.asEventDetailRows
 
 @Composable
 fun EventDetailsScreen(viewModel: EventDetailsViewModel, onClose: () -> Unit) {
@@ -50,20 +51,39 @@ fun EventDetailsScreen(state: EventDetailsContract.UiState, onClose: () -> Unit)
         content = { paddingValues ->
             when {
                 state.loading -> PrimalLoadingSpinner()
-                state.event != null -> {
-                    val formattedTimestamp = rememberPrimalFormattedDateTime(
-                        timestamp = state.event.createdAt,
-                        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
-                    )
+                !state.eventNotSupported && state.sessionEvent != null -> {
+                    val event = state.sessionEvent
                     val actionName = state.requestTypeId?.let { state.namingMap[it] }
                         ?: state.requestTypeId ?: ""
+
+                    val formattedTimestamp = rememberPrimalFormattedDateTime(
+                        timestamp = event.requestedAt,
+                        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
+                    )
+
+                    val (statusText, statusColor) = remember(event) {
+                        EventDetailsUiHelper.getStatusTextAndColor(context, event)
+                    }
+
+                    val rows = remember(event, state.namingMap, state.parsedSignedEvent, state.parsedUnsignedEvent) {
+                        EventDetailsUiHelper.buildRows(
+                            context = context,
+                            event = event,
+                            namingMap = state.namingMap,
+                            parsedSignedEvent = state.parsedSignedEvent,
+                            parsedUnsignedEvent = state.parsedUnsignedEvent,
+                        )
+                    }
+
                     NostrEventDetails(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
                         title = actionName,
                         subtitle = formattedTimestamp,
-                        eventRows = state.event.asEventDetailRows(kindName = actionName),
+                        rows = rows,
+                        status = statusText,
+                        statusColor = statusColor,
                         onCopy = { text, label ->
                             copyText(text = text, context = context, label = label)
                         },
