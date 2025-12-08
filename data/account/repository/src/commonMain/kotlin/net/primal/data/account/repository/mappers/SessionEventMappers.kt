@@ -73,7 +73,7 @@ fun SessionEventData.asDomain(): SessionEvent? {
 
         SignerMethodType.Nip04Encrypt,
         SignerMethodType.Nip44Encrypt,
-            -> {
+        -> {
             SessionEvent.Encrypt(
                 eventId = this.eventId,
                 sessionId = this.sessionId,
@@ -86,7 +86,7 @@ fun SessionEventData.asDomain(): SessionEvent? {
 
         SignerMethodType.Nip04Decrypt,
         SignerMethodType.Nip44Decrypt,
-            -> {
+        -> {
             SessionEvent.Decrypt(
                 eventId = this.eventId,
                 sessionId = this.sessionId,

@@ -126,7 +126,7 @@ class RemoteSignerServiceImpl internal constructor(
                         sessionEvent.responsePayload
                             ?.decrypted
                             ?.decodeFromJsonStringOrNull<RemoteSignerMethodResponse>()
-                            ?.assignClientPubKey(clientPubKey = sessionEvent.clientPubKey.decrypted)
+                            ?.assignClientPubKey(clientPubKey = sessionEvent.clientPubKey)
                     }
 
                     val toRespond = events.filter { it.responsePayload == null }
