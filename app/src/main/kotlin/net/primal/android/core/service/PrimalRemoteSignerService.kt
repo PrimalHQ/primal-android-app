@@ -83,6 +83,12 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
         private val _isServiceRunning = MutableStateFlow(false)
         val isServiceRunning = _isServiceRunning.asStateFlow()
 
+        fun ensureServiceStarted(context: Context) {
+            if (!isServiceRunning.value) {
+                start(context = context)
+            }
+        }
+
         fun start(context: Context) {
             val i = Intent(context, PrimalRemoteSignerService::class.java)
             context.startForegroundService(i)

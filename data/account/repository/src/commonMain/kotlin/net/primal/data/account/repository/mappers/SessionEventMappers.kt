@@ -1,5 +1,7 @@
 package net.primal.data.account.repository.mappers
 
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
@@ -21,50 +23,39 @@ import net.primal.domain.account.model.RequestState as RequestStateDO
 import net.primal.domain.account.model.SessionEvent
 import net.primal.shared.data.local.encryption.asEncryptable
 
+@OptIn(ExperimentalUuidApi::class)
 fun buildSessionEventData(
     sessionId: String,
     signerPubKey: String,
     requestedAt: Long,
+    requestType: SignerMethodType,
     completedAt: Long?,
-    method: RemoteSignerMethod,
+    method: RemoteSignerMethod?,
     response: RemoteSignerMethodResponse?,
+    requestState: RequestStatePO?,
 ): SessionEventData? {
-    val requestType = method.getRequestType()
+    val clientPubkey = method?.clientPubKey ?: response?.clientPubKey
+    if (requestType == SignerMethodType.Ping || clientPubkey == null) return null
 
-    val requestState = when (response) {
+    val resolvedRequestState = requestState ?: when (response) {
         is RemoteSignerMethodResponse.Error -> RequestStatePO.Rejected
         is RemoteSignerMethodResponse.Success -> RequestStatePO.Approved
         null -> RequestStatePO.PendingUserAction
     }
 
-    val baseData = SessionEventData(
-        eventId = method.id,
+    return SessionEventData(
+        eventId = method?.id ?: response?.id ?: Uuid.random().toString(),
         sessionId = sessionId,
         signerPubKey = signerPubKey.asEncryptable(),
-        clientPubKey = method.clientPubKey,
-        requestState = requestState,
+        clientPubKey = clientPubkey,
+        requestState = resolvedRequestState,
         requestedAt = requestedAt,
         completedAt = completedAt,
         requestType = requestType,
         requestPayload = method.encodeToJsonString().asEncryptable(),
         responsePayload = response?.encodeToJsonString()?.asEncryptable(),
-        eventKind = null,
+        eventKind = method.getIfTypeOrNull(RemoteSignerMethod.SignEvent::unsignedEvent)?.kind?.asEncryptable(),
     )
-
-    return when (method) {
-        is RemoteSignerMethod.Nip04Decrypt,
-        is RemoteSignerMethod.Nip04Encrypt,
-        is RemoteSignerMethod.Nip44Decrypt,
-        is RemoteSignerMethod.Nip44Encrypt,
-        is RemoteSignerMethod.GetPublicKey,
-        -> baseData
-
-        is RemoteSignerMethod.SignEvent -> baseData.copy(
-            eventKind = method.unsignedEvent.kind.asEncryptable(),
-        )
-
-        is RemoteSignerMethod.Connect, is RemoteSignerMethod.Ping -> null
-    }
 }
 
 fun SessionEventData.asDomain(): SessionEvent? {
@@ -139,7 +130,7 @@ private fun getResponseBody(responsePayload: String?) =
         null -> null
     }
 
-private fun RemoteSignerMethod.getRequestType(): SignerMethodType {
+fun RemoteSignerMethod.getRequestType(): SignerMethodType {
     return when (this) {
         is RemoteSignerMethod.Connect -> SignerMethodType.Connect
         is RemoteSignerMethod.GetPublicKey -> SignerMethodType.GetPublicKey

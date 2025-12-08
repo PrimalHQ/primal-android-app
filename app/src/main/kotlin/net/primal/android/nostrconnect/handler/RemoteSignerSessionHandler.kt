@@ -16,13 +16,7 @@ class RemoteSignerSessionHandler @Inject constructor(
 
     suspend fun startSession(clientPubKey: String) =
         sessionRepository.startSession(clientPubKey = clientPubKey)
-            .onSuccess { ensureServiceStarted() }
+            .onSuccess { PrimalRemoteSignerService.ensureServiceStarted(context = context) }
 
     suspend fun endSessions(sessionIds: List<String>) = sessionRepository.endSessions(sessionIds = sessionIds)
-
-    private fun ensureServiceStarted() {
-        if (!PrimalRemoteSignerService.isServiceRunning.value) {
-            PrimalRemoteSignerService.start(context = context)
-        }
-    }
 }

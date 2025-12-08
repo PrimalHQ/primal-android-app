@@ -92,22 +92,28 @@ internal class NostrRelayManager(
         scope.cancel()
     }
 
-    fun sendResponse(relays: List<String>, response: RemoteSignerMethodResponse) {
-        Napier.d(tag = "Signer") { "Sending response: $response" }
-        buildSignedEvent(response = response)
-            .onSuccess { event ->
-                relays.mapNotNull { relay -> clients[relay] }
-                    .forEach { client ->
-                        scope.launch {
-                            client.publishEvent(event = event)
-                        }
+    suspend fun sendResponse(relays: List<String>, response: RemoteSignerMethodResponse) =
+        runCatching {
+            Napier.d(tag = "Signer") { "Sending response: $response" }
+            val event = buildSignedEvent(response = response)
+                .onFailure {
+                    Napier.w(tag = "Signer", throwable = it) {
+                        "Failed to sign event. Something must have gone horribly wrong."
                     }
-            }.onFailure {
-                Napier.w(tag = "Signer", throwable = it) {
-                    "Failed to sign event. Something must have gone horribly wrong."
+                }.getOrThrow()
+
+            relays.mapNotNull { relay -> clients[relay] }
+                .also { clients ->
+                    if (clients.isEmpty()) {
+                        error("We don't have active connection to any of the following relays: $relays")
+                    }
                 }
-            }
-    }
+                .forEach { client ->
+                    scope.launch {
+                        client.publishEvent(event = event)
+                    }
+                }
+        }
 
     private fun buildSignedEvent(response: RemoteSignerMethodResponse): Result<NostrEvent> =
         runCatching {
