@@ -34,7 +34,8 @@ fun buildSessionEventData(
     response: RemoteSignerMethodResponse?,
     requestState: RequestStatePO?,
 ): SessionEventData? {
-    if (requestType == SignerMethodType.Ping) return null
+    val clientPubkey = method?.clientPubKey ?: response?.clientPubKey
+    if (requestType == SignerMethodType.Ping || clientPubkey == null) return null
 
     val resolvedRequestState = requestState ?: when (response) {
         is RemoteSignerMethodResponse.Error -> RequestStatePO.Rejected
@@ -46,7 +47,7 @@ fun buildSessionEventData(
         eventId = method?.id ?: response?.id ?: Uuid.random().toString(),
         sessionId = sessionId,
         signerPubKey = signerPubKey.asEncryptable(),
-        clientPubKey = method?.clientPubKey?.asEncryptable() ?: response?.clientPubKey?.asEncryptable() ?: return null,
+        clientPubKey = clientPubkey,
         requestState = resolvedRequestState,
         requestedAt = requestedAt,
         completedAt = completedAt,
@@ -72,7 +73,7 @@ fun SessionEventData.asDomain(): SessionEvent? {
 
         SignerMethodType.Nip04Encrypt,
         SignerMethodType.Nip44Encrypt,
-        -> {
+            -> {
             SessionEvent.Encrypt(
                 eventId = this.eventId,
                 sessionId = this.sessionId,
@@ -85,7 +86,7 @@ fun SessionEventData.asDomain(): SessionEvent? {
 
         SignerMethodType.Nip04Decrypt,
         SignerMethodType.Nip44Decrypt,
-        -> {
+            -> {
             SessionEvent.Decrypt(
                 eventId = this.eventId,
                 sessionId = this.sessionId,

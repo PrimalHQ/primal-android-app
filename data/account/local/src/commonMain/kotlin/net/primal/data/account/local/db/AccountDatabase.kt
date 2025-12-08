@@ -28,7 +28,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         SessionEventData::class,
         PendingNostrEvent::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
 )
 @TypeConverters(

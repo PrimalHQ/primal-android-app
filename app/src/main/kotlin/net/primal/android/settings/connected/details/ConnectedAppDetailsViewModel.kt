@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.push.PushNotificationsTokenUpdater
-import net.primal.android.navigation.connectionIdOrThrow
+import net.primal.android.navigation.clientPubKeyOrThrow
 import net.primal.android.nostrconnect.handler.RemoteSignerSessionHandler
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SideEffect
 import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiEvent
@@ -37,10 +37,10 @@ class ConnectedAppDetailsViewModel @Inject constructor(
     private val tokenUpdater: PushNotificationsTokenUpdater,
 ) : ViewModel() {
 
-    private val connectionId: String = savedStateHandle.connectionIdOrThrow
+    private val clientPubKey: String = savedStateHandle.clientPubKeyOrThrow
     private var activeSessionId: String? = null
 
-    private val _state = MutableStateFlow(UiState(connectionId = connectionId))
+    private val _state = MutableStateFlow(UiState(clientPubKey = clientPubKey))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
@@ -75,7 +75,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
 
     private fun observeConnection() =
         viewModelScope.launch {
-            connectionRepository.observeConnection(connectionId = connectionId).collect { connection ->
+            connectionRepository.observeConnection(clientPubKey = clientPubKey).collect { connection ->
                 setState {
                     copy(
                         appName = connection?.name,
@@ -90,7 +90,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
 
     private fun updateTrustLevel(trustLevel: TrustLevel) {
         viewModelScope.launch {
-            connectionRepository.updateTrustLevel(connectionId, trustLevel)
+            connectionRepository.updateTrustLevel(clientPubKey, trustLevel)
                 .onFailure {
                     setState { copy(error = UiError.GenericError(it.message)) }
                 }
@@ -99,7 +99,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
 
     private fun observeActiveSession() =
         viewModelScope.launch {
-            sessionRepository.observeActiveSessionForConnection(connectionId).collect { session ->
+            sessionRepository.observeActiveSessionForConnection(clientPubKey).collect { session ->
                 activeSessionId = session?.sessionId
                 setState {
                     copy(
@@ -111,7 +111,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
 
     private fun observeRecentSessions() =
         viewModelScope.launch {
-            sessionRepository.observeSessionsByConnectionId(connectionId).collect { sessions ->
+            sessionRepository.observeSessionsByClientPubKey(clientPubKey).collect { sessions ->
                 setState {
                     copy(
                         recentSessions = sessions.map {
@@ -129,7 +129,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
     private fun deleteConnection() {
         viewModelScope.launch {
             runCatching {
-                connectionRepository.deleteConnection(connectionId)
+                connectionRepository.deleteConnectionAndData(clientPubKey)
                 // Launching in a new scope to survive view model destruction
                 CoroutineScope(dispatcherProvider.io()).launch {
                     runCatching { tokenUpdater.updateTokenForRemoteSigner() }
@@ -145,7 +145,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
     private fun updateAppName(name: String) {
         viewModelScope.launch {
             runCatching {
-                connectionRepository.updateConnectionName(connectionId, name)
+                connectionRepository.updateConnectionName(clientPubKey, name)
             }.onFailure {
                 setState { copy(error = UiError.GenericError(it.message)) }
             }
@@ -155,7 +155,7 @@ class ConnectedAppDetailsViewModel @Inject constructor(
     private fun updateAutoStartSession(enabled: Boolean) {
         viewModelScope.launch {
             runCatching {
-                connectionRepository.updateConnectionAutoStart(connectionId, enabled)
+                connectionRepository.updateConnectionAutoStart(clientPubKey, enabled)
             }.onSuccess {
                 runCatching { tokenUpdater.updateTokenForRemoteSigner() }
             }.onFailure {
@@ -166,22 +166,20 @@ class ConnectedAppDetailsViewModel @Inject constructor(
 
     private fun startSession() {
         viewModelScope.launch {
-            runCatching {
-                sessionHandler.startSession(connectionId)
-            }.onFailure {
-                setState { copy(error = UiError.GenericError(it.message)) }
-            }
+            sessionHandler.startSession(clientPubKey)
+                .onFailure {
+                    setState { copy(error = UiError.GenericError(it.message)) }
+                }
         }
     }
 
     private fun endSession() {
         viewModelScope.launch {
             activeSessionId?.let {
-                runCatching {
-                    sessionHandler.endSession(it)
-                }.onFailure {
-                    setState { copy(error = UiError.GenericError(it.message)) }
-                }
+                sessionHandler.endSessions(listOf(it))
+                    .onFailure {
+                        setState { copy(error = UiError.GenericError(it.message)) }
+                    }
             }
         }
     }

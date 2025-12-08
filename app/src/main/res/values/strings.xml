@@ -106,14 +106,17 @@
     <string name="login_invalid_nsec_key">Please enter a valid Nostr key,\nstarting with “nsec”:</string>
 
     <string name="scan_code_title">Scan Code</string>
+    <string name="scan_code_remote_login_title">Remote Login</string>
     <string name="scan_code_manual_entry_title">Enter Anything</string>
     <string name="scan_code_success_title">Success!</string>
     <string name="scan_code_apply_button">Apply</string>
+    <string name="scan_code_error_invalid_login_string">Invalid remote login string. Please try again.</string>
     <string name="scan_code_redeem_button">Redeem code</string>
     <string name="scan_code_onboard_button">Onboard to Primal</string>
     <string name="scan_code_activate_wallet_button">Activate Wallet</string>
     <string name="scan_code_use_keyboard_button">Use Keyboard instead</string>
     <string name="scan_code_enter_placeholder">Enter code…</string>
+    <string name="scan_code_remote_login_manual_entry_placeholder">nostrconnect://</string>
     <string name="scan_code_paste">Paste</string>
     <string name="scan_code_loaded_with">This code is loaded with:</string>
     <string name="scan_code_get_zapping">Get Zapping!</string>
@@ -127,6 +130,9 @@
     <string name="scan_code_no_wallet_notice">To redeem your code,\nactivate your Primal Wallet.</string>
     <string name="scan_code_scan_anything_title">Scan Anything:</string>
     <string name="scan_code_scan_anything_subtitle">Invite code, payment invoice, login string, user link, content link, primal gift card</string>
+    <string name="scan_code_remote_login_camera_title">Login to Any Nostr App</string>
+    <string name="scan_code_remote_login_camera_subtitle">Use your Primal account to login to any\nNostr app that supports remote sign in.</string>
+    <string name="scan_code_remote_login_manual_entry_subtitle">Use your Primal account to login to any Nostr app that supports remote sign in. Paste the connection string below:</string>
 
     <string name="logout_title">Sign out</string>
     <string name="logout_description">If you didn\'t save your private key, it will be irretrievably lost. Do you really want to sign out?</string>
@@ -144,6 +150,7 @@
     <string name="drawer_destination_messages">Messages</string>
     <string name="drawer_destination_bookmarks">Bookmarks</string>
     <string name="drawer_destination_scan_code">Scan Code</string>
+    <string name="drawer_destination_remote_login">Remote Login</string>
     <string name="drawer_destination_settings">Settings</string>
     <string name="drawer_destination_sign_out">Sign Out</string>
     <string name="drawer_followers_suffix">Followers</string>
@@ -1092,6 +1099,8 @@
     <string name="session_event_title_sign_event_kind">Sign Event (Kind %1$d):</string>
     <string name="session_event_title_encrypt">Encrypt:</string>
     <string name="session_event_title_decrypt">Decrypt:</string>
+    <string name="session_event_state_approved">Done</string>
+    <string name="session_event_state_rejected">Rejected</string>
 
     <string name="biometric_prompt_title">Authenticate</string>
     <string name="biometric_prompt_description">This ensures that only you can access the private key.</string>

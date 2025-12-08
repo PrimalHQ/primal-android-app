@@ -105,6 +105,7 @@ fun ScanCodeScreen(
         containerColor = Color.Transparent,
         topBar = {
             ScanCodeTopAppBar(
+                scanMode = state.scanMode,
                 stage = currentStage,
                 isCameraPermissionGranted = isCameraPermissionGranted,
                 onClose = {
@@ -145,6 +146,7 @@ private fun ScanCodeMainContent(
         when (stage) {
             ScanCodeContract.ScanCodeStage.ScanCamera -> {
                 ScanCameraStage(
+                    scanMode = state.scanMode,
                     modifier = Modifier.fillMaxSize(),
                     onQrCodeDetected = { eventPublisher(UiEvent.QrCodeDetected(it)) },
                     onEnterCodeClick = { eventPublisher(UiEvent.GoToManualInput) },
@@ -158,6 +160,7 @@ private fun ScanCodeMainContent(
                         .background(AppTheme.colorScheme.background),
                 ) {
                     ScanManualEntryStage(
+                        scanMode = state.scanMode,
                         modifier = Modifier
                             .padding(paddingValues)
                             .padding(horizontal = 24.dp)
@@ -214,6 +217,7 @@ private fun ScanCodeMainContent(
 @Composable
 fun ScanCodeTopAppBar(
     onClose: () -> Unit,
+    scanMode: ScanCodeContract.ScanMode,
     stage: ScanCodeContract.ScanCodeStage,
     isCameraPermissionGranted: Boolean,
     modifier: Modifier = Modifier,
@@ -230,7 +234,11 @@ fun ScanCodeTopAppBar(
             navigationIconContentColor = if (useThemeColors) AppTheme.colorScheme.onPrimary else Color.White,
         ),
         title = {
-            Text(text = stage.toTitle())
+            val title = when (scanMode) {
+                ScanCodeContract.ScanMode.Anything -> stage.toTitle()
+                ScanCodeContract.ScanMode.RemoteLogin -> stringResource(id = R.string.scan_code_remote_login_title)
+            }
+            Text(text = title)
         },
         navigationIcon = {
             AppBarIcon(

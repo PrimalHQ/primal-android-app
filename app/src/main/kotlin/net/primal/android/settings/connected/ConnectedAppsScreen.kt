@@ -52,7 +52,7 @@ import net.primal.domain.links.CdnImage
 fun ConnectedAppsScreen(
     viewModel: ConnectedAppsViewModel,
     onClose: () -> Unit,
-    onConnectedAppClick: (String) -> Unit,
+    onConnectedAppClick: (clientPubKey: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
     ConnectedAppsScreen(
@@ -67,7 +67,7 @@ fun ConnectedAppsScreen(
 fun ConnectedAppsScreen(
     state: ConnectedAppsContract.UiState,
     onClose: () -> Unit,
-    onConnectedAppClick: (String) -> Unit,
+    onConnectedAppClick: (clientPubKey: String) -> Unit,
 ) {
     PrimalScaffold(
         topBar = {
@@ -98,18 +98,18 @@ fun ConnectedAppsScreen(
                 ) {
                     itemsIndexed(
                         items = state.connections,
-                        key = { _, connection -> connection.connectionId },
+                        key = { _, connection -> connection.clientPubKey },
                         contentType = { _, _ -> "ConnectionItem" },
                     ) { index, connection ->
                         val shape = getListItemShape(index = index, listSize = state.connections.size)
                         val isLast = index == state.connections.lastIndex
-                        val isActive = connection.connectionId in state.activeConnectionIds
+                        val isActive = connection.clientPubKey in state.activeClientPubKeys
 
                         Column(modifier = Modifier.clip(shape)) {
                             ConnectedAppListItem(
                                 connection = connection,
                                 isActive = isActive,
-                                onClick = { onConnectedAppClick(connection.connectionId) },
+                                onClick = { onConnectedAppClick(connection.clientPubKey) },
                             )
                             if (!isLast) {
                                 PrimalDivider()
@@ -195,31 +195,31 @@ fun PreviewConnectedAppsScreen() {
                     loading = false,
                     connections = listOf(
                         AppConnectionUi(
-                            connectionId = "1",
+                            clientPubKey = "1",
                             appName = "Primal web app",
                             appImage = CdnImage("https://primal.net/assets/favicon-51789dff.ico"),
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                         ),
                         AppConnectionUi(
-                            connectionId = "2",
+                            clientPubKey = "2",
                             appName = "Nostr 1",
                             appImage = null,
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                         ),
                         AppConnectionUi(
-                            connectionId = "3",
+                            clientPubKey = "3",
                             appName = "Primal",
                             appImage = null,
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                         ),
                         AppConnectionUi(
-                            connectionId = "4",
+                            clientPubKey = "4",
                             appName = "",
                             appImage = null,
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                         ),
                     ),
-                    activeConnectionIds = setOf("1", "2"),
+                    activeClientPubKeys = setOf("1", "2"),
                 ),
                 onClose = {},
                 onConnectedAppClick = {},

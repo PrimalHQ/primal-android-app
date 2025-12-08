@@ -342,7 +342,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
             appName = session.name ?: "Unknown App",
             appIcon = appIconBitmap,
             avatar = avatarBitmap,
-            onRowClick = deepLinkPendingIntent(connectionId = session.connectionId),
+            onRowClick = deepLinkPendingIntent(clientPubKey = session.clientPubKey),
             onEndSessionClick = endSessionPendingIntent(sessionId = session.sessionId),
         )
 
@@ -359,8 +359,8 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
             .notify(session.sessionId, CHILD_NOTIFICATION_ID, notification)
     }
 
-    private fun deepLinkPendingIntent(connectionId: String): PendingIntent {
-        val uri = "primal://signer/$connectionId".toUri()
+    private fun deepLinkPendingIntent(clientPubKey: String): PendingIntent {
+        val uri = "primal://signer/$clientPubKey".toUri()
         val intent = Intent(Intent.ACTION_VIEW, uri, this, MainActivity::class.java).apply {
             addFlags(
                 Intent.FLAG_ACTIVITY_SINGLE_TOP or
@@ -370,7 +370,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
         }
         return PendingIntent.getActivity(
             this,
-            connectionId.hashCode(),
+            clientPubKey.hashCode(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )

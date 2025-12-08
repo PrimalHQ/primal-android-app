@@ -55,8 +55,8 @@ class SignerConnectionInitializer internal constructor(
                 trustLevel = trustLevel,
             )
 
-            connectionRepository.saveConnection(secret = secret, connection = appConnection)
-            sessionRepository.startSession(connectionId = appConnection.connectionId)
+            connectionRepository.insertOrReplaceConnection(secret = secret, connection = appConnection)
+            sessionRepository.startSession(clientPubKey = appConnection.clientPubKey)
                 .onSuccess { sessionId ->
                     internalSessionEventRepository.saveSessionEvent(
                         sessionId = sessionId,
@@ -85,25 +85,22 @@ class SignerConnectionInitializer internal constructor(
             throw IllegalArgumentException("Invalid `connectionUrl`. It should start with `$NOSTR_CONNECT_PREFIX`.")
         }
 
-        val connectionId = Uuid.random().toString()
-
         val parsedUrl = Url(urlString = connectionUrl)
         val clientPubKey = parsedUrl.host
         val relays = extractRelaysOrThrow(parsedUrl)
         val secret = extractSecretOrThrow(parsedUrl)
-        val perms = extractPermsOrEmpty(url = parsedUrl, connectionId = connectionId)
+        val perms = extractPermsOrEmpty(url = parsedUrl, clientPubKey = clientPubKey)
         val name = parsedUrl.parameters[NAME_PARAM]
         val url = parsedUrl.parameters[URL_PARAM]
         val image = parsedUrl.parameters[IMAGE_PARAM]
 
         val defaultPermissions = if (trustLevel == TrustLevel.Medium) {
-            getMediumTrustPermissions(connectionId = connectionId)
+            getMediumTrustPermissions(clientPubKey = clientPubKey)
         } else {
             emptyList()
         }
 
         return AppConnection(
-            connectionId = connectionId,
             userPubKey = userPubKey,
             signerPubKey = signerPubKey,
             clientPubKey = clientPubKey,
@@ -129,27 +126,27 @@ class SignerConnectionInitializer internal constructor(
                 "No `$SECRET_PARAM` field found in provided `connectionUrl`. This is a mandatory field.",
             )
 
-    private fun extractPermsOrEmpty(url: Url, connectionId: String): List<AppPermission> {
+    private fun extractPermsOrEmpty(url: Url, clientPubKey: String): List<AppPermission> {
         return url.parameters[PERMS_PARAM]
             ?.split(",")
             ?.filter { permString -> Regex(VALID_PERMISSION_STRING_REGEX).matches(permString) }
             ?.map {
                 AppPermission(
                     permissionId = it,
-                    connectionId = connectionId,
+                    clientPubKey = clientPubKey,
                     action = PermissionAction.Approve,
                 )
             } ?: emptyList()
     }
 
-    private suspend fun getMediumTrustPermissions(connectionId: String): List<AppPermission> =
+    private suspend fun getMediumTrustPermissions(clientPubKey: String): List<AppPermission> =
         internalPermissionsRepository
             .getMediumTrustPermissions()
             .getOrNull()
             ?.map {
                 AppPermission(
                     permissionId = it,
-                    connectionId = connectionId,
+                    clientPubKey = clientPubKey,
                     action = PermissionAction.Approve,
                 )
             } ?: emptyList()
