@@ -4,7 +4,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import net.primal.domain.streams.StreamStatus
 
-private val LIVE_STREAM_STALE_THRESHOLD = 1.hours
+private val LIVE_STREAM_STALE_THRESHOLD = 12.hours
 
 fun resolveStreamStatus(
     status: StreamStatus,

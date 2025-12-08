@@ -15,7 +15,7 @@ interface StreamDataDao {
     @Query("SELECT * FROM StreamData WHERE mainHostId IN (:mainHostIds) ORDER BY startsAt DESC")
     suspend fun findStreamData(mainHostIds: List<String>): List<StreamData>
 
-    @Query("SELECT * FROM StreamData WHERE createdAt < (strftime('%s','now') - 3600) AND status = 'live'")
+    @Query("SELECT * FROM StreamData WHERE createdAt < (strftime('%s','now') - 43200) AND status = 'live'")
     suspend fun findStaleStreamData(): List<StreamData>
 
     @Transaction
