@@ -27,7 +27,7 @@ interface AppSessionDataDao {
         """
         SELECT * FROM AppSessionData s 
         JOIN AppConnectionData c ON s.clientPubKey = c.clientPubKey
-        WHERE activeRelayCount > 0 AND c.signerPubKey = :signerPubKey
+        WHERE activeRelayCount > 0 AND endedAt IS NULL AND c.signerPubKey = :signerPubKey
     """,
     )
     fun observeActiveSessions(signerPubKey: Encryptable<String>): Flow<List<AppSession>>
