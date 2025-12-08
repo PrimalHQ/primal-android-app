@@ -6,11 +6,14 @@ import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.RequestState
@@ -45,6 +48,7 @@ class RemoteSignerServiceImpl internal constructor(
     private var activeClientPubKeys = HashSet<String>()
     private var clientSessionMap = emptyMap<String, String>()
     private val sessionActivityMap = mutableMapOf<String, Instant>()
+    private val failedMethodResponseQueue = MutableSharedFlow<RemoteSignerMethodResponse>()
 
     companion object {
         private val SESSION_INACTIVITY_TIMEOUT = 15.minutes
@@ -58,6 +62,7 @@ class RemoteSignerServiceImpl internal constructor(
         observeRelayEvents()
         observeMethods()
         observeErrors()
+        observeFailedQueue()
         startInactivityLoop()
     }
 
@@ -109,7 +114,7 @@ class RemoteSignerServiceImpl internal constructor(
                         methodProcessor.processNostrEvent(
                             event = event,
                             signerKeyPair = signerKeyPair,
-                            onFailure = { scope.launch { sendResponse(response = it) } },
+                            onFailure = { scope.launch { sendResponseOrAddToFailedQueue(response = it) } },
                             onSuccess = { scope.launch { processMethod(method = it) } },
                         )
                     }
@@ -134,7 +139,7 @@ class RemoteSignerServiceImpl internal constructor(
                         .map { remoteSignerMethodResponseBuilder.build(method = it) }
 
                     (alreadyResponded + toRespond)
-                        .onEach { sendResponse(it) }
+                        .onEach { sendResponseOrAddToFailedQueue(it) }
                         .also { responses ->
                             internalSessionEventRepository.updateSessionEventState(
                                 requests = responses.map { response ->
@@ -192,8 +197,20 @@ class RemoteSignerServiceImpl internal constructor(
     private fun observeErrors() =
         scope.launch {
             nostrRelayManager.errors.collect { error ->
-                sendResponse(response = error)
+                sendResponseOrAddToFailedQueue(response = error)
             }
+        }
+
+    @OptIn(FlowPreview::class)
+    private fun observeFailedQueue() =
+        scope.launch {
+            failedMethodResponseQueue
+                .batchOnInactivity(inactivityTimeout = 3.seconds)
+                .collect { batchedResponses ->
+                    batchedResponses.forEach {
+                        sendResponse(it)
+                    }
+                }
         }
 
     private fun processMethod(method: RemoteSignerMethod) =
@@ -235,7 +252,7 @@ class RemoteSignerServiceImpl internal constructor(
             Napier.d(tag = "Signer") { "Response $response" }
 
             if (response != null) {
-                sendResponse(response = response)
+                sendResponseOrAddToFailedQueue(response = response)
             }
         }
 
@@ -245,19 +262,25 @@ class RemoteSignerServiceImpl internal constructor(
                 ?.let { sessionRepository.findActiveSessionForConnection(clientPubKey = it.clientPubKey) }
                 ?.getOrNull()?.sessionId
 
+    private suspend fun sendResponseOrAddToFailedQueue(response: RemoteSignerMethodResponse): Result<Unit> {
+        return sendResponse(response).onFailure {
+            Napier.d(tag = "Signer") { "Adding response to failed queue: $response" }
+            failedMethodResponseQueue.emit(response)
+        }
+    }
+
     private suspend fun sendResponse(response: RemoteSignerMethodResponse): Result<Unit> {
         Napier.d(tag = "Signer") { "Sending response: $response" }
         val relays = connectionRepository
             .getConnectionByClientPubKey(clientPubKey = response.clientPubKey)
-            .getOrNull()?.relays
+            .getOrNull()?.relays ?: emptyList()
 
         Napier.d(tag = "Signer") { "Relays: $relays" }
-
         return nostrRelayManager.sendResponse(
-            relays = relays ?: return Result.failure(IllegalStateException("No relays found.")),
+            relays = relays,
             response = response,
         ).onFailure {
-            Napier.d(tag = "Signer") { "Something went wrong while sending response: ${it.message}" }
+            Napier.d(tag = "Signer") { "Something went wrong while sending response: ${it.message}.\n" }
         }
     }
 
