@@ -18,10 +18,6 @@ class RemoteSignerSessionHandler @Inject constructor(
         sessionRepository.startSession(clientPubKey = clientPubKey)
             .onSuccess { ensureServiceStarted() }
 
-    suspend fun startSessionForClient(clientPubKey: String) =
-        sessionRepository.startSessionForClient(clientPubKey = clientPubKey)
-            .onSuccess { ensureServiceStarted() }
-
     suspend fun endSessions(sessionIds: List<String>) = sessionRepository.endSessions(sessionIds = sessionIds)
 
     private fun ensureServiceStarted() {

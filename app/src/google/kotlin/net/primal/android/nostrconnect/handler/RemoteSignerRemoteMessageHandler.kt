@@ -22,7 +22,7 @@ class RemoteSignerRemoteMessageHandler @Inject constructor(
         val eventId = message.data[NIP46_EVENT_ID]
 
         if (clientPubKey != null && eventId != null) {
-            sessionHandler.startSessionForClient(clientPubKey = clientPubKey)
+            sessionHandler.startSession(clientPubKey = clientPubKey)
             sessionEventRepository.processMissedEvents(
                 signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair(),
                 eventIds = listOf(eventId),
