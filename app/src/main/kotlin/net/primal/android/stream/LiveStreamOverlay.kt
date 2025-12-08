@@ -122,7 +122,9 @@ private fun LiveStreamOverlay(
                         viewModel.setEvent(UiEvent.OnPlayerStateUpdate(totalDuration = duration))
                     }
                 }
-
+                Player.STATE_BUFFERING -> {
+                    pipManager.shouldEnterPiPMode = true
+                }
                 Player.STATE_ENDED -> {
                     pipManager.shouldEnterPiPMode = false
                     viewModel.setEvent(UiEvent.OnVideoEnded)
