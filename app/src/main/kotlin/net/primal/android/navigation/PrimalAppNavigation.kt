@@ -1036,6 +1036,9 @@ private fun PrimalAppNavigation(
                     uriPattern = "https://primal.net/p/{$PROFILE_ID}"
                 },
                 navDeepLink {
+                    uriPattern = "https://primal.net/profile/{$PROFILE_ID}"
+                },
+                navDeepLink {
                     uriPattern = "https://primal.net/{$PRIMAL_NAME}"
                 },
             ),

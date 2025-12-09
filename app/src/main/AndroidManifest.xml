@@ -269,6 +269,19 @@
 
                 <data
                     android:host="primal.net"
+                    android:pathPrefix="/profile/"
+                    android:scheme="https" />
+            </intent-filter>
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Profile">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
                     android:pathPrefix="/.+"
                     android:scheme="https" />
             </intent-filter>
