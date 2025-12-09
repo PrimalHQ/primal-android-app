@@ -8,14 +8,17 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.navigation.clientPubKeyOrThrow
 import net.primal.android.settings.connected.model.asPermissionGroupUi
 import net.primal.android.settings.connected.permissions.AppPermissionsContract.UiEvent
 import net.primal.android.settings.connected.permissions.AppPermissionsContract.UiState
-import net.primal.core.utils.fold
 import net.primal.core.utils.onFailure
 import net.primal.domain.account.model.PermissionAction
 import net.primal.domain.account.repository.ConnectionRepository
@@ -86,29 +89,25 @@ class AppPermissionsViewModel @Inject constructor(
     }
 
     private fun observePermissions() {
-        viewModelScope.launch {
-            setState { copy(loading = true, error = null) }
-            permissionsRepository.observePermissions(clientPubKey).fold(
-                onSuccess = { permissionsFlow ->
-                    permissionsFlow.collect { groups ->
-                        setState {
-                            copy(
-                                permissions = groups.map { it.asPermissionGroupUi() },
-                                loading = false,
-                            )
-                        }
-                    }
-                },
-                onFailure = {
-                    setState {
-                        copy(
-                            error = UiError.GenericError(it.message),
-                            loading = false,
-                        )
-                    }
-                },
-            )
-        }
+        permissionsRepository.observePermissions(clientPubKey)
+            .onStart { setState { copy(loading = true, error = null) } }
+            .onEach { groups ->
+                setState {
+                    copy(
+                        permissions = groups.map { it.asPermissionGroupUi() },
+                        loading = false,
+                    )
+                }
+            }
+            .catch { error ->
+                setState {
+                    copy(
+                        error = UiError.GenericError(error.message),
+                        loading = false,
+                    )
+                }
+            }
+            .launchIn(viewModelScope)
     }
 
     private fun updatePermission(permissionIds: List<String>, action: PermissionAction) {

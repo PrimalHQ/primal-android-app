@@ -12,7 +12,7 @@ interface PermissionsRepository {
         action: PermissionAction,
     ): Result<Unit>
 
-    suspend fun observePermissions(clientPubKey: String): Result<Flow<List<AppPermissionGroup>>>
+    fun observePermissions(clientPubKey: String): Flow<List<AppPermissionGroup>>
 
     suspend fun getNamingMap(): Result<Map<String, String>>
 

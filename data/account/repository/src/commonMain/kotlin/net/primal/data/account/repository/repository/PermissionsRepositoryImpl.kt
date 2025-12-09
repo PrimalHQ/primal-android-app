@@ -1,6 +1,8 @@
 package net.primal.data.account.repository.repository
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
@@ -45,19 +47,21 @@ class PermissionsRepositoryImpl(
             }
         }
 
-    override suspend fun observePermissions(clientPubKey: String): Result<Flow<List<AppPermissionGroup>>> =
-        withContext(dispatchers.io()) {
-            runCatching {
-                val signerPermissions = wellKnownApi.getSignerPermissions()
+    override fun observePermissions(clientPubKey: String): Flow<List<AppPermissionGroup>> =
+        flow {
+            val signerPermissions = withContext(dispatchers.io()) {
+                wellKnownApi.getSignerPermissions()
+            }
 
+            emitAll(
                 database.permissions().observePermissions(clientPubKey = clientPubKey)
                     .map { permissions ->
                         buildPermissionGroups(
                             response = signerPermissions,
                             permissions = permissions.map { it.asDomain() },
                         )
-                    }
-            }
+                    },
+            )
         }
 
     override suspend fun getNamingMap(): Result<Map<String, String>> =
