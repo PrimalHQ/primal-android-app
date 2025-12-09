@@ -1,4 +1,5 @@
 import co.touchlab.skie.configuration.DefaultArgumentInterop
+import co.touchlab.skie.configuration.FlowInterop
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
@@ -132,6 +133,7 @@ skie {
 
         group {
             DefaultArgumentInterop.Enabled(false)
+            FlowInterop.Enabled(true)
         }
     }
 
