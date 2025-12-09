@@ -349,7 +349,16 @@ class LiveStreamViewModel @AssistedInject constructor(
                     UiEvent.OnReplayStream -> replayStream()
 
                     UiEvent.OnVideoEnded -> {
-                        setState { copy(playerState = playerState.copy(isVideoFinished = true, isPlaying = false)) }
+                        val isLive = state.value.streamInfo?.streamStatus == StreamStatus.LIVE
+                        if (isLive) {
+                            setState {
+                                copy(playerState = playerState.copy(isBuffering = true, isVideoFinished = false))
+                            }
+                        } else {
+                            setState {
+                                copy(playerState = playerState.copy(isVideoFinished = true, isPlaying = false))
+                            }
+                        }
                     }
 
                     is UiEvent.ChangeStreamMuted -> changeStreamMuted(it.isMuted)
@@ -504,8 +513,11 @@ class LiveStreamViewModel @AssistedInject constructor(
                         updatedStreamInfo = stream,
                     )
 
-                    val isVideoFinished = state.value.playerState.isVideoFinished ||
-                        (isEnded && nextPlaybackUrl == null)
+                    val isVideoFinished = if (isLive) {
+                        false
+                    } else {
+                        state.value.playerState.isVideoFinished || (isEnded && nextPlaybackUrl == null)
+                    }
 
                     if (authorObserversJob == null || currentStreamInfo?.mainHostId != stream.mainHostId) {
                         initializeMainHostObservers(mainHostId = stream.mainHostId)
@@ -555,8 +567,9 @@ class LiveStreamViewModel @AssistedInject constructor(
         val isEnded = updatedStreamInfo.resolvedStatus == StreamStatus.ENDED
 
         return when {
-            currentStreamInfo == null -> if (isLive) updatedStreamInfo.streamingUrl else updatedStreamInfo.recordingUrl
-            currentStreamInfo.streamStatus == StreamStatus.LIVE && isEnded -> null
+            currentStreamInfo?.streamStatus == StreamStatus.LIVE && isEnded -> null
+            state.value.playbackUrl == null ->
+                if (isLive) updatedStreamInfo.streamingUrl else updatedStreamInfo.recordingUrl
             else -> state.value.playbackUrl
         }
     }
