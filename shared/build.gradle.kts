@@ -32,6 +32,7 @@ kotlin {
         it.binaries.framework {
             baseName = xcfName
             isStatic = true
+            freeCompilerArgs += listOf("-Xadd-light-debug=enable")
             xcfFramework.add(this)
 
             export(project(":domain:nostr"))
