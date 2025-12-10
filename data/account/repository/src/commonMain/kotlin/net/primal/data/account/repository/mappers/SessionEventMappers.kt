@@ -61,19 +61,32 @@ fun buildSessionEventData(
 fun SessionEventData.asDomain(): SessionEvent? {
     val responsePayload = this.responsePayload?.decrypted
     val requestPayload = this.requestPayload?.decrypted
+    val requestMethod = requestPayload?.decodeFromJsonStringOrNull<RemoteSignerMethod>()
 
     return when (this.requestType) {
-        SignerMethodType.GetPublicKey -> SessionEvent.GetPublicKey(
-            eventId = this.eventId,
-            sessionId = this.sessionId,
-            requestState = this.requestState.asDomain(),
-            requestedAt = this.requestedAt,
-            completedAt = this.completedAt,
-        )
+        SignerMethodType.GetPublicKey -> {
+            val resultKey = getResponseBody(responsePayload)
+
+            SessionEvent.GetPublicKey(
+                eventId = this.eventId,
+                sessionId = this.sessionId,
+                requestState = this.requestState.asDomain(),
+                requestedAt = this.requestedAt,
+                completedAt = this.completedAt,
+                publicKey = resultKey,
+            )
+        }
 
         SignerMethodType.Nip04Encrypt,
         SignerMethodType.Nip44Encrypt,
         -> {
+            val plainText = when (requestMethod) {
+                is RemoteSignerMethod.Nip04Encrypt -> requestMethod.plaintext
+                is RemoteSignerMethod.Nip44Encrypt -> requestMethod.plaintext
+                else -> null
+            }
+            val encryptedText = getResponseBody(responsePayload)
+
             SessionEvent.Encrypt(
                 eventId = this.eventId,
                 sessionId = this.sessionId,
@@ -81,12 +94,21 @@ fun SessionEventData.asDomain(): SessionEvent? {
                 requestedAt = this.requestedAt,
                 completedAt = this.completedAt,
                 requestTypeId = this.getRequestTypeId(),
+                plainText = plainText,
+                encryptedText = encryptedText,
             )
         }
 
         SignerMethodType.Nip04Decrypt,
         SignerMethodType.Nip44Decrypt,
         -> {
+            val encryptedText = when (requestMethod) {
+                is RemoteSignerMethod.Nip04Decrypt -> requestMethod.ciphertext
+                is RemoteSignerMethod.Nip44Decrypt -> requestMethod.ciphertext
+                else -> null
+            }
+            val plainText = getResponseBody(responsePayload)
+
             SessionEvent.Decrypt(
                 eventId = this.eventId,
                 sessionId = this.sessionId,
@@ -94,12 +116,13 @@ fun SessionEventData.asDomain(): SessionEvent? {
                 requestedAt = this.requestedAt,
                 completedAt = this.completedAt,
                 requestTypeId = this.getRequestTypeId(),
+                plainText = plainText,
+                encryptedText = encryptedText,
             )
         }
 
         SignerMethodType.SignEvent -> {
             val eventKind = this.eventKind?.decrypted ?: return null
-            val requestMethod = requestPayload?.decodeFromJsonStringOrNull<RemoteSignerMethod>()
 
             val unsignedEventJson = requestMethod
                 .getIfTypeOrNull(RemoteSignerMethod.SignEvent::unsignedEvent)

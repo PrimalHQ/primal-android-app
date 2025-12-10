@@ -65,10 +65,12 @@ import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiState
 import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.nostrconnect.ui.NostrEventDetails
-import net.primal.android.nostrconnect.ui.asEventDetailRows
+import net.primal.android.nostrconnect.ui.buildRows
+import net.primal.android.nostrconnect.ui.getStatusTextAndColor
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.links.CdnImage
+import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -109,7 +111,7 @@ fun PermissionsBottomSheetContent(uiState: UiState, eventPublisher: (UiEvent) ->
         }
 
         AnimatedContent(
-            targetState = uiState.eventDetailsUnsignedEvent,
+            targetState = uiState.eventDetailsSessionEvent,
             contentAlignment = Alignment.TopCenter,
             transitionSpec = {
                 val animationSpec = tween<IntOffset>(durationMillis = 300)
@@ -127,12 +129,13 @@ fun PermissionsBottomSheetContent(uiState: UiState, eventPublisher: (UiEvent) ->
                 )
             },
             label = "PermissionsContent",
-        ) { nostrUnsignedEvent ->
-            if (nostrUnsignedEvent != null) {
+        ) { sessionEvent ->
+            if (sessionEvent != null) {
                 EventDetailsContent(
-                    nostrUnsignedEvent = nostrUnsignedEvent,
-                    requestTypeId = uiState.eventDetailsRequestTypeId,
+                    sessionEvent = sessionEvent,
                     permissionsMap = uiState.permissionsMap,
+                    parsedSignedEvent = uiState.parsedSignedEvent,
+                    parsedUnsignedEvent = uiState.parsedUnsignedEvent,
                     onClose = { eventPublisher(UiEvent.CloseEventDetails) },
                 )
             } else {
@@ -195,24 +198,40 @@ private fun PermissionsListContent(uiState: UiState, eventPublisher: (UiEvent) -
 
 @Composable
 private fun EventDetailsContent(
-    nostrUnsignedEvent: NostrUnsignedEvent,
-    requestTypeId: String?,
+    sessionEvent: SessionEvent,
     permissionsMap: Map<String, String>,
+    parsedSignedEvent: NostrEvent?,
+    parsedUnsignedEvent: NostrUnsignedEvent?,
     onClose: () -> Unit,
 ) {
     BackHandler(onBack = onClose)
     val context = LocalContext.current
-    val actionName = requestTypeId?.let { permissionsMap[it] } ?: requestTypeId ?: ""
+    val actionName = permissionsMap[sessionEvent.requestTypeId] ?: sessionEvent.requestTypeId
+
     val formattedTimestamp = rememberPrimalFormattedDateTime(
-        timestamp = nostrUnsignedEvent.createdAt,
+        timestamp = sessionEvent.requestedAt,
         format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
     )
+
+    val (status, color) = getStatusTextAndColor(context, sessionEvent)
+
+    val rows = remember(sessionEvent, permissionsMap, parsedSignedEvent, parsedUnsignedEvent) {
+        buildRows(
+            context = context,
+            event = sessionEvent,
+            namingMap = permissionsMap,
+            parsedSignedEvent = parsedSignedEvent,
+            parsedUnsignedEvent = parsedUnsignedEvent,
+        )
+    }
 
     Column(modifier = Modifier.fillMaxWidth()) {
         NostrEventDetails(
             title = actionName,
             subtitle = formattedTimestamp,
-            eventRows = nostrUnsignedEvent.asEventDetailRows(kindName = actionName),
+            rows = rows,
+            status = status,
+            statusColor = color,
             onCopy = { text, label ->
                 copyText(context = context, text = text, label = label)
             },

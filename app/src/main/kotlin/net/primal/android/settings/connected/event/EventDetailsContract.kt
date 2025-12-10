@@ -1,11 +1,15 @@
 package net.primal.android.settings.connected.event
 
+import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrUnsignedEvent
 
 interface EventDetailsContract {
     data class UiState(
         val loading: Boolean = true,
-        val event: NostrEvent? = null,
+        val sessionEvent: SessionEvent? = null,
+        val parsedSignedEvent: NostrEvent? = null,
+        val parsedUnsignedEvent: NostrUnsignedEvent? = null,
         val rawJson: String? = null,
         val eventNotSupported: Boolean = false,
         val requestTypeId: String? = null,

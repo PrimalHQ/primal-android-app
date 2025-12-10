@@ -1524,6 +1524,14 @@
     <string name="nostr_connect_disconnect_button">Disconnect</string>
     <string name="nostr_connect_sessions_disconnected_toast">Sessions disconnected.</string>
     <string name="nostr_connect_no_active_sessions">No active Nostr Connect sessions found.</string>
+    <string name="nostr_connect_label_plain_text">Plain text:</string>
+    <string name="nostr_connect_label_encrypted_text">Encrypted text:</string>
+    <string name="nostr_connect_label_pubkey">Pubkey:</string>
+    <string name="nostr_connect_status_signed">Signed</string>
+    <string name="nostr_connect_status_success_encryption">Successful encryption</string>
+    <string name="nostr_connect_status_success_decryption">Successful decryption</string>
+    <string name="nostr_connect_status_approved">Approved</string>
+    <string name="nostr_connect_status_rejected">Rejected by user</string>
 
     <string name="permissions_bottom_sheet_unknown_app">Unknown App</string>
     <string name="permissions_bottom_sheet_app_requests">App requests:</string>

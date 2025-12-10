@@ -9,19 +9,23 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.navigation.eventIdOrThrow
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrUnsignedEvent
 
 @HiltViewModel
 class EventDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val sessionEventRepository: SessionEventRepository,
     private val permissionsRepository: PermissionsRepository,
+    private val dispatcherProvider: DispatcherProvider,
 ) : ViewModel() {
 
     private val eventId: String = savedStateHandle.eventIdOrThrow
@@ -45,23 +49,38 @@ class EventDetailsViewModel @Inject constructor(
     private fun observeSessionEvent() =
         viewModelScope.launch {
             sessionEventRepository.observeEvent(eventId = eventId).collect { sessionEvent ->
+                var parsedSigned: NostrEvent? = null
+                var parsedUnsigned: NostrUnsignedEvent? = null
+                var rawJson: String? = null
+
                 if (sessionEvent is SessionEvent.SignEvent) {
-                    val rawJson = sessionEvent.signedNostrEventJson
-                    val nostrEvent = rawJson?.let {
-                        runCatching {
-                            NostrJsonEncodeDefaults.decodeFromString<NostrEvent>(it)
+                    rawJson = sessionEvent.signedNostrEventJson
+
+                    withContext(dispatcherProvider.io()) {
+                        sessionEvent.signedNostrEventJson?.let { json ->
+                            parsedSigned = runCatching {
+                                NostrJsonEncodeDefaults.decodeFromString<NostrEvent>(json)
+                            }.getOrNull()
+                        }
+
+                        parsedUnsigned = runCatching {
+                            NostrJsonEncodeDefaults.decodeFromString<NostrUnsignedEvent>(
+                                sessionEvent.unsignedNostrEventJson,
+                            )
                         }.getOrNull()
                     }
-                    setState {
-                        copy(
-                            loading = false,
-                            event = nostrEvent,
-                            rawJson = rawJson,
-                            requestTypeId = sessionEvent.requestTypeId,
-                        )
-                    }
-                } else {
-                    setState { copy(loading = false, eventNotSupported = true) }
+                }
+
+                setState {
+                    copy(
+                        loading = false,
+                        sessionEvent = sessionEvent,
+                        parsedSignedEvent = parsedSigned,
+                        parsedUnsignedEvent = parsedUnsigned,
+                        rawJson = rawJson,
+                        requestTypeId = sessionEvent?.requestTypeId,
+                        eventNotSupported = sessionEvent == null,
+                    )
                 }
             }
         }
