@@ -1,6 +1,9 @@
 package net.primal.data.account.repository.service
 
 import io.github.aakira.napier.Napier
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.fetchAndUpdate
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -32,6 +35,7 @@ import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
+@OptIn(ExperimentalAtomicApi::class)
 class RemoteSignerServiceImpl internal constructor(
     private val signerKeyPair: NostrKeyPair,
     private val connectionRepository: ConnectionRepository,
@@ -43,11 +47,11 @@ class RemoteSignerServiceImpl internal constructor(
 ) : RemoteSignerService {
     private val scope = CoroutineScope(SupervisorJob())
 
-    private var activeRelays = emptySet<String>()
-    private var relaySessionMap = emptyMap<String, List<String>>()
-    private var activeClientPubKeys = HashSet<String>()
-    private var clientSessionMap = emptyMap<String, String>()
-    private val sessionActivityMap = mutableMapOf<String, Instant>()
+    private val activeRelays = AtomicReference<Set<String>>(emptySet())
+    private val relaySessionMap = AtomicReference<Map<String, List<String>>>(emptyMap())
+    private val activeClientPubKeys = AtomicReference<HashSet<String>>(hashSetOf())
+    private val clientSessionMap = AtomicReference<Map<String, String>>(emptyMap())
+    private val sessionActivityMap = AtomicReference<MutableMap<String, Instant>>(mutableMapOf())
     private val retrySendMethodResponseQueue = MutableSharedFlow<RemoteSignerMethodResponse>()
 
     companion object {
@@ -73,7 +77,7 @@ class RemoteSignerServiceImpl internal constructor(
 
                 val now = Clock.System.now()
 
-                val inactiveSessions = sessionActivityMap.filter { (_, lastActiveAt) ->
+                val inactiveSessions = sessionActivityMap.load().filter { (_, lastActiveAt) ->
                     (lastActiveAt + SESSION_INACTIVITY_TIMEOUT) < now
                 }
 
@@ -85,21 +89,23 @@ class RemoteSignerServiceImpl internal constructor(
         scope.launch {
             sessionRepository.observeOngoingSessions(signerPubKey = signerKeyPair.pubKey)
                 .collect { sessions ->
-                    relaySessionMap = sessions
-                        .flatMap { session ->
-                            session.relays.map { relay -> relay to session.sessionId }
-                        }
-                        .groupBy(
-                            keySelector = { it.first },
-                            valueTransform = { it.second },
-                        )
+                    relaySessionMap.store(
+                        sessions
+                            .flatMap { session ->
+                                session.relays.map { relay -> relay to session.sessionId }
+                            }
+                            .groupBy(
+                                keySelector = { it.first },
+                                valueTransform = { it.second },
+                            ),
+                    )
 
                     sessions.forEach {
                         setActiveRelayCount(it)
-                        sessionActivityMap.getOrPut(it.sessionId) { Clock.System.now() }
+                        sessionActivityMap.load().getOrPut(it.sessionId) { Clock.System.now() }
                     }
-                    clientSessionMap = sessions.associate { it.clientPubKey to it.sessionId }
-                    activeClientPubKeys = sessions.map { it.clientPubKey }.toHashSet()
+                    clientSessionMap.store(sessions.associate { it.clientPubKey to it.sessionId })
+                    activeClientPubKeys.store(sessions.map { it.clientPubKey }.toHashSet())
                     nostrRelayManager.connectToRelays(relays = sessions.flatMap { it.relays }.toSet())
                 }
         }
@@ -161,7 +167,7 @@ class RemoteSignerServiceImpl internal constructor(
     private suspend fun setActiveRelayCount(session: AppSession) {
         sessionRepository.setActiveRelayCount(
             sessionId = session.sessionId,
-            activeRelayCount = session.relays.map { activeRelays.contains(it) }.count { it },
+            activeRelayCount = session.relays.map { activeRelays.load().contains(it) }.count { it },
         )
     }
 
@@ -170,15 +176,15 @@ class RemoteSignerServiceImpl internal constructor(
             nostrRelayManager.relayEvents.collect { event ->
                 when (event) {
                     is RelayEvent.Connected -> {
-                        activeRelays = activeRelays + event.relayUrl
-                        relaySessionMap[event.relayUrl]?.let {
+                        activeRelays.fetchAndUpdate { it + event.relayUrl }
+                        relaySessionMap.load()[event.relayUrl]?.let {
                             sessionRepository.incrementActiveRelayCount(sessionIds = it)
                         }
                     }
 
                     is RelayEvent.Disconnected -> {
-                        activeRelays = activeRelays - event.relayUrl
-                        relaySessionMap[event.relayUrl]?.let {
+                        activeRelays.fetchAndUpdate { it - event.relayUrl }
+                        relaySessionMap.load()[event.relayUrl]?.let {
                             sessionRepository.decrementActiveRelayCountOrEnd(sessionIds = it)
                         }
                     }
@@ -215,7 +221,7 @@ class RemoteSignerServiceImpl internal constructor(
 
     private fun processMethod(method: RemoteSignerMethod) =
         scope.launch {
-            if (!activeClientPubKeys.contains(method.clientPubKey)) {
+            if (!activeClientPubKeys.load().contains(method.clientPubKey)) {
                 val connection = connectionRepository
                     .getConnectionByClientPubKey(clientPubKey = method.clientPubKey).getOrNull() ?: return@launch
 
@@ -238,7 +244,7 @@ class RemoteSignerServiceImpl internal constructor(
             }
 
             findActiveSessionId(clientPubKey = method.clientPubKey)?.let { sessionId ->
-                sessionActivityMap[sessionId] = Clock.System.now()
+                sessionActivityMap.load()[sessionId] = Clock.System.now()
 
                 internalSessionEventRepository.saveSessionEvent(
                     sessionId = sessionId,
@@ -257,7 +263,7 @@ class RemoteSignerServiceImpl internal constructor(
         }
 
     private suspend fun findActiveSessionId(clientPubKey: String): String? =
-        clientSessionMap[clientPubKey]
+        clientSessionMap.load()[clientPubKey]
             ?: connectionRepository.getConnectionByClientPubKey(clientPubKey = clientPubKey).getOrNull()
                 ?.let { sessionRepository.findActiveSessionForConnection(clientPubKey = it.clientPubKey) }
                 ?.getOrNull()?.sessionId
