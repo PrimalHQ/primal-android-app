@@ -142,7 +142,7 @@ private fun EventDetailsHeader(
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
 
-        if (status != null && statusColor != null) {
+        if (!status.isNullOrBlank() && statusColor != null) {
             Text(
                 text = status,
                 style = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
