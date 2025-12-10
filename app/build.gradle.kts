@@ -73,12 +73,12 @@ ksp {
 
 android {
     namespace = "net.primal.android"
-    compileSdk = 36
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "net.primal.android"
-        minSdk = 26
-        targetSdk = 35
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = appVersionCode
         versionName = appVersionName
 
