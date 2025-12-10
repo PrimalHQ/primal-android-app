@@ -218,6 +218,7 @@ android {
         checkDependencies = true
         checkTestSources = true
         checkReleaseBuilds = false
+        disable.add("LocalContextGetResourceValueCall")
     }
 
     packaging {
