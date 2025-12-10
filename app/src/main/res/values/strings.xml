@@ -1535,7 +1535,13 @@
     <string name="permissions_bottom_sheet_event_details_unavailable">Event details unavailable</string>
     <string name="permissions_bottom_sheet_back_button">Back</string>
 
-    <string name="signer_notification_end_session">end session</string>
-    <string name="signer_notification_avatar">User Avatar</string>
-    <string name="signer_notification_app_icon">App Icon</string>
+    <string name="signer_notification_name">Remote Signer</string>
+    <string name="signer_notification_summary_title">"Primal Remote Signer"</string>
+    <string name="signer_notification_end_session">End session</string>
+    <string name="signer_notification_unknown_app">Unknown App</string>
+    <string name="signer_notification_logged_in_as">Logged in as %s</string>
+    <plurals name="signer_notification_new_signer_request">
+        <item quantity="one">"You have %d new signer request."</item>
+        <item quantity="other">"You have %d new signer requests."</item>
+    </plurals>
 </resources>
