@@ -16,7 +16,7 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
-import net.primal.android.LocalPrimalTheme
+import net.primal.android.core.activity.LocalPrimalTheme
 
 @Composable
 fun ListPlaceholderLoading(

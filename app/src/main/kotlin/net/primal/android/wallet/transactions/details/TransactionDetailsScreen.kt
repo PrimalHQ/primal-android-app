@@ -82,10 +82,10 @@ import java.time.Instant
 import java.time.format.FormatStyle
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.launch
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.articles.feed.ui.generateNaddrString
+import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.PrimalDivider
