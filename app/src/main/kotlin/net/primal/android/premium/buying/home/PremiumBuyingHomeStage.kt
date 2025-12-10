@@ -49,8 +49,8 @@ import androidx.compose.ui.text.withLink
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons

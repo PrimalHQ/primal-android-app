@@ -51,8 +51,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.DatePickerModalBottomSheet
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.icons.PrimalIcons

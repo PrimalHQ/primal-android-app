@@ -31,8 +31,8 @@ import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
+import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent

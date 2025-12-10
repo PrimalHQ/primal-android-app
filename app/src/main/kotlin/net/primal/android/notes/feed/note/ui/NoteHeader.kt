@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.Instant
 import kotlin.time.Duration.Companion.seconds
-import net.primal.android.LocalContentDisplaySettings
+import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.ReplyingToText
 import net.primal.android.core.compose.UniversalAvatarThumbnail

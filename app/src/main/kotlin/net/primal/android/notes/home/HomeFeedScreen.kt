@@ -40,8 +40,8 @@ import androidx.lifecycle.Lifecycle
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
+import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.FeedsErrorColumn
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
