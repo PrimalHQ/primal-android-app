@@ -572,8 +572,9 @@ private fun ImageScreen(
         onImageBitmapLoaded(loadedBitmap)
     }
 
-    val zoomState = rememberCoilZoomState()
-    zoomState.zoomable.keepTransformWhenSameAspectRatioContentSizeChanged = true
+    val zoomState = rememberCoilZoomState().apply {
+        zoomable.setKeepTransformWhenSameAspectRatioContentSizeChanged(true)
+    }
 
     CoilZoomAsyncImage(
         zoomState = zoomState,
