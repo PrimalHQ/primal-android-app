@@ -321,7 +321,6 @@ class ProfileDetailsViewModel @Inject constructor(
                 .mapNotNull { profile ->
                     profile.aboutUris
                         .mapNotNull { it.extractProfileId() }
-                        .filter { it != profileId }
                 }
                 .distinctUntilChanged()
                 .collect { profileIds ->
