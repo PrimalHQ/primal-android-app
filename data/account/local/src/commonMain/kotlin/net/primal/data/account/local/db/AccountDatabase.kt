@@ -13,6 +13,9 @@ import net.primal.data.account.local.dao.AppPermissionData
 import net.primal.data.account.local.dao.AppPermissionDataDao
 import net.primal.data.account.local.dao.AppSessionData
 import net.primal.data.account.local.dao.AppSessionDataDao
+import net.primal.data.account.local.dao.LocalAppData
+import net.primal.data.account.local.dao.LocalAppSessionData
+import net.primal.data.account.local.dao.LocalAppSessionEventData
 import net.primal.data.account.local.dao.PendingNostrEvent
 import net.primal.data.account.local.dao.PendingNostrEventDao
 import net.primal.data.account.local.dao.SessionEventData
@@ -27,8 +30,11 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         AppSessionData::class,
         SessionEventData::class,
         PendingNostrEvent::class,
+        LocalAppData::class,
+        LocalAppSessionData::class,
+        LocalAppSessionEventData::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
 )
 @TypeConverters(
@@ -51,6 +57,13 @@ abstract class AccountDatabase : RoomDatabase() {
                         """
                     UPDATE AppSessionData
                         SET endedAt = strftime('%s', 'now'), activeRelayCount = 0
+                        WHERE endedAt IS NULL
+                        """.trimIndent(),
+                    )
+                    connection.execSQL(
+                        """
+                    UPDATE LocalAppSessionData
+                        SET endedAt = strftime('%s', 'now')
                         WHERE endedAt IS NULL
                         """.trimIndent(),
                     )
