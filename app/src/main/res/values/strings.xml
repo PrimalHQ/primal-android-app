@@ -611,6 +611,7 @@
     <string name="post_delete_repost_button_confirmation">Delete Repost</string>
     <string name="post_repost_button_confirmation">Repost</string>
     <string name="post_quote_button_confirmation">Quote</string>
+    <string name="post_repost_again_button_confirmation">Repost again</string>
 
     <string name="note_editor_post_publish_button">Post</string>
     <string name="note_editor_reply_publish_button">Reply</string>
