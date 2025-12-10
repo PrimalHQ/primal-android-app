@@ -16,6 +16,8 @@ interface ConnectionRepository {
 
     suspend fun deleteConnectionAndData(clientPubKey: String)
 
+    suspend fun removeConnectionsByUserPubKey(userPubKey: String)
+
     suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<AppConnection>
 
     suspend fun insertOrReplaceConnection(secret: String, connection: AppConnection)

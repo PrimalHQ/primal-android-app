@@ -58,6 +58,16 @@ class ConnectionRepositoryImpl(
             }
         }
 
+    override suspend fun removeConnectionsByUserPubKey(userPubKey: String) =
+        withContext(dispatchers.io()) {
+            database.withTransaction {
+                database.connections().getConnectionsByUser(userPubKey = userPubKey.asEncryptable())
+                    .forEach { connection ->
+                        deleteEverythingForClientPubKey(clientPubKey = connection.data.clientPubKey)
+                    }
+            }
+        }
+
     override suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<AppConnection> =
         withContext(dispatchers.io()) {
             database.connections().getConnection(clientPubKey = clientPubKey)

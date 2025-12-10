@@ -25,6 +25,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.Result
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
+import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -73,11 +74,13 @@ class CreateAccountHandlerTest {
         activeAccountStore: ActiveAccountStore = mockk(relaxed = true),
         userRepository: UserRepository = mockk(relaxed = true),
         accountsStore: UserAccountsStore = mockk(relaxed = true),
+        connectionRepository: ConnectionRepository = mockk(relaxed = true),
     ) = AuthRepository(
         credentialsStore = credentialsStore,
         activeAccountStore = activeAccountStore,
         userRepository = userRepository,
         accountsStore = accountsStore,
+        connectionRepository = connectionRepository,
     )
 
     private fun createDummyNostrEvent(
