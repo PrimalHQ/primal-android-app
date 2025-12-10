@@ -18,11 +18,11 @@ class RemoteSignerMethodProcessor(
 ) {
     private val remoteSignerMethodParser = RemoteSignerMethodParser()
 
-    fun processNostrEvent(
+    suspend fun processNostrEvent(
         event: NostrEvent,
         signerKeyPair: NostrKeyPair,
-        onFailure: (RemoteSignerMethodResponse.Error) -> Unit,
-        onSuccess: (RemoteSignerMethod) -> Unit,
+        onFailure: suspend (RemoteSignerMethodResponse.Error) -> Unit,
+        onSuccess: suspend (RemoteSignerMethod) -> Unit,
     ) {
         val decryptedContent = event.decryptContent(signerKeyPair = signerKeyPair)
             .onFailure {

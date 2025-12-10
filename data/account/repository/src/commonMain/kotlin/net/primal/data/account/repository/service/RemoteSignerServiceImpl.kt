@@ -120,8 +120,8 @@ class RemoteSignerServiceImpl internal constructor(
                         methodProcessor.processNostrEvent(
                             event = event,
                             signerKeyPair = signerKeyPair,
-                            onFailure = { scope.launch { sendResponseOrAddToFailedQueue(response = it) } },
-                            onSuccess = { scope.launch { processMethod(method = it) } },
+                            onFailure = { sendResponseOrAddToFailedQueue(response = it) },
+                            onSuccess = { processMethod(method = it) },
                         )
                     }
 
