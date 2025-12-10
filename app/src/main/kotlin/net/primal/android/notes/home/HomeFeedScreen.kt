@@ -1,7 +1,5 @@
 package net.primal.android.notes.home
 
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.LocalActivity
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -56,7 +54,6 @@ import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.errors.resolveUiErrorMessage
-import net.primal.android.core.pip.LocalPiPManager
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
@@ -81,12 +78,6 @@ fun HomeFeedScreen(
 ) {
     val streamState = LocalStreamState.current
     val uiState = viewModel.state.collectAsState()
-    val pipManager = LocalPiPManager.current
-    val activity = LocalActivity.current
-
-    BackHandler(enabled = pipManager.shouldEnterPiPMode) {
-        activity?.enterPictureInPictureMode(pipManager.buildPipParams())
-    }
 
     LaunchedEffect(viewModel, viewModel.effects) {
         viewModel.effects.collect {
