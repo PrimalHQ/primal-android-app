@@ -14,6 +14,9 @@ import net.primal.data.account.local.dao.AppPermissionData
 import net.primal.data.account.local.dao.AppPermissionDataDao
 import net.primal.data.account.local.dao.AppSessionData
 import net.primal.data.account.local.dao.AppSessionDataDao
+import net.primal.data.account.local.dao.LocalAppData
+import net.primal.data.account.local.dao.LocalAppSessionData
+import net.primal.data.account.local.dao.LocalAppSessionEventData
 import net.primal.data.account.local.dao.PendingNostrEvent
 import net.primal.data.account.local.dao.PendingNostrEventDao
 import net.primal.data.account.local.dao.SessionEventData
@@ -28,6 +31,9 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         AppSessionData::class,
         SessionEventData::class,
         PendingNostrEvent::class,
+        LocalAppData::class,
+        LocalAppSessionData::class,
+        LocalAppSessionEventData::class,
     ],
     version = 8,
     exportSchema = true,
@@ -58,7 +64,14 @@ abstract class AccountDatabase : RoomDatabase() {
                         )
                         connection.execSQL(
                             """
-                                UPDATE SessionEventData
+                                UPDATE LocalAppSessionData
+                        SET endedAt = strftime('%s', 'now')
+                        WHERE endedAt IS NULL
+                        """.trimIndent(),
+                    )
+                    connection.execSQL(
+                        """
+                    UPDATE SessionEventData
                                     SET completedAt = strftime('%s', 'now'), requestState = 'Rejected'
                                     WHERE requestState = 'PendingUserAction'
                             """.trimIndent(),
