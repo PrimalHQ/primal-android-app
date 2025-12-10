@@ -63,9 +63,10 @@ import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiState
-import net.primal.android.nostrconnect.ui.EventDetailsUiHelper
 import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.nostrconnect.ui.NostrEventDetails
+import net.primal.android.nostrconnect.ui.buildRows
+import net.primal.android.nostrconnect.ui.getStatusTextAndColor
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.links.CdnImage
@@ -212,12 +213,10 @@ private fun EventDetailsContent(
         format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
     )
 
-    val (status, color) = remember(sessionEvent) {
-        EventDetailsUiHelper.getStatusTextAndColor(context, sessionEvent)
-    }
+    val (status, color) = getStatusTextAndColor(context, sessionEvent)
 
     val rows = remember(sessionEvent, permissionsMap, parsedSignedEvent, parsedUnsignedEvent) {
-        EventDetailsUiHelper.buildRows(
+        buildRows(
             context = context,
             event = sessionEvent,
             namingMap = permissionsMap,

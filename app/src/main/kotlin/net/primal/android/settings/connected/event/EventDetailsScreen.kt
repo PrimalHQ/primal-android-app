@@ -24,8 +24,9 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.utils.PrimalDateFormats
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.rememberPrimalFormattedDateTime
-import net.primal.android.nostrconnect.ui.EventDetailsUiHelper
 import net.primal.android.nostrconnect.ui.NostrEventDetails
+import net.primal.android.nostrconnect.ui.buildRows
+import net.primal.android.nostrconnect.ui.getStatusTextAndColor
 
 @Composable
 fun EventDetailsScreen(viewModel: EventDetailsViewModel, onClose: () -> Unit) {
@@ -61,12 +62,10 @@ fun EventDetailsScreen(state: EventDetailsContract.UiState, onClose: () -> Unit)
                         format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
                     )
 
-                    val (statusText, statusColor) = remember(event) {
-                        EventDetailsUiHelper.getStatusTextAndColor(context, event)
-                    }
+                    val (statusText, statusColor) = getStatusTextAndColor(context, event)
 
                     val rows = remember(event, state.namingMap, state.parsedSignedEvent, state.parsedUnsignedEvent) {
-                        EventDetailsUiHelper.buildRows(
+                        buildRows(
                             context = context,
                             event = event,
                             namingMap = state.namingMap,
