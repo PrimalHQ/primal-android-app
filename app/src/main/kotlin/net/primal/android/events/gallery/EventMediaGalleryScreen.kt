@@ -46,7 +46,6 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -262,11 +261,11 @@ private fun MediaGalleryContent(
     onCurrentlyVisibleBitmap: ((Bitmap?) -> Unit)? = null,
 ) {
     val context = LocalContext.current
-    val videoAttachments = rememberSaveable(attachments) { attachments.filter { it.type == EventUriType.Video } }
+    val videoAttachments = remember(attachments) { attachments.filter { it.type == EventUriType.Video } }
 
     val feedVideoCache = rememberFeedVideoCache()
     var exoPlayer by remember { mutableStateOf<ExoPlayer?>(null) }
-    var currentPosition by rememberSaveable { mutableLongStateOf(0L) }
+    var currentPosition by remember { mutableLongStateOf(0L) }
 
     LifecycleStartEffect(feedVideoCache) {
         exoPlayer = initializePlayer(context = context, cache = feedVideoCache)
