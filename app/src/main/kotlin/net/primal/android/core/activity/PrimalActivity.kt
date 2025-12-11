@@ -81,6 +81,7 @@ abstract class PrimalActivity : FragmentActivity() {
                     LocalPrimalTheme provides primalTheme,
                     LocalRippleConfiguration provides primalRippleConfiguration,
                     LocalContentDisplaySettings provides contentDisplaySettings.value,
+                    /* TODO: move this out to MainActivity */
                     qrCodeResultDecoder?.let { LocalQrCodeDecoder provides it },
                 ).toTypedArray(),
             ) {
