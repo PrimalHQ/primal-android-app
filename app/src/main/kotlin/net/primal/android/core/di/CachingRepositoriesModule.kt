@@ -37,8 +37,14 @@ import net.primal.domain.user.UserDataCleanupRepository
 object CachingRepositoriesModule {
 
     @Provides
-    fun providesArticleRepository(@PrimalCacheApiClient primalApiClient: PrimalApiClient): ArticleRepository {
-        return PrimalRepositoryFactory.createArticleRepository(cachingPrimalApiClient = primalApiClient)
+    fun providesArticleRepository(
+        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
+        mediaCacher: MediaCacher,
+    ): ArticleRepository {
+        return PrimalRepositoryFactory.createArticleRepository(
+            cachingPrimalApiClient = primalApiClient,
+            mediaCacher = mediaCacher,
+        )
     }
 
     @Provides
@@ -62,11 +68,13 @@ object CachingRepositoriesModule {
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         messageCipher: MessageCipher,
         primalPublisher: PrimalPublisher,
+        mediaCacher: MediaCacher,
     ): ChatRepository =
         PrimalRepositoryFactory.createChatRepository(
             cachingPrimalApiClient = primalApiClient,
             messageCipher = messageCipher,
             primalPublisher = primalPublisher,
+            mediaCacher = mediaCacher,
         )
 
     @Provides
@@ -83,15 +91,23 @@ object CachingRepositoriesModule {
     fun provideFeedsRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         nostrNotary: NostrNotary,
+        mediaCacher: MediaCacher,
     ): FeedsRepository =
         PrimalRepositoryFactory.createFeedsRepository(
             cachingPrimalApiClient = primalApiClient,
             signatureHandler = nostrNotary,
+            mediaCacher = mediaCacher,
         )
 
     @Provides
-    fun provideEventRepository(@PrimalCacheApiClient primalApiClient: PrimalApiClient): EventRepository =
-        PrimalRepositoryFactory.createEventRepository(cachingPrimalApiClient = primalApiClient)
+    fun provideEventRepository(
+        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
+        mediaCacher: MediaCacher,
+    ): EventRepository =
+        PrimalRepositoryFactory.createEventRepository(
+            cachingPrimalApiClient = primalApiClient,
+            mediaCacher = mediaCacher,
+        )
 
     @Provides
     fun provideEventUriRepository(@PrimalCacheApiClient primalApiClient: PrimalApiClient): EventUriRepository =
@@ -110,8 +126,14 @@ object CachingRepositoriesModule {
         )
 
     @Provides
-    fun provideExploreRepository(@PrimalCacheApiClient primalApiClient: PrimalApiClient): ExploreRepository =
-        PrimalRepositoryFactory.createExploreRepository(cachingPrimalApiClient = primalApiClient)
+    fun provideExploreRepository(
+        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
+        mediaCacher: MediaCacher,
+    ): ExploreRepository =
+        PrimalRepositoryFactory.createExploreRepository(
+            cachingPrimalApiClient = primalApiClient,
+            mediaCacher = mediaCacher,
+        )
 
     @Provides
     fun provideProfileRepository(
@@ -133,8 +155,14 @@ object CachingRepositoriesModule {
         PrimalRepositoryFactory.createMutedItemRepository(cachingPrimalApiClient = primalApiClient, primalPublisher)
 
     @Provides
-    fun provideNotificationRepository(@PrimalCacheApiClient primalApiClient: PrimalApiClient): NotificationRepository =
-        PrimalRepositoryFactory.createNotificationRepository(cachingPrimalApiClient = primalApiClient)
+    fun provideNotificationRepository(
+        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
+        mediaCacher: MediaCacher,
+    ): NotificationRepository =
+        PrimalRepositoryFactory.createNotificationRepository(
+            cachingPrimalApiClient = primalApiClient,
+            mediaCacher = mediaCacher,
+        )
 
     @Provides
     fun providesPublicBookmarksRepository(

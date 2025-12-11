@@ -53,11 +53,12 @@ abstract class CommonRepositoryFactory {
 
     abstract fun resolveCachingDatabase(): PrimalDatabase
 
-    fun createArticleRepository(cachingPrimalApiClient: PrimalApiClient): ArticleRepository {
+    fun createArticleRepository(cachingPrimalApiClient: PrimalApiClient, mediaCacher: MediaCacher): ArticleRepository {
         return ArticleRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             articlesApi = PrimalApiServiceFactory.createArticlesApi(cachingPrimalApiClient),
             database = resolveCachingDatabase(),
+            mediaCacher = mediaCacher,
         )
     }
 
@@ -83,6 +84,7 @@ abstract class CommonRepositoryFactory {
         cachingPrimalApiClient: PrimalApiClient,
         messageCipher: MessageCipher,
         primalPublisher: PrimalPublisher,
+        mediaCacher: MediaCacher,
     ): ChatRepository {
         return ChatRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
@@ -94,8 +96,10 @@ abstract class CommonRepositoryFactory {
                 feedApi = PrimalApiServiceFactory.createFeedApi(cachingPrimalApiClient),
                 usersApi = PrimalApiServiceFactory.createUsersApi(cachingPrimalApiClient),
                 messageCipher = messageCipher,
+                mediaCacher = mediaCacher,
             ),
             primalPublisher = primalPublisher,
+            mediaCacher = mediaCacher,
         )
     }
 
@@ -111,20 +115,23 @@ abstract class CommonRepositoryFactory {
     fun createFeedsRepository(
         cachingPrimalApiClient: PrimalApiClient,
         signatureHandler: NostrEventSignatureHandler,
+        mediaCacher: MediaCacher,
     ): FeedsRepository {
         return FeedsRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             feedsApi = PrimalApiServiceFactory.createFeedsApi(cachingPrimalApiClient),
             database = resolveCachingDatabase(),
             signatureHandler = signatureHandler,
+            mediaCacher = mediaCacher,
         )
     }
 
-    fun createEventRepository(cachingPrimalApiClient: PrimalApiClient): EventRepository {
+    fun createEventRepository(cachingPrimalApiClient: PrimalApiClient, mediaCacher: MediaCacher): EventRepository {
         return EventRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             eventStatsApi = PrimalApiServiceFactory.createEventsApi(cachingPrimalApiClient),
             database = resolveCachingDatabase(),
+            mediaCacher = mediaCacher,
         )
     }
 
@@ -155,11 +162,12 @@ abstract class CommonRepositoryFactory {
         )
     }
 
-    fun createExploreRepository(cachingPrimalApiClient: PrimalApiClient): ExploreRepository {
+    fun createExploreRepository(cachingPrimalApiClient: PrimalApiClient, mediaCacher: MediaCacher): ExploreRepository {
         return ExploreRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             exploreApi = PrimalApiServiceFactory.createExploreApi(cachingPrimalApiClient),
             database = resolveCachingDatabase(),
+            mediaCacher = mediaCacher,
         )
     }
 
@@ -175,11 +183,15 @@ abstract class CommonRepositoryFactory {
         )
     }
 
-    fun createNotificationRepository(cachingPrimalApiClient: PrimalApiClient): NotificationRepository {
+    fun createNotificationRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        mediaCacher: MediaCacher,
+    ): NotificationRepository {
         return NotificationRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = resolveCachingDatabase(),
             notificationsApi = PrimalApiServiceFactory.createNotificationsApi(cachingPrimalApiClient),
+            mediaCacher = mediaCacher,
         )
     }
 

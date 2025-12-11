@@ -19,13 +19,13 @@ import net.primal.data.repository.mappers.local.asProfileDataDO
 import net.primal.data.repository.mappers.local.asProfileStatsDO
 import net.primal.data.repository.mappers.remote.asProfileDataPO
 import net.primal.data.repository.mappers.remote.asProfileStatsPO
-import net.primal.data.repository.mappers.remote.mapAsAvatarUrls
 import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsStreamDataPO
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserFollowersCountsOrNull
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.common.UserProfileSearchItem
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -105,7 +105,7 @@ class ProfileRepositoryImpl(
     ): List<ProfileData> =
         withContext(dispatcherProvider.io()) {
             val users = usersApi.getUserProfileFollowedBy(profileId, userId, limit)
-
+            mediaCacher.cacheAvatarUrls(metadata = users.metadataEvents, cdnResources = users.cdnResources)
             val primalUserNames = users.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = users.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = users.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
@@ -125,6 +125,9 @@ class ProfileRepositoryImpl(
     override suspend fun fetchProfile(profileId: String) =
         withContext(dispatcherProvider.io()) {
             val response = retryNetworkCall { usersApi.getUserProfile(userId = profileId) }
+            response.metadata?.let {
+                mediaCacher.cacheAvatarUrls(metadata = listOf(it), cdnResources = response.cdnResources)
+            }
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
             val primalUserName = response.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
@@ -176,8 +179,7 @@ class ProfileRepositoryImpl(
                 )
             }
 
-            val avatarUrls = response.metadataEvents.mapAsAvatarUrls(cdnResources = response.cdnResources)
-            mediaCacher.preCacheUserAvatars(avatarUrls)
+            mediaCacher.cacheAvatarUrls(metadata = response.metadataEvents, cdnResources = response.cdnResources)
             database.profiles().insertOrUpdateAll(data = profiles)
 
             profiles.map { it.asProfileDataDO() }
@@ -186,6 +188,7 @@ class ProfileRepositoryImpl(
     private suspend fun queryRemoteUsers(apiBlock: suspend () -> UsersResponse): List<UserProfileSearchItem> =
         withContext(dispatcherProvider.io()) {
             val response = apiBlock()
+            mediaCacher.cacheAvatarUrls(metadata = response.contactsMetadata, cdnResources = response.cdnResources)
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
             val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()

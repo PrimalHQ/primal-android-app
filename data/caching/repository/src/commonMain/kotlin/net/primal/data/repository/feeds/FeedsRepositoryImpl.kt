@@ -3,6 +3,7 @@ package net.primal.data.repository.feeds
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.createAppBuildHelper
@@ -31,6 +32,7 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserScoresOrNull
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.common.PrimalEvent
 import net.primal.domain.feeds.DvmFeed
 import net.primal.domain.feeds.FEED_KIND_DVM
@@ -53,6 +55,7 @@ class FeedsRepositoryImpl(
     private val feedsApi: FeedsApi,
     private val database: PrimalDatabase,
     private val signatureHandler: NostrEventSignatureHandler,
+    private val mediaCacher: MediaCacher,
 ) : FeedsRepository {
 
     private val appBuildHelper = createAppBuildHelper()
@@ -213,6 +216,7 @@ class FeedsRepositoryImpl(
         val response = withContext(dispatcherProvider.io()) {
             feedsApi.getFeaturedFeeds(specKind = specKind, pubkey = userId)
         }
+        mediaCacher.cacheAvatarUrls(metadata = response.userMetadata, cdnResources = response.cdnResources)
         val eventStatsMap = response.scores.parseAndMapContentByKey<ContentPrimalEventStats> { eventId }
         val metadata = response.feedMetadata.parseAndMapContentByKey<ContentDvmFeedMetadata> { eventId }
         val userStats = response.feedUserStats.parseAndMapContentByKey<ContentPrimalEventUserStats> { eventId }

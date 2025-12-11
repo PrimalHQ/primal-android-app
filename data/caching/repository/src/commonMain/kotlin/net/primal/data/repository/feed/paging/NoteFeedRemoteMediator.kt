@@ -23,7 +23,7 @@ import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.FeedResponse
 import net.primal.data.repository.feed.processors.FeedProcessor
-import net.primal.data.repository.mappers.remote.mapAsAvatarUrls
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.isNotesBookmarkFeedSpec
 import net.primal.domain.feeds.isProfileAuthoredNoteRepliesFeedSpec
@@ -164,8 +164,7 @@ internal class NoteFeedRemoteMediator(
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             response.paging ?: throw NetworkException("PagingEvent not found.")
 
-            val avatarUrls = response.metadata.mapAsAvatarUrls(cdnResources = response.cdnResources)
-            mediaCacher.preCacheUserAvatars(avatarUrls)
+            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response
         }
@@ -196,8 +195,7 @@ internal class NoteFeedRemoteMediator(
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             if (response.paging == null) throw NetworkException("PagingEvent not found.")
 
-            val avatarUrls = response.metadata.mapAsAvatarUrls(cdnResources = response.cdnResources)
-            mediaCacher.preCacheUserAvatars(avatarUrls)
+            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response
         }
@@ -228,8 +226,7 @@ internal class NoteFeedRemoteMediator(
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             if (response.paging == null) throw NetworkException("PagingEvent not found.")
 
-            val avatarUrls = response.metadata.mapAsAvatarUrls(cdnResources = response.cdnResources)
-            mediaCacher.preCacheUserAvatars(avatarUrls)
+            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response
         }

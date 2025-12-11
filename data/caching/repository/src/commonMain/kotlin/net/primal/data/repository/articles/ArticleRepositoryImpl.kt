@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.reads.Article as ArticlePO
 import net.primal.data.local.db.PrimalDatabase
@@ -24,6 +25,7 @@ import net.primal.data.repository.articles.processors.persistArticleCommentsToDa
 import net.primal.data.repository.articles.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.local.asArticleDO
 import net.primal.data.repository.mappers.local.mapAsFeedPostDO
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.posts.FeedPost
 import net.primal.domain.reads.Article as ArticleDO
@@ -34,6 +36,7 @@ class ArticleRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val articlesApi: ArticlesApi,
     private val database: PrimalDatabase,
+    private val mediaCacher: MediaCacher,
 ) : ArticleRepository {
 
     override fun feedBySpec(userId: String, feedSpec: String): Flow<PagingData<ArticleDO>> {
@@ -60,6 +63,7 @@ class ArticleRepositoryImpl(
                 limit = 100,
             ),
         )
+        mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
         response.persistToDatabaseAsTransaction(userId = userId, database = database)
         response.persistArticleCommentsToDatabase(
             articleId = articleId,
@@ -80,6 +84,10 @@ class ArticleRepositoryImpl(
                 authorUserId = articleAuthorId,
                 kind = NostrEventKind.LongFormContent.value,
             ),
+        )
+        mediaCacher.cacheAvatarUrls(
+            metadata = highlightsResponse.profileMetadatas,
+            cdnResources = highlightsResponse.cdnResources,
         )
 
         highlightsResponse.persistToDatabaseAsTransaction(database = database)
@@ -178,6 +186,7 @@ class ArticleRepositoryImpl(
             articlesApi = articlesApi,
             database = database,
             dispatcherProvider = dispatcherProvider,
+            mediaCacher = mediaCacher,
         ),
         pagingSourceFactory = pagingSourceFactory,
     )

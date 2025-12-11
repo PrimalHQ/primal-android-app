@@ -1,6 +1,7 @@
 package net.primal.data.repository.messages.processors
 
 import io.github.aakira.napier.Napier
+import net.primal.core.caching.MediaCacher
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.feed.FeedApi
@@ -18,6 +19,7 @@ import net.primal.data.repository.mappers.remote.mapReferencedNostrUriAsEventUri
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.common.PrimalEvent
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
@@ -32,6 +34,7 @@ internal class MessagesProcessor(
     private val feedApi: FeedApi,
     private val usersApi: UsersApi,
     private val messageCipher: MessageCipher,
+    private val mediaCacher: MediaCacher,
 ) {
 
     suspend fun processMessageEventsAndSave(
@@ -82,6 +85,7 @@ internal class MessagesProcessor(
         val remoteNotes = if (missingEventIds.isNotEmpty()) {
             try {
                 val response = feedApi.getNotes(noteIds = missingEventIds)
+                mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
                 response.persistToDatabaseAsTransaction(
                     userId = userId,
                     database = database,
@@ -114,6 +118,7 @@ internal class MessagesProcessor(
         val remoteProfiles = if (missingProfileIds.isNotEmpty()) {
             try {
                 val response = usersApi.getUserProfilesMetadata(userIds = missingProfileIds)
+                mediaCacher.cacheAvatarUrls(metadata = response.metadataEvents, cdnResources = response.cdnResources)
                 val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
                 val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
                 val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()

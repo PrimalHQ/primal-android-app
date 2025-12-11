@@ -8,6 +8,7 @@ import io.github.aakira.napier.Napier
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlinx.coroutines.withContext
+import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notifications.Notification
 import net.primal.data.local.dao.notifications.NotificationData
@@ -19,6 +20,7 @@ import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.mapNotNullAsNotificationPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsProfileStatsPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsStreamDataPO
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.common.exception.NetworkException
 import net.primal.shared.data.local.db.withTransaction
 
@@ -28,6 +30,7 @@ class NotificationsRemoteMediator(
     private val dispatcherProvider: DispatcherProvider,
     private val notificationsApi: NotificationsApi,
     private val database: PrimalDatabase,
+    private val mediaCacher: MediaCacher,
 ) : RemoteMediator<Int, Notification>() {
 
     private var lastSeenTimestamp: Long = Instant.DISTANT_PAST.epochSeconds
@@ -110,6 +113,7 @@ class NotificationsRemoteMediator(
             return MediatorResult.Error(error)
         }
 
+        mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
         lastRequests[loadType] = requestBody
 
         val streamData = response.liveActivity.mapNotNullAsStreamDataPO()

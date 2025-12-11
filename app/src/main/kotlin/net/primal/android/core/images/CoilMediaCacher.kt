@@ -7,54 +7,51 @@ import coil3.request.ImageRequest
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.yield
+import kotlinx.coroutines.withTimeout
 import net.primal.core.caching.MediaCacher
-
-private const val PRE_CACHE_DEBOUNCE_DELAY = 500L
+import net.primal.core.utils.coroutines.DispatcherProvider
 
 @Singleton
 class CoilMediaCacher @Inject constructor(
     @ApplicationContext private val context: Context,
+    dispatchers: DispatcherProvider,
     private val imageLoader: ImageLoader,
 ) : MediaCacher {
 
-    private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-
-    private var preCacheJob: Job? = null
+    private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
 
     override fun preCacheUserAvatars(urls: List<String>) {
         if (urls.isEmpty()) return
 
-        preCacheJob?.cancel()
+        scope.launch {
+            withTimeout(PRE_CACHE_TIMEOUT) {
+                delay(PRE_CACHE_DEBOUNCE_DELAY)
 
-        preCacheJob = scope.launch {
-            delay(PRE_CACHE_DEBOUNCE_DELAY)
+                val uniqueUrls = urls
+                    .filter { it.isNotBlank() }
+                    .distinct()
 
-            val uniqueUrls = urls
-                .filter { it.isNotBlank() }
-                .distinct()
+                for (url in uniqueUrls) {
+                    val request = ImageRequest.Builder(context)
+                        .data(url)
+                        .memoryCachePolicy(CachePolicy.DISABLED)
+                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .networkCachePolicy(CachePolicy.ENABLED)
+                        .build()
 
-            for (url in uniqueUrls) {
-                if (!isActive) break
-
-                val request = ImageRequest.Builder(context)
-                    .data(url)
-                    .memoryCachePolicy(CachePolicy.DISABLED)
-                    .diskCachePolicy(CachePolicy.ENABLED)
-                    .networkCachePolicy(CachePolicy.ENABLED)
-                    .build()
-
-                imageLoader.enqueue(request)
-
-                yield()
+                    imageLoader.enqueue(request)
+                }
             }
         }
+    }
+
+    private companion object {
+        const val PRE_CACHE_DEBOUNCE_DELAY = 500L
+        val PRE_CACHE_TIMEOUT = 20.seconds
     }
 }

@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
 }
 
-private val xcfName = "PrimalCaching"
+private val xcfName = "PrimalCoreCaching"
 
 kotlin {
     // Android target

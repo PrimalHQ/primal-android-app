@@ -7,12 +7,14 @@ import androidx.paging.RemoteMediator
 import io.github.aakira.napier.Napier
 import kotlin.time.Clock
 import kotlinx.coroutines.withContext
+import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.messages.DirectMessage
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.messages.MessagesApi
 import net.primal.data.remote.api.messages.model.MessagesRequestBody
 import net.primal.data.repository.messages.processors.MessagesProcessor
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.common.exception.NetworkException
 
 @ExperimentalPagingApi
@@ -23,6 +25,7 @@ internal class MessagesRemoteMediator(
     private val database: PrimalDatabase,
     private val messagesApi: MessagesApi,
     private val messagesProcessor: MessagesProcessor,
+    private val mediaCacher: MediaCacher,
 ) : RemoteMediator<Int, DirectMessage>() {
 
     private val lastRequests: MutableMap<LoadType, MessagesRequestBody> = mutableMapOf()
@@ -79,6 +82,7 @@ internal class MessagesRemoteMediator(
             Napier.w(error) { "Failed to get remote messages." }
             return MediatorResult.Error(error)
         }
+        mediaCacher.cacheAvatarUrls(metadata = response.profileMetadata, cdnResources = response.cdnResources)
 
         lastRequests[loadType] = requestBody
 

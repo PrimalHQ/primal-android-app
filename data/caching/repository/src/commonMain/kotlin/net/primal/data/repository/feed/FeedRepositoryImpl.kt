@@ -28,7 +28,7 @@ import net.primal.data.repository.feed.processors.persistNoteRepliesAndArticleCo
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.local.mapAsFeedPostDO
 import net.primal.data.repository.mappers.remote.asFeedPageSnapshot
-import net.primal.data.repository.mappers.remote.mapAsAvatarUrls
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.data.repository.utils.performTopologicalSortOrThis
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.supportsNoteReposts
@@ -153,8 +153,7 @@ internal class FeedRepositoryImpl(
                 throw NetworkException(message = error.message, cause = error)
             }
 
-            val avatarUrls = response.metadata.mapAsAvatarUrls(cdnResources = response.cdnResources)
-            mediaCacher.preCacheUserAvatars(avatarUrls)
+            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
@@ -165,8 +164,7 @@ internal class FeedRepositoryImpl(
         withContext(dispatcherProvider.io()) {
             val response = feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
 
-            val avatarUrls = response.metadata.mapAsAvatarUrls(cdnResources = response.cdnResources)
-            mediaCacher.preCacheUserAvatars(avatarUrls)
+            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
@@ -216,8 +214,7 @@ internal class FeedRepositoryImpl(
                 ),
             )
 
-            val avatarUrls = response.metadata.mapAsAvatarUrls(cdnResources = response.cdnResources)
-            mediaCacher.preCacheUserAvatars(avatarUrls)
+            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response.asFeedPageSnapshot()
         }
