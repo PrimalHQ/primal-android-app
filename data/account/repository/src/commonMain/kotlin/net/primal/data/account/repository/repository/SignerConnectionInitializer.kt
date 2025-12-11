@@ -100,6 +100,9 @@ class SignerConnectionInitializer internal constructor(
             emptyList()
         }
 
+        val defaultPermsIds = defaultPermissions.map { it.permissionId }.toSet()
+        val finalPermissions = defaultPermissions + perms.filter { it.permissionId !in defaultPermsIds }
+
         return AppConnection(
             userPubKey = userPubKey,
             signerPubKey = signerPubKey,
@@ -108,7 +111,7 @@ class SignerConnectionInitializer internal constructor(
             name = name,
             url = url,
             image = image,
-            permissions = (perms + defaultPermissions).distinctBy(AppPermission::permissionId),
+            permissions = finalPermissions,
             autoStart = true,
             trustLevel = trustLevel,
         ) to secret
@@ -134,7 +137,7 @@ class SignerConnectionInitializer internal constructor(
                 AppPermission(
                     permissionId = it,
                     clientPubKey = clientPubKey,
-                    action = PermissionAction.Approve,
+                    action = PermissionAction.Ask,
                 )
             } ?: emptyList()
     }
