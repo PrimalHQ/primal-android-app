@@ -15,6 +15,7 @@ object IosRepositoryFactory : RepositoryFactory() {
     private val accountDatabase by lazy {
         LocalDatabaseFactory.createDatabase<AccountDatabase>(
             databaseName = "account_database.db",
+            fallbackToDestructiveMigration = true,
             callback = AccountDatabase.provideDatabaseCallback(),
         )
     }

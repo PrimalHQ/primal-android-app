@@ -13,7 +13,10 @@ typealias WalletRepositoryFactory = IosRepositoryFactory
 object IosRepositoryFactory : RepositoryFactory() {
 
     private val walletDatabase by lazy {
-        LocalDatabaseFactory.createDatabase<WalletDatabase>(databaseName = "wallet_database.db")
+        LocalDatabaseFactory.createDatabase<WalletDatabase>(
+            databaseName = "wallet_database.db",
+            fallbackToDestructiveMigration = true,
+        )
     }
 
     fun init(enableDbEncryption: Boolean, enableLogs: Boolean) {

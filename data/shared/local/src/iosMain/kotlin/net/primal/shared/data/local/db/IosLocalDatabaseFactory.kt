@@ -15,11 +15,13 @@ object IosLocalDatabaseFactory {
 
     inline fun <reified T : RoomDatabase> createDatabase(
         databaseName: String,
+        fallbackToDestructiveMigration: Boolean,
         callback: RoomDatabase.Callback? = null,
     ): T {
         val dbFilePath = documentDirectory() + "/$databaseName"
         return buildLocalDatabase {
             Room.databaseBuilder<T>(name = dbFilePath)
+                .fallbackToDestructiveMigration(dropAllTables = fallbackToDestructiveMigration)
                 .setQueryCoroutineContext(IOSDispatcherProvider().io())
                 .setDriver(NativeSQLiteDriver())
                 .run {
