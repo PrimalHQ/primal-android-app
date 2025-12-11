@@ -82,7 +82,7 @@ sqlcipher-android = "4.9.0"
 telephoto = "0.18.0"
 timber = "5.0.1"
 url-detector = "0.1.23"
-whyoleg-cryptography-kotlin = "0.4.0"
+whyoleg-cryptography-kotlin = "0.5.0"
 zoomimage-compose-coil3 = "1.4.0"
 uiautomator = "2.3.0"
 benchmark-macro-junit4 = "1.4.1"
@@ -279,6 +279,7 @@ androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "b
 whyoleg-cryptography-core = { module = "dev.whyoleg.cryptography:cryptography-core", version.ref = "whyoleg-cryptography-kotlin" }
 whyoleg-cryptography-provider-jdk = { module = "dev.whyoleg.cryptography:cryptography-provider-jdk", version.ref = "whyoleg-cryptography-kotlin" }
 whyoleg-cryptography-provider-apple = { module = "dev.whyoleg.cryptography:cryptography-provider-apple", version.ref = "whyoleg-cryptography-kotlin" }
+whyoleg-cryptography-provider-optimal = { module = "dev.whyoleg.cryptography:cryptography-provider-optimal", version.ref = "whyoleg-cryptography-kotlin" }
 
 #Interop
 skie-configuration-annotations = { module = "co.touchlab.skie:configuration-annotations", version.ref = "skie" }

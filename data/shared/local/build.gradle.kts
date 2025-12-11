@@ -44,6 +44,7 @@ kotlin {
 
                 // Cryptography
                 implementation(libs.whyoleg.cryptography.core)
+                implementation(libs.whyoleg.cryptography.provider.optimal)
 
                 // Room
                 api(libs.room.runtime)
