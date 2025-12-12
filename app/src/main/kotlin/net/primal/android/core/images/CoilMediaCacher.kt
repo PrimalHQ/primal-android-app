@@ -26,29 +26,26 @@ class CoilMediaCacher @Inject constructor(
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
 
     override fun preCacheUserAvatars(urls: List<String>) {
-        if (urls.isEmpty()) return
-
-        scope.launch {
-            withTimeout(PRE_CACHE_TIMEOUT) {
-                val uniqueUrls = urls
-                    .filter { it.isNotBlank() }
-                    .distinct()
-
-                for (url in uniqueUrls) {
-                    val request = ImageRequest.Builder(context)
-                        .data(url)
-                        .memoryCachePolicy(CachePolicy.DISABLED)
-                        .diskCachePolicy(CachePolicy.ENABLED)
-                        .networkCachePolicy(CachePolicy.ENABLED)
-                        .build()
-
-                    avatarImageLoader.enqueue(request)
-                }
-            }
-        }
+        preCacheImages(
+            urls = urls,
+            imageLoader = avatarImageLoader,
+            memoryCachePolicy = CachePolicy.DISABLED,
+        )
     }
 
     override fun preCacheFeedMedia(urls: List<String>) {
+        preCacheImages(
+            urls = urls,
+            imageLoader = feedImageLoader,
+            memoryCachePolicy = CachePolicy.ENABLED,
+        )
+    }
+
+    private fun preCacheImages(
+        urls: List<String>,
+        imageLoader: ImageLoader,
+        memoryCachePolicy: CachePolicy,
+    ) {
         if (urls.isEmpty()) return
 
         scope.launch {
@@ -60,12 +57,12 @@ class CoilMediaCacher @Inject constructor(
                 for (url in uniqueUrls) {
                     val request = ImageRequest.Builder(context)
                         .data(url)
-                        .memoryCachePolicy(CachePolicy.ENABLED)
+                        .memoryCachePolicy(memoryCachePolicy)
                         .diskCachePolicy(CachePolicy.ENABLED)
                         .networkCachePolicy(CachePolicy.ENABLED)
                         .build()
 
-                    feedImageLoader.enqueue(request)
+                    imageLoader.enqueue(request)
                 }
             }
         }
