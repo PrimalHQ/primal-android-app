@@ -11,7 +11,7 @@ kotlin {
     // Android target
     androidLibrary {
         namespace = "net.primal"
-        compileSdk = 35
+        compileSdk = 36
         minSdk = 26
     }
 
