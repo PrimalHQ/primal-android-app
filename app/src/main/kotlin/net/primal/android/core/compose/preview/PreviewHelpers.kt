@@ -7,9 +7,9 @@ import androidx.compose.material3.RippleConfiguration
 import androidx.compose.material3.RippleDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import net.primal.android.LocalContentDisplaySettings
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.LocalQrCodeDecoder
+import net.primal.android.core.activity.LocalContentDisplaySettings
+import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.scanner.analysis.QrCodeResultDecoder
 import net.primal.android.scanner.domain.QrCodeResult
 import net.primal.android.theme.AppTheme
