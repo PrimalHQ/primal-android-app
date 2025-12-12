@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -94,7 +95,7 @@ fun ConnectedAppDetailsScreen(
     viewModel: ConnectedAppDetailsViewModel,
     onClose: () -> Unit,
     onSessionClick: (sessionId: String) -> Unit,
-    onPermissionDetailsClick: (connectionId: String) -> Unit,
+    onPermissionDetailsClick: (clientPubKey: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -122,7 +123,7 @@ fun ConnectedAppDetailsScreen(
     onClose: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     onSessionClick: (sessionId: String) -> Unit,
-    onPermissionDetailsClick: (connectionId: String) -> Unit,
+    onPermissionDetailsClick: (clientPubKey: String) -> Unit,
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
@@ -155,7 +156,7 @@ fun ConnectedAppDetailsScreen(
                     state = state,
                     eventPublisher = eventPublisher,
                     onSessionClick = onSessionClick,
-                    onPermissionDetailsClick = { onPermissionDetailsClick(state.connectionId) },
+                    onPermissionDetailsClick = { onPermissionDetailsClick(state.clientPubKey) },
                 )
             }
         },
@@ -170,6 +171,51 @@ fun ConnectedAppDetailsContent(
     onSessionClick: (sessionId: String) -> Unit,
     onPermissionDetailsClick: () -> Unit,
 ) {
+    var confirmDeletionDialogVisibility by remember { mutableStateOf(false) }
+    if (confirmDeletionDialogVisibility) {
+        ConfirmActionAlertDialog(
+            dialogTitle = stringResource(id = R.string.settings_connected_app_details_delete_connection_dialog_title),
+            dialogText = stringResource(id = R.string.settings_connected_app_details_delete_connection_dialog_text),
+            confirmText = stringResource(id = R.string.settings_connected_app_details_delete_connection_confirm),
+            onConfirmation = {
+                confirmDeletionDialogVisibility = false
+                eventPublisher(UiEvent.DeleteConnection)
+            },
+            dismissText = stringResource(id = R.string.settings_connected_app_details_delete_connection_dismiss),
+            onDismissRequest = { confirmDeletionDialogVisibility = false },
+        )
+    }
+
+    var editingNameDialogVisibility by remember { mutableStateOf(false) }
+    if (editingNameDialogVisibility) {
+        EditNameAlertDialog(
+            currentName = state.appName,
+            onNameChange = {
+                eventPublisher(UiEvent.EditName(it))
+                editingNameDialogVisibility = false
+            },
+            onDismiss = { editingNameDialogVisibility = false },
+        )
+    }
+
+    var pendingTrustLevelValue by remember { mutableStateOf<TrustLevel?>(null) }
+    pendingTrustLevelValue?.let { trustLevel ->
+        ConfirmActionAlertDialog(
+            dialogTitle = stringResource(id = R.string.settings_connected_app_details_update_trust_level_dialog_title),
+            dialogText = stringResource(
+                id = R.string.settings_connected_app_details_update_trust_level_dialog_text,
+                trustLevel.toUserFriendlyText(),
+            ),
+            confirmText = stringResource(id = R.string.settings_connected_app_details_update_trust_level_confirm),
+            dismissText = stringResource(id = R.string.settings_connected_app_details_update_trust_level_dismiss),
+            onConfirmation = {
+                eventPublisher(UiEvent.UpdateTrustLevel(trustLevel))
+                pendingTrustLevelValue = null
+            },
+            onDismissRequest = { pendingTrustLevelValue = null },
+        )
+    }
+
     LazyColumn(modifier = modifier) {
         item(key = "Header", contentType = "Header") {
             HeaderSection(
@@ -182,15 +228,19 @@ fun ConnectedAppDetailsContent(
                 onAutoStartSessionChange = { eventPublisher(UiEvent.AutoStartSessionChange(it)) },
                 onStartSessionClick = { eventPublisher(UiEvent.StartSession) },
                 onEndSessionClick = { eventPublisher(UiEvent.EndSession) },
-                onEditNameClick = { eventPublisher(UiEvent.EditName) },
-                onDeleteConnectionClick = { eventPublisher(UiEvent.DeleteConnection) },
+                onEditNameClick = { editingNameDialogVisibility = true },
+                onDeleteConnectionClick = { confirmDeletionDialogVisibility = true },
             )
         }
 
         item(key = "Permissions", contentType = "Permissions") {
             ConnectedAppPermissionsSection(
                 trustLevel = state.trustLevel,
-                onTrustLevelChange = { eventPublisher(UiEvent.UpdateTrustLevel(it)) },
+                onTrustLevelChange = {
+                    if (state.trustLevel != it) {
+                        pendingTrustLevelValue = it
+                    }
+                },
                 onPermissionDetailsClick = onPermissionDetailsClick,
             )
         }
@@ -199,57 +249,45 @@ fun ConnectedAppDetailsContent(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        if (state.recentSessions.isNotEmpty()) {
-            item(key = "RecentSessionsTitle", contentType = "Title") {
-                Text(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    text = stringResource(id = R.string.settings_connected_app_details_recent_sessions).uppercase(),
-                    style = AppTheme.typography.titleMedium.copy(lineHeight = 20.sp),
-                    fontWeight = FontWeight.SemiBold,
-                    color = AppTheme.colorScheme.onPrimary,
+        recentSessionsSection(
+            state = state,
+            onSessionClick = onSessionClick,
+        )
+    }
+}
+
+private fun LazyListScope.recentSessionsSection(state: UiState, onSessionClick: (String) -> Unit) {
+    if (state.recentSessions.isNotEmpty()) {
+        item(key = "RecentSessionsTitle", contentType = "Title") {
+            Text(
+                modifier = Modifier.padding(bottom = 16.dp),
+                text = stringResource(id = R.string.settings_connected_app_details_recent_sessions).uppercase(),
+                style = AppTheme.typography.titleMedium.copy(lineHeight = 20.sp),
+                fontWeight = FontWeight.SemiBold,
+                color = AppTheme.colorScheme.onPrimary,
+            )
+        }
+
+        itemsIndexed(
+            items = state.recentSessions,
+            key = { _, session -> session.sessionId },
+            contentType = { _, _ -> "SessionItem" },
+        ) { index, session ->
+            val shape = getListItemShape(index = index, listSize = state.recentSessions.size)
+            val isLast = index == state.recentSessions.lastIndex
+
+            Column(modifier = Modifier.clip(shape)) {
+                RecentSessionItem(
+                    session = session,
+                    iconUrl = state.appIconUrl,
+                    appName = state.appName,
+                    onClick = { onSessionClick(session.sessionId) },
                 )
-            }
-
-            itemsIndexed(
-                items = state.recentSessions,
-                key = { _, session -> session.sessionId },
-                contentType = { _, _ -> "SessionItem" },
-            ) { index, session ->
-                val shape = getListItemShape(index = index, listSize = state.recentSessions.size)
-                val isLast = index == state.recentSessions.lastIndex
-
-                Column(modifier = Modifier.clip(shape)) {
-                    RecentSessionItem(
-                        session = session,
-                        iconUrl = state.appIconUrl,
-                        appName = state.appName,
-                        onClick = { onSessionClick(session.sessionId) },
-                    )
-                    if (!isLast) {
-                        PrimalDivider()
-                    }
+                if (!isLast) {
+                    PrimalDivider()
                 }
             }
         }
-    }
-
-    if (state.confirmingDeletion) {
-        ConfirmActionAlertDialog(
-            dialogTitle = stringResource(id = R.string.settings_connected_app_details_delete_connection_dialog_title),
-            dialogText = stringResource(id = R.string.settings_connected_app_details_delete_connection_dialog_text),
-            confirmText = stringResource(id = R.string.settings_connected_app_details_delete_connection_confirm),
-            onConfirmation = { eventPublisher(UiEvent.ConfirmDeletion) },
-            dismissText = stringResource(id = R.string.settings_connected_app_details_delete_connection_dismiss),
-            onDismissRequest = { eventPublisher(UiEvent.DismissDeletionConfirmation) },
-        )
-    }
-
-    if (state.editingName) {
-        EditNameAlertDialog(
-            currentName = state.appName,
-            onNameChange = { eventPublisher(UiEvent.NameChange(it)) },
-            onDismiss = { eventPublisher(UiEvent.DismissEditNameDialog) },
-        )
     }
 }
 
@@ -419,21 +457,21 @@ fun ConnectedAppPermissionsSection(
             PermissionsListItem(
                 icon = PrimalIcons.HighSecurity,
                 title = stringResource(id = R.string.nostr_connect_full_trust_title),
-                subtitle = stringResource(id = R.string.nostr_connect_full_trust_subtitle),
+                subtitle = stringResource(id = R.string.settings_connected_app_permissions_full_trust_subtitle),
                 isSelected = trustLevel == TrustLevel.Full,
                 onClick = { onTrustLevelChange(TrustLevel.Full) },
             )
             PermissionsListItem(
                 icon = PrimalIcons.MediumSecurity,
                 title = stringResource(id = R.string.nostr_connect_medium_trust_title),
-                subtitle = stringResource(id = R.string.nostr_connect_medium_trust_subtitle),
+                subtitle = stringResource(id = R.string.settings_connected_app_permissions_medium_trust_subtitle),
                 isSelected = trustLevel == TrustLevel.Medium,
                 onClick = { onTrustLevelChange(TrustLevel.Medium) },
             )
             PermissionsListItem(
                 icon = PrimalIcons.LowSecurity,
                 title = stringResource(id = R.string.nostr_connect_low_trust_title),
-                subtitle = stringResource(id = R.string.nostr_connect_low_trust_subtitle),
+                subtitle = stringResource(id = R.string.settings_connected_app_permissions_low_trust_subtitle),
                 isSelected = trustLevel == TrustLevel.Low,
                 onClick = { onTrustLevelChange(TrustLevel.Low) },
             )
@@ -581,6 +619,14 @@ private fun EditNameAlertDialog(
     )
 }
 
+@Composable
+private fun TrustLevel.toUserFriendlyText() =
+    when (this) {
+        TrustLevel.Full -> stringResource(id = R.string.settings_connected_app_details_full_trust)
+        TrustLevel.Medium -> stringResource(id = R.string.settings_connected_app_details_medium_trust)
+        TrustLevel.Low -> stringResource(id = R.string.settings_connected_app_details_low_trust)
+    }
+
 private val mockRecentSessionsForPreview = listOf(
     // Oct 28, 2025 12:34 PM
     SessionUi("1", 1730169240L),
@@ -610,7 +656,7 @@ fun PreviewConnectedAppDetailsScreen() {
                 appName = "Highlighter",
                 lastSessionStartedAt = mockRecentSessionsForPreview.first().startedAt,
                 recentSessions = mockRecentSessionsForPreview,
-                connectionId = "",
+                clientPubKey = "",
             ),
             onClose = {},
             eventPublisher = {},

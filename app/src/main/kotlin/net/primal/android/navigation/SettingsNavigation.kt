@@ -71,11 +71,10 @@ private fun NavController.navigateToSessionDetails(sessionId: String) = navigate
 
 private fun NavController.navigateToEventDetails(eventId: String) = navigate(route = "event_details/$eventId")
 
-private fun NavController.navigateToConnectedAppDetails(connectionId: String) =
-    navigate(route = "connected_apps/$connectionId")
+fun NavController.navigateToConnectedAppDetails(clientPubKey: String) = navigate(route = "connected_apps/$clientPubKey")
 
-private fun NavController.navigateToAppPermissions(connectionId: String) =
-    navigate(route = "connected_apps/$connectionId/permissions")
+private fun NavController.navigateToAppPermissions(clientPubKey: String) =
+    navigate(route = "connected_apps/$clientPubKey/permissions")
 
 fun NavController.navigateToLinkPrimalWallet(
     appName: String? = null,
@@ -146,23 +145,23 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         zaps(route = "zaps_settings", navController = navController)
         connectedApps(route = "connected_apps", navController = navController)
         connectedAppDetails(
-            route = "connected_apps/{$CONNECTION_ID}",
+            route = "connected_apps/{$REMOTE_LOGIN_CLIENT_PUBKEY}",
             arguments = listOf(
-                navArgument(CONNECTION_ID) {
+                navArgument(REMOTE_LOGIN_CLIENT_PUBKEY) {
                     type = NavType.StringType
                 },
             ),
             navController = navController,
             deepLinks = listOf(
                 navDeepLink {
-                    uriPattern = "primal://signer/{$CONNECTION_ID}"
+                    uriPattern = "primal://signer/{$REMOTE_LOGIN_CLIENT_PUBKEY}"
                 },
             ),
         )
         appPermissions(
-            route = "connected_apps/{$CONNECTION_ID}/permissions",
+            route = "connected_apps/{$REMOTE_LOGIN_CLIENT_PUBKEY}/permissions",
             arguments = listOf(
-                navArgument(CONNECTION_ID) {
+                navArgument(REMOTE_LOGIN_CLIENT_PUBKEY) {
                     type = NavType.StringType
                 },
             ),
@@ -438,7 +437,7 @@ private fun NavGraphBuilder.connectedApps(route: String, navController: NavContr
         ConnectedAppsScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
-            onConnectedAppClick = { connectionId -> navController.navigateToConnectedAppDetails(connectionId) },
+            onConnectedAppClick = { clientPubKey -> navController.navigateToConnectedAppDetails(clientPubKey) },
         )
     }
 
@@ -464,8 +463,8 @@ private fun NavGraphBuilder.connectedAppDetails(
         onSessionClick = { sessionId ->
             navController.navigateToSessionDetails(sessionId)
         },
-        onPermissionDetailsClick = { connectionId ->
-            navController.navigateToAppPermissions(connectionId)
+        onPermissionDetailsClick = { clientPubKey ->
+            navController.navigateToAppPermissions(clientPubKey)
         },
     )
 }

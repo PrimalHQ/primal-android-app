@@ -17,8 +17,8 @@ kotlin {
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
         namespace = "net.primal.data.account.remote"
-        compileSdk = 36
-        minSdk = 26
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
 
         withHostTestBuilder {
         }
@@ -49,6 +49,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(project(":core:utils"))
+                implementation(project(":core:nips"))
                 implementation(project(":core:networking-http"))
                 implementation(project(":core:networking-primal"))
 
@@ -68,8 +69,6 @@ kotlin {
                 // Serialization
                 implementation(libs.kotlinx.serialization.json)
                 implementation(libs.kotlinx.io)
-
-                implementation(libs.quartz)
             }
         }
 

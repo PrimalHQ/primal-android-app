@@ -20,8 +20,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
+import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalScaffold
@@ -34,6 +38,7 @@ import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.settings.connected.model.SessionEventUi
 import net.primal.android.settings.connected.ui.ConnectedAppHeader
 import net.primal.android.theme.AppTheme
+import net.primal.domain.account.model.RequestState
 
 @Composable
 fun SessionDetailsScreen(
@@ -84,21 +89,33 @@ fun SessionDetailsScreen(
                         startedAt = state.sessionStartedAt,
                     )
                 }
-
-                itemsIndexed(
-                    items = state.sessionEvents,
-                    key = { _, event -> event.id },
-                ) { index, event ->
-                    val shape = getListItemShape(index = index, listSize = state.sessionEvents.size)
-                    val isLast = index == state.sessionEvents.lastIndex
-
-                    Column(modifier = Modifier.clip(shape)) {
-                        SessionEventListItem(
-                            event = event,
-                            onClick = { onEventClick(event.id) },
+                if (state.sessionEvents.isEmpty()) {
+                    item(key = "NoContent") {
+                        ListNoContent(
+                            modifier = Modifier
+                                .fillParentMaxWidth()
+                                .padding(vertical = 32.dp),
+                            noContentText = stringResource(id = R.string.settings_session_no_events),
+                            refreshButtonVisible = false,
                         )
-                        if (!isLast) {
-                            PrimalDivider()
+                    }
+                } else {
+                    itemsIndexed(
+                        items = state.sessionEvents,
+                        key = { _, event -> event.id },
+                    ) { index, event ->
+                        val shape = getListItemShape(index = index, listSize = state.sessionEvents.size)
+                        val isLast = index == state.sessionEvents.lastIndex
+
+                        Column(modifier = Modifier.clip(shape)) {
+                            SessionEventListItem(
+                                event = event,
+                                namingMap = state.namingMap,
+                                onClick = { onEventClick(event.id) },
+                            )
+                            if (!isLast) {
+                                PrimalDivider()
+                            }
                         }
                     }
                 }
@@ -108,20 +125,19 @@ fun SessionDetailsScreen(
 }
 
 @Composable
-private fun SessionEventListItem(event: SessionEventUi, onClick: () -> Unit) {
-    val formattedTimestamp = rememberPrimalFormattedDateTime(
-        timestamp = event.timestamp,
-        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
-    )
+private fun SessionEventListItem(
+    event: SessionEventUi,
+    namingMap: Map<String, String>,
+    onClick: () -> Unit,
+) {
+    val title = namingMap[event.requestTypeId] ?: event.requestTypeId
     ListItem(
         modifier = Modifier.clickable { onClick() },
-        headlineContent = { Text(text = event.title, style = AppTheme.typography.bodyLarge) },
+        headlineContent = { Text(text = title, style = AppTheme.typography.bodyLarge) },
         supportingContent = {
             Text(
                 modifier = Modifier.padding(top = 5.dp),
-                text = formattedTimestamp,
-                style = AppTheme.typography.bodyMedium,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                text = buildSessionEventSubtitleString(timestamp = event.timestamp, requestState = event.requestState),
             )
         },
         trailingContent = {
@@ -132,8 +148,41 @@ private fun SessionEventListItem(event: SessionEventUi, onClick: () -> Unit) {
                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
             )
         },
-        colors = ListItemDefaults.colors(
-            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
-        ),
+        colors = ListItemDefaults.colors(containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3),
     )
+}
+
+@Composable
+private fun buildSessionEventSubtitleString(timestamp: Long, requestState: RequestState): AnnotatedString {
+    val formattedTimestamp = rememberPrimalFormattedDateTime(
+        timestamp = timestamp,
+        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
+    )
+
+    val baseStyle = AppTheme.typography.bodyMedium.toSpanStyle()
+    return buildAnnotatedString {
+        withStyle(
+            style = baseStyle
+                .copy(color = AppTheme.extraColorScheme.onSurfaceVariantAlt1),
+        ) {
+            append(formattedTimestamp)
+
+            if (requestState != RequestState.Pending) {
+                withStyle(baseStyle.copy(color = AppTheme.extraColorScheme.onSurfaceVariantAlt3)) {
+                    append(" • ")
+                }
+
+                when (requestState) {
+                    RequestState.Approved -> append(stringResource(id = R.string.session_event_state_approved))
+                    RequestState.Rejected -> {
+                        withStyle(style = baseStyle.copy(color = AppTheme.extraColorScheme.zapped)) {
+                            append(stringResource(id = R.string.session_event_state_rejected))
+                        }
+                    }
+
+                    else -> {}
+                }
+            }
+        }
+    }
 }

@@ -16,8 +16,8 @@ kotlin {
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
         namespace = "net.primal.data.account.repository"
-        compileSdk = 36
-        minSdk = 26
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
 
         withHostTestBuilder {
         }
@@ -49,6 +49,7 @@ kotlin {
             dependencies {
                 // Internal
                 implementation(project(":core:utils"))
+                implementation(project(":core:nips"))
                 implementation(project(":core:app-config"))
                 implementation(project(":core:networking-http"))
 
@@ -68,8 +69,6 @@ kotlin {
 
                 // Logging
                 implementation(libs.napier)
-
-                implementation(libs.quartz)
             }
         }
 

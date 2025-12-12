@@ -14,6 +14,7 @@ sealed class SessionEvent {
         override val requestState: RequestState,
         override val requestedAt: Long,
         override val completedAt: Long?,
+        val publicKey: String?,
     ) : SessionEvent() {
         override val requestTypeId: String = "get_public_key"
     }
@@ -25,6 +26,8 @@ sealed class SessionEvent {
         override val requestedAt: Long,
         override val completedAt: Long?,
         override val requestTypeId: String,
+        val plainText: String?,
+        val encryptedText: String?,
     ) : SessionEvent()
 
     data class Decrypt(
@@ -34,6 +37,8 @@ sealed class SessionEvent {
         override val requestedAt: Long,
         override val completedAt: Long?,
         override val requestTypeId: String,
+        val plainText: String?,
+        val encryptedText: String?,
     ) : SessionEvent()
 
     data class SignEvent(

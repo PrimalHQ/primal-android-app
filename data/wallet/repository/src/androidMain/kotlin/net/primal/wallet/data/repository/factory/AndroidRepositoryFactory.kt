@@ -16,6 +16,7 @@ object AndroidRepositoryFactory : RepositoryFactory() {
         val appContext = appContext ?: error("You need to call init(ApplicationContext) first.")
         LocalDatabaseFactory.createDatabase<WalletDatabase>(
             context = appContext,
+            fallbackToDestructiveMigration = true,
             databaseName = "wallet_database.db",
         )
     }

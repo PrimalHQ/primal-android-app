@@ -62,6 +62,7 @@ import net.primal.android.core.compose.icons.primaliconpack.MediumSecurity
 import net.primal.android.core.compose.nostrconnect.PermissionsListItem
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.selectableItem
+import net.primal.android.core.service.PrimalRemoteSignerService
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.navigation.primalSlideInHorizontallyFromEnd
@@ -93,6 +94,7 @@ fun NostrConnectBottomSheet(
         viewModel.effects.collect {
             when (it) {
                 is NostrConnectContract.SideEffect.ConnectionSuccess -> {
+                    PrimalRemoteSignerService.ensureServiceStarted(context = context)
                     Toast.makeText(
                         context,
                         context.getString(R.string.nostr_connect_toast_connected),

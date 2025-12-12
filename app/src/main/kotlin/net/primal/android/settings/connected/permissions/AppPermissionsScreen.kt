@@ -27,7 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +40,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -77,6 +80,7 @@ fun AppPermissionsScreen(
 ) {
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
+    var resetConfirmationVisible by remember { mutableStateOf(false) }
 
     SnackbarErrorHandler(
         error = if (state.permissions.isNotEmpty()) state.error else null,
@@ -100,50 +104,15 @@ fun AppPermissionsScreen(
         },
     ) { paddingValues ->
         if (state.permissions.isNotEmpty()) {
-            LazyColumn(
+            AppPermissionsList(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
                     .padding(horizontal = 12.dp),
-            ) {
-                item {
-                    ConnectedAppHeader(
-                        modifier = Modifier.padding(vertical = 16.dp),
-                        appName = state.appName,
-                        appIconUrl = state.appIconUrl,
-                        startedAt = state.appLastSessionAt,
-                    )
-                }
-
-                itemsIndexed(
-                    items = state.permissions,
-                    key = { _, group -> group.groupId },
-                ) { index, permissionGroup ->
-                    val shape = getListItemShape(index = index, listSize = state.permissions.size)
-
-                    Column(modifier = Modifier.clip(shape)) {
-                        PermissionGroupRow(
-                            modifier = Modifier.background(AppTheme.extraColorScheme.surfaceVariantAlt3),
-                            permissionGroup = permissionGroup,
-                            onActionChange = { action ->
-                                eventPublisher(
-                                    UiEvent.UpdatePermission(
-                                        permissionIds = permissionGroup.permissionIds,
-                                        action = action,
-                                    ),
-                                )
-                            },
-                        )
-                        if (index < state.permissions.lastIndex) {
-                            PrimalDivider()
-                        }
-                    }
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
-            }
+                state = state,
+                eventPublisher = eventPublisher,
+                onResetClick = { resetConfirmationVisible = true },
+            )
         } else if (state.loading) {
             PrimalLoadingSpinner()
         } else {
@@ -153,6 +122,79 @@ fun AppPermissionsScreen(
                 refreshButtonVisible = true,
                 onRefresh = { eventPublisher(UiEvent.Retry) },
             )
+        }
+    }
+
+    if (resetConfirmationVisible) {
+        ConfirmActionAlertDialog(
+            dialogTitle = stringResource(id = R.string.settings_connected_app_permissions_reset_dialog_title),
+            dialogText = stringResource(id = R.string.settings_connected_app_permissions_reset_dialog_text),
+            confirmText = stringResource(id = R.string.settings_connected_app_permissions_reset_dialog_confirm),
+            onConfirmation = {
+                eventPublisher(UiEvent.ResetPermissions)
+                resetConfirmationVisible = false
+            },
+            dismissText = stringResource(id = R.string.settings_connected_app_permissions_reset_dialog_dismiss),
+            onDismissRequest = { resetConfirmationVisible = false },
+        )
+    }
+}
+
+@Composable
+private fun AppPermissionsList(
+    state: AppPermissionsContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+    onResetClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(modifier = modifier) {
+        item {
+            ConnectedAppHeader(
+                modifier = Modifier.padding(vertical = 16.dp),
+                appName = state.appName,
+                appIconUrl = state.appIconUrl,
+                startedAt = state.appLastSessionAt,
+            )
+        }
+
+        itemsIndexed(
+            items = state.permissions,
+            key = { _, group -> group.groupId },
+        ) { index, permissionGroup ->
+            val shape = getListItemShape(index = index, listSize = state.permissions.size)
+
+            Column(modifier = Modifier.clip(shape)) {
+                PermissionGroupRow(
+                    modifier = Modifier.background(AppTheme.extraColorScheme.surfaceVariantAlt3),
+                    permissionGroup = permissionGroup,
+                    onActionChange = { action ->
+                        eventPublisher(
+                            UiEvent.UpdatePermission(
+                                permissionIds = permissionGroup.permissionIds,
+                                action = action,
+                            ),
+                        )
+                    },
+                )
+                if (index < state.permissions.lastIndex) {
+                    PrimalDivider()
+                }
+            }
+        }
+
+        item {
+            Text(
+                modifier = Modifier
+                    .clickable { onResetClick() }
+                    .padding(vertical = 16.dp, horizontal = 4.dp),
+                text = stringResource(id = R.string.settings_connected_app_permissions_reset),
+                style = AppTheme.typography.bodyLarge,
+                color = AppTheme.colorScheme.secondary,
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

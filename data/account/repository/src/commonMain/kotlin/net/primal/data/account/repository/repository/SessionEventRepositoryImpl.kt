@@ -12,12 +12,14 @@ import net.primal.data.account.local.dao.AppPermissionData
 import net.primal.data.account.local.dao.PendingNostrEvent
 import net.primal.data.account.local.dao.PermissionAction
 import net.primal.data.account.local.dao.RequestState
+import net.primal.data.account.local.dao.TrustLevel
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.getRequestTypeId
 import net.primal.domain.account.handler.Nip46EventsHandler
 import net.primal.domain.account.model.SessionEvent
+import net.primal.domain.account.model.SessionEventUserChoice
 import net.primal.domain.account.model.UserChoice
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.nostr.cryptography.NostrKeyPair
@@ -29,6 +31,7 @@ class SessionEventRepositoryImpl(
     private val dispatchers: DispatcherProvider,
     private val nip46EventsHandler: Nip46EventsHandler,
 ) : SessionEventRepository {
+
     override fun observeEventsPendingUserAction(signerPubKey: String): Flow<List<SessionEvent>> =
         database.sessionEvents().observeEventsByRequestState(
             signerPubKey = signerPubKey.asEncryptable(),
@@ -36,8 +39,8 @@ class SessionEventRepositoryImpl(
         ).map { events -> events.mapNotNull { it.asDomain() } }
             .distinctUntilChanged()
 
-    override fun observeEventsForSession(sessionId: String): Flow<List<SessionEvent>> {
-        return database.sessionEvents().observeEventsBySessionId(sessionId = sessionId)
+    override fun observeCompletedEventsForSession(sessionId: String): Flow<List<SessionEvent>> {
+        return database.sessionEvents().observeCompletedEventsBySessionId(sessionId = sessionId)
             .map { list -> list.mapNotNull { it.asDomain() } }
             .distinctUntilChanged()
     }
@@ -57,7 +60,7 @@ class SessionEventRepositoryImpl(
                     data = events.map {
                         PendingNostrEvent(
                             eventId = it.id,
-                            clientPubKey = it.pubKey.asEncryptable(),
+                            clientPubKey = it.pubKey,
                             signerPubKey = signerKeyPair.pubKey.asEncryptable(),
                             rawNostrEventJson = it.encodeToJsonString().asEncryptable(),
                         )
@@ -87,12 +90,12 @@ class SessionEventRepositoryImpl(
             }
         }
 
-    override suspend fun respondToEvents(eventIdToUserChoice: List<Pair<String, UserChoice>>): Result<Unit> =
+    override suspend fun respondToEvents(userChoices: List<SessionEventUserChoice>): Result<Unit> =
         withContext(dispatchers.io()) {
             database.withTransaction {
                 runCatching {
-                    eventIdToUserChoice.forEach {
-                        respondToEvent(eventId = it.first, userChoice = it.second).getOrThrow()
+                    userChoices.forEach {
+                        respondToEvent(eventId = it.sessionEventId, userChoice = it.userChoice).getOrThrow()
                     }
                 }
             }
@@ -102,12 +105,21 @@ class SessionEventRepositoryImpl(
         withContext(dispatchers.io()) {
             database.withTransaction {
                 val sessionEvent = database.sessionEvents().getSessionEvent(eventId = eventId) ?: return@withTransaction
-                val connection = database.connections()
-                    .getConnectionByClientPubKey(clientPubKey = sessionEvent.clientPubKey) ?: return@withTransaction
+                val connection = database.connections().getConnection(clientPubKey = sessionEvent.clientPubKey)
+                    ?: return@withTransaction
+
+                if (connection.data.trustLevel == TrustLevel.Low && action == PermissionAction.Approve) {
+                    database.connections().updateTrustLevel(
+                        clientPubKey = connection.data.clientPubKey,
+                        trustLevel = TrustLevel.Medium,
+                    )
+                    database.permissions().deletePermissions(clientPubKey = connection.data.clientPubKey)
+                }
+
                 database.permissions().upsert(
                     data = AppPermissionData(
                         permissionId = sessionEvent.getRequestTypeId(),
-                        connectionId = connection.data.connectionId,
+                        clientPubKey = connection.data.clientPubKey,
                         action = action,
                     ),
                 )
@@ -126,7 +138,7 @@ class SessionEventRepositoryImpl(
 
     private suspend fun rejectEvent(eventId: String) =
         withContext(dispatchers.io()) {
-            val clientPubKey = database.sessionEvents().getSessionEvent(eventId = eventId)?.clientPubKey?.decrypted
+            val clientPubKey = database.sessionEvents().getSessionEvent(eventId = eventId)?.clientPubKey
             if (clientPubKey != null) {
                 database.sessionEvents().updateSessionEventRequestState(
                     eventId = eventId,

@@ -24,6 +24,7 @@ rootProject.name = "Primal"
 include(":app")
 
 include(":core:utils")
+include(":core:nips")
 include(":core:app-config")
 include(":core:networking-lightning")
 include(":core:networking-http")

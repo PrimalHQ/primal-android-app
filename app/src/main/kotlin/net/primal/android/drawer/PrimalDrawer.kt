@@ -65,6 +65,7 @@ import net.primal.android.core.compose.icons.primaliconpack.DrawerSettings
 import net.primal.android.core.compose.icons.primaliconpack.DrawerSignOut
 import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
+import net.primal.android.core.compose.icons.primaliconpack.RemoteLogin
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.drawer.multiaccount.AccountSwitcher
@@ -396,6 +397,7 @@ sealed class DrawerScreenDestination {
     data object Messages : DrawerScreenDestination()
     data class Bookmarks(val userId: String) : DrawerScreenDestination()
     data object ScanCode : DrawerScreenDestination()
+    data object RemoteLogin : DrawerScreenDestination()
     data object Settings : DrawerScreenDestination()
     data class SignOut(val userId: String) : DrawerScreenDestination()
 }
@@ -407,6 +409,7 @@ private fun DrawerScreenDestination.label(): String {
         is DrawerScreenDestination.Premium -> stringResource(id = R.string.drawer_destination_premium)
         DrawerScreenDestination.Messages -> stringResource(R.string.drawer_destination_messages)
         is DrawerScreenDestination.Bookmarks -> stringResource(R.string.drawer_destination_bookmarks)
+        DrawerScreenDestination.RemoteLogin -> stringResource(id = R.string.drawer_destination_remote_login)
         DrawerScreenDestination.ScanCode -> stringResource(id = R.string.drawer_destination_scan_code)
         DrawerScreenDestination.Settings -> stringResource(R.string.drawer_destination_settings)
         is DrawerScreenDestination.SignOut -> stringResource(R.string.drawer_destination_sign_out)
@@ -420,6 +423,7 @@ private fun DrawerScreenDestination.icon(): ImageVector {
         is DrawerScreenDestination.Premium -> PrimalIcons.DrawerPremium
         DrawerScreenDestination.Messages -> PrimalIcons.DrawerMessages
         is DrawerScreenDestination.Bookmarks -> PrimalIcons.DrawerBookmarks
+        DrawerScreenDestination.RemoteLogin -> PrimalIcons.RemoteLogin
         DrawerScreenDestination.ScanCode -> PrimalIcons.QrCode
         DrawerScreenDestination.Settings -> PrimalIcons.DrawerSettings
         is DrawerScreenDestination.SignOut -> PrimalIcons.DrawerSignOut

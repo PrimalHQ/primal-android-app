@@ -12,18 +12,23 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
+import net.primal.android.nostrconnect.handler.RemoteSignerSessionHandler
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.SideEffect
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiEvent
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiState
+import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.nostrconnect.model.asUi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
 import net.primal.domain.account.repository.SessionRepository
 import timber.log.Timber
 
 @HiltViewModel
 class ActiveSessionsViewModel @Inject constructor(
+    private val signerSessionHandler: RemoteSignerSessionHandler,
     private val sessionRepository: SessionRepository,
     private val credentialsStore: CredentialsStore,
     private val userAccountsStore: UserAccountsStore,
@@ -63,7 +68,12 @@ class ActiveSessionsViewModel @Inject constructor(
                             appSession.asUi(userAccount = userAccount.asUserAccountUi())
                         }
                     }
-                    setState { copy(sessions = uiSessions) }
+                    setState {
+                        copy(
+                            sessions = uiSessions,
+                            selectedSessions = resolveSelectedSessions(this.selectedSessions, uiSessions),
+                        )
+                    }
                 }
         }
     }
@@ -106,21 +116,23 @@ class ActiveSessionsViewModel @Inject constructor(
     private fun handleDisconnectClick() {
         viewModelScope.launch {
             setState { copy(disconnecting = true) }
-            runCatching {
-                val selectedSessions = state.value.selectedSessions
-                Timber.d("Disconnecting sessions: $selectedSessions")
-                selectedSessions.forEach { sessionId -> sessionRepository.endSession(sessionId) }
-            }
-                .onSuccess {
-                    setEffect(SideEffect.SessionsDisconnected)
-                    setState { copy(selectedSessions = emptySet()) }
-                }
-                .onFailure {
-                    Timber.e(it, "Error disconnecting sessions")
-                }
-                .also {
-                    setState { copy(disconnecting = false) }
-                }
+            signerSessionHandler.endSessions(sessionIds = state.value.selectedSessions.toList())
+                .onSuccess { setEffect(SideEffect.SessionsDisconnected) }
+                .onFailure { Timber.e(it, "Error disconnecting sessions") }
+
+            setState { copy(disconnecting = false) }
+        }
+    }
+
+    private fun resolveSelectedSessions(
+        currentSelection: Set<String>,
+        newSessions: List<ActiveSessionUi>,
+    ): Set<String> {
+        val validSelection = currentSelection.intersect(newSessions.map { it.sessionId }.toSet())
+        return if (validSelection.isEmpty() && newSessions.isNotEmpty()) {
+            setOf(newSessions.first().sessionId)
+        } else {
+            validSelection
         }
     }
 }

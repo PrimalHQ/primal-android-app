@@ -80,6 +80,15 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
+                    android:scheme="nostrconnect" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
                     android:host="signer"
                     android:scheme="primal" />
             </intent-filter>
@@ -248,6 +257,19 @@
                 <data
                     android:host="primal.net"
                     android:pathPrefix="/p/"
+                    android:scheme="https" />
+            </intent-filter>
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Profile">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
+                    android:pathPrefix="/profile/"
                     android:scheme="https" />
             </intent-filter>
             <intent-filter

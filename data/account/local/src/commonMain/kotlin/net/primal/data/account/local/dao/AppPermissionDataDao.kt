@@ -13,12 +13,15 @@ interface AppPermissionDataDao {
     @Upsert
     suspend fun upsert(data: AppPermissionData)
 
-    @Query("DELETE FROM AppPermissionData WHERE connectionId = :connectionId")
-    suspend fun deletePermissionsByConnectionId(connectionId: String)
+    @Query("DELETE FROM AppPermissionData WHERE clientPubKey = :clientPubKey")
+    suspend fun deletePermissions(clientPubKey: String)
 
-    @Query("SELECT * FROM AppPermissionData WHERE permissionId = :permissionId AND connectionId = :connectionId")
-    suspend fun findPermission(permissionId: String, connectionId: String): AppPermissionData?
+    @Query("SELECT * FROM AppPermissionData WHERE permissionId = :permissionId AND clientPubKey = :clientPubKey")
+    suspend fun findPermission(permissionId: String, clientPubKey: String): AppPermissionData?
 
-    @Query("SELECT * FROM AppPermissionData WHERE connectionId = :connectionId")
-    fun observePermissions(connectionId: String): Flow<List<AppPermissionData>>
+    @Query("SELECT * FROM AppPermissionData WHERE clientPubKey = :clientPubKey")
+    fun observePermissions(clientPubKey: String): Flow<List<AppPermissionData>>
+
+    @Query("SELECT * FROM AppPermissionData WHERE clientPubKey = :clientPubKey")
+    suspend fun findPermissionsByClientPubKey(clientPubKey: String): List<AppPermissionData>
 }

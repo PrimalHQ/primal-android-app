@@ -6,6 +6,7 @@ import net.primal.domain.wallet.DraftTx
 
 interface ScanCodeContract {
     data class UiState(
+        val scanMode: ScanMode = ScanMode.Anything,
         val userState: UserState = UserState.NoUser,
         val requiresPrimalWallet: Boolean = false,
         val scannedValue: String? = null,
@@ -44,6 +45,11 @@ interface ScanCodeContract {
         ScanCamera,
         ManualInput,
         Success,
+    }
+
+    enum class ScanMode {
+        Anything,
+        RemoteLogin,
     }
 
     enum class UserState {

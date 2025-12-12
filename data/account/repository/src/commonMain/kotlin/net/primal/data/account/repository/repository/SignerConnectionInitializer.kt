@@ -4,14 +4,17 @@ import io.ktor.http.Url
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import net.primal.core.utils.Result
+import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
+import net.primal.data.account.local.dao.RequestState
+import net.primal.data.account.local.dao.SignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
-import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.PermissionAction
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository
+import net.primal.domain.account.repository.SessionRepository
 
 private const val NOSTR_CONNECT_PREFIX = "nostrconnect://"
 private const val NAME_PARAM = "name"
@@ -34,7 +37,8 @@ private const val VALID_PERMISSION_STRING_REGEX =
 @OptIn(ExperimentalUuidApi::class)
 class SignerConnectionInitializer internal constructor(
     private val connectionRepository: ConnectionRepository,
-    private val nostrRelayManager: NostrRelayManager,
+    private val sessionRepository: SessionRepository,
+    private val internalSessionEventRepository: InternalSessionEventRepository,
     private val internalPermissionsRepository: InternalPermissionsRepository,
 ) {
     suspend fun initialize(
@@ -51,17 +55,22 @@ class SignerConnectionInitializer internal constructor(
                 trustLevel = trustLevel,
             )
 
-            nostrRelayManager.connectToRelays(relays = appConnection.relays.toSet())
-            nostrRelayManager.sendResponse(
-                relays = appConnection.relays,
-                response = RemoteSignerMethodResponse.Success(
-                    id = Uuid.random().toString(),
-                    result = secret,
-                    clientPubKey = appConnection.clientPubKey,
-                ),
-            )
-
-            connectionRepository.saveConnection(secret = secret, connection = appConnection)
+            connectionRepository.insertOrReplaceConnection(secret = secret, connection = appConnection)
+            sessionRepository.startSession(clientPubKey = appConnection.clientPubKey)
+                .onSuccess { sessionId ->
+                    internalSessionEventRepository.saveSessionEvent(
+                        sessionId = sessionId,
+                        signerPubKey = signerPubKey,
+                        requestType = SignerMethodType.Connect,
+                        method = null,
+                        requestState = RequestState.PendingResponse,
+                        response = RemoteSignerMethodResponse.Success(
+                            id = Uuid.random().toString(),
+                            clientPubKey = appConnection.clientPubKey,
+                            result = secret,
+                        ),
+                    )
+                }
 
             appConnection
         }
@@ -76,25 +85,25 @@ class SignerConnectionInitializer internal constructor(
             throw IllegalArgumentException("Invalid `connectionUrl`. It should start with `$NOSTR_CONNECT_PREFIX`.")
         }
 
-        val connectionId = Uuid.random().toString()
-
         val parsedUrl = Url(urlString = connectionUrl)
         val clientPubKey = parsedUrl.host
         val relays = extractRelaysOrThrow(parsedUrl)
         val secret = extractSecretOrThrow(parsedUrl)
-        val perms = extractPermsOrEmpty(url = parsedUrl, connectionId = connectionId)
+        val perms = extractPermsOrEmpty(url = parsedUrl, clientPubKey = clientPubKey)
         val name = parsedUrl.parameters[NAME_PARAM]
         val url = parsedUrl.parameters[URL_PARAM]
         val image = parsedUrl.parameters[IMAGE_PARAM]
 
         val defaultPermissions = if (trustLevel == TrustLevel.Medium) {
-            getMediumTrustPermissions(connectionId = connectionId)
+            getMediumTrustPermissions(clientPubKey = clientPubKey)
         } else {
             emptyList()
         }
 
+        val defaultPermsIds = defaultPermissions.map { it.permissionId }.toSet()
+        val finalPermissions = defaultPermissions + perms.filter { it.permissionId !in defaultPermsIds }
+
         return AppConnection(
-            connectionId = connectionId,
             userPubKey = userPubKey,
             signerPubKey = signerPubKey,
             clientPubKey = clientPubKey,
@@ -102,7 +111,7 @@ class SignerConnectionInitializer internal constructor(
             name = name,
             url = url,
             image = image,
-            permissions = (perms + defaultPermissions).distinctBy(AppPermission::permissionId),
+            permissions = finalPermissions,
             autoStart = true,
             trustLevel = trustLevel,
         ) to secret
@@ -120,27 +129,27 @@ class SignerConnectionInitializer internal constructor(
                 "No `$SECRET_PARAM` field found in provided `connectionUrl`. This is a mandatory field.",
             )
 
-    private fun extractPermsOrEmpty(url: Url, connectionId: String): List<AppPermission> {
+    private fun extractPermsOrEmpty(url: Url, clientPubKey: String): List<AppPermission> {
         return url.parameters[PERMS_PARAM]
             ?.split(",")
             ?.filter { permString -> Regex(VALID_PERMISSION_STRING_REGEX).matches(permString) }
             ?.map {
                 AppPermission(
                     permissionId = it,
-                    connectionId = connectionId,
-                    action = PermissionAction.Approve,
+                    clientPubKey = clientPubKey,
+                    action = PermissionAction.Ask,
                 )
             } ?: emptyList()
     }
 
-    private suspend fun getMediumTrustPermissions(connectionId: String): List<AppPermission> =
+    private suspend fun getMediumTrustPermissions(clientPubKey: String): List<AppPermission> =
         internalPermissionsRepository
             .getMediumTrustPermissions()
             .getOrNull()
             ?.map {
                 AppPermission(
                     permissionId = it,
-                    connectionId = connectionId,
+                    clientPubKey = clientPubKey,
                     action = PermissionAction.Approve,
                 )
             } ?: emptyList()

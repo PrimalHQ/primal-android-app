@@ -10,8 +10,8 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.data.remote.factory.PublisherFactory
-import net.primal.domain.account.service.NostrEncryptionService
 import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.publisher.NostrEventImporter

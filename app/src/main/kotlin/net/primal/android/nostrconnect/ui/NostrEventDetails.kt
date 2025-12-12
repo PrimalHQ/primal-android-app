@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -33,14 +34,9 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.CopyAlt
-import net.primal.android.core.utils.PrimalDateFormats
 import net.primal.android.core.utils.ellipsizeMiddle
-import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.CourierPrimeFontFamily
-import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.nostr.NostrEventKind
-import net.primal.domain.nostr.NostrUnsignedEvent
 
 private const val CONTENT_MAX_LINES_COLLAPSED = 10
 private const val MAX_TAGS_TO_SHOW_IN_DETAILS = 10
@@ -52,6 +48,7 @@ sealed interface EventDetailRow {
         val singleLine: Boolean = true,
         val expandable: Boolean = false,
         val isKey: Boolean = false,
+        val maxLines: Int = CONTENT_MAX_LINES_COLLAPSED,
     ) : EventDetailRow
 
     data class Tags(
@@ -62,10 +59,12 @@ sealed interface EventDetailRow {
 
 @Composable
 fun NostrEventDetails(
-    kind: Int,
-    createdAt: Long,
-    eventRows: List<EventDetailRow>,
+    title: String,
+    subtitle: String,
+    rows: List<EventDetailRow>,
     modifier: Modifier = Modifier,
+    status: String? = null,
+    statusColor: Color? = null,
     onCopy: (text: String, label: String) -> Unit,
     footerContent: (@Composable () -> Unit)? = null,
 ) {
@@ -74,22 +73,19 @@ fun NostrEventDetails(
     ) {
         item(key = "Header", contentType = "Header") {
             EventDetailsHeader(
-                eventKind = kind,
-                timestamp = createdAt,
+                title = title,
+                subtitle = subtitle,
+                status = status,
+                statusColor = statusColor,
             )
         }
 
         itemsIndexed(
-            items = eventRows,
-            key = { _, item ->
-                when (item) {
-                    is EventDetailRow.Detail -> item.label
-                    is EventDetailRow.Tags -> item.label
-                }
-            },
+            items = rows,
+            key = { index, _ -> index },
         ) { index, item ->
-            val shape = getListItemShape(index = index, listSize = eventRows.size)
-            val isLast = index == eventRows.lastIndex
+            val shape = getListItemShape(index = index, listSize = rows.size)
+            val isLast = index == rows.lastIndex
 
             Column(
                 modifier = Modifier
@@ -98,12 +94,8 @@ fun NostrEventDetails(
             ) {
                 when (item) {
                     is EventDetailRow.Detail -> EventDetailListItem(
-                        label = item.label,
-                        value = item.value,
+                        item = item,
                         onCopy = { onCopy(item.value, item.label) },
-                        singleLine = item.singleLine,
-                        expandable = item.expandable,
-                        isKey = item.isKey,
                     )
 
                     is EventDetailRow.Tags -> TagsListItem(
@@ -127,151 +119,55 @@ fun NostrEventDetails(
 }
 
 @Composable
-private fun EventDetailsHeader(eventKind: Int, timestamp: Long) {
-    val formattedTimestamp = rememberPrimalFormattedDateTime(
-        timestamp = timestamp,
-        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
-    )
+private fun EventDetailsHeader(
+    title: String,
+    subtitle: String,
+    status: String?,
+    statusColor: Color?,
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(
-            text = eventKind.toKindTitle(),
+            text = title,
             style = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp),
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
         Text(
-            modifier = Modifier.padding(top = 4.dp),
-            text = formattedTimestamp,
+            text = subtitle,
             style = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
-    }
-}
 
-@Composable
-fun NostrEvent.asEventDetailRows(): List<EventDetailRow> {
-    return buildList {
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_event_kind_label),
-                value = "$kind - ${kind.toKindName()}",
-            ),
-        )
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_created_at_label),
-                value = createdAt.toString(),
-            ),
-        )
-        if (id.isNotBlank()) {
-            add(
-                EventDetailRow.Detail(
-                    label = stringResource(id = R.string.settings_event_details_id_label),
-                    value = id,
-                    isKey = true,
-                ),
-            )
-        }
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_pubkey_label),
-                value = pubKey,
-                isKey = true,
-            ),
-        )
-        if (tags.isNotEmpty()) {
-            add(
-                EventDetailRow.Tags(
-                    label = stringResource(id = R.string.settings_event_details_tags_label),
-                    tags = tags,
-                ),
-            )
-        }
-        if (content.isNotBlank()) {
-            add(
-                EventDetailRow.Detail(
-                    label = stringResource(id = R.string.settings_event_details_content_label),
-                    value = content,
-                    singleLine = false,
-                    expandable = true,
-                ),
-            )
-        }
-        if (sig.isNotBlank()) {
-            add(
-                EventDetailRow.Detail(
-                    label = stringResource(id = R.string.settings_event_details_signature_label),
-                    value = sig,
-                    isKey = true,
-                ),
+        if (status != null && statusColor != null) {
+            Text(
+                text = status,
+                style = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
+                color = statusColor,
             )
         }
     }
 }
 
 @Composable
-fun NostrUnsignedEvent.asEventDetailRows(): List<EventDetailRow> {
-    return buildList {
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_event_kind_label),
-                value = "$kind - ${kind.toKindName()}",
-            ),
-        )
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_created_at_label),
-                value = createdAt.toString(),
-            ),
-        )
-        add(
-            EventDetailRow.Detail(
-                label = stringResource(id = R.string.settings_event_details_pubkey_label),
-                value = pubKey,
-                isKey = true,
-            ),
-        )
-        if (tags.isNotEmpty()) {
-            add(
-                EventDetailRow.Tags(
-                    label = stringResource(id = R.string.settings_event_details_tags_label),
-                    tags = tags,
-                ),
-            )
-        }
-        if (content.isNotBlank()) {
-            add(
-                EventDetailRow.Detail(
-                    label = stringResource(id = R.string.settings_event_details_content_label),
-                    value = content,
-                    singleLine = false,
-                    expandable = true,
-                ),
-            )
-        }
-    }
-}
-
-@Composable
-private fun EventDetailListItem(
-    label: String,
-    value: String,
-    onCopy: () -> Unit,
-    singleLine: Boolean = true,
-    expandable: Boolean = false,
-    isKey: Boolean = false,
-) {
+private fun EventDetailListItem(item: EventDetailRow.Detail, onCopy: () -> Unit) {
     var isExpanded by remember { mutableStateOf(false) }
     var showToggle by remember { mutableStateOf(false) }
 
-    val displayValue = remember(value, isKey) {
-        if (isKey) value.ellipsizeMiddle(size = 12) else value
+    val displayValue = remember(item.value, item.isKey) {
+        if (item.isKey) item.value.ellipsizeMiddle(size = 12) else item.value
     }
 
-    val maxLines = if (singleLine) 1 else if (expandable && !isExpanded) CONTENT_MAX_LINES_COLLAPSED else Int.MAX_VALUE
+    val maxLines = if (item.singleLine) {
+        1
+    } else if (item.expandable && !isExpanded) {
+        item.maxLines
+    } else {
+        Int.MAX_VALUE
+    }
 
     Row(
         modifier = Modifier
@@ -282,7 +178,7 @@ private fun EventDetailListItem(
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = label,
+                text = item.label,
                 style = AppTheme.typography.bodyLarge.copy(fontSize = 16.sp, lineHeight = 20.sp),
                 fontWeight = FontWeight.SemiBold,
                 color = AppTheme.colorScheme.onSurface,
@@ -297,7 +193,7 @@ private fun EventDetailListItem(
                 maxLines = maxLines,
                 overflow = if (maxLines == Int.MAX_VALUE) TextOverflow.Clip else TextOverflow.Ellipsis,
                 onTextLayout = {
-                    if (expandable) {
+                    if (item.expandable) {
                         showToggle = it.didOverflowHeight || isExpanded
                     }
                 },
@@ -409,36 +305,5 @@ private fun TagsListItem(
             contentDescription = stringResource(id = R.string.accessibility_copy_content),
             tint = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         )
-    }
-}
-
-@Composable
-fun Int.toKindTitle(): String {
-    return when (this) {
-        NostrEventKind.ShortTextNote.value -> stringResource(id = R.string.settings_event_details_kind_publish_note)
-        NostrEventKind.Metadata.value -> stringResource(id = R.string.settings_event_details_kind_update_profile)
-        NostrEventKind.GenericRepost.value -> stringResource(id = R.string.settings_event_details_kind_repost)
-        NostrEventKind.ZapRequest.value -> stringResource(id = R.string.settings_event_details_kind_zap_request)
-        NostrEventKind.Zap.value -> stringResource(id = R.string.settings_event_details_kind_zap)
-        NostrEventKind.Reaction.value -> stringResource(id = R.string.settings_event_details_kind_react_to_note)
-        NostrEventKind.FollowList.value -> stringResource(id = R.string.settings_event_details_kind_update_follow_list)
-        NostrEventKind.RelayListMetadata.value -> stringResource(
-            id = R.string.settings_event_details_kind_update_relay_list,
-        )
-        else -> stringResource(id = R.string.settings_event_details_kind_sign_event, this)
-    }
-}
-
-private fun Int.toKindName(): String {
-    return when (this) {
-        NostrEventKind.ShortTextNote.value -> "short note"
-        NostrEventKind.Metadata.value -> "metadata"
-        NostrEventKind.GenericRepost.value -> "generic repost"
-        NostrEventKind.ZapRequest.value -> "zap request"
-        NostrEventKind.Zap.value -> "zap"
-        NostrEventKind.Reaction.value -> "reaction"
-        NostrEventKind.FollowList.value -> "contacts"
-        NostrEventKind.RelayListMetadata.value -> "relay list"
-        else -> "unknown"
     }
 }

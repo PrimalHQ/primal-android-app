@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,12 +13,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.core.di.SignerConnectionInitializerFactory
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.navigation.nostrConnectUri
-import net.primal.android.nostrconnect.handler.RemoteSignerSessionHandler
 import net.primal.android.nostrconnect.utils.getNostrConnectImage
 import net.primal.android.nostrconnect.utils.getNostrConnectName
 import net.primal.android.nostrconnect.utils.getNostrConnectUrl
@@ -26,20 +25,22 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.CredentialType
 import net.primal.android.user.domain.asKeyPair
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.data.account.repository.repository.SignerConnectionInitializer
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import timber.log.Timber
 
 @HiltViewModel
 class NostrConnectViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
+    private val dispatcherProvider: DispatcherProvider,
     private val accountsStore: UserAccountsStore,
     private val activeAccountStore: ActiveAccountStore,
     // private val exchangeRateHandler: ExchangeRateHandler,
     private val credentialsStore: CredentialsStore,
-    private val signerConnectionInitializerFactory: SignerConnectionInitializerFactory,
-    private val signerSessionHandler: RemoteSignerSessionHandler,
+    private val signerConnectionInitializer: SignerConnectionInitializer,
     private val tokenUpdater: PushNotificationsTokenUpdater,
 ) : ViewModel() {
 
@@ -118,7 +119,10 @@ class NostrConnectViewModel @Inject constructor(
                     credential?.type == CredentialType.PrivateKey
                 }
 
-                val accounts = nsecOnlyUserAccounts.map { it.asUserAccountUi() }
+                val accounts = nsecOnlyUserAccounts
+                    .sortedByDescending { it.lastAccessedAt }
+                    .map { it.asUserAccountUi() }
+
                 val activeAccount = activeAccountStore.activeUserAccount().asUserAccountUi()
 
                 val selectedAccount = accounts.find { it.pubkey == activeAccount.pubkey }
@@ -170,16 +174,16 @@ class NostrConnectViewModel @Inject constructor(
             val connectionUrl = state.value.connectionUrl ?: return@launch
 
             val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
-            val initializer = signerConnectionInitializerFactory.create(signerKeyPair = signerKeyPair)
 
-            initializer.initialize(
+            signerConnectionInitializer.initialize(
                 signerPubKey = signerKeyPair.pubKey,
                 userPubKey = selectedAccount.pubkey,
                 connectionUrl = connectionUrl,
                 trustLevel = state.value.trustLevel,
             ).onSuccess {
-                runCatching { tokenUpdater.updateTokenForRemoteSigner() }
-                signerSessionHandler.startSession(connectionId = it.connectionId)
+                CoroutineScope(dispatcherProvider.io()).launch {
+                    runCatching { tokenUpdater.updateTokenForRemoteSigner() }
+                }
                 setEffect(NostrConnectContract.SideEffect.ConnectionSuccess)
             }.onFailure { error ->
                 Timber.e(error)

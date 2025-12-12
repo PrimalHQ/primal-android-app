@@ -25,6 +25,7 @@ class SessionRepositoryImpl(
     private val database: AccountDatabase,
     private val dispatchers: DispatcherProvider,
 ) : SessionRepository {
+
     override fun observeActiveSessions(signerPubKey: String): Flow<List<AppSession>> =
         database.sessions().observeActiveSessions(signerPubKey = signerPubKey.asEncryptable())
             .map { list -> list.map { it.asDomain() } }
@@ -35,13 +36,13 @@ class SessionRepositoryImpl(
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
-    override fun observeActiveSessionForConnection(connectionId: String): Flow<AppSession?> =
-        database.sessions().observeActiveSessionForConnection(connectionId)
+    override fun observeActiveSessionForConnection(clientPubKey: String): Flow<AppSession?> =
+        database.sessions().observeActiveSessionForConnection(clientPubKey)
             .map { it?.asDomain() }
             .distinctUntilChanged()
 
-    override fun observeSessionsByConnectionId(connectionId: String): Flow<List<AppSession>> =
-        database.sessions().observeSessionsByConnectionId(connectionId)
+    override fun observeSessionsByClientPubKey(clientPubKey: String): Flow<List<AppSession>> =
+        database.sessions().observeSessionsByClientPubKey(clientPubKey)
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
@@ -57,20 +58,20 @@ class SessionRepositoryImpl(
                 ?: Result.failure(NoSuchElementException("Couldn't find session for given sessionId."))
         }
 
-    override suspend fun findActiveSessionForConnection(connectionId: String): Result<AppSession> =
+    override suspend fun findActiveSessionForConnection(clientPubKey: String): Result<AppSession> =
         withContext(dispatchers.io()) {
             runCatching {
-                database.sessions().findActiveSessionByConnectionId(connectionId = connectionId)?.asDomain()
+                database.sessions().findActiveSessionByClientPubKey(clientPubKey = clientPubKey)?.asDomain()
                     ?: throw NoSuchElementException("Couldn't find active session for connection.")
             }
         }
 
-    override suspend fun startSession(connectionId: String): Result<String> =
+    override suspend fun startSession(clientPubKey: String): Result<String> =
         withContext(dispatchers.io()) {
-            Napier.d(tag = "Signer") { "Starting session for $connectionId" }
-            val existingSession = database.sessions().findActiveSessionByConnectionId(connectionId = connectionId)
+            Napier.d(tag = "Signer") { "Starting session for $clientPubKey" }
+            val existingSession = database.sessions().findActiveSessionByClientPubKey(clientPubKey = clientPubKey)
             if (existingSession == null) {
-                val newSession = AppSessionData(connectionId = connectionId)
+                val newSession = AppSessionData(clientPubKey = clientPubKey)
                 database.sessions().upsertAll(data = listOf(newSession))
                 Napier.d(tag = "Signer") { "Successfully started session." }
                 newSession.sessionId.asSuccess()
@@ -85,16 +86,23 @@ class SessionRepositoryImpl(
     override suspend fun startSessionForClient(clientPubKey: String): Result<String> =
         withContext(dispatchers.io()) {
             runCatching {
-                database.connections().getConnectionByClientPubKey(clientPubKey = clientPubKey.asEncryptable())
+                database.connections().getConnection(clientPubKey = clientPubKey)
                     ?: throw NoSuchElementException("Couldn't find connection for given clientPubKey")
             }.mapCatching {
-                startSession(connectionId = it.data.connectionId).getOrThrow()
+                startSession(clientPubKey = it.data.clientPubKey).getOrThrow()
             }
         }
 
-    override suspend fun endSession(sessionId: String) =
+    override suspend fun endSessions(sessionIds: List<String>) =
         withContext(dispatchers.io()) {
-            database.sessions().endSession(sessionId = sessionId, endedAt = Clock.System.now().epochSeconds)
+            runCatching {
+                val now = Clock.System.now().epochSeconds
+                database.withTransaction {
+                    sessionIds.forEach { sessionId ->
+                        database.sessions().endSession(sessionId = sessionId, endedAt = now)
+                    }
+                }
+            }
         }
 
     override suspend fun endAllActiveSessions() =

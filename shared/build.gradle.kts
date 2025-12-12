@@ -1,4 +1,5 @@
 import co.touchlab.skie.configuration.DefaultArgumentInterop
+import co.touchlab.skie.configuration.FlowInterop
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
@@ -16,8 +17,8 @@ kotlin {
     // Android target
     androidLibrary {
         namespace = "net.primal"
-        compileSdk = 35
-        minSdk = 26
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     // JVM Target
@@ -31,6 +32,7 @@ kotlin {
         it.binaries.framework {
             baseName = xcfName
             isStatic = true
+            freeCompilerArgs += listOf("-Xadd-light-debug=enable")
             xcfFramework.add(this)
 
             export(project(":domain:nostr"))
@@ -132,6 +134,7 @@ skie {
 
         group {
             DefaultArgumentInterop.Enabled(false)
+            FlowInterop.Enabled(true)
         }
     }
 

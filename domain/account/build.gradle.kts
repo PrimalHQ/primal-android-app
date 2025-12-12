@@ -11,8 +11,8 @@ private val xcfName = "PrimalAccountDomain"
 kotlin {
     androidLibrary {
         namespace = "net.primal.domain.account"
-        compileSdk = 36
-        minSdk = 26
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
 
         withHostTestBuilder {
         }

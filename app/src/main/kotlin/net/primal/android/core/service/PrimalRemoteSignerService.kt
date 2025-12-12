@@ -15,8 +15,6 @@ import android.graphics.drawable.Icon
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
-import android.view.View
-import android.widget.RemoteViews
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
@@ -42,6 +40,7 @@ import net.primal.android.R
 import net.primal.android.core.di.RemoteSignerServiceFactory
 import net.primal.android.core.receiver.EndSessionReceiver
 import net.primal.android.core.receiver.RECEIVER_SESSION_ID
+import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
@@ -49,6 +48,7 @@ import net.primal.domain.account.model.AppSession
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
+import net.primal.domain.nostr.utils.asEllipsizedNpub
 
 @AndroidEntryPoint
 class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
@@ -82,6 +82,12 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
 
         private val _isServiceRunning = MutableStateFlow(false)
         val isServiceRunning = _isServiceRunning.asStateFlow()
+
+        fun ensureServiceStarted(context: Context) {
+            if (!isServiceRunning.value) {
+                start(context = context)
+            }
+        }
 
         fun start(context: Context) {
             val i = Intent(context, PrimalRemoteSignerService::class.java)
@@ -174,7 +180,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
     private fun buildSummaryNotification(): Notification =
         NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.primal_wave_logo_summer)
-            .setContentTitle("Active Apps")
+            .setContentTitle(resources.getString(R.string.signer_notification_summary_title))
             .setOngoing(true)
             .setGroup(GROUP_ID)
             .setGroupSummary(true)
@@ -194,7 +200,13 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.primal_wave_logo_summer)
-            .setContentTitle("You have $eventsCount new signer request(s).")
+            .setContentTitle(
+                resources.getQuantityString(
+                    R.plurals.signer_notification_new_signer_request,
+                    eventsCount,
+                    eventsCount,
+                ),
+            )
             .setContentIntent(contentPendingIntent)
             .build()
     }
@@ -262,7 +274,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
         nm.createNotificationChannel(
             NotificationChannel(
                 CHANNEL_ID,
-                "Remote Signer",
+                resources.getString(R.string.signer_notification_name),
                 NotificationManager.IMPORTANCE_DEFAULT,
             ),
         )
@@ -281,80 +293,46 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
         return (drawable as? BitmapDrawable)?.bitmap
     }
 
-    private fun buildActiveAppRemoteViews(
-        appName: String,
-        appIcon: Bitmap?,
-        avatar: Bitmap?,
-        onRowClick: PendingIntent?,
-        onEndSessionClick: PendingIntent?,
-    ): RemoteViews {
-        val rv = RemoteViews(this.packageName, R.layout.notification_active_app_item)
-
-        rv.setTextViewText(R.id.text_app_name, appName)
-
-        if (appIcon != null) {
-            rv.setImageViewBitmap(R.id.image_app_icon, appIcon)
-            rv.setViewVisibility(R.id.image_app_icon, View.VISIBLE)
-            rv.setViewVisibility(R.id.text_app_letter, View.GONE)
-        } else {
-            val firstLetter = appName.firstOrNull()?.uppercase() ?: "?"
-            rv.setTextViewText(R.id.text_app_letter, firstLetter)
-            rv.setViewVisibility(R.id.image_app_icon, View.GONE)
-            rv.setViewVisibility(R.id.text_app_letter, View.VISIBLE)
-        }
-
-        if (avatar != null) {
-            rv.setImageViewBitmap(R.id.image_avatar, avatar)
-        } else {
-            rv.setImageViewIcon(
-                R.id.image_avatar,
-                Icon.createWithResource(this, R.drawable.notification_default_avatar),
-            )
-        }
-
-        if (onRowClick != null) {
-            rv.setOnClickPendingIntent(R.id.root, onRowClick)
-        }
-
-        rv.setOnClickPendingIntent(R.id.button_end_session, onEndSessionClick)
-
-        return rv
-    }
-
     @SuppressLint("MissingPermission")
     suspend fun showActiveAppNotification(session: AppSession) {
         val appIconBitmap = session.image?.let { loadBitmapFromUrl(it) }
-        val avatarBitmap = accountsStore
+        val displayName = accountsStore
             .findByIdOrNull(session.userPubKey)
-            ?.avatarCdnImage
-            ?.variants
-            ?.minByOrNull { it.width }
-            ?.mediaUrl
-            ?.let { loadBitmapFromUrl(it) }
-
-        val remoteViews = buildActiveAppRemoteViews(
-            appName = session.name ?: "Unknown App",
-            appIcon = appIconBitmap,
-            avatar = avatarBitmap,
-            onRowClick = deepLinkPendingIntent(connectionId = session.connectionId),
-            onEndSessionClick = endSessionPendingIntent(sessionId = session.sessionId),
-        )
+            ?.authorNameUiFriendly()
+            ?: session.userPubKey.asEllipsizedNpub()
 
         val notification = NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.primal_wave_logo_summer)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .setSmallIcon(R.drawable.primal_wave_logo_summer)
+            .run {
+                if (appIconBitmap != null) {
+                    this.setLargeIcon(appIconBitmap)
+                } else {
+                    this.setLargeIcon(Icon.createWithResource(baseContext, R.drawable.remote_login))
+                }
+            }
+            .setContentTitle(session.name)
+            .setContentText(resources.getString(R.string.signer_notification_logged_in_as, displayName))
             .setGroup(GROUP_ID)
-            .setCustomContentView(remoteViews)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setContentIntent(deepLinkPendingIntent(clientPubKey = session.clientPubKey))
+            .setContentTitle(session.name ?: resources.getString(R.string.signer_notification_unknown_app))
+            .addAction(
+                NotificationCompat.Action(
+                    null,
+                    resources.getString(R.string.signer_notification_end_session),
+                    endSessionPendingIntent(sessionId = session.sessionId),
+
+                ),
+            )
             .build()
 
         NotificationManagerCompat.from(this)
             .notify(session.sessionId, CHILD_NOTIFICATION_ID, notification)
     }
 
-    private fun deepLinkPendingIntent(connectionId: String): PendingIntent {
-        val uri = "primal://signer/$connectionId".toUri()
+    private fun deepLinkPendingIntent(clientPubKey: String): PendingIntent {
+        val uri = "primal://signer/$clientPubKey".toUri()
         val intent = Intent(Intent.ACTION_VIEW, uri, this, MainActivity::class.java).apply {
             addFlags(
                 Intent.FLAG_ACTIVITY_SINGLE_TOP or
@@ -364,7 +342,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
         }
         return PendingIntent.getActivity(
             this,
-            connectionId.hashCode(),
+            clientPubKey.hashCode(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
