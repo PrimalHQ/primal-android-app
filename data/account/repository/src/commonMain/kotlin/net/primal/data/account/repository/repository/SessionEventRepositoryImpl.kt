@@ -19,6 +19,7 @@ import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.getRequestTypeId
 import net.primal.domain.account.handler.Nip46EventsHandler
 import net.primal.domain.account.model.SessionEvent
+import net.primal.domain.account.model.SessionEventUserChoice
 import net.primal.domain.account.model.UserChoice
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.nostr.cryptography.NostrKeyPair
@@ -89,12 +90,12 @@ class SessionEventRepositoryImpl(
             }
         }
 
-    override suspend fun respondToEvents(eventIdToUserChoice: List<Pair<String, UserChoice>>): Result<Unit> =
+    override suspend fun respondToEvents(userChoices: List<SessionEventUserChoice>): Result<Unit> =
         withContext(dispatchers.io()) {
             database.withTransaction {
                 runCatching {
-                    eventIdToUserChoice.forEach {
-                        respondToEvent(eventId = it.first, userChoice = it.second).getOrThrow()
+                    userChoices.forEach {
+                        respondToEvent(eventId = it.sessionEventId, userChoice = it.userChoice).getOrThrow()
                     }
                 }
             }

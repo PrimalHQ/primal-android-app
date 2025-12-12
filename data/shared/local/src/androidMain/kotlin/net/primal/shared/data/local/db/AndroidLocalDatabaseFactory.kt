@@ -13,12 +13,14 @@ object AndroidLocalDatabaseFactory {
     inline fun <reified T : RoomDatabase> createDatabase(
         context: Context,
         databaseName: String,
+        fallbackToDestructiveMigration: Boolean,
         callback: RoomDatabase.Callback? = null,
     ): T {
         val appContext = context.applicationContext
         val dbFile = context.getDatabasePath(databaseName)
         return buildLocalDatabase {
             Room.databaseBuilder<T>(context = appContext, name = dbFile.absolutePath)
+                .fallbackToDestructiveMigration(dropAllTables = fallbackToDestructiveMigration)
                 .setQueryCoroutineContext(AndroidDispatcherProvider().io())
                 .setDriver(AndroidSQLiteDriver())
                 .run {

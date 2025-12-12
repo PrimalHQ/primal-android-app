@@ -75,7 +75,7 @@ fun renderTextAsAnnotatedString(
         append(refinedContent)
 
         referencedUsers.forEach {
-            val displayHandle = "@${it.userDisplayName}"
+            val displayHandle = "@${it.authorDisplayName}"
             val startIndex = refinedContent.indexOf(displayHandle)
             if (startIndex >= 0) {
                 val endIndex = startIndex + displayHandle.length
@@ -138,7 +138,7 @@ private fun String.replaceNostrProfileUrisWithHandles(
         if (uri != null) {
             newContent = newContent.replace(
                 oldValue = uri,
-                newValue = "@${profileDetails.userDisplayName}",
+                newValue = "@${profileDetails.authorDisplayName}",
                 ignoreCase = true,
             )
         }

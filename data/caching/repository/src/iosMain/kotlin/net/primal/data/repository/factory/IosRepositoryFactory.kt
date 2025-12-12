@@ -11,7 +11,10 @@ typealias PrimalRepositoryFactory = IosRepositoryFactory
 object IosRepositoryFactory : CommonRepositoryFactory() {
 
     private val cachingDatabase: PrimalDatabase by lazy {
-        LocalDatabaseFactory.createDatabase(databaseName = "primal_database.db")
+        LocalDatabaseFactory.createDatabase(
+            databaseName = "primal_database.db",
+            fallbackToDestructiveMigration = true,
+        )
     }
 
     override fun resolveCachingDatabase(): PrimalDatabase = cachingDatabase

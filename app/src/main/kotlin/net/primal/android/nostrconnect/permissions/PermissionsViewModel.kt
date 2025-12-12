@@ -20,6 +20,7 @@ import net.primal.android.user.domain.asKeyPair
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.model.SessionEvent
+import net.primal.domain.account.model.SessionEventUserChoice
 import net.primal.domain.account.model.UserChoice
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
@@ -120,8 +121,9 @@ class PermissionsViewModel @Inject constructor(
     private fun respondToEvents(eventIds: Set<String>, choice: UserChoice) =
         viewModelScope.launch {
             setState { copy(responding = true) }
+            val userChoices = eventIds.map { SessionEventUserChoice(sessionEventId = it, userChoice = choice) }
             sessionEventRepository
-                .respondToEvents(eventIdToUserChoice = eventIds.map { it to choice })
+                .respondToEvents(userChoices = userChoices)
                 .onSuccess {
                     setState { copy(selectedEventIds = selectedEventIds - eventIds) }
                 }

@@ -53,8 +53,8 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     )
 }
 
-val appVersionCode = 2648
-val appVersionName = "2.6.7"
+val appVersionCode = 2649
+val appVersionName = "2.6.8"
 
 tasks.register("generateReleaseProperties") {
     doLast {
@@ -73,12 +73,12 @@ ksp {
 
 android {
     namespace = "net.primal.android"
-    compileSdk = 36
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "net.primal.android"
-        minSdk = 26
-        targetSdk = 35
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = appVersionCode
         versionName = appVersionName
 
@@ -218,6 +218,7 @@ android {
         checkDependencies = true
         checkTestSources = true
         checkReleaseBuilds = false
+        disable.add("LocalContextGetResourceValueCall")
     }
 
     packaging {
