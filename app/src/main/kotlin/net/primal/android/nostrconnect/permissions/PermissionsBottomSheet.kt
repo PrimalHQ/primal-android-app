@@ -2,7 +2,6 @@ package net.primal.android.nostrconnect.permissions
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -84,7 +84,6 @@ fun PermissionsBottomSheet(
 
     if (state.bottomSheetVisibility) {
         ModalBottomSheet(
-            modifier = Modifier.padding(top = 100.dp),
             sheetState = sheetState,
             dragHandle = { NostrConnectBottomSheetDragHandle() },
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
@@ -124,9 +123,7 @@ fun PermissionsBottomSheetContent(uiState: UiState, eventPublisher: (UiEvent) ->
                         slideOutHorizontally(animationSpec = animationSpec) { it }
                 }
 
-                transition.using(
-                    SizeTransform(clip = false),
-                )
+                transition
             },
             label = "PermissionsContent",
         ) { sessionEvent ->
@@ -196,6 +193,8 @@ private fun PermissionsListContent(uiState: UiState, eventPublisher: (UiEvent) -
     }
 }
 
+private const val EVENT_DETAILS_MAX_HEIGHT_RATIO = 0.8f
+
 @Composable
 private fun EventDetailsContent(
     sessionEvent: SessionEvent,
@@ -225,8 +224,9 @@ private fun EventDetailsContent(
         )
     }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = Modifier.fillMaxHeight(EVENT_DETAILS_MAX_HEIGHT_RATIO)) {
         NostrEventDetails(
+            modifier = Modifier.weight(1f),
             title = actionName,
             subtitle = formattedTimestamp,
             rows = rows,
@@ -235,9 +235,11 @@ private fun EventDetailsContent(
             onCopy = { text, label ->
                 copyText(context = context, text = text, label = label)
             },
-            footerContent = {
-                EventDetailsBackButton(onClick = onClose)
-            },
+        )
+
+        EventDetailsBackButton(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            onClick = onClose,
         )
     }
 }
