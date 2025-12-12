@@ -10,7 +10,6 @@ import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import net.primal.core.caching.MediaCacher
@@ -18,7 +17,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 
 @Singleton
 class CoilMediaCacher @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     dispatchers: DispatcherProvider,
     private val imageLoader: ImageLoader,
 ) : MediaCacher {
@@ -30,8 +29,6 @@ class CoilMediaCacher @Inject constructor(
 
         scope.launch {
             withTimeout(PRE_CACHE_TIMEOUT) {
-                delay(PRE_CACHE_DEBOUNCE_DELAY)
-
                 val uniqueUrls = urls
                     .filter { it.isNotBlank() }
                     .distinct()
@@ -51,7 +48,6 @@ class CoilMediaCacher @Inject constructor(
     }
 
     private companion object {
-        const val PRE_CACHE_DEBOUNCE_DELAY = 500L
         val PRE_CACHE_TIMEOUT = 20.seconds
     }
 }
