@@ -8,7 +8,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,12 +28,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -62,11 +64,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
+import net.primal.android.core.compose.attachment.model.isMediaUri
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
 import net.primal.android.core.compose.rememberIsItemVisible
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.di.rememberMediaCacher
 import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.FloatingNewDataHostTopPadding
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
@@ -74,9 +78,13 @@ import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
 import net.primal.android.notes.feed.model.StreamPillUi
 import net.primal.android.notes.feed.model.StreamsSyncStats
+import net.primal.android.notes.feed.note.ui.attachment.FOUR_IMAGES
+import net.primal.android.notes.feed.note.ui.attachment.findBestImageUrl
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
+import net.primal.core.caching.MediaCacher
 import net.primal.domain.links.CdnImage
+import net.primal.domain.links.EventUriType
 
 @Composable
 fun NoteFeedList(
@@ -173,37 +181,31 @@ private fun NoteFeedList(
     val pagingItems = state.notes.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
     val isStreamPillsRowVisible = listState.rememberIsItemVisible(key = STREAM_PILLS_ROW_KEY, fallback = false)
+    val mediaCacher = rememberMediaCacher()
 
-    LaunchedEffect(shouldAnimateScrollToTop, state.shouldAnimateScrollToTop) {
-        if (shouldAnimateScrollToTop || state.shouldAnimateScrollToTop == true) {
-            snapshotFlow {
-                pagingItems.itemCount > 0 && listState.layoutInfo.totalItemsCount > 0
-            }.filter { it }.first()
+    ScrollToTopHandler(
+        shouldAnimateScrollToTop = shouldAnimateScrollToTop,
+        stateShouldAnimate = state.shouldAnimateScrollToTop,
+        pagingItems = pagingItems,
+        listState = listState,
+    )
 
-            listState.animateScrollToItem(index = 0)
-        }
-    }
+    TopVisibleNoteTracker(
+        listState = listState,
+        pagingItems = pagingItems,
+        eventPublisher = eventPublisher,
+    )
 
-    LaunchedEffect(listState, pagingItems) {
-        withContext(Dispatchers.IO) {
-            snapshotFlow { listState.firstVisibleItemIndex to pagingItems.itemCount }
-                .distinctUntilChanged()
-                .filter { (index, size) -> size > 0 && index < size }
-                .collect { (index, _) ->
-                    val firstVisibleNote = pagingItems.peek(index)
-                    if (firstVisibleNote != null) {
-                        eventPublisher(
-                            UiEvent.UpdateCurrentTopVisibleNote(
-                                noteId = firstVisibleNote.postId,
-                                repostId = firstVisibleNote.repostId,
-                            ),
-                        )
-                    }
-                }
-        }
-    }
+    BoxWithConstraints {
+        val feedWidthPx = with(LocalDensity.current) { constraints.maxWidth }
 
-    Box {
+        FeedMediaPreloader(
+            pagingItems = pagingItems,
+            listState = listState,
+            mediaCacher = mediaCacher,
+            feedWidthPx = feedWidthPx,
+        )
+
         NoteFeedList(
             pagingItems = pagingItems,
             streamPills = bigPillStreams,
@@ -249,6 +251,50 @@ private fun NoteFeedList(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ScrollToTopHandler(
+    shouldAnimateScrollToTop: Boolean,
+    stateShouldAnimate: Boolean?,
+    pagingItems: LazyPagingItems<FeedPostUi>,
+    listState: LazyListState,
+) {
+    LaunchedEffect(shouldAnimateScrollToTop, stateShouldAnimate) {
+        if (shouldAnimateScrollToTop || stateShouldAnimate == true) {
+            snapshotFlow {
+                pagingItems.itemCount > 0 && listState.layoutInfo.totalItemsCount > 0
+            }.filter { it }.first()
+
+            listState.animateScrollToItem(index = 0)
+        }
+    }
+}
+
+@Composable
+private fun TopVisibleNoteTracker(
+    listState: LazyListState,
+    pagingItems: LazyPagingItems<FeedPostUi>,
+    eventPublisher: (UiEvent) -> Unit,
+) {
+    LaunchedEffect(listState, pagingItems) {
+        withContext(Dispatchers.IO) {
+            snapshotFlow { listState.firstVisibleItemIndex to pagingItems.itemCount }
+                .distinctUntilChanged()
+                .filter { (index, size) -> size > 0 && index < size }
+                .collect { (index, _) ->
+                    val firstVisibleNote = pagingItems.peek(index)
+                    if (firstVisibleNote != null) {
+                        eventPublisher(
+                            UiEvent.UpdateCurrentTopVisibleNote(
+                                noteId = firstVisibleNote.postId,
+                                repostId = firstVisibleNote.repostId,
+                            ),
+                        )
+                    }
+                }
         }
     }
 }
@@ -483,4 +529,75 @@ private fun NewPillStringIndicator(
             color = Color.White,
         )
     }
+}
+
+private const val INITIAL_PRELOAD_COUNT = 10
+private const val SCROLL_PRELOAD_COUNT = 5
+
+@Composable
+private fun FeedMediaPreloader(
+    pagingItems: LazyPagingItems<FeedPostUi>,
+    listState: LazyListState,
+    mediaCacher: MediaCacher,
+    feedWidthPx: Int,
+    preloadCount: Int = INITIAL_PRELOAD_COUNT,
+) {
+    val currentMediaCacher by rememberUpdatedState(mediaCacher)
+
+    LaunchedEffect(pagingItems.itemSnapshotList) {
+        if (pagingItems.itemCount > 0) {
+            val countToPreload = minOf(preloadCount, pagingItems.itemCount)
+            val initialItems = (0 until countToPreload).mapNotNull { pagingItems.peek(it) }
+            val urls = initialItems.flatMap { it.extractMediaUrls(feedWidthPx) }
+
+            if (urls.isNotEmpty()) {
+                currentMediaCacher.preCacheFeedMedia(urls)
+            }
+        }
+    }
+
+    LaunchedEffect(listState, pagingItems) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .collect { firstVisible ->
+                val itemCount = pagingItems.itemCount
+                if (itemCount > 0) {
+                    val start = (firstVisible + 1).coerceAtMost(itemCount - 1)
+                    val end = (firstVisible + 1 + SCROLL_PRELOAD_COUNT).coerceAtMost(itemCount)
+
+                    if (start < end) {
+                        val upcomingItems = (start until end).mapNotNull { pagingItems.peek(it) }
+                        val urls = upcomingItems.flatMap { it.extractMediaUrls(feedWidthPx) }
+
+                        if (urls.isNotEmpty()) {
+                            currentMediaCacher.preCacheFeedMedia(urls)
+                        }
+                    }
+                }
+            }
+    }
+}
+
+private fun FeedPostUi.extractMediaUrls(feedWidthPx: Int): List<String> {
+    val mediaAttachments = this.uris.filter { it.isMediaUri() }
+    val linkAttachments = this.uris.filterNot { it.isMediaUri() }
+
+    val urlsToCache = mutableListOf<String>()
+
+    mediaAttachments.take(FOUR_IMAGES).forEach { uri ->
+        when (uri.type) {
+            EventUriType.Image -> {
+                uri.findBestImageUrl(maxWidthPx = feedWidthPx)?.let { urlsToCache.add(it) }
+            }
+            EventUriType.Video -> {
+                uri.thumbnailUrl?.let { urlsToCache.add(it) }
+            }
+            else -> Unit
+        }
+    }
+
+    linkAttachments.take(2).forEach { uri ->
+        uri.thumbnailUrl?.let { urlsToCache.add(it) }
+    }
+
+    return urlsToCache
 }

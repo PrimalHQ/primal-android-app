@@ -10,6 +10,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Qualifier
+import net.primal.core.caching.MediaCacher
 
 @Qualifier
 @Target(AnnotationTarget.FUNCTION, AnnotationTarget.VALUE_PARAMETER)
@@ -52,5 +53,16 @@ fun rememberStreamVideoCache(): SimpleCache {
             context.applicationContext,
             SimpleCacheFactoryProvider::class.java,
         ).streamVideoCache()
+    }
+}
+
+@Composable
+fun rememberMediaCacher(): MediaCacher {
+    val context = LocalContext.current
+    return remember {
+        EntryPointAccessors.fromApplication(
+            context.applicationContext,
+            ImagesModule.ImagesEntryPoint::class.java,
+        ).mediaCacher()
     }
 }

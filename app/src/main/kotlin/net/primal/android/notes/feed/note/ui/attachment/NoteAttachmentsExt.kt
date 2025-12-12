@@ -32,3 +32,8 @@ fun CdnResourceVariant?.findImageSize(maxWidth: Int): DpSize {
         maxHeight = maxHeight,
     )
 }
+
+fun EventUriUi.findBestImageUrl(maxWidthPx: Int): String? {
+    val variant = this.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
+    return variant?.mediaUrl ?: this.url
+}
