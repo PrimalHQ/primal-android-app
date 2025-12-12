@@ -27,7 +27,7 @@ import timber.log.Timber
 
 @Singleton
 class MediaDownloader @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val contentResolver: ContentResolver,
 ) {
     companion object {

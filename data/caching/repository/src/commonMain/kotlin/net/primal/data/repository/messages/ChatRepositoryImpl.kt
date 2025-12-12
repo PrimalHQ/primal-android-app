@@ -7,6 +7,7 @@ import androidx.paging.PagingSource
 import androidx.paging.map
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.messages.DirectMessage
 import net.primal.data.local.dao.messages.MessageConversation
@@ -20,6 +21,7 @@ import net.primal.data.repository.mappers.local.asDMConversation
 import net.primal.data.repository.mappers.local.asDirectMessageDO
 import net.primal.data.repository.messages.paging.MessagesRemoteMediator
 import net.primal.data.repository.messages.processors.MessagesProcessor
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.messages.ChatRepository
 import net.primal.domain.messages.ConversationRelation
 import net.primal.domain.nostr.NostrEvent
@@ -37,6 +39,7 @@ internal class ChatRepositoryImpl(
     private val messagesApi: MessagesApi,
     private val messagesProcessor: MessagesProcessor,
     private val primalPublisher: PrimalPublisher,
+    private val mediaCacher: MediaCacher? = null,
 ) : ChatRepository {
 
     override fun newestConversations(userId: String, relation: ConversationRelation) =
@@ -58,7 +61,7 @@ internal class ChatRepositoryImpl(
                 ),
             )
         }
-
+        mediaCacher?.cacheAvatarUrls(metadata = response.profileMetadata, cdnResources = response.cdnResources)
         val summary = response.conversationsSummary
         val rawConversations = summary?.summaryPerParticipantId?.keys ?: emptyList()
         val messageConversation = rawConversations
@@ -118,6 +121,7 @@ internal class ChatRepositoryImpl(
                     since = latestMessage?.createdAt ?: 0,
                 ),
             )
+            mediaCacher?.cacheAvatarUrls(metadata = response.profileMetadata, cdnResources = response.cdnResources)
             messagesProcessor.processMessageEventsAndSave(
                 userId = userId,
                 messages = response.messages,
@@ -215,6 +219,7 @@ internal class ChatRepositoryImpl(
             database = database,
             messagesApi = messagesApi,
             messagesProcessor = messagesProcessor,
+            mediaCacher = mediaCacher,
         ),
         pagingSourceFactory = pagingSourceFactory,
     )

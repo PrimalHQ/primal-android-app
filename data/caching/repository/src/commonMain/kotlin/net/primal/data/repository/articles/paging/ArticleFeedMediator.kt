@@ -10,6 +10,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
+import net.primal.core.caching.MediaCacher
 import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -22,6 +23,7 @@ import net.primal.data.remote.api.articles.model.ArticleFeedRequestBody
 import net.primal.data.remote.api.articles.model.ArticleResponse
 import net.primal.data.repository.articles.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.common.ContentPrimalPaging
 import net.primal.domain.common.exception.NetworkException
 import net.primal.shared.data.local.db.withTransaction
@@ -33,6 +35,7 @@ internal class ArticleFeedMediator(
     private val articlesApi: ArticlesApi,
     private val database: PrimalDatabase,
     private val dispatcherProvider: DispatcherProvider,
+    private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, ArticlePO>() {
 
     private val lastRequests: MutableMap<LoadType, Pair<ArticleFeedRequestBody, Long>> = mutableMapOf()
@@ -112,7 +115,7 @@ internal class ArticleFeedMediator(
                 )
             }
         }
-
+        mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
         lastRequests[loadType] = request to Clock.System.now().epochSeconds
         return response
     }
