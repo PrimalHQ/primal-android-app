@@ -19,7 +19,8 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 class CoilMediaCacher @Inject constructor(
     @param:ApplicationContext private val context: Context,
     dispatchers: DispatcherProvider,
-    private val imageLoader: ImageLoader,
+    private val avatarImageLoader: ImageLoader,
+    private val feedImageLoader: ImageLoader,
 ) : MediaCacher {
 
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
@@ -41,7 +42,30 @@ class CoilMediaCacher @Inject constructor(
                         .networkCachePolicy(CachePolicy.ENABLED)
                         .build()
 
-                    imageLoader.enqueue(request)
+                    avatarImageLoader.enqueue(request)
+                }
+            }
+        }
+    }
+
+    override fun preCacheFeedMedia(urls: List<String>) {
+        if (urls.isEmpty()) return
+
+        scope.launch {
+            withTimeout(PRE_CACHE_TIMEOUT) {
+                val uniqueUrls = urls
+                    .filter { it.isNotBlank() }
+                    .distinct()
+
+                for (url in uniqueUrls) {
+                    val request = ImageRequest.Builder(context)
+                        .data(url)
+                        .memoryCachePolicy(CachePolicy.ENABLED)
+                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .networkCachePolicy(CachePolicy.ENABLED)
+                        .build()
+
+                    feedImageLoader.enqueue(request)
                 }
             }
         }
