@@ -35,7 +35,7 @@ internal class ArticleFeedMediator(
     private val articlesApi: ArticlesApi,
     private val database: PrimalDatabase,
     private val dispatcherProvider: DispatcherProvider,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, ArticlePO>() {
 
     private val lastRequests: MutableMap<LoadType, Pair<ArticleFeedRequestBody, Long>> = mutableMapOf()
@@ -115,7 +115,7 @@ internal class ArticleFeedMediator(
                 )
             }
         }
-        mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+        mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
         lastRequests[loadType] = request to Clock.System.now().epochSeconds
         return response
     }

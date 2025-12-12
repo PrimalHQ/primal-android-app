@@ -55,7 +55,7 @@ class FeedsRepositoryImpl(
     private val feedsApi: FeedsApi,
     private val database: PrimalDatabase,
     private val signatureHandler: NostrEventSignatureHandler,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : FeedsRepository {
 
     private val appBuildHelper = createAppBuildHelper()
@@ -216,7 +216,7 @@ class FeedsRepositoryImpl(
         val response = withContext(dispatcherProvider.io()) {
             feedsApi.getFeaturedFeeds(specKind = specKind, pubkey = userId)
         }
-        mediaCacher.cacheAvatarUrls(metadata = response.userMetadata, cdnResources = response.cdnResources)
+        mediaCacher?.cacheAvatarUrls(metadata = response.userMetadata, cdnResources = response.cdnResources)
         val eventStatsMap = response.scores.parseAndMapContentByKey<ContentPrimalEventStats> { eventId }
         val metadata = response.feedMetadata.parseAndMapContentByKey<ContentDvmFeedMetadata> { eventId }
         val userStats = response.feedUserStats.parseAndMapContentByKey<ContentPrimalEventUserStats> { eventId }

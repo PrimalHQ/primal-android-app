@@ -39,7 +39,7 @@ internal class ChatRepositoryImpl(
     private val messagesApi: MessagesApi,
     private val messagesProcessor: MessagesProcessor,
     private val primalPublisher: PrimalPublisher,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : ChatRepository {
 
     override fun newestConversations(userId: String, relation: ConversationRelation) =
@@ -61,7 +61,7 @@ internal class ChatRepositoryImpl(
                 ),
             )
         }
-        mediaCacher.cacheAvatarUrls(metadata = response.profileMetadata, cdnResources = response.cdnResources)
+        mediaCacher?.cacheAvatarUrls(metadata = response.profileMetadata, cdnResources = response.cdnResources)
         val summary = response.conversationsSummary
         val rawConversations = summary?.summaryPerParticipantId?.keys ?: emptyList()
         val messageConversation = rawConversations
@@ -121,7 +121,7 @@ internal class ChatRepositoryImpl(
                     since = latestMessage?.createdAt ?: 0,
                 ),
             )
-            mediaCacher.cacheAvatarUrls(metadata = response.profileMetadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.profileMetadata, cdnResources = response.cdnResources)
             messagesProcessor.processMessageEventsAndSave(
                 userId = userId,
                 messages = response.messages,

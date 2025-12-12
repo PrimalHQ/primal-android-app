@@ -25,7 +25,7 @@ internal class MessagesRemoteMediator(
     private val database: PrimalDatabase,
     private val messagesApi: MessagesApi,
     private val messagesProcessor: MessagesProcessor,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, DirectMessage>() {
 
     private val lastRequests: MutableMap<LoadType, MessagesRequestBody> = mutableMapOf()
@@ -82,7 +82,7 @@ internal class MessagesRemoteMediator(
             Napier.w(error) { "Failed to get remote messages." }
             return MediatorResult.Error(error)
         }
-        mediaCacher.cacheAvatarUrls(metadata = response.profileMetadata, cdnResources = response.cdnResources)
+        mediaCacher?.cacheAvatarUrls(metadata = response.profileMetadata, cdnResources = response.cdnResources)
 
         lastRequests[loadType] = requestBody
 

@@ -36,7 +36,7 @@ class ArticleRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val articlesApi: ArticlesApi,
     private val database: PrimalDatabase,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : ArticleRepository {
 
     override fun feedBySpec(userId: String, feedSpec: String): Flow<PagingData<ArticleDO>> {
@@ -63,7 +63,7 @@ class ArticleRepositoryImpl(
                 limit = 100,
             ),
         )
-        mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+        mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
         response.persistToDatabaseAsTransaction(userId = userId, database = database)
         response.persistArticleCommentsToDatabase(
             articleId = articleId,
@@ -85,7 +85,7 @@ class ArticleRepositoryImpl(
                 kind = NostrEventKind.LongFormContent.value,
             ),
         )
-        mediaCacher.cacheAvatarUrls(
+        mediaCacher?.cacheAvatarUrls(
             metadata = highlightsResponse.profileMetadatas,
             cdnResources = highlightsResponse.cdnResources,
         )

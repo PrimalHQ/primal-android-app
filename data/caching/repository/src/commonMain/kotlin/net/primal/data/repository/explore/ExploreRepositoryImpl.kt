@@ -58,7 +58,7 @@ class ExploreRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val exploreApi: ExploreApi,
     private val database: PrimalDatabase,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : ExploreRepository {
 
     override suspend fun fetchTrendingZaps(userId: String): List<ExploreZapNoteData> =
@@ -71,7 +71,7 @@ class ExploreRepositoryImpl(
                     ),
                 )
             }
-            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
@@ -142,7 +142,7 @@ class ExploreRepositoryImpl(
                     ),
                 )
             }
-            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
@@ -197,7 +197,7 @@ class ExploreRepositoryImpl(
                     offset = offset,
                 ),
             )
-            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response.processAndPersistFollowLists(database = database)
         }
@@ -210,7 +210,7 @@ class ExploreRepositoryImpl(
                     identifier = identifier,
                 ),
             )
-            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response.processAndPersistFollowLists(database = database).firstOrNull()
         }
@@ -267,7 +267,7 @@ class ExploreRepositoryImpl(
                 )
             }.sortedByDescending { it.score }
 
-            mediaCacher.cacheAvatarUrls(metadata = response.contactsMetadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.contactsMetadata, cdnResources = response.cdnResources)
             database.withTransaction {
                 database.profiles().insertOrUpdateAll(data = profiles)
                 database.profileStats().insertOrIgnore(data = result.map { it.asProfileStatsPO() })

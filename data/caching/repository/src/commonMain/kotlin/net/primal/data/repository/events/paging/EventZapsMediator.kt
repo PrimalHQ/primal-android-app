@@ -23,7 +23,7 @@ class EventZapsMediator(
     private val dispatcherProvider: DispatcherProvider,
     private val eventStatsApi: EventStatsApi,
     private val database: PrimalDatabase,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, EventZap>() {
 
     override suspend fun load(loadType: LoadType, state: PagingState<Int, EventZap>): MediatorResult =
@@ -36,7 +36,7 @@ class EventZapsMediator(
                         limit = 100,
                     ),
                 )
-                mediaCacher.cacheAvatarUrls(metadata = response.profiles, cdnResources = response.cdnResources)
+                mediaCacher?.cacheAvatarUrls(metadata = response.profiles, cdnResources = response.cdnResources)
                 response.persistToDatabaseAsTransaction(database)
 
                 MediatorResult.Success(endOfPaginationReached = true)

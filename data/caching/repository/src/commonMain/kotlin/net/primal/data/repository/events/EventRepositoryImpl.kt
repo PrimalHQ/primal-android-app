@@ -60,7 +60,7 @@ class EventRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val eventStatsApi: EventStatsApi,
     private val database: PrimalDatabase,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : EventRepository {
 
     override fun observeEventStats(eventIds: List<String>) =
@@ -78,7 +78,7 @@ class EventRepositoryImpl(
                     limit = 100,
                 ),
             )
-            mediaCacher.cacheAvatarUrls(metadata = response.profiles, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.profiles, cdnResources = response.cdnResources)
 
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
             val primalNames = response.primalUserNames.parseAndMapPrimalUserNames()
@@ -122,7 +122,7 @@ class EventRepositoryImpl(
                 limit = limit,
             ),
         )
-        mediaCacher.cacheAvatarUrls(metadata = response.profiles, cdnResources = response.cdnResources)
+        mediaCacher?.cacheAvatarUrls(metadata = response.profiles, cdnResources = response.cdnResources)
         response.persistToDatabaseAsTransaction(database = database)
     }
 
@@ -165,7 +165,7 @@ class EventRepositoryImpl(
         }
 
     private suspend fun persistReplaceableEventResponse(response: ReplaceableEventResponse) {
-        mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+        mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
         val eventHints = response.relayHints.flatMapAsEventHintsPO()
         val wordsCountMap = response.wordCount.flatMapAsWordCount()

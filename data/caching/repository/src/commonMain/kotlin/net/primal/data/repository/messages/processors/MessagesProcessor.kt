@@ -34,7 +34,7 @@ internal class MessagesProcessor(
     private val feedApi: FeedApi,
     private val usersApi: UsersApi,
     private val messageCipher: MessageCipher,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) {
 
     suspend fun processMessageEventsAndSave(
@@ -85,7 +85,7 @@ internal class MessagesProcessor(
         val remoteNotes = if (missingEventIds.isNotEmpty()) {
             try {
                 val response = feedApi.getNotes(noteIds = missingEventIds)
-                mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+                mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
                 response.persistToDatabaseAsTransaction(
                     userId = userId,
                     database = database,
@@ -118,7 +118,7 @@ internal class MessagesProcessor(
         val remoteProfiles = if (missingProfileIds.isNotEmpty()) {
             try {
                 val response = usersApi.getUserProfilesMetadata(userIds = missingProfileIds)
-                mediaCacher.cacheAvatarUrls(metadata = response.metadataEvents, cdnResources = response.cdnResources)
+                mediaCacher?.cacheAvatarUrls(metadata = response.metadataEvents, cdnResources = response.cdnResources)
                 val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
                 val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
                 val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()

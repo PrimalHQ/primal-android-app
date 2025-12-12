@@ -30,7 +30,7 @@ class NotificationsRemoteMediator(
     private val dispatcherProvider: DispatcherProvider,
     private val notificationsApi: NotificationsApi,
     private val database: PrimalDatabase,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, Notification>() {
 
     private var lastSeenTimestamp: Long = Instant.DISTANT_PAST.epochSeconds
@@ -113,7 +113,7 @@ class NotificationsRemoteMediator(
             return MediatorResult.Error(error)
         }
 
-        mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+        mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
         lastRequests[loadType] = requestBody
 
         val streamData = response.liveActivity.mapNotNullAsStreamDataPO()

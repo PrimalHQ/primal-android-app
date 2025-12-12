@@ -27,7 +27,7 @@ class NotificationRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
     private val notificationsApi: NotificationsApi,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : NotificationRepository {
 
     override fun observeUnseenNotifications(ownerId: String) =

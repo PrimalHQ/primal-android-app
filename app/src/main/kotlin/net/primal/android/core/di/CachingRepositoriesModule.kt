@@ -39,7 +39,7 @@ object CachingRepositoriesModule {
     @Provides
     fun providesArticleRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-        mediaCacher: MediaCacher,
+        mediaCacher: MediaCacher?,
     ): ArticleRepository {
         return PrimalRepositoryFactory.createArticleRepository(
             cachingPrimalApiClient = primalApiClient,
@@ -68,7 +68,7 @@ object CachingRepositoriesModule {
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         messageCipher: MessageCipher,
         primalPublisher: PrimalPublisher,
-        mediaCacher: MediaCacher,
+        mediaCacher: MediaCacher?,
     ): ChatRepository =
         PrimalRepositoryFactory.createChatRepository(
             cachingPrimalApiClient = primalApiClient,
@@ -80,7 +80,7 @@ object CachingRepositoriesModule {
     @Provides
     fun provideFeedRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-        mediaCacher: MediaCacher,
+        mediaCacher: MediaCacher?,
     ): FeedRepository =
         PrimalRepositoryFactory.createFeedRepository(
             cachingPrimalApiClient = primalApiClient,
@@ -91,7 +91,7 @@ object CachingRepositoriesModule {
     fun provideFeedsRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         nostrNotary: NostrNotary,
-        mediaCacher: MediaCacher,
+        mediaCacher: MediaCacher?,
     ): FeedsRepository =
         PrimalRepositoryFactory.createFeedsRepository(
             cachingPrimalApiClient = primalApiClient,
@@ -102,7 +102,7 @@ object CachingRepositoriesModule {
     @Provides
     fun provideEventRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-        mediaCacher: MediaCacher,
+        mediaCacher: MediaCacher?,
     ): EventRepository =
         PrimalRepositoryFactory.createEventRepository(
             cachingPrimalApiClient = primalApiClient,
@@ -128,7 +128,7 @@ object CachingRepositoriesModule {
     @Provides
     fun provideExploreRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-        mediaCacher: MediaCacher,
+        mediaCacher: MediaCacher?,
     ): ExploreRepository =
         PrimalRepositoryFactory.createExploreRepository(
             cachingPrimalApiClient = primalApiClient,
@@ -139,7 +139,7 @@ object CachingRepositoriesModule {
     fun provideProfileRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
-        mediaCacher: MediaCacher,
+        mediaCacher: MediaCacher?,
     ): ProfileRepository =
         PrimalRepositoryFactory.createProfileRepository(
             cachingPrimalApiClient = primalApiClient,
@@ -157,7 +157,7 @@ object CachingRepositoriesModule {
     @Provides
     fun provideNotificationRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
-        mediaCacher: MediaCacher,
+        mediaCacher: MediaCacher?,
     ): NotificationRepository =
         PrimalRepositoryFactory.createNotificationRepository(
             cachingPrimalApiClient = primalApiClient,
@@ -188,7 +188,7 @@ object CachingRepositoriesModule {
     fun provideStreamRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
-        mediaCacher: MediaCacher,
+        mediaCacher: MediaCacher?,
     ): StreamRepository =
         PrimalRepositoryFactory.createStreamRepository(
             cachingPrimalApiClient = primalApiClient,

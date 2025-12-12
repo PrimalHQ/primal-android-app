@@ -43,7 +43,7 @@ internal class FeedRepositoryImpl(
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
     private val dispatcherProvider: DispatcherProvider,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : FeedRepository {
 
     override fun feedBySpec(
@@ -153,7 +153,7 @@ internal class FeedRepositoryImpl(
                 throw NetworkException(message = error.message, cause = error)
             }
 
-            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
@@ -164,7 +164,7 @@ internal class FeedRepositoryImpl(
         withContext(dispatcherProvider.io()) {
             val response = feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
 
-            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
@@ -214,7 +214,7 @@ internal class FeedRepositoryImpl(
                 ),
             )
 
-            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response.asFeedPageSnapshot()
         }

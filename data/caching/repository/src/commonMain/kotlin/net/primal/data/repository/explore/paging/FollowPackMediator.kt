@@ -32,7 +32,7 @@ internal class FollowPackMediator(
     private val exploreApi: ExploreApi,
     private val database: PrimalDatabase,
     private val dispatcherProvider: DispatcherProvider,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, FollowPackPO>() {
 
     private val lastRequests: MutableMap<LoadType, Pair<FollowListsRequestBody, Long>> =
@@ -75,7 +75,7 @@ internal class FollowPackMediator(
                 nextUntil = nextUntil,
                 loadType = loadType,
             )
-            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             processAndPersistToDatabase(
                 response = response,

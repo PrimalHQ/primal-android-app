@@ -37,7 +37,7 @@ internal class NoteFeedRemoteMediator(
     private val userId: String,
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
-    private val mediaCacher: MediaCacher,
+    private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, FeedPost>() {
 
     private val lastRequests: MutableMap<LoadType, Pair<FeedBySpecRequestBody, Long>> = mutableMapOf()
@@ -164,7 +164,7 @@ internal class NoteFeedRemoteMediator(
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             response.paging ?: throw NetworkException("PagingEvent not found.")
 
-            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response
         }
@@ -195,7 +195,7 @@ internal class NoteFeedRemoteMediator(
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             if (response.paging == null) throw NetworkException("PagingEvent not found.")
 
-            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response
         }
@@ -226,7 +226,7 @@ internal class NoteFeedRemoteMediator(
             val response = withContext(dispatcherProvider.io()) { feedApi.getFeedBySpec(body = requestBody) }
             if (response.paging == null) throw NetworkException("PagingEvent not found.")
 
-            mediaCacher.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response
         }
