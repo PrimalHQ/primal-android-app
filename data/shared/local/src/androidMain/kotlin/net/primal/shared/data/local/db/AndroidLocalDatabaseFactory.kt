@@ -18,7 +18,9 @@ object AndroidLocalDatabaseFactory {
     ): T {
         val appContext = context.applicationContext
         val dbFile = context.getDatabasePath(databaseName)
-        return buildLocalDatabase {
+        return buildLocalDatabase(
+            fallbackToDestructiveMigration = fallbackToDestructiveMigration,
+        ) {
             Room.databaseBuilder<T>(context = appContext, name = dbFile.absolutePath)
                 .fallbackToDestructiveMigration(dropAllTables = fallbackToDestructiveMigration)
                 .setQueryCoroutineContext(AndroidDispatcherProvider().io())
