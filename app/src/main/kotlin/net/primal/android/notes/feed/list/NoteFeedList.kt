@@ -64,7 +64,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
-import net.primal.android.core.compose.attachment.model.isMediaUri
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
@@ -73,18 +72,19 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.di.rememberMediaCacher
 import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.FloatingNewDataHostTopPadding
+import net.primal.android.events.ui.findNearestOrNull
 import net.primal.android.notes.feed.list.NoteFeedContract.UiEvent
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.FeedPostsSyncStats
 import net.primal.android.notes.feed.model.StreamPillUi
 import net.primal.android.notes.feed.model.StreamsSyncStats
-import net.primal.android.notes.feed.note.ui.attachment.FOUR_IMAGES
-import net.primal.android.notes.feed.note.ui.attachment.findBestImageUrl
+import net.primal.android.notes.feed.note.ui.attachment.MaxDisplayImages
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.core.caching.MediaCacher
 import net.primal.domain.links.CdnImage
 import net.primal.domain.links.EventUriType
+import timber.log.Timber
 
 @Composable
 fun NoteFeedList(
@@ -551,6 +551,9 @@ private fun FeedMediaPreloader(
             val urls = initialItems.flatMap { it.extractMediaUrls(feedWidthPx) }
 
             if (urls.isNotEmpty()) {
+                urls.forEach {
+                    Timber.tag("PreCacheAsync").i("\uD83E\uDD16 E1 Caching $it")
+                }
                 currentMediaCacher.preCacheFeedMedia(urls)
             }
         }
@@ -569,6 +572,9 @@ private fun FeedMediaPreloader(
                         val urls = upcomingItems.flatMap { it.extractMediaUrls(feedWidthPx) }
 
                         if (urls.isNotEmpty()) {
+                            urls.forEach {
+                                Timber.tag("PreCacheAsync").i("\uD83E\uDD16 E2 Caching $it")
+                            }
                             currentMediaCacher.preCacheFeedMedia(urls)
                         }
                     }
@@ -578,26 +584,40 @@ private fun FeedMediaPreloader(
 }
 
 private fun FeedPostUi.extractMediaUrls(feedWidthPx: Int): List<String> {
-    val mediaAttachments = this.uris.filter { it.isMediaUri() }
-    val linkAttachments = this.uris.filterNot { it.isMediaUri() }
-
-    val urlsToCache = mutableListOf<String>()
-
-    mediaAttachments.take(FOUR_IMAGES).forEach { uri ->
-        when (uri.type) {
-            EventUriType.Image -> {
-                uri.findBestImageUrl(maxWidthPx = feedWidthPx)?.let { urlsToCache.add(it) }
-            }
-            EventUriType.Video -> {
-                uri.thumbnailUrl?.let { urlsToCache.add(it) }
-            }
-            else -> Unit
+    val directNoteMediaUrls = this.uris
+        .filter { it.type == EventUriType.Image }
+        .take(MaxDisplayImages)
+        .map { eventUri ->
+            val cdnUrl = eventUri.variants.findNearestOrNull(maxWidthPx = feedWidthPx)?.mediaUrl
+            cdnUrl ?: eventUri.url
         }
-    }
 
-    linkAttachments.take(2).forEach { uri ->
-        uri.thumbnailUrl?.let { urlsToCache.add(it) }
-    }
+    val directNoteThumbnailUrls = this.uris.mapNotNull { it.thumbnailUrl }
 
-    return urlsToCache
+    val referencedNoteImageUrls = this.nostrUris.map {
+        val refAttachments = it.referencedNote?.attachments
+        val thumbnails = refAttachments
+            ?.mapNotNull { link -> link.thumbnail }
+            ?: emptyList()
+
+        val media = refAttachments
+            ?.filter { link -> link.type == EventUriType.Image }
+            ?.take(MaxDisplayImages)
+            ?.map { link ->
+                val cdnUrl = link.variants.findNearestOrNull(maxWidthPx = feedWidthPx)?.mediaUrl
+                cdnUrl ?: link.url
+            }
+            ?: emptyList()
+
+        thumbnails + media
+    }.flatten()
+
+    val referencedArticleImageUrls = this.nostrUris
+        .mapNotNull { it.referencedArticle?.articleImageCdnImage }
+        .map { cdnImage ->
+            val cdnUrl = cdnImage.variants.findNearestOrNull(maxWidthPx = feedWidthPx)?.mediaUrl
+            cdnUrl ?: cdnImage.sourceUrl
+        }
+
+    return directNoteMediaUrls + directNoteThumbnailUrls + referencedNoteImageUrls + referencedArticleImageUrls
 }

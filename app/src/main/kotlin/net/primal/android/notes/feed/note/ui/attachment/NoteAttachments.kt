@@ -20,6 +20,8 @@ import net.primal.android.notes.feed.note.ui.NoteYouTubeLinkPreview
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.domain.links.EventUriType
 
+const val MaxLinkAttachmentsInFeed = 2
+
 @ExperimentalFoundationApi
 @Composable
 fun NoteAttachments(
@@ -39,7 +41,7 @@ fun NoteAttachments(
     val linkAttachments = remember(eventUris) {
         eventUris
             .filterNot { it.isMediaUri() }
-            .take(n = if (!expanded) 2 else Int.MAX_VALUE)
+            .take(n = if (!expanded) MaxLinkAttachmentsInFeed else Int.MAX_VALUE)
             .filter {
                 when (it.type) {
                     EventUriType.YouTube, EventUriType.Rumble, EventUriType.Spotify -> {
