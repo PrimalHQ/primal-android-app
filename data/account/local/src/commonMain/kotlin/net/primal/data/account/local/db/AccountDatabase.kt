@@ -14,6 +14,7 @@ import net.primal.data.account.local.dao.AppPermissionData
 import net.primal.data.account.local.dao.AppPermissionDataDao
 import net.primal.data.account.local.dao.AppSessionData
 import net.primal.data.account.local.dao.AppSessionDataDao
+import net.primal.data.account.local.dao.LocalAppDao
 import net.primal.data.account.local.dao.LocalAppData
 import net.primal.data.account.local.dao.LocalAppSessionData
 import net.primal.data.account.local.dao.LocalAppSessionEventData
@@ -45,6 +46,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AccountDatabase : RoomDatabase() {
     abstract fun connections(): AppConnectionDataDao
+    abstract fun localApps(): LocalAppDao
     abstract fun permissions(): AppPermissionDataDao
     abstract fun sessions(): AppSessionDataDao
     abstract fun sessionEvents(): SessionEventDataDao

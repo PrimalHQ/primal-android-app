@@ -10,12 +10,14 @@ import net.primal.data.account.remote.api.createWellKnownApi
 import net.primal.data.account.repository.repository.ConnectionRepositoryImpl
 import net.primal.data.account.repository.repository.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.InternalSessionEventRepository
+import net.primal.data.account.repository.repository.LocalAppRepositoryImpl
 import net.primal.data.account.repository.repository.PermissionsRepositoryImpl
 import net.primal.data.account.repository.repository.SessionEventRepositoryImpl
 import net.primal.data.account.repository.repository.SessionRepositoryImpl
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
 import net.primal.domain.account.handler.Nip46EventsHandler
 import net.primal.domain.account.repository.ConnectionRepository
+import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
@@ -42,6 +44,12 @@ abstract class RepositoryFactory {
             database = resolveAccountDatabase(),
             dispatchers = dispatcherProvider,
             wellKnownApi = wellKnownApi,
+        )
+
+    fun createLocalAppRepository(): LocalAppRepository =
+        LocalAppRepositoryImpl(
+            database = resolveAccountDatabase(),
+            dispatchers = dispatcherProvider,
         )
 
     fun createSessionRepository(): SessionRepository =
