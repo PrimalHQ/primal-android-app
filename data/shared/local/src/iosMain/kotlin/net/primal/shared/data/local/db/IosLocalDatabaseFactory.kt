@@ -19,7 +19,7 @@ object IosLocalDatabaseFactory {
         callback: RoomDatabase.Callback? = null,
     ): T {
         val dbFilePath = documentDirectory() + "/$databaseName"
-        return buildLocalDatabase {
+        return buildLocalDatabase(fallbackToDestructiveMigration = fallbackToDestructiveMigration) {
             Room.databaseBuilder<T>(name = dbFilePath)
                 .fallbackToDestructiveMigration(dropAllTables = fallbackToDestructiveMigration)
                 .setQueryCoroutineContext(IOSDispatcherProvider().io())
