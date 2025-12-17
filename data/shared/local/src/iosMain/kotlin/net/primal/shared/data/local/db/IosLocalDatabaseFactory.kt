@@ -21,7 +21,6 @@ object IosLocalDatabaseFactory {
         val dbFilePath = documentDirectory() + "/$databaseName"
         return buildLocalDatabase(fallbackToDestructiveMigration = fallbackToDestructiveMigration) {
             Room.databaseBuilder<T>(name = dbFilePath)
-                .fallbackToDestructiveMigration(dropAllTables = fallbackToDestructiveMigration)
                 .setQueryCoroutineContext(IOSDispatcherProvider().io())
                 .setDriver(NativeSQLiteDriver())
                 .run {

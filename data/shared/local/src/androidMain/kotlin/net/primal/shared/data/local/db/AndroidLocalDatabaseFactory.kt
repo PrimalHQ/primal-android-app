@@ -22,7 +22,6 @@ object AndroidLocalDatabaseFactory {
             fallbackToDestructiveMigration = fallbackToDestructiveMigration,
         ) {
             Room.databaseBuilder<T>(context = appContext, name = dbFile.absolutePath)
-                .fallbackToDestructiveMigration(dropAllTables = fallbackToDestructiveMigration)
                 .setQueryCoroutineContext(AndroidDispatcherProvider().io())
                 .setDriver(AndroidSQLiteDriver())
                 .run {
