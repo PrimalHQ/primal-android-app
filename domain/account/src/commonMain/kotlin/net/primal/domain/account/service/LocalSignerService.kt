@@ -8,7 +8,7 @@ import net.primal.domain.account.model.LocalSignerMethodResponse
 import net.primal.domain.account.model.SessionEventUserChoice
 
 interface LocalSignerService {
-    suspend fun processMethod(method: LocalSignerMethod): Boolean
+    suspend fun processMethod(method: LocalSignerMethod): Result<LocalSignerMethodResponse>
 
     fun subscribeToPendingUserActions(): Flow<List<LocalSignerMethod>>
 

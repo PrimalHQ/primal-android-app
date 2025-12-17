@@ -6,9 +6,10 @@ import net.primal.shared.data.local.encryption.asEncryptable
 
 fun LocalApp.asPO() =
     LocalAppData(
+        identifier = identifier,
         packageName = this.packageName,
-        userPubKey = userPubKey.asEncryptable(),
-        image = image.asEncryptable(),
-        name = name.asEncryptable(),
+        userPubKey = userPubKey,
+        image = image?.asEncryptable(),
+        name = name?.asEncryptable(),
         trustLevel = trustLevel.asPO(),
     )

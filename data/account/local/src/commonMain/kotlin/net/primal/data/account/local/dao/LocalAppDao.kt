@@ -11,6 +11,6 @@ interface LocalAppDao {
     suspend fun upsertAll(data: List<LocalAppData>)
 
     @Transaction
-    @Query("SELECT * FROM LocalAppData WHERE packageName = :packageName")
-    suspend fun findApp(packageName: String): LocalApp?
+    @Query("SELECT * FROM LocalAppData WHERE identifier = :identifier")
+    suspend fun findApp(identifier: String): LocalApp?
 }

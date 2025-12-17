@@ -6,9 +6,10 @@ import net.primal.shared.data.local.encryption.Encryptable
 
 @Entity
 data class LocalAppData(
-    @PrimaryKey val packageName: String,
-    val userPubKey: Encryptable<String>,
-    val image: Encryptable<String>,
-    val name: Encryptable<String>,
+    @PrimaryKey val identifier: String,
+    val packageName: String,
+    val userPubKey: String,
+    val image: Encryptable<String>?,
+    val name: Encryptable<String>?,
     val trustLevel: TrustLevel,
 )

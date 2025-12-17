@@ -10,6 +10,7 @@ sealed class LocalSignerMethod(
     data class GetPublicKey(
         override val eventId: String,
         override val packageName: String,
+        val name: String?,
         val permissions: List<AppPermission>,
     ) : LocalSignerMethod(eventId = eventId, packageName = packageName)
 
@@ -68,5 +69,16 @@ sealed class LocalSignerMethod(
             is Nip44Decrypt -> "nip44_decrypt"
             is Nip44Encrypt -> "nip44_encrypt"
             is SignEvent -> "sign_event:${this.unsignedEvent.kind}"
+        }
+
+    fun extractUserPubKey() =
+        when (this) {
+            is DecryptZapEvent -> this.userPubKey
+            is GetPublicKey -> null
+            is Nip04Decrypt -> this.userPubKey
+            is Nip04Encrypt -> this.userPubKey
+            is Nip44Decrypt -> this.userPubKey
+            is Nip44Encrypt -> this.userPubKey
+            is SignEvent -> this.userPubKey
         }
 }

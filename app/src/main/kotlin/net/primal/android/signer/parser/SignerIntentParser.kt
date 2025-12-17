@@ -1,6 +1,10 @@
 package net.primal.android.signer.parser
 
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
+import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
@@ -14,7 +18,9 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 
 @OptIn(ExperimentalUuidApi::class)
-class SignerIntentParser @Inject constructor() {
+class SignerIntentParser @Inject constructor(
+    @param:ApplicationContext private val context: Context,
+) {
     companion object {
         private const val NOSTR_SIGNER_SCHEME = "nostrsigner"
 
@@ -74,10 +80,13 @@ class SignerIntentParser @Inject constructor() {
                 )
             }
 
+        val (name, image) = getAppLabelAndIcon(packageName = callingPackage)
+
         return LocalSignerMethod.GetPublicKey(
             eventId = Uuid.random().toString(),
             permissions = permissions,
             packageName = callingPackage,
+            name = name,
         )
     }
 
@@ -181,6 +190,16 @@ class SignerIntentParser @Inject constructor() {
             requireNotNull(getStringExtra(column)) {
                 "Missing required argument $column."
             }
+        }
+    }
+
+    fun getAppLabelAndIcon(packageName: String): Pair<String?, Drawable?> {
+        return try {
+            val pm = context.packageManager
+            val appInfo = pm.getApplicationInfo(packageName, 0)
+            pm.getApplicationLabel(appInfo).toString() to pm.getApplicationIcon(appInfo)
+        } catch (_: PackageManager.NameNotFoundException) {
+            null to null
         }
     }
 }

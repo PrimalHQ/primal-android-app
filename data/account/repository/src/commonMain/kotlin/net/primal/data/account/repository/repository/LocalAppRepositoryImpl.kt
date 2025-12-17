@@ -9,6 +9,7 @@ import net.primal.data.account.local.dao.TrustLevel
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asPO
 import net.primal.domain.account.model.LocalApp
+import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.shared.data.local.db.withTransaction
 
@@ -26,15 +27,16 @@ class LocalAppRepositoryImpl(
             }
         }
 
-    override suspend fun canProcessMethod(permissionId: String, packageName: String): Boolean =
+    override suspend fun canProcessMethod(method: LocalSignerMethod): Boolean =
         withContext(dispatchers.io()) {
-            val app = database.localApps().findApp(packageName = packageName)
-                ?: return@withContext false
+            val app = method.extractUserPubKey()?.let { userPubKey ->
+                database.localApps().findApp(identifier = "${method.packageName}:$userPubKey")
+            } ?: return@withContext false
 
             when (app.data.trustLevel) {
                 TrustLevel.Full -> true
                 TrustLevel.Medium -> {
-                    val permission = app.permissions.firstOrNull { it.permissionId == permissionId }
+                    val permission = app.permissions.firstOrNull { it.permissionId == method.getPermissionId() }
 
                     when (permission?.action) {
                         PermissionAction.Approve -> true

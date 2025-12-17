@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import net.primal.core.utils.Result
+import net.primal.core.utils.asSuccess
 import net.primal.core.utils.runCatching
 import net.primal.data.account.repository.builder.LocalSignerMethodResponseBuilder
 import net.primal.data.account.repository.repository.InternalPermissionsRepository
@@ -33,22 +34,18 @@ class LocalSignerServiceImpl(
     private val responses = AtomicReference<List<LocalSignerMethodResponse>>(emptyList())
     private val _pendingUserActionMethods = MutableStateFlow<List<LocalSignerMethod>>(emptyList())
 
-    override suspend fun processMethod(method: LocalSignerMethod): Boolean {
-        val canProcessMethod = localAppRepository.canProcessMethod(
-            permissionId = method.getPermissionId(),
-            packageName = method.packageName,
-        )
+    override suspend fun processMethod(method: LocalSignerMethod): Result<LocalSignerMethodResponse> {
+        val canProcessMethod = localAppRepository.canProcessMethod(method = method)
 
-        if (canProcessMethod) {
-            val response = localSignerMethodResponseBuilder.build(method = method)
-            responses.fetchAndUpdate { it + response }
+        return if (canProcessMethod) {
+            localSignerMethodResponseBuilder.build(method = method).also { response ->
+                responses.fetchAndUpdate { it + response }
+            }.asSuccess()
         } else {
             _pendingUserActionMethods.update { it + method }
+            Result.failure(InsufficientPermissions())
         }
-
-        return canProcessMethod
     }
-
 
     override fun subscribeToPendingUserActions(): Flow<List<LocalSignerMethod>> =
         _pendingUserActionMethods.asStateFlow()
@@ -123,7 +120,7 @@ class LocalSignerServiceImpl(
             }.map { permissionId ->
                 AppPermission(
                     permissionId = permissionId,
-                    clientPubKey = app.packageName,
+                    clientPubKey = app.identifier,
                     action = PermissionAction.Approve,
                 )
             }
@@ -137,4 +134,6 @@ class LocalSignerServiceImpl(
                 )
                 .getOrThrow()
         }
+
+    class InsufficientPermissions : RuntimeException("Insufficient permissions to execute this method.")
 }

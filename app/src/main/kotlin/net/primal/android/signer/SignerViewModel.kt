@@ -68,19 +68,19 @@ class SignerViewModel @Inject constructor(
     private fun respondToMethod(method: LocalSignerMethod) =
         viewModelScope.launch {
             localSignerService.processMethod(method = method)
-            localSignerService.getMethodResponses().firstOrNull()?.let {
-                setEffect(SideEffect.RespondToIntent(it))
-            }
+                .onSuccess { setEffect(SideEffect.RespondToIntent(it)) }
         }
 
     private fun addNewApp(method: LocalSignerMethod.GetPublicKey) =
         viewModelScope.launch {
+            val userPubKey = credentialsStore.credentials.value
+                .first { it.type == CredentialType.PrivateKey }.npub.bech32ToHexOrThrow()
             val app = LocalApp(
+                identifier = "${method.packageName}:$userPubKey",
                 packageName = method.packageName,
-                userPubKey = credentialsStore.credentials.value
-                    .first { it.type == CredentialType.PrivateKey }.npub.bech32ToHexOrThrow(),
-                image = method.packageName,
-                name = method.packageName,
+                userPubKey = userPubKey,
+                image = null,
+                name = method.name,
                 trustLevel = TrustLevel.Full,
                 permissions = method.permissions,
             )
