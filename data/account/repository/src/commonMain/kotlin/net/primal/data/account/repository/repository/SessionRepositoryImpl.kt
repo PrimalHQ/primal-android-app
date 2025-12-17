@@ -55,14 +55,14 @@ class SessionRepositoryImpl(
         withContext(dispatchers.io()) {
             database.sessions().findSession(sessionId = sessionId)
                 ?.asDomain()?.asSuccess()
-                ?: Result.failure(NoSuchElementException("Couldn't find session for given sessionId."))
+                ?: Result.failure(NoSuchElementException("Couldn't find session with id $sessionId."))
         }
 
     override suspend fun findActiveSessionForConnection(clientPubKey: String): Result<AppSession> =
         withContext(dispatchers.io()) {
             runCatching {
                 database.sessions().findActiveSessionByClientPubKey(clientPubKey = clientPubKey)?.asDomain()
-                    ?: throw NoSuchElementException("Couldn't find active session for connection.")
+                    ?: throw NoSuchElementException("Couldn't find active session for connection $clientPubKey.")
             }
         }
 
@@ -78,7 +78,7 @@ class SessionRepositoryImpl(
             } else {
                 Napier.d(tag = "Signer") { "Starting session failed." }
                 Result.failure(
-                    IllegalStateException("There is an already active session for this connection."),
+                    IllegalStateException("There is an already active session for connection $clientPubKey."),
                 )
             }
         }
@@ -87,7 +87,7 @@ class SessionRepositoryImpl(
         withContext(dispatchers.io()) {
             runCatching {
                 database.connections().getConnection(clientPubKey = clientPubKey)
-                    ?: throw NoSuchElementException("Couldn't find connection for given clientPubKey")
+                    ?: throw NoSuchElementException("Couldn't find connection for $clientPubKey")
             }.mapCatching {
                 startSession(clientPubKey = it.data.clientPubKey).getOrThrow()
             }
