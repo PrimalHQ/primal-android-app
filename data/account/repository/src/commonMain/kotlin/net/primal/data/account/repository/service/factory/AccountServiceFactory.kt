@@ -23,9 +23,11 @@ object AccountServiceFactory {
         nostrEncryptionHandler: NostrEncryptionHandler,
         connectionRepository: ConnectionRepository,
         sessionRepository: SessionRepository,
+        sessionInactivityTimeoutInMinutes: Long = 0,
     ): RemoteSignerService =
         RemoteSignerServiceImpl(
             signerKeyPair = signerKeyPair,
+            sessionInactivityTimeoutInMinutes = sessionInactivityTimeoutInMinutes,
             connectionRepository = connectionRepository,
             sessionRepository = sessionRepository,
             nostrRelayManager = NostrRelayManager(

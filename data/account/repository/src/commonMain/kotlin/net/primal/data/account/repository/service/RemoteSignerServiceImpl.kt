@@ -7,6 +7,7 @@ import kotlin.concurrent.atomics.fetchAndUpdate
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
+import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -35,9 +36,10 @@ import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
-@OptIn(ExperimentalAtomicApi::class)
+@OptIn(ExperimentalAtomicApi::class, ExperimentalTime::class)
 class RemoteSignerServiceImpl internal constructor(
     private val signerKeyPair: NostrKeyPair,
+    private val sessionInactivityTimeoutInMinutes: Long,
     private val connectionRepository: ConnectionRepository,
     private val sessionRepository: SessionRepository,
     private val nostrRelayManager: NostrRelayManager,
@@ -54,10 +56,6 @@ class RemoteSignerServiceImpl internal constructor(
     private val sessionActivityMap = AtomicReference<MutableMap<String, Instant>>(mutableMapOf())
     private val retrySendMethodResponseQueue = MutableSharedFlow<RemoteSignerMethodResponse>()
 
-    companion object {
-        private val SESSION_INACTIVITY_TIMEOUT = 15.minutes
-    }
-
     override fun initialize() {
         Napier.d(tag = "Signer") { "RemoteSignerService started." }
         observeOngoingSessions()
@@ -67,7 +65,9 @@ class RemoteSignerServiceImpl internal constructor(
         observeMethods()
         observeErrors()
         observeRetryMethodResponseQueue()
-        startInactivityLoop()
+        if (sessionInactivityTimeoutInMinutes > 0) {
+            startInactivityLoop()
+        }
     }
 
     private fun startInactivityLoop() =
@@ -78,7 +78,7 @@ class RemoteSignerServiceImpl internal constructor(
                 val now = Clock.System.now()
 
                 val inactiveSessions = sessionActivityMap.load().filter { (_, lastActiveAt) ->
-                    (lastActiveAt + SESSION_INACTIVITY_TIMEOUT) < now
+                    (lastActiveAt + sessionInactivityTimeoutInMinutes.minutes) < now
                 }
 
                 sessionRepository.endSessions(sessionIds = inactiveSessions.keys.toList())

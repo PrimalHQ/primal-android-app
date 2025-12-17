@@ -22,6 +22,7 @@ class RemoteSignerServiceFactory @Inject constructor(
     fun create(signerKeyPair: NostrKeyPair): RemoteSignerService =
         AccountServiceFactory.createRemoteSignerService(
             signerKeyPair = signerKeyPair,
+            sessionInactivityTimeoutInMinutes = 15,
             eventSignatureHandler = eventSignatureHandler,
             nostrEncryptionHandler = nostrEncryptionHandler,
             connectionRepository = connectionRepository,
