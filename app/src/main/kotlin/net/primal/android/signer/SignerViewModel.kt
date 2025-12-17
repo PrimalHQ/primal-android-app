@@ -68,7 +68,9 @@ class SignerViewModel @Inject constructor(
     private fun respondToMethod(method: LocalSignerMethod) =
         viewModelScope.launch {
             localSignerService.processMethod(method = method)
-                .onSuccess { response -> setEffect(SideEffect.RespondToIntent(response)) }
+            localSignerService.getMethodResponses().firstOrNull()?.let {
+                setEffect(SideEffect.RespondToIntent(it))
+            }
         }
 
     private fun addNewApp(method: LocalSignerMethod.GetPublicKey) =
@@ -87,7 +89,7 @@ class SignerViewModel @Inject constructor(
                 .onSuccess {
                     setEffect(
                         SideEffect.RespondToIntent(
-                            LocalSignerMethodResponse.GetPublicKey(
+                            LocalSignerMethodResponse.Success.GetPublicKey(
                                 eventId = Uuid.random().toString(),
                                 pubkey = app.userPubKey.hexToNpubHrp(),
                             ),

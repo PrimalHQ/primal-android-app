@@ -18,6 +18,7 @@ import net.primal.data.account.repository.service.LocalSignerServiceImpl
 import net.primal.data.account.repository.service.RemoteSignerServiceImpl
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.LocalAppRepository
+import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.LocalSignerService
 import net.primal.domain.account.service.RemoteSignerService
@@ -73,11 +74,13 @@ object AccountServiceFactory {
 
     fun createLocalSignerService(
         localAppRepository: LocalAppRepository,
+        permissionsRepository: PermissionsRepository,
         nostrEncryptionHandler: NostrEncryptionHandler,
         eventSignatureHandler: NostrEventSignatureHandler,
     ): LocalSignerService =
         LocalSignerServiceImpl(
             localAppRepository = localAppRepository,
+            permissionsRepository = permissionsRepository,
             localSignerMethodResponseBuilder = LocalSignerMethodResponseBuilder(
                 nostrEncryptionHandler = nostrEncryptionHandler,
                 nostrEventSignatureHandler = eventSignatureHandler,

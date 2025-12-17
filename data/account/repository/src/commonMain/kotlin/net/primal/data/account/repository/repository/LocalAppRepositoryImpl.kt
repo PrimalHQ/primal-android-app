@@ -4,6 +4,8 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
+import net.primal.data.account.local.dao.PermissionAction
+import net.primal.data.account.local.dao.TrustLevel
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asPO
 import net.primal.domain.account.model.LocalApp
@@ -21,6 +23,26 @@ class LocalAppRepositoryImpl(
                     database.localApps().upsertAll(data = listOf(app.asPO()))
                     database.permissions().upsertAll(data = app.permissions.map { it.asPO() })
                 }
+            }
+        }
+
+    override suspend fun canProcessMethod(permissionId: String, packageName: String): Boolean =
+        withContext(dispatchers.io()) {
+            val app = database.localApps().findApp(packageName = packageName)
+                ?: return@withContext false
+
+            when (app.data.trustLevel) {
+                TrustLevel.Full -> true
+                TrustLevel.Medium -> {
+                    val permission = app.permissions.firstOrNull { it.permissionId == permissionId }
+
+                    when (permission?.action) {
+                        PermissionAction.Approve -> true
+                        PermissionAction.Deny, PermissionAction.Ask, null -> false
+                    }
+                }
+
+                TrustLevel.Low -> false
             }
         }
 }

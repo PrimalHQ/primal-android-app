@@ -56,11 +56,13 @@ object AccountRepositoriesModule {
     @Provides
     fun provideLocalSignerService(
         localAppRepository: LocalAppRepository,
+        permissionsRepository: PermissionsRepository,
         nostrEncryptionHandler: NostrEncryptionHandler,
         eventSignatureHandler: NostrEventSignatureHandler,
     ): LocalSignerService =
         AccountServiceFactory.createLocalSignerService(
             localAppRepository = localAppRepository,
+            permissionsRepository = permissionsRepository,
             nostrEncryptionHandler = nostrEncryptionHandler,
             eventSignatureHandler = eventSignatureHandler,
         )
