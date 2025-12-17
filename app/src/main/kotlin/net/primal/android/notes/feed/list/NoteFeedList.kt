@@ -60,6 +60,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
@@ -84,7 +85,6 @@ import net.primal.android.theme.AppTheme
 import net.primal.core.caching.MediaCacher
 import net.primal.domain.links.CdnImage
 import net.primal.domain.links.EventUriType
-import timber.log.Timber
 
 @Composable
 fun NoteFeedList(
@@ -199,7 +199,7 @@ private fun NoteFeedList(
     BoxWithConstraints {
         val feedWidthPx = with(LocalDensity.current) { constraints.maxWidth }
 
-        FeedMediaPreloader(
+        FeedMediaUrlPreLoader(
             pagingItems = pagingItems,
             listState = listState,
             mediaCacher = mediaCacher,
@@ -534,8 +534,9 @@ private fun NewPillStringIndicator(
 private const val INITIAL_PRELOAD_COUNT = 10
 private const val SCROLL_PRELOAD_COUNT = 5
 
+@OptIn(FlowPreview::class)
 @Composable
-private fun FeedMediaPreloader(
+private fun FeedMediaUrlPreLoader(
     pagingItems: LazyPagingItems<FeedPostUi>,
     listState: LazyListState,
     mediaCacher: MediaCacher,
@@ -544,37 +545,41 @@ private fun FeedMediaPreloader(
 ) {
     val currentMediaCacher by rememberUpdatedState(mediaCacher)
 
-    LaunchedEffect(pagingItems.itemSnapshotList) {
-        if (pagingItems.itemCount > 0) {
-            val countToPreload = minOf(preloadCount, pagingItems.itemCount)
-            val initialItems = (0 until countToPreload).mapNotNull { pagingItems.peek(it) }
-            val urls = initialItems.flatMap { it.extractMediaUrls(feedWidthPx) }
+    LaunchedEffect(pagingItems) {
+        snapshotFlow { pagingItems.itemCount > 0 }
+            .distinctUntilChanged()
+            .filter { it }
+            .take(1)
+            .collect {
+                withContext(Dispatchers.Default) {
+                    val countToPreload = minOf(preloadCount, pagingItems.itemCount)
+                    val initialItems = (0 until countToPreload).mapNotNull { pagingItems.peek(it) }
+                    val urls = initialItems.flatMap { it.extractMediaUrls(feedWidthPx) }
 
-            if (urls.isNotEmpty()) {
-                urls.forEach {
-                    Timber.tag("PreCacheAsync").i("\uD83E\uDD16 E1 Caching $it")
+                    if (urls.isNotEmpty()) {
+                        currentMediaCacher.preCacheFeedMedia(urls)
+                    }
                 }
-                currentMediaCacher.preCacheFeedMedia(urls)
             }
-        }
     }
 
     LaunchedEffect(listState, pagingItems) {
-        snapshotFlow { listState.firstVisibleItemIndex }
+        snapshotFlow { listState.firstVisibleItemIndex / SCROLL_PRELOAD_COUNT }
+            .distinctUntilChanged()
+            .debounce(150.milliseconds)
             .collect { firstVisible ->
                 val itemCount = pagingItems.itemCount
-                if (itemCount > 0) {
-                    val start = (firstVisible + 1).coerceAtMost(itemCount - 1)
-                    val end = (firstVisible + 1 + SCROLL_PRELOAD_COUNT).coerceAtMost(itemCount)
+                if (itemCount == 0) return@collect
 
-                    if (start < end) {
+                val start = (firstVisible + 1).coerceAtMost(itemCount - 1)
+                val end = (firstVisible + 1 + SCROLL_PRELOAD_COUNT).coerceAtMost(itemCount)
+
+                if (start < end) {
+                    withContext(Dispatchers.Default) {
                         val upcomingItems = (start until end).mapNotNull { pagingItems.peek(it) }
                         val urls = upcomingItems.flatMap { it.extractMediaUrls(feedWidthPx) }
 
                         if (urls.isNotEmpty()) {
-                            urls.forEach {
-                                Timber.tag("PreCacheAsync").i("\uD83E\uDD16 E2 Caching $it")
-                            }
                             currentMediaCacher.preCacheFeedMedia(urls)
                         }
                     }
