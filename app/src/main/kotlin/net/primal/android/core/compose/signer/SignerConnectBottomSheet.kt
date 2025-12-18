@@ -64,6 +64,13 @@ private enum class SignerConnectTab {
     Permissions,
 }
 
+/*
+companion object {
+    val DAILY_BUDGET_OPTIONS = listOf(0L, 1000L, 5000L, 10_000L, 20_000L, 50_000L, 100_000L)
+    val DAILY_BUDGET_PICKER_OPTIONS = DAILY_BUDGET_OPTIONS + listOf(null)
+}
+ */
+
 @Composable
 fun SignerConnectBottomSheet(
     appName: String?,
