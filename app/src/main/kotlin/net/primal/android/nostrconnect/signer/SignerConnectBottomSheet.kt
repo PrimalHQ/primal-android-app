@@ -184,9 +184,9 @@ private fun HeaderSection(
             color = AppTheme.colorScheme.onPrimary,
         )
 
-        appDescription?.let { url ->
+        appDescription?.let { description ->
             Text(
-                text = url,
+                text = description,
                 style = AppTheme.typography.bodyMedium.copy(
                     fontSize = 15.sp,
                     lineHeight = 24.sp,
