@@ -1,13 +1,13 @@
-package net.primal.android.nostrconnect
+package net.primal.android.nostrconnect.signer
 
 import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.domain.account.model.TrustLevel
 
-interface NostrConnectContract {
+interface SignerConnectContract {
     data class UiState(
         val appName: String?,
-        val appWebUrl: String?,
+        val appDescription: String?,
         val appImageUrl: String?,
         val connectionUrl: String?,
         val accounts: List<UserAccountUi> = emptyList(),

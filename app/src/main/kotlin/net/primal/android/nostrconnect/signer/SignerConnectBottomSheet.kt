@@ -1,0 +1,705 @@
+package net.primal.android.nostrconnect.signer
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Tab
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import net.primal.android.R
+import net.primal.android.core.compose.AppIconThumbnail
+import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.SnackbarErrorHandler
+import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.button.PrimalLoadingButton
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.HighSecurity
+import net.primal.android.core.compose.icons.primaliconpack.LowSecurity
+import net.primal.android.core.compose.icons.primaliconpack.MediumSecurity
+import net.primal.android.core.compose.nostrconnect.PermissionsListItem
+import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.core.ext.selectableItem
+import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.drawer.multiaccount.model.UserAccountUi
+import net.primal.android.navigation.primalSlideInHorizontallyFromEnd
+import net.primal.android.navigation.primalSlideOutHorizontallyToEnd
+import net.primal.android.theme.AppTheme
+import net.primal.domain.account.model.TrustLevel
+import net.primal.domain.links.CdnImage
+
+@Composable
+fun SignerConnectBottomSheet(
+    state: SignerConnectContract.UiState,
+    eventPublisher: (SignerConnectContract.UiEvent) -> Unit,
+    onDismissRequest: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context) },
+        onErrorDismiss = { eventPublisher(SignerConnectContract.UiEvent.DismissError) },
+    )
+    /*
+   val isBudgetPickerVisible by remember(state.selectedTab, state.showDailyBudgetPicker) {
+       derivedStateOf {
+           state.selectedTab == SignerConnectContract.Tab.PERMISSIONS && state.showDailyBudgetPicker
+       }
+   }
+     */
+
+    BackHandler {
+        /*
+        if (isBudgetPickerVisible) {
+            eventPublisher(SignerConnectContract.UiEvent.CancelDailyBudget)
+        } else {
+         */
+        onDismissRequest()
+        /*
+        }
+         */
+    }
+
+    Box(modifier = modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            HeaderSection(
+                imageUrl = state.appImageUrl,
+                appName = state.appName,
+                appDescription = state.appDescription,
+            )
+
+            SignerConnectTabNavigation(
+                selectedTab = state.selectedTab,
+                onTabChange = { eventPublisher(SignerConnectContract.UiEvent.ChangeTab(it)) },
+                permissionsTabEnabled = state.accounts.isNotEmpty(),
+            )
+
+            SignerConnectPages(
+                state = state,
+                eventPublisher = eventPublisher,
+            )
+
+            ActionButtons(
+                primaryButtonEnabled = state.selectedAccount != null,
+                primaryButtonLoading = state.connecting,
+                primaryButtonText = stringResource(id = R.string.nostr_connect_connect_button),
+                onPrimaryClick = {
+                    /*
+                    if (isBudgetPickerVisible) {
+                        eventPublisher(SignerConnectContract.UiEvent.ApplyDailyBudget)
+                    } else {
+                     */
+                    eventPublisher(SignerConnectContract.UiEvent.ClickConnect)
+                    /*
+                    }
+                     */
+                },
+                secondaryButtonText = stringResource(id = R.string.nostr_connect_cancel_button),
+                onSecondaryClick = {
+                    /*
+                    if (isBudgetPickerVisible) {
+                        eventPublisher(SignerConnectContract.UiEvent.CancelDailyBudget)
+                    } else {
+                     */
+                    onDismissRequest()
+                    /*
+                    }
+                     */
+                },
+            )
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter),
+        )
+    }
+}
+
+@Composable
+private fun HeaderSection(
+    imageUrl: String?,
+    appName: String?,
+    appDescription: String?,
+) {
+    Column(
+        modifier = Modifier.padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        AppIconThumbnail(
+            avatarCdnImage = imageUrl?.let { CdnImage(sourceUrl = it) },
+            avatarSize = 48.dp,
+            appName = appName,
+        )
+
+        Text(
+            text = appName ?: stringResource(id = R.string.nostr_connect_unknown_app),
+            style = AppTheme.typography.titleLarge.copy(
+                fontSize = 18.sp,
+                lineHeight = 24.sp,
+            ),
+            fontWeight = FontWeight.Bold,
+            color = AppTheme.colorScheme.onPrimary,
+        )
+
+        appDescription?.let { url ->
+            Text(
+                text = url,
+                style = AppTheme.typography.bodyMedium.copy(
+                    fontSize = 15.sp,
+                    lineHeight = 24.sp,
+                ),
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            )
+        }
+    }
+}
+
+@Composable
+private fun SignerConnectTabNavigation(
+    selectedTab: SignerConnectContract.Tab,
+    onTabChange: (SignerConnectContract.Tab) -> Unit,
+    permissionsTabEnabled: Boolean,
+) {
+    val selectedTabIndex = selectedTab.ordinal
+    PrimaryTabRow(
+        selectedTabIndex = selectedTabIndex,
+        containerColor = Color.Transparent,
+        contentColor = AppTheme.colorScheme.onSurface,
+        indicator = {
+            Box(
+                modifier = Modifier
+                    .tabIndicatorOffset(selectedTabIndex)
+                    .height(6.dp)
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 2.dp)
+                    .clip(CircleShape)
+                    .background(color = AppTheme.colorScheme.primary),
+            )
+        },
+        divider = {
+            PrimalDivider()
+        },
+    ) {
+        SignerConnectAppTab(
+            text = stringResource(id = R.string.nostr_connect_login_tab).uppercase(),
+            selected = selectedTab == SignerConnectContract.Tab.LOGIN,
+            onClick = { onTabChange(SignerConnectContract.Tab.LOGIN) },
+        )
+
+        SignerConnectAppTab(
+            text = stringResource(id = R.string.nostr_connect_permissions_tab).uppercase(),
+            selected = selectedTab == SignerConnectContract.Tab.PERMISSIONS,
+            onClick = { onTabChange(SignerConnectContract.Tab.PERMISSIONS) },
+            enabled = permissionsTabEnabled,
+        )
+    }
+}
+
+@Composable
+private fun SignerConnectAppTab(
+    text: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    Tab(
+        modifier = modifier.padding(horizontal = 16.dp),
+        selected = selected,
+        enabled = enabled,
+        onClick = onClick,
+        text = {
+            Text(
+                text = text,
+                style = AppTheme.typography.bodySmall.copy(
+                    fontSize = 14.sp,
+                    lineHeight = 14.sp,
+                ),
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
+                color = if (enabled) {
+                    AppTheme.colorScheme.onPrimary
+                } else {
+                    AppTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                },
+            )
+        },
+    )
+}
+
+@Composable
+private fun SignerConnectPages(
+    state: SignerConnectContract.UiState,
+    eventPublisher: (SignerConnectContract.UiEvent) -> Unit,
+) {
+    AnimatedContent(
+        modifier = Modifier
+            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt3)
+            .height(400.dp),
+        targetState = state.selectedTab,
+        transitionSpec = {
+            val slideIn = if (targetState.ordinal > initialState.ordinal) {
+                primalSlideInHorizontallyFromEnd
+            } else {
+                slideInHorizontally { -it }
+            }
+            val slideOut = if (targetState.ordinal > initialState.ordinal) {
+                primalSlideOutHorizontallyToEnd
+            } else {
+                slideOutHorizontally { it }
+            }
+            slideIn.togetherWith(slideOut)
+        },
+        label = "TabAnimation",
+    ) { tab ->
+        when (tab) {
+            SignerConnectContract.Tab.LOGIN -> LoginContent(
+                accounts = state.accounts,
+                selectedAccountPubkey = state.selectedAccount?.pubkey,
+                onAccountClick = { eventPublisher(SignerConnectContract.UiEvent.SelectAccount(it)) },
+            )
+
+            SignerConnectContract.Tab.PERMISSIONS -> PermissionsContent(
+                trustLevel = state.trustLevel,
+                // dailyBudget = state.dailyBudget,
+                onTrustLevelClick = { eventPublisher(SignerConnectContract.UiEvent.SelectTrustLevel(it)) },
+//                 onDailyBudgetClick = { eventPublisher(SignerConnectContract.UiEvent.ClickDailyBudget) },
+//                 showDailyBudgetPicker = state.showDailyBudgetPicker,
+//                 selectedDailyBudget = state.selectedDailyBudget,
+//                 onDailyBudgetChange = { eventPublisher(SignerConnectContract.UiEvent.ChangeDailyBudget(it)) },
+//                 budgetToUsdMap = state.budgetToUsdMap,
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoginContent(
+    accounts: List<UserAccountUi>,
+    selectedAccountPubkey: String?,
+    onAccountClick: (String) -> Unit,
+) {
+    if (accounts.isEmpty()) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 32.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = stringResource(id = R.string.nostr_connect_no_nsec_accounts_warning),
+                textAlign = TextAlign.Center,
+                style = AppTheme.typography.bodyLarge,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+        }
+    } else {
+        LazyColumn(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .padding(top = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            items(accounts, key = { it.pubkey }) { account ->
+                AccountListItem(
+                    account = account,
+                    isSelected = account.pubkey == selectedAccountPubkey,
+                    onClick = { onAccountClick(account.pubkey) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun AccountListItem(
+    account: UserAccountUi,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    ListItem(
+        modifier = Modifier.selectableItem(
+            selected = isSelected,
+            onClick = onClick,
+        ),
+        colors = ListItemDefaults.colors(containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1),
+        leadingContent = {
+            UniversalAvatarThumbnail(
+                avatarSize = 40.dp,
+                avatarCdnImage = account.avatarCdnImage,
+                avatarBlossoms = account.avatarBlossoms,
+                legendaryCustomization = account.legendaryCustomization,
+            )
+        },
+        headlineContent = {
+            NostrUserText(
+                displayName = account.displayName,
+                internetIdentifier = account.internetIdentifier,
+                legendaryCustomization = account.legendaryCustomization,
+                displayNameColor = AppTheme.colorScheme.onSurface,
+            )
+        },
+        supportingContent = account.internetIdentifier?.let {
+            {
+                Text(
+                    text = it.formatNip05Identifier(),
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun PermissionsContent(
+    trustLevel: TrustLevel,
+    // dailyBudget: Long?,
+    onTrustLevelClick: (TrustLevel) -> Unit,
+    // onDailyBudgetClick: () -> Unit,
+    // showDailyBudgetPicker: Boolean,
+    // selectedDailyBudget: Long?,
+    // onDailyBudgetChange: (Long?) -> Unit,
+    // budgetToUsdMap: Map<Long, BigDecimal?>,
+) {
+    /*
+    AnimatedContent(
+        targetState = showDailyBudgetPicker,
+        label = "PermissionsPickerAnimation",
+    ) { showPicker ->
+        if (showPicker) {
+            DailyBudgetPicker(
+                selectedBudget = selectedDailyBudget,
+                onBudgetChange = onDailyBudgetChange,
+                budgetToUsdMap = budgetToUsdMap,
+            )
+        } else {
+     */
+    PermissionsList(
+        trustLevel = trustLevel,
+        onTrustLevelClick = onTrustLevelClick,
+        // onDailyBudgetClick = onDailyBudgetClick,
+        // dailyBudget = dailyBudget,
+    )
+    /*
+        }
+    }
+     */
+}
+
+@Composable
+private fun PermissionsList(
+    trustLevel: TrustLevel,
+    onTrustLevelClick: (TrustLevel) -> Unit,
+    // onDailyBudgetClick: () -> Unit,
+    // dailyBudget: Long?,
+) {
+    Column(
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(vertical = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        PermissionsListItem(
+            icon = PrimalIcons.HighSecurity,
+            title = stringResource(id = R.string.nostr_connect_full_trust_title),
+            subtitle = stringResource(id = R.string.nostr_connect_full_trust_subtitle),
+            isSelected = trustLevel == TrustLevel.Full,
+            onClick = { onTrustLevelClick(TrustLevel.Full) },
+        )
+        PermissionsListItem(
+            icon = PrimalIcons.MediumSecurity,
+            title = stringResource(id = R.string.nostr_connect_medium_trust_title),
+            subtitle = stringResource(id = R.string.nostr_connect_medium_trust_subtitle),
+            isSelected = trustLevel == TrustLevel.Medium,
+            onClick = { onTrustLevelClick(TrustLevel.Medium) },
+        )
+        PermissionsListItem(
+            icon = PrimalIcons.LowSecurity,
+            title = stringResource(id = R.string.nostr_connect_low_trust_title),
+            subtitle = stringResource(id = R.string.nostr_connect_low_trust_subtitle),
+            isSelected = trustLevel == TrustLevel.Low,
+            onClick = { onTrustLevelClick(TrustLevel.Low) },
+        )
+
+        /*
+        PrimalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        DailyBudgetListItem(
+            dailyBudget = dailyBudget,
+            onClick = onDailyBudgetClick,
+        )
+         */
+    }
+}
+
+/*
+@Composable
+private fun DailyBudgetListItem(dailyBudget: Long?, onClick: () -> Unit) {
+    ListItem(
+        modifier = Modifier
+            .clip(AppTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .background(AppTheme.extraColorScheme.surfaceVariantAlt1),
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+        ),
+        headlineContent = {
+            Text(
+                text = stringResource(id = R.string.nostr_connect_daily_budget_title),
+                color = AppTheme.colorScheme.onPrimary,
+                style = AppTheme.typography.bodyLarge.copy(
+                    fontSize = 16.sp,
+                    lineHeight = 20.sp,
+                ),
+            )
+        },
+        trailingContent = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Row(
+                    modifier = Modifier.padding(top = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    val style = AppTheme.typography.bodyMedium.copy(
+                        fontSize = 16.sp,
+                        lineHeight = 20.sp,
+                    )
+                    Text(
+                        text = NumberFormat.getNumberInstance().format(dailyBudget ?: 0),
+                        color = AppTheme.colorScheme.onPrimary,
+                        style = style,
+                    )
+                    Text(
+                        text = stringResource(id = R.string.nostr_connect_sats_unit),
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        style = style,
+                    )
+                }
+                Icon(
+                    modifier = Modifier.size(16.dp),
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                    contentDescription = null,
+                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                )
+            }
+        },
+    )
+}
+
+@Composable
+private fun DailyBudgetPicker(
+    selectedBudget: Long?,
+    onBudgetChange: (Long?) -> Unit,
+    budgetToUsdMap: Map<Long, BigDecimal?>,
+) {
+    val numberFormat = remember {
+        NumberFormat.getCurrencyInstance().apply {
+            currency = Currency.getInstance("USD")
+            maximumFractionDigits = 2
+            minimumFractionDigits = 2
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .padding(top = 24.dp),
+    ) {
+        Text(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(bottom = 24.dp),
+            text = stringResource(id = R.string.nostr_connect_daily_spending_budget_title),
+            style = AppTheme.typography.bodyLarge.copy(
+                fontSize = 16.sp,
+                lineHeight = 20.sp,
+            ),
+            fontWeight = FontWeight.SemiBold,
+            color = AppTheme.colorScheme.onPrimary,
+        )
+
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            items(DAILY_BUDGET_PICKER_OPTIONS) { budget ->
+                val subtext = if (budget != null) {
+                    budgetToUsdMap[budget]?.let { usdAmount ->
+                        stringResource(
+                            id = R.string.nostr_connect_usd_amount_approx,
+                            numberFormat.format(usdAmount.toDouble()),
+                        )
+                    }
+                } else {
+                    null
+                }
+
+                val primaryColor = AppTheme.colorScheme.onPrimary
+                val secondaryColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2
+                val annotatedText = buildAnnotatedString {
+                    if (budget != null) {
+                        withStyle(style = SpanStyle(color = primaryColor, fontWeight = FontWeight.SemiBold)) {
+                            append(NumberFormat.getNumberInstance().format(budget))
+                        }
+                        append(" ")
+                        withStyle(style = SpanStyle(color = secondaryColor, fontWeight = FontWeight.Normal)) {
+                            append(stringResource(id = R.string.nostr_connect_sats_unit))
+                        }
+                    } else {
+                        withStyle(style = SpanStyle(color = primaryColor, fontWeight = FontWeight.SemiBold)) {
+                            append(stringResource(id = R.string.nostr_connect_no_limit).uppercase())
+                        }
+                    }
+                }
+
+                BudgetOption(
+                    text = annotatedText,
+                    subtext = subtext,
+                    isSelected = selectedBudget == budget,
+                    onClick = { onBudgetChange(budget) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BudgetOption(
+    modifier: Modifier = Modifier,
+    text: AnnotatedString,
+    subtext: String? = null,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+) {
+    val backgroundColor = if (isSelected) {
+        AppTheme.extraColorScheme.surfaceVariantAlt2
+    } else {
+        AppTheme.extraColorScheme.surfaceVariantAlt1
+    }
+
+    Surface(
+        modifier = modifier
+            .height(52.dp)
+            .selectableItem(selected = isSelected, onClick = onClick),
+        color = backgroundColor,
+        shape = AppTheme.shapes.medium,
+    ) {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center,
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(3.dp),
+            ) {
+                Text(
+                    text = text,
+                    style = AppTheme.typography.bodyLarge.copy(
+                        fontSize = 14.sp,
+                        lineHeight = 20.sp,
+                    ),
+                )
+                if (subtext != null) {
+                    Text(
+                        text = subtext,
+                        style = AppTheme.typography.bodySmall.copy(
+                            fontSize = 12.sp,
+                            lineHeight = 12.sp,
+                        ),
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    )
+                }
+            }
+        }
+    }
+}
+*/
+
+@Composable
+private fun ActionButtons(
+    primaryButtonText: String,
+    onPrimaryClick: () -> Unit,
+    secondaryButtonText: String,
+    onSecondaryClick: () -> Unit,
+    primaryButtonLoading: Boolean = false,
+    primaryButtonEnabled: Boolean = true,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = AppTheme.extraColorScheme.surfaceVariantAlt3,
+            )
+            .padding(horizontal = 16.dp, vertical = 24.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        PrimalFilledButton(
+            modifier = Modifier.weight(1f),
+            height = 50.dp,
+            containerColor = AppTheme.colorScheme.outline,
+            contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            border = BorderStroke(width = 1.dp, color = AppTheme.colorScheme.outline),
+            textStyle = AppTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold, fontSize = 16.sp),
+            onClick = onSecondaryClick,
+        ) {
+            Text(text = secondaryButtonText)
+        }
+
+        PrimalLoadingButton(
+            modifier = Modifier.weight(1f),
+            height = 50.dp,
+            loading = primaryButtonLoading,
+            enabled = primaryButtonEnabled,
+            text = primaryButtonText,
+            onClick = onPrimaryClick,
+        )
+    }
+}
