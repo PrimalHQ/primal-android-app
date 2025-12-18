@@ -17,7 +17,6 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.navigation.nostrConnectUri
-import net.primal.android.nostrconnect.signer.SignerConnectContract
 import net.primal.android.nostrconnect.utils.getNostrConnectImage
 import net.primal.android.nostrconnect.utils.getNostrConnectName
 import net.primal.android.nostrconnect.utils.getNostrConnectUrl
@@ -48,7 +47,7 @@ class NostrConnectViewModel @Inject constructor(
     private val connectionUrl = savedStateHandle.nostrConnectUri
 
     private val _state = MutableStateFlow(
-        SignerConnectContract.UiState(
+        NostrConnectContract.UiState(
             appName = connectionUrl?.getNostrConnectName(),
             appDescription = connectionUrl?.getNostrConnectUrl(),
             appImageUrl = connectionUrl?.getNostrConnectImage(),
@@ -56,15 +55,15 @@ class NostrConnectViewModel @Inject constructor(
         ),
     )
     val state = _state.asStateFlow()
-    private fun setState(reducer: SignerConnectContract.UiState.() -> SignerConnectContract.UiState) =
+    private fun setState(reducer: NostrConnectContract.UiState.() -> NostrConnectContract.UiState) =
         _state.getAndUpdate(reducer)
 
-    private val events = MutableSharedFlow<SignerConnectContract.UiEvent>()
-    fun setEvent(event: SignerConnectContract.UiEvent) = viewModelScope.launch { events.emit(event) }
+    private val events = MutableSharedFlow<NostrConnectContract.UiEvent>()
+    fun setEvent(event: NostrConnectContract.UiEvent) = viewModelScope.launch { events.emit(event) }
 
-    private val _effects = Channel<SignerConnectContract.SideEffect>()
+    private val _effects = Channel<NostrConnectContract.SideEffect>()
     val effects = _effects.receiveAsFlow()
-    private fun setEffect(effect: SignerConnectContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
+    private fun setEffect(effect: NostrConnectContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
         observeEvents()
@@ -76,12 +75,12 @@ class NostrConnectViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is SignerConnectContract.UiEvent.ChangeTab -> setState { copy(selectedTab = it.tab) }
-                    is SignerConnectContract.UiEvent.SelectAccount ->
+                    is NostrConnectContract.UiEvent.ChangeTab -> setState { copy(selectedTab = it.tab) }
+                    is NostrConnectContract.UiEvent.SelectAccount ->
                         setState { copy(selectedAccount = accounts.find { acc -> acc.pubkey == it.pubkey }) }
 
-                    is SignerConnectContract.UiEvent.SelectTrustLevel -> setState { copy(trustLevel = it.level) }
-                    is SignerConnectContract.UiEvent.ClickConnect -> connect()
+                    is NostrConnectContract.UiEvent.SelectTrustLevel -> setState { copy(trustLevel = it.level) }
+                    is NostrConnectContract.UiEvent.ClickConnect -> connect()
                     /*
                     is NostrConnectContract.UiEvent.ClickDailyBudget -> setState {
                         copy(showDailyBudgetPicker = true, selectedDailyBudget = this.dailyBudget)
@@ -103,7 +102,7 @@ class NostrConnectViewModel @Inject constructor(
                         )
                     }
                      */
-                    SignerConnectContract.UiEvent.DismissError -> setState { copy(error = null) }
+                    NostrConnectContract.UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
@@ -185,7 +184,7 @@ class NostrConnectViewModel @Inject constructor(
                 CoroutineScope(dispatcherProvider.io()).launch {
                     runCatching { tokenUpdater.updateTokenForRemoteSigner() }
                 }
-                setEffect(SignerConnectContract.SideEffect.ConnectionSuccess)
+                setEffect(NostrConnectContract.SideEffect.ConnectionSuccess)
             }.onFailure { error ->
                 Timber.e(error)
                 setState { copy(error = UiError.GenericError()) }

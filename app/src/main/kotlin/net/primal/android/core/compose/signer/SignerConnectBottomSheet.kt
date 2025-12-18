@@ -1,4 +1,4 @@
-package net.primal.android.nostrconnect.signer
+package net.primal.android.core.compose.signer
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.PrimaryTabRow
@@ -50,6 +51,9 @@ import net.primal.android.core.compose.icons.primaliconpack.HighSecurity
 import net.primal.android.core.compose.icons.primaliconpack.LowSecurity
 import net.primal.android.core.compose.icons.primaliconpack.MediumSecurity
 import net.primal.android.core.compose.nostrconnect.PermissionsListItem
+import net.primal.android.core.compose.signer.model.SignerConnectCallbacks
+import net.primal.android.core.compose.signer.model.SignerConnectTab
+import net.primal.android.core.compose.signer.model.SignerConnectUiState
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.selectableItem
 import net.primal.android.core.utils.formatNip05Identifier
@@ -62,8 +66,8 @@ import net.primal.domain.links.CdnImage
 
 @Composable
 fun SignerConnectBottomSheet(
-    state: SignerConnectContract.UiState,
-    eventPublisher: (SignerConnectContract.UiEvent) -> Unit,
+    signerConnect: SignerConnectUiState,
+    callbacks: SignerConnectCallbacks,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -71,15 +75,15 @@ fun SignerConnectBottomSheet(
     val snackbarHostState = remember { SnackbarHostState() }
 
     SnackbarErrorHandler(
-        error = state.error,
+        error = signerConnect.error,
         snackbarHostState = snackbarHostState,
         errorMessageResolver = { it.resolveUiErrorMessage(context) },
-        onErrorDismiss = { eventPublisher(SignerConnectContract.UiEvent.DismissError) },
+        onErrorDismiss = callbacks.onErrorDismiss,
     )
     /*
    val isBudgetPickerVisible by remember(state.selectedTab, state.showDailyBudgetPicker) {
        derivedStateOf {
-           state.selectedTab == SignerConnectContract.Tab.PERMISSIONS && state.showDailyBudgetPicker
+           state.selectedTab == SignerConnectTab.Permissions && state.showDailyBudgetPicker
        }
    }
      */
@@ -87,7 +91,7 @@ fun SignerConnectBottomSheet(
     BackHandler {
         /*
         if (isBudgetPickerVisible) {
-            eventPublisher(SignerConnectContract.UiEvent.CancelDailyBudget)
+            callbacks.onCancelDailyBudget()
         } else {
          */
         onDismissRequest()
@@ -104,33 +108,33 @@ fun SignerConnectBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             HeaderSection(
-                imageUrl = state.appImageUrl,
-                appName = state.appName,
-                appDescription = state.appDescription,
+                imageUrl = signerConnect.appImageUrl,
+                appName = signerConnect.appName,
+                appDescription = signerConnect.appDescription,
             )
 
             SignerConnectTabNavigation(
-                selectedTab = state.selectedTab,
-                onTabChange = { eventPublisher(SignerConnectContract.UiEvent.ChangeTab(it)) },
-                permissionsTabEnabled = state.accounts.isNotEmpty(),
+                selectedTab = signerConnect.selectedTab,
+                onTabChange = callbacks.onTabChange,
+                permissionsTabEnabled = signerConnect.accounts.isNotEmpty(),
             )
 
             SignerConnectPages(
-                state = state,
-                eventPublisher = eventPublisher,
+                state = signerConnect,
+                callbacks = callbacks,
             )
 
             ActionButtons(
-                primaryButtonEnabled = state.selectedAccount != null,
-                primaryButtonLoading = state.connecting,
+                primaryButtonEnabled = signerConnect.selectedAccount != null,
+                primaryButtonLoading = signerConnect.connecting,
                 primaryButtonText = stringResource(id = R.string.signer_connect_connect_button),
                 onPrimaryClick = {
                     /*
                     if (isBudgetPickerVisible) {
-                        eventPublisher(SignerConnectContract.UiEvent.ApplyDailyBudget)
+                        callbacks.onApplyDailyBudget()
                     } else {
                      */
-                    eventPublisher(SignerConnectContract.UiEvent.ClickConnect)
+                    callbacks.onConnectClick()
                     /*
                     }
                      */
@@ -139,7 +143,7 @@ fun SignerConnectBottomSheet(
                 onSecondaryClick = {
                     /*
                     if (isBudgetPickerVisible) {
-                        eventPublisher(SignerConnectContract.UiEvent.CancelDailyBudget)
+                        callbacks.onCancelDailyBudget()
                     } else {
                      */
                     onDismissRequest()
@@ -197,10 +201,11 @@ private fun HeaderSection(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SignerConnectTabNavigation(
-    selectedTab: SignerConnectContract.Tab,
-    onTabChange: (SignerConnectContract.Tab) -> Unit,
+    selectedTab: SignerConnectTab,
+    onTabChange: (SignerConnectTab) -> Unit,
     permissionsTabEnabled: Boolean,
 ) {
     val selectedTabIndex = selectedTab.ordinal
@@ -225,14 +230,14 @@ private fun SignerConnectTabNavigation(
     ) {
         SignerConnectAppTab(
             text = stringResource(id = R.string.signer_connect_login_tab).uppercase(),
-            selected = selectedTab == SignerConnectContract.Tab.LOGIN,
-            onClick = { onTabChange(SignerConnectContract.Tab.LOGIN) },
+            selected = selectedTab == SignerConnectTab.Login,
+            onClick = { onTabChange(SignerConnectTab.Login) },
         )
 
         SignerConnectAppTab(
             text = stringResource(id = R.string.signer_connect_permissions_tab).uppercase(),
-            selected = selectedTab == SignerConnectContract.Tab.PERMISSIONS,
-            onClick = { onTabChange(SignerConnectContract.Tab.PERMISSIONS) },
+            selected = selectedTab == SignerConnectTab.Permissions,
+            onClick = { onTabChange(SignerConnectTab.Permissions) },
             enabled = permissionsTabEnabled,
         )
     }
@@ -270,10 +275,7 @@ private fun SignerConnectAppTab(
 }
 
 @Composable
-private fun SignerConnectPages(
-    state: SignerConnectContract.UiState,
-    eventPublisher: (SignerConnectContract.UiEvent) -> Unit,
-) {
+private fun SignerConnectPages(state: SignerConnectUiState, callbacks: SignerConnectCallbacks) {
     AnimatedContent(
         modifier = Modifier
             .background(color = AppTheme.extraColorScheme.surfaceVariantAlt3)
@@ -295,21 +297,21 @@ private fun SignerConnectPages(
         label = "TabAnimation",
     ) { tab ->
         when (tab) {
-            SignerConnectContract.Tab.LOGIN -> LoginContent(
+            SignerConnectTab.Login -> LoginContent(
                 accounts = state.accounts,
                 selectedAccountPubkey = state.selectedAccount?.pubkey,
-                onAccountClick = { eventPublisher(SignerConnectContract.UiEvent.SelectAccount(it)) },
+                onAccountClick = callbacks.onAccountSelect,
             )
 
-            SignerConnectContract.Tab.PERMISSIONS -> PermissionsContent(
+            SignerConnectTab.Permissions -> PermissionsContent(
                 trustLevel = state.trustLevel,
                 // dailyBudget = state.dailyBudget,
-                onTrustLevelClick = { eventPublisher(SignerConnectContract.UiEvent.SelectTrustLevel(it)) },
-//                 onDailyBudgetClick = { eventPublisher(SignerConnectContract.UiEvent.ClickDailyBudget) },
-//                 showDailyBudgetPicker = state.showDailyBudgetPicker,
-//                 selectedDailyBudget = state.selectedDailyBudget,
-//                 onDailyBudgetChange = { eventPublisher(SignerConnectContract.UiEvent.ChangeDailyBudget(it)) },
-//                 budgetToUsdMap = state.budgetToUsdMap,
+                onTrustLevelClick = callbacks.onTrustLevelSelect,
+                // onDailyBudgetClick = callbacks.onDailyBudgetClick,
+                // showDailyBudgetPicker = state.showDailyBudgetPicker,
+                // selectedDailyBudget = state.selectedDailyBudget,
+                // onDailyBudgetChange = callbacks.onDailyBudgetChange,
+                // budgetToUsdMap = state.budgetToUsdMap,
             )
         }
     }
