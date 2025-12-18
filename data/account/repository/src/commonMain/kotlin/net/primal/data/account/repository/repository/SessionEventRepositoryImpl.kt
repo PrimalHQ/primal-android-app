@@ -34,7 +34,7 @@ class SessionEventRepositoryImpl(
 
     override fun observeEventsPendingUserAction(signerPubKey: String): Flow<List<SessionEvent>> =
         database.sessionEvents().observeEventsByRequestState(
-            signerPubKey = signerPubKey.asEncryptable(),
+            signerPubKey = signerPubKey,
             requestState = RequestState.PendingUserAction,
         ).map { events -> events.mapNotNull { it.asDomain() } }
             .distinctUntilChanged()
@@ -61,7 +61,7 @@ class SessionEventRepositoryImpl(
                         PendingNostrEvent(
                             eventId = it.id,
                             clientPubKey = it.pubKey,
-                            signerPubKey = signerKeyPair.pubKey.asEncryptable(),
+                            signerPubKey = signerKeyPair.pubKey,
                             rawNostrEventJson = it.encodeToJsonString().asEncryptable(),
                         )
                     },

@@ -8,6 +8,6 @@ import net.primal.shared.data.local.encryption.Encryptable
 data class PendingNostrEvent(
     @PrimaryKey val eventId: String,
     val rawNostrEventJson: Encryptable<String>,
-    val signerPubKey: Encryptable<String>,
+    val signerPubKey: String,
     val clientPubKey: String,
 )

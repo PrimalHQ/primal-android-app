@@ -14,8 +14,8 @@ import net.primal.shared.data.local.encryption.Encryptable
 data class AppConnectionData(
     @PrimaryKey
     val clientPubKey: String,
-    val signerPubKey: Encryptable<String>,
-    val userPubKey: Encryptable<String>,
+    val signerPubKey: String,
+    val userPubKey: String,
     val relays: Encryptable<List<String>>,
     val secret: Encryptable<String>,
     val name: Encryptable<String>?,

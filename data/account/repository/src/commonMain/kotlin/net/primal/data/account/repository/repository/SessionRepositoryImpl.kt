@@ -18,7 +18,6 @@ import net.primal.data.account.repository.mappers.asDomain
 import net.primal.domain.account.model.AppSession
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.shared.data.local.db.withTransaction
-import net.primal.shared.data.local.encryption.asEncryptable
 
 @OptIn(ExperimentalTime::class)
 class SessionRepositoryImpl(
@@ -27,12 +26,12 @@ class SessionRepositoryImpl(
 ) : SessionRepository {
 
     override fun observeActiveSessions(signerPubKey: String): Flow<List<AppSession>> =
-        database.sessions().observeActiveSessions(signerPubKey = signerPubKey.asEncryptable())
+        database.sessions().observeActiveSessions(signerPubKey = signerPubKey)
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
     override fun observeOngoingSessions(signerPubKey: String): Flow<List<AppSession>> =
-        database.sessions().observeOngoingSessions(signerPubKey = signerPubKey.asEncryptable())
+        database.sessions().observeOngoingSessions(signerPubKey = signerPubKey)
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 

@@ -14,7 +14,7 @@ interface AppConnectionDataDao {
 
     @Transaction
     @Query("SELECT * FROM AppConnectionData WHERE signerPubKey = :signerPubKey")
-    fun observeAllConnections(signerPubKey: Encryptable<String>): Flow<List<AppConnection>>
+    fun observeAllConnections(signerPubKey: String): Flow<List<AppConnection>>
 
     @Transaction
     @Query("SELECT * FROM AppConnectionData WHERE clientPubKey = :clientPubKey")
@@ -22,15 +22,15 @@ interface AppConnectionDataDao {
 
     @Transaction
     @Query("SELECT * FROM AppConnectionData WHERE signerPubKey = :signerPubKey")
-    suspend fun getAll(signerPubKey: Encryptable<String>): List<AppConnection>
+    suspend fun getAll(signerPubKey: String): List<AppConnection>
 
     @Transaction
     @Query("SELECT * FROM AppConnectionData WHERE userPubKey = :userPubKey")
-    suspend fun getConnectionsByUser(userPubKey: Encryptable<String>): List<AppConnection>
+    suspend fun getConnectionsByUser(userPubKey: String): List<AppConnection>
 
     @Transaction
     @Query("SELECT * FROM AppConnectionData WHERE signerPubKey = :signerPubKey AND autoStart = true")
-    suspend fun getAllAutoStartConnections(signerPubKey: Encryptable<String>): List<AppConnection>
+    suspend fun getAllAutoStartConnections(signerPubKey: String): List<AppConnection>
 
     @Query("DELETE FROM AppConnectionData WHERE clientPubKey = :clientPubKey")
     suspend fun deleteConnection(clientPubKey: String)

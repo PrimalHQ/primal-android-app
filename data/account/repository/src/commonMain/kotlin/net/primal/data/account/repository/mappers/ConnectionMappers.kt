@@ -12,8 +12,8 @@ import net.primal.domain.account.model.TrustLevel as TrustLevelDO
 fun AppConnectionPO.asDomain() =
     AppConnectionDO(
         clientPubKey = this.data.clientPubKey,
-        userPubKey = this.data.userPubKey.decrypted,
-        signerPubKey = this.data.signerPubKey.decrypted,
+        userPubKey = this.data.userPubKey,
+        signerPubKey = this.data.signerPubKey,
         relays = this.data.relays.decrypted,
         name = this.data.name?.decrypted,
         url = this.data.url?.decrypted,

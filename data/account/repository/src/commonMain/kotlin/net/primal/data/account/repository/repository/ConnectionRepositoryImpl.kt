@@ -31,7 +31,7 @@ class ConnectionRepositoryImpl(
 ) : ConnectionRepository {
 
     override fun observeAllConnections(signerPubKey: String): Flow<List<AppConnection>> =
-        database.connections().observeAllConnections(signerPubKey = signerPubKey.asEncryptable())
+        database.connections().observeAllConnections(signerPubKey = signerPubKey)
             .map { connections -> connections.map { it.asDomain() } }
 
     override fun observeConnection(clientPubKey: String): Flow<AppConnection?> {
@@ -41,13 +41,13 @@ class ConnectionRepositoryImpl(
 
     override suspend fun getAllConnections(signerPubKey: String): List<AppConnection> =
         withContext(dispatchers.io()) {
-            database.connections().getAll(signerPubKey = signerPubKey.asEncryptable())
+            database.connections().getAll(signerPubKey = signerPubKey)
                 .map { it.asDomain() }
         }
 
     override suspend fun getAllAutoStartConnections(signerPubKey: String): List<AppConnection> =
         withContext(dispatchers.io()) {
-            database.connections().getAllAutoStartConnections(signerPubKey = signerPubKey.asEncryptable())
+            database.connections().getAllAutoStartConnections(signerPubKey = signerPubKey)
                 .map { it.asDomain() }
         }
 
@@ -61,7 +61,7 @@ class ConnectionRepositoryImpl(
     override suspend fun removeConnectionsByUserPubKey(userPubKey: String) =
         withContext(dispatchers.io()) {
             database.withTransaction {
-                database.connections().getConnectionsByUser(userPubKey = userPubKey.asEncryptable())
+                database.connections().getConnectionsByUser(userPubKey = userPubKey)
                     .forEach { connection ->
                         deleteEverythingForClientPubKey(clientPubKey = connection.data.clientPubKey)
                     }
@@ -118,7 +118,7 @@ class ConnectionRepositoryImpl(
     override suspend fun getUserPubKey(clientPubKey: String): Result<String> =
         withContext(dispatchers.io()) {
             database.connections().getConnection(clientPubKey = clientPubKey)
-                ?.data?.userPubKey?.decrypted?.asSuccess()
+                ?.data?.userPubKey?.asSuccess()
                 ?: Result.failure(NoSuchElementException("Couldn't locate user pubkey for client pubkey."))
         }
 
@@ -166,8 +166,8 @@ class ConnectionRepositoryImpl(
         database.connections().insert(
             data = AppConnectionData(
                 clientPubKey = connection.clientPubKey,
-                signerPubKey = connection.signerPubKey.asEncryptable(),
-                userPubKey = connection.userPubKey.asEncryptable(),
+                signerPubKey = connection.signerPubKey,
+                userPubKey = connection.userPubKey,
                 relays = connection.relays.asEncryptable(),
                 secret = secret.asEncryptable(),
                 name = connection.name?.asEncryptable(),

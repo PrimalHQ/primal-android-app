@@ -46,7 +46,7 @@ fun buildSessionEventData(
     return SessionEventData(
         eventId = method?.id ?: response?.id ?: Uuid.random().toString(),
         sessionId = sessionId,
-        signerPubKey = signerPubKey.asEncryptable(),
+        signerPubKey = signerPubKey,
         clientPubKey = clientPubkey,
         requestState = resolvedRequestState,
         requestedAt = requestedAt,
@@ -126,7 +126,7 @@ fun SessionEventData.asDomain(): SessionEvent? {
 
             val unsignedEventJson = requestMethod
                 .getIfTypeOrNull(RemoteSignerMethod.SignEvent::unsignedEvent)
-                ?.withPubKey(this.signerPubKey.decrypted)
+                ?.withPubKey(this.signerPubKey)
                 ?.encodeToJsonString()
                 ?: ""
 

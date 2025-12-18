@@ -5,7 +5,6 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
-import net.primal.shared.data.local.encryption.Encryptable
 
 @Dao
 interface AppSessionDataDao {
@@ -30,7 +29,7 @@ interface AppSessionDataDao {
         WHERE activeRelayCount > 0 AND endedAt IS NULL AND c.signerPubKey = :signerPubKey
     """,
     )
-    fun observeActiveSessions(signerPubKey: Encryptable<String>): Flow<List<AppSession>>
+    fun observeActiveSessions(signerPubKey: String): Flow<List<AppSession>>
 
     @Transaction
     @Query(
@@ -40,7 +39,7 @@ interface AppSessionDataDao {
         WHERE endedAt IS NULL AND c.signerPubKey = :signerPubKey
     """,
     )
-    fun observeOngoingSessions(signerPubKey: Encryptable<String>): Flow<List<AppSession>>
+    fun observeOngoingSessions(signerPubKey: String): Flow<List<AppSession>>
 
     @Transaction
     @Query(

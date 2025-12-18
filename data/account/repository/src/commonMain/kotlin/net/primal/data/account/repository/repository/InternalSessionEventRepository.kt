@@ -50,13 +50,13 @@ internal class InternalSessionEventRepository(
 
     fun observePendingResponseEvents(signerPubKey: String) =
         accountDatabase.sessionEvents().observeEventsByRequestState(
-            signerPubKey = signerPubKey.asEncryptable(),
+            signerPubKey = signerPubKey,
             requestState = RequestState.PendingResponse,
         ).distinctUntilChanged()
 
     fun observePendingNostrEvents(signerPubKey: String) =
         accountDatabase.pendingNostrEvents().observeAllBySignerPubKey(
-            signerPubKey = signerPubKey.asEncryptable(),
+            signerPubKey = signerPubKey,
         ).map { list -> list.mapNotNull { it.rawNostrEventJson.decrypted.decodeFromJsonStringOrNull<NostrEvent>() } }
             .distinctUntilChanged()
 
