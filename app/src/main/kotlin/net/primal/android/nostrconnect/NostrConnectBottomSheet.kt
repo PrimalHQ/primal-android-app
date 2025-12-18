@@ -3,18 +3,24 @@
 package net.primal.android.nostrconnect
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import net.primal.android.R
+import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.signer.SignerConnectBottomSheet
-import net.primal.android.core.compose.signer.model.SignerConnectCallbacks
-import net.primal.android.core.compose.signer.model.SignerConnectUiState
+import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.service.PrimalRemoteSignerService
 import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.theme.AppTheme
@@ -25,6 +31,14 @@ fun NostrConnectBottomSheet(viewModel: NostrConnectViewModel, onDismissRequest: 
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    SnackbarErrorHandler(
+        error = state.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context) },
+        onErrorDismiss = { viewModel.setEvent(NostrConnectContract.UiEvent.DismissError) },
+    )
 
     LaunchedEffect(viewModel, onDismissRequest) {
         viewModel.effects.collect {
@@ -48,38 +62,28 @@ fun NostrConnectBottomSheet(viewModel: NostrConnectViewModel, onDismissRequest: 
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
         dragHandle = { NostrConnectBottomSheetDragHandle() },
     ) {
-        SignerConnectBottomSheet(
-            signerConnect = state.toSignerConnectUiState(),
-            onDismissRequest = onDismissRequest,
-            callbacks = SignerConnectCallbacks(
-                onConnectClick = { viewModel.setEvent(NostrConnectContract.UiEvent.ClickConnect) },
+        Box {
+            SignerConnectBottomSheet(
+                appName = state.appName,
+                appDescription = state.appDescription,
+                appImageUrl = state.appImageUrl,
+                accounts = state.accounts,
+                connecting = state.connecting,
+                onConnectClick = { account, trustLevel ->
+                    viewModel.setEvent(
+                        NostrConnectContract.UiEvent.ClickConnect(
+                            account = account,
+                            trustLevel = trustLevel,
+                        ),
+                    )
+                },
                 onCancelClick = onDismissRequest,
-                onTabChange = { tab ->
-                    viewModel.setEvent(NostrConnectContract.UiEvent.ChangeTab(tab))
-                },
-                onAccountSelect = { pubkey ->
-                    viewModel.setEvent(NostrConnectContract.UiEvent.SelectAccount(pubkey))
-                },
-                onTrustLevelSelect = { level ->
-                    viewModel.setEvent(NostrConnectContract.UiEvent.SelectTrustLevel(level))
-                },
-                onErrorDismiss = { viewModel.setEvent(NostrConnectContract.UiEvent.DismissError) },
-            ),
-        )
-    }
-}
+            )
 
-private fun NostrConnectContract.UiState.toSignerConnectUiState(): SignerConnectUiState {
-    return SignerConnectUiState(
-        appName = this.appName,
-        appDescription = this.appDescription,
-        appImageUrl = this.appImageUrl,
-        connectionUrl = this.connectionUrl,
-        accounts = this.accounts,
-        selectedTab = this.selectedTab,
-        selectedAccount = this.selectedAccount,
-        trustLevel = this.trustLevel,
-        connecting = this.connecting,
-        error = this.error,
-    )
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.align(Alignment.BottomCenter),
+            )
+        }
+    }
 }
