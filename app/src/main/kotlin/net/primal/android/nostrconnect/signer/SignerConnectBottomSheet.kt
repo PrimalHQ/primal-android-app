@@ -123,7 +123,7 @@ fun SignerConnectBottomSheet(
             ActionButtons(
                 primaryButtonEnabled = state.selectedAccount != null,
                 primaryButtonLoading = state.connecting,
-                primaryButtonText = stringResource(id = R.string.nostr_connect_connect_button),
+                primaryButtonText = stringResource(id = R.string.signer_connect_connect_button),
                 onPrimaryClick = {
                     /*
                     if (isBudgetPickerVisible) {
@@ -135,7 +135,7 @@ fun SignerConnectBottomSheet(
                     }
                      */
                 },
-                secondaryButtonText = stringResource(id = R.string.nostr_connect_cancel_button),
+                secondaryButtonText = stringResource(id = R.string.signer_connect_cancel_button),
                 onSecondaryClick = {
                     /*
                     if (isBudgetPickerVisible) {
@@ -175,7 +175,7 @@ private fun HeaderSection(
         )
 
         Text(
-            text = appName ?: stringResource(id = R.string.nostr_connect_unknown_app),
+            text = appName ?: stringResource(id = R.string.signer_connect_unknown_app),
             style = AppTheme.typography.titleLarge.copy(
                 fontSize = 18.sp,
                 lineHeight = 24.sp,
@@ -224,13 +224,13 @@ private fun SignerConnectTabNavigation(
         },
     ) {
         SignerConnectAppTab(
-            text = stringResource(id = R.string.nostr_connect_login_tab).uppercase(),
+            text = stringResource(id = R.string.signer_connect_login_tab).uppercase(),
             selected = selectedTab == SignerConnectContract.Tab.LOGIN,
             onClick = { onTabChange(SignerConnectContract.Tab.LOGIN) },
         )
 
         SignerConnectAppTab(
-            text = stringResource(id = R.string.nostr_connect_permissions_tab).uppercase(),
+            text = stringResource(id = R.string.signer_connect_permissions_tab).uppercase(),
             selected = selectedTab == SignerConnectContract.Tab.PERMISSIONS,
             onClick = { onTabChange(SignerConnectContract.Tab.PERMISSIONS) },
             enabled = permissionsTabEnabled,
@@ -329,7 +329,7 @@ private fun LoginContent(
             contentAlignment = Alignment.Center,
         ) {
             Text(
-                text = stringResource(id = R.string.nostr_connect_no_nsec_accounts_warning),
+                text = stringResource(id = R.string.signer_connect_no_nsec_accounts_warning),
                 textAlign = TextAlign.Center,
                 style = AppTheme.typography.bodyLarge,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
@@ -444,22 +444,22 @@ private fun PermissionsList(
     ) {
         PermissionsListItem(
             icon = PrimalIcons.HighSecurity,
-            title = stringResource(id = R.string.nostr_connect_full_trust_title),
-            subtitle = stringResource(id = R.string.nostr_connect_full_trust_subtitle),
+            title = stringResource(id = R.string.signer_connect_full_trust_title),
+            subtitle = stringResource(id = R.string.signer_connect_full_trust_subtitle),
             isSelected = trustLevel == TrustLevel.Full,
             onClick = { onTrustLevelClick(TrustLevel.Full) },
         )
         PermissionsListItem(
             icon = PrimalIcons.MediumSecurity,
-            title = stringResource(id = R.string.nostr_connect_medium_trust_title),
-            subtitle = stringResource(id = R.string.nostr_connect_medium_trust_subtitle),
+            title = stringResource(id = R.string.signer_connect_medium_trust_title),
+            subtitle = stringResource(id = R.string.signer_connect_medium_trust_subtitle),
             isSelected = trustLevel == TrustLevel.Medium,
             onClick = { onTrustLevelClick(TrustLevel.Medium) },
         )
         PermissionsListItem(
             icon = PrimalIcons.LowSecurity,
-            title = stringResource(id = R.string.nostr_connect_low_trust_title),
-            subtitle = stringResource(id = R.string.nostr_connect_low_trust_subtitle),
+            title = stringResource(id = R.string.signer_connect_low_trust_title),
+            subtitle = stringResource(id = R.string.signer_connect_low_trust_subtitle),
             isSelected = trustLevel == TrustLevel.Low,
             onClick = { onTrustLevelClick(TrustLevel.Low) },
         )

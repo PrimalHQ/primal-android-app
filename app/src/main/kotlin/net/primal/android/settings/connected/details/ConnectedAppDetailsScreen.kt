@@ -456,21 +456,21 @@ fun ConnectedAppPermissionsSection(
         ) {
             PermissionsListItem(
                 icon = PrimalIcons.HighSecurity,
-                title = stringResource(id = R.string.nostr_connect_full_trust_title),
+                title = stringResource(id = R.string.signer_connect_full_trust_title),
                 subtitle = stringResource(id = R.string.settings_connected_app_permissions_full_trust_subtitle),
                 isSelected = trustLevel == TrustLevel.Full,
                 onClick = { onTrustLevelChange(TrustLevel.Full) },
             )
             PermissionsListItem(
                 icon = PrimalIcons.MediumSecurity,
-                title = stringResource(id = R.string.nostr_connect_medium_trust_title),
+                title = stringResource(id = R.string.signer_connect_medium_trust_title),
                 subtitle = stringResource(id = R.string.settings_connected_app_permissions_medium_trust_subtitle),
                 isSelected = trustLevel == TrustLevel.Medium,
                 onClick = { onTrustLevelChange(TrustLevel.Medium) },
             )
             PermissionsListItem(
                 icon = PrimalIcons.LowSecurity,
-                title = stringResource(id = R.string.nostr_connect_low_trust_title),
+                title = stringResource(id = R.string.signer_connect_low_trust_title),
                 subtitle = stringResource(id = R.string.settings_connected_app_permissions_low_trust_subtitle),
                 isSelected = trustLevel == TrustLevel.Low,
                 onClick = { onTrustLevelChange(TrustLevel.Low) },
