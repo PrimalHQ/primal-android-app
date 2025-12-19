@@ -25,10 +25,10 @@ class SignerIntentParser @Inject constructor(
         private const val NOSTR_SIGNER_SCHEME = "nostrsigner"
 
         const val TYPE_COLUMN = "type"
-        private const val PERMISSIONS_COLUMN = "permissions"
-        private const val ID_COLUMN = "id"
-        private const val CURRENT_USER_COLUMN = "current_user"
-        private const val PUBKEY_COLUMN = "pubkey"
+        const val PERMISSIONS_COLUMN = "permissions"
+        const val ID_COLUMN = "id"
+        const val CURRENT_USER_COLUMN = "current_user"
+        const val PUBKEY_COLUMN = "pubkey"
     }
 
     fun parse(intent: Intent, callingPackage: String?): Result<LocalSignerMethod> =
