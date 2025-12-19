@@ -12,4 +12,11 @@ enum class SignerMethod(val method: String) {
     NIP44_DECRYPT("nip44_decrypt"),
     NIP44_ENCRYPT("nip44_encrypt"),
     DECRYPT_ZAP_EVENT("decrypt_zap_event"),
+    ;
+
+    companion object {
+        fun fromString(method: String) =
+            entries.firstOrNull { it.method == method }
+                ?: error("Couldn't parse $method as valid method name.")
+    }
 }

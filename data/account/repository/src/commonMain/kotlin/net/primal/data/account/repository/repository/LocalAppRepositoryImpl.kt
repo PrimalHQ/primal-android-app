@@ -6,13 +6,13 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
-import net.primal.data.account.local.dao.PermissionAction
 import net.primal.data.account.local.dao.TrustLevel
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.asPO
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.LocalSignerMethod
+import net.primal.domain.account.model.PermissionAction as PermissionActionDO
 import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.shared.data.local.db.withTransaction
 
@@ -30,24 +30,21 @@ class LocalAppRepositoryImpl(
             }
         }
 
-    override suspend fun canProcessMethod(method: LocalSignerMethod): Boolean =
+    override suspend fun getPermissionActionForMethod(method: LocalSignerMethod): PermissionActionDO =
         withContext(dispatchers.io()) {
             val app = method.extractUserPubKey()?.let { userPubKey ->
                 database.localApps().findApp(identifier = "${method.packageName}:$userPubKey")
-            } ?: return@withContext false
+            } ?: return@withContext PermissionActionDO.Deny
 
             when (app.data.trustLevel) {
-                TrustLevel.Full -> true
+                TrustLevel.Full -> PermissionActionDO.Approve
                 TrustLevel.Medium -> {
-                    val permission = app.permissions.firstOrNull { it.permissionId == method.getPermissionId() }
-
-                    when (permission?.action) {
-                        PermissionAction.Approve -> true
-                        PermissionAction.Deny, PermissionAction.Ask, null -> false
-                    }
+                    app.permissions.firstOrNull { it.permissionId == method.getPermissionId() }
+                        ?.action?.asDomain()
+                        ?: PermissionActionDO.Ask
                 }
 
-                TrustLevel.Low -> false
+                TrustLevel.Low -> PermissionActionDO.Deny
             }
         }
 
