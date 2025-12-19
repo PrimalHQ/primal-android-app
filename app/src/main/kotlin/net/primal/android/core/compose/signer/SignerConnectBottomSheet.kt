@@ -1,11 +1,13 @@
 package net.primal.android.core.compose.signer
 
+import android.graphics.drawable.Drawable
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -33,11 +36,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.NostrUserText
@@ -76,6 +82,7 @@ fun SignerConnectBottomSheet(
     appName: String?,
     appDescription: String?,
     appImageUrl: String?,
+    appIcon: Drawable? = null,
     accounts: List<UserAccountUi>,
     connecting: Boolean,
     onConnectClick: (UserAccountUi, TrustLevel) -> Unit,
@@ -115,6 +122,7 @@ fun SignerConnectBottomSheet(
         ) {
             HeaderSection(
                 imageUrl = appImageUrl,
+                appIcon = appIcon,
                 appName = appName,
                 appDescription = appDescription,
             )
@@ -171,6 +179,7 @@ fun SignerConnectBottomSheet(
 @Composable
 private fun HeaderSection(
     imageUrl: String?,
+    appIcon: Drawable?,
     appName: String?,
     appDescription: String?,
 ) {
@@ -179,11 +188,22 @@ private fun HeaderSection(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        AppIconThumbnail(
-            avatarCdnImage = imageUrl?.let { CdnImage(sourceUrl = it) },
-            avatarSize = 48.dp,
-            appName = appName,
-        )
+        if (appIcon != null) {
+            Image(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(AppTheme.shapes.small),
+                bitmap = appIcon.toBitmap().asImageBitmap(),
+                contentDescription = appName,
+                contentScale = ContentScale.Crop,
+            )
+        } else {
+            AppIconThumbnail(
+                avatarCdnImage = imageUrl?.let { CdnImage(sourceUrl = it) },
+                avatarSize = 48.dp,
+                appName = appName,
+            )
+        }
 
         Text(
             text = appName ?: stringResource(id = R.string.signer_connect_unknown_app),

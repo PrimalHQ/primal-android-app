@@ -1,22 +1,25 @@
 package net.primal.android.signer.provider.connect
 
-import android.graphics.drawable.Drawable
-import androidx.compose.foundation.layout.height
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Text
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import net.primal.android.core.compose.SnackbarErrorHandler
+import net.primal.android.core.compose.signer.SignerConnectBottomSheet
+import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.LocalSignerMethodResponse
 import net.primal.domain.account.model.LocalSignerMethodResponse.Success.GetPublicKey
-import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.nostr.cryptography.utils.assureValidNpub
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalUuidApi::class)
@@ -26,7 +29,10 @@ fun AndroidConnectScreen(
     onDismiss: () -> Unit,
     onConnectionApproved: (LocalSignerMethodResponse) -> Unit,
 ) {
-    val uiState = viewModel.state.collectAsState()
+    val uiState by viewModel.state.collectAsState()
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
     LaunchedEffect(viewModel.effects) {
         viewModel.effects.collect {
             when (it) {
@@ -51,45 +57,58 @@ fun AndroidConnectScreen(
         }
     }
 
+    SnackbarErrorHandler(
+        error = uiState.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = { it.resolveUiErrorMessage(context) },
+        onErrorDismiss = { viewModel.setEvent(AndroidConnectContract.UiEvent.DismissError) },
+    )
+
     AndroidConnectScreen(
-        state = uiState.value,
-        eventPublisher = viewModel::setEvent,
+        state = uiState,
+        eventPublisher = { viewModel.setEvent(it) },
         onDismiss = onDismiss,
+        snackbarHostState = snackbarHostState,
     )
 }
 
-@ExperimentalMaterial3Api
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AndroidConnectScreen(
     state: AndroidConnectContract.UiState,
     eventPublisher: (AndroidConnectContract.UiEvent) -> Unit,
     onDismiss: () -> Unit,
+    snackbarHostState: SnackbarHostState,
 ) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val displayAppName = state.appName.ifEmpty { state.appPackageName }
+
     ModalBottomSheet(
+        sheetState = sheetState,
         contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         onDismissRequest = onDismiss,
+        dragHandle = { NostrConnectBottomSheetDragHandle() },
     ) {
-        Text(
-            modifier = Modifier.height(600.dp),
-            text = "This is SignerConnectBottomSheet!",
-        )
-
-        Button(
-            onClick = {
+        SignerConnectBottomSheet(
+            appName = displayAppName,
+            appDescription = state.appPackageName,
+            appImageUrl = null,
+            appIcon = state.appIcon,
+            accounts = state.accounts,
+            connecting = state.connecting,
+            onConnectClick = { account, trustLevel ->
                 eventPublisher(
                     AndroidConnectContract.UiEvent.ConnectUser(
-                        userId = "88cc134b1a65f54ef48acc1df3665063d3ea45f04eab8af4646e561c5ae99079",
-                        trustLevel = TrustLevel.Full,
+                        userId = account.pubkey,
+                        trustLevel = trustLevel,
                     ),
                 )
             },
-        ) {
-            Text("Connect QA with ${state.appPackageName}")
-        }
+            onCancelClick = onDismiss,
+        )
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+        )
     }
 }
-
-data class AppDisplayInfo(
-    val name: String,
-    val icon: Drawable,
-)
