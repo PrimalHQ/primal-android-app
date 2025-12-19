@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -14,16 +13,9 @@ import kotlinx.coroutines.launch
 import net.primal.android.signer.provider.SignerContract.SideEffect
 import net.primal.android.signer.provider.parser.SignerIntentParser
 import net.primal.android.user.credentials.CredentialsStore
-import net.primal.android.user.domain.CredentialType
-import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
-import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.LocalSignerMethod
-import net.primal.domain.account.model.LocalSignerMethodResponse
-import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.service.LocalSignerService
-import net.primal.domain.nostr.cryptography.utils.assureValidNpub
-import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import timber.log.Timber
 
 @HiltViewModel
@@ -58,48 +50,8 @@ class SignerViewModel @Inject constructor(
     private fun observeMethods() =
         viewModelScope.launch {
             methods.collect { method ->
-                when (method) {
-                    is LocalSignerMethod.GetPublicKey -> addNewApp(method)
-                    else -> respondToMethod(method = method)
-                }
+                respondToMethod(method = method)
             }
-        }
-
-    private fun addNewApp(method: LocalSignerMethod.GetPublicKey) =
-        viewModelScope.launch {
-            val userPubKey = credentialsStore.credentials.value
-                .first { it.type == CredentialType.PrivateKey }.npub.bech32ToHexOrThrow()
-
-            val app = LocalApp(
-                identifier = "${method.packageName}:$userPubKey",
-                packageName = method.packageName,
-                userPubKey = userPubKey,
-                image = null,
-                name = method.name,
-                trustLevel = TrustLevel.Full,
-                permissions = method.permissions,
-            )
-
-            localSignerService.addNewApp(app)
-                .onSuccess {
-                    setEffect(
-                        SideEffect.RespondToIntent(
-                            LocalSignerMethodResponse.Success.GetPublicKey(
-                                eventId = Uuid.random().toString(),
-                                pubkey = userPubKey.assureValidNpub(),
-                            ),
-                        ),
-                    )
-                }.onFailure {
-                    setEffect(
-                        SideEffect.RespondToIntent(
-                            LocalSignerMethodResponse.Error(
-                                eventId = Uuid.random().toString(),
-                                message = "Couldn't login user.",
-                            ),
-                        ),
-                    )
-                }
         }
 
     private fun respondToMethod(method: LocalSignerMethod) =
