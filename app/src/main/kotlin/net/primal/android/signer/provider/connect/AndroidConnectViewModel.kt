@@ -75,8 +75,6 @@ class AndroidConnectViewModel @Inject constructor(
             identifier = "$callingPackage:$userId",
             packageName = callingPackage,
             userPubKey = userId,
-            image = null,
-            name = appName,
             trustLevel = trustLevel,
             permissions = emptyList(),
         )

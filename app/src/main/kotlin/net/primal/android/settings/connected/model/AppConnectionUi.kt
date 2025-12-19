@@ -26,8 +26,8 @@ fun AppConnection.asAppConnectionUi(userAccount: UserAccount?): AppConnectionUi 
 fun LocalApp.asAppConnectionUi(userAccount: UserAccount?): AppConnectionUi {
     return AppConnectionUi(
         clientPubKey = this.identifier,
-        appName = this.name ?: this.packageName,
-        appImage = this.image?.let { CdnImage(it) },
+        appName = this.packageName,
+        appImage = null,
         userAvatarCdnImage = userAccount?.avatarCdnImage,
         isLocal = true,
     )
