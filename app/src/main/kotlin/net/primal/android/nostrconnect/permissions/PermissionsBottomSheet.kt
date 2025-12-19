@@ -69,7 +69,6 @@ import net.primal.android.nostrconnect.ui.buildRows
 import net.primal.android.nostrconnect.ui.getStatusTextAndColor
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.SessionEvent
-import net.primal.domain.links.CdnImage
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 
@@ -508,7 +507,7 @@ private fun SessionDetailsColumn(modifier: Modifier = Modifier, session: ActiveS
     ) {
         AppIconThumbnail(
             avatarSize = 40.dp,
-            avatarCdnImage = session.appImageUrl?.let { CdnImage(sourceUrl = it) },
+            appIconUrl = session.appImageUrl,
             appName = session.appName,
         )
 

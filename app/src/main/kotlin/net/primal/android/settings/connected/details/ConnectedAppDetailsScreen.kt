@@ -83,7 +83,6 @@ import net.primal.android.settings.connected.model.SessionUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.account.model.TrustLevel
-import net.primal.domain.links.CdnImage
 
 private val DangerPrimaryColor = Color(0xFFFF2121)
 private val DangerSecondaryColor = Color(0xFFFA3C3C)
@@ -372,7 +371,7 @@ private fun AppSummarySection(
     ) {
         AppIconThumbnail(
             modifier = Modifier.padding(bottom = 12.dp),
-            avatarCdnImage = iconUrl?.let { CdnImage(it) },
+            appIconUrl = iconUrl,
             appName = appName ?: stringResource(id = R.string.settings_connected_apps_unknown),
             avatarSize = 48.dp,
         )
@@ -564,8 +563,8 @@ private fun RecentSessionItem(
         ),
         leadingContent = {
             AppIconThumbnail(
-                avatarCdnImage = iconUrl?.let { CdnImage(it) },
                 appName = appName ?: stringResource(id = R.string.settings_connected_apps_unknown),
+                appIconUrl = iconUrl,
                 avatarSize = 24.dp,
             )
         },

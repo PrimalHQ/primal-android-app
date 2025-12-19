@@ -27,7 +27,6 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.images.AvatarCoilImageLoader
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.domain.links.CdnImage
 
 private val LETTER_ICON_BACKGROUND
     @Composable
@@ -40,11 +39,11 @@ private val LETTER_ICON_BACKGROUND
 @Composable
 fun AppIconThumbnail(
     modifier: Modifier = Modifier,
-    avatarCdnImage: CdnImage?,
     appName: String?,
+    appIconUrl: String?,
     avatarSize: Dp,
 ) {
-    if (!avatarCdnImage?.sourceUrl.isNullOrBlank()) {
+    if (!appIconUrl.isNullOrBlank()) {
         val context = LocalContext.current
 
         PrimalAsyncImage(
@@ -52,7 +51,7 @@ fun AppIconThumbnail(
                 .size(avatarSize)
                 .clip(CircleShape),
             imageLoader = AvatarCoilImageLoader.provideNoGifsImageLoader(context = context),
-            model = avatarCdnImage.sourceUrl,
+            model = appIconUrl,
             contentScale = ContentScale.Crop,
         )
     } else {
@@ -103,7 +102,7 @@ fun AppIconThumbnail(
 fun PreviewAppIconThumbnailBig() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         AppIconThumbnail(
-            avatarCdnImage = null,
+            appIconUrl = null,
             appName = "Test",
             avatarSize = 48.dp,
         )
@@ -115,7 +114,7 @@ fun PreviewAppIconThumbnailBig() {
 fun PreviewAppIconThumbnailMedium() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         AppIconThumbnail(
-            avatarCdnImage = null,
+            appIconUrl = null,
             appName = "Test",
             avatarSize = 36.dp,
         )
@@ -127,7 +126,7 @@ fun PreviewAppIconThumbnailMedium() {
 fun PreviewAppIconThumbnailSmall() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         AppIconThumbnail(
-            avatarCdnImage = null,
+            appIconUrl = null,
             appName = "Test",
             avatarSize = 24.dp,
         )
@@ -139,7 +138,7 @@ fun PreviewAppIconThumbnailSmall() {
 fun PreviewAppIconThumbnailExtraSmall() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
         AppIconThumbnail(
-            avatarCdnImage = null,
+            appIconUrl = null,
             appName = "Test",
             avatarSize = 18.dp,
         )

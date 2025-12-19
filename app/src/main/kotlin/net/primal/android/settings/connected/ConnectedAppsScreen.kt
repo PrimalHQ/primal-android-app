@@ -1,5 +1,6 @@
 package net.primal.android.settings.connected
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,11 +29,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.ListNoContent
@@ -46,6 +50,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.settings.connected.model.AppConnectionUi
+import net.primal.android.signer.provider.rememberAppDisplayInfo
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.stream.player.StreamState
 import net.primal.android.theme.AppTheme
@@ -93,6 +98,7 @@ fun ConnectedAppsScreen(
                     refreshButtonVisible = false,
                 )
             }
+
             else -> {
                 val localAppsTitle = stringResource(id = R.string.settings_connected_apps_local_apps)
                 val remoteAppsTitle = stringResource(id = R.string.settings_connected_apps_remote_apps)
@@ -140,18 +146,18 @@ private fun LazyListScope.connectedAppListSection(
         }
         itemsIndexed(
             items = connections,
-            key = { _, connection -> connection.clientPubKey },
+            key = { _, connection -> connection.connectionId },
             contentType = { _, _ -> "ConnectionItem" },
         ) { index, connection ->
             val shape = getListItemShape(index = index, listSize = connections.size)
             val isLast = index == connections.lastIndex
-            val isActive = connection.clientPubKey in activeClientPubKeys
+            val isActive = connection.connectionId in activeClientPubKeys
 
             Column(modifier = Modifier.clip(shape)) {
                 ConnectedAppListItem(
                     connection = connection,
                     isActive = isActive || connection.isLocal,
-                    onClick = { onAppClick(connection.clientPubKey) },
+                    onClick = { onAppClick(connection.connectionId) },
                 )
                 if (!isLast) {
                     PrimalDivider()
@@ -202,17 +208,21 @@ private fun ConnectedAppListItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
-                AppIconThumbnail(
-                    avatarCdnImage = connection.appImage,
-                    appName = connection.appName,
-                    avatarSize = 22.dp,
-                )
-                Text(
-                    modifier = Modifier.padding(top = 2.dp),
-                    text = connection.appName,
-                    style = AppTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Normal,
-                )
+                if (connection.isLocal) {
+                    LocalAppIconName(appId = connection.appId)
+                } else {
+                    AppIconThumbnail(
+                        appName = connection.appName,
+                        appIconUrl = connection.appIconUrl,
+                        avatarSize = 22.dp,
+                    )
+                    Text(
+                        modifier = Modifier.padding(top = 2.dp),
+                        text = connection.appName ?: stringResource(R.string.settings_connected_apps_unknown),
+                        style = AppTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Normal,
+                    )
+                }
             }
         },
         trailingContent = {
@@ -235,6 +245,33 @@ private fun ConnectedAppListItem(
     )
 }
 
+@Composable
+private fun LocalAppIconName(appId: String) {
+    val appDisplayInfo = rememberAppDisplayInfo(packageName = appId)
+    if (appDisplayInfo.icon != null) {
+        Image(
+            modifier = Modifier
+                .size(22.dp)
+                .clip(AppTheme.shapes.small),
+            bitmap = appDisplayInfo.icon.toBitmap().asImageBitmap(),
+            contentDescription = appDisplayInfo.name,
+            contentScale = ContentScale.Crop,
+        )
+    } else {
+        AppIconThumbnail(
+            appName = appDisplayInfo.name,
+            appIconUrl = null,
+            avatarSize = 22.dp,
+        )
+    }
+    Text(
+        modifier = Modifier.padding(top = 2.dp),
+        text = appDisplayInfo.name,
+        style = AppTheme.typography.titleMedium,
+        fontWeight = FontWeight.Normal,
+    )
+}
+
 @Preview
 @Composable
 fun PreviewConnectedAppsScreen() {
@@ -245,23 +282,26 @@ fun PreviewConnectedAppsScreen() {
                     loading = false,
                     remoteConnections = listOf(
                         AppConnectionUi(
-                            clientPubKey = "1",
+                            connectionId = "1",
+                            appId = "1",
                             appName = "Primal web app",
-                            appImage = CdnImage("https://primal.net/assets/favicon-51789dff.ico"),
+                            appIconUrl = "https://primal.net/assets/favicon-51789dff.ico",
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                         ),
                         AppConnectionUi(
-                            clientPubKey = "2",
+                            connectionId = "2",
+                            appId = "2",
                             appName = "Nostr 1",
-                            appImage = null,
+                            appIconUrl = null,
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                         ),
                     ),
                     localConnections = listOf(
                         AppConnectionUi(
-                            clientPubKey = "3",
-                            appName = "Nostragious",
-                            appImage = null,
+                            connectionId = "3",
+                            appId = "net.primal.android",
+                            appName = "Primal",
+                            appIconUrl = null,
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                             isLocal = true,
                         ),

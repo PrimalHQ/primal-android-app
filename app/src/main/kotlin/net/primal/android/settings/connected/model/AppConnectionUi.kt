@@ -6,29 +6,31 @@ import net.primal.domain.account.model.LocalApp
 import net.primal.domain.links.CdnImage
 
 data class AppConnectionUi(
-    val clientPubKey: String,
-    val appName: String,
-    val appImage: CdnImage?,
+    val connectionId: String,
+    val appId: String,
     val userAvatarCdnImage: CdnImage?,
+    val appName: String? = null,
+    val appIconUrl: String? = null,
     val isLocal: Boolean = false,
 )
 
 fun AppConnection.asAppConnectionUi(userAccount: UserAccount?): AppConnectionUi {
     return AppConnectionUi(
-        clientPubKey = this.clientPubKey,
-        appName = this.name ?: "Unknown App",
-        appImage = this.image?.let { CdnImage(it) },
+        connectionId = this.clientPubKey,
+        appId = this.clientPubKey,
+        appName = this.name,
         userAvatarCdnImage = userAccount?.avatarCdnImage,
+        appIconUrl = this.image,
         isLocal = false,
     )
 }
 
 fun LocalApp.asAppConnectionUi(userAccount: UserAccount?): AppConnectionUi {
     return AppConnectionUi(
-        clientPubKey = this.identifier,
-        appName = this.packageName,
-        appImage = null,
+        connectionId = this.identifier,
+        appId = this.packageName,
         userAvatarCdnImage = userAccount?.avatarCdnImage,
+        appIconUrl = null,
         isLocal = true,
     )
 }

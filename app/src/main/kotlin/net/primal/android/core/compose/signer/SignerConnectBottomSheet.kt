@@ -63,7 +63,6 @@ import net.primal.android.navigation.primalSlideInHorizontallyFromEnd
 import net.primal.android.navigation.primalSlideOutHorizontallyToEnd
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.TrustLevel
-import net.primal.domain.links.CdnImage
 
 private enum class SignerConnectTab {
     Login,
@@ -121,7 +120,7 @@ fun SignerConnectBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             HeaderSection(
-                imageUrl = appImageUrl,
+                appIconUrl = appImageUrl,
                 appIcon = appIcon,
                 appName = appName,
                 appDescription = appDescription,
@@ -178,9 +177,9 @@ fun SignerConnectBottomSheet(
 
 @Composable
 private fun HeaderSection(
-    imageUrl: String?,
-    appIcon: Drawable?,
     appName: String?,
+    appIconUrl: String?,
+    appIcon: Drawable?,
     appDescription: String?,
 ) {
     Column(
@@ -199,7 +198,7 @@ private fun HeaderSection(
             )
         } else {
             AppIconThumbnail(
-                avatarCdnImage = imageUrl?.let { CdnImage(sourceUrl = it) },
+                appIconUrl = appIconUrl,
                 avatarSize = 48.dp,
                 appName = appName,
             )

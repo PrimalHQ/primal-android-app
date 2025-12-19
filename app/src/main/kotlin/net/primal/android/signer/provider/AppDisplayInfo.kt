@@ -7,17 +7,24 @@ import androidx.compose.ui.platform.LocalContext
 
 data class AppDisplayInfo(
     val name: String,
-    val icon: Drawable,
+    val icon: Drawable? = null,
 )
 
 @Composable
 fun rememberAppDisplayInfo(packageName: String): AppDisplayInfo {
     val context = LocalContext.current
     return remember(packageName) {
-        val appInfo = context.packageManager.getApplicationInfo(packageName, 0)
-        AppDisplayInfo(
-            name = context.packageManager.getApplicationLabel(appInfo).toString(),
-            icon = context.packageManager.getApplicationIcon(appInfo),
-        )
+        val appInfo = runCatching {
+            context.packageManager.getApplicationInfo(packageName, 0)
+        }.getOrNull()
+
+        if (appInfo != null) {
+            AppDisplayInfo(
+                name = context.packageManager.getApplicationLabel(appInfo).toString(),
+                icon = context.packageManager.getApplicationIcon(appInfo),
+            )
+        } else {
+            AppDisplayInfo(name = packageName, icon = null)
+        }
     }
 }

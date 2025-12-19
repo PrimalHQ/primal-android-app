@@ -49,7 +49,6 @@ import net.primal.android.core.ext.selectableItem
 import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiState
 import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.theme.AppTheme
-import net.primal.domain.links.CdnImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -253,8 +252,8 @@ private fun SessionListItem(
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             AppIconThumbnail(
-                avatarCdnImage = session.appImageUrl?.let { CdnImage(sourceUrl = it) },
                 appName = session.appName,
+                appIconUrl = session.appImageUrl,
                 avatarSize = 40.dp,
             )
             Column(

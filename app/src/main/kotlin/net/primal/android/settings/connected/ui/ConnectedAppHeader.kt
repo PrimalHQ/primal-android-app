@@ -18,7 +18,6 @@ import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.utils.PrimalDateFormats
 import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.theme.AppTheme
-import net.primal.domain.links.CdnImage
 
 @Composable
 fun ConnectedAppHeader(
@@ -42,7 +41,7 @@ fun ConnectedAppHeader(
         ) {
             AppIconThumbnail(
                 modifier = Modifier.padding(bottom = 6.dp),
-                avatarCdnImage = appIconUrl?.let { CdnImage(it) },
+                appIconUrl = appIconUrl,
                 appName = appName,
                 avatarSize = 48.dp,
             )
