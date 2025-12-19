@@ -14,11 +14,13 @@ import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
 import net.primal.domain.account.repository.ConnectionRepository
+import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.domain.account.repository.SessionRepository
 
 @HiltViewModel
 class ConnectedAppsViewModel @Inject constructor(
     private val connectionRepository: ConnectionRepository,
+    private val localAppRepository: LocalAppRepository,
     private val sessionRepository: SessionRepository,
     private val credentialsStore: CredentialsStore,
     private val accountsStore: UserAccountsStore,
@@ -30,6 +32,7 @@ class ConnectedAppsViewModel @Inject constructor(
 
     init {
         observeConnections()
+        observeLocalApps()
         observeActiveSessions()
     }
 
@@ -45,7 +48,23 @@ class ConnectedAppsViewModel @Inject constructor(
                         val userAccount = userAccountMap[connection.userPubKey]
                         connection.asAppConnectionUi(userAccount = userAccount)
                     }
-                    setState { copy(connections = uiConnections, loading = false) }
+                    setState { copy(remoteConnections = uiConnections, loading = false) }
+                }
+        }
+    }
+
+    private fun observeLocalApps() {
+        viewModelScope.launch {
+            localAppRepository.observeAllApps()
+                .collect { apps ->
+                    val userAccounts = accountsStore.userAccounts.value
+                    val userAccountMap = userAccounts.associateBy { it.pubkey }
+
+                    val uiConnections = apps.map { app ->
+                        val userAccount = userAccountMap[app.userPubKey]
+                        app.asAppConnectionUi(userAccount = userAccount)
+                    }
+                    setState { copy(localConnections = uiConnections, loading = false) }
                 }
         }
     }

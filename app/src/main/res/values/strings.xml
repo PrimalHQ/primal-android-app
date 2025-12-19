@@ -1021,6 +1021,8 @@
 
     <string name="settings_connected_apps_title">Connected Apps</string>
     <string name="settings_connected_apps_unknown">Unknown App</string>
+    <string name="settings_connected_apps_local_apps">Local Apps</string>
+    <string name="settings_connected_apps_remote_apps">Remote Apps</string>
     <string name="settings_no_connected_apps">No connected apps.</string>
     <string name="settings_connected_app_details_title">Connected App Details</string>
     <string name="settings_connected_app_details_not_found">Connection details not found.</string>

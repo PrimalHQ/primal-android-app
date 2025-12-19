@@ -1,5 +1,7 @@
 package net.primal.data.account.repository.repository
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -7,6 +9,7 @@ import net.primal.core.utils.runCatching
 import net.primal.data.account.local.dao.PermissionAction
 import net.primal.data.account.local.dao.TrustLevel
 import net.primal.data.account.local.db.AccountDatabase
+import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.asPO
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.LocalSignerMethod
@@ -47,4 +50,8 @@ class LocalAppRepositoryImpl(
                 TrustLevel.Low -> false
             }
         }
+
+    override fun observeAllApps(): Flow<List<LocalApp>> =
+        database.localApps().observeAll()
+            .map { apps -> apps.map { it.asDomain() } }
 }
