@@ -20,7 +20,7 @@ interface NostrConnectContract {
     )
 
     sealed class UiEvent {
-        data class ClickConnect(val account: UserAccountUi, val trustLevel: TrustLevel) : UiEvent()
+        data class ConnectUser(val userId: String, val trustLevel: TrustLevel) : UiEvent()
         data object DismissError : UiEvent()
         /*
         data object ClickDailyBudget : UiEvent()

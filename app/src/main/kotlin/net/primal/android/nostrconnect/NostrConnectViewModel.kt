@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.push.PushNotificationsTokenUpdater
-import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.navigation.nostrConnectUri
 import net.primal.android.nostrconnect.utils.getNostrConnectImage
@@ -75,7 +74,7 @@ class NostrConnectViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is NostrConnectContract.UiEvent.ClickConnect -> connect(it.account, it.trustLevel)
+                    is NostrConnectContract.UiEvent.ConnectUser -> connect(it.userId, it.trustLevel)
                     /*
                     is NostrConnectContract.UiEvent.ClickDailyBudget -> setState {
                         copy(showDailyBudgetPicker = true, selectedDailyBudget = this.dailyBudget)
@@ -152,7 +151,7 @@ class NostrConnectViewModel @Inject constructor(
     }
      */
 
-    private fun connect(selectedAccount: UserAccountUi, trustLevel: TrustLevel) {
+    private fun connect(userId: String, trustLevel: TrustLevel) {
         viewModelScope.launch {
             setState { copy(connecting = true) }
             val connectionUrl = state.value.connectionUrl ?: return@launch
@@ -161,7 +160,7 @@ class NostrConnectViewModel @Inject constructor(
 
             signerConnectionInitializer.initialize(
                 signerPubKey = signerKeyPair.pubKey,
-                userPubKey = selectedAccount.pubkey,
+                userPubKey = userId,
                 connectionUrl = connectionUrl,
                 trustLevel = trustLevel,
             ).onSuccess {

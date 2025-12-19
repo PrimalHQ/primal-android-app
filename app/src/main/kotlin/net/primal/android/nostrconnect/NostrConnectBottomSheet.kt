@@ -71,8 +71,8 @@ fun NostrConnectBottomSheet(viewModel: NostrConnectViewModel, onDismissRequest: 
                 connecting = state.connecting,
                 onConnectClick = { account, trustLevel ->
                     viewModel.setEvent(
-                        NostrConnectContract.UiEvent.ClickConnect(
-                            account = account,
+                        NostrConnectContract.UiEvent.ConnectUser(
+                            userId = account.pubkey,
                             trustLevel = trustLevel,
                         ),
                     )
