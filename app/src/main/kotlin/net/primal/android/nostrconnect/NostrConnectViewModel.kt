@@ -15,13 +15,13 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.push.PushNotificationsTokenUpdater
+import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.navigation.nostrConnectUri
 import net.primal.android.nostrconnect.utils.getNostrConnectImage
 import net.primal.android.nostrconnect.utils.getNostrConnectName
 import net.primal.android.nostrconnect.utils.getNostrConnectUrl
 import net.primal.android.user.accounts.UserAccountsStore
-import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.CredentialType
 import net.primal.android.user.domain.asKeyPair
@@ -29,6 +29,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
+import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import timber.log.Timber
 
@@ -37,7 +38,6 @@ class NostrConnectViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: DispatcherProvider,
     private val accountsStore: UserAccountsStore,
-    private val activeAccountStore: ActiveAccountStore,
     // private val exchangeRateHandler: ExchangeRateHandler,
     private val credentialsStore: CredentialsStore,
     private val signerConnectionInitializer: SignerConnectionInitializer,
@@ -49,7 +49,7 @@ class NostrConnectViewModel @Inject constructor(
     private val _state = MutableStateFlow(
         NostrConnectContract.UiState(
             appName = connectionUrl?.getNostrConnectName(),
-            appWebUrl = connectionUrl?.getNostrConnectUrl(),
+            appDescription = connectionUrl?.getNostrConnectUrl(),
             appImageUrl = connectionUrl?.getNostrConnectImage(),
             connectionUrl = connectionUrl,
         ),
@@ -75,12 +75,7 @@ class NostrConnectViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is NostrConnectContract.UiEvent.ChangeTab -> setState { copy(selectedTab = it.tab) }
-                    is NostrConnectContract.UiEvent.SelectAccount ->
-                        setState { copy(selectedAccount = accounts.find { acc -> acc.pubkey == it.pubkey }) }
-
-                    is NostrConnectContract.UiEvent.SelectTrustLevel -> setState { copy(trustLevel = it.level) }
-                    is NostrConnectContract.UiEvent.ClickConnect -> connect()
+                    is NostrConnectContract.UiEvent.ClickConnect -> connect(it.account, it.trustLevel)
                     /*
                     is NostrConnectContract.UiEvent.ClickDailyBudget -> setState {
                         copy(showDailyBudgetPicker = true, selectedDailyBudget = this.dailyBudget)
@@ -123,17 +118,7 @@ class NostrConnectViewModel @Inject constructor(
                     .sortedByDescending { it.lastAccessedAt }
                     .map { it.asUserAccountUi() }
 
-                val activeAccount = activeAccountStore.activeUserAccount().asUserAccountUi()
-
-                val selectedAccount = accounts.find { it.pubkey == activeAccount.pubkey }
-                    ?: accounts.firstOrNull()
-
-                setState {
-                    copy(
-                        accounts = accounts,
-                        selectedAccount = selectedAccount,
-                    )
-                }
+                setState { copy(accounts = accounts) }
             }
         }
     }
@@ -167,10 +152,9 @@ class NostrConnectViewModel @Inject constructor(
     }
      */
 
-    private fun connect() {
+    private fun connect(selectedAccount: UserAccountUi, trustLevel: TrustLevel) {
         viewModelScope.launch {
             setState { copy(connecting = true) }
-            val selectedAccount = state.value.selectedAccount ?: return@launch
             val connectionUrl = state.value.connectionUrl ?: return@launch
 
             val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
@@ -179,7 +163,7 @@ class NostrConnectViewModel @Inject constructor(
                 signerPubKey = signerKeyPair.pubKey,
                 userPubKey = selectedAccount.pubkey,
                 connectionUrl = connectionUrl,
-                trustLevel = state.value.trustLevel,
+                trustLevel = trustLevel,
             ).onSuccess {
                 CoroutineScope(dispatcherProvider.io()).launch {
                     runCatching { tokenUpdater.updateTokenForRemoteSigner() }
