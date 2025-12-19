@@ -107,7 +107,7 @@ fun ConnectedAppsScreen(
                         title = localAppsTitle,
                         connections = state.localConnections,
                         activeClientPubKeys = state.activeClientPubKeys,
-                        onAppClick = onConnectedAppClick,
+                        onAppClick = {},
                     )
 
                     if (state.localConnections.isNotEmpty() && state.remoteConnections.isNotEmpty()) {
