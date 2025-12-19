@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -29,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.ListNoContent
@@ -80,7 +84,7 @@ fun ConnectedAppsScreen(
     ) { paddingValues ->
         when {
             state.loading -> PrimalLoadingSpinner()
-            state.connections.isEmpty() -> {
+            state.remoteConnections.isEmpty() && state.localConnections.isEmpty() -> {
                 ListNoContent(
                     modifier = Modifier
                         .fillMaxSize()
@@ -90,36 +94,82 @@ fun ConnectedAppsScreen(
                 )
             }
             else -> {
+                val localAppsTitle = stringResource(id = R.string.settings_connected_apps_local_apps)
+                val remoteAppsTitle = stringResource(id = R.string.settings_connected_apps_remote_apps)
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
                         .padding(horizontal = 12.dp, vertical = 12.dp),
                 ) {
-                    itemsIndexed(
-                        items = state.connections,
-                        key = { _, connection -> connection.clientPubKey },
-                        contentType = { _, _ -> "ConnectionItem" },
-                    ) { index, connection ->
-                        val shape = getListItemShape(index = index, listSize = state.connections.size)
-                        val isLast = index == state.connections.lastIndex
-                        val isActive = connection.clientPubKey in state.activeClientPubKeys
+                    connectedAppListSection(
+                        title = localAppsTitle,
+                        connections = state.localConnections,
+                        activeClientPubKeys = state.activeClientPubKeys,
+                        onAppClick = onConnectedAppClick
+                    )
 
-                        Column(modifier = Modifier.clip(shape)) {
-                            ConnectedAppListItem(
-                                connection = connection,
-                                isActive = isActive,
-                                onClick = { onConnectedAppClick(connection.clientPubKey) },
-                            )
-                            if (!isLast) {
-                                PrimalDivider()
-                            }
+                    if (state.localConnections.isNotEmpty() && state.remoteConnections.isNotEmpty()) {
+                        item {
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
+
+                    connectedAppListSection(
+                        title = remoteAppsTitle,
+                        connections = state.remoteConnections,
+                        activeClientPubKeys = state.activeClientPubKeys,
+                        onAppClick = onConnectedAppClick
+                    )
                 }
             }
         }
     }
+}
+
+private fun LazyListScope.connectedAppListSection(
+    title: String,
+    connections: List<AppConnectionUi>,
+    activeClientPubKeys: Set<String>,
+    onAppClick: (String) -> Unit,
+) {
+    if (connections.isNotEmpty()) {
+        item {
+            SectionHeader(title = title)
+        }
+        itemsIndexed(
+            items = connections,
+            key = { _, connection -> connection.clientPubKey },
+            contentType = { _, _ -> "ConnectionItem" },
+        ) { index, connection ->
+            val shape = getListItemShape(index = index, listSize = connections.size)
+            val isLast = index == connections.lastIndex
+            val isActive = connection.clientPubKey in activeClientPubKeys
+
+            Column(modifier = Modifier.clip(shape)) {
+                ConnectedAppListItem(
+                    connection = connection,
+                    isActive = isActive || connection.isLocal,
+                    onClick = { onAppClick(connection.clientPubKey) },
+                )
+                if (!isLast) {
+                    PrimalDivider()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SectionHeader(title: String) {
+    Text(
+        modifier = Modifier.padding(vertical = 16.dp),
+        text = title.uppercase(),
+        style = AppTheme.typography.titleMedium.copy(lineHeight = 20.sp),
+        fontWeight = FontWeight.SemiBold,
+        color = AppTheme.colorScheme.onPrimary,
+    )
 }
 
 @Composable
@@ -193,7 +243,7 @@ fun PreviewConnectedAppsScreen() {
             ConnectedAppsScreen(
                 state = ConnectedAppsContract.UiState(
                     loading = false,
-                    connections = listOf(
+                    remoteConnections = listOf(
                         AppConnectionUi(
                             clientPubKey = "1",
                             appName = "Primal web app",
@@ -206,17 +256,14 @@ fun PreviewConnectedAppsScreen() {
                             appImage = null,
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                         ),
+                    ),
+                    localConnections = listOf(
                         AppConnectionUi(
                             clientPubKey = "3",
-                            appName = "Primal",
+                            appName = "Nostragious",
                             appImage = null,
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
-                        ),
-                        AppConnectionUi(
-                            clientPubKey = "4",
-                            appName = "",
-                            appImage = null,
-                            userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
+                            isLocal = true,
                         ),
                     ),
                     activeClientPubKeys = setOf("1", "2"),
