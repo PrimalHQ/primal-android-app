@@ -19,11 +19,6 @@ import net.primal.domain.account.model.LocalSignerMethodResponse.Success.GetPubl
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.nostr.cryptography.utils.assureValidNpub
 
-data class AppDisplayInfo(
-    val name: String,
-    val icon: Drawable,
-)
-
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalUuidApi::class)
 @Composable
 fun AndroidConnectScreen(
@@ -89,7 +84,12 @@ private fun AndroidConnectScreen(
                 )
             },
         ) {
-            Text("Connect QA userId")
+            Text("Connect QA with ${state.appPackageName}")
         }
     }
 }
+
+data class AppDisplayInfo(
+    val name: String,
+    val icon: Drawable,
+)

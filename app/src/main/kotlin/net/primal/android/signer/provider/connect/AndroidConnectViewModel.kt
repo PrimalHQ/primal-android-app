@@ -23,6 +23,7 @@ import net.primal.domain.account.service.LocalSignerService
 
 @HiltViewModel
 @OptIn(ExperimentalUuidApi::class)
+@Suppress("unused")
 class AndroidConnectViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val localSignerService: LocalSignerService,

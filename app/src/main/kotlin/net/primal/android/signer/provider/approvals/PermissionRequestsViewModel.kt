@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.signer.provider.parser.SignerIntentParser
-import net.primal.android.user.credentials.CredentialsStore
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.service.LocalSignerService
@@ -22,7 +21,6 @@ import timber.log.Timber
 class PermissionRequestsViewModel @Inject constructor(
     private val localSignerService: LocalSignerService,
     private val intentParser: SignerIntentParser,
-    private val credentialsStore: CredentialsStore,
 ) : ViewModel() {
     private val methods: MutableSharedFlow<LocalSignerMethod> = MutableSharedFlow()
     private fun setMethod(method: LocalSignerMethod) = viewModelScope.launch { methods.emit(method) }
