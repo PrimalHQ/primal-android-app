@@ -81,13 +81,13 @@ companion object {
 fun SignerConnectBottomSheet(
     appName: String?,
     appDescription: String?,
-    appImageUrl: String?,
-    appIcon: Drawable? = null,
     accounts: List<UserAccountUi>,
     connecting: Boolean,
     onConnectClick: (UserAccountUi, TrustLevel) -> Unit,
     onCancelClick: () -> Unit,
     modifier: Modifier = Modifier,
+    appImageUrl: String? = null,
+    appIcon: Drawable? = null,
 ) {
     var selectedTab by remember { mutableStateOf(SignerConnectTab.Login) }
     var trustLevel by remember { mutableStateOf(TrustLevel.Medium) }

@@ -1,6 +1,5 @@
 package net.primal.android.signer.provider.connect
 
-import android.graphics.drawable.Drawable
 import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.domain.account.model.TrustLevel
@@ -9,8 +8,6 @@ interface AndroidConnectContract {
 
     data class UiState(
         val appPackageName: String,
-        val appName: String,
-        val appIcon: Drawable? = null,
         val accounts: List<UserAccountUi> = emptyList(),
         val connecting: Boolean = false,
         val error: UiError? = null,

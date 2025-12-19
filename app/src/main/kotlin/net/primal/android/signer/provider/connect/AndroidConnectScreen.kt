@@ -17,6 +17,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.signer.SignerConnectBottomSheet
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
+import net.primal.android.signer.provider.rememberAppDisplayInfo
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.LocalSignerMethodResponse
 import net.primal.domain.account.model.LocalSignerMethodResponse.Success.GetPublicKey
@@ -72,7 +73,7 @@ fun AndroidConnectScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@ExperimentalMaterial3Api
 @Composable
 private fun AndroidConnectScreen(
     state: AndroidConnectContract.UiState,
@@ -81,7 +82,7 @@ private fun AndroidConnectScreen(
     snackbarHostState: SnackbarHostState,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val displayAppName = state.appName.ifEmpty { state.appPackageName }
+    val appDisplayInfo = rememberAppDisplayInfo(state.appPackageName)
 
     ModalBottomSheet(
         sheetState = sheetState,
@@ -90,10 +91,9 @@ private fun AndroidConnectScreen(
         dragHandle = { NostrConnectBottomSheetDragHandle() },
     ) {
         SignerConnectBottomSheet(
-            appName = displayAppName,
+            appName = appDisplayInfo.name,
+            appIcon = appDisplayInfo.icon,
             appDescription = state.appPackageName,
-            appImageUrl = null,
-            appIcon = state.appIcon,
             accounts = state.accounts,
             connecting = state.connecting,
             onConnectClick = { account, trustLevel ->

@@ -15,7 +15,9 @@ import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.signer.provider.callingPackageOrThrow
-import net.primal.android.signer.provider.parser.SignerIntentParser
+import net.primal.android.signer.provider.connect.AndroidConnectContract.SideEffect
+import net.primal.android.signer.provider.connect.AndroidConnectContract.UiEvent
+import net.primal.android.signer.provider.connect.AndroidConnectContract.UiState
 import net.primal.android.signer.provider.signerRequestedPermissionsJsonOrNull
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
@@ -31,45 +33,27 @@ import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 @Suppress("unused")
 class AndroidConnectViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val localSignerService: LocalSignerService,
-    private val intentParser: SignerIntentParser,
     private val accountsStore: UserAccountsStore,
     private val credentialsStore: CredentialsStore,
+    private val localSignerService: LocalSignerService,
 ) : ViewModel() {
 
     private val permissionsJson: String? = savedStateHandle.signerRequestedPermissionsJsonOrNull
     private val callingPackage: String = savedStateHandle.callingPackageOrThrow
 
-    private val _state = MutableStateFlow(
-        AndroidConnectContract.UiState(
-            appPackageName = callingPackage,
-            appName = callingPackage,
-        ),
-    )
+    private val _state = MutableStateFlow(UiState(appPackageName = callingPackage))
     val state = _state.asStateFlow()
-    private fun setState(reducer: AndroidConnectContract.UiState.() -> AndroidConnectContract.UiState) =
-        _state.getAndUpdate(reducer)
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
-    private val events = MutableSharedFlow<AndroidConnectContract.UiEvent>()
-    fun setEvent(event: AndroidConnectContract.UiEvent) = viewModelScope.launch { events.emit(event) }
-    private val _effects = Channel<AndroidConnectContract.SideEffect>()
+    private val events = MutableSharedFlow<UiEvent>()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+    private val _effects = Channel<SideEffect>()
     val effects = _effects.receiveAsFlow()
-    private fun setEffect(effect: AndroidConnectContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
-        resolveAppInfo()
         observeAccounts()
         observeEvents()
-    }
-
-    private fun resolveAppInfo() {
-        val (label, icon) = intentParser.getAppLabelAndIcon(callingPackage)
-        setState {
-            copy(
-                appName = label ?: callingPackage,
-                appIcon = icon,
-            )
-        }
     }
 
     private fun observeAccounts() {
@@ -96,38 +80,31 @@ class AndroidConnectViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is AndroidConnectContract.UiEvent.ConnectUser -> {
-                        addNewApp(
-                            userId = it.userId,
-                            appName = state.value.appName,
-                            trustLevel = it.trustLevel,
-                        )
-                    }
-                    AndroidConnectContract.UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.ConnectUser -> addNewApp(userId = it.userId, trustLevel = it.trustLevel)
+                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
 
-    private fun addNewApp(
-        userId: String,
-        appName: String,
-        trustLevel: TrustLevel,
-    ) = viewModelScope.launch {
-        setState { copy(connecting = true) }
-        val app = LocalApp(
-            identifier = "$callingPackage:$userId",
-            packageName = callingPackage,
-            userPubKey = userId,
-            trustLevel = trustLevel,
-            permissions = emptyList(),
-        )
+    private fun addNewApp(userId: String, trustLevel: TrustLevel) =
+        viewModelScope.launch {
+            setState { copy(connecting = true) }
+            val app = LocalApp(
+                identifier = "$callingPackage:$userId",
+                packageName = callingPackage,
+                userPubKey = userId,
+                trustLevel = trustLevel,
+                permissions = emptyList(),
+            )
 
-        localSignerService.addNewApp(app).onSuccess {
-            setEffect(AndroidConnectContract.SideEffect.ConnectionSuccess(userId = userId))
-        }.onFailure {
-            setState { copy(error = UiError.GenericError()) }
-            setEffect(AndroidConnectContract.SideEffect.ConnectionFailure(error = it))
+            localSignerService.addNewApp(app)
+                .onSuccess {
+                    setEffect(SideEffect.ConnectionSuccess(userId = userId))
+                }
+                .onFailure {
+                    setState { copy(error = UiError.GenericError()) }
+                    setEffect(SideEffect.ConnectionFailure(error = it))
+                }
+            setState { copy(connecting = false) }
         }
-        setState { copy(connecting = false) }
-    }
 }
