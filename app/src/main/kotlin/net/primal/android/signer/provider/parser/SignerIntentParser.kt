@@ -1,4 +1,4 @@
-package net.primal.android.signer.parser
+package net.primal.android.signer.provider.parser
 
 import android.content.Context
 import android.content.Intent
@@ -8,8 +8,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-import net.primal.android.signer.Permission
-import net.primal.android.signer.SignerMethod
+import net.primal.android.signer.model.Permission
+import net.primal.android.signer.model.SignerMethod
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.LocalSignerMethod
@@ -24,19 +24,11 @@ class SignerIntentParser @Inject constructor(
     companion object {
         private const val NOSTR_SIGNER_SCHEME = "nostrsigner"
 
-        private const val TYPE_COLUMN = "type"
+        const val TYPE_COLUMN = "type"
         private const val PERMISSIONS_COLUMN = "permissions"
         private const val ID_COLUMN = "id"
         private const val CURRENT_USER_COLUMN = "current_user"
         private const val PUBKEY_COLUMN = "pubkey"
-
-        private const val GET_PUBLIC_KEY = "get_public_key"
-        private const val SIGN_EVENT = "sign_event"
-        private const val NIP04_DECRYPT = "nip04_decrypt"
-        private const val NIP44_DECRYPT = "nip44_decrypt"
-        private const val NIP04_ENCRYPT = "nip04_encrypt"
-        private const val NIP44_ENCRYPT = "nip44_encrypt"
-        private const val DECRYPT_ZAP_EVENT = "decrypt_zap_event"
     }
 
     fun parse(intent: Intent, callingPackage: String?): Result<LocalSignerMethod> =
@@ -50,13 +42,13 @@ class SignerIntentParser @Inject constructor(
             }
 
             when (type) {
-                GET_PUBLIC_KEY -> parseAsGetPublicKey(intent, callingPackage)
-                SIGN_EVENT -> parseAsSignEvent(intent, callingPackage)
-                NIP04_ENCRYPT -> parseAsNip04Encrypt(intent, callingPackage)
-                NIP44_ENCRYPT -> parseAsNip44Encrypt(intent, callingPackage)
-                NIP04_DECRYPT -> parseAsNip04Decrypt(intent, callingPackage)
-                NIP44_DECRYPT -> parseAsNip44Decrypt(intent, callingPackage)
-                DECRYPT_ZAP_EVENT -> parseAsDecryptZapEvent(intent, callingPackage)
+                SignerMethod.GET_PUBLIC_KEY.method -> parseAsGetPublicKey(intent, callingPackage)
+                SignerMethod.SIGN_EVENT.method -> parseAsSignEvent(intent, callingPackage)
+                SignerMethod.NIP04_ENCRYPT.method -> parseAsNip04Encrypt(intent, callingPackage)
+                SignerMethod.NIP44_ENCRYPT.method -> parseAsNip44Encrypt(intent, callingPackage)
+                SignerMethod.NIP04_DECRYPT.method -> parseAsNip04Decrypt(intent, callingPackage)
+                SignerMethod.NIP44_DECRYPT.method -> parseAsNip44Decrypt(intent, callingPackage)
+                SignerMethod.DECRYPT_ZAP_EVENT.method -> parseAsDecryptZapEvent(intent, callingPackage)
 
                 else -> error("Unexpected method type. Received $type.")
             }
@@ -76,7 +68,7 @@ class SignerIntentParser @Inject constructor(
                         it.type.method
                     },
                     clientPubKey = "",
-                    action = PermissionAction.Approve,
+                    action = PermissionAction.Ask,
                 )
             }
 
@@ -109,7 +101,7 @@ class SignerIntentParser @Inject constructor(
         val (id, currentUser, pubkey) = intent.extractColumnsOrThrow(ID_COLUMN, CURRENT_USER_COLUMN, PUBKEY_COLUMN)
 
         val plaintext = requireNotNull(intent.getUriPayload()) {
-            "Missing required `plaintext` argument for `$NIP04_ENCRYPT`."
+            "Missing required `plaintext` argument for `${SignerMethod.NIP04_ENCRYPT.method}`."
         }
 
         return LocalSignerMethod.Nip04Encrypt(
@@ -125,7 +117,7 @@ class SignerIntentParser @Inject constructor(
         val (id, currentUser, pubkey) = intent.extractColumnsOrThrow(ID_COLUMN, CURRENT_USER_COLUMN, PUBKEY_COLUMN)
 
         val plaintext = requireNotNull(intent.getUriPayload()) {
-            "Missing required `plaintext` argument for `$NIP44_ENCRYPT`."
+            "Missing required `plaintext` argument for `${SignerMethod.NIP44_ENCRYPT.method}`."
         }
 
         return LocalSignerMethod.Nip44Encrypt(
@@ -141,7 +133,7 @@ class SignerIntentParser @Inject constructor(
         val (id, currentUser, pubkey) = intent.extractColumnsOrThrow(ID_COLUMN, CURRENT_USER_COLUMN, PUBKEY_COLUMN)
 
         val ciphertext = requireNotNull(intent.getUriPayload()) {
-            "Missing required `ciphertext` argument for `$NIP04_DECRYPT`."
+            "Missing required `ciphertext` argument for `${SignerMethod.NIP04_DECRYPT.method}`."
         }
 
         return LocalSignerMethod.Nip04Decrypt(
@@ -157,7 +149,7 @@ class SignerIntentParser @Inject constructor(
         val (id, currentUser, pubkey) = intent.extractColumnsOrThrow(ID_COLUMN, CURRENT_USER_COLUMN, PUBKEY_COLUMN)
 
         val ciphertext = requireNotNull(intent.getUriPayload()) {
-            "Missing required `ciphertext` argument for `$NIP44_DECRYPT`."
+            "Missing required `ciphertext` argument for `${SignerMethod.NIP44_DECRYPT.method}`."
         }
 
         return LocalSignerMethod.Nip44Decrypt(
@@ -172,7 +164,7 @@ class SignerIntentParser @Inject constructor(
     private fun parseAsDecryptZapEvent(intent: Intent, callingPackage: String): LocalSignerMethod {
         val (id, currentUser) = intent.extractColumnsOrThrow(ID_COLUMN, CURRENT_USER_COLUMN)
         val event = requireNotNull(intent.getUriPayload().decodeFromJsonStringOrNull<NostrEvent>()) {
-            "Missing required `event` argument in `$DECRYPT_ZAP_EVENT`."
+            "Missing required `event` argument in `${SignerMethod.DECRYPT_ZAP_EVENT.method}`."
         }
 
         return LocalSignerMethod.DecryptZapEvent(

@@ -1,4 +1,4 @@
-package net.primal.android.signer
+package net.primal.android.signer.client
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -9,6 +9,8 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.core.net.toUri
+import net.primal.android.signer.model.Permission
+import net.primal.android.signer.model.SignerMethod
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent

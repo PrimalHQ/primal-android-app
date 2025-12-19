@@ -2,13 +2,13 @@ package net.primal.data.account.repository.service
 
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.atomics.fetchAndUpdate
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import net.primal.core.utils.Result
+import net.primal.core.utils.add
 import net.primal.core.utils.asSuccess
+import net.primal.core.utils.remove
 import net.primal.core.utils.runCatching
 import net.primal.data.account.repository.builder.LocalSignerMethodResponseBuilder
 import net.primal.data.account.repository.repository.InternalPermissionsRepository
@@ -32,23 +32,22 @@ class LocalSignerServiceImpl(
     private val internalPermissionsRepository: InternalPermissionsRepository,
 ) : LocalSignerService {
     private val responses = AtomicReference<List<LocalSignerMethodResponse>>(emptyList())
-    private val _pendingUserActionMethods = MutableStateFlow<List<LocalSignerMethod>>(emptyList())
+    private val pendingUserActionMethods = MutableStateFlow<List<LocalSignerMethod>>(emptyList())
 
     override suspend fun processMethod(method: LocalSignerMethod): Result<LocalSignerMethodResponse> {
         val canProcessMethod = localAppRepository.canProcessMethod(method = method)
 
         return if (canProcessMethod) {
             localSignerMethodResponseBuilder.build(method = method).also { response ->
-                responses.fetchAndUpdate { it + response }
+                responses.add(response)
             }.asSuccess()
         } else {
-            _pendingUserActionMethods.update { it + method }
-            Result.failure(InsufficientPermissions())
+            pendingUserActionMethods.add(method)
+            Result.failure(LocalSignerService.InsufficientPermissions())
         }
     }
 
-    override fun subscribeToPendingUserActions(): Flow<List<LocalSignerMethod>> =
-        _pendingUserActionMethods.asStateFlow()
+    override fun subscribeToPendingUserActions(): Flow<List<LocalSignerMethod>> = pendingUserActionMethods.asStateFlow()
 
     override fun getMethodResponses() = responses.load()
 
@@ -57,7 +56,7 @@ class LocalSignerServiceImpl(
     }
 
     private suspend fun respondToUserAction(eventChoice: SessionEventUserChoice) {
-        val method = _pendingUserActionMethods.value
+        val method = pendingUserActionMethods.value
             .firstOrNull { it.eventId == eventChoice.sessionEventId }
             ?: return
 
@@ -85,20 +84,20 @@ class LocalSignerServiceImpl(
             }
         }
 
-        _pendingUserActionMethods.update { it - method }
+        pendingUserActionMethods.remove(method)
     }
 
     private suspend fun allowMethod(method: LocalSignerMethod) {
-        responses.fetchAndUpdate { it + localSignerMethodResponseBuilder.build(method) }
+        responses.add(localSignerMethodResponseBuilder.build(method))
     }
 
     private fun rejectMethod(eventId: String) {
-        responses.fetchAndUpdate {
-            it + LocalSignerMethodResponse.Error(
+        responses.add(
+            LocalSignerMethodResponse.Error(
                 eventId = eventId,
                 message = "User rejected this event.",
-            )
-        }
+            ),
+        )
     }
 
     private suspend fun updatePermissionPreference(
@@ -128,12 +127,11 @@ class LocalSignerServiceImpl(
             localAppRepository
                 .upsertApp(
                     app = app.copy(
-                        permissions = (addedPermissions + app.permissions)
-                            .distinctBy { it.permissionId },
+                        permissions = (
+                            addedPermissions + app.permissions.map { it.copy(clientPubKey = app.identifier) }
+                            ).distinctBy { it.permissionId },
                     ),
                 )
                 .getOrThrow()
         }
-
-    class InsufficientPermissions : RuntimeException("Insufficient permissions to execute this method.")
 }

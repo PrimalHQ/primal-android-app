@@ -1,7 +1,8 @@
-package net.primal.android.signer
+package net.primal.android.signer.client
 
 import android.content.ContentResolver
 import androidx.core.net.toUri
+import net.primal.android.signer.model.SignerMethod
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.nostr.NostrEvent

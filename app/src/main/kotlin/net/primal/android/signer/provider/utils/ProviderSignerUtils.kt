@@ -1,4 +1,4 @@
-package net.primal.android.signer.utils
+package net.primal.android.signer.provider.utils
 
 import android.content.Intent
 import net.primal.core.utils.serialization.encodeToJsonString

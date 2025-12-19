@@ -1,4 +1,4 @@
-package net.primal.android.signer
+package net.primal.android.signer.provider
 
 import android.content.Intent
 import androidx.lifecycle.ViewModel
@@ -11,18 +11,19 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.signer.SignerContract.SideEffect
-import net.primal.android.signer.parser.SignerIntentParser
+import net.primal.android.signer.provider.SignerContract.SideEffect
+import net.primal.android.signer.provider.parser.SignerIntentParser
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.CredentialType
+import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.model.LocalSignerMethodResponse
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.service.LocalSignerService
+import net.primal.domain.nostr.cryptography.utils.assureValidNpub
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
-import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import timber.log.Timber
 
 @HiltViewModel
@@ -59,22 +60,16 @@ class SignerViewModel @Inject constructor(
             methods.collect { method ->
                 when (method) {
                     is LocalSignerMethod.GetPublicKey -> addNewApp(method)
-
-                    else -> respondToMethod(method)
+                    else -> respondToMethod(method = method)
                 }
             }
-        }
-
-    private fun respondToMethod(method: LocalSignerMethod) =
-        viewModelScope.launch {
-            localSignerService.processMethod(method = method)
-                .onSuccess { setEffect(SideEffect.RespondToIntent(it)) }
         }
 
     private fun addNewApp(method: LocalSignerMethod.GetPublicKey) =
         viewModelScope.launch {
             val userPubKey = credentialsStore.credentials.value
                 .first { it.type == CredentialType.PrivateKey }.npub.bech32ToHexOrThrow()
+
             val app = LocalApp(
                 identifier = "${method.packageName}:$userPubKey",
                 packageName = method.packageName,
@@ -85,16 +80,31 @@ class SignerViewModel @Inject constructor(
                 permissions = method.permissions,
             )
 
-            localSignerService.addNewApp(app = app)
+            localSignerService.addNewApp(app)
                 .onSuccess {
                     setEffect(
                         SideEffect.RespondToIntent(
                             LocalSignerMethodResponse.Success.GetPublicKey(
                                 eventId = Uuid.random().toString(),
-                                pubkey = app.userPubKey.hexToNpubHrp(),
+                                pubkey = userPubKey.assureValidNpub(),
+                            ),
+                        ),
+                    )
+                }.onFailure {
+                    setEffect(
+                        SideEffect.RespondToIntent(
+                            LocalSignerMethodResponse.Error(
+                                eventId = Uuid.random().toString(),
+                                message = "Couldn't login user.",
                             ),
                         ),
                     )
                 }
+        }
+
+    private fun respondToMethod(method: LocalSignerMethod) =
+        viewModelScope.launch {
+            localSignerService.processMethod(method = method)
+                .onSuccess { setEffect(SideEffect.RespondToIntent(it)) }
         }
 }

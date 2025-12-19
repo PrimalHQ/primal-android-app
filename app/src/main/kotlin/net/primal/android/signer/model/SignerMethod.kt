@@ -1,7 +1,7 @@
-package net.primal.android.signer
+package net.primal.android.signer.model
 
 import kotlinx.serialization.Serializable
-import net.primal.android.signer.serialization.SignerMethodSerializer
+import net.primal.android.signer.model.serialization.SignerMethodSerializer
 
 @Serializable(with = SignerMethodSerializer::class)
 enum class SignerMethod(val method: String) {

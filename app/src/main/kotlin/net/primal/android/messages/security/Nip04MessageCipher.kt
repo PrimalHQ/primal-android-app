@@ -3,8 +3,8 @@ package net.primal.android.messages.security
 import android.content.ContentResolver
 import javax.inject.Inject
 import kotlin.io.encoding.ExperimentalEncodingApi
-import net.primal.android.signer.decryptNip04WithAmber
-import net.primal.android.signer.encryptNip04WithAmber
+import net.primal.android.signer.client.decryptNip04WithAmber
+import net.primal.android.signer.client.encryptNip04WithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.MessageEncryptException

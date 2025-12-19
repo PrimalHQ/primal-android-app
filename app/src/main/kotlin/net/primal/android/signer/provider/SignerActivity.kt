@@ -1,4 +1,4 @@
-package net.primal.android
+package net.primal.android.signer.provider
 
 import android.content.Intent
 import android.os.Bundle
@@ -14,9 +14,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import dagger.hilt.android.AndroidEntryPoint
 import net.primal.android.core.activity.PrimalActivity
-import net.primal.android.signer.SignerContract
-import net.primal.android.signer.SignerViewModel
-import net.primal.android.signer.utils.toIntent
+import net.primal.android.signer.model.SignerMethod
+import net.primal.android.signer.provider.parser.SignerIntentParser
+import net.primal.android.signer.provider.utils.toIntent
 import net.primal.android.theme.AppTheme
 import timber.log.Timber
 
@@ -30,11 +30,6 @@ class SignerActivity : PrimalActivity() {
         super.onCreate(savedInstanceState)
 
         signerViewModel.processIntent(intent, callingPackage)
-
-        addOnNewIntentListener {
-            Timber.tag("LocalSigner").d("Processing intent from listener.")
-            signerViewModel.processIntent(it, callingPackage)
-        }
 
         setContent {
             val context = LocalContext.current
@@ -57,14 +52,26 @@ class SignerActivity : PrimalActivity() {
             }
 
             ConfigureActivity {
-                ModalBottomSheet(
-                    contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    onDismissRequest = { finish() },
-                ) {
-                    Text(
-                        modifier = Modifier.height(600.dp),
-                        text = "This is a test!",
-                    )
+                if (intent.getStringExtra(SignerIntentParser.TYPE_COLUMN) == SignerMethod.GET_PUBLIC_KEY.method) {
+                    ModalBottomSheet(
+                        contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        onDismissRequest = { finish() },
+                    ) {
+                        Text(
+                            modifier = Modifier.height(600.dp),
+                            text = "This is SignerConnectBottomSheet!",
+                        )
+                    }
+                } else {
+                    ModalBottomSheet(
+                        contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        onDismissRequest = { finish() },
+                    ) {
+                        Text(
+                            modifier = Modifier.height(600.dp),
+                            text = "This is a PermissionsBottomSheet!",
+                        )
+                    }
                 }
             }
         }

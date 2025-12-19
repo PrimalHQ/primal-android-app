@@ -328,7 +328,7 @@
         </activity>
 
         <activity
-            android:name=".SignerActivity"
+            android:name=".signer.provider.SignerActivity"
             android:configChanges="orientation|screenSize|layoutDirection|screenLayout|smallestScreenSize"
             android:exported="true"
             android:launchMode="singleTop"
