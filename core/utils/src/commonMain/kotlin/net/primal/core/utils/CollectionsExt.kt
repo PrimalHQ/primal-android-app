@@ -26,5 +26,8 @@ fun <K, V> AtomicReference<Map<K, V>>.put(key: K, value: V) = this.fetchAndUpdat
 @ExperimentalAtomicApi
 fun <K, V> AtomicReference<Map<K, V>>.remove(key: K) = this.fetchAndUpdate { it - key }
 
+@ExperimentalAtomicApi
+fun <K, V> AtomicReference<Map<K, V>>.getAndClear() = this.fetchAndUpdate { emptyMap() }
+
 fun <T> MutableStateFlow<List<T>>.add(item: T) = this.update { it + item }
 fun <T> MutableStateFlow<List<T>>.remove(item: T) = this.update { it - item }

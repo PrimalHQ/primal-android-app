@@ -3,7 +3,6 @@ package net.primal.data.account.repository.manager
 import io.github.aakira.napier.Napier
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.atomics.fetchAndUpdate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -15,6 +14,7 @@ import kotlinx.coroutines.launch
 import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.getAndClear
 import net.primal.core.utils.put
 import net.primal.core.utils.remove
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
@@ -91,10 +91,10 @@ internal class NostrRelayManager(
     fun disconnectFromRelay(relay: String) = scope.launch { removeClient(relay) }
 
     suspend fun disconnectFromAll() {
-        val oldJobs = clientJobs.fetchAndUpdate { emptyMap() }
+        val oldJobs = clientJobs.getAndClear()
         oldJobs.values.forEach { it.cancel() }
 
-        val oldClients = clients.fetchAndUpdate { emptyMap() }
+        val oldClients = clients.getAndClear()
         oldClients.values.forEach { it.destroy() }
 
         scope.cancel()
