@@ -35,15 +35,21 @@ class LocalSignerServiceImpl(
     private val pendingUserActionMethods = MutableStateFlow<List<LocalSignerMethod>>(emptyList())
 
     override suspend fun processMethod(method: LocalSignerMethod): Result<LocalSignerMethodResponse> {
-        val canProcessMethod = localAppRepository.canProcessMethod(method = method)
+        val permissionAction = localAppRepository.getPermissionActionForMethod(method = method)
 
-        return if (canProcessMethod) {
-            localSignerMethodResponseBuilder.build(method = method).also { response ->
+        return when (permissionAction) {
+            PermissionAction.Approve -> localSignerMethodResponseBuilder.build(method = method).also { response ->
                 responses.add(response)
             }.asSuccess()
-        } else {
-            pendingUserActionMethods.add(method)
-            Result.failure(LocalSignerService.InsufficientPermissions())
+
+            PermissionAction.Deny -> {
+                Result.failure(LocalSignerService.UserAutoRejected())
+            }
+
+            PermissionAction.Ask -> {
+                pendingUserActionMethods.add(method)
+                Result.failure(LocalSignerService.InsufficientPermissions())
+            }
         }
     }
 

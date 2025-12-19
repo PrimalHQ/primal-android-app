@@ -19,6 +19,6 @@ object SignerMethodSerializer : KSerializer<SignerMethod> {
     override fun deserialize(decoder: Decoder): SignerMethod {
         val decoded = decoder.decodeString()
 
-        return SignerMethod.valueOf(decoded)
+        return SignerMethod.fromString(decoded)
     }
 }
