@@ -1,4 +1,4 @@
-package net.primal.android.signer.provider
+package net.primal.android.signer.provider.approvals
 
 import android.content.Intent
 import androidx.lifecycle.ViewModel
@@ -10,7 +10,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.signer.provider.SignerContract.SideEffect
 import net.primal.android.signer.provider.parser.SignerIntentParser
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.core.utils.onSuccess
@@ -20,7 +19,7 @@ import timber.log.Timber
 
 @HiltViewModel
 @OptIn(ExperimentalUuidApi::class)
-class SignerViewModel @Inject constructor(
+class PermissionRequestsViewModel @Inject constructor(
     private val localSignerService: LocalSignerService,
     private val intentParser: SignerIntentParser,
     private val credentialsStore: CredentialsStore,
@@ -28,9 +27,10 @@ class SignerViewModel @Inject constructor(
     private val methods: MutableSharedFlow<LocalSignerMethod> = MutableSharedFlow()
     private fun setMethod(method: LocalSignerMethod) = viewModelScope.launch { methods.emit(method) }
 
-    private val _effects = Channel<SideEffect>()
+    private val _effects = Channel<PermissionRequestsContract.SideEffect>()
     val effects = _effects.receiveAsFlow()
-    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
+    private fun setEffect(effect: PermissionRequestsContract.SideEffect) =
+        viewModelScope.launch { _effects.send(effect) }
 
     init {
         observeMethods()
@@ -57,6 +57,6 @@ class SignerViewModel @Inject constructor(
     private fun respondToMethod(method: LocalSignerMethod) =
         viewModelScope.launch {
             localSignerService.processMethod(method = method)
-                .onSuccess { setEffect(SideEffect.RespondToIntent(it)) }
+                .onSuccess { setEffect(PermissionRequestsContract.SideEffect.RespondToIntent(it)) }
         }
 }

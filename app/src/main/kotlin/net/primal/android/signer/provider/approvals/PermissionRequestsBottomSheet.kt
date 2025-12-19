@@ -7,12 +7,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import net.primal.android.signer.provider.SignerViewModel
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PermissionRequestsBottomSheet(viewModel: SignerViewModel, onDismiss: () -> Unit) {
+fun PermissionRequestsBottomSheet(viewModel: PermissionRequestsViewModel, onDismiss: () -> Unit) {
     ModalBottomSheet(
         contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         onDismissRequest = onDismiss,
