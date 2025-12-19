@@ -1,5 +1,6 @@
 ## Features
 - Remote Signer (NIP 46)
+- Android Signer (NIP 55)
 
 ## Fixes
 - Improved notifications auto-scroll behaviour (#766)
