@@ -29,7 +29,7 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.ui.compose.PlayerSurface
 import androidx.media3.ui.compose.SURFACE_TYPE_TEXTURE_VIEW
-import net.primal.android.LocalContentDisplaySettings
+import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.attachment.model.EventUriUi

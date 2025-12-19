@@ -14,8 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.activity.LocalPrimalTheme
 
 @Composable
 fun GridLoadingPlaceholder(

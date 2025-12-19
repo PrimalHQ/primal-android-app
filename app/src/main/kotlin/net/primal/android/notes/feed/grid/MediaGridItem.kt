@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.dp
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import coil3.request.crossfade
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.InfiniteLottieAnimation
 import net.primal.android.core.compose.PrimalImage
 import net.primal.android.core.compose.attachment.model.isMediaUri

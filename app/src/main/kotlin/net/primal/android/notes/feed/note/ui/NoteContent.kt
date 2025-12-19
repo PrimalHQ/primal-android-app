@@ -24,9 +24,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import java.time.Instant
-import net.primal.android.LocalContentDisplaySettings
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.activity.LocalContentDisplaySettings
+import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.attachment.model.isMediaUri
 import net.primal.android.core.compose.icons.PrimalIcons

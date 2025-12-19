@@ -1,4 +1,4 @@
-package net.primal.android.signer.serialization
+package net.primal.android.signer.model.serialization
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
@@ -6,8 +6,7 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import net.primal.android.signer.SignerMethod
-import net.primal.android.signer.SignerMethod.entries
+import net.primal.android.signer.model.SignerMethod
 
 object SignerMethodSerializer : KSerializer<SignerMethod> {
     override val descriptor: SerialDescriptor =
@@ -19,7 +18,7 @@ object SignerMethodSerializer : KSerializer<SignerMethod> {
 
     override fun deserialize(decoder: Decoder): SignerMethod {
         val decoded = decoder.decodeString()
-        return entries.firstOrNull { it.method == decoded }
-            ?: throw IllegalArgumentException("Unknown method: $decoded")
+
+        return SignerMethod.valueOf(decoded)
     }
 }

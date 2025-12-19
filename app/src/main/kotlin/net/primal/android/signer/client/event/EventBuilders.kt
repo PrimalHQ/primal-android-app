@@ -1,4 +1,4 @@
-package net.primal.android.signer.event
+package net.primal.android.signer.client.event
 
 import net.primal.android.networking.UserAgentProvider
 import net.primal.core.utils.serialization.encodeToJsonString

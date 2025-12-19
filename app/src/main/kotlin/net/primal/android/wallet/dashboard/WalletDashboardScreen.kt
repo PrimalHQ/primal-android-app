@@ -42,8 +42,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import kotlinx.coroutines.launch
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.NavigationBarFullHeightDp

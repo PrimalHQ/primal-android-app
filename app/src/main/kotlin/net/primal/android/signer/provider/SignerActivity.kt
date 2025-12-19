@@ -1,0 +1,86 @@
+package net.primal.android.signer.provider
+
+import android.content.Intent
+import android.os.Bundle
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import dagger.hilt.android.AndroidEntryPoint
+import net.primal.android.core.activity.PrimalActivity
+import net.primal.android.signer.model.SignerMethod
+import net.primal.android.signer.provider.parser.SignerIntentParser
+import net.primal.android.signer.provider.utils.toIntent
+import net.primal.android.theme.AppTheme
+import timber.log.Timber
+
+@AndroidEntryPoint
+class SignerActivity : PrimalActivity() {
+
+    private val signerViewModel: SignerViewModel by viewModels()
+
+    @OptIn(ExperimentalMaterial3Api::class)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        signerViewModel.processIntent(intent, callingPackage)
+
+        setContent {
+            val context = LocalContext.current
+
+            LaunchedEffect(signerViewModel.effects) {
+                signerViewModel.effects.collect {
+                    when (it) {
+                        is SignerContract.SideEffect.RespondToIntent -> {
+                            Timber.tag("LocalSigner").d("Responding to intent: ${it.result}")
+                            setResult(
+                                RESULT_OK,
+                                it.result.toIntent().apply {
+                                    putExtra("package", context.packageName)
+                                },
+                            )
+                            finish()
+                        }
+                    }
+                }
+            }
+
+            ConfigureActivity {
+                if (intent.getStringExtra(SignerIntentParser.TYPE_COLUMN) == SignerMethod.GET_PUBLIC_KEY.method) {
+                    ModalBottomSheet(
+                        contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        onDismissRequest = { finish() },
+                    ) {
+                        Text(
+                            modifier = Modifier.height(600.dp),
+                            text = "This is SignerConnectBottomSheet!",
+                        )
+                    }
+                } else {
+                    ModalBottomSheet(
+                        contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        onDismissRequest = { finish() },
+                    ) {
+                        Text(
+                            modifier = Modifier.height(600.dp),
+                            text = "This is a PermissionsBottomSheet!",
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        Timber.tag("LocalSigner").d("Processing intent.")
+        setIntent(intent)
+        signerViewModel.processIntent(intent = intent, packageName = callingPackage)
+    }
+}
