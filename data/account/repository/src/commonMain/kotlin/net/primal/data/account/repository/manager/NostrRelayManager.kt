@@ -15,6 +15,8 @@ import kotlinx.coroutines.launch
 import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.put
+import net.primal.core.utils.remove
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
 import net.primal.data.account.remote.client.RemoteSignerClient
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
@@ -137,7 +139,7 @@ internal class NostrRelayManager(
         }
 
     private fun observeClientMethods(relay: String, client: RemoteSignerClient) {
-        clients.fetchAndUpdate { it + (relay to client) }
+        clients.put(key = relay, value = client)
         val job = scope.launch {
             launch {
                 client.incomingMethods.collect { method ->
@@ -166,14 +168,11 @@ internal class NostrRelayManager(
                 }
             }
         }
-        clientJobs.fetchAndUpdate { it + (relay to job) }
+        clientJobs.put(key = relay, value = job)
     }
 
     private suspend fun removeClient(relay: String) {
-        val oldClients = clients.fetchAndUpdate { it - relay }
-        oldClients[relay]?.destroy()
-
-        val oldJobs = clientJobs.fetchAndUpdate { it - relay }
-        oldJobs[relay]?.cancel()
+        clients.remove(key = relay)[relay]?.destroy()
+        clientJobs.remove(key = relay)[relay]?.cancel()
     }
 }
