@@ -12,11 +12,16 @@ import net.primal.core.nips.encryption.service.factory.NipsEncryptionFactory
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
 import net.primal.data.account.repository.repository.factory.AccountRepositoryFactory
+import net.primal.data.account.repository.service.factory.AccountServiceFactory
 import net.primal.data.remote.factory.PrimalApiServiceFactory
 import net.primal.domain.account.repository.ConnectionRepository
+import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
+import net.primal.domain.account.service.LocalSignerService
+import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
+import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -44,6 +49,23 @@ object AccountRepositoriesModule {
 
     @Provides
     fun provideNostrEncryptionService(): NostrEncryptionService = NipsEncryptionFactory.createNostrEncryptionService()
+
+    @Provides
+    fun provideLocalAppRepository(): LocalAppRepository = AccountRepositoryFactory.createLocalAppRepository()
+
+    @Provides
+    fun provideLocalSignerService(
+        localAppRepository: LocalAppRepository,
+        permissionsRepository: PermissionsRepository,
+        nostrEncryptionHandler: NostrEncryptionHandler,
+        eventSignatureHandler: NostrEventSignatureHandler,
+    ): LocalSignerService =
+        AccountServiceFactory.createLocalSignerService(
+            localAppRepository = localAppRepository,
+            permissionsRepository = permissionsRepository,
+            nostrEncryptionHandler = nostrEncryptionHandler,
+            eventSignatureHandler = eventSignatureHandler,
+        )
 
     @Provides
     fun provideSignerConnectionInitializer(

@@ -52,8 +52,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
-import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
+import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
