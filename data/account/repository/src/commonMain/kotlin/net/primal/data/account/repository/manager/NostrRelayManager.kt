@@ -1,6 +1,9 @@
 package net.primal.data.account.repository.manager
 
 import io.github.aakira.napier.Napier
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.concurrent.atomics.fetchAndUpdate
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -29,6 +32,7 @@ import net.primal.domain.nostr.cryptography.utils.assureValidPubKeyHex
 
 private const val MAX_CACHE_SIZE = 20
 
+@OptIn(ExperimentalAtomicApi::class)
 internal class NostrRelayManager(
     private val dispatcherProvider: DispatcherProvider,
     private val signerKeyPair: NostrKeyPair,
@@ -36,8 +40,8 @@ internal class NostrRelayManager(
 ) {
     private val scope = CoroutineScope(dispatcherProvider.io() + SupervisorJob())
 
-    private val clients: MutableMap<String, RemoteSignerClient> = mutableMapOf()
-    private val clientJobs: MutableMap<String, Job> = mutableMapOf()
+    private val clients = AtomicReference<Map<String, RemoteSignerClient>>(emptyMap())
+    private val clientJobs = AtomicReference<Map<String, Job>>(emptyMap())
 
     private val cache: LruSeenCache<String> = LruSeenCache(maxEntries = MAX_CACHE_SIZE)
 
@@ -52,8 +56,9 @@ internal class NostrRelayManager(
 
     suspend fun connectToRelays(relays: Set<String>) {
         Napier.d(tag = "Signer") { "Connecting to relays: $relays" }
-        (clients.keys - relays).forEach { disconnectFromRelay(relay = it) }
-        (relays - clients.keys).forEach { connectToRelay(relay = it) }
+        val currentKeys = clients.load().keys
+        (currentKeys - relays).forEach { disconnectFromRelay(relay = it) }
+        (relays - currentKeys).forEach { connectToRelay(relay = it) }
     }
 
     suspend fun connectToRelay(relay: String) {
@@ -69,8 +74,7 @@ internal class NostrRelayManager(
             onSocketConnectionClosed = { url, _ ->
                 Napier.d(tag = "SignerNostrRelayManager") { "Disconnected from relay: $url" }
                 scope.launch { _relayEvents.emit(RelayEvent.Disconnected(relayUrl = url)) }
-                clients.remove(relay)
-                clientJobs.remove(relay)?.cancel()
+                scope.launch { removeClient(relay) }
             },
         )
 
@@ -85,10 +89,12 @@ internal class NostrRelayManager(
     fun disconnectFromRelay(relay: String) = scope.launch { removeClient(relay) }
 
     suspend fun disconnectFromAll() {
-        clientJobs.values.forEach { it.cancel() }
-        clientJobs.clear()
-        clients.values.forEach { it.destroy() }
-        clients.clear()
+        val oldJobs = clientJobs.fetchAndUpdate { emptyMap() }
+        oldJobs.values.forEach { it.cancel() }
+
+        val oldClients = clients.fetchAndUpdate { emptyMap() }
+        oldClients.values.forEach { it.destroy() }
+
         scope.cancel()
     }
 
@@ -102,7 +108,8 @@ internal class NostrRelayManager(
                     }
                 }.getOrThrow()
 
-            relays.mapNotNull { relay -> clients[relay] }
+            val currentClients = clients.load()
+            relays.mapNotNull { relay -> currentClients[relay] }
                 .also { clients ->
                     if (clients.isEmpty()) {
                         error("We don't have active connection to any of the following relays: $relays")
@@ -130,8 +137,8 @@ internal class NostrRelayManager(
         }
 
     private fun observeClientMethods(relay: String, client: RemoteSignerClient) {
-        clients[relay] = client
-        clientJobs[relay] = scope.launch {
+        clients.fetchAndUpdate { it + (relay to client) }
+        val job = scope.launch {
             launch {
                 client.incomingMethods.collect { method ->
                     Napier.d(tag = "Signer") { "Got method in `NostrRelayManager`: $method" }
@@ -159,10 +166,14 @@ internal class NostrRelayManager(
                 }
             }
         }
+        clientJobs.fetchAndUpdate { it + (relay to job) }
     }
 
     private suspend fun removeClient(relay: String) {
-        clients.remove(relay)?.destroy()
-        clientJobs.remove(relay)?.cancel()
+        val oldClients = clients.fetchAndUpdate { it - relay }
+        oldClients[relay]?.destroy()
+
+        val oldJobs = clientJobs.fetchAndUpdate { it - relay }
+        oldJobs[relay]?.cancel()
     }
 }
