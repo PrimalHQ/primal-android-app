@@ -1,10 +1,10 @@
-package net.primal.android.settings.connected.details
+package net.primal.android.settings.connected.details.remote
 
 import net.primal.android.core.errors.UiError
 import net.primal.android.settings.connected.model.SessionUi
 import net.primal.domain.account.model.TrustLevel
 
-interface ConnectedAppDetailsContract {
+interface RemoteAppDetailsContract {
     data class UiState(
         val clientPubKey: String,
         val loading: Boolean = true,

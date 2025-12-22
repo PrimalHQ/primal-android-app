@@ -62,12 +62,14 @@ fun ConnectedAppsScreen(
     viewModel: ConnectedAppsViewModel,
     onClose: () -> Unit,
     onConnectedAppClick: (clientPubKey: String) -> Unit,
+    onLocalAppClick: (identifier: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
     ConnectedAppsScreen(
         state = uiState.value,
         onClose = onClose,
         onConnectedAppClick = onConnectedAppClick,
+        onLocalAppClick = onLocalAppClick,
     )
 }
 
@@ -77,6 +79,7 @@ fun ConnectedAppsScreen(
     state: ConnectedAppsContract.UiState,
     onClose: () -> Unit,
     onConnectedAppClick: (clientPubKey: String) -> Unit,
+    onLocalAppClick: (identifier: String) -> Unit,
 ) {
     PrimalScaffold(
         topBar = {
@@ -113,7 +116,7 @@ fun ConnectedAppsScreen(
                         title = localAppsTitle,
                         connections = state.localConnections,
                         activeClientPubKeys = state.activeClientPubKeys,
-                        onAppClick = {},
+                        onAppClick = onLocalAppClick,
                     )
 
                     if (state.localConnections.isNotEmpty() && state.remoteConnections.isNotEmpty()) {
@@ -310,6 +313,7 @@ fun PreviewConnectedAppsScreen() {
                 ),
                 onClose = {},
                 onConnectedAppClick = {},
+                onLocalAppClick = {},
             )
         }
     }
