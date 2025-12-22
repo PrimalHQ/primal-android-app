@@ -81,4 +81,15 @@ sealed class LocalSignerMethod(
             is Nip44Encrypt -> this.userPubKey
             is SignEvent -> this.userPubKey
         }
+
+    fun getIdentifier() =
+        when (this) {
+            is DecryptZapEvent -> LocalApp.identifierOf(packageName = this.packageName, userId = this.userPubKey)
+            is GetPublicKey -> this.packageName
+            is Nip04Decrypt -> LocalApp.identifierOf(packageName = this.packageName, userId = this.userPubKey)
+            is Nip04Encrypt -> LocalApp.identifierOf(packageName = this.packageName, userId = this.userPubKey)
+            is Nip44Decrypt -> LocalApp.identifierOf(packageName = this.packageName, userId = this.userPubKey)
+            is Nip44Encrypt -> LocalApp.identifierOf(packageName = this.packageName, userId = this.userPubKey)
+            is SignEvent -> LocalApp.identifierOf(packageName = this.packageName, userId = this.userPubKey)
+        }
 }

@@ -90,7 +90,7 @@ class AndroidConnectViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(connecting = true) }
             val app = LocalApp(
-                identifier = "$callingPackage:$userId",
+                identifier = LocalApp.identifierOf(packageName = callingPackage, userId = userId),
                 packageName = callingPackage,
                 userPubKey = userId,
                 trustLevel = trustLevel,

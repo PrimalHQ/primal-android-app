@@ -6,4 +6,8 @@ data class LocalApp(
     val userPubKey: String,
     val trustLevel: TrustLevel,
     val permissions: List<AppPermission>,
-)
+) {
+    companion object {
+        fun identifierOf(packageName: String, userId: String): String = "$packageName:$userId"
+    }
+}
