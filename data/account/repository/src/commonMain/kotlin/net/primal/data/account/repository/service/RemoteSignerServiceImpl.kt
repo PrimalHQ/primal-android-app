@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.account.local.dao.RequestState
+import net.primal.data.account.local.dao.apps.remote.RemoteAppRequestState
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.remote.method.processor.RemoteSignerMethodProcessor
@@ -153,8 +153,8 @@ class RemoteSignerServiceImpl internal constructor(
                                         eventId = response.id,
                                         responsePayload = response.encodeToJsonString(),
                                         requestState = when (response) {
-                                            is RemoteSignerMethodResponse.Error -> RequestState.Rejected
-                                            is RemoteSignerMethodResponse.Success -> RequestState.Approved
+                                            is RemoteSignerMethodResponse.Error -> RemoteAppRequestState.Rejected
+                                            is RemoteSignerMethodResponse.Success -> RemoteAppRequestState.Approved
                                         },
                                         completedAt = Clock.System.now().epochSeconds,
                                     )

@@ -12,7 +12,7 @@ import net.primal.core.utils.asSuccess
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.mapCatching
 import net.primal.core.utils.runCatching
-import net.primal.data.account.local.dao.AppSessionData
+import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionData
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.domain.account.model.AppSession
@@ -26,33 +26,33 @@ class SessionRepositoryImpl(
 ) : SessionRepository {
 
     override fun observeActiveSessions(signerPubKey: String): Flow<List<AppSession>> =
-        database.sessions().observeActiveSessions(signerPubKey = signerPubKey)
+        database.remoteAppSessions().observeActiveSessions(signerPubKey = signerPubKey)
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
     override fun observeOngoingSessions(signerPubKey: String): Flow<List<AppSession>> =
-        database.sessions().observeOngoingSessions(signerPubKey = signerPubKey)
+        database.remoteAppSessions().observeOngoingSessions(signerPubKey = signerPubKey)
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
     override fun observeActiveSessionForConnection(clientPubKey: String): Flow<AppSession?> =
-        database.sessions().observeActiveSessionForConnection(clientPubKey)
+        database.remoteAppSessions().observeActiveSessionForConnection(clientPubKey)
             .map { it?.asDomain() }
             .distinctUntilChanged()
 
     override fun observeSessionsByClientPubKey(clientPubKey: String): Flow<List<AppSession>> =
-        database.sessions().observeSessionsByClientPubKey(clientPubKey)
+        database.remoteAppSessions().observeSessionsByClientPubKey(clientPubKey)
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
     override fun observeSession(sessionId: String): Flow<AppSession?> =
-        database.sessions().observeSession(sessionId = sessionId)
+        database.remoteAppSessions().observeSession(sessionId = sessionId)
             .map { it?.asDomain() }
             .distinctUntilChanged()
 
     override suspend fun getSession(sessionId: String): Result<AppSession> =
         withContext(dispatchers.io()) {
-            database.sessions().findSession(sessionId = sessionId)
+            database.remoteAppSessions().findSession(sessionId = sessionId)
                 ?.asDomain()?.asSuccess()
                 ?: Result.failure(NoSuchElementException("Couldn't find session with id $sessionId."))
         }
@@ -60,7 +60,7 @@ class SessionRepositoryImpl(
     override suspend fun findActiveSessionForConnection(clientPubKey: String): Result<AppSession> =
         withContext(dispatchers.io()) {
             runCatching {
-                database.sessions().findActiveSessionByClientPubKey(clientPubKey = clientPubKey)?.asDomain()
+                database.remoteAppSessions().findActiveSessionByClientPubKey(clientPubKey = clientPubKey)?.asDomain()
                     ?: throw NoSuchElementException("Couldn't find active session for connection $clientPubKey.")
             }
         }
@@ -68,10 +68,12 @@ class SessionRepositoryImpl(
     override suspend fun startSession(clientPubKey: String): Result<String> =
         withContext(dispatchers.io()) {
             Napier.d(tag = "Signer") { "Starting session for $clientPubKey" }
-            val existingSession = database.sessions().findActiveSessionByClientPubKey(clientPubKey = clientPubKey)
+            val existingSession = database.remoteAppSessions().findActiveSessionByClientPubKey(
+                clientPubKey = clientPubKey,
+            )
             if (existingSession == null) {
-                val newSession = AppSessionData(clientPubKey = clientPubKey)
-                database.sessions().upsertAll(data = listOf(newSession))
+                val newSession = RemoteAppSessionData(clientPubKey = clientPubKey)
+                database.remoteAppSessions().upsertAll(data = listOf(newSession))
                 Napier.d(tag = "Signer") { "Successfully started session." }
                 newSession.sessionId.asSuccess()
             } else {
@@ -85,7 +87,7 @@ class SessionRepositoryImpl(
     override suspend fun startSessionForClient(clientPubKey: String): Result<String> =
         withContext(dispatchers.io()) {
             runCatching {
-                database.connections().getConnection(clientPubKey = clientPubKey)
+                database.remoteAppConnections().getConnection(clientPubKey = clientPubKey)
                     ?: throw NoSuchElementException("Couldn't find connection for $clientPubKey")
             }.mapCatching {
                 startSession(clientPubKey = it.data.clientPubKey).getOrThrow()
@@ -98,7 +100,7 @@ class SessionRepositoryImpl(
                 val now = Clock.System.now().epochSeconds
                 database.withTransaction {
                     sessionIds.forEach { sessionId ->
-                        database.sessions().endSession(sessionId = sessionId, endedAt = now)
+                        database.remoteAppSessions().endSession(sessionId = sessionId, endedAt = now)
                     }
                 }
             }
@@ -106,14 +108,14 @@ class SessionRepositoryImpl(
 
     override suspend fun endAllActiveSessions() =
         withContext(dispatchers.io()) {
-            database.sessions().endAllActiveSessions(endedAt = Clock.System.now().epochSeconds)
+            database.remoteAppSessions().endAllActiveSessions(endedAt = Clock.System.now().epochSeconds)
         }
 
     override suspend fun incrementActiveRelayCount(sessionIds: List<String>) =
         withContext(dispatchers.io()) {
             database.withTransaction {
                 sessionIds.forEach {
-                    database.sessions().incrementActiveRelayCount(sessionId = it)
+                    database.remoteAppSessions().incrementActiveRelayCount(sessionId = it)
                 }
             }
         }
@@ -122,13 +124,13 @@ class SessionRepositoryImpl(
         withContext(dispatchers.io()) {
             database.withTransaction {
                 sessionIds.forEach {
-                    database.sessions().decrementActiveRelayCountOrEnd(sessionId = it)
+                    database.remoteAppSessions().decrementActiveRelayCountOrEnd(sessionId = it)
                 }
             }
         }
 
     override suspend fun setActiveRelayCount(sessionId: String, activeRelayCount: Int) =
         withContext(dispatchers.io()) {
-            database.sessions().setActiveRelayCount(sessionId = sessionId, activeRelayCount = activeRelayCount)
+            database.remoteAppSessions().setActiveRelayCount(sessionId = sessionId, activeRelayCount = activeRelayCount)
         }
 }

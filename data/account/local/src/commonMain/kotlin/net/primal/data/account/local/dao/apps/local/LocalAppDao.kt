@@ -1,10 +1,11 @@
-package net.primal.data.account.local.dao
+package net.primal.data.account.local.dao.apps.local
 
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
+import net.primal.data.account.local.dao.apps.TrustLevel
 
 @Dao
 interface LocalAppDao {

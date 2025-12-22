@@ -9,8 +9,8 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
 import net.primal.core.utils.runCatching
-import net.primal.data.account.local.dao.AppPermissionData
-import net.primal.data.account.local.dao.PermissionAction as PermissionActionPO
+import net.primal.data.account.local.dao.apps.AppPermissionData
+import net.primal.data.account.local.dao.apps.PermissionAction as PermissionActionPO
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.api.WellKnownApi
 import net.primal.data.account.remote.api.model.PermissionsResponse
@@ -35,7 +35,7 @@ class PermissionsRepositoryImpl(
     ): Result<Unit> =
         withContext(dispatchers.io()) {
             runCatching {
-                database.permissions().upsertAll(
+                database.appPermissions().upsertAll(
                     data = permissionIds.map {
                         AppPermissionData(
                             permissionId = it,
@@ -54,7 +54,7 @@ class PermissionsRepositoryImpl(
             }
 
             emitAll(
-                database.permissions().observePermissions(clientPubKey = clientPubKey)
+                database.appPermissions().observePermissions(clientPubKey = clientPubKey)
                     .map { permissions ->
                         buildPermissionGroups(
                             response = signerPermissions,
@@ -81,8 +81,8 @@ class PermissionsRepositoryImpl(
                 val mediumTrustPermissions = wellKnownApi.getMediumTrustPermissions().allowPermissions
 
                 database.withTransaction {
-                    database.permissions().deletePermissions(clientPubKey)
-                    database.permissions().upsertAll(
+                    database.appPermissions().deletePermissions(clientPubKey)
+                    database.appPermissions().upsertAll(
                         data = mediumTrustPermissions.map { permissionId ->
                             AppPermissionData(
                                 permissionId = permissionId,

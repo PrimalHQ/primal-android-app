@@ -1,11 +1,12 @@
-package net.primal.data.account.local.dao
+package net.primal.data.account.local.dao.apps.remote
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import net.primal.data.account.local.dao.apps.AppPermissionData
 
-data class AppConnection(
+data class RemoteAppConnection(
     @Embedded
-    val data: AppConnectionData,
+    val data: RemoteAppConnectionData,
 
     @Relation(
         parentColumn = "clientPubKey",

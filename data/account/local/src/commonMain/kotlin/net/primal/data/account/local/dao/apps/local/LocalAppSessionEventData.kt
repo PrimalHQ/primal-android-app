@@ -1,4 +1,4 @@
-package net.primal.data.account.local.dao
+package net.primal.data.account.local.dao.apps.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

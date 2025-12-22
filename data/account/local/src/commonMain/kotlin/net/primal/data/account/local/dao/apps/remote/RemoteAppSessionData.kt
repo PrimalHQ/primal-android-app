@@ -1,4 +1,4 @@
-package net.primal.data.account.local.dao
+package net.primal.data.account.local.dao.apps.remote
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -8,7 +8,7 @@ import kotlin.uuid.Uuid
 
 @OptIn(ExperimentalUuidApi::class)
 @Entity
-data class AppSessionData(
+data class RemoteAppSessionData(
     @PrimaryKey
     val sessionId: String = Uuid.random().toString(),
     val clientPubKey: String,

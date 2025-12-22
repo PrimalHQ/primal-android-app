@@ -1,15 +1,15 @@
 package net.primal.data.account.repository.mappers
 
-import net.primal.data.account.local.dao.AppConnection as AppConnectionPO
-import net.primal.data.account.local.dao.AppPermissionData as AppPermissionDataPO
-import net.primal.data.account.local.dao.PermissionAction as PermissionActionPO
-import net.primal.data.account.local.dao.TrustLevel as TrustLevelPO
+import net.primal.data.account.local.dao.apps.AppPermissionData as AppPermissionDataPO
+import net.primal.data.account.local.dao.apps.PermissionAction as PermissionActionPO
+import net.primal.data.account.local.dao.apps.TrustLevel as TrustLevelPO
+import net.primal.data.account.local.dao.apps.remote.RemoteAppConnection as RemoteAppConnectionPO
 import net.primal.domain.account.model.AppConnection as AppConnectionDO
 import net.primal.domain.account.model.AppPermission as AppPermissionDO
 import net.primal.domain.account.model.PermissionAction as PermissionActionDO
 import net.primal.domain.account.model.TrustLevel as TrustLevelDO
 
-fun AppConnectionPO.asDomain() =
+fun RemoteAppConnectionPO.asDomain() =
     AppConnectionDO(
         clientPubKey = this.data.clientPubKey,
         userPubKey = this.data.userPubKey,
