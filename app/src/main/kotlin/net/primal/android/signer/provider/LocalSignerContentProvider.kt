@@ -17,6 +17,7 @@ import net.primal.android.signer.provider.parser.SignerContentProviderParser
 import net.primal.android.signer.provider.utils.getResultString
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.account.model.LocalSignerMethodResponse
+import net.primal.domain.account.service.LocalSignerError
 import net.primal.domain.account.service.LocalSignerService
 import timber.log.Timber
 
@@ -70,7 +71,7 @@ class LocalSignerContentProvider : ContentProvider() {
                 onFailure = { error ->
                     Timber.tag("LocalSigner").d("Failed to process request: ${error.message}")
 
-                    if (error is LocalSignerService.UserAutoRejected) {
+                    if (error is LocalSignerError.AutoDenied) {
                         MatrixCursor(arrayOf(REJECTED_COLUMN)).apply {
                             addRow(arrayOf(true.toString()))
                         }

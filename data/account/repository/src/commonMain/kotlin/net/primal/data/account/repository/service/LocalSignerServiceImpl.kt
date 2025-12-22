@@ -22,6 +22,7 @@ import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.model.UserChoice
 import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.domain.account.repository.PermissionsRepository
+import net.primal.domain.account.service.LocalSignerError
 import net.primal.domain.account.service.LocalSignerService
 
 @OptIn(ExperimentalAtomicApi::class)
@@ -38,17 +39,19 @@ class LocalSignerServiceImpl(
         val permissionAction = localAppRepository.getPermissionActionForMethod(method = method)
 
         return when (permissionAction) {
-            PermissionAction.Approve -> localSignerMethodResponseBuilder.build(method = method).also { response ->
-                responses.add(response)
-            }.asSuccess()
+            PermissionAction.Approve -> {
+                localSignerMethodResponseBuilder.build(method = method).also { response ->
+                    responses.add(response)
+                }.asSuccess()
+            }
 
             PermissionAction.Deny -> {
-                Result.failure(LocalSignerService.UserAutoRejected())
+                Result.failure(LocalSignerError.AutoDenied)
             }
 
             PermissionAction.Ask -> {
                 pendingUserActionMethods.add(method)
-                Result.failure(LocalSignerService.InsufficientPermissions())
+                Result.failure(LocalSignerError.UserApprovalRequired)
             }
         }
     }

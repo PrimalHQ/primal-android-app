@@ -17,7 +17,4 @@ interface LocalSignerService {
     suspend fun respondToUserActions(eventChoices: List<SessionEventUserChoice>)
 
     suspend fun addNewApp(app: LocalApp): Result<Unit>
-
-    class InsufficientPermissions : RuntimeException("Insufficient permissions to execute this method.")
-    class UserAutoRejected : RuntimeException("User auto rejected this method.")
 }
