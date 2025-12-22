@@ -75,15 +75,16 @@ private fun NavController.navigateToSessionDetails(sessionId: String) = navigate
 
 private fun NavController.navigateToEventDetails(eventId: String) = navigate(route = "event_details/$eventId")
 
-fun NavController.navigateToConnectedAppDetails(clientPubKey: String) = navigate(route = "connected_apps/$clientPubKey")
+fun NavController.navigateToConnectedAppDetails(clientPubKey: String) =
+    navigate(route = "connected_apps/remote/$clientPubKey")
 
-fun NavController.navigateToLocalAppDetails(identifier: String) = navigate(route = "local_apps/$identifier")
+fun NavController.navigateToLocalAppDetails(identifier: String) = navigate(route = "connected_apps/local/$identifier")
 
 private fun NavController.navigateToRemoteAppPermissions(clientPubKey: String) =
-    navigate(route = "connected_apps/$clientPubKey/permissions")
+    navigate(route = "connected_apps/remote/$clientPubKey/permissions")
 
 private fun NavController.navigateToLocalAppPermissions(identifier: String) =
-    navigate(route = "local_apps/$identifier/permissions")
+    navigate(route = "connected_apps/local/$identifier/permissions")
 
 fun NavController.navigateToLinkPrimalWallet(
     appName: String? = null,
@@ -153,8 +154,8 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         notifications(route = "notifications_settings", navController = navController)
         zaps(route = "zaps_settings", navController = navController)
         connectedApps(route = "connected_apps", navController = navController)
-        connectedAppDetails(
-            route = "connected_apps/{$REMOTE_LOGIN_CLIENT_PUBKEY}",
+        connectedRemoteAppDetails(
+            route = "connected_apps/remote/{$REMOTE_LOGIN_CLIENT_PUBKEY}",
             arguments = listOf(
                 navArgument(REMOTE_LOGIN_CLIENT_PUBKEY) {
                     type = NavType.StringType
@@ -167,10 +168,28 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
                 },
             ),
         )
-        remoteAppPermissions(
-            route = "connected_apps/{$REMOTE_LOGIN_CLIENT_PUBKEY}/permissions",
+        connectedLocalAppDetails(
+            route = "connected_apps/local/{$IDENTIFIER}",
+            arguments = listOf(
+                navArgument(IDENTIFIER) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+        )
+        connectedRemoteAppPermissions(
+            route = "connected_apps/remote/{$REMOTE_LOGIN_CLIENT_PUBKEY}/permissions",
             arguments = listOf(
                 navArgument(REMOTE_LOGIN_CLIENT_PUBKEY) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+        )
+        connectedLocalAppPermissions(
+            route = "connected_apps/local/{$IDENTIFIER}/permissions",
+            arguments = listOf(
+                navArgument(IDENTIFIER) {
                     type = NavType.StringType
                 },
             ),
@@ -189,24 +208,6 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             arguments = listOf(
                 navArgument(EVENT_ID) { type = NavType.StringType },
             ),
-        )
-        localAppDetails(
-            route = "local_apps/{$IDENTIFIER}",
-            arguments = listOf(
-                navArgument(IDENTIFIER) {
-                    type = NavType.StringType
-                },
-            ),
-            navController = navController,
-        )
-        localAppPermissions(
-            route = "local_apps/{$IDENTIFIER}/permissions",
-            arguments = listOf(
-                navArgument(IDENTIFIER) {
-                    type = NavType.StringType
-                },
-            ),
-            navController = navController,
         )
     }
 
@@ -469,7 +470,7 @@ private fun NavGraphBuilder.connectedApps(route: String, navController: NavContr
         )
     }
 
-private fun NavGraphBuilder.localAppDetails(
+private fun NavGraphBuilder.connectedLocalAppDetails(
     route: String,
     navController: NavController,
     arguments: List<NamedNavArgument>,
@@ -495,7 +496,7 @@ private fun NavGraphBuilder.localAppDetails(
     )
 }
 
-private fun NavGraphBuilder.connectedAppDetails(
+private fun NavGraphBuilder.connectedRemoteAppDetails(
     route: String,
     navController: NavController,
     arguments: List<NamedNavArgument>,
@@ -523,7 +524,7 @@ private fun NavGraphBuilder.connectedAppDetails(
     )
 }
 
-private fun NavGraphBuilder.remoteAppPermissions(
+private fun NavGraphBuilder.connectedRemoteAppPermissions(
     route: String,
     navController: NavController,
     arguments: List<NamedNavArgument>,
@@ -544,7 +545,7 @@ private fun NavGraphBuilder.remoteAppPermissions(
     )
 }
 
-private fun NavGraphBuilder.localAppPermissions(
+private fun NavGraphBuilder.connectedLocalAppPermissions(
     route: String,
     navController: NavController,
     arguments: List<NamedNavArgument>,

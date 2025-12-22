@@ -49,6 +49,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.settings.connected.model.PermissionGroupUi
 import net.primal.android.theme.AppTheme
@@ -64,7 +65,7 @@ fun ConnectedAppPermissionsScreen(
     headerContent: @Composable () -> Unit,
     permissions: List<PermissionGroupUi>,
     loading: Boolean,
-    error: net.primal.android.core.errors.UiError?,
+    error: UiError?,
     onUpdatePermission: (List<String>, PermissionAction) -> Unit,
     onResetPermissions: () -> Unit,
     onRetry: () -> Unit,
