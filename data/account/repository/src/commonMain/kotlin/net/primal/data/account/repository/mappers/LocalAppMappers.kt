@@ -1,7 +1,7 @@
 package net.primal.data.account.repository.mappers
 
-import net.primal.data.account.local.dao.LocalApp as LocalAppPO
-import net.primal.data.account.local.dao.LocalAppData
+import net.primal.data.account.local.dao.apps.local.LocalApp as LocalAppPO
+import net.primal.data.account.local.dao.apps.local.LocalAppData
 import net.primal.domain.account.model.LocalApp
 
 fun LocalApp.asPO() =

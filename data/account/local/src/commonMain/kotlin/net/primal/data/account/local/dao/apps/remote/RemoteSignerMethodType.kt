@@ -1,6 +1,6 @@
-package net.primal.data.account.local.dao
+package net.primal.data.account.local.dao.apps.remote
 
-enum class SignerMethodType {
+enum class RemoteSignerMethodType {
     Connect,
     Ping,
     SignEvent,

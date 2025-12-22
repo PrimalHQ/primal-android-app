@@ -1,4 +1,4 @@
-package net.primal.data.account.local.dao
+package net.primal.data.account.local.dao.apps
 
 enum class PermissionAction {
     Approve,

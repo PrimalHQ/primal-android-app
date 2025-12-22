@@ -7,8 +7,8 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.data.account.local.dao.RequestState
-import net.primal.data.account.local.dao.SignerMethodType
+import net.primal.data.account.local.dao.apps.remote.RemoteAppRequestState
+import net.primal.data.account.local.dao.apps.remote.RemoteSignerMethodType
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
@@ -25,10 +25,10 @@ internal class InternalSessionEventRepository(
     suspend fun saveSessionEvent(
         sessionId: String,
         signerPubKey: String,
-        requestType: SignerMethodType,
+        requestType: RemoteSignerMethodType,
         method: RemoteSignerMethod?,
         response: RemoteSignerMethodResponse?,
-        requestState: RequestState? = null,
+        requestState: RemoteAppRequestState? = null,
     ) = withContext(dispatchers.io()) {
         runCatching {
             val completedAt = Clock.System.now().epochSeconds
@@ -43,19 +43,19 @@ internal class InternalSessionEventRepository(
                 response = response,
                 requestState = requestState,
             )?.let { sessionEventData ->
-                accountDatabase.sessionEvents().insert(data = sessionEventData)
+                accountDatabase.remoteAppSessionEvents().insert(data = sessionEventData)
             } ?: throw IllegalArgumentException("Couldn't build session event data.")
         }
     }
 
     fun observePendingResponseEvents(signerPubKey: String) =
-        accountDatabase.sessionEvents().observeEventsByRequestState(
+        accountDatabase.remoteAppSessionEvents().observeEventsByRequestState(
             signerPubKey = signerPubKey,
-            requestState = RequestState.PendingResponse,
+            requestState = RemoteAppRequestState.PendingResponse,
         ).distinctUntilChanged()
 
     fun observePendingNostrEvents(signerPubKey: String) =
-        accountDatabase.pendingNostrEvents().observeAllBySignerPubKey(
+        accountDatabase.remoteAppPendingNostrEvents().observeAllBySignerPubKey(
             signerPubKey = signerPubKey,
         ).map { list -> list.mapNotNull { it.rawNostrEventJson.decrypted.decodeFromJsonStringOrNull<NostrEvent>() } }
             .distinctUntilChanged()
@@ -63,7 +63,7 @@ internal class InternalSessionEventRepository(
     suspend fun deletePendingNostrEvents(eventIds: List<String>) =
         withContext(dispatchers.io()) {
             runCatching {
-                accountDatabase.pendingNostrEvents().deleteByIds(eventIds = eventIds)
+                accountDatabase.remoteAppPendingNostrEvents().deleteByIds(eventIds = eventIds)
             }
         }
 
@@ -71,7 +71,7 @@ internal class InternalSessionEventRepository(
         withContext(dispatchers.io()) {
             accountDatabase.withTransaction {
                 requests.forEach { request ->
-                    accountDatabase.sessionEvents().updateSessionEventRequestState(
+                    accountDatabase.remoteAppSessionEvents().updateSessionEventRequestState(
                         eventId = request.eventId,
                         requestState = request.requestState,
                         responsePayload = request.responsePayload?.asEncryptable(),

@@ -1,8 +1,9 @@
-package net.primal.data.account.local.dao
+package net.primal.data.account.local.dao.apps.remote
 
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import net.primal.data.account.local.dao.apps.TrustLevel
 import net.primal.shared.data.local.encryption.Encryptable
 
 @Entity(
@@ -11,7 +12,7 @@ import net.primal.shared.data.local.encryption.Encryptable
         Index(value = ["userPubKey"]),
     ],
 )
-data class AppConnectionData(
+data class RemoteAppConnectionData(
     @PrimaryKey
     val clientPubKey: String,
     val signerPubKey: String,

@@ -6,7 +6,7 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
-import net.primal.data.account.local.dao.TrustLevel
+import net.primal.data.account.local.dao.apps.TrustLevel
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.asPO
@@ -26,7 +26,7 @@ class LocalAppRepositoryImpl(
             runCatching {
                 database.withTransaction {
                     database.localApps().upsertAll(data = listOf(app.asPO()))
-                    database.permissions().upsertAll(data = app.permissions.map { it.asPO() })
+                    database.appPermissions().upsertAll(data = app.permissions.map { it.asPO() })
                 }
             }
         }
@@ -77,8 +77,9 @@ class LocalAppRepositoryImpl(
         }
 
     private suspend inline fun deleteEverythingForIdentifier(identifier: String) {
-        database.permissions().deletePermissions(identifier)
+        database.appPermissions().deletePermissions(identifier)
         database.localApps().deleteApp(identifier = identifier)
         // Delete sessions
+        // Delete session events
     }
 }

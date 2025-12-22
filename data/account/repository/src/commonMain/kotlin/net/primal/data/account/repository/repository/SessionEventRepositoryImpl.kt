@@ -8,11 +8,11 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.account.local.dao.AppPermissionData
-import net.primal.data.account.local.dao.PendingNostrEvent
-import net.primal.data.account.local.dao.PermissionAction
-import net.primal.data.account.local.dao.RequestState
-import net.primal.data.account.local.dao.TrustLevel
+import net.primal.data.account.local.dao.apps.AppPermissionData
+import net.primal.data.account.local.dao.apps.PermissionAction
+import net.primal.data.account.local.dao.apps.TrustLevel
+import net.primal.data.account.local.dao.apps.remote.RemoteAppPendingNostrEvent
+import net.primal.data.account.local.dao.apps.remote.RemoteAppRequestState
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.asDomain
@@ -33,20 +33,20 @@ class SessionEventRepositoryImpl(
 ) : SessionEventRepository {
 
     override fun observeEventsPendingUserAction(signerPubKey: String): Flow<List<SessionEvent>> =
-        database.sessionEvents().observeEventsByRequestState(
+        database.remoteAppSessionEvents().observeEventsByRequestState(
             signerPubKey = signerPubKey,
-            requestState = RequestState.PendingUserAction,
+            requestState = RemoteAppRequestState.PendingUserAction,
         ).map { events -> events.mapNotNull { it.asDomain() } }
             .distinctUntilChanged()
 
     override fun observeCompletedEventsForSession(sessionId: String): Flow<List<SessionEvent>> {
-        return database.sessionEvents().observeCompletedEventsBySessionId(sessionId = sessionId)
+        return database.remoteAppSessionEvents().observeCompletedEventsBySessionId(sessionId = sessionId)
             .map { list -> list.mapNotNull { it.asDomain() } }
             .distinctUntilChanged()
     }
 
     override fun observeEvent(eventId: String): Flow<SessionEvent?> {
-        return database.sessionEvents().observeEvent(eventId = eventId)
+        return database.remoteAppSessionEvents().observeEvent(eventId = eventId)
             .map { it?.asDomain() }
             .distinctUntilChanged()
     }
@@ -56,9 +56,9 @@ class SessionEventRepositoryImpl(
             runCatching {
                 val events = nip46EventsHandler.fetchNip46Events(eventIds = eventIds).getOrThrow()
 
-                database.pendingNostrEvents().upsertAll(
+                database.remoteAppPendingNostrEvents().upsertAll(
                     data = events.map {
-                        PendingNostrEvent(
+                        RemoteAppPendingNostrEvent(
                             eventId = it.id,
                             clientPubKey = it.pubKey,
                             signerPubKey = signerKeyPair.pubKey,
@@ -104,19 +104,23 @@ class SessionEventRepositoryImpl(
     private suspend fun updatePermissionPreference(eventId: String, action: PermissionAction) =
         withContext(dispatchers.io()) {
             database.withTransaction {
-                val sessionEvent = database.sessionEvents().getSessionEvent(eventId = eventId) ?: return@withTransaction
-                val connection = database.connections().getConnection(clientPubKey = sessionEvent.clientPubKey)
-                    ?: return@withTransaction
+                val sessionEvent = database.remoteAppSessionEvents().getSessionEvent(
+                    eventId = eventId,
+                ) ?: return@withTransaction
+
+                val connection = database.remoteAppConnections().getConnection(
+                    clientPubKey = sessionEvent.clientPubKey,
+                ) ?: return@withTransaction
 
                 if (connection.data.trustLevel == TrustLevel.Low && action == PermissionAction.Approve) {
-                    database.connections().updateTrustLevel(
+                    database.remoteAppConnections().updateTrustLevel(
                         clientPubKey = connection.data.clientPubKey,
                         trustLevel = TrustLevel.Medium,
                     )
-                    database.permissions().deletePermissions(clientPubKey = connection.data.clientPubKey)
+                    database.appPermissions().deletePermissions(clientPubKey = connection.data.clientPubKey)
                 }
 
-                database.permissions().upsert(
+                database.appPermissions().upsert(
                     data = AppPermissionData(
                         permissionId = sessionEvent.getRequestTypeId(),
                         clientPubKey = connection.data.clientPubKey,
@@ -128,9 +132,9 @@ class SessionEventRepositoryImpl(
 
     private suspend fun allowEvent(eventId: String) =
         withContext(dispatchers.io()) {
-            database.sessionEvents().updateSessionEventRequestState(
+            database.remoteAppSessionEvents().updateSessionEventRequestState(
                 eventId = eventId,
-                requestState = RequestState.PendingResponse,
+                requestState = RemoteAppRequestState.PendingResponse,
                 responsePayload = null,
                 completedAt = null,
             )
@@ -138,11 +142,11 @@ class SessionEventRepositoryImpl(
 
     private suspend fun rejectEvent(eventId: String) =
         withContext(dispatchers.io()) {
-            val clientPubKey = database.sessionEvents().getSessionEvent(eventId = eventId)?.clientPubKey
+            val clientPubKey = database.remoteAppSessionEvents().getSessionEvent(eventId = eventId)?.clientPubKey
             if (clientPubKey != null) {
-                database.sessionEvents().updateSessionEventRequestState(
+                database.remoteAppSessionEvents().updateSessionEventRequestState(
                     eventId = eventId,
-                    requestState = RequestState.PendingResponse,
+                    requestState = RemoteAppRequestState.PendingResponse,
                     completedAt = null,
                     responsePayload = RemoteSignerMethodResponse.Error(
                         id = eventId,

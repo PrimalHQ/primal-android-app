@@ -8,35 +8,35 @@ import androidx.room.TypeConverters
 import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 import io.github.aakira.napier.Napier
-import net.primal.data.account.local.dao.AppConnectionData
-import net.primal.data.account.local.dao.AppConnectionDataDao
-import net.primal.data.account.local.dao.AppPermissionData
-import net.primal.data.account.local.dao.AppPermissionDataDao
-import net.primal.data.account.local.dao.AppSessionData
-import net.primal.data.account.local.dao.AppSessionDataDao
-import net.primal.data.account.local.dao.LocalAppDao
-import net.primal.data.account.local.dao.LocalAppData
-import net.primal.data.account.local.dao.LocalAppSessionData
-import net.primal.data.account.local.dao.LocalAppSessionEventData
-import net.primal.data.account.local.dao.PendingNostrEvent
-import net.primal.data.account.local.dao.PendingNostrEventDao
-import net.primal.data.account.local.dao.SessionEventData
-import net.primal.data.account.local.dao.SessionEventDataDao
+import net.primal.data.account.local.dao.apps.AppPermissionData
+import net.primal.data.account.local.dao.apps.AppPermissionDataDao
+import net.primal.data.account.local.dao.apps.local.LocalAppDao
+import net.primal.data.account.local.dao.apps.local.LocalAppData
+import net.primal.data.account.local.dao.apps.local.LocalAppSessionData
+import net.primal.data.account.local.dao.apps.local.LocalAppSessionEventData
+import net.primal.data.account.local.dao.apps.remote.RemoteAppConnectionData
+import net.primal.data.account.local.dao.apps.remote.RemoteAppConnectionDataDao
+import net.primal.data.account.local.dao.apps.remote.RemoteAppPendingNostrEvent
+import net.primal.data.account.local.dao.apps.remote.RemoteAppPendingNostrEventDao
+import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionData
+import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionDataDao
+import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionEventData
+import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionEventDataDao
 import net.primal.shared.data.local.serialization.EncryptableTypeConverters
 import net.primal.shared.data.local.serialization.ListsTypeConverters
 
 @Database(
     entities = [
-        AppConnectionData::class,
         AppPermissionData::class,
-        AppSessionData::class,
-        SessionEventData::class,
-        PendingNostrEvent::class,
+        RemoteAppConnectionData::class,
+        RemoteAppSessionData::class,
+        RemoteAppSessionEventData::class,
+        RemoteAppPendingNostrEvent::class,
         LocalAppData::class,
         LocalAppSessionData::class,
         LocalAppSessionEventData::class,
     ],
-    version = 10,
+    version = 11,
     exportSchema = true,
 )
 @TypeConverters(
@@ -45,12 +45,12 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AccountDatabase : RoomDatabase() {
-    abstract fun connections(): AppConnectionDataDao
+    abstract fun appPermissions(): AppPermissionDataDao
+    abstract fun remoteAppConnections(): RemoteAppConnectionDataDao
+    abstract fun remoteAppSessions(): RemoteAppSessionDataDao
+    abstract fun remoteAppSessionEvents(): RemoteAppSessionEventDataDao
+    abstract fun remoteAppPendingNostrEvents(): RemoteAppPendingNostrEventDao
     abstract fun localApps(): LocalAppDao
-    abstract fun permissions(): AppPermissionDataDao
-    abstract fun sessions(): AppSessionDataDao
-    abstract fun sessionEvents(): SessionEventDataDao
-    abstract fun pendingNostrEvents(): PendingNostrEventDao
 
     companion object {
         fun provideDatabaseCallback() =
@@ -59,7 +59,7 @@ abstract class AccountDatabase : RoomDatabase() {
                     runCatching {
                         connection.execSQL(
                             """
-                                UPDATE AppSessionData
+                                UPDATE RemoteAppSessionData
                                     SET endedAt = strftime('%s', 'now'), activeRelayCount = 0
                                     WHERE endedAt IS NULL
                             """.trimIndent(),
@@ -73,12 +73,12 @@ abstract class AccountDatabase : RoomDatabase() {
                         )
                         connection.execSQL(
                             """
-                                UPDATE SessionEventData
+                                UPDATE RemoteAppSessionEventData
                                     SET completedAt = strftime('%s', 'now'), requestState = 'Rejected'
                                     WHERE requestState = 'PendingUserAction'
                             """.trimIndent(),
                         )
-                        connection.execSQL("DELETE FROM PendingNostrEvent")
+                        connection.execSQL("DELETE FROM RemoteAppPendingNostrEvent")
                     }.onFailure {
                         Napier.d(throwable = it) { "Failed to run onOpen sequence with AccountDatabase" }
                     }

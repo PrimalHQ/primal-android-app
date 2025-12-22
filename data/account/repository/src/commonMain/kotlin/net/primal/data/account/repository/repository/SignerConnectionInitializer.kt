@@ -6,8 +6,8 @@ import kotlin.uuid.Uuid
 import net.primal.core.utils.Result
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
-import net.primal.data.account.local.dao.RequestState
-import net.primal.data.account.local.dao.SignerMethodType
+import net.primal.data.account.local.dao.apps.remote.RemoteAppRequestState
+import net.primal.data.account.local.dao.apps.remote.RemoteSignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.model.AppPermission
@@ -61,9 +61,9 @@ class SignerConnectionInitializer internal constructor(
                     internalSessionEventRepository.saveSessionEvent(
                         sessionId = sessionId,
                         signerPubKey = signerPubKey,
-                        requestType = SignerMethodType.Connect,
+                        requestType = RemoteSignerMethodType.Connect,
                         method = null,
-                        requestState = RequestState.PendingResponse,
+                        requestState = RemoteAppRequestState.PendingResponse,
                         response = RemoteSignerMethodResponse.Success(
                             id = Uuid.random().toString(),
                             clientPubKey = appConnection.clientPubKey,

@@ -1,17 +1,18 @@
-package net.primal.data.account.local.dao
+package net.primal.data.account.local.dao.apps.remote
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import net.primal.data.account.local.dao.apps.AppPermissionData
 
-data class AppSession(
+data class RemoteAppSession(
     @Embedded
-    val data: AppSessionData,
+    val data: RemoteAppSessionData,
 
     @Relation(
         parentColumn = "clientPubKey",
         entityColumn = "clientPubKey",
     )
-    val connection: AppConnectionData,
+    val connection: RemoteAppConnectionData,
 
     @Relation(
         parentColumn = "clientPubKey",

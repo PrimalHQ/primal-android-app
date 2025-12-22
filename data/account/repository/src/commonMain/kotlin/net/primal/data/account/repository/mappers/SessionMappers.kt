@@ -1,10 +1,10 @@
 package net.primal.data.account.repository.mappers
 
-import net.primal.data.account.local.dao.AppSession as AppSessionPO
+import net.primal.data.account.local.dao.apps.remote.RemoteAppSession as RemoteAppSessionPO
 import net.primal.domain.account.model.AppSession as AppSessionDO
 import net.primal.domain.account.model.AppSessionState
 
-fun AppSessionPO.asDomain() =
+fun RemoteAppSessionPO.asDomain() =
     AppSessionDO(
         sessionId = this.data.sessionId,
         userPubKey = this.connection.userPubKey,
