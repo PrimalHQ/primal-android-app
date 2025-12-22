@@ -25,6 +25,8 @@ inline val SavedStateHandle.npub: String? get() = get(PROFILE_NPUB)
 
 const val IDENTIFIER = "identifier"
 inline val SavedStateHandle.identifier: String? get() = get(IDENTIFIER)
+inline val SavedStateHandle.identifierOrThrow: String
+    get() = get(IDENTIFIER) ?: throw IllegalArgumentException("Missing required identifier argument")
 
 const val PROFILE_ID = "profileId"
 inline val SavedStateHandle.profileId: String? get() = get(PROFILE_ID)

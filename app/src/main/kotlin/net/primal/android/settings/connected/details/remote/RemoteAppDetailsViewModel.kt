@@ -1,4 +1,4 @@
-package net.primal.android.settings.connected.details
+package net.primal.android.settings.connected.details.remote
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -17,9 +17,9 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.navigation.clientPubKeyOrThrow
 import net.primal.android.nostrconnect.handler.RemoteSignerSessionHandler
-import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.SideEffect
-import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiEvent
-import net.primal.android.settings.connected.details.ConnectedAppDetailsContract.UiState
+import net.primal.android.settings.connected.details.remote.RemoteAppDetailsContract.SideEffect
+import net.primal.android.settings.connected.details.remote.RemoteAppDetailsContract.UiEvent
+import net.primal.android.settings.connected.details.remote.RemoteAppDetailsContract.UiState
 import net.primal.android.settings.connected.model.SessionUi
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
@@ -28,7 +28,7 @@ import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 
 @HiltViewModel
-class ConnectedAppDetailsViewModel @Inject constructor(
+class RemoteAppDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: DispatcherProvider,
     private val connectionRepository: ConnectionRepository,

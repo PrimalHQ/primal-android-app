@@ -18,8 +18,10 @@ import net.primal.android.settings.appearance.AppearanceSettingsScreen
 import net.primal.android.settings.appearance.di.appearanceSettingsViewModel
 import net.primal.android.settings.connected.ConnectedAppsScreen
 import net.primal.android.settings.connected.ConnectedAppsViewModel
-import net.primal.android.settings.connected.details.ConnectedAppDetailsScreen
-import net.primal.android.settings.connected.details.ConnectedAppDetailsViewModel
+import net.primal.android.settings.connected.details.local.LocalAppDetailsScreen
+import net.primal.android.settings.connected.details.local.LocalAppDetailsViewModel
+import net.primal.android.settings.connected.details.remote.RemoteAppDetailsScreen
+import net.primal.android.settings.connected.details.remote.RemoteAppDetailsViewModel
 import net.primal.android.settings.connected.event.EventDetailsScreen
 import net.primal.android.settings.connected.event.EventDetailsViewModel
 import net.primal.android.settings.connected.permissions.AppPermissionsScreen
@@ -72,6 +74,8 @@ private fun NavController.navigateToSessionDetails(sessionId: String) = navigate
 private fun NavController.navigateToEventDetails(eventId: String) = navigate(route = "event_details/$eventId")
 
 fun NavController.navigateToConnectedAppDetails(clientPubKey: String) = navigate(route = "connected_apps/$clientPubKey")
+
+fun NavController.navigateToLocalAppDetails(identifier: String) = navigate(route = "local_apps/$identifier")
 
 private fun NavController.navigateToAppPermissions(clientPubKey: String) =
     navigate(route = "connected_apps/$clientPubKey/permissions")
@@ -180,6 +184,15 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             arguments = listOf(
                 navArgument(EVENT_ID) { type = NavType.StringType },
             ),
+        )
+        localAppDetails(
+            route = "local_apps/{$IDENTIFIER}",
+            arguments = listOf(
+                navArgument(IDENTIFIER) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
         )
     }
 
@@ -438,8 +451,35 @@ private fun NavGraphBuilder.connectedApps(route: String, navController: NavContr
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
             onConnectedAppClick = { clientPubKey -> navController.navigateToConnectedAppDetails(clientPubKey) },
+            onLocalAppClick = { identifier -> navController.navigateToLocalAppDetails(identifier) },
         )
     }
+
+private fun NavGraphBuilder.localAppDetails(
+    route: String,
+    navController: NavController,
+    arguments: List<NamedNavArgument>,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<LocalAppDetailsViewModel>()
+    LockToOrientationPortrait()
+    LocalAppDetailsScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onSessionClick = { sessionId ->
+            navController.navigateToSessionDetails(sessionId)
+        },
+        onPermissionDetailsClick = { identifier ->
+            navController.navigateToAppPermissions(identifier)
+        },
+    )
+}
 
 private fun NavGraphBuilder.connectedAppDetails(
     route: String,
@@ -455,9 +495,9 @@ private fun NavGraphBuilder.connectedAppDetails(
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
-    val viewModel = hiltViewModel<ConnectedAppDetailsViewModel>()
+    val viewModel = hiltViewModel<RemoteAppDetailsViewModel>()
     LockToOrientationPortrait()
-    ConnectedAppDetailsScreen(
+    RemoteAppDetailsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onSessionClick = { sessionId ->

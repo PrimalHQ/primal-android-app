@@ -13,6 +13,7 @@ import net.primal.data.account.repository.mappers.asPO
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.model.PermissionAction as PermissionActionDO
+import net.primal.domain.account.model.TrustLevel as TrustLevelDO
 import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.shared.data.local.db.withTransaction
 
@@ -51,4 +52,33 @@ class LocalAppRepositoryImpl(
     override fun observeAllApps(): Flow<List<LocalApp>> =
         database.localApps().observeAll()
             .map { apps -> apps.map { it.asDomain() } }
+
+    override fun observeApp(identifier: String): Flow<LocalApp?> =
+        database.localApps().observeApp(identifier)
+            .map { it?.asDomain() }
+
+    override suspend fun updateTrustLevel(identifier: String, trustLevel: TrustLevelDO): Result<Unit> =
+        withContext(dispatchers.io()) {
+            runCatching {
+                database.localApps().updateTrustLevel(
+                    identifier = identifier,
+                    trustLevel = trustLevel.asPO(),
+                )
+            }
+        }
+
+    override suspend fun deleteApp(identifier: String): Result<Unit> =
+        withContext(dispatchers.io()) {
+            runCatching {
+                database.withTransaction {
+                    deleteEverythingForIdentifier(identifier)
+                }
+            }
+        }
+
+    private suspend inline fun deleteEverythingForIdentifier(identifier: String) {
+        // Delete permissions
+        database.localApps().deleteApp(identifier = identifier)
+        // Delete sessions
+    }
 }
