@@ -11,9 +11,9 @@ import net.primal.data.account.remote.method.processor.RemoteSignerMethodProcess
 import net.primal.data.account.repository.builder.LocalSignerMethodResponseBuilder
 import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
-import net.primal.data.account.repository.repository.InternalPermissionsRepository
-import net.primal.data.account.repository.repository.InternalSessionEventRepository
 import net.primal.data.account.repository.repository.factory.provideAccountDatabase
+import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
+import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
 import net.primal.data.account.repository.service.LocalSignerServiceImpl
 import net.primal.data.account.repository.service.RemoteSignerServiceImpl
 import net.primal.domain.account.repository.ConnectionRepository
@@ -88,6 +88,10 @@ object AccountServiceFactory {
             internalPermissionsRepository = InternalPermissionsRepository(
                 dispatchers = createDispatcherProvider(),
                 wellKnownApi = wellKnownApi,
+            ),
+            internalSessionEventRepository = InternalSessionEventRepository(
+                accountDatabase = provideAccountDatabase(),
+                dispatchers = createDispatcherProvider(),
             ),
         )
 }

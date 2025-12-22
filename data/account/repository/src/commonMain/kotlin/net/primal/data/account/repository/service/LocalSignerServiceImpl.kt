@@ -11,7 +11,8 @@ import net.primal.core.utils.asSuccess
 import net.primal.core.utils.remove
 import net.primal.core.utils.runCatching
 import net.primal.data.account.repository.builder.LocalSignerMethodResponseBuilder
-import net.primal.data.account.repository.repository.InternalPermissionsRepository
+import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
+import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.LocalSignerMethod
@@ -26,11 +27,12 @@ import net.primal.domain.account.service.LocalSignerError
 import net.primal.domain.account.service.LocalSignerService
 
 @OptIn(ExperimentalAtomicApi::class)
-class LocalSignerServiceImpl(
+class LocalSignerServiceImpl internal constructor(
     private val localAppRepository: LocalAppRepository,
     private val permissionsRepository: PermissionsRepository,
     private val localSignerMethodResponseBuilder: LocalSignerMethodResponseBuilder,
     private val internalPermissionsRepository: InternalPermissionsRepository,
+    private val internalSessionEventRepository: InternalSessionEventRepository,
 ) : LocalSignerService {
     private val responses = AtomicReference<List<LocalSignerMethodResponse>>(emptyList())
     private val pendingUserActionMethods = MutableStateFlow<List<LocalSignerMethod>>(emptyList())
@@ -40,9 +42,10 @@ class LocalSignerServiceImpl(
 
         return when (permissionAction) {
             PermissionAction.Approve -> {
-                localSignerMethodResponseBuilder.build(method = method).also { response ->
+                val response = localSignerMethodResponseBuilder.build(method = method).also { response ->
                     responses.add(response)
-                }.asSuccess()
+                }
+                response.asSuccess()
             }
 
             PermissionAction.Deny -> {

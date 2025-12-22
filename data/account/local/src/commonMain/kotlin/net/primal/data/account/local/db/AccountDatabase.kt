@@ -14,6 +14,7 @@ import net.primal.data.account.local.dao.apps.local.LocalAppDao
 import net.primal.data.account.local.dao.apps.local.LocalAppData
 import net.primal.data.account.local.dao.apps.local.LocalAppSessionData
 import net.primal.data.account.local.dao.apps.local.LocalAppSessionEventData
+import net.primal.data.account.local.dao.apps.local.LocalAppSessionEventDataDao
 import net.primal.data.account.local.dao.apps.remote.RemoteAppConnectionData
 import net.primal.data.account.local.dao.apps.remote.RemoteAppConnectionDataDao
 import net.primal.data.account.local.dao.apps.remote.RemoteAppPendingNostrEvent
@@ -36,7 +37,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         LocalAppSessionData::class,
         LocalAppSessionEventData::class,
     ],
-    version = 11,
+    version = 12,
     exportSchema = true,
 )
 @TypeConverters(
@@ -51,6 +52,7 @@ abstract class AccountDatabase : RoomDatabase() {
     abstract fun remoteAppSessionEvents(): RemoteAppSessionEventDataDao
     abstract fun remoteAppPendingNostrEvents(): RemoteAppPendingNostrEventDao
     abstract fun localApps(): LocalAppDao
+    abstract fun localAppSessionEvents(): LocalAppSessionEventDataDao
 
     companion object {
         fun provideDatabaseCallback() =
