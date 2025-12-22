@@ -28,8 +28,8 @@ import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuil
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.data.account.repository.mappers.getRequestType
-import net.primal.data.account.repository.repository.InternalSessionEventRepository
-import net.primal.data.account.repository.repository.model.UpdateSessionEventRequest
+import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
+import net.primal.data.account.repository.repository.internal.model.UpdateRemoteAppSessionEventRequest
 import net.primal.domain.account.model.AppSession
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
@@ -112,7 +112,7 @@ class RemoteSignerServiceImpl internal constructor(
 
     private fun observePendingNostrEvents() =
         scope.launch {
-            internalSessionEventRepository.observePendingNostrEvents(signerPubKey = signerKeyPair.pubKey)
+            internalSessionEventRepository.observeRemoteAppPendingNostrEvents(signerPubKey = signerKeyPair.pubKey)
                 .collect { nostrEvents ->
                     if (nostrEvents.isEmpty()) return@collect
 
@@ -125,13 +125,15 @@ class RemoteSignerServiceImpl internal constructor(
                         )
                     }
 
-                    internalSessionEventRepository.deletePendingNostrEvents(eventIds = nostrEvents.map { it.id })
+                    internalSessionEventRepository.deleteRemoteAppPendingNostrEvents(
+                        eventIds = nostrEvents.map { it.id },
+                    )
                 }
         }
 
     private fun observePendingResponseEvents() =
         scope.launch {
-            internalSessionEventRepository.observePendingResponseEvents(signerPubKey = signerKeyPair.pubKey)
+            internalSessionEventRepository.observeRemoteAppPendingResponseEvents(signerPubKey = signerKeyPair.pubKey)
                 .collect { events ->
                     val alreadyResponded = events.mapNotNull { sessionEvent ->
                         sessionEvent.responsePayload
@@ -147,9 +149,9 @@ class RemoteSignerServiceImpl internal constructor(
                     (alreadyResponded + toRespond)
                         .onEach { sendResponseOrAddToFailedQueue(it) }
                         .also { responses ->
-                            internalSessionEventRepository.updateSessionEventState(
+                            internalSessionEventRepository.updateRemoteAppSessionEventState(
                                 requests = responses.map { response ->
-                                    UpdateSessionEventRequest(
+                                    UpdateRemoteAppSessionEventRequest(
                                         eventId = response.id,
                                         responsePayload = response.encodeToJsonString(),
                                         requestState = when (response) {
@@ -246,7 +248,7 @@ class RemoteSignerServiceImpl internal constructor(
             findActiveSessionId(clientPubKey = method.clientPubKey)?.let { sessionId ->
                 sessionActivityMap.load()[sessionId] = Clock.System.now()
 
-                internalSessionEventRepository.saveSessionEvent(
+                internalSessionEventRepository.saveRemoteAppSessionEvent(
                     sessionId = sessionId,
                     requestType = method.getRequestType(),
                     method = method,

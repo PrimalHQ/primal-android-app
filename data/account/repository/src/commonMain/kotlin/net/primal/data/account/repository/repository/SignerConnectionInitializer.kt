@@ -9,6 +9,8 @@ import net.primal.core.utils.runCatching
 import net.primal.data.account.local.dao.apps.remote.RemoteAppRequestState
 import net.primal.data.account.local.dao.apps.remote.RemoteSignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
+import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
 import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.PermissionAction
@@ -58,7 +60,7 @@ class SignerConnectionInitializer internal constructor(
             connectionRepository.insertOrReplaceConnection(secret = secret, connection = appConnection)
             sessionRepository.startSession(clientPubKey = appConnection.clientPubKey)
                 .onSuccess { sessionId ->
-                    internalSessionEventRepository.saveSessionEvent(
+                    internalSessionEventRepository.saveRemoteAppSessionEvent(
                         sessionId = sessionId,
                         signerPubKey = signerPubKey,
                         requestType = RemoteSignerMethodType.Connect,

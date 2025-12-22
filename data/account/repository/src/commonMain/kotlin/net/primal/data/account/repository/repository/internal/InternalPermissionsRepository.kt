@@ -1,4 +1,4 @@
-package net.primal.data.account.repository.repository
+package net.primal.data.account.repository.repository.internal
 
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result

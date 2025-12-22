@@ -1,4 +1,4 @@
-package net.primal.data.account.repository.repository
+package net.primal.data.account.repository.repository.internal
 
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -13,7 +13,7 @@ import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.buildSessionEventData
-import net.primal.data.account.repository.repository.model.UpdateSessionEventRequest
+import net.primal.data.account.repository.repository.internal.model.UpdateRemoteAppSessionEventRequest
 import net.primal.domain.nostr.NostrEvent
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
@@ -22,7 +22,7 @@ internal class InternalSessionEventRepository(
     private val accountDatabase: AccountDatabase,
     private val dispatchers: DispatcherProvider,
 ) {
-    suspend fun saveSessionEvent(
+    suspend fun saveRemoteAppSessionEvent(
         sessionId: String,
         signerPubKey: String,
         requestType: RemoteSignerMethodType,
@@ -48,26 +48,26 @@ internal class InternalSessionEventRepository(
         }
     }
 
-    fun observePendingResponseEvents(signerPubKey: String) =
+    fun observeRemoteAppPendingResponseEvents(signerPubKey: String) =
         accountDatabase.remoteAppSessionEvents().observeEventsByRequestState(
             signerPubKey = signerPubKey,
             requestState = RemoteAppRequestState.PendingResponse,
         ).distinctUntilChanged()
 
-    fun observePendingNostrEvents(signerPubKey: String) =
+    fun observeRemoteAppPendingNostrEvents(signerPubKey: String) =
         accountDatabase.remoteAppPendingNostrEvents().observeAllBySignerPubKey(
             signerPubKey = signerPubKey,
         ).map { list -> list.mapNotNull { it.rawNostrEventJson.decrypted.decodeFromJsonStringOrNull<NostrEvent>() } }
             .distinctUntilChanged()
 
-    suspend fun deletePendingNostrEvents(eventIds: List<String>) =
+    suspend fun deleteRemoteAppPendingNostrEvents(eventIds: List<String>) =
         withContext(dispatchers.io()) {
             runCatching {
                 accountDatabase.remoteAppPendingNostrEvents().deleteByIds(eventIds = eventIds)
             }
         }
 
-    suspend fun updateSessionEventState(requests: List<UpdateSessionEventRequest>) =
+    suspend fun updateRemoteAppSessionEventState(requests: List<UpdateRemoteAppSessionEventRequest>) =
         withContext(dispatchers.io()) {
             accountDatabase.withTransaction {
                 requests.forEach { request ->

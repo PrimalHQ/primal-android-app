@@ -8,7 +8,7 @@ import net.primal.shared.data.local.encryption.Encryptable
 data class LocalAppSessionEventData(
     @PrimaryKey val eventId: String,
     val sessionId: String,
-    val appPackageName: String,
+    val appIdentifier: String,
     val requestState: LocalRequestState,
     val processedAt: Long,
     val requestType: LocalSignerMethodType,
