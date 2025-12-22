@@ -25,7 +25,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -52,8 +51,6 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.settings.connected.model.PermissionGroupUi
-import net.primal.android.settings.connected.permissions.AppPermissionsContract.UiEvent
-import net.primal.android.settings.connected.ui.ConnectedAppHeader
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.PermissionAction
 
@@ -61,21 +58,17 @@ private val ToggleIndicatorColorDark = Color(0xFF757575)
 private val ToggleIndicatorColorLight = Color(0xFF666666)
 private const val PERMISSION_OPTION_COUNT = 3
 
-@Composable
-fun AppPermissionsScreen(viewModel: AppPermissionsViewModel, onClose: () -> Unit) {
-    val state = viewModel.state.collectAsState()
-    AppPermissionsScreen(
-        state = state.value,
-        onClose = onClose,
-        eventPublisher = viewModel::setEvent,
-    )
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppPermissionsScreen(
-    state: AppPermissionsContract.UiState,
-    eventPublisher: (UiEvent) -> Unit,
+fun ConnectedAppPermissionsScreen(
+    headerContent: @Composable () -> Unit,
+    permissions: List<PermissionGroupUi>,
+    loading: Boolean,
+    error: net.primal.android.core.errors.UiError?,
+    onUpdatePermission: (List<String>, PermissionAction) -> Unit,
+    onResetPermissions: () -> Unit,
+    onRetry: () -> Unit,
+    onDismissError: () -> Unit,
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -83,10 +76,10 @@ fun AppPermissionsScreen(
     var resetConfirmationVisible by remember { mutableStateOf(false) }
 
     SnackbarErrorHandler(
-        error = if (state.permissions.isNotEmpty()) state.error else null,
+        error = if (permissions.isNotEmpty()) error else null,
         snackbarHostState = snackbarHostState,
         errorMessageResolver = { it.resolveUiErrorMessage(context = context) },
-        onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
+        onErrorDismiss = onDismissError,
     )
 
     PrimalScaffold(
@@ -103,24 +96,25 @@ fun AppPermissionsScreen(
             SnackbarHost(hostState = snackbarHostState)
         },
     ) { paddingValues ->
-        if (state.permissions.isNotEmpty()) {
-            AppPermissionsList(
+        if (permissions.isNotEmpty()) {
+            PermissionsList(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
                     .padding(horizontal = 12.dp),
-                state = state,
-                eventPublisher = eventPublisher,
+                headerContent = headerContent,
+                permissions = permissions,
+                onUpdatePermission = onUpdatePermission,
                 onResetClick = { resetConfirmationVisible = true },
             )
-        } else if (state.loading) {
+        } else if (loading) {
             PrimalLoadingSpinner()
         } else {
             ListNoContent(
                 modifier = Modifier.fillMaxSize(),
                 noContentText = stringResource(id = R.string.settings_connected_app_permissions_error_loading),
                 refreshButtonVisible = true,
-                onRefresh = { eventPublisher(UiEvent.Retry) },
+                onRefresh = onRetry,
             )
         }
     }
@@ -131,7 +125,7 @@ fun AppPermissionsScreen(
             dialogText = stringResource(id = R.string.settings_connected_app_permissions_reset_dialog_text),
             confirmText = stringResource(id = R.string.settings_connected_app_permissions_reset_dialog_confirm),
             onConfirmation = {
-                eventPublisher(UiEvent.ResetPermissions)
+                onResetPermissions()
                 resetConfirmationVisible = false
             },
             dismissText = stringResource(id = R.string.settings_connected_app_permissions_reset_dialog_dismiss),
@@ -141,42 +135,33 @@ fun AppPermissionsScreen(
 }
 
 @Composable
-private fun AppPermissionsList(
-    state: AppPermissionsContract.UiState,
-    eventPublisher: (UiEvent) -> Unit,
+private fun PermissionsList(
+    headerContent: @Composable () -> Unit,
+    permissions: List<PermissionGroupUi>,
+    onUpdatePermission: (List<String>, PermissionAction) -> Unit,
     onResetClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(modifier = modifier) {
         item {
-            ConnectedAppHeader(
-                modifier = Modifier.padding(vertical = 16.dp),
-                appName = state.appName,
-                appIconUrl = state.appIconUrl,
-                startedAt = state.appLastSessionAt,
-            )
+            headerContent()
         }
 
         itemsIndexed(
-            items = state.permissions,
+            items = permissions,
             key = { _, group -> group.groupId },
         ) { index, permissionGroup ->
-            val shape = getListItemShape(index = index, listSize = state.permissions.size)
+            val shape = getListItemShape(index = index, listSize = permissions.size)
 
             Column(modifier = Modifier.clip(shape)) {
                 PermissionGroupRow(
                     modifier = Modifier.background(AppTheme.extraColorScheme.surfaceVariantAlt3),
                     permissionGroup = permissionGroup,
                     onActionChange = { action ->
-                        eventPublisher(
-                            UiEvent.UpdatePermission(
-                                permissionIds = permissionGroup.permissionIds,
-                                action = action,
-                            ),
-                        )
+                        onUpdatePermission(permissionGroup.permissionIds, action)
                     },
                 )
-                if (index < state.permissions.lastIndex) {
+                if (index < permissions.lastIndex) {
                     PrimalDivider()
                 }
             }

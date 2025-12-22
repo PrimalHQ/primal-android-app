@@ -1,10 +1,10 @@
-package net.primal.android.settings.connected.permissions
+package net.primal.android.settings.connected.permissions.remote
 
 import net.primal.android.core.errors.UiError
 import net.primal.android.settings.connected.model.PermissionGroupUi
 import net.primal.domain.account.model.PermissionAction
 
-interface AppPermissionsContract {
+interface RemoteAppPermissionsContract {
     data class UiState(
         val appName: String? = null,
         val appIconUrl: String? = null,

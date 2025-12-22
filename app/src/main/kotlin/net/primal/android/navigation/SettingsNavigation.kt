@@ -24,8 +24,10 @@ import net.primal.android.settings.connected.details.remote.RemoteAppDetailsScre
 import net.primal.android.settings.connected.details.remote.RemoteAppDetailsViewModel
 import net.primal.android.settings.connected.event.EventDetailsScreen
 import net.primal.android.settings.connected.event.EventDetailsViewModel
-import net.primal.android.settings.connected.permissions.AppPermissionsScreen
-import net.primal.android.settings.connected.permissions.AppPermissionsViewModel
+import net.primal.android.settings.connected.permissions.local.LocalAppPermissionsScreen
+import net.primal.android.settings.connected.permissions.local.LocalAppPermissionsViewModel
+import net.primal.android.settings.connected.permissions.remote.RemoteAppPermissionsScreen
+import net.primal.android.settings.connected.permissions.remote.RemoteAppPermissionsViewModel
 import net.primal.android.settings.connected.session.SessionDetailsScreen
 import net.primal.android.settings.connected.session.SessionDetailsViewModel
 import net.primal.android.settings.content.ContentDisplaySettingsScreen
@@ -77,8 +79,11 @@ fun NavController.navigateToConnectedAppDetails(clientPubKey: String) = navigate
 
 fun NavController.navigateToLocalAppDetails(identifier: String) = navigate(route = "local_apps/$identifier")
 
-private fun NavController.navigateToAppPermissions(clientPubKey: String) =
+private fun NavController.navigateToRemoteAppPermissions(clientPubKey: String) =
     navigate(route = "connected_apps/$clientPubKey/permissions")
+
+private fun NavController.navigateToLocalAppPermissions(identifier: String) =
+    navigate(route = "local_apps/$identifier/permissions")
 
 fun NavController.navigateToLinkPrimalWallet(
     appName: String? = null,
@@ -162,7 +167,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
                 },
             ),
         )
-        appPermissions(
+        remoteAppPermissions(
             route = "connected_apps/{$REMOTE_LOGIN_CLIENT_PUBKEY}/permissions",
             arguments = listOf(
                 navArgument(REMOTE_LOGIN_CLIENT_PUBKEY) {
@@ -187,6 +192,15 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         )
         localAppDetails(
             route = "local_apps/{$IDENTIFIER}",
+            arguments = listOf(
+                navArgument(IDENTIFIER) {
+                    type = NavType.StringType
+                },
+            ),
+            navController = navController,
+        )
+        localAppPermissions(
+            route = "local_apps/{$IDENTIFIER}/permissions",
             arguments = listOf(
                 navArgument(IDENTIFIER) {
                     type = NavType.StringType
@@ -476,7 +490,7 @@ private fun NavGraphBuilder.localAppDetails(
             navController.navigateToSessionDetails(sessionId)
         },
         onPermissionDetailsClick = { identifier ->
-            navController.navigateToAppPermissions(identifier)
+            navController.navigateToLocalAppPermissions(identifier)
         },
     )
 }
@@ -504,12 +518,12 @@ private fun NavGraphBuilder.connectedAppDetails(
             navController.navigateToSessionDetails(sessionId)
         },
         onPermissionDetailsClick = { clientPubKey ->
-            navController.navigateToAppPermissions(clientPubKey)
+            navController.navigateToRemoteAppPermissions(clientPubKey)
         },
     )
 }
 
-private fun NavGraphBuilder.appPermissions(
+private fun NavGraphBuilder.remoteAppPermissions(
     route: String,
     navController: NavController,
     arguments: List<NamedNavArgument>,
@@ -521,10 +535,31 @@ private fun NavGraphBuilder.appPermissions(
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
-    val viewModel = hiltViewModel<AppPermissionsViewModel>()
+    val viewModel = hiltViewModel<RemoteAppPermissionsViewModel>()
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
-    AppPermissionsScreen(
+    RemoteAppPermissionsScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+    )
+}
+
+private fun NavGraphBuilder.localAppPermissions(
+    route: String,
+    navController: NavController,
+    arguments: List<NamedNavArgument>,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<LocalAppPermissionsViewModel>()
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    LocalAppPermissionsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
     )
