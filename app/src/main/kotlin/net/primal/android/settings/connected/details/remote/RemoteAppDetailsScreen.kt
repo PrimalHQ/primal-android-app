@@ -58,11 +58,13 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.resolveUiErrorMessage
-import net.primal.android.settings.connected.details.AppSummarySection
+import net.primal.android.settings.connected.details.ConnectedAppDeleteDialog
 import net.primal.android.settings.connected.details.ConnectedAppPermissionsSection
-import net.primal.android.settings.connected.details.DeleteConnectionDialog
-import net.primal.android.settings.connected.details.UpdateTrustLevelDialog
-import net.primal.android.settings.connected.details.recentSessionsSection
+import net.primal.android.settings.connected.details.ConnectedAppSummarySection
+import net.primal.android.settings.connected.details.ConnectedAppUpdateTrustLevelDialog
+import net.primal.android.settings.connected.details.DangerPrimaryColor
+import net.primal.android.settings.connected.details.DangerSecondaryColor
+import net.primal.android.settings.connected.details.connectedAppRecentSessionsSection
 import net.primal.android.settings.connected.details.remote.RemoteAppDetailsContract.SideEffect
 import net.primal.android.settings.connected.details.remote.RemoteAppDetailsContract.UiEvent
 import net.primal.android.settings.connected.details.remote.RemoteAppDetailsContract.UiState
@@ -71,8 +73,6 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.account.model.TrustLevel
 
-private val DangerPrimaryColor = Color(0xFFFF2121)
-private val DangerSecondaryColor = Color(0xFFFA3C3C)
 private val EditButtonContainerColorDark = Color(0xFF333333)
 private val EditButtonContainerColorLight = Color(0xFFD5D5D5)
 
@@ -162,7 +162,7 @@ fun RemoteAppDetailsContent(
     var pendingTrustLevelValue by remember { mutableStateOf<TrustLevel?>(null) }
 
     if (confirmDeletionDialogVisibility) {
-        DeleteConnectionDialog(
+        ConnectedAppDeleteDialog(
             onConfirm = {
                 confirmDeletionDialogVisibility = false
                 eventPublisher(UiEvent.DeleteConnection)
@@ -183,7 +183,7 @@ fun RemoteAppDetailsContent(
     }
 
     if (pendingTrustLevelValue != null) {
-        UpdateTrustLevelDialog(
+        ConnectedAppUpdateTrustLevelDialog(
             trustLevel = pendingTrustLevelValue!!,
             onConfirm = {
                 eventPublisher(UiEvent.UpdateTrustLevel(it))
@@ -226,7 +226,7 @@ fun RemoteAppDetailsContent(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        recentSessionsSection(
+        connectedAppRecentSessionsSection(
             recentSessions = state.recentSessions,
             appIconUrl = state.appIconUrl,
             appName = state.appName,
@@ -261,7 +261,7 @@ private fun HeaderSection(
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                AppSummarySection(
+                ConnectedAppSummarySection(
                     iconUrl = iconUrl,
                     appName = appName,
                     lastSession = lastSession,

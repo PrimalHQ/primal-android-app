@@ -31,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.layout.ContentScale
@@ -54,19 +53,18 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.utils.PrimalDateFormats
 import net.primal.android.core.utils.rememberPrimalFormattedDateTime
+import net.primal.android.settings.connected.details.ConnectedAppDeleteDialog
 import net.primal.android.settings.connected.details.ConnectedAppPermissionsSection
-import net.primal.android.settings.connected.details.DeleteConnectionDialog
-import net.primal.android.settings.connected.details.UpdateTrustLevelDialog
-import net.primal.android.settings.connected.details.recentSessionsSection
+import net.primal.android.settings.connected.details.ConnectedAppUpdateTrustLevelDialog
+import net.primal.android.settings.connected.details.DangerPrimaryColor
+import net.primal.android.settings.connected.details.DangerSecondaryColor
+import net.primal.android.settings.connected.details.connectedAppRecentSessionsSection
 import net.primal.android.settings.connected.model.SessionUi
 import net.primal.android.signer.provider.AppDisplayInfo
 import net.primal.android.signer.provider.rememberAppDisplayInfo
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.account.model.TrustLevel
-
-private val DangerPrimaryColor = Color(0xFFFF2121)
-private val DangerSecondaryColor = Color(0xFFFA3C3C)
 
 @Composable
 fun LocalAppDetailsScreen(
@@ -158,7 +156,7 @@ fun LocalAppDetailsContent(
     var pendingTrustLevelValue by remember { mutableStateOf<TrustLevel?>(null) }
 
     if (confirmDeletionDialogVisibility) {
-        DeleteConnectionDialog(
+        ConnectedAppDeleteDialog(
             onConfirm = {
                 confirmDeletionDialogVisibility = false
                 eventPublisher(LocalAppDetailsContract.UiEvent.DeleteConnection)
@@ -168,7 +166,7 @@ fun LocalAppDetailsContent(
     }
 
     if (pendingTrustLevelValue != null) {
-        UpdateTrustLevelDialog(
+        ConnectedAppUpdateTrustLevelDialog(
             trustLevel = pendingTrustLevelValue!!,
             onConfirm = {
                 eventPublisher(LocalAppDetailsContract.UiEvent.UpdateTrustLevel(it))
@@ -204,7 +202,7 @@ fun LocalAppDetailsContent(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        recentSessionsSection(
+        connectedAppRecentSessionsSection(
             recentSessions = state.recentSessions,
             appIconUrl = null,
             appName = appDisplayInfo.name,

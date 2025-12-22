@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,8 +37,11 @@ import net.primal.android.settings.connected.model.SessionUi
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.TrustLevel
 
+val DangerPrimaryColor = Color(0xFFFF2121)
+val DangerSecondaryColor = Color(0xFFFA3C3C)
+
 @Composable
-fun AppSummarySection(
+fun ConnectedAppSummarySection(
     iconUrl: String?,
     appName: String?,
     lastSession: Long?,
@@ -133,7 +137,7 @@ fun ConnectedAppPermissionsSection(
     }
 }
 
-fun LazyListScope.recentSessionsSection(
+fun LazyListScope.connectedAppRecentSessionsSection(
     recentSessions: List<SessionUi>,
     appIconUrl: String?,
     appName: String?,
@@ -222,7 +226,7 @@ fun TrustLevel.toUserFriendlyText() =
     }
 
 @Composable
-fun DeleteConnectionDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
+fun ConnectedAppDeleteDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     ConfirmActionAlertDialog(
         dialogTitle = stringResource(id = R.string.settings_connected_app_details_delete_connection_dialog_title),
         dialogText = stringResource(id = R.string.settings_connected_app_details_delete_connection_dialog_text),
@@ -234,7 +238,7 @@ fun DeleteConnectionDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
 }
 
 @Composable
-fun UpdateTrustLevelDialog(
+fun ConnectedAppUpdateTrustLevelDialog(
     trustLevel: TrustLevel,
     onConfirm: (TrustLevel) -> Unit,
     onDismiss: () -> Unit,
