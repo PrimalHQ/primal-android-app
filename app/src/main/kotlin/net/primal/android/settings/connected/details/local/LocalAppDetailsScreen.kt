@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
@@ -49,6 +50,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.utils.PrimalDateFormats
 import net.primal.android.core.utils.rememberPrimalFormattedDateTime
@@ -56,9 +58,11 @@ import net.primal.android.settings.connected.details.ConnectedAppPermissionsSect
 import net.primal.android.settings.connected.details.DeleteConnectionDialog
 import net.primal.android.settings.connected.details.UpdateTrustLevelDialog
 import net.primal.android.settings.connected.details.recentSessionsSection
+import net.primal.android.settings.connected.model.SessionUi
 import net.primal.android.signer.provider.AppDisplayInfo
 import net.primal.android.signer.provider.rememberAppDisplayInfo
 import net.primal.android.theme.AppTheme
+import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.account.model.TrustLevel
 
 private val DangerPrimaryColor = Color(0xFFFF2121)
@@ -302,6 +306,32 @@ private fun DeleteOnlyActionButton(onDeleteConnectionClick: () -> Unit) {
             style = AppTheme.typography.bodyMedium,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+private val mockRecentSessionsForPreview = listOf(
+    SessionUi("1", 1730169240L),
+    SessionUi("2", 1730157720L),
+)
+
+@Preview
+@Composable
+fun PreviewLocalAppDetailsScreen() {
+    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+        LocalAppDetailsScreen(
+            state = LocalAppDetailsContract.UiState(
+                identifier = "local_app_1",
+                appPackageName = "com.example.app",
+                trustLevel = TrustLevel.Medium,
+                lastSessionStartedAt = System.currentTimeMillis(),
+                recentSessions = mockRecentSessionsForPreview,
+                loading = false,
+            ),
+            onClose = {},
+            eventPublisher = {},
+            onSessionClick = {},
+            onPermissionDetailsClick = {},
         )
     }
 }
