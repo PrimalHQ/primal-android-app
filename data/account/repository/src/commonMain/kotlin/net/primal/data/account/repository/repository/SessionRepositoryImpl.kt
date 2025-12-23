@@ -83,8 +83,10 @@ class SessionRepositoryImpl(
                 appIdentifier = clientPubKey,
             )
             if (existingOpenSession == null) {
-                val newSession =
-                    AppSessionData(appIdentifier = clientPubKey, sessionType = AppSessionType.RemoteSession)
+                val newSession = AppSessionData(
+                    appIdentifier = clientPubKey,
+                    sessionType = AppSessionType.RemoteSession,
+                )
                 database.appSessions().upsertAll(data = listOf(newSession))
                 Napier.d(tag = "Signer") { "Successfully started session." }
                 newSession.sessionId.asSuccess()

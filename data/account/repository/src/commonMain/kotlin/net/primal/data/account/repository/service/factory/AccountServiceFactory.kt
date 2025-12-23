@@ -99,6 +99,10 @@ object AccountServiceFactory {
                 dispatchers = dispatchers,
                 wellKnownApi = wellKnownApi,
             ),
+            internalSessionRepository = InternalSessionRepository(
+                dispatchers = dispatchers,
+                database = accountDatabase,
+            ),
             internalSessionEventRepository = InternalSessionEventRepository(
                 dispatchers = dispatchers,
                 accountDatabase = accountDatabase,

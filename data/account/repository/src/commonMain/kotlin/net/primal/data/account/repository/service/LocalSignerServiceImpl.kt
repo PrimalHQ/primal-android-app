@@ -11,8 +11,10 @@ import net.primal.core.utils.asSuccess
 import net.primal.core.utils.remove
 import net.primal.core.utils.runCatching
 import net.primal.data.account.repository.builder.LocalSignerMethodResponseBuilder
+import net.primal.data.account.repository.mappers.getRequestType
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
+import net.primal.data.account.repository.repository.internal.InternalSessionRepository
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.AppPermissionAction
 import net.primal.domain.account.model.LocalApp
@@ -32,6 +34,7 @@ class LocalSignerServiceImpl internal constructor(
     private val permissionsRepository: PermissionsRepository,
     private val localSignerMethodResponseBuilder: LocalSignerMethodResponseBuilder,
     private val internalPermissionsRepository: InternalPermissionsRepository,
+    private val internalSessionRepository: InternalSessionRepository,
     private val internalSessionEventRepository: InternalSessionEventRepository,
 ) : LocalSignerService {
     private val responses = AtomicReference<List<LocalSignerMethodResponse>>(emptyList())
@@ -45,6 +48,15 @@ class LocalSignerServiceImpl internal constructor(
                 val response = localSignerMethodResponseBuilder.build(method = method).also { response ->
                     responses.add(response)
                 }
+                val session = internalSessionRepository.getOrCreateLocalAppSession(
+                    appIdentifier = method.getIdentifier(),
+                )
+                internalSessionEventRepository.saveLocalSessionEvent(
+                    sessionId = session.sessionId,
+                    requestType = method.getRequestType(),
+                    method = method,
+                    response = response,
+                )
                 response.asSuccess()
             }
 

@@ -10,6 +10,16 @@ interface AppSessionDataDao {
     @Upsert
     suspend fun upsertAll(data: List<AppSessionData>)
 
+    @Query(
+        """
+            SELECT * FROM AppSessionData
+            WHERE appIdentifier = :appIdentifier
+            ORDER BY startedAt DESC
+            LIMIT 1
+        """,
+    )
+    suspend fun findLatestAppSession(appIdentifier: String): AppSessionData?
+
     @Query("UPDATE AppSessionData SET endedAt = :endedAt, activeRelayCount = 0 WHERE sessionId = :sessionId")
     suspend fun endSession(sessionId: String, endedAt: Long)
 
