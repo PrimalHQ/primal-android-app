@@ -17,10 +17,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import net.primal.android.R
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.signer.SignerConnectBottomSheet
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.service.PrimalRemoteSignerService
 import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.theme.AppTheme
@@ -30,6 +32,7 @@ import net.primal.android.theme.AppTheme
 fun NostrConnectBottomSheet(viewModel: NostrConnectViewModel, onDismissRequest: () -> Unit) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -45,12 +48,17 @@ fun NostrConnectBottomSheet(viewModel: NostrConnectViewModel, onDismissRequest: 
             when (it) {
                 is NostrConnectContract.SideEffect.ConnectionSuccess -> {
                     PrimalRemoteSignerService.ensureServiceStarted(context = context)
-                    Toast.makeText(
-                        context,
-                        context.getString(R.string.nostr_connect_toast_connected),
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                    onDismissRequest()
+                    if (it.callbackUri != null) {
+                        onDismissRequest()
+                        uriHandler.openUriSafely(it.callbackUri)
+                    } else {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.nostr_connect_toast_connected),
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                        onDismissRequest()
+                    }
                 }
             }
         }

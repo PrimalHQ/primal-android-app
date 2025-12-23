@@ -17,6 +17,7 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.navigation.nostrConnectUri
+import net.primal.android.nostrconnect.utils.getNostrConnectCallback
 import net.primal.android.nostrconnect.utils.getNostrConnectImage
 import net.primal.android.nostrconnect.utils.getNostrConnectName
 import net.primal.android.nostrconnect.utils.getNostrConnectUrl
@@ -51,6 +52,7 @@ class NostrConnectViewModel @Inject constructor(
             appDescription = connectionUrl?.getNostrConnectUrl(),
             appImageUrl = connectionUrl?.getNostrConnectImage(),
             connectionUrl = connectionUrl,
+            callback = connectionUrl?.getNostrConnectCallback(),
         ),
     )
     val state = _state.asStateFlow()
@@ -167,7 +169,11 @@ class NostrConnectViewModel @Inject constructor(
                 CoroutineScope(dispatcherProvider.io()).launch {
                     runCatching { tokenUpdater.updateTokenForRemoteSigner() }
                 }
-                setEffect(NostrConnectContract.SideEffect.ConnectionSuccess)
+                setEffect(
+                    NostrConnectContract.SideEffect.ConnectionSuccess(
+                        callbackUri = state.value.callback,
+                    ),
+                )
             }.onFailure { error ->
                 Timber.e(error)
                 setState { copy(error = UiError.GenericError()) }
