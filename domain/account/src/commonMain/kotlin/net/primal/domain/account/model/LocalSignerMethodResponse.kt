@@ -1,7 +1,10 @@
 package net.primal.domain.account.model
 
+import kotlinx.serialization.Serializable
+import net.primal.domain.account.model.serializer.LocalSignerMethodResponseSerializer
 import net.primal.domain.nostr.NostrEvent
 
+@Serializable(with = LocalSignerMethodResponseSerializer::class)
 sealed class LocalSignerMethodResponse(
     open val eventId: String,
 ) {

@@ -10,6 +10,8 @@ data class LocalApp(
     companion object {
         fun identifierOf(packageName: String, userId: String): String = "$packageName:$userId"
 
-        fun userIdFromIdentifier(identifier: String): String = identifier.split(":").last()
+        fun userIdFromIdentifier(identifier: String): String? {
+            return runCatching { identifier.split(":").lastOrNull() }.getOrNull()
+        }
     }
 }

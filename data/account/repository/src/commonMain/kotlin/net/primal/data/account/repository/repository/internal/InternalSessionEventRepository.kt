@@ -7,6 +7,8 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.data.account.local.dao.apps.local.LocalRequestState
+import net.primal.data.account.local.dao.apps.local.LocalSignerMethodType
 import net.primal.data.account.local.dao.apps.remote.RemoteAppRequestState
 import net.primal.data.account.local.dao.apps.remote.RemoteSignerMethodType
 import net.primal.data.account.local.db.AccountDatabase
@@ -14,6 +16,8 @@ import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.buildSessionEventData
 import net.primal.data.account.repository.repository.internal.model.UpdateRemoteAppSessionEventRequest
+import net.primal.domain.account.model.LocalSignerMethod
+import net.primal.domain.account.model.LocalSignerMethodResponse
 import net.primal.domain.nostr.NostrEvent
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
@@ -44,6 +48,27 @@ internal class InternalSessionEventRepository(
                 requestState = requestState,
             )?.let { sessionEventData ->
                 accountDatabase.remoteAppSessionEvents().insert(data = sessionEventData)
+            } ?: throw IllegalArgumentException("Couldn't build session event data.")
+        }
+    }
+
+    suspend fun saveLocalSessionEvent(
+        sessionId: String,
+        requestType: LocalSignerMethodType,
+        method: LocalSignerMethod?,
+        response: LocalSignerMethodResponse?,
+        requestState: LocalRequestState? = null,
+    ) = withContext(dispatchers.io()) {
+        runCatching {
+            buildSessionEventData(
+                sessionId = sessionId,
+                processedAt = Clock.System.now().epochSeconds,
+                requestType = requestType,
+                method = method,
+                response = response,
+                requestState = requestState,
+            )?.let { sessionEventData ->
+                accountDatabase.localAppSessionEvents().insert(data = sessionEventData)
             } ?: throw IllegalArgumentException("Couldn't build session event data.")
         }
     }
