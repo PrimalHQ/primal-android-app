@@ -18,6 +18,15 @@ interface RemoteAppSessionDataDao {
     suspend fun findActiveSessionByClientPubKey(appIdentifier: String): RemoteAppSession?
 
     @Transaction
+    @Query(
+        """
+        SELECT * FROM AppSessionData 
+        WHERE appIdentifier = :appIdentifier AND endedAt IS NULL
+        """,
+    )
+    suspend fun findFirstOpenSessionByAppIdentifier(appIdentifier: String): RemoteAppSession?
+
+    @Transaction
     @Query("SELECT * FROM AppSessionData WHERE sessionId = :sessionId")
     suspend fun findSession(sessionId: String): RemoteAppSession?
 

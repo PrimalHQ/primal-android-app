@@ -63,7 +63,7 @@ internal class NostrRelayManager(
         (relays - currentKeys).forEach { connectToRelay(relay = it) }
     }
 
-    suspend fun connectToRelay(relay: String) {
+    private suspend fun connectToRelay(relay: String) {
         val client = RemoteSignerClient(
             relayUrl = relay,
             dispatchers = dispatcherProvider,
