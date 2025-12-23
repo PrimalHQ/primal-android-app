@@ -39,7 +39,7 @@ class PermissionsRepositoryImpl(
                     data = permissionIds.map {
                         AppPermissionData(
                             permissionId = it,
-                            clientPubKey = clientPubKey,
+                            appIdentifier = clientPubKey,
                             action = action.asPO(),
                         )
                     },
@@ -54,7 +54,7 @@ class PermissionsRepositoryImpl(
             }
 
             emitAll(
-                database.appPermissions().observePermissions(clientPubKey = clientPubKey)
+                database.appPermissions().observePermissions(appIdentifier = clientPubKey)
                     .map { permissions ->
                         buildPermissionGroups(
                             response = signerPermissions,
@@ -86,7 +86,7 @@ class PermissionsRepositoryImpl(
                         data = mediumTrustPermissions.map { permissionId ->
                             AppPermissionData(
                                 permissionId = permissionId,
-                                clientPubKey = clientPubKey,
+                                appIdentifier = clientPubKey,
                                 action = PermissionActionPO.Approve,
                             )
                         },

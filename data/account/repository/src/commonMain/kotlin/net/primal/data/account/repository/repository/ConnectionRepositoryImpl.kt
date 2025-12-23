@@ -102,7 +102,7 @@ class ConnectionRepositoryImpl(
                 TrustLevel.Full -> true
                 TrustLevel.Medium -> {
                     val action = database.appPermissions()
-                        .findPermission(permissionId = permissionId, clientPubKey = connection.clientPubKey)
+                        .findPermission(permissionId = permissionId, appIdentifier = connection.clientPubKey)
                         ?.action
 
                     when (action) {
@@ -140,7 +140,7 @@ class ConnectionRepositoryImpl(
                 database.withTransaction {
                     if (trustLevel == TrustLevel.Medium) {
                         val existingPermissions = database.appPermissions()
-                            .findPermissionsByClientPubKey(clientPubKey = clientPubKey)
+                            .findPermissionsByAppIdentifier(appIdentifier = clientPubKey)
 
                         if (existingPermissions.isEmpty()) {
                             val newPermissions = wellKnownApi
@@ -148,7 +148,7 @@ class ConnectionRepositoryImpl(
                                 .map {
                                     AppPermissionData(
                                         permissionId = it,
-                                        clientPubKey = clientPubKey,
+                                        appIdentifier = clientPubKey,
                                         action = PermissionAction.Approve,
                                     )
                                 }
@@ -181,10 +181,10 @@ class ConnectionRepositoryImpl(
     }
 
     private suspend inline fun deleteEverythingForClientPubKey(clientPubKey: String) {
-        database.remoteAppPendingNostrEvents().deleteByClientPubKey(clientPubKey = clientPubKey)
-        database.remoteAppSessionEvents().deleteEvents(clientPubKey = clientPubKey)
-        database.remoteAppSessions().deleteSessions(clientPubKey = clientPubKey)
-        database.appPermissions().deletePermissions(clientPubKey = clientPubKey)
+        database.appSessions().deleteSessions(clientPubKey = clientPubKey)
+        database.appPermissions().deletePermissions(appIdentifier = clientPubKey)
         database.remoteAppConnections().deleteConnection(clientPubKey = clientPubKey)
+        database.remoteAppSessionEvents().deleteEvents(clientPubKey = clientPubKey)
+        database.remoteAppPendingNostrEvents().deleteByClientPubKey(clientPubKey = clientPubKey)
     }
 }

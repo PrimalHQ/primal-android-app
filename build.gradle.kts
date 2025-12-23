@@ -99,7 +99,6 @@ subprojects {
         }
     }
 
-
     afterEvaluate {
         val kspTaskName = "kspCommonMainKotlinMetadata"
         tasks.matching { it.name.startsWith("runKtlint") && it.name.contains("CommonMain") }
@@ -110,6 +109,4 @@ subprojects {
                 }
             }
     }
-
-
 }

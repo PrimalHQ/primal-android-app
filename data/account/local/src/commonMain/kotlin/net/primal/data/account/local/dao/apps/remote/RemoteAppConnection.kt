@@ -10,7 +10,7 @@ data class RemoteAppConnection(
 
     @Relation(
         parentColumn = "clientPubKey",
-        entityColumn = "clientPubKey",
+        entityColumn = "appIdentifier",
     )
     val permissions: List<AppPermissionData>,
 )

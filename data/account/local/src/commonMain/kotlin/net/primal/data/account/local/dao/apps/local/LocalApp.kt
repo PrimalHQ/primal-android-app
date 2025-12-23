@@ -10,7 +10,7 @@ data class LocalApp(
 
     @Relation(
         parentColumn = "identifier",
-        entityColumn = "clientPubKey",
+        entityColumn = "appIdentifier",
     )
     val permissions: List<AppPermissionData>,
 )

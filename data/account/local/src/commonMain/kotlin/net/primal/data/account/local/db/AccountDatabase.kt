@@ -10,6 +10,8 @@ import androidx.sqlite.execSQL
 import io.github.aakira.napier.Napier
 import net.primal.data.account.local.dao.apps.AppPermissionData
 import net.primal.data.account.local.dao.apps.AppPermissionDataDao
+import net.primal.data.account.local.dao.apps.AppSessionData
+import net.primal.data.account.local.dao.apps.AppSessionDataDao
 import net.primal.data.account.local.dao.apps.local.LocalAppDao
 import net.primal.data.account.local.dao.apps.local.LocalAppData
 import net.primal.data.account.local.dao.apps.local.LocalAppSessionData
@@ -19,7 +21,6 @@ import net.primal.data.account.local.dao.apps.remote.RemoteAppConnectionData
 import net.primal.data.account.local.dao.apps.remote.RemoteAppConnectionDataDao
 import net.primal.data.account.local.dao.apps.remote.RemoteAppPendingNostrEvent
 import net.primal.data.account.local.dao.apps.remote.RemoteAppPendingNostrEventDao
-import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionData
 import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionDataDao
 import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionEventData
 import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionEventDataDao
@@ -28,16 +29,16 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
 
 @Database(
     entities = [
+        AppSessionData::class,
         AppPermissionData::class,
         RemoteAppConnectionData::class,
-        RemoteAppSessionData::class,
         RemoteAppSessionEventData::class,
         RemoteAppPendingNostrEvent::class,
         LocalAppData::class,
         LocalAppSessionData::class,
         LocalAppSessionEventData::class,
     ],
-    version = 12,
+    version = 13,
     exportSchema = true,
 )
 @TypeConverters(
@@ -46,6 +47,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
 )
 @ConstructedBy(AppDatabaseConstructor::class)
 abstract class AccountDatabase : RoomDatabase() {
+    abstract fun appSessions(): AppSessionDataDao
     abstract fun appPermissions(): AppPermissionDataDao
     abstract fun remoteAppConnections(): RemoteAppConnectionDataDao
     abstract fun remoteAppSessions(): RemoteAppSessionDataDao

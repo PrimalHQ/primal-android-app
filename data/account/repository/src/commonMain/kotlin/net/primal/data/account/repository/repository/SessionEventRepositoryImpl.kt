@@ -117,13 +117,13 @@ class SessionEventRepositoryImpl(
                         clientPubKey = connection.data.clientPubKey,
                         trustLevel = TrustLevel.Medium,
                     )
-                    database.appPermissions().deletePermissions(clientPubKey = connection.data.clientPubKey)
+                    database.appPermissions().deletePermissions(appIdentifier = connection.data.clientPubKey)
                 }
 
                 database.appPermissions().upsert(
                     data = AppPermissionData(
                         permissionId = sessionEvent.getRequestTypeId(),
-                        clientPubKey = connection.data.clientPubKey,
+                        appIdentifier = connection.data.clientPubKey,
                         action = action,
                     ),
                 )

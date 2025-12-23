@@ -12,7 +12,7 @@ import net.primal.core.utils.asSuccess
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.mapCatching
 import net.primal.core.utils.runCatching
-import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionData
+import net.primal.data.account.local.dao.apps.AppSessionData
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.domain.account.model.AppSession
@@ -65,7 +65,7 @@ class SessionRepositoryImpl(
     override suspend fun findActiveSessionForConnection(clientPubKey: String): Result<AppSession> =
         withContext(dispatchers.io()) {
             runCatching {
-                database.remoteAppSessions().findActiveSessionByClientPubKey(clientPubKey = clientPubKey)?.asDomain()
+                database.remoteAppSessions().findActiveSessionByClientPubKey(appIdentifier = clientPubKey)?.asDomain()
                     ?: throw NoSuchElementException("Couldn't find active session for connection $clientPubKey.")
             }
         }
@@ -74,11 +74,11 @@ class SessionRepositoryImpl(
         withContext(dispatchers.io()) {
             Napier.d(tag = "Signer") { "Starting session for $clientPubKey" }
             val existingSession = database.remoteAppSessions().findActiveSessionByClientPubKey(
-                clientPubKey = clientPubKey,
+                appIdentifier = clientPubKey,
             )
             if (existingSession == null) {
-                val newSession = RemoteAppSessionData(clientPubKey = clientPubKey)
-                database.remoteAppSessions().upsertAll(data = listOf(newSession))
+                val newSession = AppSessionData(appIdentifier = clientPubKey)
+                database.appSessions().upsertAll(data = listOf(newSession))
                 Napier.d(tag = "Signer") { "Successfully started session." }
                 newSession.sessionId.asSuccess()
             } else {
@@ -105,7 +105,7 @@ class SessionRepositoryImpl(
                 val now = Clock.System.now().epochSeconds
                 database.withTransaction {
                     sessionIds.forEach { sessionId ->
-                        database.remoteAppSessions().endSession(sessionId = sessionId, endedAt = now)
+                        database.appSessions().endSession(sessionId = sessionId, endedAt = now)
                     }
                 }
             }
@@ -113,14 +113,14 @@ class SessionRepositoryImpl(
 
     override suspend fun endAllActiveSessions() =
         withContext(dispatchers.io()) {
-            database.remoteAppSessions().endAllActiveSessions(endedAt = Clock.System.now().epochSeconds)
+            database.appSessions().endAllActiveSessions(endedAt = Clock.System.now().epochSeconds)
         }
 
     override suspend fun incrementActiveRelayCount(sessionIds: List<String>) =
         withContext(dispatchers.io()) {
             database.withTransaction {
                 sessionIds.forEach {
-                    database.remoteAppSessions().incrementActiveRelayCount(sessionId = it)
+                    database.appSessions().incrementActiveRelayCount(sessionId = it)
                 }
             }
         }
@@ -129,13 +129,13 @@ class SessionRepositoryImpl(
         withContext(dispatchers.io()) {
             database.withTransaction {
                 sessionIds.forEach {
-                    database.remoteAppSessions().decrementActiveRelayCountOrEnd(sessionId = it)
+                    database.appSessions().decrementActiveRelayCountOrEnd(sessionId = it)
                 }
             }
         }
 
     override suspend fun setActiveRelayCount(sessionId: String, activeRelayCount: Int) =
         withContext(dispatchers.io()) {
-            database.remoteAppSessions().setActiveRelayCount(sessionId = sessionId, activeRelayCount = activeRelayCount)
+            database.appSessions().setActiveRelayCount(sessionId = sessionId, activeRelayCount = activeRelayCount)
         }
 }
