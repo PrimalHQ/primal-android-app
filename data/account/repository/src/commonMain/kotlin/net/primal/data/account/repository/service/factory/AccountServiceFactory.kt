@@ -14,6 +14,7 @@ import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.repository.factory.provideAccountDatabase
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
+import net.primal.data.account.repository.repository.internal.InternalSessionRepository
 import net.primal.data.account.repository.service.LocalSignerServiceImpl
 import net.primal.data.account.repository.service.RemoteSignerServiceImpl
 import net.primal.domain.account.repository.ConnectionRepository
@@ -47,14 +48,16 @@ object AccountServiceFactory {
         connectionRepository: ConnectionRepository,
         sessionRepository: SessionRepository,
         sessionInactivityTimeoutInMinutes: Long = 0,
-    ): RemoteSignerService =
-        RemoteSignerServiceImpl(
+    ): RemoteSignerService {
+        val dispatchers = createDispatcherProvider()
+        val accountDatabase = provideAccountDatabase()
+        return RemoteSignerServiceImpl(
             signerKeyPair = signerKeyPair,
             sessionInactivityTimeoutInMinutes = sessionInactivityTimeoutInMinutes,
             connectionRepository = connectionRepository,
             sessionRepository = sessionRepository,
             nostrRelayManager = NostrRelayManager(
-                dispatcherProvider = createDispatcherProvider(),
+                dispatcherProvider = dispatchers,
                 signerKeyPair = signerKeyPair,
                 nostrEncryptionService = nostrEncryptionService,
             ),
@@ -64,21 +67,28 @@ object AccountServiceFactory {
                 connectionRepository = connectionRepository,
             ),
             internalSessionEventRepository = InternalSessionEventRepository(
-                dispatchers = createDispatcherProvider(),
-                accountDatabase = provideAccountDatabase(),
+                dispatchers = dispatchers,
+                accountDatabase = accountDatabase,
+            ),
+            internalSessionRepository = InternalSessionRepository(
+                dispatchers = dispatchers,
+                database = accountDatabase,
             ),
             methodProcessor = RemoteSignerMethodProcessor(
                 nostrEncryptionService = nostrEncryptionService,
             ),
         )
+    }
 
     fun createLocalSignerService(
         localAppRepository: LocalAppRepository,
         permissionsRepository: PermissionsRepository,
         nostrEncryptionHandler: NostrEncryptionHandler,
         eventSignatureHandler: NostrEventSignatureHandler,
-    ): LocalSignerService =
-        LocalSignerServiceImpl(
+    ): LocalSignerService {
+        val dispatchers = createDispatcherProvider()
+        val accountDatabase = provideAccountDatabase()
+        return LocalSignerServiceImpl(
             localAppRepository = localAppRepository,
             permissionsRepository = permissionsRepository,
             localSignerMethodResponseBuilder = LocalSignerMethodResponseBuilder(
@@ -86,12 +96,13 @@ object AccountServiceFactory {
                 nostrEventSignatureHandler = eventSignatureHandler,
             ),
             internalPermissionsRepository = InternalPermissionsRepository(
-                dispatchers = createDispatcherProvider(),
+                dispatchers = dispatchers,
                 wellKnownApi = wellKnownApi,
             ),
             internalSessionEventRepository = InternalSessionEventRepository(
-                accountDatabase = provideAccountDatabase(),
-                dispatchers = createDispatcherProvider(),
+                dispatchers = dispatchers,
+                accountDatabase = accountDatabase,
             ),
         )
+    }
 }

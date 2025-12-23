@@ -29,6 +29,7 @@ import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.data.account.repository.mappers.getRequestType
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
+import net.primal.data.account.repository.repository.internal.InternalSessionRepository
 import net.primal.data.account.repository.repository.internal.model.UpdateRemoteAppSessionEventRequest
 import net.primal.domain.account.model.RemoteAppSession
 import net.primal.domain.account.repository.ConnectionRepository
@@ -45,6 +46,7 @@ class RemoteSignerServiceImpl internal constructor(
     private val nostrRelayManager: NostrRelayManager,
     private val remoteSignerMethodResponseBuilder: RemoteSignerMethodResponseBuilder,
     private val internalSessionEventRepository: InternalSessionEventRepository,
+    private val internalSessionRepository: InternalSessionRepository,
     private val methodProcessor: RemoteSignerMethodProcessor,
 ) : RemoteSignerService {
     private val scope = CoroutineScope(SupervisorJob())
@@ -167,7 +169,7 @@ class RemoteSignerServiceImpl internal constructor(
         }
 
     private suspend fun setActiveRelayCount(session: RemoteAppSession) {
-        sessionRepository.setActiveRelayCount(
+        internalSessionRepository.setActiveRelayCount(
             sessionId = session.sessionId,
             activeRelayCount = session.relays.map { activeRelays.load().contains(it) }.count { it },
         )
@@ -180,14 +182,14 @@ class RemoteSignerServiceImpl internal constructor(
                     is RelayEvent.Connected -> {
                         activeRelays.fetchAndUpdate { it + event.relayUrl }
                         relaySessionMap.load()[event.relayUrl]?.let {
-                            sessionRepository.incrementActiveRelayCount(sessionIds = it)
+                            internalSessionRepository.incrementActiveRelayCount(sessionIds = it)
                         }
                     }
 
                     is RelayEvent.Disconnected -> {
                         activeRelays.fetchAndUpdate { it - event.relayUrl }
                         relaySessionMap.load()[event.relayUrl]?.let {
-                            sessionRepository.decrementActiveRelayCountOrEnd(sessionIds = it)
+                            internalSessionRepository.decrementActiveRelayCountOrEnd(sessionIds = it)
                         }
                     }
                 }

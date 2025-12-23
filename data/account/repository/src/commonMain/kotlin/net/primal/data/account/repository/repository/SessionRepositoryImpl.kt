@@ -115,27 +115,4 @@ class SessionRepositoryImpl(
         withContext(dispatchers.io()) {
             database.appSessions().endAllActiveSessions(endedAt = Clock.System.now().epochSeconds)
         }
-
-    override suspend fun incrementActiveRelayCount(sessionIds: List<String>) =
-        withContext(dispatchers.io()) {
-            database.withTransaction {
-                sessionIds.forEach {
-                    database.appSessions().incrementActiveRelayCount(sessionId = it)
-                }
-            }
-        }
-
-    override suspend fun decrementActiveRelayCountOrEnd(sessionIds: List<String>) =
-        withContext(dispatchers.io()) {
-            database.withTransaction {
-                sessionIds.forEach {
-                    database.appSessions().decrementActiveRelayCountOrEnd(sessionId = it)
-                }
-            }
-        }
-
-    override suspend fun setActiveRelayCount(sessionId: String, activeRelayCount: Int) =
-        withContext(dispatchers.io()) {
-            database.appSessions().setActiveRelayCount(sessionId = sessionId, activeRelayCount = activeRelayCount)
-        }
 }
