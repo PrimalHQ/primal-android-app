@@ -23,8 +23,6 @@ interface SessionRepository {
 
     suspend fun startSession(clientPubKey: String): Result<String>
 
-    suspend fun startSessionForClient(clientPubKey: String): Result<String>
-
     suspend fun endSessions(sessionIds: List<String>): Result<Unit>
 
     suspend fun endAllActiveSessions()

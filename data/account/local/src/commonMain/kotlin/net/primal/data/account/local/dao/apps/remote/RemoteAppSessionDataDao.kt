@@ -24,7 +24,7 @@ interface RemoteAppSessionDataDao {
         WHERE appIdentifier = :appIdentifier AND endedAt IS NULL
         """,
     )
-    suspend fun findAnyOpenSessionByAppIdentifier(appIdentifier: String): RemoteAppSession?
+    suspend fun findFirstOpenSessionByAppIdentifier(appIdentifier: String): RemoteAppSession?
 
     @Transaction
     @Query("SELECT * FROM AppSessionData WHERE sessionId = :sessionId")

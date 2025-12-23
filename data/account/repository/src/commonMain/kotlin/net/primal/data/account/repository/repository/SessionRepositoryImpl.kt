@@ -10,7 +10,6 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.asSuccess
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.core.utils.mapCatching
 import net.primal.core.utils.runCatching
 import net.primal.data.account.local.dao.apps.AppSessionData
 import net.primal.data.account.local.db.AccountDatabase
@@ -73,29 +72,19 @@ class SessionRepositoryImpl(
     override suspend fun startSession(clientPubKey: String): Result<String> =
         withContext(dispatchers.io()) {
             Napier.d(tag = "Signer") { "Starting session for $clientPubKey" }
-            val existingSession = database.remoteAppSessions().findAnyOpenSessionByAppIdentifier(
+            val existingOpenSession = database.remoteAppSessions().findFirstOpenSessionByAppIdentifier(
                 appIdentifier = clientPubKey,
             )
-            if (existingSession == null) {
+            if (existingOpenSession == null) {
                 val newSession = AppSessionData(appIdentifier = clientPubKey)
                 database.appSessions().upsertAll(data = listOf(newSession))
                 Napier.d(tag = "Signer") { "Successfully started session." }
                 newSession.sessionId.asSuccess()
             } else {
-                Napier.d(tag = "Signer") { "Starting session failed (session already exists)." }
+                Napier.d(tag = "Signer") { "Existing open session already exists for $clientPubKey. Start ignored." }
                 Result.failure(
-                    IllegalStateException("There is an already active session for connection $clientPubKey."),
+                    IllegalStateException("There is an existing open session for connection $clientPubKey."),
                 )
-            }
-        }
-
-    override suspend fun startSessionForClient(clientPubKey: String): Result<String> =
-        withContext(dispatchers.io()) {
-            runCatching {
-                database.remoteAppConnections().getConnection(clientPubKey = clientPubKey)
-                    ?: throw NoSuchElementException("Couldn't find connection for $clientPubKey")
-            }.mapCatching {
-                startSession(clientPubKey = it.data.clientPubKey).getOrThrow()
             }
         }
 
