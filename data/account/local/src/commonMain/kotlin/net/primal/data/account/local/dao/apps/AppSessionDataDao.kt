@@ -3,6 +3,7 @@ package net.primal.data.account.local.dao.apps
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface AppSessionDataDao {
@@ -41,6 +42,9 @@ interface AppSessionDataDao {
     @Query("UPDATE AppSessionData SET activeRelayCount = :activeRelayCount WHERE sessionId = :sessionId")
     suspend fun setActiveRelayCount(sessionId: String, activeRelayCount: Int)
 
-    @Query("DELETE FROM AppSessionData WHERE appIdentifier = :clientPubKey")
-    suspend fun deleteSessions(clientPubKey: String)
+    @Query("DELETE FROM AppSessionData WHERE appIdentifier = :appIdentifier")
+    suspend fun deleteSessions(appIdentifier: String)
+
+    @Query("SELECT * FROM AppSessionData WHERE appIdentifier = :appIdentifier ORDER BY startedAt DESC")
+    fun observeSessionsByAppIdentifier(appIdentifier: String): Flow<List<AppSessionData>>
 }

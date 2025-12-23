@@ -35,7 +35,7 @@ interface RemoteAppSessionDataDao {
         """
         SELECT * FROM AppSessionData s 
         JOIN RemoteAppConnectionData c ON s.appIdentifier = c.clientPubKey
-        WHERE activeRelayCount > 0 AND endedAt IS NULL AND c.signerPubKey = :signerPubKey
+        WHERE activeRelayCount > 0 AND endedAt IS NULL AND c.signerPubKey = :signerPubKey AND s.sessionType = 'RemoteSession'
     """,
     )
     fun observeActiveSessions(signerPubKey: String): Flow<List<RemoteAppSession>>
@@ -45,7 +45,7 @@ interface RemoteAppSessionDataDao {
         """
         SELECT * FROM AppSessionData s 
         JOIN RemoteAppConnectionData c ON s.appIdentifier = c.clientPubKey
-        WHERE endedAt IS NULL AND c.signerPubKey = :signerPubKey
+        WHERE endedAt IS NULL AND c.signerPubKey = :signerPubKey AND s.sessionType = 'RemoteSession'
         """,
     )
     fun observeOngoingSessions(signerPubKey: String): Flow<List<RemoteAppSession>>

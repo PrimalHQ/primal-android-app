@@ -14,7 +14,6 @@ import net.primal.data.account.local.dao.apps.AppSessionData
 import net.primal.data.account.local.dao.apps.AppSessionDataDao
 import net.primal.data.account.local.dao.apps.local.LocalAppDao
 import net.primal.data.account.local.dao.apps.local.LocalAppData
-import net.primal.data.account.local.dao.apps.local.LocalAppSessionData
 import net.primal.data.account.local.dao.apps.local.LocalAppSessionEventData
 import net.primal.data.account.local.dao.apps.local.LocalAppSessionEventDataDao
 import net.primal.data.account.local.dao.apps.remote.RemoteAppConnectionData
@@ -35,10 +34,9 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         RemoteAppSessionEventData::class,
         RemoteAppPendingNostrEvent::class,
         LocalAppData::class,
-        LocalAppSessionData::class,
         LocalAppSessionEventData::class,
     ],
-    version = 13,
+    version = 14,
     exportSchema = true,
 )
 @TypeConverters(
@@ -63,15 +61,8 @@ abstract class AccountDatabase : RoomDatabase() {
                     runCatching {
                         connection.execSQL(
                             """
-                                UPDATE RemoteAppSessionData
+                                UPDATE AppSessionData
                                     SET endedAt = strftime('%s', 'now'), activeRelayCount = 0
-                                    WHERE endedAt IS NULL
-                            """.trimIndent(),
-                        )
-                        connection.execSQL(
-                            """
-                                UPDATE LocalAppSessionData
-                                    SET endedAt = strftime('%s', 'now')
                                     WHERE endedAt IS NULL
                             """.trimIndent(),
                         )

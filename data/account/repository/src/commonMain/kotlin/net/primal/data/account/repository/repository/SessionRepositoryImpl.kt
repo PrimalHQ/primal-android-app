@@ -12,8 +12,10 @@ import net.primal.core.utils.asSuccess
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.data.account.local.dao.apps.AppSessionData
+import net.primal.data.account.local.dao.apps.AppSessionType
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
+import net.primal.domain.account.model.AppSession
 import net.primal.domain.account.model.RemoteAppSession
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.shared.data.local.db.withTransaction
@@ -49,6 +51,11 @@ class SessionRepositoryImpl(
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
+    override fun observeSessionsByAppIdentifier(appIdentifier: String): Flow<List<AppSession>> =
+        database.appSessions().observeSessionsByAppIdentifier(appIdentifier = appIdentifier)
+            .map { list -> list.map { it.asDomain() } }
+            .distinctUntilChanged()
+
     override fun observeSession(sessionId: String): Flow<RemoteAppSession?> =
         database.remoteAppSessions().observeSession(sessionId = sessionId)
             .map { it?.asDomain() }
@@ -76,7 +83,8 @@ class SessionRepositoryImpl(
                 appIdentifier = clientPubKey,
             )
             if (existingOpenSession == null) {
-                val newSession = AppSessionData(appIdentifier = clientPubKey)
+                val newSession =
+                    AppSessionData(appIdentifier = clientPubKey, sessionType = AppSessionType.RemoteSession)
                 database.appSessions().upsertAll(data = listOf(newSession))
                 Napier.d(tag = "Signer") { "Successfully started session." }
                 newSession.sessionId.asSuccess()
