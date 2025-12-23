@@ -40,6 +40,11 @@ class SessionRepositoryImpl(
             .map { it?.asDomain() }
             .distinctUntilChanged()
 
+    override fun observeOngoingSessionForConnection(clientPubKey: String): Flow<AppSession?> =
+        database.remoteAppSessions().observeOngoingSessionForConnection(clientPubKey)
+            .map { it?.asDomain() }
+            .distinctUntilChanged()
+
     override fun observeSessionsByClientPubKey(clientPubKey: String): Flow<List<AppSession>> =
         database.remoteAppSessions().observeSessionsByClientPubKey(clientPubKey)
             .map { list -> list.map { it.asDomain() } }

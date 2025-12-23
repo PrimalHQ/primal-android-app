@@ -71,6 +71,7 @@ import net.primal.android.settings.connected.details.remote.RemoteAppDetailsCont
 import net.primal.android.settings.connected.model.SessionUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.account.model.AppSessionState
 import net.primal.domain.account.model.TrustLevel
 
 private val EditButtonContainerColorDark = Color(0xFF333333)
@@ -200,7 +201,7 @@ fun RemoteAppDetailsContent(
                 iconUrl = state.appIconUrl,
                 appName = state.appName,
                 lastSession = state.lastSessionStartedAt,
-                isSessionActive = state.isSessionActive,
+                sessionState = state.sessionState,
                 autoStartSession = state.autoStartSession,
                 onAutoStartSessionChange = { eventPublisher(UiEvent.AutoStartSessionChange(it)) },
                 onStartSessionClick = { eventPublisher(UiEvent.StartSession) },
@@ -241,7 +242,7 @@ private fun HeaderSection(
     iconUrl: String?,
     appName: String?,
     lastSession: Long?,
-    isSessionActive: Boolean,
+    sessionState: AppSessionState,
     autoStartSession: Boolean,
     onAutoStartSessionChange: (Boolean) -> Unit,
     onStartSessionClick: () -> Unit,
@@ -268,7 +269,7 @@ private fun HeaderSection(
                 )
 
                 SessionControlButton(
-                    isSessionActive = isSessionActive,
+                    sessionState = sessionState,
                     onStart = onStartSessionClick,
                     onEnd = onEndSessionClick,
                 )
@@ -306,11 +307,11 @@ private fun HeaderSection(
 
 @Composable
 private fun SessionControlButton(
-    isSessionActive: Boolean,
+    sessionState: AppSessionState,
     onStart: () -> Unit,
     onEnd: () -> Unit,
 ) {
-    val text = if (isSessionActive) {
+    val text = if (sessionState == AppSessionState.Active) {
         stringResource(id = R.string.settings_connected_app_details_end_session)
     } else {
         stringResource(id = R.string.settings_connected_app_details_start_session)
@@ -324,16 +325,29 @@ private fun SessionControlButton(
                 color = AppTheme.colorScheme.onSurface,
                 shape = AppTheme.shapes.extraLarge,
             )
-            .clickable { if (isSessionActive) onEnd() else onStart() },
+            .clickable(
+                enabled = sessionState != AppSessionState.Connecting,
+                onClick = {
+                    if (sessionState == AppSessionState.Active) {
+                        onEnd()
+                    } else {
+                        onStart()
+                    }
+                },
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
-        Text(
-            textAlign = TextAlign.Center,
-            text = text,
-            style = AppTheme.typography.bodyMedium,
-            color = AppTheme.colorScheme.surface,
-        )
+        if (sessionState == AppSessionState.Connecting) {
+            PrimalLoadingSpinner(size = 48.dp)
+        } else {
+            Text(
+                textAlign = TextAlign.Center,
+                text = text,
+                style = AppTheme.typography.bodyMedium,
+                color = AppTheme.colorScheme.surface,
+            )
+        }
     }
 }
 
