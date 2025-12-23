@@ -73,7 +73,7 @@ class SessionRepositoryImpl(
     override suspend fun startSession(clientPubKey: String): Result<String> =
         withContext(dispatchers.io()) {
             Napier.d(tag = "Signer") { "Starting session for $clientPubKey" }
-            val existingSession = database.remoteAppSessions().findActiveSessionByClientPubKey(
+            val existingSession = database.remoteAppSessions().findAnyOpenSessionByAppIdentifier(
                 appIdentifier = clientPubKey,
             )
             if (existingSession == null) {
@@ -82,7 +82,7 @@ class SessionRepositoryImpl(
                 Napier.d(tag = "Signer") { "Successfully started session." }
                 newSession.sessionId.asSuccess()
             } else {
-                Napier.d(tag = "Signer") { "Starting session failed." }
+                Napier.d(tag = "Signer") { "Starting session failed (session already exists)." }
                 Result.failure(
                     IllegalStateException("There is an already active session for connection $clientPubKey."),
                 )
