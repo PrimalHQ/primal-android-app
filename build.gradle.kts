@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 import org.jlleitschuh.gradle.ktlint.KtlintExtension
 import org.jlleitschuh.gradle.ktlint.tasks.KtLintCheckTask
 import org.jlleitschuh.gradle.ktlint.tasks.KtLintFormatTask
@@ -67,11 +66,39 @@ subprojects {
         }
     }
 
-    tasks.withType<KotlinCompilationTask<*>>().configureEach {
-        compilerOptions {
-            freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+    pluginManager.withPlugin("org.jetbrains.kotlin.jvm") {
+        configure<org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension> {
+            compilerOptions {
+                optIn.addAll(
+                    "kotlin.time.ExperimentalTime",
+                    "kotlin.uuid.ExperimentalUuidApi",
+                )
+            }
         }
     }
+
+    pluginManager.withPlugin("org.jetbrains.kotlin.android") {
+        configure<org.jetbrains.kotlin.gradle.dsl.KotlinAndroidProjectExtension> {
+            compilerOptions {
+                optIn.addAll(
+                    "kotlin.time.ExperimentalTime",
+                    "kotlin.uuid.ExperimentalUuidApi",
+                )
+            }
+        }
+    }
+
+    pluginManager.withPlugin("org.jetbrains.kotlin.multiplatform") {
+        configure<org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension> {
+            compilerOptions {
+                optIn.addAll(
+                    "kotlin.time.ExperimentalTime",
+                    "kotlin.uuid.ExperimentalUuidApi",
+                )
+            }
+        }
+    }
+
 
     afterEvaluate {
         val kspTaskName = "kspCommonMainKotlinMetadata"
@@ -83,4 +110,6 @@ subprojects {
                 }
             }
     }
+
+
 }
