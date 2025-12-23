@@ -15,7 +15,7 @@ import net.primal.core.utils.runCatching
 import net.primal.data.account.local.dao.apps.AppSessionData
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
-import net.primal.domain.account.model.AppSession
+import net.primal.domain.account.model.RemoteAppSession
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.shared.data.local.db.withTransaction
 
@@ -25,44 +25,44 @@ class SessionRepositoryImpl(
     private val dispatchers: DispatcherProvider,
 ) : SessionRepository {
 
-    override fun observeActiveSessions(signerPubKey: String): Flow<List<AppSession>> =
+    override fun observeActiveSessions(signerPubKey: String): Flow<List<RemoteAppSession>> =
         database.remoteAppSessions().observeActiveSessions(signerPubKey = signerPubKey)
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
-    override fun observeOngoingSessions(signerPubKey: String): Flow<List<AppSession>> =
+    override fun observeOngoingSessions(signerPubKey: String): Flow<List<RemoteAppSession>> =
         database.remoteAppSessions().observeOngoingSessions(signerPubKey = signerPubKey)
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
-    override fun observeActiveSessionForConnection(clientPubKey: String): Flow<AppSession?> =
+    override fun observeActiveSessionForConnection(clientPubKey: String): Flow<RemoteAppSession?> =
         database.remoteAppSessions().observeActiveSessionForConnection(clientPubKey)
             .map { it?.asDomain() }
             .distinctUntilChanged()
 
-    override fun observeOngoingSessionForConnection(clientPubKey: String): Flow<AppSession?> =
+    override fun observeOngoingSessionForConnection(clientPubKey: String): Flow<RemoteAppSession?> =
         database.remoteAppSessions().observeOngoingSessionForConnection(clientPubKey)
             .map { it?.asDomain() }
             .distinctUntilChanged()
 
-    override fun observeSessionsByClientPubKey(clientPubKey: String): Flow<List<AppSession>> =
+    override fun observeSessionsByClientPubKey(clientPubKey: String): Flow<List<RemoteAppSession>> =
         database.remoteAppSessions().observeSessionsByClientPubKey(clientPubKey)
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
-    override fun observeSession(sessionId: String): Flow<AppSession?> =
+    override fun observeSession(sessionId: String): Flow<RemoteAppSession?> =
         database.remoteAppSessions().observeSession(sessionId = sessionId)
             .map { it?.asDomain() }
             .distinctUntilChanged()
 
-    override suspend fun getSession(sessionId: String): Result<AppSession> =
+    override suspend fun getSession(sessionId: String): Result<RemoteAppSession> =
         withContext(dispatchers.io()) {
             database.remoteAppSessions().findSession(sessionId = sessionId)
                 ?.asDomain()?.asSuccess()
                 ?: Result.failure(NoSuchElementException("Couldn't find session with id $sessionId."))
         }
 
-    override suspend fun findActiveSessionForConnection(clientPubKey: String): Result<AppSession> =
+    override suspend fun findActiveSessionForConnection(clientPubKey: String): Result<RemoteAppSession> =
         withContext(dispatchers.io()) {
             runCatching {
                 database.remoteAppSessions().findActiveSessionByClientPubKey(appIdentifier = clientPubKey)?.asDomain()

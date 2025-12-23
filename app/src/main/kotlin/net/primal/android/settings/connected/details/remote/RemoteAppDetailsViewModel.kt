@@ -23,7 +23,7 @@ import net.primal.android.settings.connected.details.remote.RemoteAppDetailsCont
 import net.primal.android.settings.connected.model.SessionUi
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
-import net.primal.domain.account.model.AppSessionState
+import net.primal.domain.account.model.RemoteAppSessionState
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
@@ -104,7 +104,7 @@ class RemoteAppDetailsViewModel @Inject constructor(
                 activeSessionId = session?.sessionId
                 setState {
                     copy(
-                        sessionState = session?.sessionState ?: AppSessionState.Ended,
+                        sessionState = session?.sessionState ?: RemoteAppSessionState.Ended,
                     )
                 }
             }

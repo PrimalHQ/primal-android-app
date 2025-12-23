@@ -14,10 +14,10 @@ import net.primal.data.account.repository.builder.LocalSignerMethodResponseBuild
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
 import net.primal.domain.account.model.AppPermission
+import net.primal.domain.account.model.AppPermissionAction
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.model.LocalSignerMethodResponse
-import net.primal.domain.account.model.PermissionAction
 import net.primal.domain.account.model.SessionEventUserChoice
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.model.UserChoice
@@ -41,18 +41,18 @@ class LocalSignerServiceImpl internal constructor(
         val permissionAction = localAppRepository.getPermissionActionForMethod(method = method)
 
         return when (permissionAction) {
-            PermissionAction.Approve -> {
+            AppPermissionAction.Approve -> {
                 val response = localSignerMethodResponseBuilder.build(method = method).also { response ->
                     responses.add(response)
                 }
                 response.asSuccess()
             }
 
-            PermissionAction.Deny -> {
+            AppPermissionAction.Deny -> {
                 Result.failure(LocalSignerError.AutoDenied)
             }
 
-            PermissionAction.Ask -> {
+            AppPermissionAction.Ask -> {
                 pendingUserActionMethods.add(method)
                 Result.failure(LocalSignerError.UserApprovalRequired)
             }
@@ -82,7 +82,7 @@ class LocalSignerServiceImpl internal constructor(
                 updatePermissionPreference(
                     permissionId = method.getPermissionId(),
                     packageName = method.packageName,
-                    action = PermissionAction.Approve,
+                    action = AppPermissionAction.Approve,
                 )
             }
 
@@ -91,7 +91,7 @@ class LocalSignerServiceImpl internal constructor(
                 updatePermissionPreference(
                     permissionId = method.getPermissionId(),
                     packageName = method.packageName,
-                    action = PermissionAction.Deny,
+                    action = AppPermissionAction.Deny,
                 )
             }
         }
@@ -115,7 +115,7 @@ class LocalSignerServiceImpl internal constructor(
     private suspend fun updatePermissionPreference(
         permissionId: String,
         packageName: String,
-        action: PermissionAction,
+        action: AppPermissionAction,
     ) = permissionsRepository.updatePermissionsAction(
         permissionIds = listOf(permissionId),
         clientPubKey = packageName,
@@ -132,7 +132,7 @@ class LocalSignerServiceImpl internal constructor(
                 AppPermission(
                     permissionId = permissionId,
                     clientPubKey = app.identifier,
-                    action = PermissionAction.Approve,
+                    action = AppPermissionAction.Approve,
                 )
             }
 

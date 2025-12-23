@@ -11,9 +11,9 @@ import net.primal.data.account.local.dao.apps.remote.RemoteSignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
-import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.model.AppPermission
-import net.primal.domain.account.model.PermissionAction
+import net.primal.domain.account.model.AppPermissionAction
+import net.primal.domain.account.model.RemoteAppConnection
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
@@ -48,7 +48,7 @@ class SignerConnectionInitializer internal constructor(
         userPubKey: String,
         connectionUrl: String,
         trustLevel: TrustLevel,
-    ): Result<AppConnection> =
+    ): Result<RemoteAppConnection> =
         runCatching {
             val (appConnection, secret) = parseConnectionUrlOrThrow(
                 signerPubKey = signerPubKey,
@@ -82,7 +82,7 @@ class SignerConnectionInitializer internal constructor(
         userPubKey: String,
         connectionUrl: String,
         trustLevel: TrustLevel,
-    ): Pair<AppConnection, String> {
+    ): Pair<RemoteAppConnection, String> {
         if (!connectionUrl.startsWith(prefix = NOSTR_CONNECT_PREFIX, ignoreCase = true)) {
             throw IllegalArgumentException("Invalid `connectionUrl`. It should start with `$NOSTR_CONNECT_PREFIX`.")
         }
@@ -105,7 +105,7 @@ class SignerConnectionInitializer internal constructor(
         val defaultPermsIds = defaultPermissions.map { it.permissionId }.toSet()
         val finalPermissions = defaultPermissions + perms.filter { it.permissionId !in defaultPermsIds }
 
-        return AppConnection(
+        return RemoteAppConnection(
             userPubKey = userPubKey,
             signerPubKey = signerPubKey,
             clientPubKey = clientPubKey,
@@ -139,7 +139,7 @@ class SignerConnectionInitializer internal constructor(
                 AppPermission(
                     permissionId = it,
                     clientPubKey = clientPubKey,
-                    action = PermissionAction.Ask,
+                    action = AppPermissionAction.Ask,
                 )
             } ?: emptyList()
     }
@@ -152,7 +152,7 @@ class SignerConnectionInitializer internal constructor(
                 AppPermission(
                     permissionId = it,
                     clientPubKey = clientPubKey,
-                    action = PermissionAction.Approve,
+                    action = AppPermissionAction.Approve,
                 )
             } ?: emptyList()
 }

@@ -53,7 +53,7 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.settings.connected.model.PermissionGroupUi
 import net.primal.android.theme.AppTheme
-import net.primal.domain.account.model.PermissionAction
+import net.primal.domain.account.model.AppPermissionAction
 
 private val ToggleIndicatorColorDark = Color(0xFF757575)
 private val ToggleIndicatorColorLight = Color(0xFF666666)
@@ -66,7 +66,7 @@ fun ConnectedAppPermissionsScreen(
     permissions: List<PermissionGroupUi>,
     loading: Boolean,
     error: UiError?,
-    onUpdatePermission: (List<String>, PermissionAction) -> Unit,
+    onUpdatePermission: (List<String>, AppPermissionAction) -> Unit,
     onResetPermissions: () -> Unit,
     onRetry: () -> Unit,
     onDismissError: () -> Unit,
@@ -139,7 +139,7 @@ fun ConnectedAppPermissionsScreen(
 private fun PermissionsList(
     headerContent: @Composable () -> Unit,
     permissions: List<PermissionGroupUi>,
-    onUpdatePermission: (List<String>, PermissionAction) -> Unit,
+    onUpdatePermission: (List<String>, AppPermissionAction) -> Unit,
     onResetClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -189,7 +189,7 @@ private fun PermissionsList(
 private fun PermissionGroupRow(
     permissionGroup: PermissionGroupUi,
     modifier: Modifier = Modifier,
-    onActionChange: (PermissionAction) -> Unit,
+    onActionChange: (AppPermissionAction) -> Unit,
 ) {
     Row(
         modifier = modifier
@@ -216,15 +216,15 @@ private fun PermissionGroupRow(
 }
 
 @Composable
-private fun PermissionToggle(currentAction: PermissionAction, onActionChange: (PermissionAction) -> Unit) {
+private fun PermissionToggle(currentAction: AppPermissionAction, onActionChange: (AppPermissionAction) -> Unit) {
     val allowText = stringResource(id = R.string.settings_connected_app_permissions_allow)
     val denyText = stringResource(id = R.string.settings_connected_app_permissions_deny)
     val askText = stringResource(id = R.string.settings_connected_app_permissions_ask)
 
     val selectedIndex = when (currentAction) {
-        PermissionAction.Approve -> 0
-        PermissionAction.Deny -> 1
-        PermissionAction.Ask -> 2
+        AppPermissionAction.Approve -> 0
+        AppPermissionAction.Deny -> 1
+        AppPermissionAction.Ask -> 2
     }
 
     val fixedSegmentWidth = 55.dp
@@ -259,21 +259,21 @@ private fun PermissionToggle(currentAction: PermissionAction, onActionChange: (P
         Row(modifier = Modifier.fillMaxSize()) {
             ToggleOption(
                 text = allowText,
-                isSelected = currentAction == PermissionAction.Approve,
+                isSelected = currentAction == AppPermissionAction.Approve,
                 modifier = Modifier.width(fixedSegmentWidth),
-                onClick = { onActionChange(PermissionAction.Approve) },
+                onClick = { onActionChange(AppPermissionAction.Approve) },
             )
             ToggleOption(
                 text = denyText,
-                isSelected = currentAction == PermissionAction.Deny,
+                isSelected = currentAction == AppPermissionAction.Deny,
                 modifier = Modifier.width(fixedSegmentWidth),
-                onClick = { onActionChange(PermissionAction.Deny) },
+                onClick = { onActionChange(AppPermissionAction.Deny) },
             )
             ToggleOption(
                 text = askText,
-                isSelected = currentAction == PermissionAction.Ask,
+                isSelected = currentAction == AppPermissionAction.Ask,
                 modifier = Modifier.width(fixedSegmentWidth),
-                onClick = { onActionChange(PermissionAction.Ask) },
+                onClick = { onActionChange(AppPermissionAction.Ask) },
             )
         }
     }

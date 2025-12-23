@@ -16,7 +16,7 @@ import net.primal.android.settings.connected.model.asPermissionGroupUi
 import net.primal.android.settings.connected.permissions.local.LocalAppPermissionsContract.UiEvent
 import net.primal.android.settings.connected.permissions.local.LocalAppPermissionsContract.UiState
 import net.primal.core.utils.onFailure
-import net.primal.domain.account.model.PermissionAction
+import net.primal.domain.account.model.AppPermissionAction
 import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.domain.account.repository.PermissionsRepository
 
@@ -80,7 +80,7 @@ class LocalAppPermissionsViewModel @Inject constructor(
         }
     }
 
-    private fun updatePermission(permissionIds: List<String>, action: PermissionAction) {
+    private fun updatePermission(permissionIds: List<String>, action: AppPermissionAction) {
         viewModelScope.launch {
             permissionsRepository.updatePermissionsAction(
                 permissionIds = permissionIds,

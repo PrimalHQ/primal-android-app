@@ -2,25 +2,25 @@ package net.primal.domain.account.repository
 
 import kotlinx.coroutines.flow.Flow
 import net.primal.core.utils.Result
-import net.primal.domain.account.model.AppConnection
+import net.primal.domain.account.model.RemoteAppConnection
 import net.primal.domain.account.model.TrustLevel
 
 interface ConnectionRepository {
-    fun observeAllConnections(signerPubKey: String): Flow<List<AppConnection>>
+    fun observeAllConnections(signerPubKey: String): Flow<List<RemoteAppConnection>>
 
-    fun observeConnection(clientPubKey: String): Flow<AppConnection?>
+    fun observeConnection(clientPubKey: String): Flow<RemoteAppConnection?>
 
-    suspend fun getAllConnections(signerPubKey: String): List<AppConnection>
+    suspend fun getAllConnections(signerPubKey: String): List<RemoteAppConnection>
 
-    suspend fun getAllAutoStartConnections(signerPubKey: String): List<AppConnection>
+    suspend fun getAllAutoStartConnections(signerPubKey: String): List<RemoteAppConnection>
 
     suspend fun deleteConnectionAndData(clientPubKey: String)
 
     suspend fun removeConnectionsByUserPubKey(userPubKey: String)
 
-    suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<AppConnection>
+    suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<RemoteAppConnection>
 
-    suspend fun insertOrReplaceConnection(secret: String, connection: AppConnection)
+    suspend fun insertOrReplaceConnection(secret: String, connection: RemoteAppConnection)
 
     suspend fun getUserPubKey(clientPubKey: String): Result<String>
 

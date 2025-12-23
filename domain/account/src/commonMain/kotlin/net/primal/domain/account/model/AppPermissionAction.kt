@@ -1,6 +1,6 @@
 package net.primal.domain.account.model
 
-enum class PermissionAction {
+enum class AppPermissionAction {
     Approve,
     Deny,
     Ask,

@@ -4,9 +4,9 @@ import net.primal.data.account.local.dao.apps.AppPermissionData as AppPermission
 import net.primal.data.account.local.dao.apps.PermissionAction as PermissionActionPO
 import net.primal.data.account.local.dao.apps.TrustLevel as TrustLevelPO
 import net.primal.data.account.local.dao.apps.remote.RemoteAppConnection as RemoteAppConnectionPO
-import net.primal.domain.account.model.AppConnection as AppConnectionDO
 import net.primal.domain.account.model.AppPermission as AppPermissionDO
-import net.primal.domain.account.model.PermissionAction as PermissionActionDO
+import net.primal.domain.account.model.AppPermissionAction as PermissionActionDO
+import net.primal.domain.account.model.RemoteAppConnection as AppConnectionDO
 import net.primal.domain.account.model.TrustLevel as TrustLevelDO
 
 fun RemoteAppConnectionPO.asDomain() =

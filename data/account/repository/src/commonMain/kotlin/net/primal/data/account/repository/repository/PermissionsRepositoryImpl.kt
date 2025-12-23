@@ -17,8 +17,8 @@ import net.primal.data.account.remote.api.model.PermissionsResponse
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.asPO
 import net.primal.domain.account.model.AppPermission
+import net.primal.domain.account.model.AppPermissionAction
 import net.primal.domain.account.model.AppPermissionGroup
-import net.primal.domain.account.model.PermissionAction
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.shared.data.local.db.withTransaction
 
@@ -31,7 +31,7 @@ class PermissionsRepositoryImpl(
     override suspend fun updatePermissionsAction(
         permissionIds: List<String>,
         clientPubKey: String,
-        action: PermissionAction,
+        action: AppPermissionAction,
     ): Result<Unit> =
         withContext(dispatchers.io()) {
             runCatching {

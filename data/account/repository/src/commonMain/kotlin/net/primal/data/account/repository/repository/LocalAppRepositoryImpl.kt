@@ -10,9 +10,9 @@ import net.primal.data.account.local.dao.apps.TrustLevel
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.asPO
+import net.primal.domain.account.model.AppPermissionAction as PermissionActionDO
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.LocalSignerMethod
-import net.primal.domain.account.model.PermissionAction as PermissionActionDO
 import net.primal.domain.account.model.TrustLevel as TrustLevelDO
 import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.shared.data.local.db.withTransaction

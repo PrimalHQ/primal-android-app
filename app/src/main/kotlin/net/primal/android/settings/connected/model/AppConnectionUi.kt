@@ -1,8 +1,8 @@
 package net.primal.android.settings.connected.model
 
 import net.primal.android.user.domain.UserAccount
-import net.primal.domain.account.model.AppConnection
 import net.primal.domain.account.model.LocalApp
+import net.primal.domain.account.model.RemoteAppConnection
 import net.primal.domain.links.CdnImage
 
 data class AppConnectionUi(
@@ -14,7 +14,7 @@ data class AppConnectionUi(
     val isLocal: Boolean = false,
 )
 
-fun AppConnection.asAppConnectionUi(userAccount: UserAccount?): AppConnectionUi {
+fun RemoteAppConnection.asAppConnectionUi(userAccount: UserAccount?): AppConnectionUi {
     return AppConnectionUi(
         connectionId = this.clientPubKey,
         appId = this.clientPubKey,

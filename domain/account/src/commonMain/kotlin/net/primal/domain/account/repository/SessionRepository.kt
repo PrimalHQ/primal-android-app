@@ -2,24 +2,24 @@ package net.primal.domain.account.repository
 
 import kotlinx.coroutines.flow.Flow
 import net.primal.core.utils.Result
-import net.primal.domain.account.model.AppSession
+import net.primal.domain.account.model.RemoteAppSession
 
 interface SessionRepository {
-    fun observeActiveSessions(signerPubKey: String): Flow<List<AppSession>>
+    fun observeActiveSessions(signerPubKey: String): Flow<List<RemoteAppSession>>
 
-    fun observeOngoingSessions(signerPubKey: String): Flow<List<AppSession>>
+    fun observeOngoingSessions(signerPubKey: String): Flow<List<RemoteAppSession>>
 
-    fun observeActiveSessionForConnection(clientPubKey: String): Flow<AppSession?>
+    fun observeActiveSessionForConnection(clientPubKey: String): Flow<RemoteAppSession?>
 
-    fun observeOngoingSessionForConnection(clientPubKey: String): Flow<AppSession?>
+    fun observeOngoingSessionForConnection(clientPubKey: String): Flow<RemoteAppSession?>
 
-    fun observeSessionsByClientPubKey(clientPubKey: String): Flow<List<AppSession>>
+    fun observeSessionsByClientPubKey(clientPubKey: String): Flow<List<RemoteAppSession>>
 
-    fun observeSession(sessionId: String): Flow<AppSession?>
+    fun observeSession(sessionId: String): Flow<RemoteAppSession?>
 
-    suspend fun getSession(sessionId: String): Result<AppSession>
+    suspend fun getSession(sessionId: String): Result<RemoteAppSession>
 
-    suspend fun findActiveSessionForConnection(clientPubKey: String): Result<AppSession>
+    suspend fun findActiveSessionForConnection(clientPubKey: String): Result<RemoteAppSession>
 
     suspend fun startSession(clientPubKey: String): Result<String>
 

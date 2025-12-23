@@ -18,7 +18,7 @@ import net.primal.data.account.remote.utils.PERM_ID_CONNECT
 import net.primal.data.account.remote.utils.PERM_ID_PING
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.asPO
-import net.primal.domain.account.model.AppConnection
+import net.primal.domain.account.model.RemoteAppConnection
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.shared.data.local.db.withTransaction
@@ -30,22 +30,22 @@ class ConnectionRepositoryImpl(
     private val wellKnownApi: WellKnownApi,
 ) : ConnectionRepository {
 
-    override fun observeAllConnections(signerPubKey: String): Flow<List<AppConnection>> =
+    override fun observeAllConnections(signerPubKey: String): Flow<List<RemoteAppConnection>> =
         database.remoteAppConnections().observeAllConnections(signerPubKey = signerPubKey)
             .map { connections -> connections.map { it.asDomain() } }
 
-    override fun observeConnection(clientPubKey: String): Flow<AppConnection?> {
+    override fun observeConnection(clientPubKey: String): Flow<RemoteAppConnection?> {
         return database.remoteAppConnections().observeConnection(clientPubKey = clientPubKey)
             .map { it?.asDomain() }
     }
 
-    override suspend fun getAllConnections(signerPubKey: String): List<AppConnection> =
+    override suspend fun getAllConnections(signerPubKey: String): List<RemoteAppConnection> =
         withContext(dispatchers.io()) {
             database.remoteAppConnections().getAll(signerPubKey = signerPubKey)
                 .map { it.asDomain() }
         }
 
-    override suspend fun getAllAutoStartConnections(signerPubKey: String): List<AppConnection> =
+    override suspend fun getAllAutoStartConnections(signerPubKey: String): List<RemoteAppConnection> =
         withContext(dispatchers.io()) {
             database.remoteAppConnections().getAllAutoStartConnections(signerPubKey = signerPubKey)
                 .map { it.asDomain() }
@@ -68,14 +68,14 @@ class ConnectionRepositoryImpl(
             }
         }
 
-    override suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<AppConnection> =
+    override suspend fun getConnectionByClientPubKey(clientPubKey: String): Result<RemoteAppConnection> =
         withContext(dispatchers.io()) {
             database.remoteAppConnections().getConnection(clientPubKey = clientPubKey)
                 ?.asDomain()?.asSuccess()
                 ?: Result.failure(NoSuchElementException("Couldn't locate connection with given `clientPubKey`."))
         }
 
-    override suspend fun insertOrReplaceConnection(secret: String, connection: AppConnection) =
+    override suspend fun insertOrReplaceConnection(secret: String, connection: RemoteAppConnection) =
         withContext(dispatchers.io()) {
             try {
                 database.withTransaction {
@@ -162,7 +162,7 @@ class ConnectionRepositoryImpl(
             }
         }
 
-    private suspend inline fun insertAppConnection(secret: String, connection: AppConnection) {
+    private suspend inline fun insertAppConnection(secret: String, connection: RemoteAppConnection) {
         database.remoteAppConnections().insert(
             data = RemoteAppConnectionData(
                 clientPubKey = connection.clientPubKey,

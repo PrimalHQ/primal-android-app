@@ -1,8 +1,8 @@
 package net.primal.data.account.repository.mappers
 
 import net.primal.data.account.local.dao.apps.remote.RemoteAppSession as RemoteAppSessionPO
-import net.primal.domain.account.model.AppSession as AppSessionDO
-import net.primal.domain.account.model.AppSessionState
+import net.primal.domain.account.model.RemoteAppSession as AppSessionDO
+import net.primal.domain.account.model.RemoteAppSessionState
 
 fun RemoteAppSessionPO.asDomain() =
     AppSessionDO(
@@ -18,8 +18,8 @@ fun RemoteAppSessionPO.asDomain() =
         sessionStartedAt = this.data.startedAt,
         sessionEndedAt = this.data.endedAt,
         sessionState = when {
-            this.data.endedAt != null -> AppSessionState.Ended
-            this.data.activeRelayCount > 0 -> AppSessionState.Active
-            else -> AppSessionState.Connecting
+            this.data.endedAt != null -> RemoteAppSessionState.Ended
+            this.data.activeRelayCount > 0 -> RemoteAppSessionState.Active
+            else -> RemoteAppSessionState.Connecting
         },
     )

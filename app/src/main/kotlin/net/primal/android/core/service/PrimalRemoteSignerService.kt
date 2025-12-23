@@ -44,7 +44,7 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
-import net.primal.domain.account.model.AppSession
+import net.primal.domain.account.model.RemoteAppSession
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
@@ -294,7 +294,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
     }
 
     @SuppressLint("MissingPermission")
-    suspend fun showActiveAppNotification(session: AppSession) {
+    suspend fun showActiveAppNotification(session: RemoteAppSession) {
         val appIconBitmap = session.image?.let { loadBitmapFromUrl(it) }
         val displayName = accountsStore
             .findByIdOrNull(session.userPubKey)

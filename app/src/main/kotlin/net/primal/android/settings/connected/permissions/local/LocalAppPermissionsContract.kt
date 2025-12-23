@@ -2,7 +2,7 @@ package net.primal.android.settings.connected.permissions.local
 
 import net.primal.android.core.errors.UiError
 import net.primal.android.settings.connected.model.PermissionGroupUi
-import net.primal.domain.account.model.PermissionAction
+import net.primal.domain.account.model.AppPermissionAction
 
 interface LocalAppPermissionsContract {
     data class UiState(
@@ -15,7 +15,7 @@ interface LocalAppPermissionsContract {
     sealed class UiEvent {
         data class UpdatePermission(
             val permissionIds: List<String>,
-            val action: PermissionAction,
+            val action: AppPermissionAction,
         ) : UiEvent()
         data object Retry : UiEvent()
         data object DismissError : UiEvent()

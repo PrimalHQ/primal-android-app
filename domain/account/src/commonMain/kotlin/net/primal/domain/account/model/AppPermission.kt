@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class AppPermission(
     val permissionId: String,
     val clientPubKey: String,
-    val action: PermissionAction,
+    val action: AppPermissionAction,
 )

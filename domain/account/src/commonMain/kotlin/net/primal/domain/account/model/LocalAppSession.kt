@@ -4,8 +4,6 @@ data class LocalAppSession(
     val sessionId: String,
     val appPackageName: String,
     val userPubKey: String,
-    val image: String,
-    val name: String,
     val trustLevel: TrustLevel,
     val permissions: List<AppPermission>,
     val sessionStartedAt: Long,

@@ -1,12 +1,12 @@
 package net.primal.android.settings.connected.model
 
+import net.primal.domain.account.model.AppPermissionAction
 import net.primal.domain.account.model.AppPermissionGroup
-import net.primal.domain.account.model.PermissionAction
 
 data class PermissionGroupUi(
     val groupId: String,
     val title: String,
-    val action: PermissionAction,
+    val action: AppPermissionAction,
     val permissionIds: List<String>,
 )
 

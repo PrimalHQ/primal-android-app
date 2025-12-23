@@ -30,7 +30,7 @@ import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.data.account.repository.mappers.getRequestType
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
 import net.primal.data.account.repository.repository.internal.model.UpdateRemoteAppSessionEventRequest
-import net.primal.domain.account.model.AppSession
+import net.primal.domain.account.model.RemoteAppSession
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
@@ -166,7 +166,7 @@ class RemoteSignerServiceImpl internal constructor(
                 }
         }
 
-    private suspend fun setActiveRelayCount(session: AppSession) {
+    private suspend fun setActiveRelayCount(session: RemoteAppSession) {
         sessionRepository.setActiveRelayCount(
             sessionId = session.sessionId,
             activeRelayCount = session.relays.map { activeRelays.load().contains(it) }.count { it },

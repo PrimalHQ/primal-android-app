@@ -1,7 +1,7 @@
 package net.primal.android.nostrconnect.model
 
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
-import net.primal.domain.account.model.AppSession
+import net.primal.domain.account.model.RemoteAppSession
 
 data class ActiveSessionUi(
     val sessionId: String,
@@ -12,7 +12,7 @@ data class ActiveSessionUi(
     val userAccount: UserAccountUi?,
 )
 
-fun AppSession.asUi(userAccount: UserAccountUi?) =
+fun RemoteAppSession.asUi(userAccount: UserAccountUi?) =
     ActiveSessionUi(
         sessionId = sessionId,
         clientPubKey = clientPubKey,

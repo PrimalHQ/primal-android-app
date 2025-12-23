@@ -1,6 +1,6 @@
 package net.primal.domain.account.model
 
-enum class AppSessionState {
+enum class RemoteAppSessionState {
     Connecting,
     Active,
     Ended,
