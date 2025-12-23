@@ -18,3 +18,5 @@ fun String.getNostrConnectName(): String? = this.getNostrConnectQueryParameter("
 fun String.getNostrConnectUrl(): String? = this.getNostrConnectQueryParameter("url")
 
 fun String.getNostrConnectImage(): String? = this.getNostrConnectQueryParameter("image")
+
+fun String.getNostrConnectCallback(): String? = this.getNostrConnectQueryParameter("callback")

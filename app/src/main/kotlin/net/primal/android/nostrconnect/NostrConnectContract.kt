@@ -10,6 +10,7 @@ interface NostrConnectContract {
         val appDescription: String?,
         val appImageUrl: String?,
         val connectionUrl: String?,
+        val callback: String? = null,
         val accounts: List<UserAccountUi> = emptyList(),
         val connecting: Boolean = false,
         val error: UiError? = null,
@@ -31,6 +32,6 @@ interface NostrConnectContract {
     }
 
     sealed class SideEffect {
-        data object ConnectionSuccess : SideEffect()
+        data class ConnectionSuccess(val callbackUri: String?) : SideEffect()
     }
 }
