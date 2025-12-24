@@ -77,15 +77,18 @@ fun NostrConnectBottomSheet(viewModel: NostrConnectViewModel, onDismissRequest: 
                 appImageUrl = state.appImageUrl,
                 accounts = state.accounts,
                 connecting = state.connecting,
-                onConnectClick = { account, trustLevel ->
+                onConnectClick = { account, trustLevel, dailyBudget ->
                     viewModel.setEvent(
                         NostrConnectContract.UiEvent.ConnectUser(
                             userId = account.pubkey,
                             trustLevel = trustLevel,
+                            dailyBudget = dailyBudget,
                         ),
                     )
                 },
                 onCancelClick = onDismissRequest,
+                hasNwcRequest = state.hasNwcRequest,
+                budgetToUsdMap = state.budgetToUsdMap,
             )
 
             SnackbarHost(

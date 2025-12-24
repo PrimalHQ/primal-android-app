@@ -1511,6 +1511,8 @@
     <string name="signer_connect_low_trust_subtitle">Ask me to approve each request</string>
     <string name="signer_connect_cancel_button">Cancel</string>
     <string name="signer_connect_connect_button">Connect</string>
+    <string name="signer_connect_back_button">Back</string>
+    <string name="signer_connect_apply_budget_button">Apply Budget</string>
     <string name="signer_connect_no_nsec_accounts_warning">No accounts with a private key (nsec) found. Only accounts with a private key can be used with Signer Connect.</string>
 
     <string name="nostr_connect_unknown_app">Unknown App</string>
@@ -1518,6 +1520,7 @@
     <string name="nostr_connect_toast_connection_failed">Connection failed: %1$s</string>
     <string name="nostr_connect_apply_button">Apply</string>
     <string name="nostr_connect_sats_unit">sats</string>
+    <string name="nostr_connect_daily_budget_title">Daily Budget</string>
     <string name="nostr_connect_daily_spending_budget_title">Daily spending budget for this app:</string>
     <string name="nostr_connect_usd_amount_approx">~%1$s</string>
     <string name="nostr_connect_no_limit">No limit</string>

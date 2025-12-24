@@ -9,6 +9,7 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,15 +20,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,11 +48,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import java.text.NumberFormat
+import java.util.Currency
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.NostrUserText
@@ -56,12 +72,14 @@ import net.primal.android.core.compose.icons.primaliconpack.HighSecurity
 import net.primal.android.core.compose.icons.primaliconpack.LowSecurity
 import net.primal.android.core.compose.icons.primaliconpack.MediumSecurity
 import net.primal.android.core.compose.nostrconnect.PermissionsListItem
+import net.primal.android.core.compose.signer.SignerConnectBottomSheet.DAILY_BUDGET_PICKER_OPTIONS
 import net.primal.android.core.ext.selectableItem
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.navigation.primalSlideInHorizontallyFromEnd
 import net.primal.android.navigation.primalSlideOutHorizontallyToEnd
 import net.primal.android.theme.AppTheme
+import net.primal.core.utils.toDouble
 import net.primal.domain.account.model.TrustLevel
 
 private enum class SignerConnectTab {
@@ -69,47 +87,33 @@ private enum class SignerConnectTab {
     Permissions,
 }
 
-/*
-companion object {
-    val DAILY_BUDGET_OPTIONS = listOf(0L, 1000L, 5000L, 10_000L, 20_000L, 50_000L, 100_000L)
-    val DAILY_BUDGET_PICKER_OPTIONS = DAILY_BUDGET_OPTIONS + listOf(null)
-}
- */
-
 @Composable
 fun SignerConnectBottomSheet(
     appName: String?,
     appDescription: String?,
     accounts: List<UserAccountUi>,
     connecting: Boolean,
-    onConnectClick: (UserAccountUi, TrustLevel) -> Unit,
+    onConnectClick: (UserAccountUi, TrustLevel, Long?) -> Unit,
     onCancelClick: () -> Unit,
     modifier: Modifier = Modifier,
     appImageUrl: String? = null,
     appIcon: Drawable? = null,
+    hasNwcRequest: Boolean = false,
+    budgetToUsdMap: Map<Long, BigDecimal?> = emptyMap(),
 ) {
     var selectedTab by remember { mutableStateOf(SignerConnectTab.Login) }
     var trustLevel by remember { mutableStateOf(TrustLevel.Medium) }
     var selectedAccount by remember(accounts) { mutableStateOf(accounts.firstOrNull()) }
+    var dailyBudget by remember { mutableStateOf<Long?>(0L) }
+    var showDailyBudgetPicker by remember { mutableStateOf(false) }
+    var tempSelectedBudget by remember { mutableStateOf<Long?>(null) }
 
-    /*
-   val isBudgetPickerVisible by remember(selectedTab, showDailyBudgetPicker) {
-       derivedStateOf {
-           selectedTab == SignerConnectTab.Permissions && showDailyBudgetPicker
-       }
-   }
-     */
+    val isBudgetPickerVisible by remember(selectedTab, showDailyBudgetPicker) {
+        derivedStateOf { selectedTab == SignerConnectTab.Permissions && showDailyBudgetPicker }
+    }
 
     BackHandler {
-        /*
-        if (isBudgetPickerVisible) {
-            onCancelDailyBudget()
-        } else {
-         */
-        onCancelClick()
-        /*
-        }
-         */
+        if (isBudgetPickerVisible) showDailyBudgetPicker = false else onCancelClick()
     }
 
     Box(modifier = modifier.fillMaxWidth()) {
@@ -137,42 +141,66 @@ fun SignerConnectBottomSheet(
                 accounts = accounts,
                 selectedAccount = selectedAccount,
                 trustLevel = trustLevel,
-                onAccountSelect = { pubkey ->
-                    selectedAccount = accounts.find { it.pubkey == pubkey }
-                },
+                onAccountSelect = { pubkey -> selectedAccount = accounts.find { it.pubkey == pubkey } },
                 onTrustLevelSelect = { trustLevel = it },
+                hasNwcRequest = hasNwcRequest,
+                dailyBudget = dailyBudget,
+                showDailyBudgetPicker = showDailyBudgetPicker,
+                selectedDailyBudget = tempSelectedBudget,
+                budgetToUsdMap = budgetToUsdMap,
+                onDailyBudgetClick = {
+                    tempSelectedBudget = dailyBudget
+                    showDailyBudgetPicker = true
+                },
+                onDailyBudgetChange = { tempSelectedBudget = it },
             )
 
-            ActionButtons(
+            SignerConnectFooter(
+                isBudgetPickerVisible = isBudgetPickerVisible,
+                connecting = connecting,
                 primaryButtonEnabled = selectedAccount != null,
-                primaryButtonLoading = connecting,
-                primaryButtonText = stringResource(id = R.string.signer_connect_connect_button),
-                onPrimaryClick = {
-                    /*
-                    if (isBudgetPickerVisible) {
-                        onApplyDailyBudget()
-                    } else {
-                     */
-                    selectedAccount?.let { onConnectClick(it, trustLevel) }
-                    /*
-                    }
-                     */
+                onApplyBudget = {
+                    dailyBudget = tempSelectedBudget
+                    showDailyBudgetPicker = false
                 },
-                secondaryButtonText = stringResource(id = R.string.signer_connect_cancel_button),
-                onSecondaryClick = {
-                    /*
-                    if (isBudgetPickerVisible) {
-                        onCancelDailyBudget()
-                    } else {
-                     */
-                    onCancelClick()
-                    /*
+                onConnect = {
+                    selectedAccount?.let {
+                        onConnectClick(it, trustLevel, if (hasNwcRequest) dailyBudget else null)
                     }
-                     */
                 },
+                onCancelBudget = { showDailyBudgetPicker = false },
+                onCancel = onCancelClick,
             )
         }
     }
+}
+
+@Composable
+private fun SignerConnectFooter(
+    isBudgetPickerVisible: Boolean,
+    connecting: Boolean,
+    primaryButtonEnabled: Boolean,
+    onApplyBudget: () -> Unit,
+    onConnect: () -> Unit,
+    onCancelBudget: () -> Unit,
+    onCancel: () -> Unit,
+) {
+    ActionButtons(
+        primaryButtonEnabled = primaryButtonEnabled,
+        primaryButtonLoading = connecting,
+        primaryButtonText = if (isBudgetPickerVisible) {
+            stringResource(id = R.string.signer_connect_apply_budget_button)
+        } else {
+            stringResource(id = R.string.signer_connect_connect_button)
+        },
+        onPrimaryClick = {
+            if (isBudgetPickerVisible) onApplyBudget() else onConnect()
+        },
+        secondaryButtonText = stringResource(id = R.string.signer_connect_cancel_button),
+        onSecondaryClick = {
+            if (isBudgetPickerVisible) onCancelBudget() else onCancel()
+        },
+    )
 }
 
 @Composable
@@ -308,6 +336,13 @@ private fun SignerConnectPages(
     trustLevel: TrustLevel,
     onAccountSelect: (String) -> Unit,
     onTrustLevelSelect: (TrustLevel) -> Unit,
+    hasNwcRequest: Boolean,
+    dailyBudget: Long?,
+    showDailyBudgetPicker: Boolean,
+    selectedDailyBudget: Long?,
+    budgetToUsdMap: Map<Long, BigDecimal?>,
+    onDailyBudgetClick: () -> Unit,
+    onDailyBudgetChange: (Long?) -> Unit,
 ) {
     AnimatedContent(
         modifier = Modifier
@@ -338,13 +373,14 @@ private fun SignerConnectPages(
 
             SignerConnectTab.Permissions -> PermissionsContent(
                 trustLevel = trustLevel,
-                // dailyBudget = dailyBudget,
                 onTrustLevelClick = onTrustLevelSelect,
-                // onDailyBudgetClick = onDailyBudgetClick,
-                // showDailyBudgetPicker = showDailyBudgetPicker,
-                // selectedDailyBudget = selectedDailyBudget,
-                // onDailyBudgetChange = onDailyBudgetChange,
-                // budgetToUsdMap = budgetToUsdMap,
+                hasNwcRequest = hasNwcRequest,
+                dailyBudget = dailyBudget,
+                onDailyBudgetClick = onDailyBudgetClick,
+                showDailyBudgetPicker = showDailyBudgetPicker,
+                selectedDailyBudget = selectedDailyBudget,
+                onDailyBudgetChange = onDailyBudgetChange,
+                budgetToUsdMap = budgetToUsdMap,
             )
         }
     }
@@ -431,15 +467,15 @@ private fun AccountListItem(
 @Composable
 private fun PermissionsContent(
     trustLevel: TrustLevel,
-    // dailyBudget: Long?,
     onTrustLevelClick: (TrustLevel) -> Unit,
-    // onDailyBudgetClick: () -> Unit,
-    // showDailyBudgetPicker: Boolean,
-    // selectedDailyBudget: Long?,
-    // onDailyBudgetChange: (Long?) -> Unit,
-    // budgetToUsdMap: Map<Long, BigDecimal?>,
+    hasNwcRequest: Boolean,
+    dailyBudget: Long?,
+    onDailyBudgetClick: () -> Unit,
+    showDailyBudgetPicker: Boolean,
+    selectedDailyBudget: Long?,
+    onDailyBudgetChange: (Long?) -> Unit,
+    budgetToUsdMap: Map<Long, BigDecimal?>,
 ) {
-    /*
     AnimatedContent(
         targetState = showDailyBudgetPicker,
         label = "PermissionsPickerAnimation",
@@ -451,25 +487,24 @@ private fun PermissionsContent(
                 budgetToUsdMap = budgetToUsdMap,
             )
         } else {
-     */
-    PermissionsList(
-        trustLevel = trustLevel,
-        onTrustLevelClick = onTrustLevelClick,
-        // onDailyBudgetClick = onDailyBudgetClick,
-        // dailyBudget = dailyBudget,
-    )
-    /*
+            PermissionsList(
+                trustLevel = trustLevel,
+                onTrustLevelClick = onTrustLevelClick,
+                hasNwcRequest = hasNwcRequest,
+                dailyBudget = dailyBudget,
+                onDailyBudgetClick = onDailyBudgetClick,
+            )
         }
     }
-     */
 }
 
 @Composable
 private fun PermissionsList(
     trustLevel: TrustLevel,
     onTrustLevelClick: (TrustLevel) -> Unit,
-    // onDailyBudgetClick: () -> Unit,
-    // dailyBudget: Long?,
+    hasNwcRequest: Boolean,
+    dailyBudget: Long?,
+    onDailyBudgetClick: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -499,18 +534,17 @@ private fun PermissionsList(
             onClick = { onTrustLevelClick(TrustLevel.Low) },
         )
 
-        /*
-        PrimalDivider(modifier = Modifier.padding(vertical = 8.dp))
+        if (hasNwcRequest) {
+            PrimalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-        DailyBudgetListItem(
-            dailyBudget = dailyBudget,
-            onClick = onDailyBudgetClick,
-        )
-         */
+            DailyBudgetListItem(
+                dailyBudget = dailyBudget,
+                onClick = onDailyBudgetClick,
+            )
+        }
     }
 }
 
-/*
 @Composable
 private fun DailyBudgetListItem(dailyBudget: Long?, onClick: () -> Unit) {
     ListItem(
@@ -545,16 +579,24 @@ private fun DailyBudgetListItem(dailyBudget: Long?, onClick: () -> Unit) {
                         fontSize = 16.sp,
                         lineHeight = 20.sp,
                     )
-                    Text(
-                        text = NumberFormat.getNumberInstance().format(dailyBudget ?: 0),
-                        color = AppTheme.colorScheme.onPrimary,
-                        style = style,
-                    )
-                    Text(
-                        text = stringResource(id = R.string.nostr_connect_sats_unit),
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                        style = style,
-                    )
+                    if (dailyBudget != null) {
+                        Text(
+                            text = NumberFormat.getNumberInstance().format(dailyBudget),
+                            color = AppTheme.colorScheme.onPrimary,
+                            style = style,
+                        )
+                        Text(
+                            text = stringResource(id = R.string.nostr_connect_sats_unit),
+                            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                            style = style,
+                        )
+                    } else {
+                        Text(
+                            text = stringResource(id = R.string.nostr_connect_no_limit),
+                            color = AppTheme.colorScheme.onPrimary,
+                            style = style,
+                        )
+                    }
                 }
                 Icon(
                     modifier = Modifier.size(16.dp),
@@ -696,7 +738,6 @@ private fun BudgetOption(
         }
     }
 }
-*/
 
 @Composable
 private fun ActionButtons(
@@ -737,4 +778,9 @@ private fun ActionButtons(
             onClick = onPrimaryClick,
         )
     }
+}
+
+object SignerConnectBottomSheet {
+    val DAILY_BUDGET_OPTIONS = listOf(0L, 1000L, 5000L, 10_000L, 20_000L, 50_000L, 100_000L)
+    val DAILY_BUDGET_PICKER_OPTIONS = DAILY_BUDGET_OPTIONS + listOf(null)
 }
