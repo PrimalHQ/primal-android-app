@@ -5,12 +5,13 @@ import net.primal.core.utils.Result
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.model.LocalSignerMethodResponse
+import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.SessionEventUserChoice
 
 interface LocalSignerService {
     suspend fun processMethod(method: LocalSignerMethod): Result<LocalSignerMethodResponse>
 
-    fun subscribeToPendingUserActions(): Flow<List<LocalSignerMethod>>
+    fun observeSessionEventsPendingUserAction(): Flow<List<SessionEvent>>
 
     fun getMethodResponses(): List<LocalSignerMethodResponse>
 

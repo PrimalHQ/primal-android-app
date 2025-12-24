@@ -4,19 +4,16 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.runtime.LaunchedEffect
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import net.primal.android.core.activity.PrimalActivity
 import net.primal.android.signer.model.SignerMethod
 import net.primal.android.signer.provider.approvals.PermissionRequestsBottomSheet
-import net.primal.android.signer.provider.approvals.PermissionRequestsContract
 import net.primal.android.signer.provider.approvals.PermissionRequestsViewModel
 import net.primal.android.signer.provider.connect.AndroidConnectScreen
 import net.primal.android.signer.provider.connect.AndroidConnectViewModel
 import net.primal.android.signer.provider.parser.SignerIntentParser
 import net.primal.android.signer.provider.utils.toIntent
-import timber.log.Timber
 
 @AndroidEntryPoint
 class SignerActivity : PrimalActivity() {
@@ -47,32 +44,36 @@ class SignerActivity : PrimalActivity() {
                     )
                 } else {
                     val permissionRequestsViewModel = hiltViewModel<PermissionRequestsViewModel>()
-                    permissionRequestsViewModel.processIntent(intent, callingPackage)
+                    permissionRequestsViewModel.onNewIntent(intent, callingPackage)
                     addOnNewIntentListener {
-                        Timber.tag("LocalSigner").d("Processing intent.")
-                        permissionRequestsViewModel.processIntent(intent = intent, packageName = callingPackage)
-                    }
-
-                    LaunchedEffect(permissionRequestsViewModel.effects) {
-                        permissionRequestsViewModel.effects.collect {
-                            when (it) {
-                                is PermissionRequestsContract.SideEffect.RespondToIntent -> {
-                                    Timber.tag("LocalSigner").d("Responding to intent: ${it.result}")
-                                    setResult(
-                                        RESULT_OK,
-                                        it.result.toIntent().apply {
-                                            putExtra("package", packageName)
-                                        },
-                                    )
-                                    finish()
-                                }
-                            }
-                        }
+                        permissionRequestsViewModel.onNewIntent(intent = it, packageName = callingPackage)
                     }
 
                     PermissionRequestsBottomSheet(
                         viewModel = permissionRequestsViewModel,
                         onDismiss = { finish() },
+                        onCompleted = { approvedMethods ->
+                            val size = approvedMethods.size
+                            if (size == 1) {
+                                val method = approvedMethods.first()
+                                setResult(
+                                    RESULT_OK,
+                                    method.toIntent().apply {
+                                        putExtra("package", packageName)
+                                    },
+                                )
+                            } else if (size > 1) {
+                                setResult(
+                                    RESULT_OK,
+                                    approvedMethods.toIntent().apply {
+                                        putExtra("package", packageName)
+                                    },
+                                )
+                            } else {
+                                setResult(RESULT_CANCELED)
+                            }
+                            finish()
+                        },
                     )
                 }
             }

@@ -8,11 +8,17 @@ import javax.inject.Inject
 import kotlin.uuid.ExperimentalUuidApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.signer.provider.approvals.PermissionRequestsContract.SideEffect
+import net.primal.android.signer.provider.approvals.PermissionRequestsContract.UiEvent
+import net.primal.android.signer.provider.approvals.PermissionRequestsContract.UiState
 import net.primal.android.signer.provider.parser.SignerIntentParser
-import net.primal.core.utils.onSuccess
-import net.primal.domain.account.model.LocalSignerMethod
+import net.primal.domain.account.model.SessionEventUserChoice
+import net.primal.domain.account.model.UserChoice
 import net.primal.domain.account.service.LocalSignerService
 import timber.log.Timber
 
@@ -22,39 +28,68 @@ class PermissionRequestsViewModel @Inject constructor(
     private val localSignerService: LocalSignerService,
     private val intentParser: SignerIntentParser,
 ) : ViewModel() {
-    private val methods: MutableSharedFlow<LocalSignerMethod> = MutableSharedFlow()
-    private fun setMethod(method: LocalSignerMethod) = viewModelScope.launch { methods.emit(method) }
 
-    private val _effects = Channel<PermissionRequestsContract.SideEffect>()
+    private val _state = MutableStateFlow(UiState())
+    val state = _state.asStateFlow()
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
+
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    private val _effects = Channel<SideEffect>()
     val effects = _effects.receiveAsFlow()
-    private fun setEffect(effect: PermissionRequestsContract.SideEffect) =
-        viewModelScope.launch { _effects.send(effect) }
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
-        observeMethods()
+        observeEvents()
+        observeSessionEventsPendingUserAction()
     }
 
-    fun processIntent(intent: Intent, packageName: String?) =
+    fun onNewIntent(intent: Intent, packageName: String?) =
         viewModelScope.launch {
-            Timber.tag("LocalSigner").d("Processing intent in ViewModel.")
             intentParser.parse(intent = intent, callingPackage = packageName)
                 .onSuccess {
-                    Timber.tag("LocalSigner").d("Successful, we got $it.")
-                    setMethod(method = it)
+                    localSignerService.processMethod(method = it)
                 }
-                .onFailure { Timber.tag("LocalSigner").d("Failed to parse intent: ${it.message}") }
+                .onFailure {
+                    Timber.tag("LocalSigner").d("Failed to parse intent: ${it.message}")
+                }
         }
 
-    private fun observeMethods() =
+    private fun observeEvents() {
         viewModelScope.launch {
-            methods.collect { method ->
-                respondToMethod(method = method)
+            events.collect {
+                when (it) {
+                    UiEvent.ApproveSelectedMethods -> approveSelectedMethods()
+                }
             }
         }
+    }
 
-    private fun respondToMethod(method: LocalSignerMethod) =
+    private fun observeSessionEventsPendingUserAction() {
         viewModelScope.launch {
-            localSignerService.processMethod(method = method)
-                .onSuccess { setEffect(PermissionRequestsContract.SideEffect.RespondToIntent(it)) }
+            localSignerService.observeSessionEventsPendingUserAction().collect { events ->
+                setState { copy(requestQueue = events) }
+                Timber.tag("LocalSigner").i(events.toString())
+            }
+        }
+    }
+
+    private fun approveSelectedMethods() =
+        viewModelScope.launch {
+            val selectedMethods = _state.value.requestQueue
+            localSignerService.respondToUserActions(
+                eventChoices = selectedMethods.map {
+                    SessionEventUserChoice(
+                        sessionEventId = it.eventId,
+                        userChoice = UserChoice.Allow,
+                    )
+                },
+            )
+            setEffect(
+                SideEffect.ApprovalSuccess(
+                    approvedMethods = localSignerService.getMethodResponses(),
+                ),
+            )
         }
 }
