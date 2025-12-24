@@ -7,7 +7,6 @@ import kotlin.concurrent.atomics.fetchAndUpdate
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
-import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -37,7 +36,7 @@ import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
-@OptIn(ExperimentalAtomicApi::class, ExperimentalTime::class)
+@OptIn(ExperimentalAtomicApi::class)
 class RemoteSignerServiceImpl internal constructor(
     private val signerKeyPair: NostrKeyPair,
     private val sessionInactivityTimeoutInMinutes: Long,
@@ -226,8 +225,9 @@ class RemoteSignerServiceImpl internal constructor(
     private fun processMethod(method: RemoteSignerMethod) =
         scope.launch {
             if (!activeClientPubKeys.load().contains(method.clientPubKey)) {
-                val connection = connectionRepository
-                    .getConnectionByClientPubKey(clientPubKey = method.clientPubKey).getOrNull() ?: return@launch
+                val connection = connectionRepository.getConnectionByClientPubKey(
+                    clientPubKey = method.clientPubKey
+                ).getOrNull() ?: return@launch
 
                 if (connection.autoStart) {
                     sessionRepository.startSession(clientPubKey = connection.clientPubKey)

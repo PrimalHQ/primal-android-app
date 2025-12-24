@@ -2,7 +2,6 @@ package net.primal.data.account.repository.repository
 
 import io.github.aakira.napier.Napier
 import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -20,7 +19,6 @@ import net.primal.domain.account.model.RemoteAppSession
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.shared.data.local.db.withTransaction
 
-@OptIn(ExperimentalTime::class)
 class SessionRepositoryImpl(
     private val database: AccountDatabase,
     private val dispatchers: DispatcherProvider,

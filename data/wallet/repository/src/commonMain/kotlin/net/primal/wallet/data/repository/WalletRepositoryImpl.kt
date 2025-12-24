@@ -7,7 +7,6 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
 import kotlin.time.Duration.Companion.hours
-import kotlin.time.ExperimentalTime
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -44,7 +43,7 @@ import net.primal.wallet.data.repository.transactions.TimestampBasedWalletTransa
 import net.primal.wallet.data.service.WalletService
 import net.primal.wallet.data.service.factory.WalletServiceFactory
 
-@OptIn(ExperimentalPagingApi::class, ExperimentalTime::class)
+@OptIn(ExperimentalPagingApi::class)
 internal class WalletRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val walletServiceFactory: WalletServiceFactory,
