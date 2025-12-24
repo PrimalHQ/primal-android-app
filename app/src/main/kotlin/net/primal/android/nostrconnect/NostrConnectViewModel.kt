@@ -3,6 +3,8 @@ package net.primal.android.nostrconnect
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.core.compose.signer.SignerConnectBottomSheet.DAILY_BUDGET_OPTIONS
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
@@ -21,15 +24,22 @@ import net.primal.android.nostrconnect.utils.getNostrConnectCallback
 import net.primal.android.nostrconnect.utils.getNostrConnectImage
 import net.primal.android.nostrconnect.utils.getNostrConnectName
 import net.primal.android.nostrconnect.utils.getNostrConnectUrl
+import net.primal.android.nostrconnect.utils.hasNwcOption
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.CredentialType
 import net.primal.android.user.domain.asKeyPair
+import net.primal.android.wallet.repository.ExchangeRateHandler
+import net.primal.android.wallet.repository.isValidExchangeRate
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
 import net.primal.domain.account.model.TrustLevel
+import net.primal.domain.connections.PrimalWalletNwcRepository
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import timber.log.Timber
 
@@ -38,9 +48,10 @@ class NostrConnectViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: DispatcherProvider,
     private val accountsStore: UserAccountsStore,
-    // private val exchangeRateHandler: ExchangeRateHandler,
+    private val exchangeRateHandler: ExchangeRateHandler,
     private val credentialsStore: CredentialsStore,
     private val signerConnectionInitializer: SignerConnectionInitializer,
+    private val primalWalletNwcRepository: PrimalWalletNwcRepository,
     private val tokenUpdater: PushNotificationsTokenUpdater,
 ) : ViewModel() {
 
@@ -53,6 +64,7 @@ class NostrConnectViewModel @Inject constructor(
             appImageUrl = connectionUrl?.getNostrConnectImage(),
             connectionUrl = connectionUrl,
             callback = connectionUrl?.getNostrConnectCallback(),
+            isNwcRequest = connectionUrl?.hasNwcOption() == true,
         ),
     )
     val state = _state.asStateFlow()
@@ -69,35 +81,19 @@ class NostrConnectViewModel @Inject constructor(
     init {
         observeEvents()
         observeAccounts()
-        // observeUsdExchangeRate()
+        observeUsdExchangeRate()
     }
 
     private fun observeEvents() {
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is NostrConnectContract.UiEvent.ConnectUser -> connect(it.userId, it.trustLevel)
-                    /*
-                    is NostrConnectContract.UiEvent.ClickDailyBudget -> setState {
-                        copy(showDailyBudgetPicker = true, selectedDailyBudget = this.dailyBudget)
-                    }
+                    is NostrConnectContract.UiEvent.ConnectUser -> connect(
+                        userId = it.userId,
+                        trustLevel = it.trustLevel,
+                        dailyBudget = it.dailyBudget,
+                    )
 
-                    is NostrConnectContract.UiEvent.ChangeDailyBudget -> setState {
-                        copy(
-                            selectedDailyBudget = it.budget,
-                        )
-                    }
-
-                    is NostrConnectContract.UiEvent.ApplyDailyBudget -> setState {
-                        copy(dailyBudget = this.selectedDailyBudget, showDailyBudgetPicker = false)
-                    }
-
-                    is NostrConnectContract.UiEvent.CancelDailyBudget -> setState {
-                        copy(
-                            showDailyBudgetPicker = false,
-                        )
-                    }
-                     */
                     NostrConnectContract.UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
@@ -124,10 +120,8 @@ class NostrConnectViewModel @Inject constructor(
         }
     }
 
-    /*
     private fun observeUsdExchangeRate() {
         viewModelScope.launch {
-            fetchExchangeRate()
             exchangeRateHandler.usdExchangeRate.collect { exchangeRate ->
                 val budgetToUsdMap = calculateBudgetToUsdMap(exchangeRate)
                 setState { copy(budgetToUsdMap = budgetToUsdMap) }
@@ -135,28 +129,41 @@ class NostrConnectViewModel @Inject constructor(
         }
     }
 
-    private fun fetchExchangeRate() =
-        viewModelScope.launch {
-            exchangeRateHandler.updateExchangeRate(
-                userId = activeAccountStore.activeUserId(),
-            )
-        }
-
     private fun calculateBudgetToUsdMap(exchangeRate: Double?): Map<Long, BigDecimal?> {
         if (!exchangeRate.isValidExchangeRate()) {
             return emptyMap()
         }
 
         return DAILY_BUDGET_OPTIONS.associateWith { sats ->
-            sats.toBigDecimal().fromSatsToUsd(exchangeRate)
+            sats.toString().toBigDecimal().fromSatsToUsd(exchangeRate)
         }
     }
-     */
 
-    private fun connect(userId: String, trustLevel: TrustLevel) {
+    private fun connect(
+        userId: String,
+        trustLevel: TrustLevel,
+        dailyBudget: Long?,
+    ) {
         viewModelScope.launch {
             setState { copy(connecting = true) }
-            val connectionUrl = state.value.connectionUrl ?: return@launch
+            val currentState = state.value
+            val connectionUrl = currentState.connectionUrl ?: return@launch
+
+            var nwcConnectionString: String? = null
+            if (currentState.isNwcRequest && dailyBudget != 0L) {
+                val budgetBtc = dailyBudget?.toBtc()?.formatAsString()
+                runCatching {
+                    primalWalletNwcRepository.createNewWalletConnection(
+                        userId = userId,
+                        appName = currentState.appName ?: "External App",
+                        dailyBudget = budgetBtc,
+                    )
+                }.onSuccess { nwcConnection ->
+                    nwcConnectionString = nwcConnection.nwcConnectionUri
+                }.onFailure { error ->
+                    Timber.e(error)
+                }
+            }
 
             val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
 
@@ -165,6 +172,7 @@ class NostrConnectViewModel @Inject constructor(
                 userPubKey = userId,
                 connectionUrl = connectionUrl,
                 trustLevel = trustLevel,
+                nwcConnectionString = nwcConnectionString,
             ).onSuccess {
                 CoroutineScope(dispatcherProvider.io()).launch {
                     runCatching { tokenUpdater.updateTokenForRemoteSigner() }

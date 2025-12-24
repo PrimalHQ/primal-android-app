@@ -20,3 +20,7 @@ fun String.getNostrConnectUrl(): String? = this.getNostrConnectQueryParameter("u
 fun String.getNostrConnectImage(): String? = this.getNostrConnectQueryParameter("image")
 
 fun String.getNostrConnectCallback(): String? = this.getNostrConnectQueryParameter("callback")
+
+fun String.hasNwcOption(): Boolean {
+    return this.getNostrConnectQueryParameter("nwc") == "1"
+}

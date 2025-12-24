@@ -3,6 +3,8 @@ package net.primal.data.account.repository.repository
 import io.ktor.http.Url
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonPrimitive
 import net.primal.core.utils.Result
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
@@ -48,6 +50,7 @@ class SignerConnectionInitializer internal constructor(
         userPubKey: String,
         connectionUrl: String,
         trustLevel: TrustLevel,
+        nwcConnectionString: String? = null,
     ): Result<RemoteAppConnection> =
         runCatching {
             val (appConnection, secret) = parseConnectionUrlOrThrow(
@@ -56,6 +59,12 @@ class SignerConnectionInitializer internal constructor(
                 connectionUrl = connectionUrl,
                 trustLevel = trustLevel,
             )
+
+            val resultPayload = if (nwcConnectionString != null) {
+                JsonArray(listOf(JsonPrimitive(secret), JsonPrimitive(nwcConnectionString))).toString()
+            } else {
+                secret
+            }
 
             connectionRepository.insertOrReplaceConnection(secret = secret, connection = appConnection)
             sessionRepository.startSession(clientPubKey = appConnection.clientPubKey)
@@ -69,7 +78,7 @@ class SignerConnectionInitializer internal constructor(
                         response = RemoteSignerMethodResponse.Success(
                             id = Uuid.random().toString(),
                             clientPubKey = appConnection.clientPubKey,
-                            result = secret,
+                            result = resultPayload,
                         ),
                     )
                 }
