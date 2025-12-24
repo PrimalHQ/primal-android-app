@@ -3,9 +3,10 @@ package net.primal.data.account.repository.mappers
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.data.account.local.dao.apps.local.LocalAppSessionEventData
-import net.primal.data.account.local.dao.apps.local.LocalRequestState
 import net.primal.data.account.local.dao.apps.local.LocalSignerMethodType
+import net.primal.data.account.remote.utils.PERM_ID_DECRYPT_ZAP_EVENT
 import net.primal.data.account.remote.utils.PERM_ID_GET_PUBLIC_KEY
 import net.primal.data.account.remote.utils.PERM_ID_NIP04_DECRYPT
 import net.primal.data.account.remote.utils.PERM_ID_NIP04_ENCRYPT
@@ -28,14 +29,14 @@ fun buildSessionEventData(
     requestType: LocalSignerMethodType,
     method: LocalSignerMethod?,
     response: LocalSignerMethodResponse?,
-    requestState: LocalRequestState?,
+    requestState: AppRequestState?,
 ): LocalAppSessionEventData? {
     val appIdentifier = method?.getIdentifier() ?: return null
 
     val resolvedRequestState = requestState ?: when (response) {
-        is LocalSignerMethodResponse.Error -> LocalRequestState.Rejected
-        is LocalSignerMethodResponse.Success -> LocalRequestState.Approved
-        else -> LocalRequestState.Rejected
+        is LocalSignerMethodResponse.Error -> AppRequestState.Rejected
+        is LocalSignerMethodResponse.Success -> AppRequestState.Approved
+        else -> AppRequestState.PendingUserAction
     }
 
     return LocalAppSessionEventData(
@@ -135,7 +136,7 @@ fun LocalAppSessionEventData.asDomain(): SessionEvent? {
         }
 
         LocalSignerMethodType.DecryptZapEvent -> {
-            throw NotImplementedError()
+            null
         }
     }
 }
@@ -144,7 +145,7 @@ private fun getResponseBody(responsePayload: String?) =
     responsePayload.decodeFromJsonStringOrNull<LocalSignerMethodResponse>()?.let {
         when (it) {
             is LocalSignerMethodResponse.Error -> it.message
-            is LocalSignerMethodResponse.Success.DecryptZapEvent -> throw NotImplementedError()
+            is LocalSignerMethodResponse.Success.DecryptZapEvent -> it.signedEvent.encodeToJsonString()
             is LocalSignerMethodResponse.Success.GetPublicKey -> it.pubkey
             is LocalSignerMethodResponse.Success.Nip04Decrypt -> it.plaintext
             is LocalSignerMethodResponse.Success.Nip04Encrypt -> it.ciphertext
@@ -156,7 +157,7 @@ private fun getResponseBody(responsePayload: String?) =
 
 fun LocalSignerMethod.getRequestType(): LocalSignerMethodType {
     return when (this) {
-        is LocalSignerMethod.DecryptZapEvent -> throw NotImplementedError()
+        is LocalSignerMethod.DecryptZapEvent -> LocalSignerMethodType.DecryptZapEvent
         is LocalSignerMethod.GetPublicKey -> LocalSignerMethodType.GetPublicKey
         is LocalSignerMethod.Nip04Decrypt -> LocalSignerMethodType.Nip04Decrypt
         is LocalSignerMethod.Nip04Encrypt -> LocalSignerMethodType.Nip04Encrypt
@@ -174,11 +175,13 @@ fun LocalAppSessionEventData.getRequestTypeId() =
         LocalSignerMethodType.Nip04Decrypt -> PERM_ID_NIP04_DECRYPT
         LocalSignerMethodType.Nip44Encrypt -> PERM_ID_NIP44_ENCRYPT
         LocalSignerMethodType.Nip44Decrypt -> PERM_ID_NIP44_DECRYPT
-        LocalSignerMethodType.DecryptZapEvent -> throw NotImplementedError()
+        LocalSignerMethodType.DecryptZapEvent -> PERM_ID_DECRYPT_ZAP_EVENT
     }
 
-private fun LocalRequestState.asDomain(): RequestStateDO =
+private fun AppRequestState.asDomain(): RequestStateDO =
     when (this) {
-        LocalRequestState.Approved -> RequestStateDO.Approved
-        LocalRequestState.Rejected -> RequestStateDO.Rejected
+        AppRequestState.Approved -> RequestStateDO.Approved
+        AppRequestState.Rejected -> RequestStateDO.Rejected
+        AppRequestState.PendingUserAction -> RequestStateDO.Pending
+        AppRequestState.PendingResponse -> RequestStateDO.Pending
     }

@@ -2,15 +2,20 @@ package net.primal.data.account.repository.service
 
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import net.primal.core.utils.Result
 import net.primal.core.utils.add
 import net.primal.core.utils.asSuccess
 import net.primal.core.utils.remove
 import net.primal.core.utils.runCatching
+import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.data.account.repository.builder.LocalSignerMethodResponseBuilder
+import net.primal.data.account.repository.mappers.asDomain
+import net.primal.data.account.repository.mappers.buildSessionEventData
 import net.primal.data.account.repository.mappers.getRequestType
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
@@ -20,6 +25,7 @@ import net.primal.domain.account.model.AppPermissionAction
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.model.LocalSignerMethodResponse
+import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.SessionEventUserChoice
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.model.UserChoice
@@ -37,6 +43,7 @@ class LocalSignerServiceImpl internal constructor(
     private val internalSessionRepository: InternalSessionRepository,
     private val internalSessionEventRepository: InternalSessionEventRepository,
 ) : LocalSignerService {
+
     private val responses = AtomicReference<List<LocalSignerMethodResponse>>(emptyList())
     private val pendingUserActionMethods = MutableStateFlow<List<LocalSignerMethod>>(emptyList())
 
@@ -71,7 +78,20 @@ class LocalSignerServiceImpl internal constructor(
         }
     }
 
-    override fun subscribeToPendingUserActions(): Flow<List<LocalSignerMethod>> = pendingUserActionMethods.asStateFlow()
+    override fun observeSessionEventsPendingUserAction(): Flow<List<SessionEvent>> =
+        pendingUserActionMethods.asStateFlow()
+            .map {
+                it.mapNotNull { method ->
+                    buildSessionEventData(
+                        sessionId = "null",
+                        processedAt = Clock.System.now().epochSeconds,
+                        requestType = method.getRequestType(),
+                        method = method,
+                        response = null,
+                        requestState = AppRequestState.PendingUserAction,
+                    )?.asDomain()
+                }
+            }
 
     override fun getMethodResponses() = responses.load()
 

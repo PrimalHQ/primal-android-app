@@ -7,9 +7,8 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.data.account.local.dao.apps.local.LocalRequestState
+import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.data.account.local.dao.apps.local.LocalSignerMethodType
-import net.primal.data.account.local.dao.apps.remote.RemoteAppRequestState
 import net.primal.data.account.local.dao.apps.remote.RemoteSignerMethodType
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
@@ -32,7 +31,7 @@ internal class InternalSessionEventRepository(
         requestType: RemoteSignerMethodType,
         method: RemoteSignerMethod?,
         response: RemoteSignerMethodResponse?,
-        requestState: RemoteAppRequestState? = null,
+        requestState: AppRequestState? = null,
     ) = withContext(dispatchers.io()) {
         runCatching {
             val completedAt = Clock.System.now().epochSeconds
@@ -57,7 +56,7 @@ internal class InternalSessionEventRepository(
         requestType: LocalSignerMethodType,
         method: LocalSignerMethod?,
         response: LocalSignerMethodResponse?,
-        requestState: LocalRequestState? = null,
+        requestState: AppRequestState? = null,
     ) = withContext(dispatchers.io()) {
         runCatching {
             buildSessionEventData(
@@ -76,7 +75,7 @@ internal class InternalSessionEventRepository(
     fun observeRemoteAppPendingResponseEvents(signerPubKey: String) =
         accountDatabase.remoteAppSessionEvents().observeEventsByRequestState(
             signerPubKey = signerPubKey,
-            requestState = RemoteAppRequestState.PendingResponse,
+            requestState = AppRequestState.PendingResponse,
         ).distinctUntilChanged()
 
     fun observeRemoteAppPendingNostrEvents(signerPubKey: String) =

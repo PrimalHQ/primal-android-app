@@ -1,10 +1,10 @@
 package net.primal.data.account.repository.repository.internal.model
 
-import net.primal.data.account.local.dao.apps.remote.RemoteAppRequestState
+import net.primal.data.account.local.dao.apps.AppRequestState
 
 internal data class UpdateRemoteAppSessionEventRequest(
     val eventId: String,
-    val requestState: RemoteAppRequestState,
+    val requestState: AppRequestState,
     val responsePayload: String?,
     val completedAt: Long?,
 )

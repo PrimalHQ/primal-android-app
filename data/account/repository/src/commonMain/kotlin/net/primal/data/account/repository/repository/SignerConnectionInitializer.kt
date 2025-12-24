@@ -7,7 +7,7 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.account.local.dao.apps.remote.RemoteAppRequestState
+import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.data.account.local.dao.apps.remote.RemoteSignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
@@ -73,7 +73,7 @@ class SignerConnectionInitializer internal constructor(
                         signerPubKey = signerPubKey,
                         requestType = RemoteSignerMethodType.Connect,
                         method = null,
-                        requestState = RemoteAppRequestState.PendingResponse,
+                        requestState = AppRequestState.PendingResponse,
                         response = RemoteSignerMethodResponse.Success(
                             id = Uuid.random().toString(),
                             clientPubKey = appConnection.clientPubKey,

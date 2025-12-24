@@ -5,7 +5,7 @@ import kotlin.uuid.Uuid
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.account.local.dao.apps.remote.RemoteAppRequestState as RemoteAppRequestStatePO
+import net.primal.data.account.local.dao.apps.AppRequestState as RemoteAppRequestStatePO
 import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionEventData
 import net.primal.data.account.local.dao.apps.remote.RemoteSignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethod

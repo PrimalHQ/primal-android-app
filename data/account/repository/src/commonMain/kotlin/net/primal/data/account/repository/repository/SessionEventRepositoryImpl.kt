@@ -9,10 +9,10 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppPermissionData
+import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.data.account.local.dao.apps.PermissionAction
 import net.primal.data.account.local.dao.apps.TrustLevel
 import net.primal.data.account.local.dao.apps.remote.RemoteAppPendingNostrEvent
-import net.primal.data.account.local.dao.apps.remote.RemoteAppRequestState
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.asDomain
@@ -35,7 +35,7 @@ class SessionEventRepositoryImpl(
     override fun observeEventsPendingUserAction(signerPubKey: String): Flow<List<SessionEvent>> =
         database.remoteAppSessionEvents().observeEventsByRequestState(
             signerPubKey = signerPubKey,
-            requestState = RemoteAppRequestState.PendingUserAction,
+            requestState = AppRequestState.PendingUserAction,
         ).map { events -> events.mapNotNull { it.asDomain() } }
             .distinctUntilChanged()
 
@@ -134,7 +134,7 @@ class SessionEventRepositoryImpl(
         withContext(dispatchers.io()) {
             database.remoteAppSessionEvents().updateSessionEventRequestState(
                 eventId = eventId,
-                requestState = RemoteAppRequestState.PendingResponse,
+                requestState = AppRequestState.PendingResponse,
                 responsePayload = null,
                 completedAt = null,
             )
@@ -146,7 +146,7 @@ class SessionEventRepositoryImpl(
             if (clientPubKey != null) {
                 database.remoteAppSessionEvents().updateSessionEventRequestState(
                     eventId = eventId,
-                    requestState = RemoteAppRequestState.PendingResponse,
+                    requestState = AppRequestState.PendingResponse,
                     completedAt = null,
                     responsePayload = RemoteSignerMethodResponse.Error(
                         id = eventId,

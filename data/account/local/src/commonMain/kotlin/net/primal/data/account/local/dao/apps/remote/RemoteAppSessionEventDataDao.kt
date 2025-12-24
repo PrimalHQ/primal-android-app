@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.shared.data.local.encryption.Encryptable
 
 @Dao
@@ -28,7 +29,7 @@ interface RemoteAppSessionEventDataDao {
     )
     fun observeEventsByRequestState(
         signerPubKey: String,
-        requestState: RemoteAppRequestState,
+        requestState: AppRequestState,
     ): Flow<List<RemoteAppSessionEventData>>
 
     @Query(
@@ -40,7 +41,7 @@ interface RemoteAppSessionEventDataDao {
     )
     suspend fun updateSessionEventRequestState(
         eventId: String,
-        requestState: RemoteAppRequestState,
+        requestState: AppRequestState,
         responsePayload: Encryptable<String>?,
         completedAt: Long?,
     )
