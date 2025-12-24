@@ -21,6 +21,4 @@ fun String.getNostrConnectImage(): String? = this.getNostrConnectQueryParameter(
 
 fun String.getNostrConnectCallback(): String? = this.getNostrConnectQueryParameter("callback")
 
-fun String.hasNwcOption(): Boolean {
-    return this.getNostrConnectQueryParameter("nwc") == "1"
-}
+fun String.hasNwcOption(): Boolean = this.getNostrConnectQueryParameter("nwc") == "1"
