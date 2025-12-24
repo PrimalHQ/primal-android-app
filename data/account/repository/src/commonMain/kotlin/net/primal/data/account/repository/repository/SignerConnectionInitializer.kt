@@ -3,11 +3,10 @@ package net.primal.data.account.repository.repository
 import io.ktor.http.Url
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
-import kotlinx.serialization.json.JsonArray
-import kotlinx.serialization.json.JsonPrimitive
 import net.primal.core.utils.Result
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.remote.RemoteAppRequestState
 import net.primal.data.account.local.dao.apps.remote.RemoteSignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
@@ -61,7 +60,7 @@ class SignerConnectionInitializer internal constructor(
             )
 
             val resultPayload = if (nwcConnectionString != null) {
-                JsonArray(listOf(JsonPrimitive(secret), JsonPrimitive(nwcConnectionString))).toString()
+                listOf(secret, nwcConnectionString).encodeToJsonString()
             } else {
                 secret
             }
