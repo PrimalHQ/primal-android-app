@@ -26,6 +26,7 @@ import net.primal.android.nostrconnect.utils.getNostrConnectName
 import net.primal.android.nostrconnect.utils.getNostrConnectUrl
 import net.primal.android.nostrconnect.utils.hasNwcOption
 import net.primal.android.user.accounts.UserAccountsStore
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.CredentialType
 import net.primal.android.user.domain.asKeyPair
@@ -48,6 +49,7 @@ class NostrConnectViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val dispatcherProvider: DispatcherProvider,
     private val accountsStore: UserAccountsStore,
+    private val activeAccountStore: ActiveAccountStore,
     private val exchangeRateHandler: ExchangeRateHandler,
     private val credentialsStore: CredentialsStore,
     private val signerConnectionInitializer: SignerConnectionInitializer,
@@ -81,7 +83,10 @@ class NostrConnectViewModel @Inject constructor(
     init {
         observeEvents()
         observeAccounts()
-        observeUsdExchangeRate()
+        if (connectionUrl?.hasNwcOption() == true) {
+            fetchExchangeRate()
+            observeUsdExchangeRate()
+        }
     }
 
     private fun observeEvents() {
@@ -119,6 +124,13 @@ class NostrConnectViewModel @Inject constructor(
             }
         }
     }
+
+    private fun fetchExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.updateExchangeRate(
+                userId = activeAccountStore.activeUserId(),
+            )
+        }
 
     private fun observeUsdExchangeRate() {
         viewModelScope.launch {
