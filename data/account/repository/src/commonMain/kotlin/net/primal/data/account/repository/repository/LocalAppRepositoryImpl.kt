@@ -45,7 +45,7 @@ class LocalAppRepositoryImpl(
                         ?: PermissionActionDO.Ask
                 }
 
-                TrustLevel.Low -> PermissionActionDO.Deny
+                TrustLevel.Low -> PermissionActionDO.Ask
             }
         }
 
