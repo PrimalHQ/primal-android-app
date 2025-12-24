@@ -87,7 +87,7 @@ fun NostrConnectBottomSheet(viewModel: NostrConnectViewModel, onDismissRequest: 
                     )
                 },
                 onCancelClick = onDismissRequest,
-                isNwcRequest = state.isNwcRequest,
+                hasNwcRequest = state.hasNwcRequest,
                 budgetToUsdMap = state.budgetToUsdMap,
             )
 

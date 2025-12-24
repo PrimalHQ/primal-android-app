@@ -64,7 +64,7 @@ class NostrConnectViewModel @Inject constructor(
             appImageUrl = connectionUrl?.getNostrConnectImage(),
             connectionUrl = connectionUrl,
             callback = connectionUrl?.getNostrConnectCallback(),
-            isNwcRequest = connectionUrl?.hasNwcOption() == true,
+            hasNwcRequest = connectionUrl?.hasNwcOption() == true,
         ),
     )
     val state = _state.asStateFlow()
@@ -150,7 +150,7 @@ class NostrConnectViewModel @Inject constructor(
             val connectionUrl = currentState.connectionUrl ?: return@launch
 
             var nwcConnectionString: String? = null
-            if (currentState.isNwcRequest && dailyBudget != 0L) {
+            if (currentState.hasNwcRequest && dailyBudget != 0L) {
                 val budgetBtc = dailyBudget?.toBtc()?.formatAsString()
                 runCatching {
                     primalWalletNwcRepository.createNewWalletConnection(

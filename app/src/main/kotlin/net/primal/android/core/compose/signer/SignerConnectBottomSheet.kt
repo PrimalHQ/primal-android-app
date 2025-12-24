@@ -98,7 +98,7 @@ fun SignerConnectBottomSheet(
     modifier: Modifier = Modifier,
     appImageUrl: String? = null,
     appIcon: Drawable? = null,
-    isNwcRequest: Boolean = false,
+    hasNwcRequest: Boolean = false,
     budgetToUsdMap: Map<Long, BigDecimal?> = emptyMap(),
 ) {
     var selectedTab by remember { mutableStateOf(SignerConnectTab.Login) }
@@ -143,7 +143,7 @@ fun SignerConnectBottomSheet(
                 trustLevel = trustLevel,
                 onAccountSelect = { pubkey -> selectedAccount = accounts.find { it.pubkey == pubkey } },
                 onTrustLevelSelect = { trustLevel = it },
-                isNwcRequest = isNwcRequest,
+                hasNwcRequest = hasNwcRequest,
                 dailyBudget = dailyBudget,
                 showDailyBudgetPicker = showDailyBudgetPicker,
                 selectedDailyBudget = tempSelectedBudget,
@@ -165,7 +165,7 @@ fun SignerConnectBottomSheet(
                 },
                 onConnect = {
                     selectedAccount?.let {
-                        onConnectClick(it, trustLevel, if (isNwcRequest) dailyBudget else null)
+                        onConnectClick(it, trustLevel, if (hasNwcRequest) dailyBudget else null)
                     }
                 },
                 onCancelBudget = { showDailyBudgetPicker = false },
@@ -336,7 +336,7 @@ private fun SignerConnectPages(
     trustLevel: TrustLevel,
     onAccountSelect: (String) -> Unit,
     onTrustLevelSelect: (TrustLevel) -> Unit,
-    isNwcRequest: Boolean,
+    hasNwcRequest: Boolean,
     dailyBudget: Long?,
     showDailyBudgetPicker: Boolean,
     selectedDailyBudget: Long?,
@@ -374,7 +374,7 @@ private fun SignerConnectPages(
             SignerConnectTab.Permissions -> PermissionsContent(
                 trustLevel = trustLevel,
                 onTrustLevelClick = onTrustLevelSelect,
-                isNwcRequest = isNwcRequest,
+                hasNwcRequest = hasNwcRequest,
                 dailyBudget = dailyBudget,
                 onDailyBudgetClick = onDailyBudgetClick,
                 showDailyBudgetPicker = showDailyBudgetPicker,
@@ -468,7 +468,7 @@ private fun AccountListItem(
 private fun PermissionsContent(
     trustLevel: TrustLevel,
     onTrustLevelClick: (TrustLevel) -> Unit,
-    isNwcRequest: Boolean,
+    hasNwcRequest: Boolean,
     dailyBudget: Long?,
     onDailyBudgetClick: () -> Unit,
     showDailyBudgetPicker: Boolean,
@@ -490,7 +490,7 @@ private fun PermissionsContent(
             PermissionsList(
                 trustLevel = trustLevel,
                 onTrustLevelClick = onTrustLevelClick,
-                isNwcRequest = isNwcRequest,
+                hasNwcRequest = hasNwcRequest,
                 dailyBudget = dailyBudget,
                 onDailyBudgetClick = onDailyBudgetClick,
             )
@@ -502,7 +502,7 @@ private fun PermissionsContent(
 private fun PermissionsList(
     trustLevel: TrustLevel,
     onTrustLevelClick: (TrustLevel) -> Unit,
-    isNwcRequest: Boolean,
+    hasNwcRequest: Boolean,
     dailyBudget: Long?,
     onDailyBudgetClick: () -> Unit,
 ) {
@@ -534,7 +534,7 @@ private fun PermissionsList(
             onClick = { onTrustLevelClick(TrustLevel.Low) },
         )
 
-        if (isNwcRequest) {
+        if (hasNwcRequest) {
             PrimalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             DailyBudgetListItem(

@@ -15,7 +15,7 @@ interface NostrConnectContract {
         val accounts: List<UserAccountUi> = emptyList(),
         val connecting: Boolean = false,
         val error: UiError? = null,
-        val isNwcRequest: Boolean = false,
+        val hasNwcRequest: Boolean = false,
         val budgetToUsdMap: Map<Long, BigDecimal?> = emptyMap(),
     )
 
