@@ -95,8 +95,18 @@ fun SignerPermissionsBottomSheet(
     var selectedEventIds by remember { mutableStateOf(emptySet<String>()) }
     var alwaysHandleRequestsLikeThis by remember { mutableStateOf(true) }
 
+    var previousSessionId by remember { mutableStateOf<String?>(null) }
+    var previousEventIds by remember { mutableStateOf(emptySet<String>()) }
     LaunchedEffect(events) {
-        selectedEventIds = events.map { it.eventId }.toSet()
+        selectedEventIds = resolveSmartSelection(
+            newEvents = events,
+            previousSessionId = previousSessionId,
+            previousEventIds = previousEventIds,
+            currentSelectedIds = selectedEventIds,
+        )
+
+        previousSessionId = events.firstOrNull()?.sessionId
+        previousEventIds = events.map { it.eventId }.toSet()
     }
 
     ModalBottomSheet(
@@ -566,4 +576,27 @@ private fun SessionDetailsColumn(
         )
     }
     PrimalDivider()
+}
+
+private fun resolveSmartSelection(
+    newEvents: List<SessionEvent>,
+    previousSessionId: String?,
+    previousEventIds: Set<String>,
+    currentSelectedIds: Set<String>,
+): Set<String> {
+    val newSessionId = newEvents.firstOrNull()?.sessionId
+    val newEventIds = newEvents.map { it.eventId }.toSet()
+
+    return if (newSessionId != previousSessionId) {
+        newEventIds
+    } else {
+        newEventIds.filter { eventId ->
+            val isOldEvent = eventId in previousEventIds
+            if (isOldEvent) {
+                eventId in currentSelectedIds
+            } else {
+                true
+            }
+        }.toSet()
+    }
 }
