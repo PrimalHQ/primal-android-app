@@ -54,8 +54,6 @@ class RemoteSignerServiceImpl internal constructor(
     private val scope = CoroutineScope(SupervisorJob())
 
     private val relaySessionMap = AtomicReference<Map<String, List<String>>>(emptyMap())
-    private val activeClientPubKeys = AtomicReference<HashSet<String>>(hashSetOf())
-    private val clientSessionMap = AtomicReference<Map<String, String>>(emptyMap())
     private val sessionActivityMap = AtomicReference<MutableMap<String, Instant>>(mutableMapOf())
     private val retrySendMethodResponseQueue = MutableSharedFlow<RemoteSignerMethodResponse>()
 
@@ -106,8 +104,7 @@ class RemoteSignerServiceImpl internal constructor(
                     sessions.forEach {
                         sessionActivityMap.load().getOrPut(it.sessionId) { Clock.System.now() }
                     }
-                    clientSessionMap.store(sessions.associate { it.clientPubKey to it.sessionId })
-                    activeClientPubKeys.store(sessions.map { it.clientPubKey }.toHashSet())
+
                     nostrRelayManager.connectToRelays(relays = sessions.flatMap { it.relays }.toSet())
                 }
         }
@@ -231,17 +228,11 @@ class RemoteSignerServiceImpl internal constructor(
 
     private fun processMethod(method: RemoteSignerMethod) =
         scope.launch {
-            if (!activeClientPubKeys.load().contains(method.clientPubKey)) {
-                val connection = connectionRepository.getConnectionByClientPubKey(
-                    clientPubKey = method.clientPubKey,
-                ).getOrNull() ?: return@launch
-
-                if (connection.autoStart) {
-                    sessionRepository.startSession(clientPubKey = connection.clientPubKey)
-                } else {
-                    return@launch
-                }
-            }
+            val sessionId = sessionRepository.findFirstOpenSessionByAppIdentifier(
+                appIdentifier = method.clientPubKey,
+            ).getOrNull()?.sessionId
+                ?: autoStartSessionIfAllowed(method.clientPubKey)
+                ?: return@launch
 
             val canProcessMethod = connectionRepository.canProcessMethod(
                 permissionId = method.getPermissionId(),
@@ -254,17 +245,15 @@ class RemoteSignerServiceImpl internal constructor(
                 null
             }
 
-            findActiveSessionId(clientPubKey = method.clientPubKey)?.let { sessionId ->
-                sessionActivityMap.load()[sessionId] = Clock.System.now()
+            sessionActivityMap.load()[sessionId] = Clock.System.now()
 
-                internalSessionEventRepository.saveRemoteAppSessionEvent(
-                    sessionId = sessionId,
-                    requestType = method.getRequestType(),
-                    method = method,
-                    signerPubKey = signerKeyPair.pubKey,
-                    response = response,
-                )
-            }
+            internalSessionEventRepository.saveRemoteAppSessionEvent(
+                sessionId = sessionId,
+                requestType = method.getRequestType(),
+                method = method,
+                signerPubKey = signerKeyPair.pubKey,
+                response = response,
+            )
 
             Napier.d(tag = "Signer") { "Response $response" }
 
@@ -273,11 +262,29 @@ class RemoteSignerServiceImpl internal constructor(
             }
         }
 
-    private suspend fun findActiveSessionId(clientPubKey: String): String? =
-        clientSessionMap.load()[clientPubKey]
-            ?: connectionRepository.getConnectionByClientPubKey(clientPubKey = clientPubKey).getOrNull()
-                ?.let { sessionRepository.findFirstOpenSessionByAppIdentifier(appIdentifier = it.clientPubKey) }
-                ?.getOrNull()?.sessionId
+    private suspend fun autoStartSessionIfAllowed(clientPubKey: String): String? {
+        val connection = connectionRepository.getConnectionByClientPubKey(clientPubKey = clientPubKey).getOrNull()
+        return if (connection?.autoStart == true) {
+            sessionRepository.startSession(clientPubKey = connection.clientPubKey).fold(
+                onSuccess = { sessionId ->
+                    Napier.d(tag = "Signer") { "Session $sessionId auto-started." }
+                    sessionId
+                },
+                onFailure = {
+                    Napier.d(throwable = it, tag = "Signer") { "Failed to auto start session for $clientPubKey" }
+                    val sessionId = sessionRepository.findFirstOpenSessionByAppIdentifier(appIdentifier = clientPubKey)
+                        .getOrNull()?.sessionId
+
+                    Napier.d(tag = "Signer") { "Checking existing open session for $clientPubKey: $sessionId" }
+
+                    sessionId
+                },
+            )
+        } else {
+            Napier.d(tag = "Signer") { "Auto start sessions disabled for $clientPubKey" }
+            null
+        }
+    }
 
     private suspend fun sendResponseOrAddToFailedQueue(response: RemoteSignerMethodResponse): Result<Unit> {
         return sendResponse(response).onFailure {
