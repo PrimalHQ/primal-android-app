@@ -19,8 +19,6 @@ interface SessionRepository {
 
     fun observeSessionsByAppIdentifier(appIdentifier: String): Flow<List<AppSession>>
 
-    fun observeSession(sessionId: String): Flow<RemoteAppSession?>
-
     fun observeRemoteSession(sessionId: String): Flow<RemoteAppSession?>
 
     fun observeLocalSession(sessionId: String): Flow<LocalAppSession?>
