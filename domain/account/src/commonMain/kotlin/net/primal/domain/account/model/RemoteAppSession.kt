@@ -12,5 +12,5 @@ data class RemoteAppSession(
     val permissions: List<AppPermission>,
     val sessionStartedAt: Long,
     val sessionEndedAt: Long?,
-    val sessionState: RemoteAppSessionState,
+    val sessionState: AppSessionState,
 )

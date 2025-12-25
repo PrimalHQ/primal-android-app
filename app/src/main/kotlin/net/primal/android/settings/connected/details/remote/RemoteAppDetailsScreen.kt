@@ -71,7 +71,7 @@ import net.primal.android.settings.connected.details.remote.RemoteAppDetailsCont
 import net.primal.android.settings.connected.model.SessionUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.domain.account.model.RemoteAppSessionState
+import net.primal.domain.account.model.AppSessionState
 import net.primal.domain.account.model.TrustLevel
 
 private val EditButtonContainerColorDark = Color(0xFF333333)
@@ -242,7 +242,7 @@ private fun HeaderSection(
     iconUrl: String?,
     appName: String?,
     lastSession: Long?,
-    sessionState: RemoteAppSessionState,
+    sessionState: AppSessionState,
     autoStartSession: Boolean,
     onAutoStartSessionChange: (Boolean) -> Unit,
     onStartSessionClick: () -> Unit,
@@ -307,11 +307,11 @@ private fun HeaderSection(
 
 @Composable
 private fun SessionControlButton(
-    sessionState: RemoteAppSessionState,
+    sessionState: AppSessionState,
     onStart: () -> Unit,
     onEnd: () -> Unit,
 ) {
-    val text = if (sessionState == RemoteAppSessionState.Active) {
+    val text = if (sessionState == AppSessionState.Active) {
         stringResource(id = R.string.settings_connected_app_details_end_session)
     } else {
         stringResource(id = R.string.settings_connected_app_details_start_session)
@@ -326,9 +326,9 @@ private fun SessionControlButton(
                 shape = AppTheme.shapes.extraLarge,
             )
             .clickable(
-                enabled = sessionState != RemoteAppSessionState.Connecting,
+                enabled = true,
                 onClick = {
-                    if (sessionState == RemoteAppSessionState.Active) {
+                    if (sessionState == AppSessionState.Active) {
                         onEnd()
                     } else {
                         onStart()
@@ -338,16 +338,12 @@ private fun SessionControlButton(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
     ) {
-        if (sessionState == RemoteAppSessionState.Connecting) {
-            PrimalLoadingSpinner(size = 48.dp)
-        } else {
-            Text(
-                textAlign = TextAlign.Center,
-                text = text,
-                style = AppTheme.typography.bodyMedium,
-                color = AppTheme.colorScheme.surface,
-            )
-        }
+        Text(
+            textAlign = TextAlign.Center,
+            text = text,
+            style = AppTheme.typography.bodyMedium,
+            color = AppTheme.colorScheme.surface,
+        )
     }
 }
 
