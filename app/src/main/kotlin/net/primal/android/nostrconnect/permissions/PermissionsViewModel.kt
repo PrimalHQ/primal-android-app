@@ -11,7 +11,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
-import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.nostrconnect.model.asUi
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
 import net.primal.android.nostrconnect.permissions.PermissionsContract.UiState
@@ -55,21 +54,14 @@ class PermissionsViewModel @Inject constructor(
             events.collect { event ->
                 when (event) {
                     UiEvent.DismissSheet -> setState { copy(bottomSheetVisibility = false) }
-                    UiEvent.SelectAll -> setState {
-                        copy(selectedEventIds = sessionEvents.map { it.eventId }.toSet())
-                    }
 
-                    UiEvent.DeselectAll -> setState { copy(selectedEventIds = emptySet()) }
-                    is UiEvent.SelectEvent -> setState { copy(selectedEventIds = selectedEventIds + event.eventId) }
-                    is UiEvent.DeselectEvent -> setState { copy(selectedEventIds = selectedEventIds - event.eventId) }
-
-                    is UiEvent.AllowSelected -> respondToEvents(
-                        eventIds = state.value.selectedEventIds,
+                    is UiEvent.Allow -> respondToEvents(
+                        eventIds = event.eventIds,
                         choice = if (event.alwaysAllow) UserChoice.AlwaysAllow else UserChoice.Allow,
                     )
 
-                    is UiEvent.RejectSelected -> respondToEvents(
-                        eventIds = state.value.selectedEventIds,
+                    is UiEvent.Reject -> respondToEvents(
+                        eventIds = event.eventIds,
                         choice = if (event.alwaysReject) UserChoice.AlwaysReject else UserChoice.Reject,
                     )
 
@@ -118,15 +110,12 @@ class PermissionsViewModel @Inject constructor(
         }
     }
 
-    private fun respondToEvents(eventIds: Set<String>, choice: UserChoice) =
+    private fun respondToEvents(eventIds: List<String>, choice: UserChoice) =
         viewModelScope.launch {
             setState { copy(responding = true) }
             val userChoices = eventIds.map { SessionEventUserChoice(sessionEventId = it, userChoice = choice) }
             sessionEventRepository
                 .respondToEvents(userChoices = userChoices)
-                .onSuccess {
-                    setState { copy(selectedEventIds = selectedEventIds - eventIds) }
-                }
             setState { copy(responding = false) }
         }
 
@@ -157,33 +146,9 @@ class PermissionsViewModel @Inject constructor(
                 setState {
                     copy(
                         bottomSheetVisibility = requestsQueue.isNotEmpty(),
-                        selectedEventIds = resolveSelectedEventIds(requestsQueue),
                         requestQueue = requestsQueue,
                     )
                 }
             }
         }
-
-    private fun UiState.resolveSelectedEventIds(
-        newRequestQueue: List<Pair<ActiveSessionUi, List<SessionEvent>>>,
-    ): Set<String> {
-        val newSessionId = newRequestQueue.firstOrNull()?.first?.sessionId
-        val oldSessionId = this.requestQueue.firstOrNull()?.first?.sessionId
-        val newSessionEvents = newRequestQueue.firstOrNull()?.second ?: emptyList()
-
-        return if (newSessionId != oldSessionId) {
-            newSessionEvents.map { it.eventId }.toSet()
-        } else {
-            val oldEventIds = this.sessionEvents.map { it.eventId }.toSet()
-
-            newSessionEvents.filter { event ->
-                val isOldEvent = event.eventId in oldEventIds
-                if (isOldEvent) {
-                    event.eventId in this.selectedEventIds
-                } else {
-                    true
-                }
-            }.map { it.eventId }.toSet()
-        }
-    }
 }

@@ -8,7 +8,6 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 interface PermissionsContract {
     data class UiState(
         val bottomSheetVisibility: Boolean = false,
-        val selectedEventIds: Set<String> = emptySet(),
         val requestQueue: List<Pair<ActiveSessionUi, List<SessionEvent>>> = emptyList(),
         val activeSessions: Map<String, ActiveSessionUi> = emptyMap(),
         val responding: Boolean = false,
@@ -23,12 +22,8 @@ interface PermissionsContract {
 
     sealed class UiEvent {
         data object DismissSheet : UiEvent()
-        data object SelectAll : UiEvent()
-        data object DeselectAll : UiEvent()
-        data class SelectEvent(val eventId: String) : UiEvent()
-        data class DeselectEvent(val eventId: String) : UiEvent()
-        data class AllowSelected(val alwaysAllow: Boolean) : UiEvent()
-        data class RejectSelected(val alwaysReject: Boolean) : UiEvent()
+        data class Allow(val eventIds: List<String>, val alwaysAllow: Boolean) : UiEvent()
+        data class Reject(val eventIds: List<String>, val alwaysReject: Boolean) : UiEvent()
         data class OpenEventDetails(val eventId: String) : UiEvent()
         data object CloseEventDetails : UiEvent()
     }
