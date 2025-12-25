@@ -74,10 +74,6 @@ object AccountServiceFactory {
                 dispatchers = dispatchers,
                 accountDatabase = accountDatabase,
             ),
-            internalSessionRepository = InternalSessionRepository(
-                dispatchers = dispatchers,
-                database = accountDatabase,
-            ),
             remoteSignerMethodParser = RemoteSignerMethodParser(
                 nostrEncryptionService = nostrEncryptionService,
             ),
