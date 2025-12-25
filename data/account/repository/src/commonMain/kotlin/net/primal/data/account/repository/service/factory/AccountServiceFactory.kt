@@ -7,7 +7,7 @@ import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.remote.api.WellKnownApi
 import net.primal.data.account.remote.api.createWellKnownApi
-import net.primal.data.account.remote.method.processor.RemoteSignerMethodProcessor
+import net.primal.data.account.remote.method.parser.RemoteSignerMethodParser
 import net.primal.data.account.repository.builder.LocalSignerMethodResponseBuilder
 import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
@@ -74,7 +74,7 @@ object AccountServiceFactory {
                 dispatchers = dispatchers,
                 database = accountDatabase,
             ),
-            methodProcessor = RemoteSignerMethodProcessor(
+            remoteSignerMethodParser = RemoteSignerMethodParser(
                 nostrEncryptionService = nostrEncryptionService,
             ),
         )

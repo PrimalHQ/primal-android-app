@@ -20,8 +20,9 @@ import net.primal.core.utils.remove
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
 import net.primal.data.account.remote.client.RemoteSignerClient
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
+import net.primal.data.account.remote.method.model.RemoteSignerMethodException
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
-import net.primal.data.account.remote.method.processor.RemoteSignerMethodProcessor
+import net.primal.data.account.remote.method.parser.RemoteSignerMethodParser
 import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -50,7 +51,7 @@ internal class NostrRelayManager(
     private val _incomingMethods = MutableSharedFlow<RemoteSignerMethod>(extraBufferCapacity = 64)
     val incomingMethods: Flow<RemoteSignerMethod> = _incomingMethods.asSharedFlow()
 
-    private val _errors = MutableSharedFlow<RemoteSignerMethodResponse.Error>(extraBufferCapacity = 64)
+    private val _errors = MutableSharedFlow<RemoteSignerMethodException>(extraBufferCapacity = 64)
     val errors = _errors.asSharedFlow()
 
     private val _relayEvents = MutableSharedFlow<RelayEvent>(extraBufferCapacity = 64)
@@ -68,7 +69,7 @@ internal class NostrRelayManager(
             relayUrl = relay,
             dispatchers = dispatcherProvider,
             signerKeyPair = signerKeyPair,
-            remoteSignerMethodProcessor = RemoteSignerMethodProcessor(nostrEncryptionService),
+            remoteSignerMethodParser = RemoteSignerMethodParser(nostrEncryptionService),
             onSocketConnectionOpened = { url ->
                 Napier.d(tag = "SignerNostrRelayManager") { "Connected to relay: $url" }
                 scope.launch { _relayEvents.emit(RelayEvent.Connected(relayUrl = url)) }
@@ -158,13 +159,13 @@ internal class NostrRelayManager(
 
             launch {
                 client.errors.collect { error ->
-                    if (cache.seen(error.id)) return@collect
+                    if (cache.seen(error.nostrEvent.id)) return@collect
 
                     if (!_errors.tryEmit(error)) {
                         _errors.emit(error)
                     }
 
-                    cache.mark(error.id)
+                    cache.mark(error.nostrEvent.id)
                 }
             }
         }

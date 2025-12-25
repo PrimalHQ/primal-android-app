@@ -21,11 +21,13 @@ import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.fold
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.runCatching
+import net.primal.data.account.remote.mappers.mapAsRemoteSignerMethodException
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
-import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
-import net.primal.data.account.remote.method.processor.RemoteSignerMethodProcessor
+import net.primal.data.account.remote.method.model.RemoteSignerMethodException
+import net.primal.data.account.remote.method.parser.RemoteSignerMethodParser
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.NostrKeyPair
@@ -37,7 +39,7 @@ class RemoteSignerClient(
     relayUrl: String,
     dispatchers: DispatcherProvider,
     private val signerKeyPair: NostrKeyPair,
-    private val remoteSignerMethodProcessor: RemoteSignerMethodProcessor,
+    private val remoteSignerMethodParser: RemoteSignerMethodParser,
     onSocketConnectionOpened: SocketConnectionOpenedCallback? = null,
     onSocketConnectionClosed: SocketConnectionClosedCallback? = null,
 ) {
@@ -51,7 +53,7 @@ class RemoteSignerClient(
     private val _incomingMethods: Channel<RemoteSignerMethod> = Channel()
     val incomingMethods = _incomingMethods.receiveAsFlow()
 
-    private val _errors: Channel<RemoteSignerMethodResponse.Error> = Channel()
+    private val _errors: Channel<RemoteSignerMethodException> = Channel()
     val errors = _errors.receiveAsFlow()
 
     private var listenerJob: Job? = null
@@ -80,11 +82,16 @@ class RemoteSignerClient(
                     .collect { message ->
                         if (message is NostrIncomingMessage.EventMessage) {
                             message.nostrEvent?.let { event ->
-                                remoteSignerMethodProcessor.processNostrEvent(
+                                remoteSignerMethodParser.parseNostrEvent(
                                     event = event,
                                     signerKeyPair = signerKeyPair,
-                                    onSuccess = { method -> scope.launch { _incomingMethods.send(method) } },
-                                    onFailure = { error -> scope.launch { _errors.send(error) } },
+                                ).fold(
+                                    onSuccess = { method ->
+                                        scope.launch { _incomingMethods.send(method) }
+                                    },
+                                    onFailure = { error ->
+                                        scope.launch { _errors.send(error.mapAsRemoteSignerMethodException(event)) }
+                                    },
                                 )
                             }
                         }

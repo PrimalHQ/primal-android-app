@@ -17,12 +17,15 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import net.primal.core.utils.batchOnInactivity
+import net.primal.core.utils.fold
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState
+import net.primal.data.account.remote.mappers.mapAsRemoteSignerMethodException
+import net.primal.data.account.remote.mappers.mapAsRemoteSignerMethodResponse
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
-import net.primal.data.account.remote.method.processor.RemoteSignerMethodProcessor
+import net.primal.data.account.remote.method.parser.RemoteSignerMethodParser
 import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.model.RelayEvent
@@ -46,7 +49,7 @@ class RemoteSignerServiceImpl internal constructor(
     private val remoteSignerMethodResponseBuilder: RemoteSignerMethodResponseBuilder,
     private val internalSessionEventRepository: InternalSessionEventRepository,
     private val internalSessionRepository: InternalSessionRepository,
-    private val methodProcessor: RemoteSignerMethodProcessor,
+    private val remoteSignerMethodParser: RemoteSignerMethodParser,
 ) : RemoteSignerService {
     private val scope = CoroutineScope(SupervisorJob())
 
@@ -118,11 +121,18 @@ class RemoteSignerServiceImpl internal constructor(
                     if (nostrEvents.isEmpty()) return@collect
 
                     nostrEvents.forEach { event ->
-                        methodProcessor.processNostrEvent(
+                        remoteSignerMethodParser.parseNostrEvent(
                             event = event,
                             signerKeyPair = signerKeyPair,
-                            onFailure = { sendResponseOrAddToFailedQueue(response = it) },
+                        ).fold(
                             onSuccess = { processMethod(method = it) },
+                            onFailure = { error ->
+                                sendResponseOrAddToFailedQueue(
+                                    response = error
+                                        .mapAsRemoteSignerMethodException(nostrEvent = event)
+                                        .mapAsRemoteSignerMethodResponse(),
+                                )
+                            },
                         )
                     }
 
@@ -206,7 +216,8 @@ class RemoteSignerServiceImpl internal constructor(
     private fun observeErrors() =
         scope.launch {
             nostrRelayManager.errors.collect { error ->
-                sendResponseOrAddToFailedQueue(response = error)
+                val response = error.mapAsRemoteSignerMethodResponse()
+                sendResponseOrAddToFailedQueue(response = response)
             }
         }
 
@@ -226,7 +237,7 @@ class RemoteSignerServiceImpl internal constructor(
         scope.launch {
             if (!activeClientPubKeys.load().contains(method.clientPubKey)) {
                 val connection = connectionRepository.getConnectionByClientPubKey(
-                    clientPubKey = method.clientPubKey
+                    clientPubKey = method.clientPubKey,
                 ).getOrNull() ?: return@launch
 
                 if (connection.autoStart) {
