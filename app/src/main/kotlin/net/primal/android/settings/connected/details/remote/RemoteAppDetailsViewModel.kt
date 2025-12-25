@@ -112,7 +112,7 @@ class RemoteAppDetailsViewModel @Inject constructor(
 
     private fun observeRecentSessions() =
         viewModelScope.launch {
-            sessionRepository.observeSessionsByClientPubKey(clientPubKey).collect { sessions ->
+            sessionRepository.observeSessionsByAppIdentifier(appIdentifier = clientPubKey).collect { sessions ->
                 setState {
                     copy(
                         recentSessions = sessions.map {

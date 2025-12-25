@@ -15,8 +15,6 @@ interface SessionRepository {
 
     fun observeOngoingSessionForConnection(clientPubKey: String): Flow<RemoteAppSession?>
 
-    fun observeSessionsByClientPubKey(clientPubKey: String): Flow<List<RemoteAppSession>>
-
     fun observeSessionsByAppIdentifier(appIdentifier: String): Flow<List<AppSession>>
 
     fun observeRemoteSession(sessionId: String): Flow<RemoteAppSession?>

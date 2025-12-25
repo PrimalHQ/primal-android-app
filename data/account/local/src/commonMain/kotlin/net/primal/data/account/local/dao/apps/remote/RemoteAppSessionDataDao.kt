@@ -68,10 +68,6 @@ interface RemoteAppSessionDataDao {
     fun observeOngoingSessionForConnection(appIdentifier: String): Flow<RemoteAppSession?>
 
     @Transaction
-    @Query("SELECT * FROM AppSessionData WHERE appIdentifier = :appIdentifier ORDER BY startedAt DESC")
-    fun observeSessionsByClientPubKey(appIdentifier: String): Flow<List<RemoteAppSession>>
-
-    @Transaction
     @Query("SELECT * FROM AppSessionData WHERE sessionId = :sessionId")
     fun observeSession(sessionId: String): Flow<RemoteAppSession?>
 }
