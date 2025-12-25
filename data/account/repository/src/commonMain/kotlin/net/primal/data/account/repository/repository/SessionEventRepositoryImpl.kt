@@ -51,8 +51,14 @@ class SessionEventRepositoryImpl(
             .distinctUntilChanged()
     }
 
-    override fun observeEvent(eventId: String): Flow<SessionEvent?> {
+    override fun observeRemoteEvent(eventId: String): Flow<SessionEvent?> {
         return database.remoteAppSessionEvents().observeEvent(eventId = eventId)
+            .map { it?.asDomain() }
+            .distinctUntilChanged()
+    }
+
+    override fun observeLocalEvent(eventId: String): Flow<SessionEvent?> {
+        return database.localAppSessionEvents().observeEvent(eventId = eventId)
             .map { it?.asDomain() }
             .distinctUntilChanged()
     }

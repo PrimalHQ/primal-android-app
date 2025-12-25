@@ -1,4 +1,4 @@
-package net.primal.android.settings.connected.event
+package net.primal.android.settings.connected.event.local
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -21,7 +21,7 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 
 @HiltViewModel
-class EventDetailsViewModel @Inject constructor(
+class LocalEventDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val sessionEventRepository: SessionEventRepository,
     private val permissionsRepository: PermissionsRepository,
@@ -30,9 +30,9 @@ class EventDetailsViewModel @Inject constructor(
 
     private val eventId: String = savedStateHandle.eventIdOrThrow
 
-    private val _state = MutableStateFlow(EventDetailsContract.UiState())
+    private val _state = MutableStateFlow(LocalEventDetailsContract.UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: EventDetailsContract.UiState.() -> EventDetailsContract.UiState) =
+    private fun setState(reducer: LocalEventDetailsContract.UiState.() -> LocalEventDetailsContract.UiState) =
         _state.getAndUpdate(reducer)
 
     init {
@@ -48,7 +48,7 @@ class EventDetailsViewModel @Inject constructor(
 
     private fun observeSessionEvent() =
         viewModelScope.launch {
-            sessionEventRepository.observeEvent(eventId = eventId).collect { sessionEvent ->
+            sessionEventRepository.observeLocalEvent(eventId = eventId).collect { sessionEvent ->
                 var parsedSigned: NostrEvent? = null
                 var parsedUnsigned: NostrUnsignedEvent? = null
                 var rawJson: String? = null

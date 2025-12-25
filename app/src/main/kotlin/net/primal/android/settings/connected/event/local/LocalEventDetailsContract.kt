@@ -1,10 +1,10 @@
-package net.primal.android.settings.connected.event
+package net.primal.android.settings.connected.event.local
 
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 
-interface EventDetailsContract {
+interface LocalEventDetailsContract {
     data class UiState(
         val loading: Boolean = true,
         val sessionEvent: SessionEvent? = null,
