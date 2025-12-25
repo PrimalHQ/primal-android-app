@@ -18,7 +18,7 @@ interface SessionEventRepository {
 
     fun observeLocalEvent(eventId: String): Flow<SessionEvent?>
 
-    suspend fun processMissedEvents(signerKeyPair: NostrKeyPair, eventIds: List<String>): Result<Unit>
+    suspend fun notifyMissedNostrEvents(signerKeyPair: NostrKeyPair, eventIds: List<String>): Result<Unit>
 
     suspend fun respondToEvent(eventId: String, userChoice: UserChoice): Result<Unit>
 

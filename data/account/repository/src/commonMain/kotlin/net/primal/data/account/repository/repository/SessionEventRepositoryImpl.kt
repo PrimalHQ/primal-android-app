@@ -63,7 +63,7 @@ class SessionEventRepositoryImpl(
             .distinctUntilChanged()
     }
 
-    override suspend fun processMissedEvents(signerKeyPair: NostrKeyPair, eventIds: List<String>): Result<Unit> =
+    override suspend fun notifyMissedNostrEvents(signerKeyPair: NostrKeyPair, eventIds: List<String>): Result<Unit> =
         withContext(dispatchers.io()) {
             runCatching {
                 val events = nip46EventsHandler.fetchNip46Events(eventIds = eventIds).getOrThrow()
