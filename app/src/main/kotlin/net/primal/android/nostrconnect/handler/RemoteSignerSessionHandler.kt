@@ -5,7 +5,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
 import net.primal.android.core.service.PrimalRemoteSignerService
-import net.primal.core.utils.onSuccess
 import net.primal.domain.account.repository.SessionRepository
 
 @Singleton
@@ -14,9 +13,10 @@ class RemoteSignerSessionHandler @Inject constructor(
     private val sessionRepository: SessionRepository,
 ) {
 
-    suspend fun startSession(clientPubKey: String) =
+    suspend fun startSession(clientPubKey: String) = runCatching {
+        PrimalRemoteSignerService.ensureServiceStarted(context = context)
         sessionRepository.startSession(clientPubKey = clientPubKey)
-            .onSuccess { PrimalRemoteSignerService.ensureServiceStarted(context = context) }
+    }
 
     suspend fun endSessions(sessionIds: List<String>) = sessionRepository.endSessions(sessionIds = sessionIds)
 }
