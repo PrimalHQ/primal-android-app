@@ -1,4 +1,4 @@
-package net.primal.android.settings.connected.session
+package net.primal.android.settings.connected.session.local
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -12,12 +12,13 @@ import kotlinx.coroutines.launch
 import net.primal.android.navigation.sessionIdOrThrow
 import net.primal.android.settings.connected.model.asSessionEventUi
 import net.primal.core.utils.onSuccess
+import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
 
 @HiltViewModel
-class SessionDetailsViewModel @Inject constructor(
+class LocalSessionDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val sessionRepository: SessionRepository,
     private val sessionEventRepository: SessionEventRepository,
@@ -26,13 +27,10 @@ class SessionDetailsViewModel @Inject constructor(
 
     private val sessionId: String = savedStateHandle.sessionIdOrThrow
 
-    private val _state = MutableStateFlow(
-        SessionDetailsContract.UiState(
-            sessionId = sessionId,
-        ),
-    )
+    private val _state = MutableStateFlow(LocalSessionDetailsContract.UiState(sessionId = sessionId))
     val state = _state.asStateFlow()
-    private fun setState(reducer: SessionDetailsContract.UiState.() -> SessionDetailsContract.UiState) =
+
+    private fun setState(reducer: LocalSessionDetailsContract.UiState.() -> LocalSessionDetailsContract.UiState) =
         _state.getAndUpdate(reducer)
 
     init {
@@ -51,12 +49,11 @@ class SessionDetailsViewModel @Inject constructor(
 
     private fun observeSession() =
         viewModelScope.launch {
-            sessionRepository.observeSession(sessionId = sessionId).collect { session ->
+            sessionRepository.observeLocalSession(sessionId = sessionId).collect { session ->
                 setState {
                     copy(
                         loading = false,
-                        appName = session?.name,
-                        appIconUrl = session?.image,
+                        appPackageName = session?.appIdentifier?.let { LocalApp.packageNameFromIdentifier(it) },
                         sessionStartedAt = session?.sessionStartedAt,
                     )
                 }
@@ -65,7 +62,7 @@ class SessionDetailsViewModel @Inject constructor(
 
     private fun observeSessionEvents() =
         viewModelScope.launch {
-            sessionEventRepository.observeCompletedEventsForSession(sessionId = sessionId).collect { events ->
+            sessionEventRepository.observeCompletedEventsForLocalSession(sessionId = sessionId).collect { events ->
                 setState {
                     copy(sessionEvents = events.map { it.asSessionEventUi() })
                 }

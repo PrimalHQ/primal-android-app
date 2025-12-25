@@ -44,18 +44,18 @@ class SessionRepositoryImpl(
             .map { it?.asDomain() }
             .distinctUntilChanged()
 
-    override fun observeSessionsByClientPubKey(clientPubKey: String): Flow<List<RemoteAppSession>> =
-        database.remoteAppSessions().observeSessionsByClientPubKey(clientPubKey)
-            .map { list -> list.map { it.asDomain() } }
-            .distinctUntilChanged()
-
     override fun observeSessionsByAppIdentifier(appIdentifier: String): Flow<List<AppSession>> =
         database.appSessions().observeSessionsByAppIdentifier(appIdentifier = appIdentifier)
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
-    override fun observeSession(sessionId: String): Flow<RemoteAppSession?> =
+    override fun observeRemoteSession(sessionId: String): Flow<RemoteAppSession?> =
         database.remoteAppSessions().observeSession(sessionId = sessionId)
+            .map { it?.asDomain() }
+            .distinctUntilChanged()
+
+    override fun observeLocalSession(sessionId: String): Flow<AppSession?> =
+        database.appSessions().observeSession(sessionId = sessionId)
             .map { it?.asDomain() }
             .distinctUntilChanged()
 

@@ -1,9 +1,11 @@
 package net.primal.android.settings.connected.details
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
@@ -17,10 +19,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.drawable.toBitmap
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.ConfirmActionAlertDialog
@@ -34,6 +39,7 @@ import net.primal.android.core.compose.nostrconnect.PermissionsListItem
 import net.primal.android.core.utils.PrimalDateFormats
 import net.primal.android.core.utils.rememberPrimalFormattedDateTime
 import net.primal.android.settings.connected.model.SessionUi
+import net.primal.android.signer.provider.rememberAppDisplayInfo
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.TrustLevel
 
@@ -141,6 +147,7 @@ fun LazyListScope.connectedAppRecentSessionsSection(
     recentSessions: List<SessionUi>,
     appIconUrl: String?,
     appName: String?,
+    appPackageName: String? = null,
     onSessionClick: (String) -> Unit,
 ) {
     if (recentSessions.isNotEmpty()) {
@@ -167,6 +174,7 @@ fun LazyListScope.connectedAppRecentSessionsSection(
                     session = session,
                     iconUrl = appIconUrl,
                     appName = appName,
+                    packageName = appPackageName,
                     onClick = { onSessionClick(session.sessionId) },
                 )
                 if (!isLast) {
@@ -182,6 +190,7 @@ private fun RecentSessionItem(
     session: SessionUi,
     iconUrl: String?,
     appName: String?,
+    packageName: String? = null,
     onClick: () -> Unit,
 ) {
     val formattedDate = rememberPrimalFormattedDateTime(
@@ -195,11 +204,31 @@ private fun RecentSessionItem(
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
         ),
         leadingContent = {
-            AppIconThumbnail(
-                appName = appName ?: stringResource(id = R.string.settings_connected_apps_unknown),
-                appIconUrl = iconUrl,
-                avatarSize = 24.dp,
-            )
+            if (packageName != null) {
+                val appDisplayInfo = rememberAppDisplayInfo(packageName = packageName)
+                if (appDisplayInfo.icon != null) {
+                    Image(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(AppTheme.shapes.small),
+                        bitmap = appDisplayInfo.icon.toBitmap().asImageBitmap(),
+                        contentDescription = appName,
+                        contentScale = ContentScale.Crop,
+                    )
+                } else {
+                    AppIconThumbnail(
+                        appName = appName ?: stringResource(id = R.string.settings_connected_apps_unknown),
+                        appIconUrl = null,
+                        avatarSize = 24.dp,
+                    )
+                }
+            } else {
+                AppIconThumbnail(
+                    appName = appName ?: stringResource(id = R.string.settings_connected_apps_unknown),
+                    appIconUrl = iconUrl,
+                    avatarSize = 24.dp,
+                )
+            }
         },
         headlineContent = {
             Text(

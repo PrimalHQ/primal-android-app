@@ -13,5 +13,9 @@ data class LocalApp(
         fun userIdFromIdentifier(identifier: String): String? {
             return runCatching { identifier.split(":").lastOrNull() }.getOrNull()
         }
+
+        fun packageNameFromIdentifier(identifier: String): String? {
+            return runCatching { identifier.substringBeforeLast(":") }.getOrNull()
+        }
     }
 }

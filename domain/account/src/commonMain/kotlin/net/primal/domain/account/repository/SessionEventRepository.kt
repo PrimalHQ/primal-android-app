@@ -10,7 +10,9 @@ import net.primal.domain.nostr.cryptography.NostrKeyPair
 interface SessionEventRepository {
     fun observeEventsPendingUserAction(signerPubKey: String): Flow<List<SessionEvent>>
 
-    fun observeCompletedEventsForSession(sessionId: String): Flow<List<SessionEvent>>
+    fun observeCompletedEventsForRemoteSession(sessionId: String): Flow<List<SessionEvent>>
+
+    fun observeCompletedEventsForLocalSession(sessionId: String): Flow<List<SessionEvent>>
 
     fun observeEvent(eventId: String): Flow<SessionEvent?>
 

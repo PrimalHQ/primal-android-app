@@ -14,11 +14,11 @@ interface SessionRepository {
 
     fun observeOngoingSessionForConnection(clientPubKey: String): Flow<RemoteAppSession?>
 
-    fun observeSessionsByClientPubKey(clientPubKey: String): Flow<List<RemoteAppSession>>
-
     fun observeSessionsByAppIdentifier(appIdentifier: String): Flow<List<AppSession>>
 
-    fun observeSession(sessionId: String): Flow<RemoteAppSession?>
+    fun observeRemoteSession(sessionId: String): Flow<RemoteAppSession?>
+
+    fun observeLocalSession(sessionId: String): Flow<AppSession?>
 
     suspend fun getSession(sessionId: String): Result<RemoteAppSession>
 

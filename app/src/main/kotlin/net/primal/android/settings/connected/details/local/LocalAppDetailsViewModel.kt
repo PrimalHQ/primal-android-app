@@ -14,15 +14,18 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.navigation.identifierOrThrow
+import net.primal.android.settings.connected.model.SessionUi
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.LocalAppRepository
+import net.primal.domain.account.repository.SessionRepository
 
 @HiltViewModel
 class LocalAppDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val localAppRepository: LocalAppRepository,
+    private val sessionRepository: SessionRepository,
 ) : ViewModel() {
 
     private val identifier: String = savedStateHandle.identifierOrThrow
@@ -42,6 +45,7 @@ class LocalAppDetailsViewModel @Inject constructor(
     init {
         observeEvents()
         observeApp()
+        observeRecentSessions()
     }
 
     private fun observeEvents() =
@@ -66,6 +70,24 @@ class LocalAppDetailsViewModel @Inject constructor(
                     )
                 }
             }
+        }
+
+    private fun observeRecentSessions() =
+        viewModelScope.launch {
+            sessionRepository.observeSessionsByAppIdentifier(appIdentifier = identifier)
+                .collect { sessions ->
+                    setState {
+                        copy(
+                            recentSessions = sessions.map {
+                                SessionUi(
+                                    sessionId = it.sessionId,
+                                    startedAt = it.sessionStartedAt,
+                                )
+                            },
+                            lastSessionStartedAt = sessions.firstOrNull()?.sessionStartedAt,
+                        )
+                    }
+                }
         }
 
     private fun updateTrustLevel(trustLevel: TrustLevel) {

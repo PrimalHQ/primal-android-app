@@ -67,7 +67,7 @@ class RemoteAppPermissionsViewModel @Inject constructor(
 
     private fun observeLastSession() {
         viewModelScope.launch {
-            sessionRepository.observeSessionsByClientPubKey(clientPubKey).collect { sessions ->
+            sessionRepository.observeSessionsByAppIdentifier(appIdentifier = clientPubKey).collect { sessions ->
                 setState {
                     copy(appLastSessionAt = sessions.firstOrNull()?.sessionStartedAt)
                 }
