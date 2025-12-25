@@ -9,9 +9,8 @@ import kotlin.uuid.Uuid
 data class AppSessionData(
     @PrimaryKey
     val sessionId: String = Uuid.random().toString(),
+    val sessionType: AppSessionType,
+    val appIdentifier: String,
     val startedAt: Long = Clock.System.now().epochSeconds,
     val endedAt: Long? = null,
-    val activeRelayCount: Int = 0,
-    val appIdentifier: String,
-    val sessionType: AppSessionType,
 )

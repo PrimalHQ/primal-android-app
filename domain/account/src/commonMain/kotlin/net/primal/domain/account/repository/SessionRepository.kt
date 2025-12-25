@@ -6,15 +6,12 @@ import net.primal.domain.account.model.AppSession
 import net.primal.domain.account.model.RemoteAppSession
 
 interface SessionRepository {
-    fun observeActiveSessions(signerPubKey: String): Flow<List<RemoteAppSession>>
 
     fun observeOngoingSessions(signerPubKey: String): Flow<List<RemoteAppSession>>
 
-    fun observeActiveSessionForConnection(clientPubKey: String): Flow<RemoteAppSession?>
-
     fun observeOngoingSessionForConnection(clientPubKey: String): Flow<RemoteAppSession?>
 
-    fun observeSessionsByAppIdentifier(appIdentifier: String): Flow<List<AppSession>>
+    fun observeSessionsByApp(appIdentifier: String): Flow<List<AppSession>>
 
     fun observeRemoteSession(sessionId: String): Flow<RemoteAppSession?>
 
@@ -22,7 +19,7 @@ interface SessionRepository {
 
     suspend fun getSession(sessionId: String): Result<RemoteAppSession>
 
-    suspend fun findActiveSessionForConnection(clientPubKey: String): Result<RemoteAppSession>
+    suspend fun findFirstOpenSessionByAppIdentifier(appIdentifier: String): Result<RemoteAppSession>
 
     suspend fun startSession(clientPubKey: String): Result<String>
 

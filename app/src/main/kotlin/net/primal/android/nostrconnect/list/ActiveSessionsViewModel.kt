@@ -59,7 +59,7 @@ class ActiveSessionsViewModel @Inject constructor(
     private fun observeActiveSessions() {
         viewModelScope.launch {
             val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
-            sessionRepository.observeActiveSessions(signerPubKey = signerKeyPair.pubKey)
+            sessionRepository.observeOngoingSessions(signerPubKey = signerKeyPair.pubKey)
                 .collect { appSessions ->
                     val userAccounts = userAccountsStore.userAccounts.value
                     val userAccountsMap = userAccounts.associateBy { it.pubkey }

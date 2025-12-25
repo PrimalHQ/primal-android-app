@@ -3,7 +3,6 @@ package net.primal.data.account.repository.service
 import io.github.aakira.napier.Napier
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
-import kotlin.concurrent.atomics.fetchAndUpdate
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -28,12 +27,12 @@ import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.remote.method.parser.RemoteSignerMethodParser
 import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
+import net.primal.data.account.repository.manager.RemoteAppConnectionManager
 import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.data.account.repository.mappers.getRequestType
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
 import net.primal.data.account.repository.repository.internal.InternalSessionRepository
 import net.primal.data.account.repository.repository.internal.model.UpdateRemoteAppSessionEventRequest
-import net.primal.domain.account.model.RemoteAppSession
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
@@ -50,10 +49,10 @@ class RemoteSignerServiceImpl internal constructor(
     private val internalSessionEventRepository: InternalSessionEventRepository,
     private val internalSessionRepository: InternalSessionRepository,
     private val remoteSignerMethodParser: RemoteSignerMethodParser,
+    private val remoteAppConnectionManager: RemoteAppConnectionManager,
 ) : RemoteSignerService {
     private val scope = CoroutineScope(SupervisorJob())
 
-    private val activeRelays = AtomicReference<Set<String>>(emptySet())
     private val relaySessionMap = AtomicReference<Map<String, List<String>>>(emptyMap())
     private val activeClientPubKeys = AtomicReference<HashSet<String>>(hashSetOf())
     private val clientSessionMap = AtomicReference<Map<String, String>>(emptyMap())
@@ -105,7 +104,6 @@ class RemoteSignerServiceImpl internal constructor(
                     )
 
                     sessions.forEach {
-                        setActiveRelayCount(it)
                         sessionActivityMap.load().getOrPut(it.sessionId) { Clock.System.now() }
                     }
                     clientSessionMap.store(sessions.associate { it.clientPubKey to it.sessionId })
@@ -177,28 +175,26 @@ class RemoteSignerServiceImpl internal constructor(
                 }
         }
 
-    private suspend fun setActiveRelayCount(session: RemoteAppSession) {
-        internalSessionRepository.setActiveRelayCount(
-            sessionId = session.sessionId,
-            activeRelayCount = session.relays.map { activeRelays.load().contains(it) }.count { it },
-        )
-    }
-
     private fun observeRelayEvents() =
         scope.launch {
             nostrRelayManager.relayEvents.collect { event ->
                 when (event) {
                     is RelayEvent.Connected -> {
-                        activeRelays.fetchAndUpdate { it + event.relayUrl }
-                        relaySessionMap.load()[event.relayUrl]?.let {
-                            internalSessionRepository.incrementActiveRelayCount(sessionIds = it)
+                        relaySessionMap.load()[event.relayUrl]?.let { sessionIds ->
+                            remoteAppConnectionManager.onRelayConnected(
+                                sessionIds = sessionIds,
+                                relayUrl = event.relayUrl,
+                            )
                         }
                     }
 
                     is RelayEvent.Disconnected -> {
-                        activeRelays.fetchAndUpdate { it - event.relayUrl }
-                        relaySessionMap.load()[event.relayUrl]?.let {
-                            internalSessionRepository.decrementActiveRelayCountOrEnd(sessionIds = it)
+                        relaySessionMap.load()[event.relayUrl]?.let { sessionIds ->
+                            remoteAppConnectionManager.onRelayDisconnected(
+                                sessionIds = sessionIds,
+                                relayUrl = event.relayUrl,
+                                error = null,
+                            )
                         }
                     }
                 }
@@ -280,7 +276,7 @@ class RemoteSignerServiceImpl internal constructor(
     private suspend fun findActiveSessionId(clientPubKey: String): String? =
         clientSessionMap.load()[clientPubKey]
             ?: connectionRepository.getConnectionByClientPubKey(clientPubKey = clientPubKey).getOrNull()
-                ?.let { sessionRepository.findActiveSessionForConnection(clientPubKey = it.clientPubKey) }
+                ?.let { sessionRepository.findFirstOpenSessionByAppIdentifier(appIdentifier = it.clientPubKey) }
                 ?.getOrNull()?.sessionId
 
     private suspend fun sendResponseOrAddToFailedQueue(response: RemoteSignerMethodResponse): Result<Unit> {

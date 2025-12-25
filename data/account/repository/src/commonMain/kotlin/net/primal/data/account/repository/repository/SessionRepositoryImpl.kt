@@ -24,28 +24,18 @@ class SessionRepositoryImpl(
     private val dispatchers: DispatcherProvider,
 ) : SessionRepository {
 
-    override fun observeActiveSessions(signerPubKey: String): Flow<List<RemoteAppSession>> =
-        database.remoteAppSessions().observeActiveSessions(signerPubKey = signerPubKey)
-            .map { list -> list.map { it.asDomain() } }
-            .distinctUntilChanged()
-
     override fun observeOngoingSessions(signerPubKey: String): Flow<List<RemoteAppSession>> =
-        database.remoteAppSessions().observeOngoingSessions(signerPubKey = signerPubKey)
+        database.remoteAppSessions().observeOngoingSessionsBySigner(signerPubKey = signerPubKey)
             .map { list -> list.map { it.asDomain() } }
-            .distinctUntilChanged()
-
-    override fun observeActiveSessionForConnection(clientPubKey: String): Flow<RemoteAppSession?> =
-        database.remoteAppSessions().observeActiveSessionForConnection(clientPubKey)
-            .map { it?.asDomain() }
             .distinctUntilChanged()
 
     override fun observeOngoingSessionForConnection(clientPubKey: String): Flow<RemoteAppSession?> =
-        database.remoteAppSessions().observeOngoingSessionForConnection(clientPubKey)
+        database.remoteAppSessions().observeOngoingSessionByApp(clientPubKey)
             .map { it?.asDomain() }
             .distinctUntilChanged()
 
-    override fun observeSessionsByAppIdentifier(appIdentifier: String): Flow<List<AppSession>> =
-        database.appSessions().observeSessionsByAppIdentifier(appIdentifier = appIdentifier)
+    override fun observeSessionsByApp(appIdentifier: String): Flow<List<AppSession>> =
+        database.appSessions().observeSessionsByApp(appIdentifier = appIdentifier)
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
@@ -66,18 +56,18 @@ class SessionRepositoryImpl(
                 ?: Result.failure(NoSuchElementException("Couldn't find session with id $sessionId."))
         }
 
-    override suspend fun findActiveSessionForConnection(clientPubKey: String): Result<RemoteAppSession> =
+    override suspend fun findFirstOpenSessionByAppIdentifier(appIdentifier: String): Result<RemoteAppSession> =
         withContext(dispatchers.io()) {
             runCatching {
-                database.remoteAppSessions().findActiveSessionByClientPubKey(appIdentifier = clientPubKey)?.asDomain()
-                    ?: throw NoSuchElementException("Couldn't find active session for connection $clientPubKey.")
+                database.remoteAppSessions().findOngoingSessionByApp(appIdentifier = appIdentifier)?.asDomain()
+                    ?: throw NoSuchElementException("Couldn't find open session for connection $appIdentifier.")
             }
         }
 
     override suspend fun startSession(clientPubKey: String): Result<String> =
         withContext(dispatchers.io()) {
             Napier.d(tag = "Signer") { "Starting session for $clientPubKey" }
-            val existingOpenSession = database.remoteAppSessions().findFirstOpenSessionByAppIdentifier(
+            val existingOpenSession = database.remoteAppSessions().findOngoingSessionByApp(
                 appIdentifier = clientPubKey,
             )
             if (existingOpenSession == null) {
@@ -110,6 +100,6 @@ class SessionRepositoryImpl(
 
     override suspend fun endAllActiveSessions() =
         withContext(dispatchers.io()) {
-            database.appSessions().endAllActiveSessions(endedAt = Clock.System.now().epochSeconds)
+            database.appSessions().endAllOngoingSessions(endedAt = Clock.System.now().epochSeconds)
         }
 }
