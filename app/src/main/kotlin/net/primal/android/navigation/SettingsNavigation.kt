@@ -28,8 +28,10 @@ import net.primal.android.settings.connected.permissions.local.LocalAppPermissio
 import net.primal.android.settings.connected.permissions.local.LocalAppPermissionsViewModel
 import net.primal.android.settings.connected.permissions.remote.RemoteAppPermissionsScreen
 import net.primal.android.settings.connected.permissions.remote.RemoteAppPermissionsViewModel
-import net.primal.android.settings.connected.session.SessionDetailsScreen
-import net.primal.android.settings.connected.session.SessionDetailsViewModel
+import net.primal.android.settings.connected.session.local.LocalSessionDetailsScreen
+import net.primal.android.settings.connected.session.local.LocalSessionDetailsViewModel
+import net.primal.android.settings.connected.session.remote.RemoteSessionDetailsScreen
+import net.primal.android.settings.connected.session.remote.RemoteSessionDetailsViewModel
 import net.primal.android.settings.content.ContentDisplaySettingsScreen
 import net.primal.android.settings.content.ContentDisplaySettingsViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
@@ -71,7 +73,11 @@ private fun NavController.navigateToMutedAccounts() = navigate(route = "muted_ac
 private fun NavController.navigateToMediaUploads() = navigate(route = "media_uploads_settings")
 fun NavController.navigateToConnectedApps() = navigate(route = "connected_apps")
 
-private fun NavController.navigateToSessionDetails(sessionId: String) = navigate(route = "session_details/$sessionId")
+private fun NavController.navigateToRemoteSessionDetails(sessionId: String) =
+    navigate(route = "session_details/remote/$sessionId")
+
+private fun NavController.navigateToLocalSessionDetails(sessionId: String) =
+    navigate(route = "session_details/local/$sessionId")
 
 private fun NavController.navigateToEventDetails(eventId: String) = navigate(route = "event_details/$eventId")
 
@@ -195,8 +201,15 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             ),
             navController = navController,
         )
-        sessionDetails(
-            route = "session_details/{$SESSION_ID}",
+        remoteSessionDetails(
+            route = "session_details/remote/{$SESSION_ID}",
+            navController = navController,
+            arguments = listOf(
+                navArgument(SESSION_ID) { type = NavType.StringType },
+            ),
+        )
+        localSessionDetails(
+            route = "session_details/local/{$SESSION_ID}",
             navController = navController,
             arguments = listOf(
                 navArgument(SESSION_ID) { type = NavType.StringType },
@@ -488,7 +501,7 @@ private fun NavGraphBuilder.connectedLocalAppDetails(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onSessionClick = { sessionId ->
-            navController.navigateToSessionDetails(sessionId)
+            navController.navigateToLocalSessionDetails(sessionId)
         },
         onPermissionDetailsClick = { identifier ->
             navController.navigateToLocalAppPermissions(identifier)
@@ -516,7 +529,7 @@ private fun NavGraphBuilder.connectedRemoteAppDetails(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onSessionClick = { sessionId ->
-            navController.navigateToSessionDetails(sessionId)
+            navController.navigateToRemoteSessionDetails(sessionId)
         },
         onPermissionDetailsClick = { clientPubKey ->
             navController.navigateToRemoteAppPermissions(clientPubKey)
@@ -566,7 +579,7 @@ private fun NavGraphBuilder.connectedLocalAppPermissions(
     )
 }
 
-private fun NavGraphBuilder.sessionDetails(
+private fun NavGraphBuilder.remoteSessionDetails(
     route: String,
     navController: NavController,
     arguments: List<NamedNavArgument>,
@@ -578,10 +591,34 @@ private fun NavGraphBuilder.sessionDetails(
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
-    val viewModel = hiltViewModel<SessionDetailsViewModel>()
+    val viewModel = hiltViewModel<RemoteSessionDetailsViewModel>()
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
-    SessionDetailsScreen(
+    RemoteSessionDetailsScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+        onEventClick = { eventId ->
+            navController.navigateToEventDetails(eventId = eventId)
+        },
+    )
+}
+
+private fun NavGraphBuilder.localSessionDetails(
+    route: String,
+    navController: NavController,
+    arguments: List<NamedNavArgument>,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<LocalSessionDetailsViewModel>()
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    LocalSessionDetailsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onEventClick = { eventId ->

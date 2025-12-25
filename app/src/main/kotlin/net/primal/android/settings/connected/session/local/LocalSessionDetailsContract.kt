@@ -1,13 +1,12 @@
-package net.primal.android.settings.connected.session
+package net.primal.android.settings.connected.session.local
 
 import net.primal.android.settings.connected.model.SessionEventUi
 
-interface SessionDetailsContract {
+interface LocalSessionDetailsContract {
     data class UiState(
+        val sessionId: String,
         val loading: Boolean = true,
-        val sessionId: String = "",
-        val appName: String? = null,
-        val appIconUrl: String? = null,
+        val appPackageName: String? = null,
         val sessionStartedAt: Long? = null,
         val sessionEvents: List<SessionEventUi> = emptyList(),
         val namingMap: Map<String, String> = emptyMap(),

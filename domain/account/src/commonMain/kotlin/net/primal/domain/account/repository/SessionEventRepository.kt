@@ -12,6 +12,8 @@ interface SessionEventRepository {
 
     fun observeCompletedEventsForSession(sessionId: String): Flow<List<SessionEvent>>
 
+    fun observeCompletedLocalEventsForSession(sessionId: String): Flow<List<SessionEvent>>
+
     fun observeEvent(eventId: String): Flow<SessionEvent?>
 
     suspend fun processMissedEvents(signerKeyPair: NostrKeyPair, eventIds: List<String>): Result<Unit>

@@ -3,6 +3,7 @@ package net.primal.domain.account.repository
 import kotlinx.coroutines.flow.Flow
 import net.primal.core.utils.Result
 import net.primal.domain.account.model.AppSession
+import net.primal.domain.account.model.LocalAppSession
 import net.primal.domain.account.model.RemoteAppSession
 
 interface SessionRepository {
@@ -19,6 +20,10 @@ interface SessionRepository {
     fun observeSessionsByAppIdentifier(appIdentifier: String): Flow<List<AppSession>>
 
     fun observeSession(sessionId: String): Flow<RemoteAppSession?>
+
+    fun observeRemoteSession(sessionId: String): Flow<RemoteAppSession?>
+
+    fun observeLocalSession(sessionId: String): Flow<LocalAppSession?>
 
     suspend fun getSession(sessionId: String): Result<RemoteAppSession>
 

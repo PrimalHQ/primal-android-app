@@ -206,6 +206,7 @@ fun LocalAppDetailsContent(
             recentSessions = state.recentSessions,
             appIconUrl = null,
             appName = appDisplayInfo.name,
+            appPackageName = state.appPackageName,
             onSessionClick = onSessionClick,
         )
     }

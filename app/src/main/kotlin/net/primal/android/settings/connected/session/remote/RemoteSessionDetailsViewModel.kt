@@ -1,4 +1,4 @@
-package net.primal.android.settings.connected.session
+package net.primal.android.settings.connected.session.remote
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -17,7 +17,7 @@ import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
 
 @HiltViewModel
-class SessionDetailsViewModel @Inject constructor(
+class RemoteSessionDetailsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val sessionRepository: SessionRepository,
     private val sessionEventRepository: SessionEventRepository,
@@ -27,12 +27,12 @@ class SessionDetailsViewModel @Inject constructor(
     private val sessionId: String = savedStateHandle.sessionIdOrThrow
 
     private val _state = MutableStateFlow(
-        SessionDetailsContract.UiState(
+        RemoteSessionDetailsContract.UiState(
             sessionId = sessionId,
         ),
     )
     val state = _state.asStateFlow()
-    private fun setState(reducer: SessionDetailsContract.UiState.() -> SessionDetailsContract.UiState) =
+    private fun setState(reducer: RemoteSessionDetailsContract.UiState.() -> RemoteSessionDetailsContract.UiState) =
         _state.getAndUpdate(reducer)
 
     init {
@@ -51,7 +51,7 @@ class SessionDetailsViewModel @Inject constructor(
 
     private fun observeSession() =
         viewModelScope.launch {
-            sessionRepository.observeSession(sessionId = sessionId).collect { session ->
+            sessionRepository.observeRemoteSession(sessionId = sessionId).collect { session ->
                 setState {
                     copy(
                         loading = false,

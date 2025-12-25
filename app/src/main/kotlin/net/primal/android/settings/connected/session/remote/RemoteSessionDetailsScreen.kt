@@ -1,54 +1,39 @@
-package net.primal.android.settings.connected.session
+package net.primal.android.settings.connected.session.remote
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.Text
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
-import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.getListItemShape
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
-import net.primal.android.core.utils.PrimalDateFormats
-import net.primal.android.core.utils.rememberPrimalFormattedDateTime
-import net.primal.android.settings.connected.model.SessionEventUi
+import net.primal.android.settings.connected.session.SessionEventListItem
 import net.primal.android.settings.connected.ui.ConnectedAppHeader
 import net.primal.android.theme.AppTheme
-import net.primal.domain.account.model.RequestState
 
 @Composable
-fun SessionDetailsScreen(
-    viewModel: SessionDetailsViewModel,
+fun RemoteSessionDetailsScreen(
+    viewModel: RemoteSessionDetailsViewModel,
     onClose: () -> Unit,
     onEventClick: (eventId: String) -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
-
-    SessionDetailsScreen(
+    RemoteSessionDetailsScreen(
         state = uiState.value,
         onClose = onClose,
         onEventClick = onEventClick,
@@ -57,12 +42,12 @@ fun SessionDetailsScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SessionDetailsScreen(
-    state: SessionDetailsContract.UiState,
+fun RemoteSessionDetailsScreen(
+    state: RemoteSessionDetailsContract.UiState,
     onClose: () -> Unit,
     onEventClick: (eventId: String) -> Unit,
 ) {
-    PrimalScaffold(
+    Scaffold(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.settings_session_details_title),
@@ -118,69 +103,6 @@ fun SessionDetailsScreen(
                             }
                         }
                     }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SessionEventListItem(
-    event: SessionEventUi,
-    namingMap: Map<String, String>,
-    onClick: () -> Unit,
-) {
-    val title = namingMap[event.requestTypeId] ?: event.requestTypeId
-    ListItem(
-        modifier = Modifier.clickable { onClick() },
-        headlineContent = { Text(text = title, style = AppTheme.typography.bodyLarge) },
-        supportingContent = {
-            Text(
-                modifier = Modifier.padding(top = 5.dp),
-                text = buildSessionEventSubtitleString(timestamp = event.timestamp, requestState = event.requestState),
-            )
-        },
-        trailingContent = {
-            Icon(
-                modifier = Modifier.size(28.dp),
-                imageVector = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
-                contentDescription = null,
-                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-            )
-        },
-        colors = ListItemDefaults.colors(containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3),
-    )
-}
-
-@Composable
-private fun buildSessionEventSubtitleString(timestamp: Long, requestState: RequestState): AnnotatedString {
-    val formattedTimestamp = rememberPrimalFormattedDateTime(
-        timestamp = timestamp,
-        format = PrimalDateFormats.DATETIME_MM_DD_YYYY_HH_MM_SS_A,
-    )
-
-    val baseStyle = AppTheme.typography.bodyMedium.toSpanStyle()
-    return buildAnnotatedString {
-        withStyle(
-            style = baseStyle
-                .copy(color = AppTheme.extraColorScheme.onSurfaceVariantAlt1),
-        ) {
-            append(formattedTimestamp)
-
-            if (requestState != RequestState.Pending) {
-                withStyle(baseStyle.copy(color = AppTheme.extraColorScheme.onSurfaceVariantAlt3)) {
-                    append(" • ")
-                }
-
-                when (requestState) {
-                    RequestState.Approved -> append(stringResource(id = R.string.session_event_state_approved))
-                    RequestState.Rejected -> {
-                        withStyle(style = baseStyle.copy(color = AppTheme.extraColorScheme.zapped)) {
-                            append(stringResource(id = R.string.session_event_state_rejected))
-                        }
-                    }
-
-                    else -> {}
                 }
             }
         }
