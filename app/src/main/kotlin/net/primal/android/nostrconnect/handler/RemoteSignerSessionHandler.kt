@@ -16,10 +16,11 @@ class RemoteSignerSessionHandler @Inject constructor(
     private val connectionRepository: ConnectionRepository,
 ) {
 
-    suspend fun startSession(clientPubKey: String) = runCatching {
-        PrimalRemoteSignerService.ensureServiceStarted(context = context)
-        sessionRepository.startSession(clientPubKey = clientPubKey)
-    }
+    suspend fun startSession(clientPubKey: String) =
+        runCatching {
+            PrimalRemoteSignerService.ensureServiceStarted(context = context)
+            sessionRepository.startSession(clientPubKey = clientPubKey)
+        }
 
     suspend fun isAutoStartEnabled(clientPubKey: String) =
         connectionRepository.getConnectionByClientPubKey(clientPubKey = clientPubKey).fold(
