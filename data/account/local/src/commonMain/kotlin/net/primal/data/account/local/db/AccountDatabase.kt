@@ -14,7 +14,6 @@ import net.primal.data.account.local.dao.apps.AppSessionData
 import net.primal.data.account.local.dao.apps.AppSessionDataDao
 import net.primal.data.account.local.dao.apps.local.LocalAppDao
 import net.primal.data.account.local.dao.apps.local.LocalAppData
-import net.primal.data.account.local.dao.apps.local.LocalAppSessionDataDao
 import net.primal.data.account.local.dao.apps.local.LocalAppSessionEventData
 import net.primal.data.account.local.dao.apps.local.LocalAppSessionEventDataDao
 import net.primal.data.account.local.dao.apps.remote.RemoteAppConnectionData
@@ -53,7 +52,6 @@ abstract class AccountDatabase : RoomDatabase() {
     abstract fun remoteAppSessionEvents(): RemoteAppSessionEventDataDao
     abstract fun remoteAppPendingNostrEvents(): RemoteAppPendingNostrEventDao
     abstract fun localApps(): LocalAppDao
-    abstract fun localAppSessions(): LocalAppSessionDataDao
     abstract fun localAppSessionEvents(): LocalAppSessionEventDataDao
 
     companion object {

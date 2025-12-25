@@ -15,7 +15,6 @@ import net.primal.data.account.local.dao.apps.AppSessionType
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.domain.account.model.AppSession
-import net.primal.domain.account.model.LocalAppSession
 import net.primal.domain.account.model.RemoteAppSession
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.shared.data.local.db.withTransaction
@@ -55,8 +54,8 @@ class SessionRepositoryImpl(
             .map { it?.asDomain() }
             .distinctUntilChanged()
 
-    override fun observeLocalSession(sessionId: String): Flow<LocalAppSession?> =
-        database.localAppSessions().observeSession(sessionId = sessionId)
+    override fun observeLocalSession(sessionId: String): Flow<AppSession?> =
+        database.appSessions().observeSession(sessionId = sessionId)
             .map { it?.asDomain() }
             .distinctUntilChanged()
 

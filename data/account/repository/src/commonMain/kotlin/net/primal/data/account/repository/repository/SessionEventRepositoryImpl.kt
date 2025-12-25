@@ -39,13 +39,13 @@ class SessionEventRepositoryImpl(
         ).map { events -> events.mapNotNull { it.asDomain() } }
             .distinctUntilChanged()
 
-    override fun observeCompletedEventsForSession(sessionId: String): Flow<List<SessionEvent>> {
+    override fun observeCompletedEventsForRemoteSession(sessionId: String): Flow<List<SessionEvent>> {
         return database.remoteAppSessionEvents().observeCompletedEventsBySessionId(sessionId = sessionId)
             .map { list -> list.mapNotNull { it.asDomain() } }
             .distinctUntilChanged()
     }
 
-    override fun observeCompletedLocalEventsForSession(sessionId: String): Flow<List<SessionEvent>> {
+    override fun observeCompletedEventsForLocalSession(sessionId: String): Flow<List<SessionEvent>> {
         return database.localAppSessionEvents().observeCompletedEventsBySessionId(sessionId = sessionId)
             .map { list -> list.mapNotNull { it.asDomain() } }
             .distinctUntilChanged()

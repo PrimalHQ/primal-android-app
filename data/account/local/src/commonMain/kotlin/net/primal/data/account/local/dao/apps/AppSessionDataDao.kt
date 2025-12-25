@@ -57,4 +57,7 @@ interface AppSessionDataDao {
 
     @Query("SELECT * FROM AppSessionData WHERE appIdentifier = :appIdentifier ORDER BY startedAt DESC")
     fun observeSessionsByAppIdentifier(appIdentifier: String): Flow<List<AppSessionData>>
+
+    @Query("SELECT * FROM AppSessionData WHERE sessionId = :sessionId")
+    fun observeSession(sessionId: String): Flow<AppSessionData?>
 }

@@ -65,7 +65,7 @@ class RemoteSessionDetailsViewModel @Inject constructor(
 
     private fun observeSessionEvents() =
         viewModelScope.launch {
-            sessionEventRepository.observeCompletedEventsForSession(sessionId = sessionId).collect { events ->
+            sessionEventRepository.observeCompletedEventsForRemoteSession(sessionId = sessionId).collect { events ->
                 setState {
                     copy(sessionEvents = events.map { it.asSessionEventUi() })
                 }
