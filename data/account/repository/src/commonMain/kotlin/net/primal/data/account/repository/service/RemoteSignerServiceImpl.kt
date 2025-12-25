@@ -226,7 +226,7 @@ class RemoteSignerServiceImpl internal constructor(
         scope.launch {
             if (!activeClientPubKeys.load().contains(method.clientPubKey)) {
                 val connection = connectionRepository.getConnectionByClientPubKey(
-                    clientPubKey = method.clientPubKey
+                    clientPubKey = method.clientPubKey,
                 ).getOrNull() ?: return@launch
 
                 if (connection.autoStart) {
