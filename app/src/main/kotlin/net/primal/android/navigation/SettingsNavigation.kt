@@ -22,8 +22,10 @@ import net.primal.android.settings.connected.details.local.LocalAppDetailsScreen
 import net.primal.android.settings.connected.details.local.LocalAppDetailsViewModel
 import net.primal.android.settings.connected.details.remote.RemoteAppDetailsScreen
 import net.primal.android.settings.connected.details.remote.RemoteAppDetailsViewModel
-import net.primal.android.settings.connected.event.EventDetailsScreen
-import net.primal.android.settings.connected.event.EventDetailsViewModel
+import net.primal.android.settings.connected.event.local.LocalEventDetailsScreen
+import net.primal.android.settings.connected.event.local.LocalEventDetailsViewModel
+import net.primal.android.settings.connected.event.remote.RemoteEventDetailsScreen
+import net.primal.android.settings.connected.event.remote.RemoteEventDetailsViewModel
 import net.primal.android.settings.connected.permissions.local.LocalAppPermissionsScreen
 import net.primal.android.settings.connected.permissions.local.LocalAppPermissionsViewModel
 import net.primal.android.settings.connected.permissions.remote.RemoteAppPermissionsScreen
@@ -79,7 +81,11 @@ private fun NavController.navigateToRemoteSessionDetails(sessionId: String) =
 private fun NavController.navigateToLocalSessionDetails(sessionId: String) =
     navigate(route = "session_details/local/$sessionId")
 
-private fun NavController.navigateToEventDetails(eventId: String) = navigate(route = "event_details/$eventId")
+private fun NavController.navigateToRemoteEventDetails(eventId: String) =
+    navigate(route = "event_details/remote/$eventId")
+
+private fun NavController.navigateToLocalEventDetails(eventId: String) =
+    navigate(route = "event_details/local/$eventId")
 
 fun NavController.navigateToConnectedAppDetails(clientPubKey: String) =
     navigate(route = "connected_apps/remote/$clientPubKey")
@@ -215,8 +221,15 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
                 navArgument(SESSION_ID) { type = NavType.StringType },
             ),
         )
-        eventDetails(
-            route = "event_details/{$EVENT_ID}",
+        remoteEventDetails(
+            route = "event_details/remote/{$EVENT_ID}",
+            navController = navController,
+            arguments = listOf(
+                navArgument(EVENT_ID) { type = NavType.StringType },
+            ),
+        )
+        localEventDetails(
+            route = "event_details/local/{$EVENT_ID}",
             navController = navController,
             arguments = listOf(
                 navArgument(EVENT_ID) { type = NavType.StringType },
@@ -598,7 +611,7 @@ private fun NavGraphBuilder.remoteSessionDetails(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onEventClick = { eventId ->
-            navController.navigateToEventDetails(eventId = eventId)
+            navController.navigateToRemoteEventDetails(eventId = eventId)
         },
     )
 }
@@ -622,12 +635,12 @@ private fun NavGraphBuilder.localSessionDetails(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
         onEventClick = { eventId ->
-            navController.navigateToEventDetails(eventId = eventId)
+            navController.navigateToLocalEventDetails(eventId = eventId)
         },
     )
 }
 
-private fun NavGraphBuilder.eventDetails(
+private fun NavGraphBuilder.remoteEventDetails(
     route: String,
     navController: NavController,
     arguments: List<NamedNavArgument>,
@@ -639,10 +652,31 @@ private fun NavGraphBuilder.eventDetails(
     popEnterTransition = { primalScaleIn },
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
-    val viewModel = hiltViewModel<EventDetailsViewModel>()
+    val viewModel = hiltViewModel<RemoteEventDetailsViewModel>()
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
-    EventDetailsScreen(
+    RemoteEventDetailsScreen(
+        viewModel = viewModel,
+        onClose = { navController.navigateUp() },
+    )
+}
+
+private fun NavGraphBuilder.localEventDetails(
+    route: String,
+    navController: NavController,
+    arguments: List<NamedNavArgument>,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<LocalEventDetailsViewModel>()
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    LocalEventDetailsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
     )

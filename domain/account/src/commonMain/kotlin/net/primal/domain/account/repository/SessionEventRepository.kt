@@ -14,7 +14,9 @@ interface SessionEventRepository {
 
     fun observeCompletedEventsForLocalSession(sessionId: String): Flow<List<SessionEvent>>
 
-    fun observeEvent(eventId: String): Flow<SessionEvent?>
+    fun observeRemoteEvent(eventId: String): Flow<SessionEvent?>
+
+    fun observeLocalEvent(eventId: String): Flow<SessionEvent?>
 
     suspend fun processMissedEvents(signerKeyPair: NostrKeyPair, eventIds: List<String>): Result<Unit>
 
