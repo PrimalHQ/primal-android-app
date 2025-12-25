@@ -107,6 +107,7 @@ class RemoteSignerClient(
 
     suspend fun publishEvent(event: NostrEvent): Result<Unit> =
         runCatching {
+            nostrSocketClient.ensureSocketConnectionOrThrow()
             nostrSocketClient.sendEVENT(signedEvent = event.toNostrJsonObject())
         }.onFailure {
             Napier.w(tag = "Signer", throwable = it) { "Failed to publish event." }
