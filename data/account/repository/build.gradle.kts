@@ -59,6 +59,8 @@ kotlin {
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:account"))
 
+                implementation(libs.kotlinx.atomicfu)
+
                 implementation(libs.ktor.http)
 
                 // Networking && Serialization

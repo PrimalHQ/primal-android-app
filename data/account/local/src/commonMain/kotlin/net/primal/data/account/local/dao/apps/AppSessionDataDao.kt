@@ -15,48 +15,27 @@ interface AppSessionDataDao {
             SELECT * FROM AppSessionData
             WHERE appIdentifier = :appIdentifier
             ORDER BY startedAt DESC
-            LIMIT 1
         """,
     )
-    suspend fun findLatestAppSession(appIdentifier: String): AppSessionData?
+    suspend fun findLatestSessionByApp(appIdentifier: String): AppSessionData?
 
-    @Query("UPDATE AppSessionData SET endedAt = :endedAt, activeRelayCount = 0 WHERE sessionId = :sessionId")
+    @Query("UPDATE AppSessionData SET endedAt = :endedAt WHERE sessionId = :sessionId")
     suspend fun endSession(sessionId: String, endedAt: Long)
 
     @Query(
         """
         UPDATE AppSessionData
-        SET endedAt = :endedAt, activeRelayCount = 0
+        SET endedAt = :endedAt
         WHERE endedAt IS NULL
     """,
     )
-    suspend fun endAllActiveSessions(endedAt: Long)
-
-    @Query("UPDATE AppSessionData SET activeRelayCount = activeRelayCount + 1 WHERE sessionId = :sessionId")
-    suspend fun incrementActiveRelayCount(sessionId: String)
-
-    @Query(
-        """
-        UPDATE AppSessionData 
-        SET activeRelayCount = activeRelayCount - 1,
-            endedAt = CASE
-                WHEN activeRelayCount - 1 <= 0 
-                    THEN strftime('%s', 'now')
-                    ELSE endedAt
-            END
-        WHERE sessionId = :sessionId
-    """,
-    )
-    suspend fun decrementActiveRelayCountOrEnd(sessionId: String)
-
-    @Query("UPDATE AppSessionData SET activeRelayCount = :activeRelayCount WHERE sessionId = :sessionId")
-    suspend fun setActiveRelayCount(sessionId: String, activeRelayCount: Int)
+    suspend fun endAllOngoingSessions(endedAt: Long)
 
     @Query("DELETE FROM AppSessionData WHERE appIdentifier = :appIdentifier")
-    suspend fun deleteSessions(appIdentifier: String)
+    suspend fun deleteAllSessionsByApp(appIdentifier: String)
 
     @Query("SELECT * FROM AppSessionData WHERE appIdentifier = :appIdentifier ORDER BY startedAt DESC")
-    fun observeSessionsByAppIdentifier(appIdentifier: String): Flow<List<AppSessionData>>
+    fun observeSessionsByApp(appIdentifier: String): Flow<List<AppSessionData>>
 
     @Query("SELECT * FROM AppSessionData WHERE sessionId = :sessionId")
     fun observeSession(sessionId: String): Flow<AppSessionData?>

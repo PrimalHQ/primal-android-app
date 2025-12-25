@@ -121,7 +121,7 @@ class PermissionsViewModel @Inject constructor(
 
     private fun observeActiveSessions() =
         viewModelScope.launch {
-            sessionRepository.observeActiveSessions(
+            sessionRepository.observeOngoingSessions(
                 signerPubKey = credentialsStore.getOrCreateInternalSignerCredentials()
                     .asKeyPair().pubKey,
             ).collect { sessions ->

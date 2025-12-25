@@ -36,7 +36,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         LocalAppData::class,
         LocalAppSessionEventData::class,
     ],
-    version = 14,
+    version = 15,
     exportSchema = true,
 )
 @TypeConverters(
@@ -62,7 +62,7 @@ abstract class AccountDatabase : RoomDatabase() {
                         connection.execSQL(
                             """
                                 UPDATE AppSessionData
-                                    SET endedAt = strftime('%s', 'now'), activeRelayCount = 0
+                                    SET endedAt = strftime('%s', 'now')
                                     WHERE endedAt IS NULL
                             """.trimIndent(),
                         )

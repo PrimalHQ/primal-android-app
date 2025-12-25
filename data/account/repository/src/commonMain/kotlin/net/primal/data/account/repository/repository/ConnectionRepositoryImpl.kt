@@ -181,7 +181,7 @@ class ConnectionRepositoryImpl(
     }
 
     private suspend inline fun deleteEverythingForClientPubKey(clientPubKey: String) {
-        database.appSessions().deleteSessions(appIdentifier = clientPubKey)
+        database.appSessions().deleteAllSessionsByApp(appIdentifier = clientPubKey)
         database.appPermissions().deletePermissions(appIdentifier = clientPubKey)
         database.remoteAppConnections().deleteConnection(clientPubKey = clientPubKey)
         database.remoteAppSessionEvents().deleteEvents(clientPubKey = clientPubKey)

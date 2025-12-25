@@ -11,6 +11,7 @@ import net.primal.data.account.remote.method.parser.RemoteSignerMethodParser
 import net.primal.data.account.repository.builder.LocalSignerMethodResponseBuilder
 import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
+import net.primal.data.account.repository.manager.RemoteAppConnectionManager
 import net.primal.data.account.repository.repository.factory.provideAccountDatabase
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
@@ -28,6 +29,9 @@ import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
 object AccountServiceFactory {
+
+    private val remoteAppConnectionManager = RemoteAppConnectionManager()
+
     private val httpClient = HttpClientFactory.createHttpClientWithDefaultConfig {
         install(HttpCache)
     }
@@ -77,6 +81,7 @@ object AccountServiceFactory {
             remoteSignerMethodParser = RemoteSignerMethodParser(
                 nostrEncryptionService = nostrEncryptionService,
             ),
+            remoteAppConnectionManager = remoteAppConnectionManager,
         )
     }
 

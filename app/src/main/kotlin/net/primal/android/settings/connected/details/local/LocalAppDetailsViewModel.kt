@@ -74,7 +74,7 @@ class LocalAppDetailsViewModel @Inject constructor(
 
     private fun observeRecentSessions() =
         viewModelScope.launch {
-            sessionRepository.observeSessionsByAppIdentifier(appIdentifier = identifier)
+            sessionRepository.observeSessionsByApp(appIdentifier = identifier)
                 .collect { sessions ->
                     setState {
                         copy(
