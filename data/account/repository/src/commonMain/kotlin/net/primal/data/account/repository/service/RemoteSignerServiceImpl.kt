@@ -31,7 +31,6 @@ import net.primal.data.account.repository.manager.RemoteAppConnectionManager
 import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.data.account.repository.mappers.getRequestType
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
-import net.primal.data.account.repository.repository.internal.InternalSessionRepository
 import net.primal.data.account.repository.repository.internal.model.UpdateRemoteAppSessionEventRequest
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
@@ -47,7 +46,6 @@ class RemoteSignerServiceImpl internal constructor(
     private val nostrRelayManager: NostrRelayManager,
     private val remoteSignerMethodResponseBuilder: RemoteSignerMethodResponseBuilder,
     private val internalSessionEventRepository: InternalSessionEventRepository,
-    private val internalSessionRepository: InternalSessionRepository,
     private val remoteSignerMethodParser: RemoteSignerMethodParser,
     private val remoteAppConnectionManager: RemoteAppConnectionManager,
 ) : RemoteSignerService {
