@@ -77,9 +77,9 @@ class LocalAppRepositoryImpl(
         }
 
     private suspend inline fun deleteEverythingForIdentifier(identifier: String) {
-        database.appPermissions().deletePermissions(identifier)
+        database.appPermissions().deletePermissions(appIdentifier = identifier)
+        database.appSessions().deleteAllSessionsByApp(appIdentifier = identifier)
         database.localApps().deleteApp(identifier = identifier)
-        // Delete sessions
-        // Delete session events
+        database.localAppSessionEvents().deleteEvents(appIdentifier = identifier)
     }
 }
