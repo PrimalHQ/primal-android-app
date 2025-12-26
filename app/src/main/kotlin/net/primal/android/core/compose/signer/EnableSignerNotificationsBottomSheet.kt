@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -38,6 +38,8 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import net.primal.android.R
+import net.primal.android.core.compose.AppIconThumbnail
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.service.PrimalRemoteSignerService
@@ -48,7 +50,11 @@ import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
-fun EnableSignerNotificationsBottomSheet(onDismissRequest: () -> Unit) {
+fun EnableSignerNotificationsBottomSheet(
+    appName: String?,
+    appIconUrl: String?,
+    onDismissRequest: () -> Unit,
+) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -90,10 +96,12 @@ fun EnableSignerNotificationsBottomSheet(onDismissRequest: () -> Unit) {
     ModalBottomSheet(
         sheetState = sheetState,
         onDismissRequest = onDismissRequest,
-        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
         dragHandle = { NostrConnectBottomSheetDragHandle() },
     ) {
         EnableSignerNotificationsContent(
+            appName = appName,
+            appIconUrl = appIconUrl,
             isEnabled = isEnabled,
             onDismissRequest = onDismissRequest,
             onCheckedChange = { newEnabled ->
@@ -123,54 +131,117 @@ fun EnableSignerNotificationsBottomSheet(onDismissRequest: () -> Unit) {
 
 @Composable
 private fun EnableSignerNotificationsContent(
+    appName: String?,
+    appIconUrl: String?,
     isEnabled: Boolean,
     onDismissRequest: () -> Unit,
     onCheckedChange: (Boolean) -> Unit,
 ) {
+    val appNameDisplay = appName ?: stringResource(id = R.string.signer_notification_unknown_app)
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        SignerAppHeader(
+            appName = appNameDisplay,
+            appIconUrl = appIconUrl,
+        )
+
+        PrimalDivider()
+
+        SignerNotificationsControls(
+            isEnabled = isEnabled,
+            onCheckedChange = onCheckedChange,
+            onDismissRequest = onDismissRequest,
+        )
+    }
+}
+
+@Composable
+private fun SignerAppHeader(appName: String, appIconUrl: String?) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt2)
             .padding(horizontal = 24.dp)
             .padding(bottom = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        AppIconThumbnail(
+            appIconUrl = appIconUrl,
+            appName = appName,
+            avatarSize = 56.dp,
+        )
+
+        Text(
+            text = appName,
+            style = AppTheme.typography.titleLarge.copy(
+                lineHeight = 24.sp,
+                color = AppTheme.colorScheme.onPrimary,
+            ),
+            fontWeight = FontWeight.Bold,
+        )
+
+        val titleText = buildAnnotatedString {
+            append(stringResource(id = R.string.signer_notification_session_active_prefix))
+            append(" ")
+            append(appName)
+        }
+
+        Text(
+            text = titleText,
+            style = AppTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Normal,
+                color = AppTheme.extraColorScheme.successBright,
+            ),
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+private fun SignerNotificationsControls(
+    isEnabled: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            Text(
-                text = stringResource(id = R.string.signer_notification_enable_title),
-                style = AppTheme.typography.titleLarge,
-                color = AppTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-            )
-            Text(
-                text = stringResource(id = R.string.signer_notification_enable_description),
-                style = AppTheme.typography.bodyMedium,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                textAlign = TextAlign.Center,
+        Text(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            text = stringResource(id = R.string.signer_notification_keep_running_description),
+            style = AppTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Normal,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 lineHeight = 20.sp,
-            )
-        }
+            ),
+            textAlign = TextAlign.Center,
+        )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt3,
                     shape = AppTheme.shapes.medium,
                 )
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = 16.dp, vertical = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 text = stringResource(id = R.string.signer_notification_enable_switch_label),
-                style = AppTheme.typography.bodyLarge,
-                color = AppTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Medium,
+                style = AppTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Normal,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                ),
             )
 
             PrimalSwitch(
@@ -179,17 +250,15 @@ private fun EnableSignerNotificationsContent(
             )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
         PrimalFilledButton(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp),
+                .height(54.dp),
             onClick = onDismissRequest,
         ) {
             Text(
                 text = stringResource(id = R.string.signer_notification_enable_button),
-                fontWeight = FontWeight.Bold,
+                style = AppTheme.typography.titleLarge,
             )
         }
     }

@@ -1551,16 +1551,16 @@
     <string name="permissions_bottom_sheet_back_button">Back</string>
 
     <string name="signer_notification_name">Remote Signer</string>
-    <string name="signer_notification_summary_title">"Primal Remote Signer"</string>
+    <string name="signer_notification_summary_title">Primal Remote Signer</string>
     <string name="signer_notification_end_session">End session</string>
     <string name="signer_notification_unknown_app">Unknown App</string>
     <string name="signer_notification_logged_in_as">Logged in as %s</string>
     <plurals name="signer_notification_new_signer_request">
-        <item quantity="one">"You have %d new signer request."</item>
-        <item quantity="other">"You have %d new signer requests."</item>
+        <item quantity="one">You have %d new signer request.</item>
+        <item quantity="other">You have %d new signer requests.</item>
     </plurals>
-    <string name="signer_notification_enable_title">Enable background service</string>
-    <string name="signer_notification_enable_description">To ensure the remote signer keeps running in the background, please enable notifications.</string>
     <string name="signer_notification_enable_switch_label">Enable Notifications</string>
     <string name="signer_notification_enable_button">Let’s Go</string>
+    <string name="signer_notification_session_active_prefix">Session active with</string>
+    <string name="signer_notification_keep_running_description">To keep running reliably while Primal is in the background or when your phone is locked, you need to enable remote signer notifications.</string>
 </resources>

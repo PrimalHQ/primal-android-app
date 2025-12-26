@@ -42,6 +42,8 @@ fun RemoteSessionIndicatorOverlay(
 
     if (showNotificationPrompt) {
         EnableSignerNotificationsBottomSheet(
+            appName = uiState.activeAppName,
+            appIconUrl = uiState.activeAppIconUrl,
             onDismissRequest = { showNotificationPrompt = false },
         )
     }
