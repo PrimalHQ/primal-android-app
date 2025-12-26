@@ -1,6 +1,7 @@
 package net.primal.android.signer.provider.approvals
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,7 +22,10 @@ fun PermissionRequestsBottomSheet(
     onCompleted: (List<LocalSignerMethodResponse>) -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { it != SheetValue.Hidden },
+    )
 
     LaunchedEffect(viewModel.effects) {
         viewModel.effects.collect {
@@ -29,6 +33,7 @@ fun PermissionRequestsBottomSheet(
                 is PermissionRequestsContract.SideEffect.ApprovalSuccess -> {
                     onCompleted(it.approvedMethods)
                 }
+
                 is PermissionRequestsContract.SideEffect.RejectionSuccess -> {
                     onCompleted(emptyList())
                 }

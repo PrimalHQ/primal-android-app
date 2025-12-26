@@ -29,6 +29,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalBottomSheetProperties
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -91,6 +92,7 @@ fun SignerPermissionsBottomSheet(
     eventDetails: SignerEventDetails? = null,
     responding: Boolean = false,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    properties: ModalBottomSheetProperties = ModalBottomSheetProperties(),
 ) {
     var selectedEventIds by remember { mutableStateOf(emptySet<String>()) }
     var alwaysHandleRequestsLikeThis by remember { mutableStateOf(true) }
@@ -115,6 +117,7 @@ fun SignerPermissionsBottomSheet(
         dragHandle = { NostrConnectBottomSheetDragHandle() },
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         onDismissRequest = onDismissRequest,
+        properties = properties,
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
