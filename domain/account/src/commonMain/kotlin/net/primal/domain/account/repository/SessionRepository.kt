@@ -13,6 +13,8 @@ interface SessionRepository {
 
     fun observeSessionsByApp(appIdentifier: String): Flow<List<AppSession>>
 
+    fun observeRemoteSessionsByApp(appIdentifier: String): Flow<List<RemoteAppSession>>
+
     fun observeRemoteSession(sessionId: String): Flow<RemoteAppSession?>
 
     fun observeLocalSession(sessionId: String): Flow<AppSession?>
