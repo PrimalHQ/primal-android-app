@@ -44,10 +44,10 @@ import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.signer.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.core.service.PrimalRemoteSignerService
 import net.primal.android.core.utils.getNotificationSettingsIntent
 import net.primal.android.core.utils.hasNotificationPermission
-import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
