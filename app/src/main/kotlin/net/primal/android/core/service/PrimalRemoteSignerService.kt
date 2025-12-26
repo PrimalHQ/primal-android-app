@@ -75,7 +75,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
     companion object {
         private const val GROUP_ID = "net.primal.CONNECTED_APPS"
         private const val END_SESSION_ACTION_INTENT = "net.primal.END_SESSION"
-        private const val CHANNEL_ID = "remote_signer"
+        const val CHANNEL_ID = "remote_signer"
         private const val SUMMARY_NOTIFICATION_ID = 42
         private const val CHILD_NOTIFICATION_ID = 43
         private const val RESPOND_NOTIFICATION_ID = 44
