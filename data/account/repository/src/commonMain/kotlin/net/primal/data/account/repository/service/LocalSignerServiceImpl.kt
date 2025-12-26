@@ -1,31 +1,29 @@
 package net.primal.data.account.repository.service
 
+import io.github.aakira.napier.Napier
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
 import kotlin.time.Clock
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import net.primal.core.utils.Result
 import net.primal.core.utils.add
 import net.primal.core.utils.asSuccess
+import net.primal.core.utils.map
+import net.primal.core.utils.recover
 import net.primal.core.utils.remove
 import net.primal.core.utils.runCatching
+import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.data.account.repository.builder.LocalSignerMethodResponseBuilder
-import net.primal.data.account.repository.mappers.asDomain
-import net.primal.data.account.repository.mappers.buildSessionEventData
 import net.primal.data.account.repository.mappers.getRequestType
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
 import net.primal.data.account.repository.repository.internal.InternalSessionRepository
+import net.primal.data.account.repository.repository.internal.model.UpdateAppSessionEventRequest
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.AppPermissionAction
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.model.LocalSignerMethodResponse
-import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.SessionEventUserChoice
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.model.UserChoice
@@ -44,73 +42,98 @@ class LocalSignerServiceImpl internal constructor(
     private val internalSessionEventRepository: InternalSessionEventRepository,
 ) : LocalSignerService {
 
-    private val responses = AtomicReference<List<LocalSignerMethodResponse>>(emptyList())
-    private val pendingUserActionMethods = MutableStateFlow<List<LocalSignerMethod>>(emptyList())
+    private val pendingMethods = AtomicReference<List<LocalSignerMethod>>(emptyList())
+    private val allResponses = AtomicReference<List<LocalSignerMethodResponse>>(emptyList())
 
     override suspend fun processMethod(method: LocalSignerMethod): Result<LocalSignerMethodResponse> {
         val permissionAction = localAppRepository.getPermissionActionForMethod(method = method)
-
         return when (permissionAction) {
             AppPermissionAction.Approve -> {
-                val response = localSignerMethodResponseBuilder.build(method = method).also { response ->
-                    responses.add(response)
-                }
-                val session = internalSessionRepository.getOrCreateLocalAppSession(
-                    appIdentifier = method.getIdentifier(),
-                )
-                internalSessionEventRepository.saveLocalSessionEvent(
-                    sessionId = session.sessionId,
-                    requestType = method.getRequestType(),
+                val response = localSignerMethodResponseBuilder.build(method = method)
+                allResponses.add(response)
+                insertNewSessionEvent(
                     method = method,
+                    requestState = AppRequestState.Approved,
                     response = response,
                 )
                 response.asSuccess()
             }
 
             AppPermissionAction.Deny -> {
+                val response = LocalSignerMethodResponse.Error(
+                    eventId = method.eventId,
+                    message = "Request rejected by policy (auto denied).",
+                )
+                allResponses.add(response)
+                insertNewSessionEvent(
+                    method = method,
+                    requestState = AppRequestState.Rejected,
+                    response = response,
+                )
                 Result.failure(LocalSignerError.AutoDenied)
             }
 
             AppPermissionAction.Ask -> {
-                pendingUserActionMethods.add(method)
                 Result.failure(LocalSignerError.UserApprovalRequired)
             }
         }
     }
 
-    override fun observeSessionEventsPendingUserAction(): Flow<List<SessionEvent>> =
-        pendingUserActionMethods.asStateFlow()
-            .map {
-                it.mapNotNull { method ->
-                    buildSessionEventData(
-                        sessionId = "null",
-                        processedAt = Clock.System.now().epochSeconds,
-                        requestType = method.getRequestType(),
-                        method = method,
-                        response = null,
-                        requestState = AppRequestState.PendingUserAction,
-                    )?.asDomain()
-                }
+    override suspend fun processMethodOrAddToPending(method: LocalSignerMethod): Result<Unit> {
+        return processMethod(method).map { Unit }.recover { error ->
+            if (error is LocalSignerError.UserApprovalRequired) {
+                pendingMethods.add(method)
+                insertNewSessionEvent(
+                    method = method,
+                    requestState = AppRequestState.PendingUserAction,
+                    response = null,
+                )
+                Unit.asSuccess()
+            } else {
+                Result.failure(error)
             }
+        }
+    }
 
-    override fun getMethodResponses() = responses.load()
+    private suspend fun insertNewSessionEvent(
+        method: LocalSignerMethod,
+        requestState: AppRequestState,
+        response: LocalSignerMethodResponse?,
+    ) {
+        val session = internalSessionRepository.getOrCreateLocalAppSession(
+            appIdentifier = method.getIdentifier(),
+        )
+        internalSessionEventRepository.saveLocalSessionEvent(
+            sessionId = session.sessionId,
+            requestType = method.getRequestType(),
+            method = method,
+            response = null,
+            requestState = requestState,
+        )
+    }
+
+    override fun getAllMethodResponses() = allResponses.load()
 
     override suspend fun respondToUserActions(eventChoices: List<SessionEventUserChoice>) {
         eventChoices.forEach { respondToUserAction(eventChoice = it) }
     }
 
     private suspend fun respondToUserAction(eventChoice: SessionEventUserChoice) {
-        val method = pendingUserActionMethods.value
+        val method = pendingMethods.load()
             .firstOrNull { it.eventId == eventChoice.sessionEventId }
-            ?: return
+            ?: run {
+                Napier.e(tag = "LocalSigner") { "You are trying to respond to a session event " +
+                    "from different instance of LocalSignerService." }
+                return
+            }
 
         when (eventChoice.userChoice) {
-            UserChoice.Allow -> allowMethod(method)
+            UserChoice.Allow -> approveMethodByUserAction(method)
 
-            UserChoice.Reject -> rejectMethod(eventId = method.eventId)
+            UserChoice.Reject -> rejectMethodByUser(eventId = method.eventId)
 
             UserChoice.AlwaysAllow -> {
-                allowMethod(method)
+                approveMethodByUserAction(method)
                 updatePermissionPreference(
                     permissionId = method.getPermissionId(),
                     packageName = method.packageName,
@@ -119,7 +142,7 @@ class LocalSignerServiceImpl internal constructor(
             }
 
             UserChoice.AlwaysReject -> {
-                rejectMethod(eventId = method.eventId)
+                rejectMethodByUser(eventId = method.eventId)
                 updatePermissionPreference(
                     permissionId = method.getPermissionId(),
                     packageName = method.packageName,
@@ -127,19 +150,41 @@ class LocalSignerServiceImpl internal constructor(
                 )
             }
         }
-
-        pendingUserActionMethods.remove(method)
+        pendingMethods.remove(method)
     }
 
-    private suspend fun allowMethod(method: LocalSignerMethod) {
-        responses.add(localSignerMethodResponseBuilder.build(method))
+    private suspend fun approveMethodByUserAction(method: LocalSignerMethod) {
+        val response = localSignerMethodResponseBuilder.build(method)
+        storeResponseAndUpdateSessionEventState(
+            response = response,
+            requestState = AppRequestState.Approved,
+        )
     }
 
-    private fun rejectMethod(eventId: String) {
-        responses.add(
-            LocalSignerMethodResponse.Error(
-                eventId = eventId,
-                message = "User rejected this event.",
+    private suspend fun rejectMethodByUser(eventId: String) {
+        val response = LocalSignerMethodResponse.Error(
+            eventId = eventId,
+            message = "User rejected this event.",
+        )
+        storeResponseAndUpdateSessionEventState(
+            response = response,
+            requestState = AppRequestState.Rejected,
+        )
+    }
+
+    private suspend fun storeResponseAndUpdateSessionEventState(
+        response: LocalSignerMethodResponse,
+        requestState: AppRequestState,
+    ) {
+        allResponses.add(response)
+        internalSessionEventRepository.updateLocalAppSessionEventState(
+            listOf(
+                UpdateAppSessionEventRequest(
+                    eventId = response.eventId,
+                    requestState = requestState,
+                    responsePayload = response.encodeToJsonString(),
+                    completedAt = Clock.System.now().epochSeconds,
+                ),
             ),
         )
     }

@@ -31,7 +31,7 @@ import net.primal.data.account.repository.manager.RemoteAppConnectionManager
 import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.data.account.repository.mappers.getRequestType
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
-import net.primal.data.account.repository.repository.internal.model.UpdateRemoteAppSessionEventRequest
+import net.primal.data.account.repository.repository.internal.model.UpdateAppSessionEventRequest
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
@@ -155,7 +155,7 @@ class RemoteSignerServiceImpl internal constructor(
                         .also { responses ->
                             internalSessionEventRepository.updateRemoteAppSessionEventState(
                                 requests = responses.map { response ->
-                                    UpdateRemoteAppSessionEventRequest(
+                                    UpdateAppSessionEventRequest(
                                         eventId = response.id,
                                         responsePayload = response.encodeToJsonString(),
                                         requestState = when (response) {

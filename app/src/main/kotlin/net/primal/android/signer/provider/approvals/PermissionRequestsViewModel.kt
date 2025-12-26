@@ -22,10 +22,12 @@ import net.primal.android.signer.provider.localSignerMethodOrThrow
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.model.LocalSignerMethod
+import net.primal.domain.account.model.LocalSignerMethodResponse
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.SessionEventUserChoice
 import net.primal.domain.account.model.UserChoice
 import net.primal.domain.account.repository.PermissionsRepository
+import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.service.LocalSignerService
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -38,6 +40,7 @@ class PermissionRequestsViewModel @Inject constructor(
     private val localSignerService: LocalSignerService,
     private val dispatcherProvider: DispatcherProvider,
     private val permissionsRepository: PermissionsRepository,
+    private val sessionEventRepository: SessionEventRepository,
 ) : ViewModel() {
 
     private val initialMethod: LocalSignerMethod = savedStateHandle.localSignerMethodOrThrow
@@ -57,17 +60,13 @@ class PermissionRequestsViewModel @Inject constructor(
         observeEvents()
         observeSessionEventsPendingUserAction()
         fetchPermissionsNamingMap()
+        onNewLocalSignerMethod(initialMethod)
     }
-
-    private fun fetchPermissionsNamingMap() =
-        viewModelScope.launch {
-            permissionsRepository.getNamingMap()
-                .onSuccess { setState { copy(permissionsMap = it) } }
-        }
 
     fun onNewLocalSignerMethod(method: LocalSignerMethod) =
         viewModelScope.launch {
-            localSignerService.processMethod(method = method)
+            Timber.tag("LocalSignerForeground").d("We got $method.")
+            localSignerService.processMethodOrAddToPending(method = method)
         }
 
     private fun observeEvents() {
@@ -78,16 +77,39 @@ class PermissionRequestsViewModel @Inject constructor(
                         selectedEventIds = it.eventIds,
                         choice = if (it.alwaysAllow) UserChoice.AlwaysAllow else UserChoice.Allow,
                     )
+
                     is UiEvent.Reject -> respondToEvents(
                         selectedEventIds = it.eventIds,
                         choice = if (it.alwaysReject) UserChoice.AlwaysReject else UserChoice.Reject,
                     )
+
+                    UiEvent.RejectAll -> respondToEvents(
+                        selectedEventIds = _state.value.requestQueue.map { request -> request.eventId },
+                        choice = UserChoice.Reject,
+                    )
+
                     is UiEvent.OpenEventDetails -> handleOpenEventDetails(it.eventId)
                     UiEvent.CloseEventDetails -> setState { copy(eventDetailsSessionEvent = null) }
                 }
             }
         }
     }
+
+    private fun observeSessionEventsPendingUserAction() {
+        viewModelScope.launch {
+            sessionEventRepository.observeEventsPendingUserActionForLocalApp(
+                appIdentifier = initialMethod.getIdentifier(),
+            ).collect { events ->
+                setState { copy(requestQueue = events) }
+            }
+        }
+    }
+
+    private fun fetchPermissionsNamingMap() =
+        viewModelScope.launch {
+            permissionsRepository.getNamingMap()
+                .onSuccess { setState { copy(permissionsMap = it) } }
+        }
 
     private fun handleOpenEventDetails(eventId: String) {
         val sessionEvent = state.value.requestQueue.find { it.eventId == eventId }
@@ -121,28 +143,11 @@ class PermissionRequestsViewModel @Inject constructor(
         }
     }
 
-    private fun observeSessionEventsPendingUserAction() {
-        viewModelScope.launch {
-            localSignerService.observeSessionEventsPendingUserAction().collect { events ->
-                setState { copy(requestQueue = events) }
-                Timber.tag("LocalSigner").i(events.toString())
-            }
-        }
-    }
-
     private fun respondToEvents(selectedEventIds: List<String>, choice: UserChoice) =
         viewModelScope.launch {
             setState { copy(responding = true) }
 
             val allPendingEvents = state.value.requestQueue
-
-            val selectedChoices = selectedEventIds.map { id ->
-                SessionEventUserChoice(
-                    sessionEventId = id,
-                    userChoice = choice,
-                )
-            }
-
             val unselectedEventIds = allPendingEvents.map { it.eventId } - selectedEventIds.toSet()
             val unselectedChoices = unselectedEventIds.map { id ->
                 SessionEventUserChoice(
@@ -151,20 +156,21 @@ class PermissionRequestsViewModel @Inject constructor(
                 )
             }
 
-            localSignerService.respondToUserActions(
-                eventChoices = selectedChoices + unselectedChoices,
-            )
-
-            if (choice == UserChoice.Allow || choice == UserChoice.AlwaysAllow) {
-                setEffect(
-                    SideEffect.ApprovalSuccess(
-                        approvedMethods = localSignerService.getMethodResponses(),
-                    ),
+            val selectedChoices = selectedEventIds.map { id ->
+                SessionEventUserChoice(
+                    sessionEventId = id,
+                    userChoice = choice,
                 )
-            } else {
-                setEffect(SideEffect.RejectionSuccess)
             }
 
-            setState { copy(responding = false) }
+            localSignerService.respondToUserActions(eventChoices = selectedChoices + unselectedChoices)
+            val responses = localSignerService.getAllMethodResponses()
+
+            setEffect(
+                SideEffect.RequestsCompleted(
+                    approved = responses.filterIsInstance<LocalSignerMethodResponse.Success>(),
+                    rejected = responses.filterIsInstance<LocalSignerMethodResponse.Error>(),
+                ),
+            )
         }
 }

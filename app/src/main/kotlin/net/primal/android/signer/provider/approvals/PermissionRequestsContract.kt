@@ -19,12 +19,15 @@ interface PermissionRequestsContract {
     sealed class UiEvent {
         data class Allow(val eventIds: List<String>, val alwaysAllow: Boolean) : UiEvent()
         data class Reject(val eventIds: List<String>, val alwaysReject: Boolean) : UiEvent()
+        data object RejectAll : UiEvent()
         data class OpenEventDetails(val eventId: String) : UiEvent()
         data object CloseEventDetails : UiEvent()
     }
 
     sealed class SideEffect {
-        data class ApprovalSuccess(val approvedMethods: List<LocalSignerMethodResponse>) : SideEffect()
-        data object RejectionSuccess : SideEffect()
+        data class RequestsCompleted(
+            val approved: List<LocalSignerMethodResponse>,
+            val rejected: List<LocalSignerMethodResponse>,
+        ) : SideEffect()
     }
 }

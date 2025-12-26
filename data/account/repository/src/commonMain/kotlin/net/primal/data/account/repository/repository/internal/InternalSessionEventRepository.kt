@@ -14,7 +14,7 @@ import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.buildSessionEventData
-import net.primal.data.account.repository.repository.internal.model.UpdateRemoteAppSessionEventRequest
+import net.primal.data.account.repository.repository.internal.model.UpdateAppSessionEventRequest
 import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.model.LocalSignerMethodResponse
 import net.primal.domain.nostr.NostrEvent
@@ -59,9 +59,11 @@ internal class InternalSessionEventRepository(
         requestState: AppRequestState? = null,
     ) = withContext(dispatchers.io()) {
         runCatching {
+            val completedAt = Clock.System.now().epochSeconds
             buildSessionEventData(
                 sessionId = sessionId,
-                processedAt = Clock.System.now().epochSeconds,
+                requestedAt = method?.requestedAt ?: completedAt,
+                completedAt = if (response != null) completedAt else null,
                 requestType = requestType,
                 method = method,
                 response = response,
@@ -91,11 +93,25 @@ internal class InternalSessionEventRepository(
             }
         }
 
-    suspend fun updateRemoteAppSessionEventState(requests: List<UpdateRemoteAppSessionEventRequest>) =
+    suspend fun updateRemoteAppSessionEventState(requests: List<UpdateAppSessionEventRequest>) =
         withContext(dispatchers.io()) {
             accountDatabase.withTransaction {
                 requests.forEach { request ->
                     accountDatabase.remoteAppSessionEvents().updateSessionEventRequestState(
+                        eventId = request.eventId,
+                        requestState = request.requestState,
+                        responsePayload = request.responsePayload?.asEncryptable(),
+                        completedAt = request.completedAt,
+                    )
+                }
+            }
+        }
+
+    suspend fun updateLocalAppSessionEventState(requests: List<UpdateAppSessionEventRequest>) =
+        withContext(dispatchers.io()) {
+            accountDatabase.withTransaction {
+                requests.forEach { request ->
+                    accountDatabase.localAppSessionEvents().updateSessionEventRequestState(
                         eventId = request.eventId,
                         requestState = request.requestState,
                         responsePayload = request.responsePayload?.asEncryptable(),

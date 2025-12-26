@@ -2,6 +2,7 @@ package net.primal.android.signer.provider.parser
 
 import android.content.Intent
 import kotlin.uuid.Uuid
+import kotlinx.datetime.Clock
 import net.primal.android.signer.model.Permission
 import net.primal.android.signer.model.SignerMethod
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
@@ -67,6 +68,7 @@ class SignerIntentParser {
             eventId = Uuid.random().toString(),
             permissions = permissions,
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
         )
     }
 
@@ -80,6 +82,7 @@ class SignerIntentParser {
         return LocalSignerMethod.SignEvent(
             eventId = id,
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
             userPubKey = currentUser,
             unsignedEvent = event,
         )
@@ -95,6 +98,7 @@ class SignerIntentParser {
         return LocalSignerMethod.Nip04Encrypt(
             eventId = id,
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
             userPubKey = currentUser,
             otherPubKey = pubkey,
             plaintext = plaintext,
@@ -111,6 +115,7 @@ class SignerIntentParser {
         return LocalSignerMethod.Nip44Encrypt(
             eventId = id,
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
             userPubKey = currentUser,
             otherPubKey = pubkey,
             plaintext = plaintext,
@@ -127,6 +132,7 @@ class SignerIntentParser {
         return LocalSignerMethod.Nip04Decrypt(
             eventId = id,
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
             userPubKey = currentUser,
             otherPubKey = pubkey,
             ciphertext = ciphertext,
@@ -143,6 +149,7 @@ class SignerIntentParser {
         return LocalSignerMethod.Nip44Decrypt(
             eventId = id,
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
             userPubKey = currentUser,
             otherPubKey = pubkey,
             ciphertext = ciphertext,
@@ -158,6 +165,7 @@ class SignerIntentParser {
         return LocalSignerMethod.DecryptZapEvent(
             eventId = id,
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
             userPubKey = currentUser,
             signedEvent = event,
         )

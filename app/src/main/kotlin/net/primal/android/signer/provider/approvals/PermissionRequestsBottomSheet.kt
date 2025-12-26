@@ -18,8 +18,7 @@ import net.primal.domain.account.model.LocalSignerMethodResponse
 @Composable
 fun PermissionRequestsBottomSheet(
     viewModel: PermissionRequestsViewModel,
-    onDismiss: () -> Unit,
-    onCompleted: (List<LocalSignerMethodResponse>) -> Unit,
+    onCompleted: (result: RequestsResults) -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
     val sheetState = rememberModalBottomSheetState(
@@ -30,23 +29,14 @@ fun PermissionRequestsBottomSheet(
     LaunchedEffect(viewModel.effects) {
         viewModel.effects.collect {
             when (it) {
-                is PermissionRequestsContract.SideEffect.ApprovalSuccess -> {
-                    onCompleted(it.approvedMethods)
-                }
-
-                is PermissionRequestsContract.SideEffect.RejectionSuccess -> {
-                    onCompleted(emptyList())
+                is PermissionRequestsContract.SideEffect.RequestsCompleted -> {
+                    onCompleted(RequestsResults(approved = it.approved, rejected = it.rejected))
                 }
             }
         }
     }
 
-    val packageName = uiState.callingPackage
-    val appDisplayInfo = if (packageName != null) {
-        rememberAppDisplayInfo(packageName)
-    } else {
-        null
-    }
+    val appDisplayInfo = rememberAppDisplayInfo(uiState.callingPackage)
 
     val eventDetails = remember(
         uiState.eventDetailsSessionEvent,
@@ -65,15 +55,20 @@ fun PermissionRequestsBottomSheet(
     SignerPermissionsBottomSheet(
         sheetState = sheetState,
         events = uiState.requestQueue,
-        appName = appDisplayInfo?.name,
-        appIcon = appDisplayInfo?.icon,
+        appName = appDisplayInfo.name,
+        appIcon = appDisplayInfo.icon,
         permissionsMap = uiState.permissionsMap,
         eventDetails = eventDetails,
         responding = uiState.responding,
-        onDismissRequest = onDismiss,
+        onDismissRequest = { viewModel.setEvent(UiEvent.RejectAll) },
         onAllow = { ids, always -> viewModel.setEvent(UiEvent.Allow(ids, always)) },
         onReject = { ids, always -> viewModel.setEvent(UiEvent.Reject(ids, always)) },
         onLookUpEventDetails = { viewModel.setEvent(UiEvent.OpenEventDetails(it)) },
         onCloseEventDetails = { viewModel.setEvent(UiEvent.CloseEventDetails) },
     )
 }
+
+data class RequestsResults(
+    val approved: List<LocalSignerMethodResponse> = emptyList(),
+    val rejected: List<LocalSignerMethodResponse> = emptyList(),
+)

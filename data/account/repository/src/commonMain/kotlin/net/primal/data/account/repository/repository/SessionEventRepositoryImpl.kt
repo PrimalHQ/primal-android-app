@@ -88,7 +88,7 @@ class SessionEventRepositoryImpl(
             }
         }
 
-    override suspend fun respondToEvent(eventId: String, userChoice: UserChoice): Result<Unit> =
+    override suspend fun respondToRemoteEvent(eventId: String, userChoice: UserChoice): Result<Unit> =
         withContext(dispatchers.io()) {
             runCatching {
                 when (userChoice) {
@@ -109,12 +109,12 @@ class SessionEventRepositoryImpl(
             }
         }
 
-    override suspend fun respondToEvents(userChoices: List<SessionEventUserChoice>): Result<Unit> =
+    override suspend fun respondToRemoteEvents(userChoices: List<SessionEventUserChoice>): Result<Unit> =
         withContext(dispatchers.io()) {
             database.withTransaction {
                 runCatching {
                     userChoices.forEach {
-                        respondToEvent(eventId = it.sessionEventId, userChoice = it.userChoice).getOrThrow()
+                        respondToRemoteEvent(eventId = it.sessionEventId, userChoice = it.userChoice).getOrThrow()
                     }
                 }
             }

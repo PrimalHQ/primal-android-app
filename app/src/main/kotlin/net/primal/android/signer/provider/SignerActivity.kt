@@ -63,11 +63,10 @@ class SignerActivity : PrimalActivity() {
 
                         PermissionRequestsBottomSheet(
                             viewModel = permissionRequestsViewModel,
-                            onDismiss = { finish() },
-                            onCompleted = { approvedMethods ->
-                                val size = approvedMethods.size
+                            onCompleted = { requestsResults ->
+                                val size = requestsResults.approved.size
                                 if (size == 1) {
-                                    val method = approvedMethods.first()
+                                    val method = requestsResults.approved.first()
                                     setResult(
                                         RESULT_OK,
                                         method.toIntent().apply {
@@ -77,7 +76,7 @@ class SignerActivity : PrimalActivity() {
                                 } else if (size > 1) {
                                     setResult(
                                         RESULT_OK,
-                                        approvedMethods.toIntent().apply {
+                                        requestsResults.approved.toIntent().apply {
                                             putExtra("package", packageName)
                                         },
                                     )

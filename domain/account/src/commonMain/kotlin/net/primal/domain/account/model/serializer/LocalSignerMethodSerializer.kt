@@ -16,6 +16,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.model.LocalSignerMethodType
@@ -35,6 +36,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 put("type", JsonPrimitive(LocalSignerMethodType.GetPublicKey.name))
                 put("eventId", JsonPrimitive(value.eventId))
                 put("packageName", JsonPrimitive(value.packageName))
+                put("requestedAt", JsonPrimitive(value.requestedAt))
 
                 val perms = jsonEncoder.json.encodeToJsonElement(
                     ListSerializer(AppPermission.serializer()),
@@ -47,6 +49,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 put("type", JsonPrimitive(LocalSignerMethodType.SignEvent.name))
                 put("eventId", JsonPrimitive(value.eventId))
                 put("packageName", JsonPrimitive(value.packageName))
+                put("requestedAt", JsonPrimitive(value.requestedAt))
                 put("userPubKey", JsonPrimitive(value.userPubKey))
                 val unsigned = jsonEncoder.json.encodeToJsonElement(
                     NostrUnsignedEvent.serializer(),
@@ -59,6 +62,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 put("type", JsonPrimitive(LocalSignerMethodType.Nip44Decrypt.name))
                 put("eventId", JsonPrimitive(value.eventId))
                 put("packageName", JsonPrimitive(value.packageName))
+                put("requestedAt", JsonPrimitive(value.requestedAt))
                 put("userPubKey", JsonPrimitive(value.userPubKey))
                 put("otherPubKey", JsonPrimitive(value.otherPubKey))
                 put("ciphertext", JsonPrimitive(value.ciphertext))
@@ -68,6 +72,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 put("type", JsonPrimitive(LocalSignerMethodType.Nip04Decrypt.name))
                 put("eventId", JsonPrimitive(value.eventId))
                 put("packageName", JsonPrimitive(value.packageName))
+                put("requestedAt", JsonPrimitive(value.requestedAt))
                 put("userPubKey", JsonPrimitive(value.userPubKey))
                 put("otherPubKey", JsonPrimitive(value.otherPubKey))
                 put("ciphertext", JsonPrimitive(value.ciphertext))
@@ -77,6 +82,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 put("type", JsonPrimitive(LocalSignerMethodType.Nip44Encrypt.name))
                 put("eventId", JsonPrimitive(value.eventId))
                 put("packageName", JsonPrimitive(value.packageName))
+                put("requestedAt", JsonPrimitive(value.requestedAt))
                 put("userPubKey", JsonPrimitive(value.userPubKey))
                 put("otherPubKey", JsonPrimitive(value.otherPubKey))
                 put("plaintext", JsonPrimitive(value.plaintext))
@@ -86,6 +92,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 put("type", JsonPrimitive(LocalSignerMethodType.Nip04Encrypt.name))
                 put("eventId", JsonPrimitive(value.eventId))
                 put("packageName", JsonPrimitive(value.packageName))
+                put("requestedAt", JsonPrimitive(value.requestedAt))
                 put("userPubKey", JsonPrimitive(value.userPubKey))
                 put("otherPubKey", JsonPrimitive(value.otherPubKey))
                 put("plaintext", JsonPrimitive(value.plaintext))
@@ -95,6 +102,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 put("type", JsonPrimitive(LocalSignerMethodType.DecryptZapEvent.name))
                 put("eventId", JsonPrimitive(value.eventId))
                 put("packageName", JsonPrimitive(value.packageName))
+                put("requestedAt", JsonPrimitive(value.requestedAt))
                 put("userPubKey", JsonPrimitive(value.userPubKey))
                 val ev = jsonEncoder.json.encodeToJsonElement(NostrEvent.serializer(), value.signedEvent)
                 put("signedEvent", ev)
@@ -116,6 +124,8 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
             ?: throw SerializationException("Missing 'eventId'")
         val packageName = obj["packageName"]?.jsonPrimitive?.content
             ?: throw SerializationException("Missing 'packageName'")
+        val requestedAt = obj["requestedAt"]?.jsonPrimitive?.long
+            ?: throw SerializationException("Missing 'requestedAt'")
 
         return when (typeName) {
             LocalSignerMethodType.GetPublicKey.name -> {
@@ -127,6 +137,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 LocalSignerMethod.GetPublicKey(
                     eventId = eventId,
                     packageName = packageName,
+                    requestedAt = requestedAt,
                     permissions = permissions,
                 )
             }
@@ -143,6 +154,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 LocalSignerMethod.SignEvent(
                     eventId = eventId,
                     packageName = packageName,
+                    requestedAt = requestedAt,
                     userPubKey = userPubKey,
                     unsignedEvent = unsignedEvent,
                 )
@@ -158,6 +170,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 LocalSignerMethod.Nip44Decrypt(
                     eventId = eventId,
                     packageName = packageName,
+                    requestedAt = requestedAt,
                     userPubKey = userPubKey,
                     otherPubKey = otherPubKey,
                     ciphertext = ciphertext,
@@ -174,6 +187,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 LocalSignerMethod.Nip04Decrypt(
                     eventId = eventId,
                     packageName = packageName,
+                    requestedAt = requestedAt,
                     userPubKey = userPubKey,
                     otherPubKey = otherPubKey,
                     ciphertext = ciphertext,
@@ -190,6 +204,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 LocalSignerMethod.Nip44Encrypt(
                     eventId = eventId,
                     packageName = packageName,
+                    requestedAt = requestedAt,
                     userPubKey = userPubKey,
                     otherPubKey = otherPubKey,
                     plaintext = plaintext,
@@ -206,6 +221,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 LocalSignerMethod.Nip04Encrypt(
                     eventId = eventId,
                     packageName = packageName,
+                    requestedAt = requestedAt,
                     userPubKey = userPubKey,
                     otherPubKey = otherPubKey,
                     plaintext = plaintext,
@@ -221,6 +237,7 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 LocalSignerMethod.DecryptZapEvent(
                     eventId = eventId,
                     packageName = packageName,
+                    requestedAt = requestedAt,
                     userPubKey = userPubKey,
                     signedEvent = signedEvent,
                 )

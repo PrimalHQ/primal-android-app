@@ -114,8 +114,7 @@ class PermissionsViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(responding = true) }
             val userChoices = eventIds.map { SessionEventUserChoice(sessionEventId = it, userChoice = choice) }
-            sessionEventRepository
-                .respondToEvents(userChoices = userChoices)
+            sessionEventRepository.respondToRemoteEvents(userChoices = userChoices)
             setState { copy(responding = false) }
         }
 

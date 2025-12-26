@@ -36,7 +36,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         LocalAppData::class,
         LocalAppSessionEventData::class,
     ],
-    version = 15,
+    version = 16,
     exportSchema = true,
 )
 @TypeConverters(
@@ -64,6 +64,13 @@ abstract class AccountDatabase : RoomDatabase() {
                                 UPDATE AppSessionData
                                     SET endedAt = strftime('%s', 'now')
                                     WHERE endedAt IS NULL
+                            """.trimIndent(),
+                        )
+                        connection.execSQL(
+                            """
+                                UPDATE LocalAppSessionEventData
+                                    SET completedAt = strftime('%s', 'now'), requestState = 'Rejected'
+                                    WHERE requestState = 'PendingUserAction'
                             """.trimIndent(),
                         )
                         connection.execSQL(

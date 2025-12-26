@@ -3,6 +3,7 @@ package net.primal.android.signer.provider.parser
 import android.net.Uri
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import kotlinx.datetime.Clock
 import net.primal.android.signer.model.SignerMethod
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.account.model.LocalSignerMethod
@@ -39,6 +40,7 @@ class SignerContentProviderParser {
         LocalSignerMethod.DecryptZapEvent(
             eventId = Uuid.random().toString(),
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
             userPubKey = params[2],
             signedEvent = requireNotNull(
                 params[0].decodeFromJsonStringOrNull(),
@@ -49,6 +51,7 @@ class SignerContentProviderParser {
         LocalSignerMethod.Nip44Encrypt(
             eventId = Uuid.random().toString(),
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
             userPubKey = params[2],
             otherPubKey = params[1],
             plaintext = params[0],
@@ -58,6 +61,7 @@ class SignerContentProviderParser {
         LocalSignerMethod.Nip44Decrypt(
             eventId = Uuid.random().toString(),
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
             userPubKey = params[2],
             otherPubKey = params[1],
             ciphertext = params[0],
@@ -67,6 +71,7 @@ class SignerContentProviderParser {
         LocalSignerMethod.Nip04Encrypt(
             eventId = Uuid.random().toString(),
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
             userPubKey = params[2],
             otherPubKey = params[1],
             plaintext = params[0],
@@ -76,6 +81,7 @@ class SignerContentProviderParser {
         LocalSignerMethod.Nip04Decrypt(
             eventId = Uuid.random().toString(),
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
             userPubKey = params[2],
             otherPubKey = params[1],
             ciphertext = params[0],
@@ -85,6 +91,7 @@ class SignerContentProviderParser {
         LocalSignerMethod.SignEvent(
             eventId = Uuid.random().toString(),
             packageName = callingPackage,
+            requestedAt = Clock.System.now().epochSeconds,
             userPubKey = params[2],
             unsignedEvent = requireNotNull(
                 params[0].decodeFromJsonStringOrNull(),

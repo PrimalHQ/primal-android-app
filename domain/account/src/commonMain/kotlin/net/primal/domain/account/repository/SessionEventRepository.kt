@@ -22,7 +22,7 @@ interface SessionEventRepository {
 
     suspend fun notifyMissedNostrEvents(signerKeyPair: NostrKeyPair, eventIds: List<String>): Result<Unit>
 
-    suspend fun respondToEvent(eventId: String, userChoice: UserChoice): Result<Unit>
+    suspend fun respondToRemoteEvent(eventId: String, userChoice: UserChoice): Result<Unit>
 
-    suspend fun respondToEvents(userChoices: List<SessionEventUserChoice>): Result<Unit>
+    suspend fun respondToRemoteEvents(userChoices: List<SessionEventUserChoice>): Result<Unit>
 }

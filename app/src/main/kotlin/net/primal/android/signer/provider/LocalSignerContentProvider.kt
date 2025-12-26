@@ -69,7 +69,7 @@ class LocalSignerContentProvider : ContentProvider() {
                     }
                 },
                 onFailure = { error ->
-                    Timber.tag("LocalSigner").d("Failed to process request: ${error.message}")
+                    Timber.tag("LocalSignerProvider").d("Failed to process request: ${error.message}")
 
                     if (error is LocalSignerError.AutoDenied) {
                         MatrixCursor(arrayOf(REJECTED_COLUMN)).apply {

@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import net.primal.data.account.local.dao.apps.AppRequestState
+import net.primal.shared.data.local.encryption.Encryptable
 
 @Dao
 interface LocalAppSessionEventDataDao {
@@ -15,7 +16,7 @@ interface LocalAppSessionEventDataDao {
         """
         SELECT * FROM LocalAppSessionEventData
         WHERE sessionId = :sessionId AND (requestState = 'Approved' OR requestState = 'Rejected')
-        ORDER BY processedAt DESC
+        ORDER BY completedAt DESC
         """,
     )
     fun observeCompletedEventsBySessionId(sessionId: String): Flow<List<LocalAppSessionEventData>>
@@ -30,6 +31,20 @@ interface LocalAppSessionEventDataDao {
         appIdentifier: String,
         requestState: AppRequestState,
     ): Flow<List<LocalAppSessionEventData>>
+
+    @Query(
+        """
+        UPDATE LocalAppSessionEventData
+        SET requestState = :requestState, responsePayload = :responsePayload, completedAt = :completedAt
+        WHERE eventId = :eventId
+        """,
+    )
+    suspend fun updateSessionEventRequestState(
+        eventId: String,
+        requestState: AppRequestState,
+        responsePayload: Encryptable<String>?,
+        completedAt: Long?,
+    )
 
     @Query("SELECT * FROM LocalAppSessionEventData WHERE eventId = :eventId")
     fun observeEvent(eventId: String): Flow<LocalAppSessionEventData?>
