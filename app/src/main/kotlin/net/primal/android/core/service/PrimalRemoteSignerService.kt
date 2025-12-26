@@ -253,7 +253,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
     private fun observeSessionEventsPendingUserAction() =
         scope.launch {
             val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
-            sessionEventRepository.observeEventsPendingUserAction(signerPubKey = signerKeyPair.pubKey)
+            sessionEventRepository.observeEventsPendingUserActionForRemoteSigner(signerPubKey = signerKeyPair.pubKey)
                 .collect { events ->
                     if (events.isNotEmpty() && isAppInBackground()) {
                         showRespondNotification(eventsCount = events.size)

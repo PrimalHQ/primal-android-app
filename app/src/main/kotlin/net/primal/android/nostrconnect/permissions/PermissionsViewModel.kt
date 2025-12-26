@@ -131,7 +131,7 @@ class PermissionsViewModel @Inject constructor(
 
     private fun observeSessionEventsPendingUserAction() =
         viewModelScope.launch {
-            sessionEventRepository.observeEventsPendingUserAction(
+            sessionEventRepository.observeEventsPendingUserActionForRemoteSigner(
                 signerPubKey = credentialsStore.getOrCreateInternalSignerCredentials()
                     .asKeyPair().pubKey,
             ).collect { events ->

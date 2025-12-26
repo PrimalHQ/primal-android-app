@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
+import net.primal.data.account.local.dao.apps.AppRequestState
 
 @Dao
 interface LocalAppSessionEventDataDao {
@@ -15,9 +16,20 @@ interface LocalAppSessionEventDataDao {
         SELECT * FROM LocalAppSessionEventData
         WHERE sessionId = :sessionId AND (requestState = 'Approved' OR requestState = 'Rejected')
         ORDER BY processedAt DESC
-    """,
+        """,
     )
     fun observeCompletedEventsBySessionId(sessionId: String): Flow<List<LocalAppSessionEventData>>
+
+    @Query(
+        """
+        SELECT * FROM LocalAppSessionEventData 
+        WHERE appIdentifier = :appIdentifier AND requestState = :requestState
+        """,
+    )
+    fun observeEventsByAppIdentifierAndRequestState(
+        appIdentifier: String,
+        requestState: AppRequestState,
+    ): Flow<List<LocalAppSessionEventData>>
 
     @Query("SELECT * FROM LocalAppSessionEventData WHERE eventId = :eventId")
     fun observeEvent(eventId: String): Flow<LocalAppSessionEventData?>

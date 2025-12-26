@@ -73,7 +73,7 @@ internal class InternalSessionEventRepository(
     }
 
     fun observeRemoteAppPendingResponseEvents(signerPubKey: String) =
-        accountDatabase.remoteAppSessionEvents().observeEventsByRequestState(
+        accountDatabase.remoteAppSessionEvents().observeEventsBySignerAndRequestState(
             signerPubKey = signerPubKey,
             requestState = AppRequestState.PendingResponse,
         ).distinctUntilChanged()

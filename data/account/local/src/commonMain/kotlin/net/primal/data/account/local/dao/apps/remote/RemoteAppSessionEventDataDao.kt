@@ -27,7 +27,7 @@ interface RemoteAppSessionEventDataDao {
     @Query(
         "SELECT * FROM RemoteAppSessionEventData WHERE signerPubKey = :signerPubKey AND requestState = :requestState",
     )
-    fun observeEventsByRequestState(
+    fun observeEventsBySignerAndRequestState(
         signerPubKey: String,
         requestState: AppRequestState,
     ): Flow<List<RemoteAppSessionEventData>>

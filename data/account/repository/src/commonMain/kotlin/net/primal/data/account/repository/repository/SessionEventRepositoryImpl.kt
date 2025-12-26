@@ -32,8 +32,8 @@ class SessionEventRepositoryImpl(
     private val nip46EventsHandler: Nip46EventsHandler,
 ) : SessionEventRepository {
 
-    override fun observeEventsPendingUserAction(signerPubKey: String): Flow<List<SessionEvent>> =
-        database.remoteAppSessionEvents().observeEventsByRequestState(
+    override fun observeEventsPendingUserActionForRemoteSigner(signerPubKey: String): Flow<List<SessionEvent>> =
+        database.remoteAppSessionEvents().observeEventsBySignerAndRequestState(
             signerPubKey = signerPubKey,
             requestState = AppRequestState.PendingUserAction,
         ).map { events -> events.mapNotNull { it.asDomain() } }
@@ -44,6 +44,13 @@ class SessionEventRepositoryImpl(
             .map { list -> list.mapNotNull { it.asDomain() } }
             .distinctUntilChanged()
     }
+
+    override fun observeEventsPendingUserActionForLocalApp(appIdentifier: String): Flow<List<SessionEvent>> =
+        database.localAppSessionEvents().observeEventsByAppIdentifierAndRequestState(
+            appIdentifier = appIdentifier,
+            requestState = AppRequestState.PendingUserAction,
+        ).map { events -> events.mapNotNull { it.asDomain() } }
+            .distinctUntilChanged()
 
     override fun observeCompletedEventsForLocalSession(sessionId: String): Flow<List<SessionEvent>> {
         return database.localAppSessionEvents().observeCompletedEventsBySessionId(sessionId = sessionId)

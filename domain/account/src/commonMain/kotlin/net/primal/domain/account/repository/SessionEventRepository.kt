@@ -8,9 +8,11 @@ import net.primal.domain.account.model.UserChoice
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
 interface SessionEventRepository {
-    fun observeEventsPendingUserAction(signerPubKey: String): Flow<List<SessionEvent>>
+    fun observeEventsPendingUserActionForRemoteSigner(signerPubKey: String): Flow<List<SessionEvent>>
 
     fun observeCompletedEventsForRemoteSession(sessionId: String): Flow<List<SessionEvent>>
+
+    fun observeEventsPendingUserActionForLocalApp(appIdentifier: String): Flow<List<SessionEvent>>
 
     fun observeCompletedEventsForLocalSession(sessionId: String): Flow<List<SessionEvent>>
 
