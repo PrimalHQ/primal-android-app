@@ -37,6 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationManagerCompat
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -55,7 +56,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.res.painterResource
 import net.primal.android.core.utils.getNotificationSettingsIntent
-import net.primal.android.core.utils.hasNotificationPermission
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingsChanged
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError
 import net.primal.android.settings.notifications.ui.NotificationSwitchUi
@@ -291,7 +291,8 @@ private fun PushNotificationSection(
     val systemSettingsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
     ) {
-        onChange(context.hasNotificationPermission())
+        val enabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        onChange(enabled)
     }
 
     Column(modifier = modifier) {
@@ -324,7 +325,7 @@ private fun PushNotificationSection(
                             }
                         }
                     } else {
-                        systemSettingsLauncher.launch(context.getNotificationSettingsIntent())
+                        onChange(false)
                     }
                 },
             )
