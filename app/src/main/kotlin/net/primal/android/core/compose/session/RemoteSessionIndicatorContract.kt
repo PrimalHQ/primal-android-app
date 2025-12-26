@@ -6,4 +6,8 @@ interface RemoteSessionIndicatorContract {
         val activeAppName: String? = null,
         val activeAppIconUrl: String? = null,
     )
+
+    sealed class UiEvent {
+        data class PushNotificationsToggled(val enabled: Boolean) : UiEvent()
+    }
 }

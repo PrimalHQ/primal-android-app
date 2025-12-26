@@ -31,8 +31,8 @@ fun RemoteSessionIndicatorOverlay(
 
     var showNotificationPrompt by rememberSaveable { mutableStateOf(false) }
 
-    LaunchedEffect(uiState.isRemoteSessionActive) {
-        if (uiState.isRemoteSessionActive) {
+    LaunchedEffect(uiState.isRemoteSessionActive, uiState.activeAppName) {
+        if (uiState.isRemoteSessionActive && uiState.activeAppName != null) {
             val hasPermission = context.hasNotificationPermission(PrimalRemoteSignerService.CHANNEL_ID)
             if (!hasPermission) {
                 showNotificationPrompt = true
@@ -45,6 +45,9 @@ fun RemoteSessionIndicatorOverlay(
             appName = uiState.activeAppName,
             appIconUrl = uiState.activeAppIconUrl,
             onDismissRequest = { showNotificationPrompt = false },
+            onTogglePushNotifications = { enabled ->
+                viewModel.setEvent(RemoteSessionIndicatorContract.UiEvent.PushNotificationsToggled(enabled))
+            },
         )
     }
 
