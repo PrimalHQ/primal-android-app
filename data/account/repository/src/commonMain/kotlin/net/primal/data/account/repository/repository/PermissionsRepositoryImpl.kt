@@ -28,6 +28,20 @@ class PermissionsRepositoryImpl(
     private val wellKnownApi: WellKnownApi,
 ) : PermissionsRepository {
 
+    override suspend fun upsertPermissionsAction(
+        permissionId: String,
+        appIdentifier: String,
+        action: AppPermissionAction,
+    ) = withContext(dispatchers.io()) {
+        database.appPermissions().upsert(
+            data = AppPermissionData(
+                permissionId = permissionId,
+                appIdentifier = appIdentifier,
+                action = action.asPO(),
+            ),
+        )
+    }
+
     override suspend fun updatePermissionsAction(
         permissionIds: List<String>,
         appIdentifier: String,
@@ -93,6 +107,11 @@ class PermissionsRepositoryImpl(
                     )
                 }
             }
+        }
+
+    override suspend fun deletePermissions(identifier: String) =
+        withContext(dispatchers.io()) {
+            database.appPermissions().deletePermissions(appIdentifier = identifier)
         }
 
     private fun buildPermissionGroups(

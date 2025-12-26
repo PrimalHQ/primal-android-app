@@ -16,6 +16,8 @@ interface LocalAppRepository {
 
     fun observeApp(identifier: String): Flow<LocalApp?>
 
+    suspend fun getApp(identifier: String): LocalApp?
+
     suspend fun updateTrustLevel(identifier: String, trustLevel: TrustLevel): Result<Unit>
 
     suspend fun deleteApp(identifier: String): Result<Unit>

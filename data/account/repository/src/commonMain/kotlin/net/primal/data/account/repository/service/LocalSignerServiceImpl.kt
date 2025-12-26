@@ -195,11 +195,23 @@ class LocalSignerServiceImpl internal constructor(
         permissionId: String,
         appIdentifier: String,
         action: AppPermissionAction,
-    ) = permissionsRepository.updatePermissionsAction(
-        permissionIds = listOf(permissionId),
-        appIdentifier = appIdentifier,
-        action = action,
-    )
+    ) {
+        val localApp = localAppRepository.getApp(identifier = appIdentifier) ?: return
+
+        if (localApp.trustLevel == TrustLevel.Low && action == AppPermissionAction.Approve) {
+            localAppRepository.updateTrustLevel(
+                identifier = appIdentifier,
+                trustLevel = TrustLevel.Medium,
+            )
+            permissionsRepository.deletePermissions(identifier = appIdentifier)
+        }
+
+        permissionsRepository.upsertPermissionsAction(
+            permissionId = permissionId,
+            appIdentifier = appIdentifier,
+            action = action,
+        )
+    }
 
     override suspend fun addNewApp(app: LocalApp): Result<Unit> =
         runCatching {

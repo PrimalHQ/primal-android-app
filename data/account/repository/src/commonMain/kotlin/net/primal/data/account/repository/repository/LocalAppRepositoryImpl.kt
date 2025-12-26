@@ -33,9 +33,8 @@ class LocalAppRepositoryImpl(
 
     override suspend fun getPermissionActionForMethod(method: LocalSignerMethod): PermissionActionDO =
         withContext(dispatchers.io()) {
-            val app = method.extractUserPubKey()?.let { userPubKey ->
-                database.localApps().findApp(identifier = "${method.packageName}:$userPubKey")
-            } ?: return@withContext PermissionActionDO.Deny
+            val app = database.localApps().findApp(identifier = method.getIdentifier())
+                ?: return@withContext PermissionActionDO.Deny
 
             when (app.data.trustLevel) {
                 TrustLevel.Full -> PermissionActionDO.Approve
@@ -56,6 +55,11 @@ class LocalAppRepositoryImpl(
     override fun observeApp(identifier: String): Flow<LocalApp?> =
         database.localApps().observeApp(identifier)
             .map { it?.asDomain() }
+
+    override suspend fun getApp(identifier: String): LocalApp? =
+        withContext(dispatchers.io()) {
+            database.localApps().getApp(identifier)?.asDomain()
+        }
 
     override suspend fun updateTrustLevel(identifier: String, trustLevel: TrustLevelDO): Result<Unit> =
         withContext(dispatchers.io()) {

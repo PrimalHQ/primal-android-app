@@ -21,6 +21,10 @@ interface LocalAppDao {
     fun observeApp(identifier: String): Flow<LocalApp?>
 
     @Transaction
+    @Query("SELECT * FROM LocalAppData WHERE identifier = :identifier")
+    suspend fun getApp(identifier: String): LocalApp?
+
+    @Transaction
     @Query("SELECT * FROM LocalAppData")
     fun observeAll(): Flow<List<LocalApp>>
 
