@@ -13,7 +13,6 @@ sealed class LocalSignerMethod(
     data class GetPublicKey(
         override val eventId: String,
         override val packageName: String,
-        val name: String?,
         val permissions: List<AppPermission>,
     ) : LocalSignerMethod(eventId = eventId, packageName = packageName)
 

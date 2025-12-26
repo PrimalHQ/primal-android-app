@@ -13,7 +13,6 @@ import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
@@ -36,7 +35,6 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 put("type", JsonPrimitive(LocalSignerMethodType.GetPublicKey.name))
                 put("eventId", JsonPrimitive(value.eventId))
                 put("packageName", JsonPrimitive(value.packageName))
-                value.name?.let { put("name", JsonPrimitive(it)) }
 
                 val perms = jsonEncoder.json.encodeToJsonElement(
                     ListSerializer(AppPermission.serializer()),
@@ -121,7 +119,6 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
 
         return when (typeName) {
             LocalSignerMethodType.GetPublicKey.name -> {
-                val name = obj["name"]?.jsonPrimitive?.contentOrNull
                 val perms = obj["permissions"]?.jsonArray ?: buildJsonArray {}
                 val permissions = jsonDecoder.json.decodeFromJsonElement(
                     ListSerializer(AppPermission.serializer()),
@@ -130,7 +127,6 @@ object LocalSignerMethodSerializer : KSerializer<LocalSignerMethod> {
                 LocalSignerMethod.GetPublicKey(
                     eventId = eventId,
                     packageName = packageName,
-                    name = name,
                     permissions = permissions,
                 )
             }
