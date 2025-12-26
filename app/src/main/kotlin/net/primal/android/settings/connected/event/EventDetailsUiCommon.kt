@@ -14,12 +14,12 @@ import net.primal.android.R
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.signer.ui.NostrEventDetails
+import net.primal.android.core.compose.signer.ui.buildRows
+import net.primal.android.core.compose.signer.ui.getStatusTextAndColor
 import net.primal.android.core.utils.PrimalDateFormats
 import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.rememberPrimalFormattedDateTime
-import net.primal.android.nostrconnect.ui.NostrEventDetails
-import net.primal.android.nostrconnect.ui.buildRows
-import net.primal.android.nostrconnect.ui.getStatusTextAndColor
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent

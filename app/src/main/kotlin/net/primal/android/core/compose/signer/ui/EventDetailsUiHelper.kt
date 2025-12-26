@@ -1,4 +1,4 @@
-package net.primal.android.nostrconnect.ui
+package net.primal.android.core.compose.signer.ui
 
 import android.content.Context
 import androidx.compose.runtime.Composable

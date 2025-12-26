@@ -1,4 +1,4 @@
-package net.primal.android.nostrconnect
+package net.primal.android.nostrconnect.connect
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel

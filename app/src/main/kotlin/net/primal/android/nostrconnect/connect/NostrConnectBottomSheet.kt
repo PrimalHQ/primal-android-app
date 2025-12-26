@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package net.primal.android.nostrconnect
+package net.primal.android.nostrconnect.connect
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
@@ -21,10 +21,10 @@ import androidx.compose.ui.platform.LocalUriHandler
 import net.primal.android.R
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.signer.SignerConnectBottomSheet
+import net.primal.android.core.compose.signer.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.service.PrimalRemoteSignerService
-import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)

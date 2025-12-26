@@ -1,4 +1,4 @@
-package net.primal.android.nostrconnect.permissions
+package net.primal.android.nostrconnect.approvals
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
+import net.primal.android.nostrconnect.approvals.PermissionsContract.UiEvent
+import net.primal.android.nostrconnect.approvals.PermissionsContract.UiState
 import net.primal.android.nostrconnect.model.asUi
-import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
-import net.primal.android.nostrconnect.permissions.PermissionsContract.UiState
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
 import net.primal.core.utils.coroutines.DispatcherProvider

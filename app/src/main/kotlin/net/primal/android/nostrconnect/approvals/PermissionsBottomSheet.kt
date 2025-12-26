@@ -1,4 +1,4 @@
-package net.primal.android.nostrconnect.permissions
+package net.primal.android.nostrconnect.approvals
 
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -8,7 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import net.primal.android.core.compose.signer.SignerEventDetails
 import net.primal.android.core.compose.signer.SignerPermissionsBottomSheet
-import net.primal.android.nostrconnect.permissions.PermissionsContract.UiEvent
+import net.primal.android.nostrconnect.approvals.PermissionsContract.UiEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

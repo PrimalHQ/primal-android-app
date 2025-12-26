@@ -90,8 +90,8 @@ import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationContract
 import net.primal.android.messages.conversation.create.NewConversationScreen
-import net.primal.android.nostrconnect.NostrConnectBottomSheet
-import net.primal.android.nostrconnect.NostrConnectViewModel
+import net.primal.android.nostrconnect.connect.NostrConnectBottomSheet
+import net.primal.android.nostrconnect.connect.NostrConnectViewModel
 import net.primal.android.nostrconnect.list.ActiveSessionsBottomSheet
 import net.primal.android.nostrconnect.list.ActiveSessionsViewModel
 import net.primal.android.nostrconnect.utils.NOSTR_CONNECT_SCHEME

@@ -15,8 +15,8 @@ import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.signer.SignerConnectBottomSheet
+import net.primal.android.core.compose.signer.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.core.errors.resolveUiErrorMessage
-import net.primal.android.nostrconnect.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.signer.provider.rememberAppDisplayInfo
 import net.primal.android.theme.AppTheme
 import net.primal.domain.account.model.LocalSignerMethodResponse

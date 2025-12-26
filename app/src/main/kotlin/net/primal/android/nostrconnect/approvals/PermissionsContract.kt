@@ -1,4 +1,4 @@
-package net.primal.android.nostrconnect.permissions
+package net.primal.android.nostrconnect.approvals
 
 import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.domain.account.model.SessionEvent

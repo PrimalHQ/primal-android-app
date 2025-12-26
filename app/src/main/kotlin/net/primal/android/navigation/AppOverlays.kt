@@ -5,13 +5,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorOverlay
 import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorViewModel
 import net.primal.android.core.compose.session.RemoteSessionIndicatorOverlay
 import net.primal.android.core.compose.session.RemoteSessionIndicatorViewModel
-import net.primal.android.nostrconnect.permissions.PermissionsBottomSheet
-import net.primal.android.nostrconnect.permissions.PermissionsViewModel
+import net.primal.android.nostrconnect.approvals.PermissionsBottomSheet
+import net.primal.android.nostrconnect.approvals.PermissionsViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

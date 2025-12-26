@@ -1,4 +1,4 @@
-package net.primal.android.nostrconnect
+package net.primal.android.nostrconnect.connect
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import net.primal.android.core.errors.UiError
