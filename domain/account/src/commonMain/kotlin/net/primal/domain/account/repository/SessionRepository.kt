@@ -9,7 +9,7 @@ interface SessionRepository {
 
     fun observeOngoingSessions(signerPubKey: String): Flow<List<RemoteAppSession>>
 
-    fun observeOngoingSessionForConnection(clientPubKey: String): Flow<RemoteAppSession?>
+    fun observeOngoingSessionForConnection(appIdentifier: String): Flow<RemoteAppSession?>
 
     fun observeSessionsByApp(appIdentifier: String): Flow<List<AppSession>>
 
@@ -21,7 +21,7 @@ interface SessionRepository {
 
     suspend fun findFirstOpenSessionByAppIdentifier(appIdentifier: String): Result<RemoteAppSession>
 
-    suspend fun startSession(clientPubKey: String): Result<String>
+    suspend fun startRemoteSession(appIdentifier: String): Result<String>
 
     suspend fun endSessions(sessionIds: List<String>): Result<Unit>
 

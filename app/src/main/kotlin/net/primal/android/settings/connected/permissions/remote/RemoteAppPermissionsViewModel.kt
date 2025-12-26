@@ -114,7 +114,7 @@ class RemoteAppPermissionsViewModel @Inject constructor(
         viewModelScope.launch {
             permissionsRepository.updatePermissionsAction(
                 permissionIds = permissionIds,
-                clientPubKey = clientPubKey,
+                appIdentifier = clientPubKey,
                 action = action,
             ).onFailure {
                 setState { copy(error = UiError.GenericError(it.message)) }
@@ -125,7 +125,7 @@ class RemoteAppPermissionsViewModel @Inject constructor(
     private fun resetPermissions() {
         viewModelScope.launch {
             setState { copy(loading = true) }
-            permissionsRepository.resetPermissionsToDefault(clientPubKey = clientPubKey)
+            permissionsRepository.resetPermissionsToDefault(identifier = clientPubKey)
                 .onFailure {
                     setState { copy(error = UiError.GenericError(it.message), loading = false) }
                 }

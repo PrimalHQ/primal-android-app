@@ -66,7 +66,7 @@ class SignerConnectionInitializer internal constructor(
             }
 
             connectionRepository.insertOrReplaceConnection(secret = secret, connection = appConnection)
-            sessionRepository.startSession(clientPubKey = appConnection.clientPubKey)
+            sessionRepository.startRemoteSession(appIdentifier = appConnection.clientPubKey)
                 .onSuccess { sessionId ->
                     internalSessionEventRepository.saveRemoteAppSessionEvent(
                         sessionId = sessionId,
@@ -146,7 +146,7 @@ class SignerConnectionInitializer internal constructor(
             ?.map {
                 AppPermission(
                     permissionId = it,
-                    clientPubKey = clientPubKey,
+                    appIdentifier = clientPubKey,
                     action = AppPermissionAction.Ask,
                 )
             } ?: emptyList()
@@ -159,7 +159,7 @@ class SignerConnectionInitializer internal constructor(
             ?.map {
                 AppPermission(
                     permissionId = it,
-                    clientPubKey = clientPubKey,
+                    appIdentifier = clientPubKey,
                     action = AppPermissionAction.Approve,
                 )
             } ?: emptyList()

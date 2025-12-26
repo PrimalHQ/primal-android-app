@@ -59,7 +59,7 @@ class SignerIntentParser {
                     } else {
                         it.type.method
                     },
-                    clientPubKey = "",
+                    appIdentifier = callingPackage,
                     action = AppPermissionAction.Ask,
                 )
             }

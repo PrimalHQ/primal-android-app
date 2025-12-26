@@ -29,8 +29,8 @@ class SessionRepositoryImpl(
             .map { list -> list.map { it.asDomain() } }
             .distinctUntilChanged()
 
-    override fun observeOngoingSessionForConnection(clientPubKey: String): Flow<RemoteAppSession?> =
-        database.remoteAppSessions().observeOngoingSessionByApp(clientPubKey)
+    override fun observeOngoingSessionForConnection(appIdentifier: String): Flow<RemoteAppSession?> =
+        database.remoteAppSessions().observeOngoingSessionByApp(appIdentifier)
             .map { it?.asDomain() }
             .distinctUntilChanged()
 
@@ -64,24 +64,24 @@ class SessionRepositoryImpl(
             }
         }
 
-    override suspend fun startSession(clientPubKey: String): Result<String> =
+    override suspend fun startRemoteSession(appIdentifier: String): Result<String> =
         withContext(dispatchers.io()) {
-            Napier.d(tag = "Signer") { "Starting session for $clientPubKey" }
+            Napier.d(tag = "Signer") { "Starting session for $appIdentifier" }
             val existingOpenSession = database.remoteAppSessions().findOngoingSessionByApp(
-                appIdentifier = clientPubKey,
+                appIdentifier = appIdentifier,
             )
             if (existingOpenSession == null) {
                 val newSession = AppSessionData(
-                    appIdentifier = clientPubKey,
+                    appIdentifier = appIdentifier,
                     sessionType = AppSessionType.RemoteSession,
                 )
                 database.appSessions().upsertAll(data = listOf(newSession))
                 Napier.d(tag = "Signer") { "Successfully started session." }
                 newSession.sessionId.asSuccess()
             } else {
-                Napier.d(tag = "Signer") { "Existing open session already exists for $clientPubKey. Start ignored." }
+                Napier.d(tag = "Signer") { "Existing open session already exists for $appIdentifier. Start ignored." }
                 Result.failure(
-                    IllegalStateException("There is an existing open session for connection $clientPubKey."),
+                    IllegalStateException("There is an existing open session for connection $appIdentifier."),
                 )
             }
         }

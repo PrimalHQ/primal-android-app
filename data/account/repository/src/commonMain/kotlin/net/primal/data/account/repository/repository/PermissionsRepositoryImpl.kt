@@ -30,7 +30,7 @@ class PermissionsRepositoryImpl(
 
     override suspend fun updatePermissionsAction(
         permissionIds: List<String>,
-        clientPubKey: String,
+        appIdentifier: String,
         action: AppPermissionAction,
     ): Result<Unit> =
         withContext(dispatchers.io()) {
@@ -39,7 +39,7 @@ class PermissionsRepositoryImpl(
                     data = permissionIds.map {
                         AppPermissionData(
                             permissionId = it,
-                            appIdentifier = clientPubKey,
+                            appIdentifier = appIdentifier,
                             action = action.asPO(),
                         )
                     },
@@ -47,14 +47,14 @@ class PermissionsRepositoryImpl(
             }
         }
 
-    override fun observePermissions(clientPubKey: String): Flow<List<AppPermissionGroup>> =
+    override fun observePermissions(appIdentifier: String): Flow<List<AppPermissionGroup>> =
         flow {
             val signerPermissions = withContext(dispatchers.io()) {
                 wellKnownApi.getSignerPermissions()
             }
 
             emitAll(
-                database.appPermissions().observePermissions(appIdentifier = clientPubKey)
+                database.appPermissions().observePermissions(appIdentifier = appIdentifier)
                     .map { permissions ->
                         buildPermissionGroups(
                             response = signerPermissions,
@@ -75,18 +75,18 @@ class PermissionsRepositoryImpl(
             }
         }
 
-    override suspend fun resetPermissionsToDefault(clientPubKey: String): Result<Unit> =
+    override suspend fun resetPermissionsToDefault(identifier: String): Result<Unit> =
         withContext(dispatchers.io()) {
             runCatching {
                 val mediumTrustPermissions = wellKnownApi.getMediumTrustPermissions().allowPermissions
 
                 database.withTransaction {
-                    database.appPermissions().deletePermissions(clientPubKey)
+                    database.appPermissions().deletePermissions(identifier)
                     database.appPermissions().upsertAll(
                         data = mediumTrustPermissions.map { permissionId ->
                             AppPermissionData(
                                 permissionId = permissionId,
-                                appIdentifier = clientPubKey,
+                                appIdentifier = identifier,
                                 action = PermissionActionPO.Approve,
                             )
                         },

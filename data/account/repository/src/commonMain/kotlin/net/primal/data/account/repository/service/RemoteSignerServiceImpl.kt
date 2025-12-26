@@ -263,7 +263,7 @@ class RemoteSignerServiceImpl internal constructor(
     private suspend fun autoStartSessionIfAllowed(clientPubKey: String): String? {
         val connection = connectionRepository.getConnectionByClientPubKey(clientPubKey = clientPubKey).getOrNull()
         return if (connection?.autoStart == true) {
-            sessionRepository.startSession(clientPubKey = connection.clientPubKey).fold(
+            sessionRepository.startRemoteSession(appIdentifier = connection.clientPubKey).fold(
                 onSuccess = { sessionId ->
                     Napier.d(tag = "Signer") { "Session $sessionId auto-started." }
                     sessionId

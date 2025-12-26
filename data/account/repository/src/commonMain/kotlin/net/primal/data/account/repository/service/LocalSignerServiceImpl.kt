@@ -122,8 +122,10 @@ class LocalSignerServiceImpl internal constructor(
         val method = pendingMethods.load()
             .firstOrNull { it.eventId == eventChoice.sessionEventId }
             ?: run {
-                Napier.e(tag = "LocalSigner") { "You are trying to respond to a session event " +
-                    "from different instance of LocalSignerService." }
+                Napier.e(tag = "LocalSigner") {
+                    "You are trying to respond to a session event " +
+                        "from different instance of LocalSignerService."
+                }
                 return
             }
 
@@ -136,7 +138,7 @@ class LocalSignerServiceImpl internal constructor(
                 approveMethodByUserAction(method)
                 updatePermissionPreference(
                     permissionId = method.getPermissionId(),
-                    packageName = method.packageName,
+                    appIdentifier = method.getIdentifier(),
                     action = AppPermissionAction.Approve,
                 )
             }
@@ -145,7 +147,7 @@ class LocalSignerServiceImpl internal constructor(
                 rejectMethodByUser(eventId = method.eventId)
                 updatePermissionPreference(
                     permissionId = method.getPermissionId(),
-                    packageName = method.packageName,
+                    appIdentifier = method.getIdentifier(),
                     action = AppPermissionAction.Deny,
                 )
             }
@@ -191,36 +193,33 @@ class LocalSignerServiceImpl internal constructor(
 
     private suspend fun updatePermissionPreference(
         permissionId: String,
-        packageName: String,
+        appIdentifier: String,
         action: AppPermissionAction,
     ) = permissionsRepository.updatePermissionsAction(
         permissionIds = listOf(permissionId),
-        clientPubKey = packageName,
+        appIdentifier = appIdentifier,
         action = action,
     )
 
     override suspend fun addNewApp(app: LocalApp): Result<Unit> =
         runCatching {
-            val addedPermissions = if (app.trustLevel == TrustLevel.Medium) {
+            val defaultPermissions = if (app.trustLevel == TrustLevel.Medium) {
                 internalPermissionsRepository.getMediumTrustPermissions().getOrThrow()
             } else {
                 emptyList()
             }.map { permissionId ->
                 AppPermission(
                     permissionId = permissionId,
-                    clientPubKey = app.identifier,
+                    appIdentifier = app.identifier,
                     action = AppPermissionAction.Approve,
                 )
             }
 
+            val configPermissions = app.permissions.map { it.copy(appIdentifier = app.identifier) }
+            val allPermissions = (defaultPermissions + configPermissions).distinctBy { it.permissionId }
+
             localAppRepository
-                .upsertApp(
-                    app = app.copy(
-                        permissions = (
-                            addedPermissions + app.permissions.map { it.copy(clientPubKey = app.identifier) }
-                            ).distinctBy { it.permissionId },
-                    ),
-                )
+                .upsertApp(app = app.copy(permissions = allPermissions))
                 .getOrThrow()
         }
 }

@@ -68,7 +68,7 @@ class LocalAppPermissionsViewModel @Inject constructor(
 
     private fun observePermissions() {
         viewModelScope.launch {
-            permissionsRepository.observePermissions(clientPubKey = identifier)
+            permissionsRepository.observePermissions(appIdentifier = identifier)
                 .collect { groups ->
                     setState {
                         copy(
@@ -84,7 +84,7 @@ class LocalAppPermissionsViewModel @Inject constructor(
         viewModelScope.launch {
             permissionsRepository.updatePermissionsAction(
                 permissionIds = permissionIds,
-                clientPubKey = identifier,
+                appIdentifier = identifier,
                 action = action,
             ).onFailure {
                 setState { copy(error = UiError.GenericError(it.message)) }
@@ -95,7 +95,7 @@ class LocalAppPermissionsViewModel @Inject constructor(
     private fun resetPermissions() {
         viewModelScope.launch {
             setState { copy(loading = true) }
-            permissionsRepository.resetPermissionsToDefault(clientPubKey = identifier)
+            permissionsRepository.resetPermissionsToDefault(identifier = identifier)
                 .onFailure {
                     setState { copy(error = UiError.GenericError(it.message), loading = false) }
                 }

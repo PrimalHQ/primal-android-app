@@ -26,14 +26,14 @@ fun RemoteAppConnectionPO.asDomain() =
 fun AppPermissionDataPO.asDomain() =
     AppPermissionDO(
         permissionId = this.permissionId,
-        clientPubKey = this.appIdentifier,
+        appIdentifier = this.appIdentifier,
         action = this.action.asDomain(),
     )
 
 fun AppPermissionDO.asPO() =
     AppPermissionDataPO(
         permissionId = this.permissionId,
-        appIdentifier = this.clientPubKey,
+        appIdentifier = this.appIdentifier,
         action = this.action.asPO(),
     )
 
