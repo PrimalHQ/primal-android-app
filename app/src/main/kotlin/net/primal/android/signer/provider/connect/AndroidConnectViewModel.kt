@@ -14,23 +14,22 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
-import net.primal.android.signer.provider.callingPackageOrThrow
 import net.primal.android.signer.provider.connect.AndroidConnectContract.SideEffect
 import net.primal.android.signer.provider.connect.AndroidConnectContract.UiEvent
 import net.primal.android.signer.provider.connect.AndroidConnectContract.UiState
-import net.primal.android.signer.provider.signerRequestedPermissionsJsonOrNull
+import net.primal.android.signer.provider.localSignerMethodOrThrow
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.CredentialType
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.model.LocalApp
+import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.service.LocalSignerService
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 
 @HiltViewModel
-@Suppress("unused")
 class AndroidConnectViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val accountsStore: UserAccountsStore,
@@ -38,10 +37,10 @@ class AndroidConnectViewModel @Inject constructor(
     private val localSignerService: LocalSignerService,
 ) : ViewModel() {
 
-    private val permissionsJson: String? = savedStateHandle.signerRequestedPermissionsJsonOrNull
-    private val callingPackage: String = savedStateHandle.callingPackageOrThrow
+    private val method: LocalSignerMethod.GetPublicKey = savedStateHandle.localSignerMethodOrThrow
+        as LocalSignerMethod.GetPublicKey
 
-    private val _state = MutableStateFlow(UiState(appPackageName = callingPackage))
+    private val _state = MutableStateFlow(UiState(appPackageName = method.packageName))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
@@ -90,11 +89,11 @@ class AndroidConnectViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(connecting = true) }
             val app = LocalApp(
-                identifier = LocalApp.identifierOf(packageName = callingPackage, userId = userId),
-                packageName = callingPackage,
+                identifier = LocalApp.identifierOf(packageName = method.packageName, userId = userId),
+                packageName = method.packageName,
                 userPubKey = userId,
                 trustLevel = trustLevel,
-                permissions = emptyList(),
+                permissions = method.permissions,
             )
 
             localSignerService.addNewApp(app)
@@ -105,6 +104,7 @@ class AndroidConnectViewModel @Inject constructor(
                     setState { copy(error = UiError.GenericError()) }
                     setEffect(SideEffect.ConnectionFailure(error = it))
                 }
+
             setState { copy(connecting = false) }
         }
 }

@@ -1,6 +1,6 @@
 package net.primal.android.signer.provider.approvals
 
-import android.content.Intent
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,9 +18,10 @@ import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
 import net.primal.android.signer.provider.approvals.PermissionRequestsContract.SideEffect
 import net.primal.android.signer.provider.approvals.PermissionRequestsContract.UiEvent
 import net.primal.android.signer.provider.approvals.PermissionRequestsContract.UiState
-import net.primal.android.signer.provider.parser.SignerIntentParser
+import net.primal.android.signer.provider.localSignerMethodOrThrow
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onSuccess
+import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.SessionEventUserChoice
 import net.primal.domain.account.model.UserChoice
@@ -33,13 +34,15 @@ import timber.log.Timber
 @HiltViewModel
 @OptIn(ExperimentalUuidApi::class)
 class PermissionRequestsViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val localSignerService: LocalSignerService,
-    private val intentParser: SignerIntentParser,
     private val dispatcherProvider: DispatcherProvider,
     private val permissionsRepository: PermissionsRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState())
+    private val initialMethod: LocalSignerMethod = savedStateHandle.localSignerMethodOrThrow
+
+    private val _state = MutableStateFlow(UiState(callingPackage = initialMethod.packageName))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -62,18 +65,9 @@ class PermissionRequestsViewModel @Inject constructor(
                 .onSuccess { setState { copy(permissionsMap = it) } }
         }
 
-    fun onNewIntent(intent: Intent, packageName: String?) =
+    fun onNewLocalSignerMethod(method: LocalSignerMethod) =
         viewModelScope.launch {
-            if (packageName != null) {
-                setState { copy(callingPackage = packageName) }
-            }
-            intentParser.parse(intent = intent, callingPackage = packageName)
-                .onSuccess {
-                    localSignerService.processMethod(method = it)
-                }
-                .onFailure {
-                    Timber.tag("LocalSigner").d("Failed to parse intent: ${it.message}")
-                }
+            localSignerService.processMethod(method = method)
         }
 
     private fun observeEvents() {
