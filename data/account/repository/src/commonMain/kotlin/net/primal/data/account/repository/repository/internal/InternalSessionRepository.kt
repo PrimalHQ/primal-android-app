@@ -26,7 +26,6 @@ class InternalSessionRepository(
                     val expired = isSessionExpired(
                         sessionId = latestAppSession.sessionId,
                         sessionStartedAt = latestAppSession.startedAt,
-                        now = now,
                     )
 
                     if (!expired) {
@@ -49,16 +48,15 @@ class InternalSessionRepository(
             }
         }
 
-    private suspend fun isSessionExpired(
-        sessionId: String,
-        sessionStartedAt: Long,
-        now: Long,
-    ): Boolean {
-        val sessionTimeout = 15.minutes.inWholeSeconds
-
+    private suspend fun isSessionExpired(sessionId: String, sessionStartedAt: Long): Boolean {
         val lastActivityAt = database.localAppSessionEvents()
             .getLastActivityAt(sessionId) ?: sessionStartedAt
 
-        return (now - lastActivityAt) > sessionTimeout
+        val now = Clock.System.now().epochSeconds
+        return (now - lastActivityAt) > SESSION_TIMEOUT_SECONDS
+    }
+
+    companion object {
+        private val SESSION_TIMEOUT_SECONDS = 15.minutes.inWholeSeconds
     }
 }
