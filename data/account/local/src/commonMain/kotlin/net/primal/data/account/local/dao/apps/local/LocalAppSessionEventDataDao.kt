@@ -54,4 +54,7 @@ interface LocalAppSessionEventDataDao {
 
     @Query("DELETE FROM LocalAppSessionEventData WHERE appIdentifier = :appIdentifier")
     suspend fun deleteEvents(appIdentifier: String)
+
+    @Query("SELECT MAX(COALESCE(completedAt, requestedAt)) FROM LocalAppSessionEventData WHERE sessionId = :sessionId")
+    suspend fun getLastActivityAt(sessionId: String): Long?
 }
