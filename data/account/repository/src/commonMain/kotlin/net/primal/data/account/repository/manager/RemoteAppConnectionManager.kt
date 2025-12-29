@@ -18,6 +18,11 @@ class RemoteAppConnectionManager {
     private val _sessionStates = MutableStateFlow<Map<String, RemoteAppConnectionState>>(emptyMap())
     val sessionStates: StateFlow<Map<String, RemoteAppConnectionState>> = _sessionStates.asStateFlow()
 
+    /**
+     * Relay states are tracked per session because each session may have a different set of required relays.
+     * Even though underlying relay connections are shared/reused across sessions for resource optimization,
+     * the logical connection state (connected relay count, all-relays-failed errors, etc.) is session-specific.
+     */
     private val relayStates = atomic(mutableMapOf<String, MutableMap<String, RelayConnectionState>>())
 
     private sealed class RelayConnectionState {
