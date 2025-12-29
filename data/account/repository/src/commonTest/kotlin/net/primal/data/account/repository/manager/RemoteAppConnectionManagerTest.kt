@@ -59,7 +59,8 @@ class RemoteAppConnectionManagerTest {
             state2.shouldNotBeNull()
             state2.status shouldBe RemoteAppConnectionStatus.Connected
 
-            state2.lastConnectedAt.shouldNotBeNull()
-            state2.lastConnectedAt!! shouldBeGreaterThanOrEqualTo firstConnectedAt!!
+            val secondConnectedAt = state2.lastConnectedAt
+            secondConnectedAt.shouldNotBeNull()
+            secondConnectedAt shouldBeGreaterThanOrEqualTo firstConnectedAt
         }
 }
