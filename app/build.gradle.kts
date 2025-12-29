@@ -261,6 +261,7 @@ dependencies {
     implementation(project(":data:wallet:repository"))
 
     implementation(project(":data:account:repository"))
+    implementation(project(":data:account:signer"))
 
     implementation(libs.bignum)
     implementation(libs.core.ktx)

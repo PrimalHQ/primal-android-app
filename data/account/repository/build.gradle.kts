@@ -54,7 +54,7 @@ kotlin {
                 implementation(project(":core:networking-http"))
 
                 implementation(project(":data:account:local"))
-                implementation(project(":data:account:remote"))
+                implementation(project(":data:account:signer"))
 
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:account"))

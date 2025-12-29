@@ -4,7 +4,7 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
-import net.primal.data.account.remote.api.WellKnownApi
+import net.primal.data.account.signer.remote.api.WellKnownApi
 
 class InternalPermissionsRepository(
     private val wellKnownApi: WellKnownApi,

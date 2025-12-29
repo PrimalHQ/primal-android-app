@@ -5,8 +5,6 @@ import io.ktor.client.plugins.cache.HttpCache
 import net.primal.core.networking.factory.HttpClientFactory
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.local.db.AccountDatabase
-import net.primal.data.account.remote.api.WellKnownApi
-import net.primal.data.account.remote.api.createWellKnownApi
 import net.primal.data.account.repository.repository.ConnectionRepositoryImpl
 import net.primal.data.account.repository.repository.LocalAppRepositoryImpl
 import net.primal.data.account.repository.repository.PermissionsRepositoryImpl
@@ -14,7 +12,9 @@ import net.primal.data.account.repository.repository.SessionEventRepositoryImpl
 import net.primal.data.account.repository.repository.SessionRepositoryImpl
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
-import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
+import net.primal.data.account.repository.repository.internal.InternalRemoteSessionEventRepository
+import net.primal.data.account.signer.remote.api.WellKnownApi
+import net.primal.data.account.signer.remote.api.createWellKnownApi
 import net.primal.domain.account.handler.Nip46EventsHandler
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.LocalAppRepository
@@ -76,7 +76,7 @@ abstract class RepositoryFactory {
                 dispatchers = dispatcherProvider,
                 wellKnownApi = wellKnownApi,
             ),
-            internalSessionEventRepository = InternalSessionEventRepository(
+            internalSessionEventRepository = InternalRemoteSessionEventRepository(
                 accountDatabase = resolveAccountDatabase(),
                 dispatchers = dispatcherProvider,
             ),

@@ -6,9 +6,9 @@ import kotlinx.datetime.Clock
 import net.primal.android.signer.model.Permission
 import net.primal.android.signer.model.SignerMethod
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.data.account.signer.local.LocalSignerMethod
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.AppPermissionAction
-import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 

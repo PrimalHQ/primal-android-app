@@ -52,7 +52,6 @@ kotlin {
                 implementation(project(":core:utils"))
 
                 implementation(project(":domain:nostr"))
-                implementation(project(":domain:wallet"))
 
                 api(project(":data:shared:local"))
 
