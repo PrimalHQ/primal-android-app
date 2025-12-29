@@ -8,8 +8,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.account.local.dao.apps.AppRequestState
-import net.primal.data.account.local.dao.apps.local.LocalSignerMethodType
-import net.primal.data.account.local.dao.apps.remote.RemoteSignerMethodType
+import net.primal.data.account.local.dao.apps.SignerMethodType
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
@@ -28,7 +27,7 @@ internal class InternalSessionEventRepository(
     suspend fun saveRemoteAppSessionEvent(
         sessionId: String,
         signerPubKey: String,
-        requestType: RemoteSignerMethodType,
+        requestType: SignerMethodType,
         method: RemoteSignerMethod?,
         response: RemoteSignerMethodResponse?,
         requestState: AppRequestState? = null,
@@ -53,7 +52,7 @@ internal class InternalSessionEventRepository(
 
     suspend fun saveLocalSessionEvent(
         sessionId: String,
-        requestType: LocalSignerMethodType,
+        requestType: SignerMethodType,
         method: LocalSignerMethod?,
         response: LocalSignerMethodResponse?,
         requestState: AppRequestState? = null,

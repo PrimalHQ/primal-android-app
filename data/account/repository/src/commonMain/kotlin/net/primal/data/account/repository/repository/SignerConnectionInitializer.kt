@@ -8,7 +8,7 @@ import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState
-import net.primal.data.account.local.dao.apps.remote.RemoteSignerMethodType
+import net.primal.data.account.local.dao.apps.SignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
@@ -71,7 +71,7 @@ class SignerConnectionInitializer internal constructor(
                     internalSessionEventRepository.saveRemoteAppSessionEvent(
                         sessionId = sessionId,
                         signerPubKey = signerPubKey,
-                        requestType = RemoteSignerMethodType.Connect,
+                        requestType = SignerMethodType.Connect,
                         method = null,
                         requestState = AppRequestState.PendingResponse,
                         response = RemoteSignerMethodResponse.Success(

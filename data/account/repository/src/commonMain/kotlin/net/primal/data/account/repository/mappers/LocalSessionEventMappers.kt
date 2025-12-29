@@ -4,8 +4,8 @@ import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState
+import net.primal.data.account.local.dao.apps.SignerMethodType
 import net.primal.data.account.local.dao.apps.local.LocalAppSessionEventData
-import net.primal.data.account.local.dao.apps.local.LocalSignerMethodType
 import net.primal.data.account.remote.utils.PERM_ID_DECRYPT_ZAP_EVENT
 import net.primal.data.account.remote.utils.PERM_ID_GET_PUBLIC_KEY
 import net.primal.data.account.remote.utils.PERM_ID_NIP04_DECRYPT
@@ -26,7 +26,7 @@ import net.primal.shared.data.local.encryption.asEncryptable
 fun buildSessionEventData(
     sessionId: String,
     requestedAt: Long,
-    requestType: LocalSignerMethodType,
+    requestType: SignerMethodType,
     completedAt: Long?,
     method: LocalSignerMethod?,
     response: LocalSignerMethodResponse?,
@@ -60,7 +60,7 @@ fun LocalAppSessionEventData.asDomain(): SessionEvent? {
     val requestMethod = requestPayload?.decodeFromJsonStringOrNull<LocalSignerMethod>()
 
     return when (this.requestType) {
-        LocalSignerMethodType.SignEvent -> {
+        SignerMethodType.SignEvent -> {
             val eventKind = this.eventKind?.decrypted ?: return null
 
             val unsignedEventJson = requestMethod
@@ -80,7 +80,7 @@ fun LocalAppSessionEventData.asDomain(): SessionEvent? {
             )
         }
 
-        LocalSignerMethodType.GetPublicKey -> {
+        SignerMethodType.GetPublicKey -> {
             val resultKey = getResponseBody(responsePayload)
 
             GetPublicKey(
@@ -93,8 +93,8 @@ fun LocalAppSessionEventData.asDomain(): SessionEvent? {
             )
         }
 
-        LocalSignerMethodType.Nip04Encrypt,
-        LocalSignerMethodType.Nip44Encrypt,
+        SignerMethodType.Nip04Encrypt,
+        SignerMethodType.Nip44Encrypt,
         -> {
             val plainText = when (requestMethod) {
                 is LocalSignerMethod.Nip04Encrypt -> requestMethod.plaintext
@@ -115,8 +115,8 @@ fun LocalAppSessionEventData.asDomain(): SessionEvent? {
             )
         }
 
-        LocalSignerMethodType.Nip04Decrypt,
-        LocalSignerMethodType.Nip44Decrypt,
+        SignerMethodType.Nip04Decrypt,
+        SignerMethodType.Nip44Decrypt,
         -> {
             val encryptedText = when (requestMethod) {
                 is LocalSignerMethod.Nip04Decrypt -> requestMethod.ciphertext
@@ -137,7 +137,10 @@ fun LocalAppSessionEventData.asDomain(): SessionEvent? {
             )
         }
 
-        LocalSignerMethodType.DecryptZapEvent -> {
+        SignerMethodType.DecryptZapEvent,
+        SignerMethodType.Connect,
+        SignerMethodType.Ping,
+        -> {
             null
         }
     }
@@ -157,27 +160,30 @@ private fun getResponseBody(responsePayload: String?) =
         }
     }
 
-fun LocalSignerMethod.getRequestType(): LocalSignerMethodType {
+fun LocalSignerMethod.getRequestType(): SignerMethodType {
     return when (this) {
-        is LocalSignerMethod.DecryptZapEvent -> LocalSignerMethodType.DecryptZapEvent
-        is LocalSignerMethod.GetPublicKey -> LocalSignerMethodType.GetPublicKey
-        is LocalSignerMethod.Nip04Decrypt -> LocalSignerMethodType.Nip04Decrypt
-        is LocalSignerMethod.Nip04Encrypt -> LocalSignerMethodType.Nip04Encrypt
-        is LocalSignerMethod.Nip44Decrypt -> LocalSignerMethodType.Nip44Decrypt
-        is LocalSignerMethod.Nip44Encrypt -> LocalSignerMethodType.Nip44Encrypt
-        is LocalSignerMethod.SignEvent -> LocalSignerMethodType.SignEvent
+        is LocalSignerMethod.DecryptZapEvent -> SignerMethodType.DecryptZapEvent
+        is LocalSignerMethod.GetPublicKey -> SignerMethodType.GetPublicKey
+        is LocalSignerMethod.Nip04Decrypt -> SignerMethodType.Nip04Decrypt
+        is LocalSignerMethod.Nip04Encrypt -> SignerMethodType.Nip04Encrypt
+        is LocalSignerMethod.Nip44Decrypt -> SignerMethodType.Nip44Decrypt
+        is LocalSignerMethod.Nip44Encrypt -> SignerMethodType.Nip44Encrypt
+        is LocalSignerMethod.SignEvent -> SignerMethodType.SignEvent
     }
 }
 
 fun LocalAppSessionEventData.getRequestTypeId() =
     when (this.requestType) {
-        LocalSignerMethodType.SignEvent -> "$PERM_ID_PREFIX_SIGN_EVENT${this.eventKind?.decrypted}"
-        LocalSignerMethodType.GetPublicKey -> PERM_ID_GET_PUBLIC_KEY
-        LocalSignerMethodType.Nip04Encrypt -> PERM_ID_NIP04_ENCRYPT
-        LocalSignerMethodType.Nip04Decrypt -> PERM_ID_NIP04_DECRYPT
-        LocalSignerMethodType.Nip44Encrypt -> PERM_ID_NIP44_ENCRYPT
-        LocalSignerMethodType.Nip44Decrypt -> PERM_ID_NIP44_DECRYPT
-        LocalSignerMethodType.DecryptZapEvent -> PERM_ID_DECRYPT_ZAP_EVENT
+        SignerMethodType.SignEvent -> "$PERM_ID_PREFIX_SIGN_EVENT${this.eventKind?.decrypted}"
+        SignerMethodType.GetPublicKey -> PERM_ID_GET_PUBLIC_KEY
+        SignerMethodType.Nip04Encrypt -> PERM_ID_NIP04_ENCRYPT
+        SignerMethodType.Nip04Decrypt -> PERM_ID_NIP04_DECRYPT
+        SignerMethodType.Nip44Encrypt -> PERM_ID_NIP44_ENCRYPT
+        SignerMethodType.Nip44Decrypt -> PERM_ID_NIP44_DECRYPT
+        SignerMethodType.DecryptZapEvent -> PERM_ID_DECRYPT_ZAP_EVENT
+        SignerMethodType.Connect,
+        SignerMethodType.Ping,
+        -> error("Unsupported request type: ${this.requestType}")
     }
 
 private fun AppRequestState.asDomain(): RequestStateDO =

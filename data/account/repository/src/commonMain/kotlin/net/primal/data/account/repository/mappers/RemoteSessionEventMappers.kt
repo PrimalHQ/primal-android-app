@@ -6,8 +6,8 @@ import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState as RemoteAppRequestStatePO
+import net.primal.data.account.local.dao.apps.SignerMethodType
 import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionEventData
-import net.primal.data.account.local.dao.apps.remote.RemoteSignerMethodType
 import net.primal.data.account.remote.method.model.RemoteSignerMethod
 import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
 import net.primal.data.account.remote.method.model.withPubKey
@@ -28,14 +28,14 @@ fun buildSessionEventData(
     sessionId: String,
     signerPubKey: String,
     requestedAt: Long,
-    requestType: RemoteSignerMethodType,
+    requestType: SignerMethodType,
     completedAt: Long?,
     method: RemoteSignerMethod?,
     response: RemoteSignerMethodResponse?,
     requestState: RemoteAppRequestStatePO?,
 ): RemoteAppSessionEventData? {
     val clientPubkey = method?.clientPubKey ?: response?.clientPubKey
-    if (requestType == RemoteSignerMethodType.Ping || clientPubkey == null) return null
+    if (requestType == SignerMethodType.Ping || clientPubkey == null) return null
 
     val resolvedRequestState = requestState ?: when (response) {
         is RemoteSignerMethodResponse.Error -> RemoteAppRequestStatePO.Rejected
@@ -64,7 +64,7 @@ fun RemoteAppSessionEventData.asDomain(): SessionEvent? {
     val requestMethod = requestPayload?.decodeFromJsonStringOrNull<RemoteSignerMethod>()
 
     return when (this.requestType) {
-        RemoteSignerMethodType.GetPublicKey -> {
+        SignerMethodType.GetPublicKey -> {
             val resultKey = getResponseBody(responsePayload)
 
             SessionEvent.GetPublicKey(
@@ -77,8 +77,8 @@ fun RemoteAppSessionEventData.asDomain(): SessionEvent? {
             )
         }
 
-        RemoteSignerMethodType.Nip04Encrypt,
-        RemoteSignerMethodType.Nip44Encrypt,
+        SignerMethodType.Nip04Encrypt,
+        SignerMethodType.Nip44Encrypt,
         -> {
             val plainText = when (requestMethod) {
                 is RemoteSignerMethod.Nip04Encrypt -> requestMethod.plaintext
@@ -99,8 +99,8 @@ fun RemoteAppSessionEventData.asDomain(): SessionEvent? {
             )
         }
 
-        RemoteSignerMethodType.Nip04Decrypt,
-        RemoteSignerMethodType.Nip44Decrypt,
+        SignerMethodType.Nip04Decrypt,
+        SignerMethodType.Nip44Decrypt,
         -> {
             val encryptedText = when (requestMethod) {
                 is RemoteSignerMethod.Nip04Decrypt -> requestMethod.ciphertext
@@ -121,7 +121,7 @@ fun RemoteAppSessionEventData.asDomain(): SessionEvent? {
             )
         }
 
-        RemoteSignerMethodType.SignEvent -> {
+        SignerMethodType.SignEvent -> {
             val eventKind = this.eventKind?.decrypted ?: return null
 
             val unsignedEventJson = requestMethod
@@ -142,7 +142,10 @@ fun RemoteAppSessionEventData.asDomain(): SessionEvent? {
             )
         }
 
-        RemoteSignerMethodType.Connect, RemoteSignerMethodType.Ping -> null
+        SignerMethodType.Connect,
+        SignerMethodType.Ping,
+        SignerMethodType.DecryptZapEvent,
+        -> null
     }
 }
 
@@ -153,29 +156,30 @@ private fun getResponseBody(responsePayload: String?) =
         null -> null
     }
 
-fun RemoteSignerMethod.getRequestType(): RemoteSignerMethodType {
+fun RemoteSignerMethod.getRequestType(): SignerMethodType {
     return when (this) {
-        is RemoteSignerMethod.Connect -> RemoteSignerMethodType.Connect
-        is RemoteSignerMethod.GetPublicKey -> RemoteSignerMethodType.GetPublicKey
-        is RemoteSignerMethod.Nip04Decrypt -> RemoteSignerMethodType.Nip04Decrypt
-        is RemoteSignerMethod.Nip04Encrypt -> RemoteSignerMethodType.Nip04Encrypt
-        is RemoteSignerMethod.Nip44Decrypt -> RemoteSignerMethodType.Nip44Decrypt
-        is RemoteSignerMethod.Nip44Encrypt -> RemoteSignerMethodType.Nip44Encrypt
-        is RemoteSignerMethod.Ping -> RemoteSignerMethodType.Ping
-        is RemoteSignerMethod.SignEvent -> RemoteSignerMethodType.SignEvent
+        is RemoteSignerMethod.Connect -> SignerMethodType.Connect
+        is RemoteSignerMethod.GetPublicKey -> SignerMethodType.GetPublicKey
+        is RemoteSignerMethod.Nip04Decrypt -> SignerMethodType.Nip04Decrypt
+        is RemoteSignerMethod.Nip04Encrypt -> SignerMethodType.Nip04Encrypt
+        is RemoteSignerMethod.Nip44Decrypt -> SignerMethodType.Nip44Decrypt
+        is RemoteSignerMethod.Nip44Encrypt -> SignerMethodType.Nip44Encrypt
+        is RemoteSignerMethod.Ping -> SignerMethodType.Ping
+        is RemoteSignerMethod.SignEvent -> SignerMethodType.SignEvent
     }
 }
 
 fun RemoteAppSessionEventData.getRequestTypeId() =
     when (this.requestType) {
-        RemoteSignerMethodType.Connect -> PERM_ID_CONNECT
-        RemoteSignerMethodType.Ping -> PERM_ID_PING
-        RemoteSignerMethodType.SignEvent -> "$PERM_ID_PREFIX_SIGN_EVENT${this.eventKind?.decrypted}"
-        RemoteSignerMethodType.GetPublicKey -> PERM_ID_GET_PUBLIC_KEY
-        RemoteSignerMethodType.Nip04Encrypt -> PERM_ID_NIP04_ENCRYPT
-        RemoteSignerMethodType.Nip04Decrypt -> PERM_ID_NIP04_DECRYPT
-        RemoteSignerMethodType.Nip44Encrypt -> PERM_ID_NIP44_ENCRYPT
-        RemoteSignerMethodType.Nip44Decrypt -> PERM_ID_NIP44_DECRYPT
+        SignerMethodType.Connect -> PERM_ID_CONNECT
+        SignerMethodType.Ping -> PERM_ID_PING
+        SignerMethodType.SignEvent -> "$PERM_ID_PREFIX_SIGN_EVENT${this.eventKind?.decrypted}"
+        SignerMethodType.GetPublicKey -> PERM_ID_GET_PUBLIC_KEY
+        SignerMethodType.Nip04Encrypt -> PERM_ID_NIP04_ENCRYPT
+        SignerMethodType.Nip04Decrypt -> PERM_ID_NIP04_DECRYPT
+        SignerMethodType.Nip44Encrypt -> PERM_ID_NIP44_ENCRYPT
+        SignerMethodType.Nip44Decrypt -> PERM_ID_NIP44_DECRYPT
+        SignerMethodType.DecryptZapEvent -> error("Unsupported request type: ${this.requestType}")
     }
 
 private fun RemoteAppRequestStatePO.asDomain(): RequestStateDO =
