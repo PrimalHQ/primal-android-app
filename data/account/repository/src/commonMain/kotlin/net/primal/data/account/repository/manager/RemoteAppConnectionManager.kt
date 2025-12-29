@@ -18,7 +18,6 @@ class RemoteAppConnectionManager {
     private val _sessionStates = MutableStateFlow<Map<String, RemoteAppConnectionState>>(emptyMap())
     val sessionStates: StateFlow<Map<String, RemoteAppConnectionState>> = _sessionStates.asStateFlow()
 
-    /* TODO: why are we keeping relay states by session and not just global relay states? Is there any difference between sessions? */
     private val relayStates = atomic(mutableMapOf<String, MutableMap<String, RelayConnectionState>>())
 
     private sealed class RelayConnectionState {
@@ -105,7 +104,6 @@ class RemoteAppConnectionManager {
                     connectedRelayCount = connectedCount,
                     lastError = error,
                     lastConnectedAt = if (status == RemoteAppConnectionStatus.Connected) {
-                        /* TODO: this will update lastConnectedAt every time we update state. Should we do this? */
                         Clock.System.now()
                     } else {
                         existing?.lastConnectedAt
