@@ -67,7 +67,7 @@ class PermissionsRepositoryImpl(
     ): Result<Unit> =
         withContext(dispatchers.io()) {
             runCatching {
-                database.appPermissions().updateActionByAppIdentifier(
+                database.appPermissions().updateAllActionsByAppIdentifier(
                     appIdentifier = appIdentifier,
                     action = action.asPO(),
                 )

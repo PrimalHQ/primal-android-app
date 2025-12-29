@@ -140,7 +140,7 @@ class SessionEventRepositoryImpl(
                         clientPubKey = connection.data.clientPubKey,
                         trustLevel = TrustLevel.Medium,
                     )
-                    database.appPermissions().updateActionByAppIdentifier(
+                    database.appPermissions().updateAllActionsByAppIdentifier(
                         appIdentifier = connection.data.clientPubKey,
                         action = PermissionAction.Ask,
                     )
