@@ -108,7 +108,7 @@ internal class LocalSignerServiceImpl internal constructor(
             sessionId = session.sessionId,
             requestType = method.getRequestType(),
             method = method,
-            response = null,
+            response = response,
             requestState = requestState,
         )
     }
