@@ -1,7 +1,7 @@
-package net.primal.data.account.remote.method.model
+package net.primal.data.account.remote.signer.model
 
 import kotlinx.serialization.Serializable
-import net.primal.data.account.remote.method.model.serializer.RemoteSignerMethodResponseSerializer
+import net.primal.data.account.remote.signer.model.serializer.RemoteSignerMethodResponseSerializer
 
 @Serializable(with = RemoteSignerMethodResponseSerializer::class)
 sealed class RemoteSignerMethodResponse {

@@ -1,4 +1,4 @@
-package net.primal.data.account.remote.method.model.serializer
+package net.primal.data.account.remote.signer.model.serializer
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
@@ -13,7 +13,7 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.signer.model.RemoteSignerMethodResponse
 
 object RemoteSignerMethodResponseSerializer : KSerializer<RemoteSignerMethodResponse> {
     override val descriptor: SerialDescriptor =

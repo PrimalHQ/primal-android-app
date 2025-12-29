@@ -10,8 +10,8 @@ import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.data.account.local.dao.apps.SignerMethodType
 import net.primal.data.account.local.db.AccountDatabase
-import net.primal.data.account.remote.method.model.RemoteSignerMethod
-import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.signer.model.RemoteSignerMethod
+import net.primal.data.account.remote.signer.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.buildSessionEventData
 import net.primal.data.account.repository.repository.internal.model.UpdateAppSessionEventRequest
 import net.primal.domain.account.model.LocalSignerMethod

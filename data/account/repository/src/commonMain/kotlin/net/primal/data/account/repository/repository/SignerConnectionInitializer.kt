@@ -9,7 +9,7 @@ import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.data.account.local.dao.apps.SignerMethodType
-import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.signer.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
 import net.primal.domain.account.model.AppPermission

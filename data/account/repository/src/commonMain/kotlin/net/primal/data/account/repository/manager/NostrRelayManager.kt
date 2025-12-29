@@ -18,11 +18,11 @@ import net.primal.core.utils.getAndClear
 import net.primal.core.utils.put
 import net.primal.core.utils.remove
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
-import net.primal.data.account.remote.client.RemoteSignerClient
-import net.primal.data.account.remote.method.model.RemoteSignerMethod
-import net.primal.data.account.remote.method.model.RemoteSignerMethodException
-import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
-import net.primal.data.account.remote.method.parser.RemoteSignerMethodParser
+import net.primal.data.account.remote.signer.client.RemoteSignerClient
+import net.primal.data.account.remote.signer.model.RemoteSignerMethod
+import net.primal.data.account.remote.signer.model.RemoteSignerMethodException
+import net.primal.data.account.remote.signer.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.signer.parser.RemoteSignerMethodParser
 import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind

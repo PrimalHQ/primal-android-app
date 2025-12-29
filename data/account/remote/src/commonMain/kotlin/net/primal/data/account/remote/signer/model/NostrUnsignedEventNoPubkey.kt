@@ -1,4 +1,4 @@
-package net.primal.data.account.remote.method.model
+package net.primal.data.account.remote.signer.model
 
 import kotlin.time.Clock
 import kotlinx.serialization.SerialName

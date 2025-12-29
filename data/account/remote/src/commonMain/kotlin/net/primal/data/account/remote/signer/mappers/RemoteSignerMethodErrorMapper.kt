@@ -1,9 +1,9 @@
-package net.primal.data.account.remote.mappers
+package net.primal.data.account.remote.signer.mappers
 
-import net.primal.data.account.remote.method.model.RemoteSignerMethodDecryptException
-import net.primal.data.account.remote.method.model.RemoteSignerMethodException
-import net.primal.data.account.remote.method.model.RemoteSignerMethodParseException
-import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.signer.model.RemoteSignerMethodDecryptException
+import net.primal.data.account.remote.signer.model.RemoteSignerMethodException
+import net.primal.data.account.remote.signer.model.RemoteSignerMethodParseException
+import net.primal.data.account.remote.signer.model.RemoteSignerMethodResponse
 import net.primal.domain.nostr.NostrEvent
 
 fun Throwable.mapAsRemoteSignerMethodException(nostrEvent: NostrEvent): RemoteSignerMethodException {

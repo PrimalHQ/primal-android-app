@@ -1,4 +1,4 @@
-package net.primal.data.account.remote.utils
+package net.primal.data.account.remote.signer.utils
 
 const val PERM_ID_GET_PUBLIC_KEY = "get_public_key"
 const val PERM_ID_NIP04_DECRYPT = "nip04_decrypt"

@@ -1,14 +1,14 @@
-package net.primal.data.account.remote.method.model
+package net.primal.data.account.remote.signer.model
 
 import kotlinx.serialization.Serializable
-import net.primal.data.account.remote.utils.PERM_ID_CONNECT
-import net.primal.data.account.remote.utils.PERM_ID_GET_PUBLIC_KEY
-import net.primal.data.account.remote.utils.PERM_ID_NIP04_DECRYPT
-import net.primal.data.account.remote.utils.PERM_ID_NIP04_ENCRYPT
-import net.primal.data.account.remote.utils.PERM_ID_NIP44_DECRYPT
-import net.primal.data.account.remote.utils.PERM_ID_NIP44_ENCRYPT
-import net.primal.data.account.remote.utils.PERM_ID_PING
-import net.primal.data.account.remote.utils.PERM_ID_PREFIX_SIGN_EVENT
+import net.primal.data.account.remote.signer.utils.PERM_ID_CONNECT
+import net.primal.data.account.remote.signer.utils.PERM_ID_GET_PUBLIC_KEY
+import net.primal.data.account.remote.signer.utils.PERM_ID_NIP04_DECRYPT
+import net.primal.data.account.remote.signer.utils.PERM_ID_NIP04_ENCRYPT
+import net.primal.data.account.remote.signer.utils.PERM_ID_NIP44_DECRYPT
+import net.primal.data.account.remote.signer.utils.PERM_ID_NIP44_ENCRYPT
+import net.primal.data.account.remote.signer.utils.PERM_ID_PING
+import net.primal.data.account.remote.signer.utils.PERM_ID_PREFIX_SIGN_EVENT
 
 @Serializable
 sealed class RemoteSignerMethod {

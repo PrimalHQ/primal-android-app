@@ -6,13 +6,13 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.data.account.local.dao.apps.SignerMethodType
 import net.primal.data.account.local.dao.apps.local.LocalAppSessionEventData
-import net.primal.data.account.remote.utils.PERM_ID_DECRYPT_ZAP_EVENT
-import net.primal.data.account.remote.utils.PERM_ID_GET_PUBLIC_KEY
-import net.primal.data.account.remote.utils.PERM_ID_NIP04_DECRYPT
-import net.primal.data.account.remote.utils.PERM_ID_NIP04_ENCRYPT
-import net.primal.data.account.remote.utils.PERM_ID_NIP44_DECRYPT
-import net.primal.data.account.remote.utils.PERM_ID_NIP44_ENCRYPT
-import net.primal.data.account.remote.utils.PERM_ID_PREFIX_SIGN_EVENT
+import net.primal.data.account.remote.signer.utils.PERM_ID_DECRYPT_ZAP_EVENT
+import net.primal.data.account.remote.signer.utils.PERM_ID_GET_PUBLIC_KEY
+import net.primal.data.account.remote.signer.utils.PERM_ID_NIP04_DECRYPT
+import net.primal.data.account.remote.signer.utils.PERM_ID_NIP04_ENCRYPT
+import net.primal.data.account.remote.signer.utils.PERM_ID_NIP44_DECRYPT
+import net.primal.data.account.remote.signer.utils.PERM_ID_NIP44_ENCRYPT
+import net.primal.data.account.remote.signer.utils.PERM_ID_PREFIX_SIGN_EVENT
 import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.model.LocalSignerMethodResponse
 import net.primal.domain.account.model.RequestState as RequestStateDO

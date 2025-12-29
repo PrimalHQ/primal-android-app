@@ -20,11 +20,11 @@ import net.primal.core.utils.fold
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState
-import net.primal.data.account.remote.mappers.mapAsRemoteSignerMethodException
-import net.primal.data.account.remote.mappers.mapAsRemoteSignerMethodResponse
-import net.primal.data.account.remote.method.model.RemoteSignerMethod
-import net.primal.data.account.remote.method.model.RemoteSignerMethodResponse
-import net.primal.data.account.remote.method.parser.RemoteSignerMethodParser
+import net.primal.data.account.remote.signer.mappers.mapAsRemoteSignerMethodException
+import net.primal.data.account.remote.signer.mappers.mapAsRemoteSignerMethodResponse
+import net.primal.data.account.remote.signer.model.RemoteSignerMethod
+import net.primal.data.account.remote.signer.model.RemoteSignerMethodResponse
+import net.primal.data.account.remote.signer.parser.RemoteSignerMethodParser
 import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.RemoteAppConnectionManager
