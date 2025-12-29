@@ -203,7 +203,10 @@ class LocalSignerServiceImpl internal constructor(
                 identifier = appIdentifier,
                 trustLevel = TrustLevel.Medium,
             )
-            permissionsRepository.deletePermissions(identifier = appIdentifier)
+            permissionsRepository.updatePermissionsActionByAppIdentifier(
+                appIdentifier = appIdentifier,
+                action = AppPermissionAction.Ask,
+            )
         }
 
         permissionsRepository.upsertPermissionsAction(

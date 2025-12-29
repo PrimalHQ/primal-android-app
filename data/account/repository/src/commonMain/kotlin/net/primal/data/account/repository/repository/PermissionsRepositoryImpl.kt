@@ -61,6 +61,19 @@ class PermissionsRepositoryImpl(
             }
         }
 
+    override suspend fun updatePermissionsActionByAppIdentifier(
+        appIdentifier: String,
+        action: AppPermissionAction,
+    ): Result<Unit> =
+        withContext(dispatchers.io()) {
+            runCatching {
+                database.appPermissions().updateActionByAppIdentifier(
+                    appIdentifier = appIdentifier,
+                    action = action.asPO(),
+                )
+            }
+        }
+
     override fun observePermissions(appIdentifier: String): Flow<List<AppPermissionGroup>> =
         flow {
             val signerPermissions = withContext(dispatchers.io()) {

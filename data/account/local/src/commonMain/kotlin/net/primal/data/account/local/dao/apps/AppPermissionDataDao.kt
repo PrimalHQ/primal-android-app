@@ -16,6 +16,9 @@ interface AppPermissionDataDao {
     @Query("DELETE FROM AppPermissionData WHERE appIdentifier = :appIdentifier")
     suspend fun deletePermissions(appIdentifier: String)
 
+    @Query("UPDATE AppPermissionData SET `action` = :action WHERE appIdentifier = :appIdentifier")
+    suspend fun updateActionByAppIdentifier(appIdentifier: String, action: PermissionAction)
+
     @Query("SELECT * FROM AppPermissionData WHERE permissionId = :permissionId AND appIdentifier = :appIdentifier")
     suspend fun findPermission(permissionId: String, appIdentifier: String): AppPermissionData?
 

@@ -19,6 +19,11 @@ interface PermissionsRepository {
         action: AppPermissionAction,
     ): Result<Unit>
 
+    suspend fun updatePermissionsActionByAppIdentifier(
+        appIdentifier: String,
+        action: AppPermissionAction,
+    ): Result<Unit>
+
     fun observePermissions(appIdentifier: String): Flow<List<AppPermissionGroup>>
 
     suspend fun getNamingMap(): Result<Map<String, String>>
