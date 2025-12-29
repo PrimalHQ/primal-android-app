@@ -332,6 +332,8 @@
             android:configChanges="orientation|screenSize|layoutDirection|screenLayout|smallestScreenSize"
             android:exported="true"
             android:launchMode="singleTop"
+            android:taskAffinity="net.primal.android.signer"
+            android:excludeFromRecents="true"
             android:theme="@style/TransparentBottomSheetTheme"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
