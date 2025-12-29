@@ -104,7 +104,11 @@ class RemoteAppConnectionManager {
                     connectedRelayCount = connectedCount,
                     lastError = error,
                     lastConnectedAt = if (status == RemoteAppConnectionStatus.Connected) {
-                        Clock.System.now()
+                        if (existing?.status != RemoteAppConnectionStatus.Connected) {
+                            Clock.System.now()
+                        } else {
+                            existing.lastConnectedAt ?: Clock.System.now()
+                        }
                     } else {
                         existing?.lastConnectedAt
                     },
