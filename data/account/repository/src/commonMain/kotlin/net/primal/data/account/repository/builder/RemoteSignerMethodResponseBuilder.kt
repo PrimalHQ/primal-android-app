@@ -3,9 +3,9 @@ package net.primal.data.account.repository.builder
 import net.primal.core.utils.fold
 import net.primal.core.utils.mapCatching
 import net.primal.core.utils.serialization.CommonJsonEncodeDefaults
-import net.primal.data.account.remote.signer.model.RemoteSignerMethod
-import net.primal.data.account.remote.signer.model.RemoteSignerMethodResponse
-import net.primal.data.account.remote.signer.model.withPubKey
+import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethod
+import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodResponse
+import net.primal.data.account.signer.remote.signer.model.withPubKey
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
@@ -19,11 +19,21 @@ internal class RemoteSignerMethodResponseBuilder(
     suspend fun build(method: RemoteSignerMethod): RemoteSignerMethodResponse {
         return when (method) {
             is RemoteSignerMethod.Connect -> connect(method)
-            is RemoteSignerMethod.GetPublicKey -> getPublicKey(method)
-            is RemoteSignerMethod.Nip04Decrypt -> nip04Decrypt(method)
-            is RemoteSignerMethod.Nip04Encrypt -> nip04Encrypt(method)
-            is RemoteSignerMethod.Nip44Decrypt -> nip44Decrypt(method)
-            is RemoteSignerMethod.Nip44Encrypt -> nip44Encrypt(method)
+            is RemoteSignerMethod.GetPublicKey -> getPublicKey(
+                method,
+            )
+            is RemoteSignerMethod.Nip04Decrypt -> nip04Decrypt(
+                method,
+            )
+            is RemoteSignerMethod.Nip04Encrypt -> nip04Encrypt(
+                method,
+            )
+            is RemoteSignerMethod.Nip44Decrypt -> nip44Decrypt(
+                method,
+            )
+            is RemoteSignerMethod.Nip44Encrypt -> nip44Encrypt(
+                method,
+            )
             is RemoteSignerMethod.Ping -> ping(method)
             is RemoteSignerMethod.SignEvent -> signEvent(method)
         }

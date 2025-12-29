@@ -8,17 +8,17 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState as RemoteAppRequestStatePO
 import net.primal.data.account.local.dao.apps.SignerMethodType
 import net.primal.data.account.local.dao.apps.remote.RemoteAppSessionEventData
-import net.primal.data.account.remote.signer.model.RemoteSignerMethod
-import net.primal.data.account.remote.signer.model.RemoteSignerMethodResponse
-import net.primal.data.account.remote.signer.model.withPubKey
-import net.primal.data.account.remote.signer.utils.PERM_ID_CONNECT
-import net.primal.data.account.remote.signer.utils.PERM_ID_GET_PUBLIC_KEY
-import net.primal.data.account.remote.signer.utils.PERM_ID_NIP04_DECRYPT
-import net.primal.data.account.remote.signer.utils.PERM_ID_NIP04_ENCRYPT
-import net.primal.data.account.remote.signer.utils.PERM_ID_NIP44_DECRYPT
-import net.primal.data.account.remote.signer.utils.PERM_ID_NIP44_ENCRYPT
-import net.primal.data.account.remote.signer.utils.PERM_ID_PING
-import net.primal.data.account.remote.signer.utils.PERM_ID_PREFIX_SIGN_EVENT
+import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethod
+import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodResponse
+import net.primal.data.account.signer.remote.signer.model.withPubKey
+import net.primal.data.account.signer.remote.signer.utils.PERM_ID_CONNECT
+import net.primal.data.account.signer.remote.signer.utils.PERM_ID_GET_PUBLIC_KEY
+import net.primal.data.account.signer.remote.signer.utils.PERM_ID_NIP04_DECRYPT
+import net.primal.data.account.signer.remote.signer.utils.PERM_ID_NIP04_ENCRYPT
+import net.primal.data.account.signer.remote.signer.utils.PERM_ID_NIP44_DECRYPT
+import net.primal.data.account.signer.remote.signer.utils.PERM_ID_NIP44_ENCRYPT
+import net.primal.data.account.signer.remote.signer.utils.PERM_ID_PING
+import net.primal.data.account.signer.remote.signer.utils.PERM_ID_PREFIX_SIGN_EVENT
 import net.primal.domain.account.model.RequestState as RequestStateDO
 import net.primal.domain.account.model.SessionEvent
 import net.primal.shared.data.local.encryption.asEncryptable
@@ -54,7 +54,9 @@ fun buildSessionEventData(
         requestType = requestType,
         requestPayload = method.encodeToJsonString().asEncryptable(),
         responsePayload = response?.encodeToJsonString()?.asEncryptable(),
-        eventKind = method.getIfTypeOrNull(RemoteSignerMethod.SignEvent::unsignedEvent)?.kind?.asEncryptable(),
+        eventKind = method.getIfTypeOrNull(
+            RemoteSignerMethod.SignEvent::unsignedEvent,
+        )?.kind?.asEncryptable(),
     )
 }
 
@@ -173,7 +175,7 @@ fun RemoteAppSessionEventData.getRequestTypeId() =
     when (this.requestType) {
         SignerMethodType.Connect -> PERM_ID_CONNECT
         SignerMethodType.Ping -> PERM_ID_PING
-        SignerMethodType.SignEvent -> "$PERM_ID_PREFIX_SIGN_EVENT${this.eventKind?.decrypted}"
+        SignerMethodType.SignEvent -> "${PERM_ID_PREFIX_SIGN_EVENT}${this.eventKind?.decrypted}"
         SignerMethodType.GetPublicKey -> PERM_ID_GET_PUBLIC_KEY
         SignerMethodType.Nip04Encrypt -> PERM_ID_NIP04_ENCRYPT
         SignerMethodType.Nip04Decrypt -> PERM_ID_NIP04_DECRYPT

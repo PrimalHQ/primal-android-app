@@ -16,9 +16,9 @@ import kotlinx.coroutines.withTimeout
 import net.primal.android.signer.provider.parser.SignerContentProviderParser
 import net.primal.android.signer.provider.utils.getResultString
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.domain.account.model.LocalSignerMethodResponse
-import net.primal.domain.account.service.LocalSignerError
-import net.primal.domain.account.service.LocalSignerService
+import net.primal.data.account.repository.service.LocalSignerError
+import net.primal.data.account.repository.service.LocalSignerService
+import net.primal.data.account.signer.local.LocalSignerMethodResponse
 import timber.log.Timber
 
 class LocalSignerContentProvider : ContentProvider() {

@@ -20,32 +20,32 @@ import net.primal.core.utils.fold
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState
-import net.primal.data.account.remote.signer.mappers.mapAsRemoteSignerMethodException
-import net.primal.data.account.remote.signer.mappers.mapAsRemoteSignerMethodResponse
-import net.primal.data.account.remote.signer.model.RemoteSignerMethod
-import net.primal.data.account.remote.signer.model.RemoteSignerMethodResponse
-import net.primal.data.account.remote.signer.parser.RemoteSignerMethodParser
 import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.RemoteAppConnectionManager
 import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.data.account.repository.mappers.getRequestType
-import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
+import net.primal.data.account.repository.repository.internal.InternalRemoteSessionEventRepository
 import net.primal.data.account.repository.repository.internal.model.UpdateAppSessionEventRequest
+import net.primal.data.account.signer.remote.signer.mappers.mapAsRemoteSignerMethodException
+import net.primal.data.account.signer.remote.signer.mappers.mapAsRemoteSignerMethodResponse
+import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethod
+import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodResponse
+import net.primal.data.account.signer.remote.signer.parser.RemoteSignerMethodParser
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
 @OptIn(ExperimentalAtomicApi::class)
-class RemoteSignerServiceImpl internal constructor(
+internal class RemoteSignerServiceImpl internal constructor(
     private val signerKeyPair: NostrKeyPair,
     private val sessionInactivityTimeoutInMinutes: Long,
     private val connectionRepository: ConnectionRepository,
     private val sessionRepository: SessionRepository,
     private val nostrRelayManager: NostrRelayManager,
     private val remoteSignerMethodResponseBuilder: RemoteSignerMethodResponseBuilder,
-    private val internalSessionEventRepository: InternalSessionEventRepository,
+    private val internalSessionEventRepository: InternalRemoteSessionEventRepository,
     private val remoteSignerMethodParser: RemoteSignerMethodParser,
     private val remoteAppConnectionManager: RemoteAppConnectionManager,
 ) : RemoteSignerService {
@@ -53,7 +53,8 @@ class RemoteSignerServiceImpl internal constructor(
 
     private val relaySessionMap = AtomicReference<Map<String, List<String>>>(emptyMap())
     private val sessionActivityMap = AtomicReference<MutableMap<String, Instant>>(mutableMapOf())
-    private val retrySendMethodResponseQueue = MutableSharedFlow<RemoteSignerMethodResponse>()
+    private val retrySendMethodResponseQueue =
+        MutableSharedFlow<RemoteSignerMethodResponse>()
 
     override fun initialize() {
         Napier.d(tag = "Signer") { "RemoteSignerService started." }
@@ -147,7 +148,9 @@ class RemoteSignerServiceImpl internal constructor(
                     }
 
                     val toRespond = events.filter { it.responsePayload == null }
-                        .mapNotNull { it.requestPayload?.decrypted?.decodeFromJsonStringOrNull<RemoteSignerMethod>() }
+                        .mapNotNull {
+                            it.requestPayload?.decrypted?.decodeFromJsonStringOrNull<RemoteSignerMethod>()
+                        }
                         .map { remoteSignerMethodResponseBuilder.build(method = it) }
 
                     (alreadyResponded + toRespond)

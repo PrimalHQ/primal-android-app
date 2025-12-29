@@ -21,14 +21,14 @@ import net.primal.android.signer.provider.approvals.PermissionRequestsContract.U
 import net.primal.android.signer.provider.localSignerMethodOrThrow
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onSuccess
-import net.primal.domain.account.model.LocalSignerMethod
-import net.primal.domain.account.model.LocalSignerMethodResponse
+import net.primal.data.account.repository.service.LocalSignerService
+import net.primal.data.account.signer.local.LocalSignerMethod
+import net.primal.data.account.signer.local.LocalSignerMethodResponse
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.SessionEventUserChoice
 import net.primal.domain.account.model.UserChoice
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
-import net.primal.domain.account.service.LocalSignerService
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 import timber.log.Timber

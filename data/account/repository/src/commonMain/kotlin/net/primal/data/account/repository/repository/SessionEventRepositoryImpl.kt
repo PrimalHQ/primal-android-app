@@ -14,9 +14,9 @@ import net.primal.data.account.local.dao.apps.PermissionAction
 import net.primal.data.account.local.dao.apps.TrustLevel
 import net.primal.data.account.local.dao.apps.remote.RemoteAppPendingNostrEvent
 import net.primal.data.account.local.db.AccountDatabase
-import net.primal.data.account.remote.signer.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.getRequestTypeId
+import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodResponse
 import net.primal.domain.account.handler.Nip46EventsHandler
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.SessionEventUserChoice
@@ -49,7 +49,11 @@ class SessionEventRepositoryImpl(
         database.localAppSessionEvents().observeEventsByAppIdentifierAndRequestState(
             appIdentifier = appIdentifier,
             requestState = AppRequestState.PendingUserAction,
-        ).map { events -> events.mapNotNull { it.asDomain() } }
+        ).map { events ->
+            events.mapNotNull {
+                it.asDomain()
+            }
+        }
             .distinctUntilChanged()
 
     override fun observeCompletedEventsForLocalSession(sessionId: String): Flow<List<SessionEvent>> {

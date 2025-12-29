@@ -4,7 +4,7 @@ import android.content.Intent
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.domain.account.model.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.LocalSignerMethodResponse
 
 fun LocalSignerMethodResponse.toIntent() =
     Intent().apply {

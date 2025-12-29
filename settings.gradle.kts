@@ -45,7 +45,7 @@ include(":data:wallet:remote-tsunami")
 include(":data:wallet:repository")
 
 include(":data:account:local")
-include(":data:account:remote")
+include(":data:account:signer")
 include(":data:account:repository")
 
 include(":domain:nostr")

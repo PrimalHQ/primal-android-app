@@ -12,7 +12,7 @@ import net.primal.android.signer.provider.connect.AndroidConnectScreen
 import net.primal.android.signer.provider.connect.AndroidConnectViewModel
 import net.primal.android.signer.provider.parser.SignerIntentParser
 import net.primal.android.signer.provider.utils.toIntent
-import net.primal.domain.account.model.LocalSignerMethod
+import net.primal.data.account.signer.local.LocalSignerMethod
 
 @AndroidEntryPoint
 class SignerActivity : PrimalActivity() {

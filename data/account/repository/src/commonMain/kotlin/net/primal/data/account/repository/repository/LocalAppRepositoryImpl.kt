@@ -12,7 +12,6 @@ import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.asPO
 import net.primal.domain.account.model.AppPermissionAction as PermissionActionDO
 import net.primal.domain.account.model.LocalApp
-import net.primal.domain.account.model.LocalSignerMethod
 import net.primal.domain.account.model.TrustLevel as TrustLevelDO
 import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.shared.data.local.db.withTransaction
@@ -31,15 +30,15 @@ class LocalAppRepositoryImpl(
             }
         }
 
-    override suspend fun getPermissionActionForMethod(method: LocalSignerMethod): PermissionActionDO =
+    override suspend fun getPermissionActionForMethod(appIdentifier: String, permissionId: String): PermissionActionDO =
         withContext(dispatchers.io()) {
-            val app = database.localApps().findApp(identifier = method.getIdentifier())
+            val app = database.localApps().findApp(identifier = appIdentifier)
                 ?: return@withContext PermissionActionDO.Deny
 
             when (app.data.trustLevel) {
                 TrustLevel.Full -> PermissionActionDO.Approve
                 TrustLevel.Medium -> {
-                    app.permissions.firstOrNull { it.permissionId == method.getPermissionId() }
+                    app.permissions.firstOrNull { it.permissionId == permissionId }
                         ?.action?.asDomain()
                         ?: PermissionActionDO.Ask
                 }

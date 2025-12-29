@@ -18,12 +18,12 @@ import net.primal.core.utils.getAndClear
 import net.primal.core.utils.put
 import net.primal.core.utils.remove
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
-import net.primal.data.account.remote.signer.client.RemoteSignerClient
-import net.primal.data.account.remote.signer.model.RemoteSignerMethod
-import net.primal.data.account.remote.signer.model.RemoteSignerMethodException
-import net.primal.data.account.remote.signer.model.RemoteSignerMethodResponse
-import net.primal.data.account.remote.signer.parser.RemoteSignerMethodParser
 import net.primal.data.account.repository.manager.model.RelayEvent
+import net.primal.data.account.signer.remote.signer.client.RemoteSignerClient
+import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethod
+import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodException
+import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodResponse
+import net.primal.data.account.signer.remote.signer.parser.RemoteSignerMethodParser
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -101,7 +101,7 @@ internal class NostrRelayManager(
         scope.cancel()
     }
 
-    suspend fun sendResponse(relays: List<String>, response: RemoteSignerMethodResponse) =
+    fun sendResponse(relays: List<String>, response: RemoteSignerMethodResponse) =
         runCatching {
             Napier.d(tag = "Signer") { "Sending response: $response" }
             val event = buildSignedEvent(response = response)

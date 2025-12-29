@@ -12,10 +12,10 @@ import net.primal.core.utils.runCatching
 import net.primal.data.account.local.dao.apps.AppPermissionData
 import net.primal.data.account.local.dao.apps.PermissionAction as PermissionActionPO
 import net.primal.data.account.local.db.AccountDatabase
-import net.primal.data.account.remote.api.WellKnownApi
-import net.primal.data.account.remote.api.model.PermissionsResponse
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.asPO
+import net.primal.data.account.signer.remote.api.WellKnownApi
+import net.primal.data.account.signer.remote.api.model.PermissionsResponse
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.AppPermissionAction
 import net.primal.domain.account.model.AppPermissionGroup

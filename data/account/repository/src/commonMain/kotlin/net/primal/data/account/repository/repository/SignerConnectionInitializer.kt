@@ -9,9 +9,9 @@ import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.data.account.local.dao.apps.SignerMethodType
-import net.primal.data.account.remote.signer.model.RemoteSignerMethodResponse
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
-import net.primal.data.account.repository.repository.internal.InternalSessionEventRepository
+import net.primal.data.account.repository.repository.internal.InternalRemoteSessionEventRepository
+import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodResponse
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.AppPermissionAction
 import net.primal.domain.account.model.RemoteAppConnection
@@ -41,7 +41,7 @@ private const val VALID_PERMISSION_STRING_REGEX =
 class SignerConnectionInitializer internal constructor(
     private val connectionRepository: ConnectionRepository,
     private val sessionRepository: SessionRepository,
-    private val internalSessionEventRepository: InternalSessionEventRepository,
+    private val internalSessionEventRepository: InternalRemoteSessionEventRepository,
     private val internalPermissionsRepository: InternalPermissionsRepository,
 ) {
     suspend fun initialize(
