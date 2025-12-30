@@ -11,6 +11,7 @@ import net.primal.android.signer.provider.approvals.PermissionRequestsViewModel
 import net.primal.android.signer.provider.connect.AndroidConnectScreen
 import net.primal.android.signer.provider.connect.AndroidConnectViewModel
 import net.primal.data.account.signer.local.model.LocalSignerMethod
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 import net.primal.data.account.signer.local.parser.SignerIntentParser
 import net.primal.data.account.signer.local.utils.toIntent
 
@@ -64,25 +65,36 @@ class SignerActivity : PrimalActivity() {
                         PermissionRequestsBottomSheet(
                             viewModel = permissionRequestsViewModel,
                             onCompleted = { requestsResults ->
-                                val size = requestsResults.approved.size
-                                if (size == 1) {
-                                    val method = requestsResults.approved.first()
-                                    setResult(
-                                        RESULT_OK,
-                                        method.toIntent().apply {
-                                            putExtra("package", packageName)
-                                        },
-                                    )
-                                } else if (size > 1) {
-                                    setResult(
-                                        RESULT_OK,
-                                        requestsResults.approved.toIntent().apply {
-                                            putExtra("package", packageName)
-                                        },
-                                    )
-                                } else {
-                                    setResult(RESULT_CANCELED)
+                                val results = requestsResults.approved + requestsResults.rejected
+                                val size = results.size
+
+                                when {
+                                    size == 1 -> {
+                                        val method = results.first()
+                                        setResult(
+                                            if (method is LocalSignerMethodResponse.Success) {
+                                                RESULT_OK
+                                            } else {
+                                                RESULT_CANCELED
+                                            },
+                                            method.toIntent().apply {
+                                                putExtra("package", packageName)
+                                            },
+                                        )
+                                    }
+
+                                    size > 1 -> {
+                                        setResult(
+                                            RESULT_OK,
+                                            (results).toIntent(packageName),
+                                        )
+                                    }
+
+                                    else -> {
+                                        setResult(RESULT_CANCELED)
+                                    }
                                 }
+
                                 finish()
                             },
                         )
