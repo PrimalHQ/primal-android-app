@@ -71,23 +71,27 @@ class SessionRepositoryImpl(
 
     override suspend fun startRemoteSession(appIdentifier: String): Result<String> =
         withContext(dispatchers.io()) {
-            Napier.d(tag = "Signer") { "Starting session for $appIdentifier" }
-            val existingOpenSession = database.remoteAppSessions().findOngoingSessionByApp(
-                appIdentifier = appIdentifier,
-            )
-            if (existingOpenSession == null) {
-                val newSession = AppSessionData(
-                    appIdentifier = appIdentifier,
-                    sessionType = AppSessionType.RemoteSession,
-                )
-                database.appSessions().upsertAll(data = listOf(newSession))
-                Napier.d(tag = "Signer") { "Successfully started session." }
-                newSession.sessionId.asSuccess()
-            } else {
-                Napier.d(tag = "Signer") { "Existing open session already exists for $appIdentifier. Start ignored." }
-                Result.failure(
-                    IllegalStateException("There is an existing open session for connection $appIdentifier."),
-                )
+            runCatching {
+                database.withTransaction {
+                    Napier.d(tag = "Signer") { "Starting session for $appIdentifier" }
+                    val existingOpenSession = database.remoteAppSessions().findOngoingSessionByApp(
+                        appIdentifier = appIdentifier,
+                    )
+                    if (existingOpenSession != null) {
+                        Napier.d(tag = "Signer") {
+                            "Existing open session already exists for $appIdentifier. Start ignored."
+                        }
+                        throw IllegalStateException("There is an existing open session for connection $appIdentifier.")
+                    }
+
+                    val newSession = AppSessionData(
+                        appIdentifier = appIdentifier,
+                        sessionType = AppSessionType.RemoteSession,
+                    )
+                    database.appSessions().upsertAll(data = listOf(newSession))
+                    Napier.d(tag = "Signer") { "Successfully started session." }
+                    newSession.sessionId
+                }
             }
         }
 
