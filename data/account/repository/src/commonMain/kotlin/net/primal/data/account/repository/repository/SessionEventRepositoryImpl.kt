@@ -95,20 +95,8 @@ class SessionEventRepositoryImpl(
     override suspend fun respondToRemoteEvent(eventId: String, userChoice: UserChoice): Result<Unit> =
         withContext(dispatchers.io()) {
             runCatching {
-                when (userChoice) {
-                    UserChoice.Allow -> allowEvent(eventId = eventId)
-
-                    UserChoice.Reject -> rejectEvent(eventId = eventId)
-
-                    UserChoice.AlwaysAllow -> {
-                        allowEvent(eventId = eventId)
-                        updatePermissionPreference(eventId = eventId, action = PermissionAction.Approve)
-                    }
-
-                    UserChoice.AlwaysReject -> {
-                        rejectEvent(eventId = eventId)
-                        updatePermissionPreference(eventId = eventId, action = PermissionAction.Deny)
-                    }
+                database.withTransaction {
+                    processRespondToRemoteEvent(userChoice, eventId)
                 }
             }
         }
@@ -118,68 +106,76 @@ class SessionEventRepositoryImpl(
             database.withTransaction {
                 runCatching {
                     userChoices.forEach {
-                        respondToRemoteEvent(eventId = it.sessionEventId, userChoice = it.userChoice).getOrThrow()
+                        processRespondToRemoteEvent(userChoice = it.userChoice, eventId = it.sessionEventId)
                     }
                 }
             }
         }
 
-    private suspend fun updatePermissionPreference(eventId: String, action: PermissionAction) =
-        withContext(dispatchers.io()) {
-            database.withTransaction {
-                val sessionEvent = database.remoteAppSessionEvents().getSessionEvent(
-                    eventId = eventId,
-                ) ?: return@withTransaction
+    private suspend inline fun processRespondToRemoteEvent(userChoice: UserChoice, eventId: String) {
+        when (userChoice) {
+            UserChoice.Allow -> allowEvent(eventId = eventId)
 
-                val connection = database.remoteAppConnections().getConnection(
-                    clientPubKey = sessionEvent.clientPubKey,
-                ) ?: return@withTransaction
+            UserChoice.Reject -> rejectEvent(eventId = eventId)
 
-                if (connection.data.trustLevel == TrustLevel.Low && action == PermissionAction.Approve) {
-                    database.remoteAppConnections().updateTrustLevel(
-                        clientPubKey = connection.data.clientPubKey,
-                        trustLevel = TrustLevel.Medium,
-                    )
-                    database.appPermissions().updateAllActionsByAppIdentifier(
-                        appIdentifier = connection.data.clientPubKey,
-                        action = PermissionAction.Ask,
-                    )
-                }
+            UserChoice.AlwaysAllow -> {
+                allowEvent(eventId = eventId)
+                updatePermissionPreference(eventId = eventId, action = PermissionAction.Approve)
+            }
 
-                database.appPermissions().upsert(
-                    data = AppPermissionData(
-                        permissionId = sessionEvent.getRequestTypeId(),
-                        appIdentifier = connection.data.clientPubKey,
-                        action = action,
-                    ),
-                )
+            UserChoice.AlwaysReject -> {
+                rejectEvent(eventId = eventId)
+                updatePermissionPreference(eventId = eventId, action = PermissionAction.Deny)
             }
         }
+    }
 
-    private suspend fun allowEvent(eventId: String) =
-        withContext(dispatchers.io()) {
-            database.remoteAppSessionEvents().updateSessionEventRequestState(
-                eventId = eventId,
-                requestState = AppRequestState.PendingResponse,
-                responsePayload = null,
-                completedAt = null,
+    private suspend inline fun updatePermissionPreference(eventId: String, action: PermissionAction) {
+        val sessionEvent = database.remoteAppSessionEvents().getSessionEvent(eventId) ?: return
+        val connection = database.remoteAppConnections().getConnection(sessionEvent.clientPubKey) ?: return
+
+        if (connection.data.trustLevel == TrustLevel.Low && action == PermissionAction.Approve) {
+            database.remoteAppConnections().updateTrustLevel(
+                clientPubKey = connection.data.clientPubKey,
+                trustLevel = TrustLevel.Medium,
+            )
+            database.appPermissions().updateAllActionsByAppIdentifier(
+                appIdentifier = connection.data.clientPubKey,
+                action = PermissionAction.Ask,
             )
         }
 
-    private suspend fun rejectEvent(eventId: String) =
-        withContext(dispatchers.io()) {
-            val clientPubKey = database.remoteAppSessionEvents().getSessionEvent(eventId = eventId)?.clientPubKey
-            if (clientPubKey != null) {
-                database.remoteAppSessionEvents().updateSessionEventRequestState(
-                    eventId = eventId,
-                    requestState = AppRequestState.PendingResponse,
-                    completedAt = null,
-                    responsePayload = RemoteSignerMethodResponse.Error(
-                        id = eventId,
-                        clientPubKey = clientPubKey,
-                        error = "User rejected this request.",
-                    ).encodeToJsonString().asEncryptable(),
-                )
-            }
+        database.appPermissions().upsert(
+            data = AppPermissionData(
+                permissionId = sessionEvent.getRequestTypeId(),
+                appIdentifier = connection.data.clientPubKey,
+                action = action,
+            ),
+        )
+    }
+
+    private suspend inline fun allowEvent(eventId: String) {
+        database.remoteAppSessionEvents().updateSessionEventRequestState(
+            eventId = eventId,
+            requestState = AppRequestState.PendingResponse,
+            responsePayload = null,
+            completedAt = null,
+        )
+    }
+
+    private suspend inline fun rejectEvent(eventId: String) {
+        val clientPubKey = database.remoteAppSessionEvents().getSessionEvent(eventId = eventId)?.clientPubKey
+        if (clientPubKey != null) {
+            database.remoteAppSessionEvents().updateSessionEventRequestState(
+                eventId = eventId,
+                requestState = AppRequestState.PendingResponse,
+                completedAt = null,
+                responsePayload = RemoteSignerMethodResponse.Error(
+                    id = eventId,
+                    clientPubKey = clientPubKey,
+                    error = "User rejected this request.",
+                ).encodeToJsonString().asEncryptable(),
+            )
         }
+    }
 }
