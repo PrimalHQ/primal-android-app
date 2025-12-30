@@ -1,6 +1,7 @@
 package net.primal.android.nostrconnect.model
 
 import net.primal.android.drawer.multiaccount.model.UserAccountUi
+import net.primal.domain.account.model.RemoteAppConnectionStatus
 import net.primal.domain.account.model.RemoteAppSession
 
 data class ActiveSessionUi(
@@ -10,6 +11,7 @@ data class ActiveSessionUi(
     val appUrl: String?,
     val appImageUrl: String?,
     val userAccount: UserAccountUi?,
+    val connectionStatus: RemoteAppConnectionStatus? = null,
 )
 
 fun RemoteAppSession.asUi(userAccount: UserAccountUi?) =

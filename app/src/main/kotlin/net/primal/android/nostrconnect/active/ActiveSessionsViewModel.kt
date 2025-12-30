@@ -8,6 +8,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -23,6 +24,7 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.data.account.repository.manager.RemoteAppConnectionManager
 import net.primal.domain.account.repository.SessionRepository
 import timber.log.Timber
 
@@ -32,6 +34,7 @@ class ActiveSessionsViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val credentialsStore: CredentialsStore,
     private val userAccountsStore: UserAccountsStore,
+    private val remoteAppConnectionManager: RemoteAppConnectionManager,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -59,22 +62,27 @@ class ActiveSessionsViewModel @Inject constructor(
     private fun observeActiveSessions() {
         viewModelScope.launch {
             val signerKeyPair = credentialsStore.getOrCreateInternalSignerCredentials().asKeyPair()
-            sessionRepository.observeOngoingSessions(signerPubKey = signerKeyPair.pubKey)
-                .collect { appSessions ->
-                    val userAccounts = userAccountsStore.userAccounts.value
-                    val userAccountsMap = userAccounts.associateBy { it.pubkey }
-                    val uiSessions = appSessions.mapNotNull { appSession ->
-                        userAccountsMap[appSession.userPubKey]?.let { userAccount ->
-                            appSession.asUi(userAccount = userAccount.asUserAccountUi())
-                        }
-                    }
-                    setState {
-                        copy(
-                            sessions = uiSessions,
-                            selectedSessions = resolveSelectedSessions(this.selectedSessions, uiSessions),
+            combine(
+                sessionRepository.observeOngoingSessions(signerPubKey = signerKeyPair.pubKey),
+                remoteAppConnectionManager.sessionStates,
+            ) { appSessions, connectionStates ->
+                val userAccounts = userAccountsStore.userAccounts.value
+                val userAccountsMap = userAccounts.associateBy { it.pubkey }
+                appSessions.mapNotNull { appSession ->
+                    userAccountsMap[appSession.userPubKey]?.let { userAccount ->
+                        appSession.asUi(userAccount = userAccount.asUserAccountUi()).copy(
+                            connectionStatus = connectionStates[appSession.sessionId]?.status,
                         )
                     }
                 }
+            }.collect { uiSessions ->
+                setState {
+                    copy(
+                        sessions = uiSessions,
+                        selectedSessions = resolveSelectedSessions(this.selectedSessions, uiSessions),
+                    )
+                }
+            }
         }
     }
 

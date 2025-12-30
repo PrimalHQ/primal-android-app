@@ -49,6 +49,7 @@ import net.primal.android.core.ext.selectableItem
 import net.primal.android.nostrconnect.active.ActiveSessionsContract.UiState
 import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.theme.AppTheme
+import net.primal.domain.account.model.RemoteAppConnectionStatus
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -265,11 +266,24 @@ private fun SessionListItem(
                     style = AppTheme.typography.titleMedium.copy(lineHeight = 20.sp),
                     color = AppTheme.colorScheme.onPrimary,
                 )
-                if (!session.appUrl.isNullOrEmpty()) {
+                val statusText = when (session.connectionStatus) {
+                    RemoteAppConnectionStatus.Connecting ->
+                        stringResource(id = R.string.nostr_connect_status_connecting)
+                    RemoteAppConnectionStatus.Reconnecting ->
+                        stringResource(id = R.string.nostr_connect_status_reconnecting)
+                    RemoteAppConnectionStatus.Disconnected ->
+                        stringResource(id = R.string.nostr_connect_status_disconnected)
+                    RemoteAppConnectionStatus.Connected, null -> session.appUrl
+                }
+                val statusColor = when (session.connectionStatus) {
+                    RemoteAppConnectionStatus.Disconnected -> AppTheme.colorScheme.error
+                    else -> AppTheme.extraColorScheme.onSurfaceVariantAlt3
+                }
+                if (!statusText.isNullOrEmpty()) {
                     Text(
-                        text = session.appUrl,
+                        text = statusText,
                         style = AppTheme.typography.bodySmall.copy(lineHeight = 20.sp),
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                        color = statusColor,
                     )
                 }
             }

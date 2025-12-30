@@ -10,10 +10,12 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.nips.encryption.service.factory.NipsEncryptionFactory
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.data.account.repository.manager.RemoteAppConnectionManager
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
 import net.primal.data.account.repository.repository.factory.AccountRepositoryFactory
 import net.primal.data.account.repository.service.AndroidAccountServiceFactory
 import net.primal.data.account.repository.service.LocalSignerService
+import net.primal.data.account.repository.service.factory.AccountServiceFactory
 import net.primal.data.remote.factory.PrimalApiServiceFactory
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.LocalAppRepository
@@ -76,4 +78,8 @@ object AccountRepositoriesModule {
             connectionRepository = connectionRepository,
             sessionRepository = sessionRepository,
         )
+
+    @Provides
+    fun provideRemoteAppConnectionManager(): RemoteAppConnectionManager =
+        AccountServiceFactory.getRemoteAppConnectionManager()
 }

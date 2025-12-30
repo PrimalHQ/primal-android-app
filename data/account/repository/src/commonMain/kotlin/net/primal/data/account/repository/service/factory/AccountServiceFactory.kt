@@ -25,6 +25,8 @@ object AccountServiceFactory {
 
     private val remoteAppConnectionManager = RemoteAppConnectionManager()
 
+    fun getRemoteAppConnectionManager(): RemoteAppConnectionManager = remoteAppConnectionManager
+
     private val httpClient = HttpClientFactory.createHttpClientWithDefaultConfig {
         install(HttpCache)
     }

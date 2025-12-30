@@ -1539,6 +1539,9 @@
     <string name="nostr_connect_status_success_decryption">Successful decryption</string>
     <string name="nostr_connect_status_approved">Approved</string>
     <string name="nostr_connect_status_rejected">Rejected by user</string>
+    <string name="nostr_connect_status_connecting">Connecting…</string>
+    <string name="nostr_connect_status_reconnecting">Reconnecting…</string>
+    <string name="nostr_connect_status_disconnected">Check your connection</string>
 
     <string name="permissions_bottom_sheet_unknown_app">Unknown App</string>
     <string name="permissions_bottom_sheet_app_requests">App requests:</string>
