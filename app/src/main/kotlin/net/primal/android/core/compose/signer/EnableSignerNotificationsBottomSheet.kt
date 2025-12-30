@@ -229,7 +229,7 @@ private fun SignerNotificationsControls(
             text = stringResource(id = R.string.signer_notification_keep_running_description),
             style = AppTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Normal,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 lineHeight = 20.sp,
             ),
             textAlign = TextAlign.Center,
@@ -252,7 +252,7 @@ private fun SignerNotificationsControls(
                 text = stringResource(id = R.string.signer_notification_enable_switch_label),
                 style = AppTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Normal,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 ),
             )
 
