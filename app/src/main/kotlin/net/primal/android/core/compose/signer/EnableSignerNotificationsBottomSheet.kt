@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -99,7 +100,13 @@ fun EnableSignerNotificationsBottomSheet(
     }
 
     fun launchSettings() {
-        systemSettingsLauncher.launch(context.getNotificationSettingsIntent(channelId))
+        val areAppNotificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+
+        if (areAppNotificationsEnabled) {
+            systemSettingsLauncher.launch(context.getNotificationSettingsIntent(channelId))
+        } else {
+            systemSettingsLauncher.launch(context.getNotificationSettingsIntent())
+        }
     }
 
     ModalBottomSheet(
