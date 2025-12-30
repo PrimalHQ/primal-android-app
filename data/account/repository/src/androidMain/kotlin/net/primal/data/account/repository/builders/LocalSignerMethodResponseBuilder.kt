@@ -13,7 +13,11 @@ class LocalSignerMethodResponseBuilder(
 ) {
     suspend fun build(method: LocalSignerMethod): LocalSignerMethodResponse =
         when (method) {
-            is LocalSignerMethod.DecryptZapEvent -> error("Not yet implemented.")
+            is LocalSignerMethod.DecryptZapEvent -> LocalSignerMethodResponse.Error(
+                eventId = method.eventId,
+                message = "Decrypting zap events is not yet implemented.",
+            )
+
             is LocalSignerMethod.GetPublicKey -> error(
                 "We shouldn't use this to process `get_public_key` methods as they are special sign in methods.",
             )
