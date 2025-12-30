@@ -19,7 +19,7 @@ import net.primal.android.core.compose.signer.ui.NostrConnectBottomSheetDragHand
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.signer.provider.rememberAppDisplayInfo
 import net.primal.android.theme.AppTheme
-import net.primal.data.account.signer.local.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 import net.primal.domain.nostr.cryptography.utils.assureValidNpub
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalUuidApi::class)

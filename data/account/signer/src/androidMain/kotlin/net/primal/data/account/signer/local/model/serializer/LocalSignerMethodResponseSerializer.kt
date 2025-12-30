@@ -1,4 +1,4 @@
-package net.primal.data.account.signer.local.serializer
+package net.primal.data.account.signer.local.model.serializer
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
@@ -13,8 +13,8 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.data.account.signer.local.LocalSignerMethodResponse
-import net.primal.data.account.signer.local.LocalSignerMethodType
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.model.LocalSignerMethodType
 import net.primal.domain.nostr.NostrEvent
 
 object LocalSignerMethodResponseSerializer : KSerializer<LocalSignerMethodResponse> {

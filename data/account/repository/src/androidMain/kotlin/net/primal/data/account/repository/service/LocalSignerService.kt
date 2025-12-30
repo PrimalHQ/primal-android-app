@@ -1,8 +1,8 @@
 package net.primal.data.account.repository.service
 
 import net.primal.core.utils.Result
-import net.primal.data.account.signer.local.LocalSignerMethod
-import net.primal.data.account.signer.local.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.model.LocalSignerMethod
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.SessionEventUserChoice
 

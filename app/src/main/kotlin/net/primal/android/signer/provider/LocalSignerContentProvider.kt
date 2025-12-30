@@ -13,12 +13,12 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
-import net.primal.android.signer.provider.parser.SignerContentProviderParser
-import net.primal.android.signer.provider.utils.getResultString
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.repository.service.LocalSignerError
 import net.primal.data.account.repository.service.LocalSignerService
-import net.primal.data.account.signer.local.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.parser.SignerContentProviderParser
+import net.primal.data.account.signer.local.utils.getResultString
 import timber.log.Timber
 
 class LocalSignerContentProvider : ContentProvider() {

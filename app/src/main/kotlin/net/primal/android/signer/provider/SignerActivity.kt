@@ -10,9 +10,9 @@ import net.primal.android.signer.provider.approvals.PermissionRequestsBottomShee
 import net.primal.android.signer.provider.approvals.PermissionRequestsViewModel
 import net.primal.android.signer.provider.connect.AndroidConnectScreen
 import net.primal.android.signer.provider.connect.AndroidConnectViewModel
-import net.primal.android.signer.provider.parser.SignerIntentParser
-import net.primal.android.signer.provider.utils.toIntent
-import net.primal.data.account.signer.local.LocalSignerMethod
+import net.primal.data.account.signer.local.model.LocalSignerMethod
+import net.primal.data.account.signer.local.parser.SignerIntentParser
+import net.primal.data.account.signer.local.utils.toIntent
 
 @AndroidEntryPoint
 class SignerActivity : PrimalActivity() {

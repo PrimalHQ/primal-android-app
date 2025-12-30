@@ -24,7 +24,7 @@ import net.primal.android.user.domain.CredentialType
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.data.account.repository.service.LocalSignerService
-import net.primal.data.account.signer.local.LocalSignerMethod
+import net.primal.data.account.signer.local.model.LocalSignerMethod
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp

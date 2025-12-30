@@ -12,7 +12,7 @@ import net.primal.android.core.compose.signer.SignerEventDetails
 import net.primal.android.core.compose.signer.SignerPermissionsBottomSheet
 import net.primal.android.signer.provider.approvals.PermissionRequestsContract.UiEvent
 import net.primal.android.signer.provider.rememberAppDisplayInfo
-import net.primal.data.account.signer.local.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

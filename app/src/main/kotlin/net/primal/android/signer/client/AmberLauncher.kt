@@ -9,10 +9,10 @@ import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.core.net.toUri
-import net.primal.android.signer.model.Permission
-import net.primal.android.signer.model.SignerMethod
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.data.account.signer.local.model.Permission
+import net.primal.data.account.signer.local.model.SignerMethod
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent

@@ -22,8 +22,8 @@ import net.primal.android.signer.provider.localSignerMethodOrThrow
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onSuccess
 import net.primal.data.account.repository.service.LocalSignerService
-import net.primal.data.account.signer.local.LocalSignerMethod
-import net.primal.data.account.signer.local.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.model.LocalSignerMethod
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.SessionEventUserChoice
 import net.primal.domain.account.model.UserChoice

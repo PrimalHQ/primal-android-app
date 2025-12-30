@@ -1,8 +1,8 @@
 package net.primal.data.account.repository.builders
 
 import net.primal.core.utils.fold
-import net.primal.data.account.signer.local.LocalSignerMethod
-import net.primal.data.account.signer.local.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.model.LocalSignerMethod
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.utils.getOrNull

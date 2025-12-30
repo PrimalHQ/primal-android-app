@@ -1,11 +1,11 @@
-package net.primal.android.signer.provider.parser
+package net.primal.data.account.signer.local.parser
 
 import android.net.Uri
+import kotlin.time.Clock
 import kotlin.uuid.Uuid
-import kotlinx.datetime.Clock
-import net.primal.android.signer.model.SignerMethod
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.data.account.signer.local.LocalSignerMethod
+import net.primal.data.account.signer.local.model.LocalSignerMethod
+import net.primal.data.account.signer.local.model.SignerMethod
 
 class SignerContentProviderParser {
     fun parse(

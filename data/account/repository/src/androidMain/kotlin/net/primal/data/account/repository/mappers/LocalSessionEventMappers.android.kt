@@ -6,8 +6,8 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.data.account.local.dao.apps.SignerMethodType
 import net.primal.data.account.local.dao.apps.local.LocalAppSessionEventData
-import net.primal.data.account.signer.local.LocalSignerMethod
-import net.primal.data.account.signer.local.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.model.LocalSignerMethod
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 import net.primal.data.account.signer.remote.utils.PERM_ID_DECRYPT_ZAP_EVENT
 import net.primal.data.account.signer.remote.utils.PERM_ID_GET_PUBLIC_KEY
 import net.primal.data.account.signer.remote.utils.PERM_ID_NIP04_DECRYPT

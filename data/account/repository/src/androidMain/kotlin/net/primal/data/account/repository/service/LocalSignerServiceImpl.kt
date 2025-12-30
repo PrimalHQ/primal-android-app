@@ -19,8 +19,8 @@ import net.primal.data.account.repository.repository.InternalLocalSessionEventRe
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.internal.InternalSessionRepository
 import net.primal.data.account.repository.repository.internal.model.UpdateAppSessionEventRequest
-import net.primal.data.account.signer.local.LocalSignerMethod
-import net.primal.data.account.signer.local.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.model.LocalSignerMethod
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.AppPermissionAction
 import net.primal.domain.account.model.LocalApp

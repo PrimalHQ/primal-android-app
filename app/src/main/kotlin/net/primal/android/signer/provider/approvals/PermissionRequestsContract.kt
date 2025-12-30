@@ -1,6 +1,6 @@
 package net.primal.android.signer.provider.approvals
 
-import net.primal.data.account.signer.local.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent

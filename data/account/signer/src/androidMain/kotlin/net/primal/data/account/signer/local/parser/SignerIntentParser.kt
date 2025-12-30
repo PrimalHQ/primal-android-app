@@ -1,12 +1,12 @@
-package net.primal.android.signer.provider.parser
+package net.primal.data.account.signer.local.parser
 
 import android.content.Intent
+import kotlin.time.Clock
 import kotlin.uuid.Uuid
-import kotlinx.datetime.Clock
-import net.primal.android.signer.model.Permission
-import net.primal.android.signer.model.SignerMethod
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.data.account.signer.local.LocalSignerMethod
+import net.primal.data.account.signer.local.model.LocalSignerMethod
+import net.primal.data.account.signer.local.model.Permission
+import net.primal.data.account.signer.local.model.SignerMethod
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.AppPermissionAction
 import net.primal.domain.nostr.NostrEvent

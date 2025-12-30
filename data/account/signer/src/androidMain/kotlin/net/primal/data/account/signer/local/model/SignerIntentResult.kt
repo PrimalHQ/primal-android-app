@@ -1,4 +1,4 @@
-package net.primal.android.signer.provider.model
+package net.primal.data.account.signer.local.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

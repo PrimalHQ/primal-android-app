@@ -9,8 +9,8 @@ import net.primal.data.account.local.dao.apps.SignerMethodType
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.buildSessionEventData
 import net.primal.data.account.repository.repository.internal.model.UpdateAppSessionEventRequest
-import net.primal.data.account.signer.local.LocalSignerMethod
-import net.primal.data.account.signer.local.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.model.LocalSignerMethod
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
 

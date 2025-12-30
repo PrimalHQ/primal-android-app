@@ -1,10 +1,10 @@
-package net.primal.android.signer.provider.utils
+package net.primal.data.account.signer.local.utils
 
 import android.content.Intent
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.account.signer.local.LocalSignerMethodResponse
+import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 
 fun LocalSignerMethodResponse.toIntent() =
     Intent().apply {

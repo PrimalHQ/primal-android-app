@@ -1,7 +1,7 @@
-package net.primal.data.account.signer.local
+package net.primal.data.account.signer.local.model
 
 import kotlinx.serialization.Serializable
-import net.primal.data.account.signer.local.serializer.LocalSignerMethodSerializer
+import net.primal.data.account.signer.local.model.serializer.LocalSignerMethodSerializer
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.nostr.NostrEvent
