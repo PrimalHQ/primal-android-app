@@ -100,10 +100,14 @@ class PermissionRequestsViewModel @Inject constructor(
             sessionEventRepository.observeEventsPendingUserActionForLocalApp(
                 appIdentifier = initialMethod.getIdentifier(),
             ).collect { events ->
+                val previousQueueNotEmpty = state.value.requestQueue.isNotEmpty()
                 setState { copy(requestQueue = events) }
-
-                if (events.isEmpty() && state.value.requestQueue.isNotEmpty()) {
+                if (events.isEmpty() && previousQueueNotEmpty) {
                     sendResponses()
+                    Timber.tag("LocalSignerForeground").d(
+                        "There are no new pending events, but the state has events in requestQueue.\n" +
+                            "Sending responses immediately.",
+                    )
                 }
             }
         }

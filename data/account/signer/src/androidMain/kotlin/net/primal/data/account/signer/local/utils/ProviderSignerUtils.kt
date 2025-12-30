@@ -49,10 +49,11 @@ private fun List<LocalSignerMethodResponse>.asSignerResults(packageName: String)
 
 @SerialName("Result")
 @Serializable
-private sealed class SignerResult(
-) {
+private sealed class SignerResult() {
     abstract val id: String
-    @SerialName("package") abstract val packageName: String
+
+    @SerialName("package")
+    abstract val packageName: String
 
     @Serializable
     data class Success(
