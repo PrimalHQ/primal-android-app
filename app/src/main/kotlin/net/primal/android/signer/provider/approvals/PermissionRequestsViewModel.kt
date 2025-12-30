@@ -101,6 +101,10 @@ class PermissionRequestsViewModel @Inject constructor(
                 appIdentifier = initialMethod.getIdentifier(),
             ).collect { events ->
                 setState { copy(requestQueue = events) }
+
+                if (events.isEmpty() && state.value.requestQueue.isNotEmpty()) {
+                    sendResponses()
+                }
             }
         }
     }
@@ -164,13 +168,18 @@ class PermissionRequestsViewModel @Inject constructor(
             }
 
             localSignerService.respondToUserActions(eventChoices = selectedChoices + unselectedChoices)
-            val responses = localSignerService.getAllMethodResponses()
-
-            setEffect(
-                SideEffect.RequestsCompleted(
-                    approved = responses.filterIsInstance<LocalSignerMethodResponse.Success>(),
-                    rejected = responses.filterIsInstance<LocalSignerMethodResponse.Error>(),
-                ),
-            )
+            sendResponses()
+            setState { copy(responding = false) }
         }
+
+    private fun sendResponses() {
+        val responses = localSignerService.getAllMethodResponses()
+
+        setEffect(
+            SideEffect.RequestsCompleted(
+                approved = responses.filterIsInstance<LocalSignerMethodResponse.Success>(),
+                rejected = responses.filterIsInstance<LocalSignerMethodResponse.Error>(),
+            ),
+        )
+    }
 }
