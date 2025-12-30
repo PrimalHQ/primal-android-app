@@ -1,4 +1,4 @@
-package net.primal.data.account.signer.remote.signer.model
+package net.primal.data.account.signer.remote.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

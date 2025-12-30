@@ -12,8 +12,8 @@ import net.primal.data.account.local.dao.apps.SignerMethodType
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.buildSessionEventData
 import net.primal.data.account.repository.repository.internal.model.UpdateAppSessionEventRequest
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethod
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodResponse
+import net.primal.data.account.signer.remote.model.RemoteSignerMethod
+import net.primal.data.account.signer.remote.model.RemoteSignerMethodResponse
 import net.primal.domain.nostr.NostrEvent
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable

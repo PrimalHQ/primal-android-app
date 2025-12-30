@@ -19,11 +19,11 @@ import net.primal.core.utils.put
 import net.primal.core.utils.remove
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
 import net.primal.data.account.repository.manager.model.RelayEvent
-import net.primal.data.account.signer.remote.signer.client.RemoteSignerClient
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethod
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodException
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodResponse
-import net.primal.data.account.signer.remote.signer.parser.RemoteSignerMethodParser
+import net.primal.data.account.signer.remote.client.RemoteSignerClient
+import net.primal.data.account.signer.remote.model.RemoteSignerMethod
+import net.primal.data.account.signer.remote.model.RemoteSignerMethodException
+import net.primal.data.account.signer.remote.model.RemoteSignerMethodResponse
+import net.primal.data.account.signer.remote.parser.RemoteSignerMethodParser
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent

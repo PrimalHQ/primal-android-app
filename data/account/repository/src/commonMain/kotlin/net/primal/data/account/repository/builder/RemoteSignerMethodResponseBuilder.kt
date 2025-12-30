@@ -3,9 +3,9 @@ package net.primal.data.account.repository.builder
 import net.primal.core.utils.fold
 import net.primal.core.utils.mapCatching
 import net.primal.core.utils.serialization.CommonJsonEncodeDefaults
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethod
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodResponse
-import net.primal.data.account.signer.remote.signer.model.withPubKey
+import net.primal.data.account.signer.remote.model.RemoteSignerMethod
+import net.primal.data.account.signer.remote.model.RemoteSignerMethodResponse
+import net.primal.data.account.signer.remote.model.withPubKey
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.nostr.cryptography.NostrEncryptionHandler
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler

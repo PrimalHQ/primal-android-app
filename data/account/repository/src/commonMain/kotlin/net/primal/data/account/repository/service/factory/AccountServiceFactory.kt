@@ -13,7 +13,7 @@ import net.primal.data.account.repository.repository.internal.InternalRemoteSess
 import net.primal.data.account.repository.service.RemoteSignerServiceImpl
 import net.primal.data.account.signer.remote.api.WellKnownApi
 import net.primal.data.account.signer.remote.api.createWellKnownApi
-import net.primal.data.account.signer.remote.signer.parser.RemoteSignerMethodParser
+import net.primal.data.account.signer.remote.parser.RemoteSignerMethodParser
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.SessionRepository
 import net.primal.domain.account.service.RemoteSignerService

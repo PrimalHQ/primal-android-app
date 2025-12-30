@@ -1,4 +1,4 @@
-package net.primal.data.account.signer.remote.signer.client
+package net.primal.data.account.signer.remote.client
 
 import io.github.aakira.napier.Napier
 import kotlin.uuid.ExperimentalUuidApi
@@ -24,10 +24,10 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.fold
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.runCatching
-import net.primal.data.account.signer.remote.signer.mappers.mapAsRemoteSignerMethodException
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethod
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodException
-import net.primal.data.account.signer.remote.signer.parser.RemoteSignerMethodParser
+import net.primal.data.account.signer.remote.mappers.mapAsRemoteSignerMethodException
+import net.primal.data.account.signer.remote.model.RemoteSignerMethod
+import net.primal.data.account.signer.remote.model.RemoteSignerMethodException
+import net.primal.data.account.signer.remote.parser.RemoteSignerMethodParser
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.NostrKeyPair

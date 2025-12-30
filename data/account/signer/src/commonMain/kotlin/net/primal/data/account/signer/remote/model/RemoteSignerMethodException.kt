@@ -1,4 +1,4 @@
-package net.primal.data.account.signer.remote.signer.model
+package net.primal.data.account.signer.remote.model
 
 import net.primal.domain.nostr.NostrEvent
 

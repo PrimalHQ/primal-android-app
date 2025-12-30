@@ -11,7 +11,7 @@ import net.primal.data.account.local.dao.apps.AppRequestState
 import net.primal.data.account.local.dao.apps.SignerMethodType
 import net.primal.data.account.repository.repository.internal.InternalPermissionsRepository
 import net.primal.data.account.repository.repository.internal.InternalRemoteSessionEventRepository
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodResponse
+import net.primal.data.account.signer.remote.model.RemoteSignerMethodResponse
 import net.primal.domain.account.model.AppPermission
 import net.primal.domain.account.model.AppPermissionAction
 import net.primal.domain.account.model.RemoteAppConnection

@@ -16,8 +16,8 @@ import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.asPO
 import net.primal.data.account.signer.remote.api.WellKnownApi
-import net.primal.data.account.signer.remote.signer.utils.PERM_ID_CONNECT
-import net.primal.data.account.signer.remote.signer.utils.PERM_ID_PING
+import net.primal.data.account.signer.remote.utils.PERM_ID_CONNECT
+import net.primal.data.account.signer.remote.utils.PERM_ID_PING
 import net.primal.domain.account.model.RemoteAppConnection
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.account.repository.ConnectionRepository

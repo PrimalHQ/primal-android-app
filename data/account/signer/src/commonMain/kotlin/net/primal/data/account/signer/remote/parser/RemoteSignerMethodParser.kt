@@ -1,4 +1,4 @@
-package net.primal.data.account.signer.remote.signer.parser
+package net.primal.data.account.signer.remote.parser
 
 import io.github.aakira.napier.Napier
 import net.primal.core.nips.encryption.service.NostrEncryptionService
@@ -6,12 +6,12 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.recover
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.data.account.signer.remote.signer.model.NostrUnsignedEventNoPubkey
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethod
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodDecryptException
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodParseException
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodRequest
-import net.primal.data.account.signer.remote.signer.model.RemoteSignerMethodType
+import net.primal.data.account.signer.remote.model.NostrUnsignedEventNoPubkey
+import net.primal.data.account.signer.remote.model.RemoteSignerMethod
+import net.primal.data.account.signer.remote.model.RemoteSignerMethodDecryptException
+import net.primal.data.account.signer.remote.model.RemoteSignerMethodParseException
+import net.primal.data.account.signer.remote.model.RemoteSignerMethodRequest
+import net.primal.data.account.signer.remote.model.RemoteSignerMethodType
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 
