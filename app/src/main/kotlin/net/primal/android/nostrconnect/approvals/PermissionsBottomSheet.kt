@@ -1,6 +1,7 @@
 package net.primal.android.nostrconnect.approvals
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -14,7 +15,10 @@ import net.primal.android.nostrconnect.approvals.PermissionsContract.UiEvent
 @Composable
 fun PermissionsBottomSheet(viewModel: PermissionsViewModel, content: @Composable () -> Unit) {
     val state by viewModel.state.collectAsState()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { it != SheetValue.Hidden },
+    )
 
     if (state.bottomSheetVisibility) {
         val eventDetails = remember(
