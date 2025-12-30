@@ -16,7 +16,7 @@ interface LocalAppSessionEventDataDao {
         """
         SELECT * FROM LocalAppSessionEventData
         WHERE sessionId = :sessionId AND (requestState = 'Approved' OR requestState = 'Rejected')
-        ORDER BY completedAt DESC
+        ORDER BY requestedAt DESC
         """,
     )
     fun observeCompletedEventsBySessionId(sessionId: String): Flow<List<LocalAppSessionEventData>>
