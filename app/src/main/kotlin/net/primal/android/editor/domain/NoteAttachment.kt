@@ -17,9 +17,14 @@ data class NoteAttachment(
     val originalSizeInBytes: Int? = null,
     val uploadedSizeInBytes: Int? = null,
     val dimensionInPixels: String? = null,
+    val durationInSeconds: Double? = null,
+    val bitrateInBitsPerSec: Long? = null,
     val uploadError: Throwable? = null,
 ) {
     val isImageAttachment: Boolean get() = mimeType?.startsWith("image") == true
+    val isVideoAttachment: Boolean get() = mimeType?.startsWith("video") == true
+    val isAudioAttachment: Boolean get() = mimeType?.startsWith("audio") == true
+    val isMediaAttachment: Boolean get() = isImageAttachment || isVideoAttachment || isAudioAttachment
 }
 
 fun NoteAttachment.asIMetaTag(): JsonArray {
@@ -32,5 +37,7 @@ fun NoteAttachment.asIMetaTag(): JsonArray {
         this@asIMetaTag.originalHash?.let { add("ox $it") }
         this@asIMetaTag.uploadedSizeInBytes?.let { add("size $it") }
         this@asIMetaTag.dimensionInPixels?.let { add("dim $it") }
+        this@asIMetaTag.durationInSeconds?.let { add("duration $it") }
+        this@asIMetaTag.bitrateInBitsPerSec?.let { add("bitrate $it") }
     }
 }

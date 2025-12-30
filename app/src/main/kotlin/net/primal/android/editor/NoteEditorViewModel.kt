@@ -660,11 +660,13 @@ class NoteEditorViewModel @AssistedInject constructor(
                     )
                     updateNoteAttachmentState(attachment = updatedAttachment)
 
-                    val (mimeType, dimensions) = fileAnalyser.extractImageTypeAndDimensions(attachment.localUri)
-                    if (mimeType != null || dimensions != null) {
+                    val mediaInfo = fileAnalyser.extractMediaInfo(attachment.localUri)
+                    if (mediaInfo.hasAnyData) {
                         updatedAttachment = updatedAttachment.copy(
-                            mimeType = mimeType,
-                            dimensionInPixels = dimensions,
+                            mimeType = mediaInfo.mimeType ?: updatedAttachment.mimeType,
+                            dimensionInPixels = mediaInfo.dimensionInPixels ?: updatedAttachment.dimensionInPixels,
+                            durationInSeconds = mediaInfo.durationInSeconds,
+                            bitrateInBitsPerSec = mediaInfo.bitrateInBitsPerSec,
                         )
                         updateNoteAttachmentState(updatedAttachment)
                     }
