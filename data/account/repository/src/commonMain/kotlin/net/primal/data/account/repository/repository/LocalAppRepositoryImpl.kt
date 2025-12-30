@@ -10,6 +10,7 @@ import net.primal.data.account.local.dao.apps.TrustLevel
 import net.primal.data.account.local.db.AccountDatabase
 import net.primal.data.account.repository.mappers.asDomain
 import net.primal.data.account.repository.mappers.asPO
+import net.primal.data.account.signer.remote.utils.PERM_ID_DECRYPT_ZAP_EVENT
 import net.primal.domain.account.model.AppPermissionAction as PermissionActionDO
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.TrustLevel as TrustLevelDO
@@ -32,6 +33,10 @@ class LocalAppRepositoryImpl(
 
     override suspend fun getPermissionActionForMethod(appIdentifier: String, permissionId: String): PermissionActionDO =
         withContext(dispatchers.io()) {
+            if (permissionId == PERM_ID_DECRYPT_ZAP_EVENT) {
+                return@withContext PermissionActionDO.Deny
+            }
+
             val app = database.localApps().findApp(identifier = appIdentifier)
                 ?: return@withContext PermissionActionDO.Deny
 
