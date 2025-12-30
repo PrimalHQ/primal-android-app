@@ -1,4 +1,4 @@
-package net.primal.android.nostrconnect.list
+package net.primal.android.nostrconnect.active
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
@@ -46,7 +46,7 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.selectableItem
-import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiState
+import net.primal.android.nostrconnect.active.ActiveSessionsContract.UiState
 import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.theme.AppTheme
 

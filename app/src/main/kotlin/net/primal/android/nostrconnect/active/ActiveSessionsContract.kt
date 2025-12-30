@@ -1,4 +1,4 @@
-package net.primal.android.nostrconnect.list
+package net.primal.android.nostrconnect.active
 
 import net.primal.android.core.errors.UiError
 import net.primal.android.nostrconnect.model.ActiveSessionUi

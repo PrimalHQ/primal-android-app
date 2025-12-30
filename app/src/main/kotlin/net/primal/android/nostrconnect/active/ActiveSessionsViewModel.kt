@@ -1,4 +1,4 @@
-package net.primal.android.nostrconnect.list
+package net.primal.android.nostrconnect.active
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,10 +12,10 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
+import net.primal.android.nostrconnect.active.ActiveSessionsContract.SideEffect
+import net.primal.android.nostrconnect.active.ActiveSessionsContract.UiEvent
+import net.primal.android.nostrconnect.active.ActiveSessionsContract.UiState
 import net.primal.android.nostrconnect.handler.RemoteSignerSessionHandler
-import net.primal.android.nostrconnect.list.ActiveSessionsContract.SideEffect
-import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiEvent
-import net.primal.android.nostrconnect.list.ActiveSessionsContract.UiState
 import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.nostrconnect.model.asUi
 import net.primal.android.user.accounts.UserAccountsStore
