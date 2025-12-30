@@ -655,6 +655,8 @@ class NoteEditorViewModel @AssistedInject constructor(
                         remoteUrl = uploadResult.remoteUrl,
                         originalHash = uploadResult.originalHash,
                         originalSizeInBytes = uploadResult.originalFileSize.toInt(),
+                        mimeType = uploadResult.nip94?.m,
+                        dimensionInPixels = uploadResult.nip94?.dim,
                     )
                     updateNoteAttachmentState(attachment = updatedAttachment)
 
