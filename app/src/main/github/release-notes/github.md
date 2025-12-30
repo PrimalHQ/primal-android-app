@@ -1,6 +1,6 @@
 ## Features
-- Remote Signer (NIP 46)
-- Android Signer (NIP 55)
+- Remote Signer (NIP-46)
+- Android Signer (NIP-55)
 
 ## Fixes
 - Improved notifications auto-scroll behaviour (#766)
@@ -13,3 +13,4 @@
 - Fixed self-mentions in bio not rendering correctly (#797)
 - Added fallback stream title for stream pills
 - Added Repost Again option to repost bottom sheet (#793)
+- Add video/audio metadata extraction for uploaded files
