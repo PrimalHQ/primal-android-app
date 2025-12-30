@@ -65,6 +65,7 @@ internal class RemoteSignerServiceImpl internal constructor(
         observeMethods()
         observeErrors()
         observeRetryMethodResponseQueue()
+        observeReconnectionRequests()
         if (sessionInactivityTimeoutInMinutes > 0) {
             startInactivityLoop()
         }
@@ -225,6 +226,25 @@ internal class RemoteSignerServiceImpl internal constructor(
                         sendResponse(it)
                     }
                 }
+        }
+
+    private fun observeReconnectionRequests() =
+        scope.launch {
+            remoteAppConnectionManager.reconnectionRequests.collect { sessionIds ->
+                Napier.d(tag = "Signer") { "Reconnection requested for sessions: $sessionIds" }
+                val relaysToReconnect = sessionIds
+                    .flatMap { sessionId ->
+                        relaySessionMap.load()
+                            .filterValues { it.contains(sessionId) }
+                            .keys
+                    }
+                    .toSet()
+
+                if (relaysToReconnect.isNotEmpty()) {
+                    Napier.d(tag = "Signer") { "Reconnecting to relays: $relaysToReconnect" }
+                    nostrRelayManager.reconnectToRelays(relays = relaysToReconnect)
+                }
+            }
         }
 
     private fun processMethod(method: RemoteSignerMethod) =

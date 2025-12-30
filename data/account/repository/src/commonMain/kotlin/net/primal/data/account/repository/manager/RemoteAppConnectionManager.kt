@@ -4,8 +4,11 @@ import kotlin.time.Clock
 import kotlinx.atomicfu.atomic
 import kotlinx.atomicfu.update
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -17,6 +20,9 @@ import net.primal.domain.account.model.RemoteAppConnectionStatus
 class RemoteAppConnectionManager {
     private val _sessionStates = MutableStateFlow<Map<String, RemoteAppConnectionState>>(emptyMap())
     val sessionStates: StateFlow<Map<String, RemoteAppConnectionState>> = _sessionStates.asStateFlow()
+
+    private val _reconnectionRequests = MutableSharedFlow<List<String>>(extraBufferCapacity = 16)
+    val reconnectionRequests: SharedFlow<List<String>> = _reconnectionRequests.asSharedFlow()
 
     /**
      * Relay states are tracked per session because each session may have a different set of required relays.
@@ -41,6 +47,18 @@ class RemoteAppConnectionManager {
                 val sessionRelays = getOrPut(sessionId) { mutableMapOf() }
                 sessionRelays[relayUrl] = state
             }
+        }
+    }
+
+    fun requestReconnection(sessionIds: List<String>) {
+        sessionIds.forEach { sessionId -> markSessionReconnecting(sessionId) }
+        _reconnectionRequests.tryEmit(sessionIds)
+    }
+
+    private fun markSessionReconnecting(sessionId: String) {
+        _sessionStates.update { current ->
+            val existing = current[sessionId] ?: return@update current
+            current + (sessionId to existing.copy(status = RemoteAppConnectionStatus.Reconnecting))
         }
     }
 

@@ -8,6 +8,7 @@ interface ActiveSessionsContract {
         val sessions: List<ActiveSessionUi> = emptyList(),
         val selectedSessions: Set<String> = emptySet(),
         val disconnecting: Boolean = false,
+        val reconnecting: Boolean = false,
         val error: UiError? = null,
     ) {
         val allSessionsSelected: Boolean get() = sessions.isNotEmpty() && selectedSessions.size == sessions.size
@@ -17,6 +18,7 @@ interface ActiveSessionsContract {
         data class SessionClick(val sessionId: String) : UiEvent()
         data object SelectAllClick : UiEvent()
         data object DisconnectClick : UiEvent()
+        data object ReconnectClick : UiEvent()
         data object DismissError : UiEvent()
     }
 

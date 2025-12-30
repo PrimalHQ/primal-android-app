@@ -49,7 +49,10 @@ import net.primal.android.core.ext.selectableItem
 import net.primal.android.nostrconnect.active.ActiveSessionsContract.UiState
 import net.primal.android.nostrconnect.model.ActiveSessionUi
 import net.primal.android.theme.AppTheme
-import net.primal.domain.account.model.RemoteAppConnectionStatus
+import net.primal.domain.account.model.RemoteAppConnectionStatus.Connected
+import net.primal.domain.account.model.RemoteAppConnectionStatus.Connecting
+import net.primal.domain.account.model.RemoteAppConnectionStatus.Disconnected
+import net.primal.domain.account.model.RemoteAppConnectionStatus.Reconnecting
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -118,6 +121,7 @@ private fun ActiveSessionsContent(
 ) {
     val activeSessions = state.sessions.size
     val hasActiveSessions = activeSessions > 0
+    val hasSelectedSessionsForReconnect = state.hasSelectedSessionsForReconnect()
 
     Scaffold(
         modifier = Modifier
@@ -181,18 +185,22 @@ private fun ActiveSessionsContent(
             ActionButtons(
                 disconnecting = state.disconnecting,
                 disconnectEnabled = state.selectedSessions.isNotEmpty(),
+                showReconnect = hasSelectedSessionsForReconnect,
                 onDisconnectClick = { eventPublisher(ActiveSessionsContract.UiEvent.DisconnectClick) },
+                onReconnectClick = { eventPublisher(ActiveSessionsContract.UiEvent.ReconnectClick) },
                 onSettingsClick = onSettingsClick,
             )
         },
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-            )
-        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         containerColor = Color.Transparent,
     )
 }
+
+@Composable
+private fun UiState.hasSelectedSessionsForReconnect(): Boolean =
+    this.sessions
+        .filter { this.selectedSessions.contains(it.sessionId) }
+        .any { it.connectionStatus == Disconnected || it.connectionStatus == Reconnecting }
 
 @Composable
 private fun HeaderSection(
@@ -267,16 +275,19 @@ private fun SessionListItem(
                     color = AppTheme.colorScheme.onPrimary,
                 )
                 val statusText = when (session.connectionStatus) {
-                    RemoteAppConnectionStatus.Connecting ->
+                    Connecting ->
                         stringResource(id = R.string.nostr_connect_status_connecting)
-                    RemoteAppConnectionStatus.Reconnecting ->
+
+                    Reconnecting ->
                         stringResource(id = R.string.nostr_connect_status_reconnecting)
-                    RemoteAppConnectionStatus.Disconnected ->
+
+                    Disconnected ->
                         stringResource(id = R.string.nostr_connect_status_disconnected)
-                    RemoteAppConnectionStatus.Connected, null -> session.appUrl
+
+                    Connected, null -> session.appUrl
                 }
                 val statusColor = when (session.connectionStatus) {
-                    RemoteAppConnectionStatus.Disconnected -> AppTheme.colorScheme.error
+                    Disconnected -> AppTheme.colorScheme.error
                     else -> AppTheme.extraColorScheme.onSurfaceVariantAlt3
                 }
                 if (!statusText.isNullOrEmpty()) {
@@ -303,7 +314,9 @@ private fun SessionListItem(
 private fun ActionButtons(
     disconnecting: Boolean,
     disconnectEnabled: Boolean,
+    showReconnect: Boolean,
     onDisconnectClick: () -> Unit,
+    onReconnectClick: () -> Unit,
     onSettingsClick: () -> Unit,
 ) {
     Row(
@@ -323,16 +336,29 @@ private fun ActionButtons(
             Text(text = stringResource(id = R.string.nostr_connect_settings_button))
         }
 
-        PrimalLoadingButton(
-            modifier = Modifier
-                .weight(weight = 1f)
-                .height(45.dp),
-            loading = disconnecting,
-            enabled = disconnectEnabled,
-            text = stringResource(id = R.string.nostr_connect_disconnect_button),
-            onClick = onDisconnectClick,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-        )
+        if (showReconnect) {
+            PrimalFilledButton(
+                modifier = Modifier
+                    .weight(weight = 1f)
+                    .height(45.dp),
+                enabled = disconnectEnabled,
+                textStyle = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, lineHeight = 20.sp),
+                onClick = onReconnectClick,
+            ) {
+                Text(text = stringResource(id = R.string.nostr_connect_reconnect_button))
+            }
+        } else {
+            PrimalLoadingButton(
+                modifier = Modifier
+                    .weight(weight = 1f)
+                    .height(45.dp),
+                loading = disconnecting,
+                enabled = disconnectEnabled,
+                text = stringResource(id = R.string.nostr_connect_disconnect_button),
+                onClick = onDisconnectClick,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
     }
 }

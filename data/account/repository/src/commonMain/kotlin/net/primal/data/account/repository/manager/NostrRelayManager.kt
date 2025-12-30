@@ -64,6 +64,13 @@ internal class NostrRelayManager(
         (relays - currentKeys).forEach { connectToRelay(relay = it) }
     }
 
+    suspend fun reconnectToRelays(relays: Set<String>) {
+        Napier.d(tag = "Signer") { "Reconnecting to relays: $relays" }
+        val currentKeys = clients.load().keys
+        val disconnectedRelays = relays - currentKeys
+        disconnectedRelays.forEach { connectToRelay(relay = it) }
+    }
+
     private suspend fun connectToRelay(relay: String) {
         val client = RemoteSignerClient(
             relayUrl = relay,

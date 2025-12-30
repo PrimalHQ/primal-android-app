@@ -93,6 +93,7 @@ class ActiveSessionsViewModel @Inject constructor(
                     is UiEvent.SessionClick -> handleSessionClick(it.sessionId)
                     is UiEvent.SelectAllClick -> handleSelectAllClick()
                     is UiEvent.DisconnectClick -> handleDisconnectClick()
+                    is UiEvent.ReconnectClick -> handleReconnectClick()
                     is UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
@@ -130,6 +131,10 @@ class ActiveSessionsViewModel @Inject constructor(
 
             setState { copy(disconnecting = false) }
         }
+    }
+
+    private fun handleReconnectClick() {
+        remoteAppConnectionManager.requestReconnection(sessionIds = state.value.selectedSessions.toList())
     }
 
     private fun resolveSelectedSessions(
