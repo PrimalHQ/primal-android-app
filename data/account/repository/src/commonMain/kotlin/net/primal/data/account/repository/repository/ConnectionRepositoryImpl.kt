@@ -140,22 +140,24 @@ class ConnectionRepositoryImpl(
     override suspend fun updateTrustLevel(clientPubKey: String, trustLevel: TrustLevel) =
         withContext(dispatchers.io()) {
             runCatching {
+                val newPermissions = if (trustLevel == TrustLevel.Medium) {
+                    wellKnownApi.getMediumTrustPermissions().allowPermissions.map {
+                        AppPermissionData(
+                            permissionId = it,
+                            appIdentifier = clientPubKey,
+                            action = PermissionAction.Approve,
+                        )
+                    }
+                } else {
+                    emptyList()
+                }
+
                 database.withTransaction {
                     if (trustLevel == TrustLevel.Medium) {
                         val existingPermissions = database.appPermissions()
                             .findPermissionsByAppIdentifier(appIdentifier = clientPubKey)
 
                         if (existingPermissions.isEmpty()) {
-                            val newPermissions = wellKnownApi
-                                .getMediumTrustPermissions().allowPermissions
-                                .map {
-                                    AppPermissionData(
-                                        permissionId = it,
-                                        appIdentifier = clientPubKey,
-                                        action = PermissionAction.Approve,
-                                    )
-                                }
-
                             database.appPermissions().upsertAll(data = newPermissions)
                         }
                     }
