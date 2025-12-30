@@ -323,42 +323,44 @@ private fun ActionButtons(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        PrimalFilledButton(
-            modifier = Modifier
-                .weight(weight = 1f)
-                .height(45.dp),
-            containerColor = Color.Transparent,
-            contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
-            border = BorderStroke(width = 1.dp, color = AppTheme.colorScheme.outline),
-            textStyle = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, lineHeight = 20.sp),
-            onClick = onSettingsClick,
-        ) {
-            Text(text = stringResource(id = R.string.nostr_connect_settings_button))
-        }
-
         if (showReconnect) {
             PrimalFilledButton(
                 modifier = Modifier
                     .weight(weight = 1f)
                     .height(45.dp),
-                enabled = disconnectEnabled,
+                containerColor = Color.Transparent,
+                contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                border = BorderStroke(width = 1.dp, color = AppTheme.colorScheme.outline),
                 textStyle = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, lineHeight = 20.sp),
                 onClick = onReconnectClick,
             ) {
                 Text(text = stringResource(id = R.string.nostr_connect_reconnect_button))
             }
         } else {
-            PrimalLoadingButton(
+            PrimalFilledButton(
                 modifier = Modifier
                     .weight(weight = 1f)
                     .height(45.dp),
-                loading = disconnecting,
-                enabled = disconnectEnabled,
-                text = stringResource(id = R.string.nostr_connect_disconnect_button),
-                onClick = onDisconnectClick,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.SemiBold,
-            )
+                containerColor = Color.Transparent,
+                contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                border = BorderStroke(width = 1.dp, color = AppTheme.colorScheme.outline),
+                textStyle = AppTheme.typography.titleMedium.copy(fontWeight = FontWeight.SemiBold, lineHeight = 20.sp),
+                onClick = onSettingsClick,
+            ) {
+                Text(text = stringResource(id = R.string.nostr_connect_settings_button))
+            }
         }
+
+        PrimalLoadingButton(
+            modifier = Modifier
+                .weight(weight = 1f)
+                .height(45.dp),
+            loading = disconnecting,
+            enabled = disconnectEnabled,
+            text = stringResource(id = R.string.nostr_connect_disconnect_button),
+            onClick = onDisconnectClick,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.SemiBold,
+        )
     }
 }
