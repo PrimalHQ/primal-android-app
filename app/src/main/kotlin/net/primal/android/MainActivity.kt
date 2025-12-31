@@ -74,7 +74,9 @@ class MainActivity : PrimalActivity() {
 
             LaunchedEffect(navController) {
                 deepLinkIntents.collect { intent ->
-                    navController.handleDeepLink(intent)
+                    if (intent.data?.host != "live") {
+                        navController.handleDeepLink(intent)
+                    }
                 }
             }
 
