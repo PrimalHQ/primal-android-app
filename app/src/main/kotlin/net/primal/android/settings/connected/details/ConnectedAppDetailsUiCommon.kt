@@ -206,7 +206,7 @@ private fun RecentSessionItem(
         leadingContent = {
             if (packageName != null) {
                 val appDisplayInfo = rememberAppDisplayInfo(packageName = packageName)
-                if (appDisplayInfo.icon != null) {
+                if (appDisplayInfo?.icon != null) {
                     Image(
                         modifier = Modifier
                             .size(24.dp)

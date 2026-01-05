@@ -36,7 +36,7 @@ fun PermissionRequestsBottomSheet(
         }
     }
 
-    val appDisplayInfo = rememberAppDisplayInfo(uiState.callingPackage)
+    val appDisplayInfo = rememberAppDisplayInfo(packageName = uiState.callingPackage)
 
     val eventDetails = remember(
         uiState.eventDetailsSessionEvent,
@@ -55,8 +55,8 @@ fun PermissionRequestsBottomSheet(
     SignerPermissionsBottomSheet(
         sheetState = sheetState,
         events = uiState.requestQueue,
-        appName = appDisplayInfo.name,
-        appIcon = appDisplayInfo.icon,
+        appName = appDisplayInfo?.name ?: uiState.appName ?: uiState.callingPackage,
+        appIcon = appDisplayInfo?.icon,
         permissionsMap = uiState.permissionsMap,
         eventDetails = eventDetails,
         responding = uiState.responding,

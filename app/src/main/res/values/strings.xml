@@ -1567,4 +1567,6 @@
     <string name="signer_notification_enable_button">Let’s Go</string>
     <string name="signer_notification_session_active_prefix">Session active with</string>
     <string name="signer_notification_keep_running_description">To keep running reliably while Primal is in the background or when your phone is locked, you need to enable remote signer notifications.</string>
+
+    <string name="local_app_unknown_app">Unknown App</string>
 </resources>

@@ -14,7 +14,7 @@ interface AndroidConnectContract {
     )
 
     sealed class UiEvent {
-        data class ConnectUser(val userId: String, val trustLevel: TrustLevel) : UiEvent()
+        data class ConnectUser(val userId: String, val trustLevel: TrustLevel, val appName: String?) : UiEvent()
         data object DismissError : UiEvent()
     }
 

@@ -147,7 +147,7 @@ fun LocalAppDetailsScreen(
 fun LocalAppDetailsContent(
     modifier: Modifier = Modifier,
     state: LocalAppDetailsContract.UiState,
-    appDisplayInfo: AppDisplayInfo,
+    appDisplayInfo: AppDisplayInfo?,
     eventPublisher: (LocalAppDetailsContract.UiEvent) -> Unit,
     onSessionClick: (sessionId: String) -> Unit,
     onPermissionDetailsClick: () -> Unit,
@@ -181,6 +181,8 @@ fun LocalAppDetailsContent(
             LocalAppHeaderSection(
                 modifier = Modifier.padding(vertical = 16.dp),
                 appDisplayInfo = appDisplayInfo,
+                fallbackName = state.appName ?: state.appPackageName
+                    ?: stringResource(id = R.string.local_app_unknown_app),
                 lastSession = state.lastSessionStartedAt,
                 onDeleteConnectionClick = { confirmDeletionDialogVisibility = true },
             )
@@ -205,7 +207,7 @@ fun LocalAppDetailsContent(
         connectedAppRecentSessionsSection(
             recentSessions = state.recentSessions,
             appIconUrl = null,
-            appName = appDisplayInfo.name,
+            appName = appDisplayInfo?.name ?: state.appName ?: state.appPackageName,
             appPackageName = state.appPackageName,
             onSessionClick = onSessionClick,
         )
@@ -215,7 +217,8 @@ fun LocalAppDetailsContent(
 @Composable
 private fun LocalAppHeaderSection(
     modifier: Modifier = Modifier,
-    appDisplayInfo: AppDisplayInfo,
+    appDisplayInfo: AppDisplayInfo?,
+    fallbackName: String,
     lastSession: Long?,
     onDeleteConnectionClick: () -> Unit,
 ) {
@@ -234,7 +237,7 @@ private fun LocalAppHeaderSection(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(3.dp),
             ) {
-                if (appDisplayInfo.icon != null) {
+                if (appDisplayInfo != null) {
                     Image(
                         modifier = Modifier
                             .padding(bottom = 12.dp)
@@ -248,13 +251,13 @@ private fun LocalAppHeaderSection(
                     AppIconThumbnail(
                         modifier = Modifier.padding(bottom = 12.dp),
                         appIconUrl = null,
-                        appName = appDisplayInfo.name,
+                        appName = fallbackName,
                         avatarSize = 48.dp,
                     )
                 }
 
                 Text(
-                    text = appDisplayInfo.name,
+                    text = appDisplayInfo?.name ?: fallbackName,
                     style = AppTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
                     fontWeight = FontWeight.Bold,
                 )

@@ -27,6 +27,7 @@ import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 import net.primal.domain.account.model.SessionEvent
 import net.primal.domain.account.model.SessionEventUserChoice
 import net.primal.domain.account.model.UserChoice
+import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.nostr.NostrEvent
@@ -41,6 +42,7 @@ class PermissionRequestsViewModel @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val permissionsRepository: PermissionsRepository,
     private val sessionEventRepository: SessionEventRepository,
+    private val localAppRepository: LocalAppRepository,
 ) : ViewModel() {
 
     private val initialMethod: LocalSignerMethod = savedStateHandle.localSignerMethodOrThrow
@@ -60,6 +62,7 @@ class PermissionRequestsViewModel @Inject constructor(
         observeEvents()
         observeSessionEventsPendingUserAction()
         fetchPermissionsNamingMap()
+        observeAppName()
         onNewLocalSignerMethod(initialMethod)
     }
 
@@ -117,6 +120,14 @@ class PermissionRequestsViewModel @Inject constructor(
         viewModelScope.launch {
             permissionsRepository.getNamingMap()
                 .onSuccess { setState { copy(permissionsMap = it) } }
+        }
+
+    private fun observeAppName() =
+        viewModelScope.launch {
+            localAppRepository.observeApp(initialMethod.getIdentifier())
+                .collect { app ->
+                    setState { copy(appName = app?.name) }
+                }
         }
 
     private fun handleOpenEventDetails(eventId: String) {

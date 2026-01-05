@@ -7,6 +7,7 @@ interface LocalSessionDetailsContract {
         val sessionId: String,
         val loading: Boolean = true,
         val appPackageName: String? = null,
+        val appName: String? = null,
         val sessionStartedAt: Long? = null,
         val sessionEvents: List<SessionEventUi> = emptyList(),
         val namingMap: Map<String, String> = emptyMap(),

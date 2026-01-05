@@ -10,4 +10,5 @@ data class LocalAppData(
     val packageName: String,
     val userPubKey: String,
     val trustLevel: TrustLevel,
+    val name: String? = null,
 )

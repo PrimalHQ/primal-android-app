@@ -65,6 +65,7 @@ class LocalAppDetailsViewModel @Inject constructor(
                 setState {
                     copy(
                         appPackageName = app?.packageName,
+                        appName = app?.name,
                         trustLevel = app?.trustLevel ?: TrustLevel.Low,
                         loading = false,
                     )

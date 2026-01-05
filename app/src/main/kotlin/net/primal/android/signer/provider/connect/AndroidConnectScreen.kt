@@ -90,8 +90,8 @@ private fun AndroidConnectScreen(
         dragHandle = { NostrConnectBottomSheetDragHandle() },
     ) {
         SignerConnectBottomSheet(
-            appName = appDisplayInfo.name,
-            appIcon = appDisplayInfo.icon,
+            appName = appDisplayInfo?.name ?: state.appPackageName,
+            appIcon = appDisplayInfo?.icon,
             appDescription = state.appPackageName,
             accounts = state.accounts,
             connecting = state.connecting,
@@ -100,6 +100,7 @@ private fun AndroidConnectScreen(
                     AndroidConnectContract.UiEvent.ConnectUser(
                         userId = account.pubkey,
                         trustLevel = trustLevel,
+                        appName = appDisplayInfo?.name,
                     ),
                 )
             },

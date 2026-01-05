@@ -88,6 +88,7 @@ fun LocalSessionDetailsScreen(
                         LocalAppSessionHeader(
                             modifier = Modifier.padding(vertical = 16.dp),
                             appDisplayInfo = appDisplayInfo,
+                            fallbackName = state.appName ?: state.appPackageName,
                             startedAt = state.sessionStartedAt,
                         )
                     }
@@ -131,7 +132,8 @@ fun LocalSessionDetailsScreen(
 @Composable
 fun LocalAppSessionHeader(
     modifier: Modifier = Modifier,
-    appDisplayInfo: AppDisplayInfo,
+    appDisplayInfo: AppDisplayInfo?,
+    fallbackName: String?,
     startedAt: Long? = null,
 ) {
     Card(
@@ -147,7 +149,7 @@ fun LocalAppSessionHeader(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
-            if (appDisplayInfo.icon != null) {
+            if (appDisplayInfo != null) {
                 Image(
                     modifier = Modifier
                         .padding(bottom = 6.dp)
@@ -161,13 +163,13 @@ fun LocalAppSessionHeader(
                 AppIconThumbnail(
                     modifier = Modifier.padding(bottom = 6.dp),
                     appIconUrl = null,
-                    appName = appDisplayInfo.name,
+                    appName = fallbackName,
                     avatarSize = 48.dp,
                 )
             }
 
             Text(
-                text = appDisplayInfo.name,
+                text = appDisplayInfo?.name ?: fallbackName ?: stringResource(id = R.string.local_app_unknown_app),
                 style = AppTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 color = AppTheme.colorScheme.onPrimary,

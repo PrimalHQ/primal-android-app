@@ -37,9 +37,9 @@ fun LocalAppPermissionsScreen(viewModel: LocalAppPermissionsViewModel, onClose: 
     ConnectedAppPermissionsScreen(
         headerContent = {
             LocalAppHeader(
-                appName = appDisplayInfo.name,
+                appName = appDisplayInfo?.name ?: state.value.appName,
                 iconContent = {
-                    if (appDisplayInfo.icon != null) {
+                    if (appDisplayInfo != null) {
                         Image(
                             modifier = Modifier
                                 .size(48.dp)
@@ -50,8 +50,8 @@ fun LocalAppPermissionsScreen(viewModel: LocalAppPermissionsViewModel, onClose: 
                         )
                     } else {
                         AppIconThumbnail(
-                            appIconUrl = appDisplayInfo.icon,
-                            appName = appDisplayInfo.name,
+                            appIconUrl = null,
+                            appName = state.value.appName ?: state.value.packageName,
                             avatarSize = 48.dp,
                         )
                     }
