@@ -135,18 +135,6 @@ private fun buildSignEventRows(
 
 private fun NostrEvent.toDetailRows(context: Context, kindName: String): List<EventDetailRow> {
     return buildList {
-        add(
-            EventDetailRow.Detail(
-                label = context.getString(R.string.settings_event_details_event_kind_label),
-                value = "$kind - $kindName",
-            ),
-        )
-        add(
-            EventDetailRow.Detail(
-                label = context.getString(R.string.settings_event_details_created_at_label),
-                value = createdAt.toString(),
-            ),
-        )
         if (id.isNotBlank()) {
             add(
                 EventDetailRow.Detail(
@@ -161,6 +149,18 @@ private fun NostrEvent.toDetailRows(context: Context, kindName: String): List<Ev
                 label = context.getString(R.string.settings_event_details_pubkey_label),
                 value = pubKey,
                 isKey = true,
+            ),
+        )
+        add(
+            EventDetailRow.Detail(
+                label = context.getString(R.string.settings_event_details_event_kind_label),
+                value = "$kind - $kindName",
+            ),
+        )
+        add(
+            EventDetailRow.Detail(
+                label = context.getString(R.string.settings_event_details_created_at_label),
+                value = createdAt.toString(),
             ),
         )
         if (tags.isNotEmpty()) {
@@ -197,6 +197,13 @@ private fun NostrUnsignedEvent.toDetailRows(context: Context, kindName: String):
     return buildList {
         add(
             EventDetailRow.Detail(
+                label = context.getString(R.string.settings_event_details_pubkey_label),
+                value = pubKey,
+                isKey = true,
+            ),
+        )
+        add(
+            EventDetailRow.Detail(
                 label = context.getString(R.string.settings_event_details_event_kind_label),
                 value = "$kind - $kindName",
             ),
@@ -205,13 +212,6 @@ private fun NostrUnsignedEvent.toDetailRows(context: Context, kindName: String):
             EventDetailRow.Detail(
                 label = context.getString(R.string.settings_event_details_created_at_label),
                 value = createdAt.toString(),
-            ),
-        )
-        add(
-            EventDetailRow.Detail(
-                label = context.getString(R.string.settings_event_details_pubkey_label),
-                value = pubKey,
-                isKey = true,
             ),
         )
         if (tags.isNotEmpty()) {
