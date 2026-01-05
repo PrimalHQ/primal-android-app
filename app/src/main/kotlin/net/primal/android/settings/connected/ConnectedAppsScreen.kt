@@ -235,6 +235,7 @@ private fun ConnectedAppListItem(
             ) {
                 UniversalAvatarThumbnail(
                     avatarCdnImage = connection.userAvatarCdnImage,
+                    legendaryCustomization = connection.userLegendaryCustomization,
                     avatarSize = 22.dp,
                 )
                 Icon(
@@ -290,6 +291,7 @@ fun PreviewConnectedAppsScreen() {
                             appName = "Primal web app",
                             appIconUrl = "https://primal.net/assets/favicon-51789dff.ico",
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
+                            userLegendaryCustomization = null,
                         ),
                         AppConnectionUi(
                             connectionId = "2",
@@ -297,6 +299,7 @@ fun PreviewConnectedAppsScreen() {
                             appName = "Nostr 1",
                             appIconUrl = null,
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
+                            userLegendaryCustomization = null,
                         ),
                     ),
                     localConnections = listOf(
@@ -306,6 +309,7 @@ fun PreviewConnectedAppsScreen() {
                             appName = "Primal",
                             appIconUrl = null,
                             userAvatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
+                            userLegendaryCustomization = null,
                             isLocal = true,
                         ),
                     ),
