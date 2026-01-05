@@ -1,5 +1,6 @@
 package net.primal.data.account.local.db
 
+import androidx.room.AutoMigration
 import androidx.room.ConstructedBy
 import androidx.room.Database
 import androidx.room.RoomDatabase
@@ -39,7 +40,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
     version = 18,
     exportSchema = true,
     autoMigrations = [
-        androidx.room.AutoMigration(from = 17, to = 18),
+        AutoMigration(from = 17, to = 18),
     ],
 )
 @TypeConverters(

@@ -212,7 +212,7 @@ private fun ConnectedAppListItem(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 if (connection.isLocal) {
-                    LocalAppIconName(appId = connection.appId, fallbackAppName = connection.appName)
+                    LocalAppIconName(appId = connection.appId, fallbackAppName = connection.appName ?: connection.appId)
                 } else {
                     AppIconThumbnail(
                         appName = connection.appName,
@@ -249,9 +249,9 @@ private fun ConnectedAppListItem(
 }
 
 @Composable
-private fun LocalAppIconName(appId: String, fallbackAppName: String? = null) {
-    val appDisplayInfo = rememberAppDisplayInfo(packageName = appId, fallbackAppName = fallbackAppName)
-    if (appDisplayInfo.icon != null) {
+private fun LocalAppIconName(appId: String, fallbackAppName: String) {
+    val appDisplayInfo = rememberAppDisplayInfo(packageName = appId)
+    if (appDisplayInfo != null) {
         Image(
             modifier = Modifier
                 .size(22.dp)
@@ -262,14 +262,14 @@ private fun LocalAppIconName(appId: String, fallbackAppName: String? = null) {
         )
     } else {
         AppIconThumbnail(
-            appName = appDisplayInfo.name,
+            appName = fallbackAppName,
             appIconUrl = null,
             avatarSize = 22.dp,
         )
     }
     Text(
         modifier = Modifier.padding(top = 2.dp),
-        text = appDisplayInfo.name,
+        text = appDisplayInfo?.name ?: fallbackAppName,
         style = AppTheme.typography.titleMedium,
         fontWeight = FontWeight.Normal,
     )
