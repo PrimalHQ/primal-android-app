@@ -36,8 +36,11 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         LocalAppData::class,
         LocalAppSessionEventData::class,
     ],
-    version = 17,
+    version = 18,
     exportSchema = true,
+    autoMigrations = [
+        androidx.room.AutoMigration(from = 17, to = 18),
+    ],
 )
 @TypeConverters(
     ListsTypeConverters::class,

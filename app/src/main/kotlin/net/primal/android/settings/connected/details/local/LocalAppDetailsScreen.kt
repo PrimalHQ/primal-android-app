@@ -104,7 +104,8 @@ fun LocalAppDetailsScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
-    val appDisplayInfo = rememberAppDisplayInfo(packageName = state.appPackageName ?: "")
+    val appDisplayInfo =
+        rememberAppDisplayInfo(packageName = state.appPackageName ?: "", fallbackAppName = state.appName)
 
     SnackbarErrorHandler(
         error = state.error,

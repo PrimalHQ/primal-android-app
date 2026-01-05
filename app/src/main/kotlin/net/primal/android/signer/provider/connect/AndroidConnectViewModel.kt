@@ -79,32 +79,42 @@ class AndroidConnectViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.ConnectUser -> addNewApp(userId = it.userId, trustLevel = it.trustLevel)
+                    is UiEvent.ConnectUser -> addNewApp(
+                        userId = it.userId,
+                        trustLevel = it.trustLevel,
+                        appName = it.appName,
+                    )
+
                     UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
 
-    private fun addNewApp(userId: String, trustLevel: TrustLevel) =
-        viewModelScope.launch {
-            setState { copy(connecting = true) }
-            val app = LocalApp(
-                identifier = LocalApp.identifierOf(packageName = method.packageName, userId = userId),
-                packageName = method.packageName,
-                userPubKey = userId,
-                trustLevel = trustLevel,
-                permissions = method.permissions,
-            )
+    private fun addNewApp(
+        userId: String,
+        trustLevel: TrustLevel,
+        appName: String?,
+    ) = viewModelScope.launch {
+        setState { copy(connecting = true) }
 
-            localSignerService.addNewApp(app)
-                .onSuccess {
-                    setEffect(SideEffect.ConnectionSuccess(userId = userId))
-                }
-                .onFailure {
-                    setState { copy(error = UiError.GenericError()) }
-                    setEffect(SideEffect.ConnectionFailure(error = it))
-                }
+        val app = LocalApp(
+            identifier = LocalApp.identifierOf(packageName = method.packageName, userId = userId),
+            packageName = method.packageName,
+            name = appName,
+            userPubKey = userId,
+            trustLevel = trustLevel,
+            permissions = method.permissions,
+        )
 
-            setState { copy(connecting = false) }
-        }
+        localSignerService.addNewApp(app)
+            .onSuccess {
+                setEffect(SideEffect.ConnectionSuccess(userId = userId))
+            }
+            .onFailure {
+                setState { copy(error = UiError.GenericError()) }
+                setEffect(SideEffect.ConnectionFailure(error = it))
+            }
+
+        setState { copy(connecting = false) }
+    }
 }

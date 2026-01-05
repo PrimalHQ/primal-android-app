@@ -100,6 +100,7 @@ private fun AndroidConnectScreen(
                     AndroidConnectContract.UiEvent.ConnectUser(
                         userId = account.pubkey,
                         trustLevel = trustLevel,
+                        appName = appDisplayInfo.name,
                     ),
                 )
             },

@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.navigation.sessionIdOrThrow
 import net.primal.android.settings.connected.model.asSessionEventUi
 import net.primal.core.utils.onSuccess
-import net.primal.domain.account.model.LocalApp
+import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.account.repository.SessionRepository
@@ -23,6 +23,7 @@ class LocalSessionDetailsViewModel @Inject constructor(
     private val sessionRepository: SessionRepository,
     private val sessionEventRepository: SessionEventRepository,
     private val permissionsRepository: PermissionsRepository,
+    private val localAppRepository: LocalAppRepository,
 ) : ViewModel() {
 
     private val sessionId: String = savedStateHandle.sessionIdOrThrow
@@ -50,10 +51,13 @@ class LocalSessionDetailsViewModel @Inject constructor(
     private fun observeSession() =
         viewModelScope.launch {
             sessionRepository.observeLocalSession(sessionId = sessionId).collect { session ->
+                val appIdentifier = session?.appIdentifier
+                val app = appIdentifier?.let { localAppRepository.getApp(it) }
                 setState {
                     copy(
                         loading = false,
-                        appPackageName = session?.appIdentifier?.let { LocalApp.packageNameFromIdentifier(it) },
+                        appPackageName = app?.packageName,
+                        appName = app?.name,
                         sessionStartedAt = session?.sessionStartedAt,
                     )
                 }

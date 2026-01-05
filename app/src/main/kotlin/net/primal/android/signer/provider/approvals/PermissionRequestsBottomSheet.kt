@@ -36,7 +36,7 @@ fun PermissionRequestsBottomSheet(
         }
     }
 
-    val appDisplayInfo = rememberAppDisplayInfo(uiState.callingPackage)
+    val appDisplayInfo = rememberAppDisplayInfo(packageName = uiState.callingPackage, fallbackAppName = uiState.appName)
 
     val eventDetails = remember(
         uiState.eventDetailsSessionEvent,

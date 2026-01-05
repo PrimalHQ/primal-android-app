@@ -8,6 +8,7 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 interface PermissionRequestsContract {
     data class UiState(
         val callingPackage: String,
+        val appName: String? = null,
         val requestQueue: List<SessionEvent> = emptyList(),
         val responding: Boolean = false,
         val permissionsMap: Map<String, String> = emptyMap(),

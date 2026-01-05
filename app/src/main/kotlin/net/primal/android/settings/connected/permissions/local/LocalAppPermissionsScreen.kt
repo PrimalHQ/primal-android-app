@@ -32,7 +32,8 @@ import net.primal.android.theme.AppTheme
 fun LocalAppPermissionsScreen(viewModel: LocalAppPermissionsViewModel, onClose: () -> Unit) {
     val state = viewModel.state.collectAsState()
 
-    val appDisplayInfo = rememberAppDisplayInfo(packageName = state.value.packageName ?: "")
+    val appDisplayInfo =
+        rememberAppDisplayInfo(packageName = state.value.packageName ?: "", fallbackAppName = state.value.appName)
 
     ConnectedAppPermissionsScreen(
         headerContent = {

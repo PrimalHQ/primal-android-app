@@ -9,6 +9,7 @@ interface LocalAppDetailsContract {
         val identifier: String,
         val loading: Boolean = true,
         val appPackageName: String? = null,
+        val appName: String? = null,
         val lastSessionStartedAt: Long? = null,
         val trustLevel: TrustLevel = TrustLevel.Low,
         val recentSessions: List<SessionUi> = emptyList(),

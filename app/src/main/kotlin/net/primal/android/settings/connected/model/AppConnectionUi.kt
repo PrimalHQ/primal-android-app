@@ -29,6 +29,7 @@ fun LocalApp.asAppConnectionUi(userAccount: UserAccount?): AppConnectionUi {
     return AppConnectionUi(
         connectionId = this.identifier,
         appId = this.packageName,
+        appName = this.name,
         userAvatarCdnImage = userAccount?.avatarCdnImage,
         appIconUrl = null,
         isLocal = true,

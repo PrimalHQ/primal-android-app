@@ -11,9 +11,9 @@ data class AppDisplayInfo(
 )
 
 @Composable
-fun rememberAppDisplayInfo(packageName: String): AppDisplayInfo {
+fun rememberAppDisplayInfo(packageName: String, fallbackAppName: String? = null): AppDisplayInfo {
     val context = LocalContext.current
-    return remember(packageName) {
+    return remember(packageName, fallbackAppName) {
         val appInfo = runCatching {
             context.packageManager.getApplicationInfo(packageName, 0)
         }.getOrNull()
@@ -24,7 +24,10 @@ fun rememberAppDisplayInfo(packageName: String): AppDisplayInfo {
                 icon = context.packageManager.getApplicationIcon(appInfo),
             )
         } else {
-            AppDisplayInfo(name = packageName, icon = null)
+            AppDisplayInfo(
+                name = fallbackAppName ?: packageName,
+                icon = null,
+            )
         }
     }
 }

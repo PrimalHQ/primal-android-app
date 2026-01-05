@@ -61,7 +61,7 @@ class LocalAppPermissionsViewModel @Inject constructor(
     private fun observeApp() {
         viewModelScope.launch {
             localAppRepository.observeApp(identifier).collect { app ->
-                setState { copy(packageName = app?.packageName) }
+                setState { copy(packageName = app?.packageName, appName = app?.name) }
             }
         }
     }

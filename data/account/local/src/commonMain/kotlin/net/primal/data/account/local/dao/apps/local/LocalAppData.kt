@@ -8,6 +8,7 @@ import net.primal.data.account.local.dao.apps.TrustLevel
 data class LocalAppData(
     @PrimaryKey val identifier: String,
     val packageName: String,
+    val name: String? = null,
     val userPubKey: String,
     val trustLevel: TrustLevel,
 )

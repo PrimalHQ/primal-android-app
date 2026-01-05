@@ -63,7 +63,8 @@ fun LocalSessionDetailsScreen(
     onClose: () -> Unit,
     onEventClick: (eventId: String) -> Unit,
 ) {
-    val appDisplayInfo = rememberAppDisplayInfo(packageName = state.appPackageName ?: "")
+    val appDisplayInfo =
+        rememberAppDisplayInfo(packageName = state.appPackageName ?: "", fallbackAppName = state.appName)
 
     Scaffold(
         topBar = {
