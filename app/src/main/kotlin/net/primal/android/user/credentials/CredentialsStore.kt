@@ -15,6 +15,7 @@ import net.primal.android.user.domain.asCredential
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.nostr.cryptography.utils.extractKeyPairFromPrivateKeyOrThrow
+import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 
 @Singleton
 class CredentialsStore @Inject constructor(
@@ -55,8 +56,14 @@ class CredentialsStore @Inject constructor(
     }
 
     suspend fun saveExternalSignerNpub(npub: String): String {
-        addCredential(Credential(nsec = null, npub = npub, type = CredentialType.ExternalSigner))
-        return npub.bech32ToHexOrThrow()
+        val (hexKey, bech32Key) = if (npub.startsWith("npub")) {
+            npub.bech32ToHexOrThrow() to npub
+        } else {
+            npub to npub.hexToNpubHrp()
+        }
+
+        addCredential(Credential(nsec = null, npub = bech32Key, type = CredentialType.ExternalSigner))
+        return hexKey
     }
 
     suspend fun saveNpub(npub: String): String {
