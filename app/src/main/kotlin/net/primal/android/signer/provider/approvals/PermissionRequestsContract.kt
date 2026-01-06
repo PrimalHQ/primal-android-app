@@ -30,5 +30,7 @@ interface PermissionRequestsContract {
             val approved: List<LocalSignerMethodResponse>,
             val rejected: List<LocalSignerMethodResponse>,
         ) : SideEffect()
+
+        data object InvalidRequest : SideEffect()
     }
 }

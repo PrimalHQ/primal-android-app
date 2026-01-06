@@ -20,7 +20,9 @@ import net.primal.android.signer.provider.approvals.PermissionRequestsContract.U
 import net.primal.android.signer.provider.approvals.PermissionRequestsContract.UiState
 import net.primal.android.signer.provider.localSignerMethodOrThrow
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.data.account.repository.service.LocalSignerError
 import net.primal.data.account.repository.service.LocalSignerService
 import net.primal.data.account.signer.local.model.LocalSignerMethod
 import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
@@ -70,6 +72,11 @@ class PermissionRequestsViewModel @Inject constructor(
         viewModelScope.launch {
             Timber.tag("LocalSignerForeground").d("We got $method.")
             localSignerService.processMethodOrAddToPending(method = method)
+                .onFailure { error ->
+                    if (error is LocalSignerError.AppNotFound) {
+                        setEffect(SideEffect.InvalidRequest)
+                    }
+                }
         }
 
     private fun observeEvents() {

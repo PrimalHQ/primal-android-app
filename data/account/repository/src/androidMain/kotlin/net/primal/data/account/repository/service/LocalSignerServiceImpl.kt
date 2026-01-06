@@ -7,8 +7,10 @@ import kotlin.time.Clock
 import net.primal.core.utils.Result
 import net.primal.core.utils.add
 import net.primal.core.utils.asSuccess
+import net.primal.core.utils.fold
 import net.primal.core.utils.map
 import net.primal.core.utils.recover
+import net.primal.core.utils.recoverCatching
 import net.primal.core.utils.remove
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
@@ -44,40 +46,49 @@ internal class LocalSignerServiceImpl internal constructor(
     private val allResponses = AtomicReference<List<LocalSignerMethodResponse>>(emptyList())
 
     override suspend fun processMethod(method: LocalSignerMethod): Result<LocalSignerMethodResponse> {
-        val permissionAction = localAppRepository.getPermissionActionForMethod(
+        return localAppRepository.getPermissionActionForMethod(
             appIdentifier = method.getIdentifier(),
             permissionId = method.getPermissionId(),
+        ).fold(
+            onSuccess = { permissionAction ->
+                when (permissionAction) {
+                    AppPermissionAction.Approve -> {
+                        val response = localSignerMethodResponseBuilder.build(method = method)
+                        allResponses.add(response)
+                        insertNewSessionEvent(
+                            method = method,
+                            requestState = AppRequestState.Approved,
+                            response = response,
+                        )
+                        response.asSuccess()
+                    }
+
+                    AppPermissionAction.Deny -> {
+                        val response = LocalSignerMethodResponse.Error(
+                            eventId = method.eventId,
+                            message = "Request rejected by policy (auto denied).",
+                        )
+                        allResponses.add(response)
+                        insertNewSessionEvent(
+                            method = method,
+                            requestState = AppRequestState.Rejected,
+                            response = response,
+                        )
+                        Result.failure(LocalSignerError.AutoDenied)
+                    }
+
+                    AppPermissionAction.Ask -> {
+                        Result.failure(LocalSignerError.UserApprovalRequired)
+                    }
+                }
+            },
+            onFailure = { error ->
+                when (error) {
+                    is NoSuchElementException -> Result.failure(LocalSignerError.AppNotFound)
+                    else -> Result.failure(error)
+                }
+            },
         )
-        return when (permissionAction) {
-            AppPermissionAction.Approve -> {
-                val response = localSignerMethodResponseBuilder.build(method = method)
-                allResponses.add(response)
-                insertNewSessionEvent(
-                    method = method,
-                    requestState = AppRequestState.Approved,
-                    response = response,
-                )
-                response.asSuccess()
-            }
-
-            AppPermissionAction.Deny -> {
-                val response = LocalSignerMethodResponse.Error(
-                    eventId = method.eventId,
-                    message = "Request rejected by policy (auto denied).",
-                )
-                allResponses.add(response)
-                insertNewSessionEvent(
-                    method = method,
-                    requestState = AppRequestState.Rejected,
-                    response = response,
-                )
-                Result.failure(LocalSignerError.AutoDenied)
-            }
-
-            AppPermissionAction.Ask -> {
-                Result.failure(LocalSignerError.UserApprovalRequired)
-            }
-        }
     }
 
     override suspend fun processMethodOrAddToPending(method: LocalSignerMethod): Result<Unit> {

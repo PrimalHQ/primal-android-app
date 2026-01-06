@@ -19,6 +19,7 @@ import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 fun PermissionRequestsBottomSheet(
     viewModel: PermissionRequestsViewModel,
     onCompleted: (result: RequestsResults) -> Unit,
+    onCancelled: () -> Unit,
 ) {
     val uiState by viewModel.state.collectAsState()
     val sheetState = rememberModalBottomSheetState(
@@ -31,6 +32,10 @@ fun PermissionRequestsBottomSheet(
             when (it) {
                 is PermissionRequestsContract.SideEffect.RequestsCompleted -> {
                     onCompleted(RequestsResults(approved = it.approved, rejected = it.rejected))
+                }
+
+                is PermissionRequestsContract.SideEffect.InvalidRequest -> {
+                    onCancelled()
                 }
             }
         }
