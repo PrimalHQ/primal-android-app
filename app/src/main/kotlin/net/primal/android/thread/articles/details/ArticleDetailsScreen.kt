@@ -131,16 +131,14 @@ fun ArticleDetailsScreen(
     noteCallbacks: NoteCallbacks,
 ) {
     val detailsState by viewModel.state.collectAsState()
-    var isFirstResume by rememberSaveable(viewModel) { mutableStateOf(true) }
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
-            Lifecycle.Event.ON_RESUME -> {
-                if (!isFirstResume) {
+            Lifecycle.Event.ON_START -> {
+                if (detailsState.article != null) {
                     viewModel.setEvent(UiEvent.UpdateContent)
                 }
-
-                isFirstResume = false
             }
+
             else -> Unit
         }
     }
