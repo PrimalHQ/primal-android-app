@@ -38,7 +38,7 @@ kotlin {
     // JVM Target
 //    jvm("desktop")
 
-    // iOS Target
+    // iOS Target (minimum iOS 16)
     val xcfFramework = XCFramework(xcfName)
     val iosTargets = listOf(iosArm64(), iosSimulatorArm64())
 
@@ -47,6 +47,7 @@ kotlin {
             baseName = xcfName
             isStatic = false
             freeCompilerArgs += listOf("-Xadd-light-debug=enable")
+            linkerOpts += listOf("-ios_version_min", "16.0")
             xcfFramework.add(this)
             exportedDependencies.forEach { dep -> export(project(dep)) }
         }
