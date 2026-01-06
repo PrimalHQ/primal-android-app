@@ -20,7 +20,7 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.signer.provider.rememberAppDisplayInfo
 import net.primal.android.theme.AppTheme
 import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
-import net.primal.domain.nostr.cryptography.utils.assureValidNpub
+import net.primal.domain.nostr.cryptography.utils.assureValidPubKeyHex
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalUuidApi::class)
 @Composable
@@ -40,7 +40,7 @@ fun AndroidConnectScreen(
                     onConnectionApproved(
                         LocalSignerMethodResponse.Success.GetPublicKey(
                             eventId = Uuid.random().toString(),
-                            pubkey = it.userId.assureValidNpub(),
+                            pubkey = it.userId.assureValidPubKeyHex(),
                         ),
                     )
                 }
