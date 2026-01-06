@@ -108,6 +108,7 @@ class ArticleDetailsViewModel @Inject constructor(
             } else {
                 setState { copy(naddr = naddr) }
 
+                fetchData(naddr)
                 observeArticle(naddr)
                 observeArticleComments(naddr = naddr)
                 observeActiveWallet()
@@ -122,7 +123,7 @@ class ArticleDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    UiEvent.UpdateContent -> fetchData()
+                    UiEvent.UpdateContent -> state.value.naddr?.let { naddr -> fetchData(naddr) }
                     UiEvent.DismissErrors -> dismissErrors()
                     is UiEvent.ZapArticle -> zapArticle(zapAction = it)
                     UiEvent.LikeArticle -> likeArticle()
@@ -150,23 +151,24 @@ class ArticleDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun fetchData() =
+    private fun fetchData(naddr: Naddr) =
         viewModelScope.launch {
-            state.value.naddr?.let { naddr ->
-                try {
-                    articleRepository.fetchArticleAndComments(
-                        userId = activeAccountStore.activeUserId(),
-                        articleAuthorId = naddr.userId,
-                        articleId = naddr.identifier,
-                    )
-                    articleRepository.fetchArticleHighlights(
-                        userId = activeAccountStore.activeUserId(),
-                        articleAuthorId = naddr.userId,
-                        articleId = naddr.identifier,
-                    )
-                } catch (error: NetworkException) {
-                    Timber.w(error)
-                }
+            try {
+                setState { copy(fetching = true) }
+                articleRepository.fetchArticleAndComments(
+                    userId = activeAccountStore.activeUserId(),
+                    articleAuthorId = naddr.userId,
+                    articleId = naddr.identifier,
+                )
+                articleRepository.fetchArticleHighlights(
+                    userId = activeAccountStore.activeUserId(),
+                    articleAuthorId = naddr.userId,
+                    articleId = naddr.identifier,
+                )
+            } catch (error: NetworkException) {
+                Timber.w(error)
+            } finally {
+                setState { copy(fetching = false) }
             }
         }
 
