@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
+import net.primal.core.utils.asSuccess
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.data.account.local.dao.apps.TrustLevel
@@ -31,14 +32,19 @@ class LocalAppRepositoryImpl(
             }
         }
 
-    override suspend fun getPermissionActionForMethod(appIdentifier: String, permissionId: String): PermissionActionDO =
+    override suspend fun getPermissionActionForMethod(
+        appIdentifier: String,
+        permissionId: String,
+    ): Result<PermissionActionDO> =
         withContext(dispatchers.io()) {
             if (permissionId == PERM_ID_DECRYPT_ZAP_EVENT) {
-                return@withContext PermissionActionDO.Deny
+                return@withContext PermissionActionDO.Deny.asSuccess()
             }
 
             val app = database.localApps().findApp(identifier = appIdentifier)
-                ?: return@withContext PermissionActionDO.Deny
+                ?: return@withContext Result.failure(
+                    NoSuchElementException("Couldn't find app with specified identifier: $appIdentifier"),
+                )
 
             when (app.data.trustLevel) {
                 TrustLevel.Full -> PermissionActionDO.Approve
@@ -49,7 +55,7 @@ class LocalAppRepositoryImpl(
                 }
 
                 TrustLevel.Low -> PermissionActionDO.Ask
-            }
+            }.asSuccess()
         }
 
     override fun observeAllApps(): Flow<List<LocalApp>> =

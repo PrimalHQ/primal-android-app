@@ -8,4 +8,8 @@ sealed class LocalSignerError(override val message: String) : RuntimeException(m
     data object AutoDenied : LocalSignerError("Request denied by already saved permission.") {
         private fun readResolve(): Any = AutoDenied
     }
+
+    data object AppNotFound : LocalSignerError("App not found. User might have deleted it.") {
+        private fun readResolve(): Any = AppNotFound
+    }
 }

@@ -64,6 +64,10 @@ class SignerActivity : PrimalActivity() {
 
                         PermissionRequestsBottomSheet(
                             viewModel = permissionRequestsViewModel,
+                            onCancelled = {
+                                setResult(RESULT_CANCELED)
+                                finish()
+                            },
                             onCompleted = { requestsResults ->
                                 val results = requestsResults.approved + requestsResults.rejected
                                 val size = results.size
