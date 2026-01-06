@@ -13,6 +13,20 @@ plugins {
 
 private val xcfName = "PrimalShared"
 
+// Shared dependencies exported to iOS
+private val exportedDependencies = listOf(
+    ":domain:nostr",
+    ":domain:primal",
+    ":domain:wallet",
+    ":domain:account",
+    ":core:networking-primal",
+    ":core:networking-upload",
+    ":core:networking-lightning",
+    ":data:account:repository",
+    ":data:caching:repository",
+    ":data:wallet:repository",
+)
+
 kotlin {
     // Android target
     androidLibrary {
@@ -31,22 +45,10 @@ kotlin {
     iosTargets.forEach {
         it.binaries.framework {
             baseName = xcfName
-            isStatic = true
+            isStatic = false
             freeCompilerArgs += listOf("-Xadd-light-debug=enable")
             xcfFramework.add(this)
-
-            export(project(":domain:nostr"))
-            export(project(":domain:primal"))
-            export(project(":domain:wallet"))
-            export(project(":domain:account"))
-
-            export(project(":core:networking-primal"))
-            export(project(":core:networking-upload"))
-            export(project(":core:networking-lightning"))
-
-            export(project(":data:account:repository"))
-            export(project(":data:caching:repository"))
-            export(project(":data:wallet:repository"))
+            exportedDependencies.forEach { dep -> export(project(dep)) }
         }
     }
 
@@ -54,19 +56,8 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                // Internal
-                api(project(":domain:nostr"))
-                api(project(":domain:primal"))
-                api(project(":domain:wallet"))
-                api(project(":domain:account"))
-
-                api(project(":core:networking-primal"))
-                api(project(":core:networking-upload"))
-                api(project(":core:networking-lightning"))
-
-                api(project(":data:account:repository"))
-                api(project(":data:caching:repository"))
-                api(project(":data:wallet:repository"))
+                // Internal - exported to iOS
+                exportedDependencies.forEach { api(project(it)) }
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
