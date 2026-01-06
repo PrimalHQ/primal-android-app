@@ -131,9 +131,16 @@ fun ArticleDetailsScreen(
     noteCallbacks: NoteCallbacks,
 ) {
     val detailsState by viewModel.state.collectAsState()
+    var isFirstResume by rememberSaveable(viewModel) { mutableStateOf(true) }
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
-            Lifecycle.Event.ON_START -> viewModel.setEvent(UiEvent.UpdateContent)
+            Lifecycle.Event.ON_RESUME -> {
+                if (!isFirstResume) {
+                    viewModel.setEvent(UiEvent.UpdateContent)
+                }
+
+                isFirstResume = false
+            }
             else -> Unit
         }
     }
@@ -348,16 +355,7 @@ private fun ArticleDetailsScreen(
             )
         },
         content = { paddingValues ->
-            if (detailsState.isResolvingNaddr) {
-                PrimalLoadingSpinner()
-            }
-            if (detailsState.article == null) {
-                ListNoContent(
-                    modifier = Modifier.fillMaxSize(),
-                    noContentText = stringResource(id = R.string.article_details_error_resolving_naddr),
-                    onRefresh = { detailsEventPublisher(UiEvent.RequestResolveNaddr) },
-                )
-            } else {
+            if (detailsState.article != null) {
                 ArticleContentWithComments(
                     state = detailsState,
                     detailsEventPublisher = detailsEventPublisher,
@@ -415,6 +413,14 @@ private fun ArticleDetailsScreen(
                             )
                         }
                     },
+                )
+            } else if (detailsState.isResolvingNaddr || detailsState.fetching) {
+                PrimalLoadingSpinner()
+            } else {
+                ListNoContent(
+                    modifier = Modifier.fillMaxSize(),
+                    noContentText = stringResource(id = R.string.article_details_error_resolving_naddr),
+                    onRefresh = { detailsEventPublisher(UiEvent.RequestResolveNaddr) },
                 )
             }
         },
