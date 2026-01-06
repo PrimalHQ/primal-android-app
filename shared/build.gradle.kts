@@ -40,18 +40,20 @@ kotlin {
 
     // iOS Target (minimum iOS 16)
     val xcfFramework = XCFramework(xcfName)
-    val iosTargets = listOf(iosArm64(), iosSimulatorArm64())
 
-    iosTargets.forEach {
-        it.binaries.framework {
+    fun KotlinNativeTarget.configureFramework(platformName: String) {
+        binaries.framework {
             baseName = xcfName
             isStatic = false
             freeCompilerArgs += listOf("-Xadd-light-debug=enable")
-            linkerOpts += listOf("-ios_version_min", "16.0")
+            linkerOpts += listOf("-platform_version", platformName, "16.0", "16.0")
             xcfFramework.add(this)
             exportedDependencies.forEach { dep -> export(project(dep)) }
         }
     }
+
+    iosArm64 { configureFramework("ios") }
+    iosSimulatorArm64 { configureFramework("ios-simulator") }
 
     // Source set declarations (https://kotlinlang.org/docs/multiplatform-hierarchy.html)
     sourceSets {
