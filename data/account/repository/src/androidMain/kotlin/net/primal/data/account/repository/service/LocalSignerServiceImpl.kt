@@ -73,17 +73,17 @@ internal class LocalSignerServiceImpl internal constructor(
                             requestState = AppRequestState.Rejected,
                             response = response,
                         )
-                        Result.failure(LocalSignerError.AutoDenied)
+                        Result.failure(LocalSignerError.AutoDenied())
                     }
 
                     AppPermissionAction.Ask -> {
-                        Result.failure(LocalSignerError.UserApprovalRequired)
+                        Result.failure(LocalSignerError.UserApprovalRequired())
                     }
                 }
             },
             onFailure = { error ->
                 when (error) {
-                    is NoSuchElementException -> Result.failure(LocalSignerError.AppNotFound)
+                    is NoSuchElementException -> Result.failure(LocalSignerError.AppNotFound())
                     else -> Result.failure(error)
                 }
             },
