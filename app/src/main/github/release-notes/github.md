@@ -3,14 +3,10 @@
 - Android Signer (NIP-55)
 
 ## Fixes
-- Improved notifications auto-scroll behaviour (#766)
-- Improved thread screen load time (#764)
-- Improved article cover image rendering with variant images from cache
-- Implemented pre-caching user avatars (#770)
-- Implemented media pre-caching for smoother scrolling (#801)
-- Implemented `primal.net/profile` deep link handling
-- Fixed media gallery crash on app background
-- Fixed self-mentions in bio not rendering correctly (#797)
-- Added fallback stream title for stream pills
-- Added Repost Again option to repost bottom sheet (#793)
-- Add video/audio metadata extraction for uploaded files
+- Handle local signer requests for deleted apps
+- Fixed race condition while loading not cached article  (#838)
+- Assure valid pubkey hex is returned for local signer login (#839)
+- Allow external signer login with hex pubkey
+- Fixed parsing of malformed nostrconnect relay parameters (#836)
+- Cache `name` for `LocalApp`s (#835)
+- Fixed rows order in session event details (#833)
