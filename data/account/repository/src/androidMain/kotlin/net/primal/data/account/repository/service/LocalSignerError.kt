@@ -1,15 +1,12 @@
 package net.primal.data.account.repository.service
 
-sealed class LocalSignerError(override val message: String) : RuntimeException(message) {
-    data object UserApprovalRequired : LocalSignerError("User approval required for this request.") {
-        private fun readResolve(): Any = UserApprovalRequired
-    }
+sealed class LocalSignerError(override val message: String) : Throwable(message = message) {
+    data class UserApprovalRequired(override val message: String = "User approval required for this request.") :
+        LocalSignerError(message = message)
 
-    data object AutoDenied : LocalSignerError("Request denied by already saved permission.") {
-        private fun readResolve(): Any = AutoDenied
-    }
+    data class AutoDenied(override val message: String = "Request denied by already saved permission.") :
+        LocalSignerError(message = message)
 
-    data object AppNotFound : LocalSignerError("App not found. User might have deleted it.") {
-        private fun readResolve(): Any = AppNotFound
-    }
+    data class AppNotFound(override val message: String = "App not found. User might have deleted it.") :
+        LocalSignerError(message = message)
 }
