@@ -156,19 +156,23 @@ private fun MiningFeeListItem(
                 text = "${data.label}: $formattedAmountInSats sats",
             )
 
-            val approxTime = buildAnnotatedString {
-                append(stringResource(id = R.string.wallet_create_transaction_mining_fee_selector_approx_label_prefix))
-                append(' ')
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(data.confirmationEstimateInMin.toTimeAmount())
+            if (data.confirmationEstimateInMin != null) {
+                val approxTime = buildAnnotatedString {
+                    append(
+                        stringResource(id = R.string.wallet_create_transaction_mining_fee_selector_approx_label_prefix),
+                    )
+                    append(' ')
+                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append(data.confirmationEstimateInMin.toTimeAmount())
+                    }
                 }
+                Text(
+                    modifier = Modifier.padding(end = 16.dp),
+                    style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
+                    color = AppTheme.colorScheme.onPrimary,
+                    text = approxTime,
+                )
             }
-            Text(
-                modifier = Modifier.padding(end = 16.dp),
-                style = AppTheme.typography.bodyMedium.copy(fontSize = 16.sp),
-                color = AppTheme.colorScheme.onPrimary,
-                text = approxTime,
-            )
         }
     }
 }

@@ -10,6 +10,7 @@ import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.utils.ensureEncodedLnUrl
 import net.primal.domain.nostr.utils.stripLightningPrefix
+import net.primal.domain.rates.fees.OnChainTransactionFeeTier
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.Network
@@ -25,6 +26,7 @@ import net.primal.wallet.data.remote.model.DepositRequestBody
 import net.primal.wallet.data.remote.model.TransactionsRequestBody
 import net.primal.wallet.data.remote.model.WithdrawRequestBody
 import net.primal.wallet.data.repository.mappers.remote.asLightingInvoiceResultDO
+import net.primal.wallet.data.repository.mappers.remote.asOnChainTxFeeTierDO
 import net.primal.wallet.data.repository.mappers.remote.mapAsPrimalTransactions
 
 internal class PrimalWalletServiceImpl(
@@ -117,5 +119,18 @@ internal class PrimalWalletServiceImpl(
                     noteSelf = request.noteSelf,
                 ),
             )
+        }
+
+    override suspend fun fetchMiningFees(
+        wallet: Wallet.Primal,
+        onChainAddress: String,
+        amountInBtc: String,
+    ): Result<List<OnChainTransactionFeeTier>> =
+        runCatching {
+            primalWalletApi.getMiningFees(
+                userId = wallet.userId,
+                onChainAddress = onChainAddress,
+                amountInBtc = amountInBtc,
+            ).map { it.asOnChainTxFeeTierDO() }
         }
 }

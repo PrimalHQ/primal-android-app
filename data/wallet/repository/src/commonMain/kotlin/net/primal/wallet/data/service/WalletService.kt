@@ -2,6 +2,7 @@ package net.primal.wallet.data.service
 
 import kotlinx.coroutines.flow.Flow
 import net.primal.core.utils.Result
+import net.primal.domain.rates.fees.OnChainTransactionFeeTier
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.OnChainAddressResult
@@ -23,4 +24,10 @@ internal interface WalletService<W : Wallet> {
     suspend fun createOnChainAddress(wallet: W): Result<OnChainAddressResult>
 
     suspend fun pay(wallet: W, request: TxRequest): Result<Unit>
+
+    suspend fun fetchMiningFees(
+        wallet: W,
+        onChainAddress: String,
+        amountInBtc: String,
+    ): Result<List<OnChainTransactionFeeTier>>
 }

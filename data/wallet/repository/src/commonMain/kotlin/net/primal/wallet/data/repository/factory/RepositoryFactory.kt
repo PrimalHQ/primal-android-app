@@ -99,13 +99,16 @@ abstract class RepositoryFactory {
     fun createTransactionFeeRepository(
         primalWalletApiClient: PrimalApiClient,
         nostrEventSignatureHandler: NostrEventSignatureHandler,
+        eventRepository: EventRepository,
     ): TransactionFeeRepository {
         return TransactionFeeRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
-            primalWalletApi = WalletApiServiceFactory.createPrimalWalletApi(
-                primalApiClient = primalWalletApiClient,
+            walletServiceFactory = createWalletServiceFactory(
+                primalWalletApiClient = primalWalletApiClient,
                 nostrEventSignatureHandler = nostrEventSignatureHandler,
+                eventRepository = eventRepository,
             ),
+            walletDatabase = resolveWalletDatabase(),
         )
     }
 

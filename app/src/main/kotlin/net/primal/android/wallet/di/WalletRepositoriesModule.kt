@@ -55,10 +55,12 @@ object WalletRepositoriesModule {
     fun providesTransactionFeeRepository(
         @PrimalWalletApiClient primalApiClient: PrimalApiClient,
         nostrNotary: NostrNotary,
+        eventRepository: EventRepository,
     ): TransactionFeeRepository =
         WalletRepositoryFactory.createTransactionFeeRepository(
             primalWalletApiClient = primalApiClient,
             nostrEventSignatureHandler = nostrNotary,
+            eventRepository = eventRepository,
         )
 
     @Provides

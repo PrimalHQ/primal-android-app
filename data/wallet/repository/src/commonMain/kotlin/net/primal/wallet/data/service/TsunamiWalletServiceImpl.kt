@@ -1,14 +1,17 @@
 package net.primal.wallet.data.service
 
+import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
 import net.primal.core.lightning.LightningPayHelper
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.MSATS_IN_SATS
 import net.primal.core.utils.Result
 import net.primal.core.utils.runCatching
 import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.utils.decodeLNUrlOrNull
+import net.primal.domain.rates.fees.OnChainTransactionFeeTier
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.OnChainAddressResult
@@ -145,5 +148,39 @@ internal class TsunamiWalletServiceImpl(
                     ).getOrThrow()
                 }
             }
+        }
+
+    override suspend fun fetchMiningFees(
+        wallet: Wallet.Tsunami,
+        onChainAddress: String,
+        amountInBtc: String,
+    ): Result<List<OnChainTransactionFeeTier>> =
+        runCatching {
+            val response = tsunamiWalletSdk.estimateOnChainWithdrawalFees(
+                walletId = wallet.walletId,
+                withdrawalAddress = onChainAddress,
+                amountSats = amountInBtc.toSats(),
+            ).getOrThrow()
+
+            listOf(
+                OnChainTransactionFeeTier(
+                    tierId = "low",
+                    label = "Low",
+                    confirmationEstimationInMin = 10,
+                    txFeeInBtc = response.lowPriorityInSats.toBtc().toString(),
+                ),
+                OnChainTransactionFeeTier(
+                    tierId = "medium",
+                    label = "Medium",
+                    confirmationEstimationInMin = 3.hours.inWholeMinutes.toInt(),
+                    txFeeInBtc = response.mediumPriorityInSats.toBtc().toString(),
+                ),
+                OnChainTransactionFeeTier(
+                    tierId = "high",
+                    label = "High",
+                    confirmationEstimationInMin = 24.hours.inWholeMinutes.toInt(),
+                    txFeeInBtc = response.highPriorityInSats.toBtc().toString(),
+                ),
+            )
         }
 }

@@ -25,6 +25,7 @@ import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.InvoiceType
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstProfileId
+import net.primal.domain.rates.fees.OnChainTransactionFeeTier
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.NostrWalletConnect
@@ -192,6 +193,14 @@ internal class NostrWalletServiceImpl(
 
             else -> TxState.CREATED
         }
+
+    override suspend fun fetchMiningFees(
+        wallet: Wallet.NWC,
+        onChainAddress: String,
+        amountInBtc: String,
+    ): Result<List<OnChainTransactionFeeTier>> {
+        throw IllegalStateException("Mining fees are not supported for NWC wallets.")
+    }
 
     private fun createNwcApiClient(wallet: Wallet.NWC) =
         NwcClientFactory.createNwcApiClient(
