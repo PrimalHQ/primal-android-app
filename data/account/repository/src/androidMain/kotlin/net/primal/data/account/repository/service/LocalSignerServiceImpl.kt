@@ -9,7 +9,6 @@ import net.primal.core.utils.add
 import net.primal.core.utils.asSuccess
 import net.primal.core.utils.fold
 import net.primal.core.utils.map
-import net.primal.core.utils.recover
 import net.primal.core.utils.recoverCatching
 import net.primal.core.utils.remove
 import net.primal.core.utils.runCatching
@@ -92,7 +91,7 @@ internal class LocalSignerServiceImpl internal constructor(
     }
 
     override suspend fun processMethodOrAddToPending(method: LocalSignerMethod): Result<Unit> {
-        return processMethod(method).map { Unit }.recover { error ->
+        return processMethod(method).map { Unit }.recoverCatching { error ->
             if (error is LocalSignerError.UserApprovalRequired) {
                 pendingMethods.add(method)
                 insertNewSessionEvent(
@@ -102,7 +101,7 @@ internal class LocalSignerServiceImpl internal constructor(
                 )
                 Unit.asSuccess()
             } else {
-                Result.failure(error)
+                throw error
             }
         }
     }
