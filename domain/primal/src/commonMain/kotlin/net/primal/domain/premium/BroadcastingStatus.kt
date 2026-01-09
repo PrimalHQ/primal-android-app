@@ -1,4 +1,4 @@
-package net.primal.android.premium.manage.content.api.model
+package net.primal.domain.premium
 
 import kotlinx.serialization.Serializable
 

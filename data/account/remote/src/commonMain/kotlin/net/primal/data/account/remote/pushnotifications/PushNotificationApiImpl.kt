@@ -1,21 +1,20 @@
-package net.primal.android.core.push.api
+package net.primal.data.account.remote.pushnotifications
 
-import javax.inject.Inject
-import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.remote.PrimalVerb
+import net.primal.data.account.remote.PrimalAccountVerb
+import net.primal.data.account.remote.pushnotifications.model.UpdateNotificationTokenRequest
 import net.primal.domain.nostr.NostrEvent
 
-class PrimalPushMessagesApiImpl @Inject constructor(
-    @PrimalCacheApiClient private val primalCacheApiClient: PrimalApiClient,
-) : PrimalPushMessagesApi {
+class PushNotificationApiImpl(
+    private val primalApiClient: PrimalApiClient,
+) : PushNotificationApi {
 
     override suspend fun updateNotificationsToken(authorizationEvents: List<NostrEvent>, token: String) {
-        primalCacheApiClient.query(
+        primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.UPDATE_PUSH_NOTIFICATION_TOKEN.id,
+                primalVerb = PrimalAccountVerb.UPDATE_PUSH_NOTIFICATION_TOKEN.id,
                 optionsJson = UpdateNotificationTokenRequest(
                     authorizationEvents = authorizationEvents,
                     platform = "android",
@@ -26,9 +25,9 @@ class PrimalPushMessagesApiImpl @Inject constructor(
     }
 
     override suspend fun updateNotificationTokenForNip46(authorizationEvent: NostrEvent, token: String) {
-        primalCacheApiClient.query(
+        primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = PrimalVerb.UPDATE_PUSH_NOTIFICATION_TOKEN_FOR_NIP46.id,
+                primalVerb = PrimalAccountVerb.UPDATE_PUSH_NOTIFICATION_TOKEN_FOR_NIP46.id,
                 optionsJson = UpdateNotificationTokenRequest(
                     authorizationEvents = listOf(authorizationEvent),
                     platform = "android",

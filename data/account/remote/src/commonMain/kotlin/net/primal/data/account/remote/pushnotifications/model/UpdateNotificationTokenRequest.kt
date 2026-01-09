@@ -1,4 +1,4 @@
-package net.primal.android.core.push.api
+package net.primal.data.account.remote.pushnotifications.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

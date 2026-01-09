@@ -1,4 +1,4 @@
-package net.primal.data.remote.api.settings.model
+package net.primal.domain.settings
 
 import kotlinx.serialization.Serializable
 

@@ -6,6 +6,8 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.api.articles.ArticlesApiImpl
+import net.primal.data.remote.api.broadcast.BroadcastApi
+import net.primal.data.remote.api.broadcast.BroadcastApiImpl
 import net.primal.data.remote.api.events.EventStatsApi
 import net.primal.data.remote.api.events.EventStatsApiImpl
 import net.primal.data.remote.api.explore.ExploreApi
@@ -20,6 +22,8 @@ import net.primal.data.remote.api.messages.MessagesApi
 import net.primal.data.remote.api.messages.MessagesApiImpl
 import net.primal.data.remote.api.notifications.NotificationsApi
 import net.primal.data.remote.api.notifications.NotificationsApiImpl
+import net.primal.data.remote.api.premium.PremiumBroadcastApi
+import net.primal.data.remote.api.premium.PremiumBroadcastApiImpl
 import net.primal.data.remote.api.settings.SettingsApi
 import net.primal.data.remote.api.settings.SettingsApiImpl
 import net.primal.data.remote.api.stream.LiveStreamApi
@@ -35,6 +39,11 @@ object PrimalApiServiceFactory {
     private val defaultHttpClient = HttpClientFactory.createHttpClientWithDefaultConfig()
 
     fun createArticlesApi(primalApiClient: PrimalApiClient): ArticlesApi = ArticlesApiImpl(primalApiClient)
+
+    fun createBroadcastApi(primalApiClient: PrimalApiClient): BroadcastApi = BroadcastApiImpl(primalApiClient)
+
+    fun createPremiumBroadcastApi(primalApiClient: PrimalApiClient): PremiumBroadcastApi =
+        PremiumBroadcastApiImpl(primalApiClient)
 
     fun createEventsApi(primalApiClient: PrimalApiClient): EventStatsApi = EventStatsApiImpl(primalApiClient)
 
