@@ -17,6 +17,7 @@ import net.primal.data.account.repository.service.AndroidAccountServiceFactory
 import net.primal.data.account.repository.service.LocalSignerService
 import net.primal.data.account.repository.service.factory.AccountServiceFactory
 import net.primal.data.remote.factory.PrimalApiServiceFactory
+import net.primal.domain.account.blossom.BlossomRepository
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.LocalAppRepository
 import net.primal.domain.account.repository.PermissionsRepository
@@ -82,4 +83,10 @@ object AccountRepositoriesModule {
     @Provides
     fun provideRemoteAppConnectionManager(): RemoteAppConnectionManager =
         AccountServiceFactory.getRemoteAppConnectionManager()
+
+    @Provides
+    fun provideBlossomRepository(@PrimalCacheApiClient primalApiClient: PrimalApiClient): BlossomRepository =
+        AccountRepositoryFactory.createBlossomRepository(
+            primalApiClient = primalApiClient,
+        )
 }

@@ -32,6 +32,4 @@ interface UsersApi {
     suspend fun isUserFollowing(userId: String, targetUserId: String): Boolean
 
     suspend fun getUserBookmarksList(userId: String): BookmarksResponse
-
-    suspend fun getRecommendedBlossomServers(): List<String>
 }

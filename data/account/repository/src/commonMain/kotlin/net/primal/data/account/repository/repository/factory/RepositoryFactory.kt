@@ -3,8 +3,11 @@ package net.primal.data.account.repository.repository.factory
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.plugins.cache.HttpCache
 import net.primal.core.networking.factory.HttpClientFactory
+import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.account.local.db.AccountDatabase
+import net.primal.data.account.remote.factory.AccountApiServiceFactory
+import net.primal.data.account.repository.repository.BlossomRepositoryImpl
 import net.primal.data.account.repository.repository.ConnectionRepositoryImpl
 import net.primal.data.account.repository.repository.LocalAppRepositoryImpl
 import net.primal.data.account.repository.repository.PermissionsRepositoryImpl
@@ -15,6 +18,7 @@ import net.primal.data.account.repository.repository.internal.InternalPermission
 import net.primal.data.account.repository.repository.internal.InternalRemoteSessionEventRepository
 import net.primal.data.account.signer.remote.api.WellKnownApi
 import net.primal.data.account.signer.remote.api.createWellKnownApi
+import net.primal.domain.account.blossom.BlossomRepository
 import net.primal.domain.account.handler.Nip46EventsHandler
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.account.repository.LocalAppRepository
@@ -87,6 +91,12 @@ abstract class RepositoryFactory {
             database = resolveAccountDatabase(),
             dispatchers = dispatcherProvider,
             wellKnownApi = wellKnownApi,
+        )
+
+    fun createBlossomRepository(primalApiClient: PrimalApiClient): BlossomRepository =
+        BlossomRepositoryImpl(
+            dispatchers = dispatcherProvider,
+            blossomsApi = AccountApiServiceFactory.createBlossomsApi(primalApiClient = primalApiClient),
         )
 }
 

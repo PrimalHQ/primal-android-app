@@ -5,17 +5,15 @@ plugins {
     alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.ktorfit)
 }
 
-private val xcfName = "PrimalDataAccountRepository"
+private val xcfName = "PrimalDataAccountRemote"
 
 kotlin {
-
-    // Target declarations - add or remove as needed below. These define
-    // which platforms this KMP module supports.
-    // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
+    // Android target
     androidLibrary {
-        namespace = "net.primal.data.account.repository"
+        namespace = "net.primal.data.account.remote"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
 
@@ -30,11 +28,11 @@ kotlin {
     }
 
     // JVM Target
-//    jvm("desktop")
+    jvm("desktop")
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
-    val iosTargets = listOf(iosArm64(), iosSimulatorArm64())
+    val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
 
     iosTargets.forEach {
         it.binaries.framework {
@@ -49,24 +47,19 @@ kotlin {
             dependencies {
                 // Internal
                 implementation(project(":core:utils"))
-                implementation(project(":core:nips"))
-                implementation(project(":core:app-config"))
                 implementation(project(":core:networking-http"))
                 implementation(project(":core:networking-primal"))
-
-                implementation(project(":data:account:local"))
-                implementation(project(":data:account:remote"))
-                implementation(project(":data:account:signer"))
-
                 implementation(project(":domain:nostr"))
-                implementation(project(":domain:account"))
+                implementation(project(":domain:primal"))
 
-                implementation(libs.kotlinx.atomicfu)
+                // Core
+                implementation(libs.kotlinx.coroutines.core)
 
-                implementation(libs.ktor.http)
+                // Serialization
+                implementation(libs.kotlinx.serialization.json)
+                implementation(libs.kotlinx.io)
 
-                // Networking && Serialization
-                implementation(libs.okio)
+                // Ktorfit
                 implementation(libs.ktorfit.light)
                 implementation(libs.ktorfit.converters.response)
                 implementation(libs.ktorfit.converters.call)
@@ -79,7 +72,6 @@ kotlin {
         commonTest {
             dependencies {
                 implementation(libs.junit)
-                implementation(libs.kotlin.test)
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.kotest.assertions.json)
                 implementation(libs.kotlinx.coroutines.test)
@@ -105,5 +97,10 @@ kotlin {
             dependencies {
             }
         }
+    }
+
+    // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
+    kotlin.sourceSets.all {
+        languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
     }
 }
