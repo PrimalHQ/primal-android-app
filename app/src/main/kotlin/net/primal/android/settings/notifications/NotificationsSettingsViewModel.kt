@@ -34,7 +34,6 @@ import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.remote.api.settings.model.AppSettingsDescription
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -45,6 +44,7 @@ import net.primal.domain.notifications.NotificationSettingsType
 import net.primal.domain.notifications.NotificationSettingsType.Preferences
 import net.primal.domain.notifications.NotificationSettingsType.PushNotifications
 import net.primal.domain.notifications.NotificationSettingsType.TabNotifications
+import net.primal.domain.settings.AppSettingsDescription
 import timber.log.Timber
 
 @HiltViewModel
