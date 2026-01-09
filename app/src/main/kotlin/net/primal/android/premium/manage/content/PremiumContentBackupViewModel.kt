@@ -16,27 +16,29 @@ import net.primal.android.nostr.ext.takeContentOrNull
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiEvent
 import net.primal.android.premium.manage.content.PremiumContentBackupContract.UiState
-import net.primal.android.premium.manage.content.api.model.BroadcastingStatus
 import net.primal.android.premium.manage.content.model.ContentGroup
 import net.primal.android.premium.manage.content.model.ContentType
-import net.primal.android.premium.manage.content.repository.BroadcastRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
 import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.model.AppSpecificDataRequest
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
+import net.primal.domain.premium.BroadcastingStatus
+import net.primal.domain.premium.PremiumBroadcastRepository
 import timber.log.Timber
 
 @HiltViewModel
 class PremiumContentBackupViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val broadcastRepository: BroadcastRepository,
+    private val premiumBroadcastRepository: PremiumBroadcastRepository,
     @PrimalCacheApiClient private val primalCachingApiClient: PrimalApiClient,
     private val nostrNotary: NostrNotary,
 ) : ViewModel() {
@@ -61,7 +63,8 @@ class PremiumContentBackupViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val status = retryNetworkCall(retries = 2) {
-                    broadcastRepository.fetchBroadcastStatus(userId = activeAccountStore.activeUserId())
+                    premiumBroadcastRepository.fetchBroadcastStatus(userId = activeAccountStore.activeUserId())
+                        .getOrThrow()
                 }
                 handleBroadcastStatus(status)
             } catch (error: NetworkException) {
@@ -74,26 +77,22 @@ class PremiumContentBackupViewModel @Inject constructor(
 
     private fun fetchContentStats() {
         viewModelScope.launch {
-            try {
-                val stats = broadcastRepository.fetchContentStats(userId = activeAccountStore.activeUserId())
-                setState {
-                    copy(
-                        contentTypes = ContentGroup.entries.map { group ->
-                            ContentType(
-                                group = group,
-                                count = when (group) {
-                                    ContentGroup.All -> stats.values.sum()
-                                    else -> stats.filter { it.key in (group.kinds ?: emptyList()) }.values.sum()
-                                },
-                            )
-                        },
-                    )
-                }
-            } catch (error: NetworkException) {
-                Timber.e(error)
-            } catch (error: SignatureException) {
-                Timber.e(error)
-            }
+            premiumBroadcastRepository.fetchContentStats(userId = activeAccountStore.activeUserId())
+                .onSuccess { stats ->
+                    setState {
+                        copy(
+                            contentTypes = ContentGroup.entries.map { group ->
+                                ContentType(
+                                    group = group,
+                                    count = when (group) {
+                                        ContentGroup.All -> stats.values.sum()
+                                        else -> stats.filter { it.key in (group.kinds ?: emptyList()) }.values.sum()
+                                    },
+                                )
+                            },
+                        )
+                    }
+                }.onFailure { Timber.e(it) }
         }
     }
 
@@ -175,11 +174,10 @@ class PremiumContentBackupViewModel @Inject constructor(
 
     private fun startBroadcasting(type: ContentType) {
         viewModelScope.launch {
-            try {
-                broadcastRepository.startBroadcast(
-                    userId = activeAccountStore.activeUserId(),
-                    kinds = type.group.kinds,
-                )
+            premiumBroadcastRepository.startBroadcast(
+                userId = activeAccountStore.activeUserId(),
+                kinds = type.group.kinds,
+            ).onSuccess {
                 setState {
                     copy(
                         anyBroadcasting = true,
@@ -191,23 +189,14 @@ class PremiumContentBackupViewModel @Inject constructor(
                         },
                     )
                 }
-            } catch (error: NetworkException) {
-                Timber.e(error)
-            } catch (error: SignatureException) {
-                Timber.e(error)
-            }
+            }.onFailure { Timber.e(it) }
         }
     }
 
     private fun stopBroadcasting() {
         viewModelScope.launch {
-            try {
-                broadcastRepository.cancelBroadcast(userId = activeAccountStore.activeUserId())
-            } catch (error: NetworkException) {
-                Timber.e(error)
-            } catch (error: SignatureException) {
-                Timber.e(error)
-            }
+            premiumBroadcastRepository.cancelBroadcast(userId = activeAccountStore.activeUserId())
+                .onFailure { Timber.e(it) }
         }
     }
 }

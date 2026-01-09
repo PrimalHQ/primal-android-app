@@ -13,13 +13,8 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
-import net.primal.android.core.serialization.json.NostrJsonEncodeDefaults
-import net.primal.android.networking.relays.broadcast.BroadcastEventResponse
-import net.primal.android.networking.relays.broadcast.BroadcastRequestBody
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.user.domain.Relay
-import net.primal.core.networking.primal.PrimalApiClient
-import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.NostrSocketClient
 import net.primal.core.networking.sockets.NostrSocketClientFactory
@@ -29,18 +24,16 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.networking.sockets.filterByEventId
 import net.primal.core.networking.sockets.parseIncomingMessage
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.data.remote.PrimalVerb
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import timber.log.Timber
 
 class RelayPool(
     dispatchers: DispatcherProvider,
     private val nostrSocketClientFactory: NostrSocketClientFactory,
-    private val primalApiClient: PrimalApiClient,
+    private val cachingImportRepository: CachingImportRepository,
 ) {
 
     companion object {
@@ -123,26 +116,14 @@ class RelayPool(
     }
 
     private suspend fun handleBroadcastEventThroughCachingProxy(relayUrls: List<String>, nostrEvent: NostrEvent) {
-        val result = try {
-            val queryResult = primalApiClient.query(
-                message = PrimalCacheFilter(
-                    primalVerb = PrimalVerb.BROADCAST_EVENTS.id,
-                    optionsJson = NostrJsonEncodeDefaults.encodeToString(
-                        BroadcastRequestBody(
-                            events = listOf(nostrEvent),
-                            relays = relayUrls,
-                        ),
-                    ),
-                ),
-            )
-            val broadcastEvents = queryResult.findPrimalEvent(NostrEventKind.PrimalBroadcastResult)
-            broadcastEvents?.content.decodeFromJsonStringOrNull<List<BroadcastEventResponse>>()
-        } catch (error: NetworkException) {
-            Timber.w(error)
-            null
-        } ?: throw NostrPublishException(
-            cause = NetworkException(message = "Primal NostrEvent 10_000_149 not found or invalid."),
-        )
+        val result =
+            cachingImportRepository.broadcastEvents(
+                events = listOf(nostrEvent),
+                relays = relayUrls,
+            ).getOrNull()
+                ?: throw NostrPublishException(
+                    cause = NetworkException(message = "Primal NostrEvent 10_000_149 not found or invalid."),
+                )
 
         result.find { response -> response.eventId == nostrEvent.id }?.responses
             ?.mapNotNull { relayResponse ->

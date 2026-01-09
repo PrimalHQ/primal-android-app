@@ -1,4 +1,4 @@
-package net.primal.android.premium.manage.content.api.model
+package net.primal.data.remote.api.broadcast.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
