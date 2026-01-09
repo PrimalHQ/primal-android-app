@@ -2,11 +2,11 @@ package net.primal.android.signer.client.event
 
 import net.primal.android.networking.UserAgentProvider
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.remote.api.settings.model.AppSettingsDescription
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
 import net.primal.domain.nostr.utils.extractProfileId
+import net.primal.domain.settings.AppSettingsDescription
 
 fun buildAppSpecificDataEvent(pubkey: String) =
     NostrUnsignedEvent(
