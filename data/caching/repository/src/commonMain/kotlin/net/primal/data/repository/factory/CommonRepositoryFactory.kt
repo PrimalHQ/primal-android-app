@@ -9,6 +9,7 @@ import net.primal.data.repository.UserDataCleanupRepositoryImpl
 import net.primal.data.repository.articles.ArticleRepositoryImpl
 import net.primal.data.repository.articles.HighlightRepositoryImpl
 import net.primal.data.repository.bookmarks.PublicBookmarksRepositoryImpl
+import net.primal.data.repository.broadcast.PremiumBroadcastRepositoryImpl
 import net.primal.data.repository.events.EventInteractionRepositoryImpl
 import net.primal.data.repository.events.EventRelayHintsRepositoryImpl
 import net.primal.data.repository.events.EventRepositoryImpl
@@ -39,6 +40,7 @@ import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.posts.FeedRepository
+import net.primal.domain.premium.PremiumBroadcastRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
@@ -76,10 +78,23 @@ abstract class CommonRepositoryFactory {
         )
     }
 
-    fun createCachingImportRepository(): CachingImportRepository {
+    fun createCachingImportRepository(cachingPrimalApiClient: PrimalApiClient): CachingImportRepository {
         return CachingImportRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = resolveCachingDatabase(),
+            importApi = PrimalApiServiceFactory.createImportApi(cachingPrimalApiClient),
+            broadcastApi = PrimalApiServiceFactory.createBroadcastApi(cachingPrimalApiClient),
+        )
+    }
+
+    fun createPremiumBroadcastRepository(
+        cachingPrimalApiClient: PrimalApiClient,
+        nostrEventSignatureHandler: NostrEventSignatureHandler,
+    ): PremiumBroadcastRepository {
+        return PremiumBroadcastRepositoryImpl(
+            dispatchers = dispatcherProvider,
+            premiumBroadcastApi = PrimalApiServiceFactory.createPremiumBroadcastApi(cachingPrimalApiClient),
+            nostrEventSignatureHandler = nostrEventSignatureHandler,
         )
     }
 
