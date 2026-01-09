@@ -1,8 +1,8 @@
-package net.primal.android.core.push.api
+package net.primal.domain.account.pushnotifications
 
 import net.primal.domain.nostr.NostrEvent
 
-interface PrimalPushMessagesApi {
+interface PushNotificationRepository {
 
     suspend fun updateNotificationsToken(authorizationEvents: List<NostrEvent>, token: String)
 
