@@ -1,8 +1,12 @@
 package net.primal.data.repository.importer
 
 import kotlinx.coroutines.withContext
+import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.runCatching
 import net.primal.data.local.db.PrimalDatabase
+import net.primal.data.remote.api.broadcast.BroadcastApi
+import net.primal.data.remote.api.importing.PrimalImportApi
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
 import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
@@ -10,6 +14,7 @@ import net.primal.data.repository.mappers.remote.parseAndFoldPrimalLegendProfile
 import net.primal.data.repository.mappers.remote.parseAndFoldPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndFoldPrimalUserNames
 import net.primal.domain.common.PrimalEvent
+import net.primal.domain.global.BroadcastEventResponse
 import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -17,6 +22,8 @@ import net.primal.domain.nostr.NostrEventKind
 class CachingImportRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
+    private val importApi: PrimalImportApi,
+    private val broadcastApi: BroadcastApi,
 ) : CachingImportRepository {
 
     override suspend fun cacheNostrEvents(vararg events: NostrEvent) {
@@ -69,5 +76,26 @@ class CachingImportRepositoryImpl(
                 )
 
             database.profiles().insertOrUpdateAll(data = profilesPO)
+        }
+
+    override suspend fun importEvents(events: List<NostrEvent>): Boolean =
+        withContext(dispatcherProvider.io()) {
+            importApi.importEvents(events)
+        }
+
+    override suspend fun broadcastEvents(
+        events: List<NostrEvent>,
+        relays: List<String>,
+    ): Result<List<BroadcastEventResponse>> =
+        withContext(dispatcherProvider.io()) {
+            runCatching {
+                broadcastApi.broadcastEvents(events = events, relays = relays)
+                    .map { response ->
+                        BroadcastEventResponse(
+                            eventId = response.eventId,
+                            responses = response.responses,
+                        )
+                    }
+            }
         }
 }

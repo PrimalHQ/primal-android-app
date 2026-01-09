@@ -5,12 +5,12 @@ import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.domain.Relay
+import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
-import net.primal.domain.publisher.NostrEventImporter
 import net.primal.domain.publisher.PrimalPublishResult
 import net.primal.domain.publisher.PrimalPublisher
 import timber.log.Timber
@@ -18,12 +18,12 @@ import timber.log.Timber
 class NostrPublisher @Inject constructor(
     private val relaysSocketManager: RelaysSocketManager,
     private val nostrNotary: NostrNotary,
-    private val primalEventsImporter: NostrEventImporter,
+    private val cachingImportRepository: CachingImportRepository,
 ) : PrimalPublisher {
 
     private suspend fun importEvent(event: NostrEvent): Boolean {
         val result = runCatching {
-            primalEventsImporter.importEvents(events = listOf(event))
+            cachingImportRepository.importEvents(events = listOf(event))
         }
         return result.isSuccess
     }
