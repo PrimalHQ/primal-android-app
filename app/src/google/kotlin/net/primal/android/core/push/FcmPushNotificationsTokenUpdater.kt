@@ -4,7 +4,6 @@ import com.google.firebase.messaging.FirebaseMessaging
 import javax.inject.Inject
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
-import net.primal.android.core.push.api.PrimalPushMessagesApi
 import net.primal.android.core.push.api.model.UpdateTokenContent
 import net.primal.android.core.push.api.model.UpdateTokenContentNip46
 import net.primal.android.networking.UserAgentProvider
@@ -13,6 +12,7 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.domain.account.pushnotifications.PushNotificationRepository
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
@@ -28,7 +28,7 @@ class FcmPushNotificationsTokenUpdater @Inject constructor(
     private val userAccountsStore: UserAccountsStore,
     private val credentialsStore: CredentialsStore,
     private val connectionRepository: ConnectionRepository,
-    private val primalPushMessagesApi: PrimalPushMessagesApi,
+    private val pushNotificationRepository: PushNotificationRepository,
     private val signatureHandler: NostrEventSignatureHandler,
 ) : PushNotificationsTokenUpdater {
     override suspend fun updateTokenForAllUsers() {
@@ -47,7 +47,7 @@ class FcmPushNotificationsTokenUpdater @Inject constructor(
                 }
 
                 try {
-                    primalPushMessagesApi.updateNotificationsToken(
+                    pushNotificationRepository.updateNotificationsToken(
                         authorizationEvents = authorizationEvents,
                         token = token,
                     )
@@ -74,7 +74,7 @@ class FcmPushNotificationsTokenUpdater @Inject constructor(
                         clientPubKeys = connections.map { it.clientPubKey }.toSet(),
                     ).encodeToJsonString(),
                 )?.let { authorizationEvent ->
-                    primalPushMessagesApi.updateNotificationTokenForNip46(
+                    pushNotificationRepository.updateNotificationTokenForNip46(
                         authorizationEvent = authorizationEvent,
                         token = token,
                     )
