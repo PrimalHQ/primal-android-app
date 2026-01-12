@@ -4,6 +4,7 @@ import io.ktor.http.Url
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import net.primal.core.utils.Result
+import net.primal.core.utils.ensureWsOrWss
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
@@ -131,6 +132,7 @@ class SignerConnectionInitializer internal constructor(
         url.parameters.getAll(RELAY_PARAM)
             ?.flatMap { it.split("&relay=") }
             ?.map { it.dropLastWhile { c -> c == '/' } }
+            ?.map { it.ensureWsOrWss() }
             ?: throw IllegalArgumentException(
                 "No `$RELAY_PARAM` fields found in provided `connectionUrl`. This is a mandatory field.",
             )
