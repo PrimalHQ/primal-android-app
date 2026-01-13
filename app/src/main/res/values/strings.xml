@@ -1221,6 +1221,15 @@
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
     <string name="wallet_dashboard_buy_sats_button">Buy Sats Now</string>
 
+    <string name="wallet_restore_title">Restore Existing Wallet</string>
+    <string name="wallet_restore_enter_recovery_phrase_placeholder">Enter your wallet recovery phrase</string>
+    <string name="wallet_restore_helper_text">We support recovery of any existing bitcoin wallet on the network. Recovery phrases are 12 to 24 words long.</string>
+    <string name="wallet_restore_button">Restore Wallet Now</string>
+    <string name="wallet_restore_invalid_recovery_phrase">Invalid recovery phrase</string>
+    <string name="wallet_restore_valid_recovery_phrase">Valid recovery phrase</string>
+    <string name="wallet_restore_restoring_your_wallet">Restoring your wallet…</string>
+    <string name="wallet_restore_error_generic">Something went wrong. Please check your recovery phrase and try again.</string>
+
     <string name="wallet_tos_prefix">By tapping \"Next\" you agree to the</string>
     <string name="wallet_activation_title">Activate Wallet</string>
     <string name="wallet_activation_pending_data_hint">Activating your wallet is easy!\nWe just need a few details below. This info will not be shared publicly.</string>

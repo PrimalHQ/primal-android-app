@@ -62,6 +62,7 @@ fun WalletSettingsScreen(
     onEditProfileClick: () -> Unit,
     onScanNwcClick: () -> Unit,
     onCreateNewWalletConnection: () -> Unit,
+    onRestoreWalletClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
     DisposableLifecycleObserverEffect(viewModel) {
@@ -77,6 +78,7 @@ fun WalletSettingsScreen(
         onEditProfileClick = onEditProfileClick,
         onScanNwcClick = onScanNwcClick,
         onCreateNewWalletConnection = onCreateNewWalletConnection,
+        onRestoreWalletClick = onRestoreWalletClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -89,6 +91,7 @@ fun WalletSettingsScreen(
     onEditProfileClick: () -> Unit,
     onScanNwcClick: () -> Unit,
     onCreateNewWalletConnection: () -> Unit,
+    onRestoreWalletClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -137,6 +140,7 @@ fun WalletSettingsScreen(
                             PrimalWalletSettings(
                                 state = state,
                                 eventPublisher = eventPublisher,
+                                onRestoreWalletClick = onRestoreWalletClick,
                             )
                         }
 
@@ -301,6 +305,7 @@ private fun PreviewSettingsWalletScreen(
             onScanNwcClick = {},
             onCreateNewWalletConnection = {},
             eventPublisher = {},
+            onRestoreWalletClick = {},
         )
     }
 }

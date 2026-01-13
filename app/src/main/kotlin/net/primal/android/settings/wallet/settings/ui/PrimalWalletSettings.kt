@@ -39,7 +39,11 @@ import net.primal.core.utils.CurrencyConversionUtils.toSats
 private const val DEFAULT_MAX_BALANCE_IN_SATS = 0.01
 
 @Composable
-fun PrimalWalletSettings(state: WalletSettingsContract.UiState, eventPublisher: (UiEvent) -> Unit) {
+fun PrimalWalletSettings(
+    state: WalletSettingsContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+    onRestoreWalletClick: () -> Unit,
+) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     Column {
         Spacer(modifier = Modifier.height(8.dp))
@@ -106,7 +110,7 @@ fun PrimalWalletSettings(state: WalletSettingsContract.UiState, eventPublisher: 
             trailingContent = {
                 Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
             },
-            onClick = { eventPublisher(UiEvent.RestoreWallet) },
+            onClick = onRestoreWalletClick,
         )
 
         if (maxWalletBalanceShown) {
