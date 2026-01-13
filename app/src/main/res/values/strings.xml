@@ -879,6 +879,9 @@
     <string name="settings_wallet_nwc_paste_string">Paste NWC String</string>
     <string name="settings_wallet_nwc_scan_qr_code">Scan NWC QR Code</string>
     <string name="settings_wallet_nwc_disconnect_wallet_button">Disconnect Wallet</string>
+    <string name="settings_wallet_backup_balance">Wallet Balance: %1$s sats</string>
+    <string name="settings_wallet_backup_subtitle">This wallet has not been backed up. It is important to back up your wallet so you don\'t lose access to your funds.</string>
+    <string name="settings_wallet_backup_button">Back Up Wallet Now</string>
     <string name="settings_wallet_nwc_profile_lightning_address">Your Nostr Lightning Address:</string>
     <string name="settings_wallet_nwc_profile_lightning_address_hint">You can change your Nostr Lightning Address (for receiving zaps) in your</string>
     <string name="settings_wallet_nwc_profile_lightning_address_hint_suffix">profile settings</string>

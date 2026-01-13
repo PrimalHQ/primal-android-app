@@ -48,6 +48,7 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEven
 import net.primal.android.settings.wallet.settings.ui.ConnectedAppsSettings
 import net.primal.android.settings.wallet.settings.ui.ExternalWalletSettings
 import net.primal.android.settings.wallet.settings.ui.PrimalWalletSettings
+import net.primal.android.settings.wallet.settings.ui.WalletBackupDashboard
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.utils.isActivePrimalWallet
@@ -112,6 +113,15 @@ fun WalletSettingsScreen(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if (state.showBackupDashboard) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    WalletBackupDashboard(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        walletBalanceInBtc = state.wallet?.balanceInBtc?.toString(),
+                        onBackupClick = { eventPublisher(UiEvent.BackupWallet) },
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 ExternalWalletListItem(

@@ -100,6 +100,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     is UiEvent.ConnectExternalWallet -> if (it.connectionLink.isNwcUrl()) {
                         connectWallet(nwcUrl = it.connectionLink)
                     }
+                    UiEvent.BackupWallet -> Unit
                 }
             }
         }
@@ -122,7 +123,25 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private fun observeActiveWallet() =
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { setState { copy(wallet = it, preferPrimalWallet = it is Wallet.Primal) } }
+                .collect { wallet ->
+                    val isTsunami = wallet is Wallet.Tsunami
+                    val balance = wallet?.balanceInBtc ?: 0.0
+                    val isBackedUp = false
+
+                    val shouldShowBackup = isTsunami && balance > 0.0 && !isBackedUp
+
+                    setState {
+                        copy(
+                            wallet = wallet,
+                            preferPrimalWallet = wallet is Wallet.Primal,
+                            showBackupDashboard = shouldShowBackup,
+                        )
+                    }
+
+                    if (wallet != null) {
+                        walletRepository.fetchWalletBalance(walletId = wallet.walletId)
+                    }
+                }
         }
 
     private fun connectWallet(nwcUrl: String) =
