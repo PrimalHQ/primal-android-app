@@ -63,6 +63,8 @@ import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asATagValue
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.getTagValueOrNull
+import net.primal.domain.nostr.hasRootMarker
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.nostr.utils.takeAsNaddrOrNull
@@ -548,14 +550,31 @@ class NoteEditorViewModel @AssistedInject constructor(
                         attachments = _state.value.attachments,
                     )
                 } else {
-                    val rootPost = _state.value.replyToConversation.firstOrNull()
-                    val replyToPost = _state.value.replyToConversation.lastOrNull()
+                    val replyToId = referencedNoteNevent?.eventId
+                    val replyToPost = replyToId?.let {
+                        feedRepository.findPostsById(it)
+                    }
+
+                    val rootPostId = replyToPost?.tags?.find { it.hasRootMarker() }?.getTagValueOrNull()
+                        ?: replyToId
+
+                    val rootNoteNevent = rootPostId?.let { id ->
+                        val localRoot = feedRepository.findPostsById(id)
+                        localRoot?.asFeedPostUi()?.asNevent()
+                            ?: Nevent(
+                                kind = NostrEventKind.ShortTextNote.value,
+                                userId = null,
+                                eventId = id,
+                            )
+                    }
+                    val replyToNoteNevent = replyToPost?.asFeedPostUi()?.asNevent() ?: referencedNoteNevent
+
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
                         content = noteContent.concatenateUris(),
                         attachments = _state.value.attachments,
-                        rootNoteNevent = rootPost?.asNevent(),
-                        replyToNoteNevent = replyToPost?.asNevent(),
+                        rootNoteNevent = rootNoteNevent,
+                        replyToNoteNevent = replyToNoteNevent,
                         rootArticleNaddr = referencedArticleNaddr
                             ?: _state.value.replyToArticle?.generateNaddr(),
                         rootHighlightNevent = referencedHighlightNevent
