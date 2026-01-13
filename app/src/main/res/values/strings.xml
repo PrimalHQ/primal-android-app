@@ -907,6 +907,10 @@
     <string name="settings_wallet_start_in_wallet">Start in wallet</string>
     <string name="settings_wallet_start_in_wallet_hint">Open the wallet when Primal starts</string>
     <string name="settings_wallet_save">Save</string>
+    <string name="settings_wallet_backup_wallet_title">Backup wallet</string>
+    <string name="settings_wallet_backup_wallet_subtitle">Write down your wallet recovery phrase so you don\'t lose access to your funds</string>
+    <string name="settings_wallet_restore_wallet_title">Restore existing wallet</string>
+    <string name="settings_wallet_restore_wallet_subtitle">If you have an existing wallet that you wish to use with your Nostr account, you can restore it here using your 12-24 wallet recovery phrase</string>
     <string name="settings_wallet_new_nwc_connection_title">New Wallet Connection</string>
     <string name="settings_wallet_new_nwc_connection_app_name_input_header">Name of the app you wish to connect:</string>
     <string name="settings_wallet_new_nwc_connection_hint">You can revoke access at any time in your Primal Wallet settings.</string>

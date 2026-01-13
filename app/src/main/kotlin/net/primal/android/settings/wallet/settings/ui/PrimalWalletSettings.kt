@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
@@ -83,6 +84,29 @@ fun PrimalWalletSettings(state: WalletSettingsContract.UiState, eventPublisher: 
                 }
             },
             onClick = { maxWalletBalanceShown = true },
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        if (!state.showBackupDashboard) {
+            SettingsItem(
+                headlineText = stringResource(id = R.string.settings_wallet_backup_wallet_title),
+                supportText = stringResource(id = R.string.settings_wallet_backup_wallet_subtitle),
+                trailingContent = {
+                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
+                },
+                onClick = { eventPublisher(UiEvent.BackupWallet) },
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        SettingsItem(
+            headlineText = stringResource(id = R.string.settings_wallet_restore_wallet_title),
+            supportText = stringResource(id = R.string.settings_wallet_restore_wallet_subtitle),
+            trailingContent = {
+                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
+            },
+            onClick = { eventPublisher(UiEvent.RestoreWallet) },
         )
 
         if (maxWalletBalanceShown) {

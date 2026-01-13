@@ -101,6 +101,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         connectWallet(nwcUrl = it.connectionLink)
                     }
                     UiEvent.BackupWallet -> Unit
+                    UiEvent.RestoreWallet -> Unit
                 }
             }
         }
