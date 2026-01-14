@@ -1221,6 +1221,10 @@
     <string name="wallet_dashboard_no_transactions_hint">Your transactions will appear here.</string>
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
     <string name="wallet_dashboard_buy_sats_button">Buy Sats Now</string>
+    <string name="wallet_dashboard_upgrade_header">IMPORTANT</string>
+    <string name="wallet_dashboard_upgrade_expires_on">This wallet will expire on</string>
+    <string name="wallet_dashboard_upgrade_please_upgrade">Please upgrade to continue using this wallet.</string>
+    <string name="wallet_dashboard_upgrade_button">Upgrade Wallet Now</string>
 
     <string name="wallet_restore_title">Restore Existing Wallet</string>
     <string name="wallet_restore_enter_recovery_phrase_placeholder">Enter your wallet recovery phrase</string>
