@@ -1,4 +1,4 @@
-package net.primal.android.core.compose.signer.ui
+package net.primal.android.core.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -12,7 +12,7 @@ import net.primal.android.theme.AppTheme
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun NostrConnectBottomSheetDragHandle() {
+fun PrimalBottomSheetDragHandle() {
     Column(
         modifier = Modifier
             .fillMaxWidth()

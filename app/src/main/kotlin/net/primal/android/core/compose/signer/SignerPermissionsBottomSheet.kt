@@ -58,12 +58,12 @@ import androidx.core.graphics.drawable.toBitmap
 import kotlin.uuid.ExperimentalUuidApi
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
+import net.primal.android.core.compose.PrimalBottomSheetDragHandle
 import net.primal.android.core.compose.PrimalCheckBox
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.getListItemShape
-import net.primal.android.core.compose.signer.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.core.compose.signer.ui.NostrEventDetails
 import net.primal.android.core.compose.signer.ui.buildRows
 import net.primal.android.core.compose.signer.ui.getStatusTextAndColor
@@ -114,7 +114,7 @@ fun SignerPermissionsBottomSheet(
     ModalBottomSheet(
         modifier = modifier,
         sheetState = sheetState,
-        dragHandle = { NostrConnectBottomSheetDragHandle() },
+        dragHandle = { PrimalBottomSheetDragHandle() },
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         onDismissRequest = onDismissRequest,
         properties = properties,

@@ -1226,6 +1226,12 @@
     <string name="wallet_dashboard_upgrade_please_upgrade">Please upgrade to continue using this wallet.</string>
     <string name="wallet_dashboard_upgrade_button">Upgrade Wallet Now</string>
 
+    <string name="wallet_upgrade_sheet_title">Welcome to Primal 2.7!</string>
+    <string name="wallet_upgrade_sheet_subtitle">Featuring a self-custodial wallet</string>
+    <string name="wallet_upgrade_sheet_description">With one tap, we\'ll move your funds and full\ntransaction history to your new self-custodial\nwallet - so you fully control your bitcoin.\nQuestions? Check out our </string>
+    <string name="wallet_upgrade_sheet_faqs">FAQs</string>
+    <string name="wallet_upgrade_sheet_button">Upgrade Wallet Now</string>
+
     <string name="wallet_restore_title">Restore Existing Wallet</string>
     <string name="wallet_restore_enter_recovery_phrase_placeholder">Enter your wallet recovery phrase</string>
     <string name="wallet_restore_helper_text">We support recovery of any existing bitcoin wallet on the network. Recovery phrases are 12 to 24 words long.</string>

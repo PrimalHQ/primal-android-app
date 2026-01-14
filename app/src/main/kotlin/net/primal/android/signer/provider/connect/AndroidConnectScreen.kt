@@ -13,9 +13,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
+import net.primal.android.core.compose.PrimalBottomSheetDragHandle
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.signer.SignerConnectBottomSheet
-import net.primal.android.core.compose.signer.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.signer.provider.rememberAppDisplayInfo
 import net.primal.android.theme.AppTheme
@@ -87,7 +87,7 @@ private fun AndroidConnectScreen(
         sheetState = sheetState,
         contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         onDismissRequest = onDismiss,
-        dragHandle = { NostrConnectBottomSheetDragHandle() },
+        dragHandle = { PrimalBottomSheetDragHandle() },
     ) {
         SignerConnectBottomSheet(
             appName = appDisplayInfo?.name ?: state.appPackageName,
