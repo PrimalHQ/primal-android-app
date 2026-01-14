@@ -28,7 +28,7 @@ import net.primal.core.utils.CurrencyConversionUtils.toSats
 private val WalletBackupColor = Color(0xFFFE3D2F)
 
 @Composable
-fun WalletBackupDashboard(
+fun WalletBackupWidget(
     walletBalanceInBtc: String?,
     onBackupClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -83,9 +83,9 @@ fun WalletBackupDashboard(
 
 @Preview
 @Composable
-private fun PreviewWalletBackupDashboard() {
+private fun PreviewWalletBackupWidget() {
     PrimalTheme(primalTheme = PrimalTheme.Sunset) {
-        WalletBackupDashboard(
+        WalletBackupWidget(
             walletBalanceInBtc = "0.00010101",
             onBackupClick = {},
         )

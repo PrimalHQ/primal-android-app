@@ -41,7 +41,7 @@ class RestoreWalletViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.MnemonicChanged -> handleMnemonicChange(it.mnemonic)
+                    is UiEvent.MnemonicChange -> handleMnemonicChange(it.mnemonic)
                     UiEvent.RestoreWalletClick -> restoreWallet()
                 }
             }
@@ -52,7 +52,6 @@ class RestoreWalletViewModel @Inject constructor() : ViewModel() {
             copy(
                 mnemonic = mnemonic,
                 mnemonicValidation = validateMnemonic(mnemonic),
-                error = null,
             )
         }
     }
@@ -87,7 +86,7 @@ class RestoreWalletViewModel @Inject constructor() : ViewModel() {
                 setState {
                     copy(
                         currentStage = RestoreStage.MnemonicInput,
-                        error = "Invalid recovery phrase",
+                        mnemonicValidation = MnemonicValidation.Invalid("Invalid recovery phrase"),
                     )
                 }
             }

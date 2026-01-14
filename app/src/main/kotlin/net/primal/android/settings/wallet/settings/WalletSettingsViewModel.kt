@@ -53,7 +53,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
         if (nwcConnectionUrl != null) {
             connectWallet(nwcUrl = nwcConnectionUrl)
         } else {
-            observeActiveWallet()
+            observeActiveWalletData()
+            observeActiveWalletId()
         }
 
         observeEvents()
@@ -120,7 +121,17 @@ class WalletSettingsViewModel @AssistedInject constructor(
             }
         }
 
-    private fun observeActiveWallet() =
+    private fun observeActiveWalletId() =
+        viewModelScope.launch {
+            walletAccountRepository.observeActiveWalletId(userId = activeAccountStore.activeUserId())
+                .collect { walletId ->
+                    if (walletId != null) {
+                        walletRepository.fetchWalletBalance(walletId = walletId)
+                    }
+                }
+        }
+
+    private fun observeActiveWalletData() =
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
                 .collect { wallet ->
@@ -136,10 +147,6 @@ class WalletSettingsViewModel @AssistedInject constructor(
                             preferPrimalWallet = wallet is Wallet.Primal,
                             showBackupDashboard = shouldShowBackup,
                         )
-                    }
-
-                    if (wallet != null) {
-                        walletRepository.fetchWalletBalance(walletId = wallet.walletId)
                     }
                 }
         }

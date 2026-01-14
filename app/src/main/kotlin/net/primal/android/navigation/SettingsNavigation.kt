@@ -330,6 +330,7 @@ private fun NavGraphBuilder.walletRestore(route: String, navController: NavContr
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<RestoreWalletViewModel>()
+        ApplyEdgeToEdge()
         LockToOrientationPortrait()
         RestoreWalletScreen(
             viewModel = viewModel,

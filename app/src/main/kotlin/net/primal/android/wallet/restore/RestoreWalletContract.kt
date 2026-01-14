@@ -5,17 +5,16 @@ interface RestoreWalletContract {
         val currentStage: RestoreStage = RestoreStage.MnemonicInput,
         val mnemonic: String = "",
         val mnemonicValidation: MnemonicValidation = MnemonicValidation.Empty,
-        val error: String? = null,
     ) {
         sealed class MnemonicValidation {
             data object Empty : MnemonicValidation()
             data object Valid : MnemonicValidation()
-            data object Invalid : MnemonicValidation()
+            data class Invalid(val message: String) : MnemonicValidation()
         }
     }
 
     sealed class UiEvent {
-        data class MnemonicChanged(val mnemonic: String) : UiEvent()
+        data class MnemonicChange(val mnemonic: String) : UiEvent()
         data object RestoreWalletClick : UiEvent()
     }
 

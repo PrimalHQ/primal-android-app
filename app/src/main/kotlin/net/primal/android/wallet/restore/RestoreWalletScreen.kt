@@ -94,7 +94,7 @@ private fun RestoreWalletScreen(
                         )
                     }
                     RestoreStage.Restoring -> {
-                        RestoringStage(contentPadding = paddingValues)
+                        RestoringStage()
                     }
                 }
             }
@@ -121,19 +121,19 @@ private fun MnemonicInputStage(
         ) {
             Spacer(modifier = Modifier.height(16.dp))
 
-            val outlineColor = when {
-                state.error != null -> AppTheme.colorScheme.error
-                state.mnemonicValidation is MnemonicValidation.Valid -> AppTheme.extraColorScheme.successBright
+            val outlineColor = when (state.mnemonicValidation) {
+                is MnemonicValidation.Invalid -> AppTheme.colorScheme.error
+                is MnemonicValidation.Valid -> AppTheme.extraColorScheme.successBright
                 else -> AppTheme.colorScheme.outline
             }
 
             OutlinedTextField(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(160.dp),
+                    .height(190.dp),
                 value = state.mnemonic,
                 onValueChange = {
-                    eventPublisher(UiEvent.MnemonicChanged(mnemonic = it))
+                    eventPublisher(UiEvent.MnemonicChange(mnemonic = it))
                 },
                 textStyle = AppTheme.typography.bodyLarge,
                 placeholder = {
@@ -145,7 +145,10 @@ private fun MnemonicInputStage(
                 },
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
                 shape = AppTheme.shapes.large,
-                colors = PrimalDefaults.outlinedTextFieldColors(unfocusedBorderColor = outlineColor),
+                colors = PrimalDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = outlineColor,
+                    unfocusedBorderColor = outlineColor,
+                ),
             )
 
             Box(
@@ -158,9 +161,9 @@ private fun MnemonicInputStage(
             }
 
             Text(
-                modifier = Modifier.padding(top = 24.dp),
+                modifier = Modifier.padding(top = 32.dp),
                 text = stringResource(id = R.string.wallet_restore_helper_text),
-                style = AppTheme.typography.bodyMedium,
+                style = AppTheme.typography.bodyLarge,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 textAlign = TextAlign.Center,
             )
@@ -184,12 +187,12 @@ private fun ValidationMessage(state: UiState) {
     val text: String?
     val color: Color
 
-    when {
-        state.error != null -> {
-            text = state.error
+    when (val validation = state.mnemonicValidation) {
+        is MnemonicValidation.Invalid -> {
+            text = validation.message
             color = AppTheme.colorScheme.error
         }
-        state.mnemonicValidation is MnemonicValidation.Valid -> {
+        is MnemonicValidation.Valid -> {
             text = stringResource(id = R.string.wallet_restore_valid_recovery_phrase)
             color = AppTheme.extraColorScheme.successBright
         }
@@ -210,19 +213,19 @@ private fun ValidationMessage(state: UiState) {
 }
 
 @Composable
-private fun RestoringStage(contentPadding: PaddingValues) {
+private fun RestoringStage() {
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(contentPadding),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            PrimalLoadingSpinner()
+            Box(modifier = Modifier.height(124.dp)) {
+                PrimalLoadingSpinner(size = 124.dp)
+            }
             Text(
                 modifier = Modifier.padding(top = 16.dp),
                 text = stringResource(id = R.string.wallet_restore_restoring_your_wallet),
-                style = AppTheme.typography.bodyLarge,
+                style = AppTheme.typography.titleLarge,
             )
         }
     }
