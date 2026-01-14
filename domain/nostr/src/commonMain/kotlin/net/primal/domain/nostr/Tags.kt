@@ -98,6 +98,8 @@ fun JsonArray.isClientTag() = getOrNull(0)?.jsonPrimitive?.content == "client"
 
 fun JsonArray.getTagValueOrNull() = getOrNull(1)?.jsonPrimitive?.content
 
+fun JsonArray.getRelayFromReplyOrRootTag() = getOrNull(2)?.jsonPrimitive?.content
+
 fun JsonArray.getPubkeyFromReplyOrRootTag() = getOrNull(4)?.jsonPrimitive?.content
 
 fun List<JsonArray>.findFirstStreaming() = firstOrNull { it.isStreamingTag() }?.getTagValueOrNull()
@@ -309,3 +311,13 @@ fun JsonArray.removeTrailingEmptyStrings(): JsonArray {
         this
     }
 }
+
+fun JsonArray.buildNeventFromReplyOrRootNoteTag() =
+    getTagValueOrNull()?.let { eventId ->
+        Nevent(
+            kind = NostrEventKind.ShortTextNote.value,
+            userId = getPubkeyFromReplyOrRootTag() ?: return@let null,
+            eventId = eventId,
+            relays = listOfNotNull(getRelayFromReplyOrRootTag()).filter { it.isNotBlank() },
+        )
+    }

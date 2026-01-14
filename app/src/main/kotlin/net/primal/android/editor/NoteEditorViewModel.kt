@@ -24,7 +24,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.articles.feed.ui.generateNaddr
 import net.primal.android.articles.feed.ui.mapAsFeedArticleUi
 import net.primal.android.articles.highlights.asHighlightUi
@@ -63,9 +62,8 @@ import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asATagValue
+import net.primal.domain.nostr.buildNeventFromReplyOrRootNoteTag
 import net.primal.domain.nostr.cryptography.SignatureException
-import net.primal.domain.nostr.getPubkeyFromReplyOrRootTag
-import net.primal.domain.nostr.getTagValueOrNull
 import net.primal.domain.nostr.hasRootMarker
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.utils.parseNostrUris
@@ -552,31 +550,16 @@ class NoteEditorViewModel @AssistedInject constructor(
                         attachments = _state.value.attachments,
                     )
                 } else {
-                    val replyToId = referencedNoteNevent?.eventId
-                    val replyToPost = replyToId?.let {
+                    val replyToPost = referencedNoteNevent?.eventId?.let {
                         feedRepository.findPostsById(it)
                     }
 
                     val replyToNoteNevent = replyToPost?.asFeedPostUi()?.asNevent() ?: referencedNoteNevent
+                    val rootNoteNevent = replyToPost?.tags
+                        ?.find { it.hasRootMarker() }
+                        ?.buildNeventFromReplyOrRootNoteTag()
+                        ?: replyToNoteNevent
 
-                    val rootTag = replyToPost?.tags?.find { it.hasRootMarker() }
-                    val rootNoteNevent = if (rootTag != null) {
-                        val rootId = rootTag.getTagValueOrNull()
-                        val rootPubkey = rootTag.getPubkeyFromReplyOrRootTag()
-                        val rootRelay = rootTag.getOrNull(2)?.jsonPrimitive?.content
-                        if (rootId != null) {
-                            Nevent(
-                                kind = NostrEventKind.ShortTextNote.value,
-                                userId = rootPubkey,
-                                eventId = rootId,
-                                relays = listOfNotNull(rootRelay).filter { it.isNotEmpty() },
-                            )
-                        } else {
-                            replyToNoteNevent
-                        }
-                    } else {
-                        replyToNoteNevent
-                    }
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
                         content = noteContent.concatenateUris(),
