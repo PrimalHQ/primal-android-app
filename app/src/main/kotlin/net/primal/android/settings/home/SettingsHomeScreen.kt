@@ -1,12 +1,17 @@
 package net.primal.android.settings.home
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -14,6 +19,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -73,6 +79,7 @@ fun SettingsHomeScreen(
                         title = it.title(),
                         onClick = { onSettingsSectionClick(it) },
                         trailingIcon = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                        walletNeedsBackup = it == PrimalSettingsSection.Wallet && state.walletNeedsBackup,
                     )
                     PrimalDivider()
                 }
@@ -94,6 +101,7 @@ private fun SettingsListItem(
     description: String? = null,
     leadingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
+    walletNeedsBackup: Boolean = false,
 ) {
     ListItem(
         modifier = Modifier
@@ -110,10 +118,20 @@ private fun SettingsListItem(
             null
         },
         headlineContent = {
-            Text(
-                text = title,
-                style = AppTheme.typography.titleLarge,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = title,
+                    style = AppTheme.typography.titleLarge,
+                )
+                if (walletNeedsBackup) {
+                    Badge(
+                        modifier = Modifier
+                            .size(size = 8.dp)
+                            .offset(x = 8.dp, y = (-8).dp),
+                        containerColor = AppTheme.colorScheme.primary,
+                    )
+                }
+            }
         },
         supportingContent = {
             if (description != null) {
@@ -123,8 +141,20 @@ private fun SettingsListItem(
             }
         },
         trailingContent = {
-            if (trailingIcon != null) {
-                Icon(imageVector = trailingIcon, contentDescription = null)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (walletNeedsBackup) {
+                    Text(
+                        text = stringResource(id = R.string.settings_wallet_needs_backup),
+                        style = AppTheme.typography.bodyMedium,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    )
+                }
+                if (trailingIcon != null) {
+                    Icon(imageVector = trailingIcon, contentDescription = null)
+                }
             }
         },
     )
