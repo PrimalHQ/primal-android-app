@@ -42,10 +42,10 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
+import net.primal.android.core.compose.PrimalBottomSheetDragHandle
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.button.PrimalFilledButton
-import net.primal.android.core.compose.signer.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.core.service.PrimalRemoteSignerService
 import net.primal.android.core.utils.getNotificationSettingsIntent
 import net.primal.android.core.utils.hasNotificationPermission
@@ -113,7 +113,7 @@ fun EnableSignerNotificationsBottomSheet(
         sheetState = sheetState,
         onDismissRequest = onDismissRequest,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-        dragHandle = { NostrConnectBottomSheetDragHandle() },
+        dragHandle = { PrimalBottomSheetDragHandle() },
     ) {
         EnableSignerNotificationsContent(
             appName = appName,
