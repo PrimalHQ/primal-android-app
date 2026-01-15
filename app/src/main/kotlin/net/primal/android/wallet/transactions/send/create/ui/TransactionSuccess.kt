@@ -27,6 +27,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
+import net.primal.android.wallet.ui.FlowStatusColumn
 import net.primal.android.wallet.walletSuccessColor
 import net.primal.android.wallet.walletSuccessContentColor
 import net.primal.android.wallet.walletSuccessDimColor
@@ -74,7 +75,7 @@ fun TransactionSuccess(
             verticalArrangement = Arrangement.SpaceAround,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            TransactionStatusColumn(
+            FlowStatusColumn(
                 icon = PrimalIcons.WalletSuccess,
                 iconTint = walletSuccessContentColor,
                 headlineText = stringResource(id = R.string.wallet_create_transaction_success_headline),
