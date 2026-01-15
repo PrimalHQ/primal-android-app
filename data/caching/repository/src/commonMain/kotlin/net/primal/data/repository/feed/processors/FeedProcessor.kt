@@ -39,7 +39,7 @@ internal class FeedProcessor(
                 database.feedsConnections().deleteConnectionsByDirective(ownerId = userId, feedSpec = feedSpec)
             }
 
-            response.persistToDatabaseAsTransaction(userId = userId, database = database)
+            response.persistToDatabase(userId = userId, database = database)
             val feedEvents = response.notes + response.reposts
             feedEvents.processRemoteKeys(userId = userId, pagingEvent = pagingEvent)
             feedEvents.orderByPagingIfNotNull(pagingEvent = pagingEvent)
@@ -47,38 +47,34 @@ internal class FeedProcessor(
         }
     }
 
-    private suspend fun List<NostrEvent>.processRemoteKeys(userId: String, pagingEvent: ContentPrimalPaging?) {
+    private suspend inline fun List<NostrEvent>.processRemoteKeys(userId: String, pagingEvent: ContentPrimalPaging?) {
         val sinceId = pagingEvent?.sinceId
         val untilId = pagingEvent?.untilId
         if (sinceId != null && untilId != null) {
-            database.withTransaction {
-                val remoteKeys = this.map {
-                    FeedPostRemoteKey(
-                        ownerId = userId,
-                        eventId = it.id,
-                        directive = feedSpec,
-                        sinceId = sinceId,
-                        untilId = untilId,
-                        cachedAt = Clock.System.now().epochSeconds,
-                    )
-                }
-
-                database.feedPostsRemoteKeys().upsert(remoteKeys)
+            val remoteKeys = this.map {
+                FeedPostRemoteKey(
+                    ownerId = userId,
+                    eventId = it.id,
+                    directive = feedSpec,
+                    sinceId = sinceId,
+                    untilId = untilId,
+                    cachedAt = Clock.System.now().epochSeconds,
+                )
             }
+
+            database.feedPostsRemoteKeys().upsert(remoteKeys)
         }
     }
 
-    private suspend fun List<NostrEvent>.processFeedConnections(userId: String) {
-        database.withTransaction {
-            database.feedsConnections().connect(
-                data = this.map { nostrEvent ->
-                    FeedPostDataCrossRef(
-                        ownerId = userId,
-                        feedSpec = feedSpec,
-                        eventId = nostrEvent.id,
-                    )
-                },
-            )
-        }
+    private suspend inline fun List<NostrEvent>.processFeedConnections(userId: String) {
+        database.feedsConnections().connect(
+            data = this.map { nostrEvent ->
+                FeedPostDataCrossRef(
+                    ownerId = userId,
+                    feedSpec = feedSpec,
+                    eventId = nostrEvent.id,
+                )
+            },
+        )
     }
 }

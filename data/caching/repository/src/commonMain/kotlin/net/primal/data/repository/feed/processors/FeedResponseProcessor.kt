@@ -33,6 +33,12 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.shared.data.local.db.withTransaction
 
 internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
+    database.withTransaction {
+        persistToDatabase(userId = userId, database = database)
+    }
+}
+
+internal suspend inline fun FeedResponse.persistToDatabase(userId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource().asMapByKey { it.url }
     val videoThumbnails = this.cdnResources.flatMapNotNullAsVideoThumbnailsMap()
     val linkPreviews = primalLinkPreviews.flatMapNotNullAsLinkPreviewResource().asMapByKey { it.url }
@@ -104,40 +110,38 @@ internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String,
     val postStats = primalEventStats.mapNotNullAsEventStatsPO()
     val userPostStats = primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
 
-    database.withTransaction {
-        database.profiles().insertOrUpdateAll(data = profiles)
-        database.posts().upsertAll(data = allPosts)
-        database.eventUris().upsertAllEventUris(data = noteAttachments)
-        database.eventUris().upsertAllEventNostrUris(data = noteNostrUris)
-        database.reposts().upsertAll(data = reposts)
-        database.eventZaps().upsertAll(data = eventZaps)
-        database.eventStats().upsertAll(data = postStats)
-        database.eventUserStats().upsertAll(data = userPostStats)
-        database.articles().upsertAll(list = allArticles)
-        database.highlights().upsertAll(data = referencedHighlights)
-        database.streams().upsertStreamData(data = streamData)
-        database.threadConversations().connectNoteWithReply(
-            data = allPosts.map {
-                NoteConversationCrossRef(
-                    noteId = it.postId,
-                    replyNoteId = it.postId,
-                )
-            },
-        )
-        database.threadConversations().connectNoteWithReply(
-            data = allPosts.mapNotNull {
-                NoteConversationCrossRef(
-                    noteId = it.replyToPostId ?: return@mapNotNull null,
-                    replyNoteId = it.postId,
-                )
-            },
-        )
+    database.profiles().insertOrUpdateAll(data = profiles)
+    database.posts().upsertAll(data = allPosts)
+    database.eventUris().upsertAllEventUris(data = noteAttachments)
+    database.eventUris().upsertAllEventNostrUris(data = noteNostrUris)
+    database.reposts().upsertAll(data = reposts)
+    database.eventZaps().upsertAll(data = eventZaps)
+    database.eventStats().upsertAll(data = postStats)
+    database.eventUserStats().upsertAll(data = userPostStats)
+    database.articles().upsertAll(list = allArticles)
+    database.highlights().upsertAll(data = referencedHighlights)
+    database.streams().upsertStreamData(data = streamData)
+    database.threadConversations().connectNoteWithReply(
+        data = allPosts.map {
+            NoteConversationCrossRef(
+                noteId = it.postId,
+                replyNoteId = it.postId,
+            )
+        },
+    )
+    database.threadConversations().connectNoteWithReply(
+        data = allPosts.mapNotNull {
+            NoteConversationCrossRef(
+                noteId = it.replyToPostId ?: return@mapNotNull null,
+                replyNoteId = it.postId,
+            )
+        },
+    )
 
-        val eventHintsDao = database.eventHints()
-        val hintsMap = eventHints.associateBy { it.eventId }
-        eventRelayHintsUpserter(dao = eventHintsDao, eventIds = eventHints.map { it.eventId }) {
-            copy(relays = hintsMap[this.eventId]?.relays ?: emptyList())
-        }
+    val eventHintsDao = database.eventHints()
+    val hintsMap = eventHints.associateBy { it.eventId }
+    eventRelayHintsUpserter(dao = eventHintsDao, eventIds = eventHints.map { it.eventId }) {
+        copy(relays = hintsMap[this.eventId]?.relays ?: emptyList())
     }
 }
 
