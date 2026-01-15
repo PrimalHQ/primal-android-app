@@ -187,7 +187,9 @@ fun WalletDashboardScreen(
         pagingItems.refresh()
     }
 
-    val canBuySats = remember(state.wallet) { isGoogleBuild() && state.wallet is Wallet.Primal }
+    @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
+    val canBuySats = remember(state.wallet) { isGoogleBuild() && state.wallet is Wallet.Primal && false }
+
     val isScrolledToTop by remember(listState) { derivedStateOf { listState.firstVisibleItemScrollOffset == 0 } }
     val dashboardExpanded by rememberSaveable(isScrolledToTop) { mutableStateOf(isScrolledToTop) }
     val dashboardLiteHeightDp = 80.dp
