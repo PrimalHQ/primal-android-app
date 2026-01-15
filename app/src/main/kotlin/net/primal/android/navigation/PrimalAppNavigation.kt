@@ -494,6 +494,7 @@ fun PrimalAppNavigation(navController: NavHostController, startDestination: Stri
     SharedTransitionLayout {
         AppOverlays(
             onRemoteSessionClick = { navController.navigateToActiveSessions() },
+            onUpgradeWalletClick = { navController.navigateToWalletUpgrade() },
         ) {
             PiPManagerProvider {
                 LiveStreamOverlay(

@@ -96,6 +96,7 @@ fun WalletDashboardScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     onWalletActivateClick: () -> Unit,
+    onUpgradeWalletClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
     onSendClick: () -> Unit,
@@ -124,6 +125,7 @@ fun WalletDashboardScreen(
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onWalletActivateClick = onWalletActivateClick,
+        onUpgradeWalletClick = onUpgradeWalletClick,
         onProfileClick = onProfileClick,
         onTransactionClick = onTransactionClick,
         onSendClick = onSendClick,
@@ -143,6 +145,7 @@ fun WalletDashboardScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     onWalletActivateClick: () -> Unit,
+    onUpgradeWalletClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
     onSendClick: () -> Unit,
@@ -455,6 +458,7 @@ fun WalletDashboardScreen(
                                             }
                                         },
                                         actionLabel = stringResource(id = R.string.wallet_dashboard_upgrade_button),
+                                        onActionClick = onUpgradeWalletClick,
                                     )
                                 } else if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
                                     WalletCallToActionBox(

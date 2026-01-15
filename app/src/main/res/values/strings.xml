@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Primal</string>
 
     <string name="nsec_or_npub">nsec / npub</string>
@@ -1231,6 +1231,15 @@
     <string name="wallet_upgrade_sheet_description">With one tap, we\'ll move your funds and full\ntransaction history to your new self-custodial\nwallet - so you fully control your bitcoin.\nQuestions? Check out our </string>
     <string name="wallet_upgrade_sheet_faqs">FAQs</string>
     <string name="wallet_upgrade_sheet_button">Upgrade Wallet Now</string>
+    <string name="wallet_upgrade_title">Upgrade Wallet</string>
+    <string name="wallet_upgrade_upgrading_title">Upgrading…</string>
+    <string name="wallet_upgrade_upgrading_support" tools:ignore="TypographyEllipsis">transferring your wallet\nbalance &amp; transaction history...</string>
+    <string name="wallet_upgrade_success_title">Success</string>
+    <string name="wallet_upgrade_success_headline">Wallet upgraded!</string>
+    <string name="wallet_upgrade_failed_title">Upgrade Failed</string>
+    <string name="wallet_upgrade_failed_headline">Unable to upgrade</string>
+    <string name="wallet_upgrade_done_button">Done</string>
+    <string name="wallet_upgrade_close_button">Close</string>
 
     <string name="wallet_restore_title">Restore Existing Wallet</string>
     <string name="wallet_restore_enter_recovery_phrase_placeholder">Enter your wallet recovery phrase</string>

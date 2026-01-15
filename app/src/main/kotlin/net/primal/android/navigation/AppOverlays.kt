@@ -16,14 +16,21 @@ import net.primal.android.wallet.upgrade.sheet.UpgradeWalletSheetViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppOverlays(onRemoteSessionClick: () -> Unit, content: @Composable () -> Unit) {
+fun AppOverlays(
+    onRemoteSessionClick: () -> Unit,
+    onUpgradeWalletClick: () -> Unit,
+    content: @Composable () -> Unit,
+) {
     val connectionIndicatorViewModel = hiltViewModel<ConnectionIndicatorViewModel>()
     val remoteSessionIndicatorViewModel = hiltViewModel<RemoteSessionIndicatorViewModel>()
     val permissionsViewModel = hiltViewModel<PermissionsViewModel>()
     val upgradeWalletSheetViewModel = hiltViewModel<UpgradeWalletSheetViewModel>()
     val connectionState by connectionIndicatorViewModel.state.collectAsState()
 
-    UpgradeWalletBottomSheet(viewModel = upgradeWalletSheetViewModel) {
+    UpgradeWalletBottomSheet(
+        viewModel = upgradeWalletSheetViewModel,
+        onUpgradeClick = onUpgradeWalletClick,
+    ) {
         PermissionsBottomSheet(viewModel = permissionsViewModel) {
             ConnectionIndicatorOverlay(viewModel = connectionIndicatorViewModel) {
                 RemoteSessionIndicatorOverlay(

@@ -33,7 +33,11 @@ import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpgradeWalletBottomSheet(viewModel: UpgradeWalletSheetViewModel, content: @Composable () -> Unit) {
+fun UpgradeWalletBottomSheet(
+    viewModel: UpgradeWalletSheetViewModel,
+    onUpgradeClick: () -> Unit,
+    content: @Composable () -> Unit,
+) {
     val state by viewModel.state.collectAsState()
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,
@@ -45,6 +49,10 @@ fun UpgradeWalletBottomSheet(viewModel: UpgradeWalletSheetViewModel, content: @C
             state = state,
             sheetState = sheetState,
             onDismissRequest = { viewModel.setEvent(UpgradeWalletSheetContract.UiEvent.DismissSheet) },
+            onUpgradeClick = {
+                viewModel.setEvent(UpgradeWalletSheetContract.UiEvent.DismissSheet)
+                onUpgradeClick()
+            },
         )
     }
 
@@ -57,6 +65,7 @@ private fun UpgradeWalletBottomSheet(
     state: UpgradeWalletSheetContract.UiState,
     sheetState: SheetState,
     onDismissRequest: () -> Unit,
+    onUpgradeClick: () -> Unit,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -87,7 +96,7 @@ private fun UpgradeWalletBottomSheet(
             }
 
             BodyText()
-            UpgradeWalletNowButton()
+            UpgradeWalletNowButton(onClick = onUpgradeClick)
         }
     }
 }
@@ -131,12 +140,12 @@ private fun BodyText() {
 }
 
 @Composable
-fun UpgradeWalletNowButton(modifier: Modifier = Modifier) {
+private fun UpgradeWalletNowButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     PrimalFilledButton(
         modifier = modifier
             .padding(horizontal = 16.dp)
             .fillMaxWidth(),
-        onClick = {},
+        onClick = onClick,
     ) {
         Text(
             text = stringResource(id = R.string.wallet_upgrade_sheet_button),
