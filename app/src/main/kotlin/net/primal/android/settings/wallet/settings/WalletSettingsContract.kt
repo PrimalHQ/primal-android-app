@@ -9,7 +9,7 @@ interface WalletSettingsContract {
         val preferPrimalWallet: Boolean? = null,
         val nwcConnectionsInfo: List<NwcConnectionInfo> = emptyList(),
         val connectionsState: ConnectionsState = ConnectionsState.Loading,
-        val showBackupDashboard: Boolean = false,
+        val showBackupWidget: Boolean = false,
     )
 
     sealed class UiEvent {

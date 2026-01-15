@@ -116,7 +116,7 @@ fun WalletSettingsScreen(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                if (state.showBackupDashboard) {
+                if (state.showBackupWidget) {
                     Spacer(modifier = Modifier.height(16.dp))
                     WalletBackupWidget(
                         modifier = Modifier.padding(horizontal = 16.dp),

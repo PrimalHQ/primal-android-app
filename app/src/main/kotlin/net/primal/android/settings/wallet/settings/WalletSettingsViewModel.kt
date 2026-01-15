@@ -145,7 +145,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         copy(
                             wallet = wallet,
                             preferPrimalWallet = wallet is Wallet.Primal,
-                            showBackupDashboard = shouldShowBackup,
+                            showBackupWidget = shouldShowBackup,
                         )
                     }
                 }
