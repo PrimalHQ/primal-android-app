@@ -1,4 +1,4 @@
-package net.primal.android.settings.keys
+package net.primal.android.settings.account
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -58,10 +58,10 @@ import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.links.CdnImage
 
 @Composable
-fun KeysSettingsScreen(viewModel: KeysSettingsViewModel, onClose: () -> Unit) {
+fun AccountSettingsScreen(viewModel: AccountSettingsViewModel, onClose: () -> Unit) {
     val uiState = viewModel.state.collectAsState()
 
-    KeysSettingsScreen(
+    AccountSettingsScreen(
         state = uiState.value,
         onClose = onClose,
     )
@@ -69,12 +69,12 @@ fun KeysSettingsScreen(viewModel: KeysSettingsViewModel, onClose: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun KeysSettingsScreen(state: KeysSettingsContract.UiState, onClose: () -> Unit) {
+fun AccountSettingsScreen(state: AccountSettingsContract.UiState, onClose: () -> Unit) {
     PrimalScaffold(
         modifier = Modifier,
         topBar = {
             PrimalTopAppBar(
-                title = stringResource(id = R.string.settings_keys_title),
+                title = stringResource(id = R.string.settings_account_title),
                 navigationIcon = PrimalIcons.ArrowBack,
                 navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
                 onNavigationIconClick = onClose,
@@ -121,7 +121,7 @@ fun PublicKeySection(
 
     Text(
         modifier = Modifier.padding(vertical = 8.dp),
-        text = stringResource(id = R.string.settings_keys_public_key_title).uppercase(),
+        text = stringResource(id = R.string.settings_account_public_key_title).uppercase(),
         style = AppTheme.typography.bodySmall,
         color = AppTheme.colorScheme.onSurface,
         fontWeight = FontWeight.Medium,
@@ -159,9 +159,9 @@ fun PublicKeySection(
                 .height(56.dp),
             leadingIcon = if (keyCopied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
             text = if (keyCopied) {
-                stringResource(id = R.string.settings_keys_key_copied)
+                stringResource(id = R.string.settings_account_key_copied)
             } else {
-                stringResource(id = R.string.settings_keys_copy_public_key)
+                stringResource(id = R.string.settings_account_copy_public_key)
             },
             onClick = {
                 val clipboard = context.getSystemService(ClipboardManager::class.java)
@@ -174,7 +174,7 @@ fun PublicKeySection(
 
     Text(
         modifier = Modifier.padding(vertical = 8.dp),
-        text = stringResource(id = R.string.settings_keys_public_key_hint),
+        text = stringResource(id = R.string.settings_account_public_key_hint),
         style = AppTheme.typography.bodySmall,
         lineHeight = 20.sp,
         color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
@@ -213,7 +213,7 @@ fun PrivateKeySection(nsec: String) {
 
     IconText(
         modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp),
-        text = stringResource(id = R.string.settings_keys_private_key_hint),
+        text = stringResource(id = R.string.settings_account_private_key_hint),
         leadingIcon = Icons.Outlined.Warning,
         iconSize = 16.sp,
         lineHeight = 20.sp,
@@ -254,9 +254,9 @@ private fun PrivateKeyCopyButton(
                 .height(56.dp),
             leadingIcon = if (keyCopied) Icons.Outlined.Check else Icons.Outlined.ContentCopy,
             text = if (keyCopied) {
-                stringResource(id = R.string.settings_keys_key_copied)
+                stringResource(id = R.string.settings_account_key_copied)
             } else {
-                stringResource(id = R.string.settings_keys_copy_private_key)
+                stringResource(id = R.string.settings_account_copy_private_key)
             },
             onClick = {
                 if (authenticated) {
@@ -337,7 +337,7 @@ private fun PrivateKeyTextTitle(
         }
 
         Text(
-            text = stringResource(id = R.string.settings_keys_private_key_title).uppercase(),
+            text = stringResource(id = R.string.settings_account_private_key_title).uppercase(),
             style = AppTheme.typography.bodySmall,
             color = AppTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Medium,
@@ -358,9 +358,9 @@ private fun PrivateKeyTextTitle(
                     }
                 },
             text = if (privateKeyVisible) {
-                stringResource(id = R.string.settings_keys_hide_key)
+                stringResource(id = R.string.settings_account_hide_key)
             } else {
-                stringResource(id = R.string.settings_keys_show_key)
+                stringResource(id = R.string.settings_account_show_key)
             }.lowercase(),
             style = AppTheme.typography.bodySmall,
             color = AppTheme.colorScheme.secondary,
@@ -373,8 +373,8 @@ private fun PrivateKeyTextTitle(
 @Composable
 fun PreviewSettingsHomeScreen() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        KeysSettingsScreen(
-            state = KeysSettingsContract.UiState(
+        AccountSettingsScreen(
+            state = AccountSettingsContract.UiState(
                 avatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                 npub = "npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr",
                 nsec = "nsec1w33tr4t0gg3gvrhjh5mxqzvt7xzdrrk64tr0j7mnqdfrrarfj3yqlf8hxp",
@@ -388,8 +388,8 @@ fun PreviewSettingsHomeScreen() {
 @Composable
 fun PreviewSettingsHomeScreenNpubLogin() {
     PrimalPreview(primalTheme = PrimalTheme.Sunset) {
-        KeysSettingsScreen(
-            state = KeysSettingsContract.UiState(
+        AccountSettingsScreen(
+            state = AccountSettingsContract.UiState(
                 avatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
                 npub = "npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr",
                 nsec = null,
