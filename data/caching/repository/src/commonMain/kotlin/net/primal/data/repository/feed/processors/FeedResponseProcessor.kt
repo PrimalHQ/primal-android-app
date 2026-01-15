@@ -90,9 +90,9 @@ internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String,
 
     val noteNostrUris = allPosts.flatMapPostsAsReferencedNostrUriDO(
         eventIdToNostrEvent = refEvents.associateBy { it.id },
-        postIdToPostDataMap = allPosts.groupBy { it.postId }.mapValues { it.value.first() },
-        articleIdToArticle = allArticles.groupBy { it.articleId }.mapValues { it.value.first() },
-        streamIdToStreamData = streamData.groupBy { it.dTag }.mapValues { it.value.first() },
+        postIdToPostDataMap = allPosts.associateBy { it.postId },
+        articleIdToArticle = allArticles.associateBy { it.articleId },
+        streamIdToStreamData = streamData.associateBy { it.dTag },
         profileIdToProfileDataMap = profileIdToProfileDataMap,
         cdnResources = cdnResources,
         videoThumbnails = videoThumbnails,
