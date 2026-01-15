@@ -149,7 +149,7 @@ private fun SettingsListItem(
                     Text(
                         text = stringResource(id = R.string.settings_wallet_needs_backup),
                         style = AppTheme.typography.bodyMedium,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                     )
                 }
                 if (trailingIcon != null) {
