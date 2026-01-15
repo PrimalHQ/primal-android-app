@@ -14,6 +14,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.WalletError
 import net.primal.android.theme.AppTheme
+import net.primal.android.wallet.ui.FlowStatusColumn
 
 @Composable
 fun TransactionFailed(
@@ -26,7 +27,7 @@ fun TransactionFailed(
         verticalArrangement = Arrangement.SpaceAround,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        TransactionStatusColumn(
+        FlowStatusColumn(
             icon = PrimalIcons.WalletError,
             iconTint = AppTheme.colorScheme.error,
             headlineText = stringResource(id = R.string.wallet_create_transaction_failed_headline),
