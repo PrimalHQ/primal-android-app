@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,6 +37,11 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
@@ -82,6 +88,7 @@ fun WalletDashboardScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     onWalletActivateClick: () -> Unit,
+    onWalletBackupClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
     onSendClick: () -> Unit,
@@ -110,6 +117,7 @@ fun WalletDashboardScreen(
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onWalletActivateClick = onWalletActivateClick,
+        onWalletBackupClick = onWalletBackupClick,
         onProfileClick = onProfileClick,
         onTransactionClick = onTransactionClick,
         onSendClick = onSendClick,
@@ -129,6 +137,7 @@ fun WalletDashboardScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     onWalletActivateClick: () -> Unit,
+    onWalletBackupClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
     onSendClick: () -> Unit,
@@ -395,18 +404,55 @@ fun WalletDashboardScreen(
                             onProfileClick = onProfileClick,
                             onTransactionClick = onTransactionClick,
                             header = {
-                                if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
-                                    WalletCallToActionBox(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .animateContentSize()
-                                            .padding(bottom = 32.dp),
-                                        message = stringResource(id = R.string.wallet_dashboard_low_sats_hint),
-                                        actionLabel = stringResource(id = R.string.wallet_dashboard_buy_sats_button),
-                                        onActionClick = {
-                                            inAppPurchaseVisible = true
-                                        },
-                                    )
+                                Column {
+                                    if (state.wallet is Wallet.Tsunami && !state.isWalletBackedUp) {
+                                        val titleText = stringResource(
+                                            id = R.string.wallet_dashboard_backup_notice_title,
+                                        )
+                                        val descriptionText = stringResource(
+                                            id = R.string.wallet_dashboard_backup_notice_description,
+                                        )
+
+                                        val annotatedMessage = buildAnnotatedString {
+                                            withStyle(
+                                                SpanStyle(
+                                                    fontWeight = FontWeight.Bold,
+                                                    textDecoration = TextDecoration.Underline,
+                                                ),
+                                            ) {
+                                                append(titleText.uppercase())
+                                            }
+                                            append(" ")
+                                            append(descriptionText)
+                                        }
+
+                                        WalletCallToActionBox(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp)
+                                                .padding(bottom = 16.dp)
+                                                .animateContentSize(),
+                                            annotatedMessage = annotatedMessage,
+                                            actionLabel = stringResource(id = R.string.wallet_dashboard_backup_button),
+                                            onActionClick = onWalletBackupClick,
+                                        )
+                                    }
+
+                                    if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
+                                        WalletCallToActionBox(
+                                            modifier = Modifier
+                                                .fillMaxSize()
+                                                .animateContentSize()
+                                                .padding(bottom = 32.dp),
+                                            message = stringResource(id = R.string.wallet_dashboard_low_sats_hint),
+                                            actionLabel = stringResource(
+                                                id = R.string.wallet_dashboard_buy_sats_button,
+                                            ),
+                                            onActionClick = {
+                                                inAppPurchaseVisible = true
+                                            },
+                                        )
+                                    }
                                 }
                             },
                             footer = {

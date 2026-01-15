@@ -1213,6 +1213,9 @@
     <string name="wallet_dashboard_no_transactions_hint">Your transactions will appear here.</string>
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
     <string name="wallet_dashboard_buy_sats_button">Buy Sats Now</string>
+    <string name="wallet_dashboard_backup_notice_title">Important:</string>
+    <string name="wallet_dashboard_backup_notice_description">This wallet has not been backed up. You need to backup your wallet so you don\'t lose access to your funds.</string>
+    <string name="wallet_dashboard_backup_button">Backup Wallet Now</string>
 
     <string name="wallet_tos_prefix">By tapping \"Next\" you agree to the</string>
     <string name="wallet_activation_title">Activate Wallet</string>
@@ -1350,6 +1353,29 @@
     <string name="wallet_transaction_details_status_succeeded_confirmed">Confirmed</string>
     <string name="wallet_transaction_details_status_failed">Failed</string>
     <string name="wallet_transaction_details_status_canceled">Canceled</string>
+
+    <string name="wallet_backup_title">Backup Wallet</string>
+    <string name="wallet_backup_verify_title">Verify Recovery Phrase</string>
+    <string name="wallet_backup_success_title">Congrats!</string>
+    <string name="wallet_backup_welcome_description">We are going to display your wallet recovery phrase on the next screen.</string>
+    <string name="wallet_backup_important">Important:</string>
+    <string name="wallet_backup_disclaimer_part_one">Primal does not have access to the funds in your wallet. You have sole custody of your wallet via the recovery phrase. If you lose your recovery phrase, </string>
+    <string name="wallet_backup_disclaimer_part_two">Primal will not be able to restore your funds.</string>
+    <string name="wallet_backup_button_i_understand">I understand, backup wallet</string>
+    <string name="wallet_backup_button_cancel">Cancel, I\'ll do this later</string>
+    <string name="wallet_backup_seed_description_one">This is your wallet recovery phrase. To backup your wallet, simply write these words down in the correct order.</string>
+    <string name="wallet_backup_seed_description_two">The words are not case sensitive and they are separated by spaces. We will ask you to verify on the next screen.</string>
+    <string name="wallet_backup_button_written_down">I have written it down</string>
+    <string name="wallet_backup_verify_word_label">Type word #%1$d:</string>
+    <string name="wallet_backup_verify_correct">Correct</string>
+    <string name="wallet_backup_verify_incorrect">Incorrect</string>
+    <string name="wallet_backup_button_verify">Verify</string>
+    <string name="wallet_backup_confirm_check_1">My funds are not held by Primal</string>
+    <string name="wallet_backup_confirm_check_2">If my device gets lost or stolen, the only way to recover my funds is via the wallet recovery phrase</string>
+    <string name="wallet_backup_confirm_check_3">It is my sole responsibility to keep my recovery phrase safe</string>
+    <string name="wallet_backup_confirm_description">Your wallet has been backed up. You now hold the keys to your bitcoin!\nPlease confirm the three points below.</string>
+    <string name="wallet_backup_confirm_subtitle">I understand that:</string>
+    <string name="wallet_backup_button_finish">Finish</string>
 
     <string name="qrcode_scanner_permission_title">Permission required</string>
     <string name="qrcode_scanner_permission_rationale">Primal needs access to your camera to scan QR codes.</string>

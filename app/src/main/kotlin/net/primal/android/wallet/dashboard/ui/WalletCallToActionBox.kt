@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.button.PrimalFilledButton
@@ -19,6 +20,7 @@ import net.primal.android.theme.AppTheme
 fun WalletCallToActionBox(
     modifier: Modifier,
     message: String? = null,
+    annotatedMessage: AnnotatedString? = null,
     actionLabel: String? = null,
     onActionClick: (() -> Unit)? = null,
 ) {
@@ -31,7 +33,15 @@ fun WalletCallToActionBox(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            message?.let {
+            if (annotatedMessage != null) {
+                Text(
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
+                    text = annotatedMessage,
+                    textAlign = TextAlign.Center,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    style = AppTheme.typography.bodyMedium,
+                )
+            } else if (message != null) {
                 Text(
                     modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
                     text = message,
