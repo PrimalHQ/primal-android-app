@@ -73,9 +73,9 @@ internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String,
         blossomServers = blossomServers,
     )
     val profileIdToProfileDataMap = profiles.asMapByKey { it.ownerId }
+    val eventIdMap = profileIdToProfileDataMap.mapValues { it.value.eventId }
 
     val allPosts = (referencedPostsWithReplyTo + feedPosts).map { postData ->
-        val eventIdMap = profileIdToProfileDataMap.mapValues { it.value.eventId }
         postData.copy(authorMetadataId = eventIdMap[postData.authorId])
     }
 
