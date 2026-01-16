@@ -101,7 +101,6 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     is UiEvent.ConnectExternalWallet -> if (it.connectionLink.isNwcUrl()) {
                         connectWallet(nwcUrl = it.connectionLink)
                     }
-                    UiEvent.BackupWallet -> Unit
                 }
             }
         }

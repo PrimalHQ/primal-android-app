@@ -19,7 +19,6 @@ interface WalletSettingsContract {
         data class UpdatePreferPrimalWallet(val value: Boolean) : UiEvent()
         data class UpdateMinTransactionAmount(val amountInSats: Long) : UiEvent()
         data class ConnectExternalWallet(val connectionLink: String) : UiEvent()
-        data object BackupWallet : UiEvent()
     }
 
     enum class ConnectionsState {

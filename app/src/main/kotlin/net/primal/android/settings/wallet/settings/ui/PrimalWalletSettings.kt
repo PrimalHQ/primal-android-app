@@ -43,6 +43,7 @@ fun PrimalWalletSettings(
     state: WalletSettingsContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onRestoreWalletClick: () -> Unit,
+    onBackupWalletClick: () -> Unit,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     Column {
@@ -99,7 +100,7 @@ fun PrimalWalletSettings(
                 trailingContent = {
                     Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
                 },
-                onClick = { eventPublisher(UiEvent.BackupWallet) },
+                onClick = onBackupWalletClick,
             )
             Spacer(modifier = Modifier.height(8.dp))
         }

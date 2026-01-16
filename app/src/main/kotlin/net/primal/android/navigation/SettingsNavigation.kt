@@ -102,6 +102,8 @@ private fun NavController.navigateToLocalAppPermissions(identifier: String) =
 
 private fun NavController.navigateToWalletRestore() = navigate(route = "wallet_settings/restore")
 
+private fun NavController.navigateToWalletBackup() = navigate(route = "walletBackup")
+
 fun NavController.navigateToLinkPrimalWallet(
     appName: String? = null,
     appIcon: String? = null,
@@ -318,6 +320,7 @@ private fun NavGraphBuilder.wallet(
         onScanNwcClick = { navController.navigateToWalletScanNwcUrl() },
         onCreateNewWalletConnection = { navController.navigateToCreateNewWalletConnection() },
         onRestoreWalletClick = { navController.navigateToWalletRestore() },
+        onBackupWalletClick = { navController.navigateToWalletBackup() },
     )
 }
 
