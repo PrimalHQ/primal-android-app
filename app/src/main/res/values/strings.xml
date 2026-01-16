@@ -995,6 +995,7 @@
     <string name="settings_zaps_editor_message">Message</string>
     <string name="settings_zaps_editor_value">Value</string>
     <string name="settings_zaps_editor_save">Save</string>
+    <string name="settings_wallet_needs_backup">needs backup</string>
 
     <string name="settings_muted_content_title">Muted Content</string>
     <string name="settings_muted_title">Muted</string>
