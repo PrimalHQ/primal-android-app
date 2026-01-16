@@ -23,9 +23,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -41,6 +41,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -51,6 +52,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 import net.primal.android.R
 import net.primal.android.core.compose.BiometricPrompt
 import net.primal.android.core.compose.PrimalScaffold
@@ -58,6 +62,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.Check
 import net.primal.android.theme.AppTheme
 
 private const val BACKUP_PATTERN_ROWS = 4
@@ -115,6 +120,7 @@ private fun WalletBackupScreen(
                 },
                 navigationIcon = PrimalIcons.ArrowBack,
                 onNavigationIconClick = handleBackEvent,
+                showDivider = false,
             )
         },
         content = { paddingValues ->
@@ -181,7 +187,7 @@ private fun WelcomeStep(onContinue: () -> Unit, onCancel: () -> Unit) {
 
             Text(
                 text = stringResource(R.string.wallet_backup_welcome_description),
-                style = AppTheme.typography.bodyLarge,
+                style = AppTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
                 textAlign = TextAlign.Center,
                 color = AppTheme.colorScheme.onSurface,
             )
@@ -210,7 +216,7 @@ private fun WelcomeStep(onContinue: () -> Unit, onCancel: () -> Unit) {
 
             Text(
                 text = disclaimerText,
-                style = AppTheme.typography.bodyLarge,
+                style = AppTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
                 textAlign = TextAlign.Center,
                 color = AppTheme.colorScheme.onSurface,
             )
@@ -229,7 +235,7 @@ private fun WelcomeStep(onContinue: () -> Unit, onCancel: () -> Unit) {
             TextButton(onClick = onCancel) {
                 Text(
                     text = stringResource(R.string.wallet_backup_button_cancel),
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                     style = AppTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
                 )
             }
@@ -303,14 +309,14 @@ private fun SeedPhraseStep(
 
         Text(
             text = stringResource(R.string.wallet_backup_seed_description_one),
-            style = AppTheme.typography.bodyLarge,
+            style = AppTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
             textAlign = TextAlign.Center,
             color = AppTheme.colorScheme.onSurface,
         )
         Spacer(modifier = Modifier.height(26.dp))
         Text(
             text = stringResource(R.string.wallet_backup_seed_description_two),
-            style = AppTheme.typography.bodyLarge,
+            style = AppTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
             textAlign = TextAlign.Center,
             color = AppTheme.colorScheme.onSurface,
         )
@@ -330,7 +336,7 @@ private fun SeedPhraseStep(
             TextButton(onClick = onCancel) {
                 Text(
                     text = stringResource(R.string.wallet_backup_button_cancel),
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                     style = AppTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
                 )
             }
@@ -399,36 +405,18 @@ private fun VerifyStep(
     ) {
         Spacer(modifier = Modifier.height(30.dp))
 
-        indicesToVerify.forEach { index ->
+        indicesToVerify.forEachIndexed { i, index ->
             val correctWord = words.getOrNull(index) ?: ""
-            val input = inputs[index] ?: ""
-            val isValid = input.equals(correctWord, ignoreCase = true)
-            val isError = input.isNotEmpty() && !isValid
 
-            Column(modifier = Modifier.padding(bottom = 30.dp)) {
-                Text(
-                    text = stringResource(R.string.wallet_backup_verify_word_label, index + 1),
-                    style = AppTheme.typography.bodyMedium,
-                    color = AppTheme.colorScheme.onPrimary,
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                OutlinedTextField(
-                    value = input,
-                    onValueChange = { inputs[index] = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(46.dp),
-                    isError = isError,
-                    singleLine = true,
-                    shape = AppTheme.shapes.extraLarge,
-                    colors = verifyTextFieldColors(isValid = isValid),
-                    trailingIcon = {
-                        VerifyTrailingIcon(isValid = isValid, text = input)
-                    },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    textStyle = AppTheme.typography.bodyMedium,
-                )
-            }
+            VerifyWordItem(
+                labelIndex = index + 1,
+                correctWord = correctWord,
+                input = inputs[index] ?: "",
+                onInputChanged = { inputs[index] = it },
+                keyboardOptions = KeyboardOptions(
+                    imeAction = if (i == indicesToVerify.lastIndex) ImeAction.Done else ImeAction.Next,
+                ),
+            )
         }
 
         Spacer(modifier = Modifier.weight(1f))
@@ -438,6 +426,55 @@ private fun VerifyStep(
             onClick = onVerify,
             enabled = isVerifyEnabled,
             modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@Composable
+private fun VerifyWordItem(
+    labelIndex: Int,
+    correctWord: String,
+    input: String,
+    onInputChanged: (String) -> Unit,
+    keyboardOptions: KeyboardOptions,
+) {
+    var isSettled by remember { mutableStateOf(true) }
+
+    LaunchedEffect(input) {
+        isSettled = false
+        delay(500.milliseconds)
+        isSettled = true
+    }
+
+    val isValid = input.trim().equals(correctWord, ignoreCase = true)
+    val showStatus = isSettled && input.isNotEmpty()
+    val isSuccess = showStatus && isValid
+    val isError = showStatus && !isValid
+
+    Column(modifier = Modifier.padding(bottom = 30.dp)) {
+        Text(
+            text = stringResource(R.string.wallet_backup_verify_word_label, labelIndex),
+            style = AppTheme.typography.bodyMedium,
+            color = AppTheme.colorScheme.onPrimary,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = input,
+            onValueChange = onInputChanged,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(46.dp),
+            isError = isError,
+            singleLine = true,
+            shape = AppTheme.shapes.extraLarge,
+            colors = verifyTextFieldColors(isValid = isSuccess),
+            trailingIcon = {
+                if (showStatus) {
+                    VerifyTrailingIcon(isValid = isSuccess, text = input)
+                }
+            },
+            keyboardOptions = keyboardOptions,
+            textStyle = AppTheme.typography.bodyMedium,
         )
     }
 }
@@ -463,7 +500,7 @@ private fun ConfirmStep(onFinish: () -> Unit) {
 
         Text(
             text = stringResource(R.string.wallet_backup_confirm_description),
-            style = AppTheme.typography.bodyLarge,
+            style = AppTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
             textAlign = TextAlign.Center,
             color = AppTheme.colorScheme.onSurface,
         )
@@ -490,20 +527,14 @@ private fun ConfirmStep(onFinish: () -> Unit) {
                     }
                     .padding(vertical = 12.dp),
             ) {
-                RadioButton(
-                    modifier = Modifier.size(24.dp),
-                    selected = checks.getOrElse(index) { false },
-                    onClick = {
-                        if (index < checks.size) {
-                            checks[index] = !checks[index]
-                        }
-                    },
+                BackupCheckBox(
+                    checked = checks.getOrElse(index) { false },
                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Text(
-                    modifier = Modifier.padding(top = 5.dp),
+                    modifier = Modifier.padding(top = 4.dp),
                     text = label,
-                    style = AppTheme.typography.bodyLarge,
+                    style = AppTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
                     color = AppTheme.colorScheme.onSurface,
                 )
             }
@@ -517,6 +548,31 @@ private fun ConfirmStep(onFinish: () -> Unit) {
             enabled = checks.all { it },
             modifier = Modifier.fillMaxWidth(),
         )
+    }
+}
+
+@Composable
+private fun BackupCheckBox(checked: Boolean, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(24.dp)
+            .clip(CircleShape)
+            .background(if (checked) AppTheme.colorScheme.onSurface else Color.Transparent)
+            .border(
+                width = 1.dp,
+                color = if (checked) AppTheme.colorScheme.onSurface else AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                shape = CircleShape,
+            ),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (checked) {
+            Icon(
+                imageVector = PrimalIcons.Check,
+                contentDescription = null,
+                tint = AppTheme.colorScheme.surface,
+                modifier = Modifier.size(14.dp),
+            )
+        }
     }
 }
 

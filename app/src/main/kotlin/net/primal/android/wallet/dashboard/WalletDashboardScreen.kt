@@ -436,9 +436,7 @@ fun WalletDashboardScreen(
                                             actionLabel = stringResource(id = R.string.wallet_dashboard_backup_button),
                                             onActionClick = onWalletBackupClick,
                                         )
-                                    }
-
-                                    if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
+                                    } else if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
                                         WalletCallToActionBox(
                                             modifier = Modifier
                                                 .fillMaxSize()
