@@ -32,7 +32,7 @@ fun WalletCallToActionBox(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (message != null) {
+            message?.let {
                 Text(
                     modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
                     text = message,
