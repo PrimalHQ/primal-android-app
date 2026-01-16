@@ -20,7 +20,6 @@ import net.primal.android.theme.AppTheme
 fun WalletCallToActionBox(
     modifier: Modifier,
     message: String? = null,
-    annotatedMessage: AnnotatedString? = null,
     actionLabel: String? = null,
     onActionClick: (() -> Unit)? = null,
 ) {
@@ -33,15 +32,7 @@ fun WalletCallToActionBox(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (annotatedMessage != null) {
-                Text(
-                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
-                    text = annotatedMessage,
-                    textAlign = TextAlign.Center,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
-                    style = AppTheme.typography.bodyMedium,
-                )
-            } else if (message != null) {
+            if (message != null) {
                 Text(
                     modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
                     text = message,
