@@ -869,8 +869,8 @@
 
     <string name="settings_wallet_title">Wallet</string>
     <string name="settings_wallet_connected_title">Wallet Connected</string>
-    <string name="settings_wallet_use_primal_wallet">Use Primal wallet</string>
-    <string name="settings_wallet_use_primal_wallet_hint">Alternatively you can connect to an external lightning wallet via Nostr Wallet Connect</string>
+    <string name="settings_wallet_use_external_wallet">Use external wallet</string>
+    <string name="settings_wallet_use_external_wallet_hint">Alternatively you can connect to an external lightning wallet via Nostr Wallet Connect</string>
     <string name="settings_wallet_nwc_header_not_connected">Connect a Wallet</string>
     <string name="settings_wallet_nwc_header_not_connected_hint">Connect an external wallet by scanning or pasting its Nostr Wallet Connect (NWC) connection string:</string>
     <string name="settings_wallet_nwc_primal_wallet">Primal Wallet</string>
