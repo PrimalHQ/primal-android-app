@@ -40,6 +40,7 @@ fun SettingsHomeScreen(
     viewModel: SettingsHomeViewModel,
     onClose: () -> Unit,
     onSettingsSectionClick: (PrimalSettingsSection) -> Unit,
+    onDeveloperToolsClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -47,15 +48,19 @@ fun SettingsHomeScreen(
         state = uiState.value,
         onClose = onClose,
         onSettingsSectionClick = onSettingsSectionClick,
+        onDeveloperToolsClick = onDeveloperToolsClick,
+        eventPublisher = { viewModel.setEvent(it) },
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsHomeScreen(
+private fun SettingsHomeScreen(
     state: SettingsHomeContract.UiState,
     onClose: () -> Unit,
     onSettingsSectionClick: (PrimalSettingsSection) -> Unit,
+    onDeveloperToolsClick: () -> Unit,
+    eventPublisher: (SettingsHomeContract.UiEvent) -> Unit,
 ) {
     PrimalScaffold(
         modifier = Modifier,
@@ -84,9 +89,21 @@ fun SettingsHomeScreen(
                     PrimalDivider()
                 }
 
+                if (state.developerToolsEnabled) {
+                    item(key = "developer_tools") {
+                        SettingsListItem(
+                            title = stringResource(id = R.string.settings_developer_tools_title),
+                            onClick = onDeveloperToolsClick,
+                            trailingIcon = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                        )
+                        PrimalDivider()
+                    }
+                }
+
                 item {
                     VersionListItem(
                         versionName = state.version,
+                        onClick = { eventPublisher(SettingsHomeContract.UiEvent.VersionTapped) },
                     )
                 }
             }
@@ -161,8 +178,9 @@ private fun SettingsListItem(
 }
 
 @Composable
-private fun VersionListItem(versionName: String) {
+private fun VersionListItem(versionName: String, onClick: () -> Unit) {
     ListItem(
+        modifier = Modifier.clickable { onClick() },
         headlineContent = {
             Text(
                 text = stringResource(id = R.string.settings_version_title).uppercase(),
@@ -197,12 +215,14 @@ private fun PrimalSettingsSection.title(): String {
 
 @Preview
 @Composable
-fun PreviewSettingsHomeScreen() {
+private fun PreviewSettingsHomeScreen() {
     PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
         SettingsHomeScreen(
             state = SettingsHomeContract.UiState(version = "1.1"),
             onClose = { },
             onSettingsSectionClick = {},
+            onDeveloperToolsClick = {},
+            eventPublisher = {},
         )
     }
 }
