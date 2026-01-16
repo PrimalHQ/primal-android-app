@@ -90,6 +90,9 @@ kotlin {
 
                 // Bitcoin
                 implementation(libs.bitcoin.kmp)
+
+                // Crypto
+                implementation(libs.korlibs.crypto)
             }
         }
 
