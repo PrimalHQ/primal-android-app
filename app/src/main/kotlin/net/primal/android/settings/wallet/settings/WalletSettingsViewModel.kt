@@ -84,8 +84,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
             events.collect {
                 when (it) {
                     is UiEvent.DisconnectWallet -> disconnectWallet()
-                    is UiEvent.UpdatePreferPrimalWallet -> {
-                        updatePreferPrimalWallet(preferPrimalWallet = it.value)
+                    is UiEvent.UpdateUseExternalWallet -> {
+                        updateUseExternalWallet(useExternalWallet = it.value)
                     }
 
                     is UiEvent.UpdateMinTransactionAmount -> {
@@ -143,7 +143,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     setState {
                         copy(
                             wallet = wallet,
-                            preferPrimalWallet = wallet is Wallet.Primal,
+                            useExternalWallet = wallet == null || wallet is Wallet.NWC,
                             showBackupWidget = shouldShowBackup,
                         )
                     }
@@ -158,7 +158,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 autoSetAsDefaultWallet = true,
             )
                 .onFailure { Timber.w(it) }
-                .onSuccess { setState { copy(preferPrimalWallet = false) } }
+                .onSuccess { setState { copy(useExternalWallet = true) } }
         }
 
     private suspend fun disconnectWallet() {
@@ -168,18 +168,18 @@ class WalletSettingsViewModel @AssistedInject constructor(
         walletAccountRepository.clearActiveWallet(userId = activeAccountStore.activeUserId())
     }
 
-    private fun updatePreferPrimalWallet(preferPrimalWallet: Boolean) =
+    private fun updateUseExternalWallet(useExternalWallet: Boolean) =
         viewModelScope.launch {
             val userId = activeAccountStore.activeUserId()
-            if (preferPrimalWallet) {
-                walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
-            } else {
+            if (useExternalWallet) {
                 val lastUsedNWC = walletAccountRepository.findLastUsedWallet(userId = userId, type = WalletType.NWC)
                 if (lastUsedNWC != null) {
                     walletAccountRepository.setActiveWallet(userId = userId, walletId = lastUsedNWC.walletId)
                 } else {
                     walletAccountRepository.clearActiveWallet(userId = userId)
                 }
+            } else {
+                walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
             }
         }
 
