@@ -879,6 +879,9 @@
     <string name="settings_wallet_nwc_paste_string">Paste NWC String</string>
     <string name="settings_wallet_nwc_scan_qr_code">Scan NWC QR Code</string>
     <string name="settings_wallet_nwc_disconnect_wallet_button">Disconnect Wallet</string>
+    <string name="settings_wallet_backup_balance">Wallet Balance: %1$s sats</string>
+    <string name="settings_wallet_backup_subtitle">This wallet has not been backed up. It is important to back up your wallet so you don\'t lose access to your funds.</string>
+    <string name="settings_wallet_backup_button">Back Up Wallet Now</string>
     <string name="settings_wallet_nwc_profile_lightning_address">Your Nostr Lightning Address:</string>
     <string name="settings_wallet_nwc_profile_lightning_address_hint">You can change your Nostr Lightning Address (for receiving zaps) in your</string>
     <string name="settings_wallet_nwc_profile_lightning_address_hint_suffix">profile settings</string>
@@ -904,6 +907,10 @@
     <string name="settings_wallet_start_in_wallet">Start in wallet</string>
     <string name="settings_wallet_start_in_wallet_hint">Open the wallet when Primal starts</string>
     <string name="settings_wallet_save">Save</string>
+    <string name="settings_wallet_backup_wallet_title">Backup wallet</string>
+    <string name="settings_wallet_backup_wallet_subtitle">Write down your wallet recovery phrase so you don\'t lose access to your funds</string>
+    <string name="settings_wallet_restore_wallet_title">Restore existing wallet</string>
+    <string name="settings_wallet_restore_wallet_subtitle">If you have an existing wallet that you wish to use with your Nostr account, you can restore it here using your 12-24 wallet recovery phrase</string>
     <string name="settings_wallet_new_nwc_connection_title">New Wallet Connection</string>
     <string name="settings_wallet_new_nwc_connection_app_name_input_header">Name of the app you wish to connect:</string>
     <string name="settings_wallet_new_nwc_connection_hint">You can revoke access at any time in your Primal Wallet settings.</string>
@@ -1213,6 +1220,15 @@
     <string name="wallet_dashboard_no_transactions_hint">Your transactions will appear here.</string>
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
     <string name="wallet_dashboard_buy_sats_button">Buy Sats Now</string>
+
+    <string name="wallet_restore_title">Restore Existing Wallet</string>
+    <string name="wallet_restore_enter_recovery_phrase_placeholder">Enter your wallet recovery phrase</string>
+    <string name="wallet_restore_helper_text">We support recovery of any existing bitcoin wallet on the network. Recovery phrases are 12 to 24 words long.</string>
+    <string name="wallet_restore_button">Restore Wallet Now</string>
+    <string name="wallet_restore_invalid_recovery_phrase">Invalid recovery phrase</string>
+    <string name="wallet_restore_valid_recovery_phrase">Valid recovery phrase</string>
+    <string name="wallet_restore_restoring_your_wallet">Restoring your wallet…</string>
+    <string name="wallet_restore_error_generic">Something went wrong. Please check your recovery phrase and try again.</string>
 
     <string name="wallet_tos_prefix">By tapping \"Next\" you agree to the</string>
     <string name="wallet_activation_title">Activate Wallet</string>

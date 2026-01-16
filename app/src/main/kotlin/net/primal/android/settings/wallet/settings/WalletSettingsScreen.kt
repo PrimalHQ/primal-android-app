@@ -48,6 +48,7 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEven
 import net.primal.android.settings.wallet.settings.ui.ConnectedAppsSettings
 import net.primal.android.settings.wallet.settings.ui.ExternalWalletSettings
 import net.primal.android.settings.wallet.settings.ui.PrimalWalletSettings
+import net.primal.android.settings.wallet.settings.ui.WalletBackupWidget
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.utils.isActivePrimalWallet
@@ -61,6 +62,7 @@ fun WalletSettingsScreen(
     onEditProfileClick: () -> Unit,
     onScanNwcClick: () -> Unit,
     onCreateNewWalletConnection: () -> Unit,
+    onRestoreWalletClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
     DisposableLifecycleObserverEffect(viewModel) {
@@ -76,6 +78,7 @@ fun WalletSettingsScreen(
         onEditProfileClick = onEditProfileClick,
         onScanNwcClick = onScanNwcClick,
         onCreateNewWalletConnection = onCreateNewWalletConnection,
+        onRestoreWalletClick = onRestoreWalletClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -88,6 +91,7 @@ fun WalletSettingsScreen(
     onEditProfileClick: () -> Unit,
     onScanNwcClick: () -> Unit,
     onCreateNewWalletConnection: () -> Unit,
+    onRestoreWalletClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -112,6 +116,15 @@ fun WalletSettingsScreen(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if (state.showBackupWidget) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    WalletBackupWidget(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        walletBalanceInBtc = state.wallet?.balanceInBtc?.toString(),
+                        onBackupClick = { eventPublisher(UiEvent.BackupWallet) },
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 ExternalWalletListItem(
@@ -127,6 +140,7 @@ fun WalletSettingsScreen(
                             PrimalWalletSettings(
                                 state = state,
                                 eventPublisher = eventPublisher,
+                                onRestoreWalletClick = onRestoreWalletClick,
                             )
                         }
 
@@ -291,6 +305,7 @@ private fun PreviewSettingsWalletScreen(
             onScanNwcClick = {},
             onCreateNewWalletConnection = {},
             eventPublisher = {},
+            onRestoreWalletClick = {},
         )
     }
 }

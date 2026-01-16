@@ -53,7 +53,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
         if (nwcConnectionUrl != null) {
             connectWallet(nwcUrl = nwcConnectionUrl)
         } else {
-            observeActiveWallet()
+            observeActiveWalletData()
+            observeActiveWalletId()
         }
 
         observeEvents()
@@ -100,6 +101,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     is UiEvent.ConnectExternalWallet -> if (it.connectionLink.isNwcUrl()) {
                         connectWallet(nwcUrl = it.connectionLink)
                     }
+                    UiEvent.BackupWallet -> Unit
                 }
             }
         }
@@ -119,10 +121,34 @@ class WalletSettingsViewModel @AssistedInject constructor(
             }
         }
 
-    private fun observeActiveWallet() =
+    private fun observeActiveWalletId() =
+        viewModelScope.launch {
+            walletAccountRepository.observeActiveWalletId(userId = activeAccountStore.activeUserId())
+                .collect { walletId ->
+                    if (walletId != null) {
+                        walletRepository.fetchWalletBalance(walletId = walletId)
+                    }
+                }
+        }
+
+    private fun observeActiveWalletData() =
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { setState { copy(wallet = it, preferPrimalWallet = it is Wallet.Primal) } }
+                .collect { wallet ->
+                    val isTsunami = wallet is Wallet.Tsunami
+                    val balance = wallet?.balanceInBtc ?: 0.0
+                    val isBackedUp = false
+
+                    val shouldShowBackup = isTsunami && balance > 0.0 && !isBackedUp
+
+                    setState {
+                        copy(
+                            wallet = wallet,
+                            preferPrimalWallet = wallet is Wallet.Primal,
+                            showBackupWidget = shouldShowBackup,
+                        )
+                    }
+                }
         }
 
     private fun connectWallet(nwcUrl: String) =

@@ -9,6 +9,7 @@ interface WalletSettingsContract {
         val preferPrimalWallet: Boolean? = null,
         val nwcConnectionsInfo: List<NwcConnectionInfo> = emptyList(),
         val connectionsState: ConnectionsState = ConnectionsState.Loading,
+        val showBackupWidget: Boolean = false,
     )
 
     sealed class UiEvent {
@@ -18,6 +19,7 @@ interface WalletSettingsContract {
         data class UpdatePreferPrimalWallet(val value: Boolean) : UiEvent()
         data class UpdateMinTransactionAmount(val amountInSats: Long) : UiEvent()
         data class ConnectExternalWallet(val connectionLink: String) : UiEvent()
+        data object BackupWallet : UiEvent()
     }
 
     enum class ConnectionsState {
