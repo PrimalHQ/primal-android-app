@@ -141,8 +141,8 @@ fun WalletSettingsScreen(
                     state = state,
                     eventPublisher = eventPublisher,
                     onScanNwcClick = onScanNwcClick,
-                                onBackupWalletClick = onBackupWalletClick,
-                            )
+                    onBackupWalletClick = onBackupWalletClick,
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -182,6 +182,7 @@ private fun WalletSpecificSettingsItems(
     state: WalletSettingsContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onScanNwcClick: () -> Unit,
+    onBackupWalletClick: () -> Unit,
 ) {
     AnimatedContent(targetState = state.useExternalWallet == true, label = "WalletSettingsContent") {
         when (it) {
@@ -202,6 +203,7 @@ private fun WalletSpecificSettingsItems(
                 PrimalWalletSettings(
                     state = state,
                     eventPublisher = eventPublisher,
+                    onBackupWalletClick = onBackupWalletClick,
                 )
             }
         }
