@@ -63,6 +63,7 @@ fun WalletSettingsScreen(
     onScanNwcClick: () -> Unit,
     onCreateNewWalletConnection: () -> Unit,
     onRestoreWalletClick: () -> Unit,
+    onBackupWalletClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
     DisposableLifecycleObserverEffect(viewModel) {
@@ -79,6 +80,7 @@ fun WalletSettingsScreen(
         onScanNwcClick = onScanNwcClick,
         onCreateNewWalletConnection = onCreateNewWalletConnection,
         onRestoreWalletClick = onRestoreWalletClick,
+        onBackupWalletClick = onBackupWalletClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -92,6 +94,7 @@ fun WalletSettingsScreen(
     onScanNwcClick: () -> Unit,
     onCreateNewWalletConnection: () -> Unit,
     onRestoreWalletClick: () -> Unit,
+    onBackupWalletClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -121,7 +124,7 @@ fun WalletSettingsScreen(
                     WalletBackupWidget(
                         modifier = Modifier.padding(horizontal = 16.dp),
                         walletBalanceInBtc = state.wallet?.balanceInBtc?.toString(),
-                        onBackupClick = { eventPublisher(UiEvent.BackupWallet) },
+                        onBackupClick = onBackupWalletClick,
                     )
                 }
 
@@ -138,6 +141,7 @@ fun WalletSettingsScreen(
                     state = state,
                     eventPublisher = eventPublisher,
                     onScanNwcClick = onScanNwcClick,
+                    onBackupWalletClick = onBackupWalletClick,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -178,6 +182,7 @@ private fun WalletSpecificSettingsItems(
     state: WalletSettingsContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onScanNwcClick: () -> Unit,
+    onBackupWalletClick: () -> Unit,
 ) {
     AnimatedContent(targetState = state.useExternalWallet == true, label = "WalletSettingsContent") {
         when (it) {
@@ -198,6 +203,7 @@ private fun WalletSpecificSettingsItems(
                 PrimalWalletSettings(
                     state = state,
                     eventPublisher = eventPublisher,
+                    onBackupWalletClick = onBackupWalletClick,
                 )
             }
         }
@@ -329,6 +335,7 @@ private fun PreviewSettingsWalletScreen(
             onCreateNewWalletConnection = {},
             eventPublisher = {},
             onRestoreWalletClick = {},
+            onBackupWalletClick = {},
         )
     }
 }

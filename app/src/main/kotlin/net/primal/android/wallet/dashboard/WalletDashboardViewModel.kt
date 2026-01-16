@@ -129,7 +129,13 @@ class WalletDashboardViewModel @Inject constructor(
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeUserId)
                 .collect { wallet ->
-                    setState { copy(wallet = wallet, lowBalance = wallet?.balanceInBtc == 0.0) }
+                    setState {
+                        copy(
+                            wallet = wallet,
+                            lowBalance = wallet?.balanceInBtc == 0.0,
+                            isWalletBackedUp = false,
+                        )
+                    }
                 }
         }
 

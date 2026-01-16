@@ -96,6 +96,7 @@ fun WalletDashboardScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     onWalletActivateClick: () -> Unit,
+    onWalletBackupClick: () -> Unit,
     onUpgradeWalletClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
@@ -126,6 +127,7 @@ fun WalletDashboardScreen(
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onWalletActivateClick = onWalletActivateClick,
         onUpgradeWalletClick = onUpgradeWalletClick,
+        onWalletBackupClick = onWalletBackupClick,
         onProfileClick = onProfileClick,
         onTransactionClick = onTransactionClick,
         onSendClick = onSendClick,
@@ -145,6 +147,7 @@ fun WalletDashboardScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     onWalletActivateClick: () -> Unit,
+    onWalletBackupClick: () -> Unit,
     onUpgradeWalletClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
@@ -459,6 +462,37 @@ fun WalletDashboardScreen(
                                         },
                                         actionLabel = stringResource(id = R.string.wallet_dashboard_upgrade_button),
                                         onActionClick = onUpgradeWalletClick,
+                                    )
+                                } else if (state.wallet is Wallet.Tsunami && !state.isWalletBackedUp) {
+                                    val titleText = stringResource(
+                                        id = R.string.wallet_dashboard_backup_notice_title,
+                                    )
+                                    val descriptionText = stringResource(
+                                        id = R.string.wallet_dashboard_backup_notice_description,
+                                    )
+
+                                    val annotatedMessage = buildAnnotatedString {
+                                        withStyle(
+                                            SpanStyle(
+                                                fontWeight = FontWeight.Bold,
+                                                textDecoration = TextDecoration.Underline,
+                                            ),
+                                        ) {
+                                            append(titleText.uppercase())
+                                        }
+                                        append(" ")
+                                        append(descriptionText)
+                                    }
+
+                                    WalletCallToActionAnnotatedBox(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp)
+                                            .padding(bottom = 16.dp)
+                                            .animateContentSize(),
+                                        message = annotatedMessage,
+                                        actionLabel = stringResource(id = R.string.wallet_dashboard_backup_button),
+                                        onActionClick = onWalletBackupClick,
                                     )
                                 } else if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
                                     WalletCallToActionBox(
