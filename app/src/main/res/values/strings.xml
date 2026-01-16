@@ -1105,6 +1105,16 @@
     <string name="session_event_state_approved">Done</string>
     <string name="session_event_state_rejected">Rejected</string>
 
+    <string name="settings_developer_tools_title">Developer Tools</string>
+    <string name="settings_developer_tools_logging_title">Enable Logging</string>
+    <string name="settings_developer_tools_logging_description">Captures app logs for debugging</string>
+    <string name="settings_developer_tools_log_stats">Log files: %1$d (%2$s)</string>
+    <string name="settings_developer_tools_export">Export Logs (ZIP)</string>
+    <string name="settings_developer_tools_exporting">Exporting…</string>
+    <string name="settings_developer_tools_clear">Clear Logs</string>
+    <string name="settings_developer_tools_error_no_logs">No logs to export</string>
+    <string name="settings_developer_tools_error_export_failed">Failed to export logs</string>
+
     <string name="biometric_prompt_title">Authenticate</string>
     <string name="biometric_prompt_description">This ensures that only you can access the private key.</string>
 
