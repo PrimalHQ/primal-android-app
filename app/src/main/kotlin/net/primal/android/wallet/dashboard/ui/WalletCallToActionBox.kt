@@ -62,3 +62,41 @@ fun WalletCallToActionBox(
         }
     }
 }
+
+@Composable
+fun WalletCallToActionAnnotatedBox(
+    modifier: Modifier,
+    message: AnnotatedString? = null,
+    actionLabel: String? = null,
+    onActionClick: (() -> Unit)? = null,
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier.wrapContentSize(align = Alignment.Center),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            message?.let {
+                Text(
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
+                    text = message,
+                    textAlign = TextAlign.Center,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    style = AppTheme.typography.bodyMedium,
+                )
+            }
+
+            if (actionLabel != null) {
+                PrimalFilledButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onActionClick?.invoke() },
+                ) {
+                    Text(text = actionLabel)
+                }
+            }
+        }
+    }
+}

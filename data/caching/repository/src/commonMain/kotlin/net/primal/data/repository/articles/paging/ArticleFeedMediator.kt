@@ -21,7 +21,7 @@ import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.articles.ArticlesApi
 import net.primal.data.remote.api.articles.model.ArticleFeedRequestBody
 import net.primal.data.remote.api.articles.model.ArticleResponse
-import net.primal.data.repository.articles.processors.persistToDatabaseAsTransaction
+import net.primal.data.repository.articles.processors.persistToDatabase
 import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
 import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.common.ContentPrimalPaging
@@ -156,7 +156,7 @@ internal class ArticleFeedMediator(
 
                 database.articleFeedsConnections().connect(data = connections)
 
-                response.persistToDatabaseAsTransaction(
+                response.persistToDatabase(
                     userId = userId,
                     database = database,
                 )

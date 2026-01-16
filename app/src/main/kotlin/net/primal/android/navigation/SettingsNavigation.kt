@@ -14,6 +14,8 @@ import androidx.navigation.navigation
 import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
+import net.primal.android.settings.account.AccountSettingsScreen
+import net.primal.android.settings.account.AccountSettingsViewModel
 import net.primal.android.settings.appearance.AppearanceSettingsScreen
 import net.primal.android.settings.appearance.di.appearanceSettingsViewModel
 import net.primal.android.settings.connected.ConnectedAppsScreen
@@ -39,8 +41,6 @@ import net.primal.android.settings.content.ContentDisplaySettingsViewModel
 import net.primal.android.settings.home.PrimalSettingsSection
 import net.primal.android.settings.home.SettingsHomeScreen
 import net.primal.android.settings.home.SettingsHomeViewModel
-import net.primal.android.settings.keys.KeysSettingsScreen
-import net.primal.android.settings.keys.KeysSettingsViewModel
 import net.primal.android.settings.media.MediaUploadsSettingsScreen
 import net.primal.android.settings.media.MediaUploadsSettingsViewModel
 import net.primal.android.settings.muted.MutedSettingsScreen
@@ -60,6 +60,8 @@ import net.primal.android.settings.wallet.settings.WalletSettingsScreen
 import net.primal.android.settings.wallet.settings.WalletSettingsViewModel
 import net.primal.android.settings.zaps.ZapSettingsScreen
 import net.primal.android.settings.zaps.ZapSettingsViewModel
+import net.primal.android.wallet.restore.RestoreWalletScreen
+import net.primal.android.wallet.restore.RestoreWalletViewModel
 
 private fun NavController.navigateToAccountSettings() = navigate(route = "account_settings")
 private fun NavController.navigateToNetworkSettings() = navigate(route = "network")
@@ -98,6 +100,8 @@ private fun NavController.navigateToRemoteAppPermissions(clientPubKey: String) =
 private fun NavController.navigateToLocalAppPermissions(identifier: String) =
     navigate(route = "connected_apps/local/$identifier/permissions")
 
+private fun NavController.navigateToWalletRestore() = navigate(route = "wallet_settings/restore")
+
 fun NavController.navigateToLinkPrimalWallet(
     appName: String? = null,
     appIcon: String? = null,
@@ -117,7 +121,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             onClose = { navController.navigateUp() },
             onSettingsSectionClick = {
                 when (it) {
-                    PrimalSettingsSection.Keys -> navController.navigateToAccountSettings()
+                    PrimalSettingsSection.Account -> navController.navigateToAccountSettings()
                     PrimalSettingsSection.Network -> navController.navigateToNetworkSettings()
                     PrimalSettingsSection.Wallet -> navController.navigateToWalletSettings()
                     PrimalSettingsSection.Appearance -> navController.navigateToAppearanceSettings()
@@ -131,7 +135,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             },
         )
 
-        keys(route = "account_settings", navController = navController)
+        account(route = "account_settings", navController = navController)
         wallet(
             route = "wallet_settings",
             deepLinks = listOf(
@@ -144,6 +148,7 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
             ),
             navController = navController,
         )
+        walletRestore(route = "wallet_settings/restore", navController = navController)
         linkPrimalWallet(
             route = "wallet_settings/link_primal_wallet",
             deepLinks = listOf(
@@ -257,7 +262,7 @@ private fun NavGraphBuilder.home(
     )
 }
 
-private fun NavGraphBuilder.keys(route: String, navController: NavController) =
+private fun NavGraphBuilder.account(route: String, navController: NavController) =
     composable(
         route = route,
         enterTransition = { primalSlideInHorizontallyFromEnd },
@@ -265,9 +270,9 @@ private fun NavGraphBuilder.keys(route: String, navController: NavController) =
         popEnterTransition = { primalScaleIn },
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
-        val viewModel = hiltViewModel<KeysSettingsViewModel>(it)
+        val viewModel = hiltViewModel<AccountSettingsViewModel>(it)
         LockToOrientationPortrait()
-        KeysSettingsScreen(
+        AccountSettingsScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )
@@ -312,8 +317,26 @@ private fun NavGraphBuilder.wallet(
         onEditProfileClick = { navController.navigateToProfileEditor() },
         onScanNwcClick = { navController.navigateToWalletScanNwcUrl() },
         onCreateNewWalletConnection = { navController.navigateToCreateNewWalletConnection() },
+        onRestoreWalletClick = { navController.navigateToWalletRestore() },
     )
 }
+
+private fun NavGraphBuilder.walletRestore(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<RestoreWalletViewModel>()
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        RestoreWalletScreen(
+            viewModel = viewModel,
+            onClose = { navController.popBackStack() },
+        )
+    }
 
 private fun NavGraphBuilder.scanNwcUrl(route: String, navController: NavController) =
     composable(

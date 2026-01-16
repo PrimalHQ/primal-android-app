@@ -19,9 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import net.primal.android.R
+import net.primal.android.core.compose.PrimalBottomSheetDragHandle
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.signer.SignerConnectBottomSheet
-import net.primal.android.core.compose.signer.ui.NostrConnectBottomSheetDragHandle
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.service.PrimalRemoteSignerService
@@ -68,7 +68,7 @@ fun NostrConnectBottomSheet(viewModel: NostrConnectViewModel, onDismissRequest: 
         sheetState = sheetState,
         onDismissRequest = onDismissRequest,
         containerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
-        dragHandle = { NostrConnectBottomSheetDragHandle() },
+        dragHandle = { PrimalBottomSheetDragHandle() },
     ) {
         Box {
             SignerConnectBottomSheet(

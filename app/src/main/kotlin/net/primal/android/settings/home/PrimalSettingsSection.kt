@@ -1,7 +1,7 @@
 package net.primal.android.settings.home
 
 enum class PrimalSettingsSection {
-    Keys,
+    Account,
     Wallet,
     Network,
     Appearance,

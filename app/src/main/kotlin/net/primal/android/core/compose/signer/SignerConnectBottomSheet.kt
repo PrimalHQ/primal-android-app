@@ -24,7 +24,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -137,6 +139,9 @@ fun SignerConnectBottomSheet(
             )
 
             SignerConnectPages(
+                modifier = Modifier
+                    .height(400.dp)
+                    .weight(1f, fill = false),
                 selectedTab = selectedTab,
                 accounts = accounts,
                 selectedAccount = selectedAccount,
@@ -330,6 +335,7 @@ private fun SignerConnectAppTab(
 
 @Composable
 private fun SignerConnectPages(
+    modifier: Modifier = Modifier,
     selectedTab: SignerConnectTab,
     accounts: List<UserAccountUi>,
     selectedAccount: UserAccountUi?,
@@ -345,9 +351,7 @@ private fun SignerConnectPages(
     onDailyBudgetChange: (Long?) -> Unit,
 ) {
     AnimatedContent(
-        modifier = Modifier
-            .background(color = AppTheme.extraColorScheme.surfaceVariantAlt3)
-            .height(400.dp),
+        modifier = modifier.background(color = AppTheme.extraColorScheme.surfaceVariantAlt3),
         targetState = selectedTab,
         transitionSpec = {
             val slideIn = if (targetState.ordinal > initialState.ordinal) {
@@ -508,6 +512,7 @@ private fun PermissionsList(
 ) {
     Column(
         modifier = Modifier
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
             .padding(vertical = 24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),

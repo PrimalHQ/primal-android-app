@@ -56,6 +56,13 @@ fun String.ensureHttpOrHttps(): String =
         "https://$this"
     }
 
+fun String.ensureWsOrWss(): String =
+    if (startsWith("wss://") || startsWith("ws://")) {
+        this
+    } else {
+        "wss://$this"
+    }
+
 private val extensionToMimeType = mapOf(
     "jpeg" to "image/jpeg",
     "jpg" to "image/jpeg",

@@ -62,7 +62,9 @@ import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asATagValue
+import net.primal.domain.nostr.buildNeventFromReplyOrRootNoteTag
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.hasRootMarker
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.nostr.utils.takeAsNaddrOrNull
@@ -548,14 +550,22 @@ class NoteEditorViewModel @AssistedInject constructor(
                         attachments = _state.value.attachments,
                     )
                 } else {
-                    val rootPost = _state.value.replyToConversation.firstOrNull()
-                    val replyToPost = _state.value.replyToConversation.lastOrNull()
+                    val replyToPost = referencedNoteNevent?.eventId?.let {
+                        feedRepository.findPostsById(it)
+                    }
+
+                    val replyToNoteNevent = replyToPost?.asFeedPostUi()?.asNevent() ?: referencedNoteNevent
+                    val rootNoteNevent = replyToPost?.tags
+                        ?.find { it.hasRootMarker() }
+                        ?.buildNeventFromReplyOrRootNoteTag()
+                        ?: replyToNoteNevent
+
                     notePublishHandler.publishShortTextNote(
                         userId = activeAccountStore.activeUserId(),
                         content = noteContent.concatenateUris(),
                         attachments = _state.value.attachments,
-                        rootNoteNevent = rootPost?.asNevent(),
-                        replyToNoteNevent = replyToPost?.asNevent(),
+                        rootNoteNevent = rootNoteNevent,
+                        replyToNoteNevent = replyToNoteNevent,
                         rootArticleNaddr = referencedArticleNaddr
                             ?: _state.value.replyToArticle?.generateNaddr(),
                         rootHighlightNevent = referencedHighlightNevent

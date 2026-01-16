@@ -29,6 +29,8 @@ import net.primal.android.wallet.transactions.send.create.CreateTransactionViewM
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentScreen
 import net.primal.android.wallet.transactions.send.prepare.SendPaymentViewModel
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
+import net.primal.android.wallet.upgrade.UpgradeWalletScreen
+import net.primal.android.wallet.upgrade.UpgradeWalletViewModel
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.wallet.DraftTx
 
@@ -54,6 +56,8 @@ fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTx? =
 }
 
 private fun NavController.navigateToWalletReceive() = navigate(route = "walletReceive")
+
+fun NavController.navigateToWalletUpgrade() = navigate(route = "walletUpgrade")
 
 private fun NavController.navigateToTransactionDetails(txId: String) = navigate(route = "walletTransaction/$txId")
 
@@ -114,6 +118,11 @@ fun NavGraphBuilder.walletNavigation(
         navController = navController,
     )
 
+    upgradeWallet(
+        route = "walletUpgrade",
+        navController = navController,
+    )
+
     transactionDetails(
         route = "walletTransaction/{$TRANSACTION_ID}",
         arguments = listOf(
@@ -162,6 +171,7 @@ private fun NavGraphBuilder.dashboard(
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
         onWalletActivateClick = { navController.navigateToWalletActivation() },
         onWalletBackupClick = { navController.navigateToWalletBackup() },
+        onUpgradeWalletClick = { navController.navigateToWalletUpgrade() },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onTransactionClick = { txId -> navController.navigateToTransactionDetails(txId) },
         onSendClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Nostr) },
@@ -274,6 +284,24 @@ private fun NavGraphBuilder.receive(route: String, navController: NavController)
         ReceivePaymentScreen(
             viewModel = viewModel,
             onBuyPremium = { navController.navigateToPremiumBuying() },
+            onClose = { navController.navigateUp() },
+        )
+    }
+
+private fun NavGraphBuilder.upgradeWallet(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        val viewModel = hiltViewModel<UpgradeWalletViewModel>()
+
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        UpgradeWalletScreen(
+            viewModel = viewModel,
             onClose = { navController.navigateUp() },
         )
     }

@@ -11,6 +11,6 @@ import net.primal.android.settings.home.SettingsHomeContract.UiState
 @HiltViewModel
 class SettingsHomeViewModel @Inject constructor() : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState(version = BuildConfig.VERSION_NAME))
+    private val _state = MutableStateFlow(UiState(version = BuildConfig.VERSION_NAME, walletNeedsBackup = false))
     val state = _state.asStateFlow()
 }

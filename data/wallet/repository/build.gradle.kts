@@ -87,6 +87,12 @@ kotlin {
                 implementation(libs.napier)
 
                 implementation(libs.bignum)
+
+                // Bitcoin
+                implementation(libs.bitcoin.kmp)
+
+                // Crypto
+                implementation(libs.korlibs.crypto)
             }
         }
 

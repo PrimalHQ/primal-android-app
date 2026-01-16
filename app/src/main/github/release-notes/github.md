@@ -10,3 +10,7 @@
 - Fixed parsing of malformed nostrconnect relay parameters (#836)
 - Cache `name` for `LocalApp`s (#835)
 - Fixed rows order in session event details (#833)
+- Fixed crash caused by missing configuration for cronet R8 proguard rules on Google builds
+- Ensure relay URLs have wss prefix in Nostr Connect
+- Fixed nostr connect screen layout overflow on large displays
+- Fixed reply published as root note on low connectivity (#843)

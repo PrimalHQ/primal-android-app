@@ -1,4 +1,4 @@
-package net.primal.android.settings.keys
+package net.primal.android.settings.account
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -9,13 +9,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
-import net.primal.android.settings.keys.KeysSettingsContract.UiState
+import net.primal.android.settings.account.AccountSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 
 @HiltViewModel
-class KeysSettingsViewModel @Inject constructor(
+class AccountSettingsViewModel @Inject constructor(
     private val credentialsStore: CredentialsStore,
     private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {

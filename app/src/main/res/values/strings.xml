@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Primal</string>
 
     <string name="nsec_or_npub">nsec / npub</string>
@@ -856,16 +856,16 @@
 
     <string name="settings_title">Settings</string>
 
-    <string name="settings_keys_title">Keys</string>
-    <string name="settings_keys_copy_public_key">Copy public key</string>
-    <string name="settings_keys_public_key_hint">Anyone on Nostr can find you via your public key. Feel free to share anywhere.</string>
-    <string name="settings_keys_public_key_title">Your Public Key</string>
-    <string name="settings_keys_copy_private_key">Copy private key</string>
-    <string name="settings_keys_private_key_hint">This key fully controls your Nostr account. Don’t share it with anyone. Only copy this key to store it securely or to login to another Nostr app.</string>
-    <string name="settings_keys_private_key_title">Your Private Key</string>
-    <string name="settings_keys_show_key">Show Key</string>
-    <string name="settings_keys_hide_key">Hide Key</string>
-    <string name="settings_keys_key_copied">Key copied</string>
+    <string name="settings_account_title">Account</string>
+    <string name="settings_account_copy_public_key">Copy public key</string>
+    <string name="settings_account_public_key_hint">Anyone on Nostr can find you via your public key. Feel free to share anywhere.</string>
+    <string name="settings_account_public_key_title">Your Public Key</string>
+    <string name="settings_account_copy_private_key">Copy private key</string>
+    <string name="settings_account_private_key_hint">This key fully controls your Nostr account. Don’t share it with anyone. Only copy this key to store it securely or to login to another Nostr app.</string>
+    <string name="settings_account_private_key_title">Your Private Key</string>
+    <string name="settings_account_show_key">Show Key</string>
+    <string name="settings_account_hide_key">Hide Key</string>
+    <string name="settings_account_key_copied">Key copied</string>
 
     <string name="settings_wallet_title">Wallet</string>
     <string name="settings_wallet_connected_title">Wallet Connected</string>
@@ -879,6 +879,9 @@
     <string name="settings_wallet_nwc_paste_string">Paste NWC String</string>
     <string name="settings_wallet_nwc_scan_qr_code">Scan NWC QR Code</string>
     <string name="settings_wallet_nwc_disconnect_wallet_button">Disconnect Wallet</string>
+    <string name="settings_wallet_backup_balance">Wallet Balance: %1$s sats</string>
+    <string name="settings_wallet_backup_subtitle">This wallet has not been backed up. It is important to back up your wallet so you don\'t lose access to your funds.</string>
+    <string name="settings_wallet_backup_button">Back Up Wallet Now</string>
     <string name="settings_wallet_nwc_profile_lightning_address">Your Nostr Lightning Address:</string>
     <string name="settings_wallet_nwc_profile_lightning_address_hint">You can change your Nostr Lightning Address (for receiving zaps) in your</string>
     <string name="settings_wallet_nwc_profile_lightning_address_hint_suffix">profile settings</string>
@@ -904,6 +907,10 @@
     <string name="settings_wallet_start_in_wallet">Start in wallet</string>
     <string name="settings_wallet_start_in_wallet_hint">Open the wallet when Primal starts</string>
     <string name="settings_wallet_save">Save</string>
+    <string name="settings_wallet_backup_wallet_title">Backup wallet</string>
+    <string name="settings_wallet_backup_wallet_subtitle">Write down your wallet recovery phrase so you don\'t lose access to your funds</string>
+    <string name="settings_wallet_restore_wallet_title">Restore existing wallet</string>
+    <string name="settings_wallet_restore_wallet_subtitle">If you have an existing wallet that you wish to use with your Nostr account, you can restore it here using your 12-24 wallet recovery phrase</string>
     <string name="settings_wallet_new_nwc_connection_title">New Wallet Connection</string>
     <string name="settings_wallet_new_nwc_connection_app_name_input_header">Name of the app you wish to connect:</string>
     <string name="settings_wallet_new_nwc_connection_hint">You can revoke access at any time in your Primal Wallet settings.</string>
@@ -988,6 +995,7 @@
     <string name="settings_zaps_editor_message">Message</string>
     <string name="settings_zaps_editor_value">Value</string>
     <string name="settings_zaps_editor_save">Save</string>
+    <string name="settings_wallet_needs_backup">needs backup</string>
 
     <string name="settings_muted_content_title">Muted Content</string>
     <string name="settings_muted_title">Muted</string>
@@ -1216,6 +1224,34 @@
     <string name="wallet_dashboard_backup_notice_title">Important:</string>
     <string name="wallet_dashboard_backup_notice_description">This wallet has not been backed up. You need to backup your wallet so you don\'t lose access to your funds.</string>
     <string name="wallet_dashboard_backup_button">Backup Wallet Now</string>
+    <string name="wallet_dashboard_upgrade_header">IMPORTANT</string>
+    <string name="wallet_dashboard_upgrade_expires_on">This wallet will expire on</string>
+    <string name="wallet_dashboard_upgrade_please_upgrade">Please upgrade to continue using this wallet.</string>
+    <string name="wallet_dashboard_upgrade_button">Upgrade Wallet Now</string>
+
+    <string name="wallet_upgrade_sheet_title">Welcome to Primal 2.7!</string>
+    <string name="wallet_upgrade_sheet_subtitle">Featuring a self-custodial wallet</string>
+    <string name="wallet_upgrade_sheet_description">With one tap, we\'ll move your funds and full\ntransaction history to your new self-custodial\nwallet - so you fully control your bitcoin.\nQuestions? Check out our </string>
+    <string name="wallet_upgrade_sheet_faqs">FAQs</string>
+    <string name="wallet_upgrade_sheet_button">Upgrade Wallet Now</string>
+    <string name="wallet_upgrade_title">Upgrade Wallet</string>
+    <string name="wallet_upgrade_upgrading_title">Upgrading…</string>
+    <string name="wallet_upgrade_upgrading_support" tools:ignore="TypographyEllipsis">transferring your wallet\nbalance &amp; transaction history...</string>
+    <string name="wallet_upgrade_success_title">Success</string>
+    <string name="wallet_upgrade_success_headline">Wallet upgraded!</string>
+    <string name="wallet_upgrade_failed_title">Upgrade Failed</string>
+    <string name="wallet_upgrade_failed_headline">Unable to upgrade</string>
+    <string name="wallet_upgrade_done_button">Done</string>
+    <string name="wallet_upgrade_close_button">Close</string>
+
+    <string name="wallet_restore_title">Restore Existing Wallet</string>
+    <string name="wallet_restore_enter_recovery_phrase_placeholder">Enter your wallet recovery phrase</string>
+    <string name="wallet_restore_helper_text">We support recovery of any existing bitcoin wallet on the network. Recovery phrases are 12 to 24 words long.</string>
+    <string name="wallet_restore_button">Restore Wallet Now</string>
+    <string name="wallet_restore_invalid_recovery_phrase">Invalid recovery phrase</string>
+    <string name="wallet_restore_valid_recovery_phrase">Valid recovery phrase</string>
+    <string name="wallet_restore_restoring_your_wallet">Restoring your wallet…</string>
+    <string name="wallet_restore_error_generic">Something went wrong. Please check your recovery phrase and try again.</string>
 
     <string name="wallet_tos_prefix">By tapping \"Next\" you agree to the</string>
     <string name="wallet_activation_title">Activate Wallet</string>

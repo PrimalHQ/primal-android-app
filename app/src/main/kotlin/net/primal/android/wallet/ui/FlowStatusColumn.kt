@@ -1,4 +1,4 @@
-package net.primal.android.wallet.transactions.send.create.ui
+package net.primal.android.wallet.ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -25,15 +25,16 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun TransactionStatusColumn(
+fun FlowStatusColumn(
+    modifier: Modifier = Modifier,
     icon: ImageVector?,
     iconTint: Color = LocalContentColor.current,
-    headlineText: String,
-    supportText: String,
+    headlineText: String?,
+    supportText: String?,
     textColor: Color = LocalContentColor.current,
 ) {
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight(),
         verticalArrangement = Arrangement.Center,
@@ -56,26 +57,30 @@ fun TransactionStatusColumn(
             }
         }
 
-        Text(
-            modifier = Modifier
-                .fillMaxWidth(fraction = 0.8f)
-                .padding(top = 32.dp, bottom = 8.dp),
-            text = headlineText,
-            textAlign = TextAlign.Center,
-            color = textColor,
-            style = AppTheme.typography.headlineSmall,
-        )
+        headlineText?.let {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = 0.8f)
+                    .padding(top = 32.dp, bottom = 8.dp),
+                text = headlineText,
+                textAlign = TextAlign.Center,
+                color = textColor,
+                style = AppTheme.typography.headlineSmall,
+            )
+        }
 
-        Text(
-            modifier = Modifier
-                .fillMaxWidth(fraction = 0.8f)
-                .padding(vertical = 32.dp),
-            text = supportText,
-            textAlign = TextAlign.Center,
-            color = textColor,
-            style = AppTheme.typography.bodyLarge.copy(
-                lineHeight = 28.sp,
-            ),
-        )
+        supportText?.let {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth(fraction = 0.8f)
+                    .padding(vertical = 32.dp),
+                text = supportText,
+                textAlign = TextAlign.Center,
+                color = textColor,
+                style = AppTheme.typography.bodyLarge.copy(
+                    lineHeight = 28.sp,
+                ),
+            )
+        }
     }
 }
