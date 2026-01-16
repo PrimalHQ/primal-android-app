@@ -36,7 +36,7 @@ import net.primal.domain.wallet.DraftTx
 
 private fun NavController.navigateToWalletActivation() = navigate(route = "walletActivation")
 
-private fun NavController.navigateToWalletBackup() = navigate(route = "walletBackup")
+fun NavController.navigateToWalletBackup() = navigate(route = "walletBackup")
 
 private fun NavController.navigateToWalletSendPayment(tab: SendPaymentTab) =
     navigate(route = "walletSend?$SEND_PAYMENT_TAB=$tab")
