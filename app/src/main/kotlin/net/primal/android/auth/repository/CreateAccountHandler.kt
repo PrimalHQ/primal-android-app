@@ -13,7 +13,6 @@ import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.remote.api.settings.model.AppSettingsDescription
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.nostr.NostrEventKind
@@ -22,6 +21,7 @@ import net.primal.domain.nostr.asIdentifierTag
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
+import net.primal.domain.settings.AppSettingsDescription
 import timber.log.Timber
 
 class CreateAccountHandler @Inject constructor(

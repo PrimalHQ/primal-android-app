@@ -22,7 +22,6 @@ import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.remote.api.settings.model.AppSettingsDescription
 import net.primal.domain.global.ContentAppSettings
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
@@ -40,6 +39,7 @@ import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.nostr.cryptography.utils.toNpub
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.nostr.zaps.toTags
+import net.primal.domain.settings.AppSettingsDescription
 
 @Singleton
 class NostrNotary @Inject constructor(

@@ -20,9 +20,11 @@ import net.primal.domain.links.EventUriRepository
 import net.primal.domain.messages.ChatRepository
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.MessageCipher
+import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.posts.FeedRepository
+import net.primal.domain.premium.PremiumBroadcastRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
@@ -59,9 +61,23 @@ object CachingRepositoriesModule {
     }
 
     @Provides
-    fun providesCachingImporterRepository(): CachingImportRepository {
-        return PrimalRepositoryFactory.createCachingImportRepository()
+    fun providesCachingImporterRepository(
+        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
+    ): CachingImportRepository {
+        return PrimalRepositoryFactory.createCachingImportRepository(
+            cachingPrimalApiClient = primalApiClient,
+        )
     }
+
+    @Provides
+    fun providePremiumBroadcastRepository(
+        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
+        nostrEventSignatureHandler: NostrEventSignatureHandler,
+    ): PremiumBroadcastRepository =
+        PrimalRepositoryFactory.createPremiumBroadcastRepository(
+            cachingPrimalApiClient = primalApiClient,
+            nostrEventSignatureHandler = nostrEventSignatureHandler,
+        )
 
     @Provides
     fun provideChatRepository(

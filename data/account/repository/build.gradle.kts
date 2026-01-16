@@ -52,8 +52,10 @@ kotlin {
                 implementation(project(":core:nips"))
                 implementation(project(":core:app-config"))
                 implementation(project(":core:networking-http"))
+                implementation(project(":core:networking-primal"))
 
                 implementation(project(":data:account:local"))
+                implementation(project(":data:account:remote"))
                 implementation(project(":data:account:signer"))
 
                 implementation(project(":domain:nostr"))
