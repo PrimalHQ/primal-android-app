@@ -6,7 +6,7 @@ import net.primal.domain.wallet.Wallet
 interface WalletSettingsContract {
     data class UiState(
         val wallet: Wallet? = null,
-        val preferPrimalWallet: Boolean? = null,
+        val useExternalWallet: Boolean? = null,
         val nwcConnectionsInfo: List<NwcConnectionInfo> = emptyList(),
         val connectionsState: ConnectionsState = ConnectionsState.Loading,
         val showBackupWidget: Boolean = false,
@@ -16,7 +16,7 @@ interface WalletSettingsContract {
         data object DisconnectWallet : UiEvent()
         data object RequestFetchWalletConnections : UiEvent()
         data class RevokeConnection(val nwcPubkey: String) : UiEvent()
-        data class UpdatePreferPrimalWallet(val value: Boolean) : UiEvent()
+        data class UpdateUseExternalWallet(val value: Boolean) : UiEvent()
         data class UpdateMinTransactionAmount(val amountInSats: Long) : UiEvent()
         data class ConnectExternalWallet(val connectionLink: String) : UiEvent()
         data object BackupWallet : UiEvent()
