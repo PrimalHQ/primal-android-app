@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import kotlin.math.min
 import net.primal.android.core.compose.attachment.model.EventUriUi
+import net.primal.android.events.ui.calculateDimensions
 import net.primal.android.events.ui.calculateImageSize
 import net.primal.android.events.ui.findNearestOrNull
 import net.primal.domain.links.CdnResourceVariant
@@ -40,6 +41,7 @@ fun BoxWithConstraintsScope.findImageSize(eventUri: EventUriUi): DpSize {
         else -> {
             calculateFallbackDimensions(
                 maxWidth = maxWidth,
+                maxHeight = maxHeight,
                 type = eventUri.type,
             )
         }
@@ -55,24 +57,15 @@ fun CdnResourceVariant?.findImageSize(maxWidth: Int): DpSize {
     )
 }
 
-private fun calculateDimensions(
-    width: Int,
-    height: Int,
+private fun calculateFallbackDimensions(
     maxWidth: Int,
     maxHeight: Int,
+    type: EventUriType,
 ): DpSize {
-    val heightForMaxWidth = (maxWidth.toFloat() * height.toFloat()) / width.toFloat()
-    val finalHeight = min(heightForMaxWidth, maxHeight.toFloat())
-    return DpSize(
-        width = maxWidth.dp,
-        height = finalHeight.dp,
-    )
-}
-
-private fun calculateFallbackDimensions(maxWidth: Int, type: EventUriType): DpSize {
     return if (type == EventUriType.Video) {
         DpSize(width = maxWidth.dp, height = (maxWidth * 9 / 16).dp)
     } else {
-        DpSize(width = maxWidth.dp, height = maxWidth.dp)
+        val side = min(maxWidth, maxHeight)
+        DpSize(width = side.dp, height = side.dp)
     }
 }
