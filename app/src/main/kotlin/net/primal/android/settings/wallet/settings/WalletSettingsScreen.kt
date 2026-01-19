@@ -48,6 +48,7 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEven
 import net.primal.android.settings.wallet.settings.ui.ConnectedAppsSettings
 import net.primal.android.settings.wallet.settings.ui.ExternalWalletSettings
 import net.primal.android.settings.wallet.settings.ui.PrimalWalletSettings
+import net.primal.android.settings.wallet.settings.ui.WalletBackupWidget
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.utils.isActivePrimalWallet
@@ -61,6 +62,8 @@ fun WalletSettingsScreen(
     onEditProfileClick: () -> Unit,
     onScanNwcClick: () -> Unit,
     onCreateNewWalletConnection: () -> Unit,
+    onRestoreWalletClick: () -> Unit,
+    onBackupWalletClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
     DisposableLifecycleObserverEffect(viewModel) {
@@ -76,6 +79,8 @@ fun WalletSettingsScreen(
         onEditProfileClick = onEditProfileClick,
         onScanNwcClick = onScanNwcClick,
         onCreateNewWalletConnection = onCreateNewWalletConnection,
+        onRestoreWalletClick = onRestoreWalletClick,
+        onBackupWalletClick = onBackupWalletClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -88,6 +93,8 @@ fun WalletSettingsScreen(
     onEditProfileClick: () -> Unit,
     onScanNwcClick: () -> Unit,
     onCreateNewWalletConnection: () -> Unit,
+    onRestoreWalletClick: () -> Unit,
+    onBackupWalletClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -112,38 +119,41 @@ fun WalletSettingsScreen(
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                if (state.showBackupWidget) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    WalletBackupWidget(
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        walletBalanceInBtc = state.wallet?.balanceInBtc?.toString(),
+                        onBackupClick = onBackupWalletClick,
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
                 ExternalWalletListItem(
-                    preferPrimalWallet = state.preferPrimalWallet == true,
+                    useExternalWallet = state.useExternalWallet == true,
                     onExternalWalletSwitchChanged = { value ->
-                        eventPublisher(UiEvent.UpdatePreferPrimalWallet(value))
+                        eventPublisher(UiEvent.UpdateUseExternalWallet(value))
                     },
                 )
 
-                AnimatedContent(targetState = state.preferPrimalWallet == true, label = "WalletSettingsContent") {
-                    when (it) {
-                        true -> {
-                            PrimalWalletSettings(
-                                state = state,
-                                eventPublisher = eventPublisher,
-                            )
-                        }
+                WalletSpecificSettingsItems(
+                    state = state,
+                    eventPublisher = eventPublisher,
+                    onScanNwcClick = onScanNwcClick,
+                    onBackupWalletClick = onBackupWalletClick,
+                )
 
-                        false -> {
-                            val clipboardManager = LocalClipboardManager.current
-                            ExternalWalletSettings(
-                                nwcWallet = state.wallet,
-                                onExternalWalletDisconnect = { eventPublisher(UiEvent.DisconnectWallet) },
-                                onPasteNwcClick = {
-                                    val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
-                                    eventPublisher(UiEvent.ConnectExternalWallet(connectionLink = clipboardText))
-                                },
-                                onScanNwcClick = onScanNwcClick,
-                            )
-                        }
-                    }
-                }
+                Spacer(modifier = Modifier.height(8.dp))
+
+                SettingsItem(
+                    headlineText = stringResource(id = R.string.settings_wallet_restore_wallet_title),
+                    supportText = stringResource(id = R.string.settings_wallet_restore_wallet_subtitle),
+                    trailingContent = {
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
+                    },
+                    onClick = onRestoreWalletClick,
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -168,15 +178,48 @@ fun WalletSettingsScreen(
 }
 
 @Composable
-private fun ExternalWalletListItem(preferPrimalWallet: Boolean, onExternalWalletSwitchChanged: (Boolean) -> Unit) {
+private fun WalletSpecificSettingsItems(
+    state: WalletSettingsContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+    onScanNwcClick: () -> Unit,
+    onBackupWalletClick: () -> Unit,
+) {
+    AnimatedContent(targetState = state.useExternalWallet == true, label = "WalletSettingsContent") {
+        when (it) {
+            true -> {
+                val clipboardManager = LocalClipboardManager.current
+                ExternalWalletSettings(
+                    nwcWallet = state.wallet,
+                    onExternalWalletDisconnect = { eventPublisher(UiEvent.DisconnectWallet) },
+                    onPasteNwcClick = {
+                        val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
+                        eventPublisher(UiEvent.ConnectExternalWallet(connectionLink = clipboardText))
+                    },
+                    onScanNwcClick = onScanNwcClick,
+                )
+            }
+
+            false -> {
+                PrimalWalletSettings(
+                    state = state,
+                    eventPublisher = eventPublisher,
+                    onBackupWalletClick = onBackupWalletClick,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ExternalWalletListItem(useExternalWallet: Boolean, onExternalWalletSwitchChanged: (Boolean) -> Unit) {
     ListItem(
         modifier = Modifier.clickable {
-            onExternalWalletSwitchChanged(!preferPrimalWallet)
+            onExternalWalletSwitchChanged(!useExternalWallet)
         },
         headlineContent = {
             Text(
                 modifier = Modifier.padding(bottom = 4.dp),
-                text = stringResource(id = R.string.settings_wallet_use_primal_wallet),
+                text = stringResource(id = R.string.settings_wallet_use_external_wallet),
                 style = AppTheme.typography.bodyLarge,
                 color = AppTheme.colorScheme.onPrimary,
             )
@@ -184,14 +227,14 @@ private fun ExternalWalletListItem(preferPrimalWallet: Boolean, onExternalWallet
         supportingContent = {
             Text(
                 modifier = Modifier.fillMaxWidth(),
-                text = stringResource(id = R.string.settings_wallet_use_primal_wallet_hint),
+                text = stringResource(id = R.string.settings_wallet_use_external_wallet_hint),
                 style = AppTheme.typography.bodySmall,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
             )
         },
         trailingContent = {
             PrimalSwitch(
-                checked = preferPrimalWallet,
+                checked = useExternalWallet,
                 onCheckedChange = onExternalWalletSwitchChanged,
             )
         },
@@ -291,6 +334,8 @@ private fun PreviewSettingsWalletScreen(
             onScanNwcClick = {},
             onCreateNewWalletConnection = {},
             eventPublisher = {},
+            onRestoreWalletClick = {},
+            onBackupWalletClick = {},
         )
     }
 }

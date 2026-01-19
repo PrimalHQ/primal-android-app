@@ -11,6 +11,7 @@ import kotlin.time.Instant
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.caching.MediaCacher
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.asMapByKey
@@ -45,6 +46,7 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserFollowStats
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserFollowersCountsOrNull
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserScoresOrNull
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.common.UserProfileSearchItem
 import net.primal.domain.explore.ExplorePeopleData
 import net.primal.domain.explore.ExploreRepository
@@ -56,6 +58,7 @@ class ExploreRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val exploreApi: ExploreApi,
     private val database: PrimalDatabase,
+    private val mediaCacher: MediaCacher? = null,
 ) : ExploreRepository {
 
     override suspend fun fetchTrendingZaps(userId: String): List<ExploreZapNoteData> =
@@ -68,6 +71,7 @@ class ExploreRepositoryImpl(
                     ),
                 )
             }
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
@@ -138,6 +142,7 @@ class ExploreRepositoryImpl(
                     ),
                 )
             }
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
             val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
@@ -192,6 +197,7 @@ class ExploreRepositoryImpl(
                     offset = offset,
                 ),
             )
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response.processAndPersistFollowLists(database = database)
         }
@@ -204,6 +210,7 @@ class ExploreRepositoryImpl(
                     identifier = identifier,
                 ),
             )
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response.processAndPersistFollowLists(database = database).firstOrNull()
         }
@@ -260,6 +267,7 @@ class ExploreRepositoryImpl(
                 )
             }.sortedByDescending { it.score }
 
+            mediaCacher?.cacheAvatarUrls(metadata = response.contactsMetadata, cdnResources = response.cdnResources)
             database.withTransaction {
                 database.profiles().insertOrUpdateAll(data = profiles)
                 database.profileStats().insertOrIgnore(data = result.map { it.asProfileStatsPO() })
@@ -292,6 +300,7 @@ class ExploreRepositoryImpl(
                 exploreApi = exploreApi,
                 database = database,
                 dispatcherProvider = dispatcherProvider,
+                mediaCacher = mediaCacher,
             ),
             pagingSourceFactory = pagingSourceFactory,
         )

@@ -15,8 +15,8 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.core.serialization.json.NostrNotaryJson
 import net.primal.android.networking.UserAgentProvider
-import net.primal.android.signer.AmberSignResult
-import net.primal.android.signer.signEventWithAmber
+import net.primal.android.signer.client.AmberSignResult
+import net.primal.android.signer.client.signEventWithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
@@ -95,7 +95,7 @@ class NostrNotary @Inject constructor(
 
     private fun signNostrEvent(userId: String, event: NostrUnsignedEvent): NostrEvent? {
         val isExternalSignerLogin = runCatching {
-            credentialsStore.isExternalSignerLogin(npub = userId.hexToNpubHrp())
+            credentialsStore.isExternalSignerCredential(npub = userId.hexToNpubHrp())
         }.getOrDefault(false)
 
         if (isExternalSignerLogin) {

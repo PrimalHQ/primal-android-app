@@ -40,8 +40,8 @@ kotlin {
     // Android target
     androidLibrary {
         namespace = "net.primal"
-        compileSdk = 35
-        minSdk = 26
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
         withHostTestBuilder {}
     }
 
@@ -79,6 +79,8 @@ kotlin {
                 implementation(libs.secp256k1.kmp)
 
                 implementation(libs.okio)
+
+                implementation(libs.androidx.collection)
             }
         }
 

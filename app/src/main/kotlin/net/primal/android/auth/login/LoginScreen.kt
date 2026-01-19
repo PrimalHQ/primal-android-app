@@ -68,16 +68,16 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
-import net.primal.android.signer.event.buildAppSpecificDataEvent
-import net.primal.android.signer.launchGetPublicKey
-import net.primal.android.signer.launchSignEvent
-import net.primal.android.signer.rememberAmberPubkeyLauncher
-import net.primal.android.signer.rememberAmberSignerLauncher
-import net.primal.android.signer.utils.isCompatibleAmberVersionInstalled
+import net.primal.android.signer.client.event.buildAppSpecificDataEvent
+import net.primal.android.signer.client.launchGetPublicKey
+import net.primal.android.signer.client.launchSignEvent
+import net.primal.android.signer.client.rememberAmberPubkeyLauncher
+import net.primal.android.signer.client.rememberAmberSignerLauncher
+import net.primal.android.signer.client.utils.isCompatibleAmberVersionInstalled
 import net.primal.android.stream.player.hideStreamMiniPlayer
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.android.user.domain.LoginType
+import net.primal.android.user.domain.CredentialType
 import net.primal.domain.nostr.utils.isValidNostrPrivateKey
 import net.primal.domain.nostr.utils.isValidNostrPublicKey
 
@@ -124,7 +124,9 @@ fun LoginScreen(
     val pubkeyLauncher = rememberAmberPubkeyLauncher(
         onFailure = { eventPublisher(LoginContract.UiEvent.ResetLoginState) },
     ) { pubkey ->
-        eventPublisher(LoginContract.UiEvent.UpdateLoginInput(newInput = pubkey, loginType = LoginType.ExternalSigner))
+        eventPublisher(
+            LoginContract.UiEvent.UpdateLoginInput(newInput = pubkey, credentialType = CredentialType.ExternalSigner),
+        )
         signLauncher.launchSignEvent(event = buildAppSpecificDataEvent(pubkey = pubkey))
     }
 

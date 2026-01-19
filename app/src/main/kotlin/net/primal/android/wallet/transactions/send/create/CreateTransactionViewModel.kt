@@ -189,7 +189,8 @@ class CreateTransactionViewModel @Inject constructor(
         val uiState = _state.value
         val btcAddress = uiState.transaction.targetOnChainAddress
         val amountInSats = uiState.transaction.amountSats.toLong()
-        if (btcAddress == null || amountInSats == 0L) return
+        val activeWalletId = uiState.activeWallet?.walletId
+        if (btcAddress == null || amountInSats == 0L || activeWalletId == null) return
 
         viewModelScope.launch {
             val lastTierIndex = uiState.selectedFeeTierIndex
@@ -199,6 +200,7 @@ class CreateTransactionViewModel @Inject constructor(
                 withContext(dispatchers.io()) {
                     val tiers = transactionFeeRepository.fetchMiningFees(
                         userId = activeUserId,
+                        walletId = activeWalletId,
                         onChainAddress = btcAddress,
                         amountInBtc = amountInSats.toBtc().formatAsString(),
                     )

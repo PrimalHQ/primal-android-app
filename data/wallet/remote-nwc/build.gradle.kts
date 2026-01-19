@@ -14,8 +14,8 @@ kotlin {
     // Android target
     androidLibrary {
         namespace = "net.primal"
-        compileSdk = 35
-        minSdk = 26
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     // JVM Target
@@ -39,6 +39,7 @@ kotlin {
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-http"))
                 implementation(project(":core:networking-primal"))
+                implementation(project(":core:networking-lightning"))
                 implementation(project(":domain:primal"))
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:wallet"))

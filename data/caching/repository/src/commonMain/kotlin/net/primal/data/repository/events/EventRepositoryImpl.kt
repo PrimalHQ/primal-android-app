@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.Result
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -47,6 +48,7 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserScoresOrNull
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.events.EventRepository
 import net.primal.domain.events.EventZap as EventZapDO
 import net.primal.domain.events.NostrEventAction
@@ -58,6 +60,7 @@ class EventRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val eventStatsApi: EventStatsApi,
     private val database: PrimalDatabase,
+    private val mediaCacher: MediaCacher? = null,
 ) : EventRepository {
 
     override fun observeEventStats(eventIds: List<String>) =
@@ -75,6 +78,7 @@ class EventRepositoryImpl(
                     limit = 100,
                 ),
             )
+            mediaCacher?.cacheAvatarUrls(metadata = response.profiles, cdnResources = response.cdnResources)
 
             val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
             val primalNames = response.primalUserNames.parseAndMapPrimalUserNames()
@@ -118,6 +122,7 @@ class EventRepositoryImpl(
                 limit = limit,
             ),
         )
+        mediaCacher?.cacheAvatarUrls(metadata = response.profiles, cdnResources = response.cdnResources)
         response.persistToDatabaseAsTransaction(database = database)
     }
 
@@ -160,6 +165,7 @@ class EventRepositoryImpl(
         }
 
     private suspend fun persistReplaceableEventResponse(response: ReplaceableEventResponse) {
+        mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
         val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
         val eventHints = response.relayHints.flatMapAsEventHintsPO()
         val wordsCountMap = response.wordCount.flatMapAsWordCount()
@@ -247,6 +253,7 @@ class EventRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             eventStatsApi = eventStatsApi,
             database = database,
+            mediaCacher = mediaCacher,
         ),
         pagingSourceFactory = pagingSourceFactory,
     )

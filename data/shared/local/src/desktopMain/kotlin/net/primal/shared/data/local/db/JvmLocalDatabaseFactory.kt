@@ -11,7 +11,7 @@ typealias LocalDatabaseFactory = JvmLocalDatabaseFactory
 object JvmLocalDatabaseFactory {
 
     inline fun <reified T : RoomDatabase> createDatabase(databaseName: String): T {
-        return buildLocalDatabase {
+        return buildLocalDatabase(fallbackToDestructiveMigration = true) {
             val dbFile = File(System.getProperty("java.io.tmpdir"), databaseName)
             Room.databaseBuilder<T>(name = dbFile.absolutePath)
                 .setDriver(BundledSQLiteDriver())

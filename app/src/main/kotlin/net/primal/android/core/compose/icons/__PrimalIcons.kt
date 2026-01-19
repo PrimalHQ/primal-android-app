@@ -1,5 +1,6 @@
 package net.primal.android.core.compose.icons
 
+import PasteAlt
 import androidx.compose.ui.graphics.vector.ImageVector
 import kotlin.collections.List as ____KtList
 import net.primal.android.core.compose.icons.primaliconpack.AddAccount
@@ -73,6 +74,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FullScreen
 import net.primal.android.core.compose.icons.primaliconpack.FullScreenRestore
 import net.primal.android.core.compose.icons.primaliconpack.GenericLinkIcon
 import net.primal.android.core.compose.icons.primaliconpack.Help
+import net.primal.android.core.compose.icons.primaliconpack.HighSecurity
 import net.primal.android.core.compose.icons.primaliconpack.Highlight
 import net.primal.android.core.compose.icons.primaliconpack.Home
 import net.primal.android.core.compose.icons.primaliconpack.HomeFilled
@@ -88,8 +90,10 @@ import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.Link
 import net.primal.android.core.compose.icons.primaliconpack.LongRead
 import net.primal.android.core.compose.icons.primaliconpack.LongReadFilled
+import net.primal.android.core.compose.icons.primaliconpack.LowSecurity
 import net.primal.android.core.compose.icons.primaliconpack.MediaGalleryFilled
 import net.primal.android.core.compose.icons.primaliconpack.MediaVideoFilled
+import net.primal.android.core.compose.icons.primaliconpack.MediumSecurity
 import net.primal.android.core.compose.icons.primaliconpack.MenuAccount
 import net.primal.android.core.compose.icons.primaliconpack.Message
 import net.primal.android.core.compose.icons.primaliconpack.Messages
@@ -105,6 +109,7 @@ import net.primal.android.core.compose.icons.primaliconpack.NavWalletFilled
 import net.primal.android.core.compose.icons.primaliconpack.NewDM
 import net.primal.android.core.compose.icons.primaliconpack.NoConnectionBlack
 import net.primal.android.core.compose.icons.primaliconpack.NoConnectionWhite
+import net.primal.android.core.compose.icons.primaliconpack.NostrConnectSession
 import net.primal.android.core.compose.icons.primaliconpack.NostrichFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notifications
 import net.primal.android.core.compose.icons.primaliconpack.NotificationsFilled
@@ -128,6 +133,7 @@ import net.primal.android.core.compose.icons.primaliconpack.PrimalPremium
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.icons.primaliconpack.Quote
 import net.primal.android.core.compose.icons.primaliconpack.Read
+import net.primal.android.core.compose.icons.primaliconpack.RemoteLogin
 import net.primal.android.core.compose.icons.primaliconpack.RemoveAccount
 import net.primal.android.core.compose.icons.primaliconpack.RemoveHighlight
 import net.primal.android.core.compose.icons.primaliconpack.Report
@@ -273,6 +279,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Keyboard,
             PhotoFromGallery,
             Paste,
+            PasteAlt,
             PrimalPremium,
             Directory,
             Subtract,
@@ -339,6 +346,11 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             FullScreen,
             FullScreenRestore,
             Info,
+            LowSecurity,
+            MediumSecurity,
+            HighSecurity,
+            NostrConnectSession,
+            RemoteLogin,
         )
         return __PrimalIcons!!
     }

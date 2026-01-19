@@ -10,13 +10,27 @@ typealias LocalDatabaseFactory = AndroidLocalDatabaseFactory
 
 object AndroidLocalDatabaseFactory {
 
-    inline fun <reified T : RoomDatabase> createDatabase(context: Context, databaseName: String): T {
+    inline fun <reified T : RoomDatabase> createDatabase(
+        context: Context,
+        databaseName: String,
+        fallbackToDestructiveMigration: Boolean,
+        callback: RoomDatabase.Callback? = null,
+    ): T {
         val appContext = context.applicationContext
         val dbFile = context.getDatabasePath(databaseName)
-        return buildLocalDatabase {
+        return buildLocalDatabase(
+            fallbackToDestructiveMigration = fallbackToDestructiveMigration,
+        ) {
             Room.databaseBuilder<T>(context = appContext, name = dbFile.absolutePath)
                 .setQueryCoroutineContext(AndroidDispatcherProvider().io())
                 .setDriver(AndroidSQLiteDriver())
+                .run {
+                    if (callback != null) {
+                        this.addCallback(callback)
+                    } else {
+                        this
+                    }
+                }
         }
     }
 }

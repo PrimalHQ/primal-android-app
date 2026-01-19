@@ -36,14 +36,22 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.time.format.FormatStyle
 import kotlinx.coroutines.launch
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.InvisibleAppBarIcon
 import net.primal.android.core.compose.NavigationBarFullHeightDp
@@ -56,6 +64,7 @@ import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.WalletPurchaseSats
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
+import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
@@ -64,6 +73,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState.DashboardError
 import net.primal.android.wallet.dashboard.ui.WalletAction
+import net.primal.android.wallet.dashboard.ui.WalletCallToActionAnnotatedBox
 import net.primal.android.wallet.dashboard.ui.WalletCallToActionBox
 import net.primal.android.wallet.dashboard.ui.WalletDashboard
 import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
@@ -75,6 +85,10 @@ import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletKycLevel
 
+private val DATE_OF_WALLET_EXPIRATION = LocalDate.of(2026, 3, 31)
+    .atStartOfDay(ZoneOffset.UTC)
+    .toInstant()
+
 @Composable
 fun WalletDashboardScreen(
     viewModel: WalletDashboardViewModel,
@@ -82,6 +96,8 @@ fun WalletDashboardScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     onWalletActivateClick: () -> Unit,
+    onWalletBackupClick: () -> Unit,
+    onUpgradeWalletClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
     onSendClick: () -> Unit,
@@ -95,7 +111,7 @@ fun WalletDashboardScreen(
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
             Lifecycle.Event.ON_START -> {
-                if (uiState.value.wallet is Wallet.NWC) {
+                if (uiState.value.wallet !is Wallet.Primal) {
                     viewModel.setEvents(UiEvent.RequestWalletBalanceUpdate)
                 }
             }
@@ -110,6 +126,8 @@ fun WalletDashboardScreen(
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
         onWalletActivateClick = onWalletActivateClick,
+        onUpgradeWalletClick = onUpgradeWalletClick,
+        onWalletBackupClick = onWalletBackupClick,
         onProfileClick = onProfileClick,
         onTransactionClick = onTransactionClick,
         onSendClick = onSendClick,
@@ -129,6 +147,8 @@ fun WalletDashboardScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
     onWalletActivateClick: () -> Unit,
+    onWalletBackupClick: () -> Unit,
+    onUpgradeWalletClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
     onSendClick: () -> Unit,
@@ -144,12 +164,12 @@ fun WalletDashboardScreen(
     val pagingItems = state.transactions.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
-    val canShowWalletPicker = false
+    val canShowWalletPicker = state.userWallets.isNotEmpty() && state.userWallets.size > 1 && state.wallet != null
     var walletPickerVisible by remember { mutableStateOf(false) }
     if (walletPickerVisible && canShowWalletPicker) {
         WalletPickerBottomSheet(
             wallets = state.userWallets,
-            activeWallet = state.wallet!!,
+            activeWallet = state.wallet,
             onDismissRequest = { walletPickerVisible = false },
             onConfigureWalletsClick = onConfigureWalletsClick,
             onActiveWalletChanged = {
@@ -187,7 +207,9 @@ fun WalletDashboardScreen(
         pagingItems.refresh()
     }
 
-    val canBuySats = remember(state.wallet) { isGoogleBuild() && state.wallet is Wallet.Primal }
+    @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
+    val canBuySats = remember(state.wallet) { isGoogleBuild() && state.wallet is Wallet.Primal && false }
+
     val isScrolledToTop by remember(listState) { derivedStateOf { listState.firstVisibleItemScrollOffset == 0 } }
     val dashboardExpanded by rememberSaveable(isScrolledToTop) { mutableStateOf(isScrolledToTop) }
     val dashboardLiteHeightDp = 80.dp
@@ -220,7 +242,12 @@ fun WalletDashboardScreen(
         topAppBar = { scrollBehaviour ->
             PrimalTopAppBar(
                 modifier = Modifier.onSizeChanged { topBarHeight = it.height },
-                title = stringResource(id = R.string.wallet_title),
+                title = when (state.wallet) {
+                    is Wallet.NWC -> stringResource(id = R.string.wallet_nwc_title)
+                    is Wallet.Primal -> stringResource(id = R.string.wallet_primal_title)
+                    is Wallet.Tsunami -> stringResource(id = R.string.wallet_tsunami_title)
+                    null -> stringResource(id = R.string.wallet_title)
+                },
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 legendaryCustomization = state.activeAccountLegendaryCustomization,
                 avatarBlossoms = state.activeAccountBlossoms,
@@ -390,11 +417,89 @@ fun WalletDashboardScreen(
                             onProfileClick = onProfileClick,
                             onTransactionClick = onTransactionClick,
                             header = {
-                                if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
+                                if (state.wallet is Wallet.Primal) {
+                                    WalletCallToActionAnnotatedBox(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .animateContentSize()
+                                            .padding(horizontal = 32.dp)
+                                            .padding(bottom = 12.dp),
+                                        message = buildAnnotatedString {
+                                            withStyle(
+                                                AppTheme.typography.bodyMedium.toSpanStyle()
+                                                    .copy(color = AppTheme.extraColorScheme.onSurfaceVariantAlt2),
+                                            ) {
+                                                withStyle(
+                                                    SpanStyle(
+                                                        textDecoration = TextDecoration.Underline,
+                                                        fontWeight = FontWeight.Bold,
+                                                    ),
+                                                ) {
+                                                    append(
+                                                        stringResource(id = R.string.wallet_dashboard_upgrade_header),
+                                                    )
+                                                }
+                                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                                    appendLine(":")
+                                                }
+                                                append(
+                                                    stringResource(id = R.string.wallet_dashboard_upgrade_expires_on),
+                                                )
+                                                append(" ")
+                                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                                    append(
+                                                        DATE_OF_WALLET_EXPIRATION
+                                                            .formatToDefaultDateFormat(FormatStyle.LONG),
+                                                    )
+                                                }
+                                                appendLine(".")
+                                                append(
+                                                    stringResource(
+                                                        id = R.string.wallet_dashboard_upgrade_please_upgrade,
+                                                    ),
+                                                )
+                                            }
+                                        },
+                                        actionLabel = stringResource(id = R.string.wallet_dashboard_upgrade_button),
+                                        onActionClick = onUpgradeWalletClick,
+                                    )
+                                } else if (state.wallet is Wallet.Tsunami && !state.isWalletBackedUp) {
+                                    val titleText = stringResource(
+                                        id = R.string.wallet_dashboard_backup_notice_title,
+                                    )
+                                    val descriptionText = stringResource(
+                                        id = R.string.wallet_dashboard_backup_notice_description,
+                                    )
+
+                                    val annotatedMessage = buildAnnotatedString {
+                                        withStyle(
+                                            SpanStyle(
+                                                fontWeight = FontWeight.Bold,
+                                                textDecoration = TextDecoration.Underline,
+                                            ),
+                                        ) {
+                                            append(titleText.uppercase())
+                                        }
+                                        append(" ")
+                                        append(descriptionText)
+                                    }
+
+                                    WalletCallToActionAnnotatedBox(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp)
+                                            .padding(bottom = 16.dp)
+                                            .animateContentSize(),
+                                        message = annotatedMessage,
+                                        actionLabel = stringResource(id = R.string.wallet_dashboard_backup_button),
+                                        onActionClick = onWalletBackupClick,
+                                    )
+                                } else if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
                                     WalletCallToActionBox(
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .animateContentSize()
+                                            .padding(horizontal = 32.dp)
                                             .padding(bottom = 32.dp),
                                         message = stringResource(id = R.string.wallet_dashboard_low_sats_hint),
                                         actionLabel = stringResource(id = R.string.wallet_dashboard_buy_sats_button),

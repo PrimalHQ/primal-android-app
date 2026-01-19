@@ -5,8 +5,8 @@ import javax.inject.Singleton
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.credentials.CredentialsStore
-import net.primal.android.user.domain.LoginType
 import net.primal.android.user.repository.UserRepository
+import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 
 @Singleton
@@ -15,6 +15,7 @@ class AuthRepository @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val userRepository: UserRepository,
     private val accountsStore: UserAccountsStore,
+    private val connectionRepository: ConnectionRepository,
 ) {
     suspend fun loginWithNsec(nostrKey: String): String {
         val userId = credentialsStore.saveNsec(nostrKey)
@@ -22,8 +23,15 @@ class AuthRepository @Inject constructor(
         return userId
     }
 
-    suspend fun loginWithNpub(npub: String, loginType: LoginType): String {
-        val userId = credentialsStore.saveNpub(npub = npub, loginType = loginType)
+    suspend fun loginWithExternalSignerNpub(npub: String): String {
+        val userId = credentialsStore.saveExternalSignerNpub(npub = npub)
+        activeAccountStore.setActiveUserId(userId)
+
+        return userId
+    }
+
+    suspend fun loginWithNpub(npub: String): String {
+        val userId = credentialsStore.saveNpub(npub = npub)
         activeAccountStore.setActiveUserId(userId)
         return userId
     }
@@ -33,6 +41,7 @@ class AuthRepository @Inject constructor(
             setNextActiveAccount()
         }
 
+        connectionRepository.removeConnectionsByUserPubKey(userPubKey = pubkey)
         userRepository.removeUserAccountById(pubkey = pubkey)
         credentialsStore.removeCredentialByNpub(npub = pubkey.hexToNpubHrp())
         userRepository.clearAllUserRelatedData(userId = pubkey)

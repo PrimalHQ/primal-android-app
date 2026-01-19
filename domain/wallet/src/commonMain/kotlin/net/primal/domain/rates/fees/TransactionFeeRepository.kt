@@ -11,6 +11,7 @@ interface TransactionFeeRepository {
     )
     suspend fun fetchMiningFees(
         userId: String,
+        walletId: String,
         onChainAddress: String,
         amountInBtc: String,
     ): List<OnChainTransactionFeeTier>
@@ -21,6 +22,7 @@ interface TransactionFeeRepository {
     )
     suspend fun fetchDefaultMiningFee(
         userId: String,
+        walletId: String,
         onChainAddress: String,
         amountInBtc: String,
     ): OnChainTransactionFeeTier?

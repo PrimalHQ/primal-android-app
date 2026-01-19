@@ -125,7 +125,8 @@ class PrimalDrawerViewModel @Inject constructor(
             DrawerScreenDestination.Premium(hasPremium = hasPremium),
             DrawerScreenDestination.Messages,
             DrawerScreenDestination.Bookmarks(userId = userId),
-            DrawerScreenDestination.RedeemCode,
+            DrawerScreenDestination.RemoteLogin,
+            DrawerScreenDestination.ScanCode,
             DrawerScreenDestination.Settings,
             DrawerScreenDestination.SignOut(userId = userId),
         )

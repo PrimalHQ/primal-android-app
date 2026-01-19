@@ -26,6 +26,12 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.shared.data.local.db.withTransaction
 
 suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
+    database.withTransaction {
+        persistToDatabase(userId = userId, database = database)
+    }
+}
+
+suspend inline fun ArticleResponse.persistToDatabase(userId: String, database: PrimalDatabase) {
     val cdnResources = this.cdnResources.flatMapNotNullAsCdnResource()
     val eventHints = this.primalRelayHints.flatMapAsEventHintsPO()
     val wordsCountMap = this.primalLongFormWords.flatMapAsWordCount()
@@ -74,21 +80,19 @@ suspend fun ArticleResponse.persistToDatabaseAsTransaction(userId: String, datab
     val eventStats = this.primalEventStats.mapNotNullAsEventStatsPO()
     val eventUserStats = this.primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
 
-    database.withTransaction {
-        database.profiles().insertOrUpdateAll(data = profiles)
-        database.posts().upsertAll(data = allNotes + referencedPostsWithReplyTo)
-        database.articles().upsertAll(list = allArticles)
-        database.eventStats().upsertAll(data = eventStats)
-        database.eventUserStats().upsertAll(data = eventUserStats)
-        database.eventZaps().upsertAll(data = eventZaps)
-        database.highlights().upsertAll(data = referencedHighlights)
-        database.eventUris().upsertAllEventUris(data = noteAttachments)
+    database.profiles().insertOrUpdateAll(data = profiles)
+    database.posts().upsertAll(data = allNotes + referencedPostsWithReplyTo)
+    database.articles().upsertAll(list = allArticles)
+    database.eventStats().upsertAll(data = eventStats)
+    database.eventUserStats().upsertAll(data = eventUserStats)
+    database.eventZaps().upsertAll(data = eventZaps)
+    database.highlights().upsertAll(data = referencedHighlights)
+    database.eventUris().upsertAllEventUris(data = noteAttachments)
 
-        val eventHintsDao = database.eventHints()
-        val hintsMap = eventHints.associateBy { it.eventId }
-        eventRelayHintsUpserter(dao = eventHintsDao, eventIds = eventHints.map { it.eventId }) {
-            copy(relays = hintsMap[this.eventId]?.relays ?: emptyList())
-        }
+    val eventHintsDao = database.eventHints()
+    val hintsMap = eventHints.associateBy { it.eventId }
+    eventRelayHintsUpserter(dao = eventHintsDao, eventIds = eventHints.map { it.eventId }) {
+        copy(relays = hintsMap[this.eventId]?.relays ?: emptyList())
     }
 }
 

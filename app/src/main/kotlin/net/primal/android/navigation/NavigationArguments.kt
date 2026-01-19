@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavBackStackEntry
 import net.primal.android.explore.asearch.AdvancedSearchContract
 import net.primal.android.explore.search.ui.SearchScope
+import net.primal.android.scan.ScanCodeContract
 import net.primal.android.wallet.transactions.send.prepare.tabs.SendPaymentTab
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.ReactionType
@@ -24,6 +25,8 @@ inline val SavedStateHandle.npub: String? get() = get(PROFILE_NPUB)
 
 const val IDENTIFIER = "identifier"
 inline val SavedStateHandle.identifier: String? get() = get(IDENTIFIER)
+inline val SavedStateHandle.identifierOrThrow: String
+    get() = get(IDENTIFIER) ?: throw IllegalArgumentException("Missing required identifier argument")
 
 const val PROFILE_ID = "profileId"
 inline val SavedStateHandle.profileId: String? get() = get(PROFILE_ID)
@@ -71,6 +74,13 @@ const val INITIAL_QUERY = "initialQuery"
 inline val SavedStateHandle.initialQuery: String? get() = get(INITIAL_QUERY)
 
 const val POSTED_BY = "postedBy"
+
+const val SCAN_MODE = "scanMode"
+inline val SavedStateHandle.scanMode: ScanCodeContract.ScanMode
+    get() = get<String>(SCAN_MODE)?.let {
+        ScanCodeContract.ScanMode.valueOf(it)
+    } ?: ScanCodeContract.ScanMode.Anything
+
 inline val SavedStateHandle.postedBy: List<String>?
     get() = get<String>(POSTED_BY)?.decodeFromJsonStringOrNull()
 
@@ -149,3 +159,14 @@ inline val SavedStateHandle.reactionTypeOrThrow: ReactionType
     get() = get<String>(INITIAL_REACTION_TYPE)
         ?.let { ReactionType.valueOf(it) }
         ?: throw IllegalArgumentException("Missing required $INITIAL_REACTION_TYPE argument.")
+
+const val NOSTR_CONNECT_URI = "nostrConnectUri"
+inline val SavedStateHandle.nostrConnectUri: String? get() = get<String>(NOSTR_CONNECT_URI)?.asUrlDecoded()
+
+const val REMOTE_LOGIN_CLIENT_PUBKEY = "remoteLoginClientPubKey"
+inline val SavedStateHandle.clientPubKeyOrThrow: String
+    get() = get(REMOTE_LOGIN_CLIENT_PUBKEY) ?: throw IllegalArgumentException("Missing required clientPubKey argument.")
+
+const val SESSION_ID = "sessionId"
+inline val SavedStateHandle.sessionIdOrThrow: String
+    get() = get(SESSION_ID) ?: throw IllegalArgumentException("Missing required sessionId argument.")

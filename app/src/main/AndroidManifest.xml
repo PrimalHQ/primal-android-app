@@ -11,6 +11,7 @@
         android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:maxSdkVersion="32"
@@ -47,10 +48,14 @@
         tools:replace="android:allowBackup"
         tools:targetApi="33">
 
+        <receiver
+            android:name=".core.receiver.EndSessionReceiver"
+            android:exported="false" />
+
         <activity
             android:name=".MainActivity"
-            android:exported="true"
             android:configChanges="orientation|screenSize|layoutDirection|screenLayout|smallestScreenSize"
+            android:exported="true"
             android:supportsPictureInPicture="true"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -59,10 +64,32 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="android.intent.action.VIEW"/>
-                <category android:name="android.intent.category.DEFAULT"/>
-                <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="primal" android:host="live"/>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="live"
+                    android:scheme="primal" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="nostrconnect" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="signer"
+                    android:scheme="primal" />
             </intent-filter>
             <intent-filter
                 android:autoVerify="true"
@@ -241,6 +268,19 @@
 
                 <data
                     android:host="primal.net"
+                    android:pathPrefix="/profile/"
+                    android:scheme="https" />
+            </intent-filter>
+            <intent-filter
+                android:autoVerify="true"
+                android:label="Primal Profile">
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="primal.net"
                     android:pathPrefix="/.+"
                     android:scheme="https" />
             </intent-filter>
@@ -287,6 +327,25 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".signer.provider.SignerActivity"
+            android:configChanges="orientation|screenSize|layoutDirection|screenLayout|smallestScreenSize"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:taskAffinity="net.primal.android.signer"
+            android:excludeFromRecents="true"
+            android:theme="@style/TransparentBottomSheetTheme"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="nostrsigner" />
+            </intent-filter>
+        </activity>
+
         <service
             android:name=".core.service.PrimalMediaSessionService"
             android:exported="false"
@@ -295,6 +354,22 @@
                 <action android:name="androidx.media3.session.MediaSessionService" />
             </intent-filter>
         </service>
+
+        <service
+            android:name=".core.service.PrimalRemoteSignerService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Run a foreground service to keep remote signer operational." />
+        </service>
+
+        <provider
+            android:name=".signer.provider.LocalSignerContentProvider"
+            android:authorities="${applicationId}.PING;${applicationId}.SIGN_MESSAGE;${applicationId}.SIGN_EVENT;${applicationId}.NIP04_ENCRYPT;${applicationId}.NIP04_DECRYPT;${applicationId}.NIP44_ENCRYPT;${applicationId}.NIP44_DECRYPT;${applicationId}.GET_PUBLIC_KEY;${applicationId}.DECRYPT_ZAP_EVENT"
+            android:exported="true"
+            tools:ignore="ExportedContentProvider" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

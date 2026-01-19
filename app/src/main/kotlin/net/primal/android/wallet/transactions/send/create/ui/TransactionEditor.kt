@@ -713,7 +713,7 @@ private fun MiningFeeRow(
                 text = stringResource(
                     id = R.string.wallet_create_transaction_min_tx_amount_for_selected_fee_tier_error,
                     "$minAmountInSatsFormatted sats",
-                    miningFee.label,
+                    miningFee.label ?: miningFee.id,
                 ),
                 color = AppTheme.colorScheme.error,
                 textAlign = TextAlign.Center,

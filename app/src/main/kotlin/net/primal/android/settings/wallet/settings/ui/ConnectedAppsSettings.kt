@@ -36,10 +36,10 @@ import net.primal.android.R
 import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.DeleteListItemImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
-import net.primal.android.settings.wallet.domain.NwcConnectionInfo
 import net.primal.android.settings.wallet.settings.WalletSettingsContract
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.domain.connections.model.NwcConnectionInfo
 
 @Composable
 fun ConnectedAppsSettings(
@@ -212,12 +212,10 @@ private fun ConnectedAppsContent(
                     ConnectedAppItem(
                         isLastItem = isLastItem,
                         appName = app.appName,
-                        budget = if (app.dailyBudget?.isNotBlank() == true) {
-                            app.dailyBudget.toSats().toLong().let { "%,d sats".format(it) }
-                        } else {
-                            stringResource(id = R.string.settings_wallet_nwc_connection_daily_budget_no_limit)
-                        },
-                        canRevoke = app.canRevoke,
+                        budget = app.dailyBudgetInBtc?.takeIf { it.isNotBlank() }?.let { dailyBudgetInBtc ->
+                            dailyBudgetInBtc.toSats().toLong().let { "%,d sats".format(it) }
+                        } ?: stringResource(id = R.string.settings_wallet_nwc_connection_daily_budget_no_limit),
+                        canRevoke = true,
                         onRevokeConnectedApp = {
                             onRevokeDialogVisibilityChange(true)
                             onRevokeNwcPubkeyChange(app.nwcPubkey)

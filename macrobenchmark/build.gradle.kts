@@ -16,15 +16,15 @@ val configProperties by lazy {
 
 android {
     namespace = "net.primal.android.macrobenchmark"
-    compileSdk = 36
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     kotlin {
         jvmToolchain(17)
     }
 
     defaultConfig {
-        minSdk = 24
-        targetSdk = 36
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        targetSdk = libs.versions.android.targetSdk.get().toInt()
 
         buildConfigField(
             type = "String",

@@ -5,6 +5,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
@@ -32,7 +33,9 @@ class ActiveAccountStore @Inject constructor(
     )
 
     val activeUserAccount = accountsStore.userAccounts
-        .map { it.findActiveAccountOrEmpty() }
+        .combine(activeUserId) { accounts, activeId ->
+            accounts.find { it.pubkey == activeId } ?: UserAccount.EMPTY
+        }
         .distinctUntilChanged()
 
     val activeAccountState = activeUserAccount
@@ -42,10 +45,6 @@ class ActiveAccountStore @Inject constructor(
     fun activeUserId() = activeUserId.value
 
     suspend fun activeUserAccount() = activeUserAccount.firstOrNull() ?: UserAccount.EMPTY
-
-    private fun List<UserAccount>.findActiveAccountOrEmpty(): UserAccount {
-        return this.find { it.pubkey == activeUserId() } ?: UserAccount.EMPTY
-    }
 
     private fun UserAccount.asActiveUserAccountState(): ActiveUserAccountState =
         when (this) {

@@ -238,6 +238,7 @@ class LegendContributeViewModel @Inject constructor(
         if (targetBtcAddress != null && amountBtc != null) {
             val defaultMiningFee = transactionFeeRepository.fetchDefaultMiningFee(
                 userId = activeUserId,
+                walletId = activeWalletId,
                 onChainAddress = targetBtcAddress,
                 amountInBtc = amountBtc,
             )

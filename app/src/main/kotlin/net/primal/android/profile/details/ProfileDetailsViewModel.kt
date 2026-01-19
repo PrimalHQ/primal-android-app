@@ -198,7 +198,9 @@ class ProfileDetailsViewModel @Inject constructor(
                     is ZapError.FailedToFetchZapInvoice,
                     -> setState { copy(error = UiError.InvalidZapRequest()) }
 
-                    ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
+                    is ZapError.FailedToPayZap, ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent,
+                    is ZapError.Timeout,
+                    -> {
                         setState { copy(error = UiError.FailedToPublishZapEvent()) }
                     }
 
@@ -319,7 +321,6 @@ class ProfileDetailsViewModel @Inject constructor(
                 .mapNotNull { profile ->
                     profile.aboutUris
                         .mapNotNull { it.extractProfileId() }
-                        .filter { it != profileId }
                 }
                 .distinctUntilChanged()
                 .collect { profileIds ->

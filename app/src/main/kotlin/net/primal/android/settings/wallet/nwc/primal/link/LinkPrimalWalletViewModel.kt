@@ -22,16 +22,16 @@ import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContra
 import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContract.UiEvent
 import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.wallet.repository.NwcWalletRepository
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.connections.PrimalWalletNwcRepository
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = LinkPrimalWalletViewModel.Factory::class)
 class LinkPrimalWalletViewModel @AssistedInject constructor(
     @Assisted private val nwcRequest: PrimalWalletNwc,
     private val activeAccountStore: ActiveAccountStore,
-    private val nwcWalletRepository: NwcWalletRepository,
+    private val primalWalletNwcRepository: PrimalWalletNwcRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -87,7 +87,7 @@ class LinkPrimalWalletViewModel @AssistedInject constructor(
                         .toPlainString()
                 }
 
-                val response = nwcWalletRepository.createNewWalletConnection(
+                val response = primalWalletNwcRepository.createNewWalletConnection(
                     userId = activeAccountStore.activeUserId(),
                     appName = state.value.appName ?: DEFAULT_APP_NAME,
                     dailyBudget = formattedDailyBudgetBtc,

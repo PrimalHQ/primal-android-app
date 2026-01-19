@@ -34,6 +34,7 @@ const val SINGLE_IMAGE = 1
 const val TWO_IMAGES = 2
 const val THREE_IMAGES = 3
 const val FOUR_IMAGES = 4
+const val MaxDisplayImages = FOUR_IMAGES
 private val GalleryGapSpace = 1.dp
 private val RadiusSize = 8.dp
 
@@ -97,7 +98,6 @@ private fun MultipleImageGallery(
     imageSizeDp: DpSize,
     onMediaClick: (MediaClickEvent) -> Unit,
 ) {
-    val maxDisplayImages = FOUR_IMAGES
     val shapeMatrix = listOf(
         RoundedCornerShape(CornerSize(RadiusSize), CornerSize(0.dp), CornerSize(0.dp), CornerSize(0.dp)),
         RoundedCornerShape(CornerSize(0.dp), CornerSize(RadiusSize), CornerSize(0.dp), CornerSize(0.dp)),
@@ -105,9 +105,9 @@ private fun MultipleImageGallery(
         RoundedCornerShape(CornerSize(0.dp), CornerSize(0.dp), CornerSize(RadiusSize), CornerSize(0.dp)),
     )
 
-    val displayedMedia = mediaEventUri.take(maxDisplayImages)
-    val hasExtra = mediaEventUri.size > maxDisplayImages
-    val extraCount = mediaEventUri.size - maxDisplayImages
+    val displayedMedia = mediaEventUri.take(MaxDisplayImages)
+    val hasExtra = mediaEventUri.size > MaxDisplayImages
+    val extraCount = mediaEventUri.size - MaxDisplayImages
 
     Column(modifier = Modifier.fillMaxWidth()) {
         displayedMedia.chunked(2).forEachIndexed { rowIndex, rowAttachments ->
@@ -118,7 +118,7 @@ private fun MultipleImageGallery(
                 rowAttachments.forEachIndexed { index, media ->
                     val position = rowIndex * 2 + index
                     val shape = shapeMatrix.getOrNull(position) ?: RoundedCornerShape(0.dp)
-                    val isLastVisible = hasExtra && position == maxDisplayImages - 1
+                    val isLastVisible = hasExtra && position == MaxDisplayImages - 1
 
                     Box(
                         modifier = Modifier

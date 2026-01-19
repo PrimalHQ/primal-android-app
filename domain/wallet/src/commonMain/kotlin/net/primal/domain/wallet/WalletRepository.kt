@@ -4,6 +4,7 @@ import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 import net.primal.core.utils.Result
 import net.primal.domain.transactions.Transaction
+import net.primal.domain.wallet.model.WalletBalanceResult
 
 interface WalletRepository {
 
@@ -17,13 +18,17 @@ interface WalletRepository {
 
     suspend fun fetchWalletBalance(walletId: String): Result<Unit>
 
+    suspend fun subscribeToWalletBalance(walletId: String): Flow<WalletBalanceResult>
+
     suspend fun updateWalletBalance(
         walletId: String,
         balanceInBtc: Double,
         maxBalanceInBtc: Double?,
     )
 
-    fun latestTransactions(walletId: String): Flow<PagingData<Transaction>>
+    fun latestTransactions(walletId: String, walletType: WalletType): Flow<PagingData<Transaction>>
+
+    suspend fun latestTransactions(walletId: String, limit: Int): List<Transaction>
 
     suspend fun findTransactionByIdOrNull(txId: String): Transaction?
 
@@ -39,7 +44,7 @@ interface WalletRepository {
         comment: String?,
     ): Result<LnInvoiceCreateResult>
 
-    suspend fun createOnChainAddress(userId: String): OnChainAddressResult
+    suspend fun createOnChainAddress(walletId: String): Result<OnChainAddressResult>
 
     suspend fun parseLnUrl(userId: String, lnurl: String): LnUrlParseResult
 

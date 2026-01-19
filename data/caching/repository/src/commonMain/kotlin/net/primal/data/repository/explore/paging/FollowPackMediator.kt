@@ -9,6 +9,7 @@ import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.withContext
+import net.primal.core.caching.MediaCacher
 import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -21,6 +22,7 @@ import net.primal.data.remote.api.explore.model.FollowListsRequestBody
 import net.primal.data.remote.api.explore.model.FollowListsResponse
 import net.primal.data.repository.explore.mapAsFollowPackData
 import net.primal.data.repository.explore.processAndPersistFollowLists
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.common.ContentPrimalPaging
 import net.primal.domain.common.exception.NetworkException
 import net.primal.shared.data.local.db.withTransaction
@@ -30,6 +32,7 @@ internal class FollowPackMediator(
     private val exploreApi: ExploreApi,
     private val database: PrimalDatabase,
     private val dispatcherProvider: DispatcherProvider,
+    private val mediaCacher: MediaCacher? = null,
 ) : RemoteMediator<Int, FollowPackPO>() {
 
     private val lastRequests: MutableMap<LoadType, Pair<FollowListsRequestBody, Long>> =
@@ -72,6 +75,7 @@ internal class FollowPackMediator(
                 nextUntil = nextUntil,
                 loadType = loadType,
             )
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             processAndPersistToDatabase(
                 response = response,

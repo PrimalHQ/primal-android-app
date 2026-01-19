@@ -133,7 +133,12 @@ fun ArticleDetailsScreen(
     val detailsState by viewModel.state.collectAsState()
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
-            Lifecycle.Event.ON_START -> viewModel.setEvent(UiEvent.UpdateContent)
+            Lifecycle.Event.ON_START -> {
+                if (detailsState.article != null) {
+                    viewModel.setEvent(UiEvent.UpdateContent)
+                }
+            }
+
             else -> Unit
         }
     }
@@ -348,16 +353,7 @@ private fun ArticleDetailsScreen(
             )
         },
         content = { paddingValues ->
-            if (detailsState.isResolvingNaddr) {
-                PrimalLoadingSpinner()
-            }
-            if (detailsState.article == null) {
-                ListNoContent(
-                    modifier = Modifier.fillMaxSize(),
-                    noContentText = stringResource(id = R.string.article_details_error_resolving_naddr),
-                    onRefresh = { detailsEventPublisher(UiEvent.RequestResolveNaddr) },
-                )
-            } else {
+            if (detailsState.article != null) {
                 ArticleContentWithComments(
                     state = detailsState,
                     detailsEventPublisher = detailsEventPublisher,
@@ -415,6 +411,14 @@ private fun ArticleDetailsScreen(
                             )
                         }
                     },
+                )
+            } else if (detailsState.isResolvingNaddr || detailsState.fetching) {
+                PrimalLoadingSpinner()
+            } else {
+                ListNoContent(
+                    modifier = Modifier.fillMaxSize(),
+                    noContentText = stringResource(id = R.string.article_details_error_resolving_naddr),
+                    onRefresh = { detailsEventPublisher(UiEvent.RequestResolveNaddr) },
                 )
             }
         },

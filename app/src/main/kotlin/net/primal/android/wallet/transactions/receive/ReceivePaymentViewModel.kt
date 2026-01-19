@@ -20,8 +20,6 @@ import net.primal.core.utils.getMaximumUsdAmount
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.WalletAccountRepository
-import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.wallet.Network
 import net.primal.domain.wallet.WalletRepository
 import timber.log.Timber
@@ -117,16 +115,24 @@ class ReceivePaymentViewModel @Inject constructor(
     private fun fetchOnChainAddress() =
         viewModelScope.launch {
             setState { copy(loading = true) }
-            try {
-                val response = walletRepository.createOnChainAddress(userId = activeAccountStore.activeUserId())
-                setState { copy(bitcoinNetworkDetails = this.bitcoinNetworkDetails.copy(address = response.address)) }
-            } catch (error: SignatureException) {
-                Timber.w(error)
-            } catch (error: NetworkException) {
-                Timber.w(error)
-            } finally {
-                setState { copy(loading = false) }
-            }
+            runCatching {
+                val wallet = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())
+                checkNotNull(wallet)
+                walletRepository.createOnChainAddress(walletId = wallet.walletId).getOrThrow()
+            }.fold(
+                onSuccess = {
+                    setState {
+                        copy(
+                            bitcoinNetworkDetails = this.bitcoinNetworkDetails.copy(address = it.address),
+                            loading = false,
+                        )
+                    }
+                },
+                onFailure = {
+                    Timber.w(it)
+                    setState { copy(loading = false) }
+                },
+            )
         }
 
     private fun createInvoice(

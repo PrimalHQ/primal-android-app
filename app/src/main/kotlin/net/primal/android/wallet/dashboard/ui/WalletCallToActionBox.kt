@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.button.PrimalFilledButton
@@ -19,6 +20,44 @@ import net.primal.android.theme.AppTheme
 fun WalletCallToActionBox(
     modifier: Modifier,
     message: String? = null,
+    actionLabel: String? = null,
+    onActionClick: (() -> Unit)? = null,
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            modifier = Modifier.wrapContentSize(align = Alignment.Center),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            message?.let {
+                Text(
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
+                    text = message,
+                    textAlign = TextAlign.Center,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    style = AppTheme.typography.bodyMedium,
+                )
+            }
+
+            if (actionLabel != null) {
+                PrimalFilledButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = { onActionClick?.invoke() },
+                ) {
+                    Text(text = actionLabel)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WalletCallToActionAnnotatedBox(
+    modifier: Modifier,
+    message: AnnotatedString? = null,
     actionLabel: String? = null,
     onActionClick: (() -> Unit)? = null,
 ) {

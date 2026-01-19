@@ -1,16 +1,16 @@
-## Changes
-- Implemented replay button on stream and recording ended state (#691)
-- Added live stream and reply-to-reply notification settings (#703)
-- Replies in Notifications are now full width (#702)
-- Improved article content parser for Images and Notes (#696)
-- Fixed zap receipts to use main host as recipient user id (#695)
-- Fixed `Started now ago` timestamp on streams (#705)
-- Fixed player line visible at the top on light theme
-- Fixed keyboard dismiss on stream chat click
-- Fixed stream rewinding to live when stream data updates (#699)
-- Fixed stream player starting on non-stream deep links (#714)
-- Fixed data fetches with empty pubkey on login (#697)
-- Improve seekbar and player controls visibility for streams
-- Fixed wallet data leftovers when user logs out (#704)
-- Fixed wallet `0 sats` text not centered in some cases (#708)
-- Upgraded acinq libs to fix 16KB issue with Google Play
+## Features
+- Remote Signer (NIP-46)
+- Android Signer (NIP-55)
+
+## Fixes
+- Handle local signer requests for deleted apps
+- Fixed race condition while loading not cached article  (#838)
+- Assure valid pubkey hex is returned for local signer login (#839)
+- Allow external signer login with hex pubkey
+- Fixed parsing of malformed nostrconnect relay parameters (#836)
+- Cache `name` for `LocalApp`s (#835)
+- Fixed rows order in session event details (#833)
+- Fixed crash caused by missing configuration for cronet R8 proguard rules on Google builds
+- Ensure relay URLs have wss prefix in Nostr Connect
+- Fixed nostr connect screen layout overflow on large displays
+- Fixed reply published as root note on low connectivity (#843)

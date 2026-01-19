@@ -58,8 +58,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
-import net.primal.android.LocalContentDisplaySettings
 import net.primal.android.R
+import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalSliderThumb
