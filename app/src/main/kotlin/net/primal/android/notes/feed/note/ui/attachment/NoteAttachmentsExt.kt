@@ -49,7 +49,7 @@ fun BoxWithConstraintsScope.findImageSize(eventUri: EventUriUi): DpSize {
 @Composable
 fun CdnResourceVariant?.findImageSize(maxWidth: Int): DpSize {
     val maxHeight = (LocalConfiguration.current.screenHeightDp * MAX_SCREEN_HEIGHT_VISIBLE_AREA).toInt()
-    return this.calculateImageSize(
+    return calculateImageSize(
         maxWidth = maxWidth,
         maxHeight = maxHeight,
     )
