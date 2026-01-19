@@ -15,6 +15,8 @@ data class EventUriUi(
     val thumbnailUrl: String? = null,
     val authorAvatarUrl: String? = null,
     val position: Int,
+    val originalWidth: Int? = null,
+    val originalHeight: Int? = null,
 )
 
 fun EventUriUi.isMediaUri() = type == EventUriType.Image || type == EventUriType.Video
@@ -31,4 +33,6 @@ fun EventLink.asEventUriUiModel() =
         thumbnailUrl = this.thumbnail,
         authorAvatarUrl = this.authorAvatarUrl,
         position = this.position,
+        originalWidth = this.originalWidth,
+        originalHeight = this.originalHeight,
     )

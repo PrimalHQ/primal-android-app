@@ -12,12 +12,31 @@ fun List<CdnResourceVariant>?.findNearestOrNull(maxWidthPx: Int): CdnResourceVar
 }
 
 fun CdnResourceVariant?.calculateImageSize(maxWidth: Int, maxHeight: Int): DpSize {
-    if (this == null || this.width == 0 || this.height == 0) {
+    if (this == null) {
         val sideLength = min(maxWidth, maxHeight)
         return DpSize(width = sideLength.dp, height = sideLength.dp)
     }
 
-    val heightForMaxWidth = (maxWidth.toFloat() * this.height.toFloat()) / this.width.toFloat()
+    return calculateDimensions(
+        width = this.width,
+        height = this.height,
+        maxWidth = maxWidth,
+        maxHeight = maxHeight,
+    )
+}
+
+fun calculateDimensions(
+    width: Int,
+    height: Int,
+    maxWidth: Int,
+    maxHeight: Int,
+): DpSize {
+    if (width == 0 || height == 0) {
+        val sideLength = min(maxWidth, maxHeight)
+        return DpSize(width = sideLength.dp, height = sideLength.dp)
+    }
+
+    val heightForMaxWidth = (maxWidth.toFloat() * height.toFloat()) / width.toFloat()
     val finalHeight = min(heightForMaxWidth, maxHeight.toFloat())
 
     return DpSize(
