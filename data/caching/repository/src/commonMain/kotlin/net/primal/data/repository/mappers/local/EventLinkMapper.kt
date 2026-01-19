@@ -15,5 +15,7 @@ internal fun EventUri.asEventLinkDO(forcePosition: Int? = null): EventLink {
         description = this.description,
         thumbnail = this.thumbnail,
         authorAvatarUrl = this.authorAvatarUrl,
+        originalWidth = this.originalWidth,
+        originalHeight = this.originalHeight,
     )
 }

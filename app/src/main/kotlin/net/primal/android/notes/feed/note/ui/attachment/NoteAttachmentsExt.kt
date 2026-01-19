@@ -6,7 +6,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import kotlin.math.min
 import net.primal.android.core.compose.attachment.model.EventUriUi
+import net.primal.android.events.ui.calculateImageSize
 import net.primal.android.events.ui.findNearestOrNull
 import net.primal.domain.links.CdnResourceVariant
 import net.primal.domain.links.EventUriType
@@ -19,51 +21,58 @@ fun BoxWithConstraintsScope.findImageSize(eventUri: EventUriUi): DpSize {
     val maxWidth = maxWidth.value.toInt()
     val maxHeight = (LocalConfiguration.current.screenHeightDp * MAX_SCREEN_HEIGHT_VISIBLE_AREA).toInt()
     val variant = eventUri.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
-    return variant.calculateImageSize(
-        maxWidth = maxWidth,
-        maxHeight = maxHeight,
-        type = eventUri.type,
-    )
+
+    return when {
+        variant != null && variant.width > 0 && variant.height > 0 -> {
+            variant.calculateImageSize(
+                maxWidth = maxWidth,
+                maxHeight = maxHeight,
+            )
+        }
+        eventUri.originalWidth != null && eventUri.originalHeight != null -> {
+            calculateDimensions(
+                width = eventUri.originalWidth,
+                height = eventUri.originalHeight,
+                maxWidth = maxWidth,
+                maxHeight = maxHeight,
+            )
+        }
+        else -> {
+            calculateFallbackDimensions(
+                maxWidth = maxWidth,
+                type = eventUri.type,
+            )
+        }
+    }
 }
 
 @Composable
 fun CdnResourceVariant?.findImageSize(maxWidth: Int): DpSize {
     val maxHeight = (LocalConfiguration.current.screenHeightDp * MAX_SCREEN_HEIGHT_VISIBLE_AREA).toInt()
-    return calculateImageSize(
+    return this.calculateImageSize(
         maxWidth = maxWidth,
         maxHeight = maxHeight,
-        type = EventUriType.Image,
     )
 }
 
-fun CdnResourceVariant?.calculateImageSize(
+private fun calculateDimensions(
+    width: Int,
+    height: Int,
     maxWidth: Int,
     maxHeight: Int,
-    type: EventUriType,
 ): DpSize {
-    val variantWidth = this?.width?.takeIf { it > 0 }
-    val variantHeight = this?.height?.takeIf { it > 0 }
+    val heightForMaxWidth = (maxWidth.toFloat() * height.toFloat()) / width.toFloat()
+    val finalHeight = min(heightForMaxWidth, maxHeight.toFloat())
+    return DpSize(
+        width = maxWidth.dp,
+        height = finalHeight.dp,
+    )
+}
 
-    if (variantWidth == null || variantHeight == null) {
-        return if (type == EventUriType.Video) {
-            DpSize(width = maxWidth.dp, height = (maxWidth * 9 / 16).dp)
-        } else {
-            DpSize(width = maxWidth.dp, height = maxWidth.dp)
-        }
-    }
-
-    val imageAspectRatio = variantWidth.toFloat() / variantHeight.toFloat()
-    val containerAspectRatio = maxWidth.toFloat() / maxHeight.toFloat()
-
-    return if (imageAspectRatio > containerAspectRatio) {
-        DpSize(
-            width = maxWidth.dp,
-            height = (maxWidth / imageAspectRatio).dp,
-        )
+private fun calculateFallbackDimensions(maxWidth: Int, type: EventUriType): DpSize {
+    return if (type == EventUriType.Video) {
+        DpSize(width = maxWidth.dp, height = (maxWidth * 9 / 16).dp)
     } else {
-        DpSize(
-            width = (maxHeight * imageAspectRatio).dp,
-            height = maxHeight.dp,
-        )
+        DpSize(width = maxWidth.dp, height = maxWidth.dp)
     }
 }

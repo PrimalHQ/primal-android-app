@@ -7,7 +7,6 @@ import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.notes.PostData
 import net.primal.data.local.dao.reads.ArticleData
 import net.primal.domain.links.CdnResource
-import net.primal.domain.links.CdnResourceVariant
 import net.primal.domain.links.EventLink
 import net.primal.domain.links.EventLinkPreviewData
 import net.primal.domain.links.EventUriType
@@ -31,41 +30,70 @@ fun List<PostData>.flatMapPostsAsEventUriPO(
         postData.uris
             .filterNot { it.isNostrUri() }
             .map { uri ->
-                val imetaTag = postData.tags.findIMetaTagForUrl(uri)
-                val imetaDim = imetaTag?.extractDimension()
-                val imetaMime = imetaTag?.extractMimeType()
-
-                val uriCdnResource = cdnResources[uri]
-                val linkPreview = linkPreviews[uri]
-                val linkThumbnailCdnResource = linkPreview?.thumbnailUrl?.let { cdnResources[it] }
-                val videoThumbnail = videoThumbnails[uri]
-                val mimeType = uri.detectMimeType() ?: uriCdnResource?.contentType ?: linkPreview?.mimeType ?: imetaMime
-                val type = detectEventUriType(url = uri, mimeType = mimeType)
-
-                var variants = uriCdnResource?.variants ?: emptyList()
-                if (variants.isEmpty() && imetaDim != null) {
-                    variants = listOf(
-                        CdnResourceVariant(
-                            width = imetaDim.first,
-                            height = imetaDim.second,
-                            mediaUrl = uri,
-                        ),
-                    )
-                }
-
-                EventUri(
-                    eventId = postData.postId,
+                postData.asEventUri(
                     url = uri,
-                    type = type,
-                    mimeType = mimeType,
-                    variants = variants + (linkThumbnailCdnResource?.variants ?: emptyList()),
-                    title = linkPreview?.title?.ifBlank { null },
-                    description = linkPreview?.description?.ifBlank { null },
-                    thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null } ?: videoThumbnail,
-                    authorAvatarUrl = linkPreview?.authorAvatarUrl?.ifBlank { null },
+                    cdnResources = cdnResources,
+                    linkPreviews = linkPreviews,
+                    videoThumbnails = videoThumbnails,
                 )
             }
     }
+
+private fun PostData.asEventUri(
+    url: String,
+    cdnResources: Map<String, CdnResource>,
+    linkPreviews: Map<String, EventLinkPreviewData>,
+    videoThumbnails: Map<String, String>,
+): EventUri {
+    val imetaTag = this.tags.findIMetaTagForUrl(url)
+    val imetaDim = imetaTag?.extractDimension()
+    val imetaMimeType = imetaTag?.extractMimeType()
+
+    val cdnResource = cdnResources[url]
+    val linkPreview = linkPreviews[url]
+
+    val mimeType = resolveMimeType(
+        url = url,
+        cdnResource = cdnResource,
+        linkPreview = linkPreview,
+        imetaMimeType = imetaMimeType,
+    )
+
+    val type = detectEventUriType(url = url, mimeType = mimeType)
+
+    return EventUri(
+        eventId = this.postId,
+        url = url,
+        type = type,
+        mimeType = mimeType,
+        variants = resolveVariants(cdnResource, linkPreview, cdnResources),
+        title = linkPreview?.title?.ifBlank { null },
+        description = linkPreview?.description?.ifBlank { null },
+        thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null } ?: videoThumbnails[url],
+        authorAvatarUrl = linkPreview?.authorAvatarUrl?.ifBlank { null },
+        originalWidth = imetaDim?.first,
+        originalHeight = imetaDim?.second,
+    )
+}
+
+private fun resolveMimeType(
+    url: String,
+    cdnResource: CdnResource?,
+    linkPreview: EventLinkPreviewData?,
+    imetaMimeType: String?,
+): String? {
+    return url.detectMimeType()
+        ?: cdnResource?.contentType
+        ?: linkPreview?.mimeType
+        ?: imetaMimeType
+}
+
+private fun resolveVariants(
+    cdnResource: CdnResource?,
+    linkPreview: EventLinkPreviewData?,
+    allCdnResources: Map<String, CdnResource>,
+) = (cdnResource?.variants ?: emptyList()) +
+    (linkPreview?.thumbnailUrl?.let { allCdnResources[it] }?.variants ?: emptyList())
 
 fun List<EventUri>.mapEventUriAsNoteLinkDO(): List<EventLink> =
     map { eventUri ->
@@ -80,6 +108,8 @@ fun List<EventUri>.mapEventUriAsNoteLinkDO(): List<EventLink> =
             description = eventUri.description,
             thumbnail = eventUri.thumbnail,
             authorAvatarUrl = eventUri.authorAvatarUrl,
+            originalWidth = eventUri.originalWidth,
+            originalHeight = eventUri.originalHeight,
         )
     }
 
