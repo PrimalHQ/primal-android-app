@@ -136,24 +136,17 @@ fun NoteEditorScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
 
-    if (state.showAccountSwitcher) {
-        val activeAccount = remember(state.selectedAccountId, state.availableAccounts) {
-            state.availableAccounts.find { it.pubkey == state.selectedAccountId }
-        }
-        if (activeAccount != null) {
-            AccountSwitcherBottomSheet(
-                accounts = state.availableAccounts,
-                activeAccount = activeAccount,
-                onAccountClick = {
-                    eventPublisher(UiEvent.AccountSelected(it))
-                },
-                onDismissRequest = {
-                    eventPublisher(UiEvent.HideAccountSwitcher)
-                },
-                showAddAccountButtons = false,
-                showEditButton = false,
-            )
-        }
+    if (state.showAccountSwitcher && state.selectedAccount != null) {
+        AccountSwitcherBottomSheet(
+            accounts = state.availableAccounts,
+            activeAccount = state.selectedAccount,
+            onAccountClick = {
+                eventPublisher(UiEvent.SelectAccount(it))
+            },
+            onDismissRequest = {
+                eventPublisher(UiEvent.HideAccountSwitcher)
+            },
+        )
     }
 
     SnackbarErrorHandler(
@@ -566,10 +559,16 @@ private fun NoteEditor(
                     }
                     .padding(start = 16.dp, top = 8.dp),
                 avatarSize = avatarSizeDp,
-                avatarCdnImage = state.activeAccountAvatarCdnImage,
-                avatarBlossoms = state.activeAccountBlossoms,
-                legendaryCustomization = state.activeAccountLegendaryCustomization,
-                onClick = { eventPublisher(UiEvent.ShowAccountSwitcher) },
+                avatarCdnImage = state.selectedAccount?.avatarCdnImage,
+                avatarBlossoms = state.selectedAccount?.avatarBlossoms ?: emptyList(),
+                legendaryCustomization = state.selectedAccount?.legendaryCustomization,
+                onClick = if (state.attachments.isEmpty()) {
+                    {
+                        eventPublisher(UiEvent.ShowAccountSwitcher)
+                    }
+                } else {
+                    null
+                },
             )
 
             NoteOutlinedTextField(

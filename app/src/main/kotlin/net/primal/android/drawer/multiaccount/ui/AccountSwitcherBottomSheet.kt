@@ -61,11 +61,9 @@ fun AccountSwitcherBottomSheet(
     onDismissRequest: () -> Unit,
     onAccountClick: (String) -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-    onLogoutClick: (String) -> Unit = {},
-    onCreateNewAccountClick: () -> Unit = {},
-    onAddExistingAccountClick: () -> Unit = {},
-    showEditButton: Boolean = true,
-    showAddAccountButtons: Boolean = true,
+    onLogoutClick: ((String) -> Unit)? = null,
+    onCreateNewAccountClick: (() -> Unit)? = null,
+    onAddExistingAccountClick: (() -> Unit)? = null,
 ) {
     var isEditMode by remember { mutableStateOf(false) }
 
@@ -86,8 +84,8 @@ fun AccountSwitcherBottomSheet(
         ) {
             BottomSheetTopAppBar(
                 isEditMode = isEditMode,
-                showEditButton = showEditButton,
                 onToggleEditMode = { isEditMode = !isEditMode },
+                showEditButton = onLogoutClick != null,
             )
 
             AnimatedContent(
@@ -106,25 +104,27 @@ fun AccountSwitcherBottomSheet(
                     },
                 )
             }
-            if (showAddAccountButtons) {
-                Column {
-                    PlainTextButton(
-                        text = stringResource(id = R.string.account_switcher_create_new_account),
-                        onClick = {
-                            sheetState.hideAndRun(coroutineScope = uiScope, onDismissRequest = onDismissRequest) {
-                                onCreateNewAccountClick()
-                            }
-                        },
-                    )
-                    PlainTextButton(
-                        text = stringResource(id = R.string.account_switcher_add_existing_account),
-                        onClick = {
-                            sheetState.hideAndRun(coroutineScope = uiScope, onDismissRequest = onDismissRequest) {
-                                onAddExistingAccountClick()
-                            }
-                        },
-                    )
-                }
+
+            if (onCreateNewAccountClick != null) {
+                PlainTextButton(
+                    text = stringResource(id = R.string.account_switcher_create_new_account),
+                    onClick = {
+                        sheetState.hideAndRun(coroutineScope = uiScope, onDismissRequest = onDismissRequest) {
+                            onCreateNewAccountClick()
+                        }
+                    },
+                )
+            }
+
+            if (onAddExistingAccountClick != null) {
+                PlainTextButton(
+                    text = stringResource(id = R.string.account_switcher_add_existing_account),
+                    onClick = {
+                        sheetState.hideAndRun(coroutineScope = uiScope, onDismissRequest = onDismissRequest) {
+                            onAddExistingAccountClick()
+                        }
+                    },
+                )
             }
         }
     }
@@ -152,7 +152,7 @@ private fun PlainTextButton(
 private fun AccountList(
     modifier: Modifier = Modifier,
     isEditMode: Boolean,
-    onLogoutClick: (String) -> Unit,
+    onLogoutClick: ((String) -> Unit)?,
     activeAccount: UserAccountUi,
     accounts: List<UserAccountUi>,
     onAccountClick: (String) -> Unit,
@@ -190,7 +190,7 @@ private fun AccountListItem(
     modifier: Modifier = Modifier,
     account: UserAccountUi,
     isEditMode: Boolean,
-    onLogoutClick: (String) -> Unit,
+    onLogoutClick: ((String) -> Unit)?,
     onAccountClick: (String) -> Unit,
     isActive: Boolean = false,
 ) {
@@ -212,7 +212,7 @@ private fun AccountListItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             ) {
-                if (isEditMode) {
+                if (isEditMode && onLogoutClick != null) {
                     IconButton(onClick = { onLogoutClick(account.pubkey) }) {
                         Icon(
                             modifier = Modifier.size(24.dp),
@@ -264,8 +264,8 @@ private fun AccountListItem(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun BottomSheetTopAppBar(
     isEditMode: Boolean,
-    showEditButton: Boolean,
     onToggleEditMode: () -> Unit,
+    showEditButton: Boolean,
 ) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(

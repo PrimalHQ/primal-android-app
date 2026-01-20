@@ -17,7 +17,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
@@ -270,10 +269,11 @@ class NoteEditorViewModel @AssistedInject constructor(
 
                     is UiEvent.ShowAccountSwitcher -> setState { copy(showAccountSwitcher = true) }
                     is UiEvent.HideAccountSwitcher -> setState { copy(showAccountSwitcher = false) }
-                    is UiEvent.AccountSelected -> setState {
+                    is UiEvent.SelectAccount -> setState {
+                        val selectedAccount = availableAccounts.find { it.pubkey == event.accountId }
                         copy(
                             showAccountSwitcher = false,
-                            selectedAccountId = event.accountId,
+                            selectedAccount = selectedAccount ?: this.selectedAccount,
                         )
                     }
                 }
@@ -282,28 +282,18 @@ class NoteEditorViewModel @AssistedInject constructor(
 
     private fun observeAccounts() {
         viewModelScope.launch {
-            setState { copy(selectedAccountId = activeAccountStore.activeUserId()) }
             userAccountsStore.userAccounts.collect { accounts ->
-                setState { copy(availableAccounts = accounts.map { it.asUserAccountUi() }) }
-            }
-        }
-        viewModelScope.launch {
-            state
-                .map { it.selectedAccountId to it.availableAccounts }
-                .distinctUntilChanged()
-                .map { (selectedId, accounts) ->
-                    accounts.find { it.pubkey == selectedId }
-                }
-                .filterNotNull()
-                .collect { selectedAccount ->
-                    setState {
-                        copy(
-                            activeAccountAvatarCdnImage = selectedAccount.avatarCdnImage,
-                            activeAccountLegendaryCustomization = selectedAccount.legendaryCustomization,
-                            activeAccountBlossoms = selectedAccount.avatarBlossoms,
-                        )
+                val userAccounts = accounts.map { it.asUserAccountUi() }
+                setState {
+                    val currentActiveAccount = selectedAccount ?: userAccounts.find {
+                        it.pubkey == activeAccountStore.activeUserId()
                     }
+                    copy(
+                        availableAccounts = userAccounts,
+                        selectedAccount = currentActiveAccount,
+                    )
                 }
+            }
         }
     }
 
@@ -563,7 +553,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                     users = _state.value.taggedUsers,
                 )
 
-                val userId = state.value.selectedAccountId ?: activeAccountStore.activeUserId()
+                val userId = state.value.selectedAccount?.pubkey ?: activeAccountStore.activeUserId()
                 val publishResult = if (args.isQuoting) {
                     notePublishHandler.publishShortTextNote(
                         userId = userId,
@@ -668,9 +658,10 @@ class NoteEditorViewModel @AssistedInject constructor(
             updatedAttachment = updatedAttachment.copy(uploadError = null)
             updateNoteAttachmentState(attachment = updatedAttachment)
 
+            val userId = state.value.selectedAccount?.pubkey ?: activeAccountStore.activeUserId()
             val uploadResult = primalUploadService.upload(
                 uri = attachment.localUri,
-                userId = activeAccountStore.activeUserId(),
+                userId = userId,
                 onProgress = { uploadedBytes, totalBytes ->
                     updatedAttachment = updatedAttachment.copy(
                         originalUploadedInBytes = uploadedBytes,
