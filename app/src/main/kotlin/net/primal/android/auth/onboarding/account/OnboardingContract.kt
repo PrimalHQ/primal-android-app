@@ -39,7 +39,6 @@ interface OnboardingContract {
         data class ToggleFollowEvent(val groupName: String, val userId: String) : UiEvent()
         data object KeepRecommendedFollows : UiEvent()
         data object CreateNostrProfile : UiEvent()
-        data object AcknowledgeNostrKeyCreation : UiEvent()
         data object RequestNextStep : UiEvent()
         data object RequestPreviousStep : UiEvent()
         data object DismissError : UiEvent()
@@ -48,6 +47,5 @@ interface OnboardingContract {
     data class ScreenCallbacks(
         val onClose: () -> Unit,
         val onOnboarded: () -> Unit,
-        val onActivateWallet: () -> Unit,
     )
 }

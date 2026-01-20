@@ -92,13 +92,6 @@ fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
                 onClick = callbacks.onCreateAccountClick,
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OnboardingButton(
-                text = stringResource(id = R.string.welcome_redeem_code_button_title),
-                onClick = callbacks.onRedeemCodeClick,
-            )
-
             ToSAndPrivacyPolicyText(
                 modifier = Modifier
                     .widthIn(0.dp, MAX_COMPONENT_WIDTH.dp)
@@ -123,7 +116,6 @@ fun PreviewWelcomeScreen() {
             callbacks = WelcomeContract.ScreenCallbacks(
                 onSignInClick = {},
                 onCreateAccountClick = {},
-                onRedeemCodeClick = {},
             ),
         )
     }

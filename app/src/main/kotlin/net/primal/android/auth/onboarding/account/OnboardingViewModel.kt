@@ -92,12 +92,6 @@ class OnboardingViewModel @Inject constructor(
                     is UiEvent.ToggleGroupFollowEvent -> toggleFollowGroupFollowing(event)
 
                     UiEvent.KeepRecommendedFollows -> keepRecommendedFollows()
-
-                    UiEvent.AcknowledgeNostrKeyCreation -> setState {
-                        copy(
-                            accountCreationStep = AccountCreationStep.ZapsIntroduction,
-                        )
-                    }
                 }
             }
         }

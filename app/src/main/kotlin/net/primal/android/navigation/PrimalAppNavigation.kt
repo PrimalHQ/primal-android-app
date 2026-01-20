@@ -42,7 +42,6 @@ import net.primal.android.auth.logout.LogoutViewModel
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingViewModel
 import net.primal.android.auth.onboarding.account.ui.OnboardingScreen
-import net.primal.android.auth.onboarding.wallet.OnboardingWalletActivation
 import net.primal.android.auth.welcome.WelcomeContract
 import net.primal.android.auth.welcome.WelcomeScreen
 import net.primal.android.bookmarks.list.BookmarksContract
@@ -178,8 +177,6 @@ import net.primal.android.thread.articles.details.ArticleDetailsViewModel
 import net.primal.android.thread.notes.ThreadContract
 import net.primal.android.thread.notes.ThreadScreen
 import net.primal.android.thread.notes.ThreadViewModel
-import net.primal.android.wallet.activation.WalletActivationContract
-import net.primal.android.wallet.activation.WalletActivationViewModel
 import net.primal.core.utils.asUrlDecoded
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.feeds.buildAdvancedSearchNotesFeedSpec
@@ -196,11 +193,7 @@ private fun NavController.navigateToWelcome() =
 
 private fun NavController.navigateToLogin() = navigate(route = "login")
 
-private fun NavController.navigateToOnboarding(promoCode: String? = null) =
-    navigate(route = "onboarding?$PROMO_CODE=$promoCode")
-
-private fun NavController.navigateToWalletOnboarding(promoCode: String?) =
-    navigate(route = "onboardingWallet?$PROMO_CODE=$promoCode")
+private fun NavController.navigateToOnboarding() = navigate(route = "onboarding")
 
 private fun NavController.navigateToLogout(profileId: String) = navigate(route = "logout?$PROFILE_ID=$profileId")
 
@@ -531,24 +524,7 @@ private fun PrimalAppNavigation(
         login(route = "login", navController = navController)
 
         onboarding(
-            route = "onboarding?$PROMO_CODE={$PROMO_CODE}",
-            arguments = listOf(
-                navArgument(PROMO_CODE) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
-            navController = navController,
-        )
-
-        onboardingWalletActivation(
-            route = "onboardingWallet?$PROMO_CODE={$PROMO_CODE}",
-            arguments = listOf(
-                navArgument(PROMO_CODE) {
-                    type = NavType.StringType
-                    nullable = true
-                },
-            ),
+            route = "onboarding",
             navController = navController,
         )
 
@@ -1119,9 +1095,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
 
             when {
                 initialRoute == "login" ||
-                    initialRoute?.startsWith("onboarding") == true ||
-                    initialRoute?.startsWith("redeemCode") == true
-                -> slideInHorizontally(initialOffsetX = { -it })
+                    initialRoute?.startsWith("onboarding") == true -> slideInHorizontally(initialOffsetX = { -it })
 
                 else -> null
             }
@@ -1130,9 +1104,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
             val targetRoute = targetState.destination.route
             when {
                 targetRoute == "login" ||
-                    targetRoute?.startsWith("onboarding") == true ||
-                    targetRoute?.startsWith("redeemCode") == true
-                -> slideOutHorizontally(targetOffsetX = { -it })
+                    targetRoute?.startsWith("onboarding") == true -> slideOutHorizontally(targetOffsetX = { -it })
 
                 else -> null
             }
@@ -1145,7 +1117,6 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
                 callbacks = WelcomeContract.ScreenCallbacks(
                     onSignInClick = { navController.navigateToLogin() },
                     onCreateAccountClick = { navController.navigateToOnboarding() },
-                    onRedeemCodeClick = { navController.navigateToScanCode(scanMode = ScanMode.Anything) },
                 ),
             )
         }
@@ -1181,70 +1152,40 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
         }
     }
 
-private fun NavGraphBuilder.onboarding(
-    route: String,
-    arguments: List<NamedNavArgument>,
-    navController: NavController,
-) = composable(
-    route = route,
-    arguments = arguments,
-    enterTransition = {
-        val initialRoute = initialState.destination.route
+private fun NavGraphBuilder.onboarding(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = {
+            val initialRoute = initialState.destination.route
 
-        when {
-            initialRoute == "welcome" ||
-                initialRoute?.startsWith("redeemCode") == true ->
-                slideInHorizontally(initialOffsetX = { it })
+            when {
+                initialRoute == "welcome" -> slideInHorizontally(initialOffsetX = { it })
+                else -> null
+            }
+        },
+        exitTransition = {
+            val targetRoute = targetState.destination.route
 
-            else -> null
-        }
-    },
-    exitTransition = {
-        val targetRoute = targetState.destination.route
+            when {
+                targetRoute == "welcome" -> slideOutHorizontally(targetOffsetX = { it })
+                else -> null
+            }
+        },
+    ) {
+        val viewModel: OnboardingViewModel = hiltViewModel(it)
 
-        when {
-            targetRoute == "welcome" ||
-                targetRoute?.startsWith("redeemCode") == true ->
-                slideOutHorizontally(targetOffsetX = { it })
-
-            else -> null
-        }
-    },
-) {
-    val viewModel: OnboardingViewModel = hiltViewModel(it)
-    val promoCode = it.arguments?.getString(PROMO_CODE)
-
-    LockToOrientationPortrait()
-    PrimalTheme(PrimalTheme.Sunset) {
-        ApplyEdgeToEdge(isDarkTheme = true)
-        OnboardingScreen(
-            viewModel = viewModel,
-            callbacks = OnboardingContract.ScreenCallbacks(
-                onClose = { navController.popBackStack() },
-                onOnboarded = { navController.navigateToHome() },
-                onActivateWallet = { navController.navigateToWalletOnboarding(promoCode = promoCode) },
-            ),
-        )
-    }
-}
-
-private fun NavGraphBuilder.onboardingWalletActivation(
-    route: String,
-    arguments: List<NamedNavArgument>,
-    navController: NavController,
-) = composable(route = route, arguments = arguments) {
-    val viewModel = hiltViewModel<WalletActivationViewModel>()
-    PrimalTheme(PrimalTheme.Sunset) {
-        ApplyEdgeToEdge(isDarkTheme = true)
         LockToOrientationPortrait()
-        OnboardingWalletActivation(
-            viewModel = viewModel,
-            callbacks = WalletActivationContract.ScreenCallbacks(
-                onDoneOrDismiss = { navController.navigateToHome() },
-            ),
-        )
+        PrimalTheme(PrimalTheme.Sunset) {
+            ApplyEdgeToEdge(isDarkTheme = true)
+            OnboardingScreen(
+                viewModel = viewModel,
+                callbacks = OnboardingContract.ScreenCallbacks(
+                    onClose = { navController.popBackStack() },
+                    onOnboarded = { navController.navigateToHome() },
+                ),
+            )
+        }
     }
-}
 
 private fun NavGraphBuilder.scanCode(
     route: String,
@@ -1288,8 +1229,8 @@ private fun NavGraphBuilder.scanCode(
         viewModel = viewModel,
         callbacks = ScanCodeContract.ScreenCallbacks(
             onClose = navController::navigateUp,
-            navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
-            navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },
+            navigateToOnboarding = { navController.navigateToOnboarding() },
+            navigateToWalletOnboarding = { },
             onNostrConnectRequest = { url ->
                 navController.popBackStack()
                 navController.navigateToNostrConnectBottomSheet(url = url)
