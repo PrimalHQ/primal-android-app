@@ -46,6 +46,14 @@ fun NoteRepostOrQuoteBottomSheet(
         ) {
             if (isReposted) {
                 ActionButton(
+                    text = stringResource(id = R.string.post_repost_again_button_confirmation),
+                    leadingIcon = PrimalIcons.Repost,
+                    onClick = {
+                        onDismiss()
+                        onRepostClick()
+                    },
+                )
+                ActionButton(
                     text = stringResource(id = R.string.post_delete_repost_button_confirmation),
                     contentColor = AppTheme.colorScheme.error,
                     leadingIcon = PrimalIcons.DeleteRepost,

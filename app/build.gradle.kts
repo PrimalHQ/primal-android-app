@@ -53,8 +53,8 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     )
 }
 
-val appVersionCode = 2638
-val appVersionName = "2.5.19"
+val appVersionCode = 2661
+val appVersionName = "2.6.20"
 
 tasks.register("generateReleaseProperties") {
     doLast {
@@ -73,12 +73,12 @@ ksp {
 
 android {
     namespace = "net.primal.android"
-    compileSdk = 35
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
         applicationId = "net.primal.android"
-        minSdk = 26
-        targetSdk = 35
+        minSdk = libs.versions.android.minSdk.get().toInt()
+        targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = appVersionCode
         versionName = appVersionName
 
@@ -218,6 +218,7 @@ android {
         checkDependencies = true
         checkTestSources = true
         checkReleaseBuilds = false
+        disable.add("LocalContextGetResourceValueCall")
     }
 
     packaging {
@@ -242,20 +243,25 @@ android {
 
 dependencies {
     implementation(project(":core:utils"))
+    implementation(project(":core:nips"))
     implementation(project(":core:app-config"))
     implementation(project(":core:networking-primal"))
     implementation(project(":core:networking-upload"))
+    implementation(project(":core:networking-lightning"))
+    implementation(project(":core:caching"))
 
     implementation(project(":domain:nostr"))
     implementation(project(":domain:primal"))
     implementation(project(":domain:wallet"))
+    implementation(project(":domain:account"))
 
     implementation(project(":data:caching:remote"))
     implementation(project(":data:caching:repository"))
 
-    implementation(project(":data:wallet:remote-primal"))
-    implementation(project(":data:wallet:remote-nwc"))
     implementation(project(":data:wallet:repository"))
+
+    implementation(project(":data:account:repository"))
+    implementation(project(":data:account:signer"))
 
     implementation(libs.bignum)
     implementation(libs.core.ktx)

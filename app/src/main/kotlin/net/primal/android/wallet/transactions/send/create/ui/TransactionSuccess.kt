@@ -18,8 +18,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import java.text.NumberFormat
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.applyEdgeToEdge
@@ -27,6 +27,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
+import net.primal.android.wallet.ui.FlowStatusColumn
 import net.primal.android.wallet.walletSuccessColor
 import net.primal.android.wallet.walletSuccessContentColor
 import net.primal.android.wallet.walletSuccessDimColor
@@ -74,7 +75,7 @@ fun TransactionSuccess(
             verticalArrangement = Arrangement.SpaceAround,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            TransactionStatusColumn(
+            FlowStatusColumn(
                 icon = PrimalIcons.WalletSuccess,
                 iconTint = walletSuccessContentColor,
                 headlineText = stringResource(id = R.string.wallet_create_transaction_success_headline),

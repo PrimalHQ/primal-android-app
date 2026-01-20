@@ -1,6 +1,7 @@
 package net.primal.android.settings.wallet.domain
 
 import android.net.Uri
+import androidx.core.net.toUri
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -11,7 +12,7 @@ data class PrimalWalletNwc(
 )
 
 fun String.parseAsPrimalWalletNwc(): PrimalWalletNwc {
-    val uri = Uri.parse(this)
+    val uri = this.toUri()
 
     val callback = uri.getQueryParameterOrNull("callback")
     val appIcon = uri.getQueryParameterOrNull("appicon")

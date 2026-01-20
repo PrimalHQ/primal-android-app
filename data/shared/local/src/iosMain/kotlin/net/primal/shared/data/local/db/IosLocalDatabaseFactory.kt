@@ -13,12 +13,23 @@ typealias LocalDatabaseFactory = IosLocalDatabaseFactory
 
 object IosLocalDatabaseFactory {
 
-    inline fun <reified T : RoomDatabase> createDatabase(databaseName: String): T {
+    inline fun <reified T : RoomDatabase> createDatabase(
+        databaseName: String,
+        fallbackToDestructiveMigration: Boolean,
+        callback: RoomDatabase.Callback? = null,
+    ): T {
         val dbFilePath = documentDirectory() + "/$databaseName"
-        return buildLocalDatabase {
+        return buildLocalDatabase(fallbackToDestructiveMigration = fallbackToDestructiveMigration) {
             Room.databaseBuilder<T>(name = dbFilePath)
                 .setQueryCoroutineContext(IOSDispatcherProvider().io())
                 .setDriver(NativeSQLiteDriver())
+                .run {
+                    if (callback != null) {
+                        this.addCallback(callback)
+                    } else {
+                        this
+                    }
+                }
         }
     }
 

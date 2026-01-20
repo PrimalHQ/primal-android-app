@@ -2,8 +2,8 @@ package net.primal.domain.rates.fees
 
 data class OnChainTransactionFeeTier(
     val tierId: String,
-    val label: String,
-    val confirmationEstimationInMin: Int,
     val txFeeInBtc: String,
+    val label: String? = null,
+    val confirmationEstimationInMin: Int? = null,
     val minAmountInBtc: String? = null,
 )

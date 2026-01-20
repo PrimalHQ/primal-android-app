@@ -1,4 +1,5 @@
 import co.touchlab.skie.configuration.DefaultArgumentInterop
+import co.touchlab.skie.configuration.FlowInterop
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
@@ -12,57 +13,54 @@ plugins {
 
 private val xcfName = "PrimalShared"
 
+// Shared dependencies exported to iOS
+private val exportedDependencies = listOf(
+    ":domain:nostr",
+    ":domain:primal",
+    ":domain:wallet",
+    ":domain:account",
+    ":core:networking-primal",
+    ":core:networking-upload",
+    ":core:networking-lightning",
+    ":data:account:repository",
+    ":data:caching:repository",
+    ":data:wallet:repository",
+)
+
 kotlin {
     // Android target
     androidLibrary {
         namespace = "net.primal"
-        compileSdk = 35
-        minSdk = 26
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     // JVM Target
 //    jvm("desktop")
 
-    // iOS Target
+    // iOS Target (minimum iOS 16)
     val xcfFramework = XCFramework(xcfName)
-    val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
 
-    iosTargets.forEach {
-        it.binaries.framework {
+    fun KotlinNativeTarget.configureFramework(platformName: String) {
+        binaries.framework {
             baseName = xcfName
-            isStatic = true
+            isStatic = false
+            freeCompilerArgs += listOf("-Xadd-light-debug=enable")
+            linkerOpts += listOf("-platform_version", platformName, "16.0", "16.0")
             xcfFramework.add(this)
-
-            export(project(":domain:nostr"))
-            export(project(":domain:primal"))
-            export(project(":domain:wallet"))
-
-            export(project(":core:networking-primal"))
-            export(project(":core:networking-upload"))
-
-            export(project(":data:caching:repository"))
-
-            export(project(":data:wallet:remote-nwc"))
-            export(project(":data:wallet:repository"))
+            exportedDependencies.forEach { dep -> export(project(dep)) }
         }
     }
+
+    iosArm64 { configureFramework("ios") }
+    iosSimulatorArm64 { configureFramework("ios-simulator") }
 
     // Source set declarations (https://kotlinlang.org/docs/multiplatform-hierarchy.html)
     sourceSets {
         commonMain {
             dependencies {
-                // Internal
-                api(project(":domain:nostr"))
-                api(project(":domain:primal"))
-                api(project(":domain:wallet"))
-
-                api(project(":core:networking-primal"))
-                api(project(":core:networking-upload"))
-
-                api(project(":data:caching:repository"))
-
-                api(project(":data:wallet:remote-nwc"))
-                api(project(":data:wallet:repository"))
+                // Internal - exported to iOS
+                exportedDependencies.forEach { api(project(it)) }
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
@@ -130,6 +128,7 @@ skie {
 
         group {
             DefaultArgumentInterop.Enabled(false)
+            FlowInterop.Enabled(true)
         }
     }
 

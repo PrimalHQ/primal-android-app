@@ -12,7 +12,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
-import net.primal.core.networking.nwc.model.NwcWalletRequest
+import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
 import net.primal.core.networking.nwc.nip47.ListTransactionsParams
@@ -23,6 +23,7 @@ import net.primal.core.networking.nwc.nip47.MakeInvoiceParams
 import net.primal.core.networking.nwc.nip47.MakeInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.nip47.NwcResponseContent
+import net.primal.core.networking.nwc.nip47.NwcWalletRequest
 import net.primal.core.networking.nwc.nip47.PayInvoiceParams
 import net.primal.core.networking.nwc.nip47.PayInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.PayKeysendParams
@@ -49,7 +50,7 @@ import net.primal.domain.wallet.NostrWalletConnect
 
 internal class NwcClientImpl(
     private val nwcData: NostrWalletConnect,
-    private val nwcZapHelper: NwcZapHelper,
+    private val lightningPayHelper: LightningPayHelper?,
 ) : NostrZapper, NwcApi, NostrEventPublisher {
 
     private companion object {
@@ -126,9 +127,14 @@ internal class NwcClientImpl(
         }
     }
 
-    override suspend fun zap(data: ZapRequestData): ZapResult {
+    override suspend fun zap(walletId: String, data: ZapRequestData): ZapResult {
+        val nwcZapHelper = lightningPayHelper ?: throw IllegalStateException(
+            "NwcZapHelper is required when using NwcClientImpl as a NostrZapper. " +
+                "Please provide NwcZapHelper instance in the constructor.",
+        )
+
         val zapPayRequest = runCatching {
-            nwcZapHelper.fetchZapPayRequest(data.recipientLnUrlDecoded)
+            nwcZapHelper.fetchPayRequest(data.recipientLnUrlDecoded)
         }.getOrElse {
             Napier.e(it) { "FailedToFetchZapPayRequest." }
             return ZapResult.Failure(error = ZapError.FailedToFetchZapPayRequest(cause = it))
@@ -136,10 +142,10 @@ internal class NwcClientImpl(
 
         val invoice = runCatching {
             nwcZapHelper.fetchInvoice(
-                zapPayRequest = zapPayRequest,
-                zapEvent = data.userZapRequestEvent,
-                satoshiAmountInMilliSats = data.zapAmountInSats * MSATS_IN_SATS.toULong(),
+                payRequest = zapPayRequest,
+                amountInMilliSats = data.zapAmountInSats * MSATS_IN_SATS.toULong(),
                 comment = data.zapComment,
+                zapEvent = data.userZapRequestEvent,
             )
         }.getOrElse {
             Napier.e(it) { "FailedToFetchZapInvoice." }
@@ -149,7 +155,10 @@ internal class NwcClientImpl(
         val nostrEvent = runCatching {
             signNwcRequestNostrEvent(
                 nwc = nwcData,
-                request = invoice.toWalletPayRequest(),
+                request = NwcWalletRequest(
+                    method = "pay_invoice",
+                    params = PayInvoiceParams(invoice = invoice.invoice),
+                ),
             ).unwrapOrThrow()
         }.getOrElse {
             Napier.e(it) { "FailedToSignEvent." }

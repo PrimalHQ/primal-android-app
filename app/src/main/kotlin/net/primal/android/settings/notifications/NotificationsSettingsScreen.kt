@@ -1,8 +1,6 @@
 package net.primal.android.settings.notifications
 
-import android.content.Intent
 import android.os.Build
-import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -57,6 +55,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.res.painterResource
+import net.primal.android.core.utils.getNotificationSettingsIntent
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiEvent.NotificationSettingsChanged
 import net.primal.android.settings.notifications.NotificationsSettingsContract.UiState.ApiError
 import net.primal.android.settings.notifications.ui.NotificationSwitchUi
@@ -291,15 +290,10 @@ private fun PushNotificationSection(
 
     val systemSettingsLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult(),
-    ) { result ->
+    ) {
         val enabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
         onChange(enabled)
     }
-
-    fun buildNotificationsSettingsIntent() =
-        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-        }
 
     Column(modifier = modifier) {
         Box(
@@ -327,7 +321,7 @@ private fun PushNotificationSection(
                             if (notificationsPermission?.status?.shouldShowRationale == true) {
                                 notificationsPermission.launchPermissionRequest()
                             } else {
-                                systemSettingsLauncher.launch(buildNotificationsSettingsIntent())
+                                systemSettingsLauncher.launch(context.getNotificationSettingsIntent())
                             }
                         }
                     } else {

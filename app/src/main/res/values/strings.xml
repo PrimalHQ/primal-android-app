@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Primal</string>
 
     <string name="nsec_or_npub">nsec / npub</string>
@@ -44,6 +44,7 @@
     <string name="app_error_invalid_promo_code_try_later">Sorry, we couldn’t find a match for that promo code. Don\'t worry, you can proceed and try to redeem your code again.</string>
     <string name="app_no_connection_notice">Unable to connect</string>
     <string name="app_error_stream_not_found">Unable to find stream.</string>
+    <string name="app_nostr_connect_session_active">Remote Session Active</string>
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>
@@ -104,27 +105,34 @@
     <string name="login_enter_nsec_key">Enter your Nostr key to sign in:</string>
     <string name="login_invalid_nsec_key">Please enter a valid Nostr key,\nstarting with “nsec”:</string>
 
-    <string name="redeem_code_title">Redeem Code</string>
-    <string name="redeem_code_manual_entry_title">Enter Your Code</string>
-    <string name="redeem_code_success_title">Success!</string>
-    <string name="redeem_code_apply_code_button">Apply code</string>
-    <string name="redeem_code_redeem_code_button">Redeem code</string>
-    <string name="redeem_code_onboard_to_primal_button">Onboard to Primal</string>
-    <string name="redeem_code_active_wallet_button">Activate Wallet</string>
-    <string name="redeem_code_enter_code_button">Enter Code Instead</string>
-    <string name="redeem_code_enter_code_description">If you have an Invite Code, or a\nPrimal Gift Card, you can redeem it here.</string>
-    <string name="redeem_code_incorrect_code_message">Incorrect code. Please try again.</string>
-    <string name="redeem_code_this_code_is_loaded">This code is loaded with:</string>
-    <string name="redeem_code_get_zapping">Get Zapping!</string>
-    <string name="redeem_code_sats">sats</string>
-    <string name="redeem_code_primal_premium">Primal Premium</string>
-    <plurals name="redeem_code_premium_months">
+    <string name="scan_code_title">Scan Code</string>
+    <string name="scan_code_remote_login_title">Remote Login</string>
+    <string name="scan_code_manual_entry_title">Enter Anything</string>
+    <string name="scan_code_success_title">Success!</string>
+    <string name="scan_code_apply_button">Apply</string>
+    <string name="scan_code_error_invalid_login_string">Invalid remote login string. Please try again.</string>
+    <string name="scan_code_redeem_button">Redeem code</string>
+    <string name="scan_code_onboard_button">Onboard to Primal</string>
+    <string name="scan_code_activate_wallet_button">Activate Wallet</string>
+    <string name="scan_code_use_keyboard_button">Use Keyboard instead</string>
+    <string name="scan_code_enter_placeholder">Enter code…</string>
+    <string name="scan_code_remote_login_manual_entry_placeholder">nostrconnect://</string>
+    <string name="scan_code_paste">Paste</string>
+    <string name="scan_code_loaded_with">This code is loaded with:</string>
+    <string name="scan_code_get_zapping">Get Zapping!</string>
+    <string name="scan_code_sats">sats</string>
+    <string name="scan_code_primal_premium">Primal Premium</string>
+    <plurals name="scan_code_premium_months">
         <item quantity="one">%1$s month</item>
         <item quantity="other">%1$s months</item>
     </plurals>
-    <string name="redeem_code_to_redeem_code_notice">To redeem your code, onboard to Primal by\ncreating your Nostr account and activating\nyour Primal Wallet.</string>
-    <string name="redeem_code_no_wallet_notice">To redeem your code,\nactivate your Primal Wallet.</string>
-    <string name="redeem_code_scan_hint">Scan your Invite Code,\nor a Primal Gift Card.</string>
+    <string name="scan_code_to_redeem_notice">To redeem your code, onboard to Primal by\ncreating your Nostr account and activating\nyour Primal Wallet.</string>
+    <string name="scan_code_no_wallet_notice">To redeem your code,\nactivate your Primal Wallet.</string>
+    <string name="scan_code_scan_anything_title">Scan Anything:</string>
+    <string name="scan_code_scan_anything_subtitle">Invite code, payment invoice, login string, user link, content link, primal gift card</string>
+    <string name="scan_code_remote_login_camera_title">Login to Any Nostr App</string>
+    <string name="scan_code_remote_login_camera_subtitle">Use your Primal account to login to any\nNostr app that supports remote sign in.</string>
+    <string name="scan_code_remote_login_manual_entry_subtitle">Use your Primal account to login to any Nostr app that supports remote sign in. Paste the connection string below:</string>
 
     <string name="logout_title">Sign out</string>
     <string name="logout_description">If you didn\'t save your private key, it will be irretrievably lost. Do you really want to sign out?</string>
@@ -141,7 +149,8 @@
     <string name="drawer_destination_premium">Premium</string>
     <string name="drawer_destination_messages">Messages</string>
     <string name="drawer_destination_bookmarks">Bookmarks</string>
-    <string name="drawer_destination_redeem_code">Redeem Code</string>
+    <string name="drawer_destination_scan_code">Scan Code</string>
+    <string name="drawer_destination_remote_login">Remote Login</string>
     <string name="drawer_destination_settings">Settings</string>
     <string name="drawer_destination_sign_out">Sign Out</string>
     <string name="drawer_followers_suffix">Followers</string>
@@ -602,6 +611,7 @@
     <string name="post_delete_repost_button_confirmation">Delete Repost</string>
     <string name="post_repost_button_confirmation">Repost</string>
     <string name="post_quote_button_confirmation">Quote</string>
+    <string name="post_repost_again_button_confirmation">Repost Again</string>
 
     <string name="note_editor_post_publish_button">Post</string>
     <string name="note_editor_reply_publish_button">Reply</string>
@@ -772,6 +782,7 @@
     <string name="wallet_picker_title">Wallets</string>
     <string name="wallet_picker_configure_wallets">Configure</string>
     <string name="wallet_primal_title">Primal</string>
+    <string name="wallet_tsunami_title">Tsunami</string>
     <string name="wallet_primal_description">Built-in wallet</string>
     <string name="wallet_nwc_title">NWC</string>
     <string name="wallet_nwc_description">Your external lightning wallet</string>
@@ -845,21 +856,21 @@
 
     <string name="settings_title">Settings</string>
 
-    <string name="settings_keys_title">Keys</string>
-    <string name="settings_keys_copy_public_key">Copy public key</string>
-    <string name="settings_keys_public_key_hint">Anyone on Nostr can find you via your public key. Feel free to share anywhere.</string>
-    <string name="settings_keys_public_key_title">Your Public Key</string>
-    <string name="settings_keys_copy_private_key">Copy private key</string>
-    <string name="settings_keys_private_key_hint">This key fully controls your Nostr account. Don’t share it with anyone. Only copy this key to store it securely or to login to another Nostr app.</string>
-    <string name="settings_keys_private_key_title">Your Private Key</string>
-    <string name="settings_keys_show_key">Show Key</string>
-    <string name="settings_keys_hide_key">Hide Key</string>
-    <string name="settings_keys_key_copied">Key copied</string>
+    <string name="settings_account_title">Account</string>
+    <string name="settings_account_copy_public_key">Copy public key</string>
+    <string name="settings_account_public_key_hint">Anyone on Nostr can find you via your public key. Feel free to share anywhere.</string>
+    <string name="settings_account_public_key_title">Your Public Key</string>
+    <string name="settings_account_copy_private_key">Copy private key</string>
+    <string name="settings_account_private_key_hint">This key fully controls your Nostr account. Don’t share it with anyone. Only copy this key to store it securely or to login to another Nostr app.</string>
+    <string name="settings_account_private_key_title">Your Private Key</string>
+    <string name="settings_account_show_key">Show Key</string>
+    <string name="settings_account_hide_key">Hide Key</string>
+    <string name="settings_account_key_copied">Key copied</string>
 
     <string name="settings_wallet_title">Wallet</string>
     <string name="settings_wallet_connected_title">Wallet Connected</string>
-    <string name="settings_wallet_use_primal_wallet">Use Primal wallet</string>
-    <string name="settings_wallet_use_primal_wallet_hint">Alternatively you can connect to an external lightning wallet via Nostr Wallet Connect</string>
+    <string name="settings_wallet_use_external_wallet">Use external wallet</string>
+    <string name="settings_wallet_use_external_wallet_hint">Alternatively you can connect to an external lightning wallet via Nostr Wallet Connect</string>
     <string name="settings_wallet_nwc_header_not_connected">Connect a Wallet</string>
     <string name="settings_wallet_nwc_header_not_connected_hint">Connect an external wallet by scanning or pasting its Nostr Wallet Connect (NWC) connection string:</string>
     <string name="settings_wallet_nwc_primal_wallet">Primal Wallet</string>
@@ -868,6 +879,9 @@
     <string name="settings_wallet_nwc_paste_string">Paste NWC String</string>
     <string name="settings_wallet_nwc_scan_qr_code">Scan NWC QR Code</string>
     <string name="settings_wallet_nwc_disconnect_wallet_button">Disconnect Wallet</string>
+    <string name="settings_wallet_backup_balance">Wallet Balance: %1$s sats</string>
+    <string name="settings_wallet_backup_subtitle">This wallet has not been backed up. It is important to back up your wallet so you don\'t lose access to your funds.</string>
+    <string name="settings_wallet_backup_button">Back Up Wallet Now</string>
     <string name="settings_wallet_nwc_profile_lightning_address">Your Nostr Lightning Address:</string>
     <string name="settings_wallet_nwc_profile_lightning_address_hint">You can change your Nostr Lightning Address (for receiving zaps) in your</string>
     <string name="settings_wallet_nwc_profile_lightning_address_hint_suffix">profile settings</string>
@@ -893,6 +907,10 @@
     <string name="settings_wallet_start_in_wallet">Start in wallet</string>
     <string name="settings_wallet_start_in_wallet_hint">Open the wallet when Primal starts</string>
     <string name="settings_wallet_save">Save</string>
+    <string name="settings_wallet_backup_wallet_title">Backup wallet</string>
+    <string name="settings_wallet_backup_wallet_subtitle">Write down your wallet recovery phrase so you don\'t lose access to your funds</string>
+    <string name="settings_wallet_restore_wallet_title">Restore existing wallet</string>
+    <string name="settings_wallet_restore_wallet_subtitle">If you have an existing wallet that you wish to use with your Nostr account, you can restore it here using your 12-24 wallet recovery phrase</string>
     <string name="settings_wallet_new_nwc_connection_title">New Wallet Connection</string>
     <string name="settings_wallet_new_nwc_connection_app_name_input_header">Name of the app you wish to connect:</string>
     <string name="settings_wallet_new_nwc_connection_hint">You can revoke access at any time in your Primal Wallet settings.</string>
@@ -977,6 +995,7 @@
     <string name="settings_zaps_editor_message">Message</string>
     <string name="settings_zaps_editor_value">Value</string>
     <string name="settings_zaps_editor_save">Save</string>
+    <string name="settings_wallet_needs_backup">needs backup</string>
 
     <string name="settings_muted_content_title">Muted Content</string>
     <string name="settings_muted_title">Muted</string>
@@ -1007,6 +1026,102 @@
     <string name="settings_media_uploads_restore_default_blossom_server_title">Restore Default</string>
     <string name="settings_media_uploads_restore_default_blossom_server_description">Are you sure you want to restore default mirror server?</string>
     <string name="settings_version_title">Version</string>
+
+    <string name="settings_connected_apps_title">Connected Apps</string>
+    <string name="settings_connected_apps_unknown">Unknown App</string>
+    <string name="settings_connected_apps_local_apps">Local Apps</string>
+    <string name="settings_connected_apps_remote_apps">Remote Apps</string>
+    <string name="settings_no_connected_apps">No connected apps.</string>
+    <string name="settings_connected_app_details_title">Connected App Details</string>
+    <string name="settings_connected_app_details_not_found">Connection details not found.</string>
+    <string name="settings_connected_app_details_for_app">Details for %1$s</string>
+    <string name="settings_connected_app_details_permissions_and_sessions">Permissions and recent sessions will be shown here.</string>
+    <string name="settings_connected_app_details_recent_sessions">Recent Sessions</string>
+    <string name="settings_connected_app_details_delete_connection_dialog_title">Delete Connection?</string>
+    <string name="settings_connected_app_details_delete_connection_dialog_text">Are you sure you want to delete this connection? All data will be lost.</string>
+    <string name="settings_connected_app_details_delete_connection_confirm">Delete</string>
+    <string name="settings_connected_app_details_delete_connection_dismiss">Cancel</string>
+    <string name="settings_connected_app_details_update_trust_level_dialog_title">Switch Trust Level?</string>
+    <string name="settings_connected_app_details_update_trust_level_dialog_text">Are you sure you want to switch permissions level to %s?</string>
+    <string name="settings_connected_app_details_update_trust_level_confirm">Yes</string>
+    <string name="settings_connected_app_details_update_trust_level_dismiss">Cancel</string>
+    <string name="settings_connected_app_details_full_trust">Full Trust</string>
+    <string name="settings_connected_app_details_medium_trust">Medium Trust</string>
+    <string name="settings_connected_app_details_low_trust">Low Trust</string>
+    <string name="settings_connected_app_details_edit_name_dialog_title">Edit App Name</string>
+    <string name="settings_connected_app_details_edit_name_confirm">Save</string>
+    <string name="settings_connected_app_details_edit_name_dismiss">Cancel</string>
+    <string name="settings_connected_app_details_end_session">End Session</string>
+    <string name="settings_connected_app_details_start_session">Start Session</string>
+    <string name="settings_connected_app_details_edit_name">Edit Name</string>
+    <string name="settings_connected_app_details_delete_connection">Delete Connection</string>
+    <string name="settings_connected_app_details_auto_start_session">Auto start session</string>
+    <string name="settings_connected_app_details_last_session">Last Session: %1$s</string>
+    <string name="settings_connected_app_permissions_allow">Allow</string>
+    <string name="settings_connected_app_permissions_deny">Deny</string>
+    <string name="settings_connected_app_permissions_ask">Ask</string>
+    <string name="settings_connected_app_permissions_title">App Permissions</string>
+    <string name="settings_connected_app_permissions_subtitle">Permissions</string>
+    <string name="settings_connected_app_permissions_full_trust_subtitle">I fully trust this app; auto-sign all requests</string>
+    <string name="settings_connected_app_permissions_medium_trust_subtitle">Auto-approve specified requests</string>
+    <string name="settings_connected_app_permissions_low_trust_subtitle">Ask me to approve each request</string>
+    <string name="settings_connected_app_permission_details_link">Permission Details</string>
+    <string name="settings_connected_app_permissions_error_loading">We couldn\'t load permissions. Please try again.</string>
+    <string name="settings_connected_app_permissions_reset">Reset permissions</string>
+    <string name="settings_connected_app_permissions_reset_dialog_title">Reset permissions?</string>
+    <string name="settings_connected_app_permissions_reset_dialog_text">This will reset all permissions to default settings. Do you wish to continue?</string>
+    <string name="settings_connected_app_permissions_reset_dialog_confirm">Reset</string>
+    <string name="settings_connected_app_permissions_reset_dialog_dismiss">Cancel</string>
+    <string name="settings_session_details_title">Session Details</string>
+    <string name="settings_session_details_started_on">Started on: %1$s</string>
+    <string name="settings_session_no_events">Events will show up here.</string>
+    <string name="settings_event_details_title">Event Details</string>
+    <string name="settings_event_details_copy_raw_json">Copy Raw JSON</string>
+    <string name="settings_event_details_copied_toast">%1$s copied.</string>
+    <string name="settings_event_details_show_more">Show more</string>
+    <string name="settings_event_details_show_less">Show less</string>
+    <string name="settings_event_details_not_supported">Details for this event type are not available.</string>
+
+    <string name="settings_event_details_id_label">ID:</string>
+    <string name="settings_event_details_pubkey_label">Pubkey:</string>
+    <string name="settings_event_details_event_kind_label">Event kind:</string>
+    <string name="settings_event_details_created_at_label">Created at:</string>
+    <string name="settings_event_details_tags_label">Tags:</string>
+    <string name="settings_event_details_content_label">Content:</string>
+    <string name="settings_event_details_signature_label">Signature:</string>
+    <string name="settings_event_details_raw_json_label">Raw JSON:</string>
+    <string name="settings_event_details_tags_more">+%1$d more</string>
+    <string name="settings_event_details_kind_publish_note">Publish Note:</string>
+    <string name="settings_event_details_kind_update_profile">Update Profile:</string>
+    <string name="settings_event_details_kind_repost">Repost:</string>
+    <string name="settings_event_details_kind_zap_request">Zap Request:</string>
+    <string name="settings_event_details_kind_zap">Zap:</string>
+    <string name="settings_event_details_kind_react_to_note">React to Note:</string>
+    <string name="settings_event_details_kind_update_follow_list">Update Follow List:</string>
+    <string name="settings_event_details_kind_update_relay_list">Update Relay List:</string>
+    <string name="settings_event_details_kind_sign_event">Sign Event (Kind %1$d):</string>
+    <string name="session_event_title_read_public_key">Read Public Key:</string>
+    <string name="session_event_title_update_profile">Update Profile:</string>
+    <string name="session_event_title_publish_note">Publish Note:</string>
+    <string name="session_event_title_update_follow_list">Update Follow List:</string>
+    <string name="session_event_title_repost">Repost:</string>
+    <string name="session_event_title_react_to_note">React to Note:</string>
+    <string name="session_event_title_update_relay_list">Update Relay List:</string>
+    <string name="session_event_title_sign_event_kind">Sign Event (Kind %1$d):</string>
+    <string name="session_event_title_encrypt">Encrypt:</string>
+    <string name="session_event_title_decrypt">Decrypt:</string>
+    <string name="session_event_state_approved">Done</string>
+    <string name="session_event_state_rejected">Rejected</string>
+
+    <string name="settings_developer_tools_title">Developer Tools</string>
+    <string name="settings_developer_tools_logging_title">Enable Logging</string>
+    <string name="settings_developer_tools_logging_description">Captures app logs for debugging</string>
+    <string name="settings_developer_tools_log_stats">Log files: %1$d (%2$s)</string>
+    <string name="settings_developer_tools_export">Export Logs (ZIP)</string>
+    <string name="settings_developer_tools_exporting">Exporting…</string>
+    <string name="settings_developer_tools_clear">Clear Logs</string>
+    <string name="settings_developer_tools_error_no_logs">No logs to export</string>
+    <string name="settings_developer_tools_error_export_failed">Failed to export logs</string>
 
     <string name="biometric_prompt_title">Authenticate</string>
     <string name="biometric_prompt_description">This ensures that only you can access the private key.</string>
@@ -1116,6 +1231,37 @@
     <string name="wallet_dashboard_no_transactions_hint">Your transactions will appear here.</string>
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
     <string name="wallet_dashboard_buy_sats_button">Buy Sats Now</string>
+    <string name="wallet_dashboard_backup_notice_title">Important:</string>
+    <string name="wallet_dashboard_backup_notice_description">This wallet has not been backed up. You need to backup your wallet so you don\'t lose access to your funds.</string>
+    <string name="wallet_dashboard_backup_button">Backup Wallet Now</string>
+    <string name="wallet_dashboard_upgrade_header">IMPORTANT</string>
+    <string name="wallet_dashboard_upgrade_expires_on">This wallet will expire on</string>
+    <string name="wallet_dashboard_upgrade_please_upgrade">Please upgrade to continue using this wallet.</string>
+    <string name="wallet_dashboard_upgrade_button">Upgrade Wallet Now</string>
+
+    <string name="wallet_upgrade_sheet_title">Welcome to Primal 2.7!</string>
+    <string name="wallet_upgrade_sheet_subtitle">Featuring a self-custodial wallet</string>
+    <string name="wallet_upgrade_sheet_description">With one tap, we\'ll move your funds and full\ntransaction history to your new self-custodial\nwallet - so you fully control your bitcoin.\nQuestions? Check out our </string>
+    <string name="wallet_upgrade_sheet_faqs">FAQs</string>
+    <string name="wallet_upgrade_sheet_button">Upgrade Wallet Now</string>
+    <string name="wallet_upgrade_title">Upgrade Wallet</string>
+    <string name="wallet_upgrade_upgrading_title">Upgrading…</string>
+    <string name="wallet_upgrade_upgrading_support" tools:ignore="TypographyEllipsis">transferring your wallet\nbalance &amp; transaction history...</string>
+    <string name="wallet_upgrade_success_title">Success</string>
+    <string name="wallet_upgrade_success_headline">Wallet upgraded!</string>
+    <string name="wallet_upgrade_failed_title">Upgrade Failed</string>
+    <string name="wallet_upgrade_failed_headline">Unable to upgrade</string>
+    <string name="wallet_upgrade_done_button">Done</string>
+    <string name="wallet_upgrade_close_button">Close</string>
+
+    <string name="wallet_restore_title">Restore Existing Wallet</string>
+    <string name="wallet_restore_enter_recovery_phrase_placeholder">Enter your wallet recovery phrase</string>
+    <string name="wallet_restore_helper_text">We support recovery of any existing bitcoin wallet on the network. Recovery phrases are 12 to 24 words long.</string>
+    <string name="wallet_restore_button">Restore Wallet Now</string>
+    <string name="wallet_restore_invalid_recovery_phrase">Invalid recovery phrase</string>
+    <string name="wallet_restore_valid_recovery_phrase">Valid recovery phrase</string>
+    <string name="wallet_restore_restoring_your_wallet">Restoring your wallet…</string>
+    <string name="wallet_restore_error_generic">Something went wrong. Please check your recovery phrase and try again.</string>
 
     <string name="wallet_tos_prefix">By tapping \"Next\" you agree to the</string>
     <string name="wallet_activation_title">Activate Wallet</string>
@@ -1253,6 +1399,29 @@
     <string name="wallet_transaction_details_status_succeeded_confirmed">Confirmed</string>
     <string name="wallet_transaction_details_status_failed">Failed</string>
     <string name="wallet_transaction_details_status_canceled">Canceled</string>
+
+    <string name="wallet_backup_title">Backup Wallet</string>
+    <string name="wallet_backup_verify_title">Verify Recovery Phrase</string>
+    <string name="wallet_backup_success_title">Congrats!</string>
+    <string name="wallet_backup_welcome_description">We are going to display your wallet recovery phrase on the next screen.</string>
+    <string name="wallet_backup_important">Important:</string>
+    <string name="wallet_backup_disclaimer_part_one">Primal does not have access to the funds in your wallet. You have sole custody of your wallet via the recovery phrase. If you lose your recovery phrase, </string>
+    <string name="wallet_backup_disclaimer_part_two">Primal will not be able to restore your funds.</string>
+    <string name="wallet_backup_button_i_understand">I understand, backup wallet</string>
+    <string name="wallet_backup_button_cancel">Cancel, I\'ll do this later</string>
+    <string name="wallet_backup_seed_description_one">This is your wallet recovery phrase. To backup your wallet, simply write these words down in the correct order.</string>
+    <string name="wallet_backup_seed_description_two">The words are not case sensitive and they are separated by spaces. We will ask you to verify on the next screen.</string>
+    <string name="wallet_backup_button_written_down">I have written it down</string>
+    <string name="wallet_backup_verify_word_label">Type word #%1$d:</string>
+    <string name="wallet_backup_verify_correct">Correct</string>
+    <string name="wallet_backup_verify_incorrect">Incorrect</string>
+    <string name="wallet_backup_button_verify">Verify</string>
+    <string name="wallet_backup_confirm_check_1">My funds are not held by Primal</string>
+    <string name="wallet_backup_confirm_check_2">If my device gets lost or stolen, the only way to recover my funds is via the wallet recovery phrase</string>
+    <string name="wallet_backup_confirm_check_3">It is my sole responsibility to keep my recovery phrase safe</string>
+    <string name="wallet_backup_confirm_description">Your wallet has been backed up. You now hold the keys to your bitcoin!\nPlease confirm the three points below.</string>
+    <string name="wallet_backup_confirm_subtitle">I understand that:</string>
+    <string name="wallet_backup_button_finish">Finish</string>
 
     <string name="qrcode_scanner_permission_title">Permission required</string>
     <string name="qrcode_scanner_permission_rationale">Primal needs access to your camera to scan QR codes.</string>
@@ -1402,4 +1571,74 @@
 
     <string name="feed_note_render_unknown_audio_title">Unknown title</string>
     <string name="feed_note_render_play_button">Play</string>
+
+    <string name="signer_connect_unknown_app">Unknown App</string>
+    <string name="signer_connect_login_tab">Login</string>
+    <string name="signer_connect_permissions_tab">Permissions</string>
+    <string name="signer_connect_full_trust_title">Full Trust</string>
+    <string name="signer_connect_full_trust_subtitle">I fully trust this app; auto-sign all requests</string>
+    <string name="signer_connect_medium_trust_title">Medium Trust</string>
+    <string name="signer_connect_medium_trust_subtitle">Auto-approve most common requests</string>
+    <string name="signer_connect_low_trust_title">Low Trust</string>
+    <string name="signer_connect_low_trust_subtitle">Ask me to approve each request</string>
+    <string name="signer_connect_cancel_button">Cancel</string>
+    <string name="signer_connect_connect_button">Connect</string>
+    <string name="signer_connect_back_button">Back</string>
+    <string name="signer_connect_apply_budget_button">Apply Budget</string>
+    <string name="signer_connect_no_nsec_accounts_warning">No accounts with a private key (nsec) found. Only accounts with a private key can be used with Signer Connect.</string>
+
+    <string name="nostr_connect_unknown_app">Unknown App</string>
+    <string name="nostr_connect_toast_connected">Connected!</string>
+    <string name="nostr_connect_toast_connection_failed">Connection failed: %1$s</string>
+    <string name="nostr_connect_apply_button">Apply</string>
+    <string name="nostr_connect_sats_unit">sats</string>
+    <string name="nostr_connect_daily_budget_title">Daily Budget</string>
+    <string name="nostr_connect_daily_spending_budget_title">Daily spending budget for this app:</string>
+    <string name="nostr_connect_usd_amount_approx">~%1$s</string>
+    <string name="nostr_connect_no_limit">No limit</string>
+    <string name="nostr_connect_active_sessions_title">Active Sessions</string>
+    <string name="nostr_connect_select_all_button">Select All</string>
+    <string name="nostr_connect_deselect_all_button">Deselect All</string>
+    <string name="nostr_connect_settings_button">Settings</string>
+    <string name="nostr_connect_disconnect_button">Disconnect</string>
+    <string name="nostr_connect_reconnect_button">Reconnect</string>
+    <string name="nostr_connect_sessions_disconnected_toast">Sessions disconnected.</string>
+    <string name="nostr_connect_no_active_sessions">No active Nostr Connect sessions found.</string>
+    <string name="nostr_connect_label_plain_text">Plain text:</string>
+    <string name="nostr_connect_label_encrypted_text">Encrypted text:</string>
+    <string name="nostr_connect_label_pubkey">Pubkey:</string>
+    <string name="nostr_connect_status_signed">Signed</string>
+    <string name="nostr_connect_status_success_encryption">Successful encryption</string>
+    <string name="nostr_connect_status_success_decryption">Successful decryption</string>
+    <string name="nostr_connect_status_approved">Approved</string>
+    <string name="nostr_connect_status_rejected">Rejected by user</string>
+    <string name="nostr_connect_status_connecting">Connecting…</string>
+    <string name="nostr_connect_status_reconnecting">Reconnecting…</string>
+    <string name="nostr_connect_status_disconnected">Check your connection</string>
+
+    <string name="permissions_bottom_sheet_unknown_app">Unknown App</string>
+    <string name="permissions_bottom_sheet_app_requests">App requests:</string>
+    <string name="permissions_bottom_sheet_deselect_all">Deselect All</string>
+    <string name="permissions_bottom_sheet_select_all">Select All</string>
+    <string name="permissions_bottom_sheet_always_handle">Always handle requests like this</string>
+    <string name="permissions_bottom_sheet_reject_selected">Reject Selected</string>
+    <string name="permissions_bottom_sheet_allow_selected">Allow Selected</string>
+    <string name="permissions_bottom_sheet_event_details_unavailable">Event details unavailable</string>
+    <string name="permissions_bottom_sheet_back_button">Back</string>
+
+    <string name="signer_notification_name">Remote Signer</string>
+    <string name="signer_notification_summary_title">Primal Remote Signer</string>
+    <string name="signer_notification_end_session">End session</string>
+    <string name="signer_notification_unknown_app">Unknown App</string>
+    <string name="signer_notification_logged_in_as">Logged in as %s</string>
+    <plurals name="signer_notification_new_signer_request">
+        <item quantity="one">You have %d new signer request.</item>
+        <item quantity="other">You have %d new signer requests.</item>
+    </plurals>
+    <string name="signer_notification_enable_switch_label">Enable Notifications</string>
+    <string name="signer_notification_enable_button">Let’s Go</string>
+    <string name="signer_notification_session_active_prefix">Session active with</string>
+    <string name="signer_notification_keep_running_description">To keep running reliably while Primal is in the background or when your phone is locked, you need to enable remote signer notifications.</string>
+
+    <string name="local_app_unknown_app">Unknown App</string>
 </resources>

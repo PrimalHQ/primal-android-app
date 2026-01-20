@@ -14,4 +14,6 @@ data class EventLink(
     val description: String? = null,
     val thumbnail: String? = null,
     val authorAvatarUrl: String? = null,
+    val originalWidth: Int? = null,
+    val originalHeight: Int? = null,
 )

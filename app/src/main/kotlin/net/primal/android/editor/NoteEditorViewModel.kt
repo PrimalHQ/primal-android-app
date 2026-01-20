@@ -61,7 +61,9 @@ import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asATagValue
+import net.primal.domain.nostr.buildNeventFromReplyOrRootNoteTag
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.hasRootMarker
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.nostr.utils.takeAsNaddrOrNull
@@ -569,14 +571,22 @@ class NoteEditorViewModel @AssistedInject constructor(
                         attachments = _state.value.attachments,
                     )
                 } else {
-                    val rootPost = _state.value.replyToConversation.firstOrNull()
-                    val replyToPost = _state.value.replyToConversation.lastOrNull()
+                    val replyToPost = referencedNoteNevent?.eventId?.let {
+                        feedRepository.findPostsById(it)
+                    }
+
+                    val replyToNoteNevent = replyToPost?.asFeedPostUi()?.asNevent() ?: referencedNoteNevent
+                    val rootNoteNevent = replyToPost?.tags
+                        ?.find { it.hasRootMarker() }
+                        ?.buildNeventFromReplyOrRootNoteTag()
+                        ?: replyToNoteNevent
+
                     notePublishHandler.publishShortTextNote(
                         userId = userId,
                         content = noteContent.concatenateUris(),
                         attachments = _state.value.attachments,
-                        rootNoteNevent = rootPost?.asNevent(),
-                        replyToNoteNevent = replyToPost?.asNevent(),
+                        rootNoteNevent = rootNoteNevent,
+                        replyToNoteNevent = replyToNoteNevent,
                         rootArticleNaddr = referencedArticleNaddr
                             ?: _state.value.replyToArticle?.generateNaddr(),
                         rootHighlightNevent = referencedHighlightNevent
@@ -676,14 +686,18 @@ class NoteEditorViewModel @AssistedInject constructor(
                         remoteUrl = uploadResult.remoteUrl,
                         originalHash = uploadResult.originalHash,
                         originalSizeInBytes = uploadResult.originalFileSize.toInt(),
+                        mimeType = uploadResult.nip94?.m,
+                        dimensionInPixels = uploadResult.nip94?.dim,
                     )
                     updateNoteAttachmentState(attachment = updatedAttachment)
 
-                    val (mimeType, dimensions) = fileAnalyser.extractImageTypeAndDimensions(attachment.localUri)
-                    if (mimeType != null || dimensions != null) {
+                    val mediaInfo = fileAnalyser.extractMediaInfo(attachment.localUri)
+                    if (mediaInfo.hasAnyData) {
                         updatedAttachment = updatedAttachment.copy(
-                            mimeType = mimeType,
-                            dimensionInPixels = dimensions,
+                            mimeType = mediaInfo.mimeType ?: updatedAttachment.mimeType,
+                            dimensionInPixels = mediaInfo.dimensionInPixels ?: updatedAttachment.dimensionInPixels,
+                            durationInSeconds = mediaInfo.durationInSeconds,
+                            bitrateInBitsPerSec = mediaInfo.bitrateInBitsPerSec,
                         )
                         updateNoteAttachmentState(updatedAttachment)
                     }

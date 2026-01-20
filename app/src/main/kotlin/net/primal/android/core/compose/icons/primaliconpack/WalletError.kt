@@ -18,7 +18,7 @@ public val PrimalIcons.WalletError: ImageVector
         }
         _primalwalleterror = Builder(name = "Primalwalleterror", defaultWidth = 160.0.dp,
                 defaultHeight = 160.0.dp, viewportWidth = 160.0f, viewportHeight = 160.0f).apply {
-            path(fill = SolidColor(Color(0xFFffffff)), stroke = SolidColor(Color(0xFFFA3C3C)),
+            path(stroke = SolidColor(Color(0xFFFA3C3C)),
                     fillAlpha = 0.7f, strokeLineWidth = 10.0f, strokeLineCap = Butt, strokeLineJoin
                     = Miter, strokeLineMiter = 4.0f, pathFillType = NonZero) {
                 moveTo(80.0f, 80.0f)

@@ -89,3 +89,40 @@
 
 # With R8 full mode generic signatures are stripped for classes that are not kept.
 -keep,allowobfuscation,allowshrinking class retrofit2.Response
+
+# OkHttp
+-dontwarn okhttp3.internal.**
+-keep class okhttp3.internal.** { *; }
+-keepnames class okhttp3.internal.** { *; }
+
+# OkHttp EventSource
+-keep class okhttp3.internal.sse.** { *; }
+
+####################################
+# Cronet / Play Services Cronet    #
+####################################
+
+# Keep Cronet provider classes for runtime discovery
+-keep class org.chromium.net.** { *; }
+-keep class com.google.android.gms.net.** { *; }
+
+####################################################
+# Protobuf Lite (required by Cronet HttpFlagsLoader) #
+####################################################
+
+-keep class com.google.protobuf.** { *; }
+-keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite {
+    <fields>;
+    <methods>;
+}
+
+# Keep protobuf enums
+-keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite$ExtendableMessage {
+    <fields>;
+}
+
+# Keep the default instance methods
+-keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite {
+    public static *** getDefaultInstance();
+    public static *** parser();
+}

@@ -26,6 +26,7 @@ interface ArticleDetailsContract {
         val selectedHighlight: JoinedHighlightsUi? = null,
         val isHighlighted: Boolean = false,
         val error: UiError? = null,
+        val fetching: Boolean = true,
         val isWorking: Boolean = false,
     )
 

@@ -25,8 +25,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
-import net.primal.android.LocalPrimalTheme
 import net.primal.android.R
+import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.OtpTextField
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons

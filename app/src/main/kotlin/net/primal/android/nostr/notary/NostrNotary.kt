@@ -15,14 +15,13 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import net.primal.android.core.serialization.json.NostrNotaryJson
 import net.primal.android.networking.UserAgentProvider
-import net.primal.android.signer.AmberSignResult
-import net.primal.android.signer.signEventWithAmber
+import net.primal.android.signer.client.AmberSignResult
+import net.primal.android.signer.client.signEventWithAmber
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Relay
 import net.primal.android.user.domain.toZapTag
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.remote.api.settings.model.AppSettingsDescription
 import net.primal.domain.global.ContentAppSettings
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
@@ -40,6 +39,7 @@ import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.nostr.cryptography.utils.toNpub
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.nostr.zaps.toTags
+import net.primal.domain.settings.AppSettingsDescription
 
 @Singleton
 class NostrNotary @Inject constructor(
@@ -95,7 +95,7 @@ class NostrNotary @Inject constructor(
 
     private fun signNostrEvent(userId: String, event: NostrUnsignedEvent): NostrEvent? {
         val isExternalSignerLogin = runCatching {
-            credentialsStore.isExternalSignerLogin(npub = userId.hexToNpubHrp())
+            credentialsStore.isExternalSignerCredential(npub = userId.hexToNpubHrp())
         }.getOrDefault(false)
 
         if (isExternalSignerLogin) {

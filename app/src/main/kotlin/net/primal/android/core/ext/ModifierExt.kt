@@ -1,6 +1,10 @@
 package net.primal.android.core.ext
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -10,13 +14,17 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import kotlin.collections.plusAssign
+import net.primal.android.theme.AppTheme
 
 fun Modifier.onFocusSelectAll(textFieldValueState: MutableState<TextFieldValue>): Modifier =
     composed(
@@ -73,3 +81,18 @@ fun Modifier.onDragDownBeyond(threshold: Dp, onTriggered: () -> Unit): Modifier 
             }
         }
     }
+
+@Composable
+fun Modifier.selectableItem(selected: Boolean, onClick: () -> Unit) =
+    this
+        .border(
+            width = 1.dp,
+            color = if (selected) AppTheme.colorScheme.primary else Color.Transparent,
+            shape = AppTheme.shapes.medium,
+        )
+        .clip(AppTheme.shapes.medium)
+        .clickable(
+            indication = null,
+            interactionSource = remember { MutableInteractionSource() },
+            onClick = onClick,
+        )

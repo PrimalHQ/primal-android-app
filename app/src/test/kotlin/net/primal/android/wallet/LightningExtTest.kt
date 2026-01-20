@@ -1,8 +1,8 @@
 package net.primal.android.wallet
 
 import io.kotest.matchers.shouldBe
-import net.primal.wallet.data.remote.decodeLNUrlOrNull
-import net.primal.wallet.data.remote.parseAsLNUrlOrNull
+import net.primal.domain.nostr.utils.decodeLNUrlOrNull
+import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 import org.junit.Test
 
 class LightningExtTest {

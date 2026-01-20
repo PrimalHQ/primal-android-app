@@ -64,6 +64,90 @@ object LnInvoiceUtils {
 
     class AddressFormatException(message: String) : Exception(message)
 
+    /** Convert from 5-bit grouped bytes to 8-bit grouped bytes. */
+    private fun convertBits(
+        data: ByteArray,
+        fromBits: Int,
+        toBits: Int,
+        pad: Boolean,
+    ): ByteArray? {
+        var acc = 0
+        var bits = 0
+        val maxv = (1 shl toBits) - 1
+        val result = mutableListOf<Byte>()
+
+        for (value in data) {
+            val b = value.toInt() and 0xff
+            if (b < 0 || (b shr fromBits) != 0) {
+                return null
+            }
+            acc = (acc shl fromBits) or b
+            bits += fromBits
+            while (bits >= toBits) {
+                bits -= toBits
+                result.add(((acc shr bits) and maxv).toByte())
+            }
+        }
+
+        if (pad) {
+            if (bits > 0) {
+                result.add(((acc shl (toBits - bits)) and maxv).toByte())
+            }
+        } else if (bits >= fromBits || ((acc shl (toBits - bits)) and maxv) != 0) {
+            return null
+        }
+
+        return result.toByteArray()
+    }
+
+    /** Decode the data part of a bech32 string and extract tagged fields. */
+    private fun decodeData(invoice: String): Map<Int, ByteArray>? {
+        val pos = invoice.lastIndexOf('1')
+        if (pos < 1) return null
+
+        val dataPartLength = invoice.length - 1 - pos
+        if (dataPartLength < 6) return null
+
+        val values = ByteArray(dataPartLength)
+        for (i in 0 until dataPartLength) {
+            val c = invoice[i + pos + 1]
+            if (c.code >= CHARSET_REV.size || CHARSET_REV[c.code].toInt() == -1) {
+                return null
+            }
+            values[i] = CHARSET_REV[c.code]
+        }
+
+        // Remove checksum (last 6 characters)
+        val dataWithoutChecksum = values.copyOfRange(0, values.size - 6)
+
+        // Parse tagged fields
+        val tags = mutableMapOf<Int, ByteArray>()
+        var i = 0
+
+        // Skip timestamp (7 characters = 35 bits)
+        i += 7
+
+        while (i < dataWithoutChecksum.size) {
+            if (i + 1 >= dataWithoutChecksum.size) break
+
+            val type = dataWithoutChecksum[i].toInt()
+            i++
+
+            // Read data length (2 characters = 10 bits)
+            if (i + 1 >= dataWithoutChecksum.size) break
+            val dataLength = (dataWithoutChecksum[i].toInt() shl 5) or dataWithoutChecksum[i + 1].toInt()
+            i += 2
+
+            // Read data
+            if (i + dataLength > dataWithoutChecksum.size) break
+            val tagData = dataWithoutChecksum.copyOfRange(i, i + dataLength)
+            tags[type] = tagData
+            i += dataLength
+        }
+
+        return tags
+    }
+
     private fun decodeUnlimitedLength(invoice: String): Boolean {
         var lower = false
         var upper = false
@@ -100,6 +184,35 @@ object LnInvoiceUtils {
         val hrp = invoice.substring(0, pos).lowercase()
         if (!verifyChecksum(hrp, values)) throw AddressFormatException("Invalid Checksum")
         return true
+    }
+
+    /**
+     * Extracts the description from a Lightning invoice.
+     * @param invoice the Lightning invoice string (lnbc...)
+     * @return the description text, or null if no description is present or the invoice is invalid
+     */
+    fun getDescription(invoice: String): String? {
+        try {
+            decodeUnlimitedLength(invoice) // validate checksum
+        } catch (error: AddressFormatException) {
+            Napier.w(error) { "Cannot decode invoice for description extraction." }
+            return null
+        }
+
+        val tags = decodeData(invoice) ?: return null
+
+        // Tag type 'd' (13) is the description
+        val descriptionData = tags[13] ?: return null
+
+        // Convert from 5-bit to 8-bit encoding
+        val bytes = convertBits(descriptionData, 5, 8, false) ?: return null
+
+        return try {
+            bytes.decodeToString()
+        } catch (e: Exception) {
+            Napier.w(e) { "Failed to decode description bytes to string." }
+            null
+        }
     }
 
     /**
@@ -140,8 +253,8 @@ object LnInvoiceUtils {
         return amount.multiply(multiplier(multiplierGroup))
     }
 
-    fun getAmountInSats(invoice: String): BigDecimal {
-        return getAmount(invoice).multiply(BigDecimal.fromInt(100_000_000))
+    fun getAmountInSatsOrNull(invoice: String): BigDecimal? {
+        return runCatching { getAmount(invoice).multiply(BigDecimal.fromInt(100_000_000)) }.getOrNull()
     }
 
     private fun multiplier(multiplier: String): BigDecimal {

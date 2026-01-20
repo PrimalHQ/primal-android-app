@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notifications.Notification as NotificationPO
 import net.primal.data.local.db.PrimalDatabase
@@ -26,6 +27,7 @@ class NotificationRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val database: PrimalDatabase,
     private val notificationsApi: NotificationsApi,
+    private val mediaCacher: MediaCacher? = null,
 ) : NotificationRepository {
 
     override fun observeUnseenNotifications(ownerId: String) =
@@ -58,6 +60,7 @@ class NotificationRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             notificationsApi = notificationsApi,
             database = database,
+            mediaCacher = mediaCacher,
         )
 
     private fun createPager(userId: String, pagingSourceFactory: () -> PagingSource<Int, NotificationPO>) =

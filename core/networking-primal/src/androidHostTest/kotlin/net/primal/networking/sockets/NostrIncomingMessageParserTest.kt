@@ -2,8 +2,8 @@ package net.primal.networking.sockets
 
 import io.kotest.matchers.should
 import io.kotest.matchers.types.beInstanceOf
+import kotlin.time.Clock
 import kotlin.uuid.Uuid
-import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray

@@ -44,6 +44,13 @@ val NacelleFontFamily = FontFamily(
     Font(resId = R.font.nacelle_black_italic, weight = FontWeight.Black, style = FontStyle.Italic),
 )
 
+val CourierPrimeFontFamily = FontFamily(
+    Font(resId = R.font.courier_prime_regular, weight = FontWeight.Normal, style = FontStyle.Normal),
+    Font(resId = R.font.courier_prime_italic, weight = FontWeight.Normal, style = FontStyle.Italic),
+    Font(resId = R.font.courier_prime_bold, weight = FontWeight.Bold, style = FontStyle.Normal),
+    Font(resId = R.font.courier_prime_bold_italic, weight = FontWeight.Bold, style = FontStyle.Italic),
+)
+
 val PrimalTypography = Typography(
     bodyLarge = TextStyle(
         fontFamily = NacelleFontFamily,

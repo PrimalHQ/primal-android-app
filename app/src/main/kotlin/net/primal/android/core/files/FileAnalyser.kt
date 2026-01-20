@@ -2,22 +2,85 @@ package net.primal.android.core.files
 
 import android.content.ContentResolver
 import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
+import android.media.MediaMetadataRetriever.METADATA_KEY_BITRATE
+import android.media.MediaMetadataRetriever.METADATA_KEY_DURATION
+import android.media.MediaMetadataRetriever.METADATA_KEY_MIMETYPE
+import android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT
+import android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH
 import android.net.Uri
 import javax.inject.Inject
+import timber.log.Timber
 
 class FileAnalyser @Inject constructor(
     private val contentResolver: ContentResolver,
 ) {
-    fun extractImageTypeAndDimensions(uri: Uri): Pair<String?, String?> {
-        val options = BitmapFactory.Options()
-        options.inJustDecodeBounds = true
-        BitmapFactory.decodeStream(contentResolver.openInputStream(uri), null, options)
-        val width = options.outWidth
-        val height = options.outHeight
-        val type = options.outMimeType
-        return Pair(
-            first = type,
-            second = if (width != -1 && height != -1) "${width}x$height" else null,
-        )
+    fun extractMediaInfo(uri: Uri): MediaInfo {
+        val imageInfo = tryExtractImageInfo(uri)
+        if (imageInfo.mimeType?.startsWith("image") == true) {
+            return imageInfo
+        }
+
+        return tryExtractVideoAudioInfo(uri)
     }
+
+    private fun tryExtractImageInfo(uri: Uri): MediaInfo {
+        return runCatching {
+            val options = BitmapFactory.Options()
+            options.inJustDecodeBounds = true
+            contentResolver.openInputStream(uri)?.use { inputStream ->
+                BitmapFactory.decodeStream(inputStream, null, options)
+            }
+
+            val width = options.outWidth
+            val height = options.outHeight
+            val type = options.outMimeType
+
+            MediaInfo(
+                mimeType = type,
+                dimensionInPixels = if (width != -1 && height != -1) "${width}x$height" else null,
+            )
+        }.getOrElse {
+            Timber.w(it, "Failed to extract image metadata from $uri")
+            MediaInfo()
+        }
+    }
+
+    @Suppress("MagicNumber")
+    private fun tryExtractVideoAudioInfo(uri: Uri): MediaInfo {
+        return runCatching {
+            MediaMetadataRetriever().useCompat { retriever ->
+                contentResolver.openFileDescriptor(uri, "r")?.use { pfd ->
+                    retriever.setDataSource(pfd.fileDescriptor)
+
+                    val mimeType = retriever.extractMetadata(METADATA_KEY_MIMETYPE)
+                    val width = retriever.extractMetadata(METADATA_KEY_VIDEO_WIDTH)?.toIntOrNull()
+                    val height = retriever.extractMetadata(METADATA_KEY_VIDEO_HEIGHT)?.toIntOrNull()
+                    val durationMs = retriever.extractMetadata(METADATA_KEY_DURATION)?.toLongOrNull()
+                    val bitrate = retriever.extractMetadata(METADATA_KEY_BITRATE)?.toLongOrNull()
+
+                    MediaInfo(
+                        mimeType = mimeType,
+                        dimensionInPixels = if (width != null && height != null) "${width}x$height" else null,
+                        durationInSeconds = durationMs?.let { (it / 1000.0).roundToTwoDecimals() },
+                        bitrateInBitsPerSec = bitrate,
+                    )
+                } ?: MediaInfo()
+            }
+        }.getOrElse {
+            Timber.w(it, "Failed to extract video/audio metadata from $uri")
+            MediaInfo()
+        }
+    }
+
+    private inline fun <R> MediaMetadataRetriever.useCompat(block: (MediaMetadataRetriever) -> R): R {
+        return try {
+            block(this)
+        } finally {
+            runCatching { release() }
+        }
+    }
+
+    @Suppress("MagicNumber")
+    private fun Double.roundToTwoDecimals(): Double = (this * 100).toLong() / 100.0
 }

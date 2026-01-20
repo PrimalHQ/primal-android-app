@@ -20,7 +20,7 @@ import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.navigation.articleId
-import net.primal.android.navigation.naddr
+import net.primal.android.navigation.articleNaddr
 import net.primal.android.navigation.primalName
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.asFeedPostUi
@@ -108,6 +108,7 @@ class ArticleDetailsViewModel @Inject constructor(
             } else {
                 setState { copy(naddr = naddr) }
 
+                fetchData(naddr)
                 observeArticle(naddr)
                 observeArticleComments(naddr = naddr)
                 observeActiveWallet()
@@ -122,7 +123,7 @@ class ArticleDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    UiEvent.UpdateContent -> fetchData()
+                    UiEvent.UpdateContent -> state.value.naddr?.let { naddr -> fetchData(naddr) }
                     UiEvent.DismissErrors -> dismissErrors()
                     is UiEvent.ZapArticle -> zapArticle(zapAction = it)
                     UiEvent.LikeArticle -> likeArticle()
@@ -150,23 +151,24 @@ class ArticleDetailsViewModel @Inject constructor(
             }
         }
 
-    private fun fetchData() =
+    private fun fetchData(naddr: Naddr) =
         viewModelScope.launch {
-            state.value.naddr?.let { naddr ->
-                try {
-                    articleRepository.fetchArticleAndComments(
-                        userId = activeAccountStore.activeUserId(),
-                        articleAuthorId = naddr.userId,
-                        articleId = naddr.identifier,
-                    )
-                    articleRepository.fetchArticleHighlights(
-                        userId = activeAccountStore.activeUserId(),
-                        articleAuthorId = naddr.userId,
-                        articleId = naddr.identifier,
-                    )
-                } catch (error: NetworkException) {
-                    Timber.w(error)
-                }
+            try {
+                setState { copy(fetching = true) }
+                articleRepository.fetchArticleAndComments(
+                    userId = activeAccountStore.activeUserId(),
+                    articleAuthorId = naddr.userId,
+                    articleId = naddr.identifier,
+                )
+                articleRepository.fetchArticleHighlights(
+                    userId = activeAccountStore.activeUserId(),
+                    articleAuthorId = naddr.userId,
+                    articleId = naddr.identifier,
+                )
+            } catch (error: NetworkException) {
+                Timber.w(error)
+            } finally {
+                setState { copy(fetching = false) }
             }
         }
 
@@ -303,7 +305,9 @@ class ArticleDetailsViewModel @Inject constructor(
                     is ZapError.FailedToFetchZapInvoice,
                     -> setState { copy(error = UiError.InvalidZapRequest()) }
 
-                    ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent -> {
+                    is ZapError.FailedToPayZap, ZapError.FailedToPublishEvent, ZapError.FailedToSignEvent,
+                    is ZapError.Timeout,
+                    -> {
                         setState { copy(error = UiError.FailedToPublishZapEvent()) }
                     }
 
@@ -527,7 +531,7 @@ class ArticleDetailsViewModel @Inject constructor(
     }
 
     private suspend fun parseAndResolveNaddr() =
-        savedStateHandle.naddr?.let { Nip19TLV.parseUriAsNaddrOrNull(it) }
+        savedStateHandle.articleNaddr?.let { Nip19TLV.parseUriAsNaddrOrNull(it) }
             ?: run {
                 val identifier = savedStateHandle.articleId
                 val userId = savedStateHandle.primalName?.let {

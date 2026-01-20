@@ -14,8 +14,8 @@ kotlin {
     // Android target
     androidLibrary {
         namespace = "net.primal"
-        compileSdk = 35
-        minSdk = 26
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
 
     // JVM Target
@@ -44,6 +44,7 @@ kotlin {
 
                 // Cryptography
                 implementation(libs.whyoleg.cryptography.core)
+                implementation(libs.whyoleg.cryptography.provider.optimal)
 
                 // Room
                 api(libs.room.runtime)

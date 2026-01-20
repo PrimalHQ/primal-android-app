@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
+import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.local.dao.notes.FeedPost as FeedPostPO
@@ -27,6 +28,7 @@ import net.primal.data.repository.feed.processors.persistNoteRepliesAndArticleCo
 import net.primal.data.repository.feed.processors.persistToDatabaseAsTransaction
 import net.primal.data.repository.mappers.local.mapAsFeedPostDO
 import net.primal.data.repository.mappers.remote.asFeedPageSnapshot
+import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.data.repository.utils.performTopologicalSortOrThis
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.supportsNoteReposts
@@ -41,6 +43,7 @@ internal class FeedRepositoryImpl(
     private val feedApi: FeedApi,
     private val database: PrimalDatabase,
     private val dispatcherProvider: DispatcherProvider,
+    private val mediaCacher: MediaCacher? = null,
 ) : FeedRepository {
 
     override fun feedBySpec(
@@ -149,6 +152,9 @@ internal class FeedRepositoryImpl(
             } catch (error: NetworkException) {
                 throw NetworkException(message = error.message, cause = error)
             }
+
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+
             response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
         }
@@ -157,6 +163,9 @@ internal class FeedRepositoryImpl(
     override suspend fun fetchReplies(userId: String, noteId: String) =
         withContext(dispatcherProvider.io()) {
             val response = feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
+
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+
             response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
         }
@@ -193,7 +202,7 @@ internal class FeedRepositoryImpl(
         limit: Int,
     ): FeedPageSnapshot =
         withContext(dispatcherProvider.io()) {
-            feedApi.getFeedBySpec(
+            val response = feedApi.getFeedBySpec(
                 body = FeedBySpecRequestBody(
                     spec = feedSpec,
                     userPubKey = userId,
@@ -203,7 +212,11 @@ internal class FeedRepositoryImpl(
                     order = order,
                     limit = limit,
                 ),
-            ).asFeedPageSnapshot()
+            )
+
+            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
+
+            response.asFeedPageSnapshot()
         }
 
     override suspend fun findConversation(userId: String, noteId: String): List<FeedPostDO> {
@@ -237,6 +250,7 @@ internal class FeedRepositoryImpl(
             userId = userId,
             feedApi = feedApi,
             database = database,
+            mediaCacher = mediaCacher,
         ),
         pagingSourceFactory = pagingSourceFactory,
     )

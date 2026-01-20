@@ -13,12 +13,9 @@ kotlin {
     // Android target
     androidLibrary {
         namespace = "net.primal"
-        compileSdk = 35
-        minSdk = 26
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
     }
-
-    // JVM Target
-    jvm("desktop")
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
@@ -39,6 +36,7 @@ kotlin {
                 implementation(project(":core:app-config"))
                 implementation(project(":core:utils"))
                 implementation(project(":core:networking-primal"))
+                implementation(project(":core:networking-lightning"))
 
                 implementation(project(":domain:nostr"))
                 implementation(project(":domain:primal"))
@@ -47,6 +45,33 @@ kotlin {
                 implementation(project(":data:wallet:local"))
                 implementation(project(":data:wallet:remote-primal"))
                 implementation(project(":data:wallet:remote-nwc"))
+
+                val tsunamiSdkDependencyProvider = libs.primal.tsunami.sdk.kmp
+                val hasTsunamiSdkCompositeBuild = gradle.includedBuilds.any { it.name.contains("tsunami") }
+
+                if (hasTsunamiSdkCompositeBuild) {
+                    implementation(tsunamiSdkDependencyProvider)
+                    println("✓️ Using composite build for tsunami sdk.")
+                } else {
+                    val isTsunamiSdkPubliclyAvailable = providers.provider {
+                        try {
+                            configurations.detachedConfiguration(
+                                dependencies.create(tsunamiSdkDependencyProvider),
+                            ).resolve()
+                            true
+                        } catch (e: Exception) {
+                            false
+                        }
+                    }.get()
+
+                    if (isTsunamiSdkPubliclyAvailable) {
+                        implementation(tsunamiSdkDependencyProvider)
+                        println("✓️ Using tsunami sdk maven artifact.")
+                    } else {
+                        implementation(project(":data:wallet:remote-tsunami"))
+                        println("⚠️ Using stub for tsunami sdk.")
+                    }
+                }
 
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
@@ -62,6 +87,12 @@ kotlin {
                 implementation(libs.napier)
 
                 implementation(libs.bignum)
+
+                // Bitcoin
+                implementation(libs.bitcoin.kmp)
+
+                // Crypto
+                implementation(libs.korlibs.crypto)
             }
         }
 
@@ -78,11 +109,6 @@ kotlin {
         iosMain {
             dependencies {
             }
-        }
-
-        val desktopMain by getting
-        desktopMain.dependencies {
-            // Add JVM-Desktop-specific dependencies here
         }
 
         commonTest {

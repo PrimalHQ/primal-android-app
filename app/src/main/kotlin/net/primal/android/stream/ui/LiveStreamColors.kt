@@ -2,7 +2,7 @@ package net.primal.android.stream.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import net.primal.android.LocalPrimalTheme
+import net.primal.android.core.activity.LocalPrimalTheme
 
 val ZapMessageBorderColor = Color(0xFFE47C00)
 

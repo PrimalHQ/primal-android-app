@@ -1,7 +1,11 @@
 package net.primal.android.wallet.zaps
 
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.UserAccountsStore
@@ -49,13 +53,28 @@ class ZapHandler @Inject constructor(
             relays = userRelays,
         ).getOrNull() ?: return@withContext ZapResult.Failure(error = ZapError.FailedToSignEvent)
 
-        eventInteractionRepository.zapEvent(
-            userId = userId,
-            walletId = walletId,
-            amountInSats = zapAmountInSats,
-            comment = zapComment,
-            target = target,
-            zapRequestEvent = userZapRequestEvent,
-        )
+        runCatching {
+            withContext(NonCancellable) {
+                withTimeout(30.seconds) {
+                    eventInteractionRepository.zapEvent(
+                        userId = userId,
+                        walletId = walletId,
+                        amountInSats = zapAmountInSats,
+                        comment = zapComment,
+                        target = target,
+                        zapRequestEvent = userZapRequestEvent,
+                    )
+                }
+            }
+        }.getOrElse { error ->
+            when (error) {
+                is TimeoutCancellationException -> {
+                    ZapResult.Failure(error = ZapError.Timeout(error))
+                }
+                else -> {
+                    ZapResult.Failure(error = ZapError.Unknown(error))
+                }
+            }
+        }
     }
 }

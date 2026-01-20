@@ -1,12 +1,17 @@
 package net.primal.android.settings.home
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.KeyboardArrowRight
+import androidx.compose.material3.Badge
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -14,6 +19,7 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -34,6 +40,7 @@ fun SettingsHomeScreen(
     viewModel: SettingsHomeViewModel,
     onClose: () -> Unit,
     onSettingsSectionClick: (PrimalSettingsSection) -> Unit,
+    onDeveloperToolsClick: () -> Unit,
 ) {
     val uiState = viewModel.state.collectAsState()
 
@@ -41,15 +48,19 @@ fun SettingsHomeScreen(
         state = uiState.value,
         onClose = onClose,
         onSettingsSectionClick = onSettingsSectionClick,
+        onDeveloperToolsClick = onDeveloperToolsClick,
+        eventPublisher = { viewModel.setEvent(it) },
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsHomeScreen(
+private fun SettingsHomeScreen(
     state: SettingsHomeContract.UiState,
     onClose: () -> Unit,
     onSettingsSectionClick: (PrimalSettingsSection) -> Unit,
+    onDeveloperToolsClick: () -> Unit,
+    eventPublisher: (SettingsHomeContract.UiEvent) -> Unit,
 ) {
     PrimalScaffold(
         modifier = Modifier,
@@ -73,13 +84,26 @@ fun SettingsHomeScreen(
                         title = it.title(),
                         onClick = { onSettingsSectionClick(it) },
                         trailingIcon = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                        walletNeedsBackup = it == PrimalSettingsSection.Wallet && state.walletNeedsBackup,
                     )
                     PrimalDivider()
+                }
+
+                if (state.developerToolsEnabled) {
+                    item(key = "developer_tools") {
+                        SettingsListItem(
+                            title = stringResource(id = R.string.settings_developer_tools_title),
+                            onClick = onDeveloperToolsClick,
+                            trailingIcon = Icons.AutoMirrored.Outlined.KeyboardArrowRight,
+                        )
+                        PrimalDivider()
+                    }
                 }
 
                 item {
                     VersionListItem(
                         versionName = state.version,
+                        onClick = { eventPublisher(SettingsHomeContract.UiEvent.VersionTapped) },
                     )
                 }
             }
@@ -94,6 +118,7 @@ private fun SettingsListItem(
     description: String? = null,
     leadingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
+    walletNeedsBackup: Boolean = false,
 ) {
     ListItem(
         modifier = Modifier
@@ -110,10 +135,20 @@ private fun SettingsListItem(
             null
         },
         headlineContent = {
-            Text(
-                text = title,
-                style = AppTheme.typography.titleLarge,
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = title,
+                    style = AppTheme.typography.titleLarge,
+                )
+                if (walletNeedsBackup) {
+                    Badge(
+                        modifier = Modifier
+                            .size(size = 8.dp)
+                            .offset(x = 8.dp, y = (-8).dp),
+                        containerColor = AppTheme.colorScheme.primary,
+                    )
+                }
+            }
         },
         supportingContent = {
             if (description != null) {
@@ -123,16 +158,29 @@ private fun SettingsListItem(
             }
         },
         trailingContent = {
-            if (trailingIcon != null) {
-                Icon(imageVector = trailingIcon, contentDescription = null)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                if (walletNeedsBackup) {
+                    Text(
+                        text = stringResource(id = R.string.settings_wallet_needs_backup),
+                        style = AppTheme.typography.bodyMedium,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    )
+                }
+                if (trailingIcon != null) {
+                    Icon(imageVector = trailingIcon, contentDescription = null)
+                }
             }
         },
     )
 }
 
 @Composable
-private fun VersionListItem(versionName: String) {
+private fun VersionListItem(versionName: String, onClick: () -> Unit) {
     ListItem(
+        modifier = Modifier.clickable { onClick() },
         headlineContent = {
             Text(
                 text = stringResource(id = R.string.settings_version_title).uppercase(),
@@ -152,7 +200,7 @@ private fun VersionListItem(versionName: String) {
 @Composable
 private fun PrimalSettingsSection.title(): String {
     return when (this) {
-        PrimalSettingsSection.Keys -> stringResource(id = R.string.settings_keys_title)
+        PrimalSettingsSection.Account -> stringResource(id = R.string.settings_account_title)
         PrimalSettingsSection.Network -> stringResource(id = R.string.settings_network_title)
         PrimalSettingsSection.Wallet -> stringResource(id = R.string.settings_wallet_title)
         PrimalSettingsSection.Appearance -> stringResource(id = R.string.settings_appearance_title)
@@ -161,17 +209,20 @@ private fun PrimalSettingsSection.title(): String {
         PrimalSettingsSection.Zaps -> stringResource(id = R.string.settings_zaps_title)
         PrimalSettingsSection.MutedAccounts -> stringResource(id = R.string.settings_muted_content_title)
         PrimalSettingsSection.MediaUploads -> stringResource(id = R.string.settings_media_uploads_title)
+        PrimalSettingsSection.ConnectedApps -> stringResource(id = R.string.settings_connected_apps_title)
     }
 }
 
 @Preview
 @Composable
-fun PreviewSettingsHomeScreen() {
+private fun PreviewSettingsHomeScreen() {
     PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
         SettingsHomeScreen(
             state = SettingsHomeContract.UiState(version = "1.1"),
             onClose = { },
             onSettingsSectionClick = {},
+            onDeveloperToolsClick = {},
+            eventPublisher = {},
         )
     }
 }

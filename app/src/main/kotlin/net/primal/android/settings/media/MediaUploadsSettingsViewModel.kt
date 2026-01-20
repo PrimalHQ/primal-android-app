@@ -15,6 +15,8 @@ import net.primal.android.settings.media.MediaUploadsSettingsContract.UiEvent
 import net.primal.android.settings.media.MediaUploadsSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.BlossomRepository
+import net.primal.core.utils.onSuccess
+import net.primal.domain.account.blossom.BlossomRepository as AccountBlossomRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import timber.log.Timber
@@ -23,6 +25,7 @@ import timber.log.Timber
 class MediaUploadsSettingsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val blossomRepository: BlossomRepository,
+    private val accountBlossomRepository: AccountBlossomRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -190,12 +193,10 @@ class MediaUploadsSettingsViewModel @Inject constructor(
 
     private fun fetchSuggestedBlossomServers() =
         viewModelScope.launch {
-            try {
-                val suggestedBlossoms = blossomRepository.fetchSuggestedBlossomList()
-                setState { copy(suggestedBlossomServers = suggestedBlossoms) }
-            } catch (error: NetworkException) {
-                Timber.w(error)
-            }
+            accountBlossomRepository.fetchRecommendedBlossomServers()
+                .onSuccess { suggestedBlossoms ->
+                    setState { copy(suggestedBlossomServers = suggestedBlossoms) }
+                }
         }
 
     companion object {

@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.compose.button.PrimalLoadingButton
+import net.primal.android.wallet.ui.FlowStatusColumn
 
 @Composable
 fun TransactionSending(
@@ -28,7 +29,7 @@ fun TransactionSending(
         verticalArrangement = Arrangement.SpaceAround,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        TransactionStatusColumn(
+        FlowStatusColumn(
             icon = null,
             headlineText = stringResource(id = R.string.wallet_create_transaction_sending_headline),
             supportText = if (receiver != null) {

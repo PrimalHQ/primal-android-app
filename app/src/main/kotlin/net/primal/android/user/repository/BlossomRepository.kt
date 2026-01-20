@@ -5,7 +5,6 @@ import kotlinx.coroutines.withContext
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.ensureHttpOrHttps
-import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asServerTag
@@ -15,7 +14,6 @@ class BlossomRepository @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val userAccountsStore: UserAccountsStore,
     private val primalPublisher: PrimalPublisher,
-    private val usersApi: UsersApi,
 ) {
 
     private companion object {
@@ -58,9 +56,4 @@ class BlossomRepository @Inject constructor(
             copy(blossomServers = blossomServers)
         }
     }
-
-    suspend fun fetchSuggestedBlossomList(): List<String> =
-        withContext(dispatcherProvider.io()) {
-            usersApi.getRecommendedBlossomServers()
-        }
 }

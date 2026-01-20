@@ -1,1 +1,2 @@
-Live Streaming improvements and stability fixes.
+Remote Signing.
+Improvements and stability fixes.

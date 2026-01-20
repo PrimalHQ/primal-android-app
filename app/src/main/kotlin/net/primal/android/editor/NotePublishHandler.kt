@@ -77,7 +77,7 @@ class NotePublishHandler @Inject constructor(
         val hashtagTags = noteContent.parseHashtagTags().toSet()
 
         /* iMeta tags */
-        val iMetaTags = attachments.filter { it.isImageAttachment }.map { it.asIMetaTag() }
+        val iMetaTags = attachments.filter { it.isMediaAttachment }.map { it.asIMetaTag() }
 
         /* Relay Hints */
         val allReferenceTags = (allMentionedEventTags + allPubkeyTags + replyEventTag + rootTag).filterNotNull().toSet()

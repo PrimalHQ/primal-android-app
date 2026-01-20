@@ -16,12 +16,13 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.networking.relays.errors.NostrPublishException
-import net.primal.core.networking.primal.PrimalQueryResult
 import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.NostrSocketClient
-import net.primal.domain.common.PrimalEvent
+import net.primal.core.networking.sockets.NostrSocketClientFactory
+import net.primal.core.utils.Result
+import net.primal.domain.global.BroadcastEventResponse
+import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.nostr.NostrEventKind
 import org.junit.Rule
 import org.junit.Test
 
@@ -41,6 +42,15 @@ class RelayPoolTest {
             sig = "sig",
         )
     }
+
+    private fun buildRelayPool(
+        nostrSocketClientFactory: NostrSocketClientFactory = mockk(relaxed = true),
+        cachingImportRepository: CachingImportRepository = mockk(relaxed = true),
+    ) = RelayPool(
+        dispatchers = coroutinesTestRule.dispatcherProvider,
+        nostrSocketClientFactory = nostrSocketClientFactory,
+        cachingImportRepository = cachingImportRepository,
+    )
 
     private fun buildSocketClientReturningOkMessageSuccessFalse(
         scope: CoroutineScope,
@@ -93,11 +103,7 @@ class RelayPoolTest {
     @Test(expected = NostrPublishException::class)
     fun publishEvent_throwsIfAllPublishesFail() =
         runTest {
-            val relayPool = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                nostrSocketClientFactory = mockk(relaxed = true),
-                primalApiClient = mockk(relaxed = true),
-            )
+            val relayPool = buildRelayPool()
             val eventId = "randomThrowId"
             val nostrEvent = buildNostrEvent(eventId = eventId)
 
@@ -113,11 +119,7 @@ class RelayPoolTest {
     @Test
     fun publishEvent_doesNotThrowIfAtLeastOnePublishIsSuccessful() =
         runTest {
-            val relayPool = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                nostrSocketClientFactory = mockk(relaxed = true),
-                primalApiClient = mockk(relaxed = true),
-            )
+            val relayPool = buildRelayPool()
             val eventId = "randomSuccessId"
             val nostrEvent = buildNostrEvent(eventId = eventId)
 
@@ -133,11 +135,7 @@ class RelayPoolTest {
     @Test
     fun publishEvent_doesNotThrowIfWeHaveSuccessPublishAndSomeRelaysReturnNoticeMessage() =
         runTest {
-            val relayPool = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                nostrSocketClientFactory = mockk(relaxed = true),
-                primalApiClient = mockk(relaxed = true),
-            )
+            val relayPool = buildRelayPool()
             val eventId = "randomSuccessId2"
             val nostrEvent = buildNostrEvent(eventId = eventId)
 
@@ -155,11 +153,7 @@ class RelayPoolTest {
     @Test
     fun publishEvent_throwsImmediatelyIfAllPublishesFail() =
         runTest {
-            val relayPool = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                nostrSocketClientFactory = mockk(relaxed = true),
-                primalApiClient = mockk(relaxed = true),
-            )
+            val relayPool = buildRelayPool()
             val eventId = "randomThrowId"
             val nostrEvent = buildNostrEvent(eventId = eventId)
 
@@ -182,11 +176,7 @@ class RelayPoolTest {
     @Test
     fun publishEvent_timeoutsAfterSomeTimeIfWeAreStillWaitingAndNoSuccessfulMessages() =
         runTest {
-            val relayPool = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                nostrSocketClientFactory = mockk(relaxed = true),
-                primalApiClient = mockk(relaxed = true),
-            )
+            val relayPool = buildRelayPool()
             val eventId = "randomTimeoutId"
             val nostrEvent = buildNostrEvent(eventId = eventId)
 
@@ -212,11 +202,20 @@ class RelayPoolTest {
     @Test
     fun publishEvent_ifCachingProxyEnabled_socketClientsAreNotUsed() =
         runTest {
-            val relayPool = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                nostrSocketClientFactory = mockk(relaxed = true),
-                primalApiClient = mockk(relaxed = true),
-            ).apply {
+            val eventId = "helloProxy"
+            val cachingImportRepository = mockk<CachingImportRepository>(relaxed = true) {
+                coEvery { broadcastEvents(any(), any()) } returns Result.success(
+                    listOf(
+                        BroadcastEventResponse(
+                            eventId = eventId,
+                            responses = listOf(
+                                listOf("wss://relay.example.com", """["OK","$eventId",true,""]"""),
+                            ),
+                        ),
+                    ),
+                )
+            }
+            val relayPool = buildRelayPool(cachingImportRepository = cachingImportRepository).apply {
                 socketClients = listOf(
                     mockk(relaxed = true),
                     mockk(relaxed = true),
@@ -226,13 +225,10 @@ class RelayPoolTest {
                 )
             }
 
-            try {
-                relayPool.publishEvent(
-                    nostrEvent = buildNostrEvent(eventId = "helloProxy"),
-                    cachingProxyEnabled = true,
-                )
-            } catch (_: NostrPublishException) {
-            }
+            relayPool.publishEvent(
+                nostrEvent = buildNostrEvent(eventId = eventId),
+                cachingProxyEnabled = true,
+            )
             advanceUntilIdle()
 
             coVerify {
@@ -245,17 +241,10 @@ class RelayPoolTest {
     @Test(expected = NostrPublishException::class)
     fun publishEvent_ifCachingProxyEnabled_throwsExceptionIfBroadcastResultIsNotFound() =
         runTest {
-            val relayPool = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                nostrSocketClientFactory = mockk(relaxed = true),
-                primalApiClient = mockk(relaxed = true) {
-                    coEvery { query(any()) } returns PrimalQueryResult(
-                        terminationMessage = NostrIncomingMessage.EoseMessage(
-                            subscriptionId = "subid",
-                        ),
-                    )
-                },
-            ).apply {
+            val cachingImportRepository = mockk<CachingImportRepository>(relaxed = true) {
+                coEvery { broadcastEvents(any(), any()) } returns Result.failure(Exception("Not found"))
+            }
+            val relayPool = buildRelayPool(cachingImportRepository = cachingImportRepository).apply {
                 socketClients = listOf(
                     mockk(relaxed = true),
                     mockk(relaxed = true),
@@ -275,23 +264,19 @@ class RelayPoolTest {
     fun publishEvent_ifCachingProxyEnabled_throwsExceptionIfBroadcastResultDoesNotHaveOKMessage() =
         runTest {
             val eventId = "eventId"
-            val relayPool = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                nostrSocketClientFactory = mockk(relaxed = true),
-                primalApiClient = mockk(relaxed = true) {
-                    coEvery { query(any()) } returns PrimalQueryResult(
-                        terminationMessage = NostrIncomingMessage.EoseMessage(
-                            subscriptionId = "subid",
-                        ),
-                        primalEvents = listOf(
-                            PrimalEvent(
-                                kind = NostrEventKind.PrimalBroadcastResult.value,
-                                content = "[{\"event_id\":\"$eventId\"}]",
+            val cachingImportRepository = mockk<CachingImportRepository>(relaxed = true) {
+                coEvery { broadcastEvents(any(), any()) } returns Result.success(
+                    listOf(
+                        BroadcastEventResponse(
+                            eventId = eventId,
+                            responses = listOf(
+                                listOf("wss://relay.example.com", """["NOTICE","some notice"]"""),
                             ),
                         ),
-                    )
-                },
-            ).apply {
+                    ),
+                )
+            }
+            val relayPool = buildRelayPool(cachingImportRepository = cachingImportRepository).apply {
                 socketClients = listOf(
                     mockk(relaxed = true),
                     mockk(relaxed = true),
@@ -311,33 +296,19 @@ class RelayPoolTest {
     fun publishEvent_ifCachingProxyEnabled_throwsExceptionIfBroadcastResultHasOKMessageButSuccessIsFalse() =
         runTest {
             val eventId = "eventId"
-            val relayPool = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                nostrSocketClientFactory = mockk(relaxed = true),
-                primalApiClient = mockk(relaxed = true) {
-                    coEvery { query(any()) } returns PrimalQueryResult(
-                        terminationMessage = NostrIncomingMessage.EoseMessage(
-                            subscriptionId = "subid",
-                        ),
-                        primalEvents = listOf(
-                            PrimalEvent(
-                                kind = NostrEventKind.PrimalBroadcastResult.value,
-                                content = "[" +
-                                    "{" +
-                                    "   \"event_id\":\"$eventId\"," +
-                                    "   \"responses\":[" +
-                                    "       [" +
-                                    "           \"wss://relay.primal.net\"," +
-                                    "           \"[\\\"OK\\\",\\\"$eventId\\\",false,\\\"\\\"]\"" +
-                                    "       ]" +
-                                    "   ]" +
-                                    "}" +
-                                    "]",
+            val cachingImportRepository = mockk<CachingImportRepository>(relaxed = true) {
+                coEvery { broadcastEvents(any(), any()) } returns Result.success(
+                    listOf(
+                        BroadcastEventResponse(
+                            eventId = eventId,
+                            responses = listOf(
+                                listOf("wss://relay.example.com", """["OK","$eventId",false,"error"]"""),
                             ),
                         ),
-                    )
-                },
-            ).apply {
+                    ),
+                )
+            }
+            val relayPool = buildRelayPool(cachingImportRepository = cachingImportRepository).apply {
                 socketClients = listOf(
                     mockk(relaxed = true),
                     mockk(relaxed = true),
@@ -357,33 +328,19 @@ class RelayPoolTest {
     fun publishEvent_ifCachingProxyEnabled_doesNotThrowIfWeHaveSuccessInBroadcastResult() =
         runTest {
             val eventId = "eventId"
-            val relayPool = RelayPool(
-                dispatchers = coroutinesTestRule.dispatcherProvider,
-                nostrSocketClientFactory = mockk(relaxed = true),
-                primalApiClient = mockk(relaxed = true) {
-                    coEvery { query(any()) } returns PrimalQueryResult(
-                        terminationMessage = NostrIncomingMessage.EoseMessage(
-                            subscriptionId = "subid",
-                        ),
-                        primalEvents = listOf(
-                            PrimalEvent(
-                                kind = NostrEventKind.PrimalBroadcastResult.value,
-                                content = "[" +
-                                    "{" +
-                                    "   \"event_id\":\"$eventId\"," +
-                                    "   \"responses\":[" +
-                                    "       [" +
-                                    "           \"wss://relay.primal.net\"," +
-                                    "           \"[\\\"OK\\\",\\\"$eventId\\\",true,\\\"\\\"]\"" +
-                                    "       ]" +
-                                    "   ]" +
-                                    "}" +
-                                    "]",
+            val cachingImportRepository = mockk<CachingImportRepository>(relaxed = true) {
+                coEvery { broadcastEvents(any(), any()) } returns Result.success(
+                    listOf(
+                        BroadcastEventResponse(
+                            eventId = eventId,
+                            responses = listOf(
+                                listOf("wss://relay.example.com", """["OK","$eventId",true,""]"""),
                             ),
                         ),
-                    )
-                },
-            ).apply {
+                    ),
+                )
+            }
+            val relayPool = buildRelayPool(cachingImportRepository = cachingImportRepository).apply {
                 socketClients = listOf(
                     mockk(relaxed = true),
                     mockk(relaxed = true),

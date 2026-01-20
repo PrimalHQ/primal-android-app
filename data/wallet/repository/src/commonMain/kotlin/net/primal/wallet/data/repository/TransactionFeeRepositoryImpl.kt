@@ -4,38 +4,44 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.rates.fees.OnChainTransactionFeeTier
 import net.primal.domain.rates.fees.TransactionFeeRepository
-import net.primal.wallet.data.remote.api.PrimalWalletApi
-import net.primal.wallet.data.repository.mappers.remote.asOnChainTxFeeTierDO
+import net.primal.wallet.data.local.db.WalletDatabase
+import net.primal.wallet.data.repository.mappers.local.toDomain
+import net.primal.wallet.data.service.factory.WalletServiceFactory
 
-class TransactionFeeRepositoryImpl(
+internal class TransactionFeeRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
-    private val primalWalletApi: PrimalWalletApi,
+    private val walletServiceFactory: WalletServiceFactory,
+    private val walletDatabase: WalletDatabase,
 ) : TransactionFeeRepository {
 
     override suspend fun fetchMiningFees(
         userId: String,
+        walletId: String,
         onChainAddress: String,
         amountInBtc: String,
-    ): List<OnChainTransactionFeeTier> {
-        return withContext(dispatcherProvider.io()) {
-            primalWalletApi.getMiningFees(
-                userId = userId,
-                onChainAddress = onChainAddress,
-                amountInBtc = amountInBtc,
-            ).map {
-                it.asOnChainTxFeeTierDO()
-            }
+    ): List<OnChainTransactionFeeTier> =
+        withContext(dispatcherProvider.io()) {
+            val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
+                ?: throw IllegalArgumentException("Wallet not found.")
+
+            walletServiceFactory.getServiceForWallet(wallet.toDomain())
+                .fetchMiningFees(
+                    wallet = wallet.toDomain(),
+                    onChainAddress = onChainAddress,
+                    amountInBtc = amountInBtc,
+                ).getOrThrow()
         }
-    }
 
     override suspend fun fetchDefaultMiningFee(
         userId: String,
+        walletId: String,
         onChainAddress: String,
         amountInBtc: String,
     ): OnChainTransactionFeeTier? =
         withContext(dispatcherProvider.io()) {
             val tiers = fetchMiningFees(
                 userId = userId,
+                walletId = walletId,
                 onChainAddress = onChainAddress,
                 amountInBtc = amountInBtc,
             )

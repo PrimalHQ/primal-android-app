@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.pulltorefresh.PullToRefreshState
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -14,7 +13,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-@ExperimentalMaterial3Api
 fun PrimalPullToRefreshBox(
     isRefreshing: Boolean,
     onRefresh: () -> Unit,

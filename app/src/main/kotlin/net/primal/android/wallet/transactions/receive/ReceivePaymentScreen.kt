@@ -185,7 +185,7 @@ fun ReceivePaymentScreen(
             )
         },
         bottomBar = {
-            if (state.activeWallet is Wallet.Primal) {
+            if (state.activeWallet is Wallet.Primal || state.activeWallet is Wallet.Tsunami) {
                 Column {
                     PrimalDivider()
                     WalletTabsBar(

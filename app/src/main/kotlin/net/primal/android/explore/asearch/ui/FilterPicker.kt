@@ -336,7 +336,6 @@ private fun SliderColumn(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun SliderIndicatorField(
     interactionSource: MutableInteractionSource,
     value: Int,

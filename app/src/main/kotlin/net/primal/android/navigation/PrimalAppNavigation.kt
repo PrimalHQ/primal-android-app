@@ -12,6 +12,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
@@ -26,7 +27,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
@@ -52,7 +52,6 @@ import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.UnlockScreenOrientation
-import net.primal.android.core.compose.connectionindicator.ConnectionIndicatorOverlay
 import net.primal.android.core.pip.PiPManagerProvider
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
@@ -91,6 +90,11 @@ import net.primal.android.messages.conversation.MessageConversationListViewModel
 import net.primal.android.messages.conversation.MessageListScreen
 import net.primal.android.messages.conversation.create.NewConversationContract
 import net.primal.android.messages.conversation.create.NewConversationScreen
+import net.primal.android.nostrconnect.active.ActiveSessionsBottomSheet
+import net.primal.android.nostrconnect.active.ActiveSessionsViewModel
+import net.primal.android.nostrconnect.connect.NostrConnectBottomSheet
+import net.primal.android.nostrconnect.connect.NostrConnectViewModel
+import net.primal.android.nostrconnect.utils.NOSTR_CONNECT_SCHEME
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract
 import net.primal.android.notes.home.HomeFeedScreen
@@ -159,9 +163,10 @@ import net.primal.android.profile.follows.ProfileFollowsViewModel
 import net.primal.android.profile.qr.ProfileQrCodeContract
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
 import net.primal.android.profile.qr.ui.ProfileQrCodeViewerScreen
-import net.primal.android.redeem.RedeemCodeContract
-import net.primal.android.redeem.RedeemCodeScreen
-import net.primal.android.redeem.RedeemCodeViewModel
+import net.primal.android.scan.ScanCodeContract
+import net.primal.android.scan.ScanCodeContract.ScanMode
+import net.primal.android.scan.ScanCodeScreen
+import net.primal.android.scan.ScanCodeViewModel
 import net.primal.android.stream.LiveStreamOverlay
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
@@ -175,6 +180,7 @@ import net.primal.android.thread.notes.ThreadScreen
 import net.primal.android.thread.notes.ThreadViewModel
 import net.primal.android.wallet.activation.WalletActivationContract
 import net.primal.android.wallet.activation.WalletActivationViewModel
+import net.primal.core.utils.asUrlDecoded
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.feeds.buildAdvancedSearchNotesFeedSpec
 import net.primal.domain.feeds.buildAdvancedSearchNotificationsFeedSpec
@@ -262,8 +268,8 @@ fun NavController.navigateToExplore() =
 fun NavController.navigateToFollowPack(profileId: String, followPackId: String) =
     navigate(route = "explore/followPack/$profileId/$followPackId")
 
-fun NavController.navigateToRedeemCode(promoCode: String? = null) =
-    navigate(route = "redeemCode?$PROMO_CODE=$promoCode")
+fun NavController.navigateToScanCode(scanMode: ScanMode, promoCode: String? = null) =
+    navigate(route = "scanCode?$SCAN_MODE=$scanMode&$PROMO_CODE=$promoCode")
 
 private fun NavController.navigateToMessages() = navigate(route = "messages")
 
@@ -288,7 +294,7 @@ private fun NavController.navigateToSettings() = navigate(route = "settings")
 
 fun NavController.navigateToThread(noteId: String) = navigate(route = "thread/$noteId")
 
-fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$NADDR=$naddr")
+fun NavController.navigateToArticleDetails(naddr: String) = navigate(route = "article?$ARTICLE_NADDR=$naddr")
 
 fun NavController.navigateToReactions(
     eventId: String,
@@ -365,6 +371,13 @@ private fun NavController.navigateToPremiumContentBackup() = navigate(route = "p
 private fun NavController.navigateToPremiumChangePrimalName() = navigate(route = "premium/manage/changePrimalName")
 private fun NavController.navigateToPremiumOrderHistory() = navigate(route = "premium/manage/order")
 private fun NavController.navigateToPremiumRelay() = navigate(route = "premium/manage/relay")
+
+private fun NavController.navigateToNostrConnectBottomSheet(url: String) {
+    val safeUrl = url.asUrlEncoded()
+    navigate(route = "nostrConnectBottomSheet?$NOSTR_CONNECT_URI=$safeUrl")
+}
+
+private fun NavController.navigateToActiveSessions() = navigate(route = "activeSessions")
 
 fun accountSwitcherCallbacksHandler(navController: NavController) =
     AccountSwitcherCallbacks(
@@ -449,9 +462,7 @@ fun noteCallbacksHandler(navController: NavController) =
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun PrimalAppNavigation(startDestination: String) {
-    val navController = rememberNavController()
-
+fun PrimalAppNavigation(navController: NavHostController, startDestination: String) {
     val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
         when (it) {
             PrimalTopLevelDestination.Home -> navController.popBackStack()
@@ -473,14 +484,18 @@ fun PrimalAppNavigation(startDestination: String) {
 
             DrawerScreenDestination.Messages -> navController.navigateToMessages()
             is DrawerScreenDestination.Bookmarks -> navController.navigateToBookmarks()
-            DrawerScreenDestination.RedeemCode -> navController.navigateToRedeemCode()
+            DrawerScreenDestination.ScanCode -> navController.navigateToScanCode(scanMode = ScanMode.Anything)
+            DrawerScreenDestination.RemoteLogin -> navController.navigateToScanCode(scanMode = ScanMode.RemoteLogin)
             DrawerScreenDestination.Settings -> navController.navigateToSettings()
             is DrawerScreenDestination.SignOut -> navController.navigateToLogout(profileId = it.userId)
         }
     }
 
     SharedTransitionLayout {
-        ConnectionIndicatorOverlay {
+        AppOverlays(
+            onRemoteSessionClick = { navController.navigateToActiveSessions() },
+            onUpgradeWalletClick = { navController.navigateToWalletUpgrade() },
+        ) {
             PiPManagerProvider {
                 LiveStreamOverlay(
                     navController = navController,
@@ -537,9 +552,13 @@ private fun PrimalAppNavigation(
             navController = navController,
         )
 
-        redeemCode(
-            route = "redeemCode?$PROMO_CODE={$PROMO_CODE}",
+        scanCode(
+            route = "scanCode?$SCAN_MODE={$SCAN_MODE}&$PROMO_CODE={$PROMO_CODE}",
             arguments = listOf(
+                navArgument(SCAN_MODE) {
+                    type = NavType.StringType
+                    nullable = true
+                },
                 navArgument(PROMO_CODE) {
                     type = NavType.StringType
                     nullable = true
@@ -550,6 +569,22 @@ private fun PrimalAppNavigation(
                     uriPattern = "https://primal.net/rc/{$PROMO_CODE}"
                 },
             ),
+            navController = navController,
+        )
+
+        nostrConnectDialog(
+            route = "nostrConnectBottomSheet?$NOSTR_CONNECT_URI={$NOSTR_CONNECT_URI}",
+            arguments = listOf(
+                navArgument(NOSTR_CONNECT_URI) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+            ),
+            navController = navController,
+        )
+
+        activeSessions(
+            route = "activeSessions",
             navController = navController,
         )
 
@@ -585,7 +620,7 @@ private fun PrimalAppNavigation(
                     nullable = true
                     defaultValue = null
                 },
-                navArgument(NADDR) {
+                navArgument(STREAM_NADDR) {
                     type = NavType.StringType
                     nullable = true
                     defaultValue = null
@@ -605,7 +640,10 @@ private fun PrimalAppNavigation(
                     uriPattern = "https://primal.net/{$PRIMAL_NAME}/live/{$IDENTIFIER}"
                 },
                 navDeepLink {
-                    uriPattern = "primal://live/{$NADDR}"
+                    uriPattern = "primal://live/{$STREAM_NADDR}"
+                },
+                navDeepLink {
+                    uriPattern = "$NOSTR_CONNECT_SCHEME://.*"
                 },
             ),
         )
@@ -909,9 +947,9 @@ private fun PrimalAppNavigation(
         )
 
         articleDetails(
-            route = "article?$NADDR={$NADDR}&$PRIMAL_NAME={$PRIMAL_NAME}&$ARTICLE_ID={$ARTICLE_ID}",
+            route = "article?$ARTICLE_NADDR={$ARTICLE_NADDR}&$PRIMAL_NAME={$PRIMAL_NAME}&$ARTICLE_ID={$ARTICLE_ID}",
             arguments = listOf(
-                navArgument(NADDR) {
+                navArgument(ARTICLE_NADDR) {
                     type = NavType.StringType
                     nullable = true
                 },
@@ -926,7 +964,7 @@ private fun PrimalAppNavigation(
             ),
             deepLinks = listOf(
                 navDeepLink {
-                    uriPattern = "https://primal.net/a/{$NADDR}"
+                    uriPattern = "https://primal.net/a/{$ARTICLE_NADDR}"
                 },
                 navDeepLink {
                     uriPattern = "https://primal.net/{$PRIMAL_NAME}/{$ARTICLE_ID}"
@@ -1000,6 +1038,9 @@ private fun PrimalAppNavigation(
             deepLinks = listOf(
                 navDeepLink {
                     uriPattern = "https://primal.net/p/{$PROFILE_ID}"
+                },
+                navDeepLink {
+                    uriPattern = "https://primal.net/profile/{$PROFILE_ID}"
                 },
                 navDeepLink {
                     uriPattern = "https://primal.net/{$PRIMAL_NAME}"
@@ -1104,7 +1145,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
                 callbacks = WelcomeContract.ScreenCallbacks(
                     onSignInClick = { navController.navigateToLogin() },
                     onCreateAccountClick = { navController.navigateToOnboarding() },
-                    onRedeemCodeClick = { navController.navigateToRedeemCode() },
+                    onRedeemCodeClick = { navController.navigateToScanCode(scanMode = ScanMode.Anything) },
                 ),
             )
         }
@@ -1205,7 +1246,7 @@ private fun NavGraphBuilder.onboardingWalletActivation(
     }
 }
 
-private fun NavGraphBuilder.redeemCode(
+private fun NavGraphBuilder.scanCode(
     route: String,
     arguments: List<NamedNavArgument>,
     deepLinks: List<NavDeepLink>,
@@ -1239,19 +1280,42 @@ private fun NavGraphBuilder.redeemCode(
         }
     },
 ) {
-    val viewModel = hiltViewModel<RedeemCodeViewModel>()
-    PrimalTheme(PrimalTheme.Sunset) {
-        ApplyEdgeToEdge(isDarkTheme = true)
-        LockToOrientationPortrait()
-        RedeemCodeScreen(
-            viewModel = viewModel,
-            callbacks = RedeemCodeContract.ScreenCallbacks(
-                onClose = navController::navigateUp,
-                navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
-                navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },
-            ),
-        )
-    }
+    val viewModel = hiltViewModel<ScanCodeViewModel>()
+    val streamState = LocalStreamState.current
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+    ScanCodeScreen(
+        viewModel = viewModel,
+        callbacks = ScanCodeContract.ScreenCallbacks(
+            onClose = navController::navigateUp,
+            navigateToOnboarding = { promoCode -> navController.navigateToOnboarding(promoCode) },
+            navigateToWalletOnboarding = { promoCode -> navController.navigateToWalletOnboarding(promoCode) },
+            onNostrConnectRequest = { url ->
+                navController.popBackStack()
+                navController.navigateToNostrConnectBottomSheet(url = url)
+            },
+            onDraftTransactionReady = { draft ->
+                navController.popBackStack()
+                navController.navigateToWalletCreateTransaction(draftTransaction = draft)
+            },
+            onProfileScan = { profileId ->
+                navController.popBackStack()
+                navController.navigateToProfile(profileId)
+            },
+            onNoteScan = { noteId ->
+                navController.popBackStack()
+                navController.navigateToThread(noteId)
+            },
+            onArticleScan = { naddr ->
+                navController.popBackStack()
+                navController.navigateToArticleDetails(naddr)
+            },
+            onLiveStreamScan = { naddr ->
+                navController.popBackStack()
+                streamState.start(naddr)
+            },
+        ),
+    )
 }
 
 private fun NavGraphBuilder.home(
@@ -1285,6 +1349,13 @@ private fun NavGraphBuilder.home(
         }
     },
 ) { navBackEntry ->
+    val activity = LocalActivity.current
+    val nostrConnectUri = activity?.intent?.data?.toString()
+    if (nostrConnectUri?.startsWith(NOSTR_CONNECT_SCHEME) == true) {
+        navController.navigateToNostrConnectBottomSheet(url = nostrConnectUri.asUrlDecoded())
+        activity.intent = null
+    }
+
     val viewModel = hiltViewModel<HomeFeedViewModel>(navBackEntry)
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
@@ -1301,6 +1372,52 @@ private fun NavGraphBuilder.home(
             onNewPostClick = { navController.navigateToNoteEditor(null) },
         ),
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+private fun NavGraphBuilder.nostrConnectDialog(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) {
+    dialog(
+        route = route,
+        arguments = arguments,
+        dialogProperties = DialogProperties(
+            usePlatformDefaultWidth = false,
+        ),
+    ) {
+        val viewModel = hiltViewModel<NostrConnectViewModel>()
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        NostrConnectBottomSheet(
+            viewModel = viewModel,
+            onDismissRequest = { navController.popBackStack() },
+        )
+    }
+}
+
+private fun NavGraphBuilder.activeSessions(route: String, navController: NavController) {
+    dialog(
+        route = route,
+        dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        val sessionsViewModel = hiltViewModel<ActiveSessionsViewModel>()
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        ActiveSessionsBottomSheet(
+            viewModel = sessionsViewModel,
+            onDismissRequest = { navController.popBackStack() },
+            onSettingsClick = { clientPubKey ->
+                navController.popBackStack()
+                if (clientPubKey != null) {
+                    navController.navigateToConnectedAppDetails(clientPubKey = clientPubKey)
+                } else {
+                    navController.navigateToConnectedApps()
+                }
+            },
+        )
+    }
 }
 
 private fun NavGraphBuilder.reads(
@@ -2396,7 +2513,7 @@ private fun NavGraphBuilder.profileQrCodeViewer(
                 },
                 onPromoCodeScan = {
                     navController.popBackStack()
-                    navController.navigateToRedeemCode(it)
+                    navController.navigateToScanCode(scanMode = ScanMode.Anything, promoCode = it)
                 },
             ),
         )

@@ -48,6 +48,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -80,6 +81,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.TakePhotoIconButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
+import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
@@ -106,6 +108,8 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.nostr.ReactionType
+
+private const val REPLIES_LOADING_PLACEHOLDER_DEFAULT_MAX_COUNT = 3
 
 @Composable
 fun ThreadScreen(
@@ -348,6 +352,9 @@ private fun ThreadLazyColumn(
     paddingValues: PaddingValues = PaddingValues(all = 0.dp),
     onUiError: ((UiError) -> Unit)? = null,
 ) {
+    val density = LocalDensity.current
+    val maxScreenHeight = with(density) { LocalConfiguration.current.screenHeightDp.dp.toPx() }
+
     var threadListMaxHeightPx by remember { mutableIntStateOf(0) }
     var highlightPostHeightPx by remember { mutableIntStateOf(0) }
     var repliesHeightPx by remember { mutableStateOf(mapOf<Int, Int>()) }
@@ -363,6 +370,17 @@ private fun ThreadLazyColumn(
                 500.dp
             },
         )
+    }
+
+    val repliesPlaceholderHeight = 100.dp
+    val repliesPlaceholderHeightPx = with(density) { repliesPlaceholderHeight.toPx() }
+    val maxRepliesPlaceholderItems = remember(highlightPostHeightPx) {
+        if (highlightPostHeightPx == 0) {
+            REPLIES_LOADING_PLACEHOLDER_DEFAULT_MAX_COUNT
+        } else {
+            ((maxScreenHeight - highlightPostHeightPx) / repliesPlaceholderHeightPx)
+                .toInt().coerceAtLeast(0)
+        }
     }
 
     LazyColumn(
@@ -481,6 +499,18 @@ private fun ThreadLazyColumn(
                     PrimalDivider()
                 }
             }
+        }
+
+        if (
+            state.conversation.size < 2 &&
+            (state.highlightNote?.stats?.repliesCount?.takeIf { it > 0 } != null) &&
+            state.fetching
+        ) {
+            heightAdjustableLoadingLazyListPlaceholder(
+                height = repliesPlaceholderHeight,
+                repeat = state.highlightNote.stats.repliesCount.toInt()
+                    .coerceAtMost(maxRepliesPlaceholderItems),
+            )
         }
 
         if (state.conversation.isNotEmpty()) {

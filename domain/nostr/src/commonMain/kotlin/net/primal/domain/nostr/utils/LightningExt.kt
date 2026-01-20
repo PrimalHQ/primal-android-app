@@ -15,7 +15,7 @@ fun String.parseAsLNUrlOrNull(): String? {
 
 fun String.decodeLNUrlOrNull(): String? =
     runCatching {
-        val byteArray = this.bechToBytesOrThrow(hrp = "lnurl")
+        val byteArray = this.stripLightningPrefix().bechToBytesOrThrow(hrp = "lnurl")
         byteArray.decodeToString()
     }.getOrNull()
 
