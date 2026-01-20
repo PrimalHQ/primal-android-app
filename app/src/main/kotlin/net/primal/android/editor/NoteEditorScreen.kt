@@ -522,7 +522,6 @@ private fun NoteEditor(
         awaitFrame()
         focusRequester.requestFocus()
     }
-    val clipboardManager = LocalClipboardManager.current
 
     Column {
         if (state.isReply && state.replyToNote != null && !state.isQuoting) {
@@ -535,73 +534,92 @@ private fun NoteEditor(
             )
         }
 
-        Row {
-            UniversalAvatarThumbnail(
-                modifier = Modifier
-                    .drawWithCache {
-                        onDrawBehind {
-                            if (state.isReply && !state.isQuoting) {
-                                drawLine(
-                                    color = outlineColor,
-                                    start = Offset(
-                                        x = connectionLineOffsetXDp.toPx(),
-                                        y = (-32).dp.toPx(),
-                                    ),
-                                    end = Offset(
-                                        x = connectionLineOffsetXDp.toPx(),
-                                        y = size.height / 2,
-                                    ),
-                                    strokeWidth = 2.dp.toPx(),
-                                    cap = StrokeCap.Square,
-                                )
-                            }
+        NoteEditorInputArea(
+            state = state,
+            focusRequester = focusRequester,
+            outlineColor = outlineColor,
+            onReplyNoteHeightChanged = onReplyNoteHeightChanged,
+            eventPublisher = eventPublisher,
+        )
+    }
+}
+
+@Composable
+private fun NoteEditorInputArea(
+    state: NoteEditorContract.UiState,
+    focusRequester: FocusRequester,
+    outlineColor: Color,
+    onReplyNoteHeightChanged: (Int) -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
+) {
+    val clipboardManager = LocalClipboardManager.current
+
+    Row {
+        UniversalAvatarThumbnail(
+            modifier = Modifier
+                .drawWithCache {
+                    onDrawBehind {
+                        if (state.isReply && !state.isQuoting) {
+                            drawLine(
+                                color = outlineColor,
+                                start = Offset(
+                                    x = connectionLineOffsetXDp.toPx(),
+                                    y = (-32).dp.toPx(),
+                                ),
+                                end = Offset(
+                                    x = connectionLineOffsetXDp.toPx(),
+                                    y = size.height / 2,
+                                ),
+                                strokeWidth = 2.dp.toPx(),
+                                cap = StrokeCap.Square,
+                            )
                         }
                     }
-                    .padding(start = 16.dp, top = 8.dp),
-                avatarSize = avatarSizeDp,
-                avatarCdnImage = state.selectedAccount?.avatarCdnImage,
-                avatarBlossoms = state.selectedAccount?.avatarBlossoms ?: emptyList(),
-                legendaryCustomization = state.selectedAccount?.legendaryCustomization,
-                onClick = if (state.attachments.isEmpty()) {
-                    {
-                        eventPublisher(UiEvent.ShowAccountSwitcher)
-                    }
-                } else {
-                    null
-                },
-            )
+                }
+                .padding(start = 16.dp, top = 8.dp),
+            avatarSize = avatarSizeDp,
+            avatarCdnImage = state.selectedAccount?.avatarCdnImage,
+            avatarBlossoms = state.selectedAccount?.avatarBlossoms ?: emptyList(),
+            legendaryCustomization = state.selectedAccount?.legendaryCustomization,
+            onClick = if (state.attachments.isEmpty()) {
+                {
+                    eventPublisher(UiEvent.ShowAccountSwitcher)
+                }
+            } else {
+                null
+            },
+        )
 
-            NoteOutlinedTextField(
-                modifier = Modifier
-                    .offset(x = (-8).dp)
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .focusRequester(focusRequester)
-                    .onSizeChanged { onReplyNoteHeightChanged(it.height) },
-                value = state.content,
-                onValueChange = {
-                    val clipboardText = clipboardManager.getText()
-                    if (clipboardText != null && it.text.contains(clipboardText.text)) {
-                        eventPublisher(UiEvent.PasteContent(content = it))
-                    } else {
-                        eventPublisher(UiEvent.UpdateContent(content = it))
-                    }
-                },
-                taggedUsers = state.taggedUsers,
-                enabled = !state.publishing,
-                placeholder = {
-                    Text(
-                        text = stringResource(id = R.string.note_editor_content_placeholder),
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                        style = AppTheme.typography.bodyMedium,
-                    )
-                },
-                textStyle = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
-                colors = PrimalDefaults.transparentOutlinedTextFieldColors(),
-                onUserTaggingModeChanged = { eventPublisher(UiEvent.ToggleSearchUsers(enabled = it)) },
-                onUserTagSearch = { eventPublisher(UiEvent.SearchUsers(query = it)) },
-            )
-        }
+        NoteOutlinedTextField(
+            modifier = Modifier
+                .offset(x = (-8).dp)
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .focusRequester(focusRequester)
+                .onSizeChanged { onReplyNoteHeightChanged(it.height) },
+            value = state.content,
+            onValueChange = {
+                val clipboardText = clipboardManager.getText()
+                if (clipboardText != null && it.text.contains(clipboardText.text)) {
+                    eventPublisher(UiEvent.PasteContent(content = it))
+                } else {
+                    eventPublisher(UiEvent.UpdateContent(content = it))
+                }
+            },
+            taggedUsers = state.taggedUsers,
+            enabled = !state.publishing,
+            placeholder = {
+                Text(
+                    text = stringResource(id = R.string.note_editor_content_placeholder),
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    style = AppTheme.typography.bodyMedium,
+                )
+            },
+            textStyle = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
+            colors = PrimalDefaults.transparentOutlinedTextFieldColors(),
+            onUserTaggingModeChanged = { eventPublisher(UiEvent.ToggleSearchUsers(enabled = it)) },
+            onUserTagSearch = { eventPublisher(UiEvent.SearchUsers(query = it)) },
+        )
     }
 }
 
