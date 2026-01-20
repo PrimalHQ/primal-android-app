@@ -9,6 +9,7 @@ import net.primal.domain.wallet.WalletKycLevel
 import net.primal.domain.wallet.WalletType
 import net.primal.wallet.data.local.dao.ActiveWallet
 import net.primal.wallet.data.local.dao.Wallet as WalletPO
+import net.primal.wallet.data.local.dao.WalletInfo
 
 inline fun <reified T : WalletDO> WalletPO.toDomain(): T =
     when (this.info.type) {
@@ -53,6 +54,17 @@ inline fun <reified T : WalletDO> WalletPO.toDomain(): T =
             )
         }
     } as T
+
+fun WalletInfo.toTsunamiWallet() =
+    Tsunami(
+        walletId = this.walletId,
+        userId = this.userId.decrypted,
+        lightningAddress = this.lightningAddress?.decrypted,
+        spamThresholdAmountInSats = 1L, /* TODO: is this important? */
+        balanceInBtc = this.balanceInBtc?.decrypted,
+        maxBalanceInBtc = this.maxBalanceInBtc?.decrypted,
+        lastUpdatedAt = this.lastUpdatedAt,
+    )
 
 fun ActiveWallet.toDomain(): WalletDO? {
     val info = this.info

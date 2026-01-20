@@ -12,7 +12,7 @@ import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
-import net.primal.domain.connections.PrimalWalletNwcRepository
+import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.events.EventRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.exchange.ExchangeRateRepository

@@ -15,6 +15,9 @@ kotlin {
         namespace = "net.primal"
         compileSdk = libs.versions.android.compileSdk.get().toInt()
         minSdk = libs.versions.android.minSdk.get().toInt()
+
+        withHostTestBuilder {
+        }
     }
 
     // iOS Target
@@ -93,6 +96,8 @@ kotlin {
 
                 // Crypto
                 implementation(libs.korlibs.crypto)
+
+                implementation(libs.kotlinx.datetime)
             }
         }
 
@@ -117,6 +122,17 @@ kotlin {
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.kotest.assertions.json)
                 implementation(libs.kotlinx.coroutines.test)
+            }
+        }
+
+        val androidHostTest by getting {
+            dependencies {
+                implementation(libs.junit)
+                implementation(libs.kotest.assertions.core)
+                implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.androidx.test.core)
+                implementation(libs.androidx.test.ext.junit)
+                implementation(libs.robolectric)
             }
         }
     }

@@ -7,7 +7,8 @@ import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
-import net.primal.domain.connections.PrimalWalletNwcRepository
+import net.primal.domain.connections.nostr.NwcRepository
+import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.profile.ProfileRepository
@@ -19,6 +20,7 @@ import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.repository.BillingRepositoryImpl
 import net.primal.wallet.data.repository.ExchangeRateRepositoryImpl
+import net.primal.wallet.data.repository.NwcRepositoryImpl
 import net.primal.wallet.data.repository.PrimalWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.PrimalWalletNwcRepositoryImpl
 import net.primal.wallet.data.repository.TransactionFeeRepositoryImpl
@@ -167,4 +169,10 @@ abstract class RepositoryFactory {
             ),
         )
     }
+
+    fun createNwcRepository(): NwcRepository =
+        NwcRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            database = resolveWalletDatabase(),
+        )
 }
