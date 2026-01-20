@@ -1,6 +1,7 @@
 ## Features
 - Remote Signer (NIP-46)
 - Android Signer (NIP-55)
+- Implemented reading NIP-92 dimensions (#718)
 
 ## Fixes
 - Handle local signer requests for deleted apps
