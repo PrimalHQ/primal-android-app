@@ -14,6 +14,7 @@ import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.parser.factory.ParserFactory
+import net.primal.wallet.data.validator.RecoveryPhraseValidator
 import net.primal.wallet.data.zaps.NostrZapperFactoryProvider
 
 @Module
@@ -44,4 +45,8 @@ object WalletUtilitiesModule {
             primalWalletApiClient = primalApiClient,
             nostrEventSignatureHandler = nostrNotary,
         )
+
+    @Provides
+    @Singleton
+    fun providesRecoveryPhraseValidator(): RecoveryPhraseValidator = RecoveryPhraseValidator()
 }
