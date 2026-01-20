@@ -1,7 +1,7 @@
 package net.primal.android.auth.welcome
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -42,61 +42,62 @@ fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
         backgroundPainter = painterResource(id = R.drawable.onboarding_spot1),
     ) { size ->
         val uiMode = size.height.detectUiDensityModeFromMaxHeight()
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Image(
-                modifier = Modifier
-                    .widthIn(240.dp, MAX_COMPONENT_WIDTH.dp)
-                    .heightIn(
-                        0.dp,
-                        size.height * when (uiMode) {
-                            UiDensityMode.Normal, UiDensityMode.Comfortable -> ONE_HALF
-                            else -> TWO_FIFTHS
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Image(
+                    modifier = Modifier
+                        .widthIn(240.dp, MAX_COMPONENT_WIDTH.dp)
+                        .heightIn(
+                            0.dp,
+                            size.height * when (uiMode) {
+                                UiDensityMode.Normal, UiDensityMode.Comfortable -> ONE_HALF
+                                else -> TWO_FIFTHS
+                            },
+                        )
+                        .fillMaxWidth(),
+                    painter = painterResource(id = R.drawable.welcome),
+                    contentDescription = null,
+                    alignment = Alignment.BottomCenter,
+                )
+
+                Image(
+                    modifier = Modifier.width(200.dp),
+                    painter = painterResource(id = R.drawable.primal_welcome_logo),
+                    contentDescription = null,
+                )
+
+                Spacer(
+                    modifier = Modifier.height(
+                        when (uiMode) {
+                            UiDensityMode.Normal -> 24.dp
+                            UiDensityMode.Comfortable -> 20.dp
+                            else -> 16.dp
                         },
-                    )
-                    .fillMaxWidth(),
-                painter = painterResource(id = R.drawable.welcome),
-                contentDescription = null,
-                alignment = Alignment.BottomCenter,
-            )
+                    ),
+                )
 
-            Image(
-                modifier = Modifier.width(200.dp),
-                painter = painterResource(id = R.drawable.primal_welcome_logo),
-                contentDescription = null,
-            )
+                OnboardingButton(
+                    modifier = Modifier.testTag("welcomeSignInButton"),
+                    text = stringResource(id = R.string.welcome_sign_in_button_title),
+                    onClick = callbacks.onSignInClick,
+                )
 
-            Spacer(
-                modifier = Modifier.height(
-                    when (uiMode) {
-                        UiDensityMode.Normal -> 24.dp
-                        UiDensityMode.Comfortable -> 20.dp
-                        else -> 16.dp
-                    },
-                ),
-            )
+                Spacer(modifier = Modifier.height(8.dp))
 
-            OnboardingButton(
-                modifier = Modifier.testTag("welcomeSignInButton"),
-                text = stringResource(id = R.string.welcome_sign_in_button_title),
-                onClick = callbacks.onSignInClick,
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            OnboardingButton(
-                text = stringResource(id = R.string.welcome_create_account_button_title),
-                onClick = callbacks.onCreateAccountClick,
-            )
-
+                OnboardingButton(
+                    text = stringResource(id = R.string.welcome_create_account_button_title),
+                    onClick = callbacks.onCreateAccountClick,
+                )
+            }
             ToSAndPrivacyPolicyText(
                 modifier = Modifier
+                    .align(Alignment.BottomCenter)
                     .widthIn(0.dp, MAX_COMPONENT_WIDTH.dp)
                     .fillMaxWidth()
-                    .padding(top = 16.dp),
+                    .padding(bottom = 32.dp, top = 16.dp),
                 color = Color.White,
                 fontSize = 16.sp,
                 linksColor = Color.White,
