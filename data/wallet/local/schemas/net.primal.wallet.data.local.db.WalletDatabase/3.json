@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "6228a0d437eb92b25c180ff06beb667d",
+    "identityHash": "0137ef303f5f3f43a03c0b860119793d",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -368,7 +368,31 @@
         }
       },
       {
-        "tableName": "NostrWalletConnectionData",
+        "tableName": "WalletSettings",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `spamThresholdAmountInSats` TEXT NOT NULL, PRIMARY KEY(`walletId`))",
+        "fields": [
+          {
+            "fieldPath": "walletId",
+            "columnName": "walletId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "spamThresholdAmountInSats",
+            "columnName": "spamThresholdAmountInSats",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "walletId"
+          ]
+        }
+      },
+      {
+        "tableName": "NwcConnectionData",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`secretPubKey` TEXT NOT NULL, `walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `servicePubKey` TEXT NOT NULL, `servicePrivateKey` TEXT NOT NULL, `relay` TEXT NOT NULL, `appName` TEXT NOT NULL, `dailyBudgetSats` TEXT, PRIMARY KEY(`secretPubKey`))",
         "fields": [
           {
@@ -427,36 +451,12 @@
         }
       },
       {
-        "tableName": "WalletSettings",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `spamThresholdAmountInSats` TEXT NOT NULL, PRIMARY KEY(`walletId`))",
+        "tableName": "NwcPaymentHoldData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`holdId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `requestId` TEXT NOT NULL, `amountSats` TEXT NOT NULL, `status` TEXT NOT NULL, `budgetDate` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `expiresAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`holdId`))",
         "fields": [
           {
-            "fieldPath": "walletId",
-            "columnName": "walletId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "spamThresholdAmountInSats",
-            "columnName": "spamThresholdAmountInSats",
-            "affinity": "TEXT",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "walletId"
-          ]
-        }
-      },
-      {
-        "tableName": "NwcBudgetReservationData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reservationId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `requestId` TEXT NOT NULL, `amountSats` TEXT NOT NULL, `status` TEXT NOT NULL, `budgetDate` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `expiresAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`reservationId`))",
-        "fields": [
-          {
-            "fieldPath": "reservationId",
-            "columnName": "reservationId",
+            "fieldPath": "holdId",
+            "columnName": "holdId",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -512,32 +512,32 @@
         "primaryKey": {
           "autoGenerate": false,
           "columnNames": [
-            "reservationId"
+            "holdId"
           ]
         },
         "indices": [
           {
-            "name": "index_NwcBudgetReservationData_connectionId",
+            "name": "index_NwcPaymentHoldData_connectionId",
             "unique": false,
             "columnNames": [
               "connectionId"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_NwcBudgetReservationData_connectionId` ON `${TABLE_NAME}` (`connectionId`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_NwcPaymentHoldData_connectionId` ON `${TABLE_NAME}` (`connectionId`)"
           },
           {
-            "name": "index_NwcBudgetReservationData_budgetDate",
+            "name": "index_NwcPaymentHoldData_budgetDate",
             "unique": false,
             "columnNames": [
               "budgetDate"
             ],
             "orders": [],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_NwcBudgetReservationData_budgetDate` ON `${TABLE_NAME}` (`budgetDate`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_NwcPaymentHoldData_budgetDate` ON `${TABLE_NAME}` (`budgetDate`)"
           }
         ]
       },
       {
-        "tableName": "NwcDailySpendData",
+        "tableName": "NwcDailyBudgetData",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`connectionId` TEXT NOT NULL, `budgetDate` TEXT NOT NULL, `confirmedSpendSats` TEXT NOT NULL, `lastUpdatedAt` INTEGER NOT NULL, PRIMARY KEY(`connectionId`, `budgetDate`))",
         "fields": [
           {
@@ -576,7 +576,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '6228a0d437eb92b25c180ff06beb667d')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0137ef303f5f3f43a03c0b860119793d')"
     ]
   }
 }

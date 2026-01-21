@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.sqlite.driver.AndroidSQLiteDriver
 import androidx.test.core.app.ApplicationProvider
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -15,13 +16,14 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.connections.nostr.model.BudgetReservationResult
+import net.primal.domain.connections.nostr.model.NwcPaymentHoldResult
 import net.primal.shared.data.local.encryption.asEncryptable
-import net.primal.wallet.data.local.dao.NostrWalletConnectionData
-import net.primal.wallet.data.local.dao.NwcBudgetDao
-import net.primal.wallet.data.local.dao.NwcBudgetReservationData
-import net.primal.wallet.data.local.dao.ReservationStatus
+import net.primal.wallet.data.local.dao.nwc.NwcConnectionData
+import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldDao
+import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldData
+import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldStatus
 import net.primal.wallet.data.local.db.WalletDatabase
+import net.primal.wallet.data.nwc.manager.NwcBudgetManager
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -38,7 +40,7 @@ class NwcBudgetManagerTest {
     }
 
     private lateinit var database: WalletDatabase
-    private lateinit var budgetDao: NwcBudgetDao
+    private lateinit var paymentHoldDao: NwcPaymentHoldDao
     private lateinit var budgetManager: NwcBudgetManager
 
     @Before
@@ -54,7 +56,7 @@ class NwcBudgetManagerTest {
             .allowMainThreadQueries()
             .build()
 
-        budgetDao = database.nwcBudget()
+        paymentHoldDao = database.nwcPaymentHolds()
         budgetManager = NwcBudgetManager(
             dispatcherProvider = dispatcherProvider,
             walletDatabase = database,
@@ -67,9 +69,9 @@ class NwcBudgetManagerTest {
     }
 
     @Test
-    fun reserveBudgetReturnsUnlimitedWhenBudgetMissing() =
+    fun hasBudgetLimitReturnsFalseWhenNoBudgetConfigured() =
         runTest {
-            val connectionId = "connection-missing"
+            val connectionId = "connection-no-budget"
             database.nwcConnections().upsert(
                 buildConnectionData(
                     secretPubKey = connectionId,
@@ -77,137 +79,169 @@ class NwcBudgetManagerTest {
                 ),
             )
 
-            val result = budgetManager.reserveBudget(
-                connectionId = connectionId,
-                amountSats = 100,
-                requestId = "request-1",
-                timeoutMs = 1_000,
-            )
+            val result = budgetManager.hasBudgetLimit(connectionId)
 
-            result.shouldBeInstanceOf<BudgetReservationResult.Unlimited>()
+            result shouldBe false
         }
 
     @Test
-    fun reserveBudgetCreatesPendingReservation() =
+    fun hasBudgetLimitReturnsTrueWhenBudgetConfigured() =
+        runTest {
+            val connectionId = "connection-with-budget"
+            database.nwcConnections().upsert(
+                buildConnectionData(
+                    secretPubKey = connectionId,
+                    dailyBudgetSats = 1_000L,
+                ),
+            )
+
+            val result = budgetManager.hasBudgetLimit(connectionId)
+
+            result shouldBe true
+        }
+
+    @Test
+    fun placeHoldThrowsWhenNoBudgetConfigured() =
+        runTest {
+            val connectionId = "connection-no-budget"
+            database.nwcConnections().upsert(
+                buildConnectionData(
+                    secretPubKey = connectionId,
+                    dailyBudgetSats = null,
+                ),
+            )
+
+            shouldThrow<IllegalStateException> {
+                budgetManager.placeHold(
+                    connectionId = connectionId,
+                    amountSats = 100,
+                    requestId = "request-1",
+                    timeoutMs = 1_000,
+                )
+            }
+        }
+
+    @Test
+    fun placeHoldCreatesPendingHold() =
         runTest {
             val connectionId = "connection-1"
             database.nwcConnections().upsert(buildConnectionData(secretPubKey = connectionId))
 
-            val result = budgetManager.reserveBudget(
+            val result = budgetManager.placeHold(
                 connectionId = connectionId,
                 amountSats = 200,
                 requestId = "request-1",
                 timeoutMs = 5_000,
             )
 
-            val reserved = result.shouldBeInstanceOf<BudgetReservationResult.Reserved>()
-            reserved.amountSats shouldBe 200L
-            reserved.remainingBudget shouldBe 800L
+            val placed = result.shouldBeInstanceOf<NwcPaymentHoldResult.Placed>()
+            placed.amountSats shouldBe 200L
+            placed.remainingBudget shouldBe 800L
 
-            val reservation = budgetDao.getReservationById(reserved.reservationId).shouldNotBeNull()
-            reservation.status shouldBe ReservationStatus.PENDING
-            reservation.amountSats.decrypted shouldBe 200L
+            val hold = paymentHoldDao.getHoldById(placed.holdId).shouldNotBeNull()
+            hold.status shouldBe NwcPaymentHoldStatus.PENDING
+            hold.amountSats.decrypted shouldBe 200L
         }
 
     @Test
-    fun reserveBudgetConsidersPendingReservations() =
+    fun placeHoldConsidersPendingHolds() =
         runTest {
             val connectionId = "connection-2"
             database.nwcConnections().upsert(buildConnectionData(secretPubKey = connectionId))
 
-            budgetManager.reserveBudget(
+            budgetManager.placeHold(
                 connectionId = connectionId,
                 amountSats = 200,
                 requestId = "request-1",
                 timeoutMs = 5_000,
             )
 
-            val result = budgetManager.reserveBudget(
+            val result = budgetManager.placeHold(
                 connectionId = connectionId,
                 amountSats = 900,
                 requestId = "request-2",
                 timeoutMs = 5_000,
             )
 
-            val insufficient = result.shouldBeInstanceOf<BudgetReservationResult.InsufficientBudget>()
+            val insufficient = result.shouldBeInstanceOf<NwcPaymentHoldResult.InsufficientBudget>()
             insufficient.requested shouldBe 900L
             insufficient.available shouldBe 800L
         }
 
     @Test
-    fun commitReservationUpdatesSpendWithReservedAmount() =
+    fun commitHoldUpdatesSpendWithHeldAmount() =
         runTest {
             val connectionId = "connection-3"
             database.nwcConnections().upsert(buildConnectionData(secretPubKey = connectionId))
 
-            val result = budgetManager.reserveBudget(
+            val result = budgetManager.placeHold(
                 connectionId = connectionId,
                 amountSats = 250,
                 requestId = "request-1",
                 timeoutMs = 5_000,
             )
 
-            val reservationId = result.shouldBeInstanceOf<BudgetReservationResult.Reserved>().reservationId
-            budgetManager.commitReservation(reservationId = reservationId, actualAmountSats = null)
+            val holdId = result.shouldBeInstanceOf<NwcPaymentHoldResult.Placed>().holdId
+            budgetManager.commitHold(holdId = holdId, actualAmountSats = null)
 
-            val reservation = budgetDao.getReservationById(reservationId).shouldNotBeNull()
-            reservation.status shouldBe ReservationStatus.COMMITTED
+            val hold = paymentHoldDao.getHoldById(holdId).shouldNotBeNull()
+            hold.status shouldBe NwcPaymentHoldStatus.COMMITTED
 
-            val dailySpend = budgetDao.getDailySpend(
+            val dailySpend = paymentHoldDao.getDailyBudget(
                 connectionId = connectionId,
-                budgetDate = reservation.budgetDate,
+                budgetDate = hold.budgetDate,
             )
             dailySpend?.confirmedSpendSats?.decrypted shouldBe 250L
         }
 
     @Test
-    fun commitReservationUsesActualAmountWhenProvided() =
+    fun commitHoldUsesActualAmountWhenProvided() =
         runTest {
             val connectionId = "connection-4"
             database.nwcConnections().upsert(buildConnectionData(secretPubKey = connectionId))
 
-            val result = budgetManager.reserveBudget(
+            val result = budgetManager.placeHold(
                 connectionId = connectionId,
                 amountSats = 150,
                 requestId = "request-1",
                 timeoutMs = 5_000,
             )
 
-            val reservationId = result.shouldBeInstanceOf<BudgetReservationResult.Reserved>().reservationId
-            budgetManager.commitReservation(reservationId = reservationId, actualAmountSats = 175)
+            val holdId = result.shouldBeInstanceOf<NwcPaymentHoldResult.Placed>().holdId
+            budgetManager.commitHold(holdId = holdId, actualAmountSats = 175)
 
-            val reservation = budgetDao.getReservationById(reservationId).shouldNotBeNull()
-            reservation.status shouldBe ReservationStatus.COMMITTED
+            val hold = paymentHoldDao.getHoldById(holdId).shouldNotBeNull()
+            hold.status shouldBe NwcPaymentHoldStatus.COMMITTED
 
-            val dailySpend = budgetDao.getDailySpend(
+            val dailySpend = paymentHoldDao.getDailyBudget(
                 connectionId = connectionId,
-                budgetDate = reservation.budgetDate,
+                budgetDate = hold.budgetDate,
             )
             dailySpend?.confirmedSpendSats?.decrypted shouldBe 175L
         }
 
     @Test
-    fun releaseReservationMarksReservationReleased() =
+    fun releaseHoldMarksHoldReleased() =
         runTest {
             val connectionId = "connection-5"
             database.nwcConnections().upsert(buildConnectionData(secretPubKey = connectionId))
 
-            val result = budgetManager.reserveBudget(
+            val result = budgetManager.placeHold(
                 connectionId = connectionId,
                 amountSats = 120,
                 requestId = "request-1",
                 timeoutMs = 5_000,
             )
 
-            val reservationId = result.shouldBeInstanceOf<BudgetReservationResult.Reserved>().reservationId
-            budgetManager.releaseReservation(reservationId = reservationId)
+            val holdId = result.shouldBeInstanceOf<NwcPaymentHoldResult.Placed>().holdId
+            budgetManager.releaseHold(holdId = holdId)
 
-            val reservation = budgetDao.getReservationById(reservationId).shouldNotBeNull()
-            reservation.status shouldBe ReservationStatus.RELEASED
+            val hold = paymentHoldDao.getHoldById(holdId).shouldNotBeNull()
+            hold.status shouldBe NwcPaymentHoldStatus.RELEASED
 
-            val dailySpend = budgetDao.getDailySpend(
+            val dailySpend = paymentHoldDao.getDailyBudget(
                 connectionId = connectionId,
-                budgetDate = reservation.budgetDate,
+                budgetDate = hold.budgetDate,
             )
             dailySpend shouldBe null
         }
@@ -218,29 +252,29 @@ class NwcBudgetManagerTest {
             val connectionId = "connection-6"
             database.nwcConnections().upsert(buildConnectionData(secretPubKey = connectionId))
 
-            val result = budgetManager.reserveBudget(
+            val result = budgetManager.placeHold(
                 connectionId = connectionId,
                 amountSats = 200,
                 requestId = "request-1",
                 timeoutMs = 5_000,
             )
 
-            val reservationId = result.shouldBeInstanceOf<BudgetReservationResult.Reserved>().reservationId
-            budgetManager.releaseReservation(reservationId = reservationId)
-            budgetManager.commitReservation(reservationId = reservationId, actualAmountSats = 300)
+            val holdId = result.shouldBeInstanceOf<NwcPaymentHoldResult.Placed>().holdId
+            budgetManager.releaseHold(holdId = holdId)
+            budgetManager.commitHold(holdId = holdId, actualAmountSats = 300)
 
-            val reservation = budgetDao.getReservationById(reservationId).shouldNotBeNull()
-            reservation.status shouldBe ReservationStatus.RELEASED
+            val hold = paymentHoldDao.getHoldById(holdId).shouldNotBeNull()
+            hold.status shouldBe NwcPaymentHoldStatus.RELEASED
 
-            val dailySpend = budgetDao.getDailySpend(
+            val dailySpend = paymentHoldDao.getDailyBudget(
                 connectionId = connectionId,
-                budgetDate = reservation.budgetDate,
+                budgetDate = hold.budgetDate,
             )
             dailySpend shouldBe null
         }
 
     @Test
-    fun cleanupExpiredReservationsExpiresOnlyStaleEntries() =
+    fun cleanupExpiredHoldsExpiresOnlyStaleEntries() =
         runTest {
             val connectionId = "connection-7"
             database.nwcConnections().upsert(buildConnectionData(secretPubKey = connectionId))
@@ -248,37 +282,37 @@ class NwcBudgetManagerTest {
             val now = Clock.System.now().toEpochMilliseconds()
             val budgetDate = currentBudgetDate()
 
-            val expiredPending = insertReservation(
+            val expiredPending = insertHold(
                 connectionId = connectionId,
                 requestId = "request-expired-pending",
-                status = ReservationStatus.PENDING,
+                status = NwcPaymentHoldStatus.PENDING,
                 budgetDate = budgetDate,
                 expiresAt = now - 1,
             )
-            val expiredProcessing = insertReservation(
+            val expiredProcessing = insertHold(
                 connectionId = connectionId,
                 requestId = "request-expired-processing",
-                status = ReservationStatus.PROCESSING,
+                status = NwcPaymentHoldStatus.PROCESSING,
                 budgetDate = budgetDate,
                 expiresAt = now - 1,
             )
-            val activePending = insertReservation(
+            val activePending = insertHold(
                 connectionId = connectionId,
                 requestId = "request-active",
-                status = ReservationStatus.PENDING,
+                status = NwcPaymentHoldStatus.PENDING,
                 budgetDate = budgetDate,
                 expiresAt = now + 60_000,
             )
 
-            budgetManager.cleanupExpiredReservations()
+            budgetManager.cleanupExpiredHolds()
 
-            budgetDao.getReservationById(expiredPending).shouldNotBeNull().status shouldBe ReservationStatus.EXPIRED
-            budgetDao.getReservationById(expiredProcessing).shouldNotBeNull().status shouldBe ReservationStatus.EXPIRED
-            budgetDao.getReservationById(activePending).shouldNotBeNull().status shouldBe ReservationStatus.PENDING
+            paymentHoldDao.getHoldById(expiredPending).shouldNotBeNull().status shouldBe NwcPaymentHoldStatus.EXPIRED
+            paymentHoldDao.getHoldById(expiredProcessing).shouldNotBeNull().status shouldBe NwcPaymentHoldStatus.EXPIRED
+            paymentHoldDao.getHoldById(activePending).shouldNotBeNull().status shouldBe NwcPaymentHoldStatus.PENDING
         }
 
     private fun buildConnectionData(secretPubKey: String, dailyBudgetSats: Long? = 1_000L) =
-        NostrWalletConnectionData(
+        NwcConnectionData(
             secretPubKey = secretPubKey,
             walletId = "wallet-$secretPubKey",
             userId = "user-$secretPubKey",
@@ -289,18 +323,18 @@ class NwcBudgetManagerTest {
             dailyBudgetSats = dailyBudgetSats?.asEncryptable(),
         )
 
-    private suspend fun insertReservation(
+    private suspend fun insertHold(
         connectionId: String,
         requestId: String,
-        status: ReservationStatus,
+        status: NwcPaymentHoldStatus,
         budgetDate: String,
         expiresAt: Long,
     ): String {
         val now = Clock.System.now().toEpochMilliseconds()
-        val reservationId = UUID.randomUUID().toString()
-        budgetDao.insertReservation(
-            NwcBudgetReservationData(
-                reservationId = reservationId,
+        val holdId = UUID.randomUUID().toString()
+        paymentHoldDao.insertHold(
+            NwcPaymentHoldData(
+                holdId = holdId,
                 connectionId = connectionId,
                 requestId = requestId,
                 amountSats = 100L.asEncryptable(),
@@ -311,7 +345,7 @@ class NwcBudgetManagerTest {
                 updatedAt = now,
             ),
         )
-        return reservationId
+        return holdId
     }
 
     private fun currentBudgetDate(): String {

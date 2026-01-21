@@ -1,4 +1,4 @@
-package net.primal.wallet.data.local.dao
+package net.primal.wallet.data.local.dao.nwc
 
 import androidx.room.Entity
 import androidx.room.Index
@@ -11,13 +11,13 @@ import net.primal.shared.data.local.encryption.Encryptable
         Index("budgetDate"),
     ],
 )
-data class NwcBudgetReservationData(
+data class NwcPaymentHoldData(
     @PrimaryKey
-    val reservationId: String,
+    val holdId: String,
     val connectionId: String,
     val requestId: String,
     val amountSats: Encryptable<Long>,
-    val status: ReservationStatus,
+    val status: NwcPaymentHoldStatus,
     val budgetDate: String,
     val createdAt: Long,
     val expiresAt: Long,

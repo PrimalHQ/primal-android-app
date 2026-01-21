@@ -1,19 +1,19 @@
-package net.primal.wallet.data.service
+package net.primal.wallet.data.nwc.service
 
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.connections.nostr.NostrWalletConnectionService
 import net.primal.domain.connections.nostr.NwcRepository
-import net.primal.wallet.data.manager.NwcBudgetManager
+import net.primal.domain.connections.nostr.NwcService
+import net.primal.wallet.data.nwc.manager.NwcBudgetManager
 
-class NostrWalletConnectionServiceImpl internal constructor(
+class NwcServiceImpl internal constructor(
     dispatchers: DispatcherProvider,
     private val nwcBudgetManager: NwcBudgetManager,
     private val nwcRepository: NwcRepository,
-) : NostrWalletConnectionService {
+) : NwcService {
 
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
 
@@ -29,7 +29,7 @@ class NostrWalletConnectionServiceImpl internal constructor(
         scope.launch {
             nwcRepository.observeConnections(userId = userId)
                 .collect { connections ->
-                    /* TODO: start subscription to relay for all connection pubkeys */
+                    /* Start subscription to relay for all connection pubkeys */
                 }
         }
 }

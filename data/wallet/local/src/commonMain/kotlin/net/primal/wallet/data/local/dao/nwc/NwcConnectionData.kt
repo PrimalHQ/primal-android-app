@@ -1,11 +1,11 @@
-package net.primal.wallet.data.local.dao
+package net.primal.wallet.data.local.dao.nwc
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import net.primal.shared.data.local.encryption.Encryptable
 
 @Entity
-data class NostrWalletConnectionData(
+data class NwcConnectionData(
     @PrimaryKey
     val secretPubKey: String,
     val walletId: String,

@@ -1,10 +1,11 @@
-package net.primal.wallet.data.local.dao
+package net.primal.wallet.data.local.dao.nwc
 
 import androidx.room.Embedded
 import androidx.room.Relation
+import net.primal.wallet.data.local.dao.WalletInfo
 
-data class NostrWalletConnection(
-    @Embedded val data: NostrWalletConnectionData,
+data class NwcConnection(
+    @Embedded val data: NwcConnectionData,
 
     @Relation(
         parentColumn = "walletId",

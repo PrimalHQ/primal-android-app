@@ -9,12 +9,7 @@ import net.primal.shared.data.local.serialization.EncryptableTypeConverters
 import net.primal.shared.data.local.serialization.ListsTypeConverters
 import net.primal.wallet.data.local.dao.ActiveWalletData
 import net.primal.wallet.data.local.dao.NostrTransactionData
-import net.primal.wallet.data.local.dao.NostrWalletConnectionDao
-import net.primal.wallet.data.local.dao.NostrWalletConnectionData
 import net.primal.wallet.data.local.dao.NostrWalletData
-import net.primal.wallet.data.local.dao.NwcBudgetDao
-import net.primal.wallet.data.local.dao.NwcBudgetReservationData
-import net.primal.wallet.data.local.dao.NwcDailySpendData
 import net.primal.wallet.data.local.dao.PrimalTransactionData
 import net.primal.wallet.data.local.dao.PrimalWalletData
 import net.primal.wallet.data.local.dao.WalletDao
@@ -23,6 +18,11 @@ import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletSettingsDao
 import net.primal.wallet.data.local.dao.WalletTransactionDao
 import net.primal.wallet.data.local.dao.WalletTransactionData
+import net.primal.wallet.data.local.dao.nwc.NwcConnectionDao
+import net.primal.wallet.data.local.dao.nwc.NwcConnectionData
+import net.primal.wallet.data.local.dao.nwc.NwcDailyBudgetData
+import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldDao
+import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldData
 
 @Database(
     entities = [
@@ -33,10 +33,10 @@ import net.primal.wallet.data.local.dao.WalletTransactionData
         WalletTransactionData::class,
         PrimalTransactionData::class,
         NostrTransactionData::class,
-        NostrWalletConnectionData::class,
         WalletSettings::class,
-        NwcBudgetReservationData::class,
-        NwcDailySpendData::class,
+        NwcConnectionData::class,
+        NwcPaymentHoldData::class,
+        NwcDailyBudgetData::class,
     ],
     version = 3,
     exportSchema = true,
@@ -47,8 +47,8 @@ abstract class WalletDatabase : RoomDatabase() {
     abstract fun wallet(): WalletDao
     abstract fun walletTransactions(): WalletTransactionDao
     abstract fun walletSettings(): WalletSettingsDao
-    abstract fun nwcConnections(): NostrWalletConnectionDao
-    abstract fun nwcBudget(): NwcBudgetDao
+    abstract fun nwcConnections(): NwcConnectionDao
+    abstract fun nwcPaymentHolds(): NwcPaymentHoldDao
 
     companion object {
         fun setEncryption(enableEncryption: Boolean) {

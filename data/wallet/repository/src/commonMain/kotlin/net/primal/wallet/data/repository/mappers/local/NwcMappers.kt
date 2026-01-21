@@ -1,11 +1,11 @@
 package net.primal.wallet.data.repository.mappers.local
 
-import net.primal.domain.connections.nostr.model.NostrWalletConnection
+import net.primal.domain.connections.nostr.model.NwcConnection
 import net.primal.domain.nostr.cryptography.NostrKeyPair
-import net.primal.wallet.data.local.dao.NostrWalletConnection as NostrWalletConnectionPO
+import net.primal.wallet.data.local.dao.nwc.NwcConnection as NostrWalletConnectionPO
 
 fun NostrWalletConnectionPO.asDO() =
-    NostrWalletConnection(
+    NwcConnection(
         secretPubKey = this.data.secretPubKey,
         wallet = this.info.toTsunamiWallet(),
         serviceKeyPair = NostrKeyPair(this.data.servicePrivateKey.decrypted, this.data.servicePubKey),
