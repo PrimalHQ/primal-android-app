@@ -24,9 +24,9 @@ import net.primal.wallet.data.validator.RecoveryPhraseValidator
 import timber.log.Timber
 
 @HiltViewModel
-class RestoreWalletViewModel @Inject constructor(
-    private val recoveryPhraseValidator: RecoveryPhraseValidator,
-) : ViewModel() {
+class RestoreWalletViewModel @Inject constructor() : ViewModel() {
+
+    private val recoveryPhraseValidator = RecoveryPhraseValidator()
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
