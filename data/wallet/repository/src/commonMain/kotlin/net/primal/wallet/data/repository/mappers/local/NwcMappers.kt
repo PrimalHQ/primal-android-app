@@ -6,8 +6,9 @@ import net.primal.wallet.data.local.dao.nwc.NwcConnection as NostrWalletConnecti
 
 fun NostrWalletConnectionPO.asDO() =
     NwcConnection(
+        walletId = this.data.walletId,
+        userId = this.data.userId,
         secretPubKey = this.data.secretPubKey,
-        wallet = this.info.toTsunamiWallet(),
         serviceKeyPair = NostrKeyPair(this.data.servicePrivateKey.decrypted, this.data.servicePubKey),
         relay = this.data.relay.decrypted,
         appName = this.data.appName.decrypted,

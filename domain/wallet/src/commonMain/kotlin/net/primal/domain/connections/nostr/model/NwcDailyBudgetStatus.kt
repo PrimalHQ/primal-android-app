@@ -1,10 +1,10 @@
 package net.primal.domain.connections.nostr.model
 
-data class BudgetStatus(
+data class NwcDailyBudgetStatus(
     val connectionId: String,
     val budgetDate: String,
     val dailyLimitSats: Long?,
     val confirmedSpendSats: Long,
-    val pendingReservationsSats: Long,
+    val pendingHoldsSats: Long,
     val availableSats: Long?,
 )

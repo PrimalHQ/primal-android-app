@@ -98,6 +98,5 @@ interface WalletDao {
         ORDER BY lastUpdatedAt DESC LIMIT 1
         """,
     )
-    /* TODO: wouldn't query by userId as encryptable cause problems? Applies to other instances of this through-out this file. */
     suspend fun findLastUsedWalletByType(userId: Encryptable<String>, type: WalletType): Wallet?
 }
