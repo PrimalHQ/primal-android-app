@@ -68,7 +68,7 @@ class NwcRepositoryImpl(
         servicePubKey: String,
         secret: String,
         lightningAddress: String?,
-    ) = "$NWC_PROTOCOL$servicePubKey?$RELAY_PARAM=$RELAY&?$SECRET_PARAM=$secret".run {
+    ) = "$NWC_PROTOCOL$servicePubKey?$RELAY_PARAM=$RELAY&$SECRET_PARAM=$secret".run {
         if (lightningAddress != null) {
             "$this&$LUD16_PARAM=$lightningAddress"
         } else {
