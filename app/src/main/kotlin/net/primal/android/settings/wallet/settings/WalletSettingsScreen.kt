@@ -165,7 +165,7 @@ fun WalletSettingsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 ConnectedAppsSettings(
-                    nwcConnectionInfos = state.nwcConnectionsInfo,
+                    primalNwcConnectionInfos = state.nwcConnectionsInfo,
                     onRevokeConnectedApp = { eventPublisher(UiEvent.RevokeConnection(it)) },
                     onCreateNewWalletConnection = onCreateNewWalletConnection,
                     connectionsState = state.connectionsState,

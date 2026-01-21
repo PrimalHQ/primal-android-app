@@ -18,6 +18,11 @@ import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletSettingsDao
 import net.primal.wallet.data.local.dao.WalletTransactionDao
 import net.primal.wallet.data.local.dao.WalletTransactionData
+import net.primal.wallet.data.local.dao.nwc.NwcConnectionDao
+import net.primal.wallet.data.local.dao.nwc.NwcConnectionData
+import net.primal.wallet.data.local.dao.nwc.NwcDailyBudgetData
+import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldDao
+import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldData
 
 @Database(
     entities = [
@@ -29,8 +34,11 @@ import net.primal.wallet.data.local.dao.WalletTransactionData
         PrimalTransactionData::class,
         NostrTransactionData::class,
         WalletSettings::class,
+        NwcConnectionData::class,
+        NwcPaymentHoldData::class,
+        NwcDailyBudgetData::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 @TypeConverters(ListsTypeConverters::class, EncryptableTypeConverters::class)
@@ -39,6 +47,8 @@ abstract class WalletDatabase : RoomDatabase() {
     abstract fun wallet(): WalletDao
     abstract fun walletTransactions(): WalletTransactionDao
     abstract fun walletSettings(): WalletSettingsDao
+    abstract fun nwcConnections(): NwcConnectionDao
+    abstract fun nwcPaymentHolds(): NwcPaymentHoldDao
 
     companion object {
         fun setEncryption(enableEncryption: Boolean) {
