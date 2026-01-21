@@ -30,6 +30,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -108,6 +110,13 @@ private fun MnemonicInputStage(
     eventPublisher: (UiEvent) -> Unit,
     contentPadding: PaddingValues,
 ) {
+    LaunchedEffect(state.mnemonic) {
+        if (state.mnemonic.isNotBlank()) {
+            delay(500.milliseconds)
+            eventPublisher(UiEvent.ValidateMnemonic)
+        }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -187,9 +196,9 @@ private fun ValidationMessage(state: UiState) {
     val text: String?
     val color: Color
 
-    when (val validation = state.mnemonicValidation) {
+    when (state.mnemonicValidation) {
         is MnemonicValidation.Invalid -> {
-            text = validation.message
+            text = stringResource(id = R.string.wallet_restore_invalid_recovery_phrase)
             color = AppTheme.colorScheme.error
         }
         is MnemonicValidation.Valid -> {

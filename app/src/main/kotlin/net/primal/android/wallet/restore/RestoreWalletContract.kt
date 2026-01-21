@@ -9,12 +9,13 @@ interface RestoreWalletContract {
         sealed class MnemonicValidation {
             data object Empty : MnemonicValidation()
             data object Valid : MnemonicValidation()
-            data class Invalid(val message: String) : MnemonicValidation()
+            data object Invalid : MnemonicValidation()
         }
     }
 
     sealed class UiEvent {
         data class MnemonicChange(val mnemonic: String) : UiEvent()
+        data object ValidateMnemonic : UiEvent()
         data object RestoreWalletClick : UiEvent()
     }
 
