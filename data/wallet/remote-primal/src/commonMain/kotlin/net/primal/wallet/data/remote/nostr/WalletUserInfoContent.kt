@@ -8,8 +8,3 @@ data class WalletUserInfoContent(
     @SerialName("kyc_level") val kycLevel: Int,
     val lud16: String,
 )
-
-@Serializable
-data class WalletActivationContent(
-    val lud16: String,
-)
