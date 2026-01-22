@@ -116,7 +116,6 @@ import net.primal.android.core.compose.icons.primaliconpack.NotificationsFilled
 import net.primal.android.core.compose.icons.primaliconpack.Notrich
 import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppConnection
 import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppForeground
-import net.primal.android.core.compose.icons.primaliconpack.OnboardingZapsExplained
 import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.core.compose.icons.primaliconpack.PhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Play
@@ -327,7 +326,6 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             DrawerProfile,
             DrawerSettings,
             DrawerSignOut,
-            OnboardingZapsExplained,
             Document,
             WalletChangeCurrency,
             NwcExternalAppForeground,

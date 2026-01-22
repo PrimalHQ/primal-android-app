@@ -18,9 +18,15 @@ import net.primal.android.wallet.restore.RestoreWalletContract.SideEffect
 import net.primal.android.wallet.restore.RestoreWalletContract.UiEvent
 import net.primal.android.wallet.restore.RestoreWalletContract.UiState
 import net.primal.android.wallet.restore.RestoreWalletContract.UiState.MnemonicValidation
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
+import net.primal.wallet.data.validator.RecoveryPhraseValidator
 
 @HiltViewModel
 class RestoreWalletViewModel @Inject constructor() : ViewModel() {
+
+    private val recoveryPhraseValidator = RecoveryPhraseValidator()
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -42,6 +48,7 @@ class RestoreWalletViewModel @Inject constructor() : ViewModel() {
             events.collect {
                 when (it) {
                     is UiEvent.MnemonicChange -> handleMnemonicChange(it.mnemonic)
+                    UiEvent.ValidateMnemonic -> validateMnemonic()
                     UiEvent.RestoreWalletClick -> restoreWallet()
                 }
             }
@@ -51,50 +58,55 @@ class RestoreWalletViewModel @Inject constructor() : ViewModel() {
         setState {
             copy(
                 mnemonic = mnemonic,
-                mnemonicValidation = validateMnemonic(mnemonic),
+                mnemonicValidation = MnemonicValidation.Empty,
             )
         }
     }
 
-    private fun validateMnemonic(mnemonic: String): MnemonicValidation {
-        if (mnemonic.isBlank()) return MnemonicValidation.Empty
+    private fun validateMnemonic() {
+        val mnemonic = state.value.mnemonic
+        if (mnemonic.isBlank()) {
+            setState { copy(mnemonicValidation = MnemonicValidation.Empty) }
+            return
+        }
 
-        val wordCount = mnemonic.trim().split(Regex("\\s+")).count()
+        val isValid = recoveryPhraseValidator.isValid(mnemonic)
 
-        return if (wordCount in MIN_RECOVERY_PHRASE_WORD_COUNT..MAX_RECOVERY_PHRASE_WORD_COUNT) {
-            MnemonicValidation.Valid
-        } else {
-            MnemonicValidation.Empty
+        setState {
+            copy(
+                mnemonicValidation = if (isValid) {
+                    MnemonicValidation.Valid
+                } else {
+                    MnemonicValidation.Invalid
+                },
+            )
         }
     }
 
-    @Suppress("TooGenericExceptionCaught")
     private fun restoreWallet() =
         viewModelScope.launch {
             setState { copy(currentStage = RestoreStage.Restoring) }
-            try {
+            runCatching {
                 delay(RESTORE_SIMULATION_DELAY_MILLIS)
 
                 // Implement wallet restore logic
                 if (state.value.mnemonic.contains("invalid")) {
                     error("Simulated restore error.")
                 }
-
+            }.onSuccess {
                 setEffect(SideEffect.RestoreSuccess)
-            } catch (error: Exception) {
+            }.onFailure { error ->
                 Napier.e(message = "Error restoring wallet.", throwable = error)
                 setState {
                     copy(
                         currentStage = RestoreStage.MnemonicInput,
-                        mnemonicValidation = MnemonicValidation.Invalid("Invalid recovery phrase"),
+                        mnemonicValidation = MnemonicValidation.Invalid,
                     )
                 }
             }
         }
 
     companion object {
-        private const val MIN_RECOVERY_PHRASE_WORD_COUNT = 12
-        private const val MAX_RECOVERY_PHRASE_WORD_COUNT = 24
         private const val RESTORE_SIMULATION_DELAY_MILLIS = 3000L
     }
 }

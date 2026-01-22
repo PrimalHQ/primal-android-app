@@ -19,7 +19,7 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.connections.PrimalWalletNwcRepository
+import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.parser.isNwcUrl
 import net.primal.domain.usecase.ConnectNwcUseCase

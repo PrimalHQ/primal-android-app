@@ -59,10 +59,10 @@ fun UpgradeWalletScreen(state: UpgradeWalletContract.UiState, onClose: () -> Uni
                 UpgradeWalletStatus.Upgrading -> {
                     FlowStatusColumn(
                         modifier = Modifier
-                            .padding(paddingValues)
-                            .padding(bottom = 80.dp)
+                            .fillMaxSize()
                             .background(color = AppTheme.colorScheme.surfaceVariant)
-                            .fillMaxSize(),
+                            .padding(paddingValues)
+                            .padding(bottom = 80.dp),
                         icon = null,
                         headlineText = null,
                         supportText = stringResource(id = R.string.wallet_upgrade_upgrading_support),
@@ -79,9 +79,9 @@ fun UpgradeWalletScreen(state: UpgradeWalletContract.UiState, onClose: () -> Uni
                 UpgradeWalletStatus.Failed -> {
                     UpgradeWalletFailed(
                         modifier = Modifier
-                            .padding(paddingValues)
+                            .fillMaxSize()
                             .background(color = AppTheme.colorScheme.surfaceVariant)
-                            .fillMaxSize(),
+                            .padding(paddingValues),
                         errorMessage = state.error?.message
                             ?: stringResource(id = R.string.app_generic_error),
                         onCloseClick = onClose,

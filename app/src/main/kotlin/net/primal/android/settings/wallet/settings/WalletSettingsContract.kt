@@ -1,13 +1,13 @@
 package net.primal.android.settings.wallet.settings
 
-import net.primal.domain.connections.model.NwcConnectionInfo
+import net.primal.domain.connections.primal.model.PrimalNwcConnectionInfo
 import net.primal.domain.wallet.Wallet
 
 interface WalletSettingsContract {
     data class UiState(
         val wallet: Wallet? = null,
         val useExternalWallet: Boolean? = null,
-        val nwcConnectionsInfo: List<NwcConnectionInfo> = emptyList(),
+        val nwcConnectionsInfo: List<PrimalNwcConnectionInfo> = emptyList(),
         val connectionsState: ConnectionsState = ConnectionsState.Loading,
         val showBackupWidget: Boolean = false,
     )

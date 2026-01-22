@@ -50,6 +50,7 @@ kotest = "6.0.7"
 kotlin = "2.2.21"
 kotlinx-atomicfu = "0.29.0"
 kotlinx-coroutines = "1.10.2"
+kotlinx-datetime = "0.7.1"
 kotlinx-io = "0.8.2"
 kotlinx-serialization-json = "1.9.0"
 ksp = "2.3.3"
@@ -160,6 +161,7 @@ androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycl
 androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camera" }
 
 # Kotlin
+kotlinx-datetime = { module= "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines" }
 kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "kotlinx-atomicfu" }

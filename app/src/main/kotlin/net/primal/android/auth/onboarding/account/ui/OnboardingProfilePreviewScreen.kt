@@ -30,7 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -64,7 +63,6 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.CheckCircleOutline
-import net.primal.android.core.compose.icons.primaliconpack.OnboardingZapsExplained
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
 
@@ -75,7 +73,6 @@ fun OnboardingProfilePreviewScreen(
     eventPublisher: (OnboardingContract.UiEvent) -> Unit,
     onBack: () -> Unit,
     onOnboarded: () -> Unit,
-    onActivateWallet: () -> Unit,
 ) {
     val canGoBack = !state.accountCreated && !state.working
     BackHandler(enabled = !canGoBack) {}
@@ -133,12 +130,6 @@ fun OnboardingProfilePreviewScreen(
                             .padding(paddingValues),
                         state = state,
                     )
-
-                    AccountCreationStep.ZapsIntroduction -> ProfileAccountZapsIntroductionContent(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                    )
                 }
             }
         },
@@ -146,9 +137,7 @@ fun OnboardingProfilePreviewScreen(
             ProfilePreviewBottomBar(
                 accountCreationStep = state.accountCreationStep,
                 isWorking = state.working,
-                onWalletActivationClick = onActivateWallet,
                 onFinishOnboardingClick = onOnboarded,
-                onContinueClick = { eventPublisher(OnboardingContract.UiEvent.AcknowledgeNostrKeyCreation) },
                 onCreateAccountClick = { eventPublisher(OnboardingContract.UiEvent.CreateNostrProfile) },
             )
         },
@@ -163,39 +152,23 @@ private fun ProfilePreviewBottomBar(
     isWorking: Boolean,
     accountCreationStep: AccountCreationStep,
     onCreateAccountClick: () -> Unit,
-    onContinueClick: () -> Unit,
-    onWalletActivationClick: () -> Unit,
     onFinishOnboardingClick: () -> Unit,
 ) {
     OnboardingBottomBar(
         buttonText = when (accountCreationStep) {
             AccountCreationStep.AccountPreview -> stringResource(id = R.string.onboarding_button_create_account_now)
             AccountCreationStep.AccountCreated -> stringResource(id = R.string.onboarding_button_continue)
-            AccountCreationStep.ZapsIntroduction -> stringResource(id = R.string.onboarding_button_activate_wallet)
         },
         buttonEnabled = !isWorking,
         buttonLoading = isWorking,
         onButtonClick = {
             when (accountCreationStep) {
                 AccountCreationStep.AccountPreview -> onCreateAccountClick()
-                AccountCreationStep.AccountCreated -> onContinueClick()
-                AccountCreationStep.ZapsIntroduction -> onWalletActivationClick()
+                AccountCreationStep.AccountCreated -> onFinishOnboardingClick()
             }
         },
         footer = {
-            if (accountCreationStep == AccountCreationStep.ZapsIntroduction) {
-                TextButton(
-                    modifier = Modifier.height(56.dp),
-                    onClick = onFinishOnboardingClick,
-                ) {
-                    Text(
-                        text = stringResource(id = R.string.onboarding_button_label_i_will_do_this_later),
-                        style = onboardingTextHintTypography(),
-                    )
-                }
-            } else {
-                OnboardingStepsIndicator(currentPage = OnboardingStep.Preview.index)
-            }
+            OnboardingStepsIndicator(currentPage = OnboardingStep.Preview.index)
         },
     )
 }
@@ -205,7 +178,6 @@ private fun OnboardingContract.UiState.resolveAppBarTitle(): String {
     return when (this.accountCreationStep) {
         AccountCreationStep.AccountPreview -> stringResource(id = R.string.onboarding_title_account_preview)
         AccountCreationStep.AccountCreated -> stringResource(id = R.string.onboarding_title_success)
-        AccountCreationStep.ZapsIntroduction -> stringResource(id = R.string.onboarding_title_zaps_introduction)
     }
 }
 
@@ -566,62 +538,6 @@ private fun SuccessAvatarBox(modifier: Modifier = Modifier, avatarUri: Uri?) {
     }
 }
 
-@Composable
-private fun ProfileAccountZapsIntroductionContent(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier,
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Image(
-                imageVector = PrimalIcons.OnboardingZapsExplained,
-                contentDescription = null,
-            )
-
-            Spacer(modifier = Modifier.height(48.dp))
-
-            Text(
-                modifier = Modifier.padding(horizontal = 32.dp),
-                text = stringResource(R.string.onboarding_profile_zaps_introduction_title),
-                color = Color.White,
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Bold,
-                fontSize = 24.sp,
-                lineHeight = 36.sp,
-
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-
-            Text(
-                modifier = Modifier.padding(horizontal = 32.dp),
-                text = stringResource(R.string.onboarding_profile_zaps_introduction_description_1),
-                color = Color.White.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 17.sp,
-                lineHeight = 24.sp,
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Text(
-                modifier = Modifier.padding(horizontal = 40.dp),
-                text = stringResource(R.string.onboarding_profile_zaps_introduction_description_2),
-                color = Color.White.copy(alpha = 0.8f),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 17.sp,
-                lineHeight = 24.sp,
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview
 @Composable
@@ -642,7 +558,6 @@ private fun PreviewOnboardingProfilePreviewScreen() {
                 eventPublisher = {},
                 onBack = {},
                 onOnboarded = {},
-                onActivateWallet = {},
             )
         }
     }
@@ -669,29 +584,6 @@ private fun PreviewOnboardingProfileSuccessScreen() {
                 eventPublisher = {},
                 onBack = {},
                 onOnboarded = {},
-                onActivateWallet = {},
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Preview
-@Composable
-private fun PreviewOnboardingZapsIntroductionScreen() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
-        ColumnWithBackground(
-            backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
-        ) {
-            OnboardingProfilePreviewScreen(
-                state = OnboardingContract.UiState(
-                    accountCreated = true,
-                    accountCreationStep = AccountCreationStep.ZapsIntroduction,
-                ),
-                eventPublisher = {},
-                onBack = {},
-                onOnboarded = {},
-                onActivateWallet = {},
             )
         }
     }

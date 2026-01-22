@@ -92,7 +92,6 @@ private fun OnboardingScreen(
                     eventPublisher = eventPublisher,
                     onBack = onBack,
                     onOnboarded = callbacks.onOnboarded,
-                    onActivateWallet = callbacks.onActivateWallet,
                 )
             }
         }
@@ -162,7 +161,6 @@ private fun PreviewOnboarding(
             callbacks = OnboardingContract.ScreenCallbacks(
                 onClose = {},
                 onOnboarded = {},
-                onActivateWallet = {},
             ),
         )
     }

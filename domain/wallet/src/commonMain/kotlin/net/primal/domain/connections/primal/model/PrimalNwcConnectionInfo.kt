@@ -1,6 +1,6 @@
-package net.primal.domain.connections.model
+package net.primal.domain.connections.primal.model
 
-data class NwcConnectionInfo(
+data class PrimalNwcConnectionInfo(
     val appName: String,
     val dailyBudgetInBtc: String?,
     val nwcPubkey: String,
