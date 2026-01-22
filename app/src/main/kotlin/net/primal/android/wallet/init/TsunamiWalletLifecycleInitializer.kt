@@ -1,5 +1,6 @@
 package net.primal.android.wallet.init
 
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -12,7 +13,6 @@ import net.primal.android.user.domain.CredentialType
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
-import timber.log.Timber
 
 @Singleton
 class TsunamiWalletLifecycleInitializer @Inject constructor(
@@ -36,7 +36,7 @@ class TsunamiWalletLifecycleInitializer @Inject constructor(
                         runCatching {
                             tsunamiWalletAccountRepository.terminateWallet(walletId).getOrThrow()
                         }.onFailure { t ->
-                            Timber.e(t, "terminateWallet failed for walletId=%s", walletId)
+                            Napier.e("terminateWallet failed for walletId=$walletId", t)
                         }
                         currentWalletId = null
                     }
@@ -52,7 +52,7 @@ class TsunamiWalletLifecycleInitializer @Inject constructor(
                             userId
                         }
                     }.getOrElse { error ->
-                        Timber.w(error, "Falling back to userId as walletKey for userId=%s", userId)
+                        Napier.w("Falling back to userId as walletKey for userId=$userId", error)
                         userId
                     }
 
@@ -67,10 +67,10 @@ class TsunamiWalletLifecycleInitializer @Inject constructor(
                         runCatching {
                             tsunamiWalletAccountRepository.fetchWalletAccountInfo(userId, walletId)
                         }.onFailure { t ->
-                            Timber.w(t, "fetchWalletAccountInfo failed for userId=%s, walletId=%s", userId, walletId)
+                            Napier.w("fetchWalletAccountInfo failed for userId=$userId, walletId=$walletId", t)
                         }
                     }.onFailure { t ->
-                        Timber.e(t, "initializeWallet failed for userId=%s", userId)
+                        Napier.e("initializeWallet failed for userId=$userId", t)
                     }
                 }
         }

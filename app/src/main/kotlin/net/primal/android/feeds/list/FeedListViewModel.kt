@@ -6,6 +6,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -30,7 +31,6 @@ import net.primal.domain.feeds.PrimalFeed
 import net.primal.domain.feeds.buildSpec
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.posts.FeedRepository
-import timber.log.Timber
 
 @HiltViewModel(assistedFactory = FeedListViewModel.Factory::class)
 class FeedListViewModel @AssistedInject constructor(
@@ -159,9 +159,9 @@ class FeedListViewModel @AssistedInject constructor(
                 setState { copy(isEditMode = false) }
                 updateFeedsState()
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to restore default feeds due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to restore default feeds due to network error." }
             }
         }
 
@@ -205,7 +205,7 @@ class FeedListViewModel @AssistedInject constructor(
             try {
                 defaultFeeds = feedsRepository.fetchDefaultFeeds(userId = userId, specKind = specKind) ?: emptyList()
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch default feeds." }
             }
 
             try {
@@ -215,9 +215,9 @@ class FeedListViewModel @AssistedInject constructor(
                     givenDefaultFeeds = defaultFeeds,
                 )
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to persist new default feeds due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to persist new default feeds due to network error." }
             }
         }
 
@@ -237,7 +237,7 @@ class FeedListViewModel @AssistedInject constructor(
                     setState { copy(dvmFeeds = dvmFeeds, selectedDvmFeed = updatedSelectedDvmFeed) }
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch and observe latest feed marketplace." }
             } finally {
                 setState { copy(fetchingDvmFeeds = false) }
             }
@@ -296,9 +296,9 @@ class FeedListViewModel @AssistedInject constructor(
                     feeds = currentFeeds,
                 )
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to persist feeds remotely due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to persist feeds remotely due to network error." }
             }
         }
 }

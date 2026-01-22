@@ -77,6 +77,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
+import io.github.aakira.napier.Napier
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.format.FormatStyle
@@ -125,7 +126,6 @@ import net.primal.domain.links.ReferencedStream as ReferencedStreamDO
 import net.primal.domain.nostr.utils.parseNostrUris
 import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
-import timber.log.Timber
 
 private const val URL_ANNOTATION_TAG = "url"
 
@@ -679,7 +679,7 @@ private fun NumberFormat.formatSafely(any: Any?): String? {
     return try {
         format(any)
     } catch (error: IllegalArgumentException) {
-        Timber.w(error)
+        Napier.w("Failed to format number safely.", error)
         null
     }
 }

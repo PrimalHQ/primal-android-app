@@ -1,6 +1,7 @@
 package net.primal.android.networking.relays
 
 import androidx.annotation.VisibleForTesting
+import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -28,7 +29,6 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.serialization.toNostrJsonObject
-import timber.log.Timber
 
 class RelayPool(
     dispatchers: DispatcherProvider,
@@ -156,7 +156,7 @@ class RelayPool(
                         responseFlow.emit(NostrPublishResult(result = it))
                     }
                     sendEventResult.exceptionOrNull()?.let {
-                        Timber.w(it, "sendEVENT failed to $socketUrl")
+                        Napier.w(message = "sendEVENT failed to $socketUrl", throwable = it)
                         responseFlow.emit(NostrPublishResult(error = it))
                     }
                 }

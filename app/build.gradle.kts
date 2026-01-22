@@ -355,7 +355,6 @@ dependencies {
     implementation(libs.flippable)
     implementation(libs.reorderable)
 
-    implementation(libs.timber)
     implementation(libs.napier)
 
     implementation(libs.lightning.kmp)

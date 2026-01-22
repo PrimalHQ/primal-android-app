@@ -6,8 +6,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.source.LoadEventInfo
 import androidx.media3.exoplayer.source.MediaLoadData
+import io.github.aakira.napier.Napier
 import java.io.IOException
-import timber.log.Timber
 
 @UnstableApi
 class PrimalStreamAnalyticsListener : AnalyticsListener {
@@ -26,7 +26,7 @@ class PrimalStreamAnalyticsListener : AnalyticsListener {
     }
 
     override fun onPlayerError(eventTime: AnalyticsListener.EventTime, error: PlaybackException) {
-        Timber.e(error, "Player Error at ${eventTime.realtimeMs}:")
+        Napier.e(message = "Player Error at ${eventTime.realtimeMs}:", throwable = error)
     }
 
     override fun onLoadError(
@@ -37,7 +37,10 @@ class PrimalStreamAnalyticsListener : AnalyticsListener {
         wasCanceled: Boolean,
     ) {
         if (!wasCanceled) {
-            Timber.w(error, "Network Load Error at ${eventTime.realtimeMs}: uri=${loadEventInfo.uri}")
+            Napier.w(
+                message = "Network Load Error at ${eventTime.realtimeMs}: uri=${loadEventInfo.uri}",
+                throwable = error,
+            )
         }
     }
 
@@ -47,7 +50,7 @@ class PrimalStreamAnalyticsListener : AnalyticsListener {
         totalBytesLoaded: Long,
         bitrateEstimate: Long,
     ) {
-        Timber.d(
+        Napier.d(
             "Bandwidth Estimate: ${bitrateEstimate / BITS_IN_KILOBIT} kbps " +
                 "(loaded ${totalBytesLoaded / BYTES_IN_KILOBYTE} KB in ${totalLoadTimeMs}ms)",
         )
@@ -59,7 +62,7 @@ class PrimalStreamAnalyticsListener : AnalyticsListener {
         elapsedMs: Long,
     ) {
         if (droppedFrames > 0) {
-            Timber.w("Dropped $droppedFrames video frames in ${elapsedMs}ms")
+            Napier.w("Dropped $droppedFrames video frames in ${elapsedMs}ms")
         }
     }
 
@@ -71,17 +74,17 @@ class PrimalStreamAnalyticsListener : AnalyticsListener {
             Player.STATE_ENDED -> "ENDED"
             else -> "?"
         }
-        Timber.d("Playback state changed to: $stateString")
+        Napier.d("Playback state changed to: $stateString")
     }
 
     override fun onIsPlayingChanged(eventTime: AnalyticsListener.EventTime, isPlaying: Boolean) {
-        Timber.d("Is playing changed to: $isPlaying")
+        Napier.d("Is playing changed to: $isPlaying")
     }
 
     override fun onDownstreamFormatChanged(eventTime: AnalyticsListener.EventTime, mediaLoadData: MediaLoadData) {
         val format = mediaLoadData.trackFormat
         if (format != null) {
-            Timber.d(
+            Napier.d(
                 "Downstream format changed: Resolution=%dx%d, Bitrate=%d, MimeType=%s",
                 format.width,
                 format.height,
@@ -96,6 +99,6 @@ class PrimalStreamAnalyticsListener : AnalyticsListener {
         output: Any,
         renderTimeMs: Long,
     ) {
-        Timber.d("Rendered first frame in ${renderTimeMs}ms. Using Cronet: $isUsingCronet (v: $cronetVersion)")
+        Napier.d("Rendered first frame in ${renderTimeMs}ms. Using Cronet: $isUsingCronet (v: $cronetVersion)")
     }
 }

@@ -3,6 +3,7 @@ package net.primal.android.premium.buying.name
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,7 +14,6 @@ import net.primal.android.premium.buying.name.PremiumPrimalNameContract.UiEvent
 import net.primal.android.premium.buying.name.PremiumPrimalNameContract.UiState
 import net.primal.android.premium.repository.PremiumRepository
 import net.primal.domain.common.exception.NetworkException
-import timber.log.Timber
 
 @HiltViewModel
 class PremiumPrimalNameViewModel @Inject constructor(
@@ -46,7 +46,7 @@ class PremiumPrimalNameViewModel @Inject constructor(
                 val isNameAvailable = premiumRepository.isPrimalNameAvailable(name = name)
                 setState { copy(isNameAvailable = isNameAvailable) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to check Primal Name availability for '$name'." }
             }
         }
 }

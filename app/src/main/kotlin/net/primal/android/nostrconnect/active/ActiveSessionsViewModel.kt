@@ -3,6 +3,7 @@ package net.primal.android.nostrconnect.active
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,7 +27,6 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.data.account.repository.manager.RemoteAppConnectionManager
 import net.primal.domain.account.repository.SessionRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ActiveSessionsViewModel @Inject constructor(
@@ -127,7 +127,7 @@ class ActiveSessionsViewModel @Inject constructor(
             setState { copy(disconnecting = true) }
             signerSessionHandler.endSessions(sessionIds = state.value.selectedSessions.toList())
                 .onSuccess { setEffect(SideEffect.SessionsDisconnected) }
-                .onFailure { Timber.e(it, "Error disconnecting sessions") }
+                .onFailure { Napier.e(message = "Error disconnecting sessions", throwable = it) }
 
             setState { copy(disconnecting = false) }
         }

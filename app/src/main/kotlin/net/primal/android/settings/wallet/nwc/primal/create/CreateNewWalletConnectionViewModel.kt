@@ -3,6 +3,7 @@ package net.primal.android.settings.wallet.nwc.primal.create
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.math.BigDecimal
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,7 +18,6 @@ import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.connections.PrimalWalletNwcRepository
 import net.primal.domain.nostr.cryptography.SignatureException
-import timber.log.Timber
 
 @HiltViewModel
 class CreateNewWalletConnectionViewModel @Inject constructor(
@@ -88,10 +88,10 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                 }
             } catch (error: SignatureException) {
                 setState { copy(creatingSecret = false) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to create wallet connection due to signature error." }
             } catch (error: NetworkException) {
                 setState { copy(creatingSecret = false) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to create wallet connection due to network error." }
             }
         }
 }

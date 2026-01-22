@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import io.github.aakira.napier.Napier
 import java.time.Instant
 import java.util.*
 import kotlinx.coroutines.CoroutineScope
@@ -80,7 +81,6 @@ import net.primal.domain.streams.StreamStatus
 import net.primal.domain.streams.chat.ChatMessage
 import net.primal.domain.streams.chat.LiveStreamChatRepository
 import net.primal.domain.utils.isConfigured
-import timber.log.Timber
 
 @Suppress("LargeClass")
 class LiveStreamViewModel @AssistedInject constructor(
@@ -412,7 +412,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     }
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch follower count for profileId=$profileId" }
             }
         }
     }
@@ -451,12 +451,12 @@ class LiveStreamViewModel @AssistedInject constructor(
                 )
                 setState { copy(comment = TextFieldValue(), taggedUsers = emptyList()) }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to send message due to NostrPublishException." }
                 chatMessages = chatMessages?.filterNot { it.uniqueId == tempMessageId }
                 updateChatItems()
                 setState { copy(error = UiError.FailedToPublishZapEvent(error)) }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to send message due to SignatureException." }
                 chatMessages = chatMessages?.filterNot { it.uniqueId == tempMessageId }
                 updateChatItems()
                 setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
@@ -824,7 +824,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     mutedUserId = profileId,
                 )
             } catch (error: DomainNostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute user due to NostrPublishException." }
                 setState {
                     copy(
                         activeUserMutedProfiles = this.activeUserMutedProfiles - profileId,
@@ -832,7 +832,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     )
                 }
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute user due to MissingRelaysException." }
                 setState {
                     copy(
                         activeUserMutedProfiles = this.activeUserMutedProfiles - profileId,
@@ -840,7 +840,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     )
                 }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute user due to SignatureException." }
                 setState {
                     copy(
                         activeUserMutedProfiles = this.activeUserMutedProfiles - profileId,
@@ -862,7 +862,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     unmutedUserId = profileId,
                 )
             } catch (error: DomainNostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute user due to NostrPublishException." }
                 setState {
                     copy(
                         activeUserMutedProfiles = this.activeUserMutedProfiles + profileId,
@@ -870,7 +870,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     )
                 }
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute user due to MissingRelaysException." }
                 setState {
                     copy(
                         activeUserMutedProfiles = this.activeUserMutedProfiles + profileId,
@@ -878,7 +878,7 @@ class LiveStreamViewModel @AssistedInject constructor(
                     )
                 }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute user due to SignatureException." }
                 setState {
                     copy(
                         activeUserMutedProfiles = this.activeUserMutedProfiles + profileId,
@@ -900,10 +900,10 @@ class LiveStreamViewModel @AssistedInject constructor(
                     articleId = streamInfo.atag,
                 )
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to report abuse due to SignatureException." }
                 setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to report abuse due to NostrPublishException." }
             }
         }
 
@@ -922,10 +922,10 @@ class LiveStreamViewModel @AssistedInject constructor(
                 articleId = streamInfo.atag,
             )
         } catch (error: SignatureException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to report message due to SignatureException." }
             setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
         } catch (error: NostrPublishException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to report message due to NostrPublishException." }
         }
     }
 
@@ -953,13 +953,13 @@ class LiveStreamViewModel @AssistedInject constructor(
 
                 setEffect(SideEffect.StreamDeleted)
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to delete stream due to NostrPublishException." }
                 setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to delete stream due to MissingRelaysException." }
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to delete stream due to SignatureException." }
                 setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             }
         }

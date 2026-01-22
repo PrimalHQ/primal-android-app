@@ -21,6 +21,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import io.github.aakira.napier.Napier
 import net.primal.android.BuildConfig
 import net.primal.android.R
 import net.primal.android.core.compose.ListLoadingError
@@ -39,7 +40,6 @@ import net.primal.android.notes.feed.note.FeedNoteCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.domain.nostr.ReactionType
-import timber.log.Timber
 
 internal const val FEED_NESTED_NOTES_CUT_OFF_LIMIT = 2
 internal const val STREAM_PILLS_ROW_KEY = "streamPillsRow"
@@ -106,7 +106,7 @@ fun NoteFeedLazyColumn(
                 is LoadState.Error -> {
                     item(contentType = "PrependError") {
                         val error = prependMediatorLoadState.error
-                        Timber.w(error)
+                        Napier.w(throwable = error) { "Error loading prev page" }
                         ListLoadingError(
                             text = stringResource(R.string.app_error_loading_prev_page) + "\n${error.message}",
                         )
@@ -190,7 +190,7 @@ fun NoteFeedLazyColumn(
 
                 is LoadState.Error -> {
                     val error = refreshLoadState.error
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Error loading feed" }
                     item(contentType = "RefreshError") {
                         ListNoContent(
                             modifier = Modifier.fillParentMaxSize(),
@@ -215,7 +215,7 @@ fun NoteFeedLazyColumn(
             is LoadState.Error -> if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
                 item(contentType = "AppendError") {
                     val error = appendMediatorLoadState.error
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Error loading next page" }
                     ListLoadingError(
                         text = stringResource(R.string.app_error_loading_next_page) + "\n${error.message}",
                     )

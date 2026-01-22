@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -31,7 +32,6 @@ import net.primal.domain.feeds.buildAdvancedSearchFeedSpec
 import net.primal.domain.feeds.resolveFeedSpecKind
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.posts.FeedRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ExploreFeedViewModel @Inject constructor(
@@ -118,10 +118,10 @@ class ExploreFeedViewModel @Inject constructor(
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
             }
         } catch (error: SignatureException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to add feed due to signature error." }
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
         } catch (error: NetworkException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to add feed due to network error." }
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
         }
     }
@@ -132,10 +132,10 @@ class ExploreFeedViewModel @Inject constructor(
             feedsRepository.removeFeedLocally(userId = userId, feedSpec = feedSpec)
             feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
         } catch (error: SignatureException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to remove feed due to signature error." }
             setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
         } catch (error: NetworkException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to remove feed due to network error." }
             setErrorState(error = ExploreFeedError.FailedToRemoveFeed(error))
         }
     }

@@ -3,6 +3,7 @@ package net.primal.android.premium.leaderboard.legend
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +18,6 @@ import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.premium.utils.isPrimalLegendTier
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.common.exception.NetworkException
-import timber.log.Timber
 
 @HiltViewModel
 class LegendLeaderboardViewModel @Inject constructor(
@@ -72,7 +72,7 @@ class LegendLeaderboardViewModel @Inject constructor(
                     .map { it.toUiModel() }
                 setState { copy(leaderboardEntries = leaderboardEntries + (orderBy to entries)) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch legend leaderboard." }
                 setState { copy(error = error) }
             } finally {
                 setState { copy(loading = false) }

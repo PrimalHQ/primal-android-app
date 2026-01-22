@@ -3,6 +3,7 @@ package net.primal.android.settings.notifications
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.FlowPreview
@@ -45,7 +46,6 @@ import net.primal.domain.notifications.NotificationSettingsType.Preferences
 import net.primal.domain.notifications.NotificationSettingsType.PushNotifications
 import net.primal.domain.notifications.NotificationSettingsType.TabNotifications
 import net.primal.domain.settings.AppSettingsDescription
-import timber.log.Timber
 
 @HiltViewModel
 class NotificationsSettingsViewModel @Inject constructor(
@@ -171,7 +171,7 @@ class NotificationsSettingsViewModel @Inject constructor(
 
                 when (signResult) {
                     is SignResult.Rejected -> {
-                        Timber.w(signResult.error)
+                        Napier.w(throwable = signResult.error) { "Failed to sign event for fetching app settings" }
                         setState { copy(signatureError = signResult.error.asSignatureUiError()) }
                     }
 
@@ -182,7 +182,7 @@ class NotificationsSettingsViewModel @Inject constructor(
                     }
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch latest app settings" }
                 setState { copy(error = FetchAppSettingsError(cause = error)) }
             }
         }

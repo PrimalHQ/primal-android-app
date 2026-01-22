@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -54,7 +55,6 @@ import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
 import net.primal.domain.utils.isConfigured
-import timber.log.Timber
 
 @HiltViewModel
 class ProfileDetailsViewModel @Inject constructor(
@@ -239,7 +239,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     )
                 }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch profiles followed by" }
             }
         }
 
@@ -334,7 +334,7 @@ class ProfileDetailsViewModel @Inject constructor(
             try {
                 profileRepository.fetchProfile(profileId = profileId)
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to update referenced profile $profileId" }
             }
         }
     }
@@ -383,7 +383,7 @@ class ProfileDetailsViewModel @Inject constructor(
                     }
                     setState { copy(isProfileFollowingMe = isFollowing) }
                 } catch (error: NetworkException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to resolve follows me status" }
                 }
             }
         }
@@ -397,14 +397,14 @@ class ProfileDetailsViewModel @Inject constructor(
                 )
             }
         } catch (error: NetworkException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to fetch latest mute list" }
         }
 
     private suspend fun fetchLatestProfile(profileId: String) =
         try {
             profileRepository.fetchProfile(profileId = profileId)
         } catch (error: NetworkException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to fetch latest profile" }
         }
 
     private fun updateStateProfileAsFollowedAndClearApprovalFlag() =
@@ -486,13 +486,13 @@ class ProfileDetailsViewModel @Inject constructor(
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedAdded)
             } catch (error: SigningKeyNotFoundException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to add profile feed: key not found" }
                 setErrorState(error = UiError.MissingPrivateKey)
             } catch (error: SigningRejectedException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to add profile feed: signing rejected" }
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to add profile feed: network error" }
                 setErrorState(error = UiError.FailedToAddToFeed(error))
             }
         }
@@ -509,13 +509,13 @@ class ProfileDetailsViewModel @Inject constructor(
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
                 setEffect(ProfileDetailsContract.SideEffect.ProfileFeedRemoved)
             } catch (error: SigningKeyNotFoundException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to remove profile feed: key not found" }
                 setErrorState(error = UiError.MissingPrivateKey)
             } catch (error: SigningRejectedException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to remove profile feed: signing rejected" }
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to remove profile feed: network error" }
                 setErrorState(error = UiError.FailedToRemoveFeed(error))
             }
         }
@@ -532,19 +532,19 @@ class ProfileDetailsViewModel @Inject constructor(
                 }
                 setState { copy(isProfileMuted = true) }
             } catch (error: SigningKeyNotFoundException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute user: key not found" }
                 setErrorState(error = UiError.MissingPrivateKey)
             } catch (error: SigningRejectedException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute user: signing rejected" }
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute user: publish error" }
                 setErrorState(error = UiError.FailedToMuteUser(error))
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute user: missing relays" }
                 setErrorState(error = UiError.MissingRelaysConfiguration(error))
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute user: network error" }
                 setErrorState(error = UiError.FailedToMuteUser(error))
             }
         }
@@ -560,19 +560,19 @@ class ProfileDetailsViewModel @Inject constructor(
                 }
                 setState { copy(isProfileMuted = false) }
             } catch (error: SigningKeyNotFoundException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute user: key not found" }
                 setErrorState(error = UiError.MissingPrivateKey)
             } catch (error: SigningRejectedException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute user: signing rejected" }
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute user: publish error" }
                 setErrorState(error = UiError.FailedToUnmuteUser(error))
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute user: missing relays" }
                 setErrorState(error = UiError.MissingRelaysConfiguration(error))
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute user: network error" }
                 setErrorState(error = UiError.FailedToUnmuteUser(error))
             }
         }
@@ -587,13 +587,13 @@ class ProfileDetailsViewModel @Inject constructor(
                     eventId = event.noteId,
                 )
             } catch (error: SigningKeyNotFoundException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to report abuse: key not found" }
                 setErrorState(error = UiError.MissingPrivateKey)
             } catch (error: SigningRejectedException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to report abuse: signing rejected" }
                 setErrorState(error = UiError.NostrSignUnauthorized)
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to report abuse: publish error" }
             }
         }
 

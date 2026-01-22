@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -30,7 +31,6 @@ import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.DraftTx
-import timber.log.Timber
 
 @HiltViewModel
 class SendPaymentViewModel @Inject constructor(
@@ -85,7 +85,7 @@ class SendPaymentViewModel @Inject constructor(
             val userId = activeAccountStore.activeUserId()
             walletTextParser.parseAndQueryText(userId = userId, text = text)
                 .onFailure { error ->
-                    Timber.w(error, "Unable to parse text. [text = $text]")
+                    Napier.w(message = "Unable to parse text. [text = $text]", throwable = error)
                     setState { copy(error = UiState.SendPaymentError.ParseException(error)) }
                 }.onSuccess { draftTx ->
                     setEffect(SideEffect.DraftTransactionReady(draft = draftTx))

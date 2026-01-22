@@ -3,6 +3,7 @@ package net.primal.android.wallet.transactions.receive
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,6 @@ import net.primal.core.utils.onSuccess
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.wallet.Network
 import net.primal.domain.wallet.WalletRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ReceivePaymentViewModel @Inject constructor(
@@ -129,7 +129,7 @@ class ReceivePaymentViewModel @Inject constructor(
                     }
                 },
                 onFailure = {
-                    Timber.w(it)
+                    Napier.w(throwable = it) { "Failed to fetch on-chain address" }
                     setState { copy(loading = false) }
                 },
             )
@@ -167,7 +167,7 @@ class ReceivePaymentViewModel @Inject constructor(
                 )
             }
         }.onFailure { error ->
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to create lightning invoice" }
             setState { copy(error = UiState.ReceivePaymentError.FailedToCreateLightningInvoice(cause = error)) }
         }
 

@@ -1,5 +1,6 @@
 package net.primal.android.user.accounts
 
+import io.github.aakira.napier.Napier
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.boolean
@@ -7,13 +8,12 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.user.domain.Relay
 import net.primal.core.utils.serialization.CommonJson
-import timber.log.Timber
 
 fun String.parseKind3Relays(): List<Relay> {
     val jsonContent = try {
         CommonJson.parseToJsonElement(this)
     } catch (error: SerializationException) {
-        Timber.w(error)
+        Napier.w(throwable = error) { "Failed to parse kind 3 relays" }
         null
     }
 

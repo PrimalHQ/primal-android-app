@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -37,7 +38,6 @@ import net.primal.domain.account.WalletActivationStatus
 import net.primal.domain.account.WalletRegionJson
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import timber.log.Timber
 
 @HiltViewModel
 class WalletActivationViewModel @Inject constructor(
@@ -149,10 +149,10 @@ class WalletActivationViewModel @Inject constructor(
                 )
                 setState { copy(status = WalletActivationStatus.PendingOtpVerification) }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Activation request failed due to signature error." }
                 setState { copy(error = error) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Activation request failed due to network error." }
                 setState { copy(error = error) }
             } finally {
                 setState { copy(working = false) }
@@ -183,7 +183,7 @@ class WalletActivationViewModel @Inject constructor(
                         )
                     }
                 }.onFailure { error ->
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Wallet activation failed." }
                     setState { copy(error = error) }
                 }
             setState { copy(working = false) }
@@ -196,7 +196,7 @@ class WalletActivationViewModel @Inject constructor(
                 code = promoCode,
             )
         }.onFailure { error ->
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to redeem promo code." }
             setState { copy(uiError = UiError.InvalidPromoCode(error)) }
         }
 
@@ -206,5 +206,5 @@ class WalletActivationViewModel @Inject constructor(
                 userId = userId,
                 lightningAddress = lightningAddress,
             )
-        }.onFailure { Timber.w(it) }
+        }.onFailure { Napier.w(throwable = it) { "Failed to set lightning address." } }
 }

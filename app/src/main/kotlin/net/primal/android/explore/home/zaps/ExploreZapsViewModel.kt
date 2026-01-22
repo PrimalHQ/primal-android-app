@@ -3,6 +3,7 @@ package net.primal.android.explore.home.zaps
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,7 +21,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.explore.ExploreZapNoteData
-import timber.log.Timber
 
 @HiltViewModel
 class ExploreZapsViewModel @Inject constructor(
@@ -30,7 +30,7 @@ class ExploreZapsViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
@@ -49,7 +49,7 @@ class ExploreZapsViewModel @Inject constructor(
                 )
                 setState { copy(zaps = zaps.mapAsUiModel()) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch trending zaps." }
             } finally {
                 setState { copy(loading = false) }
             }

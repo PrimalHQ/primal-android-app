@@ -81,7 +81,6 @@ security-identity-credential = "1.0.0-alpha03"
 skie = "0.10.8"
 sqlcipher-android = "4.9.0"
 telephoto = "0.18.0"
-timber = "5.0.1"
 url-detector = "0.1.23"
 whyoleg-cryptography-kotlin = "0.5.0"
 zoomimage-compose-coil3 = "1.4.0"
@@ -240,7 +239,6 @@ google-play-services-cronet = { module = "com.google.android.gms:play-services-c
 zoomimage-compose-coil3 = { module = "io.github.panpf.zoomimage:zoomimage-compose-coil3", version.ref = "zoomimage-compose-coil3" }
 
 # Loggers
-timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 napier = { module = "io.github.aakira:napier", version.ref = "napier"}
 
 # Other libs

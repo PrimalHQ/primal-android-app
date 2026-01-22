@@ -3,6 +3,7 @@ package net.primal.android.settings.network
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
@@ -23,7 +24,6 @@ import net.primal.core.config.AppConfigHandler
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import timber.log.Timber
 
 @HiltViewModel
 class NetworkSettingsViewModel @Inject constructor(
@@ -101,7 +101,7 @@ class NetworkSettingsViewModel @Inject constructor(
             try {
                 relayRepository.fetchAndUpdateUserRelays(userId = activeAccountStore.activeUserId())
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch and update user relays." }
             }
             delay(1.seconds)
             relaysSocketManager.tryConnectingToAllUserRelays()
@@ -142,9 +142,9 @@ class NetworkSettingsViewModel @Inject constructor(
                 try {
                     relayRepository.bootstrapUserRelays(userId = userId)
                 } catch (error: SignatureException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to restore default relays due to signature error." }
                 } catch (error: NostrPublishException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to restore default relays due to nostr publish error." }
                 }
                 ensureRelayPoolUpdatedAndConnected()
             }
@@ -172,13 +172,13 @@ class NetworkSettingsViewModel @Inject constructor(
             val userId = activeAccountStore.activeUserId()
             block(userId)
         } catch (error: NetworkException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to change relay list due to network error." }
             setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
         } catch (error: SignatureException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to change relay list due to signature error." }
             setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
         } catch (error: NostrPublishException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to change relay list due to nostr publish error." }
             setState { copy(error = UiState.NetworkSettingsError.FailedToAddRelay(error)) }
         } finally {
             setState { copy(updatingRelays = false) }

@@ -6,6 +6,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,7 +26,6 @@ import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
-import timber.log.Timber
 
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
 class WalletSettingsViewModel @AssistedInject constructor(
@@ -72,9 +72,9 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     )
                 }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch wallet connections due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch wallet connections due to network error." }
                 setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
             }
         }
@@ -113,9 +113,9 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 setState { copy(nwcConnectionsInfo = updatedConnections) }
                 primalWalletNwcRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to revoke NWC connection due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to revoke NWC connection due to network error." }
                 setState { copy(nwcConnectionsInfo = nwcConnections) }
             }
         }
@@ -157,7 +157,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 nwcUrl = nwcUrl,
                 autoSetAsDefaultWallet = true,
             )
-                .onFailure { Timber.w(it) }
+                .onFailure { Napier.w(throwable = it) { "Failed to connect wallet." } }
                 .onSuccess { setState { copy(useExternalWallet = true) } }
         }
 

@@ -3,6 +3,7 @@ package net.primal.android.wallet.upgrade
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +11,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.wallet.upgrade.UpgradeWalletContract.UiState
-import timber.log.Timber
 
 @HiltViewModel
 class UpgradeWalletViewModel @Inject constructor() : ViewModel() {
@@ -29,7 +29,7 @@ class UpgradeWalletViewModel @Inject constructor() : ViewModel() {
                 setState { copy(status = UpgradeWalletStatus.Upgrading, error = null) }
                 delay(MOCK_UPGRADE_DELAY_MS)
             }.onFailure {
-                Timber.w(it, "Wallet upgrade failed")
+                Napier.w(message = "Wallet upgrade failed", throwable = it)
                 setState { copy(status = UpgradeWalletStatus.Failed, error = it) }
             }.onSuccess {
                 setState { copy(status = UpgradeWalletStatus.Success) }

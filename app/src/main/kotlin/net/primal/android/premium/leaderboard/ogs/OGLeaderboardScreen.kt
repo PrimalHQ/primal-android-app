@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
@@ -40,7 +41,6 @@ import net.primal.android.premium.leaderboard.ogs.ui.OGLeaderboardTabs
 import net.primal.android.premium.leaderboard.ogs.ui.PAGE_COUNT
 import net.primal.android.theme.AppTheme
 import net.primal.domain.membership.OGLeaderboardEntry
-import timber.log.Timber
 
 @Composable
 fun OGLeaderboardScreen(viewModel: OGLeaderboardViewModel, callbacks: OGLeaderboardContract.ScreenCallbacks) {
@@ -79,7 +79,7 @@ private fun OGLeaderboardScreen(
             if (pagingItems.isEmpty()) {
                 when (val refreshLoadState = pagingItems.loadState.refresh) {
                     is LoadState.Error -> {
-                        Timber.w(refreshLoadState.error)
+                        Napier.w(throwable = refreshLoadState.error) { "Error loading OG leaderboard" }
                         ListNoContent(
                             modifier = Modifier.fillMaxSize(),
                             noContentText = stringResource(id = R.string.premium_leaderboard_error_loading),

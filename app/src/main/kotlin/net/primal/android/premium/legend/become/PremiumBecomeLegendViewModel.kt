@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.math.BigDecimal
 import java.math.RoundingMode
 import javax.inject.Inject
@@ -24,7 +25,6 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.domain.utils.parseBitcoinPaymentInstructions
-import timber.log.Timber
 
 @HiltViewModel
 class PremiumBecomeLegendViewModel @Inject constructor(
@@ -146,9 +146,9 @@ class PremiumBecomeLegendViewModel @Inject constructor(
                     )
                 }
             } catch (error: SignatureException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch exchange rate" }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch exchange rate" }
             }
         }
     }
@@ -176,9 +176,9 @@ class PremiumBecomeLegendViewModel @Inject constructor(
 
                 startPurchaseMonitor()
             } catch (error: SignatureException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch legend payment instructions" }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch legend payment instructions" }
             } finally {
                 setState { copy(isFetchingPaymentInstructions = false) }
             }
@@ -205,7 +205,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
             try {
                 premiumRepository.fetchMembershipStatus(activeAccountStore.activeUserId())
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch membership status" }
             }
         }
 }

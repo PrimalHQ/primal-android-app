@@ -3,6 +3,7 @@ package net.primal.android.feeds.dvm
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +29,6 @@ import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.utils.isConfigured
-import timber.log.Timber
 
 @HiltViewModel
 class DvmFeedListItemViewModel @Inject constructor(
@@ -40,7 +40,7 @@ class DvmFeedListItemViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val event = MutableSharedFlow<UiEvent>()
     fun setEvent(e: UiEvent) = viewModelScope.launch { event.emit(e) }
@@ -103,16 +103,16 @@ class DvmFeedListItemViewModel @Inject constructor(
                 )
             } catch (error: NostrPublishException) {
                 setState { copy(error = UiError.FailedToPublishLikeEvent(error)) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to publish like event." }
             } catch (error: MissingRelaysException) {
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Missing relays for like action." }
             } catch (error: SigningKeyNotFoundException) {
                 setState { copy(error = UiError.MissingPrivateKey) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing key not found for like action." }
             } catch (error: SigningRejectedException) {
                 setState { copy(error = UiError.NostrSignUnauthorized) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing rejected for like action." }
             }
         }
 

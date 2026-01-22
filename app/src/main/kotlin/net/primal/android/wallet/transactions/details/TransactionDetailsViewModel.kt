@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,7 +39,6 @@ import net.primal.domain.streams.StreamRepository
 import net.primal.domain.streams.mappers.asReferencedStream
 import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.WalletRepository
-import timber.log.Timber
 
 @HiltViewModel
 class TransactionDetailsViewModel @Inject constructor(
@@ -136,7 +136,7 @@ class TransactionDetailsViewModel @Inject constructor(
                     )
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch zapped article for articleId=$articleId" }
             } finally {
                 setState { copy(loading = false) }
             }
@@ -160,7 +160,7 @@ class TransactionDetailsViewModel @Inject constructor(
                     feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = noteId)
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch zapped note for noteId=$noteId" }
             } finally {
                 setState { copy(loading = false) }
             }

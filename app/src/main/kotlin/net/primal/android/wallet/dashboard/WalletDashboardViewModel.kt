@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -41,7 +42,6 @@ import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.distinctUntilWalletIdChanged
-import timber.log.Timber
 
 @HiltViewModel
 class WalletDashboardViewModel @Inject constructor(
@@ -172,7 +172,7 @@ class WalletDashboardViewModel @Inject constructor(
     private fun fetchWalletBalance(walletId: String) =
         viewModelScope.launch {
             walletRepository.fetchWalletBalance(walletId = walletId)
-                .onFailure { Timber.w(it) }
+                .onFailure { Napier.w(throwable = it) { "Failed to fetch wallet balance." } }
         }
 
     private fun observeUsdExchangeRate() {
@@ -197,7 +197,7 @@ class WalletDashboardViewModel @Inject constructor(
                 primalWalletAccountRepository.fetchWalletAccountInfo(userId = activeUserId)
                 walletAccountRepository.setActiveWallet(userId = activeUserId, walletId = activeUserId)
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to enable Primal Wallet." }
             }
         }
 
@@ -210,9 +210,9 @@ class WalletDashboardViewModel @Inject constructor(
                     purchaseToken = purchase.purchaseToken,
                 )
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to confirm purchase due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to confirm purchase due to network error." }
                 val dashboardError = if (error.cause is NostrNoticeException) {
                     UiState.DashboardError.InAppPurchaseNoticeError(message = error.message)
                 } else {

@@ -15,6 +15,7 @@ import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.LoadControl
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
+import io.github.aakira.napier.Napier
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import javax.inject.Inject
@@ -27,7 +28,6 @@ import net.primal.android.stream.player.SEEK_BACK_MS
 import net.primal.android.stream.player.SEEK_FORWARD_MS
 import net.primal.core.utils.AndroidBuildConfig
 import org.chromium.net.CronetEngine
-import timber.log.Timber
 
 @OptIn(UnstableApi::class)
 class GooglePlayerManager @Inject constructor(
@@ -72,7 +72,7 @@ class GooglePlayerManager @Inject constructor(
         }.map { (engine, executor) ->
             CronetDataSource.Factory(engine, executor)
         }.onFailure {
-            Timber.w(it, "Cronet is not available. Using default HTTP stack for media playback.")
+            Napier.w(message = "Cronet is not available. Using default HTTP stack for media playback.", throwable = it)
         }.getOrNull() ?: DefaultDataSource.Factory(context)
 
         val cacheDataSourceFactory = CacheDataSource.Factory()
