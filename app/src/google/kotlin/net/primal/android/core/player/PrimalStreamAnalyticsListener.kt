@@ -50,10 +50,10 @@ class PrimalStreamAnalyticsListener : AnalyticsListener {
         totalBytesLoaded: Long,
         bitrateEstimate: Long,
     ) {
-        Napier.d(
+        Napier.d {
             "Bandwidth Estimate: ${bitrateEstimate / BITS_IN_KILOBIT} kbps " +
-                "(loaded ${totalBytesLoaded / BYTES_IN_KILOBYTE} KB in ${totalLoadTimeMs}ms)",
-        )
+                "(loaded ${totalBytesLoaded / BYTES_IN_KILOBYTE} KB in ${totalLoadTimeMs}ms)"
+        }
     }
 
     override fun onDroppedVideoFrames(
@@ -62,7 +62,7 @@ class PrimalStreamAnalyticsListener : AnalyticsListener {
         elapsedMs: Long,
     ) {
         if (droppedFrames > 0) {
-            Napier.w("Dropped $droppedFrames video frames in ${elapsedMs}ms")
+            Napier.w { "Dropped $droppedFrames video frames in ${elapsedMs}ms" }
         }
     }
 
@@ -74,23 +74,20 @@ class PrimalStreamAnalyticsListener : AnalyticsListener {
             Player.STATE_ENDED -> "ENDED"
             else -> "?"
         }
-        Napier.d("Playback state changed to: $stateString")
+        Napier.d { "Playback state changed to: $stateString" }
     }
 
     override fun onIsPlayingChanged(eventTime: AnalyticsListener.EventTime, isPlaying: Boolean) {
-        Napier.d("Is playing changed to: $isPlaying")
+        Napier.d { "Is playing changed to: $isPlaying" }
     }
 
     override fun onDownstreamFormatChanged(eventTime: AnalyticsListener.EventTime, mediaLoadData: MediaLoadData) {
         val format = mediaLoadData.trackFormat
         if (format != null) {
-            Napier.d(
-                "Downstream format changed: Resolution=%dx%d, Bitrate=%d, MimeType=%s",
-                format.width,
-                format.height,
-                format.bitrate,
-                format.sampleMimeType,
-            )
+            Napier.d {
+                "Downstream format changed: Resolution=${format.width}x${format.height}, " +
+                    "Bitrate=${format.bitrate}, MimeType=${format.sampleMimeType}"
+            }
         }
     }
 
@@ -99,6 +96,6 @@ class PrimalStreamAnalyticsListener : AnalyticsListener {
         output: Any,
         renderTimeMs: Long,
     ) {
-        Napier.d("Rendered first frame in ${renderTimeMs}ms. Using Cronet: $isUsingCronet (v: $cronetVersion)")
+        Napier.d { "Rendered first frame in ${renderTimeMs}ms. Using Cronet: $isUsingCronet (v: $cronetVersion)" }
     }
 }
