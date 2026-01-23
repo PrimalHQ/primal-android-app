@@ -1,7 +1,6 @@
-package net.primal.data.account.signer.remote.client
+package net.primal.data.account.signer.remote
 
 import io.github.aakira.napier.Napier
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -34,7 +33,6 @@ import net.primal.domain.nostr.cryptography.NostrKeyPair
 import net.primal.domain.nostr.cryptography.utils.assureValidPubKeyHex
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 
-@OptIn(ExperimentalUuidApi::class)
 class RemoteSignerClient(
     relayUrl: String,
     dispatchers: DispatcherProvider,
