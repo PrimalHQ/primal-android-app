@@ -28,7 +28,7 @@ import net.primal.wallet.data.remote.model.PromoCodeRequestBody
 import net.primal.wallet.data.repository.mappers.local.toWalletActivationRequestDTO
 import net.primal.wallet.data.repository.mappers.remote.toPromoCodeDetailsDO
 
-class PrimalWalletAccountRepositoryImpl(
+internal class PrimalWalletAccountRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val primalWalletApi: PrimalWalletApi,
     private val walletDatabase: WalletDatabase,

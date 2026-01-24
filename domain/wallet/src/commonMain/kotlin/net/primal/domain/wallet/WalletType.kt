@@ -4,4 +4,5 @@ enum class WalletType {
     PRIMAL,
     NWC,
     TSUNAMI,
+    SPARK,
 }

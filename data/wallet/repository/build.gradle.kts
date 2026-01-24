@@ -93,6 +93,7 @@ kotlin {
 
                 // Bitcoin
                 implementation(libs.bitcoin.kmp)
+                implementation(libs.breez.sdk.spark.kmp)
 
                 // Crypto
                 implementation(libs.korlibs.crypto)

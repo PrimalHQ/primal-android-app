@@ -11,7 +11,7 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.wallet.TransactionsRequest
 import net.primal.wallet.data.handler.TransactionsHandler
-import net.primal.wallet.data.local.dao.WalletTransaction
+import net.primal.wallet.data.local.dao.WalletTransactionData
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.repository.mappers.local.toDomain
 
@@ -21,11 +21,11 @@ class OffsetBasedWalletTransactionsMediator internal constructor(
     private val dispatcherProvider: DispatcherProvider,
     private val transactionsHandler: TransactionsHandler,
     private val walletDatabase: WalletDatabase,
-) : RemoteMediator<Int, WalletTransaction>() {
+) : RemoteMediator<Int, WalletTransactionData>() {
 
     private val lastRequests: MutableMap<LoadType, TransactionsRequest> = mutableMapOf()
 
-    override suspend fun load(loadType: LoadType, state: PagingState<Int, WalletTransaction>): MediatorResult {
+    override suspend fun load(loadType: LoadType, state: PagingState<Int, WalletTransactionData>): MediatorResult {
         val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
             ?: run {
                 Napier.d { "No wallet found. Exiting." }

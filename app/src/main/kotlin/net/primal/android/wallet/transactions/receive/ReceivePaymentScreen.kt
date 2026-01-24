@@ -185,7 +185,7 @@ fun ReceivePaymentScreen(
             )
         },
         bottomBar = {
-            if (state.activeWallet is Wallet.Primal || state.activeWallet is Wallet.Tsunami) {
+            if (state.isActiveWalletSupported()) {
                 Column {
                     PrimalDivider()
                     WalletTabsBar(
@@ -215,6 +215,11 @@ fun ReceivePaymentScreen(
         },
     )
 }
+
+@Composable
+private fun UiState.isActiveWalletSupported(): Boolean =
+    this.activeWallet is Wallet.Primal || this.activeWallet is Wallet.Tsunami ||
+        this.activeWallet is Wallet.Spark
 
 @ExperimentalComposeUiApi
 @Composable

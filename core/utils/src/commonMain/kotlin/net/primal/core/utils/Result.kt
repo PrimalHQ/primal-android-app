@@ -155,6 +155,19 @@ inline fun <R, T> Result<T>.mapCatching(transform: (value: T) -> R): Result<R> =
     }
 
 /**
+ * Returns the encapsulated result of the given [transform] function applied to the encapsulated [Throwable] exception
+ * if this instance represents [failure][Result.isFailure] or the
+ * original encapsulated value if it is [success][Result.isSuccess].
+ *
+ * Use this to map exceptions to domain-specific exception types.
+ */
+inline fun <T> Result<T>.mapFailure(transform: (exception: Throwable) -> Throwable): Result<T> =
+    when (this) {
+        is Success<T> -> success(value)
+        is Failure<T> -> failure(transform(exception))
+    }
+
+/**
  * Performs the given [block] on the encapsulated value if this instance represents [success][Result.isSuccess].
  * Returns the original `Result` unchanged in case the [block] doesn't fail. If the [block] fails, its own
  * failure will be returned.

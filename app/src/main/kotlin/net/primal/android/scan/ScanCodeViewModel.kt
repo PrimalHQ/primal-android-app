@@ -105,7 +105,9 @@ class ScanCodeViewModel @Inject constructor(
         val wallet = walletAccountRepository.getActiveWallet(userId = userAccount.pubkey)
 
         return when (wallet) {
-            is Wallet.NWC, is Wallet.Tsunami, null -> ScanCodeContract.UserState.UserWithoutPrimalWallet
+            is Wallet.NWC, is Wallet.Tsunami, is Wallet.Spark, null,
+            -> ScanCodeContract.UserState.UserWithoutPrimalWallet
+
             is Wallet.Primal -> ScanCodeContract.UserState.UserWithPrimalWallet
         }
     }
@@ -177,6 +179,7 @@ class ScanCodeViewModel @Inject constructor(
             NostrEventKind.LongFormContent.value -> {
                 setEffect(SideEffect.NostrArticleDetected(code))
             }
+
             NostrEventKind.LiveActivity.value -> {
                 setEffect(SideEffect.NostrLiveStreamDetected(code))
             }

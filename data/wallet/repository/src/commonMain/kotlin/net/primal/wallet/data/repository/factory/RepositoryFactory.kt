@@ -4,6 +4,7 @@ import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.account.PrimalWalletAccountRepository
+import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
@@ -23,11 +24,15 @@ import net.primal.wallet.data.repository.ExchangeRateRepositoryImpl
 import net.primal.wallet.data.repository.NwcRepositoryImpl
 import net.primal.wallet.data.repository.PrimalWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.PrimalWalletNwcRepositoryImpl
+import net.primal.wallet.data.repository.SparkWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.TransactionFeeRepositoryImpl
 import net.primal.wallet.data.repository.TsunamiWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletRepositoryImpl
 import net.primal.wallet.data.service.factory.WalletServiceFactoryImpl
+import net.primal.wallet.data.spark.BreezApiKeyProvider
+import net.primal.wallet.data.spark.BreezSdkInstanceManager
+import net.primal.wallet.data.spark.BreezSdkStorageProvider
 
 abstract class RepositoryFactory {
 
@@ -39,7 +44,16 @@ abstract class RepositoryFactory {
         dispatcher = dispatcherProvider.io(),
     )
 
-    abstract fun resolveWalletDatabase(): WalletDatabase
+    private val breezSdkInstanceManager by lazy {
+        BreezSdkInstanceManager(
+            storageProvider = resolveBreezSdkStorageProvider(),
+            apiKey = BreezApiKeyProvider.requireApiKey(),
+        )
+    }
+
+    internal abstract fun resolveWalletDatabase(): WalletDatabase
+
+    internal abstract fun resolveBreezSdkStorageProvider(): BreezSdkStorageProvider
 
     fun createWalletRepository(
         primalWalletApiClient: PrimalApiClient,
@@ -80,6 +94,10 @@ abstract class RepositoryFactory {
             tsunamiWalletService = WalletServiceFactoryImpl.createTsunamiWalletService(
                 tsunamiWalletSdk = tsunamiWalletSdk,
                 lightningPayHelper = lightningPayHelper,
+                eventRepository = eventRepository,
+            ),
+            sparkWalletService = WalletServiceFactoryImpl.createSparkWalletService(
+                breezSdkInstanceManager = breezSdkInstanceManager,
                 eventRepository = eventRepository,
             ),
         )
@@ -153,6 +171,14 @@ abstract class RepositoryFactory {
         return TsunamiWalletAccountRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             tsunamiWalletSdk = tsunamiWalletSdk,
+            walletDatabase = resolveWalletDatabase(),
+        )
+    }
+
+    fun createSparkWalletAccountRepository(): SparkWalletAccountRepository {
+        return SparkWalletAccountRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            breezSdkInstanceManager = breezSdkInstanceManager,
             walletDatabase = resolveWalletDatabase(),
         )
     }

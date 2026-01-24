@@ -13,7 +13,7 @@ import net.primal.wallet.data.local.dao.ActiveWalletData
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.repository.mappers.local.toDomain
 
-class WalletAccountRepositoryImpl(
+internal class WalletAccountRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val walletDatabase: WalletDatabase,
 ) : WalletAccountRepository {

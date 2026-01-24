@@ -12,6 +12,7 @@ import net.primal.core.utils.runCatching
 import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.utils.decodeLNUrlOrNull
 import net.primal.domain.rates.fees.OnChainTransactionFeeTier
+import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.OnChainAddressResult
@@ -22,7 +23,6 @@ import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.tsunami.TsunamiWalletSdk
 import net.primal.tsunami.model.OnChainTransactionFeePriority
 import net.primal.tsunami.model.Transfer
-import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.repository.mappers.remote.mapAsWalletTransaction
 
 internal class TsunamiWalletServiceImpl(

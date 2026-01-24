@@ -24,7 +24,7 @@ internal class NostrZapperFactoryImpl(
         return when (wallet) {
             is Wallet.Primal -> wallet.createPrimalWalletNostrZapper()
             is Wallet.NWC -> wallet.createNwcNostrZapper()
-            is Wallet.Tsunami -> createTsunamiNostrZapper()
+            else -> createDefaultNostrZapper()
         }
     }
 
@@ -39,7 +39,7 @@ internal class NostrZapperFactoryImpl(
         }
     }
 
-    private fun Wallet.NWC.createNwcNostrZapper(): NostrZapper? {
+    private fun Wallet.NWC.createNwcNostrZapper(): NostrZapper {
         return NwcClientFactory.createNwcNostrZapper(
             nwcData = NostrWalletConnect(
                 lightningAddress = this.lightningAddress,
@@ -51,8 +51,8 @@ internal class NostrZapperFactoryImpl(
         )
     }
 
-    private fun createTsunamiNostrZapper(): NostrZapper? {
-        return TsunamiWalletNostrZapper(
+    private fun createDefaultNostrZapper(): NostrZapper {
+        return DefaultWalletNostrZapper(
             lightningPayHelper = lightningPayHelper,
             walletRepository = walletRepository,
         )

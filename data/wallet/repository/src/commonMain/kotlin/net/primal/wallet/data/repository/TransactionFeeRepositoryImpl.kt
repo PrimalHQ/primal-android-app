@@ -1,9 +1,12 @@
 package net.primal.wallet.data.repository
 
 import kotlinx.coroutines.withContext
+import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.map
 import net.primal.domain.rates.fees.OnChainTransactionFeeTier
 import net.primal.domain.rates.fees.TransactionFeeRepository
+import net.primal.domain.wallet.exception.WalletException
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.repository.mappers.local.toDomain
 import net.primal.wallet.data.service.factory.WalletServiceFactory
@@ -19,17 +22,17 @@ internal class TransactionFeeRepositoryImpl(
         walletId: String,
         onChainAddress: String,
         amountInBtc: String,
-    ): List<OnChainTransactionFeeTier> =
+    ): Result<List<OnChainTransactionFeeTier>> =
         withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
-                ?: throw IllegalArgumentException("Wallet not found.")
+                ?: return@withContext Result.failure(WalletException.WalletNotFound())
 
             walletServiceFactory.getServiceForWallet(wallet.toDomain())
                 .fetchMiningFees(
                     wallet = wallet.toDomain(),
                     onChainAddress = onChainAddress,
                     amountInBtc = amountInBtc,
-                ).getOrThrow()
+                )
         }
 
     override suspend fun fetchDefaultMiningFee(
@@ -37,15 +40,13 @@ internal class TransactionFeeRepositoryImpl(
         walletId: String,
         onChainAddress: String,
         amountInBtc: String,
-    ): OnChainTransactionFeeTier? =
-        withContext(dispatcherProvider.io()) {
-            val tiers = fetchMiningFees(
-                userId = userId,
-                walletId = walletId,
-                onChainAddress = onChainAddress,
-                amountInBtc = amountInBtc,
-            )
-
+    ): Result<OnChainTransactionFeeTier?> =
+        fetchMiningFees(
+            userId = userId,
+            walletId = walletId,
+            onChainAddress = onChainAddress,
+            amountInBtc = amountInBtc,
+        ).map { tiers ->
             tiers.lastOrNull {
                 it.tierId.contains("standard", ignoreCase = true)
             } ?: tiers.lastOrNull {

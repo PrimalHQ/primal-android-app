@@ -246,6 +246,7 @@ fun WalletDashboardScreen(
                     is Wallet.NWC -> stringResource(id = R.string.wallet_nwc_title)
                     is Wallet.Primal -> stringResource(id = R.string.wallet_primal_title)
                     is Wallet.Tsunami -> stringResource(id = R.string.wallet_tsunami_title)
+                    is Wallet.Spark -> stringResource(id = R.string.wallet_spark_title)
                     null -> stringResource(id = R.string.wallet_title)
                 },
                 avatarCdnImage = state.activeAccountAvatarCdnImage,

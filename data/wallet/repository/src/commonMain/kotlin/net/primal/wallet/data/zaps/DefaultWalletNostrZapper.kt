@@ -1,6 +1,7 @@
 package net.primal.wallet.data.zaps
 
 import io.github.aakira.napier.Napier
+import kotlin.uuid.Uuid
 import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.utils.MSATS_IN_SATS
 import net.primal.domain.nostr.zaps.NostrZapper
@@ -10,7 +11,7 @@ import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.WalletRepository
 
-class TsunamiWalletNostrZapper(
+class DefaultWalletNostrZapper(
     private val lightningPayHelper: LightningPayHelper,
     private val walletRepository: WalletRepository,
 ) : NostrZapper {
@@ -42,6 +43,7 @@ class TsunamiWalletNostrZapper(
                     amountSats = data.zapAmountInSats.toString(),
                     noteRecipient = null,
                     noteSelf = null,
+                    idempotencyKey = Uuid.random().toString(),
                     lnInvoice = invoice.invoice,
                 ),
             )

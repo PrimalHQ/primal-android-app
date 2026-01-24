@@ -26,6 +26,7 @@ import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
+import net.primal.domain.wallet.exception.WalletException
 import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
@@ -34,7 +35,7 @@ import net.primal.wallet.data.local.dao.NostrWalletData
 import net.primal.wallet.data.local.dao.Wallet as WalletPO
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
-import net.primal.wallet.data.local.dao.WalletTransaction
+import net.primal.wallet.data.local.dao.WalletTransactionData
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.repository.mappers.local.toDomain
@@ -73,7 +74,7 @@ internal class WalletRepositoryImpl(
         withContext(dispatcherProvider.io()) {
             walletDatabase.wallet().findWallet(walletId = walletId)?.toDomain<Wallet>()
                 ?.let { Result.success(it) }
-                ?: Result.failure(IllegalArgumentException("Wallet with given walletId not found."))
+                ?: Result.failure(WalletException.WalletNotFound())
         }
 
     override suspend fun deleteWalletById(walletId: String) =
@@ -113,7 +114,7 @@ internal class WalletRepositoryImpl(
             walletDatabase.walletTransactions().latestTransactionsPagedByWalletId(walletId = walletId)
         }.flow.mapNotNull {
             it.map { txData ->
-                val otherProfile = txData.info.otherUserId?.let { profileId ->
+                val otherProfile = txData.otherUserId?.let { profileId ->
                     profileRepository.findProfileDataOrNull(profileId.decrypted)
                 }
 
@@ -127,7 +128,7 @@ internal class WalletRepositoryImpl(
             walletDatabase.walletTransactions()
                 .latestTransactionsByWalletId(walletId = walletId, limit = limit)
                 .map { txData ->
-                    val otherProfile = txData.info.otherUserId?.let { profileId ->
+                    val otherProfile = txData.otherUserId?.let { profileId ->
                         profileRepository.findProfileDataOrNull(profileId.decrypted)
                     }
 
@@ -140,7 +141,7 @@ internal class WalletRepositoryImpl(
             val transaction = walletDatabase.walletTransactions().findTransactionById(txId = txId)
                 ?: return@withContext null
 
-            val profile = transaction.info.otherUserId
+            val profile = transaction.otherUserId
                 ?.let { profileRepository.findProfileDataOrNull(profileId = it.decrypted) }
 
             transaction.toDomain(otherProfile = profile)
@@ -170,9 +171,7 @@ internal class WalletRepositoryImpl(
     override suspend fun pay(walletId: String, request: TxRequest): Result<Unit> =
         withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
-                ?: return@withContext Result.failure(
-                    exception = IllegalArgumentException("Couldn't find wallet with the given walletId."),
-                )
+                ?: return@withContext Result.failure(WalletException.WalletNotFound())
 
             wallet.resolveWalletService().pay(
                 wallet = wallet.toDomain(),
@@ -187,9 +186,7 @@ internal class WalletRepositoryImpl(
     ): Result<LnInvoiceCreateResult> {
         return withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
-                ?: return@withContext Result.failure(
-                    exception = IllegalArgumentException("Couldn't find wallet with the given walletId."),
-                )
+                ?: return@withContext Result.failure(WalletException.WalletNotFound())
 
             wallet.resolveWalletService().createLightningInvoice(
                 wallet = wallet.toDomain(),
@@ -205,9 +202,7 @@ internal class WalletRepositoryImpl(
     override suspend fun createOnChainAddress(walletId: String): Result<OnChainAddressResult> {
         return withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
-                ?: return@withContext Result.failure(
-                    exception = IllegalArgumentException("Couldn't find wallet with the given walletId."),
-                )
+                ?: return@withContext Result.failure(WalletException.WalletNotFound())
 
             wallet.resolveWalletService().createOnChainAddress(wallet = wallet.toDomain())
         }
@@ -216,9 +211,7 @@ internal class WalletRepositoryImpl(
     override suspend fun fetchWalletBalance(walletId: String): Result<Unit> =
         withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
-                ?: return@withContext Result.failure(
-                    exception = IllegalArgumentException("Couldn't find wallet with the given walletId."),
-                )
+                ?: return@withContext Result.failure(WalletException.WalletNotFound())
 
             wallet.resolveWalletService()
                 .fetchWalletBalance(wallet = wallet.toDomain())
@@ -294,7 +287,7 @@ internal class WalletRepositoryImpl(
     private fun createTransactionsPager(
         walletId: String,
         walletType: WalletType,
-        pagingSourceFactory: () -> PagingSource<Int, WalletTransaction>,
+        pagingSourceFactory: () -> PagingSource<Int, WalletTransactionData>,
     ) = Pager(
         config = PagingConfig(
             pageSize = 50,
@@ -310,7 +303,7 @@ internal class WalletRepositoryImpl(
                 walletDatabase = walletDatabase,
             )
 
-            WalletType.PRIMAL, WalletType.NWC -> TimestampBasedWalletTransactionsMediator(
+            WalletType.PRIMAL, WalletType.NWC, WalletType.SPARK -> TimestampBasedWalletTransactionsMediator(
                 walletId = walletId,
                 dispatcherProvider = dispatcherProvider,
                 transactionsHandler = transactionsHandler,

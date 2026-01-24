@@ -9,20 +9,25 @@ import net.primal.tsunami.TsunamiWalletSdk
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.service.NostrWalletServiceImpl
 import net.primal.wallet.data.service.PrimalWalletServiceImpl
+import net.primal.wallet.data.service.SparkWalletServiceImpl
 import net.primal.wallet.data.service.TsunamiWalletServiceImpl
 import net.primal.wallet.data.service.WalletService
+import net.primal.wallet.data.spark.BreezSdkInstanceManager
 
 internal class WalletServiceFactoryImpl(
     private val primalWalletService: WalletService<Wallet.Primal>,
     private val nostrWalletService: WalletService<Wallet.NWC>,
     private val tsunamiWalletService: WalletService<Wallet.Tsunami>,
+    private val sparkWalletService: WalletService<Wallet.Spark>,
 ) : WalletServiceFactory {
 
+    @Suppress("UNCHECKED_CAST")
     override fun getServiceForWallet(wallet: Wallet): WalletService<Wallet> {
         return when (wallet) {
             is Wallet.Primal -> primalWalletService
             is Wallet.NWC -> nostrWalletService
             is Wallet.Tsunami -> tsunamiWalletService
+            is Wallet.Spark -> sparkWalletService
         } as WalletService<Wallet>
     }
 
@@ -50,6 +55,14 @@ internal class WalletServiceFactoryImpl(
         ) = TsunamiWalletServiceImpl(
             tsunamiWalletSdk = tsunamiWalletSdk,
             lightningPayHelper = lightningPayHelper,
+            eventRepository = eventRepository,
+        )
+
+        fun createSparkWalletService(
+            breezSdkInstanceManager: BreezSdkInstanceManager,
+            eventRepository: EventRepository,
+        ) = SparkWalletServiceImpl(
+            breezSdkInstanceManager = breezSdkInstanceManager,
             eventRepository = eventRepository,
         )
     }

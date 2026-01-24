@@ -12,7 +12,7 @@ import net.primal.tsunami.TsunamiWalletSdk
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.db.WalletDatabase
 
-class TsunamiWalletAccountRepositoryImpl(
+internal class TsunamiWalletAccountRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val walletDatabase: WalletDatabase,
     private val tsunamiWalletSdk: TsunamiWalletSdk,

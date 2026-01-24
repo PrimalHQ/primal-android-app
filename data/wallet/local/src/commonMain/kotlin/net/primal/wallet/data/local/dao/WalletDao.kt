@@ -47,6 +47,18 @@ interface WalletDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertNostrWalletData(data: NostrWalletData)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertSparkWalletData(data: SparkWalletData)
+
+    @Query("SELECT * FROM SparkWalletData WHERE walletId = :walletId")
+    suspend fun findSparkWalletData(walletId: String): SparkWalletData?
+
+    @Query("SELECT * FROM SparkWalletData WHERE userId = :userId")
+    suspend fun findAllSparkWalletDataByUserId(userId: String): List<SparkWalletData>
+
+    @Query("UPDATE SparkWalletData SET backedUp = :backedUp WHERE walletId = :walletId")
+    suspend fun updateSparkWalletBackedUp(walletId: String, backedUp: Boolean)
+
     @Query(
         """
         UPDATE WalletInfo 
@@ -73,11 +85,16 @@ interface WalletDao {
     @Query("DELETE FROM NostrWalletData WHERE walletId IN (:walletIds)")
     suspend fun _deleteNostrWalletsByIds(walletIds: List<String>)
 
+    @Suppress("FunctionName")
+    @Query("DELETE FROM SparkWalletData WHERE walletId IN (:walletIds)")
+    suspend fun _deleteSparkWalletsByIds(walletIds: List<String>)
+
     @Transaction
     suspend fun deleteWalletsByIds(walletIds: List<String>) {
         _deleteWalletInfosByIds(walletIds = walletIds)
         _deleteNostrWalletsByIds(walletIds = walletIds)
         _deletePrimalWalletsByIds(walletIds = walletIds)
+        _deleteSparkWalletsByIds(walletIds = walletIds)
     }
 
     @Query("SELECT * FROM WalletInfo WHERE walletId = :walletId")

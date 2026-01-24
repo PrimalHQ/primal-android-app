@@ -15,6 +15,7 @@ barcode-scanning = "17.3.0"
 bignum = "0.3.10"
 bitcoinj-core = "0.17"
 biometric = "1.4.0-alpha04"
+breez-spark-kmp-sdk = "0.7.10"
 camera = "1.5.2"
 compose-bom = "2025.12.00"
 compose-lottie = "6.7.1"
@@ -253,7 +254,7 @@ qrcode-generator = { module = "com.github.alexzhirkevich:custom-qr-generator", v
 datastore = { module = "androidx.datastore:datastore", version.ref = "jetpack-datastore" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "jetpack-datastore" }
 
-# Crytpo libs
+# Bitcoin libs
 lightning-kmp = { module = "fr.acinq.lightning:lightning-kmp", version.ref = "acinq-lightning-kmp" }
 lightning-kmp-iosarm64 = { module = "fr.acinq.lightning:lightning-kmp-iosarm64", version.ref = "acinq-lightning-kmp" }
 lightning-kmp-iossimulatorarm64 = { module = "fr.acinq.lightning:lightning-kmp-iossimulatorarm64", version.ref = "acinq-lightning-kmp" }
@@ -273,6 +274,7 @@ secp256k1-kmp-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jvm", version.r
 secp256k1-kmp-jni-android = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-android", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-jni-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-jvm", version.ref = "acinq-secp256k1-kmp" }
 bitcoinj-core = { module = "org.bitcoinj:bitcoinj-core", version.ref = "bitcoinj-core" }
+breez-sdk-spark-kmp = { module = "technology.breez.spark:breez-sdk-spark-kmp", version.ref = "breez-spark-kmp-sdk" }
 
 #Security
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
