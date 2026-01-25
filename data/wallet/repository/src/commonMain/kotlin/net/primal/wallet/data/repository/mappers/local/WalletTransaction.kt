@@ -35,7 +35,7 @@ private fun WalletTransactionData.toZapTransaction(otherProfile: ProfileData?): 
             createdAt = this.createdAt.decrypted,
             updatedAt = this.updatedAt,
             completedAt = this.completedAt?.decrypted,
-            userId = this.userId.decrypted,
+            userId = this.userId,
             note = this.note?.decrypted,
             invoice = this.invoice?.decrypted,
             amountInBtc = this.amountInBtc.decrypted,
@@ -50,6 +50,7 @@ private fun WalletTransactionData.toZapTransaction(otherProfile: ProfileData?): 
             preimage = this.preimage?.decrypted,
             paymentHash = this.paymentHash?.decrypted,
         )
+
         else -> toLightningTransaction(otherProfile)
     }
 }
@@ -64,7 +65,7 @@ private fun WalletTransactionData.toStorePurchaseTransaction() =
         createdAt = this.createdAt.decrypted,
         updatedAt = this.updatedAt,
         completedAt = this.completedAt?.decrypted,
-        userId = this.userId.decrypted,
+        userId = this.userId,
         note = this.note?.decrypted,
         invoice = this.invoice?.decrypted,
         amountInBtc = this.amountInBtc.decrypted,
@@ -83,7 +84,7 @@ private fun WalletTransactionData.toOnChainTransaction() =
         createdAt = this.createdAt.decrypted,
         updatedAt = this.updatedAt,
         completedAt = this.completedAt?.decrypted,
-        userId = this.userId.decrypted,
+        userId = this.userId,
         note = this.note?.decrypted,
         invoice = this.invoice?.decrypted,
         amountInBtc = this.amountInBtc.decrypted,
@@ -104,7 +105,7 @@ private fun WalletTransactionData.toLightningTransaction(otherProfile: ProfileDa
         createdAt = this.createdAt.decrypted,
         updatedAt = this.updatedAt,
         completedAt = this.completedAt?.decrypted,
-        userId = this.userId.decrypted,
+        userId = this.userId,
         note = this.note?.decrypted,
         invoice = this.invoice?.decrypted,
         amountInBtc = this.amountInBtc.decrypted,
@@ -128,7 +129,7 @@ private fun WalletTransactionData.toSparkTransaction() =
         createdAt = this.createdAt.decrypted,
         updatedAt = this.updatedAt,
         completedAt = this.completedAt?.decrypted,
-        userId = this.userId.decrypted,
+        userId = this.userId,
         note = this.note?.decrypted,
         invoice = this.invoice?.decrypted,
         amountInBtc = this.amountInBtc.decrypted,
@@ -154,7 +155,7 @@ internal fun Transaction.toWalletTransactionData(): WalletTransactionData =
         updatedAt = this.updatedAt,
         completedAt = this.completedAt?.asEncryptable(),
         amountInBtc = this.amountInBtc.asEncryptable(),
-        userId = this.userId.asEncryptable(),
+        userId = this.userId,
         note = this.note?.asEncryptable(),
         invoice = this.invoice?.asEncryptable(),
         totalFeeInBtc = this.totalFeeInBtc?.asEncryptable(),

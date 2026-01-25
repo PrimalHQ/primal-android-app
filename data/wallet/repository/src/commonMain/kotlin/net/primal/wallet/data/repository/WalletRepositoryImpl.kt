@@ -88,7 +88,7 @@ internal class WalletRepositoryImpl(
                 walletDatabase.wallet().upsertWalletInfo(
                     info = WalletInfo(
                         walletId = wallet.walletId,
-                        userId = userId.asEncryptable(),
+                        userId = userId,
                         lightningAddress = wallet.lightningAddress?.asEncryptable(),
                         type = WalletType.NWC,
                         balanceInBtc = wallet.balanceInBtc?.asEncryptable(),
@@ -149,13 +149,13 @@ internal class WalletRepositoryImpl(
 
     override suspend fun deleteAllTransactions(userId: String) =
         withContext(dispatcherProvider.io()) {
-            walletDatabase.walletTransactions().deleteAllTransactions(userId = userId.asEncryptable())
+            walletDatabase.walletTransactions().deleteAllTransactions(userId = userId)
         }
 
     override suspend fun deleteAllUserData(userId: String) =
         withContext(dispatcherProvider.io()) {
             walletDatabase.withTransaction {
-                val wallets = walletDatabase.wallet().findWalletInfosByUserId(userId = userId.asEncryptable())
+                val wallets = walletDatabase.wallet().findWalletInfosByUserId(userId = userId)
                 val walletIds = wallets.map { it.walletId }
 
                 if (walletIds.isNotEmpty()) {
@@ -163,7 +163,7 @@ internal class WalletRepositoryImpl(
                     walletDatabase.wallet().deleteWalletsByIds(walletIds)
                 }
 
-                walletDatabase.walletTransactions().deleteAllTransactions(userId = userId.asEncryptable())
+                walletDatabase.walletTransactions().deleteAllTransactions(userId = userId)
                 walletDatabase.wallet().clearActiveWallet(userId)
             }
         }

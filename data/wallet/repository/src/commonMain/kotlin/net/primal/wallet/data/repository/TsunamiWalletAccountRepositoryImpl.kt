@@ -34,7 +34,7 @@ internal class TsunamiWalletAccountRepositoryImpl(
                     walletDatabase.wallet().insertOrIgnoreWalletInfo(
                         info = WalletInfo(
                             walletId = walletId,
-                            userId = userId.asEncryptable(),
+                            userId = userId,
                             lightningAddress = lud16Address?.asEncryptable(),
                             type = WalletType.TSUNAMI,
                         ),

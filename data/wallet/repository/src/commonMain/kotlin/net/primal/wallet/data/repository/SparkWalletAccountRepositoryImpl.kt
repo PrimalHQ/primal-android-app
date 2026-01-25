@@ -39,7 +39,7 @@ internal class SparkWalletAccountRepositoryImpl(
                     walletDatabase.wallet().insertOrIgnoreWalletInfo(
                         info = WalletInfo(
                             walletId = walletId,
-                            userId = userId.asEncryptable(),
+                            userId = userId,
                             lightningAddress = null,
                             type = WalletType.SPARK,
                         ),

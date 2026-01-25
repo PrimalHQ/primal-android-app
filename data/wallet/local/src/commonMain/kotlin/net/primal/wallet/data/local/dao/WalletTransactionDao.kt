@@ -5,7 +5,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import net.primal.shared.data.local.encryption.Encryptable
 
 @Dao
 interface WalletTransactionDao {
@@ -41,5 +40,5 @@ interface WalletTransactionDao {
     suspend fun findTransactionById(txId: String): WalletTransactionData?
 
     @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
-    suspend fun deleteAllTransactions(userId: Encryptable<String>)
+    suspend fun deleteAllTransactions(userId: String)
 }

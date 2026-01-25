@@ -16,7 +16,7 @@ inline fun <reified T : WalletDO> WalletPO.toDomain(): T =
         WalletType.PRIMAL ->
             Primal(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
@@ -28,7 +28,7 @@ inline fun <reified T : WalletDO> WalletPO.toDomain(): T =
         WalletType.NWC ->
             NWC(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
@@ -45,7 +45,7 @@ inline fun <reified T : WalletDO> WalletPO.toDomain(): T =
         WalletType.TSUNAMI -> {
             Tsunami(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
@@ -57,7 +57,7 @@ inline fun <reified T : WalletDO> WalletPO.toDomain(): T =
         WalletType.SPARK -> {
             Spark(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
@@ -74,7 +74,7 @@ fun ActiveWallet.toDomain(): WalletDO? {
         WalletType.PRIMAL ->
             Primal(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
@@ -86,7 +86,7 @@ fun ActiveWallet.toDomain(): WalletDO? {
         WalletType.NWC ->
             NWC(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
@@ -103,7 +103,7 @@ fun ActiveWallet.toDomain(): WalletDO? {
         WalletType.TSUNAMI ->
             Tsunami(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
@@ -114,7 +114,7 @@ fun ActiveWallet.toDomain(): WalletDO? {
         WalletType.SPARK ->
             Spark(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,

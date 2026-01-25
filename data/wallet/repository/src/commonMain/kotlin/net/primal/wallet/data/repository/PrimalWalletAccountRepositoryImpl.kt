@@ -68,7 +68,7 @@ internal class PrimalWalletAccountRepositoryImpl(
                     walletDatabase.wallet().insertOrIgnoreWalletInfo(
                         info = WalletInfo(
                             walletId = userId,
-                            userId = userId.asEncryptable(),
+                            userId = userId,
                             lightningAddress = lightningAddress.asEncryptable(),
                             type = WalletType.PRIMAL,
                         ),

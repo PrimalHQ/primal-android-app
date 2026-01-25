@@ -33,7 +33,7 @@ interface WalletDao {
 
     @Transaction
     @Query("SELECT * FROM WalletInfo WHERE userId = :userId")
-    fun observeWalletsByUserId(userId: Encryptable<String>): Flow<List<Wallet>>
+    fun observeWalletsByUserId(userId: String): Flow<List<Wallet>>
 
     @Query("UPDATE WalletInfo SET lightningAddress = :lightningAddress WHERE walletId = :walletId")
     suspend fun updateWalletLightningAddress(walletId: String, lightningAddress: Encryptable<String>?)
@@ -101,7 +101,7 @@ interface WalletDao {
     suspend fun findWalletInfo(walletId: String): WalletInfo?
 
     @Query("SELECT * FROM WalletInfo WHERE userId = :userId")
-    suspend fun findWalletInfosByUserId(userId: Encryptable<String>): List<WalletInfo>
+    suspend fun findWalletInfosByUserId(userId: String): List<WalletInfo>
 
     @Transaction
     @Query("SELECT * FROM WalletInfo WHERE walletId = :walletId")
@@ -115,5 +115,5 @@ interface WalletDao {
         ORDER BY lastUpdatedAt DESC LIMIT 1
         """,
     )
-    suspend fun findLastUsedWalletByType(userId: Encryptable<String>, type: WalletType): Wallet?
+    suspend fun findLastUsedWalletByType(userId: String, type: WalletType): Wallet?
 }
