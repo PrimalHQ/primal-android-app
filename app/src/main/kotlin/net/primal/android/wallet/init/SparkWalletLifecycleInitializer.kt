@@ -11,6 +11,7 @@ import kotlinx.coroutines.sync.withLock
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.wallet.data.generator.RecoveryPhraseGenerator
 import timber.log.Timber
@@ -87,12 +88,15 @@ class SparkWalletLifecycleInitializer @Inject constructor(
                     .onFailure { t ->
                         Timber.e(t, "Failed to persist seed words for userId=%s, walletId=%s", userId, walletId)
                     }
-
-                sparkWalletAccountRepository.fetchWalletAccountInfo(userId, walletId)
-                    .onFailure { t ->
-                        Timber.w(t, "fetchWalletAccountInfo failed for userId=%s, walletId=%s", userId, walletId)
-                    }
             }
+
+            sparkWalletAccountRepository.fetchWalletAccountInfo(userId, walletId)
+                .onSuccess {
+                    Timber.d("fetchWalletAccountInfo succeeded for userId=%s, walletId=%s", userId, walletId)
+                }
+                .onFailure { t ->
+                    Timber.w(t, "fetchWalletAccountInfo failed for userId=%s, walletId=%s", userId, walletId)
+                }
         }.onFailure { t ->
             Timber.e(t, "initializeWallet failed for userId=%s", userId)
         }

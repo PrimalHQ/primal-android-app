@@ -47,8 +47,8 @@ internal class BreezSdkInstanceManager(
      */
     suspend fun createWallet(seedWords: String): String =
         mutex.withLock {
-            // Connect with temp storage to derive walletId
             val tempId = "temp_init"
+            storageProvider.deleteStorage(tempId)
             val tempSdk = connectSdk(tempId, seedWords)
 
             // Get the pubkey by signing a message - this gives us the wallet's identity
@@ -62,7 +62,9 @@ internal class BreezSdkInstanceManager(
                 // Always cleanup temp instance
                 tempSdk.disconnect()
                 tempSdk.close()
-                storageProvider.deleteStorage(tempId)
+                // NOTE: Don't delete temp storage here - the SDK has background tasks that may
+                // still reference this path after disconnect/close. The temp storage will be
+                // cleaned up on the next createWallet call (see deleteStorage above).
             }
 
             // Check if wallet already exists in memory
