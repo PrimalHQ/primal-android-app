@@ -23,7 +23,7 @@ kotlin {
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
-    val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
+    val iosTargets = listOf(iosArm64(), iosSimulatorArm64())
 
     iosTargets.forEach {
         it.binaries.framework {
@@ -91,13 +91,6 @@ kotlin {
                 api(libs.jetpack.sqlite.framework.iossimulatorarm64)
             }
         }
-        val iosX64Main by getting {
-            dependencies {
-                // SQLite
-                api(libs.jetpack.sqlite.framework.iosx64)
-            }
-        }
-
         val desktopMain by getting
         desktopMain.dependencies {
             // Add JVM-Desktop-specific dependencies here

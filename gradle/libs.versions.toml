@@ -218,7 +218,6 @@ jetpack-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", versio
 jetpack-sqlite-framework-android = { module = "androidx.sqlite:sqlite-framework-android", version.ref = "jetpack-sqlite" }
 jetpack-sqlite-framework-iosarm64 = { module = "androidx.sqlite:sqlite-framework-iosarm64", version.ref = "jetpack-sqlite" }
 jetpack-sqlite-framework-iossimulatorarm64 = { module = "androidx.sqlite:sqlite-framework-iossimulatorarm64", version.ref = "jetpack-sqlite" }
-jetpack-sqlite-framework-iosx64 = { module = "androidx.sqlite:sqlite-framework-iosx64", version.ref = "jetpack-sqlite" }
 sqlcipher-android = { module = "net.zetetic:sqlcipher-android", version.ref = "sqlcipher-android" }
 
 # Media libs
@@ -257,18 +256,15 @@ datastore-preferences = { module = "androidx.datastore:datastore-preferences", v
 lightning-kmp = { module = "fr.acinq.lightning:lightning-kmp", version.ref = "acinq-lightning-kmp" }
 lightning-kmp-iosarm64 = { module = "fr.acinq.lightning:lightning-kmp-iosarm64", version.ref = "acinq-lightning-kmp" }
 lightning-kmp-iossimulatorarm64 = { module = "fr.acinq.lightning:lightning-kmp-iossimulatorarm64", version.ref = "acinq-lightning-kmp" }
-lightning-kmp-iosx64 = { module = "fr.acinq.lightning:lightning-kmp-iosx64", version.ref = "acinq-lightning-kmp" }
 lightning-kmp-jvm = { module = "fr.acinq.lightning:lightning-kmp-jvm", version.ref = "acinq-lightning-kmp" }
 bitcoin-kmp = { module = "fr.acinq.bitcoin:bitcoin-kmp", version.ref = "acinq-bitcoin-kmp"}
 bitcoin-kmp-iosarm64 = { module = "fr.acinq.bitcoin:bitcoin-kmp-iosarm64", version.ref = "acinq-bitcoin-kmp"}
 bitcoin-kmp-iossimulatorarm64 = { module = "fr.acinq.bitcoin:bitcoin-kmp-iossimulatorarm64", version.ref = "acinq-bitcoin-kmp"}
-bitcoin-kmp-iosx64 = { module = "fr.acinq.bitcoin:bitcoin-kmp-iosx64", version.ref = "acinq-bitcoin-kmp"}
 bitcoin-kmp-jvm = { module = "fr.acinq.bitcoin:bitcoin-kmp-jvm", version.ref = "acinq-bitcoin-kmp"}
 secp256k1 = { module = "fr.acinq.secp256k1:secp256k1", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp = { module = "fr.acinq.secp256k1:secp256k1-kmp", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-iosarm64 = { module = "fr.acinq.secp256k1:secp256k1-kmp-iosarm64", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-iossimulatorarm64 = { module = "fr.acinq.secp256k1:secp256k1-kmp-iossimulatorarm64", version.ref = "acinq-secp256k1-kmp" }
-secp256k1-kmp-iosx64 = { module = "fr.acinq.secp256k1:secp256k1-kmp-iosx64", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jvm", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-jni-android = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-android", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-jni-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-jvm", version.ref = "acinq-secp256k1-kmp" }
@@ -290,7 +286,6 @@ whyoleg-cryptography-provider-optimal = { module = "dev.whyoleg.cryptography:cry
 skie-configuration-annotations = { module = "co.touchlab.skie:configuration-annotations", version.ref = "skie" }
 skie-configuration-annotations-iosarm64 = { module = "co.touchlab.skie:configuration-annotations-iosarm64", version.ref = "skie" }
 skie-configuration-annotations-iossimulatorarm64 = { module = "co.touchlab.skie:configuration-annotations-iossimulatorarm64", version.ref = "skie" }
-skie-configuration-annotations-iosx64  = { module = "co.touchlab.skie:configuration-annotation-iosx64", version.ref = "skie" }
 
 # Tests libs
 junit = { group = "junit", name = "junit", version.ref = "junit" }

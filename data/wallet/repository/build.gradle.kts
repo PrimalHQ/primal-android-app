@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -20,16 +21,19 @@ kotlin {
         }
     }
 
-    // iOS Target
+    // iOS Target (minimum iOS 16 to match shared module)
     val xcfFramework = XCFramework(xcfName)
-    val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
 
-    iosTargets.forEach {
-        it.binaries.framework {
+    fun KotlinNativeTarget.configureFramework(platformName: String) {
+        binaries.framework {
             baseName = xcfName
+            linkerOpts += listOf("-platform_version", platformName, "16.0", "16.0")
             xcfFramework.add(this)
         }
     }
+
+    iosArm64 { configureFramework("ios") }
+    iosSimulatorArm64 { configureFramework("ios-simulator") }
 
     // Source set declarations (https://kotlinlang.org/docs/multiplatform-hierarchy.html)
     sourceSets {
