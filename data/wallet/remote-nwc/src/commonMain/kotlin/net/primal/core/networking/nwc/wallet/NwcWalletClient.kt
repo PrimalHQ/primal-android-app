@@ -22,11 +22,8 @@ import net.primal.core.networking.sockets.SocketConnectionClosedCallback
 import net.primal.core.networking.sockets.SocketConnectionOpenedCallback
 import net.primal.core.networking.sockets.filterBySubscriptionId
 import net.primal.core.networking.sockets.toPrimalSubscriptionId
-import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.fold
-import net.primal.core.utils.onFailure
-import net.primal.core.utils.runCatching
 import net.primal.domain.connections.nostr.model.NwcConnection
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -54,9 +51,12 @@ class NwcWalletClient(
         onSocketConnectionOpened = { url ->
             onSocketConnectionOpened?.invoke(url)
             scope.launch {
-                val secretPubKeys = connectionMapMutex.withLock { connectionMap.keys.toList() }
-                if (secretPubKeys.isNotEmpty()) {
-                    sendFilterRequest(secretPubKeys)
+                val servicePubKeys = connectionMapMutex.withLock { connectionMap.keys.toList() }
+                if (servicePubKeys.isNotEmpty()) {
+                    runCatching { sendFilterRequest(servicePubKeys) }
+                        .onFailure {
+                            Napier.w(it, tag = "NwcWalletClient") { "Failed to resubscribe on reconnect." }
+                        }
                 }
             }
         },
@@ -69,11 +69,10 @@ class NwcWalletClient(
     private val _errors: Channel<WalletNwcRequestException> = Channel(Channel.BUFFERED)
     val errors = _errors.receiveAsFlow()
 
-    suspend fun connect() =
-        runCatching {
-            nostrSocketClient.ensureSocketConnectionOrThrow()
-            startSubscriptionListener()
-        }
+    suspend fun connect() {
+        nostrSocketClient.ensureSocketConnectionOrThrow()
+        startSubscriptionListener()
+    }
 
     suspend fun updateConnections(connections: List<NwcConnection>) {
         val servicePubKeys = connectionMapMutex.withLock {
@@ -86,23 +85,19 @@ class NwcWalletClient(
         }
     }
 
-    private suspend fun sendFilterRequest(secretPubKeys: List<String>) {
-        runCatching {
-            nostrSocketClient.sendREQ(
-                subscriptionId = subscriptionId,
-                data = buildJsonObject {
-                    put("kinds", buildJsonArray { add(NostrEventKind.NwcRequest.value) })
-                    put(
-                        "#p",
-                        buildJsonArray {
-                            secretPubKeys.forEach { add(it) }
-                        },
-                    )
-                },
-            )
-        }.onFailure {
-            Napier.w(tag = "NwcWalletClient", throwable = it) { "Failed to update NWC subscription." }
-        }
+    private suspend fun sendFilterRequest(servicePubKeys: List<String>) {
+        nostrSocketClient.sendREQ(
+            subscriptionId = subscriptionId,
+            data = buildJsonObject {
+                put("kinds", buildJsonArray { add(NostrEventKind.NwcRequest.value) })
+                put(
+                    "#p",
+                    buildJsonArray {
+                        servicePubKeys.forEach { add(it) }
+                    },
+                )
+            },
+        )
     }
 
     private fun startSubscriptionListener() {
@@ -149,11 +144,8 @@ class NwcWalletClient(
         scope.cancel()
     }
 
-    suspend fun publishEvent(event: NostrEvent): Result<Unit> =
-        runCatching {
-            nostrSocketClient.ensureSocketConnectionOrThrow()
-            nostrSocketClient.sendEVENT(signedEvent = event.toNostrJsonObject())
-        }.onFailure {
-            Napier.w(tag = "NwcWalletClient", throwable = it) { "Failed to publish NWC response event." }
-        }
+    suspend fun publishEvent(event: NostrEvent) {
+        nostrSocketClient.ensureSocketConnectionOrThrow()
+        nostrSocketClient.sendEVENT(signedEvent = event.toNostrJsonObject())
+    }
 }
