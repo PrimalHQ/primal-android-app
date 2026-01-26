@@ -2,8 +2,11 @@ package net.primal.android.wallet.init
 
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -39,7 +42,7 @@ class SparkWalletLifecycleInitializer @Inject constructor(
                         disconnectCurrentWalletIfNeeded()
 
                         val userId = userIdOrNull ?: return@withLock
-                        initializeWalletForUser(userId)
+                        initializeWalletWithRetry(userId)
                     }
                 }
         }
@@ -56,14 +59,47 @@ class SparkWalletLifecycleInitializer @Inject constructor(
         }
     }
 
-    private suspend fun initializeWalletForUser(userId: String) {
-        ensureSparkWalletExistsUseCase.invoke(userId)
-            .onSuccess { walletId ->
+    private suspend fun initializeWalletWithRetry(userId: String) {
+        repeat(MAX_RETRY_ATTEMPTS) { attempt ->
+            if (hasUserChanged(userId)) {
+                Timber.d("User changed during retry, aborting initialization for userId=%s", userId)
+                return
+            }
+
+            val result = ensureSparkWalletExistsUseCase.invoke(userId)
+
+            result.onSuccess { walletId ->
                 currentWalletId = walletId
                 Timber.d("Wallet initialized for userId=%s, walletId=%s", userId, walletId)
+                return
             }
-            .onFailure { t ->
-                Timber.e(t, "initializeWallet failed for userId=%s", userId)
+
+            result.onFailure { t ->
+                val remainingAttempts = MAX_RETRY_ATTEMPTS - attempt - 1
+                if (remainingAttempts > 0) {
+                    val delaySeconds = INITIAL_RETRY_DELAY_SECONDS shl attempt
+                    Timber.w(
+                        t,
+                        "initializeWallet failed for userId=%s, retrying in %ds (%d attempts left)",
+                        userId,
+                        delaySeconds,
+                        remainingAttempts,
+                    )
+                    delay(delaySeconds.seconds)
+                } else {
+                    Timber.e(t, "initializeWallet failed for userId=%s after %d attempts", userId, MAX_RETRY_ATTEMPTS)
+                }
             }
+        }
+    }
+
+    private suspend fun hasUserChanged(expectedUserId: String): Boolean {
+        val currentUserId = activeAccountStore.activeUserId.first()
+        return currentUserId != expectedUserId
+    }
+
+    private companion object {
+        const val MAX_RETRY_ATTEMPTS = 5
+        const val INITIAL_RETRY_DELAY_SECONDS = 3
     }
 }
