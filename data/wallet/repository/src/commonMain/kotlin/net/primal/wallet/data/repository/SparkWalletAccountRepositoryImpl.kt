@@ -11,26 +11,14 @@ import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.local.dao.SparkWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.db.WalletDatabase
-import net.primal.wallet.data.spark.BreezSdkInstanceManager
 import net.primal.wallet.data.validator.RecoveryPhraseValidator
 
 internal class SparkWalletAccountRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val walletDatabase: WalletDatabase,
-    private val breezSdkInstanceManager: BreezSdkInstanceManager,
 ) : SparkWalletAccountRepository {
 
     private val recoveryPhraseValidator: RecoveryPhraseValidator = RecoveryPhraseValidator()
-
-    override suspend fun initializeWallet(userId: String, seedWords: String): Result<String> =
-        runCatching {
-            withContext(dispatcherProvider.io()) {
-                if (!recoveryPhraseValidator.isValid(seedWords)) {
-                    error("Invalid recovery phrase: expected 12, 15, 18, 21, or 24 valid BIP39 words.")
-                }
-                breezSdkInstanceManager.createWallet(seedWords)
-            }
-        }
 
     override suspend fun fetchWalletAccountInfo(userId: String, walletId: String): Result<Unit> =
         runCatching {
@@ -45,13 +33,6 @@ internal class SparkWalletAccountRepositoryImpl(
                         ),
                     )
                 }
-            }
-        }
-
-    override suspend fun disconnectWallet(walletId: String): Result<Unit> =
-        runCatching {
-            withContext(dispatcherProvider.io()) {
-                breezSdkInstanceManager.removeInstance(walletId)
             }
         }
 

@@ -4,11 +4,7 @@ import net.primal.core.utils.Result
 
 interface SparkWalletAccountRepository {
 
-    suspend fun initializeWallet(userId: String, seedWords: String): Result<String>
-
     suspend fun fetchWalletAccountInfo(userId: String, walletId: String): Result<Unit>
-
-    suspend fun disconnectWallet(walletId: String): Result<Unit>
 
     suspend fun hasPersistedWallet(userId: String): Boolean
 

@@ -17,6 +17,7 @@ import net.primal.domain.events.EventRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.domain.rates.fees.TransactionFeeRepository
+import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
 
@@ -94,6 +95,10 @@ object WalletRepositoriesModule {
     @Singleton
     fun providesSparkWalletAccountRepository(): SparkWalletAccountRepository =
         WalletRepositoryFactory.createSparkWalletAccountRepository()
+
+    @Provides
+    @Singleton
+    fun providesSparkWalletManager(): SparkWalletManager = WalletRepositoryFactory.createSparkWalletManager()
 
     @Provides
     @Singleton

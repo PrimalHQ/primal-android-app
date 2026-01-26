@@ -12,23 +12,22 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
-import net.primal.domain.account.SparkWalletAccountRepository
-import net.primal.wallet.data.generator.RecoveryPhraseGenerator
+import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
+import net.primal.domain.wallet.SparkWalletManager
 import timber.log.Timber
 
 @Singleton
 class SparkWalletLifecycleInitializer @Inject constructor(
     dispatchers: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
-    private val sparkWalletAccountRepository: SparkWalletAccountRepository,
+    private val sparkWalletManager: SparkWalletManager,
+    private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
 ) {
 
     private val scope = CoroutineScope(dispatchers.io())
 
     private val walletMutex = Mutex()
     private var currentWalletId: String? = null
-
-    private val recoveryPhraseGenerator = RecoveryPhraseGenerator()
 
     fun start() {
         scope.launch {
@@ -37,17 +36,8 @@ class SparkWalletLifecycleInitializer @Inject constructor(
                 .distinctUntilChanged()
                 .collect { userIdOrNull ->
                     walletMutex.withLock {
-                        // Disconnect current wallet if exists
-                        currentWalletId?.let { walletId ->
-                            runCatching {
-                                sparkWalletAccountRepository.disconnectWallet(walletId).getOrThrow()
-                            }.onFailure { t ->
-                                Timber.e(t, "terminateWallet failed for walletId=%s", walletId)
-                            }
-                            currentWalletId = null
-                        }
+                        disconnectCurrentWalletIfNeeded()
 
-                        // Initialize wallet for new user
                         val userId = userIdOrNull ?: return@withLock
                         initializeWalletForUser(userId)
                     }
@@ -55,50 +45,25 @@ class SparkWalletLifecycleInitializer @Inject constructor(
         }
     }
 
+    private suspend fun disconnectCurrentWalletIfNeeded() {
+        currentWalletId?.let { walletId ->
+            runCatching {
+                sparkWalletManager.disconnectWallet(walletId).getOrThrow()
+            }.onFailure { t ->
+                Timber.e(t, "disconnectWallet failed for walletId=%s", walletId)
+            }
+            currentWalletId = null
+        }
+    }
+
     private suspend fun initializeWalletForUser(userId: String) {
-        val allPersistedSeedWords = sparkWalletAccountRepository.getPersistedSeedWords(userId)
-        val persistedSeedWords = allPersistedSeedWords.firstOrNull()
-        val isNewWallet = persistedSeedWords == null
-
-        val seedWords = if (persistedSeedWords != null) {
-            persistedSeedWords
-        } else {
-            val generationResult = recoveryPhraseGenerator.generate(wordCount = 12)
-            if (generationResult.isFailure) {
-                Timber.e(
-                    generationResult.exceptionOrNull(),
-                    "Failed to generate recovery phrase for userId=%s",
-                    userId,
-                )
-                return
+        ensureSparkWalletExistsUseCase.invoke(userId)
+            .onSuccess { walletId ->
+                currentWalletId = walletId
+                Timber.d("Wallet initialized for userId=%s, walletId=%s", userId, walletId)
             }
-            generationResult.getOrThrow().joinToString(separator = " ")
-        }
-
-        runCatching {
-            sparkWalletAccountRepository.initializeWallet(
-                userId = userId,
-                seedWords = seedWords,
-            ).getOrThrow()
-        }.onSuccess { walletId ->
-            currentWalletId = walletId
-
-            if (isNewWallet) {
-                sparkWalletAccountRepository.persistSeedWords(userId, walletId, seedWords)
-                    .onFailure { t ->
-                        Timber.e(t, "Failed to persist seed words for userId=%s, walletId=%s", userId, walletId)
-                    }
+            .onFailure { t ->
+                Timber.e(t, "initializeWallet failed for userId=%s", userId)
             }
-
-            sparkWalletAccountRepository.fetchWalletAccountInfo(userId, walletId)
-                .onSuccess {
-                    Timber.d("fetchWalletAccountInfo succeeded for userId=%s, walletId=%s", userId, walletId)
-                }
-                .onFailure { t ->
-                    Timber.w(t, "fetchWalletAccountInfo failed for userId=%s, walletId=%s", userId, walletId)
-                }
-        }.onFailure { t ->
-            Timber.e(t, "initializeWallet failed for userId=%s", userId)
-        }
     }
 }

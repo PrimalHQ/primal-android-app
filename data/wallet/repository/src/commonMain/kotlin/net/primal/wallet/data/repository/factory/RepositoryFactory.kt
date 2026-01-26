@@ -14,6 +14,7 @@ import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.domain.rates.fees.TransactionFeeRepository
+import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
@@ -23,6 +24,7 @@ import net.primal.wallet.data.repository.NwcRepositoryImpl
 import net.primal.wallet.data.repository.PrimalWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.PrimalWalletNwcRepositoryImpl
 import net.primal.wallet.data.repository.SparkWalletAccountRepositoryImpl
+import net.primal.wallet.data.repository.SparkWalletManagerImpl
 import net.primal.wallet.data.repository.TransactionFeeRepositoryImpl
 import net.primal.wallet.data.repository.WalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletRepositoryImpl
@@ -158,8 +160,13 @@ abstract class RepositoryFactory {
     fun createSparkWalletAccountRepository(): SparkWalletAccountRepository {
         return SparkWalletAccountRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
-            breezSdkInstanceManager = breezSdkInstanceManager,
             walletDatabase = resolveWalletDatabase(),
+        )
+    }
+
+    fun createSparkWalletManager(): SparkWalletManager {
+        return SparkWalletManagerImpl(
+            breezSdkInstanceManager = breezSdkInstanceManager,
         )
     }
 
