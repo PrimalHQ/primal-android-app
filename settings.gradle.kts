@@ -42,7 +42,6 @@ include(":data:caching:repository")
 include(":data:wallet:local")
 include(":data:wallet:remote-primal")
 include(":data:wallet:remote-nwc")
-include(":data:wallet:remote-tsunami")
 include(":data:wallet:repository")
 
 include(":data:account:local")

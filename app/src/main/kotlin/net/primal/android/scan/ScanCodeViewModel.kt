@@ -105,7 +105,7 @@ class ScanCodeViewModel @Inject constructor(
         val wallet = walletAccountRepository.getActiveWallet(userId = userAccount.pubkey)
 
         return when (wallet) {
-            is Wallet.NWC, is Wallet.Tsunami, is Wallet.Spark, null,
+            is Wallet.NWC, is Wallet.Spark, null,
             -> ScanCodeContract.UserState.UserWithoutPrimalWallet
 
             is Wallet.Primal -> ScanCodeContract.UserState.UserWithPrimalWallet

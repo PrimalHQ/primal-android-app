@@ -118,7 +118,7 @@ class WalletDashboardViewModel @Inject constructor(
                     setState {
                         copy(
                             transactions = walletRepository
-                                .latestTransactions(walletId = wallet.walletId, walletType = wallet.type)
+                                .latestTransactions(walletId = wallet.walletId)
                                 .mapAsPagingDataOfTransactionUi(),
                         )
                     }

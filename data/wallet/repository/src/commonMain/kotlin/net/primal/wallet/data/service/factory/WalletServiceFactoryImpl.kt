@@ -5,19 +5,16 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.wallet.Wallet
-import net.primal.tsunami.TsunamiWalletSdk
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.service.NostrWalletServiceImpl
 import net.primal.wallet.data.service.PrimalWalletServiceImpl
 import net.primal.wallet.data.service.SparkWalletServiceImpl
-import net.primal.wallet.data.service.TsunamiWalletServiceImpl
 import net.primal.wallet.data.service.WalletService
 import net.primal.wallet.data.spark.BreezSdkInstanceManager
 
 internal class WalletServiceFactoryImpl(
     private val primalWalletService: WalletService<Wallet.Primal>,
     private val nostrWalletService: WalletService<Wallet.NWC>,
-    private val tsunamiWalletService: WalletService<Wallet.Tsunami>,
     private val sparkWalletService: WalletService<Wallet.Spark>,
 ) : WalletServiceFactory {
 
@@ -26,7 +23,6 @@ internal class WalletServiceFactoryImpl(
         return when (wallet) {
             is Wallet.Primal -> primalWalletService
             is Wallet.NWC -> nostrWalletService
-            is Wallet.Tsunami -> tsunamiWalletService
             is Wallet.Spark -> sparkWalletService
         } as WalletService<Wallet>
     }
@@ -47,16 +43,6 @@ internal class WalletServiceFactoryImpl(
                 eventRepository = eventRepository,
                 lightningPayHelper = lightningPayHelper,
             )
-
-        fun createTsunamiWalletService(
-            tsunamiWalletSdk: TsunamiWalletSdk,
-            lightningPayHelper: LightningPayHelper,
-            eventRepository: EventRepository,
-        ) = TsunamiWalletServiceImpl(
-            tsunamiWalletSdk = tsunamiWalletSdk,
-            lightningPayHelper = lightningPayHelper,
-            eventRepository = eventRepository,
-        )
 
         fun createSparkWalletService(
             breezSdkInstanceManager: BreezSdkInstanceManager,

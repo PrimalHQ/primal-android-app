@@ -218,8 +218,7 @@ fun ReceivePaymentScreen(
 
 @Composable
 private fun UiState.isActiveWalletSupported(): Boolean =
-    this.activeWallet is Wallet.Primal || this.activeWallet is Wallet.Tsunami ||
-        this.activeWallet is Wallet.Spark
+    this.activeWallet is Wallet.Primal || this.activeWallet is Wallet.Spark
 
 @ExperimentalComposeUiApi
 @Composable

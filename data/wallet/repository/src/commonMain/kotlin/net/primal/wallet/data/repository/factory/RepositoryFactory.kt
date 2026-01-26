@@ -5,7 +5,6 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
-import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.connections.nostr.NwcRepository
@@ -16,7 +15,6 @@ import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.domain.rates.fees.TransactionFeeRepository
 import net.primal.domain.wallet.WalletRepository
-import net.primal.tsunami.createTsunamiWalletSdk
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.repository.BillingRepositoryImpl
@@ -26,7 +24,6 @@ import net.primal.wallet.data.repository.PrimalWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.PrimalWalletNwcRepositoryImpl
 import net.primal.wallet.data.repository.SparkWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.TransactionFeeRepositoryImpl
-import net.primal.wallet.data.repository.TsunamiWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletRepositoryImpl
 import net.primal.wallet.data.service.factory.WalletServiceFactoryImpl
@@ -39,10 +36,6 @@ abstract class RepositoryFactory {
     private val dispatcherProvider = createDispatcherProvider()
 
     private val lightningPayHelper = LightningPayHelper(dispatcherProvider)
-
-    private val tsunamiWalletSdk = createTsunamiWalletSdk(
-        dispatcher = dispatcherProvider.io(),
-    )
 
     private val breezSdkInstanceManager by lazy {
         BreezSdkInstanceManager(
@@ -90,11 +83,6 @@ abstract class RepositoryFactory {
             nostrWalletService = WalletServiceFactoryImpl.createNostrWalletService(
                 eventRepository = eventRepository,
                 lightningPayHelper = lightningPayHelper,
-            ),
-            tsunamiWalletService = WalletServiceFactoryImpl.createTsunamiWalletService(
-                tsunamiWalletSdk = tsunamiWalletSdk,
-                lightningPayHelper = lightningPayHelper,
-                eventRepository = eventRepository,
             ),
             sparkWalletService = WalletServiceFactoryImpl.createSparkWalletService(
                 breezSdkInstanceManager = breezSdkInstanceManager,
@@ -164,14 +152,6 @@ abstract class RepositoryFactory {
                 nostrEventSignatureHandler = nostrEventSignatureHandler,
             ),
             signatureHandler = nostrEventSignatureHandler,
-        )
-    }
-
-    fun createTsunamiWalletAccountRepository(): TsunamiWalletAccountRepository {
-        return TsunamiWalletAccountRepositoryImpl(
-            dispatcherProvider = dispatcherProvider,
-            tsunamiWalletSdk = tsunamiWalletSdk,
-            walletDatabase = resolveWalletDatabase(),
         )
     }
 

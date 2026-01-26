@@ -134,11 +134,11 @@ class WalletSettingsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
                 .collect { wallet ->
-                    val isTsunami = wallet is Wallet.Tsunami
+                    val isSpark = wallet is Wallet.Spark
                     val balance = wallet?.balanceInBtc ?: 0.0
                     val isBackedUp = false
 
-                    val shouldShowBackup = isTsunami && balance > 0.0 && !isBackedUp
+                    val shouldShowBackup = isSpark && balance > 0.0 && !isBackedUp
 
                     setState {
                         copy(

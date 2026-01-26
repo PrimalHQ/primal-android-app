@@ -245,7 +245,6 @@ fun WalletDashboardScreen(
                 title = when (state.wallet) {
                     is Wallet.NWC -> stringResource(id = R.string.wallet_nwc_title)
                     is Wallet.Primal -> stringResource(id = R.string.wallet_primal_title)
-                    is Wallet.Tsunami -> stringResource(id = R.string.wallet_tsunami_title)
                     is Wallet.Spark -> stringResource(id = R.string.wallet_spark_title)
                     null -> stringResource(id = R.string.wallet_title)
                 },
@@ -464,7 +463,7 @@ fun WalletDashboardScreen(
                                         actionLabel = stringResource(id = R.string.wallet_dashboard_upgrade_button),
                                         onActionClick = onUpgradeWalletClick,
                                     )
-                                } else if (state.wallet is Wallet.Tsunami && !state.isWalletBackedUp) {
+                                } else if (state.wallet is Wallet.Spark && !state.isWalletBackedUp) {
                                     val titleText = stringResource(
                                         id = R.string.wallet_dashboard_backup_notice_title,
                                     )

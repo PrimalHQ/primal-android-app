@@ -7,6 +7,5 @@ fun Wallet.isActivePrimalWallet() = this is Wallet.Primal && this.kycLevel != Wa
 
 fun Wallet?.isConfigured(): Boolean =
     this != null && (
-        this.isActivePrimalWallet() || this is Wallet.NWC ||
-            this is Wallet.Tsunami || this is Wallet.Spark
+        this.isActivePrimalWallet() || this is Wallet.NWC || this is Wallet.Spark
         )

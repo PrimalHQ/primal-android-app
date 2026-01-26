@@ -39,7 +39,6 @@ import net.primal.wallet.data.local.dao.WalletTransactionData
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.repository.mappers.local.toDomain
-import net.primal.wallet.data.repository.transactions.OffsetBasedWalletTransactionsMediator
 import net.primal.wallet.data.repository.transactions.TimestampBasedWalletTransactionsMediator
 import net.primal.wallet.data.service.WalletService
 import net.primal.wallet.data.service.factory.WalletServiceFactory
@@ -109,8 +108,8 @@ internal class WalletRepositoryImpl(
             }
         }
 
-    override fun latestTransactions(walletId: String, walletType: WalletType): Flow<PagingData<Transaction>> {
-        return createTransactionsPager(walletId, walletType) {
+    override fun latestTransactions(walletId: String): Flow<PagingData<Transaction>> {
+        return createTransactionsPager(walletId) {
             walletDatabase.walletTransactions().latestTransactionsPagedByWalletId(walletId = walletId)
         }.flow.mapNotNull {
             it.map { txData ->
@@ -286,7 +285,6 @@ internal class WalletRepositoryImpl(
 
     private fun createTransactionsPager(
         walletId: String,
-        walletType: WalletType,
         pagingSourceFactory: () -> PagingSource<Int, WalletTransactionData>,
     ) = Pager(
         config = PagingConfig(
@@ -295,21 +293,12 @@ internal class WalletRepositoryImpl(
             initialLoadSize = 200,
             enablePlaceholders = true,
         ),
-        remoteMediator = when (walletType) {
-            WalletType.TSUNAMI -> OffsetBasedWalletTransactionsMediator(
-                walletId = walletId,
-                dispatcherProvider = dispatcherProvider,
-                transactionsHandler = transactionsHandler,
-                walletDatabase = walletDatabase,
-            )
-
-            WalletType.PRIMAL, WalletType.NWC, WalletType.SPARK -> TimestampBasedWalletTransactionsMediator(
-                walletId = walletId,
-                dispatcherProvider = dispatcherProvider,
-                transactionsHandler = transactionsHandler,
-                walletDatabase = walletDatabase,
-            )
-        },
+        remoteMediator = TimestampBasedWalletTransactionsMediator(
+            walletId = walletId,
+            dispatcherProvider = dispatcherProvider,
+            transactionsHandler = transactionsHandler,
+            walletDatabase = walletDatabase,
+        ),
         pagingSourceFactory = pagingSourceFactory,
     )
 }
