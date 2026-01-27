@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
 import javax.inject.Inject
-import kotlin.uuid.ExperimentalUuidApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,7 +36,6 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
 
 @HiltViewModel
-@OptIn(ExperimentalUuidApi::class)
 class PermissionRequestsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val localSignerService: LocalSignerService,

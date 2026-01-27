@@ -4,7 +4,6 @@ import fr.acinq.secp256k1.Hex
 import io.github.aakira.napier.Napier
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.seconds
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
@@ -63,7 +62,7 @@ internal class NwcClientImpl(
         NostrSocketClientFactory.create(wssUrl = relayUrl)
     }
 
-    @OptIn(ExperimentalUuidApi::class, ExperimentalEncodingApi::class)
+    @OptIn(ExperimentalEncodingApi::class)
     private suspend inline fun <reified T : Any, reified R : Any> sendNwcRequest(
         method: String,
         params: T,

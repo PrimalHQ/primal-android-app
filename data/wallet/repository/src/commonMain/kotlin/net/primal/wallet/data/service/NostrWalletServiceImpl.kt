@@ -1,6 +1,5 @@
 package net.primal.wallet.data.service
 
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -96,7 +95,6 @@ internal class NostrWalletServiceImpl(
         return emptyFlow()
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     override suspend fun fetchTransactions(
         wallet: Wallet.NWC,
         request: TransactionsRequest,

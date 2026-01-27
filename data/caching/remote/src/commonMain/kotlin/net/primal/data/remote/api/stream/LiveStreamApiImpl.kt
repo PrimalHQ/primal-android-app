@@ -2,7 +2,6 @@ package net.primal.data.remote.api.stream
 
 import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -27,7 +26,6 @@ class LiveStreamApiImpl(
     private val primalApiClient: PrimalApiClient,
 ) : LiveStreamApi {
 
-    @OptIn(ExperimentalUuidApi::class)
     override suspend fun subscribeToLiveEvent(
         streamingNaddr: Naddr,
         userId: String,
@@ -57,7 +55,6 @@ class LiveStreamApiImpl(
             }
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     override suspend fun subscribeToLiveEventsFromFollows(userId: String): Flow<NostrEvent> {
         val subscriptionId = Uuid.random().toPrimalSubscriptionId()
         return primalApiClient

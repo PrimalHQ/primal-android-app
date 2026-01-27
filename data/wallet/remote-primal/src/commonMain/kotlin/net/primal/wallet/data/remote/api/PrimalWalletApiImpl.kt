@@ -2,7 +2,6 @@ package net.primal.wallet.data.remote.api
 
 import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.milliseconds
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.mapNotNull
@@ -113,7 +112,6 @@ class PrimalWalletApiImpl(
             ?: throw NetworkException("Missing or invalid content in response.")
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     override suspend fun subscribeToBalance(userId: String): Flow<BalanceResponse> {
         val subscriptionId = Uuid.random().toPrimalSubscriptionId()
         return primalApiClient
