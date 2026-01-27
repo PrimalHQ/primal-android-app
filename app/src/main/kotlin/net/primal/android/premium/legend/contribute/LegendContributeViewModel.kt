@@ -214,7 +214,7 @@ class LegendContributeViewModel @Inject constructor(
                     null -> Unit
                 }
             }.onFailure { error ->
-                Timber.w(error)
+                Napier.w(error) { "Failed to execute legends payment." }
                 setState {
                     copy(
                         error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error),
