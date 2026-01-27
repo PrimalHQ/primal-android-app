@@ -84,6 +84,7 @@ import net.primal.domain.utils.isConfigured
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletKycLevel
+import net.primal.domain.wallet.capabilities
 
 private val DATE_OF_WALLET_EXPIRATION = LocalDate.of(2026, 3, 31)
     .atStartOfDay(ZoneOffset.UTC)
@@ -111,7 +112,7 @@ fun WalletDashboardScreen(
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
             Lifecycle.Event.ON_START -> {
-                if (uiState.value.wallet !is Wallet.Primal) {
+                if (uiState.value.wallet?.capabilities?.supportsBalanceSubscription != true) {
                     viewModel.setEvents(UiEvent.RequestWalletBalanceUpdate)
                 }
             }
@@ -463,7 +464,7 @@ fun WalletDashboardScreen(
                                         actionLabel = stringResource(id = R.string.wallet_dashboard_upgrade_button),
                                         onActionClick = onUpgradeWalletClick,
                                     )
-                                } else if (state.wallet is Wallet.Spark && !state.isWalletBackedUp) {
+                                } else if (state.wallet.capabilities.supportsWalletBackup && !state.isWalletBackedUp) {
                                     val titleText = stringResource(
                                         id = R.string.wallet_dashboard_backup_notice_title,
                                     )
