@@ -96,7 +96,7 @@ class RestoreWalletViewModel @Inject constructor() : ViewModel() {
             }.onSuccess {
                 setEffect(SideEffect.RestoreSuccess)
             }.onFailure { error ->
-                Napier.e(message = "Error restoring wallet.", throwable = error)
+                Napier.e(throwable = error) { "Error restoring wallet." }
                 setState {
                     copy(
                         currentStage = RestoreStage.MnemonicInput,

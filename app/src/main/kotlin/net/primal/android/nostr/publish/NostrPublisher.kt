@@ -41,7 +41,7 @@ class NostrPublisher @Inject constructor(
                     relays = outboxRelays.map { Relay(url = it, read = false, write = true) },
                 )
             } catch (error: NostrPublishException) {
-                Napier.w(message = "Failed to publish to outbox relays.", throwable = error)
+                Napier.w(throwable = error) { "Failed to publish to outbox relays." }
             }
         }
         return importEvent(signedNostrEvent)

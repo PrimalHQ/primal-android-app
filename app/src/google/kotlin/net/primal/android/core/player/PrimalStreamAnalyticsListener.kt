@@ -26,7 +26,7 @@ class PrimalStreamAnalyticsListener : AnalyticsListener {
     }
 
     override fun onPlayerError(eventTime: AnalyticsListener.EventTime, error: PlaybackException) {
-        Napier.e(message = "Player Error at ${eventTime.realtimeMs}:", throwable = error)
+        Napier.e(throwable = error) { "Player Error at ${eventTime.realtimeMs}:" }
     }
 
     override fun onLoadError(

@@ -41,7 +41,7 @@ class FileAnalyser @Inject constructor(
                 dimensionInPixels = if (width != -1 && height != -1) "${width}x$height" else null,
             )
         }.getOrElse {
-            Napier.w(message = "Failed to extract image metadata from $uri", throwable = it)
+            Napier.w(throwable = it) { "Failed to extract image metadata from $uri" }
             MediaInfo()
         }
     }
@@ -68,7 +68,7 @@ class FileAnalyser @Inject constructor(
                 } ?: MediaInfo()
             }
         }.getOrElse {
-            Napier.w(message = "Failed to extract video/audio metadata from $uri", throwable = it)
+            Napier.w(throwable = it) { "Failed to extract video/audio metadata from $uri" }
             MediaInfo()
         }
     }

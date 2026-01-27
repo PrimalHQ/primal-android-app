@@ -245,7 +245,7 @@ class CreateTransactionViewModel @Inject constructor(
         walletTextParser.parseAndQueryText(userId = userId, text = text)
             .onFailure { error ->
                 setState { copy(error = error) }
-                Napier.w(message = "Unable to parse text. [text=$text]", throwable = error)
+                Napier.w(throwable = error) { "Unable to parse text. [text=$text]" }
             }.onSuccess { draftTx ->
                 setState { copy(transaction = draftTx) }
             }

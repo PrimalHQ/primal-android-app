@@ -127,7 +127,7 @@ class ActiveSessionsViewModel @Inject constructor(
             setState { copy(disconnecting = true) }
             signerSessionHandler.endSessions(sessionIds = state.value.selectedSessions.toList())
                 .onSuccess { setEffect(SideEffect.SessionsDisconnected) }
-                .onFailure { Napier.e(message = "Error disconnecting sessions", throwable = it) }
+                .onFailure { Napier.e(throwable = it) { "Error disconnecting sessions" } }
 
             setState { copy(disconnecting = false) }
         }

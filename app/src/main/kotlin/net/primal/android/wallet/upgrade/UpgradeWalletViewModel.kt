@@ -29,7 +29,7 @@ class UpgradeWalletViewModel @Inject constructor() : ViewModel() {
                 setState { copy(status = UpgradeWalletStatus.Upgrading, error = null) }
                 delay(MOCK_UPGRADE_DELAY_MS)
             }.onFailure {
-                Napier.w(message = "Wallet upgrade failed", throwable = it)
+                Napier.w(throwable = it) { "Wallet upgrade failed" }
                 setState { copy(status = UpgradeWalletStatus.Failed, error = it) }
             }.onSuccess {
                 setState { copy(status = UpgradeWalletStatus.Success) }

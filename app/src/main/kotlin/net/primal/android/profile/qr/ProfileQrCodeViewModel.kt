@@ -116,7 +116,7 @@ class ProfileQrCodeViewModel @Inject constructor(
             userId = activeAccountStore.activeUserId(),
             text = text,
         ).onFailure { error ->
-            Napier.w(message = "Unable to parse text. [text = $text]", throwable = error)
+            Napier.w(throwable = error) { "Unable to parse text. [text = $text]" }
         }.onSuccess { draftTx ->
             setEffect(SideEffect.WalletTxDetected(draftTx = draftTx))
         }

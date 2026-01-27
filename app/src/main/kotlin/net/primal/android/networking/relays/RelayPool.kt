@@ -156,7 +156,7 @@ class RelayPool(
                         responseFlow.emit(NostrPublishResult(result = it))
                     }
                     sendEventResult.exceptionOrNull()?.let {
-                        Napier.w(message = "sendEVENT failed to $socketUrl", throwable = it)
+                        Napier.w(throwable = it) { "sendEVENT failed to $socketUrl" }
                         responseFlow.emit(NostrPublishResult(error = it))
                     }
                 }

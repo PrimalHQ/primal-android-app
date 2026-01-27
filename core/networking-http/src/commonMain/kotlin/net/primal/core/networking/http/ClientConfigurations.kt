@@ -31,7 +31,7 @@ internal fun HttpClientConfig<*>.installDefaultHttpClientConfiguration(
         install(Logging) {
             logger = object : Logger {
                 override fun log(message: String) {
-                    Napier.v(message = message, tag = loggingTag)
+                    Napier.v(tag = loggingTag) { message }
                 }
             }
             level = LogLevel.ALL

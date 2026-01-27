@@ -72,7 +72,7 @@ class GooglePlayerManager @Inject constructor(
         }.map { (engine, executor) ->
             CronetDataSource.Factory(engine, executor)
         }.onFailure {
-            Napier.w(message = "Cronet is not available. Using default HTTP stack for media playback.", throwable = it)
+            Napier.w(throwable = it) { "Cronet is not available. Using default HTTP stack for media playback." }
         }.getOrNull() ?: DefaultDataSource.Factory(context)
 
         val cacheDataSourceFactory = CacheDataSource.Factory()

@@ -85,7 +85,7 @@ class SendPaymentViewModel @Inject constructor(
             val userId = activeAccountStore.activeUserId()
             walletTextParser.parseAndQueryText(userId = userId, text = text)
                 .onFailure { error ->
-                    Napier.w(message = "Unable to parse text. [text = $text]", throwable = error)
+                    Napier.w(throwable = error) { "Unable to parse text. [text = $text]" }
                     setState { copy(error = UiState.SendPaymentError.ParseException(error)) }
                 }.onSuccess { draftTx ->
                     setEffect(SideEffect.DraftTransactionReady(draft = draftTx))
