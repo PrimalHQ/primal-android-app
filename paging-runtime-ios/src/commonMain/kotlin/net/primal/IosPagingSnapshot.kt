@@ -8,35 +8,30 @@ import androidx.paging.cachedIn
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import net.primal.core.utils.coroutines.createDispatcherProvider
 
-class IosPagingPresenter<T : Any> internal constructor(
+class IosPagingSnapshot<T : Any> internal constructor(
     pagingFlow: Flow<PagingData<T>>,
     scope: CoroutineScope,
 ) {
 
     private val dispatcher = createDispatcherProvider().io()
 
+    private val _items = MutableStateFlow<List<T>>(emptyList())
+    val items: StateFlow<List<T>> = _items.asStateFlow()
+
     private val presenter = object : PagingDataPresenter<T>(
         mainContext = dispatcher,
         cachedPagingData = null,
     ) {
         override suspend fun presentPagingDataEvent(event: PagingDataEvent<T>) {
-            _invalidations.tryEmit(Unit)
+            rebuildSnapshot()
         }
     }
-
-    private val _invalidations = MutableSharedFlow<Unit>(
-        replay = 0,
-        extraBufferCapacity = 64,
-    )
-
-    val invalidations: SharedFlow<Unit> = _invalidations.asSharedFlow()
 
     val loadStates: StateFlow<CombinedLoadStates?> = presenter.loadStateFlow
 
@@ -46,11 +41,21 @@ class IosPagingPresenter<T : Any> internal constructor(
             .collect { presenter.collectFrom(it) }
     }
 
-    fun itemCount(): Int = presenter.size
+    private fun rebuildSnapshot() {
+        val size = presenter.size
+        val snapshot = ArrayList<T>(size)
+        for (i in 0 until size) {
+            val item = presenter.peek(i)
+            if (item != null) {
+                snapshot.add(item)
+            }
+        }
+        _items.value = snapshot
+    }
 
-    fun item(index: Int): T? = presenter[index]
-
-    fun peek(index: Int): T? = presenter.peek(index)
+    fun access(index: Int) {
+        presenter[index]
+    }
 
     fun retry() = presenter.retry()
 
