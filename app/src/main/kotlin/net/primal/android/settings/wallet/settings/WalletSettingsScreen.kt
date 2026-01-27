@@ -51,7 +51,7 @@ import net.primal.android.settings.wallet.settings.ui.PrimalWalletSettings
 import net.primal.android.settings.wallet.settings.ui.WalletBackupWidget
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.domain.utils.isActivePrimalWallet
+import net.primal.domain.utils.isPrimalWalletAndActivated
 import net.primal.domain.wallet.NostrWalletKeypair
 import net.primal.domain.wallet.Wallet
 
@@ -170,7 +170,7 @@ fun WalletSettingsScreen(
                     onCreateNewWalletConnection = onCreateNewWalletConnection,
                     connectionsState = state.connectionsState,
                     onRetryFetchingConnections = { eventPublisher(UiEvent.RequestFetchWalletConnections) },
-                    isPrimalWalletActivated = state.wallet?.isActivePrimalWallet() == true,
+                    isPrimalWalletActivated = state.wallet?.isPrimalWalletAndActivated() == true,
                 )
             }
         },

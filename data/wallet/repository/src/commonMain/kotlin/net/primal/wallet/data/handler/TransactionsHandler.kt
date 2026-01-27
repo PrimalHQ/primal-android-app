@@ -5,13 +5,10 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.runCatching
 import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.Wallet
-import net.primal.shared.data.local.db.withTransaction
 import net.primal.wallet.data.local.db.WalletDatabase
-import net.primal.wallet.data.model.Transaction
-import net.primal.wallet.data.repository.mappers.local.toNostrTransactionData
-import net.primal.wallet.data.repository.mappers.local.toPrimalTransactionData
 import net.primal.wallet.data.repository.mappers.local.toWalletTransactionData
 import net.primal.wallet.data.service.factory.WalletServiceFactory
 
@@ -28,33 +25,22 @@ internal class TransactionsHandler(
                 service.fetchTransactions(wallet = wallet, request = request).getOrThrow()
             }
 
-            val otherUserIds = transactions
-                .filterIsInstance<Transaction.Primal>()
-                .mapNotNull { it.otherUserId }
-
-            persistTransactions(transactions = transactions)
-
-            if (otherUserIds.isNotEmpty()) {
-                profileRepository.fetchProfiles(profileIds = otherUserIds)
+            val otherUserIds = transactions.mapNotNull { tx ->
+                when (tx) {
+                    is Transaction.Lightning -> tx.otherUserId
+                    is Transaction.Zap -> tx.otherUserId
+                    else -> null
+                }
             }
-        }
 
-    private suspend fun persistTransactions(transactions: List<Transaction>) =
-        withContext(dispatchers.io()) {
-            walletDatabase.withTransaction {
+            withContext(dispatchers.io()) {
                 walletDatabase.walletTransactions().upsertAll(
                     data = transactions.map { it.toWalletTransactionData() },
                 )
+            }
 
-                walletDatabase.walletTransactions().upsertAllPrimalTransactions(
-                    data = transactions.filterIsInstance<Transaction.Primal>()
-                        .map { it.toPrimalTransactionData() },
-                )
-
-                walletDatabase.walletTransactions().upsertAllNostrTransactions(
-                    data = transactions.filterIsInstance<Transaction.NWC>()
-                        .map { it.toNostrTransactionData() },
-                )
+            if (otherUserIds.isNotEmpty()) {
+                profileRepository.fetchProfiles(profileIds = otherUserIds)
             }
         }
 }

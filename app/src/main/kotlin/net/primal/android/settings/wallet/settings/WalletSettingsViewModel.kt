@@ -26,6 +26,7 @@ import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
+import net.primal.domain.wallet.capabilities
 
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
 class WalletSettingsViewModel @AssistedInject constructor(
@@ -134,11 +135,11 @@ class WalletSettingsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
                 .collect { wallet ->
-                    val isTsunami = wallet is Wallet.Tsunami
+                    val supportsBackup = wallet?.capabilities?.supportsWalletBackup == true
                     val balance = wallet?.balanceInBtc ?: 0.0
                     val isBackedUp = false
 
-                    val shouldShowBackup = isTsunami && balance > 0.0 && !isBackedUp
+                    val shouldShowBackup = supportsBackup && balance > 0.0 && !isBackedUp
 
                     setState {
                         copy(

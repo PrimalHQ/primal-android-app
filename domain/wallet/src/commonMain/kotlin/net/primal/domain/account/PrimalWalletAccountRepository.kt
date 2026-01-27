@@ -7,14 +7,6 @@ import net.primal.domain.nostr.cryptography.SignatureException
 
 interface PrimalWalletAccountRepository {
 
-    suspend fun activateWallet(userId: String, code: String): Result<WalletActivationResult>
-
-    @Throws(
-        NetworkException::class,
-        CancellationException::class,
-    )
-    suspend fun requestActivationCodeToEmail(params: WalletActivationParams)
-
     @Throws(
         NetworkException::class,
         CancellationException::class,

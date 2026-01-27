@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
+import java.util.*
 import javax.inject.Inject
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -204,21 +206,15 @@ class LegendContributeViewModel @Inject constructor(
 
     private fun withdrawViaPrimalWallet() =
         viewModelScope.launch {
-            try {
+            runCatching {
                 setState { copy(primalWalletPaymentInProgress = true) }
                 when (state.value.paymentMethod) {
                     PaymentMethod.OnChainBitcoin -> executeOnChainPayment()
                     PaymentMethod.BitcoinLightning -> executeLightningPayment()
                     null -> Unit
                 }
-            } catch (error: SignatureException) {
-                setState {
-                    copy(
-                        error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error),
-                        primalWalletPaymentInProgress = false,
-                    )
-                }
-            } catch (error: NetworkException) {
+            }.onFailure { error ->
+                Timber.w(error)
                 setState {
                     copy(
                         error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error),
@@ -241,7 +237,7 @@ class LegendContributeViewModel @Inject constructor(
                 walletId = activeWalletId,
                 onChainAddress = targetBtcAddress,
                 amountInBtc = amountBtc,
-            )
+            ).getOrNull()
 
             walletRepository.pay(
                 walletId = activeWalletId,
@@ -249,10 +245,11 @@ class LegendContributeViewModel @Inject constructor(
                     amountSats = amountBtc.toSats().toDouble().formatAsString(),
                     noteRecipient = null,
                     noteSelf = null,
+                    idempotencyKey = Uuid.random().toString(),
                     onChainAddress = targetBtcAddress,
-                    onChainTier = defaultMiningFee?.tierId,
+                    onChainTierId = defaultMiningFee?.tierId,
                 ),
-            )
+            ).getOrThrow()
         }
     }
 
@@ -266,10 +263,11 @@ class LegendContributeViewModel @Inject constructor(
             request = TxRequest.Lightning.LnInvoice(
                 noteRecipient = null,
                 noteSelf = null,
+                idempotencyKey = UUID.randomUUID().toString(),
                 lnInvoice = lnInvoice,
                 amountSats = amountSats,
             ),
-        )
+        ).getOrThrow()
     }
 
     private fun updateAmount(amount: String) =

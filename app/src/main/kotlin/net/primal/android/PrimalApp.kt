@@ -12,7 +12,7 @@ import javax.inject.Inject
 import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.core.images.PrimalImageLoaderFactory
 import net.primal.android.core.utils.isGoogleBuild
-import net.primal.android.wallet.init.TsunamiWalletLifecycleInitializer
+import net.primal.android.wallet.init.SparkWalletLifecycleInitializer
 import net.primal.core.config.store.AppConfigInitializer
 import net.primal.data.account.repository.repository.factory.AccountRepositoryFactory
 import net.primal.data.repository.factory.PrimalRepositoryFactory
@@ -31,14 +31,21 @@ class PrimalApp : Application() {
     lateinit var crashReporter: PrimalCrashReporter
 
     @Inject
-    lateinit var tsunamiWalletLifecycleInitializer: Lazy<TsunamiWalletLifecycleInitializer>
+    lateinit var sparkWalletLifecycleInitializer: Lazy<SparkWalletLifecycleInitializer>
 
     override fun onCreate() {
         super.onCreate()
-        AppConfigInitializer.init(this@PrimalApp)
-        PrimalRepositoryFactory.init(this@PrimalApp)
-        WalletRepositoryFactory.init(context = this@PrimalApp, enableDbEncryption = !BuildConfig.DEBUG)
-        AccountRepositoryFactory.init(context = this@PrimalApp, enableDbEncryption = !BuildConfig.DEBUG)
+        AppConfigInitializer.init(context = this@PrimalApp)
+        PrimalRepositoryFactory.init(context = this@PrimalApp)
+        WalletRepositoryFactory.init(
+            context = this@PrimalApp,
+            enableDbEncryption = !BuildConfig.DEBUG,
+            breezApiKey = BuildConfig.BREEZ_SDK_API_KEY,
+        )
+        AccountRepositoryFactory.init(
+            context = this@PrimalApp,
+            enableDbEncryption = !BuildConfig.DEBUG,
+        )
 
         SingletonImageLoader.setSafe(imageLoaderFactory)
         antilog.forEach { Napier.base(it) }
@@ -51,7 +58,7 @@ class PrimalApp : Application() {
             initNotificationChannels()
         }
 
-        tsunamiWalletLifecycleInitializer.get().start()
+        sparkWalletLifecycleInitializer.get().start()
     }
 
     private fun initNotificationChannels() {

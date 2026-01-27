@@ -5,7 +5,7 @@ import net.primal.core.networking.nwc.NwcClientFactory
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.NostrZapperFactory
-import net.primal.domain.utils.isActivePrimalWallet
+import net.primal.domain.utils.isPrimalWalletAndActivated
 import net.primal.domain.wallet.NostrWalletConnect
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
@@ -24,12 +24,12 @@ internal class NostrZapperFactoryImpl(
         return when (wallet) {
             is Wallet.Primal -> wallet.createPrimalWalletNostrZapper()
             is Wallet.NWC -> wallet.createNwcNostrZapper()
-            is Wallet.Tsunami -> createTsunamiNostrZapper()
+            else -> createDefaultNostrZapper()
         }
     }
 
     private fun Wallet.Primal.createPrimalWalletNostrZapper(): NostrZapper? {
-        return if (isActivePrimalWallet()) {
+        return if (isPrimalWalletAndActivated()) {
             PrimalWalletNostrZapper(
                 dispatcherProvider = dispatcherProvider,
                 primalWalletApi = primalWalletApi,
@@ -39,7 +39,7 @@ internal class NostrZapperFactoryImpl(
         }
     }
 
-    private fun Wallet.NWC.createNwcNostrZapper(): NostrZapper? {
+    private fun Wallet.NWC.createNwcNostrZapper(): NostrZapper {
         return NwcClientFactory.createNwcNostrZapper(
             nwcData = NostrWalletConnect(
                 lightningAddress = this.lightningAddress,
@@ -51,8 +51,8 @@ internal class NostrZapperFactoryImpl(
         )
     }
 
-    private fun createTsunamiNostrZapper(): NostrZapper? {
-        return TsunamiWalletNostrZapper(
+    private fun createDefaultNostrZapper(): NostrZapper {
+        return DefaultWalletNostrZapper(
             lightningPayHelper = lightningPayHelper,
             walletRepository = walletRepository,
         )

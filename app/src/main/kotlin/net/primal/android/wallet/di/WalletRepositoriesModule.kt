@@ -9,7 +9,7 @@ import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.domain.account.PrimalWalletAccountRepository
-import net.primal.domain.account.TsunamiWalletAccountRepository
+import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository
@@ -17,6 +17,7 @@ import net.primal.domain.events.EventRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.domain.rates.fees.TransactionFeeRepository
+import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
 
@@ -92,8 +93,12 @@ object WalletRepositoriesModule {
 
     @Provides
     @Singleton
-    fun providesTsunamiWalletAccountRepository(): TsunamiWalletAccountRepository =
-        WalletRepositoryFactory.createTsunamiWalletAccountRepository()
+    fun providesSparkWalletAccountRepository(): SparkWalletAccountRepository =
+        WalletRepositoryFactory.createSparkWalletAccountRepository()
+
+    @Provides
+    @Singleton
+    fun providesSparkWalletManager(): SparkWalletManager = WalletRepositoryFactory.createSparkWalletManager()
 
     @Provides
     @Singleton

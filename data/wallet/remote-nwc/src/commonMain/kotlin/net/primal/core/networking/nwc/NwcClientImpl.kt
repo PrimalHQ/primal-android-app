@@ -21,6 +21,7 @@ import net.primal.core.networking.nwc.nip47.LookupInvoiceParams
 import net.primal.core.networking.nwc.nip47.LookupInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.MakeInvoiceParams
 import net.primal.core.networking.nwc.nip47.MakeInvoiceResponsePayload
+import net.primal.core.networking.nwc.nip47.NwcException
 import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.nip47.NwcResponseContent
 import net.primal.core.networking.nwc.nip47.NwcWalletRequest
@@ -117,7 +118,9 @@ internal class NwcClientImpl(
                 val parsed = CommonJson.decodeFromString<NwcResponseContent<R>>(decrypted)
                 parsed.result?.let {
                     Result.success(it)
-                } ?: Result.failure(NetworkException("NWC Error: ${parsed.error?.message}"))
+                } ?: parsed.error?.let {
+                    Result.failure(NwcException.fromNwcError(it))
+                } ?: Result.failure(NetworkException("NWC Error: Unknown error"))
             } else {
                 Result.failure(NetworkException("No response event received."))
             }
