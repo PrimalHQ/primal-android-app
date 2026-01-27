@@ -26,13 +26,11 @@ import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.wallet.SubWallet
 import net.primal.wallet.data.remote.PrimalWalletVerb
 import net.primal.wallet.data.remote.WalletOperationVerb
-import net.primal.wallet.data.remote.model.ActivateWalletRequestBody
 import net.primal.wallet.data.remote.model.AppSpecificDataRequest
 import net.primal.wallet.data.remote.model.BalanceRequestBody
 import net.primal.wallet.data.remote.model.BalanceResponse
 import net.primal.wallet.data.remote.model.DepositRequestBody
 import net.primal.wallet.data.remote.model.ExchangeRateRequestBody
-import net.primal.wallet.data.remote.model.GetActivationCodeRequestBody
 import net.primal.wallet.data.remote.model.InAppPurchaseQuoteRequestBody
 import net.primal.wallet.data.remote.model.InAppPurchaseQuoteResponse
 import net.primal.wallet.data.remote.model.InAppPurchaseRequestBody
@@ -55,7 +53,6 @@ import net.primal.wallet.data.remote.model.WalletUserInfoResponse
 import net.primal.wallet.data.remote.model.WithdrawRequestBody
 import net.primal.wallet.data.remote.nostr.ContentWalletExchangeRate
 import net.primal.wallet.data.remote.nostr.ContentWalletTransaction
-import net.primal.wallet.data.remote.nostr.WalletActivationContent
 import net.primal.wallet.data.remote.nostr.WalletUserInfoContent
 
 class PrimalWalletApiImpl(
@@ -96,38 +93,6 @@ class PrimalWalletApiImpl(
         return queryResult
             .findPrimalEvent(NostrEventKind.PrimalWalletUserInfo)
             .toUserWalletInfoResponseOrThrow()
-    }
-
-    override suspend fun requestActivationCodeToEmail(userId: String, body: GetActivationCodeRequestBody) {
-        primalApiClient.query(
-            message = PrimalCacheFilter(
-                primalVerb = PrimalWalletVerb.WALLET.id,
-                optionsJson = buildWalletOptionsJson(
-                    userId = userId,
-                    walletVerb = WalletOperationVerb.GET_ACTIVATION_CODE,
-                    requestBody = body,
-                    signatureHandler = signatureHandler,
-                ),
-            ),
-        )
-    }
-
-    override suspend fun activateWallet(userId: String, code: String): String {
-        val queryResult = primalApiClient.query(
-            message = PrimalCacheFilter(
-                primalVerb = PrimalWalletVerb.WALLET.id,
-                optionsJson = buildWalletOptionsJson(
-                    userId = userId,
-                    walletVerb = WalletOperationVerb.ACTIVATE,
-                    requestBody = ActivateWalletRequestBody(code),
-                    signatureHandler = signatureHandler,
-                ),
-            ),
-        )
-
-        return queryResult
-            .findPrimalEvent(NostrEventKind.PrimalWalletActivation)
-            .toWalletLightningAddressOrThrow()
     }
 
     override suspend fun getBalance(userId: String): BalanceResponse {
@@ -398,12 +363,6 @@ class PrimalWalletApiImpl(
             kycLevel = content.kycLevel,
             lightningAddress = content.lud16,
         )
-    }
-
-    private fun PrimalEvent?.toWalletLightningAddressOrThrow(): String {
-        val content = takeContentOrNull<WalletActivationContent>()
-            ?: throw NetworkException("Missing or invalid content in response.")
-        return content.lud16
     }
 
     override suspend fun getExchangeRate(userId: String): Double {

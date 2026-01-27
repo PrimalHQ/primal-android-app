@@ -83,7 +83,6 @@ import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
 import net.primal.domain.utils.isConfigured
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.Wallet
-import net.primal.domain.wallet.WalletKycLevel
 import net.primal.domain.wallet.capabilities
 
 private val DATE_OF_WALLET_EXPIRATION = LocalDate.of(2026, 3, 31)
@@ -96,7 +95,6 @@ fun WalletDashboardScreen(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
-    onWalletActivateClick: () -> Unit,
     onWalletBackupClick: () -> Unit,
     onUpgradeWalletClick: () -> Unit,
     onProfileClick: (String) -> Unit,
@@ -126,7 +124,6 @@ fun WalletDashboardScreen(
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
-        onWalletActivateClick = onWalletActivateClick,
         onUpgradeWalletClick = onUpgradeWalletClick,
         onWalletBackupClick = onWalletBackupClick,
         onProfileClick = onProfileClick,
@@ -147,7 +144,6 @@ fun WalletDashboardScreen(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
-    onWalletActivateClick: () -> Unit,
     onWalletBackupClick: () -> Unit,
     onUpgradeWalletClick: () -> Unit,
     onProfileClick: (String) -> Unit,
@@ -332,33 +328,6 @@ fun WalletDashboardScreen(
         },
         content = { paddingValues ->
             when {
-                state.wallet == null -> {
-                    WalletCallToActionBox(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .padding(horizontal = 32.dp)
-                            .padding(bottom = 32.dp)
-                            .navigationBarsPadding(),
-                        actionLabel = stringResource(id = R.string.wallet_dashboard_enable_wallet_button),
-                        onActionClick = { eventPublisher(UiEvent.EnablePrimalWallet) },
-                    )
-                }
-
-                state.wallet is Wallet.Primal && state.wallet.kycLevel == WalletKycLevel.None -> {
-                    WalletCallToActionBox(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .padding(horizontal = 32.dp)
-                            .padding(bottom = 32.dp)
-                            .navigationBarsPadding(),
-                        message = stringResource(id = R.string.wallet_dashboard_activate_notice_hint),
-                        actionLabel = stringResource(id = R.string.wallet_dashboard_activate_button),
-                        onActionClick = onWalletActivateClick,
-                    )
-                }
-
                 state.isNpubLogin -> {
                     WalletCallToActionBox(
                         modifier = Modifier
@@ -372,7 +341,7 @@ fun WalletDashboardScreen(
                     )
                 }
 
-                else -> {
+                state.wallet != null -> {
                     if (pagingItems.loadState.refresh is LoadState.NotLoading && pagingItems.isEmpty()) {
                         if (state.wallet.balanceInBtc == 0.0) {
                             WalletCallToActionBox(

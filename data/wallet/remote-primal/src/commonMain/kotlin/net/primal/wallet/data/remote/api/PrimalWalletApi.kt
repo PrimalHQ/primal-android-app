@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import net.primal.domain.nostr.NostrEvent
 import net.primal.wallet.data.remote.model.BalanceResponse
 import net.primal.wallet.data.remote.model.DepositRequestBody
-import net.primal.wallet.data.remote.model.GetActivationCodeRequestBody
 import net.primal.wallet.data.remote.model.InAppPurchaseQuoteResponse
 import net.primal.wallet.data.remote.model.LightningInvoiceResponse
 import net.primal.wallet.data.remote.model.MiningFeeTier
@@ -22,10 +21,6 @@ interface PrimalWalletApi {
     suspend fun getWalletUserKycLevel(userId: String): Int
 
     suspend fun getWalletUserInfo(userId: String): WalletUserInfoResponse
-
-    suspend fun requestActivationCodeToEmail(userId: String, body: GetActivationCodeRequestBody)
-
-    suspend fun activateWallet(userId: String, code: String): String
 
     suspend fun getBalance(userId: String): BalanceResponse
 

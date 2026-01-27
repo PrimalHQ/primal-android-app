@@ -163,7 +163,6 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPayme
 import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPaymentAlt
 import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPaymentFilled
 import net.primal.android.core.compose.icons.primaliconpack.WalletPay
-import net.primal.android.core.compose.icons.primaliconpack.WalletPrimalActivation
 import net.primal.android.core.compose.icons.primaliconpack.WalletPurchaseSats
 import net.primal.android.core.compose.icons.primaliconpack.WalletReceive
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
@@ -263,7 +262,6 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             Unmute,
             Play,
             Mute,
-            WalletPrimalActivation,
             WalletPay,
             WalletPurchaseSats,
             WalletReceive,
