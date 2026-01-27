@@ -1,28 +1,59 @@
 package net.primal.wallet.data.nwc.builder
 
+import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
+import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
+import net.primal.core.networking.nwc.nip47.ListTransactionsResponsePayload
 import net.primal.core.networking.nwc.nip47.NwcError
 import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.nip47.NwcResponseContent
+import net.primal.core.networking.nwc.nip47.PayInvoiceResponsePayload
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
+import net.primal.core.utils.serialization.CommonJson
 
 class NwcWalletResponseBuilder {
 
-    fun buildSuccessResponse(request: WalletNwcRequest, result: Any?): NwcResponseContent<Any?> {
-        return NwcResponseContent(
+    fun buildGetInfoResponse(request: WalletNwcRequest, result: GetInfoResponsePayload): String {
+        val response = NwcResponseContent(
             resultType = request.methodStr(),
             result = result,
         )
+        return CommonJson.encodeToString(response)
+    }
+
+    fun buildGetBalanceResponse(request: WalletNwcRequest, result: GetBalanceResponsePayload): String {
+        val response = NwcResponseContent(
+            resultType = request.methodStr(),
+            result = result,
+        )
+        return CommonJson.encodeToString(response)
+    }
+
+    fun buildPayInvoiceResponse(request: WalletNwcRequest, result: PayInvoiceResponsePayload): String {
+        val response = NwcResponseContent(
+            resultType = request.methodStr(),
+            result = result,
+        )
+        return CommonJson.encodeToString(response)
+    }
+
+    fun buildListTransactionsResponse(request: WalletNwcRequest, result: ListTransactionsResponsePayload): String {
+        val response = NwcResponseContent(
+            resultType = request.methodStr(),
+            result = result,
+        )
+        return CommonJson.encodeToString(response)
     }
 
     fun buildErrorResponse(
         request: WalletNwcRequest,
         code: String,
         message: String,
-    ): NwcResponseContent<Any?> {
-        return NwcResponseContent(
+    ): String {
+        val response = NwcResponseContent<Unit>(
             resultType = request.methodStr(),
             error = NwcError(code = code, message = message),
         )
+        return CommonJson.encodeToString(response)
     }
 
     private fun WalletNwcRequest.methodStr(): String {

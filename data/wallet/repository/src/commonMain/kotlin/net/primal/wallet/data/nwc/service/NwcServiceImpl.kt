@@ -12,16 +12,20 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
+import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
+import net.primal.core.networking.nwc.nip47.ListTransactionsResponsePayload
 import net.primal.core.networking.nwc.nip47.NwcError
-import net.primal.core.networking.nwc.nip47.NwcResponseContent
+import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.nip47.PayInvoiceResponsePayload
 import net.primal.core.networking.nwc.wallet.NwcWalletClient
 import net.primal.core.networking.nwc.wallet.NwcWalletRequestParser
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
 import net.primal.core.networking.nwc.wallet.signNwcResponseNostrEvent
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.nostr.NwcService
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
@@ -37,6 +41,7 @@ class NwcServiceImpl internal constructor(
     private val nwcRepository: NwcRepository,
     private val requestParser: NwcWalletRequestParser,
     private val responseBuilder: NwcWalletResponseBuilder,
+    private val walletAccountRepository: WalletAccountRepository,
 ) : NwcService {
 
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
@@ -48,7 +53,7 @@ class NwcServiceImpl internal constructor(
     private var clientJob: Job? = null
 
     override fun initialize(userId: String) {
-        Napier.d(tag = TAG) { "NwcService initializing..." }
+        Napier.d(tag = TAG) { "NwcService initializing for userId=$userId" }
         observeConnections(userId)
         observeRetrySendResponseQueue()
     }
@@ -87,16 +92,26 @@ class NwcServiceImpl internal constructor(
 
     private fun observeConnections(userId: String) =
         scope.launch {
+            Napier.d(tag = TAG) { "Starting to observe connections for userId=$userId" }
             nwcRepository.observeConnections(userId = userId).collect { connections ->
                 Napier.d(tag = TAG) { "Connections updated: ${connections.size} connection(s)" }
                 if (connections.isNotEmpty()) {
+                    connections.forEach { conn ->
+                        Napier.d(
+                            tag = TAG,
+                        ) { "Connection: servicePubKey=${conn.serviceKeyPair.pubKey.take(8)}..., relay=${conn.relay}" }
+                    }
                     val relayUrl = connections.first().relay
                     connectToRelay(relayUrl)
                     runCatching { nwcClient?.updateConnections(connections) }
+                        .onSuccess {
+                            Napier.d(tag = TAG) { "Connections updated on client successfully" }
+                        }
                         .onFailure {
                             Napier.w(tag = TAG, throwable = it) { "Failed to update connections." }
                         }
                 } else {
+                    Napier.d(tag = TAG) { "No connections found, disconnecting from relay" }
                     disconnectFromRelay()
                 }
             }
@@ -136,13 +151,17 @@ class NwcServiceImpl internal constructor(
                 .batchOnInactivity(inactivityTimeout = 3.seconds)
                 .collect { batchedResponses ->
                     batchedResponses.forEach { pending ->
-                        sendResponse(pending.request, pending.content)
+                        sendResponse(pending.request, pending.responseJson)
                     }
                 }
         }
 
     private fun processRequest(request: WalletNwcRequest) =
         scope.launch {
+            Napier.d(
+                tag = TAG,
+            ) { "Processing request: ${request::class.simpleName}, eventId=${request.eventId.take(8)}..." }
+
             // 1. Budget & Permission Logic
             // check permissions here.
             // val canSpend = nwcBudgetManager.canSpend(...)
@@ -151,22 +170,66 @@ class NwcServiceImpl internal constructor(
             val response = runCatching {
                 when (request) {
                     is WalletNwcRequest.GetBalance -> {
-                        // Mock balance logic
-                        val balance = 0L
-                        responseBuilder.buildSuccessResponse(
+                        val wallet = walletAccountRepository.getActiveWallet(request.connection.userId)
+                        val balanceSats = wallet?.balanceInBtc?.toSats()?.toLong() ?: 0L
+                        Napier.d(tag = TAG) { "GetBalance: balanceSats=$balanceSats (${balanceSats * 1000} msat)" }
+                        responseBuilder.buildGetBalanceResponse(
                             request = request,
-                            result = GetBalanceResponsePayload(balance = balance * 1000),
+                            result = GetBalanceResponsePayload(balance = balanceSats * 1000),
                         )
                     }
                     is WalletNwcRequest.PayInvoice -> {
-                        // Mock payment logic
+                        // TODO: Implement real payment via WalletRepository
                         val preimage = "mock_preimage"
-                        responseBuilder.buildSuccessResponse(
+                        Napier.d(tag = TAG) { "PayInvoice: returning mock preimage" }
+                        responseBuilder.buildPayInvoiceResponse(
                             request = request,
                             result = PayInvoiceResponsePayload(preimage = preimage),
                         )
                     }
+                    is WalletNwcRequest.GetInfo -> {
+                        Napier.d(tag = TAG) { "GetInfo: returning supported methods" }
+                        responseBuilder.buildGetInfoResponse(
+                            request = request,
+                            result = GetInfoResponsePayload(
+                                alias = "Primal Wallet",
+                                methods = listOf(
+                                    NwcMethod.GetInfo.value,
+                                    NwcMethod.GetBalance.value,
+                                    NwcMethod.PayInvoice.value,
+                                    NwcMethod.MakeInvoice.value,
+                                    NwcMethod.LookupInvoice.value,
+                                    NwcMethod.ListTransactions.value,
+                                ),
+                            ),
+                        )
+                    }
+                    is WalletNwcRequest.ListTransactions -> {
+                        // TODO: Implement real transaction history
+                        Napier.d(tag = TAG) { "ListTransactions: returning empty list" }
+                        responseBuilder.buildListTransactionsResponse(
+                            request = request,
+                            result = ListTransactionsResponsePayload(transactions = emptyList()),
+                        )
+                    }
+                    is WalletNwcRequest.MakeInvoice -> {
+                        Napier.d(tag = TAG) { "MakeInvoice: not implemented" }
+                        responseBuilder.buildErrorResponse(
+                            request = request,
+                            code = NwcError.NOT_IMPLEMENTED,
+                            message = "make_invoice is not yet supported",
+                        )
+                    }
+                    is WalletNwcRequest.LookupInvoice -> {
+                        Napier.d(tag = TAG) { "LookupInvoice: not implemented" }
+                        responseBuilder.buildErrorResponse(
+                            request = request,
+                            code = NwcError.NOT_IMPLEMENTED,
+                            message = "lookup_invoice is not yet supported",
+                        )
+                    }
                     else -> {
+                        Napier.d(tag = TAG) { "Unsupported method: ${request::class.simpleName}" }
                         responseBuilder.buildErrorResponse(
                             request = request,
                             code = NwcError.NOT_IMPLEMENTED,
@@ -184,31 +247,30 @@ class NwcServiceImpl internal constructor(
             }
 
             // 3. Send Response
+            Napier.d(tag = TAG) { "Sending response for eventId=${request.eventId.take(8)}..." }
             sendResponseOrAddToRetryQueue(request, response)
         }
 
-    private suspend fun sendResponseOrAddToRetryQueue(
-        request: WalletNwcRequest,
-        responseContent: NwcResponseContent<out Any?>,
-    ) {
-        sendResponse(request, responseContent).onFailure {
+    private suspend fun sendResponseOrAddToRetryQueue(request: WalletNwcRequest, responseJson: String) {
+        sendResponse(request, responseJson).onFailure {
             Napier.d(tag = TAG) { "Adding response to retry queue: ${request.eventId}" }
-            retrySendResponseQueue.emit(PendingNwcResponse(request, responseContent))
+            retrySendResponseQueue.emit(PendingNwcResponse(request, responseJson))
         }
     }
 
-    private suspend fun sendResponse(
-        request: WalletNwcRequest,
-        responseContent: NwcResponseContent<out Any?>,
-    ): Result<Unit> {
+    private suspend fun sendResponse(request: WalletNwcRequest, responseJson: String): Result<Unit> {
         return runCatching {
             val client = nwcClient ?: error("NwcWalletClient is not initialized")
             val signedEvent = signNwcResponseNostrEvent(
                 request = request,
-                response = responseContent,
+                responseJson = responseJson,
             ).unwrapOrThrow()
 
+            Napier.d(
+                tag = TAG,
+            ) { "Publishing response event: id=${signedEvent.id.take(8)}..., kind=${signedEvent.kind}" }
             client.publishEvent(signedEvent)
+            Napier.d(tag = TAG) { "Response published successfully" }
         }.onFailure {
             Napier.w(tag = TAG, throwable = it) { "Failed to publish NWC response" }
         }
@@ -227,5 +289,5 @@ class NwcServiceImpl internal constructor(
 
 private data class PendingNwcResponse(
     val request: WalletNwcRequest,
-    val content: NwcResponseContent<out Any?>,
+    val responseJson: String,
 )

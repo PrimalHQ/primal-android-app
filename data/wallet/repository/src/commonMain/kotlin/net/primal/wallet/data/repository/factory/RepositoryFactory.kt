@@ -1,6 +1,7 @@
 package net.primal.wallet.data.repository.factory
 
 import net.primal.core.lightning.LightningPayHelper
+import net.primal.core.networking.nwc.wallet.NwcWalletRequestParser
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.account.PrimalWalletAccountRepository
@@ -8,6 +9,7 @@ import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.connections.nostr.NwcRepository
+import net.primal.domain.connections.nostr.NwcService
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
@@ -17,6 +19,9 @@ import net.primal.domain.rates.fees.TransactionFeeRepository
 import net.primal.domain.wallet.WalletRepository
 import net.primal.tsunami.createTsunamiWalletSdk
 import net.primal.wallet.data.local.db.WalletDatabase
+import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
+import net.primal.wallet.data.nwc.manager.NwcBudgetManager
+import net.primal.wallet.data.nwc.service.NwcServiceImpl
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.repository.BillingRepositoryImpl
 import net.primal.wallet.data.repository.ExchangeRateRepositoryImpl
@@ -174,5 +179,18 @@ abstract class RepositoryFactory {
         NwcRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = resolveWalletDatabase(),
+        )
+
+    fun createNwcService(walletAccountRepository: WalletAccountRepository): NwcService =
+        NwcServiceImpl(
+            dispatchers = dispatcherProvider,
+            nwcBudgetManager = NwcBudgetManager(
+                dispatcherProvider = dispatcherProvider,
+                walletDatabase = resolveWalletDatabase(),
+            ),
+            nwcRepository = createNwcRepository(),
+            requestParser = NwcWalletRequestParser(),
+            responseBuilder = NwcWalletResponseBuilder(),
+            walletAccountRepository = walletAccountRepository,
         )
 }

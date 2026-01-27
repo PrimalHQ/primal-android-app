@@ -12,6 +12,8 @@ import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.TsunamiWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
+import net.primal.domain.connections.nostr.NwcRepository
+import net.primal.domain.connections.nostr.NwcService
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.events.EventRepository
 import net.primal.domain.profile.ProfileRepository
@@ -104,5 +106,16 @@ object WalletRepositoriesModule {
         WalletRepositoryFactory.createPrimalWalletNwcRepository(
             primalWalletApiClient = primalApiClient,
             nostrEventSignatureHandler = nostrNotary,
+        )
+
+    @Provides
+    @Singleton
+    fun provideNwcRepository(): NwcRepository = WalletRepositoryFactory.createNwcRepository()
+
+    @Provides
+    @Singleton
+    fun provideNwcService(walletAccountRepository: WalletAccountRepository): NwcService =
+        WalletRepositoryFactory.createNwcService(
+            walletAccountRepository = walletAccountRepository,
         )
 }

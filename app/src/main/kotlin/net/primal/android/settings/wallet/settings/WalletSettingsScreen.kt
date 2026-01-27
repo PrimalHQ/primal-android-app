@@ -64,6 +64,7 @@ fun WalletSettingsScreen(
     onCreateNewWalletConnection: () -> Unit,
     onRestoreWalletClick: () -> Unit,
     onBackupWalletClick: () -> Unit,
+    onNwcWalletServiceClick: () -> Unit = {},
 ) {
     val uiState = viewModel.state.collectAsState()
     DisposableLifecycleObserverEffect(viewModel) {
@@ -81,6 +82,7 @@ fun WalletSettingsScreen(
         onCreateNewWalletConnection = onCreateNewWalletConnection,
         onRestoreWalletClick = onRestoreWalletClick,
         onBackupWalletClick = onBackupWalletClick,
+        onNwcWalletServiceClick = onNwcWalletServiceClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -95,6 +97,7 @@ fun WalletSettingsScreen(
     onCreateNewWalletConnection: () -> Unit,
     onRestoreWalletClick: () -> Unit,
     onBackupWalletClick: () -> Unit,
+    onNwcWalletServiceClick: () -> Unit = {},
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -172,6 +175,22 @@ fun WalletSettingsScreen(
                     onRetryFetchingConnections = { eventPublisher(UiEvent.RequestFetchWalletConnections) },
                     isPrimalWalletActivated = state.wallet?.isActivePrimalWallet() == true,
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                SettingsItem(
+                    headlineText = "NWC Wallet Service (Test)",
+                    supportText = "Create NWC connection for external apps to connect to this wallet",
+                    trailingContent = {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                            contentDescription = null,
+                        )
+                    },
+                    onClick = onNwcWalletServiceClick,
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         },
     )
