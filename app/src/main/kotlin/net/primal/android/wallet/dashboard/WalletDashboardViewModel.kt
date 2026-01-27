@@ -70,7 +70,6 @@ class WalletDashboardViewModel @Inject constructor(
     private var userWalletsObserveJob: Job? = null
 
     init {
-        refreshActiveWallet()
         observeUsdExchangeRate()
         subscribeToEvents()
         subscribeToActiveWalletId()
@@ -79,20 +78,6 @@ class WalletDashboardViewModel @Inject constructor(
         subscribeToPurchases()
         subscribeToBadgesUpdates()
     }
-
-    private fun refreshActiveWallet() =
-        viewModelScope.launch {
-            runCatching {
-                primalWalletAccountRepository.fetchWalletAccountInfo(userId = activeUserId)
-
-                val activeWallet = walletAccountRepository.getActiveWallet(userId = activeUserId)
-                if (activeWallet == null) {
-                    walletAccountRepository.setActiveWallet(userId = activeUserId, walletId = activeUserId)
-                }
-            }.onFailure {
-                Timber.w(it)
-            }
-        }
 
     private fun subscribeToEvents() =
         viewModelScope.launch {
