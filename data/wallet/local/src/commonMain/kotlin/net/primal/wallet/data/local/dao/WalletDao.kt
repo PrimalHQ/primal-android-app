@@ -33,7 +33,7 @@ interface WalletDao {
 
     @Transaction
     @Query("SELECT * FROM WalletInfo WHERE userId = :userId")
-    fun observeWalletsByUserId(userId: Encryptable<String>): Flow<List<Wallet>>
+    fun observeWalletsByUserId(userId: String): Flow<List<Wallet>>
 
     @Query("UPDATE WalletInfo SET lightningAddress = :lightningAddress WHERE walletId = :walletId")
     suspend fun updateWalletLightningAddress(walletId: String, lightningAddress: Encryptable<String>?)
@@ -46,6 +46,18 @@ interface WalletDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertNostrWalletData(data: NostrWalletData)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertSparkWalletData(data: SparkWalletData)
+
+    @Query("SELECT * FROM SparkWalletData WHERE walletId = :walletId")
+    suspend fun findSparkWalletData(walletId: String): SparkWalletData?
+
+    @Query("SELECT * FROM SparkWalletData WHERE userId = :userId")
+    suspend fun findAllSparkWalletDataByUserId(userId: String): List<SparkWalletData>
+
+    @Query("UPDATE SparkWalletData SET backedUp = :backedUp WHERE walletId = :walletId")
+    suspend fun updateSparkWalletBackedUp(walletId: String, backedUp: Boolean)
 
     @Query(
         """
@@ -73,18 +85,23 @@ interface WalletDao {
     @Query("DELETE FROM NostrWalletData WHERE walletId IN (:walletIds)")
     suspend fun _deleteNostrWalletsByIds(walletIds: List<String>)
 
+    @Suppress("FunctionName")
+    @Query("DELETE FROM SparkWalletData WHERE walletId IN (:walletIds)")
+    suspend fun _deleteSparkWalletsByIds(walletIds: List<String>)
+
     @Transaction
     suspend fun deleteWalletsByIds(walletIds: List<String>) {
         _deleteWalletInfosByIds(walletIds = walletIds)
         _deleteNostrWalletsByIds(walletIds = walletIds)
         _deletePrimalWalletsByIds(walletIds = walletIds)
+        _deleteSparkWalletsByIds(walletIds = walletIds)
     }
 
     @Query("SELECT * FROM WalletInfo WHERE walletId = :walletId")
     suspend fun findWalletInfo(walletId: String): WalletInfo?
 
     @Query("SELECT * FROM WalletInfo WHERE userId = :userId")
-    suspend fun findWalletInfosByUserId(userId: Encryptable<String>): List<WalletInfo>
+    suspend fun findWalletInfosByUserId(userId: String): List<WalletInfo>
 
     @Transaction
     @Query("SELECT * FROM WalletInfo WHERE walletId = :walletId")
@@ -98,5 +115,5 @@ interface WalletDao {
         ORDER BY lastUpdatedAt DESC LIMIT 1
         """,
     )
-    suspend fun findLastUsedWalletByType(userId: Encryptable<String>, type: WalletType): Wallet?
+    suspend fun findLastUsedWalletByType(userId: String, type: WalletType): Wallet?
 }

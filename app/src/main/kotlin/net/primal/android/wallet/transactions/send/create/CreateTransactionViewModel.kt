@@ -32,7 +32,6 @@ import net.primal.core.utils.onSuccess
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.builder.TxRequestBuilder
 import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.profile.ProfileData
 import net.primal.domain.profile.ProfileRepository
@@ -196,36 +195,31 @@ class CreateTransactionViewModel @Inject constructor(
             val lastTierIndex = uiState.selectedFeeTierIndex
             setState { copy(miningFeeTiers = emptyList(), selectedFeeTierIndex = null, fetchingMiningFees = true) }
             val activeUserId = activeUserStore.activeUserId()
-            try {
-                withContext(dispatchers.io()) {
-                    val tiers = transactionFeeRepository.fetchMiningFees(
-                        userId = activeUserId,
-                        walletId = activeWalletId,
-                        onChainAddress = btcAddress,
-                        amountInBtc = amountInSats.toBtc().formatAsString(),
+
+            transactionFeeRepository.fetchMiningFees(
+                userId = activeUserId,
+                walletId = activeWalletId,
+                onChainAddress = btcAddress,
+                amountInBtc = amountInSats.toBtc().formatAsString(),
+            ).onSuccess { tiers ->
+                setState {
+                    copy(
+                        miningFeeTiers = tiers.map { it.asMiningFeeUi() },
+                        selectedFeeTierIndex = when {
+                            tiers.isNotEmpty() -> when {
+                                lastTierIndex != null && lastTierIndex < tiers.size -> lastTierIndex
+                                else -> 0
+                            }
+
+                            else -> null
+                        },
                     )
-
-                    setState {
-                        copy(
-                            miningFeeTiers = tiers.map { it.asMiningFeeUi() },
-                            selectedFeeTierIndex = when {
-                                tiers.isNotEmpty() -> when {
-                                    lastTierIndex != null && lastTierIndex < tiers.size -> lastTierIndex
-                                    else -> 0
-                                }
-
-                                else -> null
-                            },
-                        )
-                    }
                 }
-            } catch (error: SignatureException) {
+            }.onFailure { error ->
                 Timber.w(error)
-            } catch (error: NetworkException) {
-                Timber.w(error)
-            } finally {
-                setState { copy(fetchingMiningFees = false) }
             }
+
+            setState { copy(fetchingMiningFees = false) }
         }
     }
 

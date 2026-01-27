@@ -2,6 +2,7 @@ package net.primal.shared.data.local.db
 
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.migration.Migration
 import androidx.sqlite.driver.NativeSQLiteDriver
 import kotlinx.cinterop.ExperimentalForeignApi
 import net.primal.core.utils.coroutines.IOSDispatcherProvider
@@ -17,9 +18,13 @@ object IosLocalDatabaseFactory {
         databaseName: String,
         fallbackToDestructiveMigration: Boolean,
         callback: RoomDatabase.Callback? = null,
+        migrations: List<Migration> = emptyList(),
     ): T {
         val dbFilePath = documentDirectory() + "/$databaseName"
-        return buildLocalDatabase(fallbackToDestructiveMigration = fallbackToDestructiveMigration) {
+        return buildLocalDatabase(
+            fallbackToDestructiveMigration = fallbackToDestructiveMigration,
+            migrations = migrations,
+        ) {
             Room.databaseBuilder<T>(name = dbFilePath)
                 .setQueryCoroutineContext(IOSDispatcherProvider().io())
                 .setDriver(NativeSQLiteDriver())

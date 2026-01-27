@@ -24,7 +24,7 @@ import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContra
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.connections.PrimalWalletNwcRepository
+import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import timber.log.Timber
 
 @HiltViewModel(assistedFactory = LinkPrimalWalletViewModel.Factory::class)

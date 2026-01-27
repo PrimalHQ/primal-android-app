@@ -21,7 +21,7 @@ kotlin {
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
-    val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
+    val iosTargets = listOf(iosArm64(), iosSimulatorArm64())
 
     iosTargets.forEach {
         it.binaries.framework {
@@ -83,14 +83,6 @@ kotlin {
 //                implementation(libs.lightning.kmp.iossimulatorarm64)
                 implementation(libs.bitcoin.kmp.iossimulatorarm64)
                 implementation(libs.secp256k1.kmp.iossimulatorarm64)
-            }
-        }
-        val iosX64Main by getting {
-            dependencies {
-                // Cryptography
-//                implementation(libs.lightning.kmp.iosx64)
-                implementation(libs.bitcoin.kmp.iosx64)
-                implementation(libs.secp256k1.kmp.iosx64)
             }
         }
 

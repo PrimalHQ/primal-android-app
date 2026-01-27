@@ -5,7 +5,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 
-class ExchangeRateRepositoryImpl(
+internal class ExchangeRateRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val primalWalletApi: PrimalWalletApi,
 ) : ExchangeRateRepository {

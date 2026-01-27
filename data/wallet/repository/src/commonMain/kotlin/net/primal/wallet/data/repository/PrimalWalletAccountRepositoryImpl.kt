@@ -24,7 +24,7 @@ import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.PromoCodeRequestBody
 import net.primal.wallet.data.repository.mappers.remote.toPromoCodeDetailsDO
 
-class PrimalWalletAccountRepositoryImpl(
+internal class PrimalWalletAccountRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val primalWalletApi: PrimalWalletApi,
     private val walletDatabase: WalletDatabase,
@@ -46,7 +46,7 @@ class PrimalWalletAccountRepositoryImpl(
                     walletDatabase.wallet().insertOrIgnoreWalletInfo(
                         info = WalletInfo(
                             walletId = userId,
-                            userId = userId.asEncryptable(),
+                            userId = userId,
                             lightningAddress = lightningAddress.asEncryptable(),
                             type = WalletType.PRIMAL,
                         ),

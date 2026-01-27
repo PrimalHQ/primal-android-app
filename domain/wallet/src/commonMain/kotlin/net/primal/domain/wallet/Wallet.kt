@@ -54,7 +54,7 @@ sealed class Wallet(
         lastUpdatedAt = lastUpdatedAt,
     )
 
-    data class Tsunami(
+    data class Spark(
         override val walletId: String,
         override val userId: String,
         override val lightningAddress: String?,
@@ -64,7 +64,7 @@ sealed class Wallet(
         override val lastUpdatedAt: Long?,
     ) : Wallet(
         walletId = walletId,
-        walletType = WalletType.TSUNAMI,
+        walletType = WalletType.SPARK,
         userId = userId,
         lightningAddress = lightningAddress,
         spamThresholdAmountInSats = spamThresholdAmountInSats,

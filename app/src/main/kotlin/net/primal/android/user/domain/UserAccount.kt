@@ -58,6 +58,7 @@ data class UserAccount(
             pubkey = "",
             authorDisplayName = "",
             userDisplayName = "",
+            shouldShowUpgradeWalletSheet = false,
         )
 
         fun buildLocal(pubkey: String) =
@@ -65,6 +66,7 @@ data class UserAccount(
                 pubkey = pubkey,
                 authorDisplayName = pubkey.asEllipsizedNpub(),
                 userDisplayName = pubkey.asEllipsizedNpub(),
+                shouldShowUpgradeWalletSheet = false,
             )
     }
 }
