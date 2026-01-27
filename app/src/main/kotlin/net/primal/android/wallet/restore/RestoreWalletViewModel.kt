@@ -3,6 +3,7 @@ package net.primal.android.wallet.restore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -21,7 +22,6 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
 import net.primal.wallet.data.validator.RecoveryPhraseValidator
-import timber.log.Timber
 
 @HiltViewModel
 class RestoreWalletViewModel @Inject constructor() : ViewModel() {
@@ -95,8 +95,8 @@ class RestoreWalletViewModel @Inject constructor() : ViewModel() {
                 }
             }.onSuccess {
                 setEffect(SideEffect.RestoreSuccess)
-            }.onFailure {
-                Timber.e(it, "Error restoring wallet.")
+            }.onFailure { error ->
+                Napier.e(throwable = error) { "Error restoring wallet." }
                 setState {
                     copy(
                         currentStage = RestoreStage.MnemonicInput,

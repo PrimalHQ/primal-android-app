@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -26,7 +27,6 @@ import net.primal.android.navigation.noteIdOrThrow
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.links.EventUriRepository
 import net.primal.domain.links.EventUriType
-import timber.log.Timber
 
 @HiltViewModel
 class EventMediaGalleryViewModel @Inject constructor(
@@ -92,10 +92,10 @@ class EventMediaGalleryViewModel @Inject constructor(
                     mediaDownloader.downloadToMediaGallery(url = attachment.url)
                     setEffect(EventMediaGalleryContract.SideEffect.MediaSaved(type = attachment.type))
                 } catch (error: UnsuccessfulFileDownload) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to download media." }
                     setState { copy(error = UiState.MediaGalleryError.FailedToSaveMedia(error)) }
                 } catch (error: UnableToSaveContent) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to save media." }
                     setState { copy(error = UiState.MediaGalleryError.FailedToSaveMedia(error)) }
                 }
             }

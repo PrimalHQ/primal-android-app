@@ -1,5 +1,6 @@
 package net.primal.android.premium.repository
 
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
 import net.primal.android.premium.api.PremiumApi
@@ -20,7 +21,6 @@ import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.membership.LeaderboardLegendEntry
 import net.primal.domain.membership.OGLeaderboardEntry
 import net.primal.domain.nostr.cryptography.SignatureException
-import timber.log.Timber
 
 class PremiumRepository @Inject constructor(
     private val dispatchers: DispatcherProvider,
@@ -50,7 +50,7 @@ class PremiumRepository @Inject constructor(
                     }
                 }?.premiumMembership
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch membership status" }
                 null
             }
         }

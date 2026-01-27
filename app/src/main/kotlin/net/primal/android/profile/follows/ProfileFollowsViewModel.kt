@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,7 +31,6 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.profile.ProfileRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ProfileFollowsViewModel @Inject constructor(
@@ -70,7 +70,7 @@ class ProfileFollowsViewModel @Inject constructor(
             else -> try {
                 ProfileFollowsType.valueOf(this)
             } catch (error: IllegalArgumentException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Invalid followsType: $this" }
                 ProfileFollowsType.Followers
             }
         }
@@ -121,7 +121,7 @@ class ProfileFollowsViewModel @Inject constructor(
                 }
                 setState { copy(users = users.map { it.mapAsUserProfileUi() }) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch follows for profileId=$profileId" }
             } finally {
                 setState { copy(loading = false) }
             }
@@ -170,7 +170,7 @@ class ProfileFollowsViewModel @Inject constructor(
             profileFollowsHandler.observeResults().collect {
                 when (it) {
                     is ProfileFollowsHandler.ActionResult.Error -> {
-                        Timber.w(it.error)
+                        Napier.w(throwable = it.error) { "Failed to perform follow action." }
                         updateStateProfileUnfollowAndClearApprovalFlag(profileId)
                         when (it.error) {
                             is NetworkException, is SignatureException, is NostrPublishException -> {

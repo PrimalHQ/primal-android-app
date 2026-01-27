@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.Channel
@@ -35,7 +36,6 @@ import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.profile.ProfileRepository
-import timber.log.Timber
 
 @HiltViewModel
 class PremiumBuyingViewModel @Inject constructor(
@@ -107,7 +107,7 @@ class PremiumBuyingViewModel @Inject constructor(
                         }
                     }
                 } catch (error: NetworkException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to check membership status." }
                 }
             }
         }
@@ -125,7 +125,7 @@ class PremiumBuyingViewModel @Inject constructor(
 
                 fetchActiveSubscription()
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to initialize billing client." }
             }
         }
     }
@@ -179,9 +179,9 @@ class PremiumBuyingViewModel @Inject constructor(
                         )
                         setState { copy(stage = PremiumStage.Success) }
                     } catch (error: SignatureException) {
-                        Timber.w(error)
+                        Napier.w(throwable = error) { "Failed to purchase membership due to signature error." }
                     } catch (error: NetworkException) {
-                        Timber.e(error)
+                        Napier.e(throwable = error) { "Failed to purchase membership due to network error." }
                         this@PremiumBuyingViewModel.purchase = purchase
                         setState {
                             copy(
@@ -213,7 +213,7 @@ class PremiumBuyingViewModel @Inject constructor(
                     activity = event.activity,
                 )
             } catch (error: InAppPurchaseException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to launch billing flow." }
             }
         }
 
@@ -232,9 +232,9 @@ class PremiumBuyingViewModel @Inject constructor(
                     setState { copy(stage = PremiumStage.Success) }
                     premiumRepository.fetchMembershipStatus(userId = userId)
                 } catch (error: SignatureException) {
-                    Timber.e(error)
+                    Napier.e(throwable = error) { "Failed to restore purchase due to signature error." }
                 } catch (error: NetworkException) {
-                    Timber.e(error)
+                    Napier.e(throwable = error) { "Failed to restore purchase due to network error." }
                 }
             }
         }

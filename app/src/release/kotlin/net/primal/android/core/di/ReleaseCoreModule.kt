@@ -13,10 +13,6 @@ import net.primal.android.core.logging.RecordingAntilog
 @InstallIn(SingletonComponent::class)
 object ReleaseCoreModule {
 
-//    @Provides
-//    @IntoSet
-//    fun timberLogger(): Timber.Tree = Timber.DebugTree()
-
     @Provides
     @IntoSet
     fun antilog(recordingAntilog: RecordingAntilog): Antilog = recordingAntilog

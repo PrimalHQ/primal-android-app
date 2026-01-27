@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
@@ -29,7 +30,6 @@ import net.primal.domain.nostr.Nip19TLV
 import net.primal.domain.nostr.cryptography.utils.bech32ToHexOrThrow
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.reads.ArticleRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ThreadViewModel @Inject constructor(
@@ -137,7 +137,7 @@ class ThreadViewModel @Inject constructor(
                     feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = highlightPostId)
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch note replies for noteId=$highlightPostId" }
             } finally {
                 setState { copy(fetching = false) }
             }
@@ -154,7 +154,7 @@ class ThreadViewModel @Inject constructor(
                     )
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch top note zaps for eventId=$highlightPostId" }
             }
         }
 

@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import io.github.aakira.napier.Napier
 import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -78,7 +79,6 @@ import net.primal.domain.reads.HighlightRepository
 import net.primal.domain.streams.StreamRepository
 import net.primal.domain.streams.mappers.asReferencedStream
 import net.primal.domain.utils.isLnInvoice
-import timber.log.Timber
 
 class NoteEditorViewModel @AssistedInject constructor(
     userMentionHandlerFactory: UserMentionHandler.Factory,
@@ -366,7 +366,7 @@ class NoteEditorViewModel @AssistedInject constructor(
             try {
                 feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch note thread for noteId=$replyToNoteId" }
             }
         }
 
@@ -530,7 +530,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                     articleAuthorId = replyToArticleNaddr.userId,
                 )
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch article details for naddr=$replyToArticleNaddr" }
             }
         }
 
@@ -585,13 +585,13 @@ class NoteEditorViewModel @AssistedInject constructor(
 
                 sendEffect(SideEffect.PostPublished)
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to publish post due to signature error." }
                 setErrorState(error = UiError.PublishError(cause = error.cause))
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to publish post due to nostr publish error." }
                 setErrorState(error = UiError.PublishError(cause = error.cause))
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to publish post due to missing relays." }
                 setErrorState(error = UiError.MissingRelaysConfiguration(cause = error.cause))
             } finally {
                 setState { copy(publishing = false) }
@@ -683,13 +683,13 @@ class NoteEditorViewModel @AssistedInject constructor(
                 }
 
                 is UploadResult.Failed -> {
-                    Timber.w(uploadResult.error)
+                    Napier.w(throwable = uploadResult.error) { "Failed to upload attachment." }
                     updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = uploadResult.error))
                     setErrorState(error = UiError.FailedToUploadAttachment(cause = uploadResult.error))
                 }
             }
         } catch (error: SignatureException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to upload attachment due to signature error." }
             updateNoteAttachmentState(attachment = updatedAttachment.copy(uploadError = error))
         }
     }

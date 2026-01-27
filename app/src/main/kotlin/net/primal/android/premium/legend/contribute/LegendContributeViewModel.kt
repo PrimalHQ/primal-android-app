@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.util.*
 import javax.inject.Inject
 import kotlin.uuid.Uuid
@@ -36,7 +37,6 @@ import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.not
-import timber.log.Timber
 
 @HiltViewModel
 class LegendContributeViewModel @Inject constructor(
@@ -196,9 +196,9 @@ class LegendContributeViewModel @Inject constructor(
 
                 startPurchaseMonitor()
             } catch (error: SignatureException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch legend payment instructions due to signature error." }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch legend payment instructions due to network error." }
             } finally {
                 setState { copy(isFetchingPaymentInstructions = false) }
             }
@@ -214,7 +214,7 @@ class LegendContributeViewModel @Inject constructor(
                     null -> Unit
                 }
             }.onFailure { error ->
-                Timber.w(error)
+                Napier.w(error) { "Failed to execute legends payment." }
                 setState {
                     copy(
                         error = UiState.ContributionUiError.WithdrawViaPrimalWalletFailed(error),

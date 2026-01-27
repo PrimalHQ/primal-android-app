@@ -17,13 +17,9 @@ import net.primal.core.config.store.AppConfigInitializer
 import net.primal.data.account.repository.repository.factory.AccountRepositoryFactory
 import net.primal.data.repository.factory.PrimalRepositoryFactory
 import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
-import timber.log.Timber
 
 @HiltAndroidApp
 class PrimalApp : Application() {
-
-    @Inject
-    lateinit var loggers: Set<@JvmSuppressWildcards Timber.Tree>
 
     @Inject
     lateinit var antilog: Set<@JvmSuppressWildcards Antilog>
@@ -51,14 +47,8 @@ class PrimalApp : Application() {
             enableDbEncryption = !BuildConfig.DEBUG,
         )
 
-        loggers.forEach {
-            Timber.plant(it)
-        }
-
         SingletonImageLoader.setSafe(imageLoaderFactory)
-        antilog.firstOrNull()?.let { antilog ->
-            Napier.base(antilog)
-        }
+        antilog.forEach { Napier.base(it) }
 
         if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
             crashReporter.init()

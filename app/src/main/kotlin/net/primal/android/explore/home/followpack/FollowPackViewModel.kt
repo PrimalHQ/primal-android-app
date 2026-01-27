@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -33,7 +34,6 @@ import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
-import timber.log.Timber
 
 @HiltViewModel
 @OptIn(FlowPreview::class)
@@ -125,7 +125,7 @@ class FollowPackViewModel @Inject constructor(
             try {
                 exploreRepository.fetchFollowList(profileId = profileId, identifier = identifier)
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch follow pack." }
                 setState { copy(uiError = UiError.NetworkError(error)) }
             } finally {
                 setState { copy(loading = false) }

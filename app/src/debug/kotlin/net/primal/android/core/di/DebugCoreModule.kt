@@ -9,15 +9,10 @@ import io.github.aakira.napier.Antilog
 import io.github.aakira.napier.DebugAntilog
 import net.primal.android.core.logging.AppLogController
 import net.primal.android.core.logging.NoOpAppLogController
-import timber.log.Timber
 
 @Module
 @InstallIn(SingletonComponent::class)
 object DebugCoreModule {
-
-    @Provides
-    @IntoSet
-    fun timberLogger(): Timber.Tree = Timber.DebugTree()
 
     @Provides
     @IntoSet

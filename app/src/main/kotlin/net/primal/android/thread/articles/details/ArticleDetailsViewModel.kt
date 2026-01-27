@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -65,7 +66,6 @@ import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
 import net.primal.domain.utils.isConfigured
-import timber.log.Timber
 
 @HiltViewModel
 class ArticleDetailsViewModel @Inject constructor(
@@ -166,7 +166,7 @@ class ArticleDetailsViewModel @Inject constructor(
                     articleId = naddr.identifier,
                 )
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch article data." }
             } finally {
                 setState { copy(fetching = false) }
             }
@@ -334,15 +334,15 @@ class ArticleDetailsViewModel @Inject constructor(
                         ),
                     )
                 } catch (error: NostrPublishException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to publish like event." }
                 } catch (error: MissingRelaysException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Missing relays for like event." }
                 } catch (error: SigningKeyNotFoundException) {
                     setState { copy(error = UiError.MissingPrivateKey) }
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Signing key not found for like event." }
                 } catch (error: SigningRejectedException) {
                     setState { copy(error = UiError.NostrSignUnauthorized) }
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Signing rejected for like event." }
                 }
             }
         }
@@ -364,15 +364,15 @@ class ArticleDetailsViewModel @Inject constructor(
                         ),
                     )
                 } catch (error: NostrPublishException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to publish repost event." }
                 } catch (error: MissingRelaysException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Missing relays for repost event." }
                 } catch (error: SigningKeyNotFoundException) {
                     setState { copy(error = UiError.MissingPrivateKey) }
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Signing key not found for repost event." }
                 } catch (error: SigningRejectedException) {
                     setState { copy(error = UiError.NostrSignUnauthorized) }
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Signing rejected for repost event." }
                 }
             }
         }
@@ -402,7 +402,7 @@ class ArticleDetailsViewModel @Inject constructor(
             profileFollowsHandler.observeResults().collect {
                 when (it) {
                     is ProfileFollowsHandler.ActionResult.Error -> {
-                        Timber.e(it.error)
+                        Napier.e(throwable = it.error) { "Failed to update follow list." }
                         setState { copy(isAuthorFollowed = !isAuthorFollowed) }
 
                         when (it.error) {
@@ -464,12 +464,12 @@ class ArticleDetailsViewModel @Inject constructor(
             onSuccess?.invoke(highlightNevent)
         } catch (error: SigningKeyNotFoundException) {
             setState { copy(error = UiError.MissingPrivateKey) }
-            Timber.w(error)
+            Napier.w(throwable = error) { "Signing key not found for publishing highlight." }
         } catch (error: SigningRejectedException) {
             setState { copy(error = UiError.NostrSignUnauthorized) }
-            Timber.w(error)
+            Napier.w(throwable = error) { "Signing rejected for publishing highlight." }
         } catch (error: NostrPublishException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to publish highlight." }
         } finally {
             setState { copy(isWorking = false) }
         }
@@ -485,7 +485,7 @@ class ArticleDetailsViewModel @Inject constructor(
                     it.author?.pubkey == activeAccountStore.activeUserId()
             }
             if (highlightToDelete == null) {
-                Timber.w("We are trying to remove a highlight that doesn't exist.")
+                Napier.w { "We are trying to remove a highlight that doesn't exist." }
                 return@launch
             }
 
@@ -499,12 +499,12 @@ class ArticleDetailsViewModel @Inject constructor(
                 setState { copy(isHighlighted = false) }
             } catch (error: SigningKeyNotFoundException) {
                 setState { copy(error = UiError.MissingPrivateKey) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing key not found for deleting highlight." }
             } catch (error: SigningRejectedException) {
                 setState { copy(error = UiError.NostrSignUnauthorized) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing rejected for deleting highlight." }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to publish delete highlight event." }
             } finally {
                 setState { copy(isWorking = false) }
             }

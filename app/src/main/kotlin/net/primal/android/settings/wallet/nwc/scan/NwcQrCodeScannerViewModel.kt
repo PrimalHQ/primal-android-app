@@ -3,6 +3,7 @@ package net.primal.android.settings.wallet.nwc.scan
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,7 +16,6 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.parser.isNwcUrl
 import net.primal.domain.usecase.ConnectNwcUseCase
-import timber.log.Timber
 
 @HiltViewModel
 class NwcQrCodeScannerViewModel @Inject constructor(
@@ -68,7 +68,7 @@ class NwcQrCodeScannerViewModel @Inject constructor(
                 nwcUrl = nwcUrl,
                 autoSetAsDefaultWallet = true,
             )
-                .onFailure { Timber.w(it) }
+                .onFailure { Napier.w(throwable = it) { "Failed to connect wallet via NWC" } }
                 .onSuccess { setEffect(NwcQrCodeScannerContract.SideEffect.NwcConnected) }
         }
 }

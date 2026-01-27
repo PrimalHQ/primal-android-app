@@ -1,5 +1,6 @@
 package net.primal.android.wallet.repository
 
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -8,7 +9,6 @@ import kotlinx.coroutines.flow.getAndUpdate
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.rates.exchange.ExchangeRateRepository
-import timber.log.Timber
 
 @Singleton
 class ExchangeRateHandler @Inject constructor(
@@ -24,9 +24,9 @@ class ExchangeRateHandler @Inject constructor(
             val btcRate = exchangeRateRepository.getExchangeRate(userId = userId)
             setState { btcRate }
         } catch (error: SignatureException) {
-            Timber.e(error)
+            Napier.e(throwable = error) { "Failed to fetch exchange rate due to signature error." }
         } catch (error: NetworkException) {
-            Timber.e(error)
+            Napier.e(throwable = error) { "Failed to fetch exchange rate due to network error." }
         }
     }
 }

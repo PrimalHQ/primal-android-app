@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,7 +42,6 @@ import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.DraftTxStatus
 import net.primal.domain.wallet.WalletRepository
-import timber.log.Timber
 
 @HiltViewModel
 class CreateTransactionViewModel @Inject constructor(
@@ -179,7 +179,7 @@ class CreateTransactionViewModel @Inject constructor(
                         profileRepository.fetchProfile(profileId = targetUserId)
                     }
                 } catch (error: NetworkException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to fetch profile data for targetUserId: $targetUserId" }
                 }
             }
         }
@@ -216,7 +216,7 @@ class CreateTransactionViewModel @Inject constructor(
                     )
                 }
             }.onFailure { error ->
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to update mining fees." }
             }
 
             setState { copy(fetchingMiningFees = false) }
@@ -239,7 +239,7 @@ class CreateTransactionViewModel @Inject constructor(
         walletTextParser.parseAndQueryText(userId = userId, text = text)
             .onFailure { error ->
                 setState { copy(error = error) }
-                Timber.w(error, "Unable to parse text. [text=$text]")
+                Napier.w(throwable = error) { "Unable to parse text. [text=$text]" }
             }.onSuccess { draftTx ->
                 setState { copy(transaction = draftTx) }
             }
@@ -304,7 +304,7 @@ class CreateTransactionViewModel @Inject constructor(
             }.onSuccess {
                 setState { copy(transaction = transaction.copy(status = DraftTxStatus.Sent)) }
             }.onFailure { error ->
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to send transaction." }
                 setState {
                     copy(
                         error = error,

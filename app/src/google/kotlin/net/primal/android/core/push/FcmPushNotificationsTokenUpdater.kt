@@ -1,6 +1,7 @@
 package net.primal.android.core.push
 
 import com.google.firebase.messaging.FirebaseMessaging
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
@@ -21,7 +22,6 @@ import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.utils.getOrNull
-import timber.log.Timber
 
 class FcmPushNotificationsTokenUpdater @Inject constructor(
     private val dispatcherProvider: DispatcherProvider,
@@ -52,7 +52,7 @@ class FcmPushNotificationsTokenUpdater @Inject constructor(
                         token = token,
                     )
                 } catch (error: NetworkException) {
-                    Timber.e(error)
+                    Napier.e(throwable = error) { "Failed to update notifications token." }
                 }
             }
         }
@@ -79,7 +79,9 @@ class FcmPushNotificationsTokenUpdater @Inject constructor(
                         token = token,
                     )
                 }
-            }.onFailure { Timber.e(it) }
+            }.onFailure {
+                Napier.e(throwable = it) { "Failed to update notification token for remote signer." }
+            }
         }
     }
 

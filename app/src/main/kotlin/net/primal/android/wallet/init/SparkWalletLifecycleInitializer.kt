@@ -1,5 +1,6 @@
 package net.primal.android.wallet.init
 
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.time.Duration.Companion.seconds
@@ -17,7 +18,6 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.SparkWalletManager
-import timber.log.Timber
 
 @Singleton
 class SparkWalletLifecycleInitializer @Inject constructor(
@@ -53,7 +53,7 @@ class SparkWalletLifecycleInitializer @Inject constructor(
             runCatching {
                 sparkWalletManager.disconnectWallet(walletId).getOrThrow()
             }.onFailure { t ->
-                Timber.e(t, "disconnectWallet failed for walletId=%s", walletId)
+                Napier.e(throwable = t) { "disconnectWallet failed for walletId=$walletId" }
             }
             currentWalletId = null
         }
@@ -62,7 +62,7 @@ class SparkWalletLifecycleInitializer @Inject constructor(
     private suspend fun initializeWalletWithRetry(userId: String) {
         repeat(MAX_RETRY_ATTEMPTS) { attempt ->
             if (hasUserChanged(userId)) {
-                Timber.d("User changed during retry, aborting initialization for userId=%s", userId)
+                Napier.d { "User changed during retry, aborting initialization for userId=$userId" }
                 return
             }
 
@@ -70,7 +70,7 @@ class SparkWalletLifecycleInitializer @Inject constructor(
 
             result.onSuccess { walletId ->
                 currentWalletId = walletId
-                Timber.d("Wallet initialized for userId=%s, walletId=%s", userId, walletId)
+                Napier.d { "Wallet initialized for userId=$userId, walletId=$walletId" }
                 return
             }
 
@@ -78,16 +78,15 @@ class SparkWalletLifecycleInitializer @Inject constructor(
                 val remainingAttempts = MAX_RETRY_ATTEMPTS - attempt - 1
                 if (remainingAttempts > 0) {
                     val delaySeconds = INITIAL_RETRY_DELAY_SECONDS shl attempt
-                    Timber.w(
-                        t,
-                        "initializeWallet failed for userId=%s, retrying in %ds (%d attempts left)",
-                        userId,
-                        delaySeconds,
-                        remainingAttempts,
-                    )
+                    Napier.w(throwable = t) {
+                        "initializeWallet failed for userId=$userId, " +
+                            "retrying in ${delaySeconds}s ($remainingAttempts attempts left)"
+                    }
                     delay(delaySeconds.seconds)
                 } else {
-                    Timber.e(t, "initializeWallet failed for userId=%s after %d attempts", userId, MAX_RETRY_ATTEMPTS)
+                    Napier.e(
+                        throwable = t,
+                    ) { "initializeWallet failed for userId=$userId after $MAX_RETRY_ATTEMPTS attempts" }
                 }
             }
         }

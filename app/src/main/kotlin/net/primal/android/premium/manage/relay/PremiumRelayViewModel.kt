@@ -3,6 +3,7 @@ package net.primal.android.premium.manage.relay
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +16,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.RelayRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import timber.log.Timber
 
 @HiltViewModel
 class PremiumRelayViewModel @Inject constructor(
@@ -61,9 +61,9 @@ class PremiumRelayViewModel @Inject constructor(
                     url = state.value.relayUrl,
                 )
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to sign relay list update" }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Network error while connecting to relay" }
                 setState { copy(error = error) }
             } finally {
                 setState { copy(addingRelay = false) }

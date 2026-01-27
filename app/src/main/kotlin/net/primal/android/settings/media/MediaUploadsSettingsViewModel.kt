@@ -3,6 +3,7 @@ package net.primal.android.settings.media
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,6 @@ import net.primal.core.utils.onSuccess
 import net.primal.domain.account.blossom.BlossomRepository as AccountBlossomRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import timber.log.Timber
 
 @HiltViewModel
 class MediaUploadsSettingsViewModel @Inject constructor(
@@ -30,7 +30,7 @@ class MediaUploadsSettingsViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
@@ -62,7 +62,7 @@ class MediaUploadsSettingsViewModel @Inject constructor(
                     }
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to ensure blossom server list." }
             } finally {
                 setState { copy(isLoadingBlossomServerUrls = false) }
             }
@@ -180,13 +180,13 @@ class MediaUploadsSettingsViewModel @Inject constructor(
                 blossomRepository.publishBlossomServerList(userId = userId, servers = servers)
                 setState(onSuccess)
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to update blossom servers due to network error." }
                 setState { copy(error = UiError.FailedToUpdateBlossomServer(error)) }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to update blossom servers due to signature error." }
                 setState { copy(error = UiError.FailedToUpdateBlossomServer(error)) }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to update blossom servers due to nostr publish error." }
                 setState { copy(error = UiError.FailedToUpdateBlossomServer(error)) }
             }
         }

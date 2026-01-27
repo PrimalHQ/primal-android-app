@@ -3,6 +3,7 @@ package net.primal.android.settings.muted
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,6 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
-import timber.log.Timber
 
 @HiltViewModel
 class MutedSettingsViewModel @Inject constructor(
@@ -33,7 +33,7 @@ class MutedSettingsViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
@@ -97,16 +97,16 @@ class MutedSettingsViewModel @Inject constructor(
                 }
                 setState { copy(newMutedHashtag = "") }
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute hashtag due to missing relays." }
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute hashtag due to signature error." }
                 setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute hashtag due to nostr publish error." }
                 setState { copy(error = UiError.FailedToMuteHashtag(error)) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute hashtag due to network error." }
                 setState { copy(error = UiError.NetworkError(error)) }
             }
         }
@@ -121,16 +121,16 @@ class MutedSettingsViewModel @Inject constructor(
                     )
                 }
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute hashtag due to missing relays." }
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute hashtag due to signature error." }
                 setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute hashtag due to nostr publish error." }
                 setState { copy(error = UiError.FailedToUnmuteHashtag(error)) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute hashtag due to network error." }
                 setState { copy(error = UiError.NetworkError(error)) }
             }
         }
@@ -146,16 +146,16 @@ class MutedSettingsViewModel @Inject constructor(
                 }
                 setState { copy(newMutedWord = "") }
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute word due to missing relays." }
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute word due to signature error." }
                 setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute word due to nostr publish error." }
                 setState { copy(error = UiError.FailedToMuteWord(error)) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute word due to network error." }
                 setState { copy(error = UiError.NetworkError(error)) }
             }
         }
@@ -170,16 +170,16 @@ class MutedSettingsViewModel @Inject constructor(
                     )
                 }
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute word due to missing relays." }
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute word due to signature error." }
                 setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute word due to nostr publish error." }
                 setState { copy(error = UiError.FailedToUnmuteWord(error)) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute word due to network error." }
                 setState { copy(error = UiError.NetworkError(error)) }
             }
         }
@@ -194,16 +194,16 @@ class MutedSettingsViewModel @Inject constructor(
                     )
                 }
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute user due to missing relays." }
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute user due to signature error." }
                 setState { copy(error = UiError.SignatureError(error.asSignatureUiError())) }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute user due to nostr publish error." }
                 setState { copy(error = UiError.FailedToUnmuteUser(error)) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to unmute user due to network error." }
                 setState { copy(error = UiError.NetworkError(error)) }
             }
         }
@@ -217,7 +217,7 @@ class MutedSettingsViewModel @Inject constructor(
                     )
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch latest mute list." }
                 setState { copy(error = UiError.FailedToFetchMuteList(error)) }
             }
         }

@@ -1,5 +1,6 @@
 package net.primal.android.networking.relays
 
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
@@ -18,7 +19,6 @@ import net.primal.core.networking.sockets.NostrSocketClientFactory
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.NostrEvent
-import timber.log.Timber
 
 @Singleton
 class RelaysSocketManager @Inject constructor(
@@ -82,7 +82,7 @@ class RelaysSocketManager @Inject constructor(
                     updateRelayPools(regularRelays = userRelays, walletRelays = nwcRelays)
                 }
             } catch (error: CancellationException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Relay observation cancelled" }
             }
         }
 

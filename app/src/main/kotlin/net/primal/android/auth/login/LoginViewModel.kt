@@ -3,6 +3,7 @@ package net.primal.android.auth.login
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.channels.Channel
@@ -28,7 +29,6 @@ import net.primal.domain.nostr.utils.isValidNostrPrivateKey
 import net.primal.domain.nostr.utils.isValidNostrPublicKey
 import net.primal.domain.nostr.utils.takeAsProfileHexIdOrNull
 import net.primal.domain.profile.ProfileRepository
-import timber.log.Timber
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
@@ -81,7 +81,7 @@ class LoginViewModel @Inject constructor(
                     setEffect(SideEffect.LoginSuccess)
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Login failed due to network error." }
                 setErrorState(error = UiState.LoginError.GenericError(error))
                 if (state.value.credentialType == CredentialType.ExternalSigner) {
                     resetLoginState()
@@ -142,7 +142,7 @@ class LoginViewModel @Inject constructor(
                         profileRepository.findProfileDataOrNull(profileId = userId)
                     }
                 } catch (error: NetworkException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to fetch profile details for npub=$npub" }
                     null
                 }
             }

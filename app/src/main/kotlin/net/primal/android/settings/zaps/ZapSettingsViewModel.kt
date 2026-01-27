@@ -3,6 +3,7 @@ package net.primal.android.settings.zaps
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,7 +24,6 @@ import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.notifications.ContentZapConfigItem
 import net.primal.domain.notifications.ContentZapDefault
-import timber.log.Timber
 
 @HiltViewModel
 class ZapSettingsViewModel @Inject constructor(
@@ -96,7 +96,7 @@ class ZapSettingsViewModel @Inject constructor(
                     ).let { signResult ->
                         when (signResult) {
                             is SignResult.Rejected -> {
-                                Timber.w(signResult.error)
+                                Napier.w(throwable = signResult.error) { "Sign rejected while fetching app settings." }
                                 setState { copy(signatureError = signResult.error.asSignatureUiError()) }
                             }
 
@@ -105,7 +105,7 @@ class ZapSettingsViewModel @Inject constructor(
                     }
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch app settings." }
             }
         }
 
@@ -140,7 +140,7 @@ class ZapSettingsViewModel @Inject constructor(
 
                 setState { copy(editPresetIndex = null) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to update default zap amount." }
             } finally {
                 setState { copy(saving = false) }
             }
@@ -180,7 +180,7 @@ class ZapSettingsViewModel @Inject constructor(
 
                 setState { copy(editPresetIndex = null) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to update zap preset." }
             } finally {
                 setState { copy(saving = false) }
             }
