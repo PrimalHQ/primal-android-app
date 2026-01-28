@@ -21,19 +21,24 @@ import net.primal.core.networking.nwc.wallet.NwcWalletClient
 import net.primal.core.networking.nwc.wallet.NwcWalletRequestParser
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
 import net.primal.core.networking.nwc.wallet.signNwcResponseNostrEvent
+import net.primal.core.utils.CurrencyConversionUtils.msatsToSats
+import net.primal.core.utils.CurrencyConversionUtils.satsToMSats
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.nostr.NwcService
+import net.primal.domain.connections.nostr.model.NwcPaymentHoldResult
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
+import net.primal.domain.wallet.TxRequest
+import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
 import net.primal.wallet.data.nwc.manager.NwcBudgetManager
 
 private const val MAX_CACHE_SIZE = 20
 private const val TAG = "NwcServiceImpl"
+private const val PAYMENT_HOLD_TIMEOUT_MS = 60_000L
 
 class NwcServiceImpl internal constructor(
     private val dispatchers: DispatcherProvider,
@@ -41,7 +46,7 @@ class NwcServiceImpl internal constructor(
     private val nwcRepository: NwcRepository,
     private val requestParser: NwcWalletRequestParser,
     private val responseBuilder: NwcWalletResponseBuilder,
-    private val walletAccountRepository: WalletAccountRepository,
+    private val walletRepository: WalletRepository,
 ) : NwcService {
 
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
@@ -162,30 +167,21 @@ class NwcServiceImpl internal constructor(
                 tag = TAG,
             ) { "Processing request: ${request::class.simpleName}, eventId=${request.eventId.take(8)}..." }
 
-            // 1. Budget & Permission Logic
-            // check permissions here.
-            // val canSpend = nwcBudgetManager.canSpend(...)
-
-            // 2. Build Response
             val response = runCatching {
                 when (request) {
                     is WalletNwcRequest.GetBalance -> {
-                        val wallet = walletAccountRepository.getActiveWallet(request.connection.userId)
+                        val walletResult = walletRepository.getWalletById(request.connection.walletId)
+                        val wallet = walletResult.getOrNull()
                         val balanceSats = wallet?.balanceInBtc?.toSats()?.toLong() ?: 0L
-                        Napier.d(tag = TAG) { "GetBalance: balanceSats=$balanceSats (${balanceSats * 1000} msat)" }
+                        val balanceMsats = balanceSats.satsToMSats()
+                        Napier.d(tag = TAG) { "GetBalance: balanceSats=$balanceSats ($balanceMsats msat)" }
                         responseBuilder.buildGetBalanceResponse(
                             request = request,
-                            result = GetBalanceResponsePayload(balance = balanceSats * 1000),
+                            result = GetBalanceResponsePayload(balance = balanceMsats),
                         )
                     }
                     is WalletNwcRequest.PayInvoice -> {
-                        // TODO: Implement real payment via WalletRepository
-                        val preimage = "mock_preimage"
-                        Napier.d(tag = TAG) { "PayInvoice: returning mock preimage" }
-                        responseBuilder.buildPayInvoiceResponse(
-                            request = request,
-                            result = PayInvoiceResponsePayload(preimage = preimage),
-                        )
+                        processPayInvoice(request)
                     }
                     is WalletNwcRequest.GetInfo -> {
                         Napier.d(tag = TAG) { "GetInfo: returning supported methods" }
@@ -246,10 +242,94 @@ class NwcServiceImpl internal constructor(
                 )
             }
 
-            // 3. Send Response
             Napier.d(tag = TAG) { "Sending response for eventId=${request.eventId.take(8)}..." }
             sendResponseOrAddToRetryQueue(request, response)
         }
+
+    private suspend fun processPayInvoice(request: WalletNwcRequest.PayInvoice): String {
+        val connection = request.connection
+        val connectionId = connection.secretPubKey
+        val walletId = connection.walletId
+        val invoice = request.params.invoice
+
+        // Get amount from request params, or parse from invoice if not provided
+        val amountSats = request.params.amount?.msatsToSats()
+            ?: parseInvoiceAmountSats(userId = connection.userId, invoice = invoice)
+
+        Napier.d(tag = TAG) { "PayInvoice: invoice=${invoice.take(20)}..., amountSats=$amountSats" }
+
+        // 1. Check and enforce budget if configured
+        var holdId: String? = null
+        if (amountSats > 0 && nwcBudgetManager.hasBudgetLimit(connectionId)) {
+            when (
+                val holdResult = nwcBudgetManager.placeHold(
+                    connectionId = connectionId,
+                    amountSats = amountSats,
+                    requestId = request.eventId,
+                    timeoutMs = PAYMENT_HOLD_TIMEOUT_MS,
+                )
+            ) {
+                is NwcPaymentHoldResult.Placed -> {
+                    holdId = holdResult.holdId
+                    Napier.d(tag = TAG) {
+                        "PayInvoice: budget hold placed, holdId=$holdId, remaining=${holdResult.remainingBudget}"
+                    }
+                }
+
+                is NwcPaymentHoldResult.InsufficientBudget -> {
+                    Napier.w(tag = TAG) {
+                        "PayInvoice: insufficient budget, " +
+                            "requested=${holdResult.requested}, available=${holdResult.available}"
+                    }
+                    return responseBuilder.buildErrorResponse(
+                        request = request,
+                        code = NwcError.QUOTA_EXCEEDED,
+                        message = "Daily budget exceeded. Requested: ${holdResult.requested} sats, " +
+                            "available: ${holdResult.available} sats",
+                    )
+                }
+            }
+        }
+
+        // 2. Execute payment
+        val txRequest = TxRequest.Lightning.LnInvoice(
+            amountSats = amountSats.toString(),
+            noteRecipient = null,
+            noteSelf = null,
+            lnInvoice = invoice,
+        )
+
+        val paymentResult = walletRepository.pay(walletId = walletId, request = txRequest)
+
+        // 3. Handle result and manage budget hold
+        return if (paymentResult.isSuccess) {
+            holdId?.let { id -> nwcBudgetManager.commitHold(id, amountSats) }
+            Napier.d(tag = TAG) { "PayInvoice: payment successful" }
+            responseBuilder.buildPayInvoiceResponse(
+                request = request,
+                result = PayInvoiceResponsePayload(preimage = null),
+            )
+        } else {
+            val exception = paymentResult.exceptionOrNull()
+            holdId?.let { id -> nwcBudgetManager.releaseHold(id) }
+            Napier.e(tag = TAG, throwable = exception) { "PayInvoice: payment failed" }
+            responseBuilder.buildErrorResponse(
+                request = request,
+                code = NwcError.INTERNAL,
+                message = exception?.message ?: "Payment failed",
+            )
+        }
+    }
+
+    private suspend fun parseInvoiceAmountSats(userId: String, invoice: String): Long {
+        return runCatching {
+            val parseResult = walletRepository.parseLnInvoice(userId = userId, lnbc = invoice)
+            (parseResult.amountMilliSats?.toLong() ?: 0L) / 1000L
+        }.getOrElse {
+            Napier.w(tag = TAG, throwable = it) { "Failed to parse invoice amount" }
+            0L
+        }
+    }
 
     private suspend fun sendResponseOrAddToRetryQueue(request: WalletNwcRequest, responseJson: String) {
         sendResponse(request, responseJson).onFailure {

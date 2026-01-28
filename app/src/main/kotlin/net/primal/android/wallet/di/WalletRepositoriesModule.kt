@@ -114,8 +114,8 @@ object WalletRepositoriesModule {
 
     @Provides
     @Singleton
-    fun provideNwcService(walletAccountRepository: WalletAccountRepository): NwcService =
+    fun provideNwcService(walletRepository: WalletRepository): NwcService =
         WalletRepositoryFactory.createNwcService(
-            walletAccountRepository = walletAccountRepository,
+            walletRepository = walletRepository,
         )
 }

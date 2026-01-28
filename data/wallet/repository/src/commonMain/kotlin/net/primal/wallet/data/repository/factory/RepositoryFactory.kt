@@ -181,7 +181,7 @@ abstract class RepositoryFactory {
             database = resolveWalletDatabase(),
         )
 
-    fun createNwcService(walletAccountRepository: WalletAccountRepository): NwcService =
+    fun createNwcService(walletRepository: WalletRepository): NwcService =
         NwcServiceImpl(
             dispatchers = dispatcherProvider,
             nwcBudgetManager = NwcBudgetManager(
@@ -191,6 +191,6 @@ abstract class RepositoryFactory {
             nwcRepository = createNwcRepository(),
             requestParser = NwcWalletRequestParser(),
             responseBuilder = NwcWalletResponseBuilder(),
-            walletAccountRepository = walletAccountRepository,
+            walletRepository = walletRepository,
         )
 }

@@ -49,6 +49,7 @@ class NwcWalletServiceViewModel @Inject constructor(
                 when (event) {
                     UiEvent.CreateConnection -> createNwcConnection()
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.ChangeDailyBudget -> setState { copy(dailyBudgetInput = event.value) }
                 }
             }
         }
@@ -65,12 +66,14 @@ class NwcWalletServiceViewModel @Inject constructor(
             setState { copy(isCreating = true, error = null) }
 
             val userId = activeAccountStore.activeUserId()
+            val dailyBudget = state.value.dailyBudgetInput.toLongOrNull()
+
             runCatching {
                 nwcRepository.createNewWalletConnection(
                     userId = userId,
                     walletId = walletId,
                     appName = "NWC Test Connection",
-                    dailyBudget = null,
+                    dailyBudget = dailyBudget,
                 ).getOrThrow()
             }
                 .onSuccess { nwcUri ->

@@ -12,13 +12,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -32,6 +35,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -163,6 +167,30 @@ private fun CreateConnectionContent(
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
+
+        OutlinedTextField(
+            modifier = Modifier.width(200.dp),
+            value = state.dailyBudgetInput,
+            onValueChange = { eventPublisher(NwcWalletServiceContract.UiEvent.ChangeDailyBudget(it)) },
+            label = { Text("Daily Budget (sats)") },
+            placeholder = { Text("e.g. 1000") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = if (state.dailyBudgetInput.isEmpty()) {
+                "No budget limit"
+            } else {
+                "Budget: ${state.dailyBudgetInput} sats/day"
+            },
+            style = AppTheme.typography.bodySmall,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
 
         PrimalFilledButton(
             onClick = { eventPublisher(NwcWalletServiceContract.UiEvent.CreateConnection) },
