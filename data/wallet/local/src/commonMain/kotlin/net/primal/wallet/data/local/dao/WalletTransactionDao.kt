@@ -7,7 +7,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import net.primal.domain.wallet.TxType
-import net.primal.shared.data.local.encryption.Encryptable
 
 @Dao
 interface WalletTransactionDao {
@@ -40,7 +39,9 @@ interface WalletTransactionDao {
             WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED")
                 AND walletId IS :walletId
                 AND (:type IS NULL OR type IS :type)
-            ORDER BY updatedAt DESC
+                AND (:from IS NULL OR createdAt >= :from)
+                AND (:until IS NULL OR createdAt <= :until)
+            ORDER BY createdAt DESC
             LIMIT :limit OFFSET :offset
         """,
     )
@@ -49,11 +50,9 @@ interface WalletTransactionDao {
         type: TxType?,
         limit: Int,
         offset: Int,
+        from: Long?,
+        until: Long?,
     ): List<WalletTransactionData>
-
-    @Transaction
-    @Query("SELECT * FROM WalletTransactionData WHERE walletId IS :walletId AND invoice = :invoice")
-    suspend fun findTransactionByInvoice(walletId: String, invoice: Encryptable<String>): WalletTransactionData?
 
     @Query("SELECT * FROM WalletTransactionData WHERE walletId IS :walletId ORDER BY updatedAt ASC LIMIT 1")
     suspend fun firstByWalletId(walletId: String): WalletTransactionData?

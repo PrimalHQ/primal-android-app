@@ -88,6 +88,7 @@ fun WalletSettingsScreen(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("LongMethod")
 @Composable
 fun WalletSettingsScreen(
     state: WalletSettingsContract.UiState,

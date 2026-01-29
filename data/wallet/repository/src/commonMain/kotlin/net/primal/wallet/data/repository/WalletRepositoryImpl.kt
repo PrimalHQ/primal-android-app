@@ -6,7 +6,6 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
-import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -23,7 +22,6 @@ import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.LnInvoiceParseResult
 import net.primal.domain.wallet.LnUrlParseResult
 import net.primal.domain.wallet.OnChainAddressResult
-import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.TxType
 import net.primal.domain.wallet.Wallet
@@ -45,8 +43,6 @@ import net.primal.wallet.data.repository.mappers.local.toDomain
 import net.primal.wallet.data.repository.transactions.TimestampBasedWalletTransactionsMediator
 import net.primal.wallet.data.service.WalletService
 import net.primal.wallet.data.service.factory.WalletServiceFactory
-
-private const val REMOTE_SYNC_LIMIT = 50
 
 @OptIn(ExperimentalPagingApi::class)
 internal class WalletRepositoryImpl(
@@ -145,10 +141,19 @@ internal class WalletRepositoryImpl(
         type: TxType?,
         limit: Int,
         offset: Int,
+        from: Long?,
+        until: Long?,
     ): List<Transaction> =
         withContext(dispatcherProvider.io()) {
             walletDatabase.walletTransactions()
-                .queryTransactions(walletId = walletId, type = type, limit = limit, offset = offset)
+                .queryTransactions(
+                    walletId = walletId,
+                    type = type,
+                    limit = limit,
+                    offset = offset,
+                    from = from,
+                    until = until,
+                )
                 .map { txData ->
                     val otherProfile = txData.otherUserId?.let { profileId ->
                         profileRepository.findProfileDataOrNull(profileId.decrypted)
@@ -168,82 +173,6 @@ internal class WalletRepositoryImpl(
 
             transaction.toDomain(otherProfile = profile)
         }
-
-    private suspend fun findTransactionByInvoice(walletId: String, invoice: String): Transaction? =
-        withContext(dispatcherProvider.io()) {
-            Napier.d(tag = "WalletRepository") {
-                "findTransactionByInvoice: querying DAO for invoice=${invoice.take(30)}..."
-            }
-            val transaction = walletDatabase.walletTransactions()
-                .findTransactionByInvoice(walletId = walletId, invoice = invoice.asEncryptable())
-                ?: return@withContext null
-
-            Napier.d(tag = "WalletRepository") {
-                "findTransactionByInvoice: found tx=${transaction.transactionId.take(16)}..."
-            }
-
-            val profile = transaction.otherUserId
-                ?.let { profileRepository.findProfileDataOrNull(profileId = it.decrypted) }
-
-            transaction.toDomain(otherProfile = profile)
-        }
-
-    override suspend fun findTransactionByInvoiceOrPaymentHash(
-        walletId: String,
-        invoice: String?,
-        paymentHash: String?,
-    ): Transaction? =
-        withContext(dispatcherProvider.io()) {
-            Napier.d(tag = "WalletRepository") {
-                "findTransactionByInvoiceOrPaymentHash: walletId=${walletId.take(8)}..., " +
-                    "invoice=${invoice?.take(30) ?: "null"}..., paymentHash=${paymentHash ?: "null"}"
-            }
-
-            // First try local DB lookup
-            findTransactionLocally(walletId, invoice, paymentHash)?.let {
-                Napier.d(tag = "WalletRepository") { "Found transaction in local DB" }
-                return@withContext it
-            }
-
-            // Not found locally - sync recent transactions from remote and try again
-            Napier.d(tag = "WalletRepository") { "Not found locally, syncing recent transactions from remote..." }
-            val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
-            if (wallet != null) {
-                runCatching {
-                    transactionsHandler.fetchAndPersistLatestTransactions(
-                        wallet = wallet.toDomain(),
-                        request = TransactionsRequest(limit = REMOTE_SYNC_LIMIT),
-                    )
-                }.onFailure { e ->
-                    Napier.w(tag = "WalletRepository", throwable = e) { "Failed to sync transactions from remote" }
-                }
-
-                // Try local DB again after sync
-                findTransactionLocally(walletId, invoice, paymentHash)?.let {
-                    Napier.d(tag = "WalletRepository") { "Found transaction after remote sync" }
-                    return@withContext it
-                }
-            }
-
-            Napier.d(tag = "WalletRepository") { "Transaction not found even after remote sync" }
-            null
-        }
-
-    private suspend fun findTransactionLocally(
-        walletId: String,
-        invoice: String?,
-        paymentHash: String?,
-    ): Transaction? {
-        // Try paymentHash first (uses DB index)
-        if (paymentHash != null) {
-            findTransactionByIdOrNull(paymentHash)?.let { return it }
-        }
-        // Fallback to invoice search
-        if (invoice != null) {
-            findTransactionByInvoice(walletId, invoice)?.let { return it }
-        }
-        return null
-    }
 
     override suspend fun deleteAllTransactions(userId: String) =
         withContext(dispatcherProvider.io()) {

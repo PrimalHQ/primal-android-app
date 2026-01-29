@@ -23,6 +23,7 @@ import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
 
+@Suppress("TooManyFunctions")
 @Module
 @InstallIn(SingletonComponent::class)
 object WalletRepositoriesModule {

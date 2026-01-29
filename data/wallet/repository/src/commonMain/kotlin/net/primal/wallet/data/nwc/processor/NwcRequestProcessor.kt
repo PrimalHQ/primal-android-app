@@ -15,7 +15,6 @@ import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.msatsToSats
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.domain.connections.nostr.model.NwcPaymentHoldResult
-import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
@@ -186,13 +185,7 @@ class NwcRequestProcessor internal constructor(
 
         Napier.d(tag = TAG) { "ListTransactions: fetched ${transactions.size} transactions from DB" }
 
-        // Time filtering must be done in-memory because createdAt is encrypted in DB (Encryptable<Long>)
-        // SQL queries cannot filter on encrypted fields
-        val nwcTransactions = transactions
-            .asSequence()
-            .filter { tx -> filterByTimeRange(tx, params.from, params.until) }
-            .map { tx -> tx.toNwcTransaction() }
-            .toList()
+        val nwcTransactions = transactions.map { tx -> tx.toNwcTransaction() }.toList()
 
         Napier.d(tag = TAG) { "ListTransactions: returning ${nwcTransactions.size} transactions" }
 
@@ -200,16 +193,6 @@ class NwcRequestProcessor internal constructor(
             request = request,
             result = ListTransactionsResponsePayload(transactions = nwcTransactions),
         )
-    }
-
-    private fun filterByTimeRange(
-        tx: Transaction,
-        from: Long?,
-        until: Long?,
-    ): Boolean {
-        if (from != null && tx.createdAt < from) return false
-        if (until != null && tx.createdAt > until) return false
-        return true
     }
 
     private suspend fun processMakeInvoice(request: WalletNwcRequest.MakeInvoice): String {
@@ -281,40 +264,13 @@ class NwcRequestProcessor internal constructor(
             )
         } else {
             val exception = result.exceptionOrNull()
-            val errorMessage = resolveInvoiceCreationError(exception, wallet::class.simpleName ?: "Unknown")
+            val errorMessage = exception?.message ?: "Failed to create invoice"
             Napier.e(tag = TAG, throwable = exception) { "MakeInvoice: $errorMessage" }
             responseBuilder.buildErrorResponse(
                 request = request,
                 code = NwcError.INTERNAL,
                 message = errorMessage,
             )
-        }
-    }
-
-    private fun resolveInvoiceCreationError(exception: Throwable?, walletType: String): String {
-        val message = exception?.message ?: ""
-        val cause = exception?.cause?.message ?: ""
-
-        return when {
-            // Primal wallet specific errors
-            walletType == "Primal" && (message.contains("wallet") || cause.contains("wallet")) ->
-                "Primal wallet cannot create invoices. Please ensure your wallet is activated " +
-                    "and has receive capability enabled in the Primal app."
-
-            // NWC wallet errors (external wallet issues)
-            walletType == "NWC" && message.contains("timeout", ignoreCase = true) ->
-                "External wallet connection timed out. Please check your NWC wallet is online."
-
-            walletType == "NWC" ->
-                "External NWC wallet failed to create invoice: ${exception?.message ?: "Unknown error"}"
-
-            // Network errors
-            message.contains("NetworkException") || message.contains("network", ignoreCase = true) ->
-                "Network error while creating invoice. Please check your internet connection."
-
-            else ->
-                "Failed to create invoice (wallet type: $walletType). " +
-                    "Error: ${exception?.message ?: "Unknown error"}"
         }
     }
 
@@ -339,42 +295,12 @@ class NwcRequestProcessor internal constructor(
             )
         }
 
-        Napier.d(tag = TAG) { "LookupInvoice: searching for transaction in DB..." }
-        val matchingTx = walletRepository.findTransactionByInvoiceOrPaymentHash(
-            walletId = walletId,
-            invoice = invoice,
-            paymentHash = paymentHash,
+        Napier.d(tag = TAG) { "LookupInvoice: method temporarily disabled/not implemented" }
+        return responseBuilder.buildErrorResponse(
+            request = request,
+            code = NwcError.NOT_IMPLEMENTED,
+            message = "Method not implemented.",
         )
-
-        return if (matchingTx != null) {
-            Napier.d(tag = TAG) {
-                "LookupInvoice: found transaction! " +
-                    "txId=${matchingTx.transactionId.take(16)}..., " +
-                    "type=${matchingTx.type}, " +
-                    "amountBtc=${matchingTx.amountInBtc}, " +
-                    "createdAt=${matchingTx.createdAt}"
-            }
-            val nwcTx = matchingTx.toNwcTransaction()
-            Napier.d(tag = TAG) {
-                "LookupInvoice: NWC response - type=${nwcTx.type}, " +
-                    "amount=${nwcTx.amount} msats, " +
-                    "createdAt=${nwcTx.createdAt}"
-            }
-            responseBuilder.buildLookupInvoiceResponse(
-                request = request,
-                result = nwcTx,
-            )
-        } else {
-            Napier.w(tag = TAG) {
-                "LookupInvoice: no transaction found for " +
-                    "invoice=${invoice?.take(30) ?: "null"}, paymentHash=${paymentHash ?: "null"}"
-            }
-            responseBuilder.buildErrorResponse(
-                request = request,
-                code = NwcError.NOT_FOUND,
-                message = "Invoice not found",
-            )
-        }
     }
 
     companion object {

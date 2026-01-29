@@ -35,15 +35,11 @@ interface WalletRepository {
         type: TxType?,
         limit: Int,
         offset: Int,
+        from: Long? = null,
+        until: Long? = null,
     ): List<Transaction>
 
     suspend fun findTransactionByIdOrNull(txId: String): Transaction?
-
-    suspend fun findTransactionByInvoiceOrPaymentHash(
-        walletId: String,
-        invoice: String?,
-        paymentHash: String?,
-    ): Transaction?
 
     suspend fun deleteAllTransactions(userId: String)
 

@@ -39,7 +39,7 @@ import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldData
         NwcPaymentHoldData::class,
         NwcDailyBudgetData::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 @TypeConverters(ListsTypeConverters::class, EncryptableTypeConverters::class)
