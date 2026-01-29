@@ -41,6 +41,7 @@ import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.DownloadsFilled
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.settings.SettingsItem
@@ -128,14 +129,14 @@ fun WalletSettingsScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                ExternalWalletListItem(
-                    useExternalWallet = state.useExternalWallet == true,
-                    onExternalWalletSwitchChanged = { value ->
-                        eventPublisher(UiEvent.UpdateUseExternalWallet(value))
-                    },
+                NostrProfileLightingAddressSection(
+                    lightningAddress = state.wallet?.lightningAddress,
+                    onEditProfileClick = onEditProfileClick,
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 WalletSpecificSettingsItems(
                     state = state,
@@ -154,15 +155,23 @@ fun WalletSettingsScreen(
                     },
                     onClick = onRestoreWalletClick,
                 )
-
                 Spacer(modifier = Modifier.height(8.dp))
 
-                NostrProfileLightingAddressSection(
-                    lightningAddress = state.wallet?.lightningAddress,
-                    onEditProfileClick = onEditProfileClick,
+                SettingsItem(
+                    headlineText = stringResource(id = R.string.settings_wallet_export_transactions_title),
+                    supportText = stringResource(id = R.string.settings_wallet_export_transactions_subtitle),
+                    trailingContent = {
+                        Icon(imageVector = PrimalIcons.DownloadsFilled, contentDescription = null)
+                    },
                 )
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
+                ExternalWalletListItem(
+                    useExternalWallet = state.useExternalWallet == true,
+                    onExternalWalletSwitchChanged = { value ->
+                        eventPublisher(UiEvent.UpdateUseExternalWallet(value))
+                    },
+                )
 
                 ConnectedAppsSettings(
                     primalNwcConnectionInfos = state.nwcConnectionsInfo,
