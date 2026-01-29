@@ -42,14 +42,14 @@ private const val DEFAULT_MAX_BALANCE_IN_SATS = 0.01
 fun PrimalWalletSettings(
     state: WalletSettingsContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
-    onBackupWalletClick: () -> Unit,
+    onBackupWalletClick: (String) -> Unit,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     Column {
         Spacer(modifier = Modifier.height(8.dp))
 
         var spamThresholdAmountEditorDialog by remember { mutableStateOf(false) }
-        val spamThresholdAmountInSats = state.wallet?.spamThresholdAmountInSats?.let {
+        val spamThresholdAmountInSats = state.activeWallet?.spamThresholdAmountInSats?.let {
             numberFormat.format(it)
         } ?: "1"
         SettingsItem(
@@ -73,7 +73,7 @@ fun PrimalWalletSettings(
 
         var maxWalletBalanceShown by remember { mutableStateOf(false) }
         val maxBalanceInSats = numberFormat
-            .format((state.wallet?.maxBalanceInBtc ?: DEFAULT_MAX_BALANCE_IN_SATS).toSats().toLong())
+            .format((state.activeWallet?.maxBalanceInBtc ?: DEFAULT_MAX_BALANCE_IN_SATS).toSats().toLong())
         SettingsItem(
             headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
             supportText = "$maxBalanceInSats sats",
@@ -99,7 +99,9 @@ fun PrimalWalletSettings(
                 trailingContent = {
                     Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
                 },
-                onClick = onBackupWalletClick,
+                onClick = {
+                    state.activeWallet?.walletId?.let(onBackupWalletClick)
+                },
             )
             Spacer(modifier = Modifier.height(8.dp))
         }

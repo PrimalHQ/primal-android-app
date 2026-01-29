@@ -137,7 +137,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 .collect { wallet ->
                     setState {
                         copy(
-                            wallet = wallet,
+                            activeWallet = wallet,
                             useExternalWallet = wallet == null || wallet is Wallet.NWC,
                             showBackupWidget = wallet.shouldShowBackup,
                         )
@@ -157,7 +157,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
         }
 
     private suspend fun disconnectWallet() {
-        state.value.wallet?.walletId?.let { walletId ->
+        state.value.activeWallet?.walletId?.let { walletId ->
             walletRepository.deleteWalletById(walletId = walletId)
         }
         walletAccountRepository.clearActiveWallet(userId = activeAccountStore.activeUserId())
@@ -181,7 +181,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private fun updateSpamThresholdAmount(amountInSats: Long) =
         viewModelScope.launch {
             walletRepository.upsertWalletSettings(
-                walletId = state.value.wallet?.walletId ?: activeAccountStore.activeUserId(),
+                walletId = state.value.activeWallet?.walletId ?: activeAccountStore.activeUserId(),
                 spamThresholdAmountInSats = amountInSats,
             )
             walletRepository.deleteAllTransactions(userId = activeAccountStore.activeUserId())

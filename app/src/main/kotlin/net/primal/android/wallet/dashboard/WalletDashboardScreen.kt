@@ -95,7 +95,7 @@ fun WalletDashboardScreen(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
-    onWalletBackupClick: () -> Unit,
+    onWalletBackupClick: (String) -> Unit,
     onUpgradeWalletClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
@@ -144,7 +144,7 @@ fun WalletDashboardScreen(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
-    onWalletBackupClick: () -> Unit,
+    onWalletBackupClick: (String) -> Unit,
     onUpgradeWalletClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
@@ -462,7 +462,7 @@ fun WalletDashboardScreen(
                                             .animateContentSize(),
                                         message = annotatedMessage,
                                         actionLabel = stringResource(id = R.string.wallet_dashboard_backup_button),
-                                        onActionClick = onWalletBackupClick,
+                                        onActionClick = { onWalletBackupClick(state.wallet.walletId) },
                                     )
                                 } else if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
                                     WalletCallToActionBox(

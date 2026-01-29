@@ -6,9 +6,9 @@ interface SparkWalletAccountRepository {
 
     suspend fun fetchWalletAccountInfo(userId: String, walletId: String): Result<Unit>
 
-    suspend fun hasPersistedWallet(userId: String): Boolean
+    suspend fun findPersistedWalletId(userId: String): String?
 
-    suspend fun getPersistedSeedWords(userId: String): List<String>
+    suspend fun getPersistedSeedWords(walletId: String): Result<List<String>>
 
     suspend fun persistSeedWords(
         userId: String,

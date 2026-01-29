@@ -32,7 +32,7 @@ import net.primal.android.wallet.upgrade.UpgradeWalletViewModel
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.wallet.DraftTx
 
-fun NavController.navigateToWalletBackup() = navigate(route = "walletBackup")
+fun NavController.navigateToWalletBackup(walletId: String) = navigate(route = "walletBackup/$walletId")
 
 private fun NavController.navigateToWalletSendPayment(tab: SendPaymentTab) =
     navigate(route = "walletSend?$SEND_PAYMENT_TAB=$tab")
@@ -74,7 +74,12 @@ fun NavGraphBuilder.walletNavigation(
     )
 
     backup(
-        route = "walletBackup",
+        route = "walletBackup/{$WALLET_ID}",
+        arguments = listOf(
+            navArgument(WALLET_ID) {
+                type = NavType.StringType
+            },
+        ),
         navController = navController,
     )
 
@@ -160,7 +165,7 @@ private fun NavGraphBuilder.dashboard(
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        onWalletBackupClick = { navController.navigateToWalletBackup() },
+        onWalletBackupClick = { walletId -> navController.navigateToWalletBackup(walletId) },
         onUpgradeWalletClick = { navController.navigateToWalletUpgrade() },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onTransactionClick = { txId -> navController.navigateToTransactionDetails(txId) },
@@ -172,27 +177,31 @@ private fun NavGraphBuilder.dashboard(
     )
 }
 
-private fun NavGraphBuilder.backup(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<WalletBackupViewModel>(it)
+private fun NavGraphBuilder.backup(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<WalletBackupViewModel>(it)
 
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
 
-        WalletBackupScreen(
-            viewModel = viewModel,
-            callbacks = WalletBackupContract.ScreenCallbacks(
-                onBackupComplete = { navController.popBackStack() },
-                onClose = { navController.navigateUp() },
-            ),
-        )
-    }
+    WalletBackupScreen(
+        viewModel = viewModel,
+        callbacks = WalletBackupContract.ScreenCallbacks(
+            onBackupComplete = { navController.popBackStack() },
+            onClose = { navController.navigateUp() },
+        ),
+    )
+}
 
 private fun NavGraphBuilder.send(
     route: String,

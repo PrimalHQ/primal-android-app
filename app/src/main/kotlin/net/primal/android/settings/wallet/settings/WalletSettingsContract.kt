@@ -5,7 +5,7 @@ import net.primal.domain.wallet.Wallet
 
 interface WalletSettingsContract {
     data class UiState(
-        val wallet: Wallet? = null,
+        val activeWallet: Wallet? = null,
         val useExternalWallet: Boolean? = null,
         val nwcConnectionsInfo: List<PrimalNwcConnectionInfo> = emptyList(),
         val connectionsState: ConnectionsState = ConnectionsState.Loading,
