@@ -15,6 +15,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.utils.shouldShowBackup
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.WalletAccountRepository
@@ -26,7 +27,6 @@ import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
-import net.primal.domain.wallet.capabilities
 
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
 class WalletSettingsViewModel @AssistedInject constructor(
@@ -135,17 +135,11 @@ class WalletSettingsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
                 .collect { wallet ->
-                    val supportsBackup = wallet?.capabilities?.supportsWalletBackup == true
-                    val balance = wallet?.balanceInBtc ?: 0.0
-                    val isBackedUp = false
-
-                    val shouldShowBackup = supportsBackup && balance > 0.0 && !isBackedUp
-
                     setState {
                         copy(
                             wallet = wallet,
                             useExternalWallet = wallet == null || wallet is Wallet.NWC,
-                            showBackupWidget = shouldShowBackup,
+                            showBackupWidget = wallet.shouldShowBackup,
                         )
                     }
                 }

@@ -433,7 +433,7 @@ fun WalletDashboardScreen(
                                         actionLabel = stringResource(id = R.string.wallet_dashboard_upgrade_button),
                                         onActionClick = onUpgradeWalletClick,
                                     )
-                                } else if (state.wallet.capabilities.supportsWalletBackup && !state.isWalletBackedUp) {
+                                } else if (!state.isWalletBackedUp) {
                                     val titleText = stringResource(
                                         id = R.string.wallet_dashboard_backup_notice_title,
                                     )

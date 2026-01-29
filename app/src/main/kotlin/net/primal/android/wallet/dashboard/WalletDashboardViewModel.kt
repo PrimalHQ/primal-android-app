@@ -29,6 +29,7 @@ import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
+import net.primal.android.wallet.utils.shouldShowBackup
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.getIfTypeOrNull
@@ -130,7 +131,7 @@ class WalletDashboardViewModel @Inject constructor(
                         copy(
                             wallet = wallet,
                             lowBalance = wallet?.balanceInBtc == 0.0,
-                            isWalletBackedUp = false,
+                            isWalletBackedUp = !wallet.shouldShowBackup,
                         )
                     }
                 }
