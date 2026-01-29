@@ -3,6 +3,8 @@ package net.primal.wallet.data.nwc.builder
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
 import net.primal.core.networking.nwc.nip47.ListTransactionsResponsePayload
+import net.primal.core.networking.nwc.nip47.LookupInvoiceResponsePayload
+import net.primal.core.networking.nwc.nip47.MakeInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.NwcError
 import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.nip47.NwcResponseContent
@@ -37,6 +39,22 @@ class NwcWalletResponseBuilder {
     }
 
     fun buildListTransactionsResponse(request: WalletNwcRequest, result: ListTransactionsResponsePayload): String {
+        val response = NwcResponseContent(
+            resultType = request.methodStr(),
+            result = result,
+        )
+        return CommonJson.encodeToString(response)
+    }
+
+    fun buildMakeInvoiceResponse(request: WalletNwcRequest, result: MakeInvoiceResponsePayload): String {
+        val response = NwcResponseContent(
+            resultType = request.methodStr(),
+            result = result,
+        )
+        return CommonJson.encodeToString(response)
+    }
+
+    fun buildLookupInvoiceResponse(request: WalletNwcRequest, result: LookupInvoiceResponsePayload): String {
         val response = NwcResponseContent(
             resultType = request.methodStr(),
             result = result,

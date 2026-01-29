@@ -7,4 +7,5 @@ data class LnInvoiceParseResult(
     val comment: String? = null,
     val date: Long? = null,
     val expiry: Long? = null,
+    val paymentHash: String? = null,
 )

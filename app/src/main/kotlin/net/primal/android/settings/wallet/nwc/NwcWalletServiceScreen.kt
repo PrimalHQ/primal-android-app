@@ -206,7 +206,7 @@ private fun CreateConnectionContent(
         Spacer(modifier = Modifier.height(24.dp))
 
         Text(
-            text = "After creating, scan the QR code with Alby, Amethyst, or another NWC-compatible app to test.",
+            text = "After creating, scan the QR code with NWC-compatible app to test.",
             style = AppTheme.typography.bodySmall,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
             textAlign = TextAlign.Center,

@@ -1,0 +1,393 @@
+package net.primal.wallet.data.nwc.processor
+
+import io.github.aakira.napier.Napier
+import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
+import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
+import net.primal.core.networking.nwc.nip47.ListTransactionsResponsePayload
+import net.primal.core.networking.nwc.nip47.MakeInvoiceResponsePayload
+import net.primal.core.networking.nwc.nip47.NwcError
+import net.primal.core.networking.nwc.nip47.NwcMethod
+import net.primal.core.networking.nwc.nip47.PayInvoiceResponsePayload
+import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
+import net.primal.core.utils.CurrencyConversionUtils.btcToMSats
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.CurrencyConversionUtils.msatsToSats
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.domain.connections.nostr.model.NwcPaymentHoldResult
+import net.primal.domain.transactions.Transaction
+import net.primal.domain.wallet.TxRequest
+import net.primal.domain.wallet.WalletRepository
+import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
+import net.primal.wallet.data.nwc.manager.NwcBudgetManager
+import net.primal.wallet.data.nwc.mapper.toNwcTransaction
+import net.primal.wallet.data.nwc.mapper.toTxType
+
+class NwcRequestProcessor internal constructor(
+    private val walletRepository: WalletRepository,
+    private val nwcBudgetManager: NwcBudgetManager,
+    private val responseBuilder: NwcWalletResponseBuilder,
+) {
+
+    suspend fun process(request: WalletNwcRequest): String {
+        Napier.d(
+            tag = TAG,
+        ) { "Processing request: ${request::class.simpleName}, eventId=${request.eventId.take(8)}..." }
+
+        return runCatching {
+            when (request) {
+                is WalletNwcRequest.GetBalance -> processGetBalance(request)
+                is WalletNwcRequest.PayInvoice -> processPayInvoice(request)
+                is WalletNwcRequest.GetInfo -> processGetInfo(request)
+                is WalletNwcRequest.ListTransactions -> processListTransactions(request)
+                is WalletNwcRequest.MakeInvoice -> processMakeInvoice(request)
+                is WalletNwcRequest.LookupInvoice -> processLookupInvoice(request)
+                else -> {
+                    Napier.d(tag = TAG) { "Unsupported method: ${request::class.simpleName}" }
+                    responseBuilder.buildErrorResponse(
+                        request = request,
+                        code = NwcError.NOT_IMPLEMENTED,
+                        message = "Method not implemented.",
+                    )
+                }
+            }
+        }.getOrElse { e ->
+            Napier.e(tag = TAG, throwable = e) { "Error processing request ${request.eventId}" }
+            responseBuilder.buildErrorResponse(
+                request = request,
+                code = NwcError.INTERNAL,
+                message = e.message ?: "Internal error",
+            )
+        }
+    }
+
+    private suspend fun processGetBalance(request: WalletNwcRequest.GetBalance): String {
+        val wallet = walletRepository.getWalletById(request.connection.walletId).getOrNull()
+        val balanceMsats = wallet?.balanceInBtc?.btcToMSats()?.toLong() ?: 0L
+
+        Napier.d(tag = TAG) { "GetBalance: balanceMsats=$balanceMsats" }
+        return responseBuilder.buildGetBalanceResponse(
+            request = request,
+            result = GetBalanceResponsePayload(balance = balanceMsats),
+        )
+    }
+
+    private suspend fun processPayInvoice(request: WalletNwcRequest.PayInvoice): String {
+        val connection = request.connection
+        val connectionId = connection.secretPubKey
+        val walletId = connection.walletId
+        val invoice = request.params.invoice
+
+        val amountSats = request.params.amount?.msatsToSats()
+            ?: parseInvoiceAmountSats(userId = connection.userId, invoice = invoice)
+
+        Napier.d(tag = TAG) { "PayInvoice: invoice=${invoice.take(20)}..., amountSats=$amountSats" }
+
+        var holdId: String? = null
+        if (amountSats > 0 && nwcBudgetManager.hasBudgetLimit(connectionId)) {
+            when (
+                val holdResult = nwcBudgetManager.placeHold(
+                    connectionId = connectionId,
+                    amountSats = amountSats,
+                    requestId = request.eventId,
+                    timeoutMs = PAYMENT_HOLD_TIMEOUT_MS,
+                )
+            ) {
+                is NwcPaymentHoldResult.Placed -> {
+                    holdId = holdResult.holdId
+                    Napier.d(tag = TAG) {
+                        "PayInvoice: budget hold placed, holdId=$holdId, remaining=${holdResult.remainingBudget}"
+                    }
+                }
+
+                is NwcPaymentHoldResult.InsufficientBudget -> {
+                    Napier.w(tag = TAG) {
+                        "PayInvoice: insufficient budget, " +
+                            "requested=${holdResult.requested}, available=${holdResult.available}"
+                    }
+                    return responseBuilder.buildErrorResponse(
+                        request = request,
+                        code = NwcError.QUOTA_EXCEEDED,
+                        message = "Daily budget exceeded. Requested: ${holdResult.requested} sats, " +
+                            "available: ${holdResult.available} sats",
+                    )
+                }
+            }
+        }
+
+        val txRequest = TxRequest.Lightning.LnInvoice(
+            amountSats = amountSats.toString(),
+            noteRecipient = null,
+            noteSelf = null,
+            lnInvoice = invoice,
+        )
+
+        val paymentResult = walletRepository.pay(walletId = walletId, request = txRequest)
+
+        return if (paymentResult.isSuccess) {
+            holdId?.let { id -> nwcBudgetManager.commitHold(id, amountSats) }
+            Napier.d(tag = TAG) { "PayInvoice: payment successful" }
+            responseBuilder.buildPayInvoiceResponse(
+                request = request,
+                result = PayInvoiceResponsePayload(preimage = null),
+            )
+        } else {
+            val exception = paymentResult.exceptionOrNull()
+            holdId?.let { id -> nwcBudgetManager.releaseHold(id) }
+            Napier.e(tag = TAG, throwable = exception) { "PayInvoice: payment failed" }
+            responseBuilder.buildErrorResponse(
+                request = request,
+                code = NwcError.INTERNAL,
+                message = exception?.message ?: "Payment failed",
+            )
+        }
+    }
+
+    private suspend fun parseInvoiceAmountSats(userId: String, invoice: String): Long {
+        return runCatching {
+            val parseResult = walletRepository.parseLnInvoice(userId = userId, lnbc = invoice)
+            (parseResult.amountMilliSats?.toLong() ?: 0L) / 1000L
+        }.getOrElse {
+            Napier.w(tag = TAG, throwable = it) { "Failed to parse invoice amount" }
+            0L
+        }
+    }
+
+    private fun processGetInfo(request: WalletNwcRequest.GetInfo): String {
+        Napier.d(tag = TAG) { "GetInfo: returning supported methods" }
+        return responseBuilder.buildGetInfoResponse(
+            request = request,
+            result = GetInfoResponsePayload(
+                alias = "Primal Wallet",
+                methods = SUPPORTED_METHODS,
+            ),
+        )
+    }
+
+    private suspend fun processListTransactions(request: WalletNwcRequest.ListTransactions): String {
+        val params = request.params
+        val walletId = request.connection.walletId
+        val limit = params.limit ?: DEFAULT_TRANSACTIONS_LIMIT
+        val offset = params.offset ?: 0
+        val txType = params.type?.toTxType()
+
+        Napier.d(tag = TAG) {
+            "ListTransactions: walletId=${walletId.take(8)}..., limit=$limit, " +
+                "from=${params.from}, until=${params.until}, type=${params.type}"
+        }
+
+        val transactions = walletRepository.queryTransactions(
+            walletId = walletId,
+            type = txType,
+            limit = limit,
+            offset = offset,
+        )
+
+        Napier.d(tag = TAG) { "ListTransactions: fetched ${transactions.size} transactions from DB" }
+
+        // Time filtering must be done in-memory because createdAt is encrypted in DB (Encryptable<Long>)
+        // SQL queries cannot filter on encrypted fields
+        val nwcTransactions = transactions
+            .asSequence()
+            .filter { tx -> filterByTimeRange(tx, params.from, params.until) }
+            .map { tx -> tx.toNwcTransaction() }
+            .toList()
+
+        Napier.d(tag = TAG) { "ListTransactions: returning ${nwcTransactions.size} transactions" }
+
+        return responseBuilder.buildListTransactionsResponse(
+            request = request,
+            result = ListTransactionsResponsePayload(transactions = nwcTransactions),
+        )
+    }
+
+    private fun filterByTimeRange(
+        tx: Transaction,
+        from: Long?,
+        until: Long?,
+    ): Boolean {
+        if (from != null && tx.createdAt < from) return false
+        if (until != null && tx.createdAt > until) return false
+        return true
+    }
+
+    private suspend fun processMakeInvoice(request: WalletNwcRequest.MakeInvoice): String {
+        val params = request.params
+        val walletId = request.connection.walletId
+        val amountMsats = params.amount
+        val amountSats = amountMsats.msatsToSats()
+        val amountBtcFormatted = amountSats.toBtc().formatAsString()
+
+        Napier.d(tag = TAG) {
+            "MakeInvoice: walletId=${walletId.take(8)}..., " +
+                "amount=$amountMsats msats ($amountSats sats, $amountBtcFormatted BTC), " +
+                "description=${params.description}, descriptionHash=${params.descriptionHash}"
+        }
+
+        // First verify the wallet exists and log its type
+        val walletResult = walletRepository.getWalletById(walletId)
+        if (walletResult.isFailure) {
+            Napier.e(tag = TAG) { "MakeInvoice: wallet not found for walletId=$walletId" }
+            return responseBuilder.buildErrorResponse(
+                request = request,
+                code = NwcError.INTERNAL,
+                message = "Wallet not found. Please reconnect the NWC connection.",
+            )
+        }
+
+        val wallet = walletResult.getOrThrow()
+        Napier.d(tag = TAG) { "MakeInvoice: wallet type=${wallet::class.simpleName}, creating invoice..." }
+
+        val result = walletRepository.createLightningInvoice(
+            walletId = walletId,
+            amountInBtc = amountBtcFormatted,
+            comment = params.description,
+        )
+
+        return if (result.isSuccess) {
+            val invoiceResult = result.getOrThrow()
+            val invoice = invoiceResult.invoice
+
+            Napier.d(tag = TAG) { "MakeInvoice: invoice created: ${invoice.take(50)}..." }
+
+            val parseResult = walletRepository.parseLnInvoice(
+                userId = request.connection.userId,
+                lnbc = invoice,
+            )
+
+            val nowSeconds = kotlin.time.Clock.System.now().epochSeconds
+            val expiresAtSeconds = parseResult.expiry?.let { nowSeconds + it }
+
+            Napier.d(tag = TAG) {
+                "MakeInvoice: success! paymentHash=${parseResult.paymentHash?.take(16) ?: "null"}, " +
+                    "expiry=${parseResult.expiry}s, expiresAt=$expiresAtSeconds"
+            }
+
+            responseBuilder.buildMakeInvoiceResponse(
+                request = request,
+                result = MakeInvoiceResponsePayload(
+                    type = "incoming",
+                    invoice = invoice,
+                    description = params.description ?: invoiceResult.description,
+                    descriptionHash = params.descriptionHash,
+                    paymentHash = parseResult.paymentHash ?: "",
+                    amount = amountMsats,
+                    feesPaid = 0,
+                    createdAt = nowSeconds,
+                    expiresAt = expiresAtSeconds,
+                    metadata = null,
+                ),
+            )
+        } else {
+            val exception = result.exceptionOrNull()
+            val errorMessage = resolveInvoiceCreationError(exception, wallet::class.simpleName ?: "Unknown")
+            Napier.e(tag = TAG, throwable = exception) { "MakeInvoice: $errorMessage" }
+            responseBuilder.buildErrorResponse(
+                request = request,
+                code = NwcError.INTERNAL,
+                message = errorMessage,
+            )
+        }
+    }
+
+    private fun resolveInvoiceCreationError(exception: Throwable?, walletType: String): String {
+        val message = exception?.message ?: ""
+        val cause = exception?.cause?.message ?: ""
+
+        return when {
+            // Primal wallet specific errors
+            walletType == "Primal" && (message.contains("wallet") || cause.contains("wallet")) ->
+                "Primal wallet cannot create invoices. Please ensure your wallet is activated " +
+                    "and has receive capability enabled in the Primal app."
+
+            // NWC wallet errors (external wallet issues)
+            walletType == "NWC" && message.contains("timeout", ignoreCase = true) ->
+                "External wallet connection timed out. Please check your NWC wallet is online."
+
+            walletType == "NWC" ->
+                "External NWC wallet failed to create invoice: ${exception?.message ?: "Unknown error"}"
+
+            // Network errors
+            message.contains("NetworkException") || message.contains("network", ignoreCase = true) ->
+                "Network error while creating invoice. Please check your internet connection."
+
+            else ->
+                "Failed to create invoice (wallet type: $walletType). " +
+                    "Error: ${exception?.message ?: "Unknown error"}"
+        }
+    }
+
+    private suspend fun processLookupInvoice(request: WalletNwcRequest.LookupInvoice): String {
+        val params = request.params
+        val invoice = params.invoice
+        val paymentHash = params.paymentHash
+        val walletId = request.connection.walletId
+
+        Napier.d(tag = TAG) {
+            "LookupInvoice: walletId=${walletId.take(8)}..., " +
+                "invoice=${invoice?.take(30) ?: "null"}..., " +
+                "paymentHash=${paymentHash ?: "null"}"
+        }
+
+        if (invoice == null && paymentHash == null) {
+            Napier.w(tag = TAG) { "LookupInvoice: both invoice and paymentHash are null" }
+            return responseBuilder.buildErrorResponse(
+                request = request,
+                code = NwcError.OTHER,
+                message = "Either invoice or payment_hash is required",
+            )
+        }
+
+        Napier.d(tag = TAG) { "LookupInvoice: searching for transaction in DB..." }
+        val matchingTx = walletRepository.findTransactionByInvoiceOrPaymentHash(
+            walletId = walletId,
+            invoice = invoice,
+            paymentHash = paymentHash,
+        )
+
+        return if (matchingTx != null) {
+            Napier.d(tag = TAG) {
+                "LookupInvoice: found transaction! " +
+                    "txId=${matchingTx.transactionId.take(16)}..., " +
+                    "type=${matchingTx.type}, " +
+                    "amountBtc=${matchingTx.amountInBtc}, " +
+                    "createdAt=${matchingTx.createdAt}"
+            }
+            val nwcTx = matchingTx.toNwcTransaction()
+            Napier.d(tag = TAG) {
+                "LookupInvoice: NWC response - type=${nwcTx.type}, " +
+                    "amount=${nwcTx.amount} msats, " +
+                    "createdAt=${nwcTx.createdAt}"
+            }
+            responseBuilder.buildLookupInvoiceResponse(
+                request = request,
+                result = nwcTx,
+            )
+        } else {
+            Napier.w(tag = TAG) {
+                "LookupInvoice: no transaction found for " +
+                    "invoice=${invoice?.take(30) ?: "null"}, paymentHash=${paymentHash ?: "null"}"
+            }
+            responseBuilder.buildErrorResponse(
+                request = request,
+                code = NwcError.NOT_FOUND,
+                message = "Invoice not found",
+            )
+        }
+    }
+
+    companion object {
+        private val SUPPORTED_METHODS = listOf(
+            NwcMethod.GetInfo.value,
+            NwcMethod.GetBalance.value,
+            NwcMethod.PayInvoice.value,
+            NwcMethod.MakeInvoice.value,
+            NwcMethod.LookupInvoice.value,
+            NwcMethod.ListTransactions.value,
+        )
+
+        private const val PAYMENT_HOLD_TIMEOUT_MS = 60_000L
+        private const val DEFAULT_TRANSACTIONS_LIMIT = 50
+
+        private const val TAG = "NwcRequestProcessor"
+    }
+}

@@ -21,6 +21,7 @@ import net.primal.tsunami.createTsunamiWalletSdk
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
 import net.primal.wallet.data.nwc.manager.NwcBudgetManager
+import net.primal.wallet.data.nwc.processor.NwcRequestProcessor
 import net.primal.wallet.data.nwc.service.NwcServiceImpl
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.repository.BillingRepositoryImpl
@@ -184,13 +185,15 @@ abstract class RepositoryFactory {
     fun createNwcService(walletRepository: WalletRepository): NwcService =
         NwcServiceImpl(
             dispatchers = dispatcherProvider,
-            nwcBudgetManager = NwcBudgetManager(
-                dispatcherProvider = dispatcherProvider,
-                walletDatabase = resolveWalletDatabase(),
-            ),
             nwcRepository = createNwcRepository(),
             requestParser = NwcWalletRequestParser(),
-            responseBuilder = NwcWalletResponseBuilder(),
-            walletRepository = walletRepository,
+            requestProcessor = NwcRequestProcessor(
+                walletRepository = walletRepository,
+                nwcBudgetManager = NwcBudgetManager(
+                    dispatcherProvider = dispatcherProvider,
+                    walletDatabase = resolveWalletDatabase(),
+                ),
+                responseBuilder = NwcWalletResponseBuilder(),
+            ),
         )
 }
