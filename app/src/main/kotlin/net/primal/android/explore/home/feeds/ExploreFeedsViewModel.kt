@@ -3,6 +3,7 @@ package net.primal.android.explore.home.feeds
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,7 +21,6 @@ import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.feeds.buildSpec
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.posts.FeedRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ExploreFeedsViewModel @Inject constructor(
@@ -88,9 +88,9 @@ class ExploreFeedsViewModel @Inject constructor(
                 }
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to add DVM feed due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to add DVM feed due to network error." }
             }
         }
 
@@ -106,9 +106,9 @@ class ExploreFeedsViewModel @Inject constructor(
                 }
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to remove DVM feed due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to remove DVM feed due to network error." }
             }
         }
 
@@ -124,7 +124,7 @@ class ExploreFeedsViewModel @Inject constructor(
                     setState { copy(feeds = dvmFeeds) }
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch explore feeds due to network error." }
             } finally {
                 setState { copy(loading = false) }
             }

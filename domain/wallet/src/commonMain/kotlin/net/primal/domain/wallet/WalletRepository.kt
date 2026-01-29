@@ -26,7 +26,7 @@ interface WalletRepository {
         maxBalanceInBtc: Double?,
     )
 
-    fun latestTransactions(walletId: String, walletType: WalletType): Flow<PagingData<Transaction>>
+    fun latestTransactions(walletId: String): Flow<PagingData<Transaction>>
 
     suspend fun latestTransactions(walletId: String, limit: Int): List<Transaction>
 

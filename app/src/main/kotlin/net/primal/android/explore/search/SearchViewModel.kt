@@ -3,6 +3,7 @@ package net.primal.android.explore.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.FlowPreview
@@ -21,7 +22,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.explore.ExploreRepository
-import timber.log.Timber
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
@@ -72,7 +72,7 @@ class SearchViewModel @Inject constructor(
                 val result = exploreRepository.searchUsers(query = query)
                 setState { copy(searchResults = result.map { it.mapAsUserProfileUi() }) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to search users with query: $query" }
             } finally {
                 setState { copy(searching = false) }
             }
@@ -94,7 +94,7 @@ class SearchViewModel @Inject constructor(
                 val popularUsers = exploreRepository.fetchPopularUsers()
                 setState { copy(popularUsers = popularUsers.map { it.mapAsUserProfileUi() }) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch recommended users" }
             }
         }
 

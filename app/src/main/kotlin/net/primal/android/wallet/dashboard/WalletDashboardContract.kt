@@ -33,7 +33,6 @@ interface WalletDashboardContract {
     sealed class UiEvent {
         data object RequestWalletBalanceUpdate : UiEvent()
         data object DismissError : UiEvent()
-        data object EnablePrimalWallet : UiEvent()
         data class ChangeActiveWallet(val wallet: Wallet) : UiEvent()
     }
 }

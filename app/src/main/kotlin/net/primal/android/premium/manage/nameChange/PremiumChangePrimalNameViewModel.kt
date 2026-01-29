@@ -3,6 +3,7 @@ package net.primal.android.premium.manage.nameChange
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,7 +21,6 @@ import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import timber.log.Timber
 
 @HiltViewModel
 class PremiumChangePrimalNameViewModel @Inject constructor(
@@ -79,9 +79,9 @@ class PremiumChangePrimalNameViewModel @Inject constructor(
                     setEffect(SideEffect.PrimalNameChanged)
                 }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to change Primal Name due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to change Primal Name due to network error." }
                 setState { copy(error = PremiumChangePrimalNameContract.NameChangeError.GenericError) }
             } finally {
                 setState { copy(changingName = false) }

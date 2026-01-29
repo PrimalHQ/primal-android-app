@@ -5,8 +5,8 @@ import androidx.paging.PagingData
 import androidx.paging.PagingDataEvent
 import androidx.paging.PagingDataPresenter
 import androidx.paging.cachedIn
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -15,11 +15,12 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import net.primal.core.utils.coroutines.createDispatcherProvider
 
-class IosPagingPresenter<T : Any>(
+class IosPagingPresenter<T : Any> internal constructor(
     pagingFlow: Flow<PagingData<T>>,
     scope: CoroutineScope,
-    dispatcher: CoroutineDispatcher = createDispatcherProvider().io(),
 ) {
+
+    private val dispatcher = createDispatcherProvider().io()
 
     private val presenter = object : PagingDataPresenter<T>(
         mainContext = dispatcher,
@@ -39,23 +40,23 @@ class IosPagingPresenter<T : Any>(
 
     val loadStates: StateFlow<CombinedLoadStates?> = presenter.loadStateFlow
 
-    init {
-        scope.launch(dispatcher) {
-            pagingFlow
-                .cachedIn(this)
-                .collect { presenter.collectFrom(it) }
-        }
+    private val job: Job = scope.launch(dispatcher) {
+        pagingFlow
+            .cachedIn(this)
+            .collect { presenter.collectFrom(it) }
     }
 
     fun itemCount(): Int = presenter.size
 
     fun item(index: Int): T? = presenter[index]
 
-    fun access(index: Int) = presenter[index]
-
     fun peek(index: Int): T? = presenter.peek(index)
 
     fun retry() = presenter.retry()
 
     fun refresh() = presenter.refresh()
+
+    fun dispose() {
+        job.cancel()
+    }
 }

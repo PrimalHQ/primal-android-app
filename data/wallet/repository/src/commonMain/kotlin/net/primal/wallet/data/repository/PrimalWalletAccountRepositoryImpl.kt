@@ -4,13 +4,10 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.createAppBuildHelper
-import net.primal.core.utils.map
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.PromoCodeDetails
-import net.primal.domain.account.WalletActivationParams
-import net.primal.domain.account.WalletActivationResult
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
@@ -25,10 +22,9 @@ import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.PromoCodeRequestBody
-import net.primal.wallet.data.repository.mappers.local.toWalletActivationRequestDTO
 import net.primal.wallet.data.repository.mappers.remote.toPromoCodeDetailsDO
 
-class PrimalWalletAccountRepositoryImpl(
+internal class PrimalWalletAccountRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val primalWalletApi: PrimalWalletApi,
     private val walletDatabase: WalletDatabase,
@@ -36,24 +32,6 @@ class PrimalWalletAccountRepositoryImpl(
 ) : PrimalWalletAccountRepository {
 
     private val appBuildHelper = createAppBuildHelper()
-
-    override suspend fun activateWallet(userId: String, code: String): Result<WalletActivationResult> =
-        withContext(dispatcherProvider.io()) {
-            runCatching {
-                primalWalletApi.activateWallet(userId, code)
-            }.map { response ->
-                WalletActivationResult(lightningAddress = response)
-            }
-        }
-
-    override suspend fun requestActivationCodeToEmail(params: WalletActivationParams) {
-        withContext(dispatcherProvider.io()) {
-            primalWalletApi.requestActivationCodeToEmail(
-                userId = params.userId,
-                body = params.toWalletActivationRequestDTO(),
-            )
-        }
-    }
 
     override suspend fun fetchWalletAccountInfo(userId: String): Result<String> =
         withContext(dispatcherProvider.io()) {
@@ -68,7 +46,7 @@ class PrimalWalletAccountRepositoryImpl(
                     walletDatabase.wallet().insertOrIgnoreWalletInfo(
                         info = WalletInfo(
                             walletId = userId,
-                            userId = userId.asEncryptable(),
+                            userId = userId,
                             lightningAddress = lightningAddress.asEncryptable(),
                             type = WalletType.PRIMAL,
                         ),

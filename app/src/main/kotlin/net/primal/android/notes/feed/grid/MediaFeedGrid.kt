@@ -23,13 +23,13 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
+import io.github.aakira.napier.Napier
 import net.primal.android.R
 import net.primal.android.core.compose.GridLoadingPlaceholder
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PremiumFeedPaywall
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.notes.feed.model.FeedPostUi
-import timber.log.Timber
 
 const val MAX_NOTES_BEFORE_PAYWALL = 25
 const val PAYWALL_COLUMN_SPAN = 3
@@ -156,7 +156,7 @@ private fun EmptyItemsContent(
 
         is LoadState.Error -> {
             val error = refreshLoadState.error
-            Timber.w(error)
+            Napier.w(throwable = error) { "Paging refresh failed." }
             ListNoContent(
                 modifier = Modifier.fillMaxSize(),
                 noContentText = stringResource(id = R.string.feed_error_loading),

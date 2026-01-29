@@ -1,6 +1,5 @@
 package net.primal.wallet.data.service
 
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -10,6 +9,8 @@ import net.primal.core.networking.nwc.NwcClientFactory
 import net.primal.core.networking.nwc.nip47.ListTransactionsParams
 import net.primal.core.networking.nwc.nip47.LookupInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.MakeInvoiceParams
+import net.primal.core.networking.nwc.nip47.NwcError
+import net.primal.core.networking.nwc.nip47.NwcException
 import net.primal.core.networking.nwc.nip47.PayInvoiceParams
 import net.primal.core.utils.CurrencyConversionUtils.btcToMSats
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
@@ -18,14 +19,16 @@ import net.primal.core.utils.CurrencyConversionUtils.satsToMSats
 import net.primal.core.utils.Result
 import net.primal.core.utils.map
 import net.primal.core.utils.mapCatching
+import net.primal.core.utils.mapFailure
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
-import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.InvoiceType
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.rates.fees.OnChainTransactionFeeTier
+import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.NostrWalletConnect
@@ -35,14 +38,48 @@ import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
 import net.primal.domain.wallet.Wallet
+import net.primal.domain.wallet.WalletType
+import net.primal.domain.wallet.exception.WalletConnectionException
+import net.primal.domain.wallet.exception.WalletException
+import net.primal.domain.wallet.exception.WalletPaymentException
 import net.primal.domain.wallet.model.WalletBalanceResult
-import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.repository.mappers.remote.toNostrEntity
 
 internal class NostrWalletServiceImpl(
     private val eventRepository: EventRepository,
     private val lightningPayHelper: LightningPayHelper,
 ) : WalletService<Wallet.NWC> {
+
+    private fun Throwable.toWalletException(): WalletException {
+        return when (this) {
+            is WalletException -> this
+            is NwcException -> when (this.errorCode) {
+                NwcError.INSUFFICIENT_BALANCE -> WalletPaymentException.InsufficientBalance(cause = this)
+                NwcError.RATE_LIMITED -> WalletConnectionException.RateLimited(cause = this)
+                NwcError.QUOTA_EXCEEDED -> WalletConnectionException.QuotaExceeded(cause = this)
+                NwcError.UNAUTHORIZED -> WalletConnectionException.Unauthorized(cause = this)
+                NwcError.RESTRICTED -> WalletConnectionException.Unauthorized(cause = this)
+                NwcError.NOT_IMPLEMENTED -> WalletPaymentException.OperationNotSupported(
+                    operation = this.message ?: "Unknown operation",
+                    cause = this,
+                )
+                NwcError.INTERNAL, NwcError.OTHER -> WalletPaymentException.PaymentFailed(
+                    reason = this.message ?: "Unknown error",
+                    cause = this,
+                )
+                else -> WalletPaymentException.PaymentFailed(
+                    reason = this.message ?: "Unknown error",
+                    cause = this,
+                )
+            }
+            is NetworkException -> WalletException.WalletNetworkException(cause = this)
+            else -> WalletPaymentException.PaymentFailed(
+                reason = this.message ?: "Unknown error",
+                cause = this,
+            )
+        }
+    }
+
     override suspend fun fetchWalletBalance(wallet: Wallet.NWC): Result<WalletBalanceResult> =
         runCatching {
             val client = createNwcApiClient(wallet = wallet)
@@ -52,13 +89,12 @@ internal class NostrWalletServiceImpl(
                 balanceInBtc = response.balance.msatsToBtc(),
                 maxBalanceInBtc = null,
             )
-        }
+        }.mapFailure { it.toWalletException() }
 
     override suspend fun subscribeToWalletBalance(wallet: Wallet.NWC): Flow<WalletBalanceResult> {
         return emptyFlow()
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     override suspend fun fetchTransactions(
         wallet: Wallet.NWC,
         request: TransactionsRequest,
@@ -87,38 +123,71 @@ internal class NostrWalletServiceImpl(
 
                     val zappedEntity = zapRequest?.toNostrEntity()
 
-                    Transaction.NWC(
-                        transactionId = transaction.paymentHash ?: transaction.invoice ?: Uuid.random().toString(),
-                        walletId = wallet.walletId,
-                        type = when (transaction.type) {
-                            InvoiceType.Incoming -> TxType.DEPOSIT
-                            InvoiceType.Outgoing -> TxType.WITHDRAW
-                        },
-                        state = transaction.resolveState(),
-                        createdAt = transaction.createdAt,
-                        updatedAt = transaction.settledAt ?: transaction.createdAt,
-                        completedAt = transaction.settledAt,
-                        userId = wallet.userId,
-                        note = zapRequest?.content ?: transaction.description
-                            ?: transaction.metadata?.get("comment")?.toString(),
-                        invoice = transaction.invoice,
-                        amountInBtc = transaction.amount.msatsToBtc(),
-                        totalFeeInBtc = transaction.feesPaid.msatsToBtc().formatAsString(),
-                        preimage = transaction.preimage,
-                        descriptionHash = transaction.descriptionHash,
-                        paymentHash = transaction.paymentHash,
-                        metadata = transaction.metadata?.encodeToJsonString(),
-                        otherUserId = when (transaction.type) {
-                            InvoiceType.Incoming -> zapRequest?.pubKey
-                            InvoiceType.Outgoing -> zapRequest?.tags?.findFirstProfileId()
-                        },
-                        zappedByUserId = zapRequest?.pubKey,
-                        zappedEntity = zappedEntity,
-                        otherUserProfile = null,
-                    )
+                    val txType = when (transaction.type) {
+                        InvoiceType.Incoming -> TxType.DEPOSIT
+                        InvoiceType.Outgoing -> TxType.WITHDRAW
+                    }
+                    val txState = transaction.resolveState()
+                    val transactionId = transaction.paymentHash ?: transaction.invoice ?: Uuid.random().toString()
+                    val note = zapRequest?.content ?: transaction.description
+                        ?: transaction.metadata?.get("comment")?.toString()
+                    val otherUserId = when (transaction.type) {
+                        InvoiceType.Incoming -> zapRequest?.pubKey
+                        InvoiceType.Outgoing -> zapRequest?.tags?.findFirstProfileId()
+                    }
+
+                    if (zappedEntity != null) {
+                        Transaction.Zap(
+                            transactionId = transactionId,
+                            walletId = wallet.walletId,
+                            walletType = WalletType.NWC,
+                            type = txType,
+                            state = txState,
+                            createdAt = transaction.createdAt,
+                            updatedAt = transaction.settledAt ?: transaction.createdAt,
+                            completedAt = transaction.settledAt,
+                            userId = wallet.userId,
+                            note = note,
+                            invoice = transaction.invoice,
+                            amountInBtc = transaction.amount.msatsToBtc(),
+                            amountInUsd = null,
+                            exchangeRate = null,
+                            totalFeeInBtc = transaction.feesPaid.msatsToBtc().formatAsString(),
+                            zappedEntity = zappedEntity,
+                            otherUserId = otherUserId,
+                            otherLightningAddress = null,
+                            zappedByUserId = zapRequest?.pubKey,
+                            otherUserProfile = null,
+                            preimage = transaction.preimage,
+                            paymentHash = transaction.paymentHash,
+                        )
+                    } else {
+                        Transaction.Lightning(
+                            transactionId = transactionId,
+                            walletId = wallet.walletId,
+                            walletType = WalletType.NWC,
+                            type = txType,
+                            state = txState,
+                            createdAt = transaction.createdAt,
+                            updatedAt = transaction.settledAt ?: transaction.createdAt,
+                            completedAt = transaction.settledAt,
+                            userId = wallet.userId,
+                            note = note,
+                            invoice = transaction.invoice,
+                            amountInBtc = transaction.amount.msatsToBtc(),
+                            amountInUsd = null,
+                            exchangeRate = null,
+                            totalFeeInBtc = transaction.feesPaid.msatsToBtc().formatAsString(),
+                            otherUserId = otherUserId,
+                            otherLightningAddress = null,
+                            otherUserProfile = null,
+                            preimage = transaction.preimage,
+                            paymentHash = transaction.paymentHash,
+                        )
+                    }
                 }
             }.getOrThrow()
-        }
+        }.mapFailure { it.toWalletException() }
 
     override suspend fun createLightningInvoice(
         wallet: Wallet.NWC,
@@ -142,10 +211,14 @@ internal class NostrWalletServiceImpl(
                     description = result.description,
                 )
             }.getOrThrow()
-        }
+        }.mapFailure { it.toWalletException() }
 
     override suspend fun createOnChainAddress(wallet: Wallet.NWC): Result<OnChainAddressResult> {
-        throw IllegalStateException("createOnChainAddress is not supported with NWC.")
+        return Result.failure(
+            WalletPaymentException.OperationNotSupported(
+                operation = "On-chain address creation is not supported with NWC.",
+            ),
+        )
     }
 
     override suspend fun pay(wallet: Wallet.NWC, request: TxRequest): Result<Unit> =
@@ -169,7 +242,7 @@ internal class NostrWalletServiceImpl(
                     invoice = lnInvoice,
                     amount = amountInMilliSats.toLong(),
                 ),
-            ).map { }
+            ).mapFailure { it.toWalletException() }.map { }
         }
 
     private suspend fun resolveLnInvoice(
@@ -199,7 +272,11 @@ internal class NostrWalletServiceImpl(
         onChainAddress: String,
         amountInBtc: String,
     ): Result<List<OnChainTransactionFeeTier>> {
-        throw IllegalStateException("Mining fees are not supported for NWC wallets.")
+        return Result.failure(
+            WalletPaymentException.OperationNotSupported(
+                operation = "Mining fees are not supported for NWC wallets.",
+            ),
+        )
     }
 
     private fun createNwcApiClient(wallet: Wallet.NWC) =

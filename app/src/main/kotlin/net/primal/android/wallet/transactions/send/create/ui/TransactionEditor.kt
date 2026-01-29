@@ -751,7 +751,7 @@ private fun CreateTransactionContract.UiState.isAmountZero(): Boolean {
     return transaction.amountSats.toBigDecimal() == BigDecimal.ZERO
 }
 
-private val MIN_BTC_TX_AMOUNT = BigDecimal.valueOf(21_000)
+private val MIN_BTC_TX_AMOUNT = BigDecimal.valueOf(1_000)
 
 private fun CreateTransactionContract.UiState.isTxSatisfiesMinAmount(): Boolean {
     val txAmount = transaction.amountSats.toBigDecimal()

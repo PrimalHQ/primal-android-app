@@ -1,5 +1,6 @@
 package net.primal.android.auth.repository
 
+import io.github.aakira.napier.Napier
 import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
@@ -20,7 +21,6 @@ import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.settings.AppSettingsDescription
-import timber.log.Timber
 
 class CreateAccountHandler @Inject constructor(
     private val dispatchers: DispatcherProvider,
@@ -56,7 +56,7 @@ class CreateAccountHandler @Inject constructor(
                 ).unwrapOrThrow(),
             )
         }.onFailure { exception ->
-            Timber.w(exception)
+            Napier.w(throwable = exception) { "Failed to create Nostr account." }
             credentialsStore.removeCredentialByNsec(nsec = privateKey.assureValidNsec())
             throw AccountCreationException(cause = exception)
         }.onSuccess {

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.toJavaInstant
@@ -39,7 +40,6 @@ import net.primal.domain.notifications.Notification
 import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.notifications.NotificationType
 import net.primal.domain.streams.mappers.asReferencedStream
-import timber.log.Timber
 
 @HiltViewModel
 class NotificationsViewModel @Inject constructor(
@@ -162,11 +162,13 @@ class NotificationsViewModel @Inject constructor(
                 )
 
                 when (signResult) {
-                    is SignResult.Rejected -> Timber.w(signResult.error)
+                    is SignResult.Rejected -> Napier.w(throwable = signResult.error) {
+                        "Sign rejected while updating notifications last seen."
+                    }
                     is SignResult.Signed -> notificationRepository.markAllNotificationsAsSeen(signResult.event)
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mark notifications as seen due to network error." }
             }
         }
     }

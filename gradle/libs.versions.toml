@@ -15,6 +15,7 @@ barcode-scanning = "17.3.0"
 bignum = "0.3.10"
 bitcoinj-core = "0.17"
 biometric = "1.4.0-alpha04"
+breez-spark-kmp-sdk = "0.7.10"
 camera = "1.5.2"
 compose-bom = "2025.12.00"
 compose-lottie = "6.7.1"
@@ -69,7 +70,6 @@ okio = "3.16.4"
 placeholder = "2.0.0"
 play-publishing = "3.13.0"
 play-billing = "7.1.1"
-primal-tsunami-sdk-kmp = "1.0.0"
 qrcode-generator = "1.6.2"
 quartz = "1.04.2"
 reorderable = "2.4.3"
@@ -82,7 +82,6 @@ security-identity-credential = "1.0.0-alpha03"
 skie = "0.10.8"
 sqlcipher-android = "4.9.0"
 telephoto = "0.18.0"
-timber = "5.0.1"
 url-detector = "0.1.23"
 whyoleg-cryptography-kotlin = "0.5.0"
 zoomimage-compose-coil3 = "1.4.0"
@@ -218,7 +217,6 @@ jetpack-sqlite-framework = { module = "androidx.sqlite:sqlite-framework", versio
 jetpack-sqlite-framework-android = { module = "androidx.sqlite:sqlite-framework-android", version.ref = "jetpack-sqlite" }
 jetpack-sqlite-framework-iosarm64 = { module = "androidx.sqlite:sqlite-framework-iosarm64", version.ref = "jetpack-sqlite" }
 jetpack-sqlite-framework-iossimulatorarm64 = { module = "androidx.sqlite:sqlite-framework-iossimulatorarm64", version.ref = "jetpack-sqlite" }
-jetpack-sqlite-framework-iosx64 = { module = "androidx.sqlite:sqlite-framework-iosx64", version.ref = "jetpack-sqlite" }
 sqlcipher-android = { module = "net.zetetic:sqlcipher-android", version.ref = "sqlcipher-android" }
 
 # Media libs
@@ -242,7 +240,6 @@ google-play-services-cronet = { module = "com.google.android.gms:play-services-c
 zoomimage-compose-coil3 = { module = "io.github.panpf.zoomimage:zoomimage-compose-coil3", version.ref = "zoomimage-compose-coil3" }
 
 # Loggers
-timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 napier = { module = "io.github.aakira:napier", version.ref = "napier"}
 
 # Other libs
@@ -253,26 +250,24 @@ qrcode-generator = { module = "com.github.alexzhirkevich:custom-qr-generator", v
 datastore = { module = "androidx.datastore:datastore", version.ref = "jetpack-datastore" }
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "jetpack-datastore" }
 
-# Crytpo libs
+# Bitcoin libs
 lightning-kmp = { module = "fr.acinq.lightning:lightning-kmp", version.ref = "acinq-lightning-kmp" }
 lightning-kmp-iosarm64 = { module = "fr.acinq.lightning:lightning-kmp-iosarm64", version.ref = "acinq-lightning-kmp" }
 lightning-kmp-iossimulatorarm64 = { module = "fr.acinq.lightning:lightning-kmp-iossimulatorarm64", version.ref = "acinq-lightning-kmp" }
-lightning-kmp-iosx64 = { module = "fr.acinq.lightning:lightning-kmp-iosx64", version.ref = "acinq-lightning-kmp" }
 lightning-kmp-jvm = { module = "fr.acinq.lightning:lightning-kmp-jvm", version.ref = "acinq-lightning-kmp" }
 bitcoin-kmp = { module = "fr.acinq.bitcoin:bitcoin-kmp", version.ref = "acinq-bitcoin-kmp"}
 bitcoin-kmp-iosarm64 = { module = "fr.acinq.bitcoin:bitcoin-kmp-iosarm64", version.ref = "acinq-bitcoin-kmp"}
 bitcoin-kmp-iossimulatorarm64 = { module = "fr.acinq.bitcoin:bitcoin-kmp-iossimulatorarm64", version.ref = "acinq-bitcoin-kmp"}
-bitcoin-kmp-iosx64 = { module = "fr.acinq.bitcoin:bitcoin-kmp-iosx64", version.ref = "acinq-bitcoin-kmp"}
 bitcoin-kmp-jvm = { module = "fr.acinq.bitcoin:bitcoin-kmp-jvm", version.ref = "acinq-bitcoin-kmp"}
 secp256k1 = { module = "fr.acinq.secp256k1:secp256k1", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp = { module = "fr.acinq.secp256k1:secp256k1-kmp", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-iosarm64 = { module = "fr.acinq.secp256k1:secp256k1-kmp-iosarm64", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-iossimulatorarm64 = { module = "fr.acinq.secp256k1:secp256k1-kmp-iossimulatorarm64", version.ref = "acinq-secp256k1-kmp" }
-secp256k1-kmp-iosx64 = { module = "fr.acinq.secp256k1:secp256k1-kmp-iosx64", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jvm", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-jni-android = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-android", version.ref = "acinq-secp256k1-kmp" }
 secp256k1-kmp-jni-jvm = { module = "fr.acinq.secp256k1:secp256k1-kmp-jni-jvm", version.ref = "acinq-secp256k1-kmp" }
 bitcoinj-core = { module = "org.bitcoinj:bitcoinj-core", version.ref = "bitcoinj-core" }
+breez-sdk-spark-kmp = { module = "technology.breez.spark:breez-sdk-spark-kmp", version.ref = "breez-spark-kmp-sdk" }
 
 #Security
 androidx-collection = { module = "androidx.collection:collection", version.ref = "collection" }
@@ -289,10 +284,6 @@ whyoleg-cryptography-provider-optimal = { module = "dev.whyoleg.cryptography:cry
 skie-configuration-annotations = { module = "co.touchlab.skie:configuration-annotations", version.ref = "skie" }
 skie-configuration-annotations-iosarm64 = { module = "co.touchlab.skie:configuration-annotations-iosarm64", version.ref = "skie" }
 skie-configuration-annotations-iossimulatorarm64 = { module = "co.touchlab.skie:configuration-annotations-iossimulatorarm64", version.ref = "skie" }
-skie-configuration-annotations-iosx64  = { module = "co.touchlab.skie:configuration-annotation-iosx64", version.ref = "skie" }
-
-#Primal
-primal-tsunami-sdk-kmp = { module = "net.primal:tsunami-sdk-kmp", version.ref = "primal-tsunami-sdk-kmp" }
 
 # Tests libs
 junit = { group = "junit", name = "junit", version.ref = "junit" }

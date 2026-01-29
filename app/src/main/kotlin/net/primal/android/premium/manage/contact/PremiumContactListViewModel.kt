@@ -3,6 +3,7 @@ package net.primal.android.premium.manage.contact
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -20,7 +21,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import timber.log.Timber
 
 @HiltViewModel
 class PremiumContactListViewModel @Inject constructor(
@@ -60,9 +60,9 @@ class PremiumContactListViewModel @Inject constructor(
                 }.sortedByDescending { it.timestamp }
                 setState { copy(backups = backups) }
             } catch (error: SignatureException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch recovery contacts list" }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch recovery contacts list" }
             } finally {
                 setState { copy(fetching = false) }
             }

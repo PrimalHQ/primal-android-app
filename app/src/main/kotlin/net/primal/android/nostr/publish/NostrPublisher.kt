@@ -1,5 +1,6 @@
 package net.primal.android.nostr.publish
 
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -13,7 +14,6 @@ import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.publisher.PrimalPublishResult
 import net.primal.domain.publisher.PrimalPublisher
-import timber.log.Timber
 
 class NostrPublisher @Inject constructor(
     private val relaysSocketManager: RelaysSocketManager,
@@ -41,7 +41,7 @@ class NostrPublisher @Inject constructor(
                     relays = outboxRelays.map { Relay(url = it, read = false, write = true) },
                 )
             } catch (error: NostrPublishException) {
-                Timber.w(error, "Failed to publish to outbox relays.")
+                Napier.w(throwable = error) { "Failed to publish to outbox relays." }
             }
         }
         return importEvent(signedNostrEvent)

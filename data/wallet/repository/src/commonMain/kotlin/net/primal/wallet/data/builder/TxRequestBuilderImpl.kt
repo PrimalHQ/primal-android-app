@@ -1,5 +1,6 @@
 package net.primal.wallet.data.builder
 
+import kotlin.uuid.Uuid
 import net.primal.domain.builder.TxRequestBuilder
 import net.primal.domain.nostr.utils.parseAsLNUrlOrNull
 import net.primal.domain.wallet.DraftTx
@@ -11,6 +12,7 @@ class TxRequestBuilderImpl : TxRequestBuilder {
         val lnUrl = draftTx.targetLnUrl
         val parsedLnUrl = draftTx.targetLud16?.parseAsLNUrlOrNull()
         val onChainAddress = draftTx.targetOnChainAddress
+        val idempotencyKey = Uuid.random().toString()
 
         return when {
             lnInvoice != null ->
@@ -19,6 +21,7 @@ class TxRequestBuilderImpl : TxRequestBuilder {
                         amountSats = draftTx.amountSats,
                         noteRecipient = draftTx.noteRecipient,
                         noteSelf = draftTx.noteSelf,
+                        idempotencyKey = idempotencyKey,
                         lnInvoice = lnInvoice,
                     ),
                 )
@@ -29,6 +32,7 @@ class TxRequestBuilderImpl : TxRequestBuilder {
                         amountSats = draftTx.amountSats,
                         noteRecipient = draftTx.noteRecipient,
                         noteSelf = draftTx.noteSelf,
+                        idempotencyKey = idempotencyKey,
                         lnUrl = lnUrl,
                         lud16 = draftTx.targetLud16,
                     ),
@@ -40,6 +44,7 @@ class TxRequestBuilderImpl : TxRequestBuilder {
                         amountSats = draftTx.amountSats,
                         noteRecipient = draftTx.noteRecipient,
                         noteSelf = draftTx.noteSelf,
+                        idempotencyKey = idempotencyKey,
                         lnUrl = parsedLnUrl,
                         lud16 = draftTx.targetLud16,
                     ),
@@ -51,8 +56,9 @@ class TxRequestBuilderImpl : TxRequestBuilder {
                         amountSats = draftTx.amountSats,
                         noteRecipient = draftTx.noteRecipient,
                         noteSelf = draftTx.noteSelf,
+                        idempotencyKey = idempotencyKey,
                         onChainAddress = onChainAddress,
-                        onChainTier = draftTx.onChainMiningFeeTier,
+                        onChainTierId = draftTx.onChainMiningFeeTier,
                     ),
                 )
 

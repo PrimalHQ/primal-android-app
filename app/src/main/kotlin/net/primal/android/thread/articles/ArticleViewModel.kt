@@ -3,6 +3,7 @@ package net.primal.android.thread.articles
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -30,7 +31,6 @@ import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.reads.ArticleRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ArticleViewModel @Inject constructor(
@@ -88,19 +88,19 @@ class ArticleViewModel @Inject constructor(
                     mutedUserId = uiEvent.userId,
                 )
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mute user due to network error." }
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
             } catch (error: SigningKeyNotFoundException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing key not found for mute action." }
                 setState { copy(error = UiError.MissingPrivateKey) }
             } catch (error: SigningRejectedException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing rejected for mute action." }
                 setState { copy(error = UiError.NostrSignUnauthorized) }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to publish mute event." }
                 setState { copy(error = UiError.FailedToMuteUser(error)) }
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Missing relays for mute action." }
                 setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
             }
         }
@@ -117,12 +117,12 @@ class ArticleViewModel @Inject constructor(
                 )
             } catch (error: SigningKeyNotFoundException) {
                 setState { copy(error = UiError.MissingPrivateKey) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing key not found for report action." }
             } catch (error: SigningRejectedException) {
                 setState { copy(error = UiError.NostrSignUnauthorized) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing rejected for report action." }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to publish report event." }
             }
         }
 
@@ -146,17 +146,17 @@ class ArticleViewModel @Inject constructor(
             articleRepository.deleteArticleByATag(articleATag = articleATag)
             setEffect(SideEffect.ArticleDeleted)
         } catch (error: NostrPublishException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Failed to publish delete event." }
             setState { copy(error = UiError.FailedToPublishDeleteEvent(error)) }
         } catch (error: MissingRelaysException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Missing relays for delete action." }
             setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
         } catch (error: SigningKeyNotFoundException) {
             setState { copy(error = UiError.MissingPrivateKey) }
-            Timber.w(error)
+            Napier.w(throwable = error) { "Signing key not found for delete action." }
         } catch (error: SigningRejectedException) {
             setState { copy(error = UiError.NostrSignUnauthorized) }
-            Timber.w(error)
+            Napier.w(throwable = error) { "Signing rejected for delete action." }
         }
     }
 
@@ -182,16 +182,16 @@ class ArticleViewModel @Inject constructor(
                     )
                 }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to publish bookmark event." }
             } catch (error: PublicBookmarksNotFoundException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Public bookmarks not found." }
                 setState { copy(shouldApproveBookmark = true) }
             } catch (error: SigningKeyNotFoundException) {
                 setState { copy(error = UiError.MissingPrivateKey) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing key not found for bookmark action." }
             } catch (error: SigningRejectedException) {
                 setState { copy(error = UiError.NostrSignUnauthorized) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing rejected for bookmark action." }
             }
         }
 

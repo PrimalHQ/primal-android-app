@@ -4,8 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
-import kotlin.uuid.ExperimentalUuidApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,10 +34,8 @@ import net.primal.domain.account.repository.PermissionsRepository
 import net.primal.domain.account.repository.SessionEventRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent
-import timber.log.Timber
 
 @HiltViewModel
-@OptIn(ExperimentalUuidApi::class)
 class PermissionRequestsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val localSignerService: LocalSignerService,
@@ -70,7 +68,7 @@ class PermissionRequestsViewModel @Inject constructor(
 
     fun onNewLocalSignerMethod(method: LocalSignerMethod) =
         viewModelScope.launch {
-            Timber.tag("LocalSignerForeground").d("We got $method.")
+            Napier.d(tag = "LocalSignerForeground") { "We got $method." }
             localSignerService.processMethodOrAddToPending(method = method)
                 .onFailure { error ->
                     if (error is LocalSignerError.AppNotFound) {
@@ -114,10 +112,10 @@ class PermissionRequestsViewModel @Inject constructor(
                 setState { copy(requestQueue = events) }
                 if (events.isEmpty() && previousQueueNotEmpty) {
                     sendResponses()
-                    Timber.tag("LocalSignerForeground").d(
+                    Napier.d(tag = "LocalSignerForeground") {
                         "There are no new pending events, but the state has events in requestQueue.\n" +
-                            "Sending responses immediately.",
-                    )
+                            "Sending responses immediately."
+                    }
                 }
             }
         }

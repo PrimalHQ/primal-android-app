@@ -1,7 +1,6 @@
 package net.primal.core.networking.primal
 
 import io.github.aakira.napier.Napier
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -48,7 +47,6 @@ class PrimalSocketSubscription<T> private constructor(
         }
     }
 
-    @OptIn(ExperimentalUuidApi::class)
     private suspend fun subscribe() {
         val newSubscriptionId = Uuid.random().toPrimalSubscriptionId()
         this.id = newSubscriptionId

@@ -3,6 +3,7 @@ package net.primal.wallet.data.service
 import kotlinx.coroutines.flow.Flow
 import net.primal.core.utils.Result
 import net.primal.domain.rates.fees.OnChainTransactionFeeTier
+import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.OnChainAddressResult
@@ -10,7 +11,6 @@ import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.model.WalletBalanceResult
-import net.primal.wallet.data.model.Transaction
 
 internal interface WalletService<W : Wallet> {
     suspend fun fetchWalletBalance(wallet: W): Result<WalletBalanceResult>

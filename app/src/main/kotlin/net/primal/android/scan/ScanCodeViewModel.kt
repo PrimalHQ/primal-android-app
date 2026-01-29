@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -37,7 +38,6 @@ import net.primal.domain.nostr.utils.extractProfileId
 import net.primal.domain.nostr.utils.takeAsNaddrOrNull
 import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.wallet.Wallet
-import timber.log.Timber
 
 @HiltViewModel
 class ScanCodeViewModel @Inject constructor(
@@ -105,7 +105,9 @@ class ScanCodeViewModel @Inject constructor(
         val wallet = walletAccountRepository.getActiveWallet(userId = userAccount.pubkey)
 
         return when (wallet) {
-            is Wallet.NWC, is Wallet.Tsunami, null -> ScanCodeContract.UserState.UserWithoutPrimalWallet
+            is Wallet.NWC, is Wallet.Spark, null,
+            -> ScanCodeContract.UserState.UserWithoutPrimalWallet
+
             is Wallet.Primal -> ScanCodeContract.UserState.UserWithPrimalWallet
         }
     }
@@ -177,6 +179,7 @@ class ScanCodeViewModel @Inject constructor(
             NostrEventKind.LongFormContent.value -> {
                 setEffect(SideEffect.NostrArticleDetected(code))
             }
+
             NostrEventKind.LiveActivity.value -> {
                 setEffect(SideEffect.NostrLiveStreamDetected(code))
             }
@@ -197,7 +200,7 @@ class ScanCodeViewModel @Inject constructor(
                 setEffect(SideEffect.DraftTransactionReady(draft = it))
             }
             .onFailure {
-                Timber.w(it)
+                Napier.w(throwable = it) { "Failed to process payment code: $code" }
                 setState { copy(error = UiError.GenericError()) }
             }
     }
@@ -213,7 +216,7 @@ class ScanCodeViewModel @Inject constructor(
             }.onSuccess {
                 setEffect(SideEffect.PromoCodeApplied)
             }.onFailure { error ->
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to apply promo code." }
 
                 val uiError = if (error.cause is NostrNoticeException) {
                     UiError.InvalidPromoCode(error)
@@ -242,7 +245,7 @@ class ScanCodeViewModel @Inject constructor(
                     )
                 }
             }.onFailure { error ->
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to get promo code details for code=$code" }
                 if (error.cause is NostrNoticeException) {
                     setState { copy(showErrorBadge = true) }
                 } else {

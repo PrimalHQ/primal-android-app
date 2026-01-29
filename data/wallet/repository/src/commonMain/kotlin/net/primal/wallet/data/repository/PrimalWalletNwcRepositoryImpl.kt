@@ -7,7 +7,7 @@ import net.primal.domain.connections.primal.model.PrimalNwcConnection
 import net.primal.domain.connections.primal.model.PrimalNwcConnectionInfo
 import net.primal.wallet.data.remote.api.PrimalWalletNwcApi
 
-class PrimalWalletNwcRepositoryImpl(
+internal class PrimalWalletNwcRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val primalWalletNwcApi: PrimalWalletNwcApi,
 ) : PrimalWalletNwcRepository {

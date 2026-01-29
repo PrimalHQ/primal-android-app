@@ -1,6 +1,5 @@
 package net.primal.data.account.repository.mappers
 
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
@@ -23,7 +22,6 @@ import net.primal.domain.account.model.RequestState as RequestStateDO
 import net.primal.domain.account.model.SessionEvent
 import net.primal.shared.data.local.encryption.asEncryptable
 
-@OptIn(ExperimentalUuidApi::class)
 fun buildSessionEventData(
     sessionId: String,
     signerPubKey: String,

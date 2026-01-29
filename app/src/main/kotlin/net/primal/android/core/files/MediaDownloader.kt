@@ -9,6 +9,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.aakira.napier.Napier
 import java.io.File
 import java.io.IOException
 import java.time.LocalDateTime
@@ -23,7 +24,6 @@ import okhttp3.Request
 import okhttp3.Response
 import okio.BufferedSource
 import okio.sink
-import timber.log.Timber
 
 @Singleton
 class MediaDownloader @Inject constructor(
@@ -58,7 +58,7 @@ class MediaDownloader @Inject constructor(
                 )
             }
         }.getOrElse { error ->
-            Timber.w(error, "Malformed URL: $url")
+            Napier.w(throwable = error) { "Malformed URL: $url" }
             throw UnsuccessfulFileDownload("Unable to download media.", cause = error)
         }
     }
@@ -119,7 +119,7 @@ class MediaDownloader @Inject constructor(
 
         if (result.isFailure) {
             contentResolver.delete(uri, null, null)
-            Timber.w(result.exceptionOrNull())
+            Napier.w(throwable = result.exceptionOrNull()) { "Failed to save media content." }
             throw UnableToSaveContent()
         }
     }

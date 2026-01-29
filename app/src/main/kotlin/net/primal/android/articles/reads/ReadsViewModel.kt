@@ -3,6 +3,7 @@ package net.primal.android.articles.reads
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +23,6 @@ import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
-import timber.log.Timber
 
 @HiltViewModel
 class ReadsViewModel @Inject constructor(
@@ -81,9 +81,9 @@ class ReadsViewModel @Inject constructor(
                     givenDefaultFeeds = emptyList(),
                 )
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to restore default feeds" }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to restore default feeds" }
             } finally {
                 setState { copy(loading = false) }
             }
@@ -98,12 +98,12 @@ class ReadsViewModel @Inject constructor(
                     feedsRepository.fetchAndPersistArticleFeeds(userId = userId)
                 }
             } catch (error: SigningRejectedException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing rejected while fetching feeds" }
             } catch (error: SigningKeyNotFoundException) {
                 restoreDefaultReadsFeeds()
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing key not found while fetching feeds" }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Network error while fetching feeds" }
             } finally {
                 setState { copy(loading = false) }
             }

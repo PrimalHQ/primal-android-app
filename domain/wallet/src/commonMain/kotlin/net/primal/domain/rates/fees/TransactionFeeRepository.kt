@@ -1,29 +1,20 @@
 package net.primal.domain.rates.fees
 
-import kotlin.coroutines.cancellation.CancellationException
-import net.primal.domain.common.exception.NetworkException
+import net.primal.core.utils.Result
 
 interface TransactionFeeRepository {
 
-    @Throws(
-        NetworkException::class,
-        CancellationException::class,
-    )
     suspend fun fetchMiningFees(
         userId: String,
         walletId: String,
         onChainAddress: String,
         amountInBtc: String,
-    ): List<OnChainTransactionFeeTier>
+    ): Result<List<OnChainTransactionFeeTier>>
 
-    @Throws(
-        NetworkException::class,
-        CancellationException::class,
-    )
     suspend fun fetchDefaultMiningFee(
         userId: String,
         walletId: String,
         onChainAddress: String,
         amountInBtc: String,
-    ): OnChainTransactionFeeTier?
+    ): Result<OnChainTransactionFeeTier?>
 }

@@ -3,6 +3,7 @@ package net.primal.android.premium.manage.media
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
@@ -22,7 +23,6 @@ import net.primal.android.premium.repository.PremiumRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import timber.log.Timber
 
 @HiltViewModel
 class PremiumMediaManagementViewModel @Inject constructor(
@@ -97,9 +97,9 @@ class PremiumMediaManagementViewModel @Inject constructor(
 
                 setState { copy(mediaItems = uploads) }
             } catch (error: SignatureException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch media uploads due to signature error." }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch media uploads due to network error." }
             }
         }
     }
@@ -117,9 +117,9 @@ class PremiumMediaManagementViewModel @Inject constructor(
                     )
                 }
             } catch (error: SignatureException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch media stats due to signature error." }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch media stats due to network error." }
             } finally {
                 setState { copy(calculating = false) }
             }
@@ -143,9 +143,9 @@ class PremiumMediaManagementViewModel @Inject constructor(
                 fetchMediaStats()
                 premiumRepository.fetchMembershipStatus(userId = userId)
             } catch (error: SignatureException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to delete media due to signature error." }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to delete media due to network error." }
             }
         }
     }

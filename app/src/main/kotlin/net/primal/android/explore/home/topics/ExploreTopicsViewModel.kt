@@ -3,6 +3,7 @@ package net.primal.android.explore.home.topics
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,7 +17,6 @@ import net.primal.android.explore.home.topics.ui.TopicUi
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.explore.ExploreTrendingTopic
-import timber.log.Timber
 
 @HiltViewModel
 class ExploreTopicsViewModel @Inject constructor(
@@ -50,7 +50,7 @@ class ExploreTopicsViewModel @Inject constructor(
             try {
                 exploreRepository.fetchTrendingTopics()
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch trending topics." }
             } finally {
                 setState { copy(loading = false) }
             }

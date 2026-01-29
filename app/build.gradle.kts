@@ -53,8 +53,8 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     )
 }
 
-val appVersionCode = 2661
-val appVersionName = "2.6.20"
+val appVersionCode = 2665
+val appVersionName = "2.7.2"
 
 tasks.register("generateReleaseProperties") {
     doLast {
@@ -98,6 +98,12 @@ android {
             } else {
                 "false"
             },
+        )
+
+        buildConfigField(
+            type = "String",
+            name = "BREEZ_SDK_API_KEY",
+            value = "\"${configProperties?.getProperty("api.breez.sdk", "")}\"",
         )
     }
 
@@ -355,7 +361,6 @@ dependencies {
     implementation(libs.flippable)
     implementation(libs.reorderable)
 
-    implementation(libs.timber)
     implementation(libs.napier)
 
     implementation(libs.lightning.kmp)

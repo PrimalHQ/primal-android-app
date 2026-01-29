@@ -25,6 +25,7 @@ private val exportedDependencies = listOf(
     ":data:account:repository",
     ":data:caching:repository",
     ":data:wallet:repository",
+    ":paging-runtime-ios",
 )
 
 kotlin {

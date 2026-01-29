@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.channels.Channel
@@ -40,7 +41,6 @@ import net.primal.domain.nostr.toNostrString
 import net.primal.domain.nostr.utils.npubToPubkey
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
-import timber.log.Timber
 
 @HiltViewModel
 class HomeFeedViewModel @Inject constructor(
@@ -103,7 +103,7 @@ class HomeFeedViewModel @Inject constructor(
                         setEffect(HomeFeedContract.SideEffect.StartStream(naddr = naddr.toNostrString()))
                     }
                     .onFailure {
-                        Timber.w(it)
+                        Napier.w(throwable = it) { "Failed to find stream naddr for hostPubkey=$hostPubkey." }
                         setState { copy(uiError = UiError.StreamNotFound) }
                     }
             } else {
@@ -142,9 +142,9 @@ class HomeFeedViewModel @Inject constructor(
                     givenDefaultFeeds = emptyList(),
                 )
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to restore default feeds due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to restore default feeds due to network error." }
             } finally {
                 setState { copy(loading = false) }
             }
@@ -159,12 +159,12 @@ class HomeFeedViewModel @Inject constructor(
                     feedsRepository.fetchAndPersistNoteFeeds(userId = userId)
                 }
             } catch (error: SigningRejectedException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing rejected while fetching and persisting feeds." }
             } catch (error: SigningKeyNotFoundException) {
                 restoreDefaultNoteFeeds()
-                Timber.w(error)
+                Napier.w(throwable = error) { "Signing key not found while fetching and persisting feeds." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Network error while fetching and persisting feeds." }
             } finally {
                 setState { copy(loading = false) }
             }

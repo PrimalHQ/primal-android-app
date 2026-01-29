@@ -13,18 +13,14 @@ import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.core.images.PrimalImageLoaderFactory
 import net.primal.android.core.utils.isGoogleBuild
 import net.primal.android.wallet.init.NwcWalletLifecycleInitializer
-import net.primal.android.wallet.init.TsunamiWalletLifecycleInitializer
+import net.primal.android.wallet.init.SparkWalletLifecycleInitializer
 import net.primal.core.config.store.AppConfigInitializer
 import net.primal.data.account.repository.repository.factory.AccountRepositoryFactory
 import net.primal.data.repository.factory.PrimalRepositoryFactory
 import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
-import timber.log.Timber
 
 @HiltAndroidApp
 class PrimalApp : Application() {
-
-    @Inject
-    lateinit var loggers: Set<@JvmSuppressWildcards Timber.Tree>
 
     @Inject
     lateinit var antilog: Set<@JvmSuppressWildcards Antilog>
@@ -36,26 +32,27 @@ class PrimalApp : Application() {
     lateinit var crashReporter: PrimalCrashReporter
 
     @Inject
-    lateinit var tsunamiWalletLifecycleInitializer: Lazy<TsunamiWalletLifecycleInitializer>
+    lateinit var sparkWalletLifecycleInitializer: Lazy<SparkWalletLifecycleInitializer>
 
     @Inject
     lateinit var nwcWalletLifecycleInitializer: Lazy<NwcWalletLifecycleInitializer>
 
     override fun onCreate() {
         super.onCreate()
-        AppConfigInitializer.init(this@PrimalApp)
-        PrimalRepositoryFactory.init(this@PrimalApp)
-        WalletRepositoryFactory.init(context = this@PrimalApp, enableDbEncryption = !BuildConfig.DEBUG)
-        AccountRepositoryFactory.init(context = this@PrimalApp, enableDbEncryption = !BuildConfig.DEBUG)
-
-        loggers.forEach {
-            Timber.plant(it)
-        }
+        AppConfigInitializer.init(context = this@PrimalApp)
+        PrimalRepositoryFactory.init(context = this@PrimalApp)
+        WalletRepositoryFactory.init(
+            context = this@PrimalApp,
+            enableDbEncryption = !BuildConfig.DEBUG,
+            breezApiKey = BuildConfig.BREEZ_SDK_API_KEY,
+        )
+        AccountRepositoryFactory.init(
+            context = this@PrimalApp,
+            enableDbEncryption = !BuildConfig.DEBUG,
+        )
 
         SingletonImageLoader.setSafe(imageLoaderFactory)
-        antilog.firstOrNull()?.let { antilog ->
-            Napier.base(antilog)
-        }
+        antilog.forEach { Napier.base(it) }
 
         if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
             crashReporter.init()
@@ -65,7 +62,7 @@ class PrimalApp : Application() {
             initNotificationChannels()
         }
 
-        tsunamiWalletLifecycleInitializer.get().start()
+        sparkWalletLifecycleInitializer.get().start()
         nwcWalletLifecycleInitializer.get().start()
     }
 

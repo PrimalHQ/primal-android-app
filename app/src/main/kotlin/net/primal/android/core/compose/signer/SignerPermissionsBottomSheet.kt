@@ -55,7 +55,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
-import kotlin.uuid.ExperimentalUuidApi
 import net.primal.android.R
 import net.primal.android.core.compose.AppIconThumbnail
 import net.primal.android.core.compose.PrimalBottomSheetDragHandle
@@ -389,7 +388,6 @@ private fun AlwaysHandleRequestsSwitch(
     }
 }
 
-@OptIn(ExperimentalUuidApi::class)
 @Composable
 private fun AppRequestsList(
     modifier: Modifier = Modifier,

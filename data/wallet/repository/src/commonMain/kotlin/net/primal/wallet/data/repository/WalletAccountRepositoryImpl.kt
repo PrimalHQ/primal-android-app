@@ -8,12 +8,11 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletType
-import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.local.dao.ActiveWalletData
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.repository.mappers.local.toDomain
 
-class WalletAccountRepositoryImpl(
+internal class WalletAccountRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val walletDatabase: WalletDatabase,
 ) : WalletAccountRepository {
@@ -30,7 +29,7 @@ class WalletAccountRepositoryImpl(
 
     override fun observeWalletsByUser(userId: String): Flow<List<Wallet>> =
         walletDatabase.wallet()
-            .observeWalletsByUserId(userId = userId.asEncryptable())
+            .observeWalletsByUserId(userId = userId)
             .map { list -> list.map { it.toDomain() } }
 
     override suspend fun getActiveWallet(userId: String): Wallet? =
@@ -50,7 +49,7 @@ class WalletAccountRepositoryImpl(
     override suspend fun findLastUsedWallet(userId: String, type: WalletType): Wallet? =
         withContext(dispatcherProvider.io()) {
             walletDatabase.wallet()
-                .findLastUsedWalletByType(userId = userId.asEncryptable(), type = type)
+                .findLastUsedWalletByType(userId = userId, type = type)
                 ?.toDomain()
         }
 }

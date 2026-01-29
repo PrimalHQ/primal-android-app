@@ -3,7 +3,8 @@ package net.primal.android.wallet.store.inapp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.*
+import io.github.aakira.napier.Napier
+import java.util.Currency
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.channels.Channel
@@ -22,7 +23,6 @@ import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.SideEffect
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiEvent
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyContract.UiState
 import net.primal.domain.billing.BillingRepository
-import timber.log.Timber
 
 @HiltViewModel
 class InAppPurchaseBuyViewModel @Inject constructor(
@@ -91,7 +91,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
                         )
                     }
                 }.getOrElse { error ->
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to refresh in-app purchase quote." }
                     delay(500.milliseconds)
                     setState { copy(quote = null, error = error) }
                 }
@@ -116,7 +116,7 @@ class InAppPurchaseBuyViewModel @Inject constructor(
                     primalBillingClient.launchMinSatsBillingFlow(quote = it, activity = event.activity)
                 }
             } catch (error: InAppPurchaseException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to launch billing flow." }
                 setState { copy(error = error) }
             }
         }

@@ -35,6 +35,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemContentType
 import androidx.paging.compose.itemKey
 import fr.acinq.lightning.utils.UUID
+import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.debounce
@@ -58,7 +59,6 @@ import net.primal.android.core.errors.UiError
 import net.primal.android.theme.AppTheme
 import net.primal.android.thread.articles.ArticleContract
 import net.primal.android.thread.articles.ArticleViewModel
-import timber.log.Timber
 
 @Composable
 fun ArticleFeedList(
@@ -328,7 +328,7 @@ private fun LazyListScope.handleMediatorAppendState(pagingItems: LazyPagingItems
         is LoadState.Error -> if (BuildConfig.FEATURE_PRIMAL_CRASH_REPORTER) {
             item(contentType = "AppendError") {
                 val error = appendMediatorLoadState.error
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to append article feed." }
                 ListLoadingError(
                     text = stringResource(R.string.app_error_loading_next_page) + "\n${error.message}",
                 )

@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.delay
@@ -32,7 +33,6 @@ import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.signOrThrow
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.hexToNsecHrp
-import timber.log.Timber
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
@@ -121,7 +121,7 @@ class OnboardingViewModel @Inject constructor(
                 }
                 setState { copy(allSuggestions = allGroupSuggestions) }
             } catch (error: IOException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch follow suggestions." }
             } finally {
                 setState { copy(working = false) }
             }
@@ -132,7 +132,7 @@ class OnboardingViewModel @Inject constructor(
             try {
                 return block(it)
             } catch (error: IOException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Retry attempt failed." }
                 delay(DELAY * (it + 1))
             }
         }
@@ -153,10 +153,10 @@ class OnboardingViewModel @Inject constructor(
                 )
                 setState { copy(accountCreated = true, accountCreationStep = AccountCreationStep.AccountCreated) }
             } catch (error: BlossomException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to create Nostr account due to BlossomException." }
                 setState { copy(error = UiState.OnboardingError.ImageUploadFailed(error)) }
             } catch (error: CreateAccountHandler.AccountCreationException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to create Nostr account." }
                 setState { copy(error = UiState.OnboardingError.CreateAccountFailed(error)) }
             } finally {
                 setState { copy(working = false) }
@@ -179,9 +179,9 @@ class OnboardingViewModel @Inject constructor(
                         setState { copy(avatarRemoteUrl = uploadResult.remoteUrl) }
                     }
                 } catch (error: NetworkException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to upload avatar photo due to network error." }
                 } catch (error: SignatureException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to upload avatar photo due to signature error." }
                 }
             }
             avatarUploadJob = UploadJob(job = job)
@@ -206,9 +206,9 @@ class OnboardingViewModel @Inject constructor(
                         setState { copy(bannerRemoteUrl = uploadResult.remoteUrl) }
                     }
                 } catch (error: NetworkException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to upload banner photo due to network error." }
                 } catch (error: SignatureException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to upload banner photo due to signature error." }
                 }
             }
             bannerUploadJob = UploadJob(job = job)

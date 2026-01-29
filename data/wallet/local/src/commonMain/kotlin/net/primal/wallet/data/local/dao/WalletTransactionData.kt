@@ -6,6 +6,7 @@ import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
 import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.encryption.Encryptable
+import net.primal.wallet.data.local.TxKind
 
 @Entity
 data class WalletTransactionData(
@@ -18,7 +19,7 @@ data class WalletTransactionData(
     val createdAt: Encryptable<Long>,
     val updatedAt: Long,
     val completedAt: Encryptable<Long>?,
-    val userId: Encryptable<String>,
+    val userId: String,
     val note: Encryptable<String>?,
     val invoice: Encryptable<String>?,
     val amountInBtc: Encryptable<Double>,
@@ -26,4 +27,12 @@ data class WalletTransactionData(
     val otherUserId: Encryptable<String>?,
     val zappedEntity: Encryptable<String>?,
     val zappedByUserId: Encryptable<String>?,
+    val txKind: TxKind,
+    val onChainAddress: Encryptable<String>?,
+    val onChainTxId: Encryptable<String>?,
+    val preimage: Encryptable<String>?,
+    val paymentHash: Encryptable<String>?,
+    val amountInUsd: Encryptable<Double>?,
+    val exchangeRate: Encryptable<String>?,
+    val otherLightningAddress: Encryptable<String>?,
 )

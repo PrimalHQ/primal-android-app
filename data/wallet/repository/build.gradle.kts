@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
 plugins {
@@ -20,16 +21,19 @@ kotlin {
         }
     }
 
-    // iOS Target
+    // iOS Target (minimum iOS 16 to match shared module)
     val xcfFramework = XCFramework(xcfName)
-    val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
 
-    iosTargets.forEach {
-        it.binaries.framework {
+    fun KotlinNativeTarget.configureFramework(platformName: String) {
+        binaries.framework {
             baseName = xcfName
+            linkerOpts += listOf("-platform_version", platformName, "16.0", "16.0")
             xcfFramework.add(this)
         }
     }
+
+    iosArm64 { configureFramework("ios") }
+    iosSimulatorArm64 { configureFramework("ios-simulator") }
 
     // Source set declarations (https://kotlinlang.org/docs/multiplatform-hierarchy.html)
     sourceSets {
@@ -49,33 +53,6 @@ kotlin {
                 implementation(project(":data:wallet:remote-primal"))
                 implementation(project(":data:wallet:remote-nwc"))
 
-                val tsunamiSdkDependencyProvider = libs.primal.tsunami.sdk.kmp
-                val hasTsunamiSdkCompositeBuild = gradle.includedBuilds.any { it.name.contains("tsunami") }
-
-                if (hasTsunamiSdkCompositeBuild) {
-                    implementation(tsunamiSdkDependencyProvider)
-                    println("✓️ Using composite build for tsunami sdk.")
-                } else {
-                    val isTsunamiSdkPubliclyAvailable = providers.provider {
-                        try {
-                            configurations.detachedConfiguration(
-                                dependencies.create(tsunamiSdkDependencyProvider),
-                            ).resolve()
-                            true
-                        } catch (e: Exception) {
-                            false
-                        }
-                    }.get()
-
-                    if (isTsunamiSdkPubliclyAvailable) {
-                        implementation(tsunamiSdkDependencyProvider)
-                        println("✓️ Using tsunami sdk maven artifact.")
-                    } else {
-                        implementation(project(":data:wallet:remote-tsunami"))
-                        println("⚠️ Using stub for tsunami sdk.")
-                    }
-                }
-
                 // Core
                 implementation(libs.kotlinx.coroutines.core)
 
@@ -93,6 +70,7 @@ kotlin {
 
                 // Bitcoin
                 implementation(libs.bitcoin.kmp)
+                implementation(libs.breez.sdk.spark.kmp)
 
                 // Crypto
                 implementation(libs.korlibs.crypto)

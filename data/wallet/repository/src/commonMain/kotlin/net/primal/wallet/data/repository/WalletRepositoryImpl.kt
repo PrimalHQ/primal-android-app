@@ -29,6 +29,7 @@ import net.primal.domain.wallet.TxType
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
+import net.primal.domain.wallet.exception.WalletException
 import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
@@ -37,11 +38,10 @@ import net.primal.wallet.data.local.dao.NostrWalletData
 import net.primal.wallet.data.local.dao.Wallet as WalletPO
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
-import net.primal.wallet.data.local.dao.WalletTransaction
+import net.primal.wallet.data.local.dao.WalletTransactionData
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.repository.mappers.local.toDomain
-import net.primal.wallet.data.repository.transactions.OffsetBasedWalletTransactionsMediator
 import net.primal.wallet.data.repository.transactions.TimestampBasedWalletTransactionsMediator
 import net.primal.wallet.data.service.WalletService
 import net.primal.wallet.data.service.factory.WalletServiceFactory
@@ -78,7 +78,7 @@ internal class WalletRepositoryImpl(
         withContext(dispatcherProvider.io()) {
             walletDatabase.wallet().findWallet(walletId = walletId)?.toDomain<Wallet>()
                 ?.let { Result.success(it) }
-                ?: Result.failure(IllegalArgumentException("Wallet with given walletId not found."))
+                ?: Result.failure(WalletException.WalletNotFound())
         }
 
     override suspend fun deleteWalletById(walletId: String) =
@@ -92,7 +92,7 @@ internal class WalletRepositoryImpl(
                 walletDatabase.wallet().upsertWalletInfo(
                     info = WalletInfo(
                         walletId = wallet.walletId,
-                        userId = userId.asEncryptable(),
+                        userId = userId,
                         lightningAddress = wallet.lightningAddress?.asEncryptable(),
                         type = WalletType.NWC,
                         balanceInBtc = wallet.balanceInBtc?.asEncryptable(),
@@ -113,12 +113,12 @@ internal class WalletRepositoryImpl(
             }
         }
 
-    override fun latestTransactions(walletId: String, walletType: WalletType): Flow<PagingData<Transaction>> {
-        return createTransactionsPager(walletId, walletType) {
+    override fun latestTransactions(walletId: String): Flow<PagingData<Transaction>> {
+        return createTransactionsPager(walletId) {
             walletDatabase.walletTransactions().latestTransactionsPagedByWalletId(walletId = walletId)
         }.flow.mapNotNull {
             it.map { txData ->
-                val otherProfile = txData.info.otherUserId?.let { profileId ->
+                val otherProfile = txData.otherUserId?.let { profileId ->
                     profileRepository.findProfileDataOrNull(profileId.decrypted)
                 }
 
@@ -132,7 +132,7 @@ internal class WalletRepositoryImpl(
             walletDatabase.walletTransactions()
                 .latestTransactionsByWalletId(walletId = walletId, limit = limit)
                 .map { txData ->
-                    val otherProfile = txData.info.otherUserId?.let { profileId ->
+                    val otherProfile = txData.otherUserId?.let { profileId ->
                         profileRepository.findProfileDataOrNull(profileId.decrypted)
                     }
 
@@ -163,7 +163,7 @@ internal class WalletRepositoryImpl(
             val transaction = walletDatabase.walletTransactions().findTransactionById(txId = txId)
                 ?: return@withContext null
 
-            val profile = transaction.info.otherUserId
+            val profile = transaction.otherUserId
                 ?.let { profileRepository.findProfileDataOrNull(profileId = it.decrypted) }
 
             transaction.toDomain(otherProfile = profile)
@@ -247,13 +247,13 @@ internal class WalletRepositoryImpl(
 
     override suspend fun deleteAllTransactions(userId: String) =
         withContext(dispatcherProvider.io()) {
-            walletDatabase.walletTransactions().deleteAllTransactions(userId = userId.asEncryptable())
+            walletDatabase.walletTransactions().deleteAllTransactions(userId = userId)
         }
 
     override suspend fun deleteAllUserData(userId: String) =
         withContext(dispatcherProvider.io()) {
             walletDatabase.withTransaction {
-                val wallets = walletDatabase.wallet().findWalletInfosByUserId(userId = userId.asEncryptable())
+                val wallets = walletDatabase.wallet().findWalletInfosByUserId(userId = userId)
                 val walletIds = wallets.map { it.walletId }
 
                 if (walletIds.isNotEmpty()) {
@@ -261,7 +261,7 @@ internal class WalletRepositoryImpl(
                     walletDatabase.wallet().deleteWalletsByIds(walletIds)
                 }
 
-                walletDatabase.walletTransactions().deleteAllTransactions(userId = userId.asEncryptable())
+                walletDatabase.walletTransactions().deleteAllTransactions(userId = userId)
                 walletDatabase.wallet().clearActiveWallet(userId)
             }
         }
@@ -269,9 +269,7 @@ internal class WalletRepositoryImpl(
     override suspend fun pay(walletId: String, request: TxRequest): Result<Unit> =
         withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
-                ?: return@withContext Result.failure(
-                    exception = IllegalArgumentException("Couldn't find wallet with the given walletId."),
-                )
+                ?: return@withContext Result.failure(WalletException.WalletNotFound())
 
             wallet.resolveWalletService().pay(
                 wallet = wallet.toDomain(),
@@ -286,9 +284,7 @@ internal class WalletRepositoryImpl(
     ): Result<LnInvoiceCreateResult> {
         return withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
-                ?: return@withContext Result.failure(
-                    exception = IllegalArgumentException("Couldn't find wallet with the given walletId."),
-                )
+                ?: return@withContext Result.failure(WalletException.WalletNotFound())
 
             wallet.resolveWalletService().createLightningInvoice(
                 wallet = wallet.toDomain(),
@@ -304,9 +300,7 @@ internal class WalletRepositoryImpl(
     override suspend fun createOnChainAddress(walletId: String): Result<OnChainAddressResult> {
         return withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
-                ?: return@withContext Result.failure(
-                    exception = IllegalArgumentException("Couldn't find wallet with the given walletId."),
-                )
+                ?: return@withContext Result.failure(WalletException.WalletNotFound())
 
             wallet.resolveWalletService().createOnChainAddress(wallet = wallet.toDomain())
         }
@@ -315,9 +309,7 @@ internal class WalletRepositoryImpl(
     override suspend fun fetchWalletBalance(walletId: String): Result<Unit> =
         withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
-                ?: return@withContext Result.failure(
-                    exception = IllegalArgumentException("Couldn't find wallet with the given walletId."),
-                )
+                ?: return@withContext Result.failure(WalletException.WalletNotFound())
 
             wallet.resolveWalletService()
                 .fetchWalletBalance(wallet = wallet.toDomain())
@@ -393,8 +385,7 @@ internal class WalletRepositoryImpl(
 
     private fun createTransactionsPager(
         walletId: String,
-        walletType: WalletType,
-        pagingSourceFactory: () -> PagingSource<Int, WalletTransaction>,
+        pagingSourceFactory: () -> PagingSource<Int, WalletTransactionData>,
     ) = Pager(
         config = PagingConfig(
             pageSize = 50,
@@ -402,21 +393,12 @@ internal class WalletRepositoryImpl(
             initialLoadSize = 200,
             enablePlaceholders = true,
         ),
-        remoteMediator = when (walletType) {
-            WalletType.TSUNAMI -> OffsetBasedWalletTransactionsMediator(
-                walletId = walletId,
-                dispatcherProvider = dispatcherProvider,
-                transactionsHandler = transactionsHandler,
-                walletDatabase = walletDatabase,
-            )
-
-            WalletType.PRIMAL, WalletType.NWC -> TimestampBasedWalletTransactionsMediator(
-                walletId = walletId,
-                dispatcherProvider = dispatcherProvider,
-                transactionsHandler = transactionsHandler,
-                walletDatabase = walletDatabase,
-            )
-        },
+        remoteMediator = TimestampBasedWalletTransactionsMediator(
+            walletId = walletId,
+            dispatcherProvider = dispatcherProvider,
+            transactionsHandler = transactionsHandler,
+            walletDatabase = walletDatabase,
+        ),
         pagingSourceFactory = pagingSourceFactory,
     )
 }

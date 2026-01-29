@@ -1,2 +1,2 @@
-Remote Signing.
+Wallet improvements.
 Improvements and stability fixes.

@@ -4,6 +4,7 @@ import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -31,7 +32,6 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.profile.ProfileRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ProfileEditorViewModel @Inject constructor(
@@ -46,7 +46,7 @@ class ProfileEditorViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val _effect: Channel<SideEffect> = Channel()
     val effect = _effect.receiveAsFlow()
@@ -131,7 +131,7 @@ class ProfileEditorViewModel @Inject constructor(
             try {
                 profileRepository.fetchProfile(profileId = profileId)
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch latest profile for profileId=$profileId" }
             }
         }
 
@@ -163,19 +163,19 @@ class ProfileEditorViewModel @Inject constructor(
                     setEffect(effect = SideEffect.AccountSuccessfulyEdited)
                 }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to save profile due to signature error." }
                 setErrorState(error = EditProfileError.FailedToPublishMetadata(error))
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to save profile due to nostr publish error." }
                 setErrorState(error = EditProfileError.FailedToPublishMetadata(error))
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to save profile due to missing relays." }
                 setErrorState(error = EditProfileError.MissingRelaysConfiguration(error))
             } catch (error: BlossomException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to save profile due to image upload error." }
                 setErrorState(error = EditProfileError.FailedToUploadImage(error))
             } catch (error: InvalidLud16Exception) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to save profile due to invalid lightning address." }
                 setErrorState(EditProfileError.InvalidLightningAddress(lud16 = error.lud16))
             } finally {
                 setState { copy(loading = false) }

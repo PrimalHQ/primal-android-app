@@ -774,7 +774,7 @@
     <string name="wallet_picker_title">Wallets</string>
     <string name="wallet_picker_configure_wallets">Configure</string>
     <string name="wallet_primal_title">Primal</string>
-    <string name="wallet_tsunami_title">Tsunami</string>
+    <string name="wallet_spark_title">Spark</string>
     <string name="wallet_primal_description">Built-in wallet</string>
     <string name="wallet_nwc_title">NWC</string>
     <string name="wallet_nwc_description">Your external lightning wallet</string>
@@ -1216,9 +1216,6 @@
     <string name="zap_warning_bottom_sheet_no_sats_to_zap">Insufficient sats to zap, you need to get some sats before you can zap.</string>
     <string name="zap_warning_bottom_sheet_go_to_wallet_button">Go to Wallet</string>
 
-    <string name="wallet_dashboard_activate_notice_hint">You need to activate your wallet</string>
-    <string name="wallet_dashboard_activate_button">Activate Wallet Now</string>
-    <string name="wallet_dashboard_enable_wallet_button">Enable Primal Wallet</string>
     <string name="wallet_dashboard_no_sats_hint">You need sats to zap people on Nostr</string>
     <string name="wallet_dashboard_no_transactions_hint">Your transactions will appear here.</string>
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
@@ -1254,28 +1251,6 @@
     <string name="wallet_restore_valid_recovery_phrase">Valid recovery phrase</string>
     <string name="wallet_restore_restoring_your_wallet">Restoring your wallet…</string>
     <string name="wallet_restore_error_generic">Something went wrong. Please check your recovery phrase and try again.</string>
-
-    <string name="wallet_tos_prefix">By tapping \"Next\" you agree to the</string>
-    <string name="wallet_activation_title">Activate Wallet</string>
-    <string name="wallet_activation_pending_data_hint">Activating your wallet is easy!\nWe just need a few details below. This info will not be shared publicly.</string>
-    <string name="wallet_activation_pending_code_subtitle">Check Your Email</string>
-    <string name="wallet_activation_pending_code_hint">Your activation code was sent to <b>%1$s</b>. You may need to check your Junk or Spam folder.</string>
-    <string name="wallet_activation_error_invalid_code">Incorrect code. Please try again.</string>
-    <string name="wallet_activation_success_title">Success</string>
-    <string name="wallet_activation_success_description_short">Your wallet has been activated.</string>
-    <string name="wallet_activation_success_description">Your wallet has been activated. Your new Nostr lightning address is:</string>
-    <string name="wallet_activation_first_name">First name</string>
-    <string name="wallet_activation_last_name">Last name</string>
-    <string name="wallet_activation_email_address">Email address</string>
-    <string name="wallet_activation_date_of_birth">Date of birth</string>
-    <string name="wallet_activation_state">State</string>
-    <string name="wallet_activation_country_of_residence">Country of residence</string>
-    <string name="wallet_activation_next_button">Next</string>
-    <string name="wallet_activation_finish_button">Finish</string>
-    <string name="wallet_activation_done_button">Done</string>
-    <string name="wallet_activation_country_picker_title">Select country</string>
-    <string name="wallet_activation_state_picker_title">Select state</string>
-    <string name="wallet_activation_error_dialog_title">Warning</string>
 
     <string name="wallet_sats_suffix">sats</string>
     <string name="wallet_usd_suffix">USD</string>
