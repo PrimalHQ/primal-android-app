@@ -102,7 +102,7 @@ internal class NoteFeedRemoteMediator(
                 )
             }
 
-            Napier.w("feed_spec $feedSpec load exit 6")
+            Napier.i("feed_spec $feedSpec load exit 6")
             MediatorResult.Success(endOfPaginationReached = false)
         } catch (error: IOException) {
             Napier.w("feed_spec $feedSpec load exit 7", error)
@@ -112,15 +112,15 @@ internal class NoteFeedRemoteMediator(
             MediatorResult.Error(error)
         } catch (error: NoSuchFeedPostException) {
             Napier.w("feed_spec $feedSpec load exit 2", error)
-            MediatorResult.Success(endOfPaginationReached = true)
+            MediatorResult.Success(endOfPaginationReached = loadType == LoadType.REFRESH)
         } catch (error: RemoteKeyNotFoundException) {
             Napier.w("feed_spec $feedSpec load exit 3", error)
-            MediatorResult.Error(error)
+            MediatorResult.Success(endOfPaginationReached = false)
         } catch (error: NetworkException) {
             Napier.w("feed_spec $feedSpec load exit 5", error)
             MediatorResult.Error(error)
         } catch (error: RepeatingRequestBodyException) {
-            Napier.w("feed_spec $feedSpec load exit 4", error)
+            Napier.i("feed_spec $feedSpec load exit 4", error)
             MediatorResult.Success(endOfPaginationReached = true)
         }
     }
@@ -280,11 +280,11 @@ internal class NoteFeedRemoteMediator(
             database.feedsConnections().findLastBySpec(ownerId = userId, spec = feedSpec)?.let { it.eventId to null }
         }
 
-    private inner class NoSuchFeedPostException : RuntimeException()
+    private class NoSuchFeedPostException : RuntimeException()
 
-    private inner class RepeatingRequestBodyException : RuntimeException()
+    private class RepeatingRequestBodyException : RuntimeException()
 
-    private inner class RemoteKeyNotFoundException : RuntimeException()
+    private class RemoteKeyNotFoundException : RuntimeException()
 
     companion object {
         private val LAST_REQUEST_EXPIRY = 10.seconds.inWholeSeconds
