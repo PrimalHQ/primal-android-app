@@ -10,6 +10,7 @@ import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.builder.TxRequestBuilder
 import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
+import net.primal.domain.usecase.RestoreSparkWalletUseCase
 import net.primal.domain.wallet.SeedPhraseGenerator
 import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.WalletRepository
@@ -50,5 +51,18 @@ object WalletUseCasesModule {
             sparkWalletManager = sparkWalletManager,
             sparkWalletAccountRepository = sparkWalletAccountRepository,
             seedPhraseGenerator = seedPhraseGenerator,
+        )
+
+    @Provides
+    @Singleton
+    fun providesRestoreSparkWalletUseCase(
+        sparkWalletManager: SparkWalletManager,
+        walletAccountRepository: WalletAccountRepository,
+        sparkWalletAccountRepository: SparkWalletAccountRepository,
+    ): RestoreSparkWalletUseCase =
+        RestoreSparkWalletUseCase(
+            sparkWalletManager = sparkWalletManager,
+            walletAccountRepository = walletAccountRepository,
+            sparkWalletAccountRepository = sparkWalletAccountRepository,
         )
 }

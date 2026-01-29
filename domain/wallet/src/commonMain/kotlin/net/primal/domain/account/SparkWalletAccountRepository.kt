@@ -19,4 +19,6 @@ interface SparkWalletAccountRepository {
     suspend fun isWalletBackedUp(walletId: String): Boolean
 
     suspend fun markWalletAsBackedUp(walletId: String): Result<Unit>
+
+    suspend fun deleteSparkWalletByUserId(userId: String): Result<String>
 }
