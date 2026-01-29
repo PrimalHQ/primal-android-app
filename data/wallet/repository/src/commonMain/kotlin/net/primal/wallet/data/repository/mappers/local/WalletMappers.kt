@@ -50,6 +50,7 @@ inline fun <reified T : WalletDO> WalletPO.toDomain(): T =
                 balanceInBtc = info.balanceInBtc?.decrypted,
                 maxBalanceInBtc = info.maxBalanceInBtc?.decrypted,
                 lastUpdatedAt = info.lastUpdatedAt,
+                isBackedUp = spark?.backedUp ?: false,
             )
         }
     } as T
@@ -96,6 +97,7 @@ fun ActiveWallet.toDomain(): WalletDO? {
                 balanceInBtc = info.balanceInBtc?.decrypted,
                 maxBalanceInBtc = info.maxBalanceInBtc?.decrypted,
                 lastUpdatedAt = info.lastUpdatedAt,
+                isBackedUp = spark?.backedUp ?: false,
             )
     }
 }

@@ -62,6 +62,7 @@ sealed class Wallet(
         override val balanceInBtc: Double?,
         override val maxBalanceInBtc: Double?,
         override val lastUpdatedAt: Long?,
+        val isBackedUp: Boolean,
     ) : Wallet(
         walletId = walletId,
         walletType = WalletType.SPARK,
