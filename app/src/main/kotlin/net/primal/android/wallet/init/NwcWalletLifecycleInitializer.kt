@@ -1,6 +1,7 @@
 package net.primal.android.wallet.init
 
 import androidx.annotation.Keep
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -10,7 +11,6 @@ import kotlinx.coroutines.launch
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.connections.nostr.NwcService
-import timber.log.Timber
 
 @Keep
 @Singleton
@@ -31,14 +31,14 @@ class NwcWalletLifecycleInitializer @Inject constructor(
                 .distinctUntilChanged()
                 .collect { userIdOrNull ->
                     currentUserId?.let {
-                        Timber.d("NwcService destroying for previous user")
+                        Napier.d { "NwcService destroying for previous user" }
                         nwcService.destroy()
                         currentUserId = null
                     }
 
                     val userId = userIdOrNull ?: return@collect
 
-                    Timber.d("NwcService initializing for userId=%s", userId)
+                    Napier.d { "NwcService initializing for userId=$userId" }
                     nwcService.initialize(userId)
                     currentUserId = userId
                 }

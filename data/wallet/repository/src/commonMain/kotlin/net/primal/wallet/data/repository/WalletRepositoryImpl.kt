@@ -150,7 +150,7 @@ internal class WalletRepositoryImpl(
             walletDatabase.walletTransactions()
                 .queryTransactions(walletId = walletId, type = type, limit = limit, offset = offset)
                 .map { txData ->
-                    val otherProfile = txData.info.otherUserId?.let { profileId ->
+                    val otherProfile = txData.otherUserId?.let { profileId ->
                         profileRepository.findProfileDataOrNull(profileId.decrypted)
                     }
 
@@ -179,10 +179,10 @@ internal class WalletRepositoryImpl(
                 ?: return@withContext null
 
             Napier.d(tag = "WalletRepository") {
-                "findTransactionByInvoice: found tx=${transaction.info.transactionId.take(16)}..."
+                "findTransactionByInvoice: found tx=${transaction.transactionId.take(16)}..."
             }
 
-            val profile = transaction.info.otherUserId
+            val profile = transaction.otherUserId
                 ?.let { profileRepository.findProfileDataOrNull(profileId = it.decrypted) }
 
             transaction.toDomain(otherProfile = profile)

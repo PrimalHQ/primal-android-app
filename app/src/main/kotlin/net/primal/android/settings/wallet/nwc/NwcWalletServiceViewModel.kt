@@ -3,6 +3,7 @@ package net.primal.android.settings.wallet.nwc
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,7 +15,6 @@ import net.primal.android.settings.wallet.nwc.NwcWalletServiceContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.connections.nostr.NwcRepository
-import timber.log.Timber
 
 @HiltViewModel
 class NwcWalletServiceViewModel @Inject constructor(
@@ -77,11 +77,11 @@ class NwcWalletServiceViewModel @Inject constructor(
                 ).getOrThrow()
             }
                 .onSuccess { nwcUri ->
-                    Timber.d("NWC Connection created: $nwcUri")
+                    Napier.d { "NWC Connection created: $nwcUri" }
                     setState { copy(nwcConnectionUri = nwcUri, isCreating = false) }
                 }
                 .onFailure { throwable ->
-                    Timber.e(throwable, "Failed to create NWC connection")
+                    Napier.e(throwable) { "Failed to create NWC connection" }
                     setState { copy(error = throwable.message, isCreating = false) }
                 }
         }

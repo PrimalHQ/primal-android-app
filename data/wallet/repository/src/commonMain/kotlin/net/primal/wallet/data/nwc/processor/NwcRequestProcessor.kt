@@ -1,6 +1,7 @@
 package net.primal.wallet.data.nwc.processor
 
 import io.github.aakira.napier.Napier
+import kotlin.uuid.Uuid
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
 import net.primal.core.networking.nwc.nip47.ListTransactionsResponsePayload
@@ -119,6 +120,7 @@ class NwcRequestProcessor internal constructor(
             noteRecipient = null,
             noteSelf = null,
             lnInvoice = invoice,
+            idempotencyKey = Uuid.random().toString(),
         )
 
         val paymentResult = walletRepository.pay(walletId = walletId, request = txRequest)
