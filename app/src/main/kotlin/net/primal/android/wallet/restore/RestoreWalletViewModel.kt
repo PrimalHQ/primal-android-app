@@ -6,13 +6,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.restore.RestoreWalletContract.RestoreStage
 import net.primal.android.wallet.restore.RestoreWalletContract.SideEffect
 import net.primal.android.wallet.restore.RestoreWalletContract.UiEvent
@@ -20,11 +20,14 @@ import net.primal.android.wallet.restore.RestoreWalletContract.UiState
 import net.primal.android.wallet.restore.RestoreWalletContract.UiState.MnemonicValidation
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
-import net.primal.core.utils.runCatching
+import net.primal.domain.usecase.RestoreSparkWalletUseCase
 import net.primal.wallet.data.validator.RecoveryPhraseValidator
 
 @HiltViewModel
-class RestoreWalletViewModel @Inject constructor() : ViewModel() {
+class RestoreWalletViewModel @Inject constructor(
+    private val activeAccountStore: ActiveAccountStore,
+    private val restoreSparkWalletUseCase: RestoreSparkWalletUseCase,
+) : ViewModel() {
 
     private val recoveryPhraseValidator = RecoveryPhraseValidator()
 
@@ -86,14 +89,10 @@ class RestoreWalletViewModel @Inject constructor() : ViewModel() {
     private fun restoreWallet() =
         viewModelScope.launch {
             setState { copy(currentStage = RestoreStage.Restoring) }
-            runCatching {
-                delay(RESTORE_SIMULATION_DELAY_MILLIS)
-
-                // Implement wallet restore logic
-                if (state.value.mnemonic.contains("invalid")) {
-                    error("Simulated restore error.")
-                }
-            }.onSuccess {
+            restoreSparkWalletUseCase.invoke(
+                seedWords = state.value.mnemonic,
+                userId = activeAccountStore.activeUserId(),
+            ).onSuccess {
                 setEffect(SideEffect.RestoreSuccess)
             }.onFailure { error ->
                 Napier.e(throwable = error) { "Error restoring wallet." }
@@ -105,8 +104,4 @@ class RestoreWalletViewModel @Inject constructor() : ViewModel() {
                 }
             }
         }
-
-    companion object {
-        private const val RESTORE_SIMULATION_DELAY_MILLIS = 3000L
-    }
 }

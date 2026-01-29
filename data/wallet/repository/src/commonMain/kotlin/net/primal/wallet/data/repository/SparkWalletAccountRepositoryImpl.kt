@@ -78,4 +78,12 @@ internal class SparkWalletAccountRepositoryImpl(
                 walletDatabase.wallet().updateSparkWalletBackedUp(walletId, backedUp = true)
             }
         }
+
+    override suspend fun deleteSparkWalletByUserId(userId: String): Result<String> =
+        runCatching {
+            withContext(dispatcherProvider.io()) {
+                walletDatabase.wallet().deleteSparkWalletByUserId(userId = userId)
+                    ?: throw NoSuchElementException("No spark wallet found for $userId user.")
+            }
+        }
 }
