@@ -52,4 +52,11 @@ internal class WalletAccountRepositoryImpl(
                 .findLastUsedWalletByType(userId = userId, type = type)
                 ?.toDomain()
         }
+
+    override suspend fun findLastUsedWallet(userId: String, type: Set<WalletType>): Wallet? =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet()
+                .findLastUsedWalletByTypes(userId = userId, type = type)
+                ?.toDomain()
+        }
 }
