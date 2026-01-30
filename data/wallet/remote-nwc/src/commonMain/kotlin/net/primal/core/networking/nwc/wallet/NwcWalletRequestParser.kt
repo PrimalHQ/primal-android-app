@@ -14,6 +14,8 @@ import net.primal.core.networking.nwc.nip47.PayInvoiceParams
 import net.primal.core.networking.nwc.nip47.PayKeysendParams
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
 import net.primal.core.utils.Result
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.connections.nostr.model.NwcConnection
@@ -24,7 +26,7 @@ class NwcWalletRequestParser {
 
     @OptIn(ExperimentalEncodingApi::class)
     fun parseNostrEvent(event: NostrEvent, connection: NwcConnection): Result<WalletNwcRequest> {
-        return try {
+        return runCatching {
             val decryptedContent = CryptoUtils.decrypt(
                 message = event.content,
                 privateKey = Hex.decode(connection.serviceKeyPair.privateKey),
@@ -41,14 +43,9 @@ class NwcWalletRequestParser {
                 connection = connection,
             )
 
-            if (walletRequest != null) {
-                Result.success(walletRequest)
-            } else {
-                Result.failure(IllegalArgumentException("Unsupported NWC method: ${request.method}"))
-            }
-        } catch (e: Exception) {
-            Napier.w("NwcWalletRequestParser failed to parse event ${event.id}", e)
-            Result.failure(e)
+            walletRequest ?: throw IllegalArgumentException("Unsupported NWC method: ${request.method}")
+        }.onFailure {
+            Napier.w("NwcWalletRequestParser failed to parse event ${event.id}", it)
         }
     }
 
@@ -67,6 +64,7 @@ class NwcWalletRequestParser {
                     params = CommonJson.decodeFromJsonElement<PayInvoiceParams>(params),
                 )
             }
+
             NwcMethod.PayKeysend.value -> {
                 params ?: return null
                 WalletNwcRequest.PayKeysend(
@@ -75,6 +73,7 @@ class NwcWalletRequestParser {
                     params = CommonJson.decodeFromJsonElement<PayKeysendParams>(params),
                 )
             }
+
             NwcMethod.MakeInvoice.value -> {
                 params ?: return null
                 WalletNwcRequest.MakeInvoice(
@@ -83,6 +82,7 @@ class NwcWalletRequestParser {
                     params = CommonJson.decodeFromJsonElement<MakeInvoiceParams>(params),
                 )
             }
+
             NwcMethod.LookupInvoice.value -> {
                 params ?: return null
                 WalletNwcRequest.LookupInvoice(
@@ -91,6 +91,7 @@ class NwcWalletRequestParser {
                     params = CommonJson.decodeFromJsonElement<LookupInvoiceParams>(params),
                 )
             }
+
             NwcMethod.ListTransactions.value -> {
                 val listParams = if (params != null) {
                     CommonJson.decodeFromJsonElement<ListTransactionsParams>(params)
@@ -103,18 +104,21 @@ class NwcWalletRequestParser {
                     params = listParams,
                 )
             }
+
             NwcMethod.GetBalance.value -> {
                 WalletNwcRequest.GetBalance(
                     eventId = event.id,
                     connection = connection,
                 )
             }
+
             NwcMethod.GetInfo.value -> {
                 WalletNwcRequest.GetInfo(
                     eventId = event.id,
                     connection = connection,
                 )
             }
+
             NwcMethod.MultiPayInvoice.value -> {
                 params ?: return null
                 WalletNwcRequest.MultiPayInvoice(
@@ -123,6 +127,7 @@ class NwcWalletRequestParser {
                     params = CommonJson.decodeFromJsonElement<List<PayInvoiceParams>>(params),
                 )
             }
+
             NwcMethod.MultiPayKeysend.value -> {
                 params ?: return null
                 WalletNwcRequest.MultiPayKeysend(
@@ -131,6 +136,7 @@ class NwcWalletRequestParser {
                     params = CommonJson.decodeFromJsonElement<List<PayKeysendParams>>(params),
                 )
             }
+
             else -> null
         }
     }
