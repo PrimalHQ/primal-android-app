@@ -58,11 +58,13 @@ object WalletUseCasesModule {
     fun providesEnsureSparkWalletExistsUseCase(
         sparkWalletManager: SparkWalletManager,
         sparkWalletAccountRepository: SparkWalletAccountRepository,
+        walletAccountRepository: WalletAccountRepository,
         seedPhraseGenerator: SeedPhraseGenerator,
     ): EnsureSparkWalletExistsUseCase =
         EnsureSparkWalletExistsUseCase(
             sparkWalletManager = sparkWalletManager,
             sparkWalletAccountRepository = sparkWalletAccountRepository,
+            walletAccountRepository = walletAccountRepository,
             seedPhraseGenerator = seedPhraseGenerator,
         )
 

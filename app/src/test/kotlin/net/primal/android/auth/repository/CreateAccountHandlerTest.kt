@@ -28,6 +28,7 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
+import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import org.junit.Rule
 import org.junit.Test
 
@@ -47,6 +48,7 @@ class CreateAccountHandlerTest {
         eventsSignatureHandler: NostrEventSignatureHandler = FakeNostrNotary(
             expectedSignedNostrEvent = mockk(relaxed = true),
         ),
+        ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase = mockk(relaxed = true),
     ): CreateAccountHandler {
         return CreateAccountHandler(
             authRepository = authRepository,
@@ -57,6 +59,7 @@ class CreateAccountHandlerTest {
             dispatchers = coroutinesTestRule.dispatcherProvider,
             eventsSignatureHandler = eventsSignatureHandler,
             blossomRepository = blossomRepository,
+            ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
         )
     }
 
@@ -261,6 +264,30 @@ class CreateAccountHandlerTest {
                 settingsRepository.fetchAndPersistAppSettings(
                     withArg { it.pubKey shouldBe keyPair.pubKey },
                 )
+            }
+        }
+
+    @Test
+    fun createNostrAccount_callsEnsureSparkWalletExistsUseCase_withSetAsActiveTrue() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
+            }
+            val ensureSparkWalletExistsUseCase = mockk<EnsureSparkWalletExistsUseCase>(relaxed = true)
+            val handler = createAccountHandler(
+                credentialsStore = credentialsStore,
+                ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                interests = emptyList(),
+            )
+
+            coVerify {
+                ensureSparkWalletExistsUseCase.invoke(keyPair.pubKey, setAsActive = true)
             }
         }
 

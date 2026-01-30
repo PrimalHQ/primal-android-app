@@ -21,7 +21,9 @@ import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.settings.AppSettingsDescription
+import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 
+@Suppress("LongParameterList")
 class CreateAccountHandler @Inject constructor(
     private val dispatchers: DispatcherProvider,
     private val credentialsStore: CredentialsStore,
@@ -31,6 +33,7 @@ class CreateAccountHandler @Inject constructor(
     private val blossomRepository: BlossomRepository,
     private val userRepository: UserRepository,
     private val settingsRepository: SettingsRepository,
+    private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
 ) {
 
     suspend fun createNostrAccount(
@@ -45,6 +48,7 @@ class CreateAccountHandler @Inject constructor(
             userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata)
             val contacts = setOf(userId) + interests.mapToContacts()
             userRepository.setFollowList(userId = userId, contacts = contacts)
+            ensureSparkWalletExistsUseCase.invoke(userId = userId, setAsActive = true)
             settingsRepository.fetchAndPersistAppSettings(
                 authorizationEvent = eventsSignatureHandler.signNostrEvent(
                     unsignedNostrEvent = NostrUnsignedEvent(
