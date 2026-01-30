@@ -69,7 +69,7 @@ private fun ExternalWalletSection(
     onScanNwcClick: () -> Unit,
 ) {
     SectionTitle(
-        title = if (nwcWallet != null) {
+        title = if (nwcWallet is Wallet.NWC) {
             stringResource(id = R.string.settings_wallet_nwc_header_connected)
         } else {
             stringResource(id = R.string.settings_wallet_nwc_header_not_connected)
