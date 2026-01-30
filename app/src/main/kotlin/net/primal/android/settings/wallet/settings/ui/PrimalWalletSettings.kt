@@ -35,6 +35,7 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.domain.wallet.Wallet
 
 private const val DEFAULT_MAX_BALANCE_IN_SATS = 0.01
 
@@ -72,23 +73,25 @@ fun PrimalWalletSettings(
         Spacer(modifier = Modifier.height(8.dp))
 
         var maxWalletBalanceShown by remember { mutableStateOf(false) }
-        val maxBalanceInSats = numberFormat
-            .format((state.activeWallet?.maxBalanceInBtc ?: DEFAULT_MAX_BALANCE_IN_SATS).toSats().toLong())
-        SettingsItem(
-            headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
-            supportText = "$maxBalanceInSats sats",
-            trailingContent = {
-                IconButton(onClick = { maxWalletBalanceShown = true }) {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = stringResource(
-                            id = R.string.accessibility_info,
-                        ),
-                    )
-                }
-            },
-            onClick = { maxWalletBalanceShown = true },
-        )
+        if (state.activeWallet is Wallet.Primal) {
+            val maxBalanceInSats = numberFormat
+                .format((state.activeWallet.maxBalanceInBtc ?: DEFAULT_MAX_BALANCE_IN_SATS).toSats().toLong())
+            SettingsItem(
+                headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
+                supportText = "$maxBalanceInSats sats",
+                trailingContent = {
+                    IconButton(onClick = { maxWalletBalanceShown = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = stringResource(
+                                id = R.string.accessibility_info,
+                            ),
+                        )
+                    }
+                },
+                onClick = { maxWalletBalanceShown = true },
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
