@@ -212,7 +212,7 @@ private fun Transaction.extractOnChainTxId(): String? =
         else -> null
     }
 
-private fun Transaction.extractPreimage(): String? =
+fun Transaction.extractPreimage(): String? =
     when (this) {
         is Transaction.Lightning -> this.preimage
         is Transaction.Zap -> this.preimage
@@ -220,7 +220,7 @@ private fun Transaction.extractPreimage(): String? =
         else -> null
     }
 
-private fun Transaction.extractPaymentHash(): String? =
+fun Transaction.extractPaymentHash(): String? =
     when (this) {
         is Transaction.Lightning -> this.paymentHash
         is Transaction.Zap -> this.paymentHash
