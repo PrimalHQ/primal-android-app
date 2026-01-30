@@ -44,6 +44,7 @@ import net.primal.wallet.data.remote.model.ParsedLnInvoiceResponse
 import net.primal.wallet.data.remote.model.ParsedLnUrlResponse
 import net.primal.wallet.data.remote.model.PromoCodeDetailsResponse
 import net.primal.wallet.data.remote.model.PromoCodeRequestBody
+import net.primal.wallet.data.remote.model.RegisterSparkPubkeyRequestBody
 import net.primal.wallet.data.remote.model.TransactionsRequestBody
 import net.primal.wallet.data.remote.model.TransactionsResponse
 import net.primal.wallet.data.remote.model.UserWalletInfoRequestBody
@@ -384,6 +385,20 @@ class PrimalWalletApiImpl(
         return WalletUserInfoResponse(
             kycLevel = content.kycLevel,
             lightningAddress = content.lud16,
+        )
+    }
+
+    override suspend fun registerSparkWallet(userId: String, sparkWalletId: String) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalWalletVerb.WALLET.id,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.REGISTER_SPARK_PUBKEY,
+                    requestBody = RegisterSparkPubkeyRequestBody(sparkPubkey = sparkWalletId),
+                    signatureHandler = signatureHandler,
+                ),
+            ),
         )
     }
 

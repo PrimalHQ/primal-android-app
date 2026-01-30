@@ -287,7 +287,7 @@ class CreateAccountHandlerTest {
             )
 
             coVerify {
-                ensureSparkWalletExistsUseCase.invoke(keyPair.pubKey, setAsActive = true)
+                ensureSparkWalletExistsUseCase.invoke(keyPair.pubKey)
             }
         }
 

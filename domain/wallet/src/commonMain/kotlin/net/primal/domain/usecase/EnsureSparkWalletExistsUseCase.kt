@@ -14,7 +14,7 @@ class EnsureSparkWalletExistsUseCase(
     private val seedPhraseGenerator: SeedPhraseGenerator,
 ) {
 
-    suspend fun invoke(userId: String, setAsActive: Boolean = false): Result<String> =
+    suspend fun invoke(userId: String): Result<String> =
         runCatching {
             val existingWalletId = sparkWalletAccountRepository.findPersistedWalletId(userId)
             val isNewWallet = existingWalletId == null
@@ -31,9 +31,16 @@ class EnsureSparkWalletExistsUseCase(
                 sparkWalletAccountRepository.persistSeedWords(userId, walletId, seedWords).getOrThrow()
             }
 
-            sparkWalletAccountRepository.fetchWalletAccountInfo(userId, walletId)
+            // Register wallet with server if not already registered
+            if (!sparkWalletAccountRepository.isRegistered(walletId)) {
+                sparkWalletAccountRepository.registerSparkWallet(userId, walletId).getOrThrow()
+            }
 
-            if (setAsActive) {
+            // Fetch after register so we persist the LN address locally
+            sparkWalletAccountRepository.fetchWalletAccountInfo(userId, walletId).getOrThrow()
+
+            if (isNewWallet) {
+                // Activate last, only after all data is persisted locally
                 walletAccountRepository.setActiveWallet(userId = userId, walletId = walletId)
             }
 

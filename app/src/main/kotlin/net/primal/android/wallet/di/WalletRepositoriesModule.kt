@@ -96,8 +96,14 @@ object WalletRepositoriesModule {
 
     @Provides
     @Singleton
-    fun providesSparkWalletAccountRepository(): SparkWalletAccountRepository =
-        WalletRepositoryFactory.createSparkWalletAccountRepository()
+    fun providesSparkWalletAccountRepository(
+        @PrimalWalletApiClient primalApiClient: PrimalApiClient,
+        nostrNotary: NostrNotary,
+    ): SparkWalletAccountRepository =
+        WalletRepositoryFactory.createSparkWalletAccountRepository(
+            primalWalletApiClient = primalApiClient,
+            nostrEventSignatureHandler = nostrNotary,
+        )
 
     @Provides
     @Singleton
