@@ -11,9 +11,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import net.primal.core.networking.nwc.nip47.NwcError
 import net.primal.core.networking.nwc.wallet.NwcWalletClient
 import net.primal.core.networking.nwc.wallet.NwcWalletRequestParser
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
+import net.primal.core.networking.nwc.wallet.model.WalletNwcRequestException
+import net.primal.core.networking.nwc.wallet.signNwcErrorResponseNostrEvent
 import net.primal.core.networking.nwc.wallet.signNwcResponseNostrEvent
 import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.cache.LruSeenCache
@@ -21,6 +24,7 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.nostr.NwcService
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
+import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
 import net.primal.wallet.data.nwc.processor.NwcRequestProcessor
 
 private const val MAX_CACHE_SIZE = 20
@@ -31,6 +35,7 @@ class NwcServiceImpl internal constructor(
     private val nwcRepository: NwcRepository,
     private val requestParser: NwcWalletRequestParser,
     private val requestProcessor: NwcRequestProcessor,
+    private val responseBuilder: NwcWalletResponseBuilder,
 ) : NwcService {
 
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
@@ -130,6 +135,32 @@ class NwcServiceImpl internal constructor(
                     "NWC request error for event: ${error.nostrEvent.id}"
                 }
                 cache.mark(error.nostrEvent.id)
+                sendErrorResponse(error)
+            }
+        }
+
+    private fun sendErrorResponse(error: WalletNwcRequestException) =
+        scope.launch {
+            val responseJson = responseBuilder.buildParsingErrorResponse(
+                code = NwcError.INTERNAL,
+                message = error.cause?.message ?: "Failed to parse request",
+            )
+
+            runCatching {
+                val client = nwcClient ?: error("NwcWalletClient is not initialized")
+                val signedEvent = signNwcErrorResponseNostrEvent(
+                    error = error,
+                    responseJson = responseJson,
+                ).unwrapOrThrow()
+
+                Napier.d(tag = TAG) {
+                    "Publishing error response: id=${signedEvent.id.take(8)}..., " +
+                        "eventId=${error.nostrEvent.id.take(8)}..."
+                }
+                client.publishEvent(signedEvent)
+                Napier.d(tag = TAG) { "Error response published successfully" }
+            }.onFailure {
+                Napier.w(tag = TAG, throwable = it) { "Failed to publish NWC error response" }
             }
         }
 

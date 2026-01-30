@@ -74,6 +74,14 @@ class NwcWalletResponseBuilder {
         return CommonJson.encodeToString(response)
     }
 
+    fun buildParsingErrorResponse(code: String, message: String): String {
+        val response = NwcResponseContent<Unit>(
+            resultType = "",
+            error = NwcError(code = code, message = message),
+        )
+        return CommonJson.encodeToString(response)
+    }
+
     private fun WalletNwcRequest.methodStr(): String {
         return when (this) {
             is WalletNwcRequest.PayInvoice -> NwcMethod.PayInvoice.value

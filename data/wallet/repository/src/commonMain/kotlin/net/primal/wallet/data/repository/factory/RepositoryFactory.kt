@@ -195,8 +195,9 @@ abstract class RepositoryFactory {
             database = resolveWalletDatabase(),
         )
 
-    fun createNwcService(walletRepository: WalletRepository): NwcService =
-        NwcServiceImpl(
+    fun createNwcService(walletRepository: WalletRepository): NwcService {
+        val responseBuilder = NwcWalletResponseBuilder()
+        return NwcServiceImpl(
             dispatchers = dispatcherProvider,
             nwcRepository = createNwcRepository(),
             requestParser = NwcWalletRequestParser(),
@@ -206,7 +207,9 @@ abstract class RepositoryFactory {
                     dispatcherProvider = dispatcherProvider,
                     walletDatabase = resolveWalletDatabase(),
                 ),
-                responseBuilder = NwcWalletResponseBuilder(),
+                responseBuilder = responseBuilder,
             ),
+            responseBuilder = responseBuilder,
         )
+    }
 }

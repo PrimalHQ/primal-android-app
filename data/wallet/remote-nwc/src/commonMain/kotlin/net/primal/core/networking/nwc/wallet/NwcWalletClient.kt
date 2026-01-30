@@ -132,7 +132,13 @@ class NwcWalletClient(
                 onFailure = { error ->
                     Napier.w(tag = "NwcWalletClient", throwable = error) { "Failed to parse NWC request." }
                     scope.launch {
-                        _errors.send(WalletNwcRequestException(nostrEvent = event, cause = error))
+                        _errors.send(
+                            WalletNwcRequestException(
+                                nostrEvent = event,
+                                connection = connection,
+                                cause = error,
+                            ),
+                        )
                     }
                 },
             )
