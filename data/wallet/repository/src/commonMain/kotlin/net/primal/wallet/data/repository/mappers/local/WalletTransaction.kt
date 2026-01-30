@@ -47,8 +47,8 @@ private fun WalletTransactionData.toZapTransaction(otherProfile: ProfileData?): 
             zappedEntity = zappedEntity,
             zappedByUserId = this.zappedByUserId?.decrypted,
             otherUserProfile = otherProfile,
-            preimage = this.preimage,
-            paymentHash = this.paymentHash,
+            preimage = this.preimage?.decrypted,
+            paymentHash = this.paymentHash?.decrypted,
         )
 
         else -> toLightningTransaction(otherProfile)
@@ -115,8 +115,8 @@ private fun WalletTransactionData.toLightningTransaction(otherProfile: ProfileDa
         otherUserId = this.otherUserId?.decrypted,
         otherLightningAddress = this.otherLightningAddress?.decrypted,
         otherUserProfile = otherProfile,
-        preimage = this.preimage,
-        paymentHash = this.paymentHash,
+        preimage = this.preimage?.decrypted,
+        paymentHash = this.paymentHash?.decrypted,
     )
 
 private fun WalletTransactionData.toSparkTransaction() =
@@ -137,8 +137,8 @@ private fun WalletTransactionData.toSparkTransaction() =
         exchangeRate = this.exchangeRate?.decrypted,
         totalFeeInBtc = this.totalFeeInBtc?.decrypted,
         sparkAddress = null,
-        preimage = this.preimage,
-        paymentHash = this.paymentHash,
+        preimage = this.preimage?.decrypted,
+        paymentHash = this.paymentHash?.decrypted,
     )
 
 /**
@@ -165,8 +165,8 @@ internal fun Transaction.toWalletTransactionData(): WalletTransactionData =
         txKind = resolveTxKind(),
         onChainAddress = extractOnChainAddress()?.asEncryptable(),
         onChainTxId = extractOnChainTxId()?.asEncryptable(),
-        preimage = extractPreimage(),
-        paymentHash = extractPaymentHash(),
+        preimage = extractPreimage()?.asEncryptable(),
+        paymentHash = extractPaymentHash()?.asEncryptable(),
         amountInUsd = extractAmountInUsd()?.asEncryptable(),
         exchangeRate = extractExchangeRate()?.asEncryptable(),
         otherLightningAddress = extractOtherLightningAddress()?.asEncryptable(),
