@@ -212,7 +212,7 @@ class ScanCodeViewModel @Inject constructor(
                 primalWalletAccountRepository.redeemPromoCode(
                     userId = activeAccountStore.activeUserId(),
                     code = promoCode,
-                )
+                ).getOrThrow()
             }.onSuccess {
                 setEffect(SideEffect.PromoCodeApplied)
             }.onFailure { error ->
@@ -232,26 +232,25 @@ class ScanCodeViewModel @Inject constructor(
     private fun getPromoCodeDetails(code: String) =
         viewModelScope.launch {
             setState { copy(loading = true, error = null, showErrorBadge = false) }
-            runCatching {
-                primalWalletAccountRepository.getPromoCodeDetails(code = code)
-            }.onSuccess { response ->
-                setState {
-                    copy(
-                        scannedValue = code,
-                        welcomeMessage = response.welcomeMessage,
-                        promoCodeBenefits = response.toBenefitsList(),
-                        requiresPrimalWallet = response.preloadedBtc != null,
-                        stageStack = listOf(ScanCodeStage.Success),
-                    )
+            primalWalletAccountRepository.getPromoCodeDetails(code = code)
+                .onSuccess { response ->
+                    setState {
+                        copy(
+                            scannedValue = code,
+                            welcomeMessage = response.welcomeMessage,
+                            promoCodeBenefits = response.toBenefitsList(),
+                            requiresPrimalWallet = response.preloadedBtc != null,
+                            stageStack = listOf(ScanCodeStage.Success),
+                        )
+                    }
+                }.onFailure { error ->
+                    Napier.w(throwable = error) { "Failed to get promo code details for code=$code" }
+                    if (error.cause is NostrNoticeException) {
+                        setState { copy(showErrorBadge = true) }
+                    } else {
+                        setState { copy(error = UiError.NetworkError(error)) }
+                    }
                 }
-            }.onFailure { error ->
-                Napier.w(throwable = error) { "Failed to get promo code details for code=$code" }
-                if (error.cause is NostrNoticeException) {
-                    setState { copy(showErrorBadge = true) }
-                } else {
-                    setState { copy(error = UiError.NetworkError(error)) }
-                }
-            }
             setState { copy(loading = false) }
         }
 

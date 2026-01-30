@@ -70,32 +70,38 @@ internal class PrimalWalletAccountRepositoryImpl(
             }
         }
 
-    override suspend fun getPromoCodeDetails(code: String): PromoCodeDetails =
+    override suspend fun getPromoCodeDetails(code: String): Result<PromoCodeDetails> =
         withContext(dispatcherProvider.io()) {
-            val response = primalWalletApi.getPromoCodeDetails(code = code)
-            response.toPromoCodeDetailsDO()
+            runCatching {
+                val response = primalWalletApi.getPromoCodeDetails(code = code)
+                response.toPromoCodeDetailsDO()
+            }
         }
 
-    override suspend fun redeemPromoCode(userId: String, code: String) =
+    override suspend fun redeemPromoCode(userId: String, code: String): Result<Unit> =
         withContext(dispatcherProvider.io()) {
-            val authorization = signatureHandler.signNostrEvent(
-                unsignedNostrEvent = NostrUnsignedEvent(
-                    pubKey = userId,
-                    kind = NostrEventKind.ApplicationSpecificData.value,
-                    tags = listOf("${appBuildHelper.getAppName()} App".asIdentifierTag()),
-                    content = PromoCodeRequestBody(promoCode = code).encodeToJsonString(),
-                ),
-            ).unwrapOrThrow()
+            runCatching {
+                val authorization = signatureHandler.signNostrEvent(
+                    unsignedNostrEvent = NostrUnsignedEvent(
+                        pubKey = userId,
+                        kind = NostrEventKind.ApplicationSpecificData.value,
+                        tags = listOf("${appBuildHelper.getAppName()} App".asIdentifierTag()),
+                        content = PromoCodeRequestBody(promoCode = code).encodeToJsonString(),
+                    ),
+                ).unwrapOrThrow()
 
-            primalWalletApi.redeemPromoCode(authorizationEvent = authorization)
+                primalWalletApi.redeemPromoCode(authorizationEvent = authorization)
+            }
         }
 
-    override suspend fun fetchWalletStatus(userId: String): PrimalWalletStatus =
+    override suspend fun fetchWalletStatus(userId: String): Result<PrimalWalletStatus> =
         withContext(dispatcherProvider.io()) {
-            val response = primalWalletApi.getWalletStatus(userId)
-            PrimalWalletStatus(
-                hasCustodialWallet = response.hasCustodialWallet,
-                hasMigratedToSparkWallet = response.hasSparkWallet,
-            )
+            runCatching {
+                val response = primalWalletApi.getWalletStatus(userId)
+                PrimalWalletStatus(
+                    hasCustodialWallet = response.hasCustodialWallet,
+                    hasMigratedToSparkWallet = response.hasSparkWallet,
+                )
+            }
         }
 }
