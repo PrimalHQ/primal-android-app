@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - '*'
+      - '!ios-*'
   workflow_dispatch:
 
 env:

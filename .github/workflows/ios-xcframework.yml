@@ -1,0 +1,103 @@
+name: Build and publish iOS XCFramework
+
+on:
+  push:
+    tags:
+      - 'ios-*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. ios-1.0.0)'
+        required: true
+
+concurrency:
+  group: ios-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build XCFramework and create release
+    runs-on: macos-15
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.version || github.ref }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache gradle
+        uses: actions/cache@v4
+        with:
+          path: ~/.gradle/caches
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Determine version tag
+        id: version
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RAW="${INPUT_VERSION}"
+          else
+            RAW="${REF_NAME}"
+          fi
+          SEMVER="${RAW#ios-}"
+          echo "tag=${RAW}" >> "$GITHUB_OUTPUT"
+          echo "semver=${SEMVER}" >> "$GITHUB_OUTPUT"
+
+      - name: Build XCFramework
+        run: ./gradlew assembleXCFramework --no-daemon
+
+      - name: Zip XCFramework
+        run: |
+          cd shared/build/XCFrameworks/release
+          zip -r -y PrimalShared.xcframework.zip PrimalShared.xcframework
+
+      - name: Compute checksum
+        id: checksum
+        run: |
+          CHECKSUM=$(swift package compute-checksum shared/build/XCFrameworks/release/PrimalShared.xcframework.zip)
+          echo "value=$CHECKSUM" >> "$GITHUB_OUTPUT"
+
+      - name: Update Package.swift, tag, and create release on primal-shared-ios
+        env:
+          TAG: ${{ steps.version.outputs.semver }}
+          CHECKSUM: ${{ steps.checksum.outputs.value }}
+          GH_TOKEN: ${{ secrets.PRIMAL_SHARED_IOS_TOKEN }}
+        run: |
+          git clone https://x-access-token:${GH_TOKEN}@github.com/PrimalHQ/primal-shared-ios.git /tmp/primal-shared-ios
+          cd /tmp/primal-shared-ios
+
+          URL="https://github.com/PrimalHQ/primal-shared-ios/releases/download/${TAG}/PrimalShared.xcframework.zip"
+          sed -i '' "s|url: \".*\"|url: \"${URL}\"|" Package.swift
+          sed -i '' "s|checksum: \".*\"|checksum: \"${CHECKSUM}\"|" Package.swift
+
+          git config user.name "Primal CI"
+          git config user.email "developer@primal.net"
+          git add Package.swift
+          git commit -m "Update PrimalShared to ${TAG}"
+          git push origin main
+
+          git tag "${TAG}"
+          git push origin "${TAG}"
+
+      - name: Create GitHub Release on primal-shared-ios
+        env:
+          GITHUB_TOKEN: ${{ secrets.PRIMAL_SHARED_IOS_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.semver }}" \
+            shared/build/XCFrameworks/release/PrimalShared.xcframework.zip \
+            --repo PrimalHQ/primal-shared-ios \
+            --title "PrimalShared ${{ steps.version.outputs.semver }}" \
+            --notes "Built from PrimalHQ/primal-android-app@${{ steps.version.outputs.tag }}"
