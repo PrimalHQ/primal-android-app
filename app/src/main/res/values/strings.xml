@@ -928,6 +928,10 @@
     <string name="nwc_service_notification_text">Processing wallet connection requests</string>
     <string name="settings_wallet_nwc_service_start">Start wallet service</string>
     <string name="settings_wallet_nwc_service_stop">Stop wallet service</string>
+    <string name="nwc_notification_service_active">NWC Wallet Service active</string>
+    <string name="nwc_notification_enable_switch_label">Enable Notifications</string>
+    <string name="nwc_notification_enable_button">Let\'s Go</string>
+    <string name="nwc_notification_keep_running_description">To keep running reliably while Primal is in the background or when your phone is locked, you need to enable wallet service notifications.</string>
 
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_notifications_error_update_settings">Unable to update notification settings.</string>
