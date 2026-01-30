@@ -174,7 +174,16 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     walletAccountRepository.clearActiveWallet(userId = userId)
                 }
             } else {
-                walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
+                val lastUsedInternalWallet = walletAccountRepository.findLastUsedWallet(
+                    userId = userId,
+                    type = setOf(WalletType.PRIMAL, WalletType.SPARK),
+                )
+
+                if (lastUsedInternalWallet != null) {
+                    walletAccountRepository.setActiveWallet(userId = userId, walletId = lastUsedInternalWallet.walletId)
+                } else {
+                    walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
+                }
             }
         }
 

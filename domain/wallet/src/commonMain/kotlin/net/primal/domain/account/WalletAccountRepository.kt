@@ -13,6 +13,8 @@ interface WalletAccountRepository {
 
     suspend fun findLastUsedWallet(userId: String, type: WalletType): Wallet?
 
+    suspend fun findLastUsedWallet(userId: String, type: Set<WalletType>): Wallet?
+
     suspend fun getActiveWallet(userId: String): Wallet?
 
     fun observeActiveWallet(userId: String): Flow<Wallet?>

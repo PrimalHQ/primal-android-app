@@ -133,4 +133,14 @@ interface WalletDao {
         """,
     )
     suspend fun findLastUsedWalletByType(userId: String, type: WalletType): Wallet?
+
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM WalletInfo
+        WHERE userId = :userId AND type in (:type)
+        ORDER BY lastUpdatedAt DESC LIMIT 1
+        """,
+    )
+    suspend fun findLastUsedWalletByTypes(userId: String, type: Set<WalletType>): Wallet?
 }
