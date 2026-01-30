@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "114ae7f6b0ba43e621a12b57458881fe",
+    "identityHash": "b018bd3300aff8821f96cbf7f758899f",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -205,7 +205,7 @@
       },
       {
         "tableName": "WalletTransactionData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `walletType` TEXT NOT NULL, `type` TEXT NOT NULL, `state` TEXT NOT NULL, `createdAt` TEXT NOT NULL, `updatedAt` INTEGER NOT NULL, `completedAt` TEXT, `userId` TEXT NOT NULL, `note` TEXT, `invoice` TEXT, `amountInBtc` TEXT NOT NULL, `totalFeeInBtc` TEXT, `otherUserId` TEXT, `zappedEntity` TEXT, `zappedByUserId` TEXT, `txKind` TEXT NOT NULL, `onChainAddress` TEXT, `onChainTxId` TEXT, `preimage` TEXT, `paymentHash` TEXT, `amountInUsd` TEXT, `exchangeRate` TEXT, `otherLightningAddress` TEXT, PRIMARY KEY(`transactionId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`transactionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `walletType` TEXT NOT NULL, `type` TEXT NOT NULL, `state` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `completedAt` TEXT, `userId` TEXT NOT NULL, `note` TEXT, `invoice` TEXT, `amountInBtc` TEXT NOT NULL, `totalFeeInBtc` TEXT, `otherUserId` TEXT, `zappedEntity` TEXT, `zappedByUserId` TEXT, `txKind` TEXT NOT NULL, `onChainAddress` TEXT, `onChainTxId` TEXT, `preimage` TEXT, `paymentHash` TEXT, `amountInUsd` TEXT, `exchangeRate` TEXT, `otherLightningAddress` TEXT, PRIMARY KEY(`transactionId`))",
         "fields": [
           {
             "fieldPath": "transactionId",
@@ -240,7 +240,7 @@
           {
             "fieldPath": "createdAt",
             "columnName": "createdAt",
-            "affinity": "TEXT",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -554,7 +554,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '114ae7f6b0ba43e621a12b57458881fe')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b018bd3300aff8821f96cbf7f758899f')"
     ]
   }
 }
