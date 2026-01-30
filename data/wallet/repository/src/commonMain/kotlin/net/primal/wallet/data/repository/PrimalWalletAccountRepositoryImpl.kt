@@ -7,6 +7,7 @@ import net.primal.core.utils.createAppBuildHelper
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.account.PrimalWalletAccountRepository
+import net.primal.domain.account.PrimalWalletStatus
 import net.primal.domain.account.PromoCodeDetails
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
@@ -87,5 +88,14 @@ internal class PrimalWalletAccountRepositoryImpl(
             ).unwrapOrThrow()
 
             primalWalletApi.redeemPromoCode(authorizationEvent = authorization)
+        }
+
+    override suspend fun fetchWalletStatus(userId: String): PrimalWalletStatus =
+        withContext(dispatcherProvider.io()) {
+            val response = primalWalletApi.getWalletStatus(userId)
+            PrimalWalletStatus(
+                hasCustodialWallet = response.hasCustodialWallet,
+                hasMigratedToSparkWallet = response.hasSparkWallet,
+            )
         }
 }

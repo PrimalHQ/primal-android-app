@@ -48,16 +48,40 @@ import net.primal.wallet.data.remote.model.TransactionsRequestBody
 import net.primal.wallet.data.remote.model.TransactionsResponse
 import net.primal.wallet.data.remote.model.UserWalletInfoRequestBody
 import net.primal.wallet.data.remote.model.WalletRequestBody
+import net.primal.wallet.data.remote.model.WalletStatusResponse
 import net.primal.wallet.data.remote.model.WalletUserInfoResponse
 import net.primal.wallet.data.remote.model.WithdrawRequestBody
 import net.primal.wallet.data.remote.nostr.ContentWalletExchangeRate
 import net.primal.wallet.data.remote.nostr.ContentWalletTransaction
 import net.primal.wallet.data.remote.nostr.WalletUserInfoContent
+import net.primal.wallet.data.remote.serialization.encodeToWalletJsonString
 
 class PrimalWalletApiImpl(
     private val primalApiClient: PrimalApiClient,
     private val signatureHandler: NostrEventSignatureHandler,
 ) : PrimalWalletApi {
+
+    override suspend fun getWalletStatus(userId: String): WalletStatusResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalWalletVerb.GET_WALLET_STATUS.id,
+                optionsJson = AppSpecificDataRequest(
+                    eventFromUser = signatureHandler.signNostrEvent(
+                        NostrUnsignedEvent(
+                            pubKey = userId,
+                            kind = NostrEventKind.ApplicationSpecificData.value,
+                            tags = emptyList(),
+                            content = "GetWalletStatus",
+                        ),
+                    ).unwrapOrThrow(),
+                ).encodeToWalletJsonString(),
+            ),
+        )
+
+        val nostrEvent = queryResult.findPrimalEvent(NostrEventKind.PrimalWalletStatusInfo)
+        return nostrEvent?.content?.decodeFromJsonStringOrNull<WalletStatusResponse>()
+            ?: throw NetworkException("Missing or invalid content in response.")
+    }
 
     override suspend fun getWalletUserKycLevel(userId: String): Int {
         val queryResult = primalApiClient.query(

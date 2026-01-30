@@ -13,10 +13,13 @@ import net.primal.wallet.data.remote.model.ParsedLnUrlResponse
 import net.primal.wallet.data.remote.model.PromoCodeDetailsResponse
 import net.primal.wallet.data.remote.model.TransactionsRequestBody
 import net.primal.wallet.data.remote.model.TransactionsResponse
+import net.primal.wallet.data.remote.model.WalletStatusResponse
 import net.primal.wallet.data.remote.model.WalletUserInfoResponse
 import net.primal.wallet.data.remote.model.WithdrawRequestBody
 
 interface PrimalWalletApi {
+
+    suspend fun getWalletStatus(userId: String): WalletStatusResponse
 
     suspend fun getWalletUserKycLevel(userId: String): Int
 

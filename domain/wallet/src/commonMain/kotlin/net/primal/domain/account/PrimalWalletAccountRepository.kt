@@ -17,6 +17,12 @@ interface PrimalWalletAccountRepository {
         NetworkException::class,
         CancellationException::class,
     )
+    suspend fun fetchWalletStatus(userId: String): PrimalWalletStatus
+
+    @Throws(
+        NetworkException::class,
+        CancellationException::class,
+    )
     suspend fun getPromoCodeDetails(code: String): PromoCodeDetails
 
     @Throws(

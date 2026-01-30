@@ -16,21 +16,22 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.asSha256Hash
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.updater.Updater
-import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
+import net.primal.domain.usecase.EnsurePrimalWalletExistsUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 
+@Suppress("LongParameterList")
 class UserDataUpdater @AssistedInject constructor(
     @Assisted val userId: String,
     private val activeAccountStore: ActiveAccountStore,
     private val settingsRepository: SettingsRepository,
     private val userRepository: UserRepository,
     private val walletAccountRepository: WalletAccountRepository,
-    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
+    private val ensurePrimalWalletExistsUseCase: EnsurePrimalWalletExistsUseCase,
     private val walletRepository: WalletRepository,
     private val relayRepository: RelayRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
@@ -64,7 +65,7 @@ class UserDataUpdater @AssistedInject constructor(
         runCatching { relayRepository.fetchAndUpdateUserRelays(userId = userId) }
         runCatching { userRepository.fetchAndUpdateUserAccount(userId = userId) }
         runCatching { bookmarksRepository.fetchAndPersistBookmarks(userId = userId) }
-        runCatching { primalWalletAccountRepository.fetchWalletAccountInfo(userId = userId) }
+        runCatching { ensurePrimalWalletExistsUseCase.invoke(userId = userId) }
         runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }
         runCatching { pushNotificationsTokenUpdater.updateTokenForRemoteSigner() }
         runCatching { mutedItemRepository.fetchAndPersistMuteList(userId = userId) }
@@ -99,7 +100,7 @@ class UserDataUpdater @AssistedInject constructor(
             }
 
             WalletPreference.Undefined, WalletPreference.PrimalWallet -> {
-                primalWalletAccountRepository.fetchWalletAccountInfo(userId = userAccount.pubkey)
+                ensurePrimalWalletExistsUseCase.invoke(userId = userAccount.pubkey, setAsActive = true)
 
                 walletRepository.updateWalletBalance(
                     walletId = userAccount.pubkey,
@@ -111,8 +112,6 @@ class UserDataUpdater @AssistedInject constructor(
                     walletId = userAccount.pubkey,
                     spamThresholdAmountInSats = userAccount.primalWalletSettings.spamThresholdAmountInSats,
                 )
-
-                walletAccountRepository.setActiveWallet(userId = userAccount.pubkey, walletId = userAccount.pubkey)
             }
         }
 

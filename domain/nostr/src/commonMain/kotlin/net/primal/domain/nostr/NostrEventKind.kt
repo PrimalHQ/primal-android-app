@@ -121,6 +121,7 @@ enum class NostrEventKind(val value: Int) {
     PrimalMembershipStatus(value = 10_000_603),
     PrimalMembershipHistory(value = 10_000_605),
     PrimalPromoCodeDetails(value = 10_000_701),
+    PrimalWalletStatusInfo(value = 10_000_801),
     PrimalAppState(value = 10_000_999),
     PrimalLongFormContent(value = 10_030_023),
     Unknown(value = -1),

@@ -8,22 +8,21 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.CredentialType
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.domain.account.PrimalWalletAccountRepository
-import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.getOrNull
+import net.primal.domain.usecase.EnsurePrimalWalletExistsUseCase
 
+@Suppress("LongParameterList")
 class LoginHandler @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val authRepository: AuthRepository,
     private val userRepository: UserRepository,
     private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
-    private val walletAccountRepository: WalletAccountRepository,
-    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
+    private val ensurePrimalWalletExistsUseCase: EnsurePrimalWalletExistsUseCase,
     private val dispatchers: DispatcherProvider,
     private val credentialsStore: CredentialsStore,
     private val nostrNotary: NostrNotary,
@@ -42,8 +41,7 @@ class LoginHandler @Inject constructor(
 
             userRepository.fetchAndUpdateUserAccount(userId = userId)
 
-            val primalWalletId = primalWalletAccountRepository.fetchWalletAccountInfo(userId = userId)
-            primalWalletId.getOrNull()?.let { walletAccountRepository.setActiveWallet(userId = userId, walletId = it) }
+            ensurePrimalWalletExistsUseCase.invoke(userId = userId, setAsActive = true)
 
             bookmarksRepository.fetchAndPersistBookmarks(userId = userId)
             authorizationEvent?.let {
