@@ -1,6 +1,7 @@
 package net.primal.wallet.data.nwc.processor
 
 import io.github.aakira.napier.Napier
+import kotlin.math.min
 import kotlin.uuid.Uuid
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
@@ -13,6 +14,7 @@ import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
 import net.primal.core.utils.CurrencyConversionUtils.btcToMSats
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.msatsToSats
+import net.primal.core.utils.CurrencyConversionUtils.satsToMSats
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.domain.connections.nostr.model.NwcPaymentHoldResult
 import net.primal.domain.wallet.TxRequest
@@ -63,11 +65,17 @@ class NwcRequestProcessor internal constructor(
     private suspend fun processGetBalance(request: WalletNwcRequest.GetBalance): String {
         val wallet = walletRepository.getWalletById(request.connection.walletId).getOrNull()
         val balanceMsats = wallet?.balanceInBtc?.btcToMSats()?.toLong() ?: 0L
+        val availableBudgetSats = nwcBudgetManager.getAvailableBudgetSats(request.connection.secretPubKey)
+        val effectiveBalanceMsats = availableBudgetSats?.let { min(balanceMsats, it.satsToMSats()) } ?: balanceMsats
 
-        Napier.d(tag = TAG) { "GetBalance: balanceMsats=$balanceMsats" }
+        val availableBudgetLog = availableBudgetSats?.toString() ?: "none"
+        Napier.d(tag = TAG) {
+            "GetBalance: balanceMsats=$balanceMsats, availableBudgetSats=$availableBudgetLog, " +
+                "effectiveBalanceMsats=$effectiveBalanceMsats"
+        }
         return responseBuilder.buildGetBalanceResponse(
             request = request,
-            result = GetBalanceResponsePayload(balance = balanceMsats),
+            result = GetBalanceResponsePayload(balance = effectiveBalanceMsats),
         )
     }
 
