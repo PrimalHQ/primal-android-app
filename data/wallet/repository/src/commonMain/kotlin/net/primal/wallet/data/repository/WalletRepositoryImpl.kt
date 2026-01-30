@@ -23,6 +23,7 @@ import net.primal.domain.wallet.LnInvoiceParseResult
 import net.primal.domain.wallet.LnUrlParseResult
 import net.primal.domain.wallet.OnChainAddressResult
 import net.primal.domain.wallet.TxRequest
+import net.primal.domain.wallet.TxType
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
@@ -126,6 +127,33 @@ internal class WalletRepositoryImpl(
         withContext(dispatcherProvider.io()) {
             walletDatabase.walletTransactions()
                 .latestTransactionsByWalletId(walletId = walletId, limit = limit)
+                .map { txData ->
+                    val otherProfile = txData.otherUserId?.let { profileId ->
+                        profileRepository.findProfileDataOrNull(profileId.decrypted)
+                    }
+
+                    txData.toDomain(otherProfile = otherProfile)
+                }
+        }
+
+    override suspend fun queryTransactions(
+        walletId: String,
+        type: TxType?,
+        limit: Int,
+        offset: Int,
+        from: Long?,
+        until: Long?,
+    ): List<Transaction> =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.walletTransactions()
+                .queryTransactions(
+                    walletId = walletId,
+                    type = type,
+                    limit = limit,
+                    offset = offset,
+                    from = from,
+                    until = until,
+                )
                 .map { txData ->
                     val otherProfile = txData.otherUserId?.let { profileId ->
                         profileRepository.findProfileDataOrNull(profileId.decrypted)
@@ -275,6 +303,7 @@ internal class WalletRepositoryImpl(
                 description = response.lnInvoiceData.description,
                 date = response.lnInvoiceData.date,
                 expiry = response.lnInvoiceData.expiry,
+                paymentHash = response.lnInvoiceData.paymentHash,
             )
         }
     }

@@ -12,6 +12,8 @@ import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
+import net.primal.domain.connections.nostr.NwcRepository
+import net.primal.domain.connections.nostr.NwcService
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.events.EventRepository
 import net.primal.domain.profile.ProfileRepository
@@ -21,6 +23,7 @@ import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
 
+@Suppress("TooManyFunctions")
 @Module
 @InstallIn(SingletonComponent::class)
 object WalletRepositoriesModule {
@@ -109,5 +112,16 @@ object WalletRepositoriesModule {
         WalletRepositoryFactory.createPrimalWalletNwcRepository(
             primalWalletApiClient = primalApiClient,
             nostrEventSignatureHandler = nostrNotary,
+        )
+
+    @Provides
+    @Singleton
+    fun provideNwcRepository(): NwcRepository = WalletRepositoryFactory.createNwcRepository()
+
+    @Provides
+    @Singleton
+    fun provideNwcService(walletRepository: WalletRepository): NwcService =
+        WalletRepositoryFactory.createNwcService(
+            walletRepository = walletRepository,
         )
 }

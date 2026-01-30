@@ -1,4 +1,4 @@
-package net.primal.data.account.signer.remote.client
+package net.primal.data.account.signer.remote
 
 import io.github.aakira.napier.Napier
 import kotlin.uuid.Uuid

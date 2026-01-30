@@ -5,6 +5,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
+import net.primal.domain.wallet.TxType
 
 @Dao
 interface WalletTransactionDao {
@@ -29,6 +31,28 @@ interface WalletTransactionDao {
         """,
     )
     suspend fun latestTransactionsByWalletId(walletId: String, limit: Int): List<WalletTransactionData>
+
+    @Transaction
+    @Query(
+        """
+            SELECT * FROM WalletTransactionData
+            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED")
+                AND walletId IS :walletId
+                AND (:type IS NULL OR type IS :type)
+                AND (:from IS NULL OR createdAt >= :from)
+                AND (:until IS NULL OR createdAt <= :until)
+            ORDER BY createdAt DESC
+            LIMIT :limit OFFSET :offset
+        """,
+    )
+    suspend fun queryTransactions(
+        walletId: String,
+        type: TxType?,
+        limit: Int,
+        offset: Int,
+        from: Long?,
+        until: Long?,
+    ): List<WalletTransactionData>
 
     @Query("SELECT * FROM WalletTransactionData WHERE walletId IS :walletId ORDER BY updatedAt ASC LIMIT 1")
     suspend fun firstByWalletId(walletId: String): WalletTransactionData?

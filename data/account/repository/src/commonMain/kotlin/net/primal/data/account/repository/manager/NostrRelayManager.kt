@@ -19,7 +19,7 @@ import net.primal.core.utils.put
 import net.primal.core.utils.remove
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
 import net.primal.data.account.repository.manager.model.RelayEvent
-import net.primal.data.account.signer.remote.client.RemoteSignerClient
+import net.primal.data.account.signer.remote.RemoteSignerClient
 import net.primal.data.account.signer.remote.model.RemoteSignerMethod
 import net.primal.data.account.signer.remote.model.RemoteSignerMethodException
 import net.primal.data.account.signer.remote.model.RemoteSignerMethodResponse

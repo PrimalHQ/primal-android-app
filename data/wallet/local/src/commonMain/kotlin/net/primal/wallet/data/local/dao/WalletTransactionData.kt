@@ -16,7 +16,7 @@ data class WalletTransactionData(
     val walletType: WalletType,
     val type: TxType,
     val state: TxState,
-    val createdAt: Encryptable<Long>,
+    val createdAt: Long,
     val updatedAt: Long,
     val completedAt: Encryptable<Long>?,
     val userId: String,
