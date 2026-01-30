@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -58,6 +59,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
             observeActiveWalletId()
         }
 
+        observeActiveAccount()
         observeEvents()
     }
 
@@ -143,6 +145,20 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         )
                     }
                 }
+        }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(
+                        activeAccountAvatarCdnImage = it.avatarCdnImage,
+                        activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
+                        activeAccountBlossoms = it.blossomServers,
+                        activeAccountDisplayName = it.authorDisplayName,
+                    )
+                }
+            }
         }
 
     private fun connectWallet(nwcUrl: String) =

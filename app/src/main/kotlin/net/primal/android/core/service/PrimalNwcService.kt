@@ -29,7 +29,7 @@ class PrimalNwcService : Service() {
     lateinit var activeAccountStore: ActiveAccountStore
 
     companion object {
-        private const val CHANNEL_ID = "nwc_wallet_service"
+        const val CHANNEL_ID = "nwc_wallet_service"
         private const val NOTIFICATION_ID = 100
 
         private val _isServiceRunning = MutableStateFlow(false)

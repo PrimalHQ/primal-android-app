@@ -1,6 +1,5 @@
 package net.primal.android.settings.wallet.settings
 
-import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -26,7 +25,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -52,13 +53,17 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.core.service.PrimalNwcService
+import net.primal.android.core.utils.hasNotificationPermission
+import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.ui.ConnectedAppsSettings
+import net.primal.android.settings.wallet.settings.ui.EnableNwcNotificationsBottomSheet
 import net.primal.android.settings.wallet.settings.ui.ExternalWalletSettings
 import net.primal.android.settings.wallet.settings.ui.PrimalWalletSettings
 import net.primal.android.settings.wallet.settings.ui.WalletBackupWidget
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.links.CdnImage
 import net.primal.domain.utils.isPrimalWalletAndActivated
 import net.primal.domain.wallet.NostrWalletKeypair
 import net.primal.domain.wallet.Wallet
@@ -209,7 +214,12 @@ fun WalletSettingsScreen(
                     onClick = onNwcWalletServiceClick,
                 )
 
-                ToggleNwcServiceButton()
+                ToggleNwcServiceButton(
+                    avatarCdnImage = state.activeAccountAvatarCdnImage,
+                    legendaryCustomization = state.activeAccountLegendaryCustomization,
+                    avatarBlossoms = state.activeAccountBlossoms,
+                    displayName = state.activeAccountDisplayName,
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -218,9 +228,31 @@ fun WalletSettingsScreen(
 }
 
 @Composable
-private fun ToggleNwcServiceButton() {
+private fun ToggleNwcServiceButton(
+    avatarCdnImage: CdnImage?,
+    legendaryCustomization: LegendaryCustomization?,
+    avatarBlossoms: List<String>,
+    displayName: String,
+) {
     val isNwcServiceRunning by PrimalNwcService.isServiceRunning.collectAsState()
     val context = LocalContext.current
+    var showNotificationsBottomSheet by remember { mutableStateOf(false) }
+
+    if (showNotificationsBottomSheet) {
+        EnableNwcNotificationsBottomSheet(
+            avatarCdnImage = avatarCdnImage,
+            legendaryCustomization = legendaryCustomization,
+            avatarBlossoms = avatarBlossoms,
+            displayName = displayName,
+            onDismissRequest = { showNotificationsBottomSheet = false },
+            onTogglePushNotifications = { enabled ->
+                if (enabled) {
+                    PrimalNwcService.start(context)
+                    showNotificationsBottomSheet = false
+                }
+            },
+        )
+    }
 
     TextButton(
         modifier = Modifier.padding(horizontal = 16.dp),
@@ -228,7 +260,11 @@ private fun ToggleNwcServiceButton() {
             if (isNwcServiceRunning) {
                 PrimalNwcService.stop(context)
             } else {
-                PrimalNwcService.start(context)
+                if (context.hasNotificationPermission(PrimalNwcService.CHANNEL_ID)) {
+                    PrimalNwcService.start(context)
+                } else {
+                    showNotificationsBottomSheet = true
+                }
             }
         },
         contentPadding = PaddingValues(0.dp),
