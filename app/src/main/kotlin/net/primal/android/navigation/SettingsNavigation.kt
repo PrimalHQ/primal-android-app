@@ -329,7 +329,7 @@ private fun NavGraphBuilder.wallet(
         onScanNwcClick = { navController.navigateToWalletScanNwcUrl() },
         onCreateNewWalletConnection = { navController.navigateToCreateNewWalletConnection() },
         onRestoreWalletClick = { navController.navigateToWalletRestore() },
-        onBackupWalletClick = { navController.navigateToWalletBackup() },
+        onBackupWalletClick = { walletId -> navController.navigateToWalletBackup(walletId) },
         onNwcWalletServiceClick = { navController.navigateToNwcWalletService() },
     )
 }

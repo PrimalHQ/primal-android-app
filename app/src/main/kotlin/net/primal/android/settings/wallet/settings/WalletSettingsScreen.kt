@@ -41,6 +41,7 @@ import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.DownloadsFilled
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.settings.SettingsItem
@@ -63,7 +64,7 @@ fun WalletSettingsScreen(
     onScanNwcClick: () -> Unit,
     onCreateNewWalletConnection: () -> Unit,
     onRestoreWalletClick: () -> Unit,
-    onBackupWalletClick: () -> Unit,
+    onBackupWalletClick: (String) -> Unit,
     onNwcWalletServiceClick: () -> Unit = {},
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -87,8 +88,8 @@ fun WalletSettingsScreen(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WalletSettingsScreen(
     state: WalletSettingsContract.UiState,
@@ -97,7 +98,7 @@ fun WalletSettingsScreen(
     onScanNwcClick: () -> Unit,
     onCreateNewWalletConnection: () -> Unit,
     onRestoreWalletClick: () -> Unit,
-    onBackupWalletClick: () -> Unit,
+    onBackupWalletClick: (String) -> Unit,
     onNwcWalletServiceClick: () -> Unit = {},
     eventPublisher: (UiEvent) -> Unit,
 ) {
@@ -127,19 +128,21 @@ fun WalletSettingsScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     WalletBackupWidget(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        walletBalanceInBtc = state.wallet?.balanceInBtc?.toString(),
-                        onBackupClick = onBackupWalletClick,
+                        walletBalanceInBtc = state.activeWallet?.balanceInBtc?.toString(),
+                        onBackupClick = {
+                            state.activeWallet?.walletId?.let(onBackupWalletClick)
+                        },
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                ExternalWalletListItem(
-                    useExternalWallet = state.useExternalWallet == true,
-                    onExternalWalletSwitchChanged = { value ->
-                        eventPublisher(UiEvent.UpdateUseExternalWallet(value))
-                    },
+                NostrProfileLightingAddressSection(
+                    lightningAddress = state.activeWallet?.lightningAddress,
+                    onEditProfileClick = onEditProfileClick,
                 )
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 WalletSpecificSettingsItems(
                     state = state,
@@ -158,15 +161,23 @@ fun WalletSettingsScreen(
                     },
                     onClick = onRestoreWalletClick,
                 )
-
                 Spacer(modifier = Modifier.height(8.dp))
 
-                NostrProfileLightingAddressSection(
-                    lightningAddress = state.wallet?.lightningAddress,
-                    onEditProfileClick = onEditProfileClick,
+                SettingsItem(
+                    headlineText = stringResource(id = R.string.settings_wallet_export_transactions_title),
+                    supportText = stringResource(id = R.string.settings_wallet_export_transactions_subtitle),
+                    trailingContent = {
+                        Icon(imageVector = PrimalIcons.DownloadsFilled, contentDescription = null)
+                    },
                 )
+                Spacer(modifier = Modifier.height(8.dp))
 
-                Spacer(modifier = Modifier.height(16.dp))
+                ExternalWalletListItem(
+                    useExternalWallet = state.useExternalWallet == true,
+                    onExternalWalletSwitchChanged = { value ->
+                        eventPublisher(UiEvent.UpdateUseExternalWallet(value))
+                    },
+                )
 
                 ConnectedAppsSettings(
                     primalNwcConnectionInfos = state.nwcConnectionsInfo,
@@ -174,7 +185,7 @@ fun WalletSettingsScreen(
                     onCreateNewWalletConnection = onCreateNewWalletConnection,
                     connectionsState = state.connectionsState,
                     onRetryFetchingConnections = { eventPublisher(UiEvent.RequestFetchWalletConnections) },
-                    isPrimalWalletActivated = state.wallet?.isPrimalWalletAndActivated() == true,
+                    isPrimalWalletActivated = state.activeWallet?.isPrimalWalletAndActivated() == true,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -202,14 +213,14 @@ private fun WalletSpecificSettingsItems(
     state: WalletSettingsContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onScanNwcClick: () -> Unit,
-    onBackupWalletClick: () -> Unit,
+    onBackupWalletClick: (String) -> Unit,
 ) {
     AnimatedContent(targetState = state.useExternalWallet == true, label = "WalletSettingsContent") {
         when (it) {
             true -> {
                 val clipboardManager = LocalClipboardManager.current
                 ExternalWalletSettings(
-                    nwcWallet = state.wallet,
+                    nwcWallet = state.activeWallet,
                     onExternalWalletDisconnect = { eventPublisher(UiEvent.DisconnectWallet) },
                     onPasteNwcClick = {
                         val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
@@ -315,13 +326,13 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletSettingsContract.Ui
     override val values: Sequence<WalletSettingsContract.UiState>
         get() = sequenceOf(
             WalletSettingsContract.UiState(
-                wallet = null,
+                activeWallet = null,
             ),
             WalletSettingsContract.UiState(
-                wallet = null,
+                activeWallet = null,
             ),
             WalletSettingsContract.UiState(
-                wallet = Wallet.NWC(
+                activeWallet = Wallet.NWC(
                     relays = listOf("wss://relay.getalby.com/v1"),
                     lightningAddress = "miljan@getalby.com",
                     walletId = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
@@ -355,7 +366,7 @@ private fun PreviewSettingsWalletScreen(
             onCreateNewWalletConnection = {},
             eventPublisher = {},
             onRestoreWalletClick = {},
-            onBackupWalletClick = {},
+            onBackupWalletClick = { _ -> },
         )
     }
 }

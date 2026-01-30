@@ -150,6 +150,10 @@ inline val SavedStateHandle.draftTransaction: DraftTx
 const val LNBC = "lnbc"
 inline val SavedStateHandle.lnbc: String? get() = get<String>(LNBC)
 
+const val WALLET_ID = "walletId"
+inline val SavedStateHandle.walletIdOrThrow: String
+    get() = get(WALLET_ID) ?: throw IllegalArgumentException("Missing required walletId argument.")
+
 const val TRANSACTION_ID = "transactionId"
 inline val SavedStateHandle.transactionIdOrThrow: String
     get() = get(TRANSACTION_ID) ?: throw IllegalArgumentException("Missing required transactionId argument.")

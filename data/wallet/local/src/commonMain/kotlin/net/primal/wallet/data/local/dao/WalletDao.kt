@@ -89,6 +89,23 @@ interface WalletDao {
     @Query("DELETE FROM SparkWalletData WHERE walletId IN (:walletIds)")
     suspend fun _deleteSparkWalletsByIds(walletIds: List<String>)
 
+    @Suppress("FunctionName")
+    @Query("DELETE FROM WalletInfo WHERE userId = :userId AND type = 'SPARK'")
+    suspend fun _deleteSparkWalletInfoByUserId(userId: String)
+
+    @Suppress("FunctionName")
+    @Query("DELETE FROM SparkWalletData WHERE userId = :userId")
+    suspend fun _deleteSparkWalletDataByUserId(userId: String)
+
+    @Transaction
+    suspend fun deleteSparkWalletByUserId(userId: String): String? {
+        val walletId = findLastUsedWalletByType(userId = userId, type = WalletType.SPARK)
+        _deleteSparkWalletInfoByUserId(userId = userId)
+        _deleteSparkWalletDataByUserId(userId = userId)
+
+        return walletId?.info?.walletId
+    }
+
     @Transaction
     suspend fun deleteWalletsByIds(walletIds: List<String>) {
         _deleteWalletInfosByIds(walletIds = walletIds)

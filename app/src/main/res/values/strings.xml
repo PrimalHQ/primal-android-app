@@ -903,6 +903,8 @@
     <string name="settings_wallet_backup_wallet_subtitle">Write down your wallet recovery phrase so you don\'t lose access to your funds</string>
     <string name="settings_wallet_restore_wallet_title">Restore existing wallet</string>
     <string name="settings_wallet_restore_wallet_subtitle">If you have an existing wallet that you wish to use with your Nostr account, you can restore it here using your 12-24 wallet recovery phrase</string>
+    <string name="settings_wallet_export_transactions_title">Export transaction history</string>
+    <string name="settings_wallet_export_transactions_subtitle">Download your entier wallet transaction history in CSV format</string>
     <string name="settings_wallet_new_nwc_connection_title">New Wallet Connection</string>
     <string name="settings_wallet_new_nwc_connection_app_name_input_header">Name of the app you wish to connect:</string>
     <string name="settings_wallet_new_nwc_connection_hint">You can revoke access at any time in your Primal Wallet settings.</string>

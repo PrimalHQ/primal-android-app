@@ -242,7 +242,7 @@ private fun PreviewExternalWalletSettings(
         Surface {
             Column {
                 ExternalWalletSettings(
-                    nwcWallet = state.wallet,
+                    nwcWallet = state.activeWallet,
                     onExternalWalletDisconnect = {},
                     onPasteNwcClick = {},
                     onScanNwcClick = {},

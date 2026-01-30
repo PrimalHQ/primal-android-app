@@ -14,12 +14,14 @@ class EnsureSparkWalletExistsUseCase(
 
     suspend fun invoke(userId: String): Result<String> =
         runCatching {
-            val existingSeedWords = sparkWalletAccountRepository.getPersistedSeedWords(userId).firstOrNull()
-            val isNewWallet = existingSeedWords == null
+            val existingWalletId = sparkWalletAccountRepository.findPersistedWalletId(userId)
+            val isNewWallet = existingWalletId == null
 
-            val seedWords = existingSeedWords ?: seedPhraseGenerator.generate()
-                .getOrThrow()
-                .joinToString(separator = " ")
+            val seedWords = if (isNewWallet) {
+                seedPhraseGenerator.generate().getOrThrow()
+            } else {
+                sparkWalletAccountRepository.getPersistedSeedWords(existingWalletId).getOrThrow()
+            }.joinToString(separator = " ")
 
             val walletId = sparkWalletManager.initializeWallet(seedWords).getOrThrow()
 

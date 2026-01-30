@@ -36,15 +36,22 @@ internal class SparkWalletAccountRepositoryImpl(
             }
         }
 
-    override suspend fun hasPersistedWallet(userId: String): Boolean =
-        withContext(dispatcherProvider.io()) {
-            walletDatabase.wallet().findAllSparkWalletDataByUserId(userId).isNotEmpty()
-        }
-
-    override suspend fun getPersistedSeedWords(userId: String): List<String> =
+    override suspend fun findPersistedWalletId(userId: String): String? =
         withContext(dispatcherProvider.io()) {
             walletDatabase.wallet().findAllSparkWalletDataByUserId(userId)
-                .map { it.seedWords.decrypted }
+                .firstOrNull()?.walletId
+        }
+
+    override suspend fun getPersistedSeedWords(walletId: String): Result<List<String>> =
+        runCatching {
+            withContext(dispatcherProvider.io()) {
+                val data = walletDatabase.wallet().findSparkWalletData(walletId)
+                    ?: error("No spark wallet data found for walletId=$walletId")
+
+                data.seedWords.decrypted
+                    .split(" ")
+                    .filter { it.isNotBlank() }
+            }
         }
 
     override suspend fun persistSeedWords(
@@ -76,6 +83,14 @@ internal class SparkWalletAccountRepositoryImpl(
         runCatching {
             withContext(dispatcherProvider.io()) {
                 walletDatabase.wallet().updateSparkWalletBackedUp(walletId, backedUp = true)
+            }
+        }
+
+    override suspend fun deleteSparkWalletByUserId(userId: String): Result<String> =
+        runCatching {
+            withContext(dispatcherProvider.io()) {
+                walletDatabase.wallet().deleteSparkWalletByUserId(userId = userId)
+                    ?: throw NoSuchElementException("No spark wallet found for $userId user.")
             }
         }
 }
