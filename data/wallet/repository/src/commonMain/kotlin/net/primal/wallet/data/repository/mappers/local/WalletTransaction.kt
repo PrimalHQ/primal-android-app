@@ -47,8 +47,8 @@ private fun WalletTransactionData.toZapTransaction(otherProfile: ProfileData?): 
             zappedEntity = zappedEntity,
             zappedByUserId = this.zappedByUserId?.decrypted,
             otherUserProfile = otherProfile,
-            preimage = this.preimage?.decrypted,
-            paymentHash = this.paymentHash?.decrypted,
+            preimage = this.preimage,
+            paymentHash = this.paymentHash,
         )
 
         else -> toLightningTransaction(otherProfile)
@@ -115,8 +115,8 @@ private fun WalletTransactionData.toLightningTransaction(otherProfile: ProfileDa
         otherUserId = this.otherUserId?.decrypted,
         otherLightningAddress = this.otherLightningAddress?.decrypted,
         otherUserProfile = otherProfile,
-        preimage = this.preimage?.decrypted,
-        paymentHash = this.paymentHash?.decrypted,
+        preimage = this.preimage,
+        paymentHash = this.paymentHash,
     )
 
 private fun WalletTransactionData.toSparkTransaction() =
@@ -137,8 +137,8 @@ private fun WalletTransactionData.toSparkTransaction() =
         exchangeRate = this.exchangeRate?.decrypted,
         totalFeeInBtc = this.totalFeeInBtc?.decrypted,
         sparkAddress = null,
-        preimage = this.preimage?.decrypted,
-        paymentHash = this.paymentHash?.decrypted,
+        preimage = this.preimage,
+        paymentHash = this.paymentHash,
     )
 
 /**
@@ -165,8 +165,8 @@ internal fun Transaction.toWalletTransactionData(): WalletTransactionData =
         txKind = resolveTxKind(),
         onChainAddress = extractOnChainAddress()?.asEncryptable(),
         onChainTxId = extractOnChainTxId()?.asEncryptable(),
-        preimage = extractPreimage()?.asEncryptable(),
-        paymentHash = extractPaymentHash()?.asEncryptable(),
+        preimage = extractPreimage(),
+        paymentHash = extractPaymentHash(),
         amountInUsd = extractAmountInUsd()?.asEncryptable(),
         exchangeRate = extractExchangeRate()?.asEncryptable(),
         otherLightningAddress = extractOtherLightningAddress()?.asEncryptable(),
@@ -212,7 +212,7 @@ private fun Transaction.extractOnChainTxId(): String? =
         else -> null
     }
 
-private fun Transaction.extractPreimage(): String? =
+fun Transaction.extractPreimage(): String? =
     when (this) {
         is Transaction.Lightning -> this.preimage
         is Transaction.Zap -> this.preimage
@@ -220,7 +220,7 @@ private fun Transaction.extractPreimage(): String? =
         else -> null
     }
 
-private fun Transaction.extractPaymentHash(): String? =
+fun Transaction.extractPaymentHash(): String? =
     when (this) {
         is Transaction.Lightning -> this.paymentHash
         is Transaction.Zap -> this.paymentHash

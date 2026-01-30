@@ -181,6 +181,8 @@ class NwcRequestProcessor internal constructor(
             type = txType,
             limit = limit,
             offset = offset,
+            from = params.from,
+            until = params.until,
         )
 
         Napier.d(tag = TAG) { "ListTransactions: fetched ${transactions.size} transactions from DB" }

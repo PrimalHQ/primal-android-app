@@ -25,4 +25,5 @@ data class LookupInvoiceResponsePayload(
     @SerialName("expires_at") val expiresAt: Long? = null,
     @SerialName("settled_at") val settledAt: Long? = null,
     val metadata: Map<String, JsonElement>? = null,
+    val state: String? = null,
 )
