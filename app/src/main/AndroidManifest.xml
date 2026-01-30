@@ -365,6 +365,16 @@
                 android:value="Run a foreground service to keep remote signer operational." />
         </service>
 
+        <service
+            android:name=".core.service.PrimalNwcService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Run a foreground service for NWC wallet connections." />
+        </service>
+
         <provider
             android:name=".signer.provider.LocalSignerContentProvider"
             android:authorities="${applicationId}.PING;${applicationId}.SIGN_MESSAGE;${applicationId}.SIGN_EVENT;${applicationId}.NIP04_ENCRYPT;${applicationId}.NIP04_DECRYPT;${applicationId}.NIP44_ENCRYPT;${applicationId}.NIP44_DECRYPT;${applicationId}.GET_PUBLIC_KEY;${applicationId}.DECRYPT_ZAP_EVENT"

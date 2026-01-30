@@ -923,6 +923,11 @@
     <string name="settings_wallet_nwc_qr_code_scan_title">Connect NWC Wallet</string>
     <string name="settings_wallet_nwc_qr_code_scan_hint">Scan the NWC\nconnection QR code</string>
     <string name="settings_wallet_nwc_qr_code_scan_paste">Paste Connection String</string>
+    <string name="nwc_service_notification_channel_name">NWC Wallet Service</string>
+    <string name="nwc_service_notification_title">NWC Wallet Service</string>
+    <string name="nwc_service_notification_text">Processing wallet connection requests</string>
+    <string name="settings_wallet_nwc_service_start">Start wallet service</string>
+    <string name="settings_wallet_nwc_service_stop">Stop wallet service</string>
 
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_notifications_error_update_settings">Unable to update notification settings.</string>
