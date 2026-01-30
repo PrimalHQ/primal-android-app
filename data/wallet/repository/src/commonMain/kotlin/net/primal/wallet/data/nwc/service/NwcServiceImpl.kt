@@ -121,9 +121,9 @@ class NwcServiceImpl internal constructor(
         scope.launch {
             client.incomingRequests.collect { request ->
                 if (cache.seen(request.eventId)) return@collect
+                cache.mark(request.eventId)
                 Napier.d(tag = TAG) { "Received NWC request: ${request.eventId}" }
                 processRequest(request)
-                cache.mark(request.eventId)
             }
         }
 
@@ -131,10 +131,10 @@ class NwcServiceImpl internal constructor(
         scope.launch {
             client.errors.collect { error ->
                 if (cache.seen(error.nostrEvent.id)) return@collect
+                cache.mark(error.nostrEvent.id)
                 Napier.w(tag = TAG, throwable = error.cause) {
                     "NWC request error for event: ${error.nostrEvent.id}"
                 }
-                cache.mark(error.nostrEvent.id)
                 sendErrorResponse(error)
             }
         }
