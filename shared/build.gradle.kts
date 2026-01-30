@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 import co.touchlab.skie.configuration.DefaultArgumentInterop
 import co.touchlab.skie.configuration.FlowInterop
 import de.undercouch.gradle.tasks.download.Download
@@ -17,7 +19,9 @@ val breezSparkVersion = libs.versions.breez.spark.kmp.sdk.get()
 val breezFrameworkDir = layout.buildDirectory.dir("breez-sdk-spark/$breezSparkVersion")
 
 val downloadBreezFramework by tasks.registering(Download::class) {
-    src("https://github.com/breez/breez-sdk-spark-swift/releases/download/$breezSparkVersion/breez_sdk_sparkFFI.xcframework.zip")
+    src(
+        "https://github.com/breez/breez-sdk-spark-swift/releases/download/$breezSparkVersion/breez_sdk_sparkFFI.xcframework.zip",
+    )
     dest(layout.buildDirectory.file("breez-sdk-spark/$breezSparkVersion/breez_sdk_sparkFFI.xcframework.zip"))
     overwrite(false)
 }
