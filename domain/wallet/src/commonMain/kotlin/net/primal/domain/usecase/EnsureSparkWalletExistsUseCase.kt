@@ -39,8 +39,8 @@ class EnsureSparkWalletExistsUseCase(
             // Fetch after register so we persist the LN address locally
             sparkWalletAccountRepository.fetchWalletAccountInfo(userId, walletId).getOrThrow()
 
-            if (isNewWallet) {
-                // Activate last, only after all data is persisted locally
+            // Select this wallet if no wallet is currently selected
+            if (walletAccountRepository.getActiveWallet(userId) == null) {
                 walletAccountRepository.setActiveWallet(userId = userId, walletId = walletId)
             }
 
