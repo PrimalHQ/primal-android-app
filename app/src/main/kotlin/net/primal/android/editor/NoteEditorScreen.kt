@@ -86,6 +86,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.drawer.multiaccount.ui.AccountSwitcherBottomSheet
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.ui.NoteAttachmentPreview
@@ -134,6 +135,19 @@ fun NoteEditorScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+
+    if (state.showAccountSwitcher && state.selectedAccount != null) {
+        AccountSwitcherBottomSheet(
+            accounts = state.availableAccounts,
+            activeAccount = state.selectedAccount,
+            onAccountClick = {
+                eventPublisher(UiEvent.SelectAccount(it))
+            },
+            onDismissRequest = {
+                eventPublisher(UiEvent.HideAccountSwitcher)
+            },
+        )
+    }
 
     SnackbarErrorHandler(
         error = state.error,
@@ -508,7 +522,6 @@ private fun NoteEditor(
         awaitFrame()
         focusRequester.requestFocus()
     }
-    val clipboardManager = LocalClipboardManager.current
 
     Column {
         if (state.isReply && state.replyToNote != null && !state.isQuoting) {
@@ -521,67 +534,92 @@ private fun NoteEditor(
             )
         }
 
-        Row {
-            UniversalAvatarThumbnail(
-                modifier = Modifier
-                    .drawWithCache {
-                        onDrawBehind {
-                            if (state.isReply && !state.isQuoting) {
-                                drawLine(
-                                    color = outlineColor,
-                                    start = Offset(
-                                        x = connectionLineOffsetXDp.toPx(),
-                                        y = (-32).dp.toPx(),
-                                    ),
-                                    end = Offset(
-                                        x = connectionLineOffsetXDp.toPx(),
-                                        y = size.height / 2,
-                                    ),
-                                    strokeWidth = 2.dp.toPx(),
-                                    cap = StrokeCap.Square,
-                                )
-                            }
+        NoteEditorInputArea(
+            state = state,
+            focusRequester = focusRequester,
+            outlineColor = outlineColor,
+            onReplyNoteHeightChanged = onReplyNoteHeightChanged,
+            eventPublisher = eventPublisher,
+        )
+    }
+}
+
+@Composable
+private fun NoteEditorInputArea(
+    state: NoteEditorContract.UiState,
+    focusRequester: FocusRequester,
+    outlineColor: Color,
+    onReplyNoteHeightChanged: (Int) -> Unit,
+    eventPublisher: (UiEvent) -> Unit,
+) {
+    val clipboardManager = LocalClipboardManager.current
+
+    Row {
+        UniversalAvatarThumbnail(
+            modifier = Modifier
+                .drawWithCache {
+                    onDrawBehind {
+                        if (state.isReply && !state.isQuoting) {
+                            drawLine(
+                                color = outlineColor,
+                                start = Offset(
+                                    x = connectionLineOffsetXDp.toPx(),
+                                    y = (-32).dp.toPx(),
+                                ),
+                                end = Offset(
+                                    x = connectionLineOffsetXDp.toPx(),
+                                    y = size.height / 2,
+                                ),
+                                strokeWidth = 2.dp.toPx(),
+                                cap = StrokeCap.Square,
+                            )
                         }
                     }
-                    .padding(start = 16.dp)
-                    .padding(top = 8.dp),
-                avatarSize = avatarSizeDp,
-                avatarCdnImage = state.activeAccountAvatarCdnImage,
-                avatarBlossoms = state.activeAccountBlossoms,
-                legendaryCustomization = state.activeAccountLegendaryCustomization,
-            )
+                }
+                .padding(start = 16.dp, top = 8.dp),
+            avatarSize = avatarSizeDp,
+            avatarCdnImage = state.selectedAccount?.avatarCdnImage,
+            avatarBlossoms = state.selectedAccount?.avatarBlossoms ?: emptyList(),
+            legendaryCustomization = state.selectedAccount?.legendaryCustomization,
+            onClick = if (state.attachments.isEmpty()) {
+                {
+                    eventPublisher(UiEvent.ShowAccountSwitcher)
+                }
+            } else {
+                null
+            },
+        )
 
-            NoteOutlinedTextField(
-                modifier = Modifier
-                    .offset(x = (-8).dp)
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .focusRequester(focusRequester)
-                    .onSizeChanged { onReplyNoteHeightChanged(it.height) },
-                value = state.content,
-                onValueChange = {
-                    val clipboardText = clipboardManager.getText()
-                    if (clipboardText != null && it.text.contains(clipboardText.text)) {
-                        eventPublisher(UiEvent.PasteContent(content = it))
-                    } else {
-                        eventPublisher(UiEvent.UpdateContent(content = it))
-                    }
-                },
-                taggedUsers = state.taggedUsers,
-                enabled = !state.publishing,
-                placeholder = {
-                    Text(
-                        text = stringResource(id = R.string.note_editor_content_placeholder),
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                        style = AppTheme.typography.bodyMedium,
-                    )
-                },
-                textStyle = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
-                colors = PrimalDefaults.transparentOutlinedTextFieldColors(),
-                onUserTaggingModeChanged = { eventPublisher(UiEvent.ToggleSearchUsers(enabled = it)) },
-                onUserTagSearch = { eventPublisher(UiEvent.SearchUsers(query = it)) },
-            )
-        }
+        NoteOutlinedTextField(
+            modifier = Modifier
+                .offset(x = (-8).dp)
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .focusRequester(focusRequester)
+                .onSizeChanged { onReplyNoteHeightChanged(it.height) },
+            value = state.content,
+            onValueChange = {
+                val clipboardText = clipboardManager.getText()
+                if (clipboardText != null && it.text.contains(clipboardText.text)) {
+                    eventPublisher(UiEvent.PasteContent(content = it))
+                } else {
+                    eventPublisher(UiEvent.UpdateContent(content = it))
+                }
+            },
+            taggedUsers = state.taggedUsers,
+            enabled = !state.publishing,
+            placeholder = {
+                Text(
+                    text = stringResource(id = R.string.note_editor_content_placeholder),
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    style = AppTheme.typography.bodyMedium,
+                )
+            },
+            textStyle = AppTheme.typography.bodyMedium.copy(lineHeight = 20.sp),
+            colors = PrimalDefaults.transparentOutlinedTextFieldColors(),
+            onUserTaggingModeChanged = { eventPublisher(UiEvent.ToggleSearchUsers(enabled = it)) },
+            onUserTagSearch = { eventPublisher(UiEvent.SearchUsers(query = it)) },
+        )
     }
 }
 

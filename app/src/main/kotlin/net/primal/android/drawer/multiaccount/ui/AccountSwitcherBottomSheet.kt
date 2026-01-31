@@ -59,11 +59,11 @@ fun AccountSwitcherBottomSheet(
     activeAccount: UserAccountUi,
     accounts: List<UserAccountUi>,
     onDismissRequest: () -> Unit,
-    onLogoutClick: (String) -> Unit,
     onAccountClick: (String) -> Unit,
-    onCreateNewAccountClick: () -> Unit,
-    onAddExistingAccountClick: () -> Unit,
     sheetState: SheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    onLogoutClick: ((String) -> Unit)? = null,
+    onCreateNewAccountClick: (() -> Unit)? = null,
+    onAddExistingAccountClick: (() -> Unit)? = null,
 ) {
     var isEditMode by remember { mutableStateOf(false) }
 
@@ -85,6 +85,7 @@ fun AccountSwitcherBottomSheet(
             BottomSheetTopAppBar(
                 isEditMode = isEditMode,
                 onToggleEditMode = { isEditMode = !isEditMode },
+                showEditButton = onLogoutClick != null,
             )
 
             AnimatedContent(
@@ -103,7 +104,8 @@ fun AccountSwitcherBottomSheet(
                     },
                 )
             }
-            Column {
+
+            if (onCreateNewAccountClick != null) {
                 PlainTextButton(
                     text = stringResource(id = R.string.account_switcher_create_new_account),
                     onClick = {
@@ -112,6 +114,9 @@ fun AccountSwitcherBottomSheet(
                         }
                     },
                 )
+            }
+
+            if (onAddExistingAccountClick != null) {
                 PlainTextButton(
                     text = stringResource(id = R.string.account_switcher_add_existing_account),
                     onClick = {
@@ -147,7 +152,7 @@ private fun PlainTextButton(
 private fun AccountList(
     modifier: Modifier = Modifier,
     isEditMode: Boolean,
-    onLogoutClick: (String) -> Unit,
+    onLogoutClick: ((String) -> Unit)?,
     activeAccount: UserAccountUi,
     accounts: List<UserAccountUi>,
     onAccountClick: (String) -> Unit,
@@ -167,7 +172,7 @@ private fun AccountList(
             )
         }
         items(
-            items = accounts,
+            items = accounts.filter { it.pubkey != activeAccount.pubkey },
             key = { it.pubkey },
         ) { account ->
             AccountListItem(
@@ -185,7 +190,7 @@ private fun AccountListItem(
     modifier: Modifier = Modifier,
     account: UserAccountUi,
     isEditMode: Boolean,
-    onLogoutClick: (String) -> Unit,
+    onLogoutClick: ((String) -> Unit)?,
     onAccountClick: (String) -> Unit,
     isActive: Boolean = false,
 ) {
@@ -207,7 +212,7 @@ private fun AccountListItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             ) {
-                if (isEditMode) {
+                if (isEditMode && onLogoutClick != null) {
                     IconButton(onClick = { onLogoutClick(account.pubkey) }) {
                         Icon(
                             modifier = Modifier.size(24.dp),
@@ -257,7 +262,11 @@ private fun AccountListItem(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-private fun BottomSheetTopAppBar(isEditMode: Boolean, onToggleEditMode: () -> Unit) {
+private fun BottomSheetTopAppBar(
+    isEditMode: Boolean,
+    onToggleEditMode: () -> Unit,
+    showEditButton: Boolean,
+) {
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
@@ -272,18 +281,20 @@ private fun BottomSheetTopAppBar(isEditMode: Boolean, onToggleEditMode: () -> Un
             )
         },
         navigationIcon = {
-            TextButton(
-                onClick = onToggleEditMode,
-            ) {
-                Text(
-                    text = if (isEditMode) {
-                        stringResource(id = R.string.account_switcher_done)
-                    } else {
-                        stringResource(id = R.string.account_switcher_edit)
-                    },
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    style = AppTheme.typography.bodyLarge,
-                )
+            if (showEditButton) {
+                TextButton(
+                    onClick = onToggleEditMode,
+                ) {
+                    Text(
+                        text = if (isEditMode) {
+                            stringResource(id = R.string.account_switcher_done)
+                        } else {
+                            stringResource(id = R.string.account_switcher_edit)
+                        },
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                        style = AppTheme.typography.bodyLarge,
+                    )
+                }
             }
         },
     )
