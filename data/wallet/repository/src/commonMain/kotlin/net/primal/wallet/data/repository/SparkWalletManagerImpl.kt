@@ -17,7 +17,7 @@ internal class SparkWalletManagerImpl(
             if (!recoveryPhraseValidator.isValid(seedWords)) {
                 error("Invalid recovery phrase: expected 12, 15, 18, 21, or 24 valid BIP39 words.")
             }
-            breezSdkInstanceManager.createWallet(seedWords)
+            breezSdkInstanceManager.initWallet(seedWords)
         }
 
     override suspend fun disconnectWallet(walletId: String): Result<Unit> =
