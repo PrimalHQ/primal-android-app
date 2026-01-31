@@ -16,6 +16,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.SparkWalletManager
 
@@ -24,6 +25,7 @@ class SparkWalletLifecycleInitializer @Inject constructor(
     dispatchers: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val sparkWalletManager: SparkWalletManager,
+    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
 ) {
 
@@ -59,7 +61,17 @@ class SparkWalletLifecycleInitializer @Inject constructor(
         }
     }
 
+    private suspend fun isEligibleForSparkWallet(userId: String): Boolean {
+        val status = primalWalletAccountRepository.fetchWalletStatus(userId).getOrNull() ?: return false
+        return !status.hasCustodialWallet || status.hasMigratedToSparkWallet
+    }
+
     private suspend fun initializeWalletWithRetry(userId: String) {
+        if (!isEligibleForSparkWallet(userId)) {
+            Napier.d { "User userId=$userId not eligible for Spark wallet, skipping initialization" }
+            return
+        }
+
         repeat(MAX_RETRY_ATTEMPTS) { attempt ->
             if (hasUserChanged(userId)) {
                 Napier.d { "User changed during retry, aborting initialization for userId=$userId" }
