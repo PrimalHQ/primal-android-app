@@ -98,27 +98,29 @@ fun WalletSettingsScreen(
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var pendingTransactions by remember { mutableStateOf<List<Transaction>>(emptyList()) }
+    val transactionsToExport = remember { mutableListOf<Transaction>() }
 
     val saveFileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("text/csv"),
     ) { uri ->
-        if (uri != null && pendingTransactions.isNotEmpty()) {
+        if (uri != null && transactionsToExport.isNotEmpty()) {
             scope.launch {
-                saveTransactionsToUri(context, uri, pendingTransactions)
-                pendingTransactions = emptyList()
+                saveTransactionsToUri(context, uri, transactionsToExport.toList())
+                transactionsToExport.clear()
             }
         } else {
-            pendingTransactions = emptyList()
+            transactionsToExport.clear()
         }
     }
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                is WalletSettingsContract.SideEffect.ExportTransactions -> {
-                    pendingTransactions = effect.transactions
-                    saveFileLauncher.launch("PrimalTransactions.csv")
+                is WalletSettingsContract.SideEffect.TransactionsReadyForExport -> {
+                    transactionsToExport.clear()
+                    transactionsToExport.addAll(effect.transactions)
+                    val fileName = "${uiState.value.activeWallet?.type}_transactions.csv"
+                    saveFileLauncher.launch(fileName)
                 }
             }
         }
@@ -215,6 +217,7 @@ fun WalletSettingsScreen(
                 SettingsItem(
                     headlineText = stringResource(id = R.string.settings_wallet_export_transactions_title),
                     supportText = stringResource(id = R.string.settings_wallet_export_transactions_subtitle),
+                    enabled = !state.isExportingTransactions,
                     trailingContent = {
                         if (state.isExportingTransactions) {
                             CircularProgressIndicator(
@@ -225,11 +228,7 @@ fun WalletSettingsScreen(
                             Icon(imageVector = PrimalIcons.DownloadsFilled, contentDescription = null)
                         }
                     },
-                    onClick = {
-                        if (!state.isExportingTransactions) {
-                            eventPublisher(UiEvent.ExportTransactions)
-                        }
-                    },
+                    onClick = { eventPublisher(UiEvent.RequestTransactionExport) },
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 

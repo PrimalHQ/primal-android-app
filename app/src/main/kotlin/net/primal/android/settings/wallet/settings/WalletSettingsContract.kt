@@ -23,7 +23,7 @@ interface WalletSettingsContract {
     sealed class UiEvent {
         data object DisconnectWallet : UiEvent()
         data object RequestFetchWalletConnections : UiEvent()
-        data object ExportTransactions : UiEvent()
+        data object RequestTransactionExport : UiEvent()
         data class RevokeConnection(val nwcPubkey: String) : UiEvent()
         data class UpdateUseExternalWallet(val value: Boolean) : UiEvent()
         data class UpdateMinTransactionAmount(val amountInSats: Long) : UiEvent()
@@ -31,7 +31,7 @@ interface WalletSettingsContract {
     }
 
     sealed class SideEffect {
-        data class ExportTransactions(val transactions: List<Transaction>) : SideEffect()
+        data class TransactionsReadyForExport(val transactions: List<Transaction>) : SideEffect()
     }
 
     enum class ConnectionsState {

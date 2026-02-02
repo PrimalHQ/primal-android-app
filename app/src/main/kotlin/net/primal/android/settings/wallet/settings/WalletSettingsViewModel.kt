@@ -111,7 +111,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     is UiEvent.ConnectExternalWallet -> if (it.connectionLink.isNwcUrl()) {
                         connectWallet(nwcUrl = it.connectionLink)
                     }
-                    UiEvent.ExportTransactions -> exportTransactions()
+                    UiEvent.RequestTransactionExport -> exportTransactions()
                 }
             }
         }
@@ -229,6 +229,6 @@ class WalletSettingsViewModel @AssistedInject constructor(
             }
             val transactions = walletRepository.allTransactions(walletId = activeWalletId)
             setState { copy(isExportingTransactions = false) }
-            setEffect(SideEffect.ExportTransactions(transactions = transactions))
+            setEffect(SideEffect.TransactionsReadyForExport(transactions = transactions))
         }
 }
