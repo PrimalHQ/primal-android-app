@@ -11,10 +11,12 @@ import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.local.dao.SparkWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.db.WalletDatabase
+import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.validator.RecoveryPhraseValidator
 
 internal class SparkWalletAccountRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
+    private val walletApi: PrimalWalletApi,
     private val walletDatabase: WalletDatabase,
 ) : SparkWalletAccountRepository {
 
@@ -23,16 +25,30 @@ internal class SparkWalletAccountRepositoryImpl(
     override suspend fun fetchWalletAccountInfo(userId: String, walletId: String): Result<Unit> =
         runCatching {
             withContext(dispatcherProvider.io()) {
+                val walletStatus = walletApi.getWalletStatus(userId)
+                val lightningAddress = walletStatus.lightningAddress?.takeIf { walletStatus.hasSparkWallet }
                 walletDatabase.withTransaction {
                     walletDatabase.wallet().insertOrIgnoreWalletInfo(
                         info = WalletInfo(
                             walletId = walletId,
                             userId = userId,
-                            lightningAddress = null,
+                            lightningAddress = lightningAddress?.asEncryptable(),
                             type = WalletType.SPARK,
                         ),
                     )
+                    // Updating in separate call to avoid losing balance state
+                    walletDatabase.wallet().updateWalletLightningAddress(
+                        walletId = walletId,
+                        lightningAddress = lightningAddress?.asEncryptable(),
+                    )
                 }
+            }
+        }
+
+    override suspend fun registerSparkWallet(userId: String, walletId: String): Result<Unit> =
+        runCatching {
+            withContext(dispatcherProvider.io()) {
+                walletApi.registerSparkWallet(userId = userId, sparkWalletId = walletId)
             }
         }
 
@@ -72,6 +88,12 @@ internal class SparkWalletAccountRepositoryImpl(
                     ),
                 )
             }
+        }
+
+    override suspend fun isRegistered(walletId: String): Boolean =
+        withContext(dispatcherProvider.io()) {
+            val info = walletDatabase.wallet().findWalletInfo(walletId)
+            info?.lightningAddress?.decrypted?.isNotBlank() == true
         }
 
     override suspend fun isWalletBackedUp(walletId: String): Boolean =

@@ -7,4 +7,5 @@ import kotlinx.serialization.Serializable
 data class WalletStatusResponse(
     @SerialName("has_custodial_wallet") val hasCustodialWallet: Boolean,
     @SerialName("has_spark_wallet") val hasSparkWallet: Boolean,
+    @SerialName("lightning_network_address") val lightningAddress: String? = null,
 )

@@ -65,4 +65,6 @@ interface PrimalWalletApi {
     ): List<MiningFeeTier>
 
     suspend fun getExchangeRate(userId: String): Double
+
+    suspend fun registerSparkWallet(userId: String, sparkWalletId: String)
 }

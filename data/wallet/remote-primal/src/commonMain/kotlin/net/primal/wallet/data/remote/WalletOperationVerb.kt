@@ -16,4 +16,5 @@ enum class WalletOperationVerb(val identifier: String) {
     NWC_CONNECTIONS("nwc_connections"),
     NWC_REVOKE_CONNECTION("nwc_revoke"),
     NWC_CREATE_NEW_CONNECTION("nwc_connect"),
+    REGISTER_SPARK_PUBKEY("register_spark_pubkey"),
 }

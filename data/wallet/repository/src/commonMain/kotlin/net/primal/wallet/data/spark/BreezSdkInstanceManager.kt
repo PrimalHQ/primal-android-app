@@ -32,7 +32,7 @@ internal class BreezSdkInstanceManager(
     private val instances = mutableMapOf<String, BreezSdk>()
 
     /**
-     * Creates and initializes a new Spark wallet from seed words.
+     * Initializes a Spark wallet from seed words.
      *
      * This method:
      * 1. Connects with temporary storage to derive the walletId (pubkey)
@@ -42,10 +42,9 @@ internal class BreezSdkInstanceManager(
      * After creation, use [getInstance] or [requireInstance] to access the SDK.
      *
      * @param seedWords BIP39 mnemonic seed words (12 or 24 words)
-     * @return The walletId (pubkey) for the created wallet
-     * @throws IllegalStateException if wallet already exists
+     * @return The walletId (pubkey) for the created wallet, or existing walletId if already initialized
      */
-    suspend fun createWallet(seedWords: String): String =
+    suspend fun initWallet(seedWords: String): String =
         mutex.withLock {
             val tempId = "temp_init"
             storageProvider.deleteStorage(tempId)
@@ -64,12 +63,12 @@ internal class BreezSdkInstanceManager(
                 tempSdk.close()
                 // NOTE: Don't delete temp storage here - the SDK has background tasks that may
                 // still reference this path after disconnect/close. The temp storage will be
-                // cleaned up on the next createWallet call (see deleteStorage above).
+                // cleaned up on the next initWallet call (see deleteStorage above).
             }
 
-            // Check if wallet already exists in memory
+            // Return existing instance if already initialized
             if (instances.containsKey(walletId)) {
-                throw IllegalStateException("Wallet already exists: $walletId")
+                return walletId
             }
 
             // Reconnect with proper walletId-based storage

@@ -48,7 +48,7 @@ class CreateAccountHandler @Inject constructor(
             userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata)
             val contacts = setOf(userId) + interests.mapToContacts()
             userRepository.setFollowList(userId = userId, contacts = contacts)
-            ensureSparkWalletExistsUseCase.invoke(userId = userId, setAsActive = true)
+            ensureSparkWalletExistsUseCase.invoke(userId = userId)
             settingsRepository.fetchAndPersistAppSettings(
                 authorizationEvent = eventsSignatureHandler.signNostrEvent(
                     unsignedNostrEvent = NostrUnsignedEvent(

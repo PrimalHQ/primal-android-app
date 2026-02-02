@@ -83,6 +83,19 @@ internal class NwcBudgetManager(
                 .findConnection(connectionId)?.dailyBudgetSats != null
         }
 
+    suspend fun getAvailableBudgetSats(connectionId: String): Long? =
+        withContext(dispatcherProvider.io()) {
+            val dailyBudgetSats = walletDatabase.nwcConnections()
+                .findConnection(connectionId)?.dailyBudgetSats?.decrypted
+                ?: return@withContext null
+
+            val today = getCurrentBudgetDate()
+            val confirmedSpend = getConfirmedSpend(connectionId, today)
+            val pendingHolds = getPendingHoldsSum(connectionId, today)
+
+            (dailyBudgetSats - confirmedSpend - pendingHolds).coerceAtLeast(0L)
+        }
+
     /**
      * Places a hold on the daily budget for the given amount.
      *

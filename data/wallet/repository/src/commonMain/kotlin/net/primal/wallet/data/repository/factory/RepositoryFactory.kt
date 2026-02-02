@@ -163,9 +163,16 @@ abstract class RepositoryFactory {
         )
     }
 
-    fun createSparkWalletAccountRepository(): SparkWalletAccountRepository {
+    fun createSparkWalletAccountRepository(
+        primalWalletApiClient: PrimalApiClient,
+        nostrEventSignatureHandler: NostrEventSignatureHandler,
+    ): SparkWalletAccountRepository {
         return SparkWalletAccountRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
+            walletApi = WalletApiServiceFactory.createPrimalWalletApi(
+                primalApiClient = primalWalletApiClient,
+                nostrEventSignatureHandler = nostrEventSignatureHandler,
+            ),
             walletDatabase = resolveWalletDatabase(),
         )
     }
