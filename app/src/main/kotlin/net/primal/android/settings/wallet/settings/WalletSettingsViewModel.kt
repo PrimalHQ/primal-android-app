@@ -28,6 +28,7 @@ import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
+import net.primal.domain.wallet.capabilities
 
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
 class WalletSettingsViewModel @AssistedInject constructor(
@@ -137,11 +138,14 @@ class WalletSettingsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
                 .collect { wallet ->
+                    val shouldShowBackup = wallet.shouldShowBackup
                     setState {
                         copy(
                             activeWallet = wallet,
                             useExternalWallet = wallet == null || wallet is Wallet.NWC,
-                            showBackupWidget = wallet.shouldShowBackup,
+                            showBackupWidget = shouldShowBackup,
+                            showBackupListItem = wallet?.capabilities?.supportsWalletBackup == true &&
+                                !shouldShowBackup,
                         )
                     }
                 }

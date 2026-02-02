@@ -12,6 +12,7 @@ interface WalletSettingsContract {
         val nwcConnectionsInfo: List<PrimalNwcConnectionInfo> = emptyList(),
         val connectionsState: ConnectionsState = ConnectionsState.Loading,
         val showBackupWidget: Boolean = false,
+        val showBackupListItem: Boolean = false,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
         val activeAccountBlossoms: List<String> = emptyList(),
