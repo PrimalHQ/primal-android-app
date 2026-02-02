@@ -7,12 +7,15 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.android.settings.wallet.settings.WalletSettingsContract.SideEffect
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -50,6 +53,10 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    private val _effects = Channel<SideEffect>()
+    val effects = _effects.receiveAsFlow()
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
         if (nwcConnectionUrl != null) {
@@ -105,7 +112,6 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         connectWallet(nwcUrl = it.connectionLink)
                     }
                     UiEvent.ExportTransactions -> exportTransactions()
-                    UiEvent.TransactionsExported -> clearTransactions()
                 }
             }
         }
@@ -222,8 +228,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 return@launch
             }
             val transactions = walletRepository.allTransactions(walletId = activeWalletId)
-            setState { copy(transactions = transactions, isExportingTransactions = false) }
+            setState { copy(isExportingTransactions = false) }
+            setEffect(SideEffect.ExportTransactions(transactions = transactions))
         }
-
-    private fun clearTransactions() = setState { copy(transactions = emptyList()) }
 }

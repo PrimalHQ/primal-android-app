@@ -61,7 +61,6 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.core.service.PrimalNwcService
 import net.primal.android.core.utils.hasNotificationPermission
-import net.primal.android.core.utils.saveTransactionsToUri
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.ui.ConnectedAppsSettings
@@ -71,7 +70,9 @@ import net.primal.android.settings.wallet.settings.ui.PrimalWalletSettings
 import net.primal.android.settings.wallet.settings.ui.WalletBackupWidget
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.wallet.utils.saveTransactionsToUri
 import net.primal.domain.links.CdnImage
+import net.primal.domain.transactions.Transaction
 import net.primal.domain.utils.isPrimalWalletAndActivated
 import net.primal.domain.wallet.NostrWalletKeypair
 import net.primal.domain.wallet.Wallet
@@ -97,20 +98,29 @@ fun WalletSettingsScreen(
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var pendingTransactions by remember { mutableStateOf<List<Transaction>>(emptyList()) }
+
     val saveFileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("text/csv"),
     ) { uri ->
-        if (uri != null) {
+        if (uri != null && pendingTransactions.isNotEmpty()) {
             scope.launch {
-                saveTransactionsToUri(context, uri, uiState.value.transactions)
+                saveTransactionsToUri(context, uri, pendingTransactions)
+                pendingTransactions = emptyList()
             }
+        } else {
+            pendingTransactions = emptyList()
         }
-        viewModel.setEvent(UiEvent.TransactionsExported)
     }
 
-    LaunchedEffect(uiState.value.transactions) {
-        if (uiState.value.transactions.isNotEmpty()) {
-            saveFileLauncher.launch("PrimalTransactions.csv")
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                is WalletSettingsContract.SideEffect.ExportTransactions -> {
+                    pendingTransactions = effect.transactions
+                    saveFileLauncher.launch("PrimalTransactions.csv")
+                }
+            }
         }
     }
 

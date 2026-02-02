@@ -18,18 +18,20 @@ interface WalletSettingsContract {
         val activeAccountBlossoms: List<String> = emptyList(),
         val activeAccountDisplayName: String = "",
         val isExportingTransactions: Boolean = false,
-        val transactions: List<Transaction> = emptyList(),
     )
 
     sealed class UiEvent {
         data object DisconnectWallet : UiEvent()
         data object RequestFetchWalletConnections : UiEvent()
         data object ExportTransactions : UiEvent()
-        data object TransactionsExported : UiEvent()
         data class RevokeConnection(val nwcPubkey: String) : UiEvent()
         data class UpdateUseExternalWallet(val value: Boolean) : UiEvent()
         data class UpdateMinTransactionAmount(val amountInSats: Long) : UiEvent()
         data class ConnectExternalWallet(val connectionLink: String) : UiEvent()
+    }
+
+    sealed class SideEffect {
+        data class ExportTransactions(val transactions: List<Transaction>) : SideEffect()
     }
 
     enum class ConnectionsState {
