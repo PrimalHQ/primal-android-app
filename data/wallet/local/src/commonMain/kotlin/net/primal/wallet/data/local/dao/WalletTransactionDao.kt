@@ -54,6 +54,16 @@ interface WalletTransactionDao {
         until: Long?,
     ): List<WalletTransactionData>
 
+    @Transaction
+    @Query(
+        """
+            SELECT * FROM WalletTransactionData
+            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED") AND walletId IS :walletId
+            ORDER BY createdAt DESC
+        """,
+    )
+    suspend fun allTransactionsByWalletId(walletId: String): List<WalletTransactionData>
+
     @Query("SELECT * FROM WalletTransactionData WHERE walletId IS :walletId ORDER BY updatedAt ASC LIMIT 1")
     suspend fun firstByWalletId(walletId: String): WalletTransactionData?
 

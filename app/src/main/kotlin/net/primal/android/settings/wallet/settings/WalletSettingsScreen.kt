@@ -1,5 +1,7 @@
 package net.primal.android.settings.wallet.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,10 +14,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -23,10 +27,12 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,6 +48,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalSwitch
@@ -54,6 +61,7 @@ import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.core.service.PrimalNwcService
 import net.primal.android.core.utils.hasNotificationPermission
+import net.primal.android.core.utils.saveTransactionsToUri
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.ui.ConnectedAppsSettings
@@ -84,6 +92,25 @@ fun WalletSettingsScreen(
         when (it) {
             Lifecycle.Event.ON_START -> viewModel.setEvent(UiEvent.RequestFetchWalletConnections)
             else -> Unit
+        }
+    }
+
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val saveFileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv"),
+    ) { uri ->
+        if (uri != null) {
+            scope.launch {
+                saveTransactionsToUri(context, uri, uiState.value.transactions)
+            }
+        }
+        viewModel.setEvent(UiEvent.TransactionsExported)
+    }
+
+    LaunchedEffect(uiState.value.transactions) {
+        if (uiState.value.transactions.isNotEmpty()) {
+            saveFileLauncher.launch("PrimalTransactions.csv")
         }
     }
 
@@ -179,7 +206,19 @@ fun WalletSettingsScreen(
                     headlineText = stringResource(id = R.string.settings_wallet_export_transactions_title),
                     supportText = stringResource(id = R.string.settings_wallet_export_transactions_subtitle),
                     trailingContent = {
-                        Icon(imageVector = PrimalIcons.DownloadsFilled, contentDescription = null)
+                        if (state.isExportingTransactions) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            Icon(imageVector = PrimalIcons.DownloadsFilled, contentDescription = null)
+                        }
+                    },
+                    onClick = {
+                        if (!state.isExportingTransactions) {
+                            eventPublisher(UiEvent.ExportTransactions)
+                        }
                     },
                 )
                 Spacer(modifier = Modifier.height(8.dp))

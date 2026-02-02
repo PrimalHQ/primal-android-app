@@ -104,6 +104,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     is UiEvent.ConnectExternalWallet -> if (it.connectionLink.isNwcUrl()) {
                         connectWallet(nwcUrl = it.connectionLink)
                     }
+                    UiEvent.ExportTransactions -> exportTransactions()
+                    UiEvent.TransactionsExported -> clearTransactions()
                 }
             }
         }
@@ -211,4 +213,17 @@ class WalletSettingsViewModel @AssistedInject constructor(
             )
             walletRepository.deleteAllTransactions(userId = activeAccountStore.activeUserId())
         }
+
+    private fun exportTransactions() =
+        viewModelScope.launch {
+            setState { copy(isExportingTransactions = true) }
+            val activeWalletId = state.value.activeWallet?.walletId ?: run {
+                setState { copy(isExportingTransactions = false) }
+                return@launch
+            }
+            val transactions = walletRepository.allTransactions(walletId = activeWalletId)
+            setState { copy(transactions = transactions, isExportingTransactions = false) }
+        }
+
+    private fun clearTransactions() = setState { copy(transactions = emptyList()) }
 }

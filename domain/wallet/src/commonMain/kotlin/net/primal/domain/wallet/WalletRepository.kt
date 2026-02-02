@@ -30,6 +30,8 @@ interface WalletRepository {
 
     suspend fun latestTransactions(walletId: String, limit: Int): List<Transaction>
 
+    suspend fun allTransactions(walletId: String): List<Transaction>
+
     suspend fun queryTransactions(
         walletId: String,
         type: TxType?,
