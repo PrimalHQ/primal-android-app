@@ -196,6 +196,9 @@ fun WalletDashboardScreen(
 
                 is DashboardError.InAppPurchaseConfirmationFailed ->
                     context.getString(R.string.wallet_in_app_purchase_error_confirmation_failed)
+
+                is DashboardError.WalletCreationFailed ->
+                    context.getString(R.string.wallet_dashboard_create_wallet_error)
             }
         },
         onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
@@ -471,6 +474,21 @@ fun WalletDashboardScreen(
                             },
                         )
                     }
+                }
+
+                else -> {
+                    WalletCallToActionBox(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .animateContentSize()
+                            .padding(paddingValues)
+                            .padding(horizontal = 32.dp)
+                            .padding(bottom = 32.dp)
+                            .navigationBarsPadding(),
+                        message = stringResource(id = R.string.wallet_dashboard_create_wallet_hint),
+                        actionLabel = stringResource(id = R.string.wallet_dashboard_create_wallet_button),
+                        onActionClick = { eventPublisher(UiEvent.CreateWallet) },
+                    )
                 }
             }
         },

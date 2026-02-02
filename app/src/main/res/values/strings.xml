@@ -1227,6 +1227,9 @@
     <string name="zap_warning_bottom_sheet_no_sats_to_zap">Insufficient sats to zap, you need to get some sats before you can zap.</string>
     <string name="zap_warning_bottom_sheet_go_to_wallet_button">Go to Wallet</string>
 
+    <string name="wallet_dashboard_create_wallet_button">Create Wallet</string>
+    <string name="wallet_dashboard_create_wallet_hint">You don’t have an active wallet.</string>
+    <string name="wallet_dashboard_create_wallet_error">Unable to create wallet.</string>
     <string name="wallet_dashboard_no_sats_hint">You need sats to zap people on Nostr</string>
     <string name="wallet_dashboard_no_transactions_hint">Your transactions will appear here.</string>
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
