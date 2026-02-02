@@ -31,7 +31,6 @@ interface NoteEditorContract {
         val taggedUsers: List<NoteTaggedUser> = emptyList(),
         val referencedNostrUris: List<ReferencedUri<*>> = emptyList(),
         val userTaggingState: UserTaggingState = UserTaggingState(),
-        val showAccountSwitcher: Boolean = false,
         val availableAccounts: List<UserAccountUi> = emptyList(),
     ) {
         val isReply: Boolean get() = replyToConversation.isNotEmpty()
@@ -52,8 +51,6 @@ interface NoteEditorContract {
         data class SearchUsers(val query: String) : UiEvent()
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
         data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
-        data object ShowAccountSwitcher : UiEvent()
-        data object HideAccountSwitcher : UiEvent()
         data class SelectAccount(val accountId: String) : UiEvent()
         data object DismissError : UiEvent()
     }

@@ -267,14 +267,9 @@ class NoteEditorViewModel @AssistedInject constructor(
                             )
                         }
 
-                    is UiEvent.ShowAccountSwitcher -> setState { copy(showAccountSwitcher = true) }
-                    is UiEvent.HideAccountSwitcher -> setState { copy(showAccountSwitcher = false) }
                     is UiEvent.SelectAccount -> setState {
                         val selectedAccount = availableAccounts.find { it.pubkey == event.accountId }
-                        copy(
-                            showAccountSwitcher = false,
-                            selectedAccount = selectedAccount ?: this.selectedAccount,
-                        )
+                        copy(selectedAccount = selectedAccount ?: this.selectedAccount)
                     }
                 }
             }

@@ -135,16 +135,18 @@ fun NoteEditorScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    var showAccountSwitcher by remember { mutableStateOf(false) }
 
-    if (state.showAccountSwitcher && state.selectedAccount != null) {
+    if (showAccountSwitcher && state.selectedAccount != null) {
         AccountSwitcherBottomSheet(
             accounts = state.availableAccounts,
             activeAccount = state.selectedAccount,
             onAccountClick = {
+                showAccountSwitcher = false
                 eventPublisher(UiEvent.SelectAccount(it))
             },
             onDismissRequest = {
-                eventPublisher(UiEvent.HideAccountSwitcher)
+                showAccountSwitcher = false
             },
         )
     }
@@ -194,6 +196,7 @@ fun NoteEditorScreen(
                 eventPublisher = eventPublisher,
                 contentPadding = paddingValues,
                 noteCallbacks = NoteCallbacks(),
+                onShowAccountSwitcher = { showAccountSwitcher = true },
             )
         },
     )
@@ -229,6 +232,7 @@ private fun NoteEditorBox(
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
     noteCallbacks: NoteCallbacks,
+    onShowAccountSwitcher: () -> Unit,
 ) {
     val editorListState = rememberLazyListState()
     var noteEditorMaxHeightPx by remember { mutableIntStateOf(0) }
@@ -279,6 +283,7 @@ private fun NoteEditorBox(
                     eventPublisher = eventPublisher,
                     onReplyToNoticeHeightChanged = { replyingToNoticeHeightPx = it },
                     onReplyNoteHeightChanged = { replyNoteHeightPx = it },
+                    onShowAccountSwitcher = onShowAccountSwitcher,
                 )
             }
 
@@ -516,6 +521,7 @@ private fun NoteEditor(
     onReplyNoteHeightChanged: (Int) -> Unit,
     onReplyToNoticeHeightChanged: (Int) -> Unit,
     eventPublisher: (UiEvent) -> Unit,
+    onShowAccountSwitcher: () -> Unit,
 ) {
     val focusRequester = remember { FocusRequester() }
     LaunchedEffect(focusRequester) {
@@ -540,6 +546,7 @@ private fun NoteEditor(
             outlineColor = outlineColor,
             onReplyNoteHeightChanged = onReplyNoteHeightChanged,
             eventPublisher = eventPublisher,
+            onShowAccountSwitcher = onShowAccountSwitcher,
         )
     }
 }
@@ -551,6 +558,7 @@ private fun NoteEditorInputArea(
     outlineColor: Color,
     onReplyNoteHeightChanged: (Int) -> Unit,
     eventPublisher: (UiEvent) -> Unit,
+    onShowAccountSwitcher: () -> Unit,
 ) {
     val clipboardManager = LocalClipboardManager.current
 
@@ -582,9 +590,7 @@ private fun NoteEditorInputArea(
             avatarBlossoms = state.selectedAccount?.avatarBlossoms ?: emptyList(),
             legendaryCustomization = state.selectedAccount?.legendaryCustomization,
             onClick = if (state.attachments.isEmpty()) {
-                {
-                    eventPublisher(UiEvent.ShowAccountSwitcher)
-                }
+                { onShowAccountSwitcher() }
             } else {
                 null
             },
