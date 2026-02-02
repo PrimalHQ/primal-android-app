@@ -4,7 +4,6 @@ import io.github.aakira.napier.Napier
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.async
@@ -31,7 +30,6 @@ internal class BasePrimalApiClient(
     private val socketClient: NostrSocketClientImpl,
 ) {
 
-    @OptIn(ExperimentalUuidApi::class)
     suspend fun query(message: PrimalCacheFilter): PrimalQueryResult {
         return try {
             coroutineScope {

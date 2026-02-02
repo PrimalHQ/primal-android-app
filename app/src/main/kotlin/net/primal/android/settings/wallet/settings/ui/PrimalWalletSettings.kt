@@ -35,6 +35,7 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.domain.wallet.Wallet
 
 private const val DEFAULT_MAX_BALANCE_IN_SATS = 0.01
 
@@ -42,14 +43,14 @@ private const val DEFAULT_MAX_BALANCE_IN_SATS = 0.01
 fun PrimalWalletSettings(
     state: WalletSettingsContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
-    onBackupWalletClick: () -> Unit,
+    onBackupWalletClick: (String) -> Unit,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     Column {
         Spacer(modifier = Modifier.height(8.dp))
 
         var spamThresholdAmountEditorDialog by remember { mutableStateOf(false) }
-        val spamThresholdAmountInSats = state.wallet?.spamThresholdAmountInSats?.let {
+        val spamThresholdAmountInSats = state.activeWallet?.spamThresholdAmountInSats?.let {
             numberFormat.format(it)
         } ?: "1"
         SettingsItem(
@@ -72,34 +73,38 @@ fun PrimalWalletSettings(
         Spacer(modifier = Modifier.height(8.dp))
 
         var maxWalletBalanceShown by remember { mutableStateOf(false) }
-        val maxBalanceInSats = numberFormat
-            .format((state.wallet?.maxBalanceInBtc ?: DEFAULT_MAX_BALANCE_IN_SATS).toSats().toLong())
-        SettingsItem(
-            headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
-            supportText = "$maxBalanceInSats sats",
-            trailingContent = {
-                IconButton(onClick = { maxWalletBalanceShown = true }) {
-                    Icon(
-                        imageVector = Icons.Outlined.Info,
-                        contentDescription = stringResource(
-                            id = R.string.accessibility_info,
-                        ),
-                    )
-                }
-            },
-            onClick = { maxWalletBalanceShown = true },
-        )
+        if (state.activeWallet is Wallet.Primal) {
+            val maxBalanceInSats = numberFormat
+                .format((state.activeWallet.maxBalanceInBtc ?: DEFAULT_MAX_BALANCE_IN_SATS).toSats().toLong())
+            SettingsItem(
+                headlineText = stringResource(id = R.string.settings_wallet_max_wallet_balance),
+                supportText = "$maxBalanceInSats sats",
+                trailingContent = {
+                    IconButton(onClick = { maxWalletBalanceShown = true }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Info,
+                            contentDescription = stringResource(
+                                id = R.string.accessibility_info,
+                            ),
+                        )
+                    }
+                },
+                onClick = { maxWalletBalanceShown = true },
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (!state.showBackupWidget) {
+        if (state.showBackupListItem) {
             SettingsItem(
                 headlineText = stringResource(id = R.string.settings_wallet_backup_wallet_title),
                 supportText = stringResource(id = R.string.settings_wallet_backup_wallet_subtitle),
                 trailingContent = {
                     Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
                 },
-                onClick = onBackupWalletClick,
+                onClick = {
+                    state.activeWallet?.walletId?.let(onBackupWalletClick)
+                },
             )
             Spacer(modifier = Modifier.height(8.dp))
         }

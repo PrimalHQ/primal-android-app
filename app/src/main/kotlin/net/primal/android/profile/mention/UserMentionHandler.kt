@@ -3,6 +3,7 @@ package net.primal.android.profile.mention
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -22,7 +23,6 @@ import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.nostr.MAX_RELAY_HINTS
 import net.primal.domain.nostr.Nip19TLV.toNprofileString
 import net.primal.domain.nostr.Nprofile
-import timber.log.Timber
 
 @OptIn(FlowPreview::class)
 class UserMentionHandler @AssistedInject constructor(
@@ -63,7 +63,7 @@ class UserMentionHandler @AssistedInject constructor(
                 val popular = exploreRepository.fetchPopularUsers()
                 setState { copy(popularUsers = popular.map { it.mapAsUserProfileUi() }) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w("Failed to fetch popular users.", error)
             }
         }
         scope.launch {
@@ -81,7 +81,7 @@ class UserMentionHandler @AssistedInject constructor(
                 val result = exploreRepository.searchUsers(query = query, limit = 10)
                 setState { copy(searchResults = result.map { it.mapAsUserProfileUi() }) }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w("Failed to search users with query=$query.", error)
                 setState { copy(searchResults = emptyList()) }
             }
         } else {
@@ -116,7 +116,7 @@ class UserMentionHandler @AssistedInject constructor(
                 .fetchAndUpdateUserRelays(userIds = users.map { it.userId })
                 .associateBy { it.pubkey }
         } catch (error: NetworkException) {
-            Timber.w(error)
+            Napier.w("Failed to fetch user relays for mentions.", error)
             emptyMap()
         }
 

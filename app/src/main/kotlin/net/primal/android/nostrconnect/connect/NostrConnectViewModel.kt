@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -40,9 +41,8 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.data.account.repository.repository.SignerConnectionInitializer
 import net.primal.domain.account.model.TrustLevel
-import net.primal.domain.connections.PrimalWalletNwcRepository
+import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
-import timber.log.Timber
 
 @HiltViewModel
 class NostrConnectViewModel @Inject constructor(
@@ -173,7 +173,7 @@ class NostrConnectViewModel @Inject constructor(
                 }.onSuccess { nwcConnection ->
                     nwcConnectionString = nwcConnection.nwcConnectionUri
                 }.onFailure { error ->
-                    Timber.e(error)
+                    Napier.e(throwable = error) { "Failed to create new wallet connection" }
                 }
             }
 
@@ -195,7 +195,7 @@ class NostrConnectViewModel @Inject constructor(
                     ),
                 )
             }.onFailure { error ->
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to initialize signer connection" }
                 setState { copy(error = UiError.GenericError()) }
             }
 

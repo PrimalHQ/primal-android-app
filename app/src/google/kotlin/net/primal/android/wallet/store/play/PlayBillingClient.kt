@@ -15,6 +15,7 @@ import com.android.billingclient.api.QueryProductDetailsParams
 import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.queryProductDetails
 import dagger.hilt.android.qualifiers.ApplicationContext
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
@@ -36,7 +37,6 @@ import net.primal.android.wallet.store.domain.SubscriptionProduct
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import net.primal.android.wallet.store.domain.SubscriptionTier
 import net.primal.core.utils.coroutines.DispatcherProvider
-import timber.log.Timber
 
 class PlayBillingClient @Inject constructor(
     @ApplicationContext appContext: Context,
@@ -101,7 +101,9 @@ class PlayBillingClient @Inject constructor(
                             override fun onBillingSetupFinished(billinResult: BillingResult) {
                                 continuation.resume(
                                     value = billinResult.responseCode == BillingResponseCode.OK,
-                                    onCancellation = { Timber.e(it) },
+                                    onCancellation = {
+                                        Napier.e(throwable = it) { "Billing connection cancelled" }
+                                    },
                                 )
                             }
 
@@ -111,7 +113,7 @@ class PlayBillingClient @Inject constructor(
                 }
             }
         } catch (error: TimeoutCancellationException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Billing connection timed out" }
             false
         }
     }
@@ -234,19 +236,23 @@ class PlayBillingClient @Inject constructor(
                                         null
                                     }
                                 },
-                                onCancellation = { Timber.e(it) },
+                                onCancellation = {
+                                    Napier.e(throwable = it) { "Query purchases cancelled" }
+                                },
                             )
                         } else {
                             continuation.resume(
                                 value = emptyList(),
-                                onCancellation = { Timber.e(it) },
+                                onCancellation = {
+                                    Napier.e(throwable = it) { "Query purchases cancelled" }
+                                },
                             )
                         }
                     }
                 }
             }
         } catch (error: TimeoutCancellationException) {
-            Timber.w(error)
+            Napier.w(throwable = error) { "Query active subscriptions timed out" }
             emptyList()
         }
     }

@@ -11,7 +11,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import net.primal.android.core.compose.PrimalBottomSheetDragHandle
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -22,7 +21,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 import net.primal.domain.nostr.cryptography.utils.assureValidPubKeyHex
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalUuidApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AndroidConnectScreen(
     viewModel: AndroidConnectViewModel,

@@ -47,7 +47,7 @@ internal fun createBlossomHttpClient() =
         install(Logging) {
             logger = object : Logger {
                 override fun log(message: String) {
-                    Napier.v(message = message, tag = "BlossomHttpClient")
+                    Napier.v(tag = "BlossomHttpClient") { message }
                 }
             }
             level = LogLevel.HEADERS

@@ -27,13 +27,14 @@ interface WalletDashboardContract {
         sealed class DashboardError {
             data class InAppPurchaseConfirmationFailed(val cause: Throwable) : DashboardError()
             data class InAppPurchaseNoticeError(val message: String?) : DashboardError()
+            data class WalletCreationFailed(val cause: Throwable) : DashboardError()
         }
     }
 
     sealed class UiEvent {
         data object RequestWalletBalanceUpdate : UiEvent()
         data object DismissError : UiEvent()
-        data object EnablePrimalWallet : UiEvent()
+        data object CreateWallet : UiEvent()
         data class ChangeActiveWallet(val wallet: Wallet) : UiEvent()
     }
 }

@@ -8,8 +8,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import io.github.aakira.napier.Napier
 import net.primal.android.R
-import timber.log.Timber
 
 fun <T : Any> LazyListScope.handleRefreshLoadState(
     pagingItems: LazyPagingItems<T>,
@@ -36,7 +36,7 @@ fun <T : Any> LazyListScope.handleRefreshLoadState(
 
         is LoadState.Error -> {
             val error = refreshLoadState.error
-            Timber.w(error)
+            Napier.w(throwable = error) { "Paging refresh failed." }
             item(contentType = "RefreshError") {
                 ListNoContent(
                     modifier = Modifier.fillParentMaxSize(),

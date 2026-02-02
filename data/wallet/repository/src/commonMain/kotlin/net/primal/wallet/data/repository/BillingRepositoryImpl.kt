@@ -6,7 +6,7 @@ import net.primal.domain.billing.BillingRepository
 import net.primal.domain.billing.InAppPurchaseSatsQuote
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 
-class BillingRepositoryImpl(
+internal class BillingRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val primalWalletApi: PrimalWalletApi,
 ) : BillingRepository {

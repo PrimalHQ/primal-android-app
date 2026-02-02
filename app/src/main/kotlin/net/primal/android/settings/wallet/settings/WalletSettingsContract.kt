@@ -1,15 +1,22 @@
 package net.primal.android.settings.wallet.settings
 
-import net.primal.domain.connections.model.NwcConnectionInfo
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.domain.connections.primal.model.PrimalNwcConnectionInfo
+import net.primal.domain.links.CdnImage
 import net.primal.domain.wallet.Wallet
 
 interface WalletSettingsContract {
     data class UiState(
-        val wallet: Wallet? = null,
+        val activeWallet: Wallet? = null,
         val useExternalWallet: Boolean? = null,
-        val nwcConnectionsInfo: List<NwcConnectionInfo> = emptyList(),
+        val nwcConnectionsInfo: List<PrimalNwcConnectionInfo> = emptyList(),
         val connectionsState: ConnectionsState = ConnectionsState.Loading,
         val showBackupWidget: Boolean = false,
+        val showBackupListItem: Boolean = false,
+        val activeAccountAvatarCdnImage: CdnImage? = null,
+        val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
+        val activeAccountBlossoms: List<String> = emptyList(),
+        val activeAccountDisplayName: String = "",
     )
 
     sealed class UiEvent {

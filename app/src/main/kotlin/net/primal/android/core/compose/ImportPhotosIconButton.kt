@@ -10,7 +10,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import timber.log.Timber
+import io.github.aakira.napier.Napier
 
 @Composable
 fun ImportPhotosIconButton(
@@ -22,7 +22,7 @@ fun ImportPhotosIconButton(
     val multiplePhotosImportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
     ) { uri ->
-        Timber.e("uri = $uri")
+        Napier.e("uri = $uri")
         if (uri != null) onPhotosImported(listOf(uri))
     }
 

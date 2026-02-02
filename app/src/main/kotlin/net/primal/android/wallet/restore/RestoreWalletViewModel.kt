@@ -3,24 +3,33 @@ package net.primal.android.wallet.restore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.restore.RestoreWalletContract.RestoreStage
 import net.primal.android.wallet.restore.RestoreWalletContract.SideEffect
 import net.primal.android.wallet.restore.RestoreWalletContract.UiEvent
 import net.primal.android.wallet.restore.RestoreWalletContract.UiState
 import net.primal.android.wallet.restore.RestoreWalletContract.UiState.MnemonicValidation
-import timber.log.Timber
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
+import net.primal.domain.usecase.RestoreSparkWalletUseCase
+import net.primal.wallet.data.validator.RecoveryPhraseValidator
 
 @HiltViewModel
-class RestoreWalletViewModel @Inject constructor() : ViewModel() {
+class RestoreWalletViewModel @Inject constructor(
+    private val activeAccountStore: ActiveAccountStore,
+    private val restoreSparkWalletUseCase: RestoreSparkWalletUseCase,
+) : ViewModel() {
+
+    private val recoveryPhraseValidator = RecoveryPhraseValidator()
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -42,6 +51,7 @@ class RestoreWalletViewModel @Inject constructor() : ViewModel() {
             events.collect {
                 when (it) {
                     is UiEvent.MnemonicChange -> handleMnemonicChange(it.mnemonic)
+                    UiEvent.ValidateMnemonic -> validateMnemonic()
                     UiEvent.RestoreWalletClick -> restoreWallet()
                 }
             }
@@ -51,50 +61,47 @@ class RestoreWalletViewModel @Inject constructor() : ViewModel() {
         setState {
             copy(
                 mnemonic = mnemonic,
-                mnemonicValidation = validateMnemonic(mnemonic),
+                mnemonicValidation = MnemonicValidation.Empty,
             )
         }
     }
 
-    private fun validateMnemonic(mnemonic: String): MnemonicValidation {
-        if (mnemonic.isBlank()) return MnemonicValidation.Empty
+    private fun validateMnemonic() {
+        val mnemonic = state.value.mnemonic
+        if (mnemonic.isBlank()) {
+            setState { copy(mnemonicValidation = MnemonicValidation.Empty) }
+            return
+        }
 
-        val wordCount = mnemonic.trim().split(Regex("\\s+")).count()
+        val isValid = recoveryPhraseValidator.isValid(mnemonic)
 
-        return if (wordCount in MIN_RECOVERY_PHRASE_WORD_COUNT..MAX_RECOVERY_PHRASE_WORD_COUNT) {
-            MnemonicValidation.Valid
-        } else {
-            MnemonicValidation.Empty
+        setState {
+            copy(
+                mnemonicValidation = if (isValid) {
+                    MnemonicValidation.Valid
+                } else {
+                    MnemonicValidation.Invalid
+                },
+            )
         }
     }
 
-    @Suppress("TooGenericExceptionCaught")
     private fun restoreWallet() =
         viewModelScope.launch {
             setState { copy(currentStage = RestoreStage.Restoring) }
-            try {
-                delay(RESTORE_SIMULATION_DELAY_MILLIS)
-
-                // Implement wallet restore logic
-                if (state.value.mnemonic.contains("invalid")) {
-                    error("Simulated restore error.")
-                }
-
+            restoreSparkWalletUseCase.invoke(
+                seedWords = state.value.mnemonic,
+                userId = activeAccountStore.activeUserId(),
+            ).onSuccess {
                 setEffect(SideEffect.RestoreSuccess)
-            } catch (error: Exception) {
-                Timber.e(error, "Error restoring wallet.")
+            }.onFailure { error ->
+                Napier.e(throwable = error) { "Error restoring wallet." }
                 setState {
                     copy(
                         currentStage = RestoreStage.MnemonicInput,
-                        mnemonicValidation = MnemonicValidation.Invalid("Invalid recovery phrase"),
+                        mnemonicValidation = MnemonicValidation.Invalid,
                     )
                 }
             }
         }
-
-    companion object {
-        private const val MIN_RECOVERY_PHRASE_WORD_COUNT = 12
-        private const val MAX_RECOVERY_PHRASE_WORD_COUNT = 24
-        private const val RESTORE_SIMULATION_DELAY_MILLIS = 3000L
-    }
 }

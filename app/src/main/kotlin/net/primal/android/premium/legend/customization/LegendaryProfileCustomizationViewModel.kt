@@ -3,6 +3,7 @@ package net.primal.android.premium.legend.customization
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,6 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import timber.log.Timber
 
 @HiltViewModel
 class LegendaryProfileCustomizationViewModel @Inject constructor(
@@ -67,9 +67,9 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
                     ),
                 )
             } catch (error: SignatureException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to apply customization due to signature error." }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to apply customization due to network error." }
             } finally {
                 requestUpdateActiveAccount()
             }

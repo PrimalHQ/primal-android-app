@@ -6,6 +6,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.math.BigDecimal
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
@@ -24,8 +25,7 @@ import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletContra
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.connections.PrimalWalletNwcRepository
-import timber.log.Timber
+import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 
 @HiltViewModel(assistedFactory = LinkPrimalWalletViewModel.Factory::class)
 class LinkPrimalWalletViewModel @AssistedInject constructor(
@@ -47,7 +47,7 @@ class LinkPrimalWalletViewModel @AssistedInject constructor(
         ),
     )
     val state = _state.asStateFlow()
-    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
@@ -107,7 +107,7 @@ class LinkPrimalWalletViewModel @AssistedInject constructor(
                 )
             } catch (error: NetworkException) {
                 setState { copy(creatingSecret = false) }
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to create new wallet connection." }
             }
         }
 

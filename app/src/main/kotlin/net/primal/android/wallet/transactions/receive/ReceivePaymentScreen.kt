@@ -106,7 +106,7 @@ import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.Network
-import net.primal.domain.wallet.Wallet
+import net.primal.domain.wallet.capabilities
 import net.primal.domain.wallet.not
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
@@ -185,7 +185,7 @@ fun ReceivePaymentScreen(
             )
         },
         bottomBar = {
-            if (state.activeWallet is Wallet.Primal || state.activeWallet is Wallet.Tsunami) {
+            if (state.activeWallet?.capabilities?.supportsOnChainReceive == true) {
                 Column {
                     PrimalDivider()
                     WalletTabsBar(

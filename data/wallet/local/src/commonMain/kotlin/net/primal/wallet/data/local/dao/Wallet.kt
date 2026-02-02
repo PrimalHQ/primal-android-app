@@ -22,5 +22,11 @@ data class Wallet(
         parentColumn = "walletId",
         entityColumn = "walletId",
     )
+    val spark: SparkWalletData? = null,
+
+    @Relation(
+        parentColumn = "walletId",
+        entityColumn = "walletId",
+    )
     val settings: WalletSettings? = null,
 )

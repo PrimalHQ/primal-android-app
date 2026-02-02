@@ -3,6 +3,7 @@ package net.primal.android.premium.manage.content
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,6 @@ import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.premium.BroadcastingStatus
 import net.primal.domain.premium.PremiumBroadcastRepository
-import timber.log.Timber
 
 @HiltViewModel
 class PremiumContentBackupViewModel @Inject constructor(
@@ -68,9 +68,9 @@ class PremiumContentBackupViewModel @Inject constructor(
                 }
                 handleBroadcastStatus(status)
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch broadcast status due to network error." }
             } catch (error: SignatureException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch broadcast status due to signature error." }
             }
         }
     }
@@ -92,7 +92,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                             },
                         )
                     }
-                }.onFailure { Timber.e(it) }
+                }.onFailure { Napier.e(throwable = it) { "Failed to fetch content stats." } }
         }
     }
 
@@ -156,7 +156,7 @@ class PremiumContentBackupViewModel @Inject constructor(
                     try {
                         monitorBroadcasting = subscribeToBroadcastMonitor(userId = activeAccountStore.activeUserId())
                     } catch (error: SignatureException) {
-                        Timber.w(error)
+                        Napier.w(throwable = error) { "Failed to subscribe to broadcast monitor." }
                     }
                 }
             }
@@ -189,14 +189,14 @@ class PremiumContentBackupViewModel @Inject constructor(
                         },
                     )
                 }
-            }.onFailure { Timber.e(it) }
+            }.onFailure { Napier.e(throwable = it) { "Failed to start broadcasting." } }
         }
     }
 
     private fun stopBroadcasting() {
         viewModelScope.launch {
             premiumBroadcastRepository.cancelBroadcast(userId = activeAccountStore.activeUserId())
-                .onFailure { Timber.e(it) }
+                .onFailure { Napier.e(throwable = it) { "Failed to stop broadcasting." } }
         }
     }
 }

@@ -6,4 +6,5 @@ data class OnChainTransactionFeeTier(
     val label: String? = null,
     val confirmationEstimationInMin: Int? = null,
     val minAmountInBtc: String? = null,
+    val expiresAt: Long? = null,
 )

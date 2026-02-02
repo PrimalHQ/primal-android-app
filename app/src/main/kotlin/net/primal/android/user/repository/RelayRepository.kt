@@ -1,6 +1,7 @@
 package net.primal.android.user.repository
 
 import androidx.room.withTransaction
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -19,7 +20,6 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.remote.api.users.UsersApi
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import timber.log.Timber
 
 class RelayRepository @Inject constructor(
     private val dispatchers: DispatcherProvider,
@@ -39,7 +39,7 @@ class RelayRepository @Inject constructor(
             val relays = try {
                 usersApi.getDefaultRelays().map { it.toRelay() }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch default relays." }
                 FALLBACK_RELAYS
             }
             replaceUserRelays(userId, relays)

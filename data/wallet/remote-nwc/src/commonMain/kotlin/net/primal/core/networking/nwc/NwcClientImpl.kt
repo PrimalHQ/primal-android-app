@@ -4,7 +4,6 @@ import fr.acinq.secp256k1.Hex
 import io.github.aakira.napier.Napier
 import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Duration.Companion.seconds
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
@@ -21,6 +20,7 @@ import net.primal.core.networking.nwc.nip47.LookupInvoiceParams
 import net.primal.core.networking.nwc.nip47.LookupInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.MakeInvoiceParams
 import net.primal.core.networking.nwc.nip47.MakeInvoiceResponsePayload
+import net.primal.core.networking.nwc.nip47.NwcException
 import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.nip47.NwcResponseContent
 import net.primal.core.networking.nwc.nip47.NwcWalletRequest
@@ -62,7 +62,7 @@ internal class NwcClientImpl(
         NostrSocketClientFactory.create(wssUrl = relayUrl)
     }
 
-    @OptIn(ExperimentalUuidApi::class, ExperimentalEncodingApi::class)
+    @OptIn(ExperimentalEncodingApi::class)
     private suspend inline fun <reified T : Any, reified R : Any> sendNwcRequest(
         method: String,
         params: T,
@@ -117,7 +117,9 @@ internal class NwcClientImpl(
                 val parsed = CommonJson.decodeFromString<NwcResponseContent<R>>(decrypted)
                 parsed.result?.let {
                     Result.success(it)
-                } ?: Result.failure(NetworkException("NWC Error: ${parsed.error?.message}"))
+                } ?: parsed.error?.let {
+                    Result.failure(NwcException.fromNwcError(it))
+                } ?: Result.failure(NetworkException("NWC Error: Unknown error"))
             } else {
                 Result.failure(NetworkException("No response event received."))
             }

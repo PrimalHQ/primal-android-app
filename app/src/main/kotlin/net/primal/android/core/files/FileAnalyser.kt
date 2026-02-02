@@ -9,8 +9,8 @@ import android.media.MediaMetadataRetriever.METADATA_KEY_MIMETYPE
 import android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT
 import android.media.MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH
 import android.net.Uri
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
-import timber.log.Timber
 
 class FileAnalyser @Inject constructor(
     private val contentResolver: ContentResolver,
@@ -41,7 +41,7 @@ class FileAnalyser @Inject constructor(
                 dimensionInPixels = if (width != -1 && height != -1) "${width}x$height" else null,
             )
         }.getOrElse {
-            Timber.w(it, "Failed to extract image metadata from $uri")
+            Napier.w(throwable = it) { "Failed to extract image metadata from $uri" }
             MediaInfo()
         }
     }
@@ -68,7 +68,7 @@ class FileAnalyser @Inject constructor(
                 } ?: MediaInfo()
             }
         }.getOrElse {
-            Timber.w(it, "Failed to extract video/audio metadata from $uri")
+            Napier.w(throwable = it) { "Failed to extract video/audio metadata from $uri" }
             MediaInfo()
         }
     }

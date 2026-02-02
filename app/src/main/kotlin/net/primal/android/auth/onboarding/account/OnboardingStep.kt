@@ -18,5 +18,4 @@ enum class OnboardingStep(val index: Int) {
 enum class AccountCreationStep {
     AccountPreview,
     AccountCreated,
-    ZapsIntroduction,
 }

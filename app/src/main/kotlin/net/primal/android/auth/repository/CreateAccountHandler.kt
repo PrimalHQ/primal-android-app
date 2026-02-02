@@ -1,5 +1,6 @@
 package net.primal.android.auth.repository
 
+import io.github.aakira.napier.Napier
 import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
@@ -13,8 +14,6 @@ import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.domain.account.PrimalWalletAccountRepository
-import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
@@ -22,8 +21,9 @@ import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.domain.settings.AppSettingsDescription
-import timber.log.Timber
+import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 
+@Suppress("LongParameterList")
 class CreateAccountHandler @Inject constructor(
     private val dispatchers: DispatcherProvider,
     private val credentialsStore: CredentialsStore,
@@ -33,8 +33,7 @@ class CreateAccountHandler @Inject constructor(
     private val blossomRepository: BlossomRepository,
     private val userRepository: UserRepository,
     private val settingsRepository: SettingsRepository,
-    private val walletAccountRepository: WalletAccountRepository,
-    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
+    private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
 ) {
 
     suspend fun createNostrAccount(
@@ -48,9 +47,8 @@ class CreateAccountHandler @Inject constructor(
             blossomRepository.ensureBlossomServerList(userId)
             userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata)
             val contacts = setOf(userId) + interests.mapToContacts()
-            primalWalletAccountRepository.fetchWalletAccountInfo(userId = userId)
-            walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
             userRepository.setFollowList(userId = userId, contacts = contacts)
+            ensureSparkWalletExistsUseCase.invoke(userId = userId)
             settingsRepository.fetchAndPersistAppSettings(
                 authorizationEvent = eventsSignatureHandler.signNostrEvent(
                     unsignedNostrEvent = NostrUnsignedEvent(
@@ -62,7 +60,7 @@ class CreateAccountHandler @Inject constructor(
                 ).unwrapOrThrow(),
             )
         }.onFailure { exception ->
-            Timber.w(exception)
+            Napier.w(throwable = exception) { "Failed to create Nostr account." }
             credentialsStore.removeCredentialByNsec(nsec = privateKey.assureValidNsec())
             throw AccountCreationException(cause = exception)
         }.onSuccess {

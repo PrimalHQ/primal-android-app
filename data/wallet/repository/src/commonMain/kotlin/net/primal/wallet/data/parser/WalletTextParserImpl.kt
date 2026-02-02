@@ -72,7 +72,7 @@ class WalletTextParserImpl(
 
         return DraftTx(
             targetUserId = response.userId,
-            lnInvoice = text,
+            lnInvoice = lnbc,
             lnInvoiceAmountMilliSats = response.amountMilliSats,
             lnInvoiceDescription = response.description,
             amountSats = ((response.amountMilliSats ?: 0) / 1000).toString(),
@@ -89,7 +89,7 @@ class WalletTextParserImpl(
             maxSendable = response.maxSendable,
             targetUserId = response.targetPubkey,
             targetLud16 = response.targetLud16,
-            targetLnUrl = text,
+            targetLnUrl = lnurl,
             noteRecipient = response.description,
         )
     }

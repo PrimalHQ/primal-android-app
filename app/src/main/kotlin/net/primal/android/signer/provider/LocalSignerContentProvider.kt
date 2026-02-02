@@ -9,6 +9,7 @@ import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
 import dagger.hilt.components.SingletonComponent
+import io.github.aakira.napier.Napier
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -19,11 +20,11 @@ import net.primal.data.account.repository.service.LocalSignerService
 import net.primal.data.account.signer.local.model.LocalSignerMethodResponse
 import net.primal.data.account.signer.local.parser.SignerContentProviderParser
 import net.primal.data.account.signer.local.utils.getResultString
-import timber.log.Timber
 
 class LocalSignerContentProvider : ContentProvider() {
 
     companion object {
+        private const val TAG = "LocalSignerProvider"
         private const val REJECTED_COLUMN = "rejected"
         private const val EVENT_COLUMN = "event"
         private const val RESULT_COLUMN = "result"
@@ -45,7 +46,7 @@ class LocalSignerContentProvider : ContentProvider() {
         return SignerContentProviderParser()
             .parse(uri = p0, params = p1?.filterNotNull() ?: emptyList(), callingPackage = callingPackage)
             .mapCatching {
-                Timber.tag("LocalSignerProvider").d("We got $it.")
+                Napier.d(tag = TAG) { "We got $it." }
                 val appContext = context?.applicationContext ?: error("Couldn't get application context.")
 
                 val hiltEntryPoint = EntryPointAccessors.fromApplication(
@@ -63,13 +64,13 @@ class LocalSignerContentProvider : ContentProvider() {
             }
             .fold(
                 onSuccess = { response ->
-                    Timber.tag("LocalSignerProvider").d("Success! Response: $response")
+                    Napier.d(tag = TAG) { "Success! Response: $response" }
                     MatrixCursor(response.getColumnNames()).apply {
                         addRow(response.getColumnValues())
                     }
                 },
                 onFailure = { error ->
-                    Timber.tag("LocalSignerProvider").d("Failed to process request: ${error.message}")
+                    Napier.e(tag = TAG, throwable = error) { "Failed to process request: ${error.message}" }
 
                     if (error is LocalSignerError.AutoDenied || error is LocalSignerError.AppNotFound) {
                         MatrixCursor(arrayOf(REJECTED_COLUMN)).apply {

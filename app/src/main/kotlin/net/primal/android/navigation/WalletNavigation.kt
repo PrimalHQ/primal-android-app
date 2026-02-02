@@ -13,8 +13,6 @@ import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.scan.ScanCodeContract.ScanMode
-import net.primal.android.wallet.activation.WalletActivationViewModel
-import net.primal.android.wallet.activation.ui.WalletActivationScreen
 import net.primal.android.wallet.backup.WalletBackupContract
 import net.primal.android.wallet.backup.WalletBackupScreen
 import net.primal.android.wallet.backup.WalletBackupViewModel
@@ -34,9 +32,7 @@ import net.primal.android.wallet.upgrade.UpgradeWalletViewModel
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.wallet.DraftTx
 
-private fun NavController.navigateToWalletActivation() = navigate(route = "walletActivation")
-
-fun NavController.navigateToWalletBackup() = navigate(route = "walletBackup")
+fun NavController.navigateToWalletBackup(walletId: String) = navigate(route = "walletBackup/$walletId")
 
 private fun NavController.navigateToWalletSendPayment(tab: SendPaymentTab) =
     navigate(route = "walletSend?$SEND_PAYMENT_TAB=$tab")
@@ -77,13 +73,13 @@ fun NavGraphBuilder.walletNavigation(
         navController = navController,
     )
 
-    activation(
-        route = "walletActivation",
-        navController = navController,
-    )
-
     backup(
-        route = "walletBackup",
+        route = "walletBackup/{$WALLET_ID}",
+        arguments = listOf(
+            navArgument(WALLET_ID) {
+                type = NavType.StringType
+            },
+        ),
         navController = navController,
     )
 
@@ -169,8 +165,7 @@ private fun NavGraphBuilder.dashboard(
         onPrimaryDestinationChanged = onTopLevelDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        onWalletActivateClick = { navController.navigateToWalletActivation() },
-        onWalletBackupClick = { navController.navigateToWalletBackup() },
+        onWalletBackupClick = { walletId -> navController.navigateToWalletBackup(walletId) },
         onUpgradeWalletClick = { navController.navigateToWalletUpgrade() },
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
         onTransactionClick = { txId -> navController.navigateToTransactionDetails(txId) },
@@ -182,44 +177,31 @@ private fun NavGraphBuilder.dashboard(
     )
 }
 
-private fun NavGraphBuilder.activation(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<WalletActivationViewModel>(it)
+private fun NavGraphBuilder.backup(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    val viewModel = hiltViewModel<WalletBackupViewModel>(it)
 
-        LockToOrientationPortrait()
-        WalletActivationScreen(
-            viewModel = viewModel,
+    ApplyEdgeToEdge()
+    LockToOrientationPortrait()
+
+    WalletBackupScreen(
+        viewModel = viewModel,
+        callbacks = WalletBackupContract.ScreenCallbacks(
+            onBackupComplete = { navController.popBackStack() },
             onClose = { navController.navigateUp() },
-        )
-    }
-
-private fun NavGraphBuilder.backup(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<WalletBackupViewModel>(it)
-
-        ApplyEdgeToEdge()
-        LockToOrientationPortrait()
-
-        WalletBackupScreen(
-            viewModel = viewModel,
-            callbacks = WalletBackupContract.ScreenCallbacks(
-                onBackupComplete = { navController.popBackStack() },
-                onClose = { navController.navigateUp() },
-            ),
-        )
-    }
+        ),
+    )
+}
 
 private fun NavGraphBuilder.send(
     route: String,

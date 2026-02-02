@@ -16,5 +16,6 @@ data class NwcError(
         const val UNAUTHORIZED = "UNAUTHORIZED"
         const val INTERNAL = "INTERNAL"
         const val OTHER = "OTHER"
+        const val NOT_FOUND = "NOT_FOUND"
     }
 }

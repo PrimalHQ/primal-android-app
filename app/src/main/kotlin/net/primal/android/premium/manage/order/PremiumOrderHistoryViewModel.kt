@@ -3,6 +3,7 @@ package net.primal.android.premium.manage.order
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,6 @@ import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SubscriptionPurchase
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
-import timber.log.Timber
 
 @HiltViewModel
 class PremiumOrderHistoryViewModel @Inject constructor(
@@ -51,9 +51,9 @@ class PremiumOrderHistoryViewModel @Inject constructor(
                 val orders = premiumRepository.fetchOrderHistory(userId = activeAccountStore.activeUserId())
                 setState { copy(orders = orders) }
             } catch (error: SignatureException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch order history" }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch order history" }
             } finally {
                 setState { copy(fetchingHistory = false) }
             }
@@ -103,7 +103,7 @@ class PremiumOrderHistoryViewModel @Inject constructor(
                     premiumRepository.cancelSubscription(userId = userId, purchaseJson = purchase.playSubscriptionJson)
                     premiumRepository.fetchMembershipStatus(activeAccountStore.activeUserId())
                 } catch (error: SignatureException) {
-                    Timber.w(error)
+                    Napier.w(throwable = error) { "Failed to cancel subscription" }
                 } catch (error: NetworkException) {
                     setState { copy(error = MembershipError.FailedToCancelSubscription(cause = error)) }
                 } finally {

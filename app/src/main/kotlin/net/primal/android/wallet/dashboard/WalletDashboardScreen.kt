@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -83,7 +84,7 @@ import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
 import net.primal.domain.utils.isConfigured
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.Wallet
-import net.primal.domain.wallet.WalletKycLevel
+import net.primal.domain.wallet.capabilities
 
 private val DATE_OF_WALLET_EXPIRATION = LocalDate.of(2026, 3, 31)
     .atStartOfDay(ZoneOffset.UTC)
@@ -95,8 +96,7 @@ fun WalletDashboardScreen(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
-    onWalletActivateClick: () -> Unit,
-    onWalletBackupClick: () -> Unit,
+    onWalletBackupClick: (String) -> Unit,
     onUpgradeWalletClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
@@ -111,7 +111,7 @@ fun WalletDashboardScreen(
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
             Lifecycle.Event.ON_START -> {
-                if (uiState.value.wallet !is Wallet.Primal) {
+                if (uiState.value.wallet?.capabilities?.supportsBalanceSubscription != true) {
                     viewModel.setEvents(UiEvent.RequestWalletBalanceUpdate)
                 }
             }
@@ -125,7 +125,6 @@ fun WalletDashboardScreen(
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
-        onWalletActivateClick = onWalletActivateClick,
         onUpgradeWalletClick = onUpgradeWalletClick,
         onWalletBackupClick = onWalletBackupClick,
         onProfileClick = onProfileClick,
@@ -146,8 +145,7 @@ fun WalletDashboardScreen(
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
-    onWalletActivateClick: () -> Unit,
-    onWalletBackupClick: () -> Unit,
+    onWalletBackupClick: (String) -> Unit,
     onUpgradeWalletClick: () -> Unit,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
@@ -198,6 +196,9 @@ fun WalletDashboardScreen(
 
                 is DashboardError.InAppPurchaseConfirmationFailed ->
                     context.getString(R.string.wallet_in_app_purchase_error_confirmation_failed)
+
+                is DashboardError.WalletCreationFailed ->
+                    context.getString(R.string.wallet_dashboard_create_wallet_error)
             }
         },
         onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
@@ -245,7 +246,7 @@ fun WalletDashboardScreen(
                 title = when (state.wallet) {
                     is Wallet.NWC -> stringResource(id = R.string.wallet_nwc_title)
                     is Wallet.Primal -> stringResource(id = R.string.wallet_primal_title)
-                    is Wallet.Tsunami -> stringResource(id = R.string.wallet_tsunami_title)
+                    is Wallet.Spark -> stringResource(id = R.string.wallet_spark_title)
                     null -> stringResource(id = R.string.wallet_title)
                 },
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
@@ -331,33 +332,6 @@ fun WalletDashboardScreen(
         },
         content = { paddingValues ->
             when {
-                state.wallet == null -> {
-                    WalletCallToActionBox(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .padding(horizontal = 32.dp)
-                            .padding(bottom = 32.dp)
-                            .navigationBarsPadding(),
-                        actionLabel = stringResource(id = R.string.wallet_dashboard_enable_wallet_button),
-                        onActionClick = { eventPublisher(UiEvent.EnablePrimalWallet) },
-                    )
-                }
-
-                state.wallet is Wallet.Primal && state.wallet.kycLevel == WalletKycLevel.None -> {
-                    WalletCallToActionBox(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .padding(horizontal = 32.dp)
-                            .padding(bottom = 32.dp)
-                            .navigationBarsPadding(),
-                        message = stringResource(id = R.string.wallet_dashboard_activate_notice_hint),
-                        actionLabel = stringResource(id = R.string.wallet_dashboard_activate_button),
-                        onActionClick = onWalletActivateClick,
-                    )
-                }
-
                 state.isNpubLogin -> {
                     WalletCallToActionBox(
                         modifier = Modifier
@@ -371,38 +345,54 @@ fun WalletDashboardScreen(
                     )
                 }
 
-                else -> {
+                state.wallet != null -> {
                     if (pagingItems.loadState.refresh is LoadState.NotLoading && pagingItems.isEmpty()) {
-                        if (state.wallet.balanceInBtc == 0.0) {
-                            WalletCallToActionBox(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .animateContentSize()
-                                    .padding(paddingValues)
-                                    .padding(horizontal = 32.dp)
-                                    .padding(bottom = 32.dp)
-                                    .navigationBarsPadding(),
-                                message = stringResource(id = R.string.wallet_dashboard_no_sats_hint),
-                                actionLabel = if (canBuySats) {
-                                    stringResource(id = R.string.wallet_dashboard_buy_sats_button)
-                                } else {
-                                    null
-                                },
-                                onActionClick = {
-                                    inAppPurchaseVisible = true
-                                },
-                            )
-                        } else {
-                            WalletCallToActionBox(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .animateContentSize()
-                                    .padding(paddingValues)
-                                    .padding(horizontal = 32.dp)
-                                    .padding(bottom = 32.dp)
-                                    .navigationBarsPadding(),
-                                message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
-                            )
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .navigationBarsPadding(),
+                        ) {
+                            if (state.wallet is Wallet.Primal) {
+                                DashboardUpgradeNotice(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .animateContentSize()
+                                        .padding(horizontal = 32.dp)
+                                        .padding(vertical = 16.dp),
+                                    onUpgradeWalletClick = onUpgradeWalletClick,
+                                )
+                            }
+
+                            if (state.wallet.balanceInBtc == 0.0) {
+                                WalletCallToActionBox(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
+                                        .animateContentSize()
+                                        .padding(horizontal = 32.dp)
+                                        .padding(bottom = 32.dp),
+                                    message = stringResource(id = R.string.wallet_dashboard_no_sats_hint),
+                                    actionLabel = if (canBuySats) {
+                                        stringResource(id = R.string.wallet_dashboard_buy_sats_button)
+                                    } else {
+                                        null
+                                    },
+                                    onActionClick = {
+                                        inAppPurchaseVisible = true
+                                    },
+                                )
+                            } else {
+                                WalletCallToActionBox(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
+                                        .animateContentSize()
+                                        .padding(horizontal = 32.dp)
+                                        .padding(bottom = 32.dp),
+                                    message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
+                                )
+                            }
                         }
                     } else {
                         TransactionsLazyColumn(
@@ -418,52 +408,15 @@ fun WalletDashboardScreen(
                             onTransactionClick = onTransactionClick,
                             header = {
                                 if (state.wallet is Wallet.Primal) {
-                                    WalletCallToActionAnnotatedBox(
+                                    DashboardUpgradeNotice(
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .animateContentSize()
                                             .padding(horizontal = 32.dp)
                                             .padding(bottom = 12.dp),
-                                        message = buildAnnotatedString {
-                                            withStyle(
-                                                AppTheme.typography.bodyMedium.toSpanStyle()
-                                                    .copy(color = AppTheme.extraColorScheme.onSurfaceVariantAlt2),
-                                            ) {
-                                                withStyle(
-                                                    SpanStyle(
-                                                        textDecoration = TextDecoration.Underline,
-                                                        fontWeight = FontWeight.Bold,
-                                                    ),
-                                                ) {
-                                                    append(
-                                                        stringResource(id = R.string.wallet_dashboard_upgrade_header),
-                                                    )
-                                                }
-                                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                                    appendLine(":")
-                                                }
-                                                append(
-                                                    stringResource(id = R.string.wallet_dashboard_upgrade_expires_on),
-                                                )
-                                                append(" ")
-                                                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                                                    append(
-                                                        DATE_OF_WALLET_EXPIRATION
-                                                            .formatToDefaultDateFormat(FormatStyle.LONG),
-                                                    )
-                                                }
-                                                appendLine(".")
-                                                append(
-                                                    stringResource(
-                                                        id = R.string.wallet_dashboard_upgrade_please_upgrade,
-                                                    ),
-                                                )
-                                            }
-                                        },
-                                        actionLabel = stringResource(id = R.string.wallet_dashboard_upgrade_button),
-                                        onActionClick = onUpgradeWalletClick,
+                                        onUpgradeWalletClick = onUpgradeWalletClick,
                                     )
-                                } else if (state.wallet is Wallet.Tsunami && !state.isWalletBackedUp) {
+                                } else if (!state.isWalletBackedUp) {
                                     val titleText = stringResource(
                                         id = R.string.wallet_dashboard_backup_notice_title,
                                     )
@@ -492,7 +445,7 @@ fun WalletDashboardScreen(
                                             .animateContentSize(),
                                         message = annotatedMessage,
                                         actionLabel = stringResource(id = R.string.wallet_dashboard_backup_button),
-                                        onActionClick = onWalletBackupClick,
+                                        onActionClick = { onWalletBackupClick(state.wallet.walletId) },
                                     )
                                 } else if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
                                     WalletCallToActionBox(
@@ -522,10 +475,70 @@ fun WalletDashboardScreen(
                         )
                     }
                 }
+
+                else -> {
+                    WalletCallToActionBox(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .animateContentSize()
+                            .padding(paddingValues)
+                            .padding(horizontal = 32.dp)
+                            .padding(bottom = 32.dp)
+                            .navigationBarsPadding(),
+                        message = stringResource(id = R.string.wallet_dashboard_create_wallet_hint),
+                        actionLabel = stringResource(id = R.string.wallet_dashboard_create_wallet_button),
+                        onActionClick = { eventPublisher(UiEvent.CreateWallet) },
+                    )
+                }
             }
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
+    )
+}
+
+@Composable
+private fun DashboardUpgradeNotice(onUpgradeWalletClick: () -> Unit, modifier: Modifier = Modifier) {
+    WalletCallToActionAnnotatedBox(
+        modifier = modifier,
+        message = buildAnnotatedString {
+            withStyle(
+                AppTheme.typography.bodyMedium.toSpanStyle()
+                    .copy(color = AppTheme.extraColorScheme.onSurfaceVariantAlt2),
+            ) {
+                withStyle(
+                    SpanStyle(
+                        textDecoration = TextDecoration.Underline,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                ) {
+                    append(
+                        stringResource(id = R.string.wallet_dashboard_upgrade_header),
+                    )
+                }
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                    appendLine(":")
+                }
+                append(
+                    stringResource(id = R.string.wallet_dashboard_upgrade_expires_on),
+                )
+                append(" ")
+                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append(
+                        DATE_OF_WALLET_EXPIRATION
+                            .formatToDefaultDateFormat(FormatStyle.LONG),
+                    )
+                }
+                appendLine(".")
+                append(
+                    stringResource(
+                        id = R.string.wallet_dashboard_upgrade_please_upgrade,
+                    ),
+                )
+            }
+        },
+        actionLabel = stringResource(id = R.string.wallet_dashboard_upgrade_button),
+        onActionClick = onUpgradeWalletClick,
     )
 }

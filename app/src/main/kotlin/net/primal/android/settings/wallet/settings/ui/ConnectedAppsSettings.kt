@@ -39,11 +39,11 @@ import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.settings.wallet.settings.WalletSettingsContract
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.CurrencyConversionUtils.toSats
-import net.primal.domain.connections.model.NwcConnectionInfo
+import net.primal.domain.connections.primal.model.PrimalNwcConnectionInfo
 
 @Composable
 fun ConnectedAppsSettings(
-    nwcConnectionInfos: List<NwcConnectionInfo>,
+    primalNwcConnectionInfos: List<PrimalNwcConnectionInfo>,
     isPrimalWalletActivated: Boolean,
     connectionsState: WalletSettingsContract.ConnectionsState,
     onRevokeConnectedApp: (nwcPubkey: String) -> Unit,
@@ -84,7 +84,7 @@ fun ConnectedAppsSettings(
 
         ConnectedAppsContent(
             connectionsState = connectionsState,
-            nwcConnectionInfos = nwcConnectionInfos,
+            primalNwcConnectionInfos = primalNwcConnectionInfos,
             onRetryFetchingConnections = onRetryFetchingConnections,
             onRevokeDialogVisibilityChange = { revokeDialogVisible = it },
             onRevokeNwcPubkeyChange = { revokeNwcPubkey = it },
@@ -152,7 +152,7 @@ private fun ConnectedAppsContent(
     connectionsState: WalletSettingsContract.ConnectionsState,
     isPrimalWalletActivated: Boolean,
     onRetryFetchingConnections: () -> Unit,
-    nwcConnectionInfos: List<NwcConnectionInfo>,
+    primalNwcConnectionInfos: List<PrimalNwcConnectionInfo>,
     onRevokeDialogVisibilityChange: (Boolean) -> Unit,
     onRevokeNwcPubkeyChange: (String) -> Unit,
 ) {
@@ -192,7 +192,7 @@ private fun ConnectedAppsContent(
         }
 
         WalletSettingsContract.ConnectionsState.Loaded -> {
-            if (nwcConnectionInfos.isEmpty()) {
+            if (primalNwcConnectionInfos.isEmpty()) {
                 Box(modifier = Modifier.height(48.dp)) {
                     Text(
                         modifier = Modifier
@@ -206,8 +206,8 @@ private fun ConnectedAppsContent(
                     )
                 }
             } else {
-                nwcConnectionInfos.forEachIndexed { index, app ->
-                    val isLastItem = index == nwcConnectionInfos.lastIndex
+                primalNwcConnectionInfos.forEachIndexed { index, app ->
+                    val isLastItem = index == primalNwcConnectionInfos.lastIndex
 
                     ConnectedAppItem(
                         isLastItem = isLastItem,

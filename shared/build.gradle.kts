@@ -1,5 +1,8 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
 import co.touchlab.skie.configuration.DefaultArgumentInterop
 import co.touchlab.skie.configuration.FlowInterop
+import de.undercouch.gradle.tasks.download.Download
 import org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget
 import org.jetbrains.kotlin.gradle.plugin.mpp.apple.XCFramework
 
@@ -9,9 +12,28 @@ plugins {
     alias(libs.plugins.org.jetbrains.kotlin.plugin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.touchlab.skie)
+    id("de.undercouch.download") version "5.6.0"
+}
+
+val breezSparkVersion = libs.versions.breez.spark.kmp.sdk.get()
+val breezFrameworkDir = layout.buildDirectory.dir("breez-sdk-spark/$breezSparkVersion")
+
+val downloadBreezFramework by tasks.registering(Download::class) {
+    src(
+        "https://github.com/breez/breez-sdk-spark-swift/releases/download/$breezSparkVersion/breez_sdk_sparkFFI.xcframework.zip",
+    )
+    dest(layout.buildDirectory.file("breez-sdk-spark/$breezSparkVersion/breez_sdk_sparkFFI.xcframework.zip"))
+    overwrite(false)
+}
+
+val unzipBreezFramework by tasks.registering(Copy::class) {
+    dependsOn(downloadBreezFramework)
+    from(zipTree(layout.buildDirectory.file("breez-sdk-spark/$breezSparkVersion/breez_sdk_sparkFFI.xcframework.zip")))
+    into(breezFrameworkDir)
 }
 
 private val xcfName = "PrimalShared"
+private val xcfVersionName = "0.1.4"
 
 // Shared dependencies exported to iOS
 private val exportedDependencies = listOf(
@@ -25,6 +47,7 @@ private val exportedDependencies = listOf(
     ":data:account:repository",
     ":data:caching:repository",
     ":data:wallet:repository",
+    ":paging-runtime-ios",
 )
 
 kotlin {
@@ -41,12 +64,19 @@ kotlin {
     // iOS Target (minimum iOS 16)
     val xcfFramework = XCFramework(xcfName)
 
+    val breezFrameworkSlices = mapOf(
+        "ios" to "ios-arm64",
+        "ios-simulator" to "ios-arm64_x86_64-simulator",
+    )
+
     fun KotlinNativeTarget.configureFramework(platformName: String) {
         binaries.framework {
             baseName = xcfName
             isStatic = false
             freeCompilerArgs += listOf("-Xadd-light-debug=enable")
             linkerOpts += listOf("-platform_version", platformName, "16.0", "16.0")
+            val sliceDir = breezFrameworkSlices[platformName] ?: error("Unknown platform: $platformName")
+            linkerOpts += listOf("-F", breezFrameworkDir.get().asFile.resolve("breez_sdk_sparkFFI.xcframework/$sliceDir").absolutePath)
             xcfFramework.add(this)
             exportedDependencies.forEach { dep -> export(project(dep)) }
         }
@@ -107,6 +137,12 @@ kotlin {
     // Opting in to the experimental @ObjCName annotation for native coroutines on iOS targets
     kotlin.sourceSets.all {
         languageSettings.optIn("kotlin.experimental.ExperimentalObjCName")
+    }
+}
+
+tasks.configureEach {
+    if (name.contains("link", ignoreCase = true) && name.contains("Ios", ignoreCase = true)) {
+        dependsOn(unzipBreezFramework)
     }
 }
 

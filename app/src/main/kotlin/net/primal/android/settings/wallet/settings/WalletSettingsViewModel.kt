@@ -6,26 +6,29 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.utils.shouldShowBackup
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.connections.PrimalWalletNwcRepository
+import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.parser.isNwcUrl
 import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
-import timber.log.Timber
+import net.primal.domain.wallet.capabilities
 
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
 class WalletSettingsViewModel @AssistedInject constructor(
@@ -57,6 +60,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
             observeActiveWalletId()
         }
 
+        observeActiveAccount()
         observeEvents()
     }
 
@@ -72,9 +76,9 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     )
                 }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch wallet connections due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch wallet connections due to network error." }
                 setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
             }
         }
@@ -113,9 +117,9 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 setState { copy(nwcConnectionsInfo = updatedConnections) }
                 primalWalletNwcRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to revoke NWC connection due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to revoke NWC connection due to network error." }
                 setState { copy(nwcConnectionsInfo = nwcConnections) }
             }
         }
@@ -134,20 +138,31 @@ class WalletSettingsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
                 .collect { wallet ->
-                    val isTsunami = wallet is Wallet.Tsunami
-                    val balance = wallet?.balanceInBtc ?: 0.0
-                    val isBackedUp = false
-
-                    val shouldShowBackup = isTsunami && balance > 0.0 && !isBackedUp
-
+                    val shouldShowBackup = wallet.shouldShowBackup
                     setState {
                         copy(
-                            wallet = wallet,
+                            activeWallet = wallet,
                             useExternalWallet = wallet == null || wallet is Wallet.NWC,
                             showBackupWidget = shouldShowBackup,
+                            showBackupListItem = wallet?.capabilities?.supportsWalletBackup == true &&
+                                !shouldShowBackup,
                         )
                     }
                 }
+        }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(
+                        activeAccountAvatarCdnImage = it.avatarCdnImage,
+                        activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
+                        activeAccountBlossoms = it.blossomServers,
+                        activeAccountDisplayName = it.authorDisplayName,
+                    )
+                }
+            }
         }
 
     private fun connectWallet(nwcUrl: String) =
@@ -157,12 +172,12 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 nwcUrl = nwcUrl,
                 autoSetAsDefaultWallet = true,
             )
-                .onFailure { Timber.w(it) }
+                .onFailure { Napier.w(throwable = it) { "Failed to connect wallet." } }
                 .onSuccess { setState { copy(useExternalWallet = true) } }
         }
 
     private suspend fun disconnectWallet() {
-        state.value.wallet?.walletId?.let { walletId ->
+        state.value.activeWallet?.walletId?.let { walletId ->
             walletRepository.deleteWalletById(walletId = walletId)
         }
         walletAccountRepository.clearActiveWallet(userId = activeAccountStore.activeUserId())
@@ -179,14 +194,23 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     walletAccountRepository.clearActiveWallet(userId = userId)
                 }
             } else {
-                walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
+                val lastUsedInternalWallet = walletAccountRepository.findLastUsedWallet(
+                    userId = userId,
+                    type = setOf(WalletType.PRIMAL, WalletType.SPARK),
+                )
+
+                if (lastUsedInternalWallet != null) {
+                    walletAccountRepository.setActiveWallet(userId = userId, walletId = lastUsedInternalWallet.walletId)
+                } else {
+                    walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
+                }
             }
         }
 
     private fun updateSpamThresholdAmount(amountInSats: Long) =
         viewModelScope.launch {
             walletRepository.upsertWalletSettings(
-                walletId = state.value.wallet?.walletId ?: activeAccountStore.activeUserId(),
+                walletId = state.value.activeWallet?.walletId ?: activeAccountStore.activeUserId(),
                 spamThresholdAmountInSats = amountInSats,
             )
             walletRepository.deleteAllTransactions(userId = activeAccountStore.activeUserId())

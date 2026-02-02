@@ -4,7 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import net.primal.domain.nostr.NostrEvent
 import net.primal.wallet.data.remote.model.BalanceResponse
 import net.primal.wallet.data.remote.model.DepositRequestBody
-import net.primal.wallet.data.remote.model.GetActivationCodeRequestBody
 import net.primal.wallet.data.remote.model.InAppPurchaseQuoteResponse
 import net.primal.wallet.data.remote.model.LightningInvoiceResponse
 import net.primal.wallet.data.remote.model.MiningFeeTier
@@ -14,18 +13,17 @@ import net.primal.wallet.data.remote.model.ParsedLnUrlResponse
 import net.primal.wallet.data.remote.model.PromoCodeDetailsResponse
 import net.primal.wallet.data.remote.model.TransactionsRequestBody
 import net.primal.wallet.data.remote.model.TransactionsResponse
+import net.primal.wallet.data.remote.model.WalletStatusResponse
 import net.primal.wallet.data.remote.model.WalletUserInfoResponse
 import net.primal.wallet.data.remote.model.WithdrawRequestBody
 
 interface PrimalWalletApi {
 
+    suspend fun getWalletStatus(userId: String): WalletStatusResponse
+
     suspend fun getWalletUserKycLevel(userId: String): Int
 
     suspend fun getWalletUserInfo(userId: String): WalletUserInfoResponse
-
-    suspend fun requestActivationCodeToEmail(userId: String, body: GetActivationCodeRequestBody)
-
-    suspend fun activateWallet(userId: String, code: String): String
 
     suspend fun getBalance(userId: String): BalanceResponse
 
@@ -67,4 +65,6 @@ interface PrimalWalletApi {
     ): List<MiningFeeTier>
 
     suspend fun getExchangeRate(userId: String): Double
+
+    suspend fun registerSparkWallet(userId: String, sparkWalletId: String)
 }

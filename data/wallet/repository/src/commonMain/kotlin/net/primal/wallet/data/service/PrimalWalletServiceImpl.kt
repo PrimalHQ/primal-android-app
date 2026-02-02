@@ -11,6 +11,7 @@ import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.utils.ensureEncodedLnUrl
 import net.primal.domain.nostr.utils.stripLightningPrefix
 import net.primal.domain.rates.fees.OnChainTransactionFeeTier
+import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.Network
@@ -20,7 +21,6 @@ import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.model.WalletBalanceResult
-import net.primal.wallet.data.model.Transaction
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.DepositRequestBody
 import net.primal.wallet.data.remote.model.TransactionsRequestBody
@@ -68,11 +68,14 @@ internal class PrimalWalletServiceImpl(
                 ),
             )
 
-            response.transactions.mapAsPrimalTransactions(
+            val transactions = response.transactions.mapAsPrimalTransactions(
                 walletId = wallet.walletId,
                 userId = wallet.userId,
-                walletAddress = wallet.lightningAddress,
-            ).orderByPagingIfNotNull(pagingEvent = response.paging) { transactionId }
+            )
+
+            transactions.orderByPagingIfNotNull(
+                pagingEvent = response.paging,
+            ) { transactionId }
         }
 
     override suspend fun createLightningInvoice(
@@ -111,7 +114,7 @@ internal class PrimalWalletServiceImpl(
                     targetLnUrl = request.getIfTypeOrNull(TxRequest.Lightning.LnUrl::lnUrl)
                         ?.ensureEncodedLnUrl()?.stripLightningPrefix(),
                     targetBtcAddress = request.getIfTypeOrNull(TxRequest.BitcoinOnChain::onChainAddress),
-                    onChainTier = request.getIfTypeOrNull(TxRequest.BitcoinOnChain::onChainTier),
+                    onChainTier = request.getIfTypeOrNull(TxRequest.BitcoinOnChain::onChainTierId),
                     lnInvoice = request.getIfTypeOrNull(TxRequest.Lightning.LnInvoice::lnInvoice)
                         ?.stripLightningPrefix(),
                     amountBtc = request.amountSats.toLong().toBtc().formatAsString(),

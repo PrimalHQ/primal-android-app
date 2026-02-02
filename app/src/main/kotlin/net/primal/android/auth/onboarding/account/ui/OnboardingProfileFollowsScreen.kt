@@ -164,7 +164,7 @@ fun OnboardingProfileFollowsScreen(
                         }
                     }
                 },
-                footer = { OnboardingStepsIndicator(currentPage = OnboardingStep.Interests.index) },
+                footer = { OnboardingStepsIndicator(currentPage = OnboardingStep.Follows.index) },
             )
         },
     )

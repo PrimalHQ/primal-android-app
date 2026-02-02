@@ -7,7 +7,6 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import dagger.multibindings.ElementsIntoSet
 import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.messages.security.Nip04MessageCipher
 import net.primal.core.config.AppConfigFactory
@@ -17,16 +16,10 @@ import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.nostr.cryptography.MessageCipher
 import okhttp3.OkHttpClient
-import timber.log.Timber
 
 @Module
 @InstallIn(SingletonComponent::class)
 object CoreModule {
-
-    /* Logging */
-    @Provides
-    @ElementsIntoSet
-    fun emptyLoggersSet(): Set<Timber.Tree> = emptySet()
 
     @Provides
     fun provideContentResolver(@ApplicationContext context: Context): ContentResolver = context.contentResolver

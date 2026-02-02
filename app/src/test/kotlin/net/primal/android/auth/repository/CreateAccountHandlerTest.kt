@@ -22,15 +22,13 @@ import net.primal.android.user.domain.Credential
 import net.primal.android.user.repository.BlossomRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
-import net.primal.core.utils.Result
-import net.primal.domain.account.PrimalWalletAccountRepository
-import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
+import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import org.junit.Rule
 import org.junit.Test
 
@@ -47,13 +45,10 @@ class CreateAccountHandlerTest {
         blossomRepository: BlossomRepository = mockk(relaxed = true),
         settingsRepository: SettingsRepository = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
-        walletAccountRepository: WalletAccountRepository = mockk(relaxed = true),
-        primalWalletAccountRepository: PrimalWalletAccountRepository = mockk(relaxed = true) {
-            coEvery { fetchWalletAccountInfo(any()) } answers { Result.success(firstArg()) }
-        },
         eventsSignatureHandler: NostrEventSignatureHandler = FakeNostrNotary(
             expectedSignedNostrEvent = mockk(relaxed = true),
         ),
+        ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase = mockk(relaxed = true),
     ): CreateAccountHandler {
         return CreateAccountHandler(
             authRepository = authRepository,
@@ -64,8 +59,7 @@ class CreateAccountHandlerTest {
             dispatchers = coroutinesTestRule.dispatcherProvider,
             eventsSignatureHandler = eventsSignatureHandler,
             blossomRepository = blossomRepository,
-            walletAccountRepository = walletAccountRepository,
-            primalWalletAccountRepository = primalWalletAccountRepository,
+            ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
         )
     }
 
@@ -274,18 +268,16 @@ class CreateAccountHandlerTest {
         }
 
     @Test
-    fun createNostrAccount_callsFetchWalletAccountInfo() =
+    fun createNostrAccount_callsEnsureSparkWalletExistsUseCase_withSetAsActiveTrue() =
         runTest {
             val keyPair = CryptoUtils.generateHexEncodedKeypair()
-            val primalWalletAccountRepository = mockk<PrimalWalletAccountRepository>(relaxed = true)
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
                 coEvery { saveNsec(any()) } returns keyPair.pubKey
             }
-
+            val ensureSparkWalletExistsUseCase = mockk<EnsureSparkWalletExistsUseCase>(relaxed = true)
             val handler = createAccountHandler(
-                authRepository = createAuthRepository(),
-                primalWalletAccountRepository = primalWalletAccountRepository,
                 credentialsStore = credentialsStore,
+                ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
             )
 
             handler.createNostrAccount(
@@ -295,33 +287,7 @@ class CreateAccountHandlerTest {
             )
 
             coVerify {
-                primalWalletAccountRepository.fetchWalletAccountInfo(keyPair.pubKey)
-            }
-        }
-
-    @Test
-    fun createNostrAccount_setsActiveWalletId() =
-        runTest {
-            val keyPair = CryptoUtils.generateHexEncodedKeypair()
-            val walletAccountRepository = mockk<WalletAccountRepository>(relaxed = true)
-            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
-                coEvery { saveNsec(any()) } returns keyPair.pubKey
-            }
-
-            val handler = createAccountHandler(
-                authRepository = createAuthRepository(),
-                walletAccountRepository = walletAccountRepository,
-                credentialsStore = credentialsStore,
-            )
-
-            handler.createNostrAccount(
-                privateKey = keyPair.privateKey,
-                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-                interests = emptyList(),
-            )
-
-            coVerify {
-                walletAccountRepository.setActiveWallet(keyPair.pubKey, keyPair.pubKey)
+                ensureSparkWalletExistsUseCase.invoke(keyPair.pubKey)
             }
         }
 

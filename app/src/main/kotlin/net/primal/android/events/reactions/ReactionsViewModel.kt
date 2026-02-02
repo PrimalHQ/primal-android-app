@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,7 +24,6 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRepository
 import net.primal.domain.events.NostrEventAction
 import net.primal.domain.nostr.NostrEventKind
-import timber.log.Timber
 
 @HiltViewModel
 class ReactionsViewModel @Inject constructor(
@@ -65,7 +65,7 @@ class ReactionsViewModel @Inject constructor(
                 )
                 setState { copy(likes = likes.map { it.mapAsEventActionUi() }) }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch likes for eventId=$eventId" }
             } finally {
                 setState { copy(loading = false) }
             }
@@ -81,7 +81,7 @@ class ReactionsViewModel @Inject constructor(
                 )
                 setState { copy(reposts = reposts.map { it.mapAsEventActionUi() }) }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch reposts for eventId=$eventId" }
             } finally {
                 setState { copy(loading = false) }
             }

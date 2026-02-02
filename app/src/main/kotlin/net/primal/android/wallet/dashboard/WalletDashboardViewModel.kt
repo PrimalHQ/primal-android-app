@@ -6,6 +6,7 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -28,32 +29,32 @@ import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
 import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
+import net.primal.android.wallet.utils.shouldShowBackup
 import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.onFailure
-import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.transactions.Transaction
+import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.distinctUntilWalletIdChanged
-import timber.log.Timber
 
 @HiltViewModel
 class WalletDashboardViewModel @Inject constructor(
     userRepository: UserRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val walletAccountRepository: WalletAccountRepository,
-    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val walletRepository: WalletRepository,
     private val primalBillingClient: PrimalBillingClient,
     private val billingRepository: BillingRepository,
     private val subscriptionsManager: SubscriptionsManager,
     private val exchangeRateHandler: ExchangeRateHandler,
+    private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
@@ -84,14 +85,21 @@ class WalletDashboardViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     UiEvent.DismissError -> setState { copy(error = null) }
-                    UiEvent.EnablePrimalWallet -> enablePrimalWallet()
                     UiEvent.RequestWalletBalanceUpdate -> state.value.wallet?.let { wallet ->
                         fetchWalletBalance(walletId = wallet.walletId)
                     }
 
                     is UiEvent.ChangeActiveWallet -> changeActiveWallet(wallet = it.wallet)
+
+                    UiEvent.CreateWallet -> createWallet()
                 }
             }
+        }
+
+    private fun createWallet() =
+        viewModelScope.launch {
+            ensureSparkWalletExistsUseCase.invoke(userId = activeUserId)
+                .onFailure { setErrorState(UiState.DashboardError.WalletCreationFailed(it)) }
         }
 
     private fun observeUserWallets(userId: String) {
@@ -118,7 +126,7 @@ class WalletDashboardViewModel @Inject constructor(
                     setState {
                         copy(
                             transactions = walletRepository
-                                .latestTransactions(walletId = wallet.walletId, walletType = wallet.type)
+                                .latestTransactions(walletId = wallet.walletId)
                                 .mapAsPagingDataOfTransactionUi(),
                         )
                     }
@@ -133,7 +141,7 @@ class WalletDashboardViewModel @Inject constructor(
                         copy(
                             wallet = wallet,
                             lowBalance = wallet?.balanceInBtc == 0.0,
-                            isWalletBackedUp = false,
+                            isWalletBackedUp = !wallet.shouldShowBackup,
                         )
                     }
                 }
@@ -172,7 +180,7 @@ class WalletDashboardViewModel @Inject constructor(
     private fun fetchWalletBalance(walletId: String) =
         viewModelScope.launch {
             walletRepository.fetchWalletBalance(walletId = walletId)
-                .onFailure { Timber.w(it) }
+                .onFailure { Napier.w(throwable = it) { "Failed to fetch wallet balance." } }
         }
 
     private fun observeUsdExchangeRate() {
@@ -191,16 +199,6 @@ class WalletDashboardViewModel @Inject constructor(
             )
         }
 
-    private fun enablePrimalWallet() =
-        viewModelScope.launch {
-            try {
-                primalWalletAccountRepository.fetchWalletAccountInfo(userId = activeUserId)
-                walletAccountRepository.setActiveWallet(userId = activeUserId, walletId = activeUserId)
-            } catch (error: NetworkException) {
-                Timber.w(error)
-            }
-        }
-
     private fun confirmPurchase(purchase: SatsPurchase) =
         viewModelScope.launch {
             try {
@@ -210,9 +208,9 @@ class WalletDashboardViewModel @Inject constructor(
                     purchaseToken = purchase.purchaseToken,
                 )
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to confirm purchase due to signature error." }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to confirm purchase due to network error." }
                 val dashboardError = if (error.cause is NostrNoticeException) {
                     UiState.DashboardError.InAppPurchaseNoticeError(message = error.message)
                 } else {

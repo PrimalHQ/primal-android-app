@@ -16,15 +16,13 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.CredentialType
 import net.primal.android.user.repository.UserRepository
-import net.primal.core.utils.Result
-import net.primal.domain.account.PrimalWalletAccountRepository
-import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.SignResult
+import net.primal.domain.usecase.EnsurePrimalWalletExistsUseCase
 import org.junit.Rule
 import org.junit.Test
 
@@ -46,10 +44,7 @@ class LoginHandlerTest {
         userRepository: UserRepository = mockk(relaxed = true),
         mutedItemRepository: MutedItemRepository = mockk(relaxed = true),
         bookmarksRepository: PublicBookmarksRepository = mockk(relaxed = true),
-        walletAccountRepository: WalletAccountRepository = mockk(relaxed = true),
-        primalWalletAccountRepository: PrimalWalletAccountRepository = mockk(relaxed = true) {
-            coEvery { fetchWalletAccountInfo(any()) } returns Result.success(expectedUserId)
-        },
+        ensurePrimalWalletExistsUseCase: EnsurePrimalWalletExistsUseCase = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
         nostrNotary: NostrNotary = mockk(relaxed = true),
     ): LoginHandler =
@@ -62,8 +57,7 @@ class LoginHandlerTest {
             dispatchers = coroutinesTestRule.dispatcherProvider,
             credentialsStore = credentialsStore,
             nostrNotary = nostrNotary,
-            walletAccountRepository = walletAccountRepository,
-            primalWalletAccountRepository = primalWalletAccountRepository,
+            ensurePrimalWalletExistsUseCase = ensurePrimalWalletExistsUseCase,
         )
 
     private fun createDummyNostrEvent(
@@ -174,16 +168,14 @@ class LoginHandlerTest {
         }
 
     @Test
-    fun login_callsFetchWalletAccountInfo() =
+    fun login_callsEnsurePrimalWalletExistsUseCase() =
         runTest {
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
                 coEvery { saveNsec(any()) } returns expectedUserId
             }
-            val primalWalletAccountRepository = mockk<PrimalWalletAccountRepository>(relaxed = true) {
-                coEvery { fetchWalletAccountInfo(any()) } returns Result.success(expectedUserId)
-            }
+            val ensurePrimalWalletExistsUseCase = mockk<EnsurePrimalWalletExistsUseCase>(relaxed = true)
             val loginHandler = createLoginHandler(
-                primalWalletAccountRepository = primalWalletAccountRepository,
+                ensurePrimalWalletExistsUseCase = ensurePrimalWalletExistsUseCase,
                 credentialsStore = credentialsStore,
             )
             loginHandler.login(
@@ -193,29 +185,7 @@ class LoginHandlerTest {
             )
 
             coVerify {
-                primalWalletAccountRepository.fetchWalletAccountInfo(expectedUserId)
-            }
-        }
-
-    @Test
-    fun login_setsActiveWalletId() =
-        runTest {
-            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
-                coEvery { saveNsec(any()) } returns expectedUserId
-            }
-            val walletAccountRepository = mockk<WalletAccountRepository>(relaxed = true)
-            val loginHandler = createLoginHandler(
-                walletAccountRepository = walletAccountRepository,
-                credentialsStore = credentialsStore,
-            )
-            loginHandler.login(
-                nostrKey = nsec,
-                credentialType = CredentialType.PrivateKey,
-                authorizationEvent = null,
-            )
-
-            coVerify {
-                walletAccountRepository.setActiveWallet(expectedUserId, expectedUserId)
+                ensurePrimalWalletExistsUseCase.invoke(expectedUserId, setAsActive = true)
             }
         }
 

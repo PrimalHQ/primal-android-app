@@ -21,7 +21,7 @@ kotlin {
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
-    val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
+    val iosTargets = listOf(iosArm64(), iosSimulatorArm64())
 
     iosTargets.forEach {
         it.binaries.framework {
@@ -50,6 +50,14 @@ kotlin {
                 implementation(libs.bitcoin.kmp)
 
                 implementation(libs.ktor.http)
+            }
+        }
+
+        commonTest {
+            dependencies {
+                implementation(kotlin("test"))
+                implementation(libs.kotest.assertions.core)
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
 

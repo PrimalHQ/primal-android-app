@@ -8,6 +8,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import kotlin.random.Random
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
@@ -46,7 +47,6 @@ import net.primal.domain.posts.FeedPageSnapshot
 import net.primal.domain.posts.FeedPost
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.streams.StreamRepository
-import timber.log.Timber
 
 @HiltViewModel(assistedFactory = NoteFeedViewModel.Factory::class)
 class NoteFeedViewModel @AssistedInject constructor(
@@ -159,7 +159,7 @@ class NoteFeedViewModel @AssistedInject constructor(
                         delay(pollInterval.seconds)
                     }
                 } catch (error: NetworkException) {
-                    Timber.e(error)
+                    Napier.e(throwable = error) { "Polling failed due to network error." }
                 }
             }
         }

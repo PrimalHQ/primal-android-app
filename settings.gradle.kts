@@ -16,6 +16,7 @@ dependencyResolutionManagement {
         google()
         mavenCentral()
         maven { url = URI.create("https://jitpack.io") }
+        maven { url = URI.create("https://mvn.breez.technology/releases") }
     }
 }
 
@@ -41,7 +42,6 @@ include(":data:caching:repository")
 include(":data:wallet:local")
 include(":data:wallet:remote-primal")
 include(":data:wallet:remote-nwc")
-include(":data:wallet:remote-tsunami")
 include(":data:wallet:repository")
 
 include(":data:account:local")
@@ -56,12 +56,3 @@ include(":domain:account")
 
 include(":paging-runtime-ios")
 include(":shared")
-
-val primalTsunamiSdkRepoPath = file("../primal-tsunami-sdk")
-if (primalTsunamiSdkRepoPath.exists()) {
-    includeBuild("../primal-tsunami-sdk/bindings/kmp/primal-tsunami-kmp") {
-        dependencySubstitution {
-            substitute(module("net.primal:tsunami-sdk-kmp")).using(project(":sdk"))
-        }
-    }
-}

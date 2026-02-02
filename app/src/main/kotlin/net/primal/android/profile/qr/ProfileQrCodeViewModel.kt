@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -32,7 +33,6 @@ import net.primal.domain.nostr.utils.takeAsNaddrOrNull
 import net.primal.domain.nostr.utils.takeAsNaddrStringOrNull
 import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.profile.ProfileRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ProfileQrCodeViewModel @Inject constructor(
@@ -116,7 +116,7 @@ class ProfileQrCodeViewModel @Inject constructor(
             userId = activeAccountStore.activeUserId(),
             text = text,
         ).onFailure { error ->
-            Timber.w(error, "Unable to parse text. [text = $text]")
+            Napier.w(throwable = error) { "Unable to parse text. [text = $text]" }
         }.onSuccess { draftTx ->
             setEffect(SideEffect.WalletTxDetected(draftTx = draftTx))
         }

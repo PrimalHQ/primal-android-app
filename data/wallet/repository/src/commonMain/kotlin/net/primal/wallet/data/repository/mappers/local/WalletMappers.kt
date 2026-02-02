@@ -4,7 +4,7 @@ import net.primal.domain.wallet.NostrWalletKeypair
 import net.primal.domain.wallet.Wallet as WalletDO
 import net.primal.domain.wallet.Wallet.NWC
 import net.primal.domain.wallet.Wallet.Primal
-import net.primal.domain.wallet.Wallet.Tsunami
+import net.primal.domain.wallet.Wallet.Spark
 import net.primal.domain.wallet.WalletKycLevel
 import net.primal.domain.wallet.WalletType
 import net.primal.wallet.data.local.dao.ActiveWallet
@@ -15,7 +15,7 @@ inline fun <reified T : WalletDO> WalletPO.toDomain(): T =
         WalletType.PRIMAL ->
             Primal(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
@@ -27,7 +27,7 @@ inline fun <reified T : WalletDO> WalletPO.toDomain(): T =
         WalletType.NWC ->
             NWC(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
@@ -41,28 +41,28 @@ inline fun <reified T : WalletDO> WalletPO.toDomain(): T =
                 ),
             )
 
-        WalletType.TSUNAMI -> {
-            Tsunami(
+        WalletType.SPARK -> {
+            Spark(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
                 maxBalanceInBtc = info.maxBalanceInBtc?.decrypted,
                 lastUpdatedAt = info.lastUpdatedAt,
+                isBackedUp = spark?.backedUp ?: false,
             )
         }
     } as T
 
 fun ActiveWallet.toDomain(): WalletDO? {
-    val info = this.info
-    if (info == null) return null
+    val info = this.info ?: return null
 
     return when (info.type) {
         WalletType.PRIMAL ->
             Primal(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
@@ -74,7 +74,7 @@ fun ActiveWallet.toDomain(): WalletDO? {
         WalletType.NWC ->
             NWC(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
@@ -88,15 +88,16 @@ fun ActiveWallet.toDomain(): WalletDO? {
                 ),
             )
 
-        WalletType.TSUNAMI ->
-            Tsunami(
+        WalletType.SPARK ->
+            Spark(
                 walletId = info.walletId,
-                userId = info.userId.decrypted,
+                userId = info.userId,
                 lightningAddress = info.lightningAddress?.decrypted,
                 spamThresholdAmountInSats = settings?.spamThresholdAmountInSats?.decrypted ?: 1L,
                 balanceInBtc = info.balanceInBtc?.decrypted,
                 maxBalanceInBtc = info.maxBalanceInBtc?.decrypted,
                 lastUpdatedAt = info.lastUpdatedAt,
+                isBackedUp = spark?.backedUp ?: false,
             )
     }
 }

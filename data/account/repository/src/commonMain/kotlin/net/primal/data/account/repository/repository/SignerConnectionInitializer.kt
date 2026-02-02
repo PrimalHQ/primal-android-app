@@ -1,7 +1,6 @@
 package net.primal.data.account.repository.repository
 
 import io.ktor.http.Url
-import kotlin.uuid.ExperimentalUuidApi
 import kotlin.uuid.Uuid
 import net.primal.core.utils.Result
 import net.primal.core.utils.ensureWsOrWss
@@ -38,7 +37,6 @@ private const val NIP44_ENCRYPT = "nip44_encrypt"
 private const val VALID_PERMISSION_STRING_REGEX =
     "$GET_PUBLIC_KEY|$NIP04_DECRYPT|$NIP04_ENCRYPT|$NIP44_DECRYPT|$NIP44_ENCRYPT|($SIGN_EVENT:\\d+)"
 
-@OptIn(ExperimentalUuidApi::class)
 class SignerConnectionInitializer internal constructor(
     private val connectionRepository: ConnectionRepository,
     private val sessionRepository: SessionRepository,

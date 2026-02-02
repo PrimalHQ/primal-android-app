@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.map
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
@@ -40,7 +41,6 @@ import net.primal.domain.nostr.cryptography.SignResult
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.profile.ProfileRepository
-import timber.log.Timber
 
 @HiltViewModel
 class ChatViewModel @Inject constructor(
@@ -118,7 +118,7 @@ class ChatViewModel @Inject constructor(
                     try {
                         chatRepository.fetchNewConversationMessages(userId, participantId)
                     } catch (error: NetworkException) {
-                        Timber.w(error)
+                        Napier.w(throwable = error) { "Failed to fetch new conversation messages." }
                     }
                 }
         }
@@ -133,7 +133,7 @@ class ChatViewModel @Inject constructor(
 
                 when (signResult) {
                     is SignResult.Rejected -> {
-                        Timber.w(signResult.error)
+                        Napier.w(throwable = signResult.error) { "Signing rejected for marking conversation as read." }
                         setErrorState(error = UiState.ChatError.PublishError(signResult.error))
                     }
 
@@ -145,7 +145,7 @@ class ChatViewModel @Inject constructor(
                     }
                 }
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to mark conversation as read due to network error." }
             }
         }
 
@@ -160,16 +160,16 @@ class ChatViewModel @Inject constructor(
                 )
                 setState { copy(newMessageText = "") }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "SignatureException while sending message." }
                 setErrorState(error = UiState.ChatError.PublishError(error))
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "NostrPublishException while sending message." }
                 setErrorState(error = UiState.ChatError.PublishError(error))
             } catch (error: MissingRelaysException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "MissingRelaysException while sending message." }
                 setErrorState(error = UiState.ChatError.MissingRelaysConfiguration(error))
             } catch (error: MessageEncryptException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "MessageEncryptException while sending message." }
                 setErrorState(error = UiState.ChatError.PublishError(error))
             } finally {
                 setState { copy(sending = false) }

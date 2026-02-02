@@ -3,6 +3,7 @@ package net.primal.android.premium.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,6 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.profile.ProfileRepository
-import timber.log.Timber
 
 @HiltViewModel
 class PremiumHomeViewModel @Inject constructor(
@@ -100,13 +100,13 @@ class PremiumHomeViewModel @Inject constructor(
             try {
                 userRepository.setNostrAddress(userId = activeAccountStore.activeUserId(), nostrAddress = nip05)
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to set nostr address" }
                 setState { copy(error = MembershipError.ProfileMetadataNotFound) }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to set nostr address" }
                 setState { copy(error = MembershipError.FailedToApplyNostrAddress) }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to set nostr address" }
                 setState { copy(error = MembershipError.FailedToApplyNostrAddress) }
             }
         }
@@ -119,13 +119,13 @@ class PremiumHomeViewModel @Inject constructor(
             try {
                 userRepository.setLightningAddress(userId = activeAccountStore.activeUserId(), lightningAddress = lud16)
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to set lightning address" }
                 setState { copy(error = MembershipError.ProfileMetadataNotFound) }
             } catch (error: SignatureException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to set lightning address" }
                 setState { copy(error = MembershipError.FailedToApplyLightningAddress) }
             } catch (error: NostrPublishException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to set lightning address" }
                 setState { copy(error = MembershipError.FailedToApplyLightningAddress) }
             }
         }
@@ -135,7 +135,7 @@ class PremiumHomeViewModel @Inject constructor(
             try {
                 premiumRepository.fetchMembershipStatus(activeAccountStore.activeUserId())
             } catch (error: NetworkException) {
-                Timber.w(error)
+                Napier.w(throwable = error) { "Failed to fetch membership status" }
             }
         }
 
@@ -149,7 +149,7 @@ class PremiumHomeViewModel @Inject constructor(
                     )
                 }
             } catch (error: NetworkException) {
-                Timber.e(error)
+                Napier.e(throwable = error) { "Failed to fetch support notice status" }
             }
         }
 }

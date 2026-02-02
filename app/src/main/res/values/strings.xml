@@ -48,7 +48,6 @@
 
     <string name="welcome_sign_in_button_title">Sign In</string>
     <string name="welcome_create_account_button_title">Create Account</string>
-    <string name="welcome_redeem_code_button_title">Redeem Code</string>
     <string name="welcome_tos_prefix">By proceeding you accept our</string>
 
     <string name="legal_tos_hint_highlighted_word">Terms of Service</string>
@@ -58,14 +57,10 @@
     <string name="onboarding_title_your_interests">Your Interests</string>
     <string name="onboarding_title_your_follows">Your Follows</string>
     <string name="onboarding_title_account_preview">Account Preview</string>
-    <string name="onboarding_title_zaps_introduction">Primal Wallet</string>
-    <string name="onboarding_title_wallet_activation">Wallet Activation</string>
     <string name="onboarding_title_success">Success</string>
     <string name="onboarding_button_next">Next</string>
     <string name="onboarding_button_continue">Continue</string>
     <string name="onboarding_button_create_account_now">Create Account Now</string>
-    <string name="onboarding_button_activate_wallet">Activate Wallet</string>
-    <string name="onboarding_button_label_i_will_do_this_later">I\'ll do this later</string>
     <string name="onboarding_profile_details_hint">Create a public profile on Nostr. Choose any Display Name and say something about yourself. You can easily change these things later.</string>
     <string name="onboarding_profile_details_display_name_hint">Display Name</string>
     <string name="onboarding_profile_details_about_you_hint">About You</string>
@@ -93,9 +88,6 @@
     <string name="onboarding_profile_success_description">Account created!</string>
     <string name="onboarding_profile_create_error_image_upload">Unable to upload photo. Please try again.</string>
     <string name="onboarding_profile_create_error_failed_to_create">Something went wrong while creating your account. Please try again.</string>
-    <string name="onboarding_profile_zaps_introduction_title">Nostr is much more\nfun with ZAPS!</string>
-    <string name="onboarding_profile_zaps_introduction_description_1">Zaps are small payments that Nostr users send to each other. You can zap a note instead of hitting the like button.</string>
-    <string name="onboarding_profile_zaps_introduction_description_2">Activate your Primal Wallet to participate in the Nostr zapping economy and earn money for the awesome content you publish! </string>
 
     <string name="login_title">Sign In</string>
     <string name="login_description">Enter your Nostr key to sign in:</string>
@@ -782,7 +774,7 @@
     <string name="wallet_picker_title">Wallets</string>
     <string name="wallet_picker_configure_wallets">Configure</string>
     <string name="wallet_primal_title">Primal</string>
-    <string name="wallet_tsunami_title">Tsunami</string>
+    <string name="wallet_spark_title">Spark</string>
     <string name="wallet_primal_description">Built-in wallet</string>
     <string name="wallet_nwc_title">NWC</string>
     <string name="wallet_nwc_description">Your external lightning wallet</string>
@@ -911,6 +903,8 @@
     <string name="settings_wallet_backup_wallet_subtitle">Write down your wallet recovery phrase so you don\'t lose access to your funds</string>
     <string name="settings_wallet_restore_wallet_title">Restore existing wallet</string>
     <string name="settings_wallet_restore_wallet_subtitle">If you have an existing wallet that you wish to use with your Nostr account, you can restore it here using your 12-24 wallet recovery phrase</string>
+    <string name="settings_wallet_export_transactions_title">Export transaction history</string>
+    <string name="settings_wallet_export_transactions_subtitle">Download your entier wallet transaction history in CSV format</string>
     <string name="settings_wallet_new_nwc_connection_title">New Wallet Connection</string>
     <string name="settings_wallet_new_nwc_connection_app_name_input_header">Name of the app you wish to connect:</string>
     <string name="settings_wallet_new_nwc_connection_hint">You can revoke access at any time in your Primal Wallet settings.</string>
@@ -929,6 +923,15 @@
     <string name="settings_wallet_nwc_qr_code_scan_title">Connect NWC Wallet</string>
     <string name="settings_wallet_nwc_qr_code_scan_hint">Scan the NWC\nconnection QR code</string>
     <string name="settings_wallet_nwc_qr_code_scan_paste">Paste Connection String</string>
+    <string name="nwc_service_notification_channel_name">NWC Wallet Service</string>
+    <string name="nwc_service_notification_title">NWC Wallet Service</string>
+    <string name="nwc_service_notification_text">Processing wallet connection requests</string>
+    <string name="settings_wallet_nwc_service_start">Start wallet service</string>
+    <string name="settings_wallet_nwc_service_stop">Stop wallet service</string>
+    <string name="nwc_notification_service_active">NWC Wallet Service active</string>
+    <string name="nwc_notification_enable_switch_label">Enable Notifications</string>
+    <string name="nwc_notification_enable_button">Let\'s Go</string>
+    <string name="nwc_notification_keep_running_description">To keep running reliably while Primal is in the background or when your phone is locked, you need to enable wallet service notifications.</string>
 
     <string name="settings_notifications_title">Notifications</string>
     <string name="settings_notifications_error_update_settings">Unable to update notification settings.</string>
@@ -1224,9 +1227,9 @@
     <string name="zap_warning_bottom_sheet_no_sats_to_zap">Insufficient sats to zap, you need to get some sats before you can zap.</string>
     <string name="zap_warning_bottom_sheet_go_to_wallet_button">Go to Wallet</string>
 
-    <string name="wallet_dashboard_activate_notice_hint">You need to activate your wallet</string>
-    <string name="wallet_dashboard_activate_button">Activate Wallet Now</string>
-    <string name="wallet_dashboard_enable_wallet_button">Enable Primal Wallet</string>
+    <string name="wallet_dashboard_create_wallet_button">Create Wallet</string>
+    <string name="wallet_dashboard_create_wallet_hint">You don’t have an active wallet.</string>
+    <string name="wallet_dashboard_create_wallet_error">Unable to create wallet.</string>
     <string name="wallet_dashboard_no_sats_hint">You need sats to zap people on Nostr</string>
     <string name="wallet_dashboard_no_transactions_hint">Your transactions will appear here.</string>
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
@@ -1262,28 +1265,6 @@
     <string name="wallet_restore_valid_recovery_phrase">Valid recovery phrase</string>
     <string name="wallet_restore_restoring_your_wallet">Restoring your wallet…</string>
     <string name="wallet_restore_error_generic">Something went wrong. Please check your recovery phrase and try again.</string>
-
-    <string name="wallet_tos_prefix">By tapping \"Next\" you agree to the</string>
-    <string name="wallet_activation_title">Activate Wallet</string>
-    <string name="wallet_activation_pending_data_hint">Activating your wallet is easy!\nWe just need a few details below. This info will not be shared publicly.</string>
-    <string name="wallet_activation_pending_code_subtitle">Check Your Email</string>
-    <string name="wallet_activation_pending_code_hint">Your activation code was sent to <b>%1$s</b>. You may need to check your Junk or Spam folder.</string>
-    <string name="wallet_activation_error_invalid_code">Incorrect code. Please try again.</string>
-    <string name="wallet_activation_success_title">Success</string>
-    <string name="wallet_activation_success_description_short">Your wallet has been activated.</string>
-    <string name="wallet_activation_success_description">Your wallet has been activated. Your new Nostr lightning address is:</string>
-    <string name="wallet_activation_first_name">First name</string>
-    <string name="wallet_activation_last_name">Last name</string>
-    <string name="wallet_activation_email_address">Email address</string>
-    <string name="wallet_activation_date_of_birth">Date of birth</string>
-    <string name="wallet_activation_state">State</string>
-    <string name="wallet_activation_country_of_residence">Country of residence</string>
-    <string name="wallet_activation_next_button">Next</string>
-    <string name="wallet_activation_finish_button">Finish</string>
-    <string name="wallet_activation_done_button">Done</string>
-    <string name="wallet_activation_country_picker_title">Select country</string>
-    <string name="wallet_activation_state_picker_title">Select state</string>
-    <string name="wallet_activation_error_dialog_title">Warning</string>
 
     <string name="wallet_sats_suffix">sats</string>
     <string name="wallet_usd_suffix">USD</string>
