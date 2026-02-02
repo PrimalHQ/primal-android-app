@@ -95,7 +95,7 @@ fun PrimalWalletSettings(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        if (!state.showBackupWidget) {
+        if (state.showBackupListItem) {
             SettingsItem(
                 headlineText = stringResource(id = R.string.settings_wallet_backup_wallet_title),
                 supportText = stringResource(id = R.string.settings_wallet_backup_wallet_subtitle),
