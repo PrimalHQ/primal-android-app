@@ -8,7 +8,6 @@ import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
 import net.primal.core.networking.nwc.nip47.ListTransactionsResponsePayload
 import net.primal.core.networking.nwc.nip47.MakeInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.NwcError
-import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.nip47.PayInvoiceResponsePayload
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
 import net.primal.core.utils.CurrencyConversionUtils.btcToMSats
@@ -19,6 +18,7 @@ import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.domain.connections.nostr.model.NwcPaymentHoldResult
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.WalletRepository
+import net.primal.wallet.data.nwc.NwcCapabilities
 import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
 import net.primal.wallet.data.nwc.manager.NwcBudgetManager
 import net.primal.wallet.data.nwc.mapper.toNwcTransaction
@@ -167,7 +167,9 @@ class NwcRequestProcessor internal constructor(
             request = request,
             result = GetInfoResponsePayload(
                 alias = "Primal Wallet",
-                methods = SUPPORTED_METHODS,
+                methods = NwcCapabilities.supportedMethods,
+                pubkey = request.connection.serviceKeyPair.pubKey,
+                network = NwcCapabilities.NETWORK,
             ),
         )
     }
@@ -314,15 +316,6 @@ class NwcRequestProcessor internal constructor(
     }
 
     companion object {
-        private val SUPPORTED_METHODS = listOf(
-            NwcMethod.GetInfo.value,
-            NwcMethod.GetBalance.value,
-            NwcMethod.PayInvoice.value,
-            NwcMethod.MakeInvoice.value,
-            NwcMethod.LookupInvoice.value,
-            NwcMethod.ListTransactions.value,
-        )
-
         private const val PAYMENT_HOLD_TIMEOUT_MS = 60_000L
         private const val DEFAULT_TRANSACTIONS_LIMIT = 50
 
