@@ -17,13 +17,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import net.primal.android.R
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.wallet.di.NwcServiceFactory
 import net.primal.domain.connections.nostr.NwcService
 
 @AndroidEntryPoint
 class PrimalNwcService : Service() {
 
+    var nwcService: NwcService? = null
+
     @Inject
-    lateinit var nwcService: NwcService
+    lateinit var nwcServiceFactory: NwcServiceFactory
 
     @Inject
     lateinit var activeAccountStore: ActiveAccountStore
@@ -59,6 +62,7 @@ class PrimalNwcService : Service() {
         flags: Int,
         startId: Int,
     ): Int {
+        nwcService = nwcServiceFactory.create()
         val notification = buildNotification()
 
         ServiceCompat.startForeground(
@@ -74,7 +78,7 @@ class PrimalNwcService : Service() {
 
         val userId = activeAccountStore.activeUserId.value
         if (userId.isNotBlank()) {
-            nwcService.initialize(userId)
+            nwcService?.initialize(userId)
         }
 
         return START_STICKY
@@ -82,7 +86,8 @@ class PrimalNwcService : Service() {
 
     override fun onDestroy() {
         _isServiceRunning.value = false
-        nwcService.destroy()
+        nwcService?.destroy()
+        nwcService = null
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.cancel(NOTIFICATION_ID)
         super.onDestroy()
