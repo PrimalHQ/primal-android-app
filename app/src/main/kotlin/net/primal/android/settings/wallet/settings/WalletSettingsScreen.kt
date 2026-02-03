@@ -198,15 +198,17 @@ fun WalletSettingsScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                SettingsItem(
-                    headlineText = stringResource(id = R.string.settings_wallet_restore_wallet_title),
-                    supportText = stringResource(id = R.string.settings_wallet_restore_wallet_subtitle),
-                    trailingContent = {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
-                    },
-                    onClick = onRestoreWalletClick,
-                )
-                Spacer(modifier = Modifier.height(8.dp))
+                if (state.activeWallet is Wallet.Spark) {
+                    SettingsItem(
+                        headlineText = stringResource(id = R.string.settings_wallet_restore_wallet_title),
+                        supportText = stringResource(id = R.string.settings_wallet_restore_wallet_subtitle),
+                        trailingContent = {
+                            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos, contentDescription = null)
+                        },
+                        onClick = onRestoreWalletClick,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
                 SettingsItem(
                     headlineText = stringResource(id = R.string.settings_wallet_export_transactions_title),
