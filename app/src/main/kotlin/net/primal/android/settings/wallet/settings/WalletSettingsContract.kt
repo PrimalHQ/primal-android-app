@@ -19,6 +19,7 @@ interface WalletSettingsContract {
         val activeAccountBlossoms: List<String> = emptyList(),
         val activeAccountDisplayName: String = "",
         val isExportingTransactions: Boolean = false,
+        val transactionsToExport: List<Transaction> = emptyList(),
     )
 
     sealed class UiEvent {
@@ -32,7 +33,7 @@ interface WalletSettingsContract {
     }
 
     sealed class SideEffect {
-        data class TransactionsReadyForExport(val transactions: List<Transaction>) : SideEffect()
+        data object TransactionsReadyForExport : SideEffect()
     }
 
     enum class ConnectionsState {

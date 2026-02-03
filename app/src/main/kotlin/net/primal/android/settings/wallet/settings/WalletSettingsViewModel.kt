@@ -112,6 +112,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     is UiEvent.ConnectExternalWallet -> if (it.connectionLink.isNwcUrl()) {
                         connectWallet(nwcUrl = it.connectionLink)
                     }
+
                     UiEvent.RequestTransactionExport -> exportTransactions()
                 }
             }
@@ -226,13 +227,16 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
     private fun exportTransactions() =
         viewModelScope.launch {
+            val activeWalletId = state.value.activeWallet?.walletId ?: return@launch
             setState { copy(isExportingTransactions = true) }
-            val activeWalletId = state.value.activeWallet?.walletId ?: run {
-                setState { copy(isExportingTransactions = false) }
-                return@launch
-            }
+
             val transactions = walletRepository.allTransactions(walletId = activeWalletId)
-            setState { copy(isExportingTransactions = false) }
-            setEffect(SideEffect.TransactionsReadyForExport(transactions = transactions))
+            setState {
+                copy(
+                    isExportingTransactions = false,
+                    transactionsToExport = transactions,
+                )
+            }
+            setEffect(SideEffect.TransactionsReadyForExport)
         }
 }

@@ -72,7 +72,6 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.utils.saveTransactionsToUri
 import net.primal.domain.links.CdnImage
-import net.primal.domain.transactions.Transaction
 import net.primal.domain.utils.isPrimalWalletAndActivated
 import net.primal.domain.wallet.NostrWalletKeypair
 import net.primal.domain.wallet.Wallet
@@ -98,27 +97,22 @@ fun WalletSettingsScreen(
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val transactionsToExport = remember { mutableListOf<Transaction>() }
 
     val saveFileLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("text/csv"),
     ) { uri ->
-        if (uri != null && transactionsToExport.isNotEmpty()) {
+        val transactions = uiState.value.transactionsToExport
+        if (uri != null && transactions.isNotEmpty()) {
             scope.launch {
-                saveTransactionsToUri(context, uri, transactionsToExport.toList())
-                transactionsToExport.clear()
+                saveTransactionsToUri(context, uri, transactions)
             }
-        } else {
-            transactionsToExport.clear()
         }
     }
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                is WalletSettingsContract.SideEffect.TransactionsReadyForExport -> {
-                    transactionsToExport.clear()
-                    transactionsToExport.addAll(effect.transactions)
+                WalletSettingsContract.SideEffect.TransactionsReadyForExport -> {
                     val fileName = "${uiState.value.activeWallet?.type}_transactions.csv"
                     saveFileLauncher.launch(fileName)
                 }
