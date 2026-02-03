@@ -1,5 +1,6 @@
 package net.primal.wallet.data.nwc
 
+import net.primal.core.networking.nwc.nip47.NwcEncryptionScheme
 import net.primal.core.networking.nwc.nip47.NwcMethod
 
 /**
@@ -23,8 +24,9 @@ object NwcCapabilities {
     /**
      * Supported encryption schemes for NWC communication.
      */
-    val supportedEncryption: List<String> = listOf(
-        "nip04",
+    val supportedEncryption: List<NwcEncryptionScheme> = listOf(
+        NwcEncryptionScheme.NIP04,
+        NwcEncryptionScheme.NIP44,
     )
 
     /**

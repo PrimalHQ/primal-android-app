@@ -3,6 +3,7 @@ package net.primal.wallet.data.repository.factory
 import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.networking.nwc.wallet.NwcWalletRequestParser
 import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
@@ -202,12 +203,18 @@ abstract class RepositoryFactory {
             database = resolveWalletDatabase(),
         )
 
-    fun createNwcService(walletRepository: WalletRepository): NwcService {
+    fun createNwcService(
+        walletRepository: WalletRepository,
+        nostrEncryptionService: NostrEncryptionService,
+    ): NwcService {
         val responseBuilder = NwcWalletResponseBuilder()
         return NwcServiceImpl(
             dispatchers = dispatcherProvider,
             nwcRepository = createNwcRepository(),
-            requestParser = NwcWalletRequestParser(),
+            encryptionService = nostrEncryptionService,
+            requestParser = NwcWalletRequestParser(
+                encryptionService = nostrEncryptionService,
+            ),
             requestProcessor = NwcRequestProcessor(
                 walletRepository = walletRepository,
                 nwcBudgetManager = NwcBudgetManager(

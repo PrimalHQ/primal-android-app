@@ -37,6 +37,7 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(project(":core:utils"))
+                implementation(project(":core:nips"))
                 implementation(project(":core:networking-http"))
                 implementation(project(":core:networking-primal"))
                 implementation(project(":core:networking-lightning"))
