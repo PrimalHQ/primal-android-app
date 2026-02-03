@@ -26,7 +26,7 @@ kotlin {
     }
 
     // JVM Target
-//    jvm("desktop")
+    jvm("desktop")
 
     // iOS Target
     val xcfFramework = XCFramework(xcfName)
@@ -76,9 +76,9 @@ kotlin {
             }
         }
 
-//        val desktopMain by getting
-//        desktopMain.dependencies {
-//        }
+        val desktopMain by getting
+        desktopMain.dependencies {
+        }
 
         iosMain {
             dependencies {
