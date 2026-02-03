@@ -17,13 +17,16 @@ import net.primal.core.networking.nwc.wallet.NwcWalletRequestParser
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequestException
 import net.primal.core.networking.nwc.wallet.signNwcErrorResponseNostrEvent
+import net.primal.core.networking.nwc.wallet.signNwcInfoNostrEvent
 import net.primal.core.networking.nwc.wallet.signNwcResponseNostrEvent
 import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.nostr.NwcService
+import net.primal.domain.connections.nostr.model.NwcConnection
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
+import net.primal.wallet.data.nwc.NwcCapabilities
 import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
 import net.primal.wallet.data.nwc.processor.NwcRequestProcessor
 
@@ -45,6 +48,7 @@ class NwcServiceImpl internal constructor(
     private val clientMutex = Mutex()
     private var nwcClient: NwcWalletClient? = null
     private var clientJob: Job? = null
+    private val publishedInfoPubKeys: MutableSet<String> = mutableSetOf()
 
     override fun initialize(userId: String) {
         Napier.d(tag = TAG) { "NwcService initializing for userId=$userId" }
@@ -81,6 +85,7 @@ class NwcServiceImpl internal constructor(
             clientJob = null
             nwcClient?.destroy()
             nwcClient = null
+            publishedInfoPubKeys.clear()
             Napier.d(tag = TAG) { "Disconnected from NWC relay." }
         }
 
@@ -104,12 +109,43 @@ class NwcServiceImpl internal constructor(
                         .onFailure {
                             Napier.w(tag = TAG, throwable = it) { "Failed to update connections." }
                         }
+                    ensureInfoEventsArePublished(connections)
                 } else {
                     Napier.d(tag = TAG) { "No connections found, disconnecting from relay" }
                     disconnectFromRelay()
                 }
             }
         }
+
+    private suspend fun ensureInfoEventsArePublished(connections: List<NwcConnection>) {
+        for (connection in connections) {
+            val servicePubKey = connection.serviceKeyPair.pubKey
+
+            val (shouldPublish, client) = clientMutex.withLock {
+                val client = nwcClient ?: return@withLock false to null
+                val alreadyPublished = servicePubKey in publishedInfoPubKeys
+                !alreadyPublished to client
+            }
+
+            if (!shouldPublish || client == null) continue
+
+            runCatching {
+                val signedEvent = signNwcInfoNostrEvent(
+                    connection = connection,
+                    supportedMethods = NwcCapabilities.supportedMethods,
+                    supportedEncryption = NwcCapabilities.supportedEncryption,
+                    supportedNotifications = NwcCapabilities.supportedNotifications,
+                ).unwrapOrThrow()
+                client.publishEvent(signedEvent)
+                clientMutex.withLock {
+                    publishedInfoPubKeys.add(servicePubKey)
+                }
+                Napier.d(tag = TAG) { "Published info event for servicePubKey=${servicePubKey.take(8)}..." }
+            }.onFailure {
+                Napier.w(tag = TAG, throwable = it) { "Failed to publish info event" }
+            }
+        }
+    }
 
     private fun observeClientFlows(client: NwcWalletClient): Job =
         scope.launch {

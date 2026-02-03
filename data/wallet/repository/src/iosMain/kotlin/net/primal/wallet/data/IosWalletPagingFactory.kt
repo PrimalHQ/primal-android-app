@@ -7,9 +7,8 @@ import net.primal.IosPagingPresenter
 import net.primal.IosPagingSnapshot
 import net.primal.domain.transactions.Transaction
 
-object IosPagingUtils {
+object IosWalletPagingFactory {
 
-    // Option D: Typed for Transaction — no generics in Swift signature
     fun createTransactionPresenter(pagingFlow: Flow<PagingData<Transaction>>): IosPagingPresenter<Transaction> {
         return IosPagingFactory.createPresenter(pagingFlow)
     }

@@ -186,6 +186,18 @@ fun Nevent.asEventTag(marker: String? = null): JsonArray =
         authorPubkey = this.userId,
     )
 
+fun String.asEncryptionTag(): JsonArray =
+    buildJsonArray {
+        add("encryption")
+        add(this@asEncryptionTag)
+    }
+
+fun String.asNotificationsTag(): JsonArray =
+    buildJsonArray {
+        add("notifications")
+        add(this@asNotificationsTag)
+    }
+
 fun String.asPubkeyTag(relayHint: String? = null, optional: String? = null): JsonArray =
     buildJsonArray {
         add("p")

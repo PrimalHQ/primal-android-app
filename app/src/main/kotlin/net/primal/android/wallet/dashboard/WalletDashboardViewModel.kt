@@ -39,6 +39,7 @@ import net.primal.domain.billing.BillingRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.transactions.Transaction
+import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.distinctUntilWalletIdChanged
@@ -53,6 +54,7 @@ class WalletDashboardViewModel @Inject constructor(
     private val billingRepository: BillingRepository,
     private val subscriptionsManager: SubscriptionsManager,
     private val exchangeRateHandler: ExchangeRateHandler,
+    private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
@@ -88,8 +90,16 @@ class WalletDashboardViewModel @Inject constructor(
                     }
 
                     is UiEvent.ChangeActiveWallet -> changeActiveWallet(wallet = it.wallet)
+
+                    UiEvent.CreateWallet -> createWallet()
                 }
             }
+        }
+
+    private fun createWallet() =
+        viewModelScope.launch {
+            ensureSparkWalletExistsUseCase.invoke(userId = activeUserId)
+                .onFailure { setErrorState(UiState.DashboardError.WalletCreationFailed(it)) }
         }
 
     private fun observeUserWallets(userId: String) {

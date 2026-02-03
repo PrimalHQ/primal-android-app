@@ -77,6 +77,7 @@ kotlin {
 
         iosMain {
             dependencies {
+                implementation(project(":paging-runtime-ios"))
             }
         }
 
