@@ -136,6 +136,19 @@ internal class WalletRepositoryImpl(
                 }
         }
 
+    override suspend fun allTransactions(walletId: String): List<Transaction> =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.walletTransactions()
+                .allTransactionsByWalletId(walletId = walletId)
+                .map { txData ->
+                    val otherProfile = txData.otherUserId?.let { profileId ->
+                        profileRepository.findProfileDataOrNull(profileId.decrypted)
+                    }
+
+                    txData.toDomain(otherProfile = otherProfile)
+                }
+        }
+
     override suspend fun queryTransactions(
         walletId: String,
         type: TxType?,

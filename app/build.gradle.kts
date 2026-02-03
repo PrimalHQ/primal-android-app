@@ -336,6 +336,7 @@ dependencies {
     implementation(libs.retrofit.serialization.converter)
 
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.serialization.csv)
     implementation(libs.guava)
 
     implementation(libs.coil)

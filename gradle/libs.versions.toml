@@ -54,6 +54,7 @@ kotlinx-coroutines = "1.10.2"
 kotlinx-datetime = "0.7.1"
 kotlinx-io = "0.8.2"
 kotlinx-serialization-json = "1.9.0"
+kotlinx-serialization-csv = "3.2.1"
 ksp = "2.3.3"
 ktlint-wrapper-plugin = "14.0.1"
 ktlint-compose-rules = "0.5.1"
@@ -203,6 +204,7 @@ url-detector = { module = "io.github.url-detector:url-detector", version.ref = "
 
 kotlinx-io = { module = "org.jetbrains.kotlinx:kotlinx-io-core", version.ref = "kotlinx-io"}
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+kotlinx-serialization-csv = { module = "de.brudaswen.kotlinx.serialization:kotlinx-serialization-csv", version.ref = "kotlinx-serialization-csv" }
 guava = { module = "com.google.guava:guava", version.ref = "guava" }
 
 # KMP Room

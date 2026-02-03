@@ -17,6 +17,7 @@ fun SettingsItem(
     modifier: Modifier = Modifier,
     supportText: String? = null,
     trailingContent: @Composable (() -> Unit)? = null,
+    enabled: Boolean = true,
     onClick: (() -> Unit)? = null,
     colors: ListItemColors = ListItemDefaults.colors(
         containerColor = AppTheme.colorScheme.surfaceVariant,
@@ -24,7 +25,7 @@ fun SettingsItem(
 ) {
     ListItem(
         modifier = modifier.clickable(
-            enabled = onClick != null,
+            enabled = enabled && onClick != null,
             onClick = { onClick?.invoke() },
         ),
         headlineContent = {
@@ -32,7 +33,11 @@ fun SettingsItem(
                 modifier = Modifier.padding(bottom = 4.dp),
                 text = headlineText,
                 style = AppTheme.typography.bodyLarge,
-                color = AppTheme.colorScheme.onPrimary,
+                color = if (enabled) {
+                    AppTheme.colorScheme.onPrimary
+                } else {
+                    AppTheme.extraColorScheme.onSurfaceVariantAlt3
+                },
             )
         },
         supportingContent = if (supportText != null) {
@@ -41,7 +46,11 @@ fun SettingsItem(
                     modifier = Modifier.padding(top = 4.dp),
                     text = supportText,
                     style = AppTheme.typography.bodySmall,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    color = if (enabled) {
+                        AppTheme.extraColorScheme.onSurfaceVariantAlt1
+                    } else {
+                        AppTheme.extraColorScheme.onSurfaceVariantAlt4
+                    },
                 )
             }
         } else {

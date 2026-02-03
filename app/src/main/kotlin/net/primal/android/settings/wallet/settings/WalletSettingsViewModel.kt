@@ -7,12 +7,15 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.android.settings.wallet.settings.WalletSettingsContract.SideEffect
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -51,6 +54,10 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    private val _effects = Channel<SideEffect>()
+    val effects = _effects.receiveAsFlow()
+    private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
         if (nwcConnectionUrl != null) {
@@ -105,6 +112,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     is UiEvent.ConnectExternalWallet -> if (it.connectionLink.isNwcUrl()) {
                         connectWallet(nwcUrl = it.connectionLink)
                     }
+
+                    UiEvent.RequestTransactionExport -> exportTransactions()
                 }
             }
         }
@@ -214,5 +223,20 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 spamThresholdAmountInSats = amountInSats,
             )
             walletRepository.deleteAllTransactions(userId = activeAccountStore.activeUserId())
+        }
+
+    private fun exportTransactions() =
+        viewModelScope.launch {
+            val activeWalletId = state.value.activeWallet?.walletId ?: return@launch
+            setState { copy(isExportingTransactions = true) }
+
+            val transactions = walletRepository.allTransactions(walletId = activeWalletId)
+            setState {
+                copy(
+                    isExportingTransactions = false,
+                    transactionsToExport = transactions,
+                )
+            }
+            setEffect(SideEffect.TransactionsReadyForExport)
         }
 }
