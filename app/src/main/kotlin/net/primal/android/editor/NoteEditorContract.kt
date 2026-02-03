@@ -6,12 +6,11 @@ import java.util.*
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.articles.highlights.HighlightUi
 import net.primal.android.core.errors.UiError
+import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.notes.feed.model.FeedPostUi
-import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.profile.mention.UserTaggingState
-import net.primal.domain.links.CdnImage
 import net.primal.domain.links.ReferencedStream
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
@@ -26,14 +25,13 @@ interface NoteEditorContract {
         val isQuoting: Boolean = false,
         val publishing: Boolean = false,
         val error: UiError? = null,
-        val activeAccountAvatarCdnImage: CdnImage? = null,
-        val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
-        val activeAccountBlossoms: List<String> = emptyList(),
+        val selectedAccount: UserAccountUi? = null,
         val uploadingAttachments: Boolean = false,
         val attachments: List<NoteAttachment> = emptyList(),
         val taggedUsers: List<NoteTaggedUser> = emptyList(),
         val referencedNostrUris: List<ReferencedUri<*>> = emptyList(),
         val userTaggingState: UserTaggingState = UserTaggingState(),
+        val availableAccounts: List<UserAccountUi> = emptyList(),
     ) {
         val isReply: Boolean get() = replyToConversation.isNotEmpty()
         val replyToNote: FeedPostUi? = replyToConversation.lastOrNull()
@@ -53,6 +51,7 @@ interface NoteEditorContract {
         data class SearchUsers(val query: String) : UiEvent()
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
         data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
+        data class SelectAccount(val accountId: String) : UiEvent()
         data object DismissError : UiEvent()
     }
 

@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
@@ -31,6 +30,7 @@ import net.primal.android.articles.highlights.asHighlightUi
 import net.primal.android.articles.highlights.generateNevent
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.files.FileAnalyser
+import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.editor.NoteEditorContract.ReferencedUri
 import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
@@ -40,18 +40,16 @@ import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asFeedPostUi
-import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.profile.mention.UserMentionHandler
 import net.primal.android.profile.mention.appendUserTagAtSignAtCursorPosition
+import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.accounts.active.ActiveUserAccountState
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
 import net.primal.core.utils.fetchAndGet
 import net.primal.core.utils.fetchAndGetResult
 import net.primal.core.utils.onSuccess
-import net.primal.core.utils.runCatching
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.events.EventRepository
@@ -85,6 +83,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     @Assisted private val args: NoteEditorArgs,
     private val fileAnalyser: FileAnalyser,
     private val activeAccountStore: ActiveAccountStore,
+    private val userAccountsStore: UserAccountsStore,
     private val feedRepository: FeedRepository,
     private val notePublishHandler: NotePublishHandler,
     private val primalUploadService: AndroidPrimalBlossomUploadService,
@@ -121,7 +120,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     init {
         handleArgs()
         subscribeToEvents()
-        subscribeToActiveAccount()
+        observeAccounts()
         observeUserTaggingState()
     }
 
@@ -267,9 +266,31 @@ class NoteEditorViewModel @AssistedInject constructor(
                                 },
                             )
                         }
+
+                    is UiEvent.SelectAccount -> setState {
+                        val selectedAccount = availableAccounts.find { it.pubkey == event.accountId }
+                        copy(selectedAccount = selectedAccount ?: this.selectedAccount)
+                    }
                 }
             }
         }
+
+    private fun observeAccounts() {
+        viewModelScope.launch {
+            userAccountsStore.userAccounts.collect { accounts ->
+                val userAccounts = accounts.map { it.asUserAccountUi() }
+                setState {
+                    val currentActiveAccount = selectedAccount ?: userAccounts.find {
+                        it.pubkey == activeAccountStore.activeUserId()
+                    }
+                    copy(
+                        availableAccounts = userAccounts,
+                        selectedAccount = currentActiveAccount,
+                    )
+                }
+            }
+        }
+    }
 
     private fun handlePasteContent(content: TextFieldValue) =
         viewModelScope.launch {
@@ -311,22 +332,6 @@ class NoteEditorViewModel @AssistedInject constructor(
             highlightRepository.observeHighlightById(highlightId = highlightNevent.eventId)
                 .collect {
                     setState { copy(replyToHighlight = it.asHighlightUi()) }
-                }
-        }
-
-    private fun subscribeToActiveAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeAccountState
-                .filterIsInstance<ActiveUserAccountState.ActiveUserAccount>()
-                .collect {
-                    setState {
-                        copy(
-                            activeAccountAvatarCdnImage = it.data.avatarCdnImage,
-                            activeAccountLegendaryCustomization = it.data.primalLegendProfile
-                                ?.asLegendaryCustomization(),
-                            activeAccountBlossoms = it.data.blossomServers,
-                        )
-                    }
                 }
         }
 
@@ -543,9 +548,10 @@ class NoteEditorViewModel @AssistedInject constructor(
                     users = _state.value.taggedUsers,
                 )
 
+                val userId = state.value.selectedAccount?.pubkey ?: activeAccountStore.activeUserId()
                 val publishResult = if (args.isQuoting) {
                     notePublishHandler.publishShortTextNote(
-                        userId = activeAccountStore.activeUserId(),
+                        userId = userId,
                         content = noteContent.concatenateUris(),
                         attachments = _state.value.attachments,
                     )
@@ -561,7 +567,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                         ?: replyToNoteNevent
 
                     notePublishHandler.publishShortTextNote(
-                        userId = activeAccountStore.activeUserId(),
+                        userId = userId,
                         content = noteContent.concatenateUris(),
                         attachments = _state.value.attachments,
                         rootNoteNevent = rootNoteNevent,
@@ -647,9 +653,10 @@ class NoteEditorViewModel @AssistedInject constructor(
             updatedAttachment = updatedAttachment.copy(uploadError = null)
             updateNoteAttachmentState(attachment = updatedAttachment)
 
+            val userId = state.value.selectedAccount?.pubkey ?: activeAccountStore.activeUserId()
             val uploadResult = primalUploadService.upload(
                 uri = attachment.localUri,
-                userId = activeAccountStore.activeUserId(),
+                userId = userId,
                 onProgress = { uploadedBytes, totalBytes ->
                     updatedAttachment = updatedAttachment.copy(
                         originalUploadedInBytes = uploadedBytes,
