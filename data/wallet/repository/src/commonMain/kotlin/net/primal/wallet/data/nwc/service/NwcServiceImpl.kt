@@ -19,6 +19,7 @@ import net.primal.core.networking.nwc.wallet.model.WalletNwcRequestException
 import net.primal.core.networking.nwc.wallet.signNwcErrorResponseNostrEvent
 import net.primal.core.networking.nwc.wallet.signNwcInfoNostrEvent
 import net.primal.core.networking.nwc.wallet.signNwcResponseNostrEvent
+import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -36,6 +37,7 @@ private const val TAG = "NwcServiceImpl"
 class NwcServiceImpl internal constructor(
     private val dispatchers: DispatcherProvider,
     private val nwcRepository: NwcRepository,
+    private val encryptionService: NostrEncryptionService,
     private val requestParser: NwcWalletRequestParser,
     private val requestProcessor: NwcRequestProcessor,
     private val responseBuilder: NwcWalletResponseBuilder,
@@ -187,6 +189,7 @@ class NwcServiceImpl internal constructor(
                 val signedEvent = signNwcErrorResponseNostrEvent(
                     error = error,
                     responseJson = responseJson,
+                    encryptionService = encryptionService,
                 ).unwrapOrThrow()
 
                 Napier.d(tag = TAG) {
@@ -232,6 +235,7 @@ class NwcServiceImpl internal constructor(
             val signedEvent = signNwcResponseNostrEvent(
                 request = request,
                 responseJson = responseJson,
+                encryptionService = encryptionService,
             ).unwrapOrThrow()
 
             Napier.d(

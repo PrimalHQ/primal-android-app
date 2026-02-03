@@ -1,18 +1,18 @@
 package net.primal.core.networking.nwc.wallet
 
-import fr.acinq.secp256k1.Hex
 import io.github.aakira.napier.Napier
-import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.decodeFromJsonElement
 import net.primal.core.networking.nwc.nip47.ListTransactionsParams
 import net.primal.core.networking.nwc.nip47.LookupInvoiceParams
 import net.primal.core.networking.nwc.nip47.MakeInvoiceParams
+import net.primal.core.networking.nwc.nip47.NwcEncryptionScheme
 import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.nip47.PayInvoiceParams
 import net.primal.core.networking.nwc.nip47.PayKeysendParams
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
+import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.Result
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.runCatching
@@ -20,18 +20,29 @@ import net.primal.core.utils.serialization.CommonJson
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.connections.nostr.model.NwcConnection
 import net.primal.domain.nostr.NostrEvent
-import net.primal.domain.nostr.cryptography.utils.CryptoUtils
+import net.primal.domain.nostr.findFirstEncryptionTag
 
-class NwcWalletRequestParser {
+class NwcWalletRequestParser(
+    private val encryptionService: NostrEncryptionService,
+) {
 
-    @OptIn(ExperimentalEncodingApi::class)
     fun parseNostrEvent(event: NostrEvent, connection: NwcConnection): Result<WalletNwcRequest> {
         return runCatching {
-            val decryptedContent = CryptoUtils.decrypt(
-                message = event.content,
-                privateKey = Hex.decode(connection.serviceKeyPair.privateKey),
-                pubKey = Hex.decode(event.pubKey),
-            )
+            val encryptionTag = event.tags.findFirstEncryptionTag()
+            val encryptionScheme = NwcEncryptionScheme.fromValueOrDefault(encryptionTag)
+
+            val decryptedContent = when (encryptionScheme) {
+                NwcEncryptionScheme.NIP44 -> encryptionService.nip44Decrypt(
+                    privateKey = connection.serviceKeyPair.privateKey,
+                    pubKey = event.pubKey,
+                    ciphertext = event.content,
+                ).getOrThrow()
+                NwcEncryptionScheme.NIP04 -> encryptionService.nip04Decrypt(
+                    privateKey = connection.serviceKeyPair.privateKey,
+                    pubKey = event.pubKey,
+                    ciphertext = event.content,
+                ).getOrThrow()
+            }
 
             val request = decryptedContent.decodeFromJsonStringOrNull<NwcWalletRequestRaw>()
                 ?: return Result.failure(IllegalArgumentException("Failed to parse NWC JSON."))
@@ -41,6 +52,7 @@ class NwcWalletRequestParser {
                 params = request.params,
                 event = event,
                 connection = connection,
+                encryptionScheme = encryptionScheme,
             )
 
             walletRequest ?: throw IllegalArgumentException("Unsupported NWC method: ${request.method}")
@@ -54,6 +66,7 @@ class NwcWalletRequestParser {
         params: JsonElement?,
         event: NostrEvent,
         connection: NwcConnection,
+        encryptionScheme: NwcEncryptionScheme,
     ): WalletNwcRequest? {
         return when (method) {
             NwcMethod.PayInvoice.value -> {
@@ -61,6 +74,7 @@ class NwcWalletRequestParser {
                 WalletNwcRequest.PayInvoice(
                     eventId = event.id,
                     connection = connection,
+                    encryptionScheme = encryptionScheme,
                     params = CommonJson.decodeFromJsonElement<PayInvoiceParams>(params),
                 )
             }
@@ -70,6 +84,7 @@ class NwcWalletRequestParser {
                 WalletNwcRequest.PayKeysend(
                     eventId = event.id,
                     connection = connection,
+                    encryptionScheme = encryptionScheme,
                     params = CommonJson.decodeFromJsonElement<PayKeysendParams>(params),
                 )
             }
@@ -79,6 +94,7 @@ class NwcWalletRequestParser {
                 WalletNwcRequest.MakeInvoice(
                     eventId = event.id,
                     connection = connection,
+                    encryptionScheme = encryptionScheme,
                     params = CommonJson.decodeFromJsonElement<MakeInvoiceParams>(params),
                 )
             }
@@ -88,6 +104,7 @@ class NwcWalletRequestParser {
                 WalletNwcRequest.LookupInvoice(
                     eventId = event.id,
                     connection = connection,
+                    encryptionScheme = encryptionScheme,
                     params = CommonJson.decodeFromJsonElement<LookupInvoiceParams>(params),
                 )
             }
@@ -101,6 +118,7 @@ class NwcWalletRequestParser {
                 WalletNwcRequest.ListTransactions(
                     eventId = event.id,
                     connection = connection,
+                    encryptionScheme = encryptionScheme,
                     params = listParams,
                 )
             }
@@ -109,6 +127,7 @@ class NwcWalletRequestParser {
                 WalletNwcRequest.GetBalance(
                     eventId = event.id,
                     connection = connection,
+                    encryptionScheme = encryptionScheme,
                 )
             }
 
@@ -116,6 +135,7 @@ class NwcWalletRequestParser {
                 WalletNwcRequest.GetInfo(
                     eventId = event.id,
                     connection = connection,
+                    encryptionScheme = encryptionScheme,
                 )
             }
 
@@ -124,6 +144,7 @@ class NwcWalletRequestParser {
                 WalletNwcRequest.MultiPayInvoice(
                     eventId = event.id,
                     connection = connection,
+                    encryptionScheme = encryptionScheme,
                     params = CommonJson.decodeFromJsonElement<List<PayInvoiceParams>>(params),
                 )
             }
@@ -133,6 +154,7 @@ class NwcWalletRequestParser {
                 WalletNwcRequest.MultiPayKeysend(
                     eventId = event.id,
                     connection = connection,
+                    encryptionScheme = encryptionScheme,
                     params = CommonJson.decodeFromJsonElement<List<PayKeysendParams>>(params),
                 )
             }

@@ -56,7 +56,11 @@ fun List<JsonArray>.findFirstKindTag() = firstOrNull { it.isKindTag() }?.getTagV
 
 fun List<JsonArray>.findFirstClient() = firstOrNull { it.isClientTag() }?.getTagValueOrNull()
 
+fun List<JsonArray>.findFirstEncryptionTag() = firstOrNull { it.isEncryptionTag() }?.getTagValueOrNull()
+
 fun JsonArray.isContextTag() = getOrNull(0)?.jsonPrimitive?.content == "context"
+
+fun JsonArray.isEncryptionTag() = getOrNull(0)?.jsonPrimitive?.content == "encryption"
 
 fun JsonArray.isBolt11Tag() = getOrNull(0)?.jsonPrimitive?.content == "bolt11"
 
