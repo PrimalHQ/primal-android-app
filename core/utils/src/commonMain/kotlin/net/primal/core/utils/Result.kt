@@ -234,32 +234,26 @@ inline fun <T> Result<T>.onSuccess(action: (value: T) -> Unit): Result<T> {
 fun <T> T.asSuccess(): Result<T> = success(this)
 
 /**
- * Retries the operation with support for early abort and separate failure callbacks.
+ * Retries the operation with support for early abort and retry callbacks.
  *
  * @param times Maximum number of attempts (default: 5)
  * @param initialDelaySeconds Initial delay in seconds before first retry (default: 3)
- * @param shouldContinue Called before each attempt; returns false to abort immediately
+ * @param shouldRetry Called before each retry (after first failure); returns false to abort retries
  * @param onRetry Called on each intermediate failure with attempt index, remaining attempts, delay, and error
- * @param onFinalFailure Called when all retries are exhausted
  * @return Result of the operation or failure
  */
 suspend inline fun <T> (suspend () -> Result<T>).retryOnFailureWithAbort(
     times: Int = 5,
     initialDelaySeconds: Int = 3,
-    noinline shouldContinue: suspend () -> Boolean = { true },
+    noinline shouldRetry: suspend () -> Boolean = { true },
     crossinline onRetry: (
         attempt: Int,
         remainingAttempts: Int,
         delaySeconds: Int,
         error: Throwable,
     ) -> Unit = { _, _, _, _ -> },
-    crossinline onFinalFailure: (error: Throwable) -> Unit = { },
 ): Result<T> {
     repeat(times) { attempt ->
-        if (!shouldContinue()) {
-            return failure(IllegalStateException("Retry aborted by shouldContinue"))
-        }
-
         val result = invoke()
 
         result.onSuccess { return result }
@@ -267,11 +261,13 @@ suspend inline fun <T> (suspend () -> Result<T>).retryOnFailureWithAbort(
         result.onFailure { error ->
             val remainingAttempts = times - attempt - 1
             if (remainingAttempts > 0) {
+                if (!shouldRetry()) {
+                    return failure(IllegalStateException("Retry aborted by shouldRetry"))
+                }
                 val delaySeconds = initialDelaySeconds shl attempt
                 onRetry(attempt, remainingAttempts, delaySeconds, error)
                 delay(delaySeconds.seconds)
             } else {
-                onFinalFailure(error)
                 return result
             }
         }
