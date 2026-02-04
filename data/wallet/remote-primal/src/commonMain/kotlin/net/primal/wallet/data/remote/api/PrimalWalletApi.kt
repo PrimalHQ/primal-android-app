@@ -67,4 +67,6 @@ interface PrimalWalletApi {
     suspend fun getExchangeRate(userId: String): Double
 
     suspend fun registerSparkWallet(userId: String, sparkWalletId: String)
+
+    suspend fun unregisterSparkWallet(userId: String, sparkWalletId: String)
 }

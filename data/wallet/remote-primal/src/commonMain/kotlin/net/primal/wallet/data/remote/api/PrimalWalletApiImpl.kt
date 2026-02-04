@@ -47,6 +47,7 @@ import net.primal.wallet.data.remote.model.PromoCodeRequestBody
 import net.primal.wallet.data.remote.model.RegisterSparkPubkeyRequestBody
 import net.primal.wallet.data.remote.model.TransactionsRequestBody
 import net.primal.wallet.data.remote.model.TransactionsResponse
+import net.primal.wallet.data.remote.model.UnregisterSparkPubkeyRequestBody
 import net.primal.wallet.data.remote.model.UserWalletInfoRequestBody
 import net.primal.wallet.data.remote.model.WalletRequestBody
 import net.primal.wallet.data.remote.model.WalletStatusResponse
@@ -396,6 +397,20 @@ class PrimalWalletApiImpl(
                     userId = userId,
                     walletVerb = WalletOperationVerb.REGISTER_SPARK_PUBKEY,
                     requestBody = RegisterSparkPubkeyRequestBody(sparkPubkey = sparkWalletId),
+                    signatureHandler = signatureHandler,
+                ),
+            ),
+        )
+    }
+
+    override suspend fun unregisterSparkWallet(userId: String, sparkWalletId: String) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalWalletVerb.WALLET.id,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.UNREGISTER_SPARK_PUBKEY,
+                    requestBody = UnregisterSparkPubkeyRequestBody(sparkPubkey = sparkWalletId),
                     signatureHandler = signatureHandler,
                 ),
             ),

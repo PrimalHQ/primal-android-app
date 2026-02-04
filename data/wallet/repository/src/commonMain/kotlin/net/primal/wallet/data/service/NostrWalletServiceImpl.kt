@@ -1,5 +1,6 @@
 package net.primal.wallet.data.service
 
+import kotlin.time.Duration
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
@@ -278,6 +279,12 @@ internal class NostrWalletServiceImpl(
             ),
         )
     }
+
+    override suspend fun awaitInvoicePayment(
+        wallet: Wallet.NWC,
+        invoice: String,
+        timeout: Duration,
+    ): Result<Unit> = Result.failure(UnsupportedOperationException("Not supported for NWC wallet"))
 
     private fun createNwcApiClient(wallet: Wallet.NWC) =
         NwcClientFactory.createNwcApiClient(

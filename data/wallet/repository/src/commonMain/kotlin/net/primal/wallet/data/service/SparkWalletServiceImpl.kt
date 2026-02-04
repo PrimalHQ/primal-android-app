@@ -1,5 +1,6 @@
 package net.primal.wallet.data.service
 
+import breez_sdk_spark.EventListener
 import breez_sdk_spark.GetInfoRequest
 import breez_sdk_spark.InputType
 import breez_sdk_spark.ListPaymentsRequest
@@ -12,6 +13,7 @@ import breez_sdk_spark.PrepareLnurlPayRequest
 import breez_sdk_spark.PrepareSendPaymentRequest
 import breez_sdk_spark.ReceivePaymentMethod
 import breez_sdk_spark.ReceivePaymentRequest
+import breez_sdk_spark.SdkEvent
 import breez_sdk_spark.SdkException
 import breez_sdk_spark.SendPaymentMethod
 import breez_sdk_spark.SendPaymentOptions
@@ -20,9 +22,12 @@ import com.ionspin.kotlin.bignum.integer.BigInteger
 import com.ionspin.kotlin.bignum.integer.toBigInteger
 import io.github.aakira.napier.Napier
 import kotlin.time.Clock
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.withTimeout
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.Result
@@ -314,6 +319,40 @@ internal class SparkWalletServiceImpl(
             )
         }.mapFailure { it.toWalletException() }
 
+    override suspend fun awaitInvoicePayment(
+        wallet: Wallet.Spark,
+        invoice: String,
+        timeout: Duration,
+    ): Result<Unit> =
+        runCatching {
+            val sdk = breezSdkInstanceManager.requireInstance(wallet.walletId)
+
+            Napier.d { "Awaiting payment for invoice (timeout=$timeout): ${invoice.take(30)}..." }
+
+            val paymentReceived = CompletableDeferred<Unit>()
+
+            val listener = object : EventListener {
+                override suspend fun onEvent(event: SdkEvent) {
+                    if (event is SdkEvent.PaymentSucceeded) {
+                        val details = event.payment.details
+                        if (details is PaymentDetails.Lightning && details.invoice == invoice) {
+                            Napier.i { "Payment confirmed via event! paymentId=${event.payment.id}" }
+                            paymentReceived.complete(Unit)
+                        }
+                    }
+                }
+            }
+
+            val listenerId = sdk.addEventListener(listener)
+            try {
+                withTimeout(timeout) {
+                    paymentReceived.await()
+                }
+            } finally {
+                sdk.removeEventListener(listenerId)
+            }
+        }.mapFailure { it.toWalletException() }
+
     private fun Throwable.toWalletException(): WalletException {
         return when (this) {
             is WalletException -> this
@@ -347,6 +386,11 @@ internal class SparkWalletServiceImpl(
 
             is FeeQuoteExpiredException -> WalletFeesException.FeeQuoteExpired(cause = this)
 
+            is InvoicePaymentTimeoutException -> WalletPaymentException.PaymentFailed(
+                reason = this.message ?: "Payment confirmation timeout",
+                cause = this,
+            )
+
             is InvalidAmountException -> WalletPaymentException.InvalidPaymentRequest(
                 reason = this.message ?: "Invalid amount format",
                 cause = this,
@@ -375,4 +419,10 @@ internal class SparkWalletServiceImpl(
      */
     private class InvalidAmountException(amount: String, cause: Throwable) :
         Exception("Invalid amount format: '$amount'. Expected a valid number.", cause)
+
+    /**
+     * Custom exception for invoice payment timeout.
+     */
+    private class InvoicePaymentTimeoutException(invoice: String) :
+        Exception("Timed out waiting for invoice payment confirmation: ${invoice.take(30)}...")
 }

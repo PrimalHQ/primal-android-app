@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
+import kotlin.time.Duration
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.flow.Flow
@@ -361,6 +362,22 @@ internal class WalletRepositoryImpl(
     override suspend fun findNwcInvoiceByInvoice(invoice: String): NwcInvoice? =
         withContext(dispatcherProvider.io()) {
             walletDatabase.nwcInvoices().findByInvoice(invoice)?.asDO()
+        }
+
+    override suspend fun awaitInvoicePayment(
+        walletId: String,
+        invoice: String,
+        timeout: Duration,
+    ): Result<Unit> =
+        withContext(dispatcherProvider.io()) {
+            val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
+                ?: return@withContext Result.failure(WalletException.WalletNotFound())
+
+            wallet.resolveWalletService().awaitInvoicePayment(
+                wallet = wallet.toDomain(),
+                invoice = invoice,
+                timeout = timeout,
+            )
         }
 
     private fun WalletPO.resolveWalletService(): WalletService<Wallet> {
