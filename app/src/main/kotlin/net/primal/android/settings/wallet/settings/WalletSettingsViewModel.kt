@@ -165,6 +165,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
+                        activeUserId = it.pubkey,
                         activeAccountAvatarCdnImage = it.avatarCdnImage,
                         activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
                         activeAccountBlossoms = it.blossomServers,

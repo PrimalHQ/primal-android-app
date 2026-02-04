@@ -259,6 +259,7 @@ fun WalletSettingsScreen(
                 )
 
                 ToggleNwcServiceButton(
+                    currentUserId = state.activeUserId,
                     avatarCdnImage = state.activeAccountAvatarCdnImage,
                     legendaryCustomization = state.activeAccountLegendaryCustomization,
                     avatarBlossoms = state.activeAccountBlossoms,
@@ -273,12 +274,16 @@ fun WalletSettingsScreen(
 
 @Composable
 private fun ToggleNwcServiceButton(
+    currentUserId: String,
     avatarCdnImage: CdnImage?,
     legendaryCustomization: LegendaryCustomization?,
     avatarBlossoms: List<String>,
     displayName: String,
 ) {
-    val isNwcServiceRunning by PrimalNwcService.isServiceRunning.collectAsState()
+    val isRunningForCurrentUser by PrimalNwcService
+        .isRunningForUser(userId = currentUserId)
+        .collectAsState()
+
     val context = LocalContext.current
     var showNotificationsBottomSheet by remember { mutableStateOf(false) }
 
@@ -291,7 +296,7 @@ private fun ToggleNwcServiceButton(
             onDismissRequest = { showNotificationsBottomSheet = false },
             onTogglePushNotifications = { enabled ->
                 if (enabled) {
-                    PrimalNwcService.start(context)
+                    PrimalNwcService.start(context, currentUserId)
                     showNotificationsBottomSheet = false
                 }
             },
@@ -301,11 +306,11 @@ private fun ToggleNwcServiceButton(
     TextButton(
         modifier = Modifier.padding(horizontal = 16.dp),
         onClick = {
-            if (isNwcServiceRunning) {
-                PrimalNwcService.stop(context)
+            if (isRunningForCurrentUser) {
+                PrimalNwcService.stop(context, currentUserId)
             } else {
                 if (context.hasNotificationPermission(PrimalNwcService.CHANNEL_ID)) {
-                    PrimalNwcService.start(context)
+                    PrimalNwcService.start(context, currentUserId)
                 } else {
                     showNotificationsBottomSheet = true
                 }
@@ -317,7 +322,7 @@ private fun ToggleNwcServiceButton(
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = stringResource(
-                id = if (isNwcServiceRunning) {
+                id = if (isRunningForCurrentUser) {
                     R.string.settings_wallet_nwc_service_stop
                 } else {
                     R.string.settings_wallet_nwc_service_start
