@@ -11,9 +11,11 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.core.service.PrimalNwcService
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.SideEffect
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
@@ -48,7 +50,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
         fun create(nwcConnectionUrl: String?): WalletSettingsViewModel
     }
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(activeUserId = activeAccountStore.activeUserId()))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 
@@ -68,6 +70,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
         }
 
         observeActiveAccount()
+        observeServiceRunningState()
         observeEvents()
     }
 
@@ -173,6 +176,18 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     )
                 }
             }
+        }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private fun observeServiceRunningState() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserId
+                .flatMapLatest { userId ->
+                    PrimalNwcService.isRunningForUser(userId)
+                }
+                .collect { isRunning ->
+                    setState { copy(isServiceRunningForCurrentUser = isRunning) }
+                }
         }
 
     private fun connectWallet(nwcUrl: String) =

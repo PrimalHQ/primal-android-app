@@ -260,6 +260,7 @@ fun WalletSettingsScreen(
 
                 ToggleNwcServiceButton(
                     currentUserId = state.activeUserId,
+                    isRunningForCurrentUser = state.isServiceRunningForCurrentUser,
                     avatarCdnImage = state.activeAccountAvatarCdnImage,
                     legendaryCustomization = state.activeAccountLegendaryCustomization,
                     avatarBlossoms = state.activeAccountBlossoms,
@@ -275,15 +276,12 @@ fun WalletSettingsScreen(
 @Composable
 private fun ToggleNwcServiceButton(
     currentUserId: String,
+    isRunningForCurrentUser: Boolean,
     avatarCdnImage: CdnImage?,
     legendaryCustomization: LegendaryCustomization?,
     avatarBlossoms: List<String>,
     displayName: String,
 ) {
-    val isRunningForCurrentUser by PrimalNwcService
-        .isRunningForUser(userId = currentUserId)
-        .collectAsState()
-
     val context = LocalContext.current
     var showNotificationsBottomSheet by remember { mutableStateOf(false) }
 
@@ -454,12 +452,15 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletSettingsContract.Ui
     override val values: Sequence<WalletSettingsContract.UiState>
         get() = sequenceOf(
             WalletSettingsContract.UiState(
+                activeUserId = "",
                 activeWallet = null,
             ),
             WalletSettingsContract.UiState(
+                activeUserId = "",
                 activeWallet = null,
             ),
             WalletSettingsContract.UiState(
+                activeUserId = "",
                 activeWallet = Wallet.NWC(
                     relays = listOf("wss://relay.getalby.com/v1"),
                     lightningAddress = "miljan@getalby.com",

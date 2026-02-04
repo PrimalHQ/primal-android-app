@@ -64,14 +64,15 @@ class PrimalNwcService : Service() {
 
         private val runningStateScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-        fun isRunningForUser(userId: String): StateFlow<Boolean> = activeUserIds
-            .map { userId in it }
-            .distinctUntilChanged()
-            .stateIn(
-                scope = runningStateScope,
-                started = SharingStarted.WhileSubscribed(),
-                initialValue = userId in activeUserIds.value,
-            )
+        fun isRunningForUser(userId: String): StateFlow<Boolean> =
+            activeUserIds
+                .map { userId in it }
+                .distinctUntilChanged()
+                .stateIn(
+                    scope = runningStateScope,
+                    started = SharingStarted.WhileSubscribed(),
+                    initialValue = userId in activeUserIds.value,
+                )
 
         fun start(context: Context, userId: String) {
             val intent = Intent(context, PrimalNwcService::class.java).apply {
@@ -107,7 +108,9 @@ class PrimalNwcService : Service() {
             ACTION_STOP_USER -> stopUserService(intent.getStringExtra(EXTRA_USER_ID))
             else -> startUserService(activeAccountStore.activeUserId.value)
         }
-        startForegroundIfNeeded()
+        if (nwcServices.isNotEmpty()) {
+            startForeground()
+        }
         return START_NOT_STICKY
     }
 
@@ -132,9 +135,7 @@ class PrimalNwcService : Service() {
         }
     }
 
-    private fun startForegroundIfNeeded() {
-        if (nwcServices.isEmpty()) return
-
+    private fun startForeground() {
         val summaryNotification = buildSummaryNotification()
         ServiceCompat.startForeground(
             this,
@@ -173,6 +174,7 @@ class PrimalNwcService : Service() {
 
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.cancel(SUMMARY_NOTIFICATION_ID)
+        notificationManager.cancel(CHILD_NOTIFICATION_ID)
         super.onDestroy()
     }
 
