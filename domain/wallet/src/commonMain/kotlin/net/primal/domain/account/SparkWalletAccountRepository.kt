@@ -8,6 +8,8 @@ interface SparkWalletAccountRepository {
 
     suspend fun registerSparkWallet(userId: String, walletId: String): Result<Unit>
 
+    suspend fun unregisterSparkWallet(userId: String, walletId: String): Result<Unit>
+
     suspend fun findPersistedWalletId(userId: String): String?
 
     suspend fun getPersistedSeedWords(walletId: String): Result<List<String>>
@@ -25,4 +27,6 @@ interface SparkWalletAccountRepository {
     suspend fun markWalletAsBackedUp(walletId: String): Result<Unit>
 
     suspend fun deleteSparkWalletByUserId(userId: String): Result<String>
+
+    suspend fun isPrimalTxsMigrationCompleted(walletId: String): Boolean
 }

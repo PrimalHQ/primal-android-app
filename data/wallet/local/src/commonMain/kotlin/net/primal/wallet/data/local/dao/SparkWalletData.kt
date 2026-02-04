@@ -12,4 +12,6 @@ data class SparkWalletData(
     val userId: String,
     val seedWords: Encryptable<String>,
     val backedUp: Boolean = false,
+    val primalTxsMigrated: Boolean? = null,
+    val primalTxsMigratedUntil: Long? = null,
 )

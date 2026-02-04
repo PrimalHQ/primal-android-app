@@ -9,9 +9,32 @@ import net.primal.wallet.data.remote.nostr.ContentWalletTransaction
 internal fun List<ContentWalletTransaction>.mapAsPrimalTransactions(
     walletId: String,
     userId: String,
-): List<Transaction> = map { it.asPrimalTransaction(walletId, userId) }
+): List<Transaction> =
+    map {
+        it.asPrimalTransaction(
+            walletId = walletId,
+            userId = userId,
+            walletType = WalletType.PRIMAL,
+        )
+    }
 
-internal fun ContentWalletTransaction.asPrimalTransaction(walletId: String, userId: String): Transaction {
+internal fun List<ContentWalletTransaction>.mapForMigration(
+    targetWalletId: String,
+    userId: String,
+): List<Transaction> =
+    map {
+        it.asPrimalTransaction(
+            walletId = targetWalletId,
+            userId = userId,
+            walletType = WalletType.SPARK,
+        )
+    }
+
+private fun ContentWalletTransaction.asPrimalTransaction(
+    walletId: String,
+    userId: String,
+    walletType: WalletType = WalletType.PRIMAL,
+): Transaction {
     val zapEvent = this.zapRequestRawJson.decodeFromJsonStringOrNull<NostrEvent>()
     val zappedEntity = zapEvent?.toNostrEntity()
 
@@ -25,7 +48,7 @@ internal fun ContentWalletTransaction.asPrimalTransaction(walletId: String, user
         isStorePurchase -> Transaction.StorePurchase(
             transactionId = this.id,
             walletId = walletId,
-            walletType = WalletType.PRIMAL,
+            walletType = walletType,
             type = this.type,
             state = this.state,
             createdAt = this.createdAt,
@@ -39,10 +62,11 @@ internal fun ContentWalletTransaction.asPrimalTransaction(walletId: String, user
             exchangeRate = this.exchangeRate,
             totalFeeInBtc = this.totalFeeInBtc,
         )
+
         isZap -> Transaction.Zap(
             transactionId = this.id,
             walletId = walletId,
-            walletType = WalletType.PRIMAL,
+            walletType = walletType,
             type = this.type,
             state = this.state,
             createdAt = this.createdAt,
@@ -55,7 +79,7 @@ internal fun ContentWalletTransaction.asPrimalTransaction(walletId: String, user
             amountInUsd = this.amountInUsd,
             exchangeRate = this.exchangeRate,
             totalFeeInBtc = this.totalFeeInBtc,
-            zappedEntity = zappedEntity!!,
+            zappedEntity = zappedEntity,
             otherUserId = this.otherPubkey,
             otherLightningAddress = this.otherLud16,
             zappedByUserId = zapEvent?.pubKey,
@@ -63,10 +87,11 @@ internal fun ContentWalletTransaction.asPrimalTransaction(walletId: String, user
             preimage = null,
             paymentHash = null,
         )
+
         isOnChain -> Transaction.OnChain(
             transactionId = this.id,
             walletId = walletId,
-            walletType = WalletType.PRIMAL,
+            walletType = walletType,
             type = this.type,
             state = this.state,
             createdAt = this.createdAt,
@@ -82,10 +107,11 @@ internal fun ContentWalletTransaction.asPrimalTransaction(walletId: String, user
             onChainTxId = this.onChainTxId,
             onChainAddress = this.onChainAddress,
         )
+
         else -> Transaction.Lightning(
             transactionId = this.id,
             walletId = walletId,
-            walletType = WalletType.PRIMAL,
+            walletType = walletType,
             type = this.type,
             state = this.state,
             createdAt = this.createdAt,

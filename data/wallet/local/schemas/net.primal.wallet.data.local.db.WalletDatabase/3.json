@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "39f6dbf17a23bb59a7c8862186ff9188",
+    "identityHash": "a58b3da15d3232077c33f561c61497ae",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -122,7 +122,7 @@
       },
       {
         "tableName": "SparkWalletData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `seedWords` TEXT NOT NULL, `backedUp` INTEGER NOT NULL, PRIMARY KEY(`walletId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `seedWords` TEXT NOT NULL, `backedUp` INTEGER NOT NULL, `primalTxsMigrated` INTEGER, `primalTxsMigratedUntil` INTEGER, PRIMARY KEY(`walletId`))",
         "fields": [
           {
             "fieldPath": "walletId",
@@ -147,6 +147,16 @@
             "columnName": "backedUp",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "primalTxsMigrated",
+            "columnName": "primalTxsMigrated",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "primalTxsMigratedUntil",
+            "columnName": "primalTxsMigratedUntil",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -676,7 +686,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '39f6dbf17a23bb59a7c8862186ff9188')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a58b3da15d3232077c33f561c61497ae')"
     ]
   }
 }

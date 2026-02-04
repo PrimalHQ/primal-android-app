@@ -1,5 +1,6 @@
 package net.primal.wallet.data.service
 
+import kotlin.time.Duration
 import kotlinx.coroutines.flow.Flow
 import net.primal.core.utils.Result
 import net.primal.domain.rates.fees.OnChainTransactionFeeTier
@@ -30,4 +31,13 @@ internal interface WalletService<W : Wallet> {
         onChainAddress: String,
         amountInBtc: String,
     ): Result<List<OnChainTransactionFeeTier>>
+
+    /**
+     * Awaits confirmation that a Lightning invoice has been paid.
+     */
+    suspend fun awaitInvoicePayment(
+        wallet: W,
+        invoice: String,
+        timeout: Duration,
+    ): Result<Unit>
 }
