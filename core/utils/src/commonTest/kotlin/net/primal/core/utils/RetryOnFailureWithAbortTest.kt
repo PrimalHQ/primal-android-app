@@ -51,10 +51,10 @@ class RetryOnFailureWithAbortTest {
         }
 
     @Test
-    fun `abort via shouldContinue returning false`() =
+    fun `abort via shouldRetry returning false`() =
         runTest {
             var invocationCount = 0
-            var shouldContinueCallCount = 0
+            var shouldRetryCallCount = 0
             val block: suspend () -> Result<String> = {
                 invocationCount++
                 failure(RuntimeException("error"))
@@ -63,24 +63,22 @@ class RetryOnFailureWithAbortTest {
             val result = block.retryOnFailureWithAbort(
                 times = 5,
                 initialDelaySeconds = 1,
-                shouldContinue = {
-                    shouldContinueCallCount++
-                    shouldContinueCallCount <= 2
+                shouldRetry = {
+                    shouldRetryCallCount++
+                    shouldRetryCallCount <= 1
                 },
             )
 
             assertTrue(result.isFailure)
             assertIs<IllegalStateException>(result.exceptionOrNull())
-            assertEquals("Retry aborted by shouldContinue", result.exceptionOrNull()?.message)
+            assertEquals("Retry aborted by shouldRetry", result.exceptionOrNull()?.message)
             assertEquals(2, invocationCount)
-            assertEquals(3, shouldContinueCallCount)
+            assertEquals(2, shouldRetryCallCount)
         }
 
     @Test
-    fun `all retries exhausted calls onFinalFailure`() =
+    fun `all retries exhausted returns failure`() =
         runTest {
-            var finalFailureCalled = false
-            var finalError: Throwable? = null
             val testException = RuntimeException("persistent error")
             val block: suspend () -> Result<String> = {
                 failure(testException)
@@ -89,15 +87,10 @@ class RetryOnFailureWithAbortTest {
             val result = block.retryOnFailureWithAbort(
                 times = 3,
                 initialDelaySeconds = 1,
-                onFinalFailure = { error ->
-                    finalFailureCalled = true
-                    finalError = error
-                },
             )
 
             assertTrue(result.isFailure)
-            assertTrue(finalFailureCalled)
-            assertEquals(testException, finalError)
+            assertEquals(testException, result.exceptionOrNull())
         }
 
     @Test
@@ -154,21 +147,6 @@ class RetryOnFailureWithAbortTest {
         }
 
     @Test
-    fun `onFinalFailure not called on success`() =
-        runTest {
-            var finalFailureCalled = false
-            val block: suspend () -> Result<String> = {
-                success("result")
-            }
-
-            block.retryOnFailureWithAbort(
-                onFinalFailure = { finalFailureCalled = true },
-            )
-
-            assertTrue(!finalFailureCalled)
-        }
-
-    @Test
     fun `onRetry not called on first success`() =
         runTest {
             var retryCalled = false
@@ -181,23 +159,6 @@ class RetryOnFailureWithAbortTest {
             )
 
             assertTrue(!retryCalled)
-        }
-
-    @Test
-    fun `shouldContinue checked before first attempt`() =
-        runTest {
-            var invocationCount = 0
-            val block: suspend () -> Result<String> = {
-                invocationCount++
-                success("result")
-            }
-
-            val result = block.retryOnFailureWithAbort(
-                shouldContinue = { false },
-            )
-
-            assertTrue(result.isFailure)
-            assertEquals(0, invocationCount)
         }
 
     private data class RetryParams(

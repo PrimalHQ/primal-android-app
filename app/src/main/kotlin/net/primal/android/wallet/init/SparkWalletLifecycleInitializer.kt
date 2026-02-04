@@ -12,6 +12,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.retryOnFailureWithAbort
 import net.primal.domain.account.PrimalWalletAccountRepository
@@ -73,19 +74,16 @@ class SparkWalletLifecycleInitializer @Inject constructor(
         suspend { ensureSparkWalletExistsUseCase.invoke(userId) }.retryOnFailureWithAbort(
             times = MAX_RETRY_ATTEMPTS,
             initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
-            shouldContinue = { hasUserChanged(expectedUserId = userId) },
+            shouldRetry = { !hasUserChanged(expectedUserId = userId) },
             onRetry = { _, remainingAttempts, delaySeconds, error ->
                 Napier.w(throwable = error) {
                     "initializeWallet failed for userId=$userId, " +
                         "retrying in ${delaySeconds}s ($remainingAttempts attempts left)"
                 }
             },
-            onFinalFailure = { error ->
-                Napier.e(
-                    throwable = error,
-                ) { "initializeWallet failed for userId=$userId after $MAX_RETRY_ATTEMPTS attempts" }
-            },
-        ).onSuccess { walletId ->
+        ).onFailure { error ->
+            Napier.e(throwable = error) { "initializeWallet failed for userId=$userId" }
+        }.onSuccess { walletId ->
             currentWalletId = walletId
             Napier.d { "Wallet initialized for userId=$userId, walletId=$walletId" }
         }
