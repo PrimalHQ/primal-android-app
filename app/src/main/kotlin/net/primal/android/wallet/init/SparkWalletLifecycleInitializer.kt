@@ -60,7 +60,7 @@ class SparkWalletLifecycleInitializer @Inject constructor(
 
     private suspend fun isEligibleForSparkWallet(userId: String): Boolean {
         val status = primalWalletAccountRepository.fetchWalletStatus(userId).getOrNull() ?: return false
-        return !status.hasCustodialWallet || status.hasMigratedToSparkWallet
+        return !status.hasCustodialWallet || status.hasMigratedToSparkWallet || status.primalWalletDeprecated
     }
 
     private suspend fun initializeWallet(userId: String) {
