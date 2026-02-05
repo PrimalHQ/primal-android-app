@@ -34,6 +34,7 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.onFailure
+import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.common.exception.NetworkException
@@ -55,6 +56,7 @@ class WalletDashboardViewModel @Inject constructor(
     private val subscriptionsManager: SubscriptionsManager,
     private val exchangeRateHandler: ExchangeRateHandler,
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
+    private val sparkWalletAccountRepository: SparkWalletAccountRepository,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
@@ -78,7 +80,14 @@ class WalletDashboardViewModel @Inject constructor(
         subscribeToActiveAccount()
         subscribeToPurchases()
         subscribeToBadgesUpdates()
+        checkForPersistedSparkWallet()
     }
+
+    private fun checkForPersistedSparkWallet() =
+        viewModelScope.launch {
+            val existingWalletId = sparkWalletAccountRepository.findPersistedWalletId(activeUserId)
+            setState { copy(hasPersistedSparkWallet = existingWalletId != null) }
+        }
 
     private fun subscribeToEvents() =
         viewModelScope.launch {

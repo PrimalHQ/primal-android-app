@@ -22,6 +22,7 @@ interface WalletDashboardContract {
         val exchangeBtcUsdRate: Double? = null,
         val lowBalance: Boolean = false,
         val isWalletBackedUp: Boolean = false,
+        val hasPersistedSparkWallet: Boolean = false,
         val error: DashboardError? = null,
     ) {
         sealed class DashboardError {
