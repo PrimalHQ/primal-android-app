@@ -44,7 +44,7 @@ class MigratePrimalToSparkWalletHandler(
         private const val LOG_TAG = "WalletMigration"
 
         // Delay before fetching transaction history to allow backend indexing
-        private val HISTORY_FETCH_DELAY = 3.seconds
+        private val HISTORY_FETCH_DELAY = 10.seconds
     }
 
     private val migrationMutex = Mutex()
@@ -340,6 +340,9 @@ class MigratePrimalToSparkWalletHandler(
 
         logDebug("Step: Importing transaction history")
 
+        // Clear any previous migration state to start fresh
+        walletDatabase.wallet().clearPrimalTxsMigrationState(walletId = sparkWalletId)
+
         // Mark migration as started (false = needs more pages in background)
         walletDatabase.wallet().updatePrimalTxsMigrated(
             walletId = sparkWalletId,
@@ -350,6 +353,7 @@ class MigratePrimalToSparkWalletHandler(
             userId = userId,
             targetSparkWalletId = sparkWalletId,
             maxPages = INITIAL_TRANSACTION_PAGES,
+            onPageFetched = { page -> logDebug("Transaction history page $page fetched.") },
         ).onFailure { error ->
             logWarning("Transaction migration incomplete, will retry in background: ${error.message}")
         }.onSuccess {

@@ -67,6 +67,15 @@ interface WalletDao {
 
     @Query(
         """
+        UPDATE SparkWalletData
+        SET primalTxsMigrated = NULL, primalTxsMigratedUntil = NULL
+        WHERE walletId = :walletId
+        """,
+    )
+    suspend fun clearPrimalTxsMigrationState(walletId: String)
+
+    @Query(
+        """
         UPDATE WalletInfo 
         SET balanceInBtc = :balanceInBtc, maxBalanceInBtc = :maxBalanceInBtc,
          lastUpdatedAt = CAST(strftime('%s','now') AS INTEGER) 

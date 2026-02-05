@@ -301,6 +301,12 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     return@launch
                 }
 
+            // Fetch latest info to revert lightning address from local db
+            sparkWalletAccountRepository.fetchWalletAccountInfo(userId = userId, sparkWallet.walletId)
+
+            // Clear migration state so it can be re-run if user migrates again
+            sparkWalletAccountRepository.clearPrimalTxsMigrationState(sparkWallet.walletId)
+
             // Ensure Primal wallet exists and set as active
             ensurePrimalWalletExistsUseCase.invoke(userId = userId, setAsActive = true)
                 .onFailure { error ->
