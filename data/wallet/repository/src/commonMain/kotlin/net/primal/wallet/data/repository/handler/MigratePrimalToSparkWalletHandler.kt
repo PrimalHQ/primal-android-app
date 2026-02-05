@@ -123,15 +123,13 @@ class MigratePrimalToSparkWalletHandler(
 
                     finalizeWallet(userId = userId, sparkWalletId = sparkWalletId, onProgress = onProgress)
 
-                    // Wait for backend to index the migration transaction before fetching history
-                    logDebug("Waiting ${HISTORY_FETCH_DELAY.inWholeMilliseconds}ms for backend to index transaction")
-                    delay(HISTORY_FETCH_DELAY)
-
                     importTransactionHistory(
                         userId = userId,
                         sparkWalletId = sparkWalletId,
                         onProgress = onProgress,
                     )
+
+                    activateWallet(userId = userId, sparkWalletId = sparkWalletId, onProgress = onProgress)
 
                     onProgress(MigrationProgress.Completed)
                     logInfo("Migration completed successfully for user $userId")
@@ -319,9 +317,9 @@ class MigratePrimalToSparkWalletHandler(
         sparkWalletId: String,
         onProgress: (MigrationProgress) -> Unit,
     ) {
-        currentStep = MigrationStep.FINALIZING_WALLET
+        currentStep = MigrationStep.CONFIGURING_WALLET
         onProgress(MigrationProgress.InProgress(currentStep))
-        logDebug("Step: Finalizing wallet setup")
+        logDebug("Step: Configuring wallet")
 
         // Fetch wallet info (lightning address) with retry
         suspend {
@@ -342,9 +340,6 @@ class MigratePrimalToSparkWalletHandler(
         }.onFailure { error ->
             logError("Failed to delete Primal wallet.", error)
         }
-
-        // Set Spark as active wallet
-        walletAccountRepository.setActiveWallet(userId, sparkWalletId)
     }
 
     private suspend fun importTransactionHistory(
@@ -354,6 +349,11 @@ class MigratePrimalToSparkWalletHandler(
     ) {
         currentStep = MigrationStep.IMPORTING_HISTORY
         onProgress(MigrationProgress.InProgress(currentStep))
+
+        // Wait for backend to index the migration transaction before fetching history
+        logDebug("Waiting ${HISTORY_FETCH_DELAY.inWholeMilliseconds}ms for backend to index transaction")
+        delay(HISTORY_FETCH_DELAY)
+
         logDebug("Step: Importing transaction history")
 
         // Mark migration as started (false = needs more pages in background)
@@ -371,6 +371,18 @@ class MigratePrimalToSparkWalletHandler(
         }.onSuccess {
             logDebug("Transaction migration completed successfully")
         }
+    }
+
+    private suspend fun activateWallet(
+        userId: String,
+        sparkWalletId: String,
+        onProgress: (MigrationProgress) -> Unit,
+    ) {
+        currentStep = MigrationStep.ACTIVATING_WALLET
+        onProgress(MigrationProgress.InProgress(currentStep))
+        logDebug("Step: Activating wallet")
+
+        walletAccountRepository.setActiveWallet(userId, sparkWalletId)
     }
 
     /**

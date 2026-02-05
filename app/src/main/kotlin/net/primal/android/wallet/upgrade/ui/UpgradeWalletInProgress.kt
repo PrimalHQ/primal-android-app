@@ -28,7 +28,8 @@ private fun MigrationStep.toUserFriendlyDescription(): String {
         MigrationStep.CREATING_INVOICE -> stringResource(id = R.string.wallet_upgrade_step_creating_invoice)
         MigrationStep.TRANSFERRING_FUNDS -> stringResource(id = R.string.wallet_upgrade_step_transferring_funds)
         MigrationStep.AWAITING_CONFIRMATION -> stringResource(id = R.string.wallet_upgrade_step_awaiting_confirmation)
-        MigrationStep.FINALIZING_WALLET -> stringResource(id = R.string.wallet_upgrade_step_finalizing_wallet)
+        MigrationStep.CONFIGURING_WALLET -> stringResource(id = R.string.wallet_upgrade_step_configuring_wallet)
         MigrationStep.IMPORTING_HISTORY -> stringResource(id = R.string.wallet_upgrade_step_importing_history)
+        MigrationStep.ACTIVATING_WALLET -> stringResource(id = R.string.wallet_upgrade_step_activating_wallet)
     }
 }
