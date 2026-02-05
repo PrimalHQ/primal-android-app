@@ -1232,6 +1232,8 @@
     <string name="wallet_dashboard_create_wallet_button">Create Wallet</string>
     <string name="wallet_dashboard_create_wallet_hint">You don’t have an active wallet.</string>
     <string name="wallet_dashboard_create_wallet_error">Unable to create wallet.</string>
+    <string name="wallet_dashboard_activate_wallet_button">Activate Wallet</string>
+    <string name="wallet_dashboard_activate_wallet_hint">Your wallet is ready to be activated</string>
     <string name="wallet_dashboard_no_sats_hint">You need sats to zap people on Nostr</string>
     <string name="wallet_dashboard_no_transactions_hint">Your transactions will appear here.</string>
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
