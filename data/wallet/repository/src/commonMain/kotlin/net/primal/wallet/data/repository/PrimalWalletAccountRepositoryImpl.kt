@@ -102,6 +102,7 @@ internal class PrimalWalletAccountRepositoryImpl(
                     hasCustodialWallet = response.hasCustodialWallet,
                     hasMigratedToSparkWallet = response.hasSparkWallet,
                     lightningAddress = response.lightningAddress,
+                    primalWalletDeprecated = response.mustMigrate,
                 )
             }
         }
