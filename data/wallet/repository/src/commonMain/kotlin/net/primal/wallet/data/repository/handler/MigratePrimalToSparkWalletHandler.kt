@@ -96,10 +96,13 @@ class MigratePrimalToSparkWalletHandler(
                     registeredWalletId = sparkWalletId
 
                     val balanceInBtc = checkBalance(userId = userId, onProgress = onProgress)
-                    if (balanceInBtc.isPositiveBtcAmount()) {
-                        val adjustedBalanceInBtc = balanceInBtc.subtractSats(TEST_BUFFER_SATS)
-                        logDebug("Adjusted balance: $balanceInBtc BTC → $adjustedBalanceInBtc BTC (minus $TEST_BUFFER_SATS sats)")
+                    val adjustedBalanceInBtc = balanceInBtc.subtractSats(TEST_BUFFER_SATS)
+                    logDebug(
+                        "Adjusted balance: $balanceInBtc BTC → " +
+                            "$adjustedBalanceInBtc BTC (minus $TEST_BUFFER_SATS sats)",
+                    )
 
+                    if (adjustedBalanceInBtc.isPositiveBtcAmount()) {
                         val invoice = createInvoice(
                             sparkWalletId = sparkWalletId,
                             balanceInBtc = adjustedBalanceInBtc,
