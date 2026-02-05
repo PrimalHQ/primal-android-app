@@ -2,6 +2,7 @@ package net.primal.wallet.data.repository.handler
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import io.github.aakira.napier.Napier
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -41,20 +42,48 @@ class MigratePrimalToSparkWalletHandler(
         private const val INITIAL_TRANSACTION_PAGES = 3
         private const val MAX_RETRIES = 3
         private const val INITIAL_RETRY_DELAY_SECONDS = 1
+        private const val LOG_TAG = "WalletMigration"
     }
 
     private val migrationMutex = Mutex()
     private var currentStep: MigrationStep = MigrationStep.CREATING_WALLET
+    private val migrationLogs = mutableListOf<String>()
+
+    private fun logDebug(message: String) {
+        val timestamp = Clock.System.now().toString()
+        migrationLogs.add("[$timestamp] D: $message")
+        Napier.d(tag = LOG_TAG) { message }
+    }
+
+    private fun logInfo(message: String) {
+        val timestamp = Clock.System.now().toString()
+        migrationLogs.add("[$timestamp] I: $message")
+        Napier.i(tag = LOG_TAG) { message }
+    }
+
+    private fun logWarning(message: String) {
+        val timestamp = Clock.System.now().toString()
+        migrationLogs.add("[$timestamp] W: $message")
+        Napier.w(tag = LOG_TAG) { message }
+    }
+
+    private fun logError(message: String, throwable: Throwable? = null) {
+        val timestamp = Clock.System.now().toString()
+        val errorDetails = throwable?.let { ": ${it.stackTraceToString()}" } ?: ""
+        migrationLogs.add("[$timestamp] E: $message$errorDetails")
+        Napier.e(tag = LOG_TAG, throwable = throwable) { message }
+    }
 
     suspend fun invoke(userId: String, onProgress: (MigrationProgress) -> Unit = {}): Result<Unit> =
         migrationMutex.withLock {
+            migrationLogs.clear()
             currentStep = MigrationStep.CREATING_WALLET
             var registeredWalletId: String? = null
             var fundsTransferred = false
 
             withContext(dispatcherProvider.io()) {
                 runCatching {
-                    Napier.i { "Starting Primal→Spark migration for user $userId" }
+                    logInfo("Starting Primal→Spark migration for user $userId")
 
                     val sparkWalletId = createSparkWallet(userId = userId, onProgress = onProgress)
                     registerSparkWallet(userId = userId, sparkWalletId = sparkWalletId, onProgress = onProgress)
@@ -77,7 +106,7 @@ class MigratePrimalToSparkWalletHandler(
                             onProgress = onProgress,
                         )
                     } else {
-                        Napier.d { "No balance to transfer, skipping balance transfer." }
+                        logDebug("No balance to transfer, skipping balance transfer.")
                     }
 
                     finalizeWallet(userId = userId, sparkWalletId = sparkWalletId, onProgress = onProgress)
@@ -89,9 +118,9 @@ class MigratePrimalToSparkWalletHandler(
                     )
 
                     onProgress(MigrationProgress.Completed)
-                    Napier.i { "Migration completed successfully for user $userId" }
+                    logInfo("Migration completed successfully for user $userId")
                 }.onFailure { error ->
-                    Napier.e(throwable = error) { "Migration failed at step $currentStep" }
+                    logError("Migration failed at step $currentStep", error)
 
                     // Rollback if wallet was registered but funds weren't transferred yet
                     val walletId = registeredWalletId
@@ -99,7 +128,7 @@ class MigratePrimalToSparkWalletHandler(
                         rollbackRegistration(userId = userId, sparkWalletId = walletId)
                     }
 
-                    onProgress(MigrationProgress.Failed(currentStep, error))
+                    onProgress(MigrationProgress.Failed(currentStep, error, migrationLogs.toList()))
                 }
             }
         }
@@ -107,7 +136,7 @@ class MigratePrimalToSparkWalletHandler(
     private suspend fun createSparkWallet(userId: String, onProgress: (MigrationProgress) -> Unit): String {
         currentStep = MigrationStep.CREATING_WALLET
         onProgress(MigrationProgress.InProgress(currentStep))
-        Napier.d { "Step: Creating Spark wallet locally" }
+        logDebug("Step: Creating Spark wallet locally")
 
         return suspend {
             ensureSparkWalletExistsUseCase.invoke(userId = userId, register = false)
@@ -115,7 +144,7 @@ class MigratePrimalToSparkWalletHandler(
             times = MAX_RETRIES,
             initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
             onRetry = { attempt, _, delay, error ->
-                Napier.w { "EnsureSparkWallet failed (attempt $attempt, retry in ${delay}s): ${error.message}" }
+                logWarning("EnsureSparkWallet failed (attempt $attempt, retry in ${delay}s): ${error.message}")
             },
         ).getOrThrow()
     }
@@ -127,7 +156,7 @@ class MigratePrimalToSparkWalletHandler(
     ) {
         currentStep = MigrationStep.REGISTERING_WALLET
         onProgress(MigrationProgress.InProgress(currentStep))
-        Napier.d { "Step: Registering Spark wallet" }
+        logDebug("Step: Registering Spark wallet")
 
         suspend {
             sparkWalletAccountRepository.registerSparkWallet(
@@ -138,7 +167,7 @@ class MigratePrimalToSparkWalletHandler(
             times = MAX_RETRIES,
             initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
             onRetry = { attempt, _, delay, error ->
-                Napier.w { "RegisterSparkWallet failed (attempt $attempt, retry in ${delay}s): ${error.message}" }
+                logWarning("RegisterSparkWallet failed (attempt $attempt, retry in ${delay}s): ${error.message}")
             },
         ).getOrThrow()
     }
@@ -146,7 +175,7 @@ class MigratePrimalToSparkWalletHandler(
     private suspend fun checkBalance(userId: String, onProgress: (MigrationProgress) -> Unit): String {
         currentStep = MigrationStep.CHECKING_BALANCE
         onProgress(MigrationProgress.InProgress(currentStep))
-        Napier.d { "Step: Checking Primal balance" }
+        logDebug("Step: Checking Primal balance")
 
         val balance = suspend {
             runCatching { primalWalletApi.getBalance(userId) }
@@ -154,11 +183,11 @@ class MigratePrimalToSparkWalletHandler(
             times = MAX_RETRIES,
             initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
             onRetry = { attempt, _, delay, error ->
-                Napier.w { "GetBalance failed (attempt $attempt, retry in ${delay}s): ${error.message}" }
+                logWarning("GetBalance failed (attempt $attempt, retry in ${delay}s): ${error.message}")
             },
         ).getOrThrow()
 
-        Napier.d { "Primal balance: ${balance.amount}" }
+        logDebug("Primal balance: ${balance.amount}")
         return balance.amount
     }
 
@@ -169,7 +198,7 @@ class MigratePrimalToSparkWalletHandler(
     ): String {
         currentStep = MigrationStep.CREATING_INVOICE
         onProgress(MigrationProgress.InProgress(currentStep))
-        Napier.d { "Step: Creating invoice on Spark wallet for $balanceInBtc BTC" }
+        logDebug("Step: Creating invoice on Spark wallet for $balanceInBtc BTC")
 
         val invoice = suspend {
             walletRepository.createLightningInvoice(
@@ -181,7 +210,7 @@ class MigratePrimalToSparkWalletHandler(
             times = MAX_RETRIES,
             initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
             onRetry = { attempt, _, delay, error ->
-                Napier.w { "CreateInvoice failed (attempt $attempt, retry in ${delay}s): ${error.message}" }
+                logWarning("CreateInvoice failed (attempt $attempt, retry in ${delay}s): ${error.message}")
             },
         ).getOrThrow().invoice
 
@@ -202,7 +231,7 @@ class MigratePrimalToSparkWalletHandler(
     ) {
         currentStep = MigrationStep.TRANSFERRING_FUNDS
         onProgress(MigrationProgress.InProgress(currentStep))
-        Napier.d { "Step: Transferring funds from Primal to Spark" }
+        logDebug("Step: Transferring funds from Primal to Spark")
 
         suspend {
             runCatching {
@@ -219,7 +248,7 @@ class MigratePrimalToSparkWalletHandler(
             times = MAX_RETRIES,
             initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
             onRetry = { attempt, _, delay, error ->
-                Napier.w { "Withdraw failed (attempt $attempt, retry in ${delay}s): ${error.message}" }
+                logWarning("Withdraw failed (attempt $attempt, retry in ${delay}s): ${error.message}")
             },
         ).getOrThrow()
     }
@@ -231,41 +260,41 @@ class MigratePrimalToSparkWalletHandler(
     ) {
         currentStep = MigrationStep.AWAITING_CONFIRMATION
         onProgress(MigrationProgress.InProgress(currentStep))
-        Napier.d { "Step: Awaiting payment confirmation in Spark wallet" }
+        logDebug("Step: Awaiting payment confirmation in Spark wallet")
 
         walletRepository.awaitInvoicePayment(
             walletId = sparkWalletId,
             invoice = invoice,
             timeout = PAYMENT_CONFIRMATION_TIMEOUT,
         ).onFailure { confirmationError ->
-            Napier.e { "Payment confirmation failed: ${confirmationError.message}" }
+            logError("Payment confirmation failed: ${confirmationError.message}")
 
             // Check Spark wallet balance directly - if > 0, funds arrived
             walletRepository.fetchWalletBalance(walletId = sparkWalletId)
             val wallet = walletRepository.getWalletById(walletId = sparkWalletId).getOrNull()
             val balance = wallet?.balanceInBtc ?: 0.0
             if (balance > 0.0) {
-                Napier.w { "Confirmation failed but Spark balance is $balance BTC. Continuing." }
+                logWarning("Confirmation failed but Spark balance is $balance BTC. Continuing.")
             } else {
                 throw confirmationError
             }
         }
 
-        Napier.i { "Payment confirmed successfully in Spark wallet" }
+        logInfo("Payment confirmed successfully in Spark wallet")
     }
 
     private suspend fun rollbackRegistration(userId: String, sparkWalletId: String) {
-        Napier.w { "Rolling back Spark wallet registration for walletId=$sparkWalletId" }
+        logWarning("Rolling back Spark wallet registration for walletId=$sparkWalletId")
         suspend {
             sparkWalletAccountRepository.unregisterSparkWallet(userId, sparkWalletId)
         }.retryOnFailureWithAbort(
             times = MAX_RETRIES,
             initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
             onRetry = { attempt, _, delay, error ->
-                Napier.w { "UnregisterSparkWallet failed (attempt $attempt, retry in ${delay}s): ${error.message}" }
+                logWarning("UnregisterSparkWallet failed (attempt $attempt, retry in ${delay}s): ${error.message}")
             },
         ).onFailure { error ->
-            Napier.e { "Failed to rollback registration after all retries: ${error.message}" }
+            logError("Failed to rollback registration after all retries: ${error.message}")
         }
     }
 
@@ -276,7 +305,7 @@ class MigratePrimalToSparkWalletHandler(
     ) {
         currentStep = MigrationStep.FINALIZING_WALLET
         onProgress(MigrationProgress.InProgress(currentStep))
-        Napier.d { "Step: Finalizing wallet setup" }
+        logDebug("Step: Finalizing wallet setup")
 
         // Fetch wallet info (lightning address) with retry
         suspend {
@@ -285,17 +314,17 @@ class MigratePrimalToSparkWalletHandler(
             times = MAX_RETRIES,
             initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
             onRetry = { attempt, _, delay, error ->
-                Napier.w { "FetchWalletAccountInfo failed (attempt $attempt, retry in ${delay}s): ${error.message}" }
+                logWarning("FetchWalletAccountInfo failed (attempt $attempt, retry in ${delay}s): ${error.message}")
             },
         ).onFailure { error ->
-            Napier.w { "Failed to fetch wallet info after all retries: ${error.message}" }
+            logWarning("Failed to fetch wallet info after all retries: ${error.message}")
         }
 
         // Delete old Primal wallet (best-effort, no retry)
         runCatching {
             walletRepository.deleteWalletById(walletId = userId)
         }.onFailure { error ->
-            Napier.e(throwable = error) { "Failed to delete Primal wallet." }
+            logError("Failed to delete Primal wallet.", error)
         }
 
         // Set Spark as active wallet
@@ -309,7 +338,7 @@ class MigratePrimalToSparkWalletHandler(
     ) {
         currentStep = MigrationStep.IMPORTING_HISTORY
         onProgress(MigrationProgress.InProgress(currentStep))
-        Napier.d { "Step: Importing transaction history" }
+        logDebug("Step: Importing transaction history")
 
         // Mark migration as started (false = needs more pages in background)
         walletDatabase.wallet().updatePrimalTxsMigrated(
@@ -322,9 +351,9 @@ class MigratePrimalToSparkWalletHandler(
             targetWalletId = sparkWalletId,
             maxPages = INITIAL_TRANSACTION_PAGES,
         ).onFailure { error ->
-            Napier.w { "Transaction migration incomplete, will retry in background: ${error.message}" }
+            logWarning("Transaction migration incomplete, will retry in background: ${error.message}")
         }.onSuccess {
-            Napier.d { "Transaction migration completed successfully" }
+            logDebug("Transaction migration completed successfully")
         }
     }
 
