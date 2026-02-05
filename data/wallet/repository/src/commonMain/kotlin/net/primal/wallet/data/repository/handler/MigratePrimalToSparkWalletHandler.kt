@@ -221,7 +221,7 @@ class MigratePrimalToSparkWalletHandler(
 
         // Verify invoice amount matches expected balance
         val expectedSats = balanceInBtc.toSats()
-        val invoiceSats = LnInvoiceUtils.getAmountInSatsOrNull(invoice)?.toULong() ?: 0L
+        val invoiceSats = LnInvoiceUtils.getAmountInSatsOrNull(invoice)?.toULong() ?: 0UL
         if (invoiceSats != expectedSats) {
             error("Invoice amount mismatch: expected $expectedSats sats, got $invoiceSats sats")
         }
