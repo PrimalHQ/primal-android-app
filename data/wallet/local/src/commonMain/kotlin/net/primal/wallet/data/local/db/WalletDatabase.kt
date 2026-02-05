@@ -25,6 +25,8 @@ import net.primal.wallet.data.local.dao.nwc.NwcConnectionData
 import net.primal.wallet.data.local.dao.nwc.NwcDailyBudgetData
 import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldDao
 import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldData
+import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLog
+import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLogDao
 
 @Database(
     entities = [
@@ -38,6 +40,7 @@ import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldData
         NwcConnectionData::class,
         NwcPaymentHoldData::class,
         NwcDailyBudgetData::class,
+        NwcWalletRequestLog::class,
     ],
     version = 3,
     exportSchema = true,
@@ -50,6 +53,7 @@ abstract class WalletDatabase : RoomDatabase() {
     abstract fun walletSettings(): WalletSettingsDao
     abstract fun nwcConnections(): NwcConnectionDao
     abstract fun nwcPaymentHolds(): NwcPaymentHoldDao
+    abstract fun nwcLogs(): NwcWalletRequestLogDao
 
     companion object {
         val MIGRATION_2_3 = object : Migration(2, 3) {

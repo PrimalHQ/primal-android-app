@@ -34,6 +34,7 @@ import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
 import net.primal.domain.wallet.capabilities
+import net.primal.domain.wallet.nwc.NwcLogRepository
 
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
 class WalletSettingsViewModel @AssistedInject constructor(
@@ -43,6 +44,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private val walletAccountRepository: WalletAccountRepository,
     private val primalWalletNwcRepository: PrimalWalletNwcRepository,
     private val connectNwcUseCase: ConnectNwcUseCase,
+    private val nwcLogRepository: NwcLogRepository,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -117,6 +119,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     }
 
                     UiEvent.RequestTransactionExport -> exportTransactions()
+
+                    UiEvent.RequestNwcLogsExport -> exportNwcLogs()
                 }
             }
         }
@@ -254,5 +258,18 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 )
             }
             setEffect(SideEffect.TransactionsReadyForExport)
+        }
+
+    private fun exportNwcLogs() =
+        viewModelScope.launch {
+            setState { copy(isExportingNwcLogs = true) }
+            val logs = nwcLogRepository.getNwcLogs()
+            setState {
+                copy(
+                    isExportingNwcLogs = false,
+                    nwcLogsToExport = logs,
+                )
+            }
+            setEffect(SideEffect.NwcLogsReadyForExport)
         }
 }

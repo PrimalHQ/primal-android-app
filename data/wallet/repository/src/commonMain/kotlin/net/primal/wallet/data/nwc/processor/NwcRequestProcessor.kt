@@ -2,6 +2,7 @@ package net.primal.wallet.data.nwc.processor
 
 import io.github.aakira.napier.Napier
 import kotlin.math.min
+import kotlin.time.Clock
 import kotlin.uuid.Uuid
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
@@ -18,22 +19,41 @@ import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.domain.connections.nostr.model.NwcPaymentHoldResult
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.WalletRepository
+import net.primal.domain.wallet.nwc.model.NwcRequestState
 import net.primal.wallet.data.nwc.NwcCapabilities
 import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
 import net.primal.wallet.data.nwc.manager.NwcBudgetManager
+import net.primal.wallet.data.nwc.mapper.resolveNwcErrorCode
 import net.primal.wallet.data.nwc.mapper.toNwcTransaction
 import net.primal.wallet.data.nwc.mapper.toTxType
+import net.primal.wallet.data.repository.InternalNwcLogRepository
 
 class NwcRequestProcessor internal constructor(
     private val walletRepository: WalletRepository,
     private val nwcBudgetManager: NwcBudgetManager,
     private val responseBuilder: NwcWalletResponseBuilder,
+    private val nwcLogRepository: InternalNwcLogRepository,
 ) {
 
     suspend fun process(request: WalletNwcRequest): String {
         Napier.d(
             tag = TAG,
         ) { "Processing request: ${request::class.simpleName}, eventId=${request.eventId.take(8)}..." }
+
+        val requestedAt = Clock.System.now().epochSeconds
+        val connectionId = request.connection.secretPubKey
+        val walletId = request.connection.walletId
+        val userId = request.connection.userId
+        val appName = request.connection.appName
+
+        nwcLogRepository.logRequest(
+            request = request,
+            connectionId = connectionId,
+            walletId = walletId,
+            userId = userId,
+            appName = appName,
+            requestedAt = requestedAt,
+        )
 
         return runCatching {
             when (request) {
@@ -52,14 +72,39 @@ class NwcRequestProcessor internal constructor(
                     )
                 }
             }
-        }.getOrElse { e ->
-            Napier.e(tag = TAG, throwable = e) { "Error processing request ${request.eventId}" }
-            responseBuilder.buildErrorResponse(
-                request = request,
-                code = NwcError.INTERNAL,
-                message = e.message ?: "Internal error",
-            )
-        }
+        }.fold(
+            onSuccess = { responseJson ->
+                val nwcError = responseBuilder.parseNwcError(responseJson)
+                nwcLogRepository.updateLogWithResponse(
+                    eventId = request.eventId,
+                    responsePayload = responseJson,
+                    requestState = if (nwcError != null) NwcRequestState.Error else NwcRequestState.Success,
+                    completedAt = Clock.System.now().epochSeconds,
+                    errorCode = nwcError?.code,
+                    errorMessage = nwcError?.message,
+                )
+                responseJson
+            },
+            onFailure = { e ->
+                Napier.e(tag = TAG, throwable = e) { "Error processing request ${request.eventId}" }
+                val errorCode = e.resolveNwcErrorCode()
+                val errorMessage = e.message ?: "Internal error"
+                val responseJson = responseBuilder.buildErrorResponse(
+                    request = request,
+                    code = errorCode,
+                    message = errorMessage,
+                )
+                nwcLogRepository.updateLogWithResponse(
+                    eventId = request.eventId,
+                    responsePayload = responseJson,
+                    requestState = NwcRequestState.Error,
+                    completedAt = Clock.System.now().epochSeconds,
+                    errorCode = errorCode,
+                    errorMessage = errorMessage,
+                )
+                responseJson
+            },
+        )
     }
 
     private suspend fun processGetBalance(request: WalletNwcRequest.GetBalance): String {
@@ -145,7 +190,7 @@ class NwcRequestProcessor internal constructor(
             Napier.e(tag = TAG, throwable = exception) { "PayInvoice: payment failed" }
             responseBuilder.buildErrorResponse(
                 request = request,
-                code = NwcError.INTERNAL,
+                code = exception?.resolveNwcErrorCode() ?: NwcError.INTERNAL,
                 message = exception?.message ?: "Payment failed",
             )
         }
@@ -251,7 +296,7 @@ class NwcRequestProcessor internal constructor(
                 lnbc = invoice,
             )
 
-            val nowSeconds = kotlin.time.Clock.System.now().epochSeconds
+            val nowSeconds = Clock.System.now().epochSeconds
             val expiresAtSeconds = parseResult.expiry?.let { nowSeconds + it }
 
             Napier.d(tag = TAG) {
@@ -280,7 +325,7 @@ class NwcRequestProcessor internal constructor(
             Napier.e(tag = TAG, throwable = exception) { "MakeInvoice: $errorMessage" }
             responseBuilder.buildErrorResponse(
                 request = request,
-                code = NwcError.INTERNAL,
+                code = exception?.resolveNwcErrorCode() ?: NwcError.INTERNAL,
                 message = errorMessage,
             )
         }

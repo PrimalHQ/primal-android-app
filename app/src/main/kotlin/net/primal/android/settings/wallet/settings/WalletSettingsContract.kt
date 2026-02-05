@@ -5,6 +5,7 @@ import net.primal.domain.connections.primal.model.PrimalNwcConnectionInfo
 import net.primal.domain.links.CdnImage
 import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.Wallet
+import net.primal.domain.wallet.nwc.model.NwcRequestLog
 
 interface WalletSettingsContract {
     data class UiState(
@@ -22,12 +23,15 @@ interface WalletSettingsContract {
         val activeAccountDisplayName: String = "",
         val isExportingTransactions: Boolean = false,
         val transactionsToExport: List<Transaction> = emptyList(),
+        val isExportingNwcLogs: Boolean = false,
+        val nwcLogsToExport: List<NwcRequestLog> = emptyList(),
     )
 
     sealed class UiEvent {
         data object DisconnectWallet : UiEvent()
         data object RequestFetchWalletConnections : UiEvent()
         data object RequestTransactionExport : UiEvent()
+        data object RequestNwcLogsExport : UiEvent()
         data class RevokeConnection(val nwcPubkey: String) : UiEvent()
         data class UpdateUseExternalWallet(val value: Boolean) : UiEvent()
         data class UpdateMinTransactionAmount(val amountInSats: Long) : UiEvent()
@@ -36,6 +40,7 @@ interface WalletSettingsContract {
 
     sealed class SideEffect {
         data object TransactionsReadyForExport : SideEffect()
+        data object NwcLogsReadyForExport : SideEffect()
     }
 
     enum class ConnectionsState {
