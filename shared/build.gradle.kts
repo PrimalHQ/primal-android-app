@@ -148,6 +148,23 @@ tasks.configureEach {
 
 tasks.register("assembleXCFramework") {
     dependsOn("assemble${xcfName}ReleaseXCFramework")
+    doLast {
+        // Patch MinimumOSVersion from 13.0 to 16.0 in all Info.plist files
+        val xcframeworkDir = layout.buildDirectory.dir("XCFrameworks/release/$xcfName.xcframework").get().asFile
+        xcframeworkDir.walkTopDown()
+            .filter { it.name == "Info.plist" }
+            .forEach { plist ->
+                val content = plist.readText()
+                if (content.contains("<key>MinimumOSVersion</key>")) {
+                    val patched = content.replace(
+                        Regex("<key>MinimumOSVersion</key>\\s*<string>\\d+\\.\\d+</string>"),
+                        "<key>MinimumOSVersion</key>\n\t<string>16.0</string>",
+                    )
+                    plist.writeText(patched)
+                    println("Patched MinimumOSVersion to 16.0 in ${plist.path}")
+                }
+            }
+    }
 }
 
 tasks.register("compileTargets") {
