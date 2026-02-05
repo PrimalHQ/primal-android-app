@@ -37,7 +37,7 @@ private fun WalletTransactionData.toZapTransaction(otherProfile: ProfileData?): 
             completedAt = this.completedAt?.decrypted,
             userId = this.userId,
             note = this.note?.decrypted,
-            invoice = this.invoice?.decrypted,
+            invoice = this.invoice,
             amountInBtc = this.amountInBtc.decrypted,
             amountInUsd = this.amountInUsd?.decrypted,
             exchangeRate = this.exchangeRate?.decrypted,
@@ -48,7 +48,7 @@ private fun WalletTransactionData.toZapTransaction(otherProfile: ProfileData?): 
             zappedByUserId = this.zappedByUserId?.decrypted,
             otherUserProfile = otherProfile,
             preimage = this.preimage?.decrypted,
-            paymentHash = this.paymentHash?.decrypted,
+            paymentHash = this.paymentHash,
         )
 
         else -> toLightningTransaction(otherProfile)
@@ -67,7 +67,7 @@ private fun WalletTransactionData.toStorePurchaseTransaction() =
         completedAt = this.completedAt?.decrypted,
         userId = this.userId,
         note = this.note?.decrypted,
-        invoice = this.invoice?.decrypted,
+        invoice = this.invoice,
         amountInBtc = this.amountInBtc.decrypted,
         amountInUsd = this.amountInUsd?.decrypted,
         exchangeRate = this.exchangeRate?.decrypted,
@@ -86,7 +86,7 @@ private fun WalletTransactionData.toOnChainTransaction() =
         completedAt = this.completedAt?.decrypted,
         userId = this.userId,
         note = this.note?.decrypted,
-        invoice = this.invoice?.decrypted,
+        invoice = this.invoice,
         amountInBtc = this.amountInBtc.decrypted,
         amountInUsd = this.amountInUsd?.decrypted,
         exchangeRate = this.exchangeRate?.decrypted,
@@ -107,7 +107,7 @@ private fun WalletTransactionData.toLightningTransaction(otherProfile: ProfileDa
         completedAt = this.completedAt?.decrypted,
         userId = this.userId,
         note = this.note?.decrypted,
-        invoice = this.invoice?.decrypted,
+        invoice = this.invoice,
         amountInBtc = this.amountInBtc.decrypted,
         amountInUsd = this.amountInUsd?.decrypted,
         exchangeRate = this.exchangeRate?.decrypted,
@@ -116,7 +116,7 @@ private fun WalletTransactionData.toLightningTransaction(otherProfile: ProfileDa
         otherLightningAddress = this.otherLightningAddress?.decrypted,
         otherUserProfile = otherProfile,
         preimage = this.preimage?.decrypted,
-        paymentHash = this.paymentHash?.decrypted,
+        paymentHash = this.paymentHash,
     )
 
 private fun WalletTransactionData.toSparkTransaction() =
@@ -131,14 +131,14 @@ private fun WalletTransactionData.toSparkTransaction() =
         completedAt = this.completedAt?.decrypted,
         userId = this.userId,
         note = this.note?.decrypted,
-        invoice = this.invoice?.decrypted,
+        invoice = this.invoice,
         amountInBtc = this.amountInBtc.decrypted,
         amountInUsd = this.amountInUsd?.decrypted,
         exchangeRate = this.exchangeRate?.decrypted,
         totalFeeInBtc = this.totalFeeInBtc?.decrypted,
         sparkAddress = null,
         preimage = this.preimage?.decrypted,
-        paymentHash = this.paymentHash?.decrypted,
+        paymentHash = this.paymentHash,
     )
 
 /**
@@ -157,7 +157,7 @@ internal fun Transaction.toWalletTransactionData(): WalletTransactionData =
         amountInBtc = this.amountInBtc.asEncryptable(),
         userId = this.userId,
         note = this.note?.asEncryptable(),
-        invoice = this.invoice?.asEncryptable(),
+        invoice = this.invoice,
         totalFeeInBtc = this.totalFeeInBtc?.asEncryptable(),
         zappedEntity = extractZappedEntity()?.asEncryptable(),
         zappedByUserId = extractZappedByUserId()?.asEncryptable(),
@@ -166,7 +166,7 @@ internal fun Transaction.toWalletTransactionData(): WalletTransactionData =
         onChainAddress = extractOnChainAddress()?.asEncryptable(),
         onChainTxId = extractOnChainTxId()?.asEncryptable(),
         preimage = extractPreimage()?.asEncryptable(),
-        paymentHash = extractPaymentHash()?.asEncryptable(),
+        paymentHash = extractPaymentHash(),
         amountInUsd = extractAmountInUsd()?.asEncryptable(),
         exchangeRate = extractExchangeRate()?.asEncryptable(),
         otherLightningAddress = extractOtherLightningAddress()?.asEncryptable(),

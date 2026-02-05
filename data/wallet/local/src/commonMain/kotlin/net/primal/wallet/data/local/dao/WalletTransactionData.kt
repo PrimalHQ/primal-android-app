@@ -1,6 +1,7 @@
 package net.primal.wallet.data.local.dao
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
@@ -8,7 +9,12 @@ import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.encryption.Encryptable
 import net.primal.wallet.data.local.TxKind
 
-@Entity
+@Entity(
+    indices = [
+        Index("invoice"),
+        Index("paymentHash"),
+    ],
+)
 data class WalletTransactionData(
     @PrimaryKey
     val transactionId: String,
@@ -21,7 +27,7 @@ data class WalletTransactionData(
     val completedAt: Encryptable<Long>?,
     val userId: String,
     val note: Encryptable<String>?,
-    val invoice: Encryptable<String>?,
+    val invoice: String?,
     val amountInBtc: Encryptable<Double>,
     val totalFeeInBtc: Encryptable<String>?,
     val otherUserId: Encryptable<String>?,
@@ -31,7 +37,7 @@ data class WalletTransactionData(
     val onChainAddress: Encryptable<String>?,
     val onChainTxId: Encryptable<String>?,
     val preimage: Encryptable<String>?,
-    val paymentHash: Encryptable<String>?,
+    val paymentHash: String?,
     val amountInUsd: Encryptable<Double>?,
     val exchangeRate: Encryptable<String>?,
     val otherLightningAddress: Encryptable<String>?,
