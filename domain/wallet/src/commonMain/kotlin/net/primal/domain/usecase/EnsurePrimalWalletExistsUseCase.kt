@@ -13,7 +13,7 @@ class EnsurePrimalWalletExistsUseCase(
     suspend fun invoke(userId: String, setAsActive: Boolean = false): Result<String?> =
         runCatching {
             val status = primalWalletAccountRepository.fetchWalletStatus(userId = userId).getOrThrow()
-            if (status.hasCustodialWallet && !status.hasMigratedToSparkWallet) {
+            if (status.hasCustodialWallet && !status.hasMigratedToSparkWallet && !status.primalWalletDeprecated) {
                 primalWalletAccountRepository.fetchWalletAccountInfo(userId = userId).getOrThrow()
                 if (setAsActive) {
                     walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)

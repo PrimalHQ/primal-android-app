@@ -277,7 +277,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
             primalWalletAccountRepository.fetchWalletStatus(userId)
                 .onSuccess { status ->
                     setState {
-                        copy(showRevertToPrimalWallet = status.hasCustodialWallet)
+                        copy(showRevertToPrimalWallet = status.hasCustodialWallet && !status.primalWalletDeprecated)
                     }
                 }
                 .onFailure {
