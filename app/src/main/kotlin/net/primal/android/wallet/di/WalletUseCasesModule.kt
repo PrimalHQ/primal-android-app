@@ -12,6 +12,7 @@ import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.builder.TxRequestBuilder
+import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.usecase.EnsurePrimalWalletExistsUseCase
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
@@ -92,10 +93,12 @@ object WalletUseCasesModule {
     fun providesMigratePrimalTransactionsHandler(
         @PrimalWalletApiClient primalApiClient: PrimalApiClient,
         nostrNotary: NostrNotary,
+        profileRepository: ProfileRepository,
     ): MigratePrimalTransactionsHandler =
         WalletRepositoryFactory.createMigratePrimalTransactionsHandler(
             primalWalletApiClient = primalApiClient,
             nostrEventSignatureHandler = nostrNotary,
+            profileRepository = profileRepository,
         )
 
     @Provides
@@ -105,11 +108,13 @@ object WalletUseCasesModule {
         nostrNotary: NostrNotary,
         ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
         walletRepository: WalletRepository,
+        profileRepository: ProfileRepository,
     ): MigratePrimalToSparkWalletHandler =
         WalletRepositoryFactory.createMigratePrimalToSparkWalletHandler(
             primalWalletApiClient = primalApiClient,
             nostrEventSignatureHandler = nostrNotary,
             ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
             walletRepository = walletRepository,
+            profileRepository = profileRepository,
         )
 }

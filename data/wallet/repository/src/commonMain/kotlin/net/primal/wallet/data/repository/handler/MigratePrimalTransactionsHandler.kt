@@ -3,6 +3,7 @@ package net.primal.wallet.data.repository.handler
 import io.github.aakira.napier.Napier
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.wallet.SubWallet
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
@@ -11,9 +12,10 @@ import net.primal.wallet.data.repository.mappers.local.toWalletTransactionData
 import net.primal.wallet.data.repository.mappers.remote.mapForMigration
 
 class MigratePrimalTransactionsHandler(
-    private val primalWalletApi: PrimalWalletApi,
-    private val walletDatabase: WalletDatabase,
     private val dispatcherProvider: DispatcherProvider,
+    private val walletDatabase: WalletDatabase,
+    private val primalWalletApi: PrimalWalletApi,
+    private val profileRepository: ProfileRepository? = null,
 ) {
 
     private companion object {
@@ -79,6 +81,15 @@ class MigratePrimalTransactionsHandler(
                         .map { it.toWalletTransactionData() }
 
                     walletDatabase.walletTransactions().upsertAll(mapped)
+
+                    // Fetch profiles for other users in transactions (for UI enrichment)
+                    if (profileRepository != null) {
+                        val otherUserIds = response.transactions.mapNotNull { it.otherPubkey }
+                        if (otherUserIds.isNotEmpty()) {
+                            profileRepository.fetchMissingProfiles(profileIds = otherUserIds)
+                            Napier.d { "Fetched ${otherUserIds.size} profiles for transaction enrichment" }
+                        }
+                    }
 
                     // Save progress after each page (resume point for next iteration)
                     until = response.paging?.untilId
