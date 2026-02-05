@@ -35,6 +35,7 @@ import net.primal.wallet.data.remote.model.InAppPurchaseQuoteResponse
 import net.primal.wallet.data.remote.model.InAppPurchaseRequestBody
 import net.primal.wallet.data.remote.model.IsWalletUserRequestBody
 import net.primal.wallet.data.remote.model.LightningInvoiceResponse
+import net.primal.wallet.data.remote.model.MigrationWithdrawRequestBody
 import net.primal.wallet.data.remote.model.MiningFeeTier
 import net.primal.wallet.data.remote.model.MiningFeesRequestBody
 import net.primal.wallet.data.remote.model.OnChainAddressResponse
@@ -173,6 +174,20 @@ class PrimalWalletApiImpl(
                     userId = userId,
                     walletVerb = WalletOperationVerb.WITHDRAW,
                     requestBody = body,
+                    signatureHandler = signatureHandler,
+                ),
+            ),
+        )
+    }
+
+    override suspend fun migrationWithdraw(userId: String, lnInvoice: String) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalWalletVerb.WALLET.id,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.MIGRATION_WITHDRAW,
+                    requestBody = MigrationWithdrawRequestBody(lnInvoice = lnInvoice),
                     signatureHandler = signatureHandler,
                 ),
             ),

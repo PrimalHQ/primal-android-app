@@ -19,13 +19,11 @@ import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.nostr.utils.LnInvoiceUtils
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
-import net.primal.domain.wallet.SubWallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.migration.MigrationProgress
 import net.primal.domain.wallet.migration.MigrationStep
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
-import net.primal.wallet.data.remote.model.WithdrawRequestBody
 
 class MigratePrimalToSparkWalletHandler(
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
@@ -44,8 +42,6 @@ class MigratePrimalToSparkWalletHandler(
         private const val MAX_RETRIES = 3
         private const val INITIAL_RETRY_DELAY_SECONDS = 1
         private const val LOG_TAG = "WalletMigration"
-
-        private const val TEST_BUFFER_SATS = 100
 
         // Delay before fetching transaction history to allow backend indexing
         private val HISTORY_FETCH_DELAY = 3.seconds
@@ -96,16 +92,11 @@ class MigratePrimalToSparkWalletHandler(
                     registeredWalletId = sparkWalletId
 
                     val balanceInBtc = checkBalance(userId = userId, onProgress = onProgress)
-                    val adjustedBalanceInBtc = balanceInBtc.subtractSats(TEST_BUFFER_SATS)
-                    logDebug(
-                        "Adjusted balance: $balanceInBtc BTC → " +
-                            "$adjustedBalanceInBtc BTC (minus $TEST_BUFFER_SATS sats)",
-                    )
 
-                    if (adjustedBalanceInBtc.isPositiveBtcAmount()) {
+                    if (balanceInBtc.isPositiveBtcAmount()) {
                         val invoice = createInvoice(
                             sparkWalletId = sparkWalletId,
-                            balanceInBtc = adjustedBalanceInBtc,
+                            balanceInBtc = balanceInBtc,
                             onProgress = onProgress,
                         )
                         transferBalance(userId = userId, invoice = invoice, onProgress = onProgress)
@@ -249,20 +240,13 @@ class MigratePrimalToSparkWalletHandler(
 
         suspend {
             runCatching {
-                primalWalletApi.withdraw(
-                    userId = userId,
-                    body = WithdrawRequestBody(
-                        subWallet = SubWallet.Open,
-                        lnInvoice = invoice,
-                        noteSelf = "Old Primal Wallet Balance",
-                    ),
-                )
+                primalWalletApi.migrationWithdraw(userId = userId, lnInvoice = invoice)
             }
         }.retryOnFailureWithAbort(
             times = MAX_RETRIES,
             initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
             onRetry = { attempt, _, delay, error ->
-                logWarning("Withdraw failed (attempt $attempt, retry in ${delay}s): ${error.message}")
+                logWarning("MigrationWithdraw failed (attempt $attempt, retry in ${delay}s): ${error.message}")
             },
         ).getOrThrow()
     }
@@ -383,15 +367,6 @@ class MigratePrimalToSparkWalletHandler(
         logDebug("Step: Activating wallet")
 
         walletAccountRepository.setActiveWallet(userId, sparkWalletId)
-    }
-
-    /**
-     * Subtracts the given number of sats from a BTC amount string.
-     */
-    private fun String.subtractSats(sats: Int): String {
-        val btcAmount = BigDecimal.parseString(this)
-        val satsInBtc = BigDecimal.fromInt(sats).divide(BigDecimal.fromLong(100_000_000L))
-        return btcAmount.subtract(satsInBtc).toStringExpanded()
     }
 
     /**

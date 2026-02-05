@@ -5,6 +5,7 @@ enum class WalletOperationVerb(val identifier: String) {
     BALANCE("balance"),
     DEPOSIT("deposit"),
     WITHDRAW("withdraw"),
+    MIGRATION_WITHDRAW("migration_withdraw"),
     TRANSACTIONS("transactions"),
     EXCHANGE_RATE("exchange_rate"),
     USER_INFO("user_info"),
