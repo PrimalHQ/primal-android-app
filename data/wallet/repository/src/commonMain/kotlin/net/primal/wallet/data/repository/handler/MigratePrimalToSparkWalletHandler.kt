@@ -43,6 +43,8 @@ class MigratePrimalToSparkWalletHandler(
         private const val MAX_RETRIES = 3
         private const val INITIAL_RETRY_DELAY_SECONDS = 1
         private const val LOG_TAG = "WalletMigration"
+
+        private const val TEST_BUFFER_SATS = 100
     }
 
     private val migrationMutex = Mutex()
@@ -91,9 +93,12 @@ class MigratePrimalToSparkWalletHandler(
 
                     val balanceInBtc = checkBalance(userId = userId, onProgress = onProgress)
                     if (balanceInBtc.isPositiveBtcAmount()) {
+                        val adjustedBalanceInBtc = balanceInBtc.subtractSats(TEST_BUFFER_SATS)
+                        logDebug("Adjusted balance: $balanceInBtc BTC → $adjustedBalanceInBtc BTC (minus $TEST_BUFFER_SATS sats)")
+
                         val invoice = createInvoice(
                             sparkWalletId = sparkWalletId,
-                            balanceInBtc = balanceInBtc,
+                            balanceInBtc = adjustedBalanceInBtc,
                             onProgress = onProgress,
                         )
                         transferBalance(userId = userId, invoice = invoice, onProgress = onProgress)
@@ -355,6 +360,15 @@ class MigratePrimalToSparkWalletHandler(
         }.onSuccess {
             logDebug("Transaction migration completed successfully")
         }
+    }
+
+    /**
+     * Subtracts the given number of sats from a BTC amount string.
+     */
+    private fun String.subtractSats(sats: Int): String {
+        val btcAmount = BigDecimal.parseString(this)
+        val satsInBtc = BigDecimal.fromInt(sats).divide(BigDecimal.fromLong(100_000_000L))
+        return btcAmount.subtract(satsInBtc).toStringExpanded()
     }
 
     /**
