@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -21,6 +22,8 @@ import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.LnInvoiceParseResult
 import net.primal.domain.wallet.LnUrlParseResult
+import net.primal.domain.wallet.NwcInvoice
+import net.primal.domain.wallet.NwcInvoiceState
 import net.primal.domain.wallet.OnChainAddressResult
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.TxType
@@ -37,8 +40,11 @@ import net.primal.wallet.data.local.dao.Wallet as WalletPO
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletTransactionData
+import net.primal.wallet.data.local.dao.nwc.NwcInvoiceData
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
+import net.primal.wallet.data.repository.mappers.local.asDO
+import net.primal.wallet.data.repository.mappers.local.asPO
 import net.primal.wallet.data.repository.mappers.local.toDomain
 import net.primal.wallet.data.repository.transactions.TimestampBasedWalletTransactionsMediator
 import net.primal.wallet.data.service.WalletService
@@ -187,6 +193,26 @@ internal class WalletRepositoryImpl(
             transaction.toDomain(otherProfile = profile)
         }
 
+    override suspend fun findTransactionByInvoice(invoice: String): Transaction? =
+        withContext(dispatcherProvider.io()) {
+            val txData = walletDatabase.walletTransactions().findByInvoice(invoice)
+                ?: return@withContext null
+            val profile = txData.otherUserId?.let {
+                profileRepository.findProfileDataOrNull(profileId = it.decrypted)
+            }
+            txData.toDomain(otherProfile = profile)
+        }
+
+    override suspend fun findTransactionByPaymentHash(paymentHash: String): Transaction? =
+        withContext(dispatcherProvider.io()) {
+            val txData = walletDatabase.walletTransactions().findByPaymentHash(paymentHash)
+                ?: return@withContext null
+            val profile = txData.otherUserId?.let {
+                profileRepository.findProfileDataOrNull(profileId = it.decrypted)
+            }
+            txData.toDomain(otherProfile = profile)
+        }
+
     override suspend fun deleteAllTransactions(userId: String) =
         withContext(dispatcherProvider.io()) {
             walletDatabase.walletTransactions().deleteAllTransactions(userId = userId)
@@ -223,6 +249,7 @@ internal class WalletRepositoryImpl(
         walletId: String,
         amountInBtc: String?,
         comment: String?,
+        expiry: Long?,
     ): Result<LnInvoiceCreateResult> {
         return withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
@@ -233,7 +260,7 @@ internal class WalletRepositoryImpl(
                 request = LnInvoiceCreateRequest(
                     description = comment,
                     amountInBtc = amountInBtc,
-                    expiry = if (wallet.info.type != WalletType.PRIMAL) 1.hours.inWholeSeconds else null,
+                    expiry = if (wallet.info.type != WalletType.PRIMAL) 1.hours.inWholeSeconds else expiry,
                 ),
             )
         }
@@ -320,6 +347,21 @@ internal class WalletRepositoryImpl(
             )
         }
     }
+
+    override suspend fun persistNwcInvoice(nwcInvoice: NwcInvoice) =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.nwcInvoices().upsert(nwcInvoice.asPO())
+        }
+
+    override suspend fun findNwcInvoiceByPaymentHash(paymentHash: String): NwcInvoice? =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.nwcInvoices().findByPaymentHash(paymentHash)?.asDO()
+        }
+
+    override suspend fun findNwcInvoiceByInvoice(invoice: String): NwcInvoice? =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.nwcInvoices().findByInvoice(invoice)?.asDO()
+        }
 
     private fun WalletPO.resolveWalletService(): WalletService<Wallet> {
         return walletServiceFactory.getServiceForWallet(this.toDomain())

@@ -43,6 +43,10 @@ interface WalletRepository {
 
     suspend fun findTransactionByIdOrNull(txId: String): Transaction?
 
+    suspend fun findTransactionByInvoice(invoice: String): Transaction?
+
+    suspend fun findTransactionByPaymentHash(paymentHash: String): Transaction?
+
     suspend fun deleteAllTransactions(userId: String)
 
     suspend fun deleteAllUserData(userId: String)
@@ -53,6 +57,7 @@ interface WalletRepository {
         walletId: String,
         amountInBtc: String?,
         comment: String?,
+        expiry: Long? = null,
     ): Result<LnInvoiceCreateResult>
 
     suspend fun createOnChainAddress(walletId: String): Result<OnChainAddressResult>
@@ -60,4 +65,10 @@ interface WalletRepository {
     suspend fun parseLnUrl(userId: String, lnurl: String): LnUrlParseResult
 
     suspend fun parseLnInvoice(userId: String, lnbc: String): LnInvoiceParseResult
+
+    suspend fun persistNwcInvoice(nwcInvoice: NwcInvoice)
+
+    suspend fun findNwcInvoiceByPaymentHash(paymentHash: String): NwcInvoice?
+
+    suspend fun findNwcInvoiceByInvoice(invoice: String): NwcInvoice?
 }

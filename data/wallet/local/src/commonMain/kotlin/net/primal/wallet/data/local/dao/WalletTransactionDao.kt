@@ -73,6 +73,12 @@ interface WalletTransactionDao {
     @Query("SELECT * FROM WalletTransactionData WHERE transactionId IS :txId")
     suspend fun findTransactionById(txId: String): WalletTransactionData?
 
+    @Query("SELECT * FROM WalletTransactionData WHERE invoice = :invoice LIMIT 1")
+    suspend fun findByInvoice(invoice: String): WalletTransactionData?
+
+    @Query("SELECT * FROM WalletTransactionData WHERE paymentHash = :paymentHash LIMIT 1")
+    suspend fun findByPaymentHash(paymentHash: String): WalletTransactionData?
+
     @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
     suspend fun deleteAllTransactions(userId: String)
 }

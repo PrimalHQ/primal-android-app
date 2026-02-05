@@ -2,10 +2,12 @@ package net.primal.wallet.data.nwc.processor
 
 import io.github.aakira.napier.Napier
 import kotlin.math.min
+import kotlin.time.Clock
 import kotlin.uuid.Uuid
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
 import net.primal.core.networking.nwc.nip47.ListTransactionsResponsePayload
+import net.primal.core.networking.nwc.nip47.LookupInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.MakeInvoiceResponsePayload
 import net.primal.core.networking.nwc.nip47.NwcError
 import net.primal.core.networking.nwc.nip47.PayInvoiceResponsePayload
@@ -16,6 +18,9 @@ import net.primal.core.utils.CurrencyConversionUtils.msatsToSats
 import net.primal.core.utils.CurrencyConversionUtils.satsToMSats
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.domain.connections.nostr.model.NwcPaymentHoldResult
+import net.primal.domain.nostr.InvoiceType
+import net.primal.domain.wallet.NwcInvoice
+import net.primal.domain.wallet.NwcInvoiceState
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.nwc.NwcCapabilities
@@ -238,6 +243,7 @@ class NwcRequestProcessor internal constructor(
             walletId = walletId,
             amountInBtc = amountBtcFormatted,
             comment = params.description,
+            expiry = params.expiry,
         )
 
         return if (result.isSuccess) {
@@ -246,17 +252,42 @@ class NwcRequestProcessor internal constructor(
 
             Napier.d(tag = TAG) { "MakeInvoice: invoice created: ${invoice.take(50)}..." }
 
-            val parseResult = walletRepository.parseLnInvoice(
-                userId = request.connection.userId,
-                lnbc = invoice,
-            )
+            val parseResult = runCatching {
+                walletRepository.parseLnInvoice(
+                    userId = request.connection.userId,
+                    lnbc = invoice,
+                )
+            }.getOrNull()
 
-            val nowSeconds = kotlin.time.Clock.System.now().epochSeconds
-            val expiresAtSeconds = parseResult.expiry?.let { nowSeconds + it }
+            val nowSeconds = Clock.System.now().epochSeconds
+            val expiresAtSeconds = parseResult?.expiry?.let { nowSeconds + it }
+                ?: params.expiry?.let { nowSeconds + it }
 
             Napier.d(tag = TAG) {
-                "MakeInvoice: success! paymentHash=${parseResult.paymentHash?.take(16) ?: "null"}, " +
-                    "expiry=${parseResult.expiry}s, expiresAt=$expiresAtSeconds"
+                "MakeInvoice: success! paymentHash=${parseResult?.paymentHash?.take(16)}, " +
+                    "expiry=${parseResult?.expiry}s, expiresAt=$expiresAtSeconds"
+            }
+
+            runCatching {
+                walletRepository.persistNwcInvoice(
+                    NwcInvoice(
+                        paymentHash = parseResult?.paymentHash,
+                        walletId = walletId,
+                        connectionId = request.connection.secretPubKey,
+                        invoice = invoice,
+                        description = params.description ?: invoiceResult.description,
+                        descriptionHash = params.descriptionHash,
+                        amountMsats = amountMsats,
+                        createdAt = nowSeconds,
+                        expiresAt = expiresAtSeconds ?: (nowSeconds + DEFAULT_INVOICE_EXPIRY_SECONDS),
+                        settledAt = null,
+                        preimage = null,
+                        state = NwcInvoiceState.PENDING,
+                    ),
+                )
+                Napier.d(tag = TAG) { "MakeInvoice: persisted NwcInvoice for lookup" }
+            }.onFailure { e ->
+                Napier.e(tag = TAG, throwable = e) { "MakeInvoice: failed to persist NwcInvoice" }
             }
 
             responseBuilder.buildMakeInvoiceResponse(
@@ -266,12 +297,13 @@ class NwcRequestProcessor internal constructor(
                     invoice = invoice,
                     description = params.description ?: invoiceResult.description,
                     descriptionHash = params.descriptionHash,
-                    paymentHash = parseResult.paymentHash ?: "",
+                    paymentHash = parseResult?.paymentHash ?: "",
                     amount = amountMsats,
                     feesPaid = 0,
                     createdAt = nowSeconds,
                     expiresAt = expiresAtSeconds,
                     metadata = null,
+                    state = "pending",
                 ),
             )
         } else {
@@ -294,8 +326,8 @@ class NwcRequestProcessor internal constructor(
 
         Napier.d(tag = TAG) {
             "LookupInvoice: walletId=${walletId.take(8)}..., " +
-                "invoice=${invoice?.take(30) ?: "null"}..., " +
-                "paymentHash=${paymentHash ?: "null"}"
+                "invoice=${invoice?.take(30)}..., " +
+                "paymentHash=$paymentHash"
         }
 
         if (invoice == null && paymentHash == null) {
@@ -307,17 +339,61 @@ class NwcRequestProcessor internal constructor(
             )
         }
 
-        Napier.d(tag = TAG) { "LookupInvoice: method temporarily disabled/not implemented" }
-        return responseBuilder.buildErrorResponse(
-            request = request,
-            code = NwcError.NOT_IMPLEMENTED,
-            message = "Method not implemented.",
-        )
+        val nwcInvoice = when {
+            invoice != null -> walletRepository.findNwcInvoiceByInvoice(invoice)
+            paymentHash != null -> walletRepository.findNwcInvoiceByPaymentHash(paymentHash)
+            else -> null
+        }
+
+        if (nwcInvoice != null) {
+            Napier.d(tag = TAG) { "LookupInvoice: found NwcInvoice, state=${nwcInvoice.state}" }
+            return responseBuilder.buildLookupInvoiceResponse(
+                request = request,
+                result = LookupInvoiceResponsePayload(
+                    type = InvoiceType.Incoming,
+                    invoice = nwcInvoice.invoice,
+                    description = nwcInvoice.description,
+                    descriptionHash = nwcInvoice.descriptionHash,
+                    paymentHash = nwcInvoice.paymentHash ?: "",
+                    preimage = nwcInvoice.preimage,
+                    amount = nwcInvoice.amountMsats,
+                    feesPaid = 0,
+                    createdAt = nwcInvoice.createdAt,
+                    expiresAt = nwcInvoice.expiresAt,
+                    settledAt = nwcInvoice.settledAt,
+                    state = nwcInvoice.state.name.lowercase(),
+                ),
+            )
+        }
+
+        Napier.d(tag = TAG) { "LookupInvoice: NwcInvoice not found, searching transactions..." }
+
+        val matchingTransaction = when {
+            invoice != null -> walletRepository.findTransactionByInvoice(invoice)
+            paymentHash != null -> walletRepository.findTransactionByPaymentHash(paymentHash)
+            else -> null
+        }
+
+        return if (matchingTransaction != null) {
+            Napier.d(tag = TAG) { "LookupInvoice: found matching transaction" }
+            responseBuilder.buildLookupInvoiceResponse(
+                request = request,
+                result = matchingTransaction.toNwcTransaction(),
+            )
+        } else {
+            Napier.w(tag = TAG) { "LookupInvoice: invoice not found" }
+            responseBuilder.buildErrorResponse(
+                request = request,
+                code = NwcError.NOT_FOUND,
+                message = "Invoice not found",
+            )
+        }
     }
 
     companion object {
         private const val PAYMENT_HOLD_TIMEOUT_MS = 60_000L
         private const val DEFAULT_TRANSACTIONS_LIMIT = 50
+        private const val DEFAULT_INVOICE_EXPIRY_SECONDS = 3600L
 
         private const val TAG = "NwcRequestProcessor"
     }
