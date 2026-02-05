@@ -233,6 +233,7 @@ abstract class RepositoryFactory {
     fun createMigratePrimalTransactionsHandler(
         primalWalletApiClient: PrimalApiClient,
         nostrEventSignatureHandler: NostrEventSignatureHandler,
+        profileRepository: ProfileRepository? = null,
     ): MigratePrimalTransactionsHandler {
         return MigratePrimalTransactionsHandler(
             primalWalletApi = WalletApiServiceFactory.createPrimalWalletApi(
@@ -240,6 +241,7 @@ abstract class RepositoryFactory {
                 nostrEventSignatureHandler = nostrEventSignatureHandler,
             ),
             walletDatabase = resolveWalletDatabase(),
+            profileRepository = profileRepository,
             dispatcherProvider = dispatcherProvider,
         )
     }
@@ -249,6 +251,7 @@ abstract class RepositoryFactory {
         nostrEventSignatureHandler: NostrEventSignatureHandler,
         ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
         walletRepository: WalletRepository,
+        profileRepository: ProfileRepository? = null,
     ): MigratePrimalToSparkWalletHandler {
         val primalWalletApi = WalletApiServiceFactory.createPrimalWalletApi(
             primalApiClient = primalWalletApiClient,
@@ -259,6 +262,7 @@ abstract class RepositoryFactory {
             migratePrimalTransactionsHandler = MigratePrimalTransactionsHandler(
                 primalWalletApi = primalWalletApi,
                 walletDatabase = resolveWalletDatabase(),
+                profileRepository = profileRepository,
                 dispatcherProvider = dispatcherProvider,
             ),
             sparkWalletAccountRepository = SparkWalletAccountRepositoryImpl(
