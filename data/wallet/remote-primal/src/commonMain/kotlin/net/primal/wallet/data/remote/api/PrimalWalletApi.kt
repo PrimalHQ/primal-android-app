@@ -31,6 +31,8 @@ interface PrimalWalletApi {
 
     suspend fun withdraw(userId: String, body: WithdrawRequestBody)
 
+    suspend fun migrationWithdraw(userId: String, lnInvoice: String)
+
     suspend fun createLightningInvoice(userId: String, body: DepositRequestBody): LightningInvoiceResponse
 
     suspend fun createOnChainAddress(userId: String, body: DepositRequestBody): OnChainAddressResponse
