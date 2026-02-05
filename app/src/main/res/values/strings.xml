@@ -925,7 +925,9 @@
     <string name="settings_wallet_nwc_qr_code_scan_paste">Paste Connection String</string>
     <string name="nwc_service_notification_channel_name">NWC Wallet Service</string>
     <string name="nwc_service_notification_title">NWC Wallet Service</string>
-    <string name="nwc_service_notification_text">Processing wallet connection requests</string>
+    <string name="nwc_service_notification_text">Running for %s</string>
+    <string name="nwc_service_notification_user_title">NWC Wallet Active</string>
+    <string name="nwc_service_notification_stop">Stop service</string>
     <string name="settings_wallet_nwc_service_start">Start wallet service</string>
     <string name="settings_wallet_nwc_service_stop">Stop wallet service</string>
     <string name="nwc_notification_service_active">NWC Wallet Service active</string>

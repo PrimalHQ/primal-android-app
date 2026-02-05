@@ -52,6 +52,10 @@
             android:name=".core.receiver.EndSessionReceiver"
             android:exported="false" />
 
+        <receiver
+            android:name=".core.receiver.StopNwcServiceReceiver"
+            android:exported="false" />
+
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|screenSize|layoutDirection|screenLayout|smallestScreenSize"
