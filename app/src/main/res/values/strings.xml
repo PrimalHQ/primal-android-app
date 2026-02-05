@@ -1260,6 +1260,18 @@
     <string name="wallet_upgrade_failed_headline">Unable to upgrade</string>
     <string name="wallet_upgrade_done_button">Done</string>
     <string name="wallet_upgrade_close_button">Close</string>
+    <string name="wallet_upgrade_retry_button">Retry</string>
+    <string name="wallet_upgrade_ready_headline">Ready to Upgrade</string>
+    <string name="wallet_upgrade_ready_description">We\'ll transfer your existing wallet balance and transaction history to your new self-custodial wallet.\n\nPlease don\'t close the app during the upgrade.</string>
+    <string name="wallet_upgrade_start_button">Start Upgrade</string>
+    <string name="wallet_upgrade_step_creating_wallet">Creating your new wallet…</string>
+    <string name="wallet_upgrade_step_registering_wallet">Registering wallet…</string>
+    <string name="wallet_upgrade_step_checking_balance">Checking your balance…</string>
+    <string name="wallet_upgrade_step_creating_invoice">Preparing transfer…</string>
+    <string name="wallet_upgrade_step_transferring_funds">Transferring your funds…</string>
+    <string name="wallet_upgrade_step_awaiting_confirmation">Awaiting confirmation…</string>
+    <string name="wallet_upgrade_step_finalizing_wallet">Finalizing wallet setup…</string>
+    <string name="wallet_upgrade_step_importing_history">Importing transaction history…</string>
 
     <string name="wallet_restore_title">Restore Existing Wallet</string>
     <string name="wallet_restore_enter_recovery_phrase_placeholder">Enter your wallet recovery phrase</string>
