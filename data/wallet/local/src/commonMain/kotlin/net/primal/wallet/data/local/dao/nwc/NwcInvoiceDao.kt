@@ -16,14 +16,11 @@ interface NwcInvoiceDao {
     @Query("SELECT * FROM NwcInvoiceData WHERE paymentHash = :paymentHash")
     suspend fun findByPaymentHash(paymentHash: String): NwcInvoiceData?
 
-    @Query("UPDATE NwcInvoiceData SET state = 'EXPIRED' WHERE invoice = :invoice")
-    suspend fun markExpired(invoice: String)
-
     @Query(
         """
         UPDATE NwcInvoiceData
-        SET state = 'SETTLED', settledAt = :settledAt, preimage = :preimage
-        WHERE paymentHash = :paymentHash AND state != 'SETTLED'
+        SET settledAt = :settledAt, preimage = :preimage
+        WHERE paymentHash = :paymentHash
         """,
     )
     suspend fun markSettledWithDetails(

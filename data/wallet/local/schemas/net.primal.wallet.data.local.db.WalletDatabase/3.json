@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "807c1a5190d7bdf9e36c490949d4e132",
+    "identityHash": "39f6dbf17a23bb59a7c8862186ff9188",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -573,7 +573,7 @@
       },
       {
         "tableName": "NwcInvoiceData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`invoice` TEXT NOT NULL, `paymentHash` TEXT, `walletId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `description` TEXT, `descriptionHash` TEXT, `amountMsats` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `expiresAt` INTEGER NOT NULL, `settledAt` INTEGER, `preimage` TEXT, `state` TEXT NOT NULL, PRIMARY KEY(`invoice`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`invoice` TEXT NOT NULL, `paymentHash` TEXT, `walletId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `description` TEXT, `descriptionHash` TEXT, `amountMsats` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `expiresAt` INTEGER NOT NULL, `settledAt` INTEGER, `preimage` TEXT, PRIMARY KEY(`invoice`))",
         "fields": [
           {
             "fieldPath": "invoice",
@@ -635,12 +635,6 @@
             "fieldPath": "preimage",
             "columnName": "preimage",
             "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "state",
-            "columnName": "state",
-            "affinity": "TEXT",
-            "notNull": true
           }
         ],
         "primaryKey": {
@@ -682,7 +676,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '807c1a5190d7bdf9e36c490949d4e132')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '39f6dbf17a23bb59a7c8862186ff9188')"
     ]
   }
 }

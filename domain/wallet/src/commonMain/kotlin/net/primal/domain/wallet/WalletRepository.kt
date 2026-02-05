@@ -57,6 +57,7 @@ interface WalletRepository {
         walletId: String,
         amountInBtc: String?,
         comment: String?,
+        expiry: Long? = null,
     ): Result<LnInvoiceCreateResult>
 
     suspend fun createOnChainAddress(walletId: String): Result<OnChainAddressResult>
@@ -70,6 +71,4 @@ interface WalletRepository {
     suspend fun findNwcInvoiceByPaymentHash(paymentHash: String): NwcInvoice?
 
     suspend fun findNwcInvoiceByInvoice(invoice: String): NwcInvoice?
-
-    suspend fun markNwcInvoiceExpired(invoice: String)
 }

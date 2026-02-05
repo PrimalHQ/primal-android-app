@@ -1,13 +1,13 @@
 package net.primal.wallet.data.repository.mappers.local
 
+import kotlin.time.Clock
 import net.primal.domain.connections.nostr.model.NwcConnection
 import net.primal.domain.nostr.cryptography.NostrKeyPair
 import net.primal.domain.wallet.NwcInvoice
-import net.primal.domain.wallet.NwcInvoiceState as NwcInvoiceStateDO
+import net.primal.domain.wallet.NwcInvoiceState
 import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.local.dao.nwc.NwcConnection as NostrWalletConnectionPO
 import net.primal.wallet.data.local.dao.nwc.NwcInvoiceData
-import net.primal.wallet.data.local.dao.nwc.NwcInvoiceState as NwcInvoiceStatePO
 
 fun NostrWalletConnectionPO.asDO() =
     NwcConnection(
@@ -33,7 +33,7 @@ fun NwcInvoiceData.asDO() =
         expiresAt = this.expiresAt,
         settledAt = this.settledAt,
         preimage = this.preimage?.decrypted,
-        state = this.state.asDO(),
+        state = this.resolveInvoiceState(),
     )
 
 fun NwcInvoice.asPO() =
@@ -49,19 +49,12 @@ fun NwcInvoice.asPO() =
         expiresAt = this.expiresAt,
         settledAt = this.settledAt,
         preimage = this.preimage?.asEncryptable(),
-        state = this.state.asPO(),
     )
 
-private fun NwcInvoiceStatePO.asDO(): NwcInvoiceStateDO =
-    when (this) {
-        NwcInvoiceStatePO.PENDING -> NwcInvoiceStateDO.PENDING
-        NwcInvoiceStatePO.SETTLED -> NwcInvoiceStateDO.SETTLED
-        NwcInvoiceStatePO.EXPIRED -> NwcInvoiceStateDO.EXPIRED
+private fun NwcInvoiceData.resolveInvoiceState(): NwcInvoiceState {
+    return when {
+        expiresAt < Clock.System.now().epochSeconds -> NwcInvoiceState.EXPIRED
+        settledAt != null -> NwcInvoiceState.SETTLED
+        else -> NwcInvoiceState.PENDING
     }
-
-private fun NwcInvoiceStateDO.asPO(): NwcInvoiceStatePO =
-    when (this) {
-        NwcInvoiceStateDO.PENDING -> NwcInvoiceStatePO.PENDING
-        NwcInvoiceStateDO.SETTLED -> NwcInvoiceStatePO.SETTLED
-        NwcInvoiceStateDO.EXPIRED -> NwcInvoiceStatePO.EXPIRED
-    }
+}

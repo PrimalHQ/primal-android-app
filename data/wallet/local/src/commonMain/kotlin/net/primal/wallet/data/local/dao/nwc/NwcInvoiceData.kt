@@ -25,5 +25,4 @@ data class NwcInvoiceData(
     val expiresAt: Long,
     val settledAt: Long?,
     val preimage: Encryptable<String>?,
-    val state: NwcInvoiceState,
 )

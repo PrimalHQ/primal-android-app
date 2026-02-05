@@ -243,6 +243,7 @@ class NwcRequestProcessor internal constructor(
             walletId = walletId,
             amountInBtc = amountBtcFormatted,
             comment = params.description,
+            expiry = params.expiry,
         )
 
         return if (result.isSuccess) {
@@ -251,23 +252,26 @@ class NwcRequestProcessor internal constructor(
 
             Napier.d(tag = TAG) { "MakeInvoice: invoice created: ${invoice.take(50)}..." }
 
-            val parseResult = walletRepository.parseLnInvoice(
-                userId = request.connection.userId,
-                lnbc = invoice,
-            )
+            val parseResult = runCatching {
+                walletRepository.parseLnInvoice(
+                    userId = request.connection.userId,
+                    lnbc = invoice,
+                )
+            }.getOrNull()
 
             val nowSeconds = Clock.System.now().epochSeconds
-            val expiresAtSeconds = parseResult.expiry?.let { nowSeconds + it }
+            val expiresAtSeconds = parseResult?.expiry?.let { nowSeconds + it }
+                ?: params.expiry?.let { nowSeconds + it }
 
             Napier.d(tag = TAG) {
-                "MakeInvoice: success! paymentHash=${parseResult.paymentHash?.take(16) ?: "null"}, " +
-                    "expiry=${parseResult.expiry}s, expiresAt=$expiresAtSeconds"
+                "MakeInvoice: success! paymentHash=${parseResult?.paymentHash?.take(16)}, " +
+                    "expiry=${parseResult?.expiry}s, expiresAt=$expiresAtSeconds"
             }
 
             runCatching {
                 walletRepository.persistNwcInvoice(
                     NwcInvoice(
-                        paymentHash = parseResult.paymentHash,
+                        paymentHash = parseResult?.paymentHash,
                         walletId = walletId,
                         connectionId = request.connection.secretPubKey,
                         invoice = invoice,
@@ -293,7 +297,7 @@ class NwcRequestProcessor internal constructor(
                     invoice = invoice,
                     description = params.description ?: invoiceResult.description,
                     descriptionHash = params.descriptionHash,
-                    paymentHash = parseResult.paymentHash ?: "",
+                    paymentHash = parseResult?.paymentHash ?: "",
                     amount = amountMsats,
                     feesPaid = 0,
                     createdAt = nowSeconds,
@@ -343,22 +347,6 @@ class NwcRequestProcessor internal constructor(
 
         if (nwcInvoice != null) {
             Napier.d(tag = TAG) { "LookupInvoice: found NwcInvoice, state=${nwcInvoice.state}" }
-
-            val nowSeconds = Clock.System.now().epochSeconds
-            val effectiveState = when {
-                nwcInvoice.state == NwcInvoiceState.SETTLED -> "settled"
-                nwcInvoice.state == NwcInvoiceState.EXPIRED -> "expired"
-                nwcInvoice.expiresAt < nowSeconds -> {
-                    runCatching {
-                        walletRepository.markNwcInvoiceExpired(nwcInvoice.invoice)
-                        Napier.d(tag = TAG) { "LookupInvoice: marked invoice as expired" }
-                    }
-                    "expired"
-                }
-
-                else -> "pending"
-            }
-
             return responseBuilder.buildLookupInvoiceResponse(
                 request = request,
                 result = LookupInvoiceResponsePayload(
@@ -373,7 +361,7 @@ class NwcRequestProcessor internal constructor(
                     createdAt = nwcInvoice.createdAt,
                     expiresAt = nwcInvoice.expiresAt,
                     settledAt = nwcInvoice.settledAt,
-                    state = effectiveState,
+                    state = nwcInvoice.state.name.lowercase(),
                 ),
             )
         }
