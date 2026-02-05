@@ -3,13 +3,12 @@ package net.primal.android.wallet.init
 import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
@@ -32,7 +31,6 @@ class SparkWalletLifecycleInitializer @Inject constructor(
 
     private val scope = CoroutineScope(dispatchers.io())
 
-    private val walletMutex = Mutex()
     private var currentWalletId: String? = null
 
     fun start() {
@@ -40,13 +38,11 @@ class SparkWalletLifecycleInitializer @Inject constructor(
             activeAccountStore.activeUserId
                 .map { it.takeIf { id -> id.isNotBlank() } }
                 .distinctUntilChanged()
-                .collect { userIdOrNull ->
-                    walletMutex.withLock {
-                        disconnectCurrentWalletIfNeeded()
+                .collectLatest { userIdOrNull ->
+                    disconnectCurrentWalletIfNeeded()
 
-                        val userId = userIdOrNull ?: return@withLock
-                        initializeWalletWithRetry(userId)
-                    }
+                    val userId = userIdOrNull ?: return@collectLatest
+                    initializeWallet(userId)
                 }
         }
     }
@@ -67,43 +63,42 @@ class SparkWalletLifecycleInitializer @Inject constructor(
         return !status.hasCustodialWallet || status.hasMigratedToSparkWallet
     }
 
-    private suspend fun initializeWalletWithRetry(userId: String) {
-        if (!isEligibleForSparkWallet(userId)) {
-            Napier.d { "User userId=$userId not eligible for Spark wallet, skipping initialization" }
-            return
-        }
+    private suspend fun initializeWallet(userId: String) {
+        try {
+            if (!isEligibleForSparkWallet(userId)) {
+                Napier.d { "User userId=$userId not eligible for Spark wallet, skipping initialization" }
+                return
+            }
 
-        suspend { ensureSparkWalletExistsUseCase.invoke(userId) }.retryOnFailureWithAbort(
-            times = MAX_RETRY_ATTEMPTS,
-            initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
-            shouldRetry = { !hasUserChanged(expectedUserId = userId) },
-            onRetry = { _, remainingAttempts, delaySeconds, error ->
-                Napier.w(throwable = error) {
-                    "initializeWallet failed for userId=$userId, " +
-                        "retrying in ${delaySeconds}s ($remainingAttempts attempts left)"
-                }
-            },
-        ).onFailure { error ->
-            Napier.e(throwable = error) { "initializeWallet failed for userId=$userId" }
-        }.onSuccess { walletId ->
-            currentWalletId = walletId
-            Napier.d { "Wallet initialized for userId=$userId, walletId=$walletId" }
-            checkAndRetryTransactionMigration(userId = userId, walletId = walletId)
+            suspend { ensureSparkWalletExistsUseCase.invoke(userId) }.retryOnFailureWithAbort(
+                times = MAX_RETRY_ATTEMPTS,
+                initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
+                onRetry = { _, remainingAttempts, delaySeconds, error ->
+                    Napier.w(throwable = error) {
+                        "initializeWallet failed for userId=$userId, " +
+                            "retrying in ${delaySeconds}s ($remainingAttempts attempts left)"
+                    }
+                },
+            ).onFailure { error ->
+                Napier.e(throwable = error) { "initializeWallet failed for userId=$userId" }
+            }.onSuccess { walletId ->
+                currentWalletId = walletId
+                Napier.d { "Wallet initialized for userId=$userId, walletId=$walletId" }
+                migrateTransactions(userId = userId, walletId = walletId)
+            }
+        } catch (e: CancellationException) {
+            Napier.d { "Wallet initialization cancelled for userId=$userId" }
+            throw e
         }
     }
 
-    private suspend fun checkAndRetryTransactionMigration(userId: String, walletId: String) {
+    private suspend fun migrateTransactions(userId: String, walletId: String) {
         migratePrimalTransactionsHandler.invoke(
             userId = userId,
             targetSparkWalletId = walletId,
         ).onSuccess {
             Napier.i { "Background transaction migration completed for walletId=$walletId" }
         }
-    }
-
-    private suspend fun hasUserChanged(expectedUserId: String): Boolean {
-        val currentUserId = activeAccountStore.activeUserId.first()
-        return currentUserId != expectedUserId
     }
 
     private companion object {
