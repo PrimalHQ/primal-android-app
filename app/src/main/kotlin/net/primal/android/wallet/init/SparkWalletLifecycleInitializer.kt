@@ -15,16 +15,19 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.retryOnFailureWithAbort
 import net.primal.domain.account.PrimalWalletAccountRepository
+import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.SparkWalletManager
 import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 
+@Suppress("LongParameterList")
 @Singleton
 class SparkWalletLifecycleInitializer @Inject constructor(
     dispatchers: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val sparkWalletManager: SparkWalletManager,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
+    private val sparkWalletAccountRepository: SparkWalletAccountRepository,
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
     private val migratePrimalTransactionsHandler: MigratePrimalTransactionsHandler,
 ) {
@@ -63,14 +66,27 @@ class SparkWalletLifecycleInitializer @Inject constructor(
         return !status.hasCustodialWallet || status.hasMigratedToSparkWallet || status.primalWalletDeprecated
     }
 
+    private suspend fun hasLocalSparkWallet(userId: String): Boolean {
+        return sparkWalletAccountRepository.findPersistedWalletId(userId) != null
+    }
+
     private suspend fun initializeWallet(userId: String) {
         try {
-            if (!isEligibleForSparkWallet(userId)) {
+            val isEligible = isEligibleForSparkWallet(userId)
+            val hasLocalWallet = hasLocalSparkWallet(userId)
+
+            if (!isEligible && !hasLocalWallet) {
                 Napier.d { "User userId=$userId not eligible for Spark wallet, skipping initialization" }
                 return
             }
 
-            suspend { ensureSparkWalletExistsUseCase.invoke(userId) }.retryOnFailureWithAbort(
+            // Only register if eligible - prevents hijacking lightning address
+            // when user has local Spark wallet but is using Primal custodial
+            val shouldRegister = isEligible
+
+            suspend {
+                ensureSparkWalletExistsUseCase.invoke(userId, register = shouldRegister)
+            }.retryOnFailureWithAbort(
                 times = MAX_RETRY_ATTEMPTS,
                 initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
                 onRetry = { _, remainingAttempts, delaySeconds, error ->
