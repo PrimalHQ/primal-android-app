@@ -16,19 +16,16 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.retryOnFailureWithAbort
 import net.primal.domain.account.PrimalWalletAccountRepository
-import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.SparkWalletManager
 import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 
-@Suppress("LongParameterList")
 @Singleton
 class SparkWalletLifecycleInitializer @Inject constructor(
     dispatchers: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val sparkWalletManager: SparkWalletManager,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
-    private val sparkWalletAccountRepository: SparkWalletAccountRepository,
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
     private val migratePrimalTransactionsHandler: MigratePrimalTransactionsHandler,
 ) {
@@ -96,14 +93,11 @@ class SparkWalletLifecycleInitializer @Inject constructor(
     }
 
     private suspend fun checkAndRetryTransactionMigration(userId: String, walletId: String) {
-        if (!sparkWalletAccountRepository.isPrimalTxsMigrationCompleted(walletId)) {
-            Napier.d { "Starting background transaction migration for walletId=$walletId" }
-            migratePrimalTransactionsHandler.invoke(
-                userId = userId,
-                targetWalletId = walletId,
-            ).onSuccess {
-                Napier.i { "Background transaction migration completed for walletId=$walletId" }
-            }
+        migratePrimalTransactionsHandler.invoke(
+            userId = userId,
+            targetSparkWalletId = walletId,
+        ).onSuccess {
+            Napier.i { "Background transaction migration completed for walletId=$walletId" }
         }
     }
 

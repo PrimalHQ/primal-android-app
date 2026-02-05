@@ -364,7 +364,7 @@ class MigratePrimalToSparkWalletHandler(
 
         migratePrimalTransactionsHandler.invoke(
             userId = userId,
-            targetWalletId = sparkWalletId,
+            targetSparkWalletId = sparkWalletId,
             maxPages = INITIAL_TRANSACTION_PAGES,
         ).onFailure { error ->
             logWarning("Transaction migration incomplete, will retry in background: ${error.message}")
