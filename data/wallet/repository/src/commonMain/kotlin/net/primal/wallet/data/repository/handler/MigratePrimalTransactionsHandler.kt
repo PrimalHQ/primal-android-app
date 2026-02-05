@@ -108,7 +108,8 @@ class MigratePrimalTransactionsHandler(
                     }
 
                     // Save progress after each page (resume point for next iteration)
-                    until = response.paging?.untilId
+                    // Use sinceId (oldest/min timestamp) for backward pagination, not untilId (newest/max)
+                    until = response.paging?.sinceId
 
                     // Prevent infinite loop: if cursor didn't change, we're stuck
                     if (until != null && until == previousUntil) {
