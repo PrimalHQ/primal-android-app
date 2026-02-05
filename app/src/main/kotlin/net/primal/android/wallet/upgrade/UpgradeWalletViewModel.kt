@@ -24,7 +24,7 @@ class UpgradeWalletViewModel @Inject constructor(
     private val migratePrimalToSparkWalletHandler: MigratePrimalToSparkWalletHandler,
 ) : ViewModel() {
 
-    private val simulateUpgrade = true
+    private val simulateUpgrade = false
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
