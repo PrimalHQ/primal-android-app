@@ -1,5 +1,6 @@
 package net.primal.android.wallet.upgrade
 
+import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.fadeIn
@@ -13,6 +14,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
@@ -46,6 +48,8 @@ fun UpgradeWalletScreen(
     eventPublisher: (UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
+    val context = LocalContext.current
+
     BackHandler(enabled = state.status == UpgradeWalletStatus.Upgrading) {
         // Block back navigation during upgrade
     }
@@ -100,8 +104,20 @@ fun UpgradeWalletScreen(
                                 .padding(paddingValues),
                             errorMessage = state.error?.message
                                 ?: stringResource(id = R.string.app_generic_error),
+                            errorLogs = state.errorLogs,
                             onRetryClick = { eventPublisher(UiEvent.RetryUpgrade) },
                             onCloseClick = onClose,
+                            onShareLogsClick = {
+                                val logsText = state.errorLogs.joinToString("\n")
+                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_SUBJECT, "Wallet Migration Error Logs")
+                                    putExtra(Intent.EXTRA_TEXT, logsText)
+                                }
+                                context.startActivity(
+                                    Intent.createChooser(shareIntent, "Share Error Logs"),
+                                )
+                            },
                         )
                     }
                 }

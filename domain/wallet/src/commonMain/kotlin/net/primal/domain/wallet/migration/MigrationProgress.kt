@@ -12,6 +12,7 @@ sealed class MigrationProgress {
     data class Failed(
         val step: MigrationStep,
         val error: Throwable,
+        val logs: List<String> = emptyList(),
     ) : MigrationProgress()
 }
 

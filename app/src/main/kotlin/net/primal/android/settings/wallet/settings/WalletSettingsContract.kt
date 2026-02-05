@@ -22,12 +22,15 @@ interface WalletSettingsContract {
         val activeAccountDisplayName: String = "",
         val isExportingTransactions: Boolean = false,
         val transactionsToExport: List<Transaction> = emptyList(),
+        val showRevertToPrimalWallet: Boolean = false,
+        val isRevertingToPrimalWallet: Boolean = false,
     )
 
     sealed class UiEvent {
         data object DisconnectWallet : UiEvent()
         data object RequestFetchWalletConnections : UiEvent()
         data object RequestTransactionExport : UiEvent()
+        data object RevertToPrimalWallet : UiEvent()
         data class RevokeConnection(val nwcPubkey: String) : UiEvent()
         data class UpdateUseExternalWallet(val value: Boolean) : UiEvent()
         data class UpdateMinTransactionAmount(val amountInSats: Long) : UiEvent()

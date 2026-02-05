@@ -67,6 +67,19 @@ class UpgradeWalletViewModel @Inject constructor(
                     status = UpgradeWalletStatus.Failed,
                     currentStep = MigrationStep.TRANSFERRING_FUNDS,
                     error = Exception("Simulated error: Connection timeout"),
+                    errorLogs = listOf(
+                        "[2024-01-15T10:30:00Z] I: Starting Primal→Spark migration for user abc123",
+                        "[2024-01-15T10:30:01Z] D: Step: Creating Spark wallet locally",
+                        "[2024-01-15T10:30:02Z] D: Step: Registering Spark wallet",
+                        "[2024-01-15T10:30:03Z] D: Step: Checking Primal balance",
+                        "[2024-01-15T10:30:04Z] D: Primal balance: 0.00015000",
+                        "[2024-01-15T10:30:05Z] D: Step: Creating invoice on Spark wallet for 0.00015000 BTC",
+                        "[2024-01-15T10:30:06Z] D: Step: Transferring funds from Primal to Spark",
+                        "[2024-01-15T10:30:07Z] W: Withdraw failed (attempt 0, retry in 1s): Connection timeout",
+                        "[2024-01-15T10:30:09Z] W: Withdraw failed (attempt 1, retry in 2s): Connection timeout",
+                        "[2024-01-15T10:30:12Z] W: Withdraw failed (attempt 2, retry in 4s): Connection timeout",
+                        "[2024-01-15T10:30:16Z] E: Migration failed at step TRANSFERRING_FUNDS: Connection timeout",
+                    ),
                 )
             }
         }
@@ -102,6 +115,7 @@ class UpgradeWalletViewModel @Inject constructor(
                                     status = UpgradeWalletStatus.Failed,
                                     currentStep = progress.step,
                                     error = progress.error,
+                                    errorLogs = progress.logs,
                                 )
                             }
                         }

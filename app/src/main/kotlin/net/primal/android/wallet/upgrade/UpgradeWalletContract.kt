@@ -8,6 +8,7 @@ interface UpgradeWalletContract {
         val status: UpgradeWalletStatus = UpgradeWalletStatus.Ready,
         val currentStep: MigrationStep? = null,
         val error: Throwable? = null,
+        val errorLogs: List<String> = emptyList(),
     )
 
     sealed class UiEvent {
