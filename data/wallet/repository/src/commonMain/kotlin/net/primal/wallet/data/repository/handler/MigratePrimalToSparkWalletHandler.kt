@@ -4,6 +4,7 @@ import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import io.github.aakira.napier.Napier
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -45,6 +46,9 @@ class MigratePrimalToSparkWalletHandler(
         private const val LOG_TAG = "WalletMigration"
 
         private const val TEST_BUFFER_SATS = 100
+
+        // Delay before fetching transaction history to allow backend indexing
+        private val HISTORY_FETCH_DELAY = 3.seconds
     }
 
     private val migrationMutex = Mutex()
@@ -115,6 +119,10 @@ class MigratePrimalToSparkWalletHandler(
                     }
 
                     finalizeWallet(userId = userId, sparkWalletId = sparkWalletId, onProgress = onProgress)
+
+                    // Wait for backend to index the migration transaction before fetching history
+                    logDebug("Waiting ${HISTORY_FETCH_DELAY.inWholeMilliseconds}ms for backend to index transaction")
+                    delay(HISTORY_FETCH_DELAY)
 
                     importTransactionHistory(
                         userId = userId,
