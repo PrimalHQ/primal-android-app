@@ -175,7 +175,7 @@ class MigratePrimalToSparkWalletHandler(
             walletRepository.createLightningInvoice(
                 walletId = sparkWalletId,
                 amountInBtc = balanceInBtc,
-                comment = "Primal wallet migration",
+                comment = "Receiving Wallet Balance",
             )
         }.retryOnFailureWithAbort(
             times = MAX_RETRIES,
@@ -211,6 +211,7 @@ class MigratePrimalToSparkWalletHandler(
                     body = WithdrawRequestBody(
                         subWallet = SubWallet.Open,
                         lnInvoice = invoice,
+                        noteSelf = "Old Primal Wallet Balance",
                     ),
                 )
             }
@@ -263,10 +264,9 @@ class MigratePrimalToSparkWalletHandler(
             onRetry = { attempt, _, delay, error ->
                 Napier.w { "UnregisterSparkWallet failed (attempt $attempt, retry in ${delay}s): ${error.message}" }
             },
-            onFinalFailure = { error ->
-                Napier.e { "Failed to rollback registration after all retries: ${error.message}" }
-            },
-        )
+        ).onFailure { error ->
+            Napier.e { "Failed to rollback registration after all retries: ${error.message}" }
+        }
     }
 
     private suspend fun finalizeWallet(
@@ -287,10 +287,9 @@ class MigratePrimalToSparkWalletHandler(
             onRetry = { attempt, _, delay, error ->
                 Napier.w { "FetchWalletAccountInfo failed (attempt $attempt, retry in ${delay}s): ${error.message}" }
             },
-            onFinalFailure = { error ->
-                Napier.w { "Failed to fetch wallet info after all retries: ${error.message}" }
-            },
-        )
+        ).onFailure { error ->
+            Napier.w { "Failed to fetch wallet info after all retries: ${error.message}" }
+        }
 
         // Delete old Primal wallet (best-effort, no retry)
         runCatching {
