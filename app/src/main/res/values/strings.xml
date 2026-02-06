@@ -865,7 +865,7 @@
     <string name="settings_wallet_use_external_wallet_hint">Alternatively you can connect to an external lightning wallet via Nostr Wallet Connect</string>
     <string name="settings_wallet_nwc_header_not_connected">Connect a Wallet</string>
     <string name="settings_wallet_nwc_header_not_connected_hint">Connect an external wallet by scanning or pasting its Nostr Wallet Connect (NWC) connection string:</string>
-    <string name="settings_wallet_nwc_primal_wallet">Primal Wallet</string>
+    <string name="settings_wallet_nwc_wallet">Wallet</string>
     <string name="settings_wallet_nwc_external_app">External App</string>
     <string name="settings_wallet_nwc_header_connected">Wallet Connected</string>
     <string name="settings_wallet_nwc_paste_string">Paste NWC String</string>
@@ -886,13 +886,13 @@
     <string name="settings_wallet_nwc_connections_connected_apps">Connected Apps</string>
     <string name="settings_wallet_nwc_connections_revoke_connection_dialog_title">Revoke Connection</string>
     <string name="settings_wallet_nwc_connections_revoke_connection_dialog_text">Are you sure you want to revoke this wallet connection?</string>
-    <string name="settings_wallet_nwc_connections_no_connected_apps">There are no apps connected to Primal Wallet</string>
+    <string name="settings_wallet_nwc_connections_no_connected_apps">There are no apps connected to your wallet</string>
     <string name="settings_wallet_nwc_connection_daily_budget_no_limit">no limit</string>
-    <string name="settings_wallet_nwc_connections_hint">You can connect your Primal Wallet to other Nostr apps via Nostr Wallet Connect to enable zapping and payments. </string>
+    <string name="settings_wallet_nwc_connections_hint">You can connect your wallet to other Nostr apps via Nostr Wallet Connect to enable zapping and payments. </string>
     <string name="settings_wallet_nwc_connections_create_new_text_button">Create a new wallet connection</string>
     <string name="settings_wallet_nwc_connections_retry">Retry</string>
     <string name="settings_wallet_nwc_connections_error_unable_to_load_apps">Unable to load apps.</string>
-    <string name="settings_wallet_nwc_connections_wallet_not_activated">Primal wallet needs to be activated first.</string>
+    <string name="settings_wallet_nwc_connections_wallet_not_activated">Wallet needs to be activated first.</string>
     <string name="settings_wallet_hide_transactions_below_hint">You can choose to hide small transactions to avoid spam in your transaction list</string>
     <string name="settings_wallet_hide_transactions_below_edit_title">Edit amount</string>
     <string name="settings_wallet_ln_address">Nostr lightning address</string>

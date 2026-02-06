@@ -330,7 +330,6 @@ private fun NavGraphBuilder.wallet(
         onCreateNewWalletConnection = { navController.navigateToCreateNewWalletConnection() },
         onRestoreWalletClick = { navController.navigateToWalletRestore() },
         onBackupWalletClick = { walletId -> navController.navigateToWalletBackup(walletId) },
-        onNwcWalletServiceClick = { navController.navigateToNwcWalletService() },
     )
 }
 

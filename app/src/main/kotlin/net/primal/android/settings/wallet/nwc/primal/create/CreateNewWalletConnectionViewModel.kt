@@ -15,14 +15,19 @@ import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConne
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.wallet.Wallet
 
 @HiltViewModel
 class CreateNewWalletConnectionViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
+    private val walletAccountRepository: WalletAccountRepository,
     private val primalWalletNwcRepository: PrimalWalletNwcRepository,
+    private val nwcRepository: NwcRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -66,23 +71,35 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
             try {
                 setState { copy(creatingSecret = true) }
 
-                val dailyBudgetBtc = dailyBudget?.toBtc()
-
-                val formattedDailyBudgetBtc = dailyBudgetBtc?.let {
-                    BigDecimal(it.toString())
-                        .stripTrailingZeros()
-                        .toPlainString()
+                val userId = activeAccountStore.activeUserId()
+                val nwcConnectionUri = when (val activeWallet = walletAccountRepository.getActiveWallet(userId)) {
+                    is Wallet.Spark -> {
+                        nwcRepository.createNewWalletConnection(
+                            userId = userId,
+                            walletId = activeWallet.walletId,
+                            appName = appName,
+                            dailyBudget = dailyBudget,
+                        ).getOrNull()
+                    }
+                    is Wallet.Primal -> {
+                        val dailyBudgetBtc = dailyBudget?.toBtc()
+                        val formattedDailyBudgetBtc = dailyBudgetBtc?.let {
+                            BigDecimal(it.toString())
+                                .stripTrailingZeros()
+                                .toPlainString()
+                        }
+                        primalWalletNwcRepository.createNewWalletConnection(
+                            userId = userId,
+                            appName = appName,
+                            dailyBudget = formattedDailyBudgetBtc,
+                        ).nwcConnectionUri
+                    }
+                    else -> null
                 }
-
-                val response = primalWalletNwcRepository.createNewWalletConnection(
-                    userId = activeAccountStore.activeUserId(),
-                    appName = appName,
-                    dailyBudget = formattedDailyBudgetBtc,
-                )
 
                 setState {
                     copy(
-                        nwcConnectionUri = response.nwcConnectionUri,
+                        nwcConnectionUri = nwcConnectionUri,
                         creatingSecret = false,
                     )
                 }
