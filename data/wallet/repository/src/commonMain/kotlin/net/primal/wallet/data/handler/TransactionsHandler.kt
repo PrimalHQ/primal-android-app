@@ -1,7 +1,6 @@
 package net.primal.wallet.data.handler
 
 import io.github.aakira.napier.Napier
-import kotlin.time.Clock
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
