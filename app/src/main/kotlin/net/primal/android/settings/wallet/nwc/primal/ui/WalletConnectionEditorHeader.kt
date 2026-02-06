@@ -44,13 +44,13 @@ fun WalletConnectionEditorHeader(
                     .clip(AppTheme.shapes.medium)
                     .size(99.dp),
                 painter = painterResource(id = R.drawable.primal_nwc_logo),
-                contentDescription = stringResource(id = R.string.settings_wallet_nwc_primal_wallet),
+                contentDescription = stringResource(id = R.string.settings_wallet_nwc_wallet),
                 tint = Color.Unspecified,
             )
 
             Text(
                 modifier = Modifier.padding(top = 13.dp),
-                text = stringResource(id = R.string.settings_wallet_nwc_primal_wallet),
+                text = stringResource(id = R.string.settings_wallet_nwc_wallet),
             )
         }
 

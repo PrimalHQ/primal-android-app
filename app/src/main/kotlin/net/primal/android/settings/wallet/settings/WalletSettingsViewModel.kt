@@ -20,6 +20,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.SideEffect
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
+import net.primal.android.settings.wallet.settings.ui.model.asWalletNwcConnectionUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.utils.shouldShowBackup
 import net.primal.core.utils.onFailure
@@ -27,9 +28,8 @@ import net.primal.core.utils.onSuccess
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
-import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository
-import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.parser.isNwcUrl
 import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.usecase.EnsurePrimalWalletExistsUseCase
@@ -46,6 +46,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private val walletRepository: WalletRepository,
     private val walletAccountRepository: WalletAccountRepository,
     private val primalWalletNwcRepository: PrimalWalletNwcRepository,
+    private val nwcRepository: NwcRepository,
     private val connectNwcUseCase: ConnectNwcUseCase,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
@@ -83,19 +84,34 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
     private fun fetchWalletConnections() =
         viewModelScope.launch {
-            try {
-                setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Loading) }
-                val connections = primalWalletNwcRepository.getConnections(userId = activeAccountStore.activeUserId())
+            val activeWallet = state.value.activeWallet ?: return@launch
+            if (!activeWallet.capabilities.supportsNwcConnections) {
+                setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
+                return@launch
+            }
+
+            setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Loading) }
+            runCatching {
+                when (activeWallet) {
+                    is Wallet.Spark -> {
+                        nwcRepository.getConnections(userId = activeAccountStore.activeUserId())
+                            .map { it.asWalletNwcConnectionUi() }
+                    }
+                    is Wallet.Primal -> {
+                        primalWalletNwcRepository.getConnections(userId = activeAccountStore.activeUserId())
+                            .map { it.asWalletNwcConnectionUi() }
+                    }
+                    else -> emptyList()
+                }
+            }.onSuccess { connections ->
                 setState {
                     copy(
                         nwcConnectionsInfo = connections,
                         connectionsState = WalletSettingsContract.ConnectionsState.Loaded,
                     )
                 }
-            } catch (error: SignatureException) {
-                Napier.w(throwable = error) { "Failed to fetch wallet connections due to signature error." }
-            } catch (error: NetworkException) {
-                Napier.w(throwable = error) { "Failed to fetch wallet connections due to network error." }
+            }.onFailure { error ->
+                Napier.w(throwable = error) { "Failed to fetch wallet connections." }
                 setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
             }
         }
@@ -132,15 +148,23 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
     private fun revokeNwcConnection(nwcPubkey: String) =
         viewModelScope.launch {
+            val activeWallet = state.value.activeWallet
             val nwcConnections = state.value.nwcConnectionsInfo
-            try {
-                val updatedConnections = nwcConnections.filterNot { it.nwcPubkey == nwcPubkey }
-                setState { copy(nwcConnectionsInfo = updatedConnections) }
-                primalWalletNwcRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
-            } catch (error: SignatureException) {
-                Napier.w(throwable = error) { "Failed to revoke NWC connection due to signature error." }
-            } catch (error: NetworkException) {
-                Napier.w(throwable = error) { "Failed to revoke NWC connection due to network error." }
+            val updatedConnections = nwcConnections.filterNot { it.nwcPubkey == nwcPubkey }
+            setState { copy(nwcConnectionsInfo = updatedConnections) }
+
+            runCatching {
+                when (activeWallet) {
+                    is Wallet.Spark -> {
+                        nwcRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
+                    }
+                    is Wallet.Primal -> {
+                        primalWalletNwcRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
+                    }
+                    else -> Unit
+                }
+            }.onFailure { error ->
+                Napier.w(throwable = error) { "Failed to revoke NWC connection." }
                 setState { copy(nwcConnectionsInfo = nwcConnections) }
             }
         }
@@ -168,6 +192,10 @@ class WalletSettingsViewModel @AssistedInject constructor(
                             showBackupListItem = wallet?.capabilities?.supportsWalletBackup == true &&
                                 !shouldShowBackup,
                         )
+                    }
+
+                    if (wallet != null) {
+                        fetchWalletConnections()
                     }
 
                     if (wallet is Wallet.Spark) {

@@ -63,6 +63,11 @@ internal class NwcRepositoryImpl(
             ).asSuccess()
         }
 
+    override suspend fun revokeConnection(userId: String, secretPubKey: String) =
+        with(dispatcherProvider.io()) {
+            database.nwcConnections().deleteConnection(userId = userId, secretPubKey = secretPubKey)
+        }
+
     private fun buildNwcString(
         servicePubKey: String,
         secret: String,

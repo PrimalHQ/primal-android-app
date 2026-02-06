@@ -37,14 +37,14 @@ import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.DeleteListItemImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.settings.wallet.settings.WalletSettingsContract
+import net.primal.android.settings.wallet.settings.ui.model.WalletNwcConnectionUi
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.CurrencyConversionUtils.toSats
-import net.primal.domain.connections.primal.model.PrimalNwcConnectionInfo
 
 @Composable
 fun ConnectedAppsSettings(
-    primalNwcConnectionInfos: List<PrimalNwcConnectionInfo>,
-    isPrimalWalletActivated: Boolean,
+    primalNwcConnectionInfos: List<WalletNwcConnectionUi>,
+    walletSupportsNwcConnections: Boolean,
     connectionsState: WalletSettingsContract.ConnectionsState,
     onRevokeConnectedApp: (nwcPubkey: String) -> Unit,
     onCreateNewWalletConnection: () -> Unit,
@@ -88,14 +88,14 @@ fun ConnectedAppsSettings(
             onRetryFetchingConnections = onRetryFetchingConnections,
             onRevokeDialogVisibilityChange = { revokeDialogVisible = it },
             onRevokeNwcPubkeyChange = { revokeNwcPubkey = it },
-            isPrimalWalletActivated = isPrimalWalletActivated,
+            walletSupportsNwcConnections = walletSupportsNwcConnections,
         )
     }
 
     Spacer(modifier = Modifier.height(16.dp))
 
     ConnectedAppsHint(
-        isPrimalWalletActivated = isPrimalWalletActivated,
+        walletSupportsNwcConnections = walletSupportsNwcConnections,
         createNewWalletConnection = onCreateNewWalletConnection,
     )
 
@@ -150,9 +150,9 @@ private fun ConnectedAppsHeader() {
 @Composable
 private fun ConnectedAppsContent(
     connectionsState: WalletSettingsContract.ConnectionsState,
-    isPrimalWalletActivated: Boolean,
+    walletSupportsNwcConnections: Boolean,
     onRetryFetchingConnections: () -> Unit,
-    primalNwcConnectionInfos: List<PrimalNwcConnectionInfo>,
+    primalNwcConnectionInfos: List<WalletNwcConnectionUi>,
     onRevokeDialogVisibilityChange: (Boolean) -> Unit,
     onRevokeNwcPubkeyChange: (String) -> Unit,
 ) {
@@ -172,7 +172,7 @@ private fun ConnectedAppsContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = when (isPrimalWalletActivated) {
+                    text = when (walletSupportsNwcConnections) {
                         true -> stringResource(R.string.settings_wallet_nwc_connections_error_unable_to_load_apps)
                         else -> stringResource(R.string.settings_wallet_nwc_connections_wallet_not_activated)
                     },
@@ -181,7 +181,7 @@ private fun ConnectedAppsContent(
                     fontWeight = FontWeight.Medium,
                 )
 
-                if (isPrimalWalletActivated) {
+                if (walletSupportsNwcConnections) {
                     TextButton(onClick = onRetryFetchingConnections) {
                         Text(
                             text = stringResource(id = R.string.settings_wallet_nwc_connections_retry),
@@ -212,7 +212,7 @@ private fun ConnectedAppsContent(
                     ConnectedAppItem(
                         isLastItem = isLastItem,
                         appName = app.appName,
-                        budget = app.dailyBudgetInBtc?.takeIf { it.isNotBlank() }?.let { dailyBudgetInBtc ->
+                        budget = app.dailyBudget?.takeIf { it.isNotBlank() }?.let { dailyBudgetInBtc ->
                             dailyBudgetInBtc.toSats().toLong().let { "%,d sats".format(it) }
                         } ?: stringResource(id = R.string.settings_wallet_nwc_connection_daily_budget_no_limit),
                         canRevoke = true,
@@ -289,7 +289,7 @@ private fun ConnectedAppItem(
 }
 
 @Composable
-private fun ConnectedAppsHint(isPrimalWalletActivated: Boolean, createNewWalletConnection: () -> Unit) {
+private fun ConnectedAppsHint(walletSupportsNwcConnections: Boolean, createNewWalletConnection: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -301,7 +301,7 @@ private fun ConnectedAppsHint(isPrimalWalletActivated: Boolean, createNewWalletC
             style = AppTheme.typography.bodySmall,
         )
 
-        if (isPrimalWalletActivated) {
+        if (walletSupportsNwcConnections) {
             TextButton(
                 onClick = createNewWalletConnection,
                 contentPadding = PaddingValues(0.dp),
