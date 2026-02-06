@@ -19,6 +19,7 @@ import net.primal.android.wallet.upgrade.sheet.UpgradeWalletSheetViewModel
 fun AppOverlays(
     onRemoteSessionClick: () -> Unit,
     onUpgradeWalletClick: () -> Unit,
+    onWalletFaqClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     val connectionIndicatorViewModel = hiltViewModel<ConnectionIndicatorViewModel>()
@@ -30,6 +31,7 @@ fun AppOverlays(
     UpgradeWalletBottomSheet(
         viewModel = upgradeWalletSheetViewModel,
         onUpgradeClick = onUpgradeWalletClick,
+        onFaqClick = onWalletFaqClick,
     ) {
         PermissionsBottomSheet(viewModel = permissionsViewModel) {
             ConnectionIndicatorOverlay(viewModel = connectionIndicatorViewModel) {
