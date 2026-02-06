@@ -211,6 +211,10 @@ abstract class RepositoryFactory {
         nostrEncryptionService: NostrEncryptionService,
     ): NwcService {
         val responseBuilder = NwcWalletResponseBuilder()
+        val budgetManager = NwcBudgetManager(
+            dispatcherProvider = dispatcherProvider,
+            walletDatabase = resolveWalletDatabase(),
+        )
         return NwcServiceImpl(
             dispatchers = dispatcherProvider,
             nwcRepository = createNwcRepository(),
@@ -220,13 +224,11 @@ abstract class RepositoryFactory {
             ),
             requestProcessor = NwcRequestProcessor(
                 walletRepository = walletRepository,
-                nwcBudgetManager = NwcBudgetManager(
-                    dispatcherProvider = dispatcherProvider,
-                    walletDatabase = resolveWalletDatabase(),
-                ),
+                nwcBudgetManager = budgetManager,
                 responseBuilder = responseBuilder,
             ),
             responseBuilder = responseBuilder,
+            budgetManager = budgetManager,
         )
     }
 
