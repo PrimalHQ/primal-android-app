@@ -42,7 +42,7 @@ fun UpgradeWalletBottomSheet(
         skipPartiallyExpanded = true,
     )
 
-    if (state.shouldShowUpgradeNotice) {
+    if (state.shouldUserUpgrade && state.noticeDebouncePassed) {
         UpgradeWalletBottomSheet(
             state = state,
             sheetState = sheetState,
@@ -112,29 +112,35 @@ private fun TitleColumn(modifier: Modifier = Modifier) {
             style = AppTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
         )
-
-        Text(
-            text = stringResource(id = R.string.wallet_upgrade_sheet_subtitle),
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            style = AppTheme.typography.bodyMedium,
-        )
     }
 }
 
 @Composable
 private fun BodyText() {
-    Text(
-        text = buildAnnotatedString {
-            append(stringResource(id = R.string.wallet_upgrade_sheet_description))
-            append(" ")
-            withStyle(SpanStyle(color = AppTheme.colorScheme.secondary)) {
-                append(stringResource(id = R.string.wallet_upgrade_sheet_faqs))
-            }
-        },
-        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-        style = AppTheme.typography.bodyMedium.copy(lineHeight = 24.sp),
-        textAlign = TextAlign.Center,
-    )
+    Column(
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(id = R.string.wallet_upgrade_sheet_description_first),
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            style = AppTheme.typography.bodyMedium.copy(lineHeight = 24.sp),
+            textAlign = TextAlign.Center,
+        )
+
+        Text(
+            text = buildAnnotatedString {
+                append(stringResource(id = R.string.wallet_upgrade_sheet_description_second))
+                append(" ")
+                withStyle(SpanStyle(color = AppTheme.colorScheme.secondary)) {
+                    append(stringResource(id = R.string.wallet_upgrade_sheet_faqs))
+                }
+            },
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            style = AppTheme.typography.bodyMedium.copy(lineHeight = 24.sp),
+            textAlign = TextAlign.Center,
+        )
+    }
 }
 
 @Composable

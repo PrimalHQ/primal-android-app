@@ -5,7 +5,8 @@ import net.primal.domain.links.CdnImage
 
 interface UpgradeWalletSheetContract {
     data class UiState(
-        val shouldShowUpgradeNotice: Boolean = false,
+        val shouldUserUpgrade: Boolean = false,
+        val noticeDebouncePassed: Boolean = false,
         val activeUserCdnImage: CdnImage? = null,
         val activeUserLegendaryCustomization: LegendaryCustomization? = null,
     )
