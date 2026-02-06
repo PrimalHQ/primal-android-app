@@ -52,7 +52,7 @@ class EnsureSparkWalletExistsUseCaseTest {
         }
 
     @Test
-    fun existingWallet_restoresSeeds_initializesWallet_fetchesInfo_skipsRegistrationAndActivation() =
+    fun existingWallet_restoresSeeds_initializesWallet_fetchesInfo_skipsRegistration() =
         runTest {
             val callOrder = mutableListOf<String>()
             val useCase = buildUseCase(
@@ -76,6 +76,7 @@ class EnsureSparkWalletExistsUseCaseTest {
                 "initializeWallet",
                 "isRegistered",
                 "fetchWalletAccountInfo",
+                "setActiveWallet",
             )
         }
 
@@ -105,7 +106,37 @@ class EnsureSparkWalletExistsUseCaseTest {
                 "isRegistered",
                 "registerSparkWallet",
                 "fetchWalletAccountInfo",
+                "setActiveWallet",
             )
+        }
+
+    @Test
+    fun registerFalse_skipsRegistrationButStillFetchesInfo() =
+        runTest {
+            val callOrder = mutableListOf<String>()
+            val useCase = buildUseCase(
+                sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
+                    persistedWalletId = null,
+                    callLog = callOrder,
+                ),
+                walletAccountRepository = FakeWalletAccountRepository(callLog = callOrder),
+                sparkWalletManager = FakeSparkWalletManager(walletId = walletId, callLog = callOrder),
+                seedPhraseGenerator = FakeSeedPhraseGenerator(seedWords = seedWords),
+            )
+
+            val result = useCase.invoke(userId, register = false)
+
+            result.getOrThrow() shouldBe walletId
+            callOrder shouldBe listOf(
+                "findPersistedWalletId",
+                "initializeWallet",
+                "persistSeedWords",
+                "fetchWalletAccountInfo",
+                "setActiveWallet",
+            )
+            // Should NOT contain registration-related calls
+            callOrder.contains("isRegistered") shouldBe false
+            callOrder.contains("registerSparkWallet") shouldBe false
         }
 
     @Test
@@ -388,6 +419,8 @@ private class FakeSparkWalletAccountRepository(
     override suspend fun isWalletBackedUp(walletId: String): Boolean = false
     override suspend fun markWalletAsBackedUp(walletId: String): Result<Unit> = Result.success(Unit)
     override suspend fun deleteSparkWalletByUserId(userId: String): Result<String> = Result.success("")
+    override suspend fun unregisterSparkWallet(userId: String, walletId: String): Result<Unit> = Result.success(Unit)
+    override suspend fun isPrimalTxsMigrationCompleted(walletId: String): Boolean = true
 }
 
 private class FakeWalletAccountRepository(

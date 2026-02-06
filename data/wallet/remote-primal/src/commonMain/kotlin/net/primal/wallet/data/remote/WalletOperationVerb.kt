@@ -5,6 +5,7 @@ enum class WalletOperationVerb(val identifier: String) {
     BALANCE("balance"),
     DEPOSIT("deposit"),
     WITHDRAW("withdraw"),
+    MIGRATION_WITHDRAW("migration_withdraw"),
     TRANSACTIONS("transactions"),
     EXCHANGE_RATE("exchange_rate"),
     USER_INFO("user_info"),
@@ -17,4 +18,5 @@ enum class WalletOperationVerb(val identifier: String) {
     NWC_REVOKE_CONNECTION("nwc_revoke"),
     NWC_CREATE_NEW_CONNECTION("nwc_connect"),
     REGISTER_SPARK_PUBKEY("register_spark_pubkey"),
+    UNREGISTER_SPARK_PUBKEY("unregister_spark_pubkey"),
 }

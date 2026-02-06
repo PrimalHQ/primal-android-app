@@ -1,5 +1,11 @@
 package net.primal.android.wallet.upgrade
 
+import android.content.Intent
+import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -8,6 +14,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
@@ -16,8 +23,10 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.ui.FlowStatusColumn
+import net.primal.android.wallet.upgrade.UpgradeWalletContract.UiEvent
 import net.primal.android.wallet.upgrade.ui.UpgradeWalletFailed
+import net.primal.android.wallet.upgrade.ui.UpgradeWalletInProgress
+import net.primal.android.wallet.upgrade.ui.UpgradeWalletReady
 import net.primal.android.wallet.upgrade.ui.UpgradeWalletSuccess
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -27,67 +36,121 @@ fun UpgradeWalletScreen(viewModel: UpgradeWalletViewModel, onClose: () -> Unit) 
 
     UpgradeWalletScreen(
         state = state.value,
+        eventPublisher = viewModel::setEvent,
         onClose = onClose,
     )
 }
 
 @ExperimentalMaterial3Api
 @Composable
-fun UpgradeWalletScreen(state: UpgradeWalletContract.UiState, onClose: () -> Unit) {
+fun UpgradeWalletScreen(
+    state: UpgradeWalletContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+    onClose: () -> Unit,
+) {
+    val context = LocalContext.current
+
+    BackHandler(enabled = state.status == UpgradeWalletStatus.Upgrading) {
+        // Block back navigation during upgrade
+    }
+
     PrimalScaffold(
         topBar = {
-            if (state.status != UpgradeWalletStatus.Success) {
-                PrimalTopAppBar(
-                    title = when (state.status) {
-                        UpgradeWalletStatus.Upgrading -> stringResource(id = R.string.wallet_upgrade_upgrading_title)
-                        UpgradeWalletStatus.Failed -> stringResource(id = R.string.wallet_upgrade_failed_title)
-                        else -> ""
-                    },
-                    navigationIcon = PrimalIcons.ArrowBack,
-                    navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
-                    showDivider = false,
-                    onNavigationIconClick = onClose,
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = AppTheme.colorScheme.surfaceVariant,
-                        scrolledContainerColor = AppTheme.colorScheme.surfaceVariant,
-                    ),
-                )
-            }
+            UpgradeWalletTopAppBar(
+                status = state.status,
+                onClose = onClose,
+            )
         },
         content = { paddingValues ->
-            when (state.status) {
-                UpgradeWalletStatus.Upgrading -> {
-                    FlowStatusColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = AppTheme.colorScheme.surfaceVariant)
-                            .padding(paddingValues)
-                            .padding(bottom = 80.dp),
-                        icon = null,
-                        headlineText = null,
-                        supportText = stringResource(id = R.string.wallet_upgrade_upgrading_support),
-                    )
-                }
+            AnimatedContent(
+                targetState = state.status,
+                transitionSpec = { fadeIn().togetherWith(fadeOut()) },
+                label = "UpgradeWalletContent",
+            ) { status ->
+                when (status) {
+                    UpgradeWalletStatus.Ready -> {
+                        UpgradeWalletReady(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color = AppTheme.colorScheme.surfaceVariant)
+                                .padding(paddingValues),
+                            onStartUpgrade = { eventPublisher(UiEvent.StartUpgrade) },
+                        )
+                    }
 
-                UpgradeWalletStatus.Success -> {
-                    UpgradeWalletSuccess(
-                        modifier = Modifier.fillMaxSize(),
-                        onDoneClick = onClose,
-                    )
-                }
+                    UpgradeWalletStatus.Upgrading -> {
+                        UpgradeWalletInProgress(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color = AppTheme.colorScheme.surfaceVariant)
+                                .padding(paddingValues)
+                                .padding(bottom = 80.dp),
+                            currentStep = state.currentStep,
+                        )
+                    }
 
-                UpgradeWalletStatus.Failed -> {
-                    UpgradeWalletFailed(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(color = AppTheme.colorScheme.surfaceVariant)
-                            .padding(paddingValues),
-                        errorMessage = state.error?.message
-                            ?: stringResource(id = R.string.app_generic_error),
-                        onCloseClick = onClose,
-                    )
+                    UpgradeWalletStatus.Success -> {
+                        UpgradeWalletSuccess(
+                            modifier = Modifier.fillMaxSize(),
+                            onDoneClick = onClose,
+                        )
+                    }
+
+                    UpgradeWalletStatus.Failed -> {
+                        UpgradeWalletFailed(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color = AppTheme.colorScheme.surfaceVariant)
+                                .padding(paddingValues),
+                            errorMessage = state.error?.message
+                                ?: stringResource(id = R.string.app_generic_error),
+                            errorLogs = state.errorLogs,
+                            onRetryClick = { eventPublisher(UiEvent.RetryUpgrade) },
+                            onCloseClick = onClose,
+                            onShareLogsClick = {
+                                val logsText = state.errorLogs.joinToString("\n")
+                                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_SUBJECT, "Wallet Migration Error Logs")
+                                    putExtra(Intent.EXTRA_TEXT, logsText)
+                                }
+                                context.startActivity(
+                                    Intent.createChooser(shareIntent, "Share Error Logs"),
+                                )
+                            },
+                        )
+                    }
                 }
             }
         },
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun UpgradeWalletTopAppBar(status: UpgradeWalletStatus, onClose: () -> Unit) {
+    if (status != UpgradeWalletStatus.Success) {
+        val showBackButton = status == UpgradeWalletStatus.Ready ||
+            status == UpgradeWalletStatus.Failed
+        PrimalTopAppBar(
+            title = when (status) {
+                UpgradeWalletStatus.Ready -> stringResource(id = R.string.wallet_upgrade_title)
+                UpgradeWalletStatus.Upgrading -> stringResource(id = R.string.wallet_upgrade_upgrading_title)
+                UpgradeWalletStatus.Failed -> stringResource(id = R.string.wallet_upgrade_failed_title)
+                else -> ""
+            },
+            navigationIcon = if (showBackButton) PrimalIcons.ArrowBack else null,
+            navigationIconContentDescription = if (showBackButton) {
+                stringResource(id = R.string.accessibility_back_button)
+            } else {
+                null
+            },
+            showDivider = false,
+            onNavigationIconClick = if (showBackButton) onClose else null,
+            colors = TopAppBarDefaults.topAppBarColors(
+                containerColor = AppTheme.colorScheme.surfaceVariant,
+                scrolledContainerColor = AppTheme.colorScheme.surfaceVariant,
+            ),
+        )
+    }
 }

@@ -24,4 +24,5 @@ data class MakeInvoiceResponsePayload(
     @SerialName("created_at") val createdAt: Long,
     @SerialName("expires_at") val expiresAt: Long? = null,
     val metadata: Map<String, String>? = null,
+    val state: String? = null,
 )

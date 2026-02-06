@@ -59,6 +59,21 @@ interface WalletDao {
     @Query("UPDATE SparkWalletData SET backedUp = :backedUp WHERE walletId = :walletId")
     suspend fun updateSparkWalletBackedUp(walletId: String, backedUp: Boolean)
 
+    @Query("UPDATE SparkWalletData SET primalTxsMigrated = :migrated WHERE walletId = :walletId")
+    suspend fun updatePrimalTxsMigrated(walletId: String, migrated: Boolean)
+
+    @Query("UPDATE SparkWalletData SET primalTxsMigratedUntil = :until WHERE walletId = :walletId")
+    suspend fun updatePrimalTxsMigratedUntil(walletId: String, until: Long?)
+
+    @Query(
+        """
+        UPDATE SparkWalletData
+        SET primalTxsMigrated = NULL, primalTxsMigratedUntil = NULL
+        WHERE walletId = :walletId
+        """,
+    )
+    suspend fun clearPrimalTxsMigrationState(walletId: String)
+
     @Query(
         """
         UPDATE WalletInfo 

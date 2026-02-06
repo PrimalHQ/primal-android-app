@@ -52,6 +52,13 @@ internal class SparkWalletAccountRepositoryImpl(
             }
         }
 
+    override suspend fun unregisterSparkWallet(userId: String, walletId: String): Result<Unit> =
+        runCatching {
+            withContext(dispatcherProvider.io()) {
+                walletApi.unregisterSparkWallet(userId = userId, sparkWalletId = walletId)
+            }
+        }
+
     override suspend fun findPersistedWalletId(userId: String): String? =
         withContext(dispatcherProvider.io()) {
             walletDatabase.wallet().findAllSparkWalletDataByUserId(userId)
@@ -114,5 +121,18 @@ internal class SparkWalletAccountRepositoryImpl(
                 walletDatabase.wallet().deleteSparkWalletByUserId(userId = userId)
                     ?: throw NoSuchElementException("No spark wallet found for $userId user.")
             }
+        }
+
+    override suspend fun isPrimalTxsMigrationCompleted(walletId: String): Boolean =
+        withContext(dispatcherProvider.io()) {
+            val sparkWalletData = walletDatabase.wallet().findSparkWalletData(walletId)
+            // Returns true if migration completed OR not needed (new user)
+            // null = new user (no migration needed), true = fully migrated, false = in progress
+            sparkWalletData?.primalTxsMigrated != false
+        }
+
+    override suspend fun clearPrimalTxsMigrationState(walletId: String) =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet().clearPrimalTxsMigrationState(walletId)
         }
 }

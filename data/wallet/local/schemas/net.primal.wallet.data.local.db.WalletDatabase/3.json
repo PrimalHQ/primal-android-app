@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "36006f4cd331f9a1f24fa945a9387ef8",
+    "identityHash": "a58b3da15d3232077c33f561c61497ae",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -122,7 +122,7 @@
       },
       {
         "tableName": "SparkWalletData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `seedWords` TEXT NOT NULL, `backedUp` INTEGER NOT NULL, PRIMARY KEY(`walletId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `seedWords` TEXT NOT NULL, `backedUp` INTEGER NOT NULL, `primalTxsMigrated` INTEGER, `primalTxsMigratedUntil` INTEGER, PRIMARY KEY(`walletId`))",
         "fields": [
           {
             "fieldPath": "walletId",
@@ -147,6 +147,16 @@
             "columnName": "backedUp",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "primalTxsMigrated",
+            "columnName": "primalTxsMigrated",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "primalTxsMigratedUntil",
+            "columnName": "primalTxsMigratedUntil",
+            "affinity": "INTEGER"
           }
         ],
         "primaryKey": {
@@ -343,7 +353,27 @@
           "columnNames": [
             "transactionId"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "index_WalletTransactionData_invoice",
+            "unique": false,
+            "columnNames": [
+              "invoice"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_WalletTransactionData_invoice` ON `${TABLE_NAME}` (`invoice`)"
+          },
+          {
+            "name": "index_WalletTransactionData_paymentHash",
+            "unique": false,
+            "columnNames": [
+              "paymentHash"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_WalletTransactionData_paymentHash` ON `${TABLE_NAME}` (`paymentHash`)"
+          }
+        ]
       },
       {
         "tableName": "WalletSettings",
@@ -552,6 +582,108 @@
         }
       },
       {
+        "tableName": "NwcInvoiceData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`invoice` TEXT NOT NULL, `paymentHash` TEXT, `walletId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `description` TEXT, `descriptionHash` TEXT, `amountMsats` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `expiresAt` INTEGER NOT NULL, `settledAt` INTEGER, `preimage` TEXT, PRIMARY KEY(`invoice`))",
+        "fields": [
+          {
+            "fieldPath": "invoice",
+            "columnName": "invoice",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paymentHash",
+            "columnName": "paymentHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "walletId",
+            "columnName": "walletId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "connectionId",
+            "columnName": "connectionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "descriptionHash",
+            "columnName": "descriptionHash",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "amountMsats",
+            "columnName": "amountMsats",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "expiresAt",
+            "columnName": "expiresAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "settledAt",
+            "columnName": "settledAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "preimage",
+            "columnName": "preimage",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "invoice"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_NwcInvoiceData_walletId",
+            "unique": false,
+            "columnNames": [
+              "walletId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_NwcInvoiceData_walletId` ON `${TABLE_NAME}` (`walletId`)"
+          },
+          {
+            "name": "index_NwcInvoiceData_connectionId",
+            "unique": false,
+            "columnNames": [
+              "connectionId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_NwcInvoiceData_connectionId` ON `${TABLE_NAME}` (`connectionId`)"
+          },
+          {
+            "name": "index_NwcInvoiceData_paymentHash",
+            "unique": false,
+            "columnNames": [
+              "paymentHash"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_NwcInvoiceData_paymentHash` ON `${TABLE_NAME}` (`paymentHash`)"
+          }
+        ]
+      },
+      {
         "tableName": "NwcWalletRequestLog",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `method` TEXT NOT NULL, `requestPayload` TEXT NOT NULL, `responsePayload` TEXT, `requestState` TEXT NOT NULL, `errorCode` TEXT, `errorMessage` TEXT, `requestedAt` INTEGER NOT NULL, `completedAt` INTEGER, `amountMsats` INTEGER, PRIMARY KEY(`eventId`))",
         "fields": [
@@ -639,7 +771,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '36006f4cd331f9a1f24fa945a9387ef8')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a58b3da15d3232077c33f561c61497ae')"
     ]
   }
 }

@@ -5,10 +5,14 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import net.primal.android.networking.di.PrimalWalletApiClient
+import net.primal.android.nostr.notary.NostrNotary
+import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.builder.TxRequestBuilder
+import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.usecase.EnsurePrimalWalletExistsUseCase
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
@@ -18,6 +22,9 @@ import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.builder.factory.TxRequestBuilderFactory
 import net.primal.wallet.data.generator.RecoveryPhraseGenerator
+import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
+import net.primal.wallet.data.repository.handler.MigratePrimalToSparkWalletHandler
+import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -79,5 +86,35 @@ object WalletUseCasesModule {
             sparkWalletManager = sparkWalletManager,
             walletAccountRepository = walletAccountRepository,
             sparkWalletAccountRepository = sparkWalletAccountRepository,
+        )
+
+    @Provides
+    @Singleton
+    fun providesMigratePrimalTransactionsHandler(
+        @PrimalWalletApiClient primalApiClient: PrimalApiClient,
+        nostrNotary: NostrNotary,
+        profileRepository: ProfileRepository,
+    ): MigratePrimalTransactionsHandler =
+        WalletRepositoryFactory.createMigratePrimalTransactionsHandler(
+            primalWalletApiClient = primalApiClient,
+            nostrEventSignatureHandler = nostrNotary,
+            profileRepository = profileRepository,
+        )
+
+    @Provides
+    @Singleton
+    fun providesMigratePrimalToSparkWalletHandler(
+        @PrimalWalletApiClient primalApiClient: PrimalApiClient,
+        nostrNotary: NostrNotary,
+        ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
+        walletRepository: WalletRepository,
+        profileRepository: ProfileRepository,
+    ): MigratePrimalToSparkWalletHandler =
+        WalletRepositoryFactory.createMigratePrimalToSparkWalletHandler(
+            primalWalletApiClient = primalApiClient,
+            nostrEventSignatureHandler = nostrNotary,
+            ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
+            walletRepository = walletRepository,
+            profileRepository = profileRepository,
         )
 }

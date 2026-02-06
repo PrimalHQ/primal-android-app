@@ -35,6 +35,7 @@ import net.primal.wallet.data.remote.model.InAppPurchaseQuoteResponse
 import net.primal.wallet.data.remote.model.InAppPurchaseRequestBody
 import net.primal.wallet.data.remote.model.IsWalletUserRequestBody
 import net.primal.wallet.data.remote.model.LightningInvoiceResponse
+import net.primal.wallet.data.remote.model.MigrationWithdrawRequestBody
 import net.primal.wallet.data.remote.model.MiningFeeTier
 import net.primal.wallet.data.remote.model.MiningFeesRequestBody
 import net.primal.wallet.data.remote.model.OnChainAddressResponse
@@ -47,6 +48,7 @@ import net.primal.wallet.data.remote.model.PromoCodeRequestBody
 import net.primal.wallet.data.remote.model.RegisterSparkPubkeyRequestBody
 import net.primal.wallet.data.remote.model.TransactionsRequestBody
 import net.primal.wallet.data.remote.model.TransactionsResponse
+import net.primal.wallet.data.remote.model.UnregisterSparkPubkeyRequestBody
 import net.primal.wallet.data.remote.model.UserWalletInfoRequestBody
 import net.primal.wallet.data.remote.model.WalletRequestBody
 import net.primal.wallet.data.remote.model.WalletStatusResponse
@@ -172,6 +174,20 @@ class PrimalWalletApiImpl(
                     userId = userId,
                     walletVerb = WalletOperationVerb.WITHDRAW,
                     requestBody = body,
+                    signatureHandler = signatureHandler,
+                ),
+            ),
+        )
+    }
+
+    override suspend fun migrationWithdraw(userId: String, lnInvoice: String) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalWalletVerb.WALLET.id,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.MIGRATION_WITHDRAW,
+                    requestBody = MigrationWithdrawRequestBody(lnInvoice = lnInvoice),
                     signatureHandler = signatureHandler,
                 ),
             ),
@@ -396,6 +412,20 @@ class PrimalWalletApiImpl(
                     userId = userId,
                     walletVerb = WalletOperationVerb.REGISTER_SPARK_PUBKEY,
                     requestBody = RegisterSparkPubkeyRequestBody(sparkPubkey = sparkWalletId),
+                    signatureHandler = signatureHandler,
+                ),
+            ),
+        )
+    }
+
+    override suspend fun unregisterSparkWallet(userId: String, sparkWalletId: String) {
+        primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalWalletVerb.WALLET.id,
+                optionsJson = buildWalletOptionsJson(
+                    userId = userId,
+                    walletVerb = WalletOperationVerb.UNREGISTER_SPARK_PUBKEY,
+                    requestBody = UnregisterSparkPubkeyRequestBody(sparkPubkey = sparkWalletId),
                     signatureHandler = signatureHandler,
                 ),
             ),

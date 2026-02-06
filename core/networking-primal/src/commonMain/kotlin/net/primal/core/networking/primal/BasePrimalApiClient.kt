@@ -58,7 +58,11 @@ internal class BasePrimalApiClient(
     private fun Throwable?.takeAsNetworkException(verb: String?): NetworkException {
         return when (this) {
             is NetworkException -> this
-            is NostrNoticeException -> NetworkException(message = "${this.reason} [$verb]", cause = this)
+            is NostrNoticeException -> NetworkException(
+                message = "[verb=$verb, subId=${this.subscriptionId}, reason=${this.reason}]",
+                cause = this,
+            )
+
             is SocketSendMessageException -> NetworkException(
                 message = "Api unreachable at the moment. [$verb]",
                 cause = this,

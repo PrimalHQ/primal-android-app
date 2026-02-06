@@ -1,5 +1,6 @@
 package net.primal.wallet.data.service
 
+import kotlin.time.Duration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import net.primal.core.networking.utils.orderByPagingIfNotNull
@@ -136,4 +137,10 @@ internal class PrimalWalletServiceImpl(
                 amountInBtc = amountInBtc,
             ).map { it.asOnChainTxFeeTierDO() }
         }
+
+    override suspend fun awaitInvoicePayment(
+        wallet: Wallet.Primal,
+        invoice: String,
+        timeout: Duration,
+    ): Result<Unit> = Result.failure(UnsupportedOperationException("Not supported for Primal wallet"))
 }

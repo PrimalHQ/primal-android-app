@@ -485,8 +485,20 @@ fun WalletDashboardScreen(
                             .padding(horizontal = 32.dp)
                             .padding(bottom = 32.dp)
                             .navigationBarsPadding(),
-                        message = stringResource(id = R.string.wallet_dashboard_create_wallet_hint),
-                        actionLabel = stringResource(id = R.string.wallet_dashboard_create_wallet_button),
+                        message = stringResource(
+                            id = if (state.hasPersistedSparkWallet) {
+                                R.string.wallet_dashboard_activate_wallet_hint
+                            } else {
+                                R.string.wallet_dashboard_create_wallet_hint
+                            },
+                        ),
+                        actionLabel = stringResource(
+                            id = if (state.hasPersistedSparkWallet) {
+                                R.string.wallet_dashboard_activate_wallet_button
+                            } else {
+                                R.string.wallet_dashboard_create_wallet_button
+                            },
+                        ),
                         onActionClick = { eventPublisher(UiEvent.CreateWallet) },
                     )
                 }

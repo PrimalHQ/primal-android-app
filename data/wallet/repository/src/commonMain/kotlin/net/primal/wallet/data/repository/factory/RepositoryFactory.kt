@@ -17,6 +17,7 @@ import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.rates.exchange.ExchangeRateRepository
 import net.primal.domain.rates.fees.TransactionFeeRepository
+import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.nwc.NwcLogRepository
@@ -38,6 +39,8 @@ import net.primal.wallet.data.repository.SparkWalletManagerImpl
 import net.primal.wallet.data.repository.TransactionFeeRepositoryImpl
 import net.primal.wallet.data.repository.WalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletRepositoryImpl
+import net.primal.wallet.data.repository.handler.MigratePrimalToSparkWalletHandler
+import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 import net.primal.wallet.data.service.factory.WalletServiceFactoryImpl
 import net.primal.wallet.data.spark.BreezApiKeyProvider
 import net.primal.wallet.data.spark.BreezSdkInstanceManager
@@ -240,6 +243,57 @@ abstract class RepositoryFactory {
                 nwcLogRepository = createInternalNwcLogRepository(),
             ),
             responseBuilder = responseBuilder,
+        )
+    }
+
+    fun createMigratePrimalTransactionsHandler(
+        primalWalletApiClient: PrimalApiClient,
+        nostrEventSignatureHandler: NostrEventSignatureHandler,
+        profileRepository: ProfileRepository? = null,
+    ): MigratePrimalTransactionsHandler {
+        return MigratePrimalTransactionsHandler(
+            primalWalletApi = WalletApiServiceFactory.createPrimalWalletApi(
+                primalApiClient = primalWalletApiClient,
+                nostrEventSignatureHandler = nostrEventSignatureHandler,
+            ),
+            walletDatabase = resolveWalletDatabase(),
+            profileRepository = profileRepository,
+            dispatcherProvider = dispatcherProvider,
+        )
+    }
+
+    fun createMigratePrimalToSparkWalletHandler(
+        primalWalletApiClient: PrimalApiClient,
+        nostrEventSignatureHandler: NostrEventSignatureHandler,
+        ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
+        walletRepository: WalletRepository,
+        profileRepository: ProfileRepository? = null,
+    ): MigratePrimalToSparkWalletHandler {
+        val primalWalletApi = WalletApiServiceFactory.createPrimalWalletApi(
+            primalApiClient = primalWalletApiClient,
+            nostrEventSignatureHandler = nostrEventSignatureHandler,
+        )
+        return MigratePrimalToSparkWalletHandler(
+            ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
+            migratePrimalTransactionsHandler = MigratePrimalTransactionsHandler(
+                primalWalletApi = primalWalletApi,
+                walletDatabase = resolveWalletDatabase(),
+                profileRepository = profileRepository,
+                dispatcherProvider = dispatcherProvider,
+            ),
+            sparkWalletAccountRepository = SparkWalletAccountRepositoryImpl(
+                dispatcherProvider = dispatcherProvider,
+                walletApi = primalWalletApi,
+                walletDatabase = resolveWalletDatabase(),
+            ),
+            walletAccountRepository = WalletAccountRepositoryImpl(
+                dispatcherProvider = dispatcherProvider,
+                walletDatabase = resolveWalletDatabase(),
+            ),
+            walletRepository = walletRepository,
+            walletDatabase = resolveWalletDatabase(),
+            primalWalletApi = primalWalletApi,
+            dispatcherProvider = dispatcherProvider,
         )
     }
 }

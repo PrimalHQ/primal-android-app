@@ -225,6 +225,29 @@ fun WalletSettingsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                 }
 
+                if (state.showRevertToPrimalWallet) {
+                    SettingsItem(
+                        headlineText = stringResource(id = R.string.settings_wallet_revert_to_primal_title),
+                        supportText = stringResource(id = R.string.settings_wallet_revert_to_primal_subtitle),
+                        enabled = !state.isRevertingToPrimalWallet,
+                        trailingContent = {
+                            if (state.isRevertingToPrimalWallet) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp,
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                                    contentDescription = null,
+                                )
+                            }
+                        },
+                        onClick = { eventPublisher(UiEvent.RevertToPrimalWallet) },
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
                 SettingsItem(
                     headlineText = stringResource(id = R.string.settings_wallet_export_transactions_title),
                     supportText = stringResource(id = R.string.settings_wallet_export_transactions_subtitle),
