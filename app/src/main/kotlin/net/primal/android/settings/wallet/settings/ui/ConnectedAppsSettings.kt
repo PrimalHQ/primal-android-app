@@ -37,13 +37,13 @@ import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.DeleteListItemImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.settings.wallet.settings.WalletSettingsContract
+import net.primal.android.settings.wallet.settings.ui.model.WalletNwcConnectionUi
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.CurrencyConversionUtils.toSats
-import net.primal.domain.connections.primal.model.PrimalNwcConnectionInfo
 
 @Composable
 fun ConnectedAppsSettings(
-    primalNwcConnectionInfos: List<PrimalNwcConnectionInfo>,
+    primalNwcConnectionInfos: List<WalletNwcConnectionUi>,
     walletSupportsNwcConnections: Boolean,
     connectionsState: WalletSettingsContract.ConnectionsState,
     onRevokeConnectedApp: (nwcPubkey: String) -> Unit,
@@ -152,7 +152,7 @@ private fun ConnectedAppsContent(
     connectionsState: WalletSettingsContract.ConnectionsState,
     walletSupportsNwcConnections: Boolean,
     onRetryFetchingConnections: () -> Unit,
-    primalNwcConnectionInfos: List<PrimalNwcConnectionInfo>,
+    primalNwcConnectionInfos: List<WalletNwcConnectionUi>,
     onRevokeDialogVisibilityChange: (Boolean) -> Unit,
     onRevokeNwcPubkeyChange: (String) -> Unit,
 ) {
@@ -212,7 +212,7 @@ private fun ConnectedAppsContent(
                     ConnectedAppItem(
                         isLastItem = isLastItem,
                         appName = app.appName,
-                        budget = app.dailyBudgetInBtc?.takeIf { it.isNotBlank() }?.let { dailyBudgetInBtc ->
+                        budget = app.dailyBudget?.takeIf { it.isNotBlank() }?.let { dailyBudgetInBtc ->
                             dailyBudgetInBtc.toSats().toLong().let { "%,d sats".format(it) }
                         } ?: stringResource(id = R.string.settings_wallet_nwc_connection_daily_budget_no_limit),
                         canRevoke = true,
