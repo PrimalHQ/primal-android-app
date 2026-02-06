@@ -1,12 +1,14 @@
 package net.primal.wallet.data.nwc.service
 
 import io.github.aakira.napier.Napier
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -29,9 +31,11 @@ import net.primal.domain.connections.nostr.model.NwcConnection
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.wallet.data.nwc.NwcCapabilities
 import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
+import net.primal.wallet.data.nwc.manager.NwcBudgetManager
 import net.primal.wallet.data.nwc.processor.NwcRequestProcessor
 
 private const val MAX_CACHE_SIZE = 20
+private val CLEANUP_INTERVAL = 2.minutes
 private const val TAG = "NwcServiceImpl"
 
 class NwcServiceImpl internal constructor(
@@ -41,6 +45,7 @@ class NwcServiceImpl internal constructor(
     private val requestParser: NwcWalletRequestParser,
     private val requestProcessor: NwcRequestProcessor,
     private val responseBuilder: NwcWalletResponseBuilder,
+    private val budgetManager: NwcBudgetManager,
 ) : NwcService {
 
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
@@ -54,8 +59,19 @@ class NwcServiceImpl internal constructor(
 
     override fun initialize(userId: String) {
         Napier.d(tag = TAG) { "NwcService initializing for userId=$userId" }
+        startPeriodicCleanup()
         observeConnections(userId)
         observeRetrySendResponseQueue()
+    }
+
+    private fun startPeriodicCleanup() {
+        scope.launch {
+            while (true) {
+                Napier.d(tag = TAG) { "Running cleanupExpiredHolds" }
+                budgetManager.cleanupExpiredHolds()
+                delay(CLEANUP_INTERVAL)
+            }
+        }
     }
 
     private suspend fun connectToRelay(relayUrl: String) =

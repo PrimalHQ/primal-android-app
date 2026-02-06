@@ -391,7 +391,7 @@ class NwcRequestProcessor internal constructor(
     }
 
     companion object {
-        private const val PAYMENT_HOLD_TIMEOUT_MS = 60_000L
+        private const val PAYMENT_HOLD_TIMEOUT_MS = 300_000L // 5 minutes
         private const val DEFAULT_TRANSACTIONS_LIMIT = 50
         private const val DEFAULT_INVOICE_EXPIRY_SECONDS = 3600L
 
