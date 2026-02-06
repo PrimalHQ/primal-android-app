@@ -46,7 +46,7 @@ fun UpgradeWalletBottomSheet(
         skipPartiallyExpanded = true,
     )
 
-    if (state.shouldShowUpgradeNotice) {
+    if (state.shouldUserUpgrade && state.shouldShowNotice) {
         UpgradeWalletBottomSheet(
             state = state,
             sheetState = sheetState,
@@ -121,48 +121,54 @@ private fun TitleColumn(modifier: Modifier = Modifier) {
             style = AppTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
         )
-
-        Text(
-            text = stringResource(id = R.string.wallet_upgrade_sheet_subtitle),
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            style = AppTheme.typography.bodyMedium,
-        )
     }
 }
 
 @Composable
 private fun BodyText(onFaqClick: () -> Unit) {
-    val descriptionText = stringResource(id = R.string.wallet_upgrade_sheet_description)
-    val faqText = stringResource(id = R.string.wallet_upgrade_sheet_faqs)
-
-    val annotatedString = buildAnnotatedString {
-        append(descriptionText)
-        append(" ")
-        pushStringAnnotation(FAQ_ANNOTATION_TAG, "faq")
-        withStyle(SpanStyle(color = AppTheme.colorScheme.secondary)) {
-            append(faqText)
-        }
-        pop()
-        append(".")
-    }
-
-    PrimalClickableText(
-        text = annotatedString,
-        style = AppTheme.typography.bodyMedium.copy(
+    Column(
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(id = R.string.wallet_upgrade_sheet_description_first),
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            lineHeight = 24.sp,
+            style = AppTheme.typography.bodyMedium.copy(lineHeight = 24.sp),
             textAlign = TextAlign.Center,
-        ),
-        onClick = { position, _ ->
-            annotatedString.getStringAnnotations(
-                tag = FAQ_ANNOTATION_TAG,
-                start = position,
-                end = position,
-            ).firstOrNull()?.let {
-                onFaqClick()
+        )
+
+        val descriptionText = stringResource(id = R.string.wallet_upgrade_sheet_description_second)
+        val faqText = stringResource(id = R.string.wallet_upgrade_sheet_faqs)
+
+        val annotatedString = buildAnnotatedString {
+            append(descriptionText)
+            append(" ")
+            pushStringAnnotation(FAQ_ANNOTATION_TAG, "faq")
+            withStyle(SpanStyle(color = AppTheme.colorScheme.secondary)) {
+                append(faqText)
             }
-        },
-    )
+            pop()
+            append(".")
+        }
+
+        PrimalClickableText(
+            text = annotatedString,
+            style = AppTheme.typography.bodyMedium.copy(
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                lineHeight = 24.sp,
+                textAlign = TextAlign.Center,
+            ),
+            onClick = { position, _ ->
+                annotatedString.getStringAnnotations(
+                    tag = FAQ_ANNOTATION_TAG,
+                    start = position,
+                    end = position,
+                ).firstOrNull()?.let {
+                    onFaqClick()
+                }
+            },
+        )
+    }
 }
 
 @Composable
