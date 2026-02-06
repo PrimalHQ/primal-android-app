@@ -37,6 +37,7 @@ import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
 import net.primal.domain.wallet.capabilities
+import net.primal.domain.wallet.nwc.NwcLogRepository
 
 @Suppress("LongParameterList")
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
@@ -47,6 +48,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private val walletAccountRepository: WalletAccountRepository,
     private val primalWalletNwcRepository: PrimalWalletNwcRepository,
     private val connectNwcUseCase: ConnectNwcUseCase,
+    private val nwcLogRepository: NwcLogRepository,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val ensurePrimalWalletExistsUseCase: EnsurePrimalWalletExistsUseCase,
@@ -126,6 +128,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     UiEvent.RequestTransactionExport -> exportTransactions()
 
                     UiEvent.RevertToPrimalWallet -> revertToPrimalWallet()
+
+                    UiEvent.RequestNwcLogsExport -> exportNwcLogs()
                 }
             }
         }
@@ -269,6 +273,19 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 )
             }
             setEffect(SideEffect.TransactionsReadyForExport)
+        }
+
+    private fun exportNwcLogs() =
+        viewModelScope.launch {
+            setState { copy(isExportingNwcLogs = true) }
+            val logs = nwcLogRepository.getNwcLogs()
+            setState {
+                copy(
+                    isExportingNwcLogs = false,
+                    nwcLogsToExport = logs,
+                )
+            }
+            setEffect(SideEffect.NwcLogsReadyForExport)
         }
 
     private fun checkRevertToPrimalWalletAvailability() =

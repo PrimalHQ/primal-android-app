@@ -70,6 +70,7 @@ import net.primal.android.settings.wallet.settings.ui.PrimalWalletSettings
 import net.primal.android.settings.wallet.settings.ui.WalletBackupWidget
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.android.wallet.utils.saveNwcLogsToUri
 import net.primal.android.wallet.utils.saveTransactionsToUri
 import net.primal.domain.links.CdnImage
 import net.primal.domain.utils.isPrimalWalletAndActivated
@@ -109,12 +110,26 @@ fun WalletSettingsScreen(
         }
     }
 
+    val saveNwcLogsLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("text/csv"),
+    ) { uri ->
+        val logs = uiState.value.nwcLogsToExport
+        if (uri != null && logs.isNotEmpty()) {
+            scope.launch {
+                saveNwcLogsToUri(context, uri, logs)
+            }
+        }
+    }
+
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 WalletSettingsContract.SideEffect.TransactionsReadyForExport -> {
                     val fileName = "${uiState.value.activeWallet?.type}_transactions.csv"
                     saveFileLauncher.launch(fileName)
+                }
+                WalletSettingsContract.SideEffect.NwcLogsReadyForExport -> {
+                    saveNwcLogsLauncher.launch("nwc_audit_logs.csv")
                 }
             }
         }
@@ -279,6 +294,23 @@ fun WalletSettingsScreen(
                         )
                     },
                     onClick = onNwcWalletServiceClick,
+                )
+
+                SettingsItem(
+                    headlineText = stringResource(id = R.string.settings_wallet_export_nwc_logs_title),
+                    supportText = stringResource(id = R.string.settings_wallet_export_nwc_logs_subtitle),
+                    enabled = !state.isExportingNwcLogs,
+                    trailingContent = {
+                        if (state.isExportingNwcLogs) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                strokeWidth = 2.dp,
+                            )
+                        } else {
+                            Icon(imageVector = PrimalIcons.DownloadsFilled, contentDescription = null)
+                        }
+                    },
+                    onClick = { eventPublisher(UiEvent.RequestNwcLogsExport) },
                 )
 
                 ToggleNwcServiceButton(

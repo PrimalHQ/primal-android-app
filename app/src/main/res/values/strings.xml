@@ -906,7 +906,9 @@
     <string name="settings_wallet_revert_to_primal_title">Revert to Primal Wallet</string>
     <string name="settings_wallet_revert_to_primal_subtitle">Unregister Spark wallet and switch back to custodial Primal wallet for testing. CAUTION: You MUST manually transfer your funds from Spark wallet before you do this.</string>
     <string name="settings_wallet_export_transactions_title">Export transaction history</string>
-    <string name="settings_wallet_export_transactions_subtitle">Download your entier wallet transaction history in CSV format</string>
+    <string name="settings_wallet_export_transactions_subtitle">Download your entire wallet transaction history in CSV format</string>
+    <string name="settings_wallet_export_nwc_logs_title">Export NWC logs</string>
+    <string name="settings_wallet_export_nwc_logs_subtitle">Download logs history for all NWC connections in CSV format</string>
     <string name="settings_wallet_new_nwc_connection_title">New Wallet Connection</string>
     <string name="settings_wallet_new_nwc_connection_app_name_input_header">Name of the app you wish to connect:</string>
     <string name="settings_wallet_new_nwc_connection_hint">You can revoke access at any time in your Primal Wallet settings.</string>

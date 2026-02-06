@@ -371,7 +371,10 @@ internal class SparkWalletServiceImpl(
                 val reason = this.v1
                 // Check for insufficient balance message in SparkException
                 if (reason.contains("insufficient", ignoreCase = true) &&
-                    reason.contains("balance", ignoreCase = true)
+                    (
+                        reason.contains("balance", ignoreCase = true) ||
+                            reason.contains("funds", ignoreCase = true)
+                        )
                 ) {
                     WalletPaymentException.InsufficientBalance(cause = this)
                 } else {
