@@ -2,12 +2,8 @@ package net.primal.android.wallet.utils
 
 import android.content.Context
 import android.net.Uri
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.csv.Csv
-import kotlinx.serialization.encodeToString
+import net.primal.android.core.utils.saveCsvToUri
 import net.primal.domain.wallet.nwc.model.NwcRequestLog
 
 @Serializable
@@ -16,7 +12,6 @@ private data class NwcLogCsvRecord(
     val connectionId: String,
     val walletId: String,
     val userId: String,
-    val appName: String,
     val method: String,
     val requestedAt: Long,
     val completedAt: Long?,
@@ -28,24 +23,13 @@ private data class NwcLogCsvRecord(
     val responsePayload: String?,
 )
 
-@OptIn(ExperimentalSerializationApi::class)
 suspend fun saveNwcLogsToUri(
     context: Context,
     uri: Uri,
     logs: List<NwcRequestLog>,
 ) = runCatching {
-    withContext(Dispatchers.IO) {
-        val csv = Csv {
-            hasHeaderRecord = true
-            recordSeparator = System.lineSeparator()
-        }
-        val records = logs.map { it.toCsvRecord() }
-        val csvContent = csv.encodeToString(records)
-
-        context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-            outputStream.write(csvContent.toByteArray())
-        }
-    }
+    val records = logs.map { it.toCsvRecord() }
+    saveCsvToUri(context, uri, records)
 }
 
 private fun NwcRequestLog.toCsvRecord(): NwcLogCsvRecord {
@@ -54,7 +38,6 @@ private fun NwcRequestLog.toCsvRecord(): NwcLogCsvRecord {
         connectionId = connectionId,
         walletId = walletId,
         userId = userId,
-        appName = appName,
         method = method,
         requestedAt = requestedAt,
         completedAt = completedAt,

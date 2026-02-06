@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "84f9d6654b2e71eb61d77e8f8d3991a7",
+    "identityHash": "36006f4cd331f9a1f24fa945a9387ef8",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -553,7 +553,7 @@
       },
       {
         "tableName": "NwcWalletRequestLog",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `appName` TEXT NOT NULL, `method` TEXT NOT NULL, `requestPayload` TEXT NOT NULL, `responsePayload` TEXT, `requestState` TEXT NOT NULL, `errorCode` TEXT, `errorMessage` TEXT, `requestedAt` INTEGER NOT NULL, `completedAt` INTEGER, `amountMsats` INTEGER, PRIMARY KEY(`eventId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `method` TEXT NOT NULL, `requestPayload` TEXT NOT NULL, `responsePayload` TEXT, `requestState` TEXT NOT NULL, `errorCode` TEXT, `errorMessage` TEXT, `requestedAt` INTEGER NOT NULL, `completedAt` INTEGER, `amountMsats` INTEGER, PRIMARY KEY(`eventId`))",
         "fields": [
           {
             "fieldPath": "eventId",
@@ -576,12 +576,6 @@
           {
             "fieldPath": "userId",
             "columnName": "userId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "appName",
-            "columnName": "appName",
             "affinity": "TEXT",
             "notNull": true
           },
@@ -645,7 +639,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '84f9d6654b2e71eb61d77e8f8d3991a7')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '36006f4cd331f9a1f24fa945a9387ef8')"
     ]
   }
 }

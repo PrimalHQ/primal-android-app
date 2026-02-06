@@ -15,12 +15,6 @@ interface NwcWalletRequestLogDao {
     @Query("SELECT * FROM NwcWalletRequestLog ORDER BY requestedAt DESC")
     suspend fun getAllLogs(): List<NwcWalletRequestLog>
 
-    @Query("SELECT * FROM NwcWalletRequestLog WHERE connectionId = :connectionId ORDER BY requestedAt DESC")
-    suspend fun getLogsByConnectionId(connectionId: String): List<NwcWalletRequestLog>
-
-    @Query("SELECT * FROM NwcWalletRequestLog WHERE eventId = :eventId")
-    suspend fun findLogByEventId(eventId: String): NwcWalletRequestLog?
-
     @Query(
         """
         UPDATE NwcWalletRequestLog 

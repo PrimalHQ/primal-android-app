@@ -12,7 +12,6 @@ data class NwcWalletRequestLog(
     val connectionId: String,
     val walletId: String,
     val userId: String,
-    val appName: String,
     val method: String,
     val requestPayload: Encryptable<String>,
     val responsePayload: Encryptable<String>?,

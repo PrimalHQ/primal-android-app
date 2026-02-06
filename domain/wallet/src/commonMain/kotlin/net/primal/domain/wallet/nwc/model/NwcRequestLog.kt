@@ -5,7 +5,6 @@ data class NwcRequestLog(
     val connectionId: String,
     val walletId: String,
     val userId: String,
-    val appName: String,
     val method: String,
     val requestPayload: String,
     val responsePayload: String?,

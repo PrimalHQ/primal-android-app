@@ -41,17 +41,9 @@ class NwcRequestProcessor internal constructor(
         ) { "Processing request: ${request::class.simpleName}, eventId=${request.eventId.take(8)}..." }
 
         val requestedAt = Clock.System.now().epochSeconds
-        val connectionId = request.connection.secretPubKey
-        val walletId = request.connection.walletId
-        val userId = request.connection.userId
-        val appName = request.connection.appName
 
         nwcLogRepository.logRequest(
             request = request,
-            connectionId = connectionId,
-            walletId = walletId,
-            userId = userId,
-            appName = appName,
             requestedAt = requestedAt,
         )
 

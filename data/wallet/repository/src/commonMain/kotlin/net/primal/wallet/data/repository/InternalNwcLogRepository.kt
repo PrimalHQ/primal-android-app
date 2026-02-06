@@ -13,27 +13,17 @@ internal class InternalNwcLogRepository(
     private val walletDatabase: WalletDatabase,
     private val dispatchers: DispatcherProvider,
 ) {
-    suspend fun logRequest(
-        request: WalletNwcRequest,
-        connectionId: String,
-        walletId: String,
-        userId: String,
-        appName: String,
-        requestedAt: Long,
-    ) = withContext(dispatchers.io()) {
-        runCatching {
-            walletDatabase.nwcLogs().upsert(
-                buildNwcRequestLog(
-                    request = request,
-                    connectionId = connectionId,
-                    walletId = walletId,
-                    userId = userId,
-                    appName = appName,
-                    requestedAt = requestedAt,
-                ),
-            )
+    suspend fun logRequest(request: WalletNwcRequest, requestedAt: Long) =
+        withContext(dispatchers.io()) {
+            runCatching {
+                walletDatabase.nwcLogs().upsert(
+                    buildNwcRequestLog(
+                        request = request,
+                        requestedAt = requestedAt,
+                    ),
+                )
+            }
         }
-    }
 
     suspend fun updateLogWithResponse(
         eventId: String,

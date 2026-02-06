@@ -12,20 +12,12 @@ import net.primal.domain.wallet.nwc.model.NwcRequestState
 import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLog
 
-fun buildNwcRequestLog(
-    request: WalletNwcRequest,
-    connectionId: String,
-    walletId: String,
-    userId: String,
-    appName: String,
-    requestedAt: Long,
-): NwcWalletRequestLog {
+fun buildNwcRequestLog(request: WalletNwcRequest, requestedAt: Long): NwcWalletRequestLog {
     return NwcWalletRequestLog(
         eventId = request.eventId,
-        connectionId = connectionId,
-        walletId = walletId,
-        userId = userId,
-        appName = appName,
+        connectionId = request.connection.secretPubKey,
+        walletId = request.connection.walletId,
+        userId = request.connection.userId,
         method = request.resolveMethodType(),
         requestPayload = request.resolvePayloadJson().asEncryptable(),
         responsePayload = null,
@@ -82,7 +74,6 @@ fun NwcWalletRequestLog.asDomain(): NwcRequestLog =
         connectionId = connectionId,
         walletId = walletId,
         userId = userId,
-        appName = appName,
         method = method,
         requestPayload = requestPayload.decrypted,
         responsePayload = responsePayload?.decrypted,
