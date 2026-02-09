@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "a58b3da15d3232077c33f561c61497ae",
+    "identityHash": "29df1f3dc6effe968b9894dd18985a6f",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -582,6 +582,91 @@
         }
       },
       {
+        "tableName": "NwcWalletRequestLog",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `method` TEXT NOT NULL, `requestPayload` TEXT NOT NULL, `responsePayload` TEXT, `requestState` TEXT NOT NULL, `errorCode` TEXT, `errorMessage` TEXT, `requestedAt` INTEGER NOT NULL, `completedAt` INTEGER, `amountMsats` TEXT, PRIMARY KEY(`eventId`))",
+        "fields": [
+          {
+            "fieldPath": "eventId",
+            "columnName": "eventId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "connectionId",
+            "columnName": "connectionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "walletId",
+            "columnName": "walletId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "method",
+            "columnName": "method",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "requestPayload",
+            "columnName": "requestPayload",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "responsePayload",
+            "columnName": "responsePayload",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requestState",
+            "columnName": "requestState",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "errorCode",
+            "columnName": "errorCode",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "errorMessage",
+            "columnName": "errorMessage",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requestedAt",
+            "columnName": "requestedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completedAt",
+            "columnName": "completedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "amountMsats",
+            "columnName": "amountMsats",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "eventId"
+          ]
+        }
+      },
+      {
         "tableName": "NwcInvoiceData",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`invoice` TEXT NOT NULL, `paymentHash` TEXT, `walletId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `description` TEXT, `descriptionHash` TEXT, `amountMsats` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `expiresAt` INTEGER NOT NULL, `settledAt` INTEGER, `preimage` TEXT, PRIMARY KEY(`invoice`))",
         "fields": [
@@ -682,96 +767,11 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_NwcInvoiceData_paymentHash` ON `${TABLE_NAME}` (`paymentHash`)"
           }
         ]
-      },
-      {
-        "tableName": "NwcWalletRequestLog",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `method` TEXT NOT NULL, `requestPayload` TEXT NOT NULL, `responsePayload` TEXT, `requestState` TEXT NOT NULL, `errorCode` TEXT, `errorMessage` TEXT, `requestedAt` INTEGER NOT NULL, `completedAt` INTEGER, `amountMsats` INTEGER, PRIMARY KEY(`eventId`))",
-        "fields": [
-          {
-            "fieldPath": "eventId",
-            "columnName": "eventId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "connectionId",
-            "columnName": "connectionId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "walletId",
-            "columnName": "walletId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "userId",
-            "columnName": "userId",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "method",
-            "columnName": "method",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "requestPayload",
-            "columnName": "requestPayload",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "responsePayload",
-            "columnName": "responsePayload",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "requestState",
-            "columnName": "requestState",
-            "affinity": "TEXT",
-            "notNull": true
-          },
-          {
-            "fieldPath": "errorCode",
-            "columnName": "errorCode",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "errorMessage",
-            "columnName": "errorMessage",
-            "affinity": "TEXT"
-          },
-          {
-            "fieldPath": "requestedAt",
-            "columnName": "requestedAt",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "completedAt",
-            "columnName": "completedAt",
-            "affinity": "INTEGER"
-          },
-          {
-            "fieldPath": "amountMsats",
-            "columnName": "amountMsats",
-            "affinity": "INTEGER"
-          }
-        ],
-        "primaryKey": {
-          "autoGenerate": false,
-          "columnNames": [
-            "eventId"
-          ]
-        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a58b3da15d3232077c33f561c61497ae')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '29df1f3dc6effe968b9894dd18985a6f')"
     ]
   }
 }

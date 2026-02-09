@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import net.primal.domain.wallet.nwc.model.NwcRequestState
 import net.primal.shared.data.local.encryption.Encryptable
 
 @Dao
@@ -17,21 +16,21 @@ interface NwcWalletRequestLogDao {
 
     @Query(
         """
-        UPDATE NwcWalletRequestLog 
-        SET responsePayload = :responsePayload, 
-            requestState = :requestState, 
-            completedAt = :completedAt, 
-            errorCode = :errorCode, 
-            errorMessage = :errorMessage 
+        UPDATE NwcWalletRequestLog
+        SET responsePayload = :responsePayload,
+            requestState = :requestState,
+            completedAt = :completedAt,
+            errorCode = :errorCode,
+            errorMessage = :errorMessage
         WHERE eventId = :eventId
     """,
     )
     suspend fun updateResponse(
         eventId: String,
         responsePayload: Encryptable<String>?,
-        requestState: NwcRequestState,
+        requestState: Encryptable<String>,
         completedAt: Long,
-        errorCode: String?,
-        errorMessage: String?,
+        errorCode: Encryptable<String>?,
+        errorMessage: Encryptable<String>?,
     )
 }

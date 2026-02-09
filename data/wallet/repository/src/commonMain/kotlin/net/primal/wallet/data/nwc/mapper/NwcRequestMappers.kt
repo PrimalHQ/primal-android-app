@@ -15,18 +15,18 @@ import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLog
 fun buildNwcRequestLog(request: WalletNwcRequest, requestedAt: Long): NwcWalletRequestLog {
     return NwcWalletRequestLog(
         eventId = request.eventId,
-        connectionId = request.connection.secretPubKey,
-        walletId = request.connection.walletId,
-        userId = request.connection.userId,
-        method = request.resolveMethodType(),
+        connectionId = request.connection.secretPubKey.asEncryptable(),
+        walletId = request.connection.walletId.asEncryptable(),
+        userId = request.connection.userId.asEncryptable(),
+        method = request.resolveMethodType().asEncryptable(),
         requestPayload = request.resolvePayloadJson().asEncryptable(),
         responsePayload = null,
-        requestState = NwcRequestState.Processing,
+        requestState = NwcRequestState.Processing.name.asEncryptable(),
         errorCode = null,
         errorMessage = null,
         requestedAt = requestedAt,
         completedAt = null,
-        amountMsats = request.resolveAmountMsats(),
+        amountMsats = request.resolveAmountMsats()?.asEncryptable(),
     )
 }
 
@@ -71,18 +71,18 @@ internal fun WalletNwcRequest.resolveAmountMsats(): Long? =
 fun NwcWalletRequestLog.asDomain(): NwcRequestLog =
     NwcRequestLog(
         eventId = eventId,
-        connectionId = connectionId,
-        walletId = walletId,
-        userId = userId,
-        method = method,
+        connectionId = connectionId.decrypted,
+        walletId = walletId.decrypted,
+        userId = userId.decrypted,
+        method = method.decrypted,
         requestPayload = requestPayload.decrypted,
         responsePayload = responsePayload?.decrypted,
-        requestState = requestState,
-        errorCode = errorCode,
-        errorMessage = errorMessage,
+        requestState = NwcRequestState.valueOf(requestState.decrypted),
+        errorCode = errorCode?.decrypted,
+        errorMessage = errorMessage?.decrypted,
         requestedAt = requestedAt,
         completedAt = completedAt,
-        amountMsats = amountMsats,
+        amountMsats = amountMsats?.decrypted,
     )
 
 internal fun Throwable.resolveNwcErrorCode(): String =

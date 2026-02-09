@@ -24,6 +24,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.utils.shouldShowBackup
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
@@ -264,28 +265,43 @@ class WalletSettingsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val activeWalletId = state.value.activeWallet?.walletId ?: return@launch
             setState { copy(isExportingTransactions = true) }
-
-            val transactions = walletRepository.allTransactions(walletId = activeWalletId)
-            setState {
-                copy(
-                    isExportingTransactions = false,
-                    transactionsToExport = transactions,
-                )
+            runCatching {
+                walletRepository.allTransactions(walletId = activeWalletId)
             }
-            setEffect(SideEffect.TransactionsReadyForExport)
+                .onSuccess { transactions ->
+                    setState {
+                        copy(
+                            isExportingTransactions = false,
+                            transactionsToExport = transactions,
+                        )
+                    }
+                    setEffect(SideEffect.TransactionsReadyForExport)
+                }
+                .onFailure {
+                    Napier.e(throwable = it) { "Failed to export transactions." }
+                    setState { copy(isExportingTransactions = false) }
+                }
         }
 
     private fun exportNwcLogs() =
         viewModelScope.launch {
             setState { copy(isExportingNwcLogs = true) }
-            val logs = nwcLogRepository.getNwcLogs()
-            setState {
-                copy(
-                    isExportingNwcLogs = false,
-                    nwcLogsToExport = logs,
-                )
+            runCatching {
+                nwcLogRepository.getNwcLogs()
             }
-            setEffect(SideEffect.NwcLogsReadyForExport)
+                .onSuccess { logs ->
+                    setState {
+                        copy(
+                            isExportingNwcLogs = false,
+                            nwcLogsToExport = logs,
+                        )
+                    }
+                    setEffect(SideEffect.NwcLogsReadyForExport)
+                }
+                .onFailure {
+                    Napier.e(throwable = it) { "Failed to export NWC logs." }
+                    setState { copy(isExportingNwcLogs = false) }
+                }
         }
 
     private fun checkRevertToPrimalWalletAvailability() =

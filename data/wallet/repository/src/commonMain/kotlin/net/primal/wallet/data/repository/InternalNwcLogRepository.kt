@@ -1,8 +1,10 @@
 package net.primal.wallet.data.repository
 
+import io.github.aakira.napier.Napier
 import kotlinx.coroutines.withContext
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.onFailure
 import net.primal.core.utils.runCatching
 import net.primal.domain.wallet.nwc.model.NwcRequestState
 import net.primal.shared.data.local.encryption.asEncryptable
@@ -22,7 +24,7 @@ internal class InternalNwcLogRepository(
                         requestedAt = requestedAt,
                     ),
                 )
-            }
+            }.onFailure { Napier.e(it) { "Failed to log NWC request." } }
         }
 
     suspend fun updateLogWithResponse(
@@ -37,11 +39,11 @@ internal class InternalNwcLogRepository(
             walletDatabase.nwcLogs().updateResponse(
                 eventId = eventId,
                 responsePayload = responsePayload.asEncryptable(),
-                requestState = requestState,
+                requestState = requestState.name.asEncryptable(),
                 completedAt = completedAt,
-                errorCode = errorCode,
-                errorMessage = errorMessage,
+                errorCode = errorCode?.asEncryptable(),
+                errorMessage = errorMessage?.asEncryptable(),
             )
-        }
+        }.onFailure { Napier.e(it) { "Failed to update NWC log response." } }
     }
 }

@@ -7,7 +7,6 @@ import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
 import kotlin.time.Duration
-import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -24,7 +23,6 @@ import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.LnInvoiceParseResult
 import net.primal.domain.wallet.LnUrlParseResult
 import net.primal.domain.wallet.NwcInvoice
-import net.primal.domain.wallet.NwcInvoiceState
 import net.primal.domain.wallet.OnChainAddressResult
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.TxType
@@ -41,7 +39,6 @@ import net.primal.wallet.data.local.dao.Wallet as WalletPO
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletTransactionData
-import net.primal.wallet.data.local.dao.nwc.NwcInvoiceData
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.repository.mappers.local.asDO
