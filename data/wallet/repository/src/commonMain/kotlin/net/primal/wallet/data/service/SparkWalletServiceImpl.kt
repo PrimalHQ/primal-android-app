@@ -97,9 +97,9 @@ internal class SparkWalletServiceImpl(
 
             val payments = response.payments
 
-            // Only fetch zap receipts for SENT Lightning payments
+            // Only fetch zap receipts for SENT payments (Lightning and Spark)
             // Received payments already have zap data in lnurlReceiveMetadata from SDK
-            val sentLightningInvoices = payments.extractSentLightningInvoices()
+            val sentLightningInvoices = payments.extractSentInvoices()
             val zapReceiptsMap = if (sentLightningInvoices.isNotEmpty()) {
                 eventRepository.getZapReceipts(invoices = sentLightningInvoices).getOrNull()
             } else {
@@ -119,7 +119,7 @@ internal class SparkWalletServiceImpl(
             }
         }.mapFailure { it.toWalletException() }
 
-    private fun List<Payment>.extractSentLightningInvoices(): List<String> {
+    private fun List<Payment>.extractSentInvoices(): List<String> {
         return this
             .filter { it.paymentType == PaymentType.SEND }
             .mapNotNull { it.extractSentInvoice() }
@@ -129,6 +129,7 @@ internal class SparkWalletServiceImpl(
         if (this.paymentType != PaymentType.SEND) return null
         return when (val details = this.details) {
             is PaymentDetails.Lightning -> details.invoice
+            is PaymentDetails.Spark -> details.invoiceDetails?.invoice
             else -> null
         }
     }
@@ -334,8 +335,13 @@ internal class SparkWalletServiceImpl(
             val listener = object : EventListener {
                 override suspend fun onEvent(event: SdkEvent) {
                     if (event is SdkEvent.PaymentSucceeded) {
-                        val details = event.payment.details
-                        if (details is PaymentDetails.Lightning && details.invoice == invoice) {
+                        val matchedInvoice = when (val details = event.payment.details) {
+                            is PaymentDetails.Lightning -> details.invoice
+                            is PaymentDetails.Spark -> details.invoiceDetails?.invoice
+                            else -> null
+                        }
+
+                        if (matchedInvoice == invoice) {
                             Napier.i { "Payment confirmed via event! paymentId=${event.payment.id}" }
                             paymentReceived.complete(Unit)
                         }
