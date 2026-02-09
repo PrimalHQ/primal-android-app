@@ -31,13 +31,18 @@ import net.primal.android.wallet.upgrade.ui.UpgradeWalletSuccess
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpgradeWalletScreen(viewModel: UpgradeWalletViewModel, onClose: () -> Unit) {
+fun UpgradeWalletScreen(
+    viewModel: UpgradeWalletViewModel,
+    onClose: () -> Unit,
+    onFaqClick: () -> Unit,
+) {
     val state = viewModel.state.collectAsState()
 
     UpgradeWalletScreen(
         state = state.value,
         eventPublisher = viewModel::setEvent,
         onClose = onClose,
+        onFaqClick = onFaqClick,
     )
 }
 
@@ -47,6 +52,7 @@ fun UpgradeWalletScreen(
     state: UpgradeWalletContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onClose: () -> Unit,
+    onFaqClick: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -76,6 +82,7 @@ fun UpgradeWalletScreen(
                                 .padding(paddingValues),
                             walletBalanceInSats = state.walletBalanceInSats,
                             onStartUpgrade = { eventPublisher(UiEvent.StartUpgrade) },
+                            onFaqClick = onFaqClick,
                         )
                     }
 

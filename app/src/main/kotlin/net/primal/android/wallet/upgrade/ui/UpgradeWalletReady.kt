@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -31,7 +30,6 @@ import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletFilled
-import net.primal.android.core.ext.openUriSafely
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.walletUpgradeBulletColor
 
@@ -40,6 +38,7 @@ fun UpgradeWalletReady(
     modifier: Modifier = Modifier,
     walletBalanceInSats: Long?,
     onStartUpgrade: () -> Unit,
+    onFaqClick: () -> Unit,
 ) {
     Column(
         modifier = modifier.padding(top = 52.dp, bottom = 32.dp),
@@ -76,7 +75,7 @@ fun UpgradeWalletReady(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            FaqLink()
+            FaqLink(onFaqClick = onFaqClick)
         }
 
         PrimalLoadingButton(
@@ -145,18 +144,17 @@ private fun BulletItem(text: CharSequence) {
     }
 }
 
-private const val FAQ_URL = "https://primal.net/faq"
 private const val FAQ_ANNOTATION_TAG = "FaqTag"
 
 @Composable
-private fun FaqLink() {
+private fun FaqLink(onFaqClick: () -> Unit) {
     val faqText = stringResource(id = R.string.wallet_upgrade_faq_question)
     val faqLink = stringResource(id = R.string.wallet_upgrade_faq_link)
 
     val annotatedString = buildAnnotatedString {
         append(faqText)
         append(" ")
-        pushStringAnnotation(tag = FAQ_ANNOTATION_TAG, annotation = FAQ_URL)
+        pushStringAnnotation(tag = FAQ_ANNOTATION_TAG, annotation = "faq")
         withStyle(
             style = SpanStyle(
                 color = AppTheme.colorScheme.secondary,
@@ -168,7 +166,6 @@ private fun FaqLink() {
         pop()
     }
 
-    val uriHandler = LocalUriHandler.current
     PrimalClickableText(
         modifier = Modifier.padding(bottom = 24.dp),
         text = annotatedString,
@@ -181,7 +178,7 @@ private fun FaqLink() {
                 end = position,
             ).firstOrNull()?.let { annotation ->
                 if (annotation.tag == FAQ_ANNOTATION_TAG) {
-                    uriHandler.openUriSafely(FAQ_URL)
+                    onFaqClick()
                 }
             }
         },

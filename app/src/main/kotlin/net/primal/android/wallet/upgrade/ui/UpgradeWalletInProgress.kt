@@ -24,6 +24,7 @@ fun UpgradeWalletInProgress(modifier: Modifier = Modifier, currentStep: Migratio
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         FlowStatusColumn(
+            modifier = Modifier.fillMaxHeight(fraction = 0.7f),
             icon = null,
             headlineText = null,
             supportText = currentStep?.toUserFriendlyDescription()

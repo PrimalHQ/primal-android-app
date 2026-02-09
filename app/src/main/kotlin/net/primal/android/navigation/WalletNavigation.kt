@@ -293,6 +293,7 @@ private fun NavGraphBuilder.upgradeWallet(route: String, navController: NavContr
         UpgradeWalletScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
+            onFaqClick = { navController.navigateToWalletUpgradeFaq() },
         )
     }
 
