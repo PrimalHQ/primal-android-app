@@ -121,7 +121,10 @@ class WalletDashboardViewModel @Inject constructor(
     private fun createWallet() =
         viewModelScope.launch {
             ensureSparkWalletExistsUseCase.invoke(userId = activeUserId)
-                .onFailure { setErrorState(UiState.DashboardError.WalletCreationFailed(it)) }
+                .onFailure {
+                    Napier.e(it) { "Failed to create wallet." }
+                    setErrorState(UiState.DashboardError.WalletCreationFailed(it))
+                }
         }
 
     private fun observeUserWallets(userId: String) {
