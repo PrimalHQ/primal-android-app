@@ -1,7 +1,6 @@
 package net.primal.wallet.data.nwc.service
 
 import io.github.aakira.napier.Napier
-import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -10,6 +9,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -33,10 +33,6 @@ import net.primal.wallet.data.nwc.NwcCapabilities
 import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
 import net.primal.wallet.data.nwc.manager.NwcBudgetManager
 import net.primal.wallet.data.nwc.processor.NwcRequestProcessor
-
-private const val MAX_CACHE_SIZE = 20
-private val CLEANUP_INTERVAL = 2.minutes
-private const val TAG = "NwcServiceImpl"
 
 class NwcServiceImpl internal constructor(
     private val dispatchers: DispatcherProvider,
@@ -66,9 +62,13 @@ class NwcServiceImpl internal constructor(
 
     private fun startPeriodicCleanup() {
         scope.launch {
-            while (true) {
-                Napier.d(tag = TAG) { "Running cleanupExpiredHolds" }
-                budgetManager.cleanupExpiredHolds()
+            while (isActive) {
+                runCatching {
+                    Napier.d(tag = TAG) { "Running cleanupExpiredHolds" }
+                    budgetManager.cleanupExpiredHolds()
+                }.onFailure {
+                    Napier.w(tag = TAG, throwable = it) { "cleanupExpiredHolds failed" }
+                }
                 delay(CLEANUP_INTERVAL)
             }
         }
@@ -272,6 +272,12 @@ class NwcServiceImpl internal constructor(
             scope.cancel()
             Napier.d(tag = TAG) { "NwcService stopped." }
         }
+    }
+
+    companion object {
+        private const val MAX_CACHE_SIZE = 20
+        private val CLEANUP_INTERVAL = 30.seconds
+        private const val TAG = "NwcServiceImpl"
     }
 }
 
