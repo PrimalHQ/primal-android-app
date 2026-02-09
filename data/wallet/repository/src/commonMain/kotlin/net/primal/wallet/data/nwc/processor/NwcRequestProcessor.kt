@@ -3,6 +3,8 @@ package net.primal.wallet.data.nwc.processor
 import io.github.aakira.napier.Napier
 import kotlin.math.min
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 import kotlin.uuid.Uuid
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
@@ -427,9 +429,9 @@ class NwcRequestProcessor internal constructor(
     }
 
     companion object {
-        private const val PAYMENT_HOLD_TIMEOUT_MS = 60_000L
+        private val PAYMENT_HOLD_TIMEOUT_MS = 5.minutes.inWholeMilliseconds
         private const val DEFAULT_TRANSACTIONS_LIMIT = 50
-        private const val DEFAULT_INVOICE_EXPIRY_SECONDS = 3600L
+        private val DEFAULT_INVOICE_EXPIRY_SECONDS = 1.hours.inWholeSeconds
 
         private const val TAG = "NwcRequestProcessor"
     }

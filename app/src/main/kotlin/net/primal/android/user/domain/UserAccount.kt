@@ -51,14 +51,12 @@ data class UserAccount(
     val blossomServers: List<String> = emptyList(),
     val pushNotificationsEnabled: Boolean = false,
     val shouldShowStreamControlPopup: Boolean = true,
-    val shouldShowUpgradeWalletSheet: Boolean = true,
 ) {
     companion object {
         val EMPTY = UserAccount(
             pubkey = "",
             authorDisplayName = "",
             userDisplayName = "",
-            shouldShowUpgradeWalletSheet = false,
         )
 
         fun buildLocal(pubkey: String) =
@@ -66,7 +64,6 @@ data class UserAccount(
                 pubkey = pubkey,
                 authorDisplayName = pubkey.asEllipsizedNpub(),
                 userDisplayName = pubkey.asEllipsizedNpub(),
-                shouldShowUpgradeWalletSheet = false,
             )
     }
 }

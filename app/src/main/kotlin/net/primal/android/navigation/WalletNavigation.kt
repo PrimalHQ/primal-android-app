@@ -18,6 +18,7 @@ import net.primal.android.wallet.backup.WalletBackupScreen
 import net.primal.android.wallet.backup.WalletBackupViewModel
 import net.primal.android.wallet.dashboard.WalletDashboardScreen
 import net.primal.android.wallet.dashboard.WalletDashboardViewModel
+import net.primal.android.wallet.faq.WalletUpgradeFaqScreen
 import net.primal.android.wallet.transactions.details.TransactionDetailsScreen
 import net.primal.android.wallet.transactions.details.TransactionDetailsViewModel
 import net.primal.android.wallet.transactions.receive.ReceivePaymentScreen
@@ -54,6 +55,8 @@ fun NavController.navigateToWalletCreateTransaction(draftTransaction: DraftTx? =
 private fun NavController.navigateToWalletReceive() = navigate(route = "walletReceive")
 
 fun NavController.navigateToWalletUpgrade() = navigate(route = "walletUpgrade")
+
+fun NavController.navigateToWalletUpgradeFaq() = navigate(route = "walletUpgradeFaq")
 
 private fun NavController.navigateToTransactionDetails(txId: String) = navigate(route = "walletTransaction/$txId")
 
@@ -116,6 +119,11 @@ fun NavGraphBuilder.walletNavigation(
 
     upgradeWallet(
         route = "walletUpgrade",
+        navController = navController,
+    )
+
+    walletUpgradeFaq(
+        route = "walletUpgradeFaq",
         navController = navController,
     )
 
@@ -284,6 +292,21 @@ private fun NavGraphBuilder.upgradeWallet(route: String, navController: NavContr
         LockToOrientationPortrait()
         UpgradeWalletScreen(
             viewModel = viewModel,
+            onClose = { navController.navigateUp() },
+        )
+    }
+
+private fun NavGraphBuilder.walletUpgradeFaq(route: String, navController: NavController) =
+    composable(
+        route = route,
+        enterTransition = { primalSlideInHorizontallyFromEnd },
+        exitTransition = { primalScaleOut },
+        popEnterTransition = { primalScaleIn },
+        popExitTransition = { primalSlideOutHorizontallyToEnd },
+    ) {
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        WalletUpgradeFaqScreen(
             onClose = { navController.navigateUp() },
         )
     }

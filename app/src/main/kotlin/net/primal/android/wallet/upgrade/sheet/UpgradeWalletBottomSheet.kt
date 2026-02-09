@@ -26,15 +26,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalBottomSheetDragHandle
+import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.theme.AppTheme
+
+private const val FAQ_ANNOTATION_TAG = "FaqAnnotationTag"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UpgradeWalletBottomSheet(
     viewModel: UpgradeWalletSheetViewModel,
     onUpgradeClick: () -> Unit,
+    onFaqClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     val state by viewModel.state.collectAsState()
@@ -42,7 +46,7 @@ fun UpgradeWalletBottomSheet(
         skipPartiallyExpanded = true,
     )
 
-    if (state.shouldShowUpgradeNotice) {
+    if (state.shouldUserUpgrade && state.shouldShowNotice) {
         UpgradeWalletBottomSheet(
             state = state,
             sheetState = sheetState,
@@ -50,6 +54,10 @@ fun UpgradeWalletBottomSheet(
             onUpgradeClick = {
                 viewModel.setEvent(UpgradeWalletSheetContract.UiEvent.DismissSheet)
                 onUpgradeClick()
+            },
+            onFaqClick = {
+                viewModel.setEvent(UpgradeWalletSheetContract.UiEvent.DismissSheet)
+                onFaqClick()
             },
         )
     }
@@ -64,6 +72,7 @@ private fun UpgradeWalletBottomSheet(
     sheetState: SheetState,
     onDismissRequest: () -> Unit,
     onUpgradeClick: () -> Unit,
+    onFaqClick: () -> Unit,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -93,7 +102,7 @@ private fun UpgradeWalletBottomSheet(
                 TitleColumn()
             }
 
-            BodyText()
+            BodyText(onFaqClick = onFaqClick)
             UpgradeWalletNowButton(onClick = onUpgradeClick)
         }
     }
@@ -112,29 +121,54 @@ private fun TitleColumn(modifier: Modifier = Modifier) {
             style = AppTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
         )
-
-        Text(
-            text = stringResource(id = R.string.wallet_upgrade_sheet_subtitle),
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            style = AppTheme.typography.bodyMedium,
-        )
     }
 }
 
 @Composable
-private fun BodyText() {
-    Text(
-        text = buildAnnotatedString {
-            append(stringResource(id = R.string.wallet_upgrade_sheet_description))
+private fun BodyText(onFaqClick: () -> Unit) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(id = R.string.wallet_upgrade_sheet_description_first),
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            style = AppTheme.typography.bodyMedium.copy(lineHeight = 24.sp),
+            textAlign = TextAlign.Center,
+        )
+
+        val descriptionText = stringResource(id = R.string.wallet_upgrade_sheet_description_second)
+        val faqText = stringResource(id = R.string.wallet_upgrade_sheet_faqs)
+
+        val annotatedString = buildAnnotatedString {
+            append(descriptionText)
             append(" ")
+            pushStringAnnotation(FAQ_ANNOTATION_TAG, "faq")
             withStyle(SpanStyle(color = AppTheme.colorScheme.secondary)) {
-                append(stringResource(id = R.string.wallet_upgrade_sheet_faqs))
+                append(faqText)
             }
-        },
-        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-        style = AppTheme.typography.bodyMedium.copy(lineHeight = 24.sp),
-        textAlign = TextAlign.Center,
-    )
+            pop()
+            append(".")
+        }
+
+        PrimalClickableText(
+            text = annotatedString,
+            style = AppTheme.typography.bodyMedium.copy(
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                lineHeight = 24.sp,
+                textAlign = TextAlign.Center,
+            ),
+            onClick = { position, _ ->
+                annotatedString.getStringAnnotations(
+                    tag = FAQ_ANNOTATION_TAG,
+                    start = position,
+                    end = position,
+                ).firstOrNull()?.let {
+                    onFaqClick()
+                }
+            },
+        )
+    }
 }
 
 @Composable
