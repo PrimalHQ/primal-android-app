@@ -1,5 +1,6 @@
 package net.primal.wallet.data.nwc.builder
 
+import kotlinx.serialization.json.JsonElement
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
 import net.primal.core.networking.nwc.nip47.ListTransactionsResponsePayload
@@ -80,6 +81,12 @@ class NwcWalletResponseBuilder {
             error = NwcError(code = code, message = message),
         )
         return CommonJson.encodeToString(response)
+    }
+
+    fun parseNwcError(responseJson: String): NwcError? {
+        return runCatching {
+            CommonJson.decodeFromString<NwcResponseContent<JsonElement>>(responseJson).error
+        }.getOrNull()
     }
 
     private fun WalletNwcRequest.methodStr(): String {

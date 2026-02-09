@@ -24,6 +24,7 @@ import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.utils.shouldShowBackup
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
+import net.primal.core.utils.runCatching
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
@@ -37,6 +38,7 @@ import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
 import net.primal.domain.wallet.capabilities
+import net.primal.domain.wallet.nwc.NwcLogRepository
 
 @Suppress("LongParameterList")
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
@@ -47,6 +49,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private val walletAccountRepository: WalletAccountRepository,
     private val primalWalletNwcRepository: PrimalWalletNwcRepository,
     private val connectNwcUseCase: ConnectNwcUseCase,
+    private val nwcLogRepository: NwcLogRepository,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val ensurePrimalWalletExistsUseCase: EnsurePrimalWalletExistsUseCase,
@@ -126,6 +129,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     UiEvent.RequestTransactionExport -> exportTransactions()
 
                     UiEvent.RevertToPrimalWallet -> revertToPrimalWallet()
+
+                    UiEvent.RequestNwcLogsExport -> exportNwcLogs()
                 }
             }
         }
@@ -260,15 +265,43 @@ class WalletSettingsViewModel @AssistedInject constructor(
         viewModelScope.launch {
             val activeWalletId = state.value.activeWallet?.walletId ?: return@launch
             setState { copy(isExportingTransactions = true) }
-
-            val transactions = walletRepository.allTransactions(walletId = activeWalletId)
-            setState {
-                copy(
-                    isExportingTransactions = false,
-                    transactionsToExport = transactions,
-                )
+            runCatching {
+                walletRepository.allTransactions(walletId = activeWalletId)
             }
-            setEffect(SideEffect.TransactionsReadyForExport)
+                .onSuccess { transactions ->
+                    setState {
+                        copy(
+                            isExportingTransactions = false,
+                            transactionsToExport = transactions,
+                        )
+                    }
+                    setEffect(SideEffect.TransactionsReadyForExport)
+                }
+                .onFailure {
+                    Napier.e(throwable = it) { "Failed to export transactions." }
+                    setState { copy(isExportingTransactions = false) }
+                }
+        }
+
+    private fun exportNwcLogs() =
+        viewModelScope.launch {
+            setState { copy(isExportingNwcLogs = true) }
+            runCatching {
+                nwcLogRepository.getNwcLogs()
+            }
+                .onSuccess { logs ->
+                    setState {
+                        copy(
+                            isExportingNwcLogs = false,
+                            nwcLogsToExport = logs,
+                        )
+                    }
+                    setEffect(SideEffect.NwcLogsReadyForExport)
+                }
+                .onFailure {
+                    Napier.e(throwable = it) { "Failed to export NWC logs." }
+                    setState { copy(isExportingNwcLogs = false) }
+                }
         }
 
     private fun checkRevertToPrimalWalletAvailability() =
