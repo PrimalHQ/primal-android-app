@@ -7,7 +7,9 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -29,10 +31,8 @@ import net.primal.domain.connections.nostr.model.NwcConnection
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.wallet.data.nwc.NwcCapabilities
 import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
+import net.primal.wallet.data.nwc.manager.NwcBudgetManager
 import net.primal.wallet.data.nwc.processor.NwcRequestProcessor
-
-private const val MAX_CACHE_SIZE = 20
-private const val TAG = "NwcServiceImpl"
 
 class NwcServiceImpl internal constructor(
     private val dispatchers: DispatcherProvider,
@@ -41,6 +41,7 @@ class NwcServiceImpl internal constructor(
     private val requestParser: NwcWalletRequestParser,
     private val requestProcessor: NwcRequestProcessor,
     private val responseBuilder: NwcWalletResponseBuilder,
+    private val budgetManager: NwcBudgetManager,
 ) : NwcService {
 
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
@@ -54,8 +55,23 @@ class NwcServiceImpl internal constructor(
 
     override fun initialize(userId: String) {
         Napier.d(tag = TAG) { "NwcService initializing for userId=$userId" }
+        startPeriodicCleanup()
         observeConnections(userId)
         observeRetrySendResponseQueue()
+    }
+
+    private fun startPeriodicCleanup() {
+        scope.launch {
+            while (isActive) {
+                runCatching {
+                    Napier.d(tag = TAG) { "Running cleanupExpiredHolds" }
+                    budgetManager.cleanupExpiredHolds()
+                }.onFailure {
+                    Napier.w(tag = TAG, throwable = it) { "cleanupExpiredHolds failed" }
+                }
+                delay(CLEANUP_INTERVAL)
+            }
+        }
     }
 
     private suspend fun connectToRelay(relayUrl: String) =
@@ -256,6 +272,12 @@ class NwcServiceImpl internal constructor(
             scope.cancel()
             Napier.d(tag = TAG) { "NwcService stopped." }
         }
+    }
+
+    companion object {
+        private const val MAX_CACHE_SIZE = 20
+        private val CLEANUP_INTERVAL = 30.seconds
+        private const val TAG = "NwcServiceImpl"
     }
 }
 
