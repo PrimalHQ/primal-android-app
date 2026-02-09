@@ -22,6 +22,8 @@ import net.primal.android.user.domain.Credential
 import net.primal.android.user.repository.BlossomRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.utils.Result
+import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.NostrEvent
@@ -48,7 +50,10 @@ class CreateAccountHandlerTest {
         eventsSignatureHandler: NostrEventSignatureHandler = FakeNostrNotary(
             expectedSignedNostrEvent = mockk(relaxed = true),
         ),
-        ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase = mockk(relaxed = true),
+        ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase = mockk(relaxed = true) {
+            coEvery { invoke(userId = any()) } returns Result.success("walletId")
+        },
+        sparkWalletAccountRepository: SparkWalletAccountRepository = mockk(relaxed = true),
     ): CreateAccountHandler {
         return CreateAccountHandler(
             authRepository = authRepository,
@@ -60,6 +65,7 @@ class CreateAccountHandlerTest {
             eventsSignatureHandler = eventsSignatureHandler,
             blossomRepository = blossomRepository,
             ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
+            sparkWalletAccountRepository = sparkWalletAccountRepository,
         )
     }
 
@@ -274,7 +280,9 @@ class CreateAccountHandlerTest {
             val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
                 coEvery { saveNsec(any()) } returns keyPair.pubKey
             }
-            val ensureSparkWalletExistsUseCase = mockk<EnsureSparkWalletExistsUseCase>(relaxed = true)
+            val ensureSparkWalletExistsUseCase = mockk<EnsureSparkWalletExistsUseCase>(relaxed = true) {
+                coEvery { invoke(userId = any()) } returns Result.success("walletId")
+            }
             val handler = createAccountHandler(
                 credentialsStore = credentialsStore,
                 ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,

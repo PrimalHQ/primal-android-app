@@ -97,6 +97,11 @@ internal class SparkWalletAccountRepositoryImpl(
             }
         }
 
+    override suspend fun getLightningAddress(walletId: String): String? =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet().findWalletInfo(walletId)?.lightningAddress?.decrypted
+        }
+
     override suspend fun isRegistered(walletId: String): Boolean =
         withContext(dispatcherProvider.io()) {
             val info = walletDatabase.wallet().findWalletInfo(walletId)

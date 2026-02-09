@@ -20,6 +20,8 @@ interface SparkWalletAccountRepository {
         seedWords: String,
     ): Result<Unit>
 
+    suspend fun getLightningAddress(walletId: String): String?
+
     suspend fun isRegistered(walletId: String): Boolean
 
     suspend fun isWalletBackedUp(walletId: String): Boolean

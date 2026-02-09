@@ -13,7 +13,9 @@ import net.primal.android.user.repository.BlossomRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.onSuccess
 import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
@@ -34,6 +36,7 @@ class CreateAccountHandler @Inject constructor(
     private val userRepository: UserRepository,
     private val settingsRepository: SettingsRepository,
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
+    private val sparkWalletAccountRepository: SparkWalletAccountRepository,
 ) {
 
     suspend fun createNostrAccount(
@@ -49,6 +52,7 @@ class CreateAccountHandler @Inject constructor(
             val contacts = setOf(userId) + interests.mapToContacts()
             userRepository.setFollowList(userId = userId, contacts = contacts)
             ensureSparkWalletExistsUseCase.invoke(userId = userId)
+                .onSuccess { setLightningAddress(userId = userId, walletId = it) }
             settingsRepository.fetchAndPersistAppSettings(
                 authorizationEvent = eventsSignatureHandler.signNostrEvent(
                     unsignedNostrEvent = NostrUnsignedEvent(
@@ -75,6 +79,17 @@ class CreateAccountHandler @Inject constructor(
                 .map { member -> member.userId }
         }
             .toSet()
+    }
+
+    private suspend fun setLightningAddress(userId: String, walletId: String) {
+        runCatching {
+            val lightningAddress = sparkWalletAccountRepository.getLightningAddress(walletId)
+            if (!lightningAddress.isNullOrBlank()) {
+                userRepository.setLightningAddress(userId = userId, lightningAddress = lightningAddress)
+            }
+        }.onFailure { error ->
+            Napier.w(throwable = error) { "Failed to set lightning address in profile metadata." }
+        }
     }
 
     class AccountCreationException(cause: Throwable) : IOException(cause)
