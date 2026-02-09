@@ -44,7 +44,9 @@ import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.distinctUntilWalletIdChanged
+import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 
+@Suppress("LongParameterList")
 @HiltViewModel
 class WalletDashboardViewModel @Inject constructor(
     userRepository: UserRepository,
@@ -57,6 +59,7 @@ class WalletDashboardViewModel @Inject constructor(
     private val exchangeRateHandler: ExchangeRateHandler,
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
+    private val migratePrimalTransactionsHandler: MigratePrimalTransactionsHandler,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
@@ -81,12 +84,22 @@ class WalletDashboardViewModel @Inject constructor(
         subscribeToPurchases()
         subscribeToBadgesUpdates()
         checkForPersistedSparkWallet()
+        migratePrimalTransactionsIfNeeded()
     }
 
     private fun checkForPersistedSparkWallet() =
         viewModelScope.launch {
             val existingWalletId = sparkWalletAccountRepository.findPersistedWalletId(activeUserId)
             setState { copy(hasPersistedSparkWallet = existingWalletId != null) }
+        }
+
+    private fun migratePrimalTransactionsIfNeeded() =
+        viewModelScope.launch {
+            val sparkWalletId = sparkWalletAccountRepository.findPersistedWalletId(activeUserId) ?: return@launch
+            migratePrimalTransactionsHandler.invoke(
+                userId = activeUserId,
+                targetSparkWalletId = sparkWalletId,
+            )
         }
 
     private fun subscribeToEvents() =

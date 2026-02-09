@@ -1,6 +1,8 @@
 package net.primal.wallet.data.repository.handler
 
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.profile.ProfileRepository
@@ -17,6 +19,8 @@ class MigratePrimalTransactionsHandler(
     private val primalWalletApi: PrimalWalletApi,
     private val profileRepository: ProfileRepository? = null,
 ) {
+
+    private val migrationMutex = Mutex()
 
     private companion object {
         private const val DEFAULT_PAGE_SIZE = 50
@@ -43,105 +47,107 @@ class MigratePrimalTransactionsHandler(
     ): Result<Unit> =
         withContext(dispatcherProvider.io()) {
             runCatching {
-                // Check locally if migration is already completed
-                val sparkWalletData = walletDatabase.wallet().findSparkWalletData(targetSparkWalletId)
-                if (sparkWalletData?.primalTxsMigrated == true) {
-                    Napier.d { "Transaction migration already completed for walletId=$targetSparkWalletId" }
-                    return@runCatching
-                }
-
-                // Check if Primal wallet API is deprecated - if so, mark migration complete and skip
-                val walletStatus = primalWalletApi.getWalletStatus(userId)
-                if (walletStatus.mustMigrate) {
-                    Napier.i { "Primal wallet API deprecated, marking transaction migration as completed" }
-                    walletDatabase.wallet().updatePrimalTxsMigrated(walletId = targetSparkWalletId, migrated = true)
-                    return@runCatching
-                }
-
-                Napier.d { "Starting Primal transaction migration for user $userId to wallet $targetSparkWalletId" }
-
-                // Get resume point (null = start from most recent)
-                var until: Long? = walletDatabase.wallet()
-                    .findSparkWalletData(targetSparkWalletId)
-                    ?.primalTxsMigratedUntil
-
-                if (until != null) {
-                    Napier.d { "Resuming migration from timestamp $until" }
-                }
-
-                var pageCount = 0
-
-                do {
-                    val previousUntil = until
-
-                    val response = primalWalletApi.getTransactions(
-                        userId = userId,
-                        body = TransactionsRequestBody(
-                            subWallet = SubWallet.Open,
-                            limit = DEFAULT_PAGE_SIZE,
-                            until = until,
-                        ),
-                    )
-
-                    if (response.transactions.isEmpty()) {
-                        Napier.d { "No more transactions to migrate" }
-                        until = null
-                        break
+                migrationMutex.withLock {
+                    // Check locally if migration is already completed
+                    val sparkWalletData = walletDatabase.wallet().findSparkWalletData(targetSparkWalletId)
+                    if (sparkWalletData?.primalTxsMigrated == true) {
+                        Napier.d { "Transaction migration already completed for walletId=$targetSparkWalletId" }
+                        return@runCatching
                     }
 
-                    Napier.d { "Fetched ${response.transactions.size} transactions for page ${pageCount + 1}" }
+                    // Check if Primal wallet API is deprecated - if so, mark migration complete and skip
+                    val walletStatus = primalWalletApi.getWalletStatus(userId)
+                    if (walletStatus.mustMigrate) {
+                        Napier.i { "Primal wallet API deprecated, marking transaction migration as completed" }
+                        walletDatabase.wallet().updatePrimalTxsMigrated(walletId = targetSparkWalletId, migrated = true)
+                        return@runCatching
+                    }
 
-                    // Map transactions for migration (sets walletType = SPARK)
-                    val mapped = response.transactions
-                        .mapForMigration(targetWalletId = targetSparkWalletId, userId = userId)
-                        .map { it.toWalletTransactionData() }
+                    Napier.d { "Starting Primal transaction migration for user $userId to wallet $targetSparkWalletId" }
 
-                    walletDatabase.walletTransactions().upsertAll(mapped)
+                    // Get resume point (null = start from most recent)
+                    var until: Long? = walletDatabase.wallet()
+                        .findSparkWalletData(targetSparkWalletId)
+                        ?.primalTxsMigratedUntil
 
-                    // Fetch profiles for other users in transactions (for UI enrichment)
-                    if (profileRepository != null) {
-                        val otherUserIds = response.transactions.mapNotNull { it.otherPubkey }
-                        if (otherUserIds.isNotEmpty()) {
-                            profileRepository.fetchMissingProfiles(profileIds = otherUserIds)
-                            Napier.d { "Fetched ${otherUserIds.size} profiles for transaction enrichment" }
+                    if (until != null) {
+                        Napier.d { "Resuming migration from timestamp $until" }
+                    }
+
+                    var pageCount = 0
+
+                    do {
+                        val previousUntil = until
+
+                        val response = primalWalletApi.getTransactions(
+                            userId = userId,
+                            body = TransactionsRequestBody(
+                                subWallet = SubWallet.Open,
+                                limit = DEFAULT_PAGE_SIZE,
+                                until = until,
+                            ),
+                        )
+
+                        if (response.transactions.isEmpty()) {
+                            Napier.d { "No more transactions to migrate" }
+                            until = null
+                            break
                         }
+
+                        Napier.d { "Fetched ${response.transactions.size} transactions for page ${pageCount + 1}" }
+
+                        // Map transactions for migration (sets walletType = SPARK)
+                        val mapped = response.transactions
+                            .mapForMigration(targetWalletId = targetSparkWalletId, userId = userId)
+                            .map { it.toWalletTransactionData() }
+
+                        walletDatabase.walletTransactions().upsertAll(mapped)
+
+                        // Fetch profiles for other users in transactions (for UI enrichment)
+                        if (profileRepository != null) {
+                            val otherUserIds = response.transactions.mapNotNull { it.otherPubkey }
+                            if (otherUserIds.isNotEmpty()) {
+                                profileRepository.fetchMissingProfiles(profileIds = otherUserIds)
+                                Napier.d { "Fetched ${otherUserIds.size} profiles for transaction enrichment" }
+                            }
+                        }
+
+                        // Save progress after each page (resume point for next iteration)
+                        // Use sinceId (oldest/min timestamp) for backward pagination, not untilId (newest/max)
+                        until = response.paging?.sinceId
+
+                        // Prevent infinite loop: if cursor didn't change, we're stuck
+                        if (until != null && until == previousUntil) {
+                            Napier.w { "Pagination cursor unchanged ($until), breaking to prevent infinite loop" }
+                            until = null
+                            break
+                        }
+
+                        walletDatabase.wallet().updatePrimalTxsMigratedUntil(
+                            walletId = targetSparkWalletId,
+                            until = until,
+                        )
+
+                        pageCount++
+                        onPageFetched?.invoke(pageCount)
+
+                        // Stop if we've fetched enough pages (for foreground migration)
+                        if (maxPages != null && pageCount >= maxPages) {
+                            Napier.d { "Reached max pages limit ($maxPages), stopping" }
+                            break
+                        }
+                    } while (until != null)
+
+                    // Only mark as fully migrated if we fetched ALL pages (until == null)
+                    if (until == null) {
+                        walletDatabase.wallet().updatePrimalTxsMigrated(
+                            walletId = targetSparkWalletId,
+                            migrated = true,
+                        )
+                        Napier.i { "Transaction migration completed - all pages fetched" }
+                    } else {
+                        Napier.i { "Transaction migration paused - $pageCount pages fetched, more remaining" }
                     }
-
-                    // Save progress after each page (resume point for next iteration)
-                    // Use sinceId (oldest/min timestamp) for backward pagination, not untilId (newest/max)
-                    until = response.paging?.sinceId
-
-                    // Prevent infinite loop: if cursor didn't change, we're stuck
-                    if (until != null && until == previousUntil) {
-                        Napier.w { "Pagination cursor unchanged ($until), breaking to prevent infinite loop" }
-                        until = null
-                        break
-                    }
-
-                    walletDatabase.wallet().updatePrimalTxsMigratedUntil(
-                        walletId = targetSparkWalletId,
-                        until = until,
-                    )
-
-                    pageCount++
-                    onPageFetched?.invoke(pageCount)
-
-                    // Stop if we've fetched enough pages (for foreground migration)
-                    if (maxPages != null && pageCount >= maxPages) {
-                        Napier.d { "Reached max pages limit ($maxPages), stopping" }
-                        break
-                    }
-                } while (until != null)
-
-                // Only mark as fully migrated if we fetched ALL pages (until == null)
-                if (until == null) {
-                    walletDatabase.wallet().updatePrimalTxsMigrated(
-                        walletId = targetSparkWalletId,
-                        migrated = true,
-                    )
-                    Napier.i { "Transaction migration completed - all pages fetched" }
-                } else {
-                    Napier.i { "Transaction migration paused - $pageCount pages fetched, more remaining" }
                 }
             }
         }
