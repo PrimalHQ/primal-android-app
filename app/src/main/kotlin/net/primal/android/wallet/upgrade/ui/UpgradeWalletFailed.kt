@@ -1,24 +1,23 @@
 package net.primal.android.wallet.upgrade.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -26,140 +25,123 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.WalletError
+import net.primal.android.core.compose.icons.primaliconpack.WalletUpgradeError
 import net.primal.android.theme.AppTheme
 
-private const val SHARE_LOGS_ANNOTATION_TAG = "ShareLogsTag"
+private const val COPY_LOGS_ANNOTATION_TAG = "CopyLogsTag"
 
 @Composable
 fun UpgradeWalletFailed(
     modifier: Modifier,
-    errorMessage: String,
-    errorLogs: List<String>,
     onRetryClick: () -> Unit,
-    onCloseClick: () -> Unit,
-    onShareLogsClick: () -> Unit,
+    onCopyLogsClick: () -> Unit,
 ) {
     Column(
-        modifier = modifier.padding(top = 80.dp, bottom = 32.dp),
+        modifier = modifier.padding(top = 32.dp, bottom = 32.dp),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        FailedStatusColumn(
-            headlineText = stringResource(id = R.string.wallet_upgrade_failed_headline),
-            errorMessage = errorMessage,
-            showShareLogs = errorLogs.isNotEmpty(),
-            onShareLogsClick = onShareLogsClick,
-        )
-
         Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+                .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
-            PrimalLoadingButton(
-                modifier = Modifier.width(200.dp),
-                text = stringResource(id = R.string.wallet_upgrade_retry_button),
-                onClick = onRetryClick,
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            TextButton(onClick = onCloseClick) {
-                Text(
-                    text = stringResource(id = R.string.wallet_upgrade_close_button),
+            Image(
+                modifier = Modifier.size(160.dp),
+                imageVector = PrimalIcons.WalletUpgradeError,
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                    style = AppTheme.typography.bodyLarge.copy(fontWeight = FontWeight.SemiBold),
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun FailedStatusColumn(
-    headlineText: String,
-    errorMessage: String,
-    showShareLogs: Boolean,
-    onShareLogsClick: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Spacer(modifier = Modifier.height(80.dp))
-
-        androidx.compose.foundation.Image(
-            modifier = Modifier
-                .height(160.dp)
-                .padding(vertical = 16.dp),
-            imageVector = PrimalIcons.WalletError,
-            contentDescription = null,
-            colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(color = AppTheme.colorScheme.error),
-        )
-
-        Text(
-            modifier = Modifier
-                .fillMaxWidth(fraction = 0.8f)
-                .padding(top = 32.dp, bottom = 8.dp),
-            text = headlineText,
-            textAlign = TextAlign.Center,
-            style = AppTheme.typography.headlineSmall,
-        )
-
-        if (showShareLogs) {
-            ErrorMessageWithShareLogs(
-                errorMessage = errorMessage,
-                onShareLogsClick = onShareLogsClick,
+                ),
             )
-        } else {
+
+            Spacer(modifier = Modifier.height(60.dp))
+
             Text(
-                modifier = Modifier
-                    .fillMaxWidth(fraction = 0.8f)
-                    .padding(vertical = 32.dp),
-                text = errorMessage,
+                modifier = Modifier.fillMaxWidth(fraction = 0.8f),
+                text = stringResource(id = R.string.wallet_upgrade_failed_headline),
                 textAlign = TextAlign.Center,
-                style = AppTheme.typography.bodyLarge.copy(lineHeight = 28.sp),
+                style = AppTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 20.sp,
+                ),
+            )
+
+            Spacer(modifier = Modifier.height(35.dp))
+
+            Text(
+                text = stringResource(id = R.string.wallet_upgrade_failed_subtitle),
+                textAlign = TextAlign.Center,
+                style = AppTheme.typography.bodyLarge,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            SupportMessageWithCopyLogs(
+                onCopyLogsClick = onCopyLogsClick,
             )
         }
+
+        PrimalLoadingButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp),
+            text = stringResource(id = R.string.wallet_upgrade_try_again_button),
+            onClick = onRetryClick,
+        )
     }
 }
 
 @Composable
-private fun ErrorMessageWithShareLogs(errorMessage: String, onShareLogsClick: () -> Unit) {
-    val shareLogsText = stringResource(id = R.string.wallet_upgrade_share_logs)
+private fun SupportMessageWithCopyLogs(onCopyLogsClick: () -> Unit) {
+    val support1 = stringResource(id = R.string.wallet_upgrade_failed_support_1)
+    val email = stringResource(id = R.string.wallet_upgrade_failed_support_email)
+    val support2 = stringResource(id = R.string.wallet_upgrade_failed_support_2)
+    val copyLog = stringResource(id = R.string.wallet_upgrade_failed_support_copy_log)
+    val support3 = stringResource(id = R.string.wallet_upgrade_failed_support_3)
+
+    val boldSpanStyle = SpanStyle(
+        fontWeight = FontWeight.Bold,
+    )
+
     val linkSpanStyle = SpanStyle(
         color = AppTheme.colorScheme.secondary,
-        textDecoration = TextDecoration.Underline,
-        fontWeight = FontWeight.SemiBold,
     )
 
     val annotatedString = buildAnnotatedString {
-        append(errorMessage)
+        append("$support1 ")
+        withStyle(style = boldSpanStyle) {
+            append(email)
+        }
+        append(support2)
         append(" ")
-        pushStringAnnotation(SHARE_LOGS_ANNOTATION_TAG, "share")
+        pushStringAnnotation(COPY_LOGS_ANNOTATION_TAG, "copy")
         withStyle(style = linkSpanStyle) {
-            append(shareLogsText)
+            append(copyLog)
         }
         pop()
+        append(support3)
     }
 
     PrimalClickableText(
-        modifier = Modifier
-            .fillMaxWidth(fraction = 0.8f)
-            .padding(vertical = 32.dp),
+        modifier = Modifier.fillMaxWidth(),
         text = annotatedString,
         style = AppTheme.typography.bodyLarge.copy(
-            lineHeight = 28.sp,
+            lineHeight = 24.sp,
             textAlign = TextAlign.Center,
-            color = AppTheme.colorScheme.onSurface,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
         ),
         onClick = { position, _ ->
             annotatedString.getStringAnnotations(
                 start = position,
                 end = position,
             ).firstOrNull()?.let { annotation ->
-                if (annotation.tag == SHARE_LOGS_ANNOTATION_TAG) {
-                    onShareLogsClick()
+                if (annotation.tag == COPY_LOGS_ANNOTATION_TAG) {
+                    onCopyLogsClick()
                 }
             }
         },

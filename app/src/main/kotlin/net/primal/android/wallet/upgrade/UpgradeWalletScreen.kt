@@ -74,6 +74,7 @@ fun UpgradeWalletScreen(
                                 .fillMaxSize()
                                 .background(color = AppTheme.colorScheme.surfaceVariant)
                                 .padding(paddingValues),
+                            walletBalanceInSats = state.walletBalanceInSats,
                             onStartUpgrade = { eventPublisher(UiEvent.StartUpgrade) },
                         )
                     }
@@ -102,12 +103,8 @@ fun UpgradeWalletScreen(
                                 .fillMaxSize()
                                 .background(color = AppTheme.colorScheme.surfaceVariant)
                                 .padding(paddingValues),
-                            errorMessage = state.error?.message
-                                ?: stringResource(id = R.string.app_generic_error),
-                            errorLogs = state.errorLogs,
                             onRetryClick = { eventPublisher(UiEvent.RetryUpgrade) },
-                            onCloseClick = onClose,
-                            onShareLogsClick = {
+                            onCopyLogsClick = {
                                 val logsText = state.errorLogs.joinToString("\n")
                                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                     type = "text/plain"

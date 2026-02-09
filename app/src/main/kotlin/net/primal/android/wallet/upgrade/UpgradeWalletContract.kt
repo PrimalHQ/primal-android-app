@@ -6,6 +6,7 @@ interface UpgradeWalletContract {
 
     data class UiState(
         val status: UpgradeWalletStatus = UpgradeWalletStatus.Ready,
+        val walletBalanceInSats: Long? = null,
         val currentStep: MigrationStep? = null,
         val error: Throwable? = null,
         val errorLogs: List<String> = emptyList(),

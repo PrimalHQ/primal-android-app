@@ -166,6 +166,7 @@ import net.primal.android.core.compose.icons.primaliconpack.WalletPay
 import net.primal.android.core.compose.icons.primaliconpack.WalletPurchaseSats
 import net.primal.android.core.compose.icons.primaliconpack.WalletReceive
 import net.primal.android.core.compose.icons.primaliconpack.WalletSuccess
+import net.primal.android.core.compose.icons.primaliconpack.WalletUpgradeError
 import net.primal.android.core.compose.icons.primaliconpack.Zap
 
 object PrimalIcons
@@ -271,6 +272,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             WalletLightningPayment,
             WalletLightningPaymentFilled,
             WalletLightningPaymentAlt,
+            WalletUpgradeError,
             LightningBolt,
             LightningBoltFilled,
             Keyboard,
