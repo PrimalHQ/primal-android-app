@@ -72,6 +72,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.utils.saveTransactionsToUri
 import net.primal.domain.links.CdnImage
+import net.primal.domain.utils.isPrimalWalletAndActivated
 import net.primal.domain.wallet.NostrWalletKeypair
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.capabilities
@@ -255,14 +256,17 @@ fun WalletSettingsScreen(
                     },
                 )
 
-                ConnectedAppsSettings(
-                    primalNwcConnectionInfos = state.nwcConnectionsInfo,
-                    onRevokeConnectedApp = { eventPublisher(UiEvent.RevokeConnection(it)) },
-                    onCreateNewWalletConnection = onCreateNewWalletConnection,
-                    connectionsState = state.connectionsState,
-                    onRetryFetchingConnections = { eventPublisher(UiEvent.RequestFetchWalletConnections) },
-                    walletSupportsNwcConnections = state.activeWallet?.capabilities?.supportsNwcConnections == true,
-                )
+                if (state.activeWallet?.capabilities?.supportsNwcConnections == true) {
+                    ConnectedAppsSettings(
+                        primalNwcConnectionInfos = state.nwcConnectionsInfo,
+                        onRevokeConnectedApp = { eventPublisher(UiEvent.RevokeConnection(it)) },
+                        onCreateNewWalletConnection = onCreateNewWalletConnection,
+                        connectionsState = state.connectionsState,
+                        onRetryFetchingConnections = { eventPublisher(UiEvent.RequestFetchWalletConnections) },
+                        isWalletActivated = state.activeWallet is Wallet.Spark ||
+                            state.activeWallet.isPrimalWalletAndActivated(),
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 

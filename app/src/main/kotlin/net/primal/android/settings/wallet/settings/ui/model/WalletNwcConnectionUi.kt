@@ -6,20 +6,20 @@ import net.primal.domain.connections.primal.model.PrimalNwcConnectionInfo
 
 data class WalletNwcConnectionUi(
     val appName: String,
-    val dailyBudget: String?,
+    val dailyBudgetInBtc: String?,
     val nwcPubkey: String,
 )
 
 fun NwcConnection.asWalletNwcConnectionUi() =
     WalletNwcConnectionUi(
         appName = appName,
-        dailyBudget = dailyBudgetSats?.toBtc()?.toString(),
+        dailyBudgetInBtc = dailyBudgetSats?.toBtc()?.toString(),
         nwcPubkey = secretPubKey,
     )
 
 fun PrimalNwcConnectionInfo.asWalletNwcConnectionUi() =
     WalletNwcConnectionUi(
         appName = appName,
-        dailyBudget = dailyBudgetInBtc,
+        dailyBudgetInBtc = dailyBudgetInBtc,
         nwcPubkey = nwcPubkey,
     )

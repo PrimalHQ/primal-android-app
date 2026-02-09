@@ -91,7 +91,7 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                             dailyBudget = formattedDailyBudgetBtc,
                         ).nwcConnectionUri
                     }
-                    else -> null
+                    else -> error("Active wallet does not support NWC connections.")
                 }
             }.onSuccess { nwcConnectionUri ->
                 setState {
