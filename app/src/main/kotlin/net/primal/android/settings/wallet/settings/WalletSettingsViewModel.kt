@@ -82,9 +82,9 @@ class WalletSettingsViewModel @AssistedInject constructor(
         observeEvents()
     }
 
-    private fun fetchWalletConnections() =
+    private fun fetchWalletConnections(wallet: Wallet? = null) =
         viewModelScope.launch {
-            val activeWallet = state.value.activeWallet ?: return@launch
+            val activeWallet = wallet ?: state.value.activeWallet ?: return@launch
             if (!activeWallet.capabilities.supportsNwcConnections) {
                 setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
                 return@launch
@@ -195,7 +195,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     }
 
                     if (wallet != null) {
-                        fetchWalletConnections()
+                        fetchWalletConnections(wallet)
                     }
 
                     if (wallet is Wallet.Spark) {
