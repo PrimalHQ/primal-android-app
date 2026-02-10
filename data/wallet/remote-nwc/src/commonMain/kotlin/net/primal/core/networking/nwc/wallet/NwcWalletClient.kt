@@ -1,6 +1,7 @@
 package net.primal.core.networking.nwc.wallet
 
 import io.github.aakira.napier.Napier
+import kotlin.time.Clock
 import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
@@ -43,6 +45,8 @@ class NwcWalletClient(
 
     private val connectionMapMutex = Mutex()
     private var connectionMap: Map<String, NwcConnection> = emptyMap()
+
+    private val sinceTimestamp = Clock.System.now().epochSeconds
 
     private var subscriptionJob: Job? = null
 
@@ -96,6 +100,7 @@ class NwcWalletClient(
                         servicePubKeys.forEach { add(it) }
                     },
                 )
+                put("since", JsonPrimitive(sinceTimestamp))
             },
         )
     }
