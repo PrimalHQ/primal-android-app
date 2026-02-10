@@ -9,8 +9,11 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.core.service.PrimalNwcService
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiEvent
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -28,7 +31,7 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
     private val nwcRepository: NwcRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState())
+    private val _state = MutableStateFlow(UiState(activeUserId = activeAccountStore.activeUserId()))
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
@@ -36,8 +39,37 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
+        observeActiveAccount()
+        observeServiceRunningState()
         observeEvents()
     }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(
+                        activeUserId = it.pubkey,
+                        activeAccountAvatarCdnImage = it.avatarCdnImage,
+                        activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
+                        activeAccountBlossoms = it.blossomServers,
+                        activeAccountDisplayName = it.authorDisplayName,
+                    )
+                }
+            }
+        }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private fun observeServiceRunningState() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserId
+                .flatMapLatest { userId ->
+                    PrimalNwcService.isRunningForUser(userId)
+                }
+                .collect { isRunning ->
+                    setState { copy(isServiceRunningForCurrentUser = isRunning) }
+                }
+        }
 
     private fun observeEvents() {
         viewModelScope.launch {

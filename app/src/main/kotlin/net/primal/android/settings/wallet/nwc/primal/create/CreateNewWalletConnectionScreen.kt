@@ -22,6 +22,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -61,10 +63,13 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.service.PrimalNwcService
+import net.primal.android.core.utils.hasNotificationPermission
 import net.primal.android.settings.wallet.nwc.primal.PrimalNwcDefaults
 import net.primal.android.settings.wallet.nwc.primal.ui.DailyBudgetBottomSheet
 import net.primal.android.settings.wallet.nwc.primal.ui.WalletConnectionEditorHeader
 import net.primal.android.settings.wallet.nwc.primal.ui.WalletConnectionFooter
+import net.primal.android.settings.wallet.settings.ui.EnableNwcNotificationsBottomSheet
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -85,6 +90,35 @@ private fun CreateNewWalletConnectionScreen(
     eventPublisher: (CreateNewWalletConnectionContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
+    val context = LocalContext.current
+    var showNotificationsBottomSheet by remember { mutableStateOf(false) }
+
+    LaunchedEffect(state.nwcConnectionUri) {
+        if (state.nwcConnectionUri != null && !state.isServiceRunningForCurrentUser) {
+            if (context.hasNotificationPermission(PrimalNwcService.CHANNEL_ID)) {
+                PrimalNwcService.start(context, state.activeUserId)
+            } else {
+                showNotificationsBottomSheet = true
+            }
+        }
+    }
+
+    if (showNotificationsBottomSheet) {
+        EnableNwcNotificationsBottomSheet(
+            avatarCdnImage = state.activeAccountAvatarCdnImage,
+            legendaryCustomization = state.activeAccountLegendaryCustomization,
+            avatarBlossoms = state.activeAccountBlossoms,
+            displayName = state.activeAccountDisplayName,
+            onDismissRequest = { showNotificationsBottomSheet = false },
+            onTogglePushNotifications = { enabled ->
+                if (enabled) {
+                    PrimalNwcService.start(context, state.activeUserId)
+                    showNotificationsBottomSheet = false
+                }
+            },
+        )
+    }
+
     PrimalScaffold(
         topBar = {
             PrimalTopAppBar(
@@ -123,36 +157,49 @@ private fun CreateNewWalletConnectionScreen(
             }
         },
         bottomBar = {
-            val clipboard = LocalClipboardManager.current
-            when (state.nwcConnectionUri) {
-                null -> WalletConnectionFooter(
-                    loading = state.creatingSecret,
-                    enabled = !state.creatingSecret && state.appName.isNotEmpty(),
-                    primaryButtonText = stringResource(
-                        id = R.string.settings_wallet_new_nwc_connection_create_new_connection_button,
-                    ),
-                    onPrimaryButtonClick = {
-                        eventPublisher(CreateNewWalletConnectionContract.UiEvent.CreateWalletConnection)
-                    },
-                    secondaryButtonText = stringResource(
-                        id = R.string.settings_wallet_new_nwc_connection_cancel_button,
-                    ),
-                    onSecondaryButtonClick = onClose,
-                )
-
-                else -> WalletConnectionFooter(
-                    primaryButtonText = stringResource(
-                        id = R.string.settings_wallet_new_nwc_connection_copy_nwc_string_button,
-                    ),
-                    onPrimaryButtonClick = {
-                        clipboard.setText(AnnotatedString(text = state.nwcConnectionUri))
-                    },
-                    secondaryButtonText = stringResource(id = R.string.settings_wallet_new_nwc_connection_done_button),
-                    onSecondaryButtonClick = onClose,
-                )
-            }
+            WalletConnectionBottomBar(
+                state = state,
+                eventPublisher = eventPublisher,
+                onClose = onClose,
+            )
         },
     )
+}
+
+@Composable
+private fun WalletConnectionBottomBar(
+    state: CreateNewWalletConnectionContract.UiState,
+    eventPublisher: (CreateNewWalletConnectionContract.UiEvent) -> Unit,
+    onClose: () -> Unit,
+) {
+    val clipboard = LocalClipboardManager.current
+    when (state.nwcConnectionUri) {
+        null -> WalletConnectionFooter(
+            loading = state.creatingSecret,
+            enabled = !state.creatingSecret && state.appName.isNotEmpty(),
+            primaryButtonText = stringResource(
+                id = R.string.settings_wallet_new_nwc_connection_create_new_connection_button,
+            ),
+            onPrimaryButtonClick = {
+                eventPublisher(CreateNewWalletConnectionContract.UiEvent.CreateWalletConnection)
+            },
+            secondaryButtonText = stringResource(
+                id = R.string.settings_wallet_new_nwc_connection_cancel_button,
+            ),
+            onSecondaryButtonClick = onClose,
+        )
+
+        else -> WalletConnectionFooter(
+            primaryButtonText = stringResource(
+                id = R.string.settings_wallet_new_nwc_connection_copy_nwc_string_button,
+            ),
+            onPrimaryButtonClick = {
+                clipboard.setText(AnnotatedString(text = state.nwcConnectionUri))
+            },
+            secondaryButtonText = stringResource(id = R.string.settings_wallet_new_nwc_connection_done_button),
+            onSecondaryButtonClick = onClose,
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
