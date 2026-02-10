@@ -99,10 +99,9 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 }
         }
 
-    private fun fetchPrimalWalletConnections(wallet: Wallet.Primal? = null): Job =
+    private fun fetchPrimalWalletConnections(wallet: Wallet.Primal): Job =
         viewModelScope.launch {
-            val primalWallet = wallet ?: state.value.activeWallet as? Wallet.Primal ?: return@launch
-            if (primalWallet.kycLevel == WalletKycLevel.None) {
+            if (wallet.kycLevel == WalletKycLevel.None) {
                 setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
                 return@launch
             }

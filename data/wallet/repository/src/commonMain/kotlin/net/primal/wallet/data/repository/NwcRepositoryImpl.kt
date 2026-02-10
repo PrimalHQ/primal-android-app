@@ -2,6 +2,7 @@ package net.primal.wallet.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.asSuccess
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -19,7 +20,7 @@ internal class NwcRepositoryImpl(
 ) : NwcRepository {
 
     override suspend fun getConnections(userId: String): List<NwcConnection> =
-        with(dispatcherProvider.io()) {
+        withContext(dispatcherProvider.io()) {
             database.nwcConnections()
                 .getAllConnectionsByUser(userId = userId)
                 .map { it.asDO() }
@@ -36,12 +37,12 @@ internal class NwcRepositoryImpl(
         appName: String,
         dailyBudget: Long?,
     ): Result<String> =
-        with(dispatcherProvider.io()) {
+        withContext(dispatcherProvider.io()) {
             val secretKeyPair = CryptoUtils.generateHexEncodedKeypair()
             val serviceKeyPair = CryptoUtils.generateHexEncodedKeypair()
 
             val walletInfo = database.wallet().findWalletInfo(walletId = walletId)
-                ?: return Result.failure<String>(IllegalArgumentException("Couldn't find given wallet id."))
+                ?: return@withContext Result.failure<String>(IllegalArgumentException("Couldn't find given wallet id."))
 
             database.nwcConnections().upsert(
                 data = NwcConnectionData(
@@ -64,7 +65,7 @@ internal class NwcRepositoryImpl(
         }
 
     override suspend fun revokeConnection(userId: String, secretPubKey: String) =
-        with(dispatcherProvider.io()) {
+        withContext(dispatcherProvider.io()) {
             database.nwcConnections().deleteConnection(userId = userId, secretPubKey = secretPubKey)
         }
 

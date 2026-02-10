@@ -44,7 +44,6 @@ import net.primal.core.utils.CurrencyConversionUtils.toSats
 @Composable
 fun ConnectedAppsSettings(
     primalNwcConnectionInfos: List<WalletNwcConnectionUi>,
-    isWalletActivated: Boolean,
     connectionsState: WalletSettingsContract.ConnectionsState,
     onRevokeConnectedApp: (nwcPubkey: String) -> Unit,
     onCreateNewWalletConnection: () -> Unit,
@@ -88,14 +87,12 @@ fun ConnectedAppsSettings(
             onRetryFetchingConnections = onRetryFetchingConnections,
             onRevokeDialogVisibilityChange = { revokeDialogVisible = it },
             onRevokeNwcPubkeyChange = { revokeNwcPubkey = it },
-            isWalletActivated = isWalletActivated,
         )
     }
 
     Spacer(modifier = Modifier.height(16.dp))
 
     ConnectedAppsHint(
-        isWalletActivated = isWalletActivated,
         createNewWalletConnection = onCreateNewWalletConnection,
     )
 
@@ -150,7 +147,6 @@ private fun ConnectedAppsHeader() {
 @Composable
 private fun ConnectedAppsContent(
     connectionsState: WalletSettingsContract.ConnectionsState,
-    isWalletActivated: Boolean,
     onRetryFetchingConnections: () -> Unit,
     primalNwcConnectionInfos: List<WalletNwcConnectionUi>,
     onRevokeDialogVisibilityChange: (Boolean) -> Unit,
@@ -172,21 +168,16 @@ private fun ConnectedAppsContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = when (isWalletActivated) {
-                        true -> stringResource(R.string.settings_wallet_nwc_connections_error_unable_to_load_apps)
-                        else -> stringResource(R.string.settings_wallet_nwc_connections_wallet_not_activated)
-                    },
+                    text = stringResource(R.string.settings_wallet_nwc_connections_error_unable_to_load_apps),
                     style = AppTheme.typography.titleMedium,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     fontWeight = FontWeight.Medium,
                 )
 
-                if (isWalletActivated) {
-                    TextButton(onClick = onRetryFetchingConnections) {
-                        Text(
-                            text = stringResource(id = R.string.settings_wallet_nwc_connections_retry),
-                        )
-                    }
+                TextButton(onClick = onRetryFetchingConnections) {
+                    Text(
+                        text = stringResource(id = R.string.settings_wallet_nwc_connections_retry),
+                    )
                 }
             }
         }
@@ -289,7 +280,7 @@ private fun ConnectedAppItem(
 }
 
 @Composable
-private fun ConnectedAppsHint(isWalletActivated: Boolean, createNewWalletConnection: () -> Unit) {
+private fun ConnectedAppsHint(createNewWalletConnection: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -301,28 +292,26 @@ private fun ConnectedAppsHint(isWalletActivated: Boolean, createNewWalletConnect
             style = AppTheme.typography.bodySmall,
         )
 
-        if (isWalletActivated) {
-            TextButton(
-                onClick = createNewWalletConnection,
-                contentPadding = PaddingValues(0.dp),
-                shape = AppTheme.shapes.small,
-            ) {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = createNewWalletConnection,
-                        ),
-                    text = stringResource(id = R.string.settings_wallet_nwc_connections_create_new_text_button),
-                    style = AppTheme.typography.bodyMedium.copy(
-                        color = AppTheme.colorScheme.secondary,
-                        fontStyle = AppTheme.typography.bodyMedium.fontStyle,
-                        fontWeight = FontWeight.SemiBold,
+        TextButton(
+            onClick = createNewWalletConnection,
+            contentPadding = PaddingValues(0.dp),
+            shape = AppTheme.shapes.small,
+        ) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = createNewWalletConnection,
                     ),
-                )
-            }
+                text = stringResource(id = R.string.settings_wallet_nwc_connections_create_new_text_button),
+                style = AppTheme.typography.bodyMedium.copy(
+                    color = AppTheme.colorScheme.secondary,
+                    fontStyle = AppTheme.typography.bodyMedium.fontStyle,
+                    fontWeight = FontWeight.SemiBold,
+                ),
+            )
         }
     }
 }
