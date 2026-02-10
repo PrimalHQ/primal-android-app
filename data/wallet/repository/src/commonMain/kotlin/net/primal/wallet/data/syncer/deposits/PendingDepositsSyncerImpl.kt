@@ -209,7 +209,7 @@ internal class PendingDepositsSyncerImpl(
 
     private companion object {
         private const val TAG = "PendingDepositsSyncer"
-        private val POLL_INTERVAL = 30.seconds
+        private val POLL_INTERVAL = 15.seconds
         private val ADDRESS_TTL = 24.hours
         private const val MAX_ADDRESSES_TO_POLL = 5
     }
