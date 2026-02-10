@@ -59,6 +59,12 @@ abstract class RepositoryFactory {
         )
     }
 
+    private val sparkWalletManager by lazy {
+        SparkWalletManagerImpl(
+            breezSdkInstanceManager = breezSdkInstanceManager,
+        )
+    }
+
     internal abstract fun resolveWalletDatabase(): WalletDatabase
 
     internal abstract fun resolveBreezSdkStorageProvider(): BreezSdkStorageProvider
@@ -102,6 +108,7 @@ abstract class RepositoryFactory {
             sparkWalletService = WalletServiceFactoryImpl.createSparkWalletService(
                 breezSdkInstanceManager = breezSdkInstanceManager,
                 eventRepository = eventRepository,
+                sparkWalletManager = sparkWalletManager,
             ),
         )
     }
@@ -184,11 +191,7 @@ abstract class RepositoryFactory {
         )
     }
 
-    fun createSparkWalletManager(): SparkWalletManager {
-        return SparkWalletManagerImpl(
-            breezSdkInstanceManager = breezSdkInstanceManager,
-        )
-    }
+    fun createSparkWalletManager(): SparkWalletManager = sparkWalletManager
 
     fun createPrimalWalletNwcRepository(
         primalWalletApiClient: PrimalApiClient,

@@ -7,6 +7,8 @@ interface SparkWalletManager {
 
     val unclaimedDeposits: Flow<UnclaimedDepositEvent>
 
+    val balanceChanged: Flow<String>
+
     suspend fun initializeWallet(seedWords: String): Result<String>
 
     suspend fun disconnectWallet(walletId: String): Result<Unit>

@@ -28,6 +28,9 @@ internal class SparkWalletManagerImpl(
     private val _unclaimedDeposits = MutableSharedFlow<UnclaimedDepositEvent>()
     override val unclaimedDeposits: Flow<UnclaimedDepositEvent> = _unclaimedDeposits.asSharedFlow()
 
+    private val _balanceChanged = MutableSharedFlow<String>()
+    override val balanceChanged: Flow<String> = _balanceChanged.asSharedFlow()
+
     override suspend fun initializeWallet(seedWords: String): Result<String> =
         runCatching {
             if (!recoveryPhraseValidator.isValid(seedWords)) {
@@ -63,14 +66,19 @@ internal class SparkWalletManagerImpl(
                 is SdkEvent.Synced ->
                     Napier.d { "SdkEvent.Synced walletId=$walletId" }
 
-                is SdkEvent.PaymentSucceeded ->
+                is SdkEvent.PaymentSucceeded -> {
                     Napier.i { "SdkEvent.PaymentSucceeded walletId=$walletId paymentId=${event.payment.id}" }
+                    _balanceChanged.emit(walletId)
+                }
 
-                is SdkEvent.PaymentPending ->
+                is SdkEvent.PaymentPending -> {
                     Napier.i { "SdkEvent.PaymentPending walletId=$walletId paymentId=${event.payment.id}" }
+                    _balanceChanged.emit(walletId)
+                }
 
-                is SdkEvent.PaymentFailed ->
+                is SdkEvent.PaymentFailed -> {
                     Napier.w { "SdkEvent.PaymentFailed walletId=$walletId paymentId=${event.payment.id}" }
+                }
 
                 is SdkEvent.UnclaimedDeposits -> {
                     val deposits = event.unclaimedDeposits
@@ -78,16 +86,24 @@ internal class SparkWalletManagerImpl(
                     _unclaimedDeposits.emit(
                         UnclaimedDepositEvent(
                             walletId = walletId,
-                            deposits = deposits.map { UnclaimedDeposit(txid = it.txid, amountSats = it.amountSats.toLong()) },
+                            deposits = deposits.map {
+                                UnclaimedDeposit(
+                                    txid = it.txid,
+                                    amountSats = it.amountSats.toLong(),
+                                )
+                            },
                         ),
                     )
                 }
 
-                is SdkEvent.ClaimedDeposits ->
+                is SdkEvent.ClaimedDeposits -> {
                     Napier.i { "SdkEvent.ClaimedDeposits walletId=$walletId" }
+                    _balanceChanged.emit(walletId)
+                }
 
-                is SdkEvent.Optimization ->
+                is SdkEvent.Optimization -> {
                     Napier.d { "SdkEvent.Optimization walletId=$walletId" }
+                }
             }
         }
     }

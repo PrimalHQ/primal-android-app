@@ -13,6 +13,8 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
 import net.primal.wallet.data.local.dao.ActiveWalletData
 import net.primal.wallet.data.local.dao.NostrWalletData
 import net.primal.wallet.data.local.dao.PrimalWalletData
+import net.primal.wallet.data.local.dao.ReceiveRequestDao
+import net.primal.wallet.data.local.dao.ReceiveRequestData
 import net.primal.wallet.data.local.dao.SparkWalletData
 import net.primal.wallet.data.local.dao.WalletDao
 import net.primal.wallet.data.local.dao.WalletInfo
@@ -20,8 +22,6 @@ import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletSettingsDao
 import net.primal.wallet.data.local.dao.WalletTransactionDao
 import net.primal.wallet.data.local.dao.WalletTransactionData
-import net.primal.wallet.data.local.dao.ReceiveRequestDao
-import net.primal.wallet.data.local.dao.ReceiveRequestData
 import net.primal.wallet.data.local.dao.nwc.NwcConnectionDao
 import net.primal.wallet.data.local.dao.nwc.NwcConnectionData
 import net.primal.wallet.data.local.dao.nwc.NwcDailyBudgetData

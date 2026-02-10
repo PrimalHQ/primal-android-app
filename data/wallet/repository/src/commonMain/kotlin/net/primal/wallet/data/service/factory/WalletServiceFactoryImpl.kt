@@ -4,6 +4,7 @@ import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.Wallet
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.service.NostrWalletServiceImpl
@@ -47,9 +48,11 @@ internal class WalletServiceFactoryImpl(
         fun createSparkWalletService(
             breezSdkInstanceManager: BreezSdkInstanceManager,
             eventRepository: EventRepository,
+            sparkWalletManager: SparkWalletManager,
         ) = SparkWalletServiceImpl(
             breezSdkInstanceManager = breezSdkInstanceManager,
             eventRepository = eventRepository,
+            sparkWalletManager = sparkWalletManager,
         )
     }
 }

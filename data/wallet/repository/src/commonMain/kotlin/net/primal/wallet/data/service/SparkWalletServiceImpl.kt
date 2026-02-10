@@ -27,7 +27,8 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withTimeout
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toSats
@@ -40,6 +41,7 @@ import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.OnChainAddressResult
+import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
@@ -53,6 +55,7 @@ import net.primal.wallet.data.spark.BreezSdkInstanceManager
 internal class SparkWalletServiceImpl(
     private val breezSdkInstanceManager: BreezSdkInstanceManager,
     private val eventRepository: EventRepository,
+    private val sparkWalletManager: SparkWalletManager,
 ) : WalletService<Wallet.Spark> {
 
     private companion object Companion {
@@ -77,7 +80,15 @@ internal class SparkWalletServiceImpl(
         }.mapFailure { it.toWalletException() }
 
     override suspend fun subscribeToWalletBalance(wallet: Wallet.Spark): Flow<WalletBalanceResult> {
-        return emptyFlow()
+        return flow {
+            fetchWalletBalance(wallet).getOrNull()?.let { emit(it) }
+
+            sparkWalletManager.balanceChanged
+                .filter { it == wallet.walletId }
+                .collect {
+                    fetchWalletBalance(wallet).getOrNull()?.let { emit(it) }
+                }
+        }
     }
 
     override suspend fun fetchTransactions(
