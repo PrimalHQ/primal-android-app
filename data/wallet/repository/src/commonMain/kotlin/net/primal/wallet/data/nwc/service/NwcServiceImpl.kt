@@ -275,7 +275,7 @@ class NwcServiceImpl internal constructor(
     }
 
     companion object {
-        private const val MAX_CACHE_SIZE = 20
+        private const val MAX_CACHE_SIZE = 500
         private val CLEANUP_INTERVAL = 30.seconds
         private const val TAG = "NwcServiceImpl"
     }
