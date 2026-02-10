@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.upgrade.UpgradeWalletContract.UiEvent
@@ -40,18 +41,17 @@ class UpgradeWalletViewModel @Inject constructor(
 
     init {
         observeEvents()
-        subscribeToActiveWallet()
+        observePrimalWallet()
     }
 
-    private fun subscribeToActiveWallet() =
+    private fun observePrimalWallet() =
         viewModelScope.launch {
-            walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { wallet ->
-                    if (wallet is Wallet.Primal) {
-                        wallet.balanceInBtc?.let { balanceInBtc ->
-                            val sats = balanceInBtc.toBigDecimal().toSats()
-                            setState { copy(walletBalanceInSats = sats.toLong()) }
-                        }
+            walletAccountRepository.observeWalletsByUser(userId = activeAccountStore.activeUserId())
+                .mapNotNull { wallets -> wallets.firstOrNull { it is Wallet.Primal } as? Wallet.Primal }
+                .collect { primalWallet ->
+                    primalWallet.balanceInBtc?.let { balanceInBtc ->
+                        val sats = balanceInBtc.toBigDecimal().toSats()
+                        setState { copy(walletBalanceInSats = sats.toLong()) }
                     }
                 }
         }

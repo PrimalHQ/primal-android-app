@@ -67,6 +67,7 @@ fun UpgradeWalletFailed(
                 style = AppTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 20.sp,
+                    lineHeight = 24.sp,
                 ),
             )
 
@@ -76,7 +77,7 @@ fun UpgradeWalletFailed(
                 text = stringResource(id = R.string.wallet_upgrade_failed_subtitle),
                 textAlign = TextAlign.Center,
                 style = AppTheme.typography.bodyLarge,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -133,7 +134,7 @@ private fun SupportMessageWithCopyLogs(onCopyLogsClick: () -> Unit) {
         style = AppTheme.typography.bodyLarge.copy(
             lineHeight = 24.sp,
             textAlign = TextAlign.Center,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         ),
         onClick = { position, _ ->
             annotatedString.getStringAnnotations(

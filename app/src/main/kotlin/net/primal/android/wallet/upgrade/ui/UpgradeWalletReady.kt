@@ -31,7 +31,6 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletFilled
 import net.primal.android.theme.AppTheme
-import net.primal.android.wallet.walletUpgradeBulletColor
 
 @Composable
 fun UpgradeWalletReady(
@@ -69,13 +68,15 @@ fun UpgradeWalletReady(
             Text(
                 text = stringResource(id = R.string.wallet_upgrade_keep_open),
                 textAlign = TextAlign.Center,
-                style = AppTheme.typography.bodyLarge,
+                style = AppTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
                 color = AppTheme.colorScheme.onSurface,
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(65.dp))
 
             FaqLink(onFaqClick = onFaqClick)
+
+            Spacer(modifier = Modifier.weight(1f))
         }
 
         PrimalLoadingButton(
@@ -93,12 +94,12 @@ private fun BulletList(walletBalanceInSats: Long?) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(19.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
         BulletItem(text = stringResource(id = R.string.wallet_upgrade_ready_bullet_1))
 
         val formattedSats = walletBalanceInSats
-            ?.let { numberFormat.format(it) } ?: "0"
+            ?.let { numberFormat.format(it) } ?: "-"
         val balanceText = buildAnnotatedString {
             append(stringResource(id = R.string.wallet_upgrade_ready_bullet_2_pre))
             append(" ")
@@ -117,6 +118,7 @@ private fun BulletList(walletBalanceInSats: Long?) {
 
 @Composable
 private fun BulletItem(text: CharSequence) {
+    val bulletColor = AppTheme.colorScheme.primary
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.Top,
@@ -126,7 +128,7 @@ private fun BulletItem(text: CharSequence) {
                 .padding(top = 8.dp, end = 12.dp)
                 .size(8.dp),
         ) {
-            drawCircle(color = walletUpgradeBulletColor)
+            drawCircle(color = bulletColor)
         }
 
         when (text) {
@@ -151,19 +153,24 @@ private fun FaqLink(onFaqClick: () -> Unit) {
     val faqText = stringResource(id = R.string.wallet_upgrade_faq_question)
     val faqLink = stringResource(id = R.string.wallet_upgrade_faq_link)
 
+    val textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2
     val annotatedString = buildAnnotatedString {
-        append(faqText)
+        withStyle(style = SpanStyle(color = textColor)) {
+            append(faqText)
+        }
         append(" ")
         pushStringAnnotation(tag = FAQ_ANNOTATION_TAG, annotation = "faq")
         withStyle(
             style = SpanStyle(
                 color = AppTheme.colorScheme.secondary,
-                fontWeight = FontWeight.Bold,
             ),
         ) {
             append(faqLink)
         }
         pop()
+        withStyle(style = SpanStyle(color = textColor)) {
+            append(".")
+        }
     }
 
     PrimalClickableText(

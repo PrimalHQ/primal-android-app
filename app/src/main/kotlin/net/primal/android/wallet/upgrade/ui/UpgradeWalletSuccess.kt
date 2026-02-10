@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -86,7 +87,7 @@ fun UpgradeWalletSuccess(modifier: Modifier, onDoneClick: () -> Unit) {
             }
 
             PrimalLoadingButton(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.width(150.dp),
                 text = stringResource(id = R.string.wallet_upgrade_done_button),
                 containerColor = walletSuccessDimColor,
                 onClick = onDoneClick,

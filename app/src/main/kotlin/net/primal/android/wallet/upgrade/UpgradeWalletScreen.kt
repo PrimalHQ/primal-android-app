@@ -134,8 +134,7 @@ fun UpgradeWalletScreen(
 @Composable
 private fun UpgradeWalletTopAppBar(status: UpgradeWalletStatus, onClose: () -> Unit) {
     if (status != UpgradeWalletStatus.Success) {
-        val showBackButton = status == UpgradeWalletStatus.Ready ||
-            status == UpgradeWalletStatus.Failed
+        val showBackButton = status == UpgradeWalletStatus.Ready
         PrimalTopAppBar(
             title = when (status) {
                 UpgradeWalletStatus.Ready -> stringResource(id = R.string.wallet_upgrade_title)
