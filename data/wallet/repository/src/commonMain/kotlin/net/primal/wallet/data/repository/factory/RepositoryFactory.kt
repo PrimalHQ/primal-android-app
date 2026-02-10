@@ -20,6 +20,7 @@ import net.primal.domain.rates.fees.TransactionFeeRepository
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.WalletRepository
+import net.primal.domain.wallet.nwc.NwcLogRepository
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
 import net.primal.wallet.data.nwc.manager.NwcBudgetManager
@@ -28,6 +29,8 @@ import net.primal.wallet.data.nwc.service.NwcServiceImpl
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.repository.BillingRepositoryImpl
 import net.primal.wallet.data.repository.ExchangeRateRepositoryImpl
+import net.primal.wallet.data.repository.InternalNwcLogRepository
+import net.primal.wallet.data.repository.NwcLogRepositoryImpl
 import net.primal.wallet.data.repository.NwcRepositoryImpl
 import net.primal.wallet.data.repository.PrimalWalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.PrimalWalletNwcRepositoryImpl
@@ -206,11 +209,27 @@ abstract class RepositoryFactory {
             database = resolveWalletDatabase(),
         )
 
+    fun createNwcLogRepository(): NwcLogRepository =
+        NwcLogRepositoryImpl(
+            walletDatabase = resolveWalletDatabase(),
+            dispatchers = dispatcherProvider,
+        )
+
+    private fun createInternalNwcLogRepository(): InternalNwcLogRepository =
+        InternalNwcLogRepository(
+            walletDatabase = resolveWalletDatabase(),
+            dispatchers = dispatcherProvider,
+        )
+
     fun createNwcService(
         walletRepository: WalletRepository,
         nostrEncryptionService: NostrEncryptionService,
     ): NwcService {
         val responseBuilder = NwcWalletResponseBuilder()
+        val budgetManager = NwcBudgetManager(
+            dispatcherProvider = dispatcherProvider,
+            walletDatabase = resolveWalletDatabase(),
+        )
         return NwcServiceImpl(
             dispatchers = dispatcherProvider,
             nwcRepository = createNwcRepository(),
@@ -220,13 +239,12 @@ abstract class RepositoryFactory {
             ),
             requestProcessor = NwcRequestProcessor(
                 walletRepository = walletRepository,
-                nwcBudgetManager = NwcBudgetManager(
-                    dispatcherProvider = dispatcherProvider,
-                    walletDatabase = resolveWalletDatabase(),
-                ),
+                nwcBudgetManager = budgetManager,
                 responseBuilder = responseBuilder,
+                nwcLogRepository = createInternalNwcLogRepository(),
             ),
             responseBuilder = responseBuilder,
+            budgetManager = budgetManager,
         )
     }
 

@@ -2,12 +2,8 @@ package net.primal.android.wallet.utils
 
 import android.content.Context
 import android.net.Uri
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.csv.Csv
-import kotlinx.serialization.encodeToString
+import net.primal.android.core.utils.saveCsvToUri
 import net.primal.domain.nostr.toNostrString
 import net.primal.domain.transactions.Transaction
 
@@ -39,24 +35,13 @@ private data class TransactionCsvRecord(
     val sparkAddress: String?,
 )
 
-@OptIn(ExperimentalSerializationApi::class)
 suspend fun saveTransactionsToUri(
     context: Context,
     uri: Uri,
     transactions: List<Transaction>,
 ) = runCatching {
-    withContext(Dispatchers.IO) {
-        val csv = Csv {
-            hasHeaderRecord = true
-            recordSeparator = System.lineSeparator()
-        }
-        val records = transactions.map { it.toCsvRecord() }
-        val csvContent = csv.encodeToString(records)
-
-        context.contentResolver.openOutputStream(uri)?.use { outputStream ->
-            outputStream.write(csvContent.toByteArray())
-        }
-    }
+    val records = transactions.map { it.toCsvRecord() }
+    saveCsvToUri(context, uri, records)
 }
 
 private fun Transaction.toCsvRecord(): TransactionCsvRecord {
