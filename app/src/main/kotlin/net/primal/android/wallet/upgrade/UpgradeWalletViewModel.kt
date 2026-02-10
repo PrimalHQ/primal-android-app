@@ -47,7 +47,7 @@ class UpgradeWalletViewModel @Inject constructor(
     private fun observePrimalWallet() =
         viewModelScope.launch {
             walletAccountRepository.observeWalletsByUser(userId = activeAccountStore.activeUserId())
-                .mapNotNull { wallets -> wallets.firstOrNull { it is Wallet.Primal } as? Wallet.Primal }
+                .mapNotNull { wallets -> wallets.filterIsInstance<Wallet.Primal>().firstOrNull() }
                 .collect { primalWallet ->
                     primalWallet.balanceInBtc?.let { balanceInBtc ->
                         val sats = balanceInBtc.toBigDecimal().toSats()
