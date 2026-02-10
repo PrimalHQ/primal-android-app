@@ -349,6 +349,7 @@ private class FakeSparkWalletManager(
     private val onInitialize: ((String) -> Unit)? = null,
 ) : SparkWalletManager {
     override val unclaimedDeposits: Flow<UnclaimedDepositEvent> = emptyFlow()
+    override val balanceChanged: Flow<String> = emptyFlow()
 
     override suspend fun initializeWallet(seedWords: String): Result<String> {
         callLog?.add("initializeWallet")
