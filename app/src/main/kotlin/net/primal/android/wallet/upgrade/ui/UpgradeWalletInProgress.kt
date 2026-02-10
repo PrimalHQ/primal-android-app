@@ -1,22 +1,45 @@
 package net.primal.android.wallet.upgrade.ui
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.ui.FlowStatusColumn
 import net.primal.domain.wallet.migration.MigrationStep
 
 @Composable
 fun UpgradeWalletInProgress(modifier: Modifier = Modifier, currentStep: MigrationStep?) {
-    val stepDescription = currentStep?.toUserFriendlyDescription()
+    Column(
+        modifier = modifier.padding(top = 32.dp, bottom = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(70.dp),
+    ) {
+        FlowStatusColumn(
+            modifier = Modifier.fillMaxHeight(fraction = 0.7f),
+            icon = null,
+            headlineText = null,
+            supportText = currentStep?.toUserFriendlyDescription()
+                ?: stringResource(id = R.string.wallet_upgrade_creating_spark),
+            textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+        )
 
-    FlowStatusColumn(
-        modifier = modifier,
-        icon = null,
-        headlineText = null,
-        supportText = stepDescription ?: stringResource(id = R.string.wallet_upgrade_upgrading_support),
-    )
+        Text(
+            text = stringResource(id = R.string.wallet_upgrade_keep_open),
+            textAlign = TextAlign.Center,
+            style = AppTheme.typography.bodyLarge.copy(lineHeight = 24.sp),
+            color = AppTheme.colorScheme.onSurface,
+        )
+    }
 }
 
 @Composable

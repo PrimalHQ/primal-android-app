@@ -1255,13 +1255,13 @@
     <string name="wallet_upgrade_sheet_description_second">With one tap, we\'ll move your funds and full\ntransaction history to your new self-custodial\nwallet - so you fully control your bitcoin.\nQuestions? Check out our </string>
     <string name="wallet_upgrade_sheet_faqs">FAQs</string>
     <string name="wallet_upgrade_sheet_button">Start Wallet Upgrade</string>
-    <string name="wallet_upgrade_title">Upgrade Wallet</string>
+    <string name="wallet_upgrade_title">Wallet Upgrade</string>
     <string name="wallet_upgrade_upgrading_title">Upgrading…</string>
     <string name="wallet_upgrade_upgrading_support" tools:ignore="TypographyEllipsis">transferring your wallet\nbalance &amp; transaction history...</string>
     <string name="wallet_upgrade_success_title">Success</string>
     <string name="wallet_upgrade_success_headline">Wallet upgraded!</string>
-    <string name="wallet_upgrade_failed_title">Upgrade Failed</string>
-    <string name="wallet_upgrade_failed_headline">Unable to upgrade</string>
+    <string name="wallet_upgrade_failed_title">Wallet Upgrade</string>
+    <string name="wallet_upgrade_failed_headline">We encountered an issue while upgrading your wallet.</string>
     <string name="wallet_upgrade_done_button">Done</string>
     <string name="wallet_upgrade_close_button">Close</string>
     <string name="wallet_upgrade_retry_button">Retry</string>
@@ -1666,4 +1666,22 @@
     <string name="signer_notification_keep_running_description">To keep running reliably while Primal is in the background or when your phone is locked, you need to enable remote signer notifications.</string>
 
     <string name="local_app_unknown_app">Unknown App</string>
+
+    <string name="wallet_upgrade_ready_bullet_1">The upgrade process should take less than a minute</string>
+    <string name="wallet_upgrade_ready_bullet_2_pre">We will transfer your wallet balance of</string>
+    <string name="wallet_upgrade_ready_bullet_2_post">to the new wallet</string>
+    <string name="wallet_upgrade_ready_bullet_3">We will copy your entire transaction history to the new wallet</string>
+    <string name="wallet_upgrade_ready_bullet_4">You will keep your existing lightning address</string>
+    <string name="wallet_upgrade_keep_open">Please keep Primal open\nuntil the upgrade process is done.</string>
+    <string name="wallet_upgrade_faq_question">Questions? Check out our </string>
+    <string name="wallet_upgrade_faq_link">FAQs</string>
+    <string name="wallet_upgrade_button_now">Upgrade Wallet Now</string>
+    <string name="wallet_upgrade_creating_spark">Creating your new Spark wallet…</string>
+    <string name="wallet_upgrade_failed_subtitle">But no worries, you can safely try again.</string>
+    <string name="wallet_upgrade_failed_support_1">If this issue persists please feel free to contact support at</string>
+    <string name="wallet_upgrade_failed_support_email">support@primal.net</string>
+    <string name="wallet_upgrade_failed_support_2">. Make sure you</string>
+    <string name="wallet_upgrade_failed_support_copy_log">copy the error log</string>
+    <string name="wallet_upgrade_failed_support_3">, and include that in your email.</string>
+    <string name="wallet_upgrade_try_again_button">Try Again</string>
 </resources>

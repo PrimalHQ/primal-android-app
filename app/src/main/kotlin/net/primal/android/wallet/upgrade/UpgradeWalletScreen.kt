@@ -31,13 +31,18 @@ import net.primal.android.wallet.upgrade.ui.UpgradeWalletSuccess
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UpgradeWalletScreen(viewModel: UpgradeWalletViewModel, onClose: () -> Unit) {
+fun UpgradeWalletScreen(
+    viewModel: UpgradeWalletViewModel,
+    onClose: () -> Unit,
+    onFaqClick: () -> Unit,
+) {
     val state = viewModel.state.collectAsState()
 
     UpgradeWalletScreen(
         state = state.value,
         eventPublisher = viewModel::setEvent,
         onClose = onClose,
+        onFaqClick = onFaqClick,
     )
 }
 
@@ -47,6 +52,7 @@ fun UpgradeWalletScreen(
     state: UpgradeWalletContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onClose: () -> Unit,
+    onFaqClick: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -74,7 +80,9 @@ fun UpgradeWalletScreen(
                                 .fillMaxSize()
                                 .background(color = AppTheme.colorScheme.surfaceVariant)
                                 .padding(paddingValues),
+                            walletBalanceInSats = state.walletBalanceInSats,
                             onStartUpgrade = { eventPublisher(UiEvent.StartUpgrade) },
+                            onFaqClick = onFaqClick,
                         )
                     }
 
@@ -102,12 +110,8 @@ fun UpgradeWalletScreen(
                                 .fillMaxSize()
                                 .background(color = AppTheme.colorScheme.surfaceVariant)
                                 .padding(paddingValues),
-                            errorMessage = state.error?.message
-                                ?: stringResource(id = R.string.app_generic_error),
-                            errorLogs = state.errorLogs,
                             onRetryClick = { eventPublisher(UiEvent.RetryUpgrade) },
-                            onCloseClick = onClose,
-                            onShareLogsClick = {
+                            onCopyLogsClick = {
                                 val logsText = state.errorLogs.joinToString("\n")
                                 val shareIntent = Intent(Intent.ACTION_SEND).apply {
                                     type = "text/plain"
@@ -130,8 +134,7 @@ fun UpgradeWalletScreen(
 @Composable
 private fun UpgradeWalletTopAppBar(status: UpgradeWalletStatus, onClose: () -> Unit) {
     if (status != UpgradeWalletStatus.Success) {
-        val showBackButton = status == UpgradeWalletStatus.Ready ||
-            status == UpgradeWalletStatus.Failed
+        val showBackButton = status == UpgradeWalletStatus.Ready
         PrimalTopAppBar(
             title = when (status) {
                 UpgradeWalletStatus.Ready -> stringResource(id = R.string.wallet_upgrade_title)
