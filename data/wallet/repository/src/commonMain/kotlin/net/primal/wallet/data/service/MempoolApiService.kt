@@ -18,6 +18,11 @@ internal class MempoolApiService(
         return body.decodeFromJsonStringOrNull<List<MempoolTransaction>>() ?: emptyList()
     }
 
+    suspend fun getTransaction(txid: String): MempoolTransaction? {
+        val body = httpClient.get("$baseUrl/api/tx/$txid").bodyAsText()
+        return body.decodeFromJsonStringOrNull<MempoolTransaction>()
+    }
+
     private companion object {
         private const val BASE_URL = "https://mempool.space"
     }
@@ -46,4 +51,8 @@ internal fun MempoolTransaction.totalReceivedSats(address: String): Long {
     return vout
         .filter { it.scriptpubkeyAddress == address }
         .sumOf { it.value }
+}
+
+internal fun MempoolTransaction.outputAddresses(): Set<String> {
+    return vout.mapNotNullTo(mutableSetOf()) { it.scriptpubkeyAddress }
 }
