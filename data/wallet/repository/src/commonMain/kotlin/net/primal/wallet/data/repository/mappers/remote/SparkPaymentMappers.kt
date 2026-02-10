@@ -125,11 +125,8 @@ internal fun Payment.mapAsSparkTransaction(
 
     val timestampSeconds = this.timestamp.toLong()
     val completedAt = if (txState == TxState.SUCCEEDED) timestampSeconds else null
-    val totalFeeInBtc = if (txType == TxType.WITHDRAW) {
-        this.fees.longValue().toBtc().toString()
-    } else {
-        null
-    }
+    val feeSats = this.fees.longValue()
+    val totalFeeInBtc = if (feeSats > 0) feeSats.toBtc().toString() else null
     val otherUserId = when (txType) {
         TxType.DEPOSIT -> zapRequest?.pubKey
         TxType.WITHDRAW -> zapRequest?.tags?.findFirstProfileId()
