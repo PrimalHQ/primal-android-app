@@ -76,9 +76,9 @@ interface WalletDao {
 
     @Query(
         """
-        UPDATE WalletInfo 
+        UPDATE WalletInfo
         SET balanceInBtc = :balanceInBtc, maxBalanceInBtc = :maxBalanceInBtc,
-         lastUpdatedAt = CAST(strftime('%s','now') AS INTEGER) 
+         lastUpdatedAt = CAST(strftime('%s','now') AS INTEGER)
         WHERE walletId = :walletId
         """,
     )
@@ -87,6 +87,9 @@ interface WalletDao {
         balanceInBtc: Encryptable<Double>,
         maxBalanceInBtc: Encryptable<Double>?,
     )
+
+    @Query("UPDATE WalletInfo SET lastUpdatedAt = CAST(strftime('%s','now') AS INTEGER) WHERE walletId = :walletId")
+    suspend fun touchLastUpdatedAt(walletId: String)
 
     @Suppress("FunctionName")
     @Query("DELETE FROM WalletInfo WHERE walletId IN (:walletIds)")

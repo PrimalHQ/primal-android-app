@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "7d8dcb77ea7b9033a800b05d676572f1",
+    "identityHash": "dbb34a878e1564a05745f93e1373f76a",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -824,12 +824,25 @@
           "columnNames": [
             "id"
           ]
-        }
+        },
+        "indices": [
+          {
+            "name": "index_ReceiveRequestData_walletId_type_payload",
+            "unique": true,
+            "columnNames": [
+              "walletId",
+              "type",
+              "payload"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ReceiveRequestData_walletId_type_payload` ON `${TABLE_NAME}` (`walletId`, `type`, `payload`)"
+          }
+        ]
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7d8dcb77ea7b9033a800b05d676572f1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dbb34a878e1564a05745f93e1373f76a')"
     ]
   }
 }

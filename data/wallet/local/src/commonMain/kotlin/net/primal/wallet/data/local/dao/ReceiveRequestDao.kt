@@ -2,13 +2,14 @@ package net.primal.wallet.data.local.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
 interface ReceiveRequestDao {
 
-    @Insert
-    suspend fun insert(data: ReceiveRequestData)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrReplace(data: ReceiveRequestData)
 
     @Query(
         """

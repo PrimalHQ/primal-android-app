@@ -108,7 +108,7 @@ internal class TransactionsHandler(
 
         if (unfulfilledRequests.isEmpty()) return
 
-        val unfulfilledAddresses = unfulfilledRequests.associate { it.payload.decrypted to it.id }
+        val unfulfilledAddresses = unfulfilledRequests.associate { it.payload to it.id }
 
         val now = Clock.System.now().epochSeconds
 

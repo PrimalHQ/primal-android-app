@@ -112,6 +112,7 @@ internal class PendingDepositsSyncerImpl(
 
         if (transactionRows.isNotEmpty()) {
             walletDatabase.walletTransactions().upsertAll(data = transactionRows)
+            walletDatabase.wallet().touchLastUpdatedAt(event.walletId)
         }
     }
 
@@ -137,11 +138,18 @@ internal class PendingDepositsSyncerImpl(
 
         if (unfulfilledRequests.isEmpty()) return
 
+        Napier.d(tag = TAG) { "Polling ${unfulfilledRequests.size} unfulfilled address(es)" }
+
         val now = Clock.System.now().epochSeconds
+        var depositsDetected = false
 
         for (request in unfulfilledRequests) {
-            val address = request.payload.decrypted
+            val address = request.payload
             val mempoolTxs = mempoolApiService.getUnconfirmedTransactions(address)
+
+            Napier.d(tag = TAG) {
+                "Address ${address.take(10)}...: ${mempoolTxs.size} mempool tx(s)"
+            }
 
             for (tx in mempoolTxs) {
                 val amountSats = tx.totalReceivedSats(address)
@@ -182,11 +190,20 @@ internal class PendingDepositsSyncerImpl(
                     ),
                 )
 
+                Napier.i(tag = TAG) {
+                    "Marking address as fulfilled: requestId=${request.id}, address=${address.take(10)}..."
+                }
                 walletDatabase.receiveRequests().markFulfilled(
                     id = request.id,
                     fulfilledAt = now,
                 )
+
+                depositsDetected = true
             }
+        }
+
+        if (depositsDetected) {
+            walletDatabase.wallet().touchLastUpdatedAt(walletId)
         }
     }
 

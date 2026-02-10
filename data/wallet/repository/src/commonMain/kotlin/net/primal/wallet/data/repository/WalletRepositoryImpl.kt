@@ -270,13 +270,13 @@ internal class WalletRepositoryImpl(
 
             if (domainWallet.capabilities.supportsReceivableTracking) {
                 result.onSuccess { invoiceResult ->
-                    walletDatabase.receiveRequests().insert(
+                    walletDatabase.receiveRequests().insertOrReplace(
                         ReceiveRequestData(
                             walletId = walletId,
                             userId = wallet.info.userId,
                             type = ReceiveRequestType.LIGHTNING,
                             createdAt = Clock.System.now().epochSeconds,
-                            payload = invoiceResult.invoice.asEncryptable(),
+                            payload = invoiceResult.invoice,
                             amountInBtc = amountInBtc?.asEncryptable(),
                         ),
                     )
@@ -297,13 +297,13 @@ internal class WalletRepositoryImpl(
 
             if (domainWallet.capabilities.supportsReceivableTracking) {
                 result.onSuccess { addressResult ->
-                    walletDatabase.receiveRequests().insert(
+                    walletDatabase.receiveRequests().insertOrReplace(
                         ReceiveRequestData(
                             walletId = walletId,
                             userId = wallet.info.userId,
                             type = ReceiveRequestType.ON_CHAIN,
                             createdAt = Clock.System.now().epochSeconds,
-                            payload = addressResult.address.asEncryptable(),
+                            payload = addressResult.address,
                         ),
                     )
                 }

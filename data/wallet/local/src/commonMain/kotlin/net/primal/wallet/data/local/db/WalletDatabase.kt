@@ -247,6 +247,12 @@ abstract class WalletDatabase : RoomDatabase() {
                     )
                     """.trimIndent(),
                 )
+                connection.execSQL(
+                    """
+                    CREATE UNIQUE INDEX IF NOT EXISTS index_ReceiveRequestData_walletId_type_payload
+                    ON ReceiveRequestData (walletId, type, payload)
+                    """.trimIndent(),
+                )
             }
         }
 
