@@ -5,7 +5,6 @@ import kotlin.math.min
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
-import kotlin.uuid.Uuid
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
 import net.primal.core.networking.nwc.nip47.ListTransactionsResponsePayload
@@ -170,7 +169,7 @@ class NwcRequestProcessor internal constructor(
             noteRecipient = null,
             noteSelf = null,
             lnInvoice = invoice,
-            idempotencyKey = Uuid.random().toString(),
+            idempotencyKey = request.eventId,
         )
 
         val paymentResult = walletRepository.pay(walletId = walletId, request = txRequest)
