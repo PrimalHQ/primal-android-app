@@ -1,9 +1,11 @@
 package net.primal.wallet.data.repository.mappers.remote
 
+import breez_sdk_spark.DepositInfo
 import breez_sdk_spark.Payment
 import breez_sdk_spark.PaymentDetails
 import breez_sdk_spark.PaymentStatus
 import breez_sdk_spark.PaymentType
+import kotlin.time.Clock
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.nostr.NostrEvent
@@ -12,6 +14,7 @@ import net.primal.domain.nostr.utils.LnInvoiceUtils
 import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
+import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletType
 
 /**
@@ -80,7 +83,7 @@ internal fun Payment.mapAsSparkTransaction(
             }
         }
         is PaymentDetails.Deposit -> {
-            // On-chain deposit
+            // On-chain deposit or withdrawal
             onChainTxId = details.txId
             preimage = null
             paymentHash = null
@@ -187,7 +190,7 @@ internal fun Payment.mapAsSparkTransaction(
         }
         is PaymentDetails.Deposit, is PaymentDetails.Withdraw -> {
             Transaction.OnChain(
-                transactionId = this.id,
+                transactionId = onChainTxId ?: error("onChainTxId should not be null here"),
                 walletId = walletId,
                 walletType = WalletType.SPARK,
                 type = txType,
@@ -257,4 +260,27 @@ internal fun Payment.mapAsSparkTransaction(
         }
         is PaymentDetails.Token -> null
     }
+}
+
+internal fun DepositInfo.mapAsSparkTransaction(wallet: Wallet.Spark): Transaction.OnChain {
+    val now = Clock.System.now().epochSeconds
+    return Transaction.OnChain(
+        transactionId = this.txid,
+        walletId = wallet.walletId,
+        walletType = WalletType.SPARK,
+        type = TxType.DEPOSIT,
+        state = TxState.PROCESSING,
+        createdAt = now,
+        updatedAt = now,
+        completedAt = null,
+        userId = wallet.userId,
+        note = null,
+        invoice = null,
+        amountInBtc = this.amountSats.toLong().toBtc(),
+        amountInUsd = null,
+        exchangeRate = null,
+        totalFeeInBtc = null,
+        onChainTxId = this.txid,
+        onChainAddress = null,
+    )
 }

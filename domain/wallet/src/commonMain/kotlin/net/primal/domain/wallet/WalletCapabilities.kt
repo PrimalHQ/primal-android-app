@@ -11,6 +11,7 @@ data class WalletCapabilities(
     val supportsOnChainFees: Boolean,
     val supportsWalletBackup: Boolean,
     val supportsNwcConnections: Boolean,
+    val supportsReceivableTracking: Boolean,
 )
 
 val Wallet.capabilities: WalletCapabilities
@@ -31,6 +32,7 @@ private val PrimalCapabilities = WalletCapabilities(
     supportsOnChainFees = true,
     supportsWalletBackup = false,
     supportsNwcConnections = true,
+    supportsReceivableTracking = false,
 )
 
 private val NwcCapabilities = WalletCapabilities(
@@ -44,6 +46,7 @@ private val NwcCapabilities = WalletCapabilities(
     supportsOnChainFees = false,
     supportsWalletBackup = false,
     supportsNwcConnections = false,
+    supportsReceivableTracking = false,
 )
 
 private val SparkCapabilities = WalletCapabilities(
@@ -57,4 +60,5 @@ private val SparkCapabilities = WalletCapabilities(
     supportsOnChainFees = true,
     supportsWalletBackup = true,
     supportsNwcConnections = true,
+    supportsReceivableTracking = true,
 )

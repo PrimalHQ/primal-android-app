@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "29df1f3dc6effe968b9894dd18985a6f",
+    "identityHash": "7d8dcb77ea7b9033a800b05d676572f1",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -767,11 +767,69 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_NwcInvoiceData_paymentHash` ON `${TABLE_NAME}` (`paymentHash`)"
           }
         ]
+      },
+      {
+        "tableName": "ReceiveRequestData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `type` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `fulfilledAt` INTEGER, `payload` TEXT NOT NULL, `amountInBtc` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "walletId",
+            "columnName": "walletId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "type",
+            "columnName": "type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fulfilledAt",
+            "columnName": "fulfilledAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "payload",
+            "columnName": "payload",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "amountInBtc",
+            "columnName": "amountInBtc",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '29df1f3dc6effe968b9894dd18985a6f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '7d8dcb77ea7b9033a800b05d676572f1')"
     ]
   }
 }

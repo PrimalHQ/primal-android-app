@@ -4,6 +4,7 @@ import breez_sdk_spark.EventListener
 import breez_sdk_spark.GetInfoRequest
 import breez_sdk_spark.InputType
 import breez_sdk_spark.ListPaymentsRequest
+import breez_sdk_spark.ListUnclaimedDepositsRequest
 import breez_sdk_spark.LnurlPayRequest
 import breez_sdk_spark.OnchainConfirmationSpeed
 import breez_sdk_spark.Payment
@@ -106,7 +107,7 @@ internal class SparkWalletServiceImpl(
                 null
             }
 
-            payments.mapNotNull { payment ->
+            val claimedTransactions = payments.mapNotNull { payment ->
                 val txInvoice = payment.extractSentInvoice()
                 val zapRequestFallback = txInvoice?.let { zapReceiptsMap?.get(it) }
 
@@ -117,6 +118,25 @@ internal class SparkWalletServiceImpl(
                     zapRequestFallback = zapRequestFallback,
                 )
             }
+
+            // Merge unclaimed deposits as PROCESSING transactions.
+            // Dedup by txid — prefer claimed version if both exist.
+            val claimedTxIds = claimedTransactions
+                .filterIsInstance<Transaction.OnChain>()
+                .mapTo(mutableSetOf()) { it.onChainTxId }
+
+            val unclaimedDeposits = try {
+                sdk.listUnclaimedDeposits(ListUnclaimedDepositsRequest).deposits
+            } catch (e: Exception) {
+                Napier.w { "Failed to list unclaimed deposits: ${e.message}" }
+                emptyList()
+            }
+
+            val unclaimedTransactions = unclaimedDeposits
+                .filter { it.txid !in claimedTxIds }
+                .map { it.mapAsSparkTransaction(wallet) }
+
+            claimedTransactions + unclaimedTransactions
         }.mapFailure { it.toWalletException() }
 
     private fun List<Payment>.extractSentInvoices(): List<String> {

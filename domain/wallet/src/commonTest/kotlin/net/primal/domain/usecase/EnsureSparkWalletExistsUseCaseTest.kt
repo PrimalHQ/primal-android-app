@@ -10,6 +10,7 @@ import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.wallet.SeedPhraseGenerator
 import net.primal.domain.wallet.SparkWalletManager
+import net.primal.domain.wallet.UnclaimedDepositEvent
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletType
 
@@ -347,6 +348,8 @@ private class FakeSparkWalletManager(
     private val callLog: MutableList<String>? = null,
     private val onInitialize: ((String) -> Unit)? = null,
 ) : SparkWalletManager {
+    override val unclaimedDeposits: Flow<UnclaimedDepositEvent> = emptyFlow()
+
     override suspend fun initializeWallet(seedWords: String): Result<String> {
         callLog?.add("initializeWallet")
         onInitialize?.invoke(seedWords)

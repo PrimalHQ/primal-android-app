@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.PagingSource
 import androidx.paging.map
+import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours
 import kotlinx.coroutines.flow.Flow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.withContext
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
+import net.primal.core.utils.onSuccess
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.LnInvoiceCreateRequest
@@ -25,6 +27,7 @@ import net.primal.domain.wallet.LnUrlParseResult
 import net.primal.domain.wallet.NwcInvoice
 import net.primal.domain.wallet.OnChainAddressResult
 import net.primal.domain.wallet.TxRequest
+import net.primal.domain.wallet.capabilities
 import net.primal.domain.wallet.TxType
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
@@ -35,6 +38,8 @@ import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.handler.TransactionsHandler
 import net.primal.wallet.data.local.dao.NostrWalletData
+import net.primal.wallet.data.local.dao.ReceiveRequestData
+import net.primal.wallet.data.local.dao.ReceiveRequestType
 import net.primal.wallet.data.local.dao.Wallet as WalletPO
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
@@ -253,14 +258,32 @@ internal class WalletRepositoryImpl(
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
                 ?: return@withContext Result.failure(WalletException.WalletNotFound())
 
-            wallet.resolveWalletService().createLightningInvoice(
-                wallet = wallet.toDomain(),
+            val domainWallet = wallet.toDomain<Wallet>()
+            val result = wallet.resolveWalletService().createLightningInvoice(
+                wallet = domainWallet,
                 request = LnInvoiceCreateRequest(
                     description = comment,
                     amountInBtc = amountInBtc,
                     expiry = if (wallet.info.type != WalletType.PRIMAL) 1.hours.inWholeSeconds else expiry,
                 ),
             )
+
+            if (domainWallet.capabilities.supportsReceivableTracking) {
+                result.onSuccess { invoiceResult ->
+                    walletDatabase.receiveRequests().insert(
+                        ReceiveRequestData(
+                            walletId = walletId,
+                            userId = wallet.info.userId,
+                            type = ReceiveRequestType.LIGHTNING,
+                            createdAt = Clock.System.now().epochSeconds,
+                            payload = invoiceResult.invoice.asEncryptable(),
+                            amountInBtc = amountInBtc?.asEncryptable(),
+                        ),
+                    )
+                }
+            }
+
+            result
         }
     }
 
@@ -269,7 +292,24 @@ internal class WalletRepositoryImpl(
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
                 ?: return@withContext Result.failure(WalletException.WalletNotFound())
 
-            wallet.resolveWalletService().createOnChainAddress(wallet = wallet.toDomain())
+            val domainWallet = wallet.toDomain<Wallet>()
+            val result = wallet.resolveWalletService().createOnChainAddress(wallet = domainWallet)
+
+            if (domainWallet.capabilities.supportsReceivableTracking) {
+                result.onSuccess { addressResult ->
+                    walletDatabase.receiveRequests().insert(
+                        ReceiveRequestData(
+                            walletId = walletId,
+                            userId = wallet.info.userId,
+                            type = ReceiveRequestType.ON_CHAIN,
+                            createdAt = Clock.System.now().epochSeconds,
+                            payload = addressResult.address.asEncryptable(),
+                        ),
+                    )
+                }
+            }
+
+            result
         }
     }
 

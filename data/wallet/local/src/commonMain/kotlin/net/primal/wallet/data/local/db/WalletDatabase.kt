@@ -20,6 +20,8 @@ import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletSettingsDao
 import net.primal.wallet.data.local.dao.WalletTransactionDao
 import net.primal.wallet.data.local.dao.WalletTransactionData
+import net.primal.wallet.data.local.dao.ReceiveRequestDao
+import net.primal.wallet.data.local.dao.ReceiveRequestData
 import net.primal.wallet.data.local.dao.nwc.NwcConnectionDao
 import net.primal.wallet.data.local.dao.nwc.NwcConnectionData
 import net.primal.wallet.data.local.dao.nwc.NwcDailyBudgetData
@@ -44,6 +46,7 @@ import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLogDao
         NwcDailyBudgetData::class,
         NwcWalletRequestLog::class,
         NwcInvoiceData::class,
+        ReceiveRequestData::class,
     ],
     version = 3,
     exportSchema = true,
@@ -58,6 +61,7 @@ abstract class WalletDatabase : RoomDatabase() {
     abstract fun nwcPaymentHolds(): NwcPaymentHoldDao
     abstract fun nwcInvoices(): NwcInvoiceDao
     abstract fun nwcLogs(): NwcWalletRequestLogDao
+    abstract fun receiveRequests(): ReceiveRequestDao
 
     companion object {
         val MIGRATION_2_3 = object : Migration(2, 3) {
@@ -227,6 +231,22 @@ abstract class WalletDatabase : RoomDatabase() {
 
                 // 7. Drop PrimalTransactionData table
                 connection.execSQL("DROP TABLE IF EXISTS PrimalTransactionData")
+
+                // 8. Create ReceiveRequestData table
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS ReceiveRequestData (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        walletId TEXT NOT NULL,
+                        userId TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        fulfilledAt INTEGER,
+                        payload TEXT NOT NULL,
+                        amountInBtc TEXT
+                    )
+                    """.trimIndent(),
+                )
             }
         }
 

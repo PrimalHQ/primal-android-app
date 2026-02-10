@@ -24,6 +24,7 @@ import net.primal.android.notifications.domain.NotificationsSummary
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.Badges
 import net.primal.android.wallet.di.ActiveWalletBalanceSyncerFactory
+import net.primal.android.wallet.di.PendingDepositsSyncerFactory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
@@ -40,6 +41,7 @@ class SubscriptionsManager @Inject constructor(
     private val streamRepository: StreamRepository,
     @PrimalCacheApiClient private val cacheApiClient: PrimalApiClient,
     private val activeWalletBalanceSyncerFactory: ActiveWalletBalanceSyncerFactory,
+    private val pendingDepositsSyncerFactory: PendingDepositsSyncerFactory,
 ) {
 
     private val lifecycle: Lifecycle = ProcessLifecycleOwner.get().lifecycle
@@ -51,6 +53,7 @@ class SubscriptionsManager @Inject constructor(
     private var messagesUnreadCountSubscription: PrimalSocketSubscription<MessagesUnreadCount>? = null
 
     private var activeWalletBalanceSyncer: WalletDataSyncer? = null
+    private var pendingDepositsSyncer: WalletDataSyncer? = null
 
     private val _badges = MutableSharedFlow<Badges>(
         replay = 1,
@@ -117,6 +120,7 @@ class SubscriptionsManager @Inject constructor(
         notificationsSummarySubscription = launchNotificationsSummarySubscription(userId = userId)
         messagesUnreadCountSubscription = launchMessagesUnreadCountSubscription(userId = userId)
         activeWalletBalanceSyncer = activeWalletBalanceSyncerFactory.create(userId = userId).also { it.start() }
+        pendingDepositsSyncer = pendingDepositsSyncerFactory.create(userId = userId).also { it.start() }
     }
 
     private suspend fun unsubscribeAll() {
@@ -125,6 +129,7 @@ class SubscriptionsManager @Inject constructor(
         notificationsSummarySubscription?.unsubscribe()
         messagesUnreadCountSubscription?.unsubscribe()
         activeWalletBalanceSyncer?.stop()
+        pendingDepositsSyncer?.stop()
     }
 
     private fun launchStreamsFromFollowsSubscription(userId: String) =
