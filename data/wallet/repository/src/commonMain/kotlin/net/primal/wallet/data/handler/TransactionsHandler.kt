@@ -2,12 +2,9 @@ package net.primal.wallet.data.handler
 
 import io.github.aakira.napier.Napier
 import kotlin.time.Clock
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
@@ -33,8 +30,9 @@ internal class TransactionsHandler(
     val walletServiceFactory: WalletServiceFactory,
     val walletDatabase: WalletDatabase,
     val profileRepository: ProfileRepository,
-    val mempoolApiService: MempoolApiService = MempoolApiService(),
 ) {
+
+    private val mempoolApiService: MempoolApiService = MempoolApiService()
     private val backgroundScope = CoroutineScope(dispatchers.io() + SupervisorJob())
 
     suspend fun fetchAndPersistLatestTransactions(wallet: Wallet, request: TransactionsRequest): Result<Unit> =
@@ -80,11 +78,14 @@ internal class TransactionsHandler(
                 }
             }
 
-            backgroundScope.launch {
-                withTimeout(MARK_FULFILLED_TIMEOUT) {
-                    markFulfilledAddresses(wallet, transactions)
-                }
-            }
+            //  With a static address, historical deposits match unfulfilled requests
+            //  causing premature fulfillment. Once addresses rotate, each address maps
+            //  to exactly one deposit and this logic works correctly.
+//             backgroundScope.launch {
+//                 withTimeout(MARK_FULFILLED_TIMEOUT) {
+//                     markFulfilledAddresses(wallet, transactions)
+//                 }
+//             }
 
             if (otherUserIds.isNotEmpty()) {
                 profileRepository.fetchProfiles(profileIds = otherUserIds)
@@ -132,6 +133,6 @@ internal class TransactionsHandler(
     companion object {
         private const val TAG = "TransactionsHandler"
         private const val MAX_UNFULFILLED_TO_CHECK = 10
-        private val MARK_FULFILLED_TIMEOUT = 30.seconds
+//         private val MARK_FULFILLED_TIMEOUT = 30.seconds
     }
 }
