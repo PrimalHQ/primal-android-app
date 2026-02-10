@@ -52,8 +52,6 @@ import net.primal.android.settings.network.NetworkSettingsViewModel
 import net.primal.android.settings.notifications.NotificationsSettingsScreen
 import net.primal.android.settings.notifications.NotificationsSettingsViewModel
 import net.primal.android.settings.wallet.domain.parseAsPrimalWalletNwc
-import net.primal.android.settings.wallet.nwc.NwcWalletServiceScreen
-import net.primal.android.settings.wallet.nwc.NwcWalletServiceViewModel
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionScreen
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionViewModel
 import net.primal.android.settings.wallet.nwc.primal.link.LinkPrimalWalletScreen
@@ -73,7 +71,6 @@ fun NavController.navigateToWalletSettings() = navigate(route = "wallet_settings
 private fun NavController.navigateToWalletScanNwcUrl() = navigate(route = "wallet_settings/scan_nwc_url")
 
 private fun NavController.navigateToCreateNewWalletConnection() = navigate(route = "wallet_settings/create_new_nwc")
-fun NavController.navigateToNwcWalletService() = navigate(route = "wallet_settings/nwc_wallet_service")
 private fun NavController.navigateToAppearanceSettings() = navigate(route = "appearance_settings")
 private fun NavController.navigateToContentDisplaySettings() = navigate(route = "content_display")
 fun NavController.navigateToNotificationsSettings() = navigate(route = "notifications_settings")
@@ -170,7 +167,6 @@ fun NavGraphBuilder.settingsNavigation(route: String, navController: NavControll
         )
         scanNwcUrl(route = "wallet_settings/scan_nwc_url", navController = navController)
         createNewWalletConnection(route = "wallet_settings/create_new_nwc", navController = navController)
-        nwcWalletService(route = "wallet_settings/nwc_wallet_service", navController = navController)
         network(route = "network", navController = navController)
         appearance(route = "appearance_settings", navController = navController)
         contentDisplay(route = "content_display", navController = navController)
@@ -330,7 +326,6 @@ private fun NavGraphBuilder.wallet(
         onCreateNewWalletConnection = { navController.navigateToCreateNewWalletConnection() },
         onRestoreWalletClick = { navController.navigateToWalletRestore() },
         onBackupWalletClick = { walletId -> navController.navigateToWalletBackup(walletId) },
-        onNwcWalletServiceClick = { navController.navigateToNwcWalletService() },
     )
 }
 
@@ -413,22 +408,6 @@ private fun NavGraphBuilder.createNewWalletConnection(route: String, navControll
         val viewModel = hiltViewModel<CreateNewWalletConnectionViewModel>()
         LockToOrientationPortrait()
         CreateNewWalletConnectionScreen(
-            viewModel = viewModel,
-            onClose = { navController.popBackStack() },
-        )
-    }
-
-private fun NavGraphBuilder.nwcWalletService(route: String, navController: NavController) =
-    composable(
-        route = route,
-        enterTransition = { primalSlideInHorizontallyFromEnd },
-        exitTransition = { primalScaleOut },
-        popEnterTransition = { primalScaleIn },
-        popExitTransition = { primalSlideOutHorizontallyToEnd },
-    ) {
-        val viewModel = hiltViewModel<NwcWalletServiceViewModel>()
-        LockToOrientationPortrait()
-        NwcWalletServiceScreen(
             viewModel = viewModel,
             onClose = { navController.popBackStack() },
         )
@@ -561,7 +540,6 @@ private fun NavGraphBuilder.developerTools(route: String, navController: NavCont
         DeveloperToolsScreen(
             viewModel = viewModel,
             onClose = { navController.navigateUp() },
-            onNavigateToNwcWalletService = { navController.navigateToNwcWalletService() },
         )
     }
 

@@ -73,9 +73,9 @@ import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.wallet.utils.saveNwcLogsToUri
 import net.primal.android.wallet.utils.saveTransactionsToUri
 import net.primal.domain.links.CdnImage
-import net.primal.domain.utils.isPrimalWalletAndActivated
 import net.primal.domain.wallet.NostrWalletKeypair
 import net.primal.domain.wallet.Wallet
+import net.primal.domain.wallet.capabilities
 
 @Composable
 fun WalletSettingsScreen(
@@ -86,7 +86,6 @@ fun WalletSettingsScreen(
     onCreateNewWalletConnection: () -> Unit,
     onRestoreWalletClick: () -> Unit,
     onBackupWalletClick: (String) -> Unit,
-    onNwcWalletServiceClick: () -> Unit = {},
 ) {
     val uiState = viewModel.state.collectAsState()
     DisposableLifecycleObserverEffect(viewModel) {
@@ -143,7 +142,6 @@ fun WalletSettingsScreen(
         onCreateNewWalletConnection = onCreateNewWalletConnection,
         onRestoreWalletClick = onRestoreWalletClick,
         onBackupWalletClick = onBackupWalletClick,
-        onNwcWalletServiceClick = onNwcWalletServiceClick,
         eventPublisher = { viewModel.setEvent(it) },
     )
 }
@@ -159,7 +157,6 @@ fun WalletSettingsScreen(
     onCreateNewWalletConnection: () -> Unit,
     onRestoreWalletClick: () -> Unit,
     onBackupWalletClick: (String) -> Unit,
-    onNwcWalletServiceClick: () -> Unit = {},
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -273,28 +270,17 @@ fun WalletSettingsScreen(
                     },
                 )
 
-                ConnectedAppsSettings(
-                    primalNwcConnectionInfos = state.nwcConnectionsInfo,
-                    onRevokeConnectedApp = { eventPublisher(UiEvent.RevokeConnection(it)) },
-                    onCreateNewWalletConnection = onCreateNewWalletConnection,
-                    connectionsState = state.connectionsState,
-                    onRetryFetchingConnections = { eventPublisher(UiEvent.RequestFetchWalletConnections) },
-                    isPrimalWalletActivated = state.activeWallet?.isPrimalWalletAndActivated() == true,
-                )
+                if (state.activeWallet?.capabilities?.supportsNwcConnections == true) {
+                    ConnectedAppsSettings(
+                        primalNwcConnectionInfos = state.nwcConnectionsInfo,
+                        onRevokeConnectedApp = { eventPublisher(UiEvent.RevokeConnection(it)) },
+                        onCreateNewWalletConnection = onCreateNewWalletConnection,
+                        connectionsState = state.connectionsState,
+                        onRetryFetchingConnections = { eventPublisher(UiEvent.RequestFetchWalletConnections) },
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                SettingsItem(
-                    headlineText = "NWC Wallet Service (Test)",
-                    supportText = "Create NWC connection for external apps to connect to this wallet",
-                    trailingContent = {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
-                            contentDescription = null,
-                        )
-                    },
-                    onClick = onNwcWalletServiceClick,
-                )
 
                 SettingsItem(
                     headlineText = stringResource(id = R.string.settings_wallet_export_nwc_logs_title),

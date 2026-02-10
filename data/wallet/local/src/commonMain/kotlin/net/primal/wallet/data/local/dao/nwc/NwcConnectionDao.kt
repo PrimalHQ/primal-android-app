@@ -31,4 +31,7 @@ interface NwcConnectionDao {
         """,
     )
     suspend fun updateDailyBudgetSats(secretPubKey: String, dailyBudgetSats: Encryptable<Long>?)
+
+    @Query("DELETE FROM NwcConnectionData WHERE secretPubKey = :secretPubKey AND userId = :userId")
+    suspend fun deleteConnection(userId: String, secretPubKey: String)
 }

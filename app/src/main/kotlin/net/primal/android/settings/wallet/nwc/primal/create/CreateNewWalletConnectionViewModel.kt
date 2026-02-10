@@ -15,14 +15,17 @@ import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConne
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
-import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.account.WalletAccountRepository
+import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository
-import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.wallet.Wallet
 
 @HiltViewModel
 class CreateNewWalletConnectionViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
+    private val walletAccountRepository: WalletAccountRepository,
     private val primalWalletNwcRepository: PrimalWalletNwcRepository,
+    private val nwcRepository: NwcRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -63,35 +66,43 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
 
     private fun createNewWalletConnection(appName: String, dailyBudget: Long?) =
         viewModelScope.launch {
-            try {
-                setState { copy(creatingSecret = true) }
-
-                val dailyBudgetBtc = dailyBudget?.toBtc()
-
-                val formattedDailyBudgetBtc = dailyBudgetBtc?.let {
-                    BigDecimal(it.toString())
-                        .stripTrailingZeros()
-                        .toPlainString()
+            setState { copy(creatingSecret = true) }
+            runCatching {
+                val userId = activeAccountStore.activeUserId()
+                when (val activeWallet = walletAccountRepository.getActiveWallet(userId)) {
+                    is Wallet.Spark -> {
+                        nwcRepository.createNewWalletConnection(
+                            userId = userId,
+                            walletId = activeWallet.walletId,
+                            appName = appName,
+                            dailyBudget = dailyBudget,
+                        ).getOrThrow()
+                    }
+                    is Wallet.Primal -> {
+                        val dailyBudgetBtc = dailyBudget?.toBtc()
+                        val formattedDailyBudgetBtc = dailyBudgetBtc?.let {
+                            BigDecimal(it.toString())
+                                .stripTrailingZeros()
+                                .toPlainString()
+                        }
+                        primalWalletNwcRepository.createNewWalletConnection(
+                            userId = userId,
+                            appName = appName,
+                            dailyBudget = formattedDailyBudgetBtc,
+                        ).nwcConnectionUri
+                    }
+                    else -> error("Active wallet does not support NWC connections.")
                 }
-
-                val response = primalWalletNwcRepository.createNewWalletConnection(
-                    userId = activeAccountStore.activeUserId(),
-                    appName = appName,
-                    dailyBudget = formattedDailyBudgetBtc,
-                )
-
+            }.onSuccess { nwcConnectionUri ->
                 setState {
                     copy(
-                        nwcConnectionUri = response.nwcConnectionUri,
+                        nwcConnectionUri = nwcConnectionUri,
                         creatingSecret = false,
                     )
                 }
-            } catch (error: SignatureException) {
+            }.onFailure { error ->
                 setState { copy(creatingSecret = false) }
-                Napier.w(throwable = error) { "Failed to create wallet connection due to signature error." }
-            } catch (error: NetworkException) {
-                setState { copy(creatingSecret = false) }
-                Napier.w(throwable = error) { "Failed to create wallet connection due to network error." }
+                Napier.w(throwable = error) { "Failed to create wallet connection." }
             }
         }
 }

@@ -7,10 +7,12 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -20,6 +22,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.SideEffect
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiState
+import net.primal.android.settings.wallet.settings.ui.model.asWalletNwcConnectionUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.utils.shouldShowBackup
 import net.primal.core.utils.onFailure
@@ -28,13 +31,13 @@ import net.primal.core.utils.runCatching
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
-import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository
-import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.parser.isNwcUrl
 import net.primal.domain.usecase.ConnectNwcUseCase
 import net.primal.domain.usecase.EnsurePrimalWalletExistsUseCase
 import net.primal.domain.wallet.Wallet
+import net.primal.domain.wallet.WalletKycLevel
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
 import net.primal.domain.wallet.capabilities
@@ -48,6 +51,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private val walletRepository: WalletRepository,
     private val walletAccountRepository: WalletAccountRepository,
     private val primalWalletNwcRepository: PrimalWalletNwcRepository,
+    private val nwcRepository: NwcRepository,
     private val connectNwcUseCase: ConnectNwcUseCase,
     private val nwcLogRepository: NwcLogRepository,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
@@ -71,6 +75,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
     val effects = _effects.receiveAsFlow()
     private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
+    private var connectionsJob: Job? = null
+
     init {
         if (nwcConnectionUrl != null) {
             connectWallet(nwcUrl = nwcConnectionUrl)
@@ -84,21 +90,39 @@ class WalletSettingsViewModel @AssistedInject constructor(
         observeEvents()
     }
 
-    private fun fetchWalletConnections() =
+    private fun observeSparkConnections(): Job =
         viewModelScope.launch {
-            try {
-                setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Loading) }
-                val connections = primalWalletNwcRepository.getConnections(userId = activeAccountStore.activeUserId())
+            nwcRepository.observeConnections(userId = activeAccountStore.activeUserId())
+                .collect { connections ->
+                    setState {
+                        copy(
+                            nwcConnectionsInfo = connections.map { it.asWalletNwcConnectionUi() },
+                            connectionsState = WalletSettingsContract.ConnectionsState.Loaded,
+                        )
+                    }
+                }
+        }
+
+    private fun fetchPrimalWalletConnections(wallet: Wallet.Primal): Job =
+        viewModelScope.launch {
+            if (wallet.kycLevel == WalletKycLevel.None) {
+                setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
+                return@launch
+            }
+
+            setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Loading) }
+            runCatching {
+                primalWalletNwcRepository.getConnections(userId = activeAccountStore.activeUserId())
+                    .map { it.asWalletNwcConnectionUi() }
+            }.onSuccess { connections ->
                 setState {
                     copy(
                         nwcConnectionsInfo = connections,
                         connectionsState = WalletSettingsContract.ConnectionsState.Loaded,
                     )
                 }
-            } catch (error: SignatureException) {
-                Napier.w(throwable = error) { "Failed to fetch wallet connections due to signature error." }
-            } catch (error: NetworkException) {
-                Napier.w(throwable = error) { "Failed to fetch wallet connections due to network error." }
+            }.onFailure { error ->
+                Napier.w(throwable = error) { "Failed to fetch wallet connections." }
                 setState { copy(connectionsState = WalletSettingsContract.ConnectionsState.Error) }
             }
         }
@@ -120,7 +144,13 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         revokeNwcConnection(nwcPubkey = it.nwcPubkey)
                     }
 
-                    UiEvent.RequestFetchWalletConnections -> fetchWalletConnections()
+                    UiEvent.RequestFetchWalletConnections -> {
+                        val wallet = state.value.activeWallet
+                        if (wallet is Wallet.Primal) {
+                            connectionsJob?.cancel()
+                            connectionsJob = fetchPrimalWalletConnections(wallet)
+                        }
+                    }
 
                     is UiEvent.ConnectExternalWallet -> if (it.connectionLink.isNwcUrl()) {
                         connectWallet(nwcUrl = it.connectionLink)
@@ -137,16 +167,27 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
     private fun revokeNwcConnection(nwcPubkey: String) =
         viewModelScope.launch {
-            val nwcConnections = state.value.nwcConnectionsInfo
-            try {
-                val updatedConnections = nwcConnections.filterNot { it.nwcPubkey == nwcPubkey }
-                setState { copy(nwcConnectionsInfo = updatedConnections) }
-                primalWalletNwcRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
-            } catch (error: SignatureException) {
-                Napier.w(throwable = error) { "Failed to revoke NWC connection due to signature error." }
-            } catch (error: NetworkException) {
-                Napier.w(throwable = error) { "Failed to revoke NWC connection due to network error." }
-                setState { copy(nwcConnectionsInfo = nwcConnections) }
+            when (state.value.activeWallet) {
+                is Wallet.Spark -> {
+                    runCatching {
+                        nwcRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
+                    }.onFailure { error ->
+                        Napier.w(throwable = error) { "Failed to revoke NWC connection." }
+                    }
+                }
+                is Wallet.Primal -> {
+                    val nwcConnections = state.value.nwcConnectionsInfo
+                    val updatedConnections = nwcConnections.filterNot { it.nwcPubkey == nwcPubkey }
+                    setState { copy(nwcConnectionsInfo = updatedConnections) }
+
+                    runCatching {
+                        primalWalletNwcRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
+                    }.onFailure { error ->
+                        Napier.w(throwable = error) { "Failed to revoke NWC connection." }
+                        setState { copy(nwcConnectionsInfo = nwcConnections) }
+                    }
+                }
+                else -> Unit
             }
         }
 
@@ -162,7 +203,9 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
     private fun observeActiveWalletData() =
         viewModelScope.launch {
+            var lastFetchedWalletId: String? = null
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
+                .distinctUntilChanged()
                 .collect { wallet ->
                     val shouldShowBackup = wallet.shouldShowBackup
                     setState {
@@ -173,6 +216,16 @@ class WalletSettingsViewModel @AssistedInject constructor(
                             showBackupListItem = wallet?.capabilities?.supportsWalletBackup == true &&
                                 !shouldShowBackup,
                         )
+                    }
+
+                    if (wallet?.walletId != lastFetchedWalletId) {
+                        lastFetchedWalletId = wallet?.walletId
+                        connectionsJob?.cancel()
+                        connectionsJob = when (wallet) {
+                            is Wallet.Spark -> observeSparkConnections()
+                            is Wallet.Primal -> fetchPrimalWalletConnections(wallet)
+                            else -> null
+                        }
                     }
 
                     if (wallet is Wallet.Spark) {

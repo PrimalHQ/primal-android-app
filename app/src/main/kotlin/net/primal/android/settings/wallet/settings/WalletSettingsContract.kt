@@ -1,7 +1,7 @@
 package net.primal.android.settings.wallet.settings
 
 import net.primal.android.premium.legend.domain.LegendaryCustomization
-import net.primal.domain.connections.primal.model.PrimalNwcConnectionInfo
+import net.primal.android.settings.wallet.settings.ui.model.WalletNwcConnectionUi
 import net.primal.domain.links.CdnImage
 import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.Wallet
@@ -13,7 +13,7 @@ interface WalletSettingsContract {
         val isServiceRunningForCurrentUser: Boolean = false,
         val activeWallet: Wallet? = null,
         val useExternalWallet: Boolean? = null,
-        val nwcConnectionsInfo: List<PrimalNwcConnectionInfo> = emptyList(),
+        val nwcConnectionsInfo: List<WalletNwcConnectionUi> = emptyList(),
         val connectionsState: ConnectionsState = ConnectionsState.Loading,
         val showBackupWidget: Boolean = false,
         val showBackupListItem: Boolean = false,

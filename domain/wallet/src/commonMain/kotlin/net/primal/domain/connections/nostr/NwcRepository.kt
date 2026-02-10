@@ -15,4 +15,6 @@ interface NwcRepository {
         appName: String,
         dailyBudget: Long?,
     ): Result<String>
+
+    suspend fun revokeConnection(userId: String, secretPubKey: String)
 }

@@ -37,14 +37,13 @@ import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.DeleteListItemImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.settings.wallet.settings.WalletSettingsContract
+import net.primal.android.settings.wallet.settings.ui.model.WalletNwcConnectionUi
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.CurrencyConversionUtils.toSats
-import net.primal.domain.connections.primal.model.PrimalNwcConnectionInfo
 
 @Composable
 fun ConnectedAppsSettings(
-    primalNwcConnectionInfos: List<PrimalNwcConnectionInfo>,
-    isPrimalWalletActivated: Boolean,
+    primalNwcConnectionInfos: List<WalletNwcConnectionUi>,
     connectionsState: WalletSettingsContract.ConnectionsState,
     onRevokeConnectedApp: (nwcPubkey: String) -> Unit,
     onCreateNewWalletConnection: () -> Unit,
@@ -88,14 +87,12 @@ fun ConnectedAppsSettings(
             onRetryFetchingConnections = onRetryFetchingConnections,
             onRevokeDialogVisibilityChange = { revokeDialogVisible = it },
             onRevokeNwcPubkeyChange = { revokeNwcPubkey = it },
-            isPrimalWalletActivated = isPrimalWalletActivated,
         )
     }
 
     Spacer(modifier = Modifier.height(16.dp))
 
     ConnectedAppsHint(
-        isPrimalWalletActivated = isPrimalWalletActivated,
         createNewWalletConnection = onCreateNewWalletConnection,
     )
 
@@ -150,9 +147,8 @@ private fun ConnectedAppsHeader() {
 @Composable
 private fun ConnectedAppsContent(
     connectionsState: WalletSettingsContract.ConnectionsState,
-    isPrimalWalletActivated: Boolean,
     onRetryFetchingConnections: () -> Unit,
-    primalNwcConnectionInfos: List<PrimalNwcConnectionInfo>,
+    primalNwcConnectionInfos: List<WalletNwcConnectionUi>,
     onRevokeDialogVisibilityChange: (Boolean) -> Unit,
     onRevokeNwcPubkeyChange: (String) -> Unit,
 ) {
@@ -172,21 +168,16 @@ private fun ConnectedAppsContent(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = when (isPrimalWalletActivated) {
-                        true -> stringResource(R.string.settings_wallet_nwc_connections_error_unable_to_load_apps)
-                        else -> stringResource(R.string.settings_wallet_nwc_connections_wallet_not_activated)
-                    },
+                    text = stringResource(R.string.settings_wallet_nwc_connections_error_unable_to_load_apps),
                     style = AppTheme.typography.titleMedium,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     fontWeight = FontWeight.Medium,
                 )
 
-                if (isPrimalWalletActivated) {
-                    TextButton(onClick = onRetryFetchingConnections) {
-                        Text(
-                            text = stringResource(id = R.string.settings_wallet_nwc_connections_retry),
-                        )
-                    }
+                TextButton(onClick = onRetryFetchingConnections) {
+                    Text(
+                        text = stringResource(id = R.string.settings_wallet_nwc_connections_retry),
+                    )
                 }
             }
         }
@@ -289,7 +280,7 @@ private fun ConnectedAppItem(
 }
 
 @Composable
-private fun ConnectedAppsHint(isPrimalWalletActivated: Boolean, createNewWalletConnection: () -> Unit) {
+private fun ConnectedAppsHint(createNewWalletConnection: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -301,28 +292,26 @@ private fun ConnectedAppsHint(isPrimalWalletActivated: Boolean, createNewWalletC
             style = AppTheme.typography.bodySmall,
         )
 
-        if (isPrimalWalletActivated) {
-            TextButton(
-                onClick = createNewWalletConnection,
-                contentPadding = PaddingValues(0.dp),
-                shape = AppTheme.shapes.small,
-            ) {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = createNewWalletConnection,
-                        ),
-                    text = stringResource(id = R.string.settings_wallet_nwc_connections_create_new_text_button),
-                    style = AppTheme.typography.bodyMedium.copy(
-                        color = AppTheme.colorScheme.secondary,
-                        fontStyle = AppTheme.typography.bodyMedium.fontStyle,
-                        fontWeight = FontWeight.SemiBold,
+        TextButton(
+            onClick = createNewWalletConnection,
+            contentPadding = PaddingValues(0.dp),
+            shape = AppTheme.shapes.small,
+        ) {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = createNewWalletConnection,
                     ),
-                )
-            }
+                text = stringResource(id = R.string.settings_wallet_nwc_connections_create_new_text_button),
+                style = AppTheme.typography.bodyMedium.copy(
+                    color = AppTheme.colorScheme.secondary,
+                    fontStyle = AppTheme.typography.bodyMedium.fontStyle,
+                    fontWeight = FontWeight.SemiBold,
+                ),
+            )
         }
     }
 }

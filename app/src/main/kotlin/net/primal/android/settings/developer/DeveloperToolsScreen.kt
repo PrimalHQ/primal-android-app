@@ -39,11 +39,7 @@ import net.primal.android.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DeveloperToolsScreen(
-    viewModel: DeveloperToolsViewModel,
-    onClose: () -> Unit,
-    onNavigateToNwcWalletService: () -> Unit = {},
-) {
+fun DeveloperToolsScreen(viewModel: DeveloperToolsViewModel, onClose: () -> Unit) {
     val uiState = viewModel.uiState.collectAsState()
     val context = LocalContext.current
 
@@ -80,7 +76,6 @@ fun DeveloperToolsScreen(
         state = uiState.value,
         onClose = onClose,
         eventPublisher = { viewModel.setEvent(it) },
-        onNavigateToNwcWalletService = onNavigateToNwcWalletService,
     )
 }
 
@@ -91,7 +86,6 @@ private fun DeveloperToolsScreen(
     state: UiState,
     onClose: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
-    onNavigateToNwcWalletService: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -180,36 +174,6 @@ private fun DeveloperToolsScreen(
                     contentColor = AppTheme.colorScheme.onSurface,
                 ) {
                     Text(text = stringResource(id = R.string.settings_developer_tools_clear))
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Text(
-                    text = "NWC Wallet Service",
-                    style = AppTheme.typography.titleMedium,
-                    color = AppTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Test NWC wallet service by creating a connection for external apps.",
-                    style = AppTheme.typography.bodySmall,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                PrimalFilledButton(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                        .height(48.dp),
-                    onClick = onNavigateToNwcWalletService,
-                ) {
-                    Text(text = "Create NWC Test Connection")
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
