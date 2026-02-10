@@ -12,6 +12,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -146,7 +147,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     UiEvent.RequestFetchWalletConnections -> {
                         val wallet = state.value.activeWallet
                         if (wallet is Wallet.Primal) {
-                            fetchPrimalWalletConnections(wallet)
+                            connectionsJob?.cancel()
+                            connectionsJob = fetchPrimalWalletConnections(wallet)
                         }
                     }
 
@@ -201,7 +203,9 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
     private fun observeActiveWalletData() =
         viewModelScope.launch {
+            var lastFetchedWalletId: String? = null
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
+                .distinctUntilChanged()
                 .collect { wallet ->
                     val shouldShowBackup = wallet.shouldShowBackup
                     setState {
@@ -214,11 +218,14 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         )
                     }
 
-                    connectionsJob?.cancel()
-                    connectionsJob = when (wallet) {
-                        is Wallet.Spark -> observeSparkConnections()
-                        is Wallet.Primal -> fetchPrimalWalletConnections(wallet)
-                        else -> null
+                    if (wallet?.walletId != lastFetchedWalletId) {
+                        lastFetchedWalletId = wallet?.walletId
+                        connectionsJob?.cancel()
+                        connectionsJob = when (wallet) {
+                            is Wallet.Spark -> observeSparkConnections()
+                            is Wallet.Primal -> fetchPrimalWalletConnections(wallet)
+                            else -> null
+                        }
                     }
 
                     if (wallet is Wallet.Spark) {
