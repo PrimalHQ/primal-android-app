@@ -6,13 +6,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
 import java.math.BigDecimal
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.core.service.PrimalNwcService
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiEvent
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
@@ -38,9 +38,13 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private val _effects = Channel<CreateNewWalletConnectionContract.SideEffect>()
+    val effects = _effects.receiveAsFlow()
+    private fun setEffect(effect: CreateNewWalletConnectionContract.SideEffect) =
+        viewModelScope.launch { _effects.send(effect) }
+
     init {
         observeActiveAccount()
-        observeServiceRunningState()
         observeEvents()
     }
 
@@ -57,18 +61,6 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                     )
                 }
             }
-        }
-
-    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
-    private fun observeServiceRunningState() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserId
-                .flatMapLatest { userId ->
-                    PrimalNwcService.isRunningForUser(userId)
-                }
-                .collect { isRunning ->
-                    setState { copy(isServiceRunningForCurrentUser = isRunning) }
-                }
         }
 
     private fun observeEvents() {
@@ -99,10 +91,12 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
     private fun createNewWalletConnection(appName: String, dailyBudget: Long?) =
         viewModelScope.launch {
             setState { copy(creatingSecret = true) }
+            var isSparkWallet = false
             runCatching {
                 val userId = activeAccountStore.activeUserId()
                 when (val activeWallet = walletAccountRepository.getActiveWallet(userId)) {
                     is Wallet.Spark -> {
+                        isSparkWallet = true
                         nwcRepository.createNewWalletConnection(
                             userId = userId,
                             walletId = activeWallet.walletId,
@@ -131,6 +125,9 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                         nwcConnectionUri = nwcConnectionUri,
                         creatingSecret = false,
                     )
+                }
+                if (isSparkWallet) {
+                    setEffect(CreateNewWalletConnectionContract.SideEffect.StartNwcService)
                 }
             }.onFailure { error ->
                 setState { copy(creatingSecret = false) }

@@ -75,30 +75,20 @@ import net.primal.android.theme.domain.PrimalTheme
 
 @Composable
 fun CreateNewWalletConnectionScreen(viewModel: CreateNewWalletConnectionViewModel, onClose: () -> Unit) {
-    val state = viewModel.state.collectAsState()
-    CreateNewWalletConnectionScreen(
-        eventPublisher = { viewModel.setEvent(it) },
-        state = state.value,
-        onClose = onClose,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun CreateNewWalletConnectionScreen(
-    state: CreateNewWalletConnectionContract.UiState,
-    eventPublisher: (CreateNewWalletConnectionContract.UiEvent) -> Unit,
-    onClose: () -> Unit,
-) {
+    val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     var showNotificationsBottomSheet by remember { mutableStateOf(false) }
 
-    LaunchedEffect(state.nwcConnectionUri) {
-        if (state.nwcConnectionUri != null && !state.isServiceRunningForCurrentUser) {
-            if (context.hasNotificationPermission(PrimalNwcService.CHANNEL_ID)) {
-                PrimalNwcService.start(context, state.activeUserId)
-            } else {
-                showNotificationsBottomSheet = true
+    LaunchedEffect(viewModel) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                CreateNewWalletConnectionContract.SideEffect.StartNwcService -> {
+                    if (context.hasNotificationPermission(PrimalNwcService.CHANNEL_ID)) {
+                        PrimalNwcService.start(context, state.activeUserId)
+                    } else {
+                        showNotificationsBottomSheet = true
+                    }
+                }
             }
         }
     }
@@ -119,6 +109,20 @@ private fun CreateNewWalletConnectionScreen(
         )
     }
 
+    CreateNewWalletConnectionScreen(
+        eventPublisher = { viewModel.setEvent(it) },
+        state = state,
+        onClose = onClose,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CreateNewWalletConnectionScreen(
+    state: CreateNewWalletConnectionContract.UiState,
+    eventPublisher: (CreateNewWalletConnectionContract.UiEvent) -> Unit,
+    onClose: () -> Unit,
+) {
     PrimalScaffold(
         topBar = {
             PrimalTopAppBar(

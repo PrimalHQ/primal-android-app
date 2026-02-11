@@ -11,7 +11,6 @@ interface CreateNewWalletConnectionContract {
         val nwcConnectionUri: String? = null,
         val dailyBudget: Long? = PrimalNwcDefaults.DEFAULT_DAILY_BUDGET,
         val activeUserId: String = "",
-        val isServiceRunningForCurrentUser: Boolean = false,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
         val activeAccountBlossoms: List<String> = emptyList(),
@@ -22,5 +21,9 @@ interface CreateNewWalletConnectionContract {
         data class AppNameChanged(val appName: String) : UiEvent()
         data class DailyBudgetChanged(val dailyBudget: Long?) : UiEvent()
         data object CreateWalletConnection : UiEvent()
+    }
+
+    sealed class SideEffect {
+        data object StartNwcService : SideEffect()
     }
 }
