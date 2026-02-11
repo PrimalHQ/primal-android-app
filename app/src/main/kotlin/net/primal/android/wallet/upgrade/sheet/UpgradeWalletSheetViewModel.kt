@@ -1,10 +1,16 @@
 package net.primal.android.wallet.upgrade.sheet
 
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,10 +31,12 @@ class UpgradeWalletSheetViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-        private val NOTICE_INTERVAL_MILLIS = 5.minutes.inWholeMilliseconds
+        private val INITIAL_DELAY = 10.seconds
+        private val AWAY_THRESHOLD = 5.minutes
     }
 
-    private var lastNoticeShownAtMillis: Long? = null
+    private var backgroundedAtMillis: Long? = null
+    private var showDelayJob: Job? = null
 
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
@@ -37,10 +45,50 @@ class UpgradeWalletSheetViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private val lifecycleObserver = LifecycleEventObserver { _: LifecycleOwner, event: Lifecycle.Event ->
+        when (event) {
+            Lifecycle.Event.ON_STOP -> {
+                backgroundedAtMillis = System.currentTimeMillis()
+                showDelayJob?.cancel()
+            }
+
+            Lifecycle.Event.ON_START -> {
+                val backgroundedAt = backgroundedAtMillis
+                backgroundedAtMillis = null
+                if (backgroundedAt != null) {
+                    val elapsedMillis = System.currentTimeMillis() - backgroundedAt
+                    if (elapsedMillis >= AWAY_THRESHOLD.inWholeMilliseconds) {
+                        scheduleNoticeIfEligible()
+                    }
+                }
+            }
+
+            else -> Unit
+        }
+    }
+
     init {
+        ProcessLifecycleOwner.get().lifecycle.addObserver(lifecycleObserver)
         observeActiveAccount()
         observeActiveAccountId()
         observeEvents()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        ProcessLifecycleOwner.get().lifecycle.removeObserver(lifecycleObserver)
+        showDelayJob?.cancel()
+    }
+
+    private fun scheduleNoticeIfEligible() {
+        val currentState = _state.value
+        if (currentState.shouldUserUpgrade && !currentState.shouldShowNotice) {
+            showDelayJob?.cancel()
+            showDelayJob = viewModelScope.launch {
+                delay(INITIAL_DELAY)
+                setState { copy(shouldShowNotice = true) }
+            }
+        }
     }
 
     private fun observeActiveAccount() =
@@ -69,7 +117,7 @@ class UpgradeWalletSheetViewModel @Inject constructor(
                         setState { copy(shouldUserUpgrade = shouldUpgrade) }
 
                         if (shouldUpgrade) {
-                            showNoticeIfIntervalPassed()
+                            scheduleNoticeIfEligible()
                         }
                     }
             }
@@ -81,22 +129,9 @@ class UpgradeWalletSheetViewModel @Inject constructor(
                 when (event) {
                     UiEvent.DismissSheet -> {
                         setState { copy(shouldShowNotice = false) }
-                        viewModelScope.launch {
-                            delay(NOTICE_INTERVAL_MILLIS)
-                            showNoticeIfIntervalPassed()
-                        }
+                        showDelayJob?.cancel()
                     }
                 }
             }
         }
-
-    private fun showNoticeIfIntervalPassed() {
-        val now = System.currentTimeMillis()
-        val lastShown = lastNoticeShownAtMillis
-
-        if (lastShown == null || now - lastShown >= NOTICE_INTERVAL_MILLIS) {
-            lastNoticeShownAtMillis = now
-            setState { copy(shouldShowNotice = true) }
-        }
-    }
 }
