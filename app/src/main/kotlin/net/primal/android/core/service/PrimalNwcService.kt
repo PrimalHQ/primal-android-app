@@ -19,6 +19,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,6 +28,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.receiver.StopNwcServiceReceiver
 import net.primal.android.core.utils.authorNameUiFriendly
@@ -48,6 +51,9 @@ class PrimalNwcService : Service() {
 
     @Inject
     lateinit var accountsStore: UserAccountsStore
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val commandChannel = Channel<ServiceCommand>(Channel.UNLIMITED)
 
     companion object {
         private const val GROUP_ID = "net.primal.NWC_WALLET_SERVICE"
@@ -95,6 +101,14 @@ class PrimalNwcService : Service() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
+        serviceScope.launch {
+            for (command in commandChannel) {
+                when (command) {
+                    is ServiceCommand.Start -> handleStartUser(command.userId)
+                    is ServiceCommand.Stop -> handleStopUser(command.userId)
+                }
+            }
+        }
     }
 
     override fun onStartCommand(
@@ -103,27 +117,42 @@ class PrimalNwcService : Service() {
         startId: Int,
     ): Int {
         when (intent?.action) {
-            ACTION_START_USER -> startUserService(intent.getStringExtra(EXTRA_USER_ID))
+            ACTION_START_USER -> {
+                startForeground()
+                startUserService(intent.getStringExtra(EXTRA_USER_ID))
+            }
+
             ACTION_STOP_USER -> stopUserService(intent.getStringExtra(EXTRA_USER_ID))
-            else -> startUserService(activeAccountStore.activeUserId.value)
+
+            else -> {
+                startForeground()
+                startUserService(activeAccountStore.activeUserId.value)
+            }
         }
-        if (nwcServices.isNotEmpty()) {
-            startForeground()
-        }
+
         return START_NOT_STICKY
     }
 
     private fun startUserService(userId: String?) {
-        if (userId.isNullOrBlank() || nwcServices.containsKey(userId)) return
-        val service = nwcServiceFactory.create()
-        service.initialize(userId)
-        nwcServices[userId] = service
-        _activeUserIds.value = nwcServices.keys.toSet()
-        updateNotifications()
+        if (userId.isNullOrBlank()) return
+        commandChannel.trySend(ServiceCommand.Start(userId))
     }
 
     private fun stopUserService(userId: String?) {
         if (userId == null) return
+        commandChannel.trySend(ServiceCommand.Stop(userId))
+    }
+
+    private fun handleStartUser(userId: String) {
+        if (nwcServices.containsKey(userId)) return
+        val service = nwcServiceFactory.create()
+        nwcServices[userId] = service
+        service.initialize(userId)
+        _activeUserIds.value = nwcServices.keys.toSet()
+        updateNotifications()
+    }
+
+    private fun handleStopUser(userId: String) {
         nwcServices.remove(userId)?.destroy()
         _activeUserIds.value = nwcServices.keys.toSet()
         cancelChildNotification(userId)
@@ -167,10 +196,10 @@ class PrimalNwcService : Service() {
     }
 
     override fun onDestroy() {
+        serviceScope.cancel()
         nwcServices.values.forEach { it.destroy() }
         nwcServices.clear()
         _activeUserIds.value = emptySet()
-
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.cancel(SUMMARY_NOTIFICATION_ID)
         notificationManager.cancel(CHILD_NOTIFICATION_ID)
@@ -225,5 +254,10 @@ class PrimalNwcService : Service() {
                 ),
             )
             .build()
+    }
+
+    private sealed interface ServiceCommand {
+        data class Start(val userId: String) : ServiceCommand
+        data class Stop(val userId: String) : ServiceCommand
     }
 }

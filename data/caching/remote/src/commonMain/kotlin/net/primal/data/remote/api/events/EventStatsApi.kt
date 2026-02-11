@@ -6,6 +6,7 @@ import net.primal.data.remote.api.events.model.EventActionsResponse
 import net.primal.data.remote.api.events.model.EventZapsRequestBody
 import net.primal.data.remote.api.events.model.EventZapsResponse
 import net.primal.data.remote.api.events.model.EventsNip46Response
+import net.primal.data.remote.api.events.model.EventsNip47Response
 import net.primal.data.remote.api.events.model.InvoicesToZapReceiptsResponse
 import net.primal.data.remote.api.events.model.ReplaceableEventRequest
 import net.primal.data.remote.api.events.model.ReplaceableEventResponse
@@ -24,4 +25,6 @@ interface EventStatsApi {
     suspend fun getZapReceipts(invoices: List<String>): Result<InvoicesToZapReceiptsResponse>
 
     suspend fun getNip46Events(eventIds: List<String>): Result<EventsNip46Response>
+
+    suspend fun getNip47Events(eventIds: List<String>): Result<EventsNip47Response>
 }

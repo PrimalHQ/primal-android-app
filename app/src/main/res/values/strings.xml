@@ -930,6 +930,8 @@
     <string name="nwc_service_notification_text">Running for %s</string>
     <string name="nwc_service_notification_user_title">NWC Wallet Active</string>
     <string name="nwc_service_notification_stop">Stop service</string>
+    <string name="settings_wallet_nwc_auto_start">Auto start wallet service</string>
+    <string name="settings_wallet_nwc_auto_start_hint">To keep running reliably it\'s necessary to run wallet service in the background.</string>
     <string name="settings_wallet_nwc_service_start">Start wallet service</string>
     <string name="settings_wallet_nwc_service_stop">Stop wallet service</string>
     <string name="nwc_notification_service_active">NWC Wallet Service active</string>

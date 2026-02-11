@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "97846ea5a49ea0858a659d1054df7ba6",
+    "identityHash": "85527eb1c9015960ef4dcf02ee121638",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -122,7 +122,7 @@
       },
       {
         "tableName": "SparkWalletData",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `seedWords` TEXT NOT NULL, `backedUp` INTEGER NOT NULL, `primalTxsMigrated` INTEGER, `primalTxsMigratedUntil` INTEGER, PRIMARY KEY(`walletId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `seedWords` TEXT NOT NULL, `backedUp` INTEGER NOT NULL, `primalTxsMigrated` INTEGER, `primalTxsMigratedUntil` INTEGER, `nwcAutoStart` INTEGER NOT NULL, PRIMARY KEY(`walletId`))",
         "fields": [
           {
             "fieldPath": "walletId",
@@ -157,6 +157,12 @@
             "fieldPath": "primalTxsMigratedUntil",
             "columnName": "primalTxsMigratedUntil",
             "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "nwcAutoStart",
+            "columnName": "nwcAutoStart",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -812,6 +818,48 @@
         ]
       },
       {
+        "tableName": "NwcPendingEventData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`eventId` TEXT NOT NULL, `userId` TEXT NOT NULL, `connectionId` TEXT NOT NULL, `rawNostrEventJson` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`eventId`))",
+        "fields": [
+          {
+            "fieldPath": "eventId",
+            "columnName": "eventId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "userId",
+            "columnName": "userId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "connectionId",
+            "columnName": "connectionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rawNostrEventJson",
+            "columnName": "rawNostrEventJson",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "eventId"
+          ]
+        }
+      },
+      {
         "tableName": "ReceiveRequestData",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `walletId` TEXT NOT NULL, `userId` TEXT NOT NULL, `type` TEXT NOT NULL, `createdAt` INTEGER NOT NULL, `fulfilledAt` INTEGER, `payload` TEXT NOT NULL, `amountInBtc` TEXT)",
         "fields": [
@@ -885,7 +933,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '97846ea5a49ea0858a659d1054df7ba6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dbb34a878e1564a05745f93e1373f76a')"
     ]
   }
 }

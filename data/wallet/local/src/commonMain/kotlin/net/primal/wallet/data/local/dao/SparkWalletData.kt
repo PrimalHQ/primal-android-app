@@ -14,4 +14,5 @@ data class SparkWalletData(
     val backedUp: Boolean = false,
     val primalTxsMigrated: Boolean? = null,
     val primalTxsMigratedUntil: Long? = null,
+    val nwcAutoStart: Boolean = true,
 )

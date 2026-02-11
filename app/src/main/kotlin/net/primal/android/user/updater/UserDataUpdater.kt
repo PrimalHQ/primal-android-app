@@ -68,6 +68,7 @@ class UserDataUpdater @AssistedInject constructor(
         runCatching { ensurePrimalWalletExistsUseCase.invoke(userId = userId) }
         runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }
         runCatching { pushNotificationsTokenUpdater.updateTokenForRemoteSigner() }
+        runCatching { pushNotificationsTokenUpdater.updateTokenForNwcService() }
         runCatching { mutedItemRepository.fetchAndPersistMuteList(userId = userId) }
         mutedItemRepository.fetchAndPersistStreamMuteList(userId = userId)
 

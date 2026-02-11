@@ -1,12 +1,14 @@
 package net.primal.android.core.push
 
 import com.google.firebase.messaging.FirebaseMessaging
+import fr.acinq.secp256k1.Hex
 import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import net.primal.android.core.push.api.model.UpdateTokenContent
 import net.primal.android.core.push.api.model.UpdateTokenContentNip46
+import net.primal.android.core.push.api.model.UpdateTokenContentNip47
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.credentials.CredentialsStore
@@ -16,11 +18,13 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.account.pushnotifications.PushNotificationRepository
 import net.primal.domain.account.repository.ConnectionRepository
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asIdentifierTag
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
+import net.primal.domain.nostr.cryptography.signOrThrow
 import net.primal.domain.nostr.cryptography.utils.getOrNull
 
 class FcmPushNotificationsTokenUpdater @Inject constructor(
@@ -28,6 +32,7 @@ class FcmPushNotificationsTokenUpdater @Inject constructor(
     private val userAccountsStore: UserAccountsStore,
     private val credentialsStore: CredentialsStore,
     private val connectionRepository: ConnectionRepository,
+    private val nwcRepository: NwcRepository,
     private val pushNotificationRepository: PushNotificationRepository,
     private val signatureHandler: NostrEventSignatureHandler,
 ) : PushNotificationsTokenUpdater {
@@ -85,6 +90,40 @@ class FcmPushNotificationsTokenUpdater @Inject constructor(
         }
     }
 
+    override suspend fun updateTokenForNwcService() {
+        withContext(dispatcherProvider.io()) {
+            runCatching {
+                FirebaseMessaging.getInstance().token.await()
+            }.mapCatching { token ->
+                userAccountsStore.userAccounts.value.map { it.pubkey }
+                    .flatMap { nwcRepository.getAutoStartConnections(it) }
+                    .mapNotNull { connection ->
+                        signAuthorizationEvent(
+                            userId = connection.serviceKeyPair.pubKey,
+                            privateKey = connection.serviceKeyPair.privateKey,
+                            content = UpdateTokenContentNip47(
+                                token = token,
+                                relays = setOf(connection.relay),
+                                clientPubKeys = emptyList(),
+                            ).encodeToJsonString(),
+                        ).onFailure {
+                            Napier.e(it) {
+                                "Failed to sign authorization event for nip47 " +
+                                    "connection connectionId=${connection.secretPubKey}"
+                            }
+                        }.getOrNull()
+                    }.also { authorizationEvents ->
+                        pushNotificationRepository.updateNotificationTokenForNip47(
+                            authorizationEvents = authorizationEvents,
+                            token = token,
+                        )
+                    }
+            }.onFailure {
+                Napier.e(throwable = it) { "Failed to update notification token for NWC service." }
+            }
+        }
+    }
+
     private suspend fun signAuthorizationEventOrNull(userId: String, content: String): NostrEvent? {
         val signResult = signatureHandler.signNostrEvent(
             NostrUnsignedEvent(
@@ -96,4 +135,18 @@ class FcmPushNotificationsTokenUpdater @Inject constructor(
         )
         return signResult.getOrNull()
     }
+
+    private fun signAuthorizationEvent(
+        userId: String,
+        privateKey: String,
+        content: String,
+    ): Result<NostrEvent> =
+        runCatching {
+            NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.ApplicationSpecificData.value,
+                tags = listOf("${UserAgentProvider.APP_NAME} App".asIdentifierTag()),
+                content = content,
+            ).signOrThrow(hexPrivateKey = Hex.decode(privateKey))
+        }
 }

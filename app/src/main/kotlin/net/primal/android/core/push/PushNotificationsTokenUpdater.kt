@@ -4,4 +4,6 @@ interface PushNotificationsTokenUpdater {
     suspend fun updateTokenForAllUsers()
 
     suspend fun updateTokenForRemoteSigner()
+
+    suspend fun updateTokenForNwcService()
 }

@@ -10,6 +10,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import net.primal.android.nostrconnect.handler.RemoteSignerRemoteMessageHandler
+import net.primal.android.wallet.nwc.handler.NwcRemoteMessageHandler
 
 @AndroidEntryPoint
 class PrimalFirebaseMessagingService : FirebaseMessagingService() {
@@ -20,11 +21,16 @@ class PrimalFirebaseMessagingService : FirebaseMessagingService() {
     @Inject
     lateinit var signerRemoteMessageHandler: RemoteSignerRemoteMessageHandler
 
+    @Inject
+    lateinit var nwcRemoteMessageHandler: NwcRemoteMessageHandler
+
     val scope = CoroutineScope(SupervisorJob())
 
     override fun onMessageReceived(message: RemoteMessage) {
         if (signerRemoteMessageHandler.isRemoteSignerMessage(message = message)) {
             scope.launch { signerRemoteMessageHandler.process(message = message) }
+        } else if (nwcRemoteMessageHandler.isNwcMessage(message = message)) {
+            scope.launch { nwcRemoteMessageHandler.process(message = message) }
         }
 
         super.onMessageReceived(message)
@@ -38,6 +44,9 @@ class PrimalFirebaseMessagingService : FirebaseMessagingService() {
         }
         GlobalScope.launch {
             runCatching { tokenUpdater.updateTokenForRemoteSigner() }
+        }
+        GlobalScope.launch {
+            runCatching { tokenUpdater.updateTokenForNwcService() }
         }
     }
 }

@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
 import java.math.BigDecimal
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,11 +14,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiEvent
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository
@@ -25,6 +28,8 @@ import net.primal.domain.wallet.Wallet
 
 @HiltViewModel
 class CreateNewWalletConnectionViewModel @Inject constructor(
+    private val dispatchers: DispatcherProvider,
+    private val tokenUpdater: PushNotificationsTokenUpdater,
     private val activeAccountStore: ActiveAccountStore,
     private val walletAccountRepository: WalletAccountRepository,
     private val primalWalletNwcRepository: PrimalWalletNwcRepository,
@@ -127,6 +132,11 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                         nwcServiceIsRequired = isSparkWallet,
                     ),
                 )
+                if (isSparkWallet) {
+                    CoroutineScope(dispatchers.io()).launch {
+                        runCatching { tokenUpdater.updateTokenForNwcService() }
+                    }
+                }
             }.onFailure { error ->
                 setState { copy(creatingSecret = false) }
                 Napier.w(throwable = error) { "Failed to create wallet connection." }

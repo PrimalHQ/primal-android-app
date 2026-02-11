@@ -5,9 +5,11 @@ import javax.inject.Inject
 import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.asKeyPair
 import net.primal.domain.account.repository.SessionEventRepository
+import net.primal.domain.nostr.NostrEventKind
 
 private const val NIP46_EVENT_PUBKEY = "nip46_event_pubkey"
 private const val NIP46_EVENT_ID = "nip46_event_id"
+private const val EVENT_KIND = "event_kind"
 
 class RemoteSignerRemoteMessageHandler @Inject constructor(
     private val sessionHandler: RemoteSignerSessionHandler,
@@ -15,7 +17,8 @@ class RemoteSignerRemoteMessageHandler @Inject constructor(
     private val credentialsStore: CredentialsStore,
 ) {
     fun isRemoteSignerMessage(message: RemoteMessage) =
-        message.data[NIP46_EVENT_PUBKEY] != null && message.data[NIP46_EVENT_ID] != null
+        message.data[EVENT_KIND] == null ||
+            message.data[EVENT_KIND]?.toIntOrNull() == NostrEventKind.NostrConnect.value
 
     suspend fun process(message: RemoteMessage) {
         val clientPubKey = message.data[NIP46_EVENT_PUBKEY]

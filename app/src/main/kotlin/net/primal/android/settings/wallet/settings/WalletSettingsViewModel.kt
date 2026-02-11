@@ -7,6 +7,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.core.push.PushNotificationsTokenUpdater
 import net.primal.android.core.service.PrimalNwcService
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.SideEffect
@@ -25,6 +27,7 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiStat
 import net.primal.android.settings.wallet.settings.ui.model.asWalletNwcConnectionUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.utils.shouldShowBackup
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
@@ -47,6 +50,7 @@ import net.primal.domain.wallet.nwc.NwcLogRepository
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
 class WalletSettingsViewModel @AssistedInject constructor(
     @Assisted private val nwcConnectionUrl: String?,
+    private val dispatchers: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val walletAccountRepository: WalletAccountRepository,
@@ -54,6 +58,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private val nwcRepository: NwcRepository,
     private val connectNwcUseCase: ConnectNwcUseCase,
     private val nwcLogRepository: NwcLogRepository,
+    private val pushNotificationsTokenUpdater: PushNotificationsTokenUpdater,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val ensurePrimalWalletExistsUseCase: EnsurePrimalWalletExistsUseCase,
@@ -87,6 +92,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
         observeActiveAccount()
         observeServiceRunningState()
+        observeAutoStartState()
         observeEvents()
     }
 
@@ -158,6 +164,8 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
                     UiEvent.RequestTransactionExport -> exportTransactions()
 
+                    is UiEvent.UpdateAutoStartNwcService -> updateAutoStart(it.enabled)
+
                     UiEvent.RevertToPrimalWallet -> revertToPrimalWallet()
 
                     UiEvent.RequestNwcLogsExport -> exportNwcLogs()
@@ -173,8 +181,13 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         nwcRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
                     }.onFailure { error ->
                         Napier.w(throwable = error) { "Failed to revoke NWC connection." }
+                    }.onSuccess {
+                        CoroutineScope(dispatchers.io()).launch {
+                            runCatching { pushNotificationsTokenUpdater.updateTokenForNwcService() }
+                        }
                     }
                 }
+
                 is Wallet.Primal -> {
                     val nwcConnections = state.value.nwcConnectionsInfo
                     val updatedConnections = nwcConnections.filterNot { it.nwcPubkey == nwcPubkey }
@@ -187,6 +200,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         setState { copy(nwcConnectionsInfo = nwcConnections) }
                     }
                 }
+
                 else -> Unit
             }
         }
@@ -261,6 +275,30 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 .collect { isRunning ->
                     setState { copy(isServiceRunningForCurrentUser = isRunning) }
                 }
+        }
+
+    @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+    private fun observeAutoStartState() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserId
+                .flatMapLatest { userId -> nwcRepository.observeAutoStartEnabled(userId) }
+                .distinctUntilChanged()
+                .collect { isEnabled ->
+                    setState { copy(isAutoStartEnabled = isEnabled) }
+                }
+        }
+
+    private fun updateAutoStart(enabled: Boolean) =
+        viewModelScope.launch {
+            runCatching {
+                nwcRepository.updateAutoStartForUser(userId = activeAccountStore.activeUserId(), autoStart = enabled)
+            }.onSuccess {
+                CoroutineScope(dispatchers.io()).launch {
+                    runCatching { pushNotificationsTokenUpdater.updateTokenForNwcService() }
+                }
+            }.onFailure {
+                Napier.w(throwable = it) { "Failed to update auto-start setting." }
+            }
         }
 
     private fun connectWallet(nwcUrl: String) =

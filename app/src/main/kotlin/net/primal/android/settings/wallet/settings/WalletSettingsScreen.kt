@@ -300,14 +300,25 @@ fun WalletSettingsScreen(
                     onClick = { eventPublisher(UiEvent.RequestNwcLogsExport) },
                 )
 
-                ToggleNwcServiceButton(
-                    currentUserId = state.activeUserId,
-                    isRunningForCurrentUser = state.isServiceRunningForCurrentUser,
-                    avatarCdnImage = state.activeAccountAvatarCdnImage,
-                    legendaryCustomization = state.activeAccountLegendaryCustomization,
-                    avatarBlossoms = state.activeAccountBlossoms,
-                    displayName = state.activeAccountDisplayName,
-                )
+                if (state.activeWallet is Wallet.Spark) {
+                    AutoStartNwcListItem(
+                        isAutoStartEnabled = state.isAutoStartEnabled,
+                        onAutoStartChanged = { value ->
+                            eventPublisher(UiEvent.UpdateAutoStartNwcService(value))
+                        },
+                    )
+
+                    if (!state.isAutoStartEnabled) {
+                        ToggleNwcServiceButton(
+                            currentUserId = state.activeUserId,
+                            isRunningForCurrentUser = state.isServiceRunningForCurrentUser,
+                            avatarCdnImage = state.activeAccountAvatarCdnImage,
+                            legendaryCustomization = state.activeAccountLegendaryCustomization,
+                            avatarBlossoms = state.activeAccountBlossoms,
+                            displayName = state.activeAccountDisplayName,
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -435,6 +446,40 @@ private fun ExternalWalletListItem(useExternalWallet: Boolean, onExternalWalletS
             PrimalSwitch(
                 checked = useExternalWallet,
                 onCheckedChange = onExternalWalletSwitchChanged,
+            )
+        },
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.colorScheme.surfaceVariant,
+        ),
+    )
+}
+
+@Composable
+private fun AutoStartNwcListItem(isAutoStartEnabled: Boolean, onAutoStartChanged: (Boolean) -> Unit) {
+    ListItem(
+        modifier = Modifier.clickable {
+            onAutoStartChanged(!isAutoStartEnabled)
+        },
+        headlineContent = {
+            Text(
+                modifier = Modifier.padding(bottom = 4.dp),
+                text = stringResource(id = R.string.settings_wallet_nwc_auto_start),
+                style = AppTheme.typography.bodyLarge,
+                color = AppTheme.colorScheme.onPrimary,
+            )
+        },
+        supportingContent = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(id = R.string.settings_wallet_nwc_auto_start_hint),
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            )
+        },
+        trailingContent = {
+            PrimalSwitch(
+                checked = isAutoStartEnabled,
+                onCheckedChange = onAutoStartChanged,
             )
         },
         colors = ListItemDefaults.colors(

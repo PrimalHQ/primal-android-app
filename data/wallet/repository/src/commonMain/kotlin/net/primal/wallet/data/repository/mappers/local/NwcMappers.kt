@@ -7,17 +7,20 @@ import net.primal.domain.wallet.NwcInvoice
 import net.primal.domain.wallet.NwcInvoiceState
 import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.local.dao.nwc.NwcConnection as NostrWalletConnectionPO
+import net.primal.wallet.data.local.dao.nwc.NwcConnectionData
 import net.primal.wallet.data.local.dao.nwc.NwcInvoiceData
 
-fun NostrWalletConnectionPO.asDO() =
+fun NostrWalletConnectionPO.asDO() = this.data.asDO()
+
+fun NwcConnectionData.asDO() =
     NwcConnection(
-        walletId = this.data.walletId,
-        userId = this.data.userId,
-        secretPubKey = this.data.secretPubKey,
-        serviceKeyPair = NostrKeyPair(this.data.servicePrivateKey.decrypted, this.data.servicePubKey),
-        relay = this.data.relay.decrypted,
-        appName = this.data.appName.decrypted,
-        dailyBudgetSats = this.data.dailyBudgetSats?.decrypted,
+        walletId = this.walletId,
+        userId = this.userId,
+        secretPubKey = this.secretPubKey,
+        serviceKeyPair = NostrKeyPair(this.servicePrivateKey.decrypted, this.servicePubKey),
+        relay = this.relay.decrypted,
+        appName = this.appName.decrypted,
+        dailyBudgetSats = this.dailyBudgetSats?.decrypted,
     )
 
 fun NwcInvoiceData.asDO() =
