@@ -212,6 +212,7 @@ class TransactionDetailsViewModel @Inject constructor(
             otherUserLightningAddress = this.getIfTypeOrNull(Transaction.Zap::otherLightningAddress)
                 ?: this.getIfTypeOrNull(Transaction.Lightning::otherLightningAddress),
             isZap = this is Transaction.Zap,
+            isOnChain = this is Transaction.OnChain,
             isStorePurchase = this is Transaction.StorePurchase,
         )
 }

@@ -402,7 +402,7 @@ private fun TransactionDetailDataUi.typeToReadableString(useBitcoinTerm: Boolean
     return when {
         isZap -> stringResource(id = R.string.wallet_transaction_details_type_nostr_zap)
         isStorePurchase -> stringResource(id = R.string.wallet_transaction_details_type_in_app_purchase)
-        onChainAddress != null -> when (useBitcoinTerm) {
+        isOnChain -> when (useBitcoinTerm) {
             true -> stringResource(id = R.string.wallet_transaction_details_type_bitcoin_payment)
             false -> stringResource(id = R.string.wallet_transaction_details_type_on_chain_payment)
         }
@@ -453,7 +453,7 @@ private fun TransactionCard(
             )
         } else {
             TxHeader(
-                onChainAddress = txData.onChainAddress,
+                isOnChain = txData.isOnChain,
                 isPending = txData.txState.isPending(),
                 otherUserLightningAddress = txData.otherUserLightningAddress,
                 type = txData.typeToReadableString(),
@@ -570,7 +570,7 @@ private fun TransactionExpandableDetails(txData: TransactionDetailDataUi, curren
         PrimalDivider()
         TransactionDetailListItem(
             section = stringResource(id = R.string.wallet_transaction_details_status_item),
-            value = txData.txState.toReadableString(isOnChainPayment = txData.onChainAddress != null),
+            value = txData.txState.toReadableString(isOnChainPayment = txData.isOnChain),
         )
 
         PrimalDivider()
@@ -592,10 +592,10 @@ private fun TransactionExpandableDetails(txData: TransactionDetailDataUi, curren
         txData.totalFeeInSats?.let { feeAmount ->
             PrimalDivider()
             TransactionDetailListItem(
-                section = if (txData.onChainAddress == null) {
-                    stringResource(id = R.string.wallet_transaction_details_fee_item)
-                } else {
+                section = if (txData.isOnChain) {
                     stringResource(id = R.string.wallet_transaction_details_mining_fee_item)
+                } else {
+                    stringResource(id = R.string.wallet_transaction_details_fee_item)
                 },
                 value = "${
                     numberFormat.format(
@@ -605,7 +605,7 @@ private fun TransactionExpandableDetails(txData: TransactionDetailDataUi, curren
             )
         }
 
-        if (txData.onChainAddress == null) {
+        if (!txData.isOnChain) {
             txData.invoice?.let { invoice ->
                 val clipboardManager = LocalClipboardManager.current
 
@@ -686,7 +686,7 @@ private fun NumberFormat.formatSafely(any: Any?): String? {
 
 @Composable
 private fun TxHeader(
-    onChainAddress: String?,
+    isOnChain: Boolean,
     isPending: Boolean,
     otherUserLightningAddress: String?,
     type: String,
@@ -699,7 +699,7 @@ private fun TxHeader(
     ) {
         TransactionIcon(background = walletTransactionIconBackgroundColor) {
             Image(
-                imageVector = when (onChainAddress != null) {
+                imageVector = when (isOnChain) {
                     true -> PrimalIcons.WalletBitcoinPayment
                     false -> PrimalIcons.WalletLightningPaymentAlt
                 },
@@ -708,7 +708,7 @@ private fun TxHeader(
             )
 
             if (isPending) {
-                val infiniteTransition = rememberInfiniteTransition(label = "ClockRotation$onChainAddress")
+                val infiniteTransition = rememberInfiniteTransition(label = "ClockRotation$isOnChain")
                 val angle by infiniteTransition.animateFloat(
                     initialValue = 0.0f,
                     targetValue = 360.0f,
@@ -719,7 +719,7 @@ private fun TxHeader(
                         ),
                         repeatMode = RepeatMode.Restart,
                     ),
-                    label = "ClockPendingAngle$onChainAddress",
+                    label = "ClockPendingAngle$isOnChain",
                 )
 
                 Box(
@@ -825,6 +825,7 @@ class TransactionParameterProvider : PreviewParameterProvider<TransactionDetailD
                 otherUserId = "storeId",
                 otherUserAvatarCdnImage = null,
                 isZap = false,
+                isOnChain = false,
                 isStorePurchase = true,
                 exchangeRate = null,
                 txAmountInUsd = null,
