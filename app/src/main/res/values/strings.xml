@@ -926,7 +926,6 @@
     <string name="settings_wallet_nwc_qr_code_scan_title">Connect NWC Wallet</string>
     <string name="settings_wallet_nwc_qr_code_scan_hint">Scan the NWC\nconnection QR code</string>
     <string name="settings_wallet_nwc_qr_code_scan_paste">Paste Connection String</string>
-    <string name="nwc_service_notification_channel_name">NWC Wallet Service</string>
     <string name="nwc_service_notification_title">NWC Wallet Service</string>
     <string name="nwc_service_notification_text">Running for %s</string>
     <string name="nwc_service_notification_user_title">NWC Wallet Active</string>

@@ -50,7 +50,7 @@ class PrimalNwcService : Service() {
     lateinit var accountsStore: UserAccountsStore
 
     companion object {
-        const val CHANNEL_ID = "nwc_wallet_service"
+        const val CHANNEL_ID = "remote_signer"
         private const val GROUP_ID = "net.primal.NWC_WALLET_SERVICE"
         private const val SUMMARY_NOTIFICATION_ID = 200
         private const val CHILD_NOTIFICATION_ID = 201
@@ -183,7 +183,7 @@ class PrimalNwcService : Service() {
         notificationManager.createNotificationChannel(
             NotificationChannel(
                 CHANNEL_ID,
-                getString(R.string.nwc_service_notification_channel_name),
+                getString(R.string.signer_notification_name),
                 NotificationManager.IMPORTANCE_DEFAULT,
             ),
         )
