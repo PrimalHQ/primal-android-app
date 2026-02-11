@@ -14,13 +14,12 @@ interface ReceiveRequestDao {
     @Query(
         """
         SELECT * FROM ReceiveRequestData
-        WHERE walletId IS :walletId AND type IS :type AND fulfilledAt IS NULL
-            AND createdAt >= :createdAfter
+        WHERE walletId IS :walletId AND type IS :type AND createdAt >= :createdAfter
         ORDER BY createdAt DESC
         LIMIT :limit
         """,
     )
-    suspend fun findUnfulfilled(
+    suspend fun findAll(
         walletId: String,
         type: ReceiveRequestType,
         createdAfter: Long,

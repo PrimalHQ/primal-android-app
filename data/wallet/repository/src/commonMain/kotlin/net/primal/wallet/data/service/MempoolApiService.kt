@@ -3,6 +3,7 @@ package net.primal.wallet.data.service
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import net.primal.core.networking.factory.HttpClientFactory
@@ -21,6 +22,16 @@ internal class MempoolApiService(
     suspend fun getTransaction(txid: String): MempoolTransaction? {
         val body = httpClient.get("$baseUrl/api/tx/$txid").bodyAsText()
         return body.decodeFromJsonStringOrNull<MempoolTransaction>()
+    }
+
+    suspend fun lookupTransaction(txid: String): TransactionLookupResult {
+        val response = httpClient.get("$baseUrl/api/tx/$txid")
+        if (response.status == HttpStatusCode.NotFound) {
+            return TransactionLookupResult.NotFound
+        }
+        val tx = response.bodyAsText().decodeFromJsonStringOrNull<MempoolTransaction>()
+            ?: return TransactionLookupResult.Error
+        return TransactionLookupResult.Found(tx)
     }
 
     private companion object {
@@ -55,4 +66,10 @@ internal fun MempoolTransaction.totalReceivedSats(address: String): Long {
 
 internal fun MempoolTransaction.outputAddresses(): Set<String> {
     return vout.mapNotNullTo(mutableSetOf()) { it.scriptpubkeyAddress }
+}
+
+internal sealed interface TransactionLookupResult {
+    data class Found(val transaction: MempoolTransaction) : TransactionLookupResult
+    data object NotFound : TransactionLookupResult
+    data object Error : TransactionLookupResult
 }

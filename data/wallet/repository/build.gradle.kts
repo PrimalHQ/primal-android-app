@@ -78,6 +78,9 @@ kotlin {
                 implementation(libs.korlibs.crypto)
 
                 implementation(libs.kotlinx.datetime)
+
+                // WebSocket
+                implementation(libs.ktor.client.websockets)
             }
         }
 

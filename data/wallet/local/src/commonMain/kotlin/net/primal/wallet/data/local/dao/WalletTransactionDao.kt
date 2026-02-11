@@ -79,6 +79,17 @@ interface WalletTransactionDao {
     @Query("SELECT * FROM WalletTransactionData WHERE paymentHash = :paymentHash LIMIT 1")
     suspend fun findByPaymentHash(paymentHash: String): WalletTransactionData?
 
+    @Query(
+        """
+        SELECT * FROM WalletTransactionData
+        WHERE walletId IS :walletId AND state = 'CREATED' AND txKind = 'ON_CHAIN'
+        """,
+    )
+    suspend fun findCreatedOnChain(walletId: String): List<WalletTransactionData>
+
+    @Query("DELETE FROM WalletTransactionData WHERE transactionId IS :transactionId")
+    suspend fun deleteByTransactionId(transactionId: String)
+
     @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
     suspend fun deleteAllTransactions(userId: String)
 }
