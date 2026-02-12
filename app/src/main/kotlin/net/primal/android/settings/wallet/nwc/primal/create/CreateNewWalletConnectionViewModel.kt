@@ -125,7 +125,6 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                 setEffect(
                     CreateNewWalletConnectionContract.SideEffect.CreateSuccess(
                         nwcServiceIsRequired = isSparkWallet,
-                        userId = activeAccountStore.activeUserId(),
                     ),
                 )
             }.onFailure { error ->

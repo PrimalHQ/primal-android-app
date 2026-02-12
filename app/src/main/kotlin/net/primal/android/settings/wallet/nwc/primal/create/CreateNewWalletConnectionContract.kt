@@ -19,6 +19,6 @@ interface CreateNewWalletConnectionContract {
     }
 
     sealed class SideEffect {
-        data class CreateSuccess(val nwcServiceIsRequired: Boolean, val userId: String) : SideEffect()
+        data class CreateSuccess(val nwcServiceIsRequired: Boolean) : SideEffect()
     }
 }

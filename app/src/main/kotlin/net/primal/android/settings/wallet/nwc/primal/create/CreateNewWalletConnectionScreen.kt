@@ -77,7 +77,7 @@ import net.primal.android.theme.domain.PrimalTheme
 fun CreateNewWalletConnectionScreen(viewModel: CreateNewWalletConnectionViewModel, onClose: () -> Unit) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-    var nwcUserId by remember { mutableStateOf<String?>(null) }
+    var showNotificationsBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -85,9 +85,9 @@ fun CreateNewWalletConnectionScreen(viewModel: CreateNewWalletConnectionViewMode
                 is CreateNewWalletConnectionContract.SideEffect.CreateSuccess -> {
                     if (effect.nwcServiceIsRequired) {
                         if (context.hasNotificationPermission(PrimalNwcService.CHANNEL_ID)) {
-                            PrimalNwcService.start(context, effect.userId)
+                            state.activeAccount?.pubkey?.let { PrimalNwcService.start(context, it) }
                         } else {
-                            nwcUserId = effect.userId
+                            showNotificationsBottomSheet = true
                         }
                     }
                 }
@@ -95,17 +95,17 @@ fun CreateNewWalletConnectionScreen(viewModel: CreateNewWalletConnectionViewMode
         }
     }
 
-    if (nwcUserId != null) {
+    if (showNotificationsBottomSheet) {
         EnableNwcNotificationsBottomSheet(
             avatarCdnImage = state.activeAccount?.avatarCdnImage,
             legendaryCustomization = state.activeAccount?.legendaryCustomization,
             avatarBlossoms = state.activeAccount?.avatarBlossoms ?: emptyList(),
             displayName = state.activeAccount?.displayName ?: "",
-            onDismissRequest = { nwcUserId = null },
+            onDismissRequest = { showNotificationsBottomSheet = false },
             onTogglePushNotifications = { enabled ->
                 if (enabled) {
-                    nwcUserId?.let { PrimalNwcService.start(context, it) }
-                    nwcUserId = null
+                    state.activeAccount?.pubkey?.let { PrimalNwcService.start(context, it) }
+                    showNotificationsBottomSheet = false
                 }
             },
         )
