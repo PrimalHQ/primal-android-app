@@ -24,6 +24,7 @@ import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.signer.SignerConnectBottomSheet
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.core.service.PrimalNwcService
 import net.primal.android.core.service.PrimalRemoteSignerService
 import net.primal.android.theme.AppTheme
 
@@ -48,6 +49,9 @@ fun NostrConnectBottomSheet(viewModel: NostrConnectViewModel, onDismissRequest: 
             when (it) {
                 is NostrConnectContract.SideEffect.ConnectionSuccess -> {
                     PrimalRemoteSignerService.ensureServiceStarted(context = context)
+                    if (it.requiresNwcService) {
+                        PrimalNwcService.start(context = context, userId = it.userId)
+                    }
                     if (it.callbackUri != null) {
                         onDismissRequest()
                         uriHandler.openUriSafely(it.callbackUri)

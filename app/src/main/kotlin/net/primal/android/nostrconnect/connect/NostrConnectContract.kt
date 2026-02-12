@@ -30,6 +30,10 @@ interface NostrConnectContract {
     }
 
     sealed class SideEffect {
-        data class ConnectionSuccess(val callbackUri: String?) : SideEffect()
+        data class ConnectionSuccess(
+            val callbackUri: String?,
+            val userId: String,
+            val requiresNwcService: Boolean = false,
+        ) : SideEffect()
     }
 }

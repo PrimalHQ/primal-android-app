@@ -15,7 +15,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.NostrConnectSession
 import net.primal.android.core.compose.indicator.IndicatorOverlay
 import net.primal.android.core.compose.signer.EnableSignerNotificationsBottomSheet
-import net.primal.android.core.service.PrimalRemoteSignerService
+import net.primal.android.core.service.PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID
 import net.primal.android.core.utils.hasNotificationPermission
 import net.primal.android.theme.AppTheme
 
@@ -33,7 +33,7 @@ fun RemoteSessionIndicatorOverlay(
 
     LaunchedEffect(uiState.isRemoteSessionActive, uiState.activeAppName) {
         if (uiState.isRemoteSessionActive && uiState.activeAppName != null) {
-            val hasPermission = context.hasNotificationPermission(PrimalRemoteSignerService.CHANNEL_ID)
+            val hasPermission = context.hasNotificationPermission(PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID)
             if (!hasPermission) {
                 showNotificationPrompt = true
             }

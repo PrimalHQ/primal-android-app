@@ -59,6 +59,7 @@ import net.primal.android.core.compose.icons.primaliconpack.DownloadsFilled
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.compose.settings.SettingsItem
+import net.primal.android.core.service.PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID
 import net.primal.android.core.service.PrimalNwcService
 import net.primal.android.core.utils.hasNotificationPermission
 import net.primal.android.premium.legend.domain.LegendaryCustomization
@@ -348,7 +349,7 @@ private fun ToggleNwcServiceButton(
             if (isRunningForCurrentUser) {
                 PrimalNwcService.stop(context, currentUserId)
             } else {
-                if (context.hasNotificationPermission(PrimalNwcService.CHANNEL_ID)) {
+                if (context.hasNotificationPermission(PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID)) {
                     PrimalNwcService.start(context, currentUserId)
                 } else {
                     showNotificationsBottomSheet = true
