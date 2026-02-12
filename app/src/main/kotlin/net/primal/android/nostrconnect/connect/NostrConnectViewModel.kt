@@ -218,7 +218,7 @@ class NostrConnectViewModel @Inject constructor(
                     NostrConnectContract.SideEffect.ConnectionSuccess(
                         callbackUri = state.value.callback,
                         userId = userId,
-                        shouldStartNwcService = activeWallet is Wallet.Spark && nwcConnectionString != null,
+                        requiresNwcService = activeWallet is Wallet.Spark && nwcConnectionString != null,
                     ),
                 )
             }.onFailure { error ->

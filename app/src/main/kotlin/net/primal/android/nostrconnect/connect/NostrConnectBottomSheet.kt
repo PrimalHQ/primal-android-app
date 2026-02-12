@@ -49,7 +49,7 @@ fun NostrConnectBottomSheet(viewModel: NostrConnectViewModel, onDismissRequest: 
             when (it) {
                 is NostrConnectContract.SideEffect.ConnectionSuccess -> {
                     PrimalRemoteSignerService.ensureServiceStarted(context = context)
-                    if (it.shouldStartNwcService) {
+                    if (it.requiresNwcService) {
                         PrimalNwcService.start(context = context, userId = it.userId)
                     }
                     if (it.callbackUri != null) {

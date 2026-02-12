@@ -33,7 +33,7 @@ interface NostrConnectContract {
         data class ConnectionSuccess(
             val callbackUri: String?,
             val userId: String,
-            val shouldStartNwcService: Boolean = false,
+            val requiresNwcService: Boolean = false,
         ) : SideEffect()
     }
 }

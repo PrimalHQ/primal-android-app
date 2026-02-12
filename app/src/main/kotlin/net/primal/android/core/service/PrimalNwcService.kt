@@ -50,7 +50,6 @@ class PrimalNwcService : Service() {
     lateinit var accountsStore: UserAccountsStore
 
     companion object {
-        const val CHANNEL_ID = "remote_signer"
         private const val GROUP_ID = "net.primal.NWC_WALLET_SERVICE"
         private const val SUMMARY_NOTIFICATION_ID = 200
         private const val CHILD_NOTIFICATION_ID = 201
@@ -182,7 +181,7 @@ class PrimalNwcService : Service() {
         val notificationManager = getSystemService(NotificationManager::class.java)
         notificationManager.createNotificationChannel(
             NotificationChannel(
-                CHANNEL_ID,
+                PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID,
                 getString(R.string.signer_notification_name),
                 NotificationManager.IMPORTANCE_DEFAULT,
             ),
@@ -190,7 +189,7 @@ class PrimalNwcService : Service() {
     }
 
     private fun buildSummaryNotification(): Notification {
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        return NotificationCompat.Builder(this, PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.primal_wave_logo_summer)
             .setContentTitle(getString(R.string.nwc_service_notification_title))
             .setOngoing(true)
@@ -211,7 +210,7 @@ class PrimalNwcService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        return NotificationCompat.Builder(this, PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.primal_wave_logo_summer)
             .setContentTitle(getString(R.string.nwc_service_notification_user_title))
             .setContentText(getString(R.string.nwc_service_notification_text, displayName))

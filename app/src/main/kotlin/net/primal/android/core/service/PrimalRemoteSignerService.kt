@@ -75,7 +75,6 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
     companion object {
         private const val GROUP_ID = "net.primal.CONNECTED_APPS"
         private const val END_SESSION_ACTION_INTENT = "net.primal.END_SESSION"
-        const val CHANNEL_ID = "remote_signer"
         private const val SUMMARY_NOTIFICATION_ID = 42
         private const val CHILD_NOTIFICATION_ID = 43
         private const val RESPOND_NOTIFICATION_ID = 44
@@ -178,7 +177,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
     }
 
     private fun buildSummaryNotification(): Notification =
-        NotificationCompat.Builder(this, CHANNEL_ID)
+        NotificationCompat.Builder(this, PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.primal_wave_logo_summer)
             .setContentTitle(resources.getString(R.string.signer_notification_summary_title))
             .setOngoing(true)
@@ -198,7 +197,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        return NotificationCompat.Builder(this, PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.primal_wave_logo_summer)
             .setContentTitle(
                 resources.getQuantityString(
@@ -273,7 +272,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
         val nm = getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(
             NotificationChannel(
-                CHANNEL_ID,
+                PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID,
                 resources.getString(R.string.signer_notification_name),
                 NotificationManager.IMPORTANCE_DEFAULT,
             ),
@@ -301,7 +300,7 @@ class PrimalRemoteSignerService : Service(), DefaultLifecycleObserver {
             ?.authorNameUiFriendly()
             ?: session.userPubKey.asEllipsizedNpub()
 
-        val notification = NotificationCompat.Builder(this, CHANNEL_ID)
+        val notification = NotificationCompat.Builder(this, PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setSmallIcon(R.drawable.primal_wave_logo_summer)

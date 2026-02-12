@@ -46,7 +46,7 @@ import net.primal.android.core.compose.PrimalBottomSheetDragHandle
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.button.PrimalFilledButton
-import net.primal.android.core.service.PrimalRemoteSignerService
+import net.primal.android.core.service.PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID
 import net.primal.android.core.utils.getNotificationSettingsIntent
 import net.primal.android.core.utils.hasNotificationPermission
 import net.primal.android.theme.AppTheme
@@ -63,7 +63,7 @@ fun EnableSignerNotificationsBottomSheet(
     val lifecycleOwner = LocalLifecycleOwner.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
-    val channelId = PrimalRemoteSignerService.CHANNEL_ID
+    val channelId = PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID
 
     var isEnabled by remember { mutableStateOf(context.hasNotificationPermission(channelId)) }
 
