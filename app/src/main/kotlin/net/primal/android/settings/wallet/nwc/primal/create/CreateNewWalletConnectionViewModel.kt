@@ -6,11 +6,14 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
 import java.math.BigDecimal
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
+import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiEvent
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -35,9 +38,24 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private val _effects = Channel<CreateNewWalletConnectionContract.SideEffect>()
+    val effects = _effects.receiveAsFlow()
+    private fun setEffect(effect: CreateNewWalletConnectionContract.SideEffect) =
+        viewModelScope.launch { _effects.send(effect) }
+
     init {
+        observeActiveAccount()
         observeEvents()
     }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(activeAccount = it.asUserAccountUi())
+                }
+            }
+        }
 
     private fun observeEvents() {
         viewModelScope.launch {
@@ -71,13 +89,15 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                 val userId = activeAccountStore.activeUserId()
                 when (val activeWallet = walletAccountRepository.getActiveWallet(userId)) {
                     is Wallet.Spark -> {
-                        nwcRepository.createNewWalletConnection(
+                        val uri = nwcRepository.createNewWalletConnection(
                             userId = userId,
                             walletId = activeWallet.walletId,
                             appName = appName,
                             dailyBudget = dailyBudget,
                         ).getOrThrow()
+                        uri to true
                     }
+
                     is Wallet.Primal -> {
                         val dailyBudgetBtc = dailyBudget?.toBtc()
                         val formattedDailyBudgetBtc = dailyBudgetBtc?.let {
@@ -85,21 +105,28 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                                 .stripTrailingZeros()
                                 .toPlainString()
                         }
-                        primalWalletNwcRepository.createNewWalletConnection(
+                        val uri = primalWalletNwcRepository.createNewWalletConnection(
                             userId = userId,
                             appName = appName,
                             dailyBudget = formattedDailyBudgetBtc,
                         ).nwcConnectionUri
+                        uri to false
                     }
+
                     else -> error("Active wallet does not support NWC connections.")
                 }
-            }.onSuccess { nwcConnectionUri ->
+            }.onSuccess { (nwcConnectionUri, isSparkWallet) ->
                 setState {
                     copy(
                         nwcConnectionUri = nwcConnectionUri,
                         creatingSecret = false,
                     )
                 }
+                setEffect(
+                    CreateNewWalletConnectionContract.SideEffect.CreateSuccess(
+                        nwcServiceIsRequired = isSparkWallet,
+                    ),
+                )
             }.onFailure { error ->
                 setState { copy(creatingSecret = false) }
                 Napier.w(throwable = error) { "Failed to create wallet connection." }
