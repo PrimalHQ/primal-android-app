@@ -1,8 +1,7 @@
 package net.primal.android.settings.wallet.nwc.primal.create
 
-import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.settings.wallet.nwc.primal.PrimalNwcDefaults
-import net.primal.domain.links.CdnImage
 
 interface CreateNewWalletConnectionContract {
     data class UiState(
@@ -10,11 +9,7 @@ interface CreateNewWalletConnectionContract {
         val appName: String = "",
         val nwcConnectionUri: String? = null,
         val dailyBudget: Long? = PrimalNwcDefaults.DEFAULT_DAILY_BUDGET,
-        val activeUserId: String = "",
-        val activeAccountAvatarCdnImage: CdnImage? = null,
-        val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
-        val activeAccountBlossoms: List<String> = emptyList(),
-        val activeAccountDisplayName: String = "",
+        val activeAccount: UserAccountUi? = null,
     )
 
     sealed class UiEvent {
@@ -24,6 +19,6 @@ interface CreateNewWalletConnectionContract {
     }
 
     sealed class SideEffect {
-        data object StartNwcService : SideEffect()
+        data class CreateSuccess(val nwcServiceIsRequired: Boolean, val userId: String) : SideEffect()
     }
 }

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
-import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiEvent
 import net.primal.android.settings.wallet.nwc.primal.create.CreateNewWalletConnectionContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -31,7 +31,7 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
     private val nwcRepository: NwcRepository,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UiState(activeUserId = activeAccountStore.activeUserId()))
+    private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate(reducer)
 
@@ -52,13 +52,7 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect {
                 setState {
-                    copy(
-                        activeUserId = it.pubkey,
-                        activeAccountAvatarCdnImage = it.avatarCdnImage,
-                        activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
-                        activeAccountBlossoms = it.blossomServers,
-                        activeAccountDisplayName = it.authorDisplayName,
-                    )
+                    copy(activeAccount = it.asUserAccountUi())
                 }
             }
         }
@@ -91,19 +85,19 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
     private fun createNewWalletConnection(appName: String, dailyBudget: Long?) =
         viewModelScope.launch {
             setState { copy(creatingSecret = true) }
-            var isSparkWallet = false
             runCatching {
                 val userId = activeAccountStore.activeUserId()
                 when (val activeWallet = walletAccountRepository.getActiveWallet(userId)) {
                     is Wallet.Spark -> {
-                        isSparkWallet = true
-                        nwcRepository.createNewWalletConnection(
+                        val uri = nwcRepository.createNewWalletConnection(
                             userId = userId,
                             walletId = activeWallet.walletId,
                             appName = appName,
                             dailyBudget = dailyBudget,
                         ).getOrThrow()
+                        uri to true
                     }
+
                     is Wallet.Primal -> {
                         val dailyBudgetBtc = dailyBudget?.toBtc()
                         val formattedDailyBudgetBtc = dailyBudgetBtc?.let {
@@ -111,24 +105,29 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
                                 .stripTrailingZeros()
                                 .toPlainString()
                         }
-                        primalWalletNwcRepository.createNewWalletConnection(
+                        val uri = primalWalletNwcRepository.createNewWalletConnection(
                             userId = userId,
                             appName = appName,
                             dailyBudget = formattedDailyBudgetBtc,
                         ).nwcConnectionUri
+                        uri to false
                     }
+
                     else -> error("Active wallet does not support NWC connections.")
                 }
-            }.onSuccess { nwcConnectionUri ->
+            }.onSuccess { (nwcConnectionUri, isSparkWallet) ->
                 setState {
                     copy(
                         nwcConnectionUri = nwcConnectionUri,
                         creatingSecret = false,
                     )
                 }
-                if (isSparkWallet) {
-                    setEffect(CreateNewWalletConnectionContract.SideEffect.StartNwcService)
-                }
+                setEffect(
+                    CreateNewWalletConnectionContract.SideEffect.CreateSuccess(
+                        nwcServiceIsRequired = isSparkWallet,
+                        userId = activeAccountStore.activeUserId(),
+                    ),
+                )
             }.onFailure { error ->
                 setState { copy(creatingSecret = false) }
                 Napier.w(throwable = error) { "Failed to create wallet connection." }

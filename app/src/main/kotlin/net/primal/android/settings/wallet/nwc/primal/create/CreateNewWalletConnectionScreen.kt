@@ -77,33 +77,35 @@ import net.primal.android.theme.domain.PrimalTheme
 fun CreateNewWalletConnectionScreen(viewModel: CreateNewWalletConnectionViewModel, onClose: () -> Unit) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-    var showNotificationsBottomSheet by remember { mutableStateOf(false) }
+    var nwcUserId by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
             when (effect) {
-                CreateNewWalletConnectionContract.SideEffect.StartNwcService -> {
-                    if (context.hasNotificationPermission(PrimalNwcService.CHANNEL_ID)) {
-                        PrimalNwcService.start(context, state.activeUserId)
-                    } else {
-                        showNotificationsBottomSheet = true
+                is CreateNewWalletConnectionContract.SideEffect.CreateSuccess -> {
+                    if (effect.nwcServiceIsRequired) {
+                        if (context.hasNotificationPermission(PrimalNwcService.CHANNEL_ID)) {
+                            PrimalNwcService.start(context, effect.userId)
+                        } else {
+                            nwcUserId = effect.userId
+                        }
                     }
                 }
             }
         }
     }
 
-    if (showNotificationsBottomSheet) {
+    if (nwcUserId != null) {
         EnableNwcNotificationsBottomSheet(
-            avatarCdnImage = state.activeAccountAvatarCdnImage,
-            legendaryCustomization = state.activeAccountLegendaryCustomization,
-            avatarBlossoms = state.activeAccountBlossoms,
-            displayName = state.activeAccountDisplayName,
-            onDismissRequest = { showNotificationsBottomSheet = false },
+            avatarCdnImage = state.activeAccount?.avatarCdnImage,
+            legendaryCustomization = state.activeAccount?.legendaryCustomization,
+            avatarBlossoms = state.activeAccount?.avatarBlossoms ?: emptyList(),
+            displayName = state.activeAccount?.displayName ?: "",
+            onDismissRequest = { nwcUserId = null },
             onTogglePushNotifications = { enabled ->
                 if (enabled) {
-                    PrimalNwcService.start(context, state.activeUserId)
-                    showNotificationsBottomSheet = false
+                    nwcUserId?.let { PrimalNwcService.start(context, it) }
+                    nwcUserId = null
                 }
             },
         )
