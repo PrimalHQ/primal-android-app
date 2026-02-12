@@ -42,6 +42,7 @@ import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.OnChainAddressResult
 import net.primal.domain.wallet.SparkWalletManager
+import net.primal.domain.wallet.TransactionsPage
 import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
@@ -63,6 +64,7 @@ internal class SparkWalletServiceImpl(
         private const val DEFAULT_LIMIT = 100u
         private const val DEFAULT_INVOICE_EXPIRY_SECS = 3600u
         private const val DEFAULT_COMPLETION_TIMEOUT_SECS = 30u
+        private const val MAX_SAME_TIMESTAMP_PAGES = 10
 
         private const val TIER_SLOW_ID = "slow"
         private const val TIER_MEDIUM_ID = "medium"
@@ -94,45 +96,58 @@ internal class SparkWalletServiceImpl(
     override suspend fun fetchTransactions(
         wallet: Wallet.Spark,
         request: TransactionsRequest,
-    ): Result<List<Transaction>> =
+    ): Result<TransactionsPage> =
         runCatching {
             val sdk = breezSdkInstanceManager.requireInstance(wallet.walletId)
-            val response = sdk.listPayments(
-                ListPaymentsRequest(
-                    offset = (request.offset ?: DEFAULT_OFFSET.toInt()).toUInt(),
-                    limit = (request.limit ?: DEFAULT_LIMIT.toInt()).toUInt(),
-                    sortAscending = false,
-                    fromTimestamp = request.since?.toULong(),
-                    toTimestamp = request.until?.toULong(),
-                ),
+            val limit = request.limit ?: DEFAULT_LIMIT.toInt()
+
+            val firstBatch = fetchClaimedTransactions(
+                wallet = wallet,
+                until = request.until,
+                since = request.since,
+                offset = request.offset ?: 0,
+                limit = limit,
             )
 
-            val payments = response.payments
+            val allClaimed: List<Transaction>
+            val nextCursor: Long?
 
-            // Only fetch zap receipts for SENT payments (Lightning and Spark)
-            // Received payments already have zap data in lnurlReceiveMetadata from SDK
-            val sentLightningInvoices = payments.extractSentInvoices()
-            val zapReceiptsMap = if (sentLightningInvoices.isNotEmpty()) {
-                eventRepository.getZapReceipts(invoices = sentLightningInvoices).getOrNull()
+            if (firstBatch.size < limit) {
+                allClaimed = firstBatch
+                nextCursor = null
             } else {
-                null
-            }
+                val minCreatedAt = firstBatch.minOfOrNull { it.createdAt }!!
+                val allSameTimestamp = firstBatch.all { it.createdAt == minCreatedAt }
 
-            val claimedTransactions = payments.mapNotNull { payment ->
-                val txInvoice = payment.extractSentInvoice()
-                val zapRequestFallback = txInvoice?.let { zapReceiptsMap?.get(it) }
-
-                payment.mapAsSparkTransaction(
-                    userId = wallet.userId,
-                    walletId = wallet.walletId,
-                    walletAddress = wallet.lightningAddress,
-                    zapRequestFallback = zapRequestFallback,
-                )
+                if (allSameTimestamp) {
+                    // Same-timestamp edge case: use offset to exhaust this timestamp
+                    val accumulated = firstBatch.toMutableList()
+                    var offset = limit
+                    while (offset < limit * MAX_SAME_TIMESTAMP_PAGES) {
+                        val innerBatch = fetchClaimedTransactions(
+                            wallet = wallet,
+                            // Clamp to exact timestamp: toTimestamp is EXCLUSIVE in Breez SDK
+                            until = minCreatedAt + 1,
+                            since = minCreatedAt,
+                            offset = offset,
+                            limit = limit,
+                        )
+                        accumulated.addAll(innerBatch)
+                        offset += limit
+                        if (innerBatch.size < limit) break
+                    }
+                    allClaimed = accumulated
+                    // toTimestamp is exclusive, so until=T will fetch < T on next page
+                    nextCursor = minCreatedAt
+                } else {
+                    allClaimed = firstBatch
+                    nextCursor = minCreatedAt
+                }
             }
 
             // Merge unclaimed deposits as PROCESSING transactions.
             // Dedup by txid — prefer claimed version if both exist.
-            val claimedTxIds = claimedTransactions
+            val claimedTxIds = allClaimed
                 .filterIsInstance<Transaction.OnChain>()
                 .mapTo(mutableSetOf()) { it.onChainTxId }
 
@@ -147,8 +162,51 @@ internal class SparkWalletServiceImpl(
                 .filter { it.txid !in claimedTxIds }
                 .map { it.mapAsSparkTransaction(wallet) }
 
-            claimedTransactions + unclaimedTransactions
+            TransactionsPage(
+                transactions = allClaimed + unclaimedTransactions,
+                nextCursor = nextCursor,
+            )
         }.mapFailure { it.toWalletException() }
+
+    private suspend fun fetchClaimedTransactions(
+        wallet: Wallet.Spark,
+        until: Long?,
+        since: Long?,
+        offset: Int,
+        limit: Int,
+    ): List<Transaction> {
+        val sdk = breezSdkInstanceManager.requireInstance(wallet.walletId)
+        val response = sdk.listPayments(
+            ListPaymentsRequest(
+                offset = offset.toUInt(),
+                limit = limit.toUInt(),
+                sortAscending = false,
+                fromTimestamp = since?.toULong(),
+                toTimestamp = until?.toULong(),
+            ),
+        )
+
+        val payments = response.payments
+
+        val sentLightningInvoices = payments.extractSentInvoices()
+        val zapReceiptsMap = if (sentLightningInvoices.isNotEmpty()) {
+            eventRepository.getZapReceipts(invoices = sentLightningInvoices).getOrNull()
+        } else {
+            null
+        }
+
+        return payments.mapNotNull { payment ->
+            val txInvoice = payment.extractSentInvoice()
+            val zapRequestFallback = txInvoice?.let { zapReceiptsMap?.get(it) }
+
+            payment.mapAsSparkTransaction(
+                userId = wallet.userId,
+                walletId = wallet.walletId,
+                walletAddress = wallet.lightningAddress,
+                zapRequestFallback = zapRequestFallback,
+            )
+        }
+    }
 
     private fun List<Payment>.extractSentInvoices(): List<String> {
         return this

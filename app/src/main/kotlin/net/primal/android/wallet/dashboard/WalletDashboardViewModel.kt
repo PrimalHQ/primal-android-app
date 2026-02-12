@@ -3,6 +3,7 @@ package net.primal.android.wallet.dashboard
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import androidx.paging.map
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -152,7 +153,8 @@ class WalletDashboardViewModel @Inject constructor(
                         copy(
                             transactions = walletRepository
                                 .latestTransactions(walletId = wallet.walletId)
-                                .mapAsPagingDataOfTransactionUi(),
+                                .mapAsPagingDataOfTransactionUi()
+                                .cachedIn(viewModelScope),
                         )
                     }
                 }

@@ -1,9 +1,9 @@
 package net.primal.wallet.data.service
 
+import io.github.aakira.napier.Napier
 import kotlin.time.Duration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import net.primal.core.networking.utils.orderByPagingIfNotNull
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.Result
@@ -12,12 +12,12 @@ import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.utils.ensureEncodedLnUrl
 import net.primal.domain.nostr.utils.stripLightningPrefix
 import net.primal.domain.rates.fees.OnChainTransactionFeeTier
-import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.Network
 import net.primal.domain.wallet.OnChainAddressResult
 import net.primal.domain.wallet.SubWallet
+import net.primal.domain.wallet.TransactionsPage
 import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.Wallet
@@ -33,6 +33,11 @@ import net.primal.wallet.data.repository.mappers.remote.mapAsPrimalTransactions
 internal class PrimalWalletServiceImpl(
     private val primalWalletApi: PrimalWalletApi,
 ) : WalletService<Wallet.Primal> {
+
+    private companion object {
+        private const val TAG = "PrimalWalletService"
+        private const val DEFAULT_PAGE_SIZE = 50
+    }
 
     override suspend fun fetchWalletBalance(wallet: Wallet.Primal): Result<WalletBalanceResult> =
         runCatching {
@@ -56,7 +61,7 @@ internal class PrimalWalletServiceImpl(
     override suspend fun fetchTransactions(
         wallet: Wallet.Primal,
         request: TransactionsRequest,
-    ): Result<List<Transaction>> =
+    ): Result<TransactionsPage> =
         runCatching {
             val response = primalWalletApi.getTransactions(
                 userId = wallet.walletId,
@@ -74,9 +79,24 @@ internal class PrimalWalletServiceImpl(
                 userId = wallet.userId,
             )
 
-            transactions.orderByPagingIfNotNull(
-                pagingEvent = response.paging,
-            ) { transactionId }
+            val requestedLimit = request.limit ?: DEFAULT_PAGE_SIZE
+            val serverCursor = response.paging?.sinceId
+            val nextCursor = serverCursor ?: if (transactions.size >= requestedLimit) {
+                // Server didn't provide a cursor but we got a full page — compute fallback
+                transactions.minOfOrNull { it.createdAt }
+            } else {
+                null
+            }
+
+            Napier.d(tag = TAG) {
+                "Fetched ${transactions.size} txs (limit=$requestedLimit), " +
+                    "paging.sinceId=$serverCursor, nextCursor=$nextCursor"
+            }
+
+            TransactionsPage(
+                transactions = transactions,
+                nextCursor = nextCursor,
+            )
         }
 
     override suspend fun createLightningInvoice(

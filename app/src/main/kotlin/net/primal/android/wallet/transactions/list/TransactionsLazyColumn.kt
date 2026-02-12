@@ -1,12 +1,11 @@
 package net.primal.android.wallet.transactions.list
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -14,6 +13,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemContentType
+import androidx.paging.compose.itemKey
 import java.text.NumberFormat
 import java.time.Instant
 import java.time.ZoneId
@@ -26,7 +27,6 @@ import net.primal.android.core.compose.isEmpty
 import net.primal.android.theme.AppTheme
 import net.primal.domain.wallet.CurrencyMode
 
-@ExperimentalFoundationApi
 @Composable
 fun TransactionsLazyColumn(
     modifier: Modifier,
@@ -56,31 +56,34 @@ fun TransactionsLazyColumn(
             }
         }
 
-        pagingItems.itemSnapshotList.items.groupBy {
-            it.txUpdatedAt.formatDay(
+        items(
+            count = pagingItems.itemCount,
+            key = pagingItems.itemKey { it.txId },
+            contentType = pagingItems.itemContentType(),
+        ) { index ->
+            val item = pagingItems[index] ?: return@items
+            val previousItem = if (index > 0) pagingItems.peek(index - 1) else null
+            val currentDay = item.txUpdatedAt.formatDay(
                 todayTranslation = today,
                 yesterdayTranslation = yesterday,
             )
-        }.forEach { (day, dayTransactions) ->
-            stickyHeader(
-                key = day,
-                contentType = "DayHeader",
-            ) {
-                TransactionsHeaderListItem(
-                    modifier = Modifier
-                        .background(color = AppTheme.colorScheme.surfaceVariant)
-                        .fillMaxWidth(),
-                    day = day,
-                )
-            }
+            val previousDay = previousItem?.txUpdatedAt?.formatDay(
+                todayTranslation = today,
+                yesterdayTranslation = yesterday,
+            )
 
-            items(
-                items = dayTransactions,
-                key = { it.txId },
-                contentType = { "Transaction" },
-            ) {
+            Column {
+                if (currentDay != previousDay) {
+                    TransactionsHeaderListItem(
+                        modifier = Modifier
+                            .background(color = AppTheme.colorScheme.surfaceVariant)
+                            .fillMaxWidth(),
+                        day = currentDay,
+                    )
+                }
+
                 TransactionListItem(
-                    data = it,
+                    data = item,
                     numberFormat = numberFormat,
                     onAvatarClick = onProfileClick,
                     onClick = onTransactionClick,
