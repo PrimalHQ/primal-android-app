@@ -63,6 +63,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.service.PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID
 import net.primal.android.core.service.PrimalNwcService
 import net.primal.android.core.utils.hasNotificationPermission
 import net.primal.android.settings.wallet.nwc.primal.PrimalNwcDefaults
@@ -84,7 +85,7 @@ fun CreateNewWalletConnectionScreen(viewModel: CreateNewWalletConnectionViewMode
             when (effect) {
                 is CreateNewWalletConnectionContract.SideEffect.CreateSuccess -> {
                     if (effect.nwcServiceIsRequired) {
-                        if (context.hasNotificationPermission(PrimalNwcService.CHANNEL_ID)) {
+                        if (context.hasNotificationPermission(PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID)) {
                             state.activeAccount?.pubkey?.let { PrimalNwcService.start(context, it) }
                         } else {
                             showNotificationsBottomSheet = true
