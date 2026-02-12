@@ -1649,7 +1649,7 @@
     <string name="permissions_bottom_sheet_event_details_unavailable">Event details unavailable</string>
     <string name="permissions_bottom_sheet_back_button">Back</string>
 
-    <string name="signer_notification_name">Primal Service</string>
+    <string name="signer_notification_name">Remote Signer</string>
     <string name="signer_notification_summary_title">Primal Remote Signer</string>
     <string name="signer_notification_end_session">End session</string>
     <string name="signer_notification_unknown_app">Unknown App</string>
