@@ -139,6 +139,17 @@ class CreateTransactionViewModel @Inject constructor(
                     UiEvent.ReloadMiningFees -> {
                         updateMiningFees()
                     }
+
+                    UiEvent.SendingAnimationFinished -> {
+                        val finalStatus = _state.value.pendingFinalStatus ?: return@collect
+                        setState {
+                            copy(
+                                transaction = transaction.copy(status = finalStatus),
+                                sendingCompleted = false,
+                                pendingFinalStatus = null,
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -302,13 +313,14 @@ class CreateTransactionViewModel @Inject constructor(
                     request = txRequest,
                 ).getOrThrow()
             }.onSuccess {
-                setState { copy(transaction = transaction.copy(status = DraftTxStatus.Sent)) }
+                setState { copy(sendingCompleted = true, pendingFinalStatus = DraftTxStatus.Sent) }
             }.onFailure { error ->
                 Napier.w(throwable = error) { "Failed to send transaction." }
                 setState {
                     copy(
                         error = error,
-                        transaction = transaction.copy(status = DraftTxStatus.Failed),
+                        sendingCompleted = true,
+                        pendingFinalStatus = DraftTxStatus.Failed,
                     )
                 }
             }
