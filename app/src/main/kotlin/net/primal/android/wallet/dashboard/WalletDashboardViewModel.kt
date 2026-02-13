@@ -26,6 +26,8 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
+import net.primal.android.wallet.di.PendingDepositsSyncerFactory
+import net.primal.android.wallet.di.bindToProcessLifecycle
 import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.store.PrimalBillingClient
 import net.primal.android.wallet.store.domain.SatsPurchase
@@ -51,6 +53,7 @@ import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandle
 @HiltViewModel
 class WalletDashboardViewModel @Inject constructor(
     userRepository: UserRepository,
+    pendingDepositsSyncerFactory: PendingDepositsSyncerFactory,
     private val activeAccountStore: ActiveAccountStore,
     private val walletAccountRepository: WalletAccountRepository,
     private val walletRepository: WalletRepository,
@@ -64,6 +67,7 @@ class WalletDashboardViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
+    private val pendingDepositsSyncer = pendingDepositsSyncerFactory.create(userId = activeUserId)
 
     private val _state = MutableStateFlow(
         value = UiState(isNpubLogin = userRepository.isNpubLogin(userId = activeUserId)),
@@ -86,6 +90,7 @@ class WalletDashboardViewModel @Inject constructor(
         subscribeToBadgesUpdates()
         checkForPersistedSparkWallet()
         migratePrimalTransactionsIfNeeded()
+        bindToProcessLifecycle(pendingDepositsSyncer)
     }
 
     private fun checkForPersistedSparkWallet() =
