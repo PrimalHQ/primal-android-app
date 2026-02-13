@@ -123,8 +123,28 @@ internal class SparkWalletAccountRepositoryImpl(
     override suspend fun deleteSparkWalletByUserId(userId: String): Result<String> =
         runCatching {
             withContext(dispatcherProvider.io()) {
-                walletDatabase.wallet().deleteSparkWalletByUserId(userId = userId)
-                    ?: throw NoSuchElementException("No spark wallet found for $userId user.")
+                walletDatabase.withTransaction {
+                    val walletId = walletDatabase.wallet().deleteSparkWalletByUserId(userId = userId)
+                        ?: throw NoSuchElementException("No spark wallet found for $userId user.")
+
+                    val connectionIds = walletDatabase.nwcConnections()
+                        .findConnectionIdsByWalletId(walletId)
+
+                    walletDatabase.walletSettings().deleteWalletSettings(listOf(walletId))
+                    walletDatabase.walletTransactionRemoteKeys().deleteByWalletId(walletId)
+                    walletDatabase.walletTransactions().deleteByWalletId(walletId)
+                    walletDatabase.nwcInvoices().deleteByWalletIds(listOf(walletId))
+                    walletDatabase.receiveRequests().deleteByWalletId(walletId)
+
+                    if (connectionIds.isNotEmpty()) {
+                        walletDatabase.nwcPaymentHolds().deleteHoldsByConnectionIds(connectionIds)
+                        walletDatabase.nwcPaymentHolds().deleteDailyBudgetsByConnectionIds(connectionIds)
+                    }
+                    walletDatabase.nwcConnections().deleteAllByWalletId(walletId)
+                    walletDatabase.nwcLogs().deleteByWalletId(walletId)
+
+                    walletId
+                }
             }
         }
 
