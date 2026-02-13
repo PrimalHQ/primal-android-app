@@ -63,8 +63,10 @@ internal class SparkWalletManagerImpl(
     ) : EventListener {
         override suspend fun onEvent(event: SdkEvent) {
             when (event) {
-                is SdkEvent.Synced ->
+                is SdkEvent.Synced -> {
                     Napier.d { "SdkEvent.Synced walletId=$walletId" }
+                    _balanceChanged.emit(walletId)
+                }
 
                 is SdkEvent.PaymentSucceeded -> {
                     Napier.i { "SdkEvent.PaymentSucceeded walletId=$walletId paymentId=${event.payment.id}" }
