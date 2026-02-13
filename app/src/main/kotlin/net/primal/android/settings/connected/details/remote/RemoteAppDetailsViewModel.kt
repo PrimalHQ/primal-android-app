@@ -158,9 +158,7 @@ class RemoteAppDetailsViewModel @Inject constructor(
             runCatching {
                 connectionRepository.updateConnectionAutoStart(clientPubKey, enabled)
             }.onSuccess {
-                CoroutineScope(dispatcherProvider.io()).launch {
-                    runCatching { tokenUpdater.updateTokenForRemoteSigner() }
-                }
+                runCatching { tokenUpdater.updateTokenForRemoteSigner() }
             }.onFailure {
                 setState { copy(error = UiError.GenericError(it.message)) }
             }

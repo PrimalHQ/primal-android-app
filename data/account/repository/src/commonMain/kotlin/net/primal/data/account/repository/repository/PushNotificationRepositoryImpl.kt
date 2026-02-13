@@ -20,13 +20,13 @@ class PushNotificationRepositoryImpl(
 
     override suspend fun updateNotificationTokenForNip46(authorizationEvent: NostrEvent, token: String) {
         withContext(dispatchers.io()) {
-            pushNotificationApi.updateNotificationTokenForNip46OrNip47(listOf(authorizationEvent), token)
+            pushNotificationApi.updateNotificationTokenForRemoteSigners(listOf(authorizationEvent), token)
         }
     }
 
     override suspend fun updateNotificationTokenForNip47(authorizationEvents: List<NostrEvent>, token: String) {
         withContext(dispatchers.io()) {
-            pushNotificationApi.updateNotificationTokenForNip46OrNip47(
+            pushNotificationApi.updateNotificationTokenForRemoteSigners(
                 authorizationEvents = authorizationEvents,
                 token = token,
                 scope = NotificationScope.Nip47,

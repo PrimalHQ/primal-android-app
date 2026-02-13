@@ -7,7 +7,7 @@ interface PushNotificationApi {
 
     suspend fun updateNotificationsToken(authorizationEvents: List<NostrEvent>, token: String)
 
-    suspend fun updateNotificationTokenForNip46OrNip47(
+    suspend fun updateNotificationTokenForRemoteSigners(
         authorizationEvents: List<NostrEvent>,
         token: String,
         scope: NotificationScope = NotificationScope.Nip46,

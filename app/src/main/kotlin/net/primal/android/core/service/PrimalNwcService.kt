@@ -52,7 +52,7 @@ class PrimalNwcService : Service() {
     @Inject
     lateinit var accountsStore: UserAccountsStore
 
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val commandChannel = Channel<ServiceCommand>(Channel.UNLIMITED)
 
     companion object {

@@ -7,7 +7,6 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -27,7 +26,6 @@ import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiStat
 import net.primal.android.settings.wallet.settings.ui.model.asWalletNwcConnectionUi
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.utils.shouldShowBackup
-import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
@@ -50,7 +48,6 @@ import net.primal.domain.wallet.nwc.NwcLogRepository
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
 class WalletSettingsViewModel @AssistedInject constructor(
     @Assisted private val nwcConnectionUrl: String?,
-    private val dispatchers: DispatcherProvider,
     private val activeAccountStore: ActiveAccountStore,
     private val walletRepository: WalletRepository,
     private val walletAccountRepository: WalletAccountRepository,
@@ -182,9 +179,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     }.onFailure { error ->
                         Napier.w(throwable = error) { "Failed to revoke NWC connection." }
                     }.onSuccess {
-                        CoroutineScope(dispatchers.io()).launch {
-                            runCatching { pushNotificationsTokenUpdater.updateTokenForNwcService() }
-                        }
+                        runCatching { pushNotificationsTokenUpdater.updateTokenForNwcService() }
                     }
                 }
 
@@ -293,9 +288,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
             runCatching {
                 nwcRepository.updateAutoStartForUser(userId = activeAccountStore.activeUserId(), autoStart = enabled)
             }.onSuccess {
-                CoroutineScope(dispatchers.io()).launch {
-                    runCatching { pushNotificationsTokenUpdater.updateTokenForNwcService() }
-                }
+                runCatching { pushNotificationsTokenUpdater.updateTokenForNwcService() }
             }.onFailure {
                 Napier.w(throwable = it) { "Failed to update auto-start setting." }
             }

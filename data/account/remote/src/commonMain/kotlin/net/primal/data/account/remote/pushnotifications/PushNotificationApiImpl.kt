@@ -27,7 +27,7 @@ class PushNotificationApiImpl(
         )
     }
 
-    override suspend fun updateNotificationTokenForNip46OrNip47(
+    override suspend fun updateNotificationTokenForRemoteSigners(
         authorizationEvents: List<NostrEvent>,
         token: String,
         scope: NotificationScope,
