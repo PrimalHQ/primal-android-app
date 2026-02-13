@@ -86,6 +86,7 @@ fun TransactionEditor(
     paddingValues: PaddingValues,
     eventPublisher: (CreateTransactionContract.UiEvent) -> Unit,
     onCancelClick: () -> Unit,
+    btcAmountModifier: Modifier = Modifier,
 ) {
     val keyboardVisible by keyboardVisibilityAsState()
 
@@ -133,6 +134,7 @@ fun TransactionEditor(
                 uiMode = uiMode ?: UiDensityMode.Normal,
                 state = state,
                 keyboardVisible = keyboardVisible,
+                btcAmountModifier = btcAmountModifier,
                 onAmountClick = {
                     if (state.isNotInvoice() || state.isAmountZero()) {
                         isNumericPadOn = true
@@ -338,6 +340,7 @@ private fun TransactionHeaderColumn(
     uiMode: UiDensityMode,
     state: CreateTransactionContract.UiState,
     keyboardVisible: Boolean,
+    btcAmountModifier: Modifier = Modifier,
     onAmountClick: () -> Unit,
 ) {
     val verticalPadding = animateDpAsState(
@@ -452,6 +455,7 @@ private fun TransactionHeaderColumn(
             currentExchangeRate = state.currentExchangeRate,
             currentCurrencyMode = state.currencyMode,
             onAmountClick = onAmountClick,
+            btcAmountModifier = btcAmountModifier,
         )
 
         Spacer(modifier = Modifier.height(amountSpacing.value))

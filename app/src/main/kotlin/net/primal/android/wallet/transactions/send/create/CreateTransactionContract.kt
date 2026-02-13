@@ -6,6 +6,7 @@ import net.primal.android.wallet.transactions.send.create.ui.model.MiningFeeUi
 import net.primal.domain.links.CdnImage
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.DraftTx
+import net.primal.domain.wallet.DraftTxStatus
 import net.primal.domain.wallet.Wallet
 
 interface CreateTransactionContract {
@@ -26,6 +27,8 @@ interface CreateTransactionContract {
         val amountInUsd: String = "0",
         val currentExchangeRate: Double? = null,
         val maximumUsdAmount: BigDecimal? = null,
+        val sendingCompleted: Boolean = false,
+        val pendingFinalStatus: DraftTxStatus? = null,
     ) {
         fun isNotInvoice() = transaction.lnInvoice == null && transaction.onChainInvoice == null
     }
@@ -41,5 +44,7 @@ interface CreateTransactionContract {
             val noteSelf: String?,
             val miningFeeTierId: String? = null,
         ) : UiEvent()
+
+        data object SendingAnimationFinished : UiEvent()
     }
 }

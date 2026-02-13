@@ -22,7 +22,7 @@ import net.primal.core.utils.CurrencyConversionUtils.toSats
 
 @Composable
 fun BtcAmountText(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     amountInBtc: BigDecimal?,
     textSize: TextUnit = 42.sp,
     amountColor: Color = Color.Unspecified,
