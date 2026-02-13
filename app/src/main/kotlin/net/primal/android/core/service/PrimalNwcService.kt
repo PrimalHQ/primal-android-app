@@ -147,7 +147,9 @@ class PrimalNwcService : Service() {
         if (nwcServices.containsKey(userId)) return
         val service = nwcServiceFactory.create()
         nwcServices[userId] = service
-        service.initialize(userId)
+        service.initialize(userId) {
+            commandChannel.trySend(ServiceCommand.Stop(userId))
+        }
         _activeUserIds.value = nwcServices.keys.toSet()
         updateNotifications()
     }
