@@ -15,8 +15,8 @@ import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLog
 fun buildNwcRequestLog(request: WalletNwcRequest, requestedAt: Long): NwcWalletRequestLog {
     return NwcWalletRequestLog(
         eventId = request.eventId,
-        connectionId = request.connection.secretPubKey.asEncryptable(),
-        walletId = request.connection.walletId.asEncryptable(),
+        connectionId = request.connection.secretPubKey,
+        walletId = request.connection.walletId,
         userId = request.connection.userId,
         method = request.resolveMethodType().asEncryptable(),
         requestPayload = request.resolvePayloadJson().asEncryptable(),
@@ -71,8 +71,8 @@ internal fun WalletNwcRequest.resolveAmountMsats(): Long? =
 fun NwcWalletRequestLog.asDomain(): NwcRequestLog =
     NwcRequestLog(
         eventId = eventId,
-        connectionId = connectionId.decrypted,
-        walletId = walletId.decrypted,
+        connectionId = connectionId,
+        walletId = walletId,
         userId = userId,
         method = method.decrypted,
         requestPayload = requestPayload.decrypted,

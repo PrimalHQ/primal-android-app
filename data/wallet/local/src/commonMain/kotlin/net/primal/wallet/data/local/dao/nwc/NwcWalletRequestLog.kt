@@ -8,8 +8,8 @@ import net.primal.shared.data.local.encryption.Encryptable
 data class NwcWalletRequestLog(
     @PrimaryKey
     val eventId: String,
-    val connectionId: Encryptable<String>,
-    val walletId: Encryptable<String>,
+    val connectionId: String,
+    val walletId: String,
     val userId: String,
     val method: Encryptable<String>,
     val requestPayload: Encryptable<String>,
