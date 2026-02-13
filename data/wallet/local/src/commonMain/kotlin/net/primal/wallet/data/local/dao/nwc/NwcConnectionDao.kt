@@ -34,4 +34,10 @@ interface NwcConnectionDao {
 
     @Query("DELETE FROM NwcConnectionData WHERE secretPubKey = :secretPubKey AND userId = :userId")
     suspend fun deleteConnection(userId: String, secretPubKey: String)
+
+    @Query("SELECT secretPubKey FROM NwcConnectionData WHERE userId = :userId")
+    suspend fun findConnectionIdsByUserId(userId: String): List<String>
+
+    @Query("DELETE FROM NwcConnectionData WHERE userId = :userId")
+    suspend fun deleteAllByUserId(userId: String)
 }
