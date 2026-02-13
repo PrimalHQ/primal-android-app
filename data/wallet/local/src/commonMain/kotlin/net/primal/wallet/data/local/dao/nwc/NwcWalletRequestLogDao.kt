@@ -36,4 +36,7 @@ interface NwcWalletRequestLogDao {
 
     @Query("DELETE FROM NwcWalletRequestLog WHERE userId = :userId")
     suspend fun deleteAllByUserId(userId: String)
+
+    @Query("DELETE FROM NwcWalletRequestLog WHERE walletId = :walletId")
+    suspend fun deleteByWalletId(walletId: String)
 }
