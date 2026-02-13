@@ -31,4 +31,7 @@ interface ReceiveRequestDao {
 
     @Query("DELETE FROM ReceiveRequestData WHERE userId = :userId")
     suspend fun deleteAllByUserId(userId: String)
+
+    @Query("DELETE FROM ReceiveRequestData WHERE walletId = :walletId")
+    suspend fun deleteByWalletId(walletId: String)
 }
