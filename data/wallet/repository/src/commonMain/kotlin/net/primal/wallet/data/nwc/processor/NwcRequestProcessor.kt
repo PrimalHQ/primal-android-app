@@ -127,13 +127,16 @@ class NwcRequestProcessor internal constructor(
         val walletId = connection.walletId
         val invoice = request.params.invoice
 
-        val amountSats = request.params.amount?.msatsToSats()
-            ?: parseInvoiceAmountSats(userId = connection.userId, invoice = invoice)
+        val amountSats = parseInvoiceAmountSats(userId = connection.userId, invoice = invoice)
+            ?: request.params.amount?.msatsToSats()
+            ?: error("Amount wasn't specified. If this is an amountless invoice, please specify amount through params.")
+
+        require(amountSats > 0) { "Cannot process invoices with negative or zero amount." }
 
         Napier.d(tag = TAG) { "PayInvoice: invoice=${invoice.take(20)}..., amountSats=$amountSats" }
 
         var holdId: String? = null
-        if (amountSats > 0 && nwcBudgetManager.hasBudgetLimit(connectionId)) {
+        if (nwcBudgetManager.hasBudgetLimit(connectionId)) {
             when (
                 val holdResult = nwcBudgetManager.placeHold(
                     connectionId = connectionId,
@@ -193,9 +196,9 @@ class NwcRequestProcessor internal constructor(
         }
     }
 
-    private suspend fun parseInvoiceAmountSats(userId: String, invoice: String): Long {
+    private suspend fun parseInvoiceAmountSats(userId: String, invoice: String): Long? {
         val parseResult = walletRepository.parseLnInvoice(userId = userId, lnbc = invoice)
-        return (parseResult.amountMilliSats?.toLong() ?: 0L) / 1000L
+        return parseResult.amountMilliSats?.toLong()?.msatsToSats()
     }
 
     private fun processGetInfo(request: WalletNwcRequest.GetInfo): String {
