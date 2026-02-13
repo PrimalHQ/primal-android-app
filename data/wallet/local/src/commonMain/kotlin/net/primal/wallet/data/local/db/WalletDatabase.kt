@@ -22,6 +22,8 @@ import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletSettingsDao
 import net.primal.wallet.data.local.dao.WalletTransactionDao
 import net.primal.wallet.data.local.dao.WalletTransactionData
+import net.primal.wallet.data.local.dao.WalletTransactionRemoteKey
+import net.primal.wallet.data.local.dao.WalletTransactionRemoteKeyDao
 import net.primal.wallet.data.local.dao.nwc.NwcConnectionDao
 import net.primal.wallet.data.local.dao.nwc.NwcConnectionData
 import net.primal.wallet.data.local.dao.nwc.NwcDailyBudgetData
@@ -40,6 +42,7 @@ import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLogDao
         SparkWalletData::class,
         ActiveWalletData::class,
         WalletTransactionData::class,
+        WalletTransactionRemoteKey::class,
         WalletSettings::class,
         NwcConnectionData::class,
         NwcPaymentHoldData::class,
@@ -56,6 +59,7 @@ import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLogDao
 abstract class WalletDatabase : RoomDatabase() {
     abstract fun wallet(): WalletDao
     abstract fun walletTransactions(): WalletTransactionDao
+    abstract fun walletTransactionRemoteKeys(): WalletTransactionRemoteKeyDao
     abstract fun walletSettings(): WalletSettingsDao
     abstract fun nwcConnections(): NwcConnectionDao
     abstract fun nwcPaymentHolds(): NwcPaymentHoldDao
@@ -232,7 +236,21 @@ abstract class WalletDatabase : RoomDatabase() {
                 // 7. Drop PrimalTransactionData table
                 connection.execSQL("DROP TABLE IF EXISTS PrimalTransactionData")
 
-                // 8. Create ReceiveRequestData table
+                // 8. Create WalletTransactionRemoteKey table
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS WalletTransactionRemoteKey (
+                        walletId TEXT NOT NULL,
+                        transactionId TEXT NOT NULL,
+                        sinceId INTEGER NOT NULL,
+                        untilId INTEGER NOT NULL,
+                        cachedAt INTEGER NOT NULL,
+                        PRIMARY KEY (walletId, transactionId)
+                    )
+                    """.trimIndent(),
+                )
+
+                // 9. Create ReceiveRequestData table
                 connection.execSQL(
                     """
                     CREATE TABLE IF NOT EXISTS ReceiveRequestData (

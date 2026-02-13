@@ -206,9 +206,10 @@ fun WalletDashboardScreen(
     )
 
     var pullToRefreshing by remember { mutableStateOf(false) }
-    LaunchedEffect(state.wallet?.lastUpdatedAt) {
-        pagingItems.refresh()
-        pullToRefreshing = false
+    LaunchedEffect(pagingItems.loadState.refresh) {
+        if (pagingItems.loadState.refresh is LoadState.NotLoading) {
+            pullToRefreshing = false
+        }
     }
 
     @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
@@ -338,6 +339,7 @@ fun WalletDashboardScreen(
                 isRefreshing = pullToRefreshing,
                 onRefresh = {
                     pullToRefreshing = true
+                    pagingItems.refresh()
                     eventPublisher(UiEvent.RequestWalletBalanceUpdate)
                 },
                 enabled = state.wallet != null,
