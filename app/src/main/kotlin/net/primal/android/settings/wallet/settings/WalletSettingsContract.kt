@@ -27,6 +27,7 @@ interface WalletSettingsContract {
         val nwcLogsToExport: List<NwcRequestLog> = emptyList(),
         val showRevertToPrimalWallet: Boolean = false,
         val isRevertingToPrimalWallet: Boolean = false,
+        val isAutoStartEnabled: Boolean = false,
     )
 
     sealed class UiEvent {
@@ -38,6 +39,7 @@ interface WalletSettingsContract {
         data class RevokeConnection(val nwcPubkey: String) : UiEvent()
         data class UpdateUseExternalWallet(val value: Boolean) : UiEvent()
         data class UpdateMinTransactionAmount(val amountInSats: Long) : UiEvent()
+        data class UpdateAutoStartNwcService(val enabled: Boolean) : UiEvent()
         data class ConnectExternalWallet(val connectionLink: String) : UiEvent()
     }
 

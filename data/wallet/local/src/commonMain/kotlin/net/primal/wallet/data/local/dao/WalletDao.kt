@@ -65,6 +65,15 @@ interface WalletDao {
     @Query("UPDATE SparkWalletData SET primalTxsMigratedUntil = :until WHERE walletId = :walletId")
     suspend fun updatePrimalTxsMigratedUntil(walletId: String, until: Long?)
 
+    @Query("UPDATE SparkWalletData SET nwcAutoStart = :autoStart WHERE userId = :userId")
+    suspend fun updateNwcAutoStart(userId: String, autoStart: Boolean)
+
+    @Query("SELECT nwcAutoStart FROM SparkWalletData WHERE userId = :userId LIMIT 1")
+    suspend fun isNwcAutoStartEnabled(userId: String): Boolean?
+
+    @Query("SELECT nwcAutoStart FROM SparkWalletData WHERE userId = :userId LIMIT 1")
+    fun observeNwcAutoStart(userId: String): Flow<Boolean?>
+
     @Query(
         """
         UPDATE SparkWalletData

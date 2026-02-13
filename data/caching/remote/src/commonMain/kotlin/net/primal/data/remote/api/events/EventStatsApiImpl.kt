@@ -14,6 +14,8 @@ import net.primal.data.remote.api.events.model.EventZapsRequestBody
 import net.primal.data.remote.api.events.model.EventZapsResponse
 import net.primal.data.remote.api.events.model.EventsNip46Request
 import net.primal.data.remote.api.events.model.EventsNip46Response
+import net.primal.data.remote.api.events.model.EventsNip47Request
+import net.primal.data.remote.api.events.model.EventsNip47Response
 import net.primal.data.remote.api.events.model.InvoicesToZapReceiptsRequest
 import net.primal.data.remote.api.events.model.InvoicesToZapReceiptsResponse
 import net.primal.data.remote.api.events.model.ReplaceableEventRequest
@@ -133,6 +135,20 @@ internal class EventStatsApiImpl(
 
             EventsNip46Response(
                 nip46Events = queryResult.filterNostrEvents(kind = NostrEventKind.NostrConnect),
+            )
+        }
+
+    override suspend fun getNip47Events(eventIds: List<String>): Result<EventsNip47Response> =
+        runCatching {
+            val queryResult = primalApiClient.query(
+                message = PrimalCacheFilter(
+                    primalVerb = PrimalVerb.EVENTS_NIP46.id,
+                    optionsJson = EventsNip47Request(eventIds = eventIds).encodeToJsonString(),
+                ),
+            )
+
+            EventsNip47Response(
+                nip47Events = queryResult.filterNostrEvents(kind = NostrEventKind.NwcRequest),
             )
         }
 }

@@ -1,6 +1,7 @@
 package net.primal.wallet.data.nwc.service
 
 import io.github.aakira.napier.Napier
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
@@ -9,6 +10,9 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -25,18 +29,25 @@ import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.batchOnInactivity
 import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.nostr.NwcService
 import net.primal.domain.connections.nostr.model.NwcConnection
+import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
 import net.primal.wallet.data.nwc.NwcCapabilities
 import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
 import net.primal.wallet.data.nwc.manager.NwcBudgetManager
 import net.primal.wallet.data.nwc.processor.NwcRequestProcessor
+import net.primal.wallet.data.repository.InternalNwcRepository
+import net.primal.wallet.data.repository.mappers.local.asDO
 
 class NwcServiceImpl internal constructor(
     private val dispatchers: DispatcherProvider,
     private val nwcRepository: NwcRepository,
+    private val internalNwcRepository: InternalNwcRepository,
     private val encryptionService: NostrEncryptionService,
     private val requestParser: NwcWalletRequestParser,
     private val requestProcessor: NwcRequestProcessor,
@@ -47,6 +58,7 @@ class NwcServiceImpl internal constructor(
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
     private val cache: LruSeenCache<String> = LruSeenCache(maxEntries = MAX_CACHE_SIZE)
     private val retrySendResponseQueue = MutableSharedFlow<PendingNwcResponse>()
+    private val _relayConnected = MutableStateFlow(false)
 
     private val clientMutex = Mutex()
     private var nwcClient: NwcWalletClient? = null
@@ -58,6 +70,7 @@ class NwcServiceImpl internal constructor(
         startPeriodicCleanup()
         observeConnections(userId)
         observeRetrySendResponseQueue()
+        observePendingEvents(userId)
     }
 
     private fun startPeriodicCleanup() {
@@ -68,6 +81,12 @@ class NwcServiceImpl internal constructor(
                     budgetManager.cleanupExpiredHolds()
                 }.onFailure {
                     Napier.w(tag = TAG, throwable = it) { "cleanupExpiredHolds failed" }
+                }
+                runCatching {
+                    Napier.d(tag = TAG) { "Running cleanupStalePendingNwcEvents" }
+                    internalNwcRepository.cleanupStalePendingNwcEvents(STALE_PENDING_EVENT_THRESHOLD)
+                }.onFailure {
+                    Napier.w(tag = TAG, throwable = it) { "cleanupStalePendingNwcEvents failed" }
                 }
                 delay(CLEANUP_INTERVAL)
             }
@@ -82,8 +101,14 @@ class NwcServiceImpl internal constructor(
                 relayUrl = relayUrl,
                 dispatchers = dispatchers,
                 requestParser = requestParser,
-                onSocketConnectionOpened = { url -> Napier.d(tag = TAG) { "Connected to NWC relay: $url" } },
-                onSocketConnectionClosed = { url, _ -> Napier.d(tag = TAG) { "Disconnected from NWC relay: $url" } },
+                onSocketConnectionOpened = { url ->
+                    _relayConnected.value = true
+                    Napier.d(tag = TAG) { "Connected to NWC relay: $url" }
+                },
+                onSocketConnectionClosed = { url, _ ->
+                    _relayConnected.value = false
+                    Napier.d(tag = TAG) { "Disconnected from NWC relay: $url" }
+                },
             )
 
             runCatching { client.connect() }
@@ -103,6 +128,7 @@ class NwcServiceImpl internal constructor(
             clientJob = null
             nwcClient?.destroy()
             nwcClient = null
+            _relayConnected.value = false
             publishedInfoPubKeys.clear()
             Napier.d(tag = TAG) { "Disconnected from NWC relay." }
         }
@@ -231,6 +257,47 @@ class NwcServiceImpl internal constructor(
                 }
         }
 
+    private fun observePendingEvents(userId: String) =
+        scope.launch {
+            combine(
+                internalNwcRepository.observePendingNwcEvents(userId = userId),
+                _relayConnected,
+            ) { pendingEvents, isConnected ->
+                pendingEvents.takeIf { isConnected }
+            }
+                .filterNotNull()
+                .collect { pendingEvents ->
+                    pendingEvents.onEach { pendingEvent ->
+                        val nostrEvent = pendingEvent.data
+                            .rawNostrEventJson.decrypted.decodeFromJsonStringOrNull<NostrEvent>()
+                            ?: return@onEach
+                        val connection = pendingEvent.connection ?: return@onEach
+
+                        val eventId = nostrEvent.id
+                        if (cache.seen(eventId)) return@onEach
+                        cache.mark(eventId)
+
+                        requestParser.parseNostrEvent(
+                            event = nostrEvent,
+                            connection = connection.asDO(),
+                        ).onSuccess { nwcRequest ->
+                            processRequest(nwcRequest)
+                        }.onFailure {
+                            sendErrorResponse(
+                                error = WalletNwcRequestException(
+                                    nostrEvent = nostrEvent,
+                                    connection = connection.asDO(),
+                                    cause = it,
+                                ),
+                            )
+                        }
+                    }.also { pendingEvents ->
+                        internalNwcRepository
+                            .deletePendingNwcEvents(pendingEventIds = pendingEvents.map { it.data.eventId })
+                    }
+                }
+        }
+
     private fun processRequest(request: WalletNwcRequest) =
         scope.launch {
             val response = requestProcessor.process(request)
@@ -277,6 +344,7 @@ class NwcServiceImpl internal constructor(
     companion object {
         private const val MAX_CACHE_SIZE = 500
         private val CLEANUP_INTERVAL = 30.seconds
+        private val STALE_PENDING_EVENT_THRESHOLD = 15.minutes
         private const val TAG = "NwcServiceImpl"
     }
 }

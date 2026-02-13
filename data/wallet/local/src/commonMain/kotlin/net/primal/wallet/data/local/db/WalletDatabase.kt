@@ -31,6 +31,8 @@ import net.primal.wallet.data.local.dao.nwc.NwcInvoiceDao
 import net.primal.wallet.data.local.dao.nwc.NwcInvoiceData
 import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldDao
 import net.primal.wallet.data.local.dao.nwc.NwcPaymentHoldData
+import net.primal.wallet.data.local.dao.nwc.NwcPendingEventDao
+import net.primal.wallet.data.local.dao.nwc.NwcPendingEventData
 import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLog
 import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLogDao
 
@@ -49,6 +51,7 @@ import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLogDao
         NwcDailyBudgetData::class,
         NwcWalletRequestLog::class,
         NwcInvoiceData::class,
+        NwcPendingEventData::class,
         ReceiveRequestData::class,
     ],
     version = 3,
@@ -64,6 +67,7 @@ abstract class WalletDatabase : RoomDatabase() {
     abstract fun nwcConnections(): NwcConnectionDao
     abstract fun nwcPaymentHolds(): NwcPaymentHoldDao
     abstract fun nwcInvoices(): NwcInvoiceDao
+    abstract fun nwcPendingEvents(): NwcPendingEventDao
     abstract fun nwcLogs(): NwcWalletRequestLogDao
     abstract fun receiveRequests(): ReceiveRequestDao
 

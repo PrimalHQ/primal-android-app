@@ -11,6 +11,7 @@ import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
 import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.nostr.NwcService
+import net.primal.domain.connections.nostr.handler.Nip47EventsHandler
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
@@ -30,6 +31,7 @@ import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.repository.BillingRepositoryImpl
 import net.primal.wallet.data.repository.ExchangeRateRepositoryImpl
 import net.primal.wallet.data.repository.InternalNwcLogRepository
+import net.primal.wallet.data.repository.InternalNwcRepository
 import net.primal.wallet.data.repository.NwcLogRepositoryImpl
 import net.primal.wallet.data.repository.NwcRepositoryImpl
 import net.primal.wallet.data.repository.PrimalWalletAccountRepositoryImpl
@@ -206,10 +208,11 @@ abstract class RepositoryFactory {
         )
     }
 
-    fun createNwcRepository(): NwcRepository =
+    fun createNwcRepository(nip47EventsHandler: Nip47EventsHandler): NwcRepository =
         NwcRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             database = resolveWalletDatabase(),
+            nip47EventsHandler = nip47EventsHandler,
         )
 
     fun createNwcLogRepository(): NwcLogRepository =
@@ -227,6 +230,7 @@ abstract class RepositoryFactory {
     fun createNwcService(
         walletRepository: WalletRepository,
         nostrEncryptionService: NostrEncryptionService,
+        nwcRepository: NwcRepository,
     ): NwcService {
         val responseBuilder = NwcWalletResponseBuilder()
         val budgetManager = NwcBudgetManager(
@@ -235,7 +239,11 @@ abstract class RepositoryFactory {
         )
         return NwcServiceImpl(
             dispatchers = dispatcherProvider,
-            nwcRepository = createNwcRepository(),
+            nwcRepository = nwcRepository,
+            internalNwcRepository = InternalNwcRepository(
+                dispatcherProvider = dispatcherProvider,
+                database = resolveWalletDatabase(),
+            ),
             encryptionService = nostrEncryptionService,
             requestParser = NwcWalletRequestParser(
                 encryptionService = nostrEncryptionService,

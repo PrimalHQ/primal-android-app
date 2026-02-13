@@ -9,4 +9,10 @@ data class UpdateNotificationTokenRequest(
     @SerialName("events_from_users") val authorizationEvents: List<NostrEvent>,
     val platform: String,
     val token: String,
+    val scope: String? = null,
 )
+
+enum class NotificationScope(val value: String) {
+    Nip46("nip46"),
+    Nip47("nip47"),
+}

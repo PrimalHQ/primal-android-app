@@ -5,9 +5,13 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.di.PrimalWalletApiClient
 import net.primal.android.nostr.notary.NostrNotary
+import net.primal.android.wallet.nwc.handler.Nip47EventsHandlerImpl
 import net.primal.core.networking.primal.PrimalApiClient
+import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.data.remote.factory.PrimalApiServiceFactory
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
@@ -122,7 +126,16 @@ object WalletRepositoriesModule {
 
     @Provides
     @Singleton
-    fun provideNwcRepository(): NwcRepository = WalletRepositoryFactory.createNwcRepository()
+    fun provideNwcRepository(
+        @PrimalCacheApiClient primalApiClient: PrimalApiClient,
+        dispatchers: DispatcherProvider,
+    ): NwcRepository =
+        WalletRepositoryFactory.createNwcRepository(
+            nip47EventsHandler = Nip47EventsHandlerImpl(
+                eventStatsApi = PrimalApiServiceFactory.createEventsApi(primalApiClient = primalApiClient),
+                dispatchers = dispatchers,
+            ),
+        )
 
     @Provides
     @Singleton
