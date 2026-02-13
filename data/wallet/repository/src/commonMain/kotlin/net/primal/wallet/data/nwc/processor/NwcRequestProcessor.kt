@@ -194,13 +194,8 @@ class NwcRequestProcessor internal constructor(
     }
 
     private suspend fun parseInvoiceAmountSats(userId: String, invoice: String): Long {
-        return runCatching {
-            val parseResult = walletRepository.parseLnInvoice(userId = userId, lnbc = invoice)
-            (parseResult.amountMilliSats?.toLong() ?: 0L) / 1000L
-        }.getOrElse {
-            Napier.w(tag = TAG, throwable = it) { "Failed to parse invoice amount" }
-            0L
-        }
+        val parseResult = walletRepository.parseLnInvoice(userId = userId, lnbc = invoice)
+        return (parseResult.amountMilliSats?.toLong() ?: 0L) / 1000L
     }
 
     private fun processGetInfo(request: WalletNwcRequest.GetInfo): String {
