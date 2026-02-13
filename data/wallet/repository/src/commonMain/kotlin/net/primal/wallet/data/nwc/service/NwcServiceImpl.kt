@@ -1,6 +1,9 @@
 package net.primal.wallet.data.nwc.service
 
 import io.github.aakira.napier.Napier
+import kotlin.concurrent.atomics.AtomicReference
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
@@ -44,6 +47,7 @@ import net.primal.wallet.data.nwc.processor.NwcRequestProcessor
 import net.primal.wallet.data.repository.InternalNwcRepository
 import net.primal.wallet.data.repository.mappers.local.asDO
 
+@OptIn(ExperimentalAtomicApi::class)
 class NwcServiceImpl internal constructor(
     private val dispatchers: DispatcherProvider,
     private val nwcRepository: NwcRepository,
@@ -65,13 +69,38 @@ class NwcServiceImpl internal constructor(
     private var clientJob: Job? = null
     private val publishedInfoPubKeys: MutableSet<String> = mutableSetOf()
 
-    override fun initialize(userId: String) {
+    private var onIdleTimeout: (() -> Unit)? = null
+    private val lastActivityAt = AtomicReference(Clock.System.now())
+
+    override fun initialize(userId: String, onIdleTimeout: (() -> Unit)?) {
         Napier.d(tag = TAG) { "NwcService initializing for userId=$userId" }
+        this.onIdleTimeout = onIdleTimeout
         startPeriodicCleanup()
         observeConnections(userId)
         observeRetrySendResponseQueue()
         observePendingEvents(userId)
+        recordActivity()
+        if (onIdleTimeout != null) {
+            startInactivityLoop()
+        }
     }
+
+    private fun recordActivity() {
+        lastActivityAt.store(Clock.System.now())
+    }
+
+    private fun startInactivityLoop() =
+        scope.launch {
+            while (isActive) {
+                delay(INACTIVITY_POLL_INTERVAL)
+                val now = Clock.System.now()
+                if ((lastActivityAt.load() + IDLE_TIMEOUT) < now) {
+                    Napier.d(tag = TAG) { "Idle timeout reached, stopping NwcService." }
+                    onIdleTimeout?.invoke()
+                    break
+                }
+            }
+        }
 
     private fun startPeriodicCleanup() {
         scope.launch {
@@ -221,6 +250,7 @@ class NwcServiceImpl internal constructor(
 
     private fun sendErrorResponse(error: WalletNwcRequestException) =
         scope.launch {
+            recordActivity()
             val responseJson = responseBuilder.buildParsingErrorResponse(
                 code = NwcError.INTERNAL,
                 message = error.cause?.message ?: "Failed to parse request",
@@ -300,6 +330,7 @@ class NwcServiceImpl internal constructor(
 
     private fun processRequest(request: WalletNwcRequest) =
         scope.launch {
+            recordActivity()
             val response = requestProcessor.process(request)
             Napier.d(tag = TAG) { "Sending response for eventId=${request.eventId.take(8)}..." }
             sendResponseOrAddToRetryQueue(request, response)
@@ -345,6 +376,8 @@ class NwcServiceImpl internal constructor(
         private const val MAX_CACHE_SIZE = 500
         private val CLEANUP_INTERVAL = 30.seconds
         private val STALE_PENDING_EVENT_THRESHOLD = 15.minutes
+        private val IDLE_TIMEOUT = 15.minutes
+        private val INACTIVITY_POLL_INTERVAL = 45.seconds
         private const val TAG = "NwcServiceImpl"
     }
 }
