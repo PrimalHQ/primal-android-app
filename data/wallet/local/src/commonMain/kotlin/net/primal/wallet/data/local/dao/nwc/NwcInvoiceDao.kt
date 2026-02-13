@@ -28,4 +28,7 @@ interface NwcInvoiceDao {
         settledAt: Long,
         preimage: String?,
     )
+
+    @Query("DELETE FROM NwcInvoiceData WHERE walletId IN (:walletIds)")
+    suspend fun deleteByWalletIds(walletIds: List<String>)
 }

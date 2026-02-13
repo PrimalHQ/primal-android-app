@@ -253,6 +253,7 @@ internal class WalletRepositoryImpl(
             walletDatabase.withTransaction {
                 val wallets = walletDatabase.wallet().findWalletInfosByUserId(userId = userId)
                 val walletIds = wallets.map { it.walletId }
+                val connectionIds = walletDatabase.nwcConnections().findConnectionIdsByUserId(userId)
 
                 if (walletIds.isNotEmpty()) {
                     walletDatabase.walletSettings().deleteWalletSettings(walletIds)
@@ -260,8 +261,18 @@ internal class WalletRepositoryImpl(
                     walletIds.forEach { walletId ->
                         walletDatabase.walletTransactionRemoteKeys().deleteByWalletId(walletId)
                     }
+                    walletDatabase.nwcInvoices().deleteByWalletIds(walletIds)
                 }
 
+                if (connectionIds.isNotEmpty()) {
+                    walletDatabase.nwcPaymentHolds().deleteHoldsByConnectionIds(connectionIds)
+                    walletDatabase.nwcPaymentHolds().deleteDailyBudgetsByConnectionIds(connectionIds)
+                }
+
+                walletDatabase.nwcLogs().deleteAllByUserId(userId)
+
+                walletDatabase.nwcConnections().deleteAllByUserId(userId)
+                walletDatabase.receiveRequests().deleteAllByUserId(userId)
                 walletDatabase.walletTransactions().deleteAllTransactions(userId = userId)
                 walletDatabase.wallet().clearActiveWallet(userId)
             }

@@ -63,4 +63,10 @@ interface NwcPaymentHoldDao {
 
     @Query("DELETE FROM NwcDailyBudgetData WHERE connectionId = :connectionId")
     suspend fun deleteDailyBudgetByConnectionId(connectionId: String)
+
+    @Query("DELETE FROM NwcPaymentHoldData WHERE connectionId IN (:connectionIds)")
+    suspend fun deleteHoldsByConnectionIds(connectionIds: List<String>)
+
+    @Query("DELETE FROM NwcDailyBudgetData WHERE connectionId IN (:connectionIds)")
+    suspend fun deleteDailyBudgetsByConnectionIds(connectionIds: List<String>)
 }

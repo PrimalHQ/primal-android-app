@@ -33,4 +33,7 @@ interface NwcWalletRequestLogDao {
         errorCode: Encryptable<String>?,
         errorMessage: Encryptable<String>?,
     )
+
+    @Query("DELETE FROM NwcWalletRequestLog WHERE userId = :userId")
+    suspend fun deleteAllByUserId(userId: String)
 }
