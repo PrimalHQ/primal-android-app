@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
+import net.primal.core.utils.CurrencyConversionUtils.formatAsString
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
@@ -26,6 +28,7 @@ import net.primal.domain.wallet.LnInvoiceParseResult
 import net.primal.domain.wallet.LnUrlParseResult
 import net.primal.domain.wallet.NwcInvoice
 import net.primal.domain.wallet.OnChainAddressResult
+import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.TxType
 import net.primal.domain.wallet.Wallet
@@ -132,6 +135,30 @@ internal class WalletRepositoryImpl(
         }
     }
 
+    override suspend fun syncLatestTransactions(walletId: String) =
+        withContext(dispatcherProvider.io()) {
+            val newestTx = walletDatabase.walletTransactions().lastByWalletId(walletId = walletId)
+                ?: return@withContext // No transactions yet — mediator REFRESH handles initial load
+
+            val walletPO = walletDatabase.wallet().findWallet(walletId = walletId) ?: return@withContext
+            val wallet = walletPO.toDomain<Wallet>()
+            val walletSettings = walletDatabase.walletSettings().findWalletSettings(walletId = walletId)
+
+            transactionsHandler.fetchAndPersistLatestTransactions(
+                wallet = wallet,
+                request = TransactionsRequest(
+                    limit = SYNC_TRANSACTIONS_PAGE_SIZE,
+                    since = newestTx.updatedAt,
+                    until = null,
+                    minAmountInBtc = if (walletPO.info.type == WalletType.PRIMAL) {
+                        walletSettings?.spamThresholdAmountInSats?.decrypted?.toBtc()?.formatAsString()
+                    } else {
+                        null
+                    },
+                ),
+            )
+        }
+
     override suspend fun latestTransactions(walletId: String, limit: Int): List<Transaction> =
         withContext(dispatcherProvider.io()) {
             walletDatabase.walletTransactions()
@@ -231,6 +258,9 @@ internal class WalletRepositoryImpl(
                 if (walletIds.isNotEmpty()) {
                     walletDatabase.walletSettings().deleteWalletSettings(walletIds)
                     walletDatabase.wallet().deleteWalletsByIds(walletIds)
+                    walletIds.forEach { walletId ->
+                        walletDatabase.walletTransactionRemoteKeys().deleteByWalletId(walletId)
+                    }
                     walletDatabase.nwcInvoices().deleteByWalletIds(walletIds)
                 }
 
@@ -362,11 +392,15 @@ internal class WalletRepositoryImpl(
         balanceInBtc: Double,
         maxBalanceInBtc: Double?,
     ) = withContext(dispatcherProvider.io()) {
+        val previousBalance = walletDatabase.wallet().findWalletInfo(walletId)?.balanceInBtc?.decrypted
         walletDatabase.wallet().updateWalletBalance(
             walletId = walletId,
             balanceInBtc = balanceInBtc.asEncryptable(),
             maxBalanceInBtc = maxBalanceInBtc?.asEncryptable(),
         )
+        if (previousBalance != null && previousBalance.toBits() != balanceInBtc.toBits()) {
+            syncLatestTransactions(walletId = walletId)
+        }
     }
 
     override suspend fun parseLnUrl(userId: String, lnurl: String): LnUrlParseResult {
@@ -430,6 +464,10 @@ internal class WalletRepositoryImpl(
 
     private fun WalletPO.resolveWalletService(): WalletService<Wallet> {
         return walletServiceFactory.getServiceForWallet(this.toDomain())
+    }
+
+    companion object {
+        private const val SYNC_TRANSACTIONS_PAGE_SIZE = 50
     }
 
     private fun createTransactionsPager(

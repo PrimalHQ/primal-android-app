@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 3,
-    "identityHash": "dbb34a878e1564a05745f93e1373f76a",
+    "identityHash": "97846ea5a49ea0858a659d1054df7ba6",
     "entities": [
       {
         "tableName": "WalletInfo",
@@ -374,6 +374,49 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_WalletTransactionData_paymentHash` ON `${TABLE_NAME}` (`paymentHash`)"
           }
         ]
+      },
+      {
+        "tableName": "WalletTransactionRemoteKey",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`walletId` TEXT NOT NULL, `transactionId` TEXT NOT NULL, `sinceId` INTEGER NOT NULL, `untilId` INTEGER NOT NULL, `cachedAt` INTEGER NOT NULL, PRIMARY KEY(`walletId`, `transactionId`))",
+        "fields": [
+          {
+            "fieldPath": "walletId",
+            "columnName": "walletId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transactionId",
+            "columnName": "transactionId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sinceId",
+            "columnName": "sinceId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "untilId",
+            "columnName": "untilId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "cachedAt",
+            "columnName": "cachedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "walletId",
+            "transactionId"
+          ]
+        }
       },
       {
         "tableName": "WalletSettings",
@@ -842,7 +885,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dbb34a878e1564a05745f93e1373f76a')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '97846ea5a49ea0858a659d1054df7ba6')"
     ]
   }
 }

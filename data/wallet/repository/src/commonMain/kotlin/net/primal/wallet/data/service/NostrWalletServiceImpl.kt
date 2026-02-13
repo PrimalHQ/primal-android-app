@@ -34,6 +34,7 @@ import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.NostrWalletConnect
 import net.primal.domain.wallet.OnChainAddressResult
+import net.primal.domain.wallet.TransactionsPage
 import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.TxState
@@ -50,6 +51,11 @@ internal class NostrWalletServiceImpl(
     private val eventRepository: EventRepository,
     private val lightningPayHelper: LightningPayHelper,
 ) : WalletService<Wallet.NWC> {
+
+    private companion object {
+        private const val MAX_SAME_TIMESTAMP_PAGES = 10
+        private const val DEFAULT_PAGE_SIZE = 50
+    }
 
     private fun Throwable.toWalletException(): WalletException {
         return when (this) {
@@ -99,96 +105,161 @@ internal class NostrWalletServiceImpl(
     override suspend fun fetchTransactions(
         wallet: Wallet.NWC,
         request: TransactionsRequest,
-    ): Result<List<Transaction>> =
+    ): Result<TransactionsPage> =
         runCatching {
-            val client = createNwcApiClient(wallet = wallet)
+            val limit = request.limit ?: DEFAULT_PAGE_SIZE
 
-            client.listTransactions(
-                params = ListTransactionsParams(
-                    from = request.since,
-                    until = request.until,
-                    limit = request.limit,
-                    unpaid = request.unpaid,
-                    type = request.type,
-                ),
-            ).map { response ->
-                val invoices = response.transactions.mapNotNull { it.invoice }
+            val firstBatch = fetchNwcTransactions(
+                wallet = wallet,
+                until = request.until,
+                from = request.since,
+                offset = request.offset,
+                limit = limit,
+                unpaid = request.unpaid,
+                type = request.type,
+            )
 
-                val zapReceiptsMap = eventRepository.getZapReceipts(invoices = invoices).getOrNull()
+            val allTransactions: List<Transaction>
+            val nextCursor: Long?
 
-                response.transactions.map { transaction ->
-                    val zapRequest = (transaction.metadata?.get("nostr") ?: transaction.metadata?.get("zap_request"))
-                        ?.jsonObject?.toString()
-                        ?.decodeFromJsonStringOrNull<NostrEvent>()
-                        ?: zapReceiptsMap?.get(transaction.invoice)
+            if (firstBatch.size < limit) {
+                allTransactions = firstBatch
+                nextCursor = null
+            } else {
+                val minCreatedAt = firstBatch.minOfOrNull { it.createdAt }!!
+                val allSameTimestamp = firstBatch.all { it.createdAt == minCreatedAt }
 
-                    val zappedEntity = zapRequest?.toNostrEntity()
-
-                    val txType = when (transaction.type) {
-                        InvoiceType.Incoming -> TxType.DEPOSIT
-                        InvoiceType.Outgoing -> TxType.WITHDRAW
-                    }
-                    val txState = transaction.resolveState()
-                    val transactionId = transaction.paymentHash ?: transaction.invoice ?: Uuid.random().toString()
-                    val note = zapRequest?.content ?: transaction.description
-                        ?: transaction.metadata?.get("comment")?.toString()
-                    val otherUserId = when (transaction.type) {
-                        InvoiceType.Incoming -> zapRequest?.pubKey
-                        InvoiceType.Outgoing -> zapRequest?.tags?.findFirstProfileId()
-                    }
-
-                    if (zappedEntity != null) {
-                        Transaction.Zap(
-                            transactionId = transactionId,
-                            walletId = wallet.walletId,
-                            walletType = WalletType.NWC,
-                            type = txType,
-                            state = txState,
-                            createdAt = transaction.createdAt,
-                            updatedAt = transaction.settledAt ?: transaction.createdAt,
-                            completedAt = transaction.settledAt,
-                            userId = wallet.userId,
-                            note = note,
-                            invoice = transaction.invoice,
-                            amountInBtc = transaction.amount.msatsToBtc(),
-                            amountInUsd = null,
-                            exchangeRate = null,
-                            totalFeeInBtc = transaction.feesPaid.msatsToBtc().formatAsString(),
-                            zappedEntity = zappedEntity,
-                            otherUserId = otherUserId,
-                            otherLightningAddress = null,
-                            zappedByUserId = zapRequest?.pubKey,
-                            otherUserProfile = null,
-                            preimage = transaction.preimage,
-                            paymentHash = transaction.paymentHash,
+                if (allSameTimestamp) {
+                    // Same-timestamp edge case: use offset to exhaust this timestamp
+                    val accumulated = firstBatch.toMutableList()
+                    var offset = limit
+                    while (offset < limit * MAX_SAME_TIMESTAMP_PAGES) {
+                        val innerBatch = fetchNwcTransactions(
+                            wallet = wallet,
+                            // Clamp to exact timestamp: NIP-47 from/until are both INCLUSIVE
+                            until = minCreatedAt,
+                            from = minCreatedAt,
+                            offset = offset,
+                            limit = limit,
+                            unpaid = request.unpaid,
+                            type = request.type,
                         )
-                    } else {
-                        Transaction.Lightning(
-                            transactionId = transactionId,
-                            walletId = wallet.walletId,
-                            walletType = WalletType.NWC,
-                            type = txType,
-                            state = txState,
-                            createdAt = transaction.createdAt,
-                            updatedAt = transaction.settledAt ?: transaction.createdAt,
-                            completedAt = transaction.settledAt,
-                            userId = wallet.userId,
-                            note = note,
-                            invoice = transaction.invoice,
-                            amountInBtc = transaction.amount.msatsToBtc(),
-                            amountInUsd = null,
-                            exchangeRate = null,
-                            totalFeeInBtc = transaction.feesPaid.msatsToBtc().formatAsString(),
-                            otherUserId = otherUserId,
-                            otherLightningAddress = null,
-                            otherUserProfile = null,
-                            preimage = transaction.preimage,
-                            paymentHash = transaction.paymentHash,
-                        )
+                        accumulated.addAll(innerBatch)
+                        offset += limit
+                        if (innerBatch.size < limit) break
                     }
+                    allTransactions = accumulated
+                    // NIP-47 until is inclusive, so T-1 to skip the exhausted timestamp
+                    nextCursor = minCreatedAt - 1
+                } else {
+                    allTransactions = firstBatch
+                    nextCursor = minCreatedAt
                 }
-            }.getOrThrow()
+            }
+
+            TransactionsPage(
+                transactions = allTransactions,
+                nextCursor = nextCursor,
+            )
         }.mapFailure { it.toWalletException() }
+
+    private suspend fun fetchNwcTransactions(
+        wallet: Wallet.NWC,
+        until: Long?,
+        from: Long?,
+        offset: Int?,
+        limit: Int,
+        unpaid: Boolean?,
+        type: InvoiceType?,
+    ): List<Transaction> {
+        val client = createNwcApiClient(wallet = wallet)
+
+        val response = client.listTransactions(
+            params = ListTransactionsParams(
+                from = from,
+                until = until,
+                limit = limit,
+                offset = offset,
+                unpaid = unpaid,
+                type = type,
+            ),
+        ).getOrThrow()
+
+        val invoices = response.transactions.mapNotNull { it.invoice }
+        val zapReceiptsMap = eventRepository.getZapReceipts(invoices = invoices).getOrNull()
+
+        return response.transactions.map { transaction ->
+            val zapRequest = (transaction.metadata?.get("nostr") ?: transaction.metadata?.get("zap_request"))
+                ?.jsonObject?.toString()
+                ?.decodeFromJsonStringOrNull<NostrEvent>()
+                ?: zapReceiptsMap?.get(transaction.invoice)
+
+            val zappedEntity = zapRequest?.toNostrEntity()
+
+            val txType = when (transaction.type) {
+                InvoiceType.Incoming -> TxType.DEPOSIT
+                InvoiceType.Outgoing -> TxType.WITHDRAW
+            }
+            val txState = transaction.resolveState()
+            val transactionId = transaction.paymentHash ?: transaction.invoice ?: Uuid.random().toString()
+            val note = zapRequest?.content ?: transaction.description
+                ?: transaction.metadata?.get("comment")?.toString()
+            val otherUserId = when (transaction.type) {
+                InvoiceType.Incoming -> zapRequest?.pubKey
+                InvoiceType.Outgoing -> zapRequest?.tags?.findFirstProfileId()
+            }
+
+            if (zappedEntity != null) {
+                Transaction.Zap(
+                    transactionId = transactionId,
+                    walletId = wallet.walletId,
+                    walletType = WalletType.NWC,
+                    type = txType,
+                    state = txState,
+                    createdAt = transaction.createdAt,
+                    updatedAt = transaction.settledAt ?: transaction.createdAt,
+                    completedAt = transaction.settledAt,
+                    userId = wallet.userId,
+                    note = note,
+                    invoice = transaction.invoice,
+                    amountInBtc = transaction.amount.msatsToBtc(),
+                    amountInUsd = null,
+                    exchangeRate = null,
+                    totalFeeInBtc = transaction.feesPaid.msatsToBtc().formatAsString(),
+                    zappedEntity = zappedEntity,
+                    otherUserId = otherUserId,
+                    otherLightningAddress = null,
+                    zappedByUserId = zapRequest?.pubKey,
+                    otherUserProfile = null,
+                    preimage = transaction.preimage,
+                    paymentHash = transaction.paymentHash,
+                )
+            } else {
+                Transaction.Lightning(
+                    transactionId = transactionId,
+                    walletId = wallet.walletId,
+                    walletType = WalletType.NWC,
+                    type = txType,
+                    state = txState,
+                    createdAt = transaction.createdAt,
+                    updatedAt = transaction.settledAt ?: transaction.createdAt,
+                    completedAt = transaction.settledAt,
+                    userId = wallet.userId,
+                    note = note,
+                    invoice = transaction.invoice,
+                    amountInBtc = transaction.amount.msatsToBtc(),
+                    amountInUsd = null,
+                    exchangeRate = null,
+                    totalFeeInBtc = transaction.feesPaid.msatsToBtc().formatAsString(),
+                    otherUserId = otherUserId,
+                    otherLightningAddress = null,
+                    otherUserProfile = null,
+                    preimage = transaction.preimage,
+                    paymentHash = transaction.paymentHash,
+                )
+            }
+        }
+    }
 
     override suspend fun createLightningInvoice(
         wallet: Wallet.NWC,
