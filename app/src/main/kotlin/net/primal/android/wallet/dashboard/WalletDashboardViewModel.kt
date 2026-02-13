@@ -84,7 +84,6 @@ class WalletDashboardViewModel @Inject constructor(
         subscribeToPurchases()
         subscribeToBadgesUpdates()
         checkForPersistedSparkWallet()
-        migratePrimalTransactionsIfNeeded()
     }
 
     private fun checkForPersistedSparkWallet() =
@@ -93,9 +92,8 @@ class WalletDashboardViewModel @Inject constructor(
             setState { copy(hasPersistedSparkWallet = existingWalletId != null) }
         }
 
-    private fun migratePrimalTransactionsIfNeeded() =
+    private fun migratePrimalTransactionsIfNeeded(sparkWalletId: String) =
         viewModelScope.launch {
-            val sparkWalletId = sparkWalletAccountRepository.findPersistedWalletId(activeUserId) ?: return@launch
             migratePrimalTransactionsHandler.invoke(
                 userId = activeUserId,
                 targetSparkWalletId = sparkWalletId,
@@ -148,6 +146,9 @@ class WalletDashboardViewModel @Inject constructor(
                 .filterNotNull()
                 .collect { wallet ->
                     fetchWalletBalance(walletId = wallet.walletId)
+                    if (wallet is Wallet.Spark) {
+                        migratePrimalTransactionsIfNeeded(sparkWalletId = wallet.walletId)
+                    }
                     setState {
                         copy(
                             transactions = walletRepository
