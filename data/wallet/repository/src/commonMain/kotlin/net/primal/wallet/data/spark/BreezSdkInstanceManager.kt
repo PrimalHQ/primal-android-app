@@ -2,8 +2,6 @@ package net.primal.wallet.data.spark
 
 import breez_sdk_spark.BreezSdk
 import breez_sdk_spark.ConnectWithSignerRequest
-import breez_sdk_spark.KeySetConfig
-import breez_sdk_spark.KeySetType
 import breez_sdk_spark.MaxFee
 import breez_sdk_spark.Network
 import breez_sdk_spark.SignMessageRequest
@@ -93,11 +91,7 @@ internal class BreezSdkInstanceManager(
             mnemonic = seedWords,
             passphrase = null,
             network = Network.MAINNET,
-            keySetConfig = KeySetConfig(
-                keySetType = KeySetType.DEFAULT,
-                useAddressIndex = false,
-                accountNumber = 0u,
-            ),
+            keySetConfig = null,
         )
 
         return connectWithSigner(
