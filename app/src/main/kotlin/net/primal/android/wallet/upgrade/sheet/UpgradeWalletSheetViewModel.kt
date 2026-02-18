@@ -31,7 +31,7 @@ class UpgradeWalletSheetViewModel @Inject constructor(
 ) : ViewModel() {
 
     companion object {
-        private val INITIAL_DELAY = 10.seconds
+        private val INITIAL_DELAY = 2.seconds
         private val AWAY_THRESHOLD = 5.minutes
     }
 
