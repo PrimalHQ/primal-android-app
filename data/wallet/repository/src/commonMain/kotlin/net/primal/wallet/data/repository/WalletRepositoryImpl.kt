@@ -258,9 +258,7 @@ internal class WalletRepositoryImpl(
                 if (walletIds.isNotEmpty()) {
                     walletDatabase.walletSettings().deleteWalletSettings(walletIds)
                     walletDatabase.wallet().deleteWalletsByIds(walletIds)
-                    walletIds.forEach { walletId ->
-                        walletDatabase.walletTransactionRemoteKeys().deleteByWalletId(walletId)
-                    }
+                    walletDatabase.walletTransactionRemoteKeys().deleteByWalletIds(walletIds)
                     walletDatabase.nwcInvoices().deleteByWalletIds(walletIds)
                 }
 

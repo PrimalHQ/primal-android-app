@@ -20,4 +20,7 @@ interface WalletTransactionRemoteKeyDao {
 
     @Query("DELETE FROM WalletTransactionRemoteKey WHERE walletId = :walletId")
     suspend fun deleteByWalletId(walletId: String)
+
+    @Query("DELETE FROM WalletTransactionRemoteKey WHERE walletId in (:walletIds)")
+    suspend fun deleteByWalletIds(walletIds: List<String>)
 }
