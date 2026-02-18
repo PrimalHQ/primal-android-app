@@ -21,7 +21,7 @@ object AndroidRepositoryFactory : RepositoryFactory() {
             context = appContext,
             fallbackToDestructiveMigration = true,
             databaseName = "wallet_database.db",
-//            migrations = listOf(WalletDatabase.MIGRATION_2_3),
+            migrations = listOf(WalletDatabase.MIGRATION_2_3),
         )
     }
 
