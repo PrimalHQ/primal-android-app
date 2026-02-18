@@ -271,6 +271,7 @@ internal class WalletRepositoryImpl(
 
                 walletDatabase.nwcLogs().deleteAllByUserId(userId)
 
+                walletDatabase.nwcPendingEvents().deleteAllByUserId(userId)
                 walletDatabase.nwcConnections().deleteAllByUserId(userId)
                 walletDatabase.receiveRequests().deleteAllByUserId(userId)
                 walletDatabase.walletTransactions().deleteAllTransactions(userId = userId)
