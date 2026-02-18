@@ -139,6 +139,7 @@ internal class SparkWalletAccountRepositoryImpl(
                     if (connectionIds.isNotEmpty()) {
                         walletDatabase.nwcPaymentHolds().deleteHoldsByConnectionIds(connectionIds)
                         walletDatabase.nwcPaymentHolds().deleteDailyBudgetsByConnectionIds(connectionIds)
+                        walletDatabase.nwcPendingEvents().deleteAllByConnectionIds(connectionIds)
                     }
                     walletDatabase.nwcConnections().deleteAllByWalletId(walletId)
                     walletDatabase.nwcLogs().deleteByWalletId(walletId)

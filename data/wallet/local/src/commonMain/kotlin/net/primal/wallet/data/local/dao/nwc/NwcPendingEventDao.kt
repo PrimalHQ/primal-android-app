@@ -18,4 +18,10 @@ interface NwcPendingEventDao {
 
     @Query("DELETE FROM NwcPendingEventData WHERE createdAt < :minCreatedAt")
     suspend fun deleteEventsOlderThan(minCreatedAt: Long)
+
+    @Query("DELETE FROM NwcPendingEventData WHERE userId = :userId")
+    suspend fun deleteAllByUserId(userId: String)
+
+    @Query("DELETE FROM NwcPendingEventData WHERE connectionId IN (:connectionIds)")
+    suspend fun deleteAllByConnectionIds(connectionIds: List<String>)
 }
