@@ -41,6 +41,7 @@ import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.OnChainAddressResult
+import net.primal.domain.wallet.PayResult
 import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.TransactionsPage
 import net.primal.domain.wallet.TransactionsRequest
@@ -223,6 +224,13 @@ internal class SparkWalletServiceImpl(
         }
     }
 
+    private fun Payment.extractPreimage(): String? =
+        when (val details = this.details) {
+            is PaymentDetails.Lightning -> details.preimage
+            is PaymentDetails.Spark -> details.htlcDetails?.preimage
+            else -> null
+        }
+
     override suspend fun createLightningInvoice(
         wallet: Wallet.Spark,
         request: LnInvoiceCreateRequest,
@@ -270,11 +278,11 @@ internal class SparkWalletServiceImpl(
         }
     }
 
-    override suspend fun pay(wallet: Wallet.Spark, request: TxRequest): Result<Unit> =
+    override suspend fun pay(wallet: Wallet.Spark, request: TxRequest): Result<PayResult> =
         runCatching {
             val sdk = breezSdkInstanceManager.requireInstance(wallet.walletId)
 
-            when (request) {
+            val payment = when (request) {
                 is TxRequest.BitcoinOnChain -> {
                     val amountSats = parseAmountSats(request.amountSats)
                     val prepareResponse = sdk.prepareSendPayment(
@@ -310,7 +318,7 @@ internal class SparkWalletServiceImpl(
                             ),
                             idempotencyKey = request.idempotencyKey,
                         ),
-                    )
+                    ).payment
                 }
 
                 is TxRequest.Lightning.LnInvoice -> {
@@ -325,7 +333,7 @@ internal class SparkWalletServiceImpl(
                             ),
                             idempotencyKey = request.idempotencyKey,
                         ),
-                    )
+                    ).payment
                 }
 
                 is TxRequest.Lightning.LnUrl -> {
@@ -349,11 +357,14 @@ internal class SparkWalletServiceImpl(
                             prepareResponse = prepareResponse,
                             idempotencyKey = request.idempotencyKey,
                         ),
-                    )
+                    ).payment
                 }
             }
 
-            Unit
+            val preimage = payment.extractPreimage()
+            val feesPaid = runCatching { payment.fees.longValue() }.getOrNull()
+
+            PayResult(preimage = preimage, feesPaid = feesPaid)
         }.mapFailure { it.toWalletException() }
 
     override suspend fun fetchMiningFees(

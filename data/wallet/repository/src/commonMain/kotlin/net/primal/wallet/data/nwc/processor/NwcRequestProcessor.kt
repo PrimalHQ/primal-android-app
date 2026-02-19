@@ -181,10 +181,14 @@ class NwcRequestProcessor internal constructor(
 
         return if (paymentResult.isSuccess) {
             holdId?.let { id -> nwcBudgetManager.commitHold(id, amountSats) }
+            val payResult = paymentResult.getOrNull()
             Napier.d(tag = TAG) { "PayInvoice: payment successful" }
             responseBuilder.buildPayInvoiceResponse(
                 request = request,
-                result = PayInvoiceResponsePayload(preimage = null),
+                result = PayInvoiceResponsePayload(
+                    preimage = payResult?.preimage,
+                    feesPaid = payResult?.feesPaid,
+                ),
             )
         } else {
             val exception = paymentResult.exceptionOrNull()

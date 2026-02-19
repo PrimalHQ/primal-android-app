@@ -34,6 +34,7 @@ import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.NostrWalletConnect
 import net.primal.domain.wallet.OnChainAddressResult
+import net.primal.domain.wallet.PayResult
 import net.primal.domain.wallet.TransactionsPage
 import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
@@ -70,15 +71,18 @@ internal class NostrWalletServiceImpl(
                     operation = this.message ?: "Unknown operation",
                     cause = this,
                 )
+
                 NwcError.INTERNAL, NwcError.OTHER -> WalletPaymentException.PaymentFailed(
                     reason = this.message ?: "Unknown error",
                     cause = this,
                 )
+
                 else -> WalletPaymentException.PaymentFailed(
                     reason = this.message ?: "Unknown error",
                     cause = this,
                 )
             }
+
             is NetworkException -> WalletException.WalletNetworkException(cause = this)
             else -> WalletPaymentException.PaymentFailed(
                 reason = this.message ?: "Unknown error",
@@ -203,7 +207,7 @@ internal class NostrWalletServiceImpl(
             val txState = transaction.resolveState()
             val transactionId = transaction.paymentHash ?: transaction.invoice ?: Uuid.random().toString()
             val note = zapRequest?.content ?: transaction.description
-                ?: transaction.metadata?.get("comment")?.toString()
+            ?: transaction.metadata?.get("comment")?.toString()
             val otherUserId = when (transaction.type) {
                 InvoiceType.Incoming -> zapRequest?.pubKey
                 InvoiceType.Outgoing -> zapRequest?.tags?.findFirstProfileId()
@@ -293,7 +297,7 @@ internal class NostrWalletServiceImpl(
         )
     }
 
-    override suspend fun pay(wallet: Wallet.NWC, request: TxRequest): Result<Unit> =
+    override suspend fun pay(wallet: Wallet.NWC, request: TxRequest): Result<PayResult> =
         runCatching {
             require(request is TxRequest.Lightning) { "Only lightning transactions are supported through NWC wallet." }
 
@@ -314,7 +318,8 @@ internal class NostrWalletServiceImpl(
                     invoice = lnInvoice,
                     amount = amountInMilliSats.toLong(),
                 ),
-            ).mapFailure { it.toWalletException() }.map { }
+            ).mapFailure { it.toWalletException() }
+                .map { PayResult(preimage = it.preimage, feesPaid = it.feesPaid) }
         }
 
     private suspend fun resolveLnInvoice(
