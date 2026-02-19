@@ -50,6 +50,8 @@ import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.FormatStyle
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.activity.LocalPrimalTheme
@@ -108,6 +110,18 @@ fun WalletDashboardScreen(
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
+    var pullToRefreshing by remember { mutableStateOf(false) }
+
+    LaunchedEffect(viewModel, viewModel.effects) {
+        viewModel.effects.collect { effect ->
+            when (effect) {
+                WalletDashboardContract.SideEffect.LatestTransactionsSyncCompleted -> {
+                    delay(150.milliseconds)
+                    pullToRefreshing = false
+                }
+            }
+        }
+    }
 
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
@@ -123,6 +137,8 @@ fun WalletDashboardScreen(
 
     WalletDashboardScreen(
         state = uiState.value,
+        pullToRefreshing = pullToRefreshing,
+        updatePullToRefreshing = { pullToRefreshing = it },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
@@ -143,6 +159,8 @@ fun WalletDashboardScreen(
 @Composable
 fun WalletDashboardScreen(
     state: WalletDashboardContract.UiState,
+    pullToRefreshing: Boolean,
+    updatePullToRefreshing: (Boolean) -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
@@ -204,13 +222,6 @@ fun WalletDashboardScreen(
         },
         onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
     )
-
-    var pullToRefreshing by remember { mutableStateOf(false) }
-    LaunchedEffect(pagingItems.loadState.refresh) {
-        if (pagingItems.loadState.refresh is LoadState.NotLoading) {
-            pullToRefreshing = false
-        }
-    }
 
     @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
     val canBuySats = remember(state.wallet) { isGoogleBuild() && state.wallet is Wallet.Primal && false }
@@ -338,8 +349,8 @@ fun WalletDashboardScreen(
             PrimalPullToRefreshBox(
                 isRefreshing = pullToRefreshing,
                 onRefresh = {
-                    pullToRefreshing = true
-                    pagingItems.refresh()
+                    updatePullToRefreshing(true)
+                    eventPublisher(UiEvent.RequestLatestTransactionsSync)
                     eventPublisher(UiEvent.RequestWalletBalanceUpdate)
                 },
                 enabled = state.wallet != null,

@@ -34,8 +34,13 @@ interface WalletDashboardContract {
 
     sealed class UiEvent {
         data object RequestWalletBalanceUpdate : UiEvent()
+        data object RequestLatestTransactionsSync : UiEvent()
         data object DismissError : UiEvent()
         data object CreateWallet : UiEvent()
         data class ChangeActiveWallet(val wallet: Wallet) : UiEvent()
+    }
+
+    sealed class SideEffect {
+        data object LatestTransactionsSyncCompleted : SideEffect()
     }
 }
