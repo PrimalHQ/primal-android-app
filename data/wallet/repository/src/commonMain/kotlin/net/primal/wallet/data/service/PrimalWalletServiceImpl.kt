@@ -16,6 +16,7 @@ import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.Network
 import net.primal.domain.wallet.OnChainAddressResult
+import net.primal.domain.wallet.PayResult
 import net.primal.domain.wallet.SubWallet
 import net.primal.domain.wallet.TransactionsPage
 import net.primal.domain.wallet.TransactionsRequest
@@ -125,7 +126,7 @@ internal class PrimalWalletServiceImpl(
             OnChainAddressResult(address = response.onChainAddress)
         }
 
-    override suspend fun pay(wallet: Wallet.Primal, request: TxRequest): Result<Unit> =
+    override suspend fun pay(wallet: Wallet.Primal, request: TxRequest): Result<PayResult> =
         runCatching {
             primalWalletApi.withdraw(
                 userId = wallet.userId,
@@ -143,6 +144,7 @@ internal class PrimalWalletServiceImpl(
                     noteSelf = request.noteSelf,
                 ),
             )
+            PayResult()
         }
 
     override suspend fun fetchMiningFees(

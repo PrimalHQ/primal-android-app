@@ -7,6 +7,7 @@ import net.primal.domain.rates.fees.OnChainTransactionFeeTier
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.OnChainAddressResult
+import net.primal.domain.wallet.PayResult
 import net.primal.domain.wallet.TransactionsPage
 import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
@@ -24,7 +25,7 @@ internal interface WalletService<W : Wallet> {
 
     suspend fun createOnChainAddress(wallet: W): Result<OnChainAddressResult>
 
-    suspend fun pay(wallet: W, request: TxRequest): Result<Unit>
+    suspend fun pay(wallet: W, request: TxRequest): Result<PayResult>
 
     suspend fun fetchMiningFees(
         wallet: W,

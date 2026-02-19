@@ -28,6 +28,7 @@ import net.primal.domain.wallet.LnInvoiceParseResult
 import net.primal.domain.wallet.LnUrlParseResult
 import net.primal.domain.wallet.NwcInvoice
 import net.primal.domain.wallet.OnChainAddressResult
+import net.primal.domain.wallet.PayResult
 import net.primal.domain.wallet.TransactionsRequest
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.TxType
@@ -277,7 +278,7 @@ internal class WalletRepositoryImpl(
             }
         }
 
-    override suspend fun pay(walletId: String, request: TxRequest): Result<Unit> =
+    override suspend fun pay(walletId: String, request: TxRequest): Result<PayResult> =
         withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
                 ?: return@withContext Result.failure(WalletException.WalletNotFound())
