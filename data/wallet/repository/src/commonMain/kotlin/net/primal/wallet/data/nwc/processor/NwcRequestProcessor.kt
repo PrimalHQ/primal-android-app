@@ -5,6 +5,7 @@ import kotlin.math.min
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.uuid.Uuid
 import net.primal.core.networking.nwc.nip47.GetBalanceResponsePayload
 import net.primal.core.networking.nwc.nip47.GetInfoResponsePayload
 import net.primal.core.networking.nwc.nip47.ListTransactionsResponsePayload
@@ -32,6 +33,7 @@ import net.primal.wallet.data.nwc.mapper.resolveNwcErrorCode
 import net.primal.wallet.data.nwc.mapper.toNwcTransaction
 import net.primal.wallet.data.nwc.mapper.toTxType
 import net.primal.wallet.data.repository.InternalNwcLogRepository
+import okio.ByteString.Companion.encodeUtf8
 
 class NwcRequestProcessor internal constructor(
     private val walletRepository: WalletRepository,
@@ -172,7 +174,7 @@ class NwcRequestProcessor internal constructor(
             noteRecipient = null,
             noteSelf = null,
             lnInvoice = invoice,
-            idempotencyKey = request.eventId,
+            idempotencyKey = request.eventId.toIdempotencyUuid(),
         )
 
         val paymentResult = walletRepository.pay(walletId = walletId, request = txRequest)
@@ -423,6 +425,11 @@ class NwcRequestProcessor internal constructor(
                 message = "Invoice not found",
             )
         }
+    }
+
+    private fun String.toIdempotencyUuid(): String {
+        val hashBytes = encodeUtf8().sha256().toByteArray()
+        return Uuid.fromByteArray(hashBytes.copyOf(16)).toString()
     }
 
     companion object {
