@@ -50,8 +50,6 @@ import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.FormatStyle
-import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.activity.LocalPrimalTheme
@@ -110,18 +108,6 @@ fun WalletDashboardScreen(
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
-    var pullToRefreshing by remember { mutableStateOf(false) }
-
-    LaunchedEffect(viewModel, viewModel.effects) {
-        viewModel.effects.collect { effect ->
-            when (effect) {
-                WalletDashboardContract.SideEffect.LatestTransactionsSyncCompleted -> {
-                    delay(150.milliseconds)
-                    pullToRefreshing = false
-                }
-            }
-        }
-    }
 
     DisposableLifecycleObserverEffect(viewModel) {
         when (it) {
@@ -137,8 +123,6 @@ fun WalletDashboardScreen(
 
     WalletDashboardScreen(
         state = uiState.value,
-        pullToRefreshing = pullToRefreshing,
-        updatePullToRefreshing = { pullToRefreshing = it },
         onPrimaryDestinationChanged = onPrimaryDestinationChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = onDrawerQrCodeClick,
@@ -159,8 +143,6 @@ fun WalletDashboardScreen(
 @Composable
 fun WalletDashboardScreen(
     state: WalletDashboardContract.UiState,
-    pullToRefreshing: Boolean,
-    updatePullToRefreshing: (Boolean) -> Unit,
     onPrimaryDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onDrawerQrCodeClick: () -> Unit,
@@ -347,9 +329,8 @@ fun WalletDashboardScreen(
         },
         content = { paddingValues ->
             PrimalPullToRefreshBox(
-                isRefreshing = pullToRefreshing,
+                isRefreshing = state.refreshing,
                 onRefresh = {
-                    updatePullToRefreshing(true)
                     eventPublisher(UiEvent.RequestLatestTransactionsSync)
                     eventPublisher(UiEvent.RequestWalletBalanceUpdate)
                 },
@@ -371,7 +352,11 @@ fun WalletDashboardScreen(
                     }
 
                     state.wallet != null -> {
-                        if (pagingItems.loadState.refresh is LoadState.NotLoading && pagingItems.isEmpty()) {
+                        if (
+                            pagingItems.loadState.refresh is LoadState.NotLoading &&
+                            pagingItems.isEmpty() &&
+                            !state.refreshing
+                        ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -426,6 +411,7 @@ fun WalletDashboardScreen(
                                     .background(color = AppTheme.colorScheme.surfaceVariant)
                                     .padding(top = with(LocalDensity.current) { topBarHeight.toDp() }),
                                 pagingItems = pagingItems,
+                                isRefreshing = state.refreshing,
                                 currencyMode = currencyMode,
                                 exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                                 listState = listState,

@@ -32,6 +32,7 @@ fun TransactionsLazyColumn(
     modifier: Modifier,
     pagingItems: LazyPagingItems<TransactionListItemDataUi>,
     listState: LazyListState,
+    isRefreshing: Boolean,
     onProfileClick: (String) -> Unit,
     onTransactionClick: (String) -> Unit,
     paddingValues: PaddingValues = PaddingValues(0.dp),
@@ -93,18 +94,12 @@ fun TransactionsLazyColumn(
             }
         }
 
-        if (pagingItems.isEmpty()) {
-            when (pagingItems.loadState.refresh) {
-                LoadState.Loading -> {
-                    heightAdjustableLoadingLazyListPlaceholder(
-                        height = 80.dp,
-                        showDivider = false,
-                        itemPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    )
-                }
-
-                else -> Unit
-            }
+        if (pagingItems.isEmpty() && (pagingItems.loadState.refresh is LoadState.Loading || isRefreshing)) {
+            heightAdjustableLoadingLazyListPlaceholder(
+                height = 80.dp,
+                showDivider = false,
+                itemPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            )
         }
 
         if (footer != null) {

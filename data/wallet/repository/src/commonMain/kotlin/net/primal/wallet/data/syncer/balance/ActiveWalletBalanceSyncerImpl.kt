@@ -10,7 +10,6 @@ import kotlinx.coroutines.launch
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.wallet.WalletRepository
-import net.primal.domain.wallet.distinctUntilWalletIdChanged
 import net.primal.domain.wallet.sync.ActiveWalletBalanceSyncer
 
 class ActiveWalletBalanceSyncerImpl(
@@ -32,16 +31,15 @@ class ActiveWalletBalanceSyncerImpl(
     override fun start() {
         activeWalletIdObserverJob?.cancel()
         activeWalletIdObserverJob = scope.launch {
-            walletAccountRepository.observeActiveWallet(userId)
-                .distinctUntilWalletIdChanged()
-                .collect { wallet ->
-                    activeWalletId = wallet?.walletId
+            walletAccountRepository.observeActiveWalletId(userId)
+                .collect { walletId ->
+                    activeWalletId = walletId
                     walletSyncerJob?.cancel()
-                    if (wallet?.walletId != null) {
+                    if (walletId != null) {
                         walletSyncerJob = scope.launch {
                             repeat(times = 10) {
                                 runCatching {
-                                    walletRepository.subscribeToWalletBalance(walletId = wallet.walletId).collect()
+                                    walletRepository.subscribeToWalletBalance(walletId = walletId).collect()
                                 }
                                 delay(5.seconds)
                             }

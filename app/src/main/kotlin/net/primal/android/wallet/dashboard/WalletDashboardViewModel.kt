@@ -10,16 +10,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
@@ -48,7 +47,6 @@ import net.primal.domain.transactions.Transaction
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
-import net.primal.domain.wallet.distinctUntilWalletIdChanged
 import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 
 @Suppress("LongParameterList")
@@ -80,16 +78,11 @@ class WalletDashboardViewModel @Inject constructor(
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvents(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
-    private val _effects = Channel<WalletDashboardContract.SideEffect>()
-    val effects = _effects.receiveAsFlow()
-    private fun setEffect(effect: WalletDashboardContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
-
     private var userWalletsObserveJob: Job? = null
 
     init {
         observeUsdExchangeRate()
         subscribeToEvents()
-        subscribeToActiveWalletId()
         subscribeToActiveWalletData()
         subscribeToActiveAccount()
         subscribeToPurchases()
@@ -157,34 +150,29 @@ class WalletDashboardViewModel @Inject constructor(
             walletAccountRepository.setActiveWallet(userId = activeUserId, walletId = wallet.walletId)
         }
 
-    private fun subscribeToActiveWalletId() =
-        viewModelScope.launch {
-            walletAccountRepository.observeActiveWallet(userId = activeUserId)
-                .distinctUntilWalletIdChanged()
-                .filterNotNull()
-                .collect { wallet ->
-                    fetchWalletBalance(walletId = wallet.walletId)
-                    syncLatestTransactions(walletId = wallet.walletId)
-                    setState {
-                        copy(
-                            transactions = walletRepository
-                                .latestTransactions(walletId = wallet.walletId)
-                                .mapAsPagingDataOfTransactionUi()
-                                .cachedIn(viewModelScope),
-                        )
-                    }
-                }
-        }
-
     private fun subscribeToActiveWalletData() =
         viewModelScope.launch {
+            var previousWalletId: String? = null
             walletAccountRepository.observeActiveWallet(userId = activeUserId)
                 .collect { wallet ->
+                    val transactionsUpdate = wallet?.walletId?.let { walletId ->
+                        if (walletId != previousWalletId) {
+                            previousWalletId = walletId
+                            walletRepository
+                                .latestTransactions(walletId = walletId)
+                                .mapAsPagingDataOfTransactionUi()
+                                .cachedIn(viewModelScope)
+                        } else {
+                            null
+                        }
+                    }
+
                     setState {
                         copy(
                             wallet = wallet,
                             lowBalance = wallet?.balanceInBtc == 0.0,
                             isWalletBackedUp = !wallet.shouldShowBackup,
+                            transactions = transactionsUpdate ?: transactions,
                         )
                     }
                 }
@@ -228,13 +216,15 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun syncLatestTransactions(walletId: String) =
         viewModelScope.launch {
+            setState { copy(refreshing = true) }
             runCatching {
                 walletRepository.syncLatestTransactions(walletId = walletId)
             }.onFailure { error ->
                 Napier.w(throwable = error) { "Failed to sync latest transactions." }
             }
 
-            setEffect(WalletDashboardContract.SideEffect.LatestTransactionsSyncCompleted)
+            delay(150.milliseconds)
+            setState { copy(refreshing = false) }
         }
 
     private fun observeUsdExchangeRate() {
