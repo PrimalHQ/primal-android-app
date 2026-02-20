@@ -29,14 +29,11 @@ import net.primal.android.wallet.utils.shouldShowBackup
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.runCatching
-import net.primal.domain.account.PrimalWalletAccountRepository
-import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.parser.isNwcUrl
 import net.primal.domain.usecase.ConnectNwcUseCase
-import net.primal.domain.usecase.EnsurePrimalWalletExistsUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletKycLevel
 import net.primal.domain.wallet.WalletRepository
@@ -56,9 +53,6 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private val connectNwcUseCase: ConnectNwcUseCase,
     private val nwcLogRepository: NwcLogRepository,
     private val pushNotificationsTokenUpdater: PushNotificationsTokenUpdater,
-    private val sparkWalletAccountRepository: SparkWalletAccountRepository,
-    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
-    private val ensurePrimalWalletExistsUseCase: EnsurePrimalWalletExistsUseCase,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -163,8 +157,6 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
                     is UiEvent.UpdateAutoStartNwcService -> updateAutoStart(it.enabled)
 
-                    UiEvent.RevertToPrimalWallet -> revertToPrimalWallet()
-
                     UiEvent.RequestNwcLogsExport -> exportNwcLogs()
                 }
             }
@@ -235,12 +227,6 @@ class WalletSettingsViewModel @AssistedInject constructor(
                             is Wallet.Primal -> fetchPrimalWalletConnections(wallet)
                             else -> null
                         }
-                    }
-
-                    if (wallet is Wallet.Spark) {
-                        checkRevertToPrimalWalletAvailability()
-                    } else {
-                        setState { copy(showRevertToPrimalWallet = false) }
                     }
                 }
         }
@@ -386,50 +372,5 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     Napier.e(throwable = it) { "Failed to export NWC logs." }
                     setState { copy(isExportingNwcLogs = false) }
                 }
-        }
-
-    private fun checkRevertToPrimalWalletAvailability() =
-        viewModelScope.launch {
-            val userId = activeAccountStore.activeUserId()
-            primalWalletAccountRepository.fetchWalletStatus(userId)
-                .onSuccess { status ->
-                    setState {
-                        copy(showRevertToPrimalWallet = status.hasCustodialWallet && !status.primalWalletDeprecated)
-                    }
-                }
-                .onFailure {
-                    Napier.w(throwable = it) { "Failed to check wallet status for revert option." }
-                    setState { copy(showRevertToPrimalWallet = false) }
-                }
-        }
-
-    private fun revertToPrimalWallet() =
-        viewModelScope.launch {
-            val userId = activeAccountStore.activeUserId()
-            val sparkWallet = state.value.activeWallet as? Wallet.Spark ?: return@launch
-
-            setState { copy(isRevertingToPrimalWallet = true) }
-
-            // Unregister Spark wallet
-            sparkWalletAccountRepository.unregisterSparkWallet(userId, sparkWallet.walletId)
-                .onFailure { error ->
-                    Napier.e(throwable = error) { "Failed to unregister Spark wallet." }
-                    setState { copy(isRevertingToPrimalWallet = false) }
-                    return@launch
-                }
-
-            // Fetch latest info to revert lightning address from local db
-            sparkWalletAccountRepository.fetchWalletAccountInfo(userId = userId, sparkWallet.walletId)
-
-            // Clear migration state so it can be re-run if user migrates again
-            sparkWalletAccountRepository.clearPrimalTxsMigrationState(sparkWallet.walletId)
-
-            // Ensure Primal wallet exists and set as active
-            ensurePrimalWalletExistsUseCase.invoke(userId = userId, setAsActive = true)
-                .onFailure { error ->
-                    Napier.e(throwable = error) { "Failed to restore Primal wallet." }
-                }
-
-            setState { copy(isRevertingToPrimalWallet = false, showRevertToPrimalWallet = false) }
         }
 }

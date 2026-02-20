@@ -207,7 +207,7 @@ internal class NostrWalletServiceImpl(
             val txState = transaction.resolveState()
             val transactionId = transaction.paymentHash ?: transaction.invoice ?: Uuid.random().toString()
             val note = zapRequest?.content ?: transaction.description
-            ?: transaction.metadata?.get("comment")?.toString()
+                ?: transaction.metadata?.get("comment")?.toString()
             val otherUserId = when (transaction.type) {
                 InvoiceType.Incoming -> zapRequest?.pubKey
                 InvoiceType.Outgoing -> zapRequest?.tags?.findFirstProfileId()
