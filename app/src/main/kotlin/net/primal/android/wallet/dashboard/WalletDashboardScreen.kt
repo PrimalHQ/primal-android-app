@@ -205,13 +205,6 @@ fun WalletDashboardScreen(
         onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
     )
 
-    var pullToRefreshing by remember { mutableStateOf(false) }
-    LaunchedEffect(pagingItems.loadState.refresh) {
-        if (pagingItems.loadState.refresh is LoadState.NotLoading) {
-            pullToRefreshing = false
-        }
-    }
-
     @Suppress("SimplifyBooleanWithConstants", "KotlinConstantConditions")
     val canBuySats = remember(state.wallet) { isGoogleBuild() && state.wallet is Wallet.Primal && false }
 
@@ -336,10 +329,9 @@ fun WalletDashboardScreen(
         },
         content = { paddingValues ->
             PrimalPullToRefreshBox(
-                isRefreshing = pullToRefreshing,
+                isRefreshing = state.refreshing,
                 onRefresh = {
-                    pullToRefreshing = true
-                    pagingItems.refresh()
+                    eventPublisher(UiEvent.RequestLatestTransactionsSync)
                     eventPublisher(UiEvent.RequestWalletBalanceUpdate)
                 },
                 enabled = state.wallet != null,
@@ -360,7 +352,11 @@ fun WalletDashboardScreen(
                     }
 
                     state.wallet != null -> {
-                        if (pagingItems.loadState.refresh is LoadState.NotLoading && pagingItems.isEmpty()) {
+                        if (
+                            pagingItems.loadState.refresh is LoadState.NotLoading &&
+                            pagingItems.isEmpty() &&
+                            !state.refreshing
+                        ) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -415,6 +411,7 @@ fun WalletDashboardScreen(
                                     .background(color = AppTheme.colorScheme.surfaceVariant)
                                     .padding(top = with(LocalDensity.current) { topBarHeight.toDp() }),
                                 pagingItems = pagingItems,
+                                isRefreshing = state.refreshing,
                                 currencyMode = currencyMode,
                                 exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                                 listState = listState,

@@ -12,6 +12,7 @@ import net.primal.domain.wallet.Wallet
 interface WalletDashboardContract {
     data class UiState(
         val transactions: Flow<PagingData<TransactionListItemDataUi>> = emptyFlow(),
+        val refreshing: Boolean = false,
         val isNpubLogin: Boolean = false,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
@@ -34,6 +35,7 @@ interface WalletDashboardContract {
 
     sealed class UiEvent {
         data object RequestWalletBalanceUpdate : UiEvent()
+        data object RequestLatestTransactionsSync : UiEvent()
         data object DismissError : UiEvent()
         data object CreateWallet : UiEvent()
         data class ChangeActiveWallet(val wallet: Wallet) : UiEvent()
