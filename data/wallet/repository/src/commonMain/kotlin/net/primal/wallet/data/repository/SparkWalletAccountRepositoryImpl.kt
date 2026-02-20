@@ -156,9 +156,4 @@ internal class SparkWalletAccountRepositoryImpl(
             // null = new user (no migration needed), true = fully migrated, false = in progress
             sparkWalletData?.primalTxsMigrated != false
         }
-
-    override suspend fun clearPrimalTxsMigrationState(walletId: String) =
-        withContext(dispatcherProvider.io()) {
-            walletDatabase.wallet().clearPrimalTxsMigrationState(walletId)
-        }
 }

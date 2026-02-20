@@ -25,8 +25,6 @@ interface WalletSettingsContract {
         val transactionsToExport: List<Transaction> = emptyList(),
         val isExportingNwcLogs: Boolean = false,
         val nwcLogsToExport: List<NwcRequestLog> = emptyList(),
-        val showRevertToPrimalWallet: Boolean = false,
-        val isRevertingToPrimalWallet: Boolean = false,
         val isAutoStartEnabled: Boolean = false,
     )
 
@@ -34,7 +32,6 @@ interface WalletSettingsContract {
         data object DisconnectWallet : UiEvent()
         data object RequestFetchWalletConnections : UiEvent()
         data object RequestTransactionExport : UiEvent()
-        data object RevertToPrimalWallet : UiEvent()
         data object RequestNwcLogsExport : UiEvent()
         data class RevokeConnection(val nwcPubkey: String) : UiEvent()
         data class UpdateUseExternalWallet(val value: Boolean) : UiEvent()
