@@ -15,7 +15,7 @@ import net.primal.domain.wallet.WalletRepository
 class DefaultWalletNostrZapper(
     private val lightningPayHelper: LightningPayHelper,
     private val walletRepository: WalletRepository,
-    private val eventRepository: EventRepository,
+    private val eventRepository: EventRepository?,
 ) : NostrZapper {
 
     override suspend fun zap(walletId: String, data: ZapRequestData): ZapResult {
@@ -38,7 +38,7 @@ class DefaultWalletNostrZapper(
             return ZapResult.Failure(error = ZapError.FailedToFetchZapInvoice(cause = it))
         }
 
-        runCatching { eventRepository.saveZapRequest(invoice.invoice, data.userZapRequestEvent) }
+        runCatching { eventRepository?.saveZapRequest(invoice.invoice, data.userZapRequestEvent) }
 
         runCatching {
             walletRepository.pay(
@@ -53,7 +53,7 @@ class DefaultWalletNostrZapper(
             )
         }.getOrElse {
             Napier.e(it) { "FailedToPayInvoice." }
-            runCatching { eventRepository.deleteZapRequest(invoice.invoice) }
+            runCatching { eventRepository?.deleteZapRequest(invoice.invoice) }
             return ZapResult.Failure(error = ZapError.FailedToPayZap(cause = it))
         }
 

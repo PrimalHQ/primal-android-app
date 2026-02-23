@@ -17,7 +17,7 @@ internal class NostrZapperFactoryImpl(
     private val walletRepository: WalletRepository,
     private val primalWalletApi: PrimalWalletApi,
     private val lightningPayHelper: LightningPayHelper,
-    private val eventRepository: EventRepository,
+    private val eventRepository: EventRepository?,
 ) : NostrZapperFactory {
 
     override suspend fun createOrNull(walletId: String): NostrZapper? {

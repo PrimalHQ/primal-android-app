@@ -17,7 +17,7 @@ object NostrZapperFactoryProvider {
         walletRepository: WalletRepository,
         nostrEventSignatureHandler: NostrEventSignatureHandler,
         primalWalletApiClient: PrimalApiClient,
-        eventRepository: EventRepository,
+        eventRepository: EventRepository? = null,
     ): NostrZapperFactory {
         return NostrZapperFactoryImpl(
             dispatcherProvider = dispatcherProvider,
