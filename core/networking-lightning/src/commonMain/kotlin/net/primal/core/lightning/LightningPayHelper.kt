@@ -2,6 +2,7 @@ package net.primal.core.lightning
 
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.statement.bodyAsText
@@ -20,6 +21,8 @@ import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.LnInvoiceUtils
 import net.primal.domain.nostr.utils.decodeLNUrlOrNull
 
+private const val REQUEST_TIMEOUT_MS = 30_000L
+
 class LightningPayHelper(
     private val dispatcherProvider: DispatcherProvider,
     private val httpClient: HttpClient = LightningHttpClient.defaultHttpClient,
@@ -34,6 +37,7 @@ class LightningPayHelper(
         val bodyString = withContext(dispatcherProvider.io()) {
             httpClient.get(decodedLnUrl) {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
+                timeout { requestTimeoutMillis = REQUEST_TIMEOUT_MS }
             }.bodyAsText()
         }
 
@@ -66,7 +70,9 @@ class LightningPayHelper(
         }.buildString()
 
         val bodyString = withContext(dispatcherProvider.io()) {
-            httpClient.get(rawUrl).bodyAsText()
+            httpClient.get(rawUrl) {
+                timeout { requestTimeoutMillis = REQUEST_TIMEOUT_MS }
+            }.bodyAsText()
         }
 
         val decoded = bodyString.decodeFromJsonStringOrNull<LightningPayResponse>()
