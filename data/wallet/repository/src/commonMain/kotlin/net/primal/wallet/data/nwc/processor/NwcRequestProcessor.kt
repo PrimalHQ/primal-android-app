@@ -19,8 +19,10 @@ import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.msatsToSats
 import net.primal.core.utils.CurrencyConversionUtils.satsToMSats
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.core.utils.toLong
 import net.primal.domain.connections.nostr.model.NwcPaymentHoldResult
 import net.primal.domain.nostr.InvoiceType
+import net.primal.domain.nostr.utils.LnInvoiceUtils
 import net.primal.domain.wallet.NwcInvoice
 import net.primal.domain.wallet.NwcInvoiceState
 import net.primal.domain.wallet.TxRequest
@@ -129,7 +131,8 @@ class NwcRequestProcessor internal constructor(
         val walletId = connection.walletId
         val invoice = request.params.invoice
 
-        val amountSats = parseInvoiceAmountSats(userId = connection.userId, invoice = invoice)
+        val amountSats = LnInvoiceUtils.getAmountInSatsOrNull(invoice)?.toLong()
+            ?: parseInvoiceAmountSats(userId = connection.userId, invoice = invoice)
             ?: request.params.amount?.msatsToSats()
             ?: error("Amount wasn't specified. If this is an amountless invoice, please specify amount through params.")
 
