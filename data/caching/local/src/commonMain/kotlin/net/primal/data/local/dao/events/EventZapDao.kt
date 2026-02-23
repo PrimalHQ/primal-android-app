@@ -37,6 +37,9 @@ interface EventZapDao {
     @Query("SELECT * FROM EventZap WHERE invoice IN (:invoices)")
     suspend fun findAllByInvoices(invoices: List<String>): List<EventZap>
 
+    @Query("DELETE FROM EventZap WHERE invoice = :invoice")
+    suspend fun deleteByInvoice(invoice: String)
+
     @Transaction
     @Query("SELECT * FROM EventZap WHERE eventId = :eventId")
     fun observeAllByEventId(eventId: String): Flow<List<EventZap>>

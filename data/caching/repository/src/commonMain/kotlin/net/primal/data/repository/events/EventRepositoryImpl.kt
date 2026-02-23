@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.caching.MediaCacher
+import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
+import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.Result
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
@@ -20,6 +22,8 @@ import net.primal.core.utils.mapCatching
 import net.primal.core.utils.recover
 import net.primal.core.utils.runCatching
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.core.utils.serialization.encodeToJsonString
+import net.primal.core.utils.toDouble
 import net.primal.data.local.dao.events.EventZap as EventZapPO
 import net.primal.data.local.dao.events.eventRelayHintsUpserter
 import net.primal.data.local.db.PrimalDatabase
@@ -54,6 +58,11 @@ import net.primal.domain.events.EventZap as EventZapDO
 import net.primal.domain.events.NostrEventAction
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.findFirstATag
+import net.primal.domain.nostr.findFirstEventId
+import net.primal.domain.nostr.findFirstProfileId
+import net.primal.domain.nostr.findFirstZapAmount
+import net.primal.domain.nostr.utils.LnInvoiceUtils
 import net.primal.shared.data.local.db.withTransaction
 
 class EventRepositoryImpl(
@@ -233,6 +242,37 @@ class EventRepositoryImpl(
             } else {
                 Result.success(emptyMap())
             }.map { it + localMap }.recover { localMap }
+        }
+
+    override suspend fun saveZapRequest(invoice: String, zapRequestEvent: NostrEvent) =
+        withContext(dispatcherProvider.io()) {
+            val senderId = zapRequestEvent.pubKey
+            val receiverId = zapRequestEvent.tags.findFirstProfileId() ?: return@withContext
+            val eventId = zapRequestEvent.tags.findFirstATag()
+                ?: zapRequestEvent.tags.findFirstEventId()
+                ?: receiverId
+
+            val amountInSats = zapRequestEvent.tags.findFirstZapAmount()?.toBigDecimal()
+                ?: LnInvoiceUtils.getAmountInSatsOrNull(invoice)
+                ?: return@withContext
+
+            val data = EventZapPO(
+                eventId = eventId,
+                zapSenderId = senderId,
+                zapReceiverId = receiverId,
+                zapRequestAt = zapRequestEvent.createdAt,
+                zapReceiptAt = 0,
+                amountInBtc = amountInSats.toBtc().toDouble(),
+                message = zapRequestEvent.content,
+                invoice = invoice,
+                rawNostrEvent = zapRequestEvent.encodeToJsonString(),
+            )
+            database.eventZaps().upsertAll(data = listOf(data))
+        }
+
+    override suspend fun deleteZapRequest(invoice: String) =
+        withContext(dispatcherProvider.io()) {
+            database.eventZaps().deleteByInvoice(invoice = invoice)
         }
 
     @OptIn(ExperimentalPagingApi::class)
