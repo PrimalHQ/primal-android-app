@@ -10,6 +10,7 @@ import net.primal.android.nostr.notary.NostrNotary
 import net.primal.core.lightning.LightningAddressChecker
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.events.EventRepository
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.parser.WalletTextParser
 import net.primal.domain.wallet.WalletRepository
@@ -38,10 +39,12 @@ object WalletUtilitiesModule {
         walletRepository: WalletRepository,
         @PrimalWalletApiClient primalApiClient: PrimalApiClient,
         nostrNotary: NostrNotary,
+        eventRepository: EventRepository,
     ): NostrZapperFactory =
         NostrZapperFactoryProvider.createNostrZapperFactory(
             walletRepository = walletRepository,
             primalWalletApiClient = primalApiClient,
             nostrEventSignatureHandler = nostrNotary,
+            eventRepository = eventRepository,
         )
 }
