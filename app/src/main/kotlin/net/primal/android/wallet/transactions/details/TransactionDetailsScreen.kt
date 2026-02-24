@@ -95,8 +95,6 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Copy
-import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
-import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPaymentAlt
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
@@ -117,7 +115,6 @@ import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.android.wallet.transactions.details.TransactionDetailsContract.UiState
 import net.primal.android.wallet.transactions.list.TransactionIcon
 import net.primal.android.wallet.walletDepositColor
-import net.primal.android.wallet.walletTransactionIconBackgroundColor
 import net.primal.android.wallet.walletWithdrawColor
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toUsd
@@ -697,17 +694,10 @@ private fun TxHeader(
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        TransactionIcon(background = walletTransactionIconBackgroundColor) {
-            Image(
-                imageVector = when (isOnChain) {
-                    true -> PrimalIcons.WalletBitcoinPayment
-                    false -> PrimalIcons.WalletLightningPaymentAlt
-                },
-                contentDescription = null,
-                colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.zapped),
-            )
-
-            if (isPending) {
+        TransactionIcon(
+            isOnChainPayment = isOnChain,
+            isPending = isPending,
+            isPendingContent = {
                 val infiniteTransition = rememberInfiniteTransition(label = "ClockRotation$isOnChain")
                 val angle by infiniteTransition.animateFloat(
                     initialValue = 0.0f,
@@ -737,8 +727,8 @@ private fun TxHeader(
                         colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt1),
                     )
                 }
-            }
-        }
+            },
+        )
 
         Column(
             modifier = Modifier.padding(horizontal = 10.dp),

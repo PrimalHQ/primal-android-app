@@ -67,6 +67,7 @@ import net.primal.android.core.compose.numericpad.PrimalNumericPad
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.numericPadContentTransformAnimation
 import net.primal.android.wallet.repository.isValidExchangeRate
+import net.primal.android.wallet.transactions.list.LightningTransactionIcon
 import net.primal.android.wallet.transactions.send.create.CreateTransactionContract
 import net.primal.android.wallet.transactions.send.create.ellipsizeLnUrl
 import net.primal.android.wallet.transactions.send.create.ellipsizeOnChainAddress
@@ -86,7 +87,6 @@ fun TransactionEditor(
     paddingValues: PaddingValues,
     eventPublisher: (CreateTransactionContract.UiEvent) -> Unit,
     onCancelClick: () -> Unit,
-    btcAmountModifier: Modifier = Modifier,
 ) {
     val keyboardVisible by keyboardVisibilityAsState()
 
@@ -134,7 +134,6 @@ fun TransactionEditor(
                 uiMode = uiMode ?: UiDensityMode.Normal,
                 state = state,
                 keyboardVisible = keyboardVisible,
-                btcAmountModifier = btcAmountModifier,
                 onAmountClick = {
                     if (state.isNotInvoice() || state.isAmountZero()) {
                         isNumericPadOn = true
@@ -340,7 +339,6 @@ private fun TransactionHeaderColumn(
     uiMode: UiDensityMode,
     state: CreateTransactionContract.UiState,
     keyboardVisible: Boolean,
-    btcAmountModifier: Modifier = Modifier,
     onAmountClick: () -> Unit,
 ) {
     val verticalPadding = animateDpAsState(
@@ -373,9 +371,9 @@ private fun TransactionHeaderColumn(
             0.dp
         } else {
             when (uiMode) {
-                UiDensityMode.Normal -> 32.dp
-                UiDensityMode.Comfortable -> 24.dp
-                else -> 8.dp
+                UiDensityMode.Normal -> 24.dp
+                UiDensityMode.Comfortable -> 16.dp
+                else -> 6.dp
             }
         },
         label = "headerSpacing",
@@ -414,12 +412,17 @@ private fun TransactionHeaderColumn(
                     contentDescription = null,
                 )
             }
-        } else {
+        } else if (state.transaction.targetUserId != null) {
             UniversalAvatarThumbnail(
                 modifier = Modifier.padding(vertical = verticalPadding.value),
                 avatarCdnImage = state.profileAvatarCdnImage,
                 avatarSize = avatarSize.value,
                 legendaryCustomization = state.profileLegendaryCustomization,
+            )
+        } else {
+            LightningTransactionIcon(
+                modifier = Modifier.padding(vertical = verticalPadding.value),
+                size = avatarSize.value,
             )
         }
 
@@ -455,7 +458,6 @@ private fun TransactionHeaderColumn(
             currentExchangeRate = state.currentExchangeRate,
             currentCurrencyMode = state.currencyMode,
             onAmountClick = onAmountClick,
-            btcAmountModifier = btcAmountModifier,
         )
 
         Spacer(modifier = Modifier.height(amountSpacing.value))
@@ -784,6 +786,9 @@ private fun CreateTransactionContract.UiState.resolveTransactionTitle(): String?
         ?: transaction.targetLnUrl?.ellipsizeLnUrl()
         ?: transaction.targetOnChainAddress?.let {
             stringResource(id = R.string.wallet_create_transaction_bitcoin_address)
+        }
+        ?: transaction.lnInvoice?.let {
+            stringResource(id = R.string.wallet_create_transaction_lightning_invoice)
         }
 }
 

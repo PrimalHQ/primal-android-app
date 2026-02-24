@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -28,8 +29,10 @@ fun UpgradeWalletInProgress(modifier: Modifier = Modifier, currentStep: Migratio
             modifier = Modifier.fillMaxHeight(fraction = 0.7f),
             icon = null,
             headlineText = null,
-            supportText = currentStep?.toUserFriendlyDescription()
-                ?: stringResource(id = R.string.wallet_upgrade_creating_spark),
+            supportText = AnnotatedString(
+                currentStep?.toUserFriendlyDescription()
+                    ?: stringResource(id = R.string.wallet_upgrade_creating_spark),
+            ),
             textColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         )
 
