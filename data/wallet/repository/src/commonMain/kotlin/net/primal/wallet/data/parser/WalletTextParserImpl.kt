@@ -1,3 +1,5 @@
+package net.primal.wallet.data.parser
+
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.Result
 import net.primal.core.utils.asUrlDecoded
@@ -44,7 +46,7 @@ class WalletTextParserImpl(
             isLnUrl() -> WalletRecipientType.LnUrl
             isLightningAddress() -> WalletRecipientType.LnAddress
             isLightningUri() -> {
-                val path = this.split(":").last()
+                val path = this.split(":").lastOrNull() ?: this
                 path.parseLightningRecipientType()
             }
 
@@ -67,7 +69,7 @@ class WalletTextParserImpl(
         }
 
     private suspend fun handleLnInvoiceText(userId: String, text: String): DraftTx {
-        val lnbc = text.split(":").last()
+        val lnbc = text.split(":").lastOrNull() ?: text
         val response = walletRepository.parseLnInvoice(userId = userId, lnbc = lnbc)
 
         return DraftTx(
@@ -81,7 +83,7 @@ class WalletTextParserImpl(
     }
 
     private suspend fun handleLnUrlText(userId: String, text: String): DraftTx {
-        val lnurl = text.split(":").last()
+        val lnurl = text.split(":").lastOrNull() ?: text
         val response = walletRepository.parseLnUrl(userId = userId, lnurl = lnurl)
 
         return DraftTx(
@@ -95,7 +97,7 @@ class WalletTextParserImpl(
     }
 
     private suspend fun handleLightningAddressText(userId: String, text: String): DraftTx? {
-        val lud16Value = text.split(":").last()
+        val lud16Value = text.split(":").lastOrNull() ?: text
         val lnUrl = lud16Value.parseAsLNUrlOrNull()?.urlToLnUrlHrp() ?: return null
         return handleLnUrlText(userId = userId, text = lnUrl)
     }
