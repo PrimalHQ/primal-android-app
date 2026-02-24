@@ -85,6 +85,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.icons.primaliconpack.Keyboard
 import net.primal.android.core.compose.icons.primaliconpack.LegendaryProfileNoCustomization
 import net.primal.android.core.compose.icons.primaliconpack.LightMode
+import net.primal.android.core.compose.icons.primaliconpack.LightningBlue
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.core.compose.icons.primaliconpack.Link
@@ -275,6 +276,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             WalletUpgradeError,
             LightningBolt,
             LightningBoltFilled,
+            LightningBlue,
             Keyboard,
             PhotoFromGallery,
             Paste,

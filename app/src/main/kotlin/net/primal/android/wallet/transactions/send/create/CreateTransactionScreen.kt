@@ -1,8 +1,6 @@
 package net.primal.android.wallet.transactions.send.create
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
@@ -29,9 +27,7 @@ import net.primal.android.wallet.transactions.send.create.ui.TransactionSending
 import net.primal.android.wallet.transactions.send.create.ui.TransactionSuccess
 import net.primal.domain.wallet.DraftTxStatus
 
-private const val TX_AMOUNT_KEY = "tx_amount"
-
-@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalComposeUiApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CreateTransactionScreen(viewModel: CreateTransactionViewModel, onClose: () -> Unit) {
     val state = viewModel.state.collectAsState()
@@ -43,7 +39,6 @@ fun CreateTransactionScreen(viewModel: CreateTransactionViewModel, onClose: () -
     )
 }
 
-@ExperimentalSharedTransitionApi
 @ExperimentalComposeUiApi
 @ExperimentalMaterial3Api
 @Composable
@@ -56,68 +51,64 @@ fun CreateTransactionScreen(
         modifier = Modifier.imePadding(),
         topBar = { CreateTransactionTopAppBar(txStatus = state.transaction.status, onClose = onClose) },
         content = { paddingValues ->
-            SharedTransitionLayout {
-                AnimatedContent(
-                    targetState = state.transaction.status,
-                    transitionSpec = { fadeIn() togetherWith fadeOut() },
-                    label = "TransactionStatus",
-                ) { status ->
-                    val sharedAmountModifier = Modifier.sharedBounds(
-                        sharedContentState = rememberSharedContentState(key = TX_AMOUNT_KEY),
-                        animatedVisibilityScope = this@AnimatedContent,
-                    )
+            AnimatedContent(
+                targetState = state.transaction.status,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "TransactionStatus",
+            ) { status ->
+                when (status) {
+                    DraftTxStatus.Draft -> {
+                        TransactionEditor(
+                            modifier = Modifier
+                                .background(color = AppTheme.colorScheme.surfaceVariant)
+                                .fillMaxSize(),
+                            paddingValues = paddingValues,
+                            state = state,
+                            eventPublisher = eventPublisher,
+                            onCancelClick = onClose,
+                        )
+                    }
 
-                    when (status) {
-                        DraftTxStatus.Draft -> {
-                            TransactionEditor(
-                                modifier = Modifier
-                                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                                    .fillMaxSize(),
-                                paddingValues = paddingValues,
-                                state = state,
-                                eventPublisher = eventPublisher,
-                                onCancelClick = onClose,
-                                btcAmountModifier = sharedAmountModifier,
-                            )
-                        }
+                    DraftTxStatus.Sending -> {
+                        TransactionSending(
+                            modifier = Modifier
+                                .background(color = AppTheme.colorScheme.surfaceVariant)
+                                .fillMaxSize(),
+                            amountInSats = state.transaction.amountSats.toLong(),
+                            sendingCompleted = state.sendingCompleted,
+                            onAnimationFinished = {
+                                eventPublisher(CreateTransactionContract.UiEvent.SendingAnimationFinished)
+                            },
+                            receiver = state.profileLightningAddress
+                                ?: state.transaction.targetLud16
+                                ?: state.transaction.targetLnUrl?.ellipsizeLnUrl()
+                                ?: state.transaction.lnInvoiceDescription
+                                ?: state.transaction.targetOnChainAddress?.ellipsizeOnChainAddress(),
+                        )
+                    }
 
-                        DraftTxStatus.Sending -> {
-                            TransactionSending(
-                                modifier = Modifier
-                                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                                    .fillMaxSize(),
-                                amountInSats = state.transaction.amountSats.toLong(),
-                                sendingCompleted = state.sendingCompleted,
-                                onAnimationFinished = {
-                                    eventPublisher(CreateTransactionContract.UiEvent.SendingAnimationFinished)
-                                },
-                                btcAmountModifier = sharedAmountModifier,
-                            )
-                        }
+                    DraftTxStatus.Sent -> {
+                        TransactionSuccess(
+                            modifier = Modifier.fillMaxSize(),
+                            amountInSats = state.transaction.amountSats.toLong(),
+                            receiver = state.profileLightningAddress
+                                ?: state.transaction.targetLud16
+                                ?: state.transaction.targetLnUrl?.ellipsizeLnUrl()
+                                ?: state.transaction.lnInvoiceDescription
+                                ?: state.transaction.targetOnChainAddress?.ellipsizeOnChainAddress(),
+                            onDoneClick = onClose,
+                        )
+                    }
 
-                        DraftTxStatus.Sent -> {
-                            TransactionSuccess(
-                                modifier = Modifier.fillMaxSize(),
-                                amountInSats = state.transaction.amountSats.toLong(),
-                                receiver = state.profileLightningAddress
-                                    ?: state.transaction.targetLud16
-                                    ?: state.transaction.targetLnUrl?.ellipsizeLnUrl()
-                                    ?: state.transaction.lnInvoiceDescription
-                                    ?: state.transaction.targetOnChainAddress?.ellipsizeOnChainAddress(),
-                                onDoneClick = onClose,
-                            )
-                        }
-
-                        DraftTxStatus.Failed -> {
-                            TransactionFailed(
-                                modifier = Modifier
-                                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                                    .fillMaxSize(),
-                                errorMessage = state.error?.message
-                                    ?: stringResource(id = R.string.app_generic_error),
-                                onCloseClick = onClose,
-                            )
-                        }
+                    DraftTxStatus.Failed -> {
+                        TransactionFailed(
+                            modifier = Modifier
+                                .background(color = AppTheme.colorScheme.surfaceVariant)
+                                .fillMaxSize(),
+                            errorMessage = state.error?.message
+                                ?: stringResource(id = R.string.app_generic_error),
+                            onCloseClick = onClose,
+                        )
                     }
                 }
             }

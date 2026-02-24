@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,7 +31,7 @@ fun FlowStatusColumn(
     icon: ImageVector?,
     iconTint: Color = LocalContentColor.current,
     headlineText: String?,
-    supportText: String?,
+    supportText: AnnotatedString?,
     textColor: Color = LocalContentColor.current,
 ) {
     Column(

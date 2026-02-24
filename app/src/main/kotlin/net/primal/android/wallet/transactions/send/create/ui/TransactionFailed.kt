@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -31,7 +32,7 @@ fun TransactionFailed(
             icon = PrimalIcons.WalletError,
             iconTint = AppTheme.colorScheme.error,
             headlineText = stringResource(id = R.string.wallet_create_transaction_failed_headline),
-            supportText = errorMessage,
+            supportText = AnnotatedString(errorMessage),
         )
 
         PrimalLoadingButton(

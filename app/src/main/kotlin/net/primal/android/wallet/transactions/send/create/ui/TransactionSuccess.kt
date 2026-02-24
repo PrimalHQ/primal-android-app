@@ -16,6 +16,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import java.text.NumberFormat
 import net.primal.android.R
@@ -55,6 +59,22 @@ fun TransactionSuccess(
         closingSequence()
     }
 
+    val formattedAmount = numberFormat.format(amountInSats)
+    val satsToText = stringResource(id = R.string.wallet_create_transaction_success_suffix_recipient)
+    val satsText = stringResource(id = R.string.wallet_create_transaction_success_suffix)
+    val supportText = buildAnnotatedString {
+        append(stringResource(id = R.string.wallet_create_transaction_success_prefix))
+        append(" ")
+        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+            append(formattedAmount)
+        }
+        if (receiver != null) {
+            append(" $satsToText\n$receiver")
+        } else {
+            append(" $satsText")
+        }
+    }
+
     Column(modifier = modifier.background(color = walletSuccessColor)) {
         PrimalTopAppBar(
             title = stringResource(id = R.string.wallet_create_transaction_success_title),
@@ -78,19 +98,8 @@ fun TransactionSuccess(
             FlowStatusColumn(
                 icon = PrimalIcons.WalletSuccess,
                 iconTint = walletSuccessContentColor,
-                headlineText = stringResource(id = R.string.wallet_create_transaction_success_headline),
-                supportText = if (receiver != null) {
-                    stringResource(
-                        id = R.string.wallet_create_transaction_transaction_description,
-                        numberFormat.format(amountInSats),
-                        receiver,
-                    )
-                } else {
-                    stringResource(
-                        id = R.string.wallet_create_transaction_transaction_description_lite,
-                        numberFormat.format(amountInSats),
-                    )
-                },
+                headlineText = "",
+                supportText = supportText,
                 textColor = walletSuccessContentColor,
             )
 
@@ -98,7 +107,7 @@ fun TransactionSuccess(
                 modifier = Modifier
                     .width(200.dp)
                     .padding(bottom = 16.dp),
-                text = stringResource(id = R.string.wallet_create_transaction_done_button),
+                text = stringResource(id = R.string.wallet_create_transaction_close_button),
                 containerColor = walletSuccessDimColor,
                 onClick = { closingSequence() },
             )

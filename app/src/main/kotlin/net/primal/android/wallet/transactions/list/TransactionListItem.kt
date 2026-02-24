@@ -52,15 +52,12 @@ import net.primal.android.R
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.WrappedContentWithSuffix
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.WalletBitcoinPayment
-import net.primal.android.core.compose.icons.primaliconpack.WalletLightningPaymentAlt
 import net.primal.android.core.compose.icons.primaliconpack.WalletPay
 import net.primal.android.core.compose.icons.primaliconpack.WalletReceive
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.walletDepositColor
-import net.primal.android.wallet.walletTransactionIconBackgroundColor
 import net.primal.android.wallet.walletWithdrawColor
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.CurrencyConversionUtils.toUsd
@@ -162,17 +159,10 @@ private fun TransactionLeadingContent(
         }
 
         else -> {
-            TransactionIcon(background = walletTransactionIconBackgroundColor) {
-                Image(
-                    imageVector = when (onChainPayment) {
-                        true -> PrimalIcons.WalletBitcoinPayment
-                        false -> PrimalIcons.WalletLightningPaymentAlt
-                    },
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.zapped),
-                )
-
-                if (isPending) {
+            TransactionIcon(
+                isOnChainPayment = onChainPayment,
+                isPending = isPending,
+                isPendingContent = {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.BottomEnd,
@@ -187,8 +177,8 @@ private fun TransactionLeadingContent(
                             colorFilter = ColorFilter.tint(color = AppTheme.extraColorScheme.onSurfaceVariantAlt1),
                         )
                     }
-                }
-            }
+                },
+            )
         }
     }
 }
@@ -335,6 +325,21 @@ class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
                 txId = "123",
                 txType = TxType.DEPOSIT,
                 txState = TxState.SUCCEEDED,
+                txAmountInSats = 333.toULong(),
+                txNote = null,
+                txCreatedAt = Instant.now(),
+                txUpdatedAt = Instant.now(),
+                txCompletedAt = Instant.now(),
+                otherUserId = null,
+                otherUserAvatarCdnImage = null,
+                isZap = false,
+                isStorePurchase = false,
+                isOnChainPayment = true,
+            ),
+            TransactionListItemDataUi(
+                txId = "123",
+                txType = TxType.DEPOSIT,
+                txState = TxState.PROCESSING,
                 txAmountInSats = 333.toULong(),
                 txNote = null,
                 txCreatedAt = Instant.now(),

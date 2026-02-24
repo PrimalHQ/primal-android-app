@@ -10,11 +10,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -27,16 +27,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
+import java.text.NumberFormat
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.AnimatedRawResImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.button.PrimalLoadingButton
-import net.primal.android.wallet.dashboard.ui.BtcAmountText
-import net.primal.core.utils.CurrencyConversionUtils.toBtc
+import net.primal.android.theme.AppTheme
 
 private enum class AnimationPhase { START, LOOP, END }
 
@@ -52,8 +57,10 @@ fun TransactionSending(
     amountInSats: Long,
     sendingCompleted: Boolean,
     onAnimationFinished: () -> Unit,
-    btcAmountModifier: Modifier = Modifier,
+    receiver: String? = null,
 ) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.SpaceAround,
@@ -66,15 +73,6 @@ fun TransactionSending(
             verticalArrangement = Arrangement.spacedBy(48.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            BtcAmountText(
-                modifier = Modifier
-                    .padding(start = 32.dp, top = 80.dp)
-                    .height(72.dp)
-                    .then(btcAmountModifier),
-                amountInBtc = amountInSats.toBigDecimal().toBtc(),
-                textSize = 48.sp,
-            )
-
             val iconScale = remember { Animatable(ICON_START_SCALE) }
             val iconOffsetY = remember { Animatable(ICON_START_Y_OFFSET) }
 
@@ -109,6 +107,30 @@ fun TransactionSending(
                     }
                 }
             }
+
+            val formattedAmount = numberFormat.format(amountInSats)
+            val sendingHeadline = stringResource(id = R.string.wallet_create_transaction_sending_headline)
+            val satsText = stringResource(id = R.string.wallet_sats_suffix)
+            val satsToText = stringResource(id = R.string.wallet_create_transaction_sats_to)
+            val sendingText = buildAnnotatedString {
+                append("$sendingHeadline ")
+                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                    append(formattedAmount)
+                }
+                if (receiver != null) {
+                    append(" $satsToText\n$receiver")
+                } else {
+                    append(" $satsText")
+                }
+            }
+
+            Text(
+                text = sendingText,
+                style = AppTheme.typography.bodyLarge,
+                lineHeight = 28.sp,
+                textAlign = TextAlign.Center,
+                color = AppTheme.colorScheme.onSurface,
+            )
         }
 
         PrimalLoadingButton(
@@ -130,7 +152,7 @@ private fun AnimatedLightningSendingIcon(sendingCompleted: Boolean, onAnimationF
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 40.dp),
     ) {
         key(phase) {
             when (phase) {

@@ -26,7 +26,6 @@ fun TransactionAmountText(
     amountInUsd: String,
     onAmountClick: () -> Unit,
     modifier: Modifier = Modifier,
-    btcAmountModifier: Modifier = Modifier,
 ) {
     Column(
         modifier = modifier.clickable(
@@ -43,8 +42,7 @@ fun TransactionAmountText(
                 BtcAmountText(
                     modifier = Modifier
                         .padding(start = 32.dp)
-                        .height(72.dp)
-                        .then(btcAmountModifier),
+                        .height(72.dp),
                     amountInBtc = amountInBtc.toBigDecimal(),
                     textSize = 48.sp,
                 )
@@ -54,8 +52,7 @@ fun TransactionAmountText(
                 FiatAmountTextFromUsd(
                     modifier = Modifier
                         .padding(start = 32.dp)
-                        .height(72.dp)
-                        .then(btcAmountModifier),
+                        .height(72.dp),
                     amount = amountInUsd,
                     textSize = 48.sp,
                 )
