@@ -10,6 +10,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -95,6 +96,7 @@ import net.primal.android.wallet.transactions.receive.ReceivePaymentContract.UiS
 import net.primal.android.wallet.transactions.receive.model.NetworkDetails
 import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
+import net.primal.android.wallet.transactions.receive.ui.ReceivePaymentSuccess
 import net.primal.android.wallet.ui.TransactionAmountText
 import net.primal.android.wallet.ui.WalletTabsBar
 import net.primal.android.wallet.ui.WalletTabsHeight
@@ -155,65 +157,97 @@ fun ReceivePaymentScreen(
 
     PrimalScaffold(
         topBar = {
-            PrimalTopAppBar(
-                title = when (state.currentTab) {
-                    ReceivePaymentTab.Lightning -> stringResource(
-                        id = R.string.wallet_receive_lightning_transaction_title,
-                    )
-
-                    ReceivePaymentTab.Bitcoin -> stringResource(id = R.string.wallet_receive_btc_transaction_title)
-                },
-                navigationIcon = PrimalIcons.ArrowBack,
-                navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
-                showDivider = false,
-                onNavigationIconClick = {
-                    if (state.editMode) {
-                        onCancel()
-                    } else {
-                        onClose()
-                    }
-                },
-            )
+            ReceivePaymentTopBar(state, onCancel, onClose)
         },
         content = { paddingValues ->
-            ReceiveContent(
-                state = state,
-                paddingValues = paddingValues,
-                onCancel = onCancel,
-                onBuyPremium = onBuyPremium,
-                eventPublisher = eventPublisher,
-            )
-        },
-        bottomBar = {
-            if (state.activeWallet?.capabilities?.supportsOnChainReceive == true) {
-                Column {
-                    PrimalDivider()
-                    WalletTabsBar(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .navigationBarsPadding()
-                            .height(WalletTabsHeight)
-                            .background(color = AppTheme.colorScheme.surface),
-                        tabs = ReceivePaymentTab.entries.map { it.data },
-                        activeTab = state.currentTab.data,
-                        onTabClick = {
-                            if (state.currentTab.data != it) {
-                                val network = when (ReceivePaymentTab.valueOfOrThrow(it)) {
-                                    ReceivePaymentTab.Lightning -> Network.Lightning
-                                    ReceivePaymentTab.Bitcoin -> Network.Bitcoin
-                                }
-                                eventPublisher(ReceivePaymentContract.UiEvent.ChangeNetwork(network))
-                            }
-                        },
-                        tabIconSize = 32.dp,
-                    )
+            AnimatedContent(
+                targetState = state.paymentReceived,
+                transitionSpec = { fadeIn() togetherWith fadeOut() },
+                label = "ReceivePaymentContent",
+            ) { paymentReceived ->
+                when (paymentReceived) {
+                    true -> {
+                        val amountInSats = state.paymentDetails.amountInBtc?.toSats()?.toLong() ?: 0L
+                        ReceivePaymentSuccess(
+                            modifier = Modifier.fillMaxSize(),
+                            amountInSats = amountInSats,
+                            onDoneClick = onClose,
+                        )
+                    }
+
+                    false -> {
+                        ReceiveContent(
+                            state = state,
+                            paddingValues = paddingValues,
+                            onCancel = onCancel,
+                            onBuyPremium = onBuyPremium,
+                            eventPublisher = eventPublisher,
+                        )
+                    }
                 }
             }
         },
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
+        bottomBar = { ReceivePaymentBottomBar(state, eventPublisher) },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
     )
+}
+
+@ExperimentalMaterial3Api
+@Composable
+private fun ReceivePaymentTopBar(
+    state: UiState,
+    onCancel: () -> Unit,
+    onClose: () -> Unit,
+) {
+    if (!state.paymentReceived) {
+        PrimalTopAppBar(
+            title = when (state.currentTab) {
+                ReceivePaymentTab.Lightning -> stringResource(
+                    id = R.string.wallet_receive_lightning_transaction_title,
+                )
+
+                ReceivePaymentTab.Bitcoin -> stringResource(id = R.string.wallet_receive_btc_transaction_title)
+            },
+            navigationIcon = PrimalIcons.ArrowBack,
+            navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
+            showDivider = false,
+            onNavigationIconClick = {
+                if (state.editMode) {
+                    onCancel()
+                } else {
+                    onClose()
+                }
+            },
+        )
+    }
+}
+
+@Composable
+private fun ReceivePaymentBottomBar(state: UiState, eventPublisher: (ReceivePaymentContract.UiEvent) -> Unit) {
+    if (!state.paymentReceived && state.activeWallet?.capabilities?.supportsOnChainReceive == true) {
+        Column {
+            PrimalDivider()
+            WalletTabsBar(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .height(WalletTabsHeight)
+                    .background(color = AppTheme.colorScheme.surface),
+                tabs = ReceivePaymentTab.entries.map { it.data },
+                activeTab = state.currentTab.data,
+                onTabClick = {
+                    if (state.currentTab.data != it) {
+                        val network = when (ReceivePaymentTab.valueOfOrThrow(it)) {
+                            ReceivePaymentTab.Lightning -> Network.Lightning
+                            ReceivePaymentTab.Bitcoin -> Network.Bitcoin
+                        }
+                        eventPublisher(ReceivePaymentContract.UiEvent.ChangeNetwork(network))
+                    }
+                },
+                tabIconSize = 32.dp,
+            )
+        }
+    }
 }
 
 @ExperimentalComposeUiApi
