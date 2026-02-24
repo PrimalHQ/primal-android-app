@@ -129,13 +129,14 @@ internal class NostrSocketClientImpl(
     override suspend fun close() {
         wsReceiverJob?.cancel()
         wsReceiverJob = null
-        wsSession?.close(
-            reason = CloseReason(
-                code = CloseReason.Codes.NORMAL,
-                message = "Closed by client.",
-            ),
-        )
-        onSocketConnectionClosed?.invoke(socketUrl, RuntimeException("Closed by client."))
+        runCatching {
+            wsSession?.close(
+                reason = CloseReason(
+                    code = CloseReason.Codes.NORMAL,
+                    message = "Closed by client.",
+                ),
+            )
+        }
         wsSession = null
     }
 

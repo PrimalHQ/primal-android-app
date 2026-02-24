@@ -24,6 +24,7 @@ import net.primal.android.notifications.domain.NotificationsSummary
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.Badges
 import net.primal.android.wallet.di.ActiveWalletBalanceSyncerFactory
+import net.primal.core.networking.factory.PrimalApiClientFactory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.networking.primal.PrimalSocketSubscription
@@ -96,8 +97,16 @@ class SubscriptionsManager @Inject constructor(
 
     private val lifecycleEventObserver = LifecycleEventObserver { _, event ->
         when (event) {
-            Lifecycle.Event.ON_RESUME -> scope.launch { resumeSubscriptions() }
-            Lifecycle.Event.ON_PAUSE -> scope.launch { pauseSubscriptions() }
+            Lifecycle.Event.ON_RESUME -> scope.launch {
+                PrimalApiClientFactory.resumeAll()
+                resumeSubscriptions()
+            }
+
+            Lifecycle.Event.ON_PAUSE -> scope.launch {
+                pauseSubscriptions()
+                PrimalApiClientFactory.pauseAll()
+            }
+
             else -> Unit
         }
     }

@@ -36,6 +36,8 @@ internal class ProxyPrimalApiClient(
     private var clientInitialized = CompletableDeferred<Boolean>()
     private val clientMutex = Mutex()
 
+    private val _paused = MutableStateFlow(false)
+
     private val _connectionStatus = MutableStateFlow(PrimalServerConnectionStatus(serverType = serverType))
     override val connectionStatus = _connectionStatus.asStateFlow()
 
@@ -46,6 +48,15 @@ internal class ProxyPrimalApiClient(
     init {
         scope.launch { appConfigHandler.updateImmediately() }
         observeApiUrlAndInitializeSocketClient()
+    }
+
+    internal fun pause() {
+        _paused.value = true
+    }
+
+    internal fun resume() {
+        _paused.value = false
+        scope.launch { appConfigHandler.updateWithDebounce(1.minutes) }
     }
 
     private fun observeApiUrlAndInitializeSocketClient() =
@@ -85,7 +96,9 @@ internal class ProxyPrimalApiClient(
             },
             onSocketConnectionClosed = { _, _ ->
                 updateStatus { copy(connected = false) }
-                scope.launch { appConfigHandler.updateWithDebounce(1.minutes) }
+                if (!_paused.value) {
+                    scope.launch { appConfigHandler.updateWithDebounce(1.minutes) }
+                }
             },
         )
     }

@@ -79,12 +79,18 @@ class RelayPool(
         }
 
         socketClients = newSocketClients
-        toRemoveSocketClients.forEach { scope.launch { it.close() } }
+        toRemoveSocketClients.forEach { client ->
+            updateRelayStatus(url = client.socketUrl, connected = false)
+            scope.launch { client.close() }
+        }
         this.relays = relays
     }
 
     fun closePool() {
-        socketClients.forEach { scope.launch { it.close() } }
+        socketClients.forEach { client ->
+            updateRelayStatus(url = client.socketUrl, connected = false)
+            scope.launch { client.close() }
+        }
         socketClients = emptyList()
         relays = emptyList()
     }

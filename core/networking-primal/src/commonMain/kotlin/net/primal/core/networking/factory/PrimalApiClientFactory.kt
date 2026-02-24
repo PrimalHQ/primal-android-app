@@ -46,4 +46,12 @@ object PrimalApiClientFactory {
             appConfigHandler = AppConfigFactory.createAppConfigHandler(),
         )
     }
+
+    fun pauseAll() {
+        clients.values.forEach { (it as? ProxyPrimalApiClient)?.pause() }
+    }
+
+    fun resumeAll() {
+        clients.values.forEach { (it as? ProxyPrimalApiClient)?.resume() }
+    }
 }
