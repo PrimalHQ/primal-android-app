@@ -616,6 +616,9 @@
     <string name="note_editor_nostr_publish_error">Unable to publish your note. Please check your connection and try again.</string>
     <string name="note_editor_unable_to_locate_event">Unable to preview %1$s event. Tap to retry.</string>
 
+    <string name="gif_picker_search_placeholder">Search KLIPY</string>
+    <string name="gif_picker_cancel">Cancel</string>
+
     <string name="post_action_missing_lightning_address">Unable to zap this user since they don\'t have a lightning address set up.</string>
     <string name="post_action_invalid_zap_request">Unable to zap. Check your wallet connection and try again.</string>
     <string name="post_action_zap_failed">Unable to zap. Please try again.</string>
@@ -1485,6 +1488,7 @@
     <string name="accessibility_import_photo_from_gallery">Import photo from gallery</string>
     <string name="accessibility_take_photo">Take photo with camera</string>
     <string name="accessibility_tag_user">Tag user</string>
+    <string name="accessibility_gif_picker">Pick a GIF</string>
     <string name="accessibility_refresh">Refresh</string>
     <string name="accessibility_new_direct_message">New direct message</string>
     <string name="accessibility_new_post">New post</string>

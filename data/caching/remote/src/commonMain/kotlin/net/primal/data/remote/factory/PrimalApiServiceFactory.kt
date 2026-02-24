@@ -18,6 +18,8 @@ import net.primal.data.remote.api.feeds.FeedsApi
 import net.primal.data.remote.api.feeds.FeedsApiImpl
 import net.primal.data.remote.api.importing.PrimalImportApi
 import net.primal.data.remote.api.importing.PrimalImportApiImpl
+import net.primal.data.remote.api.klipy.KlipyApi
+import net.primal.data.remote.api.klipy.KlipyApiImpl
 import net.primal.data.remote.api.messages.MessagesApi
 import net.primal.data.remote.api.messages.MessagesApiImpl
 import net.primal.data.remote.api.notifications.NotificationsApi
@@ -63,6 +65,12 @@ object PrimalApiServiceFactory {
     fun createSettingsApi(primalApiClient: PrimalApiClient): SettingsApi = SettingsApiImpl(primalApiClient)
 
     fun createUsersApi(primalApiClient: PrimalApiClient): UsersApi = UsersApiImpl(primalApiClient)
+
+    fun createKlipyApi(apiKey: String): KlipyApi =
+        KlipyApiImpl(
+            apiKey = apiKey,
+            httpClient = defaultHttpClient,
+        )
 
     fun createUserWellKnownApi(): UserWellKnownApi =
         Ktorfit.Builder()

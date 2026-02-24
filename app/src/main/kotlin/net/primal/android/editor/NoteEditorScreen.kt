@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Gif
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -83,6 +84,7 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.Gif
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.errors.resolveUiErrorMessage
@@ -197,6 +199,7 @@ fun NoteEditorScreen(
                 contentPadding = paddingValues,
                 noteCallbacks = NoteCallbacks(),
                 onShowAccountSwitcher = { showAccountSwitcher = true },
+                onGifClick = callbacks.onGifPickerClick,
             )
         },
     )
@@ -233,6 +236,7 @@ private fun NoteEditorBox(
     contentPadding: PaddingValues,
     noteCallbacks: NoteCallbacks,
     onShowAccountSwitcher: () -> Unit,
+    onGifClick: () -> Unit,
 ) {
     val editorListState = rememberLazyListState()
     var noteEditorMaxHeightPx by remember { mutableIntStateOf(0) }
@@ -295,34 +299,13 @@ private fun NoteEditorBox(
                 onRemoveHighlight = { eventPublisher(UiEvent.RemoveHighlightByArticle(it)) },
             )
 
-            item(key = "attachments") {
-                NoteAttachmentsLazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(attachmentsHeightDp),
-                    attachments = state.attachments,
-                    onDiscard = {
-                        eventPublisher(UiEvent.DiscardNoteAttachment(attachmentId = it))
-                    },
-                    onRetryUpload = {
-                        eventPublisher(UiEvent.RetryUpload(attachmentId = it))
-                    },
-                )
-            }
-
-            item(key = "extraSpacing") {
-                Spacer(modifier = Modifier.height(extraSpacing))
-            }
-
-            if (state.attachments.isNotEmpty()) {
-                item(key = "attachmentSpacing") {
-                    Spacer(
-                        modifier = Modifier.height(
-                            with(density) { footerHeight.toDp() + 8.dp },
-                        ),
-                    )
-                }
-            }
+            noteEditorBottomItems(
+                attachments = state.attachments,
+                extraSpacing = extraSpacing,
+                footerHeight = footerHeight,
+                onDiscardAttachment = { eventPublisher(UiEvent.DiscardNoteAttachment(it)) },
+                onRetryUpload = { eventPublisher(UiEvent.RetryUpload(it)) },
+            )
         }
 
         NoteEditorFooter(
@@ -332,6 +315,7 @@ private fun NoteEditorBox(
                 .onSizeChanged { footerHeight = it.height },
             state = state,
             eventPublisher = eventPublisher,
+            onGifClick = onGifClick,
         )
     }
 }
@@ -634,6 +618,7 @@ private fun NoteEditorFooter(
     modifier: Modifier,
     state: NoteEditorContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
+    onGifClick: () -> Unit,
 ) {
     Column(modifier = modifier) {
         HorizontalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
@@ -666,6 +651,41 @@ private fun NoteEditorFooter(
                     eventPublisher(UiEvent.AppendUserTagAtSign)
                     eventPublisher(UiEvent.ToggleSearchUsers(enabled = true))
                 },
+                onGifClick = onGifClick,
+            )
+        }
+    }
+}
+
+private fun LazyListScope.noteEditorBottomItems(
+    attachments: List<NoteAttachment>,
+    extraSpacing: Dp,
+    footerHeight: Int,
+    onDiscardAttachment: (UUID) -> Unit,
+    onRetryUpload: (UUID) -> Unit,
+) {
+    item(key = "attachments") {
+        NoteAttachmentsLazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(attachmentsHeightDp),
+            attachments = attachments,
+            onDiscard = onDiscardAttachment,
+            onRetryUpload = onRetryUpload,
+        )
+    }
+
+    item(key = "extraSpacing") {
+        Spacer(modifier = Modifier.height(extraSpacing))
+    }
+
+    if (attachments.isNotEmpty()) {
+        item(key = "attachmentSpacing") {
+            val density = LocalDensity.current
+            Spacer(
+                modifier = Modifier.height(
+                    with(density) { footerHeight.toDp() + 8.dp },
+                ),
             )
         }
     }
@@ -757,7 +777,11 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
 }
 
 @Composable
-private fun NoteActionRow(onPhotosImported: (List<Uri>) -> Unit, onUserTag: () -> Unit) {
+private fun NoteActionRow(
+    onPhotosImported: (List<Uri>) -> Unit,
+    onUserTag: () -> Unit,
+    onGifClick: () -> Unit,
+) {
     Row(
         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
@@ -779,6 +803,14 @@ private fun NoteActionRow(onPhotosImported: (List<Uri>) -> Unit, onUserTag: () -
             Icon(
                 imageVector = Icons.Default.AlternateEmail,
                 contentDescription = stringResource(id = R.string.accessibility_tag_user),
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+        }
+
+        IconButton(onClick = onGifClick) {
+            Icon(
+                imageVector = PrimalIcons.Gif,
+                contentDescription = stringResource(id = R.string.accessibility_gif_picker),
                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
         }

@@ -52,6 +52,7 @@ interface NoteEditorContract {
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
         data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
         data class SelectAccount(val accountId: String) : UiEvent()
+        data class InsertGifUrl(val url: String) : UiEvent()
         data object DismissError : UiEvent()
     }
 
@@ -101,5 +102,6 @@ interface NoteEditorContract {
 
     data class ScreenCallbacks(
         val onClose: () -> Unit,
+        val onGifPickerClick: () -> Unit = {},
     )
 }

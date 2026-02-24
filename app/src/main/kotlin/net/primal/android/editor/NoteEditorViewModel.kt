@@ -271,6 +271,8 @@ class NoteEditorViewModel @AssistedInject constructor(
                         val selectedAccount = availableAccounts.find { it.pubkey == event.accountId }
                         copy(selectedAccount = selectedAccount ?: this.selectedAccount)
                     }
+
+                    is UiEvent.InsertGifUrl -> insertGifUrl(event.url)
                 }
             }
         }
@@ -289,6 +291,19 @@ class NoteEditorViewModel @AssistedInject constructor(
                     )
                 }
             }
+        }
+    }
+
+    private fun insertGifUrl(url: String) {
+        setState {
+            val currentText = content.text
+            val newText = if (currentText.isBlank()) url else "$currentText\n$url"
+            copy(
+                content = TextFieldValue(
+                    text = newText,
+                    selection = TextRange(newText.length),
+                ),
+            )
         }
     }
 
