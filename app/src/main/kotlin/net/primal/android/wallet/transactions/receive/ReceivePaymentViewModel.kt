@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,6 +25,7 @@ import net.primal.core.utils.onSuccess
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.wallet.Network
 import net.primal.domain.wallet.WalletRepository
+import net.primal.domain.wallet.WalletType
 
 @HiltViewModel
 class ReceivePaymentViewModel @Inject constructor(
@@ -39,6 +42,8 @@ class ReceivePaymentViewModel @Inject constructor(
         viewModelScope.launch {
             _state.getAndUpdate { it.reducer() }
         }
+
+    private var awaitPaymentJob: Job? = null
 
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
@@ -166,12 +171,30 @@ class ReceivePaymentViewModel @Inject constructor(
                     ),
                 )
             }
+
+            val wallet = _state.value.activeWallet
+            if (wallet?.type == WalletType.SPARK) {
+                awaitPayment(walletId = activeWalletId, invoice = result.invoice)
+            }
         }.onFailure { error ->
             Napier.w(throwable = error) { "Failed to create lightning invoice" }
             setState { copy(error = UiState.ReceivePaymentError.FailedToCreateLightningInvoice(cause = error)) }
         }
 
         setState { copy(creatingInvoice = false) }
+    }
+
+    private fun awaitPayment(walletId: String, invoice: String) {
+        awaitPaymentJob?.cancel()
+        awaitPaymentJob = viewModelScope.launch {
+            walletRepository.awaitInvoicePayment(
+                walletId = walletId,
+                invoice = invoice,
+                timeout = 15.minutes,
+            ).onSuccess {
+                setState { copy(paymentReceived = true) }
+            }
+        }
     }
 
     private fun changeNetwork(network: Network) =
