@@ -40,6 +40,7 @@ import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
 import net.primal.domain.wallet.capabilities
 import net.primal.domain.wallet.nwc.NwcLogRepository
+import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 
 @Suppress("LongParameterList")
 @HiltViewModel(assistedFactory = WalletSettingsViewModel.Factory::class)
@@ -53,6 +54,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private val connectNwcUseCase: ConnectNwcUseCase,
     private val nwcLogRepository: NwcLogRepository,
     private val pushNotificationsTokenUpdater: PushNotificationsTokenUpdater,
+    private val migratePrimalTransactionsHandler: MigratePrimalTransactionsHandler,
 ) : ViewModel() {
 
     @AssistedFactory
@@ -336,6 +338,13 @@ class WalletSettingsViewModel @AssistedInject constructor(
             val activeWalletId = state.value.activeWallet?.walletId ?: return@launch
             setState { copy(isExportingTransactions = true) }
             runCatching {
+                if (state.value.activeWallet is Wallet.Spark) {
+                    migratePrimalTransactionsHandler.invoke(
+                        userId = activeAccountStore.activeUserId(),
+                        targetSparkWalletId = activeWalletId,
+                    ).getOrThrow()
+                }
+                walletRepository.ensureAllTransactionsSynced(walletId = activeWalletId)
                 walletRepository.allTransactions(walletId = activeWalletId)
             }
                 .onSuccess { transactions ->

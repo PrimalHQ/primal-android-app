@@ -31,6 +31,8 @@ interface WalletRepository {
 
     suspend fun syncLatestTransactions(walletId: String)
 
+    suspend fun ensureAllTransactionsSynced(walletId: String)
+
     suspend fun latestTransactions(walletId: String, limit: Int): List<Transaction>
 
     suspend fun allTransactions(walletId: String): List<Transaction>
