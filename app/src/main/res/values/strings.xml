@@ -618,6 +618,23 @@
 
     <string name="gif_picker_search_placeholder">Search KLIPY</string>
     <string name="gif_picker_cancel">Cancel</string>
+    <string name="gif_picker_powered_by">Powered by</string>
+    <string name="gif_picker_klipy">KLIPY</string>
+    <string name="gif_category_trending">Trending</string>
+    <string name="gif_category_omg">OMG</string>
+    <string name="gif_category_funny">Funny</string>
+    <string name="gif_category_sad">Sad</string>
+    <string name="gif_category_love">Love</string>
+    <string name="gif_category_angry">Angry</string>
+    <string name="gif_category_dumb">Dumb</string>
+    <string name="gif_category_terrible">Terrible</string>
+    <string name="gif_category_wow">Wow</string>
+    <string name="gif_category_cringe">Cringe</string>
+    <string name="gif_category_yes">Yes</string>
+    <string name="gif_category_no">No</string>
+    <string name="gif_category_lol">LOL</string>
+    <string name="gif_category_savage">Savage</string>
+    <string name="gif_category_blessed">Blessed</string>
 
     <string name="post_action_missing_lightning_address">Unable to zap this user since they don\'t have a lightning address set up.</string>
     <string name="post_action_invalid_zap_request">Unable to zap. Check your wallet connection and try again.</string>

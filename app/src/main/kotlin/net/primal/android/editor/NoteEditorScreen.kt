@@ -30,7 +30,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Gif
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -792,6 +791,14 @@ private fun NoteActionRow(
             onPhotosImported = onPhotosImported,
         )
 
+        IconButton(onClick = onGifClick) {
+            Icon(
+                imageVector = PrimalIcons.Gif,
+                contentDescription = stringResource(id = R.string.accessibility_gif_picker),
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+        }
+
         TakePhotoIconButton(
             imageVector = PrimalIcons.ImportPhotoFromCamera,
             contentDescription = stringResource(id = R.string.accessibility_take_photo),
@@ -803,14 +810,6 @@ private fun NoteActionRow(
             Icon(
                 imageVector = Icons.Default.AlternateEmail,
                 contentDescription = stringResource(id = R.string.accessibility_tag_user),
-                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            )
-        }
-
-        IconButton(onClick = onGifClick) {
-            Icon(
-                imageVector = PrimalIcons.Gif,
-                contentDescription = stringResource(id = R.string.accessibility_gif_picker),
                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
         }

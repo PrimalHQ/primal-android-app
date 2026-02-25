@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,10 +21,13 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.SnackbarHost
@@ -52,6 +54,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalAsyncImage
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Search
@@ -59,6 +62,7 @@ import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.gifpicker.GifPickerContract.UiEvent
 import net.primal.android.gifpicker.domain.GifCategory
 import net.primal.android.gifpicker.domain.GifItem
+import net.primal.android.gifpicker.domain.toDisplayName
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -96,74 +100,73 @@ fun GifPickerScreen(
         onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
     )
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding(),
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 12.dp, end = 4.dp, top = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                GifSearchBar(
-                    modifier = Modifier.weight(1f),
-                    query = state.searchQuery,
-                    onQueryChange = { eventPublisher(UiEvent.UpdateSearchQuery(it)) },
-                )
-                TextButton(onClick = callbacks.onClose) {
+    PrimalScaffold(
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.navigationBarsPadding(),
+            )
+        },
+        content = { paddingValues ->
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 12.dp, end = 4.dp, top = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        GifSearchBar(
+                            modifier = Modifier.weight(1f),
+                            query = state.searchQuery,
+                            onQueryChange = { eventPublisher(UiEvent.UpdateSearchQuery(it)) },
+                        )
+                        TextButton(onClick = callbacks.onClose) {
+                            Text(
+                                modifier = Modifier.padding(top = 1.dp),
+                                text = stringResource(id = R.string.gif_picker_cancel),
+                                color = AppTheme.colorScheme.onSurface,
+                            )
+                        }
+                    }
+
+                    GifCategoryChips(
+                        categories = state.categories,
+                        selectedCategory = state.selectedCategory,
+                        onCategorySelected = { eventPublisher(UiEvent.SelectCategory(it)) },
+                    )
+
+                    GifGridContent(
+                        state = state,
+                        eventPublisher = eventPublisher,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                    )
+
                     Text(
-                        modifier = Modifier.padding(top = 1.dp),
-                        text = stringResource(id = R.string.gif_picker_cancel),
-                        color = AppTheme.colorScheme.onSurface,
+                        text = buildAnnotatedString {
+                            append(stringResource(id = R.string.gif_picker_powered_by))
+                            append(" ")
+                            withStyle(SpanStyle(color = AppTheme.extraColorScheme.onSurfaceVariantAlt2)) {
+                                append(stringResource(id = R.string.gif_picker_klipy))
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        textAlign = TextAlign.Center,
+                        style = AppTheme.typography.bodySmall,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                     )
                 }
+
+                if (state.uploading) {
+                    UploadingOverlay()
+                }
             }
-
-            GifCategoryChips(
-                categories = state.categories,
-                selectedCategory = state.selectedCategory,
-                onCategorySelected = { eventPublisher(UiEvent.SelectCategory(it)) },
-            )
-
-            GifGridContent(
-                state = state,
-                eventPublisher = eventPublisher,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-            )
-
-            Text(
-                text = buildAnnotatedString {
-                    append("Powered by ")
-                    withStyle(SpanStyle(color = AppTheme.extraColorScheme.onSurfaceVariantAlt2)) {
-                        append("KLIPY")
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                textAlign = TextAlign.Center,
-                style = AppTheme.typography.bodySmall,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-            )
-        }
-
-        if (state.uploading) {
-            UploadingOverlay()
-        }
-
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding(),
-        )
-    }
+        },
+    )
 }
 
 @Composable
@@ -189,6 +192,17 @@ private fun GifSearchBar(
                 contentDescription = null,
                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
             )
+        },
+        trailingIcon = {
+            if (query.isNotEmpty()) {
+                IconButton(onClick = { onQueryChange("") }) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = null,
+                        tint = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                    )
+                }
+            }
         },
         colors = OutlinedTextFieldDefaults.colors(
             focusedBorderColor = Color.Transparent,
@@ -221,13 +235,13 @@ private fun GifCategoryChips(
                 onClick = { onCategorySelected(category) },
                 label = {
                     Text(
-                        text = category.displayName,
+                        text = category.toDisplayName(),
                         style = AppTheme.typography.bodyMedium,
                     )
                 },
                 colors = FilterChipDefaults.filterChipColors(
                     containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                    labelColor = AppTheme.colorScheme.onSurface,
+                    labelColor = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                     selectedContainerColor = AppTheme.colorScheme.onSurface,
                     selectedLabelColor = AppTheme.colorScheme.surface,
                 ),
@@ -251,7 +265,6 @@ private fun GifGridContent(
 ) {
     Box(modifier = modifier) {
         val gridState = rememberLazyGridState()
-        val gifItems = remember(state.gifItems) { state.gifItems.distinctBy { it.id } }
 
         LazyVerticalGrid(
             columns = GridCells.Fixed(GIF_GRID_COLUMN_COUNT),
@@ -261,7 +274,7 @@ private fun GifGridContent(
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            items(gifItems, key = { it.id }) { gif ->
+            items(state.gifItems, key = { it.id }) { gif ->
                 GifGridItem(
                     gif = gif,
                     onClick = {
@@ -302,8 +315,7 @@ private fun UploadingOverlay() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f))
-            .clickable(enabled = false) { },
+            .background(Color.Black.copy(alpha = 0.5f)),
         contentAlignment = Alignment.Center,
     ) {
         CircularProgressIndicator(

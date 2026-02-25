@@ -8,12 +8,13 @@ import io.github.aakira.napier.Napier
 import java.io.File
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.getAndUpdate
@@ -29,10 +30,12 @@ import net.primal.android.gifpicker.domain.asGifItem
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.UploadResult
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.remote.api.klipy.KlipyApi
 
 @HiltViewModel
 class GifPickerViewModel @Inject constructor(
+    private val dispatchers: DispatcherProvider,
     private val klipyApi: KlipyApi,
     private val primalUploadService: AndroidPrimalBlossomUploadService,
     private val activeAccountStore: ActiveAccountStore,
@@ -104,7 +107,7 @@ class GifPickerViewModel @Inject constructor(
         viewModelScope.launch {
             events.filterIsInstance<UiEvent.UpdateSearchQuery>()
                 .debounce(SEARCH_DEBOUNCE_DURATION)
-                .collect {
+                .collectLatest {
                     nextCursor = null
                     if (it.query.isBlank()) {
                         setState {
@@ -113,7 +116,7 @@ class GifPickerViewModel @Inject constructor(
                                 selectedCategory = GifCategory.TRENDING,
                             )
                         }
-                        fetchTrending()
+                        performFetchTrending()
                     } else {
                         setState {
                             copy(
@@ -121,67 +124,71 @@ class GifPickerViewModel @Inject constructor(
                                 selectedCategory = null,
                             )
                         }
-                        searchGifs(query = it.query)
+                        performSearchGifs(query = it.query)
                     }
                 }
         }
 
-    private fun fetchTrending(cursor: String? = null) =
-        viewModelScope.launch {
-            setState { copy(searching = true) }
-            runCatching { klipyApi.fetchTrendingGifs(cursor = cursor) }
-                .onSuccess { response ->
-                    val gifs = response.results.mapNotNull { it.asGifItem() }
-                    nextCursor = response.next
-                    setState {
-                        copy(
-                            gifItems = if (cursor == null) gifs else gifItems + gifs,
-                            searching = false,
-                        )
-                    }
+    private fun fetchTrending(cursor: String? = null) = viewModelScope.launch { performFetchTrending(cursor) }
+
+    private suspend fun performFetchTrending(cursor: String? = null) {
+        setState { copy(searching = true) }
+        runCatching { klipyApi.fetchTrendingGifs(cursor = cursor) }
+            .onSuccess { response ->
+                val gifs = response.results.mapNotNull { it.asGifItem() }
+                nextCursor = response.next
+                setState {
+                    copy(
+                        gifItems = if (cursor == null) gifs else (gifItems + gifs).distinctBy { it.id },
+                        searching = false,
+                    )
                 }
-                .onFailure { error ->
-                    Napier.w(throwable = error) { "Failed to fetch trending GIFs" }
-                    setState { copy(searching = false, error = UiError.GenericError()) }
-                }
-        }
+            }
+            .onFailure { error ->
+                Napier.w(throwable = error) { "Failed to fetch trending GIFs" }
+                setState { copy(searching = false, error = UiError.GenericError()) }
+            }
+    }
 
     private fun searchGifs(query: String, cursor: String? = null) =
-        viewModelScope.launch {
-            setState { copy(searching = true) }
-            runCatching { klipyApi.searchGifs(query = query, cursor = cursor) }
-                .onSuccess { response ->
-                    val gifs = response.results.mapNotNull { it.asGifItem() }
-                    nextCursor = response.next
-                    setState {
-                        copy(
-                            gifItems = if (cursor == null) gifs else gifItems + gifs,
-                            searching = false,
-                        )
-                    }
+        viewModelScope.launch { performSearchGifs(query, cursor) }
+
+    private suspend fun performSearchGifs(query: String, cursor: String? = null) {
+        setState { copy(searching = true) }
+        runCatching { klipyApi.searchGifs(query = query, cursor = cursor) }
+            .onSuccess { response ->
+                val gifs = response.results.mapNotNull { it.asGifItem() }
+                nextCursor = response.next
+                setState {
+                    copy(
+                        gifItems = if (cursor == null) gifs else (gifItems + gifs).distinctBy { it.id },
+                        searching = false,
+                    )
                 }
-                .onFailure { error ->
-                    Napier.w(throwable = error) { "Failed to search GIFs" }
-                    setState { copy(searching = false, error = UiError.GenericError()) }
-                }
-        }
-
-    private fun loadMoreGifs() {
-        val currentState = _state.value
-        val cursor = nextCursor
-        if (currentState.searching || cursor == null) return
-
-        val query = currentState.searchQuery
-        val category = currentState.selectedCategory
-
-        when {
-            query.isNotBlank() -> searchGifs(query = query, cursor = cursor)
-            category != null && category != GifCategory.TRENDING -> {
-                searchGifs(query = category.displayName, cursor = cursor)
             }
-            else -> fetchTrending(cursor = cursor)
-        }
+            .onFailure { error ->
+                Napier.w(throwable = error) { "Failed to search GIFs" }
+                setState { copy(searching = false, error = UiError.GenericError()) }
+            }
     }
+
+    private fun loadMoreGifs() =
+        viewModelScope.launch {
+            val currentState = _state.value
+            val cursor = nextCursor
+            if (currentState.searching || cursor == null) return@launch
+
+            val query = currentState.searchQuery
+            val category = currentState.selectedCategory
+
+            when {
+                query.isNotBlank() -> searchGifs(query = query, cursor = cursor)
+                category != null && category != GifCategory.TRENDING -> {
+                    searchGifs(query = category.displayName, cursor = cursor)
+                }
+                else -> fetchTrending(cursor = cursor)
+            }
+        }
 
     private fun uploadGifToBlossom(event: UiEvent.SelectGif) =
         viewModelScope.launch {
@@ -208,13 +215,15 @@ class GifPickerViewModel @Inject constructor(
                 }
             }
 
-            runCatching {
-                klipyApi.registerShare(gifId = event.gif.id, query = _state.value.searchQuery)
+            withContext(NonCancellable) {
+                runCatching {
+                    klipyApi.registerShare(gifId = event.gif.id, query = _state.value.searchQuery)
+                }
             }
         }
 
     private suspend fun downloadGifToTempFile(url: String): File? =
-        withContext(Dispatchers.IO) {
+        withContext(dispatchers.io()) {
             runCatching {
                 val bytes = klipyApi.downloadGifBytes(url)
                 val file = File.createTempFile("gif", ".gif")
