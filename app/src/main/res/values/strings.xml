@@ -1279,17 +1279,17 @@
 
     <string name="wallet_upgrade_faq_title">Wallet Upgrade FAQ</string>
     <string name="wallet_upgrade_faq_first_question">Do I have to upgrade my wallet?</string>
-    <string name="wallet_upgrade_faq_first_answer">Yes. Support for the old custodial wallet will be discontinued on March 31, 2026. All users need to upgrade prior to this date.</string>
+    <string name="wallet_upgrade_faq_first_answer">Yes. Support for the old custodial wallet will be discontinued on April 30, 2026. All users need to upgrade prior to this date.</string>
     <string name="wallet_upgrade_faq_second_question">Does the new Primal wallet support both lightning and on-chain transactions?</string>
     <string name="wallet_upgrade_faq_second_answer">Yes. Just like with the old custodial wallet, the new Primal wallet enables users to send and receive lightning and on-chain bitcoin transactions.</string>
     <string name="wallet_upgrade_faq_third_question">Can I keep my existing Primal lightning address?</string>
     <string name="wallet_upgrade_faq_third_answer">Yes. Your Primal lightning address will not change after the wallet upgrade.</string>
     <string name="wallet_upgrade_faq_fourth_question">Can I transfer my funds to a different wallet before I upgrade?</string>
-    <string name="wallet_upgrade_faq_fourth_answer">Yes. The old custodial wallet remains fully functional until March 31, 2026. You can send your funds to any other bitcoin wallet prior to upgrading.</string>
+    <string name="wallet_upgrade_faq_fourth_answer">Yes. The old custodial wallet remains fully functional until April 30, 2026. You can send your funds to any other bitcoin wallet prior to upgrading.</string>
     <string name="wallet_upgrade_faq_fifth_question">Will I be able to revert to the old custodial wallet after the upgrade?</string>
     <string name="wallet_upgrade_faq_fifth_answer">No. After the wallet upgrade is completed, you will not be able to revert to the old custodial wallet, however your full transaction history will be transferred to the new wallet.</string>
     <string name="wallet_upgrade_faq_sixth_question">What if I don\'t upgrade before support for the old wallet is discontinued?</string>
-    <string name="wallet_upgrade_faq_sixth_answer">After March 31, 2026 the old custodial wallet will no longer be functional. If you don\'t upgrade and still have some funds in that wallet, you will be able to recover them by contacting us at support@primal.net.</string>
+    <string name="wallet_upgrade_faq_sixth_answer">After April 30, 2026 the old custodial wallet will no longer be functional. If you don\'t upgrade and still have some funds in that wallet, you will be able to recover them by contacting us at support@primal.net.</string>
     <string name="wallet_upgrade_faq_seventh_question">Which technology is the new Primal wallet built on?</string>
     <string name="wallet_upgrade_faq_seventh_answer">The new Primal wallet is built on the Spark network technology. For more information, you can visit: https://spark.money.</string>
     <string name="wallet_upgrade_faq_eighth_question">Are there any transaction fees that I need to pay to upgrade?</string>
@@ -1297,7 +1297,7 @@
     <string name="wallet_upgrade_faq_ninth_question">Does the new wallet support Nostr Wallet Connect?</string>
     <string name="wallet_upgrade_faq_ninth_answer">Yes. The new Primal wallet does support Nostr Wallet Connect, however it works a bit differently than the old one. Since the new wallet is self-custodial, the Primal mobile app needs to be running in order to sign NWC events. The NWC feature is best used in conjunction with the Primal remote signer.</string>
     <string name="wallet_upgrade_faq_tenth_question">I have existing NWC connections to the old Primal wallet. Will I have to re-create those with the new wallet?</string>
-    <string name="wallet_upgrade_faq_tenth_answer">Yes. Old NWC connections will stop working when the old wallet is deprecated on March 31, 2026.</string>
+    <string name="wallet_upgrade_faq_tenth_answer">Yes. Old NWC connections will stop working when the old wallet is deprecated on April 30, 2026.</string>
 
     <string name="wallet_restore_title">Restore Existing Wallet</string>
     <string name="wallet_restore_enter_recovery_phrase_placeholder">Enter your wallet recovery phrase</string>

@@ -87,7 +87,7 @@ import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.capabilities
 
-private val DATE_OF_WALLET_EXPIRATION = LocalDate.of(2026, 3, 31)
+private val DATE_OF_WALLET_EXPIRATION = LocalDate.of(2026, 4, 30)
     .atTime(12, 0)
     .toInstant(ZoneOffset.UTC)
 
