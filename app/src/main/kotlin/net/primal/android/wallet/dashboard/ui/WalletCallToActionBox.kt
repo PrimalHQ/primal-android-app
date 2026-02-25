@@ -72,7 +72,7 @@ fun WalletCallToActionAnnotatedBox(
         ) {
             message?.let {
                 Text(
-                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 16.dp),
+                    modifier = Modifier.padding(vertical = 16.dp),
                     text = message,
                     textAlign = TextAlign.Center,
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
