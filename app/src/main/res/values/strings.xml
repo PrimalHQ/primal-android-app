@@ -1248,7 +1248,7 @@
     <string name="wallet_dashboard_upgrade_please_upgrade">Please upgrade to continue using this wallet.</string>
     <string name="wallet_dashboard_upgrade_button">Upgrade Wallet Now</string>
 
-    <string name="wallet_upgrade_sheet_title">The New Primal Wallet is Here!</string>
+    <string name="wallet_upgrade_sheet_title">Upgrade Your Wallet!</string>
     <string name="wallet_upgrade_sheet_description_first">Good news: Primal now features a new self-custodial wallet, which is a required upgrade for all users.</string>
     <string name="wallet_upgrade_sheet_description_second">With one tap, we\'ll move your funds and full\ntransaction history to your new self-custodial\nwallet - so you fully control your bitcoin.\nQuestions? Check out our </string>
     <string name="wallet_upgrade_sheet_faqs">FAQs</string>
