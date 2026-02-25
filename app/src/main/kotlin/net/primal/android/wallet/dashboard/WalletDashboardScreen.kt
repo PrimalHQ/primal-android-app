@@ -88,8 +88,8 @@ import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.capabilities
 
 private val DATE_OF_WALLET_EXPIRATION = LocalDate.of(2026, 3, 31)
-    .atStartOfDay(ZoneOffset.UTC)
-    .toInstant()
+    .atTime(12, 0)
+    .toInstant(ZoneOffset.UTC)
 
 @Composable
 fun WalletDashboardScreen(
