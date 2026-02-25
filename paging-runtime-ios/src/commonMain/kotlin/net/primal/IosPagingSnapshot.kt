@@ -57,6 +57,13 @@ class IosPagingSnapshot<T : Any> internal constructor(
         presenter[index]
     }
 
+    fun accessLast() {
+        val lastIndex = presenter.size - 1
+        if (lastIndex >= 0) {
+            presenter[lastIndex]
+        }
+    }
+
     fun retry() = presenter.retry()
 
     fun refresh() = presenter.refresh()
