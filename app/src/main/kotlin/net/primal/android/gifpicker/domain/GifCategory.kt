@@ -6,6 +6,8 @@ import net.primal.android.R
 
 enum class GifCategory(val displayName: String) {
     TRENDING("Trending"),
+    YES("Yes"),
+    NO("No"),
     OMG("OMG"),
     FUNNY("Funny"),
     SAD("Sad"),
@@ -15,8 +17,6 @@ enum class GifCategory(val displayName: String) {
     TERRIBLE("Terrible"),
     WOW("Wow"),
     CRINGE("Cringe"),
-    YES("Yes"),
-    NO("No"),
     LOL("LOL"),
     SAVAGE("Savage"),
     BLESSED("Blessed"),
