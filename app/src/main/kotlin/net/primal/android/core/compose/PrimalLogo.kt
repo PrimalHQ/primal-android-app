@@ -19,13 +19,13 @@ fun PrimalLogo(modifier: Modifier = Modifier, showBackground: Boolean = false) {
         if (showBackground) {
             Image(
                 modifier = Modifier.clip(CircleShape),
-                painter = painterResource(id = R.drawable.ic_launcher_background),
+                painter = painterResource(id = R.drawable.primal_icon_bg),
                 contentDescription = null,
             )
         }
 
         Image(
-            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+            painter = painterResource(id = R.drawable.primal_icon_fg),
             contentDescription = null,
         )
     }
