@@ -260,7 +260,7 @@ class MigratePrimalToSparkWalletHandler(
         onProgress(MigrationProgress.InProgress(currentStep))
         logDebug("Step: Awaiting payment confirmation in Spark wallet")
 
-        walletRepository.awaitInvoicePayment(
+        walletRepository.awaitLightningPayment(
             walletId = sparkWalletId,
             invoice = invoice,
             timeout = PAYMENT_CONFIRMATION_TIMEOUT,
