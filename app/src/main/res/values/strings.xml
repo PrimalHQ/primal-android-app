@@ -616,6 +616,27 @@
     <string name="note_editor_nostr_publish_error">Unable to publish your note. Please check your connection and try again.</string>
     <string name="note_editor_unable_to_locate_event">Unable to preview %1$s event. Tap to retry.</string>
 
+    <string name="gif_picker_search_placeholder">Search KLIPY</string>
+    <string name="gif_picker_cancel">Cancel</string>
+    <string name="gif_picker_powered_by">Powered by</string>
+    <string name="gif_picker_klipy">KLIPY</string>
+    <string name="gif_picker_retry_upload">Retry</string>
+    <string name="gif_category_trending">Trending</string>
+    <string name="gif_category_omg">OMG</string>
+    <string name="gif_category_funny">Funny</string>
+    <string name="gif_category_sad">Sad</string>
+    <string name="gif_category_love">Love</string>
+    <string name="gif_category_angry">Angry</string>
+    <string name="gif_category_dumb">Dumb</string>
+    <string name="gif_category_terrible">Terrible</string>
+    <string name="gif_category_wow">Wow</string>
+    <string name="gif_category_cringe">Cringe</string>
+    <string name="gif_category_yes">Yes</string>
+    <string name="gif_category_no">No</string>
+    <string name="gif_category_lol">LOL</string>
+    <string name="gif_category_savage">Savage</string>
+    <string name="gif_category_blessed">Blessed</string>
+
     <string name="post_action_missing_lightning_address">Unable to zap this user since they don\'t have a lightning address set up.</string>
     <string name="post_action_invalid_zap_request">Unable to zap. Check your wallet connection and try again.</string>
     <string name="post_action_zap_failed">Unable to zap. Please try again.</string>
@@ -1487,6 +1508,7 @@
     <string name="accessibility_import_photo_from_gallery">Import photo from gallery</string>
     <string name="accessibility_take_photo">Take photo with camera</string>
     <string name="accessibility_tag_user">Tag user</string>
+    <string name="accessibility_gif_picker">Pick a GIF</string>
     <string name="accessibility_refresh">Refresh</string>
     <string name="accessibility_new_direct_message">New direct message</string>
     <string name="accessibility_new_post">New post</string>

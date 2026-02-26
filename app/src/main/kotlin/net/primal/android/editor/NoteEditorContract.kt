@@ -32,6 +32,7 @@ interface NoteEditorContract {
         val referencedNostrUris: List<ReferencedUri<*>> = emptyList(),
         val userTaggingState: UserTaggingState = UserTaggingState(),
         val availableAccounts: List<UserAccountUi> = emptyList(),
+        val pendingGifUploads: List<PendingGifUpload> = emptyList(),
     ) {
         val isReply: Boolean get() = replyToConversation.isNotEmpty()
         val replyToNote: FeedPostUi? = replyToConversation.lastOrNull()
@@ -52,6 +53,9 @@ interface NoteEditorContract {
         data class ToggleSearchUsers(val enabled: Boolean) : UiEvent()
         data class TagUser(val taggedUser: NoteTaggedUser) : UiEvent()
         data class SelectAccount(val accountId: String) : UiEvent()
+        data class InsertGif(val gifUrl: String) : UiEvent()
+        data class RetryGifUpload(val gifId: UUID) : UiEvent()
+        data class RemovePendingGif(val gifId: UUID) : UiEvent()
         data object DismissError : UiEvent()
     }
 
@@ -99,7 +103,16 @@ interface NoteEditorContract {
         ) : ReferencedUri<ReferencedStream>
     }
 
+    data class PendingGifUpload(
+        val id: UUID = UUID.randomUUID(),
+        val originalUrl: String,
+        val blossomUrl: String? = null,
+        val uploading: Boolean = true,
+        val uploadFailed: Boolean = false,
+    )
+
     data class ScreenCallbacks(
         val onClose: () -> Unit,
+        val onGifPickerClick: () -> Unit = {},
     )
 }

@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -38,6 +39,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -55,6 +57,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -71,6 +74,7 @@ import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.articles.highlights.HighlightUi
 import net.primal.android.core.compose.ImportPhotosIconButton
+import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -83,6 +87,7 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.Gif
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.errors.resolveUiErrorMessage
@@ -178,7 +183,12 @@ fun NoteEditorScreen(
                         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 0.dp),
                         enabled = !state.publishing && !state.uploadingAttachments &&
                             state.attachments.none { it.uploadError != null } &&
-                            (state.content.text.isNotBlank() || state.attachments.isNotEmpty()),
+                            state.pendingGifUploads.none { it.uploading } &&
+                            state.pendingGifUploads.none { it.uploadFailed } &&
+                            (
+                                state.content.text.isNotBlank() || state.attachments.isNotEmpty() ||
+                                    state.pendingGifUploads.any { it.blossomUrl != null }
+                                ),
                         onClick = { eventPublisher(UiEvent.PublishNote) },
                     )
                 },
@@ -197,6 +207,7 @@ fun NoteEditorScreen(
                 contentPadding = paddingValues,
                 noteCallbacks = NoteCallbacks(),
                 onShowAccountSwitcher = { showAccountSwitcher = true },
+                onGifClick = callbacks.onGifPickerClick,
             )
         },
     )
@@ -224,6 +235,7 @@ private fun NoteEditorContract.UiState.resolvePublishNoteButtonText() =
         }
     }
 
+@Suppress("LongMethod")
 @ExperimentalMaterial3Api
 @Composable
 private fun NoteEditorBox(
@@ -233,6 +245,7 @@ private fun NoteEditorBox(
     contentPadding: PaddingValues,
     noteCallbacks: NoteCallbacks,
     onShowAccountSwitcher: () -> Unit,
+    onGifClick: () -> Unit,
 ) {
     val editorListState = rememberLazyListState()
     var noteEditorMaxHeightPx by remember { mutableIntStateOf(0) }
@@ -295,34 +308,18 @@ private fun NoteEditorBox(
                 onRemoveHighlight = { eventPublisher(UiEvent.RemoveHighlightByArticle(it)) },
             )
 
-            item(key = "attachments") {
-                NoteAttachmentsLazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(attachmentsHeightDp),
-                    attachments = state.attachments,
-                    onDiscard = {
-                        eventPublisher(UiEvent.DiscardNoteAttachment(attachmentId = it))
-                    },
-                    onRetryUpload = {
-                        eventPublisher(UiEvent.RetryUpload(attachmentId = it))
-                    },
-                )
-            }
+            pendingGifUploads(
+                pendingGifUploads = state.pendingGifUploads,
+                eventPublisher = eventPublisher,
+            )
 
-            item(key = "extraSpacing") {
-                Spacer(modifier = Modifier.height(extraSpacing))
-            }
-
-            if (state.attachments.isNotEmpty()) {
-                item(key = "attachmentSpacing") {
-                    Spacer(
-                        modifier = Modifier.height(
-                            with(density) { footerHeight.toDp() + 8.dp },
-                        ),
-                    )
-                }
-            }
+            noteEditorBottomItems(
+                attachments = state.attachments,
+                extraSpacing = extraSpacing,
+                footerHeight = footerHeight,
+                onDiscardAttachment = { eventPublisher(UiEvent.DiscardNoteAttachment(it)) },
+                onRetryUpload = { eventPublisher(UiEvent.RetryUpload(it)) },
+            )
         }
 
         NoteEditorFooter(
@@ -332,6 +329,7 @@ private fun NoteEditorBox(
                 .onSizeChanged { footerHeight = it.height },
             state = state,
             eventPublisher = eventPublisher,
+            onGifClick = onGifClick,
         )
     }
 }
@@ -634,6 +632,7 @@ private fun NoteEditorFooter(
     modifier: Modifier,
     state: NoteEditorContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
+    onGifClick: () -> Unit,
 ) {
     Column(modifier = modifier) {
         HorizontalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
@@ -666,7 +665,134 @@ private fun NoteEditorFooter(
                     eventPublisher(UiEvent.AppendUserTagAtSign)
                     eventPublisher(UiEvent.ToggleSearchUsers(enabled = true))
                 },
+                onGifClick = onGifClick,
             )
+        }
+    }
+}
+
+private fun LazyListScope.pendingGifUploads(
+    pendingGifUploads: List<NoteEditorContract.PendingGifUpload>,
+    eventPublisher: (UiEvent) -> Unit,
+) {
+    items(
+        items = pendingGifUploads,
+        key = { it.id },
+        contentType = { "PendingGif" },
+    ) { pendingGif ->
+        PendingGifPreview(
+            pendingGif = pendingGif,
+            onRetry = { eventPublisher(UiEvent.RetryGifUpload(pendingGif.id)) },
+            onRemove = { eventPublisher(UiEvent.RemovePendingGif(pendingGif.id)) },
+        )
+    }
+}
+
+private fun LazyListScope.noteEditorBottomItems(
+    attachments: List<NoteAttachment>,
+    extraSpacing: Dp,
+    footerHeight: Int,
+    onDiscardAttachment: (UUID) -> Unit,
+    onRetryUpload: (UUID) -> Unit,
+) {
+    item(key = "attachments") {
+        NoteAttachmentsLazyRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(attachmentsHeightDp),
+            attachments = attachments,
+            onDiscard = onDiscardAttachment,
+            onRetryUpload = onRetryUpload,
+        )
+    }
+
+    item(key = "extraSpacing") {
+        Spacer(modifier = Modifier.height(extraSpacing))
+    }
+
+    if (attachments.isNotEmpty()) {
+        item(key = "attachmentSpacing") {
+            val density = LocalDensity.current
+            Spacer(
+                modifier = Modifier.height(
+                    with(density) { footerHeight.toDp() + 8.dp },
+                ),
+            )
+        }
+    }
+}
+
+@Composable
+private fun PendingGifPreview(
+    pendingGif: NoteEditorContract.PendingGifUpload,
+    onRetry: () -> Unit,
+    onRemove: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .padding(start = avatarsColumnWidthDp, end = contentEndPadding, bottom = 8.dp)
+            .fillMaxWidth()
+            .heightIn(max = 200.dp),
+    ) {
+        PrimalAsyncImage(
+            model = pendingGif.originalUrl,
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(AppTheme.shapes.medium),
+        )
+
+        if (pendingGif.uploading) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(AppTheme.shapes.medium)
+                    .background(Color.Black.copy(alpha = 0.4f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(36.dp),
+                )
+            }
+        }
+
+        if (pendingGif.uploadFailed) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(AppTheme.shapes.medium)
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                TextButton(onClick = onRetry) {
+                    Text(
+                        text = stringResource(id = R.string.gif_picker_retry_upload),
+                        color = Color.White,
+                    )
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .padding(top = 8.dp, end = 8.dp)
+                .align(Alignment.TopEnd)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.6f))
+                .padding(4.dp),
+        ) {
+            IconButton(
+                modifier = Modifier.size(24.dp),
+                onClick = onRemove,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = null,
+                    tint = Color.White,
+                )
+            }
         }
     }
 }
@@ -757,7 +883,11 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
 }
 
 @Composable
-private fun NoteActionRow(onPhotosImported: (List<Uri>) -> Unit, onUserTag: () -> Unit) {
+private fun NoteActionRow(
+    onPhotosImported: (List<Uri>) -> Unit,
+    onUserTag: () -> Unit,
+    onGifClick: () -> Unit,
+) {
     Row(
         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
@@ -767,6 +897,14 @@ private fun NoteActionRow(onPhotosImported: (List<Uri>) -> Unit, onUserTag: () -
             tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             onPhotosImported = onPhotosImported,
         )
+
+        IconButton(onClick = onGifClick) {
+            Icon(
+                imageVector = PrimalIcons.Gif,
+                contentDescription = stringResource(id = R.string.accessibility_gif_picker),
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+        }
 
         TakePhotoIconButton(
             imageVector = PrimalIcons.ImportPhotoFromCamera,

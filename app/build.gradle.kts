@@ -105,6 +105,18 @@ android {
             name = "BREEZ_SDK_API_KEY",
             value = "\"${configProperties?.getProperty("api.breez.sdk", "")}\"",
         )
+
+        buildConfigField(
+            type = "String",
+            name = "KLIPY_API_KEY",
+            value = "\"${configProperties?.getProperty("api.klipy", "")}\"",
+        )
+
+        buildConfigField(
+            type = "String",
+            name = "KLIPY_CLIENT_KEY",
+            value = "\"${configProperties?.getProperty("api.klipy.clientKey", "")}\"",
+        )
     }
 
     ksp {

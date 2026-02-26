@@ -73,6 +73,7 @@ import net.primal.android.core.compose.icons.primaliconpack.FontSize
 import net.primal.android.core.compose.icons.primaliconpack.FullScreen
 import net.primal.android.core.compose.icons.primaliconpack.FullScreenRestore
 import net.primal.android.core.compose.icons.primaliconpack.GenericLinkIcon
+import net.primal.android.core.compose.icons.primaliconpack.Gif
 import net.primal.android.core.compose.icons.primaliconpack.Help
 import net.primal.android.core.compose.icons.primaliconpack.HighSecurity
 import net.primal.android.core.compose.icons.primaliconpack.Highlight
@@ -351,6 +352,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             HighSecurity,
             NostrConnectSession,
             RemoteLogin,
+            Gif,
         )
         return __PrimalIcons!!
     }
