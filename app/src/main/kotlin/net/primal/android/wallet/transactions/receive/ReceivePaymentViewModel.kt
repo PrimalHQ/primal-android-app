@@ -25,7 +25,7 @@ import net.primal.core.utils.onSuccess
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.wallet.Network
 import net.primal.domain.wallet.WalletRepository
-import net.primal.domain.wallet.WalletType
+import net.primal.domain.wallet.capabilities
 
 @HiltViewModel
 class ReceivePaymentViewModel @Inject constructor(
@@ -85,6 +85,10 @@ class ReceivePaymentViewModel @Inject constructor(
                                 address = wallet?.lightningAddress ?: lightningNetworkDetails.address,
                             ),
                         )
+                    }
+
+                    if (wallet?.capabilities?.canAwaitLightningPayment == true && awaitPaymentJob == null) {
+                        awaitPayment(walletId = wallet.walletId)
                     }
                 }
         }
@@ -173,7 +177,7 @@ class ReceivePaymentViewModel @Inject constructor(
             }
 
             val wallet = _state.value.activeWallet
-            if (wallet?.type == WalletType.SPARK) {
+            if (wallet?.capabilities?.canAwaitLightningPayment == true) {
                 awaitPayment(walletId = activeWalletId, invoice = result.invoice)
             }
         }.onFailure { error ->
@@ -184,15 +188,22 @@ class ReceivePaymentViewModel @Inject constructor(
         setState { copy(creatingInvoice = false) }
     }
 
-    private fun awaitPayment(walletId: String, invoice: String) {
+    private fun awaitPayment(walletId: String, invoice: String? = null) {
         awaitPaymentJob?.cancel()
         awaitPaymentJob = viewModelScope.launch {
-            walletRepository.awaitInvoicePayment(
+            walletRepository.awaitLightningPayment(
                 walletId = walletId,
                 invoice = invoice,
                 timeout = 15.minutes,
-            ).onSuccess {
-                setState { copy(paymentReceived = true) }
+            ).onSuccess { result ->
+                setState {
+                    copy(
+                        paymentDetails = PaymentDetails(amountInBtc = result.amountInBtc),
+                        paymentReceived = true,
+                    )
+                }
+            }.onFailure { error ->
+                Napier.w(throwable = error) { "awaitLightningPayment failed" }
             }
         }
     }

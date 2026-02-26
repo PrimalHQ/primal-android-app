@@ -4,6 +4,7 @@ import kotlin.time.Duration
 import kotlinx.coroutines.flow.Flow
 import net.primal.core.utils.Result
 import net.primal.domain.rates.fees.OnChainTransactionFeeTier
+import net.primal.domain.wallet.LightningPaymentResult
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.OnChainAddressResult
@@ -34,11 +35,12 @@ internal interface WalletService<W : Wallet> {
     ): Result<List<OnChainTransactionFeeTier>>
 
     /**
-     * Awaits confirmation that a Lightning invoice has been paid.
+     * Awaits an incoming lightning payment. If [invoice] is provided, matches that specific invoice;
+     * otherwise matches any non-zap receive payment.
      */
-    suspend fun awaitInvoicePayment(
+    suspend fun awaitLightningPayment(
         wallet: W,
-        invoice: String,
+        invoice: String?,
         timeout: Duration,
-    ): Result<Unit>
+    ): Result<LightningPaymentResult>
 }

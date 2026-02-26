@@ -111,6 +111,7 @@ abstract class RepositoryFactory {
                 breezSdkInstanceManager = breezSdkInstanceManager,
                 eventRepository = eventRepository,
                 sparkWalletManager = sparkWalletManager,
+                sparkSdkEventProvider = sparkWalletManager,
             ),
         )
     }

@@ -22,6 +22,7 @@ import net.primal.core.utils.map
 import net.primal.core.utils.onSuccess
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.transactions.Transaction
+import net.primal.domain.wallet.LightningPaymentResult
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.LnInvoiceParseResult
@@ -446,16 +447,16 @@ internal class WalletRepositoryImpl(
             walletDatabase.nwcInvoices().findByInvoice(invoice)?.asDO()
         }
 
-    override suspend fun awaitInvoicePayment(
+    override suspend fun awaitLightningPayment(
         walletId: String,
-        invoice: String,
+        invoice: String?,
         timeout: Duration,
-    ): Result<Unit> =
+    ): Result<LightningPaymentResult> =
         withContext(dispatcherProvider.io()) {
             val wallet = walletDatabase.wallet().findWallet(walletId = walletId)
                 ?: return@withContext Result.failure(WalletException.WalletNotFound())
 
-            wallet.resolveWalletService().awaitInvoicePayment(
+            wallet.resolveWalletService().awaitLightningPayment(
                 wallet = wallet.toDomain(),
                 invoice = invoice,
                 timeout = timeout,

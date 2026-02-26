@@ -9,6 +9,7 @@ import net.primal.domain.wallet.Wallet
 import net.primal.wallet.data.remote.factory.WalletApiServiceFactory
 import net.primal.wallet.data.service.NostrWalletServiceImpl
 import net.primal.wallet.data.service.PrimalWalletServiceImpl
+import net.primal.wallet.data.service.SparkSdkEventProvider
 import net.primal.wallet.data.service.SparkWalletServiceImpl
 import net.primal.wallet.data.service.WalletService
 import net.primal.wallet.data.spark.BreezSdkInstanceManager
@@ -49,10 +50,12 @@ internal class WalletServiceFactoryImpl(
             breezSdkInstanceManager: BreezSdkInstanceManager,
             eventRepository: EventRepository,
             sparkWalletManager: SparkWalletManager,
+            sparkSdkEventProvider: SparkSdkEventProvider,
         ) = SparkWalletServiceImpl(
             breezSdkInstanceManager = breezSdkInstanceManager,
             eventRepository = eventRepository,
             sparkWalletManager = sparkWalletManager,
+            sparkSdkEventProvider = sparkSdkEventProvider,
         )
     }
 }

@@ -76,17 +76,12 @@ interface WalletRepository {
     suspend fun findNwcInvoiceByInvoice(invoice: String): NwcInvoice?
 
     /**
-     * Awaits confirmation that a Lightning invoice has been paid.
-     * Depending on wallet type, listens for payment events or polls for incoming payments.
-     *
-     * @param walletId The wallet to check for the incoming payment
-     * @param invoice The BOLT11 invoice string to match
-     * @param timeout Maximum time to wait for confirmation
-     * @return Success if payment confirmed, Failure if timeout or unsupported
+     * Awaits an incoming lightning payment. If [invoice] is provided, matches that specific invoice;
+     * otherwise matches any non-zap receive payment.
      */
-    suspend fun awaitInvoicePayment(
+    suspend fun awaitLightningPayment(
         walletId: String,
-        invoice: String,
+        invoice: String?,
         timeout: Duration,
-    ): Result<Unit>
+    ): Result<LightningPaymentResult>
 }

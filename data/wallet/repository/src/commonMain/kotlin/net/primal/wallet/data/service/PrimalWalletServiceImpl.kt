@@ -12,6 +12,7 @@ import net.primal.core.utils.runCatching
 import net.primal.domain.nostr.utils.ensureEncodedLnUrl
 import net.primal.domain.nostr.utils.stripLightningPrefix
 import net.primal.domain.rates.fees.OnChainTransactionFeeTier
+import net.primal.domain.wallet.LightningPaymentResult
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.Network
@@ -160,9 +161,9 @@ internal class PrimalWalletServiceImpl(
             ).map { it.asOnChainTxFeeTierDO() }
         }
 
-    override suspend fun awaitInvoicePayment(
+    override suspend fun awaitLightningPayment(
         wallet: Wallet.Primal,
-        invoice: String,
+        invoice: String?,
         timeout: Duration,
-    ): Result<Unit> = Result.failure(UnsupportedOperationException("Not supported for Primal wallet"))
+    ): Result<LightningPaymentResult> = Result.failure(UnsupportedOperationException("Not supported for Primal wallet"))
 }
