@@ -160,6 +160,46 @@ internal class WalletRepositoryImpl(
             )
         }
 
+    override suspend fun ensureAllTransactionsSynced(walletId: String) =
+        withContext(dispatcherProvider.io()) {
+            val walletPO = walletDatabase.wallet().findWallet(walletId = walletId) ?: return@withContext
+            val wallet = walletPO.toDomain<Wallet>()
+            val walletSettings = walletDatabase.walletSettings().findWalletSettings(walletId = walletId)
+            val minAmountInBtc = if (walletPO.info.type == WalletType.PRIMAL) {
+                walletSettings?.spamThresholdAmountInSats?.decrypted?.toBtc()?.formatAsString()
+            } else {
+                null
+            }
+
+            var until: Long? = walletDatabase.walletTransactions()
+                .firstByWalletId(walletId = walletId)
+                ?.let { oldestTx ->
+                    walletDatabase.walletTransactionRemoteKeys()
+                        .find(walletId = walletId, transactionId = oldestTx.transactionId)
+                        ?.sinceId
+                }
+
+            do {
+                val previousUntil = until
+
+                val fetchResult = transactionsHandler.fetchAndPersistLatestTransactions(
+                    wallet = wallet,
+                    request = TransactionsRequest(
+                        limit = SYNC_TRANSACTIONS_PAGE_SIZE,
+                        since = null,
+                        until = until,
+                        minAmountInBtc = minAmountInBtc,
+                    ),
+                ).getOrThrow()
+
+                if (fetchResult.transactionsCount == 0) break
+
+                until = fetchResult.nextCursor
+
+                if (until != null && until == previousUntil) break
+            } while (until != null)
+        }
+
     override suspend fun latestTransactions(walletId: String, limit: Int): List<Transaction> =
         withContext(dispatcherProvider.io()) {
             walletDatabase.walletTransactions()
