@@ -1447,7 +1447,7 @@ private fun NavGraphBuilder.noteEditor(
 
     LaunchedEffect(gifUrlResult.value) {
         gifUrlResult.value?.let { gifUrl ->
-            viewModel.setEvent(NoteEditorContract.UiEvent.InsertGifUrl(gifUrl))
+            viewModel.setEvent(NoteEditorContract.UiEvent.InsertGif(gifUrl))
             it.savedStateHandle[GIF_URL_RESULT] = null
         }
     }

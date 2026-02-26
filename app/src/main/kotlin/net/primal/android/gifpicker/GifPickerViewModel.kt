@@ -1,11 +1,9 @@
 package net.primal.android.gifpicker
 
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
-import java.io.File
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.FlowPreview
@@ -27,18 +25,11 @@ import net.primal.android.gifpicker.GifPickerContract.UiEvent
 import net.primal.android.gifpicker.GifPickerContract.UiState
 import net.primal.android.gifpicker.domain.GifCategory
 import net.primal.android.gifpicker.domain.asGifItem
-import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
-import net.primal.core.networking.blossom.UploadResult
-import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.data.remote.api.klipy.KlipyApi
 
 @HiltViewModel
 class GifPickerViewModel @Inject constructor(
-    private val dispatchers: DispatcherProvider,
     private val klipyApi: KlipyApi,
-    private val primalUploadService: AndroidPrimalBlossomUploadService,
-    private val activeAccountStore: ActiveAccountStore,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UiState())
@@ -94,7 +85,7 @@ class GifPickerViewModel @Inject constructor(
                         }
                     }
 
-                    is UiEvent.SelectGif -> uploadGifToBlossom(event)
+                    is UiEvent.SelectGif -> selectGif(event)
 
                     is UiEvent.LoadMoreGifs -> loadMoreGifs()
 
@@ -191,47 +182,14 @@ class GifPickerViewModel @Inject constructor(
             }
         }
 
-    private fun uploadGifToBlossom(event: UiEvent.SelectGif) =
+    private fun selectGif(event: UiEvent.SelectGif) {
+        setEffect(SideEffect.GifSelected(url = event.gif.url))
         viewModelScope.launch {
-            setState { copy(uploading = true) }
-
-            val tempFile = downloadGifToTempFile(event.gif.url)
-            if (tempFile == null) {
-                setState { copy(uploading = false, error = UiError.GenericError()) }
-                return@launch
-            }
-
-            val userId = activeAccountStore.activeUserId()
-            val uploadResult = primalUploadService.upload(uri = Uri.fromFile(tempFile), userId = userId)
-            tempFile.delete()
-
-            when (uploadResult) {
-                is UploadResult.Success -> {
-                    setState { copy(uploading = false) }
-                    setEffect(SideEffect.GifUploaded(url = uploadResult.remoteUrl))
-                }
-                is UploadResult.Failed -> {
-                    Napier.w(throwable = uploadResult.error) { "Failed to upload GIF to Blossom." }
-                    setState { copy(uploading = false, error = UiError.GenericError()) }
-                }
-            }
-
             withContext(NonCancellable) {
                 runCatching {
                     klipyApi.registerShare(gifId = event.gif.id, query = _state.value.searchQuery)
                 }
             }
         }
-
-    private suspend fun downloadGifToTempFile(url: String): File? =
-        withContext(dispatchers.io()) {
-            runCatching {
-                val bytes = klipyApi.downloadGifBytes(url)
-                val file = File.createTempFile("gif", ".gif")
-                file.writeBytes(bytes)
-                file
-            }.onFailure { error ->
-                Napier.w(throwable = error) { "Failed to download GIF." }
-            }.getOrNull()
-        }
+    }
 }

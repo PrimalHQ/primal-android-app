@@ -12,7 +12,6 @@ interface GifPickerContract {
         val gifItems: List<GifItem> = emptyList(),
         val categories: List<GifCategory> = GifCategory.entries,
         val searching: Boolean = false,
-        val uploading: Boolean = false,
         val error: UiError? = null,
     )
 
@@ -25,7 +24,7 @@ interface GifPickerContract {
     }
 
     sealed class SideEffect {
-        data class GifUploaded(val url: String) : SideEffect()
+        data class GifSelected(val url: String) : SideEffect()
     }
 
     data class ScreenCallbacks(

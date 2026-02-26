@@ -620,6 +620,7 @@
     <string name="gif_picker_cancel">Cancel</string>
     <string name="gif_picker_powered_by">Powered by</string>
     <string name="gif_picker_klipy">KLIPY</string>
+    <string name="gif_picker_retry_upload">Retry</string>
     <string name="gif_category_trending">Trending</string>
     <string name="gif_category_omg">OMG</string>
     <string name="gif_category_funny">Funny</string>

@@ -1,6 +1,5 @@
 package net.primal.android.gifpicker
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -72,7 +71,7 @@ fun GifPickerScreen(viewModel: GifPickerViewModel, callbacks: GifPickerContract.
     LaunchedEffect(viewModel, callbacks) {
         viewModel.effect.collect {
             when (it) {
-                is GifPickerContract.SideEffect.GifUploaded -> callbacks.onGifSelected(it.url)
+                is GifPickerContract.SideEffect.GifSelected -> callbacks.onGifSelected(it.url)
             }
         }
     }
@@ -108,8 +107,11 @@ fun GifPickerScreen(
             )
         },
         content = { paddingValues ->
-            Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
-                Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+            ) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -159,11 +161,6 @@ fun GifPickerScreen(
                         style = AppTheme.typography.bodySmall,
                         color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                     )
-                }
-
-                if (state.uploading) {
-                    UploadingOverlay()
-                }
             }
         },
     )
@@ -277,11 +274,7 @@ private fun GifGridContent(
             items(state.gifItems, key = { it.id }) { gif ->
                 GifGridItem(
                     gif = gif,
-                    onClick = {
-                        if (!state.uploading) {
-                            eventPublisher(UiEvent.SelectGif(gif))
-                        }
-                    },
+                    onClick = { eventPublisher(UiEvent.SelectGif(gif)) },
                 )
             }
         }
@@ -307,20 +300,6 @@ private fun GifGridContent(
                 color = AppTheme.colorScheme.onSurface,
             )
         }
-    }
-}
-
-@Composable
-private fun UploadingOverlay() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.5f)),
-        contentAlignment = Alignment.Center,
-    ) {
-        CircularProgressIndicator(
-            color = Color.White,
-        )
     }
 }
 

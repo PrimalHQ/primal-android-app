@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -38,6 +39,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -55,6 +57,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
@@ -71,6 +74,7 @@ import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.articles.feed.ui.FeedArticleUi
 import net.primal.android.articles.highlights.HighlightUi
 import net.primal.android.core.compose.ImportPhotosIconButton
+import net.primal.android.core.compose.PrimalAsyncImage
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalLoadingSpinner
@@ -179,7 +183,12 @@ fun NoteEditorScreen(
                         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 0.dp),
                         enabled = !state.publishing && !state.uploadingAttachments &&
                             state.attachments.none { it.uploadError != null } &&
-                            (state.content.text.isNotBlank() || state.attachments.isNotEmpty()),
+                            state.pendingGifUploads.none { it.uploading } &&
+                            state.pendingGifUploads.none { it.uploadFailed } &&
+                            (
+                                state.content.text.isNotBlank() || state.attachments.isNotEmpty() ||
+                                    state.pendingGifUploads.any { it.blossomUrl != null }
+                                ),
                         onClick = { eventPublisher(UiEvent.PublishNote) },
                     )
                 },
@@ -226,6 +235,7 @@ private fun NoteEditorContract.UiState.resolvePublishNoteButtonText() =
         }
     }
 
+@Suppress("LongMethod")
 @ExperimentalMaterial3Api
 @Composable
 private fun NoteEditorBox(
@@ -296,6 +306,11 @@ private fun NoteEditorBox(
                 onRetryUriClick = { eventPublisher(UiEvent.RefreshUri(it.uri)) },
                 onRemoveUriClick = { eventPublisher(UiEvent.RemoveUri(it)) },
                 onRemoveHighlight = { eventPublisher(UiEvent.RemoveHighlightByArticle(it)) },
+            )
+
+            pendingGifUploads(
+                pendingGifUploads = state.pendingGifUploads,
+                eventPublisher = eventPublisher,
             )
 
             noteEditorBottomItems(
@@ -656,6 +671,23 @@ private fun NoteEditorFooter(
     }
 }
 
+private fun LazyListScope.pendingGifUploads(
+    pendingGifUploads: List<NoteEditorContract.PendingGifUpload>,
+    eventPublisher: (UiEvent) -> Unit,
+) {
+    items(
+        items = pendingGifUploads,
+        key = { it.id },
+        contentType = { "PendingGif" },
+    ) { pendingGif ->
+        PendingGifPreview(
+            pendingGif = pendingGif,
+            onRetry = { eventPublisher(UiEvent.RetryGifUpload(pendingGif.id)) },
+            onRemove = { eventPublisher(UiEvent.RemovePendingGif(pendingGif.id)) },
+        )
+    }
+}
+
 private fun LazyListScope.noteEditorBottomItems(
     attachments: List<NoteAttachment>,
     extraSpacing: Dp,
@@ -686,6 +718,81 @@ private fun LazyListScope.noteEditorBottomItems(
                     with(density) { footerHeight.toDp() + 8.dp },
                 ),
             )
+        }
+    }
+}
+
+@Composable
+private fun PendingGifPreview(
+    pendingGif: NoteEditorContract.PendingGifUpload,
+    onRetry: () -> Unit,
+    onRemove: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .padding(start = avatarsColumnWidthDp, end = contentEndPadding, bottom = 8.dp)
+            .fillMaxWidth()
+            .heightIn(max = 200.dp),
+    ) {
+        PrimalAsyncImage(
+            model = pendingGif.originalUrl,
+            contentDescription = null,
+            contentScale = ContentScale.FillWidth,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(AppTheme.shapes.medium),
+        )
+
+        if (pendingGif.uploading) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(AppTheme.shapes.medium)
+                    .background(Color.Black.copy(alpha = 0.4f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(36.dp),
+                )
+            }
+        }
+
+        if (pendingGif.uploadFailed) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clip(AppTheme.shapes.medium)
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                TextButton(onClick = onRetry) {
+                    Text(
+                        text = stringResource(id = R.string.gif_picker_retry_upload),
+                        color = Color.White,
+                    )
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .padding(top = 8.dp, end = 8.dp)
+                .align(Alignment.TopEnd)
+                .clip(CircleShape)
+                .background(Color.Black.copy(alpha = 0.6f))
+                .padding(4.dp),
+        ) {
+            IconButton(
+                modifier = Modifier.size(24.dp),
+                onClick = onRemove,
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = null,
+                    tint = Color.White,
+                )
+            }
         }
     }
 }
