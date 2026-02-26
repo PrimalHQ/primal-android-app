@@ -66,9 +66,10 @@ object PrimalApiServiceFactory {
 
     fun createUsersApi(primalApiClient: PrimalApiClient): UsersApi = UsersApiImpl(primalApiClient)
 
-    fun createKlipyApi(apiKey: String): KlipyApi =
+    fun createKlipyApi(apiKey: String, clientKey: String): KlipyApi =
         KlipyApiImpl(
             apiKey = apiKey,
+            clientKey = clientKey,
             httpClient = defaultHttpClient,
         )
 

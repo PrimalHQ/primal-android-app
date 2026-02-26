@@ -78,6 +78,7 @@ class GifPickerViewModel @Inject constructor(
                         } else {
                             event.category
                         }
+                        if (newCategory == _state.value.selectedCategory) return@collect
                         nextCursor = null
                         setState {
                             copy(

@@ -125,7 +125,7 @@ const val EXPLORE_FEED_DESCRIPTION = "exploreFeedDescription"
 inline val SavedStateHandle.exploreFeedDescription: String?
     get() = get<String>(EXPLORE_FEED_DESCRIPTION)?.asBase64Decoded()?.ifEmpty { null }
 
-const val GIF_URL_RESULT = "gif_url_result"
+const val GIF_URL_RESULT = "gifUrlResult"
 
 const val NOTE_EDITOR_ARGS = "preFillContent"
 

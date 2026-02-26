@@ -13,5 +13,9 @@ import net.primal.data.remote.factory.PrimalApiServiceFactory
 object KlipyApiModule {
 
     @Provides
-    fun provideKlipyApi(): KlipyApi = PrimalApiServiceFactory.createKlipyApi(apiKey = BuildConfig.KLIPY_API_KEY)
+    fun provideKlipyApi(): KlipyApi =
+        PrimalApiServiceFactory.createKlipyApi(
+            apiKey = BuildConfig.KLIPY_API_KEY,
+            clientKey = BuildConfig.KLIPY_CLIENT_KEY,
+        )
 }
