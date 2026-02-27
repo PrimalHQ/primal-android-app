@@ -834,7 +834,7 @@ fun PreviewTransactionDetail(
     @PreviewParameter(provider = TransactionParameterProvider::class)
     txDataParam: TransactionDetailDataUi,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             TransactionDetailsScreen(
                 state = UiState(

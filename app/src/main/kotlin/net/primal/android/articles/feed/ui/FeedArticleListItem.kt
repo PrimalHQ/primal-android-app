@@ -459,7 +459,7 @@ private fun PreviewFeedArticleListItem(
     @PreviewParameter(provider = FeedArticleUiProvider::class)
     articleUi: FeedArticleUi,
 ) {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         FeedArticleListItem(
             data = articleUi,
             modifier = Modifier.padding(all = 16.dp),

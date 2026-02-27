@@ -115,7 +115,7 @@ fun PrimalButtonPreview(
     @PreviewParameter(PrimalStatePreviewProvider::class)
     state: PrimalButtonPreviewState,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         PrimalFilledButton(
             modifier = Modifier.height(48.dp),
             onClick = { },

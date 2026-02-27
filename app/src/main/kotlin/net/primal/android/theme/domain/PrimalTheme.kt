@@ -1,62 +1,52 @@
 package net.primal.android.theme.domain
 
 import androidx.compose.material3.ColorScheme
+import net.primal.android.R
 import net.primal.android.theme.colors.ExtraColorScheme
 import net.primal.android.theme.colors.iceColorScheme
 import net.primal.android.theme.colors.iceExtraColorScheme
 import net.primal.android.theme.colors.midnightColorScheme
 import net.primal.android.theme.colors.midnightExtraColorScheme
-import net.primal.android.theme.colors.sunriseColorScheme
-import net.primal.android.theme.colors.sunriseExtraColorScheme
-import net.primal.android.theme.colors.sunsetColorScheme
-import net.primal.android.theme.colors.sunsetExtraColorScheme
 
 enum class PrimalTheme(
     val themeName: String,
     val colorScheme: ColorScheme,
     val extraColorScheme: ExtraColorScheme,
-    val inverseThemeName: String,
     val isDarkTheme: Boolean,
-    val accent: PrimalAccent,
+    val logoId: Int,
 ) {
-    Sunset(
-        themeName = "sunset",
-        colorScheme = sunsetColorScheme,
-        extraColorScheme = sunsetExtraColorScheme,
-        inverseThemeName = "sunrise",
-        isDarkTheme = true,
-        accent = PrimalAccent.Summer,
-    ),
-
     Midnight(
         themeName = "midnight",
         colorScheme = midnightColorScheme,
         extraColorScheme = midnightExtraColorScheme,
-        inverseThemeName = "ice",
         isDarkTheme = true,
-        accent = PrimalAccent.Winter,
-    ),
-
-    Sunrise(
-        themeName = "sunrise",
-        colorScheme = sunriseColorScheme,
-        extraColorScheme = sunriseExtraColorScheme,
-        inverseThemeName = "sunset",
-        isDarkTheme = false,
-        accent = PrimalAccent.Summer,
+        logoId = R.drawable.primal_wave_logo_winter,
     ),
 
     Ice(
         themeName = "ice",
         colorScheme = iceColorScheme,
         extraColorScheme = iceExtraColorScheme,
-        inverseThemeName = "midnight",
         isDarkTheme = false,
-        accent = PrimalAccent.Winter,
+        logoId = R.drawable.primal_wave_logo_winter,
     ),
     ;
 
+    val inverse: PrimalTheme
+        get() = when (this) {
+            Midnight -> Ice
+            Ice -> Midnight
+        }
+
     companion object {
-        fun valueOf(themeName: String): PrimalTheme? = enumValues<PrimalTheme>().find { it.themeName == themeName }
+        fun valueOf(themeName: String): PrimalTheme? {
+            return when (themeName) {
+                // Migration: map removed themes to their closest remaining equivalents
+                // for users who still have these values persisted in DataStore.
+                "sunset" -> Midnight
+                "sunrise" -> Ice
+                else -> enumValues<PrimalTheme>().find { it.themeName == themeName }
+            }
+        }
     }
 }

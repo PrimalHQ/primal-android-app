@@ -124,7 +124,7 @@ fun PrimalLoadingButtonDarkThemePreview(
     @PreviewParameter(PrimalButtonStatePreviewProvider::class)
     state: PrimalLoadingButtonPreviewState,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         PrimalLoadingButton(
             modifier = Modifier.height(48.dp),
             onClick = { },
@@ -143,7 +143,7 @@ fun PrimalLoadingButtonLightThemePreview(
     @PreviewParameter(PrimalButtonStatePreviewProvider::class)
     state: PrimalLoadingButtonPreviewState,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = PrimalTheme.Ice) {
         PrimalLoadingButton(
             modifier = Modifier.height(48.dp),
             onClick = { },

@@ -329,7 +329,7 @@ private fun SearchBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
 @Preview
 @Composable
 fun PreviewExploreTopAppBar() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             ExploreTopAppBar(
                 avatarCdnImage = null,

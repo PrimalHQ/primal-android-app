@@ -118,7 +118,7 @@ private fun String.hasValidPaymentInput(): Boolean {
 @Preview
 @Composable
 fun PreviewSendPaymentTabText() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Ice) {
         Surface {
             SendPaymentTabText(
                 parsing = false,

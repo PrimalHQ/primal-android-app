@@ -1124,7 +1124,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
         },
     ) {
         LockToOrientationPortrait()
-        PrimalTheme(PrimalTheme.Sunset) {
+        PrimalTheme(PrimalTheme.Midnight) {
             ApplyEdgeToEdge(isDarkTheme = true)
             WelcomeScreen(
                 callbacks = WelcomeContract.ScreenCallbacks(
@@ -1153,7 +1153,7 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
     ) {
         val viewModel: LoginViewModel = hiltViewModel(it)
         LockToOrientationPortrait()
-        PrimalTheme(PrimalTheme.Sunset) {
+        PrimalTheme(PrimalTheme.Midnight) {
             ApplyEdgeToEdge(isDarkTheme = true)
             LoginScreen(
                 viewModel = viewModel,
@@ -1188,7 +1188,7 @@ private fun NavGraphBuilder.onboarding(route: String, navController: NavControll
         val viewModel: OnboardingViewModel = hiltViewModel(it)
 
         LockToOrientationPortrait()
-        PrimalTheme(PrimalTheme.Sunset) {
+        PrimalTheme(PrimalTheme.Midnight) {
             ApplyEdgeToEdge(isDarkTheme = true)
             OnboardingScreen(
                 viewModel = viewModel,
@@ -2333,7 +2333,7 @@ private fun NavGraphBuilder.media(
     popExitTransition = { fadeOut() },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<EventMediaGalleryViewModel>(navBackEntry)
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalTheme(primalTheme = PrimalTheme.Midnight) {
         ApplyEdgeToEdge(isDarkTheme = true)
         UnlockScreenOrientation()
         EventMediaGalleryScreen(
@@ -2354,7 +2354,7 @@ private fun NavGraphBuilder.mediaItem(
 ) {
     val viewModel = hiltViewModel<MediaItemViewModel>()
 
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalTheme(primalTheme = PrimalTheme.Midnight) {
         ApplyEdgeToEdge(isDarkTheme = true)
         UnlockScreenOrientation()
         MediaItemScreen(
@@ -2470,7 +2470,7 @@ private fun NavGraphBuilder.profileQrCodeViewer(
 ) {
     val streamState = LocalStreamState.current
     val viewModel = hiltViewModel<ProfileQrCodeViewModel>()
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalTheme(primalTheme = PrimalTheme.Midnight) {
         ApplyEdgeToEdge(isDarkTheme = true)
         LockToOrientationPortrait()
         ProfileQrCodeViewerScreen(

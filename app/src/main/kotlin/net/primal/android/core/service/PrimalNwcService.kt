@@ -221,7 +221,7 @@ class PrimalNwcService : Service() {
 
     private fun buildSummaryNotification(): Notification {
         return NotificationCompat.Builder(this, PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(R.drawable.primal_wave_logo_summer)
+            .setSmallIcon(R.drawable.primal_wave_logo_winter)
             .setContentTitle(getString(R.string.nwc_service_notification_title))
             .setOngoing(true)
             .setGroup(GROUP_ID)
@@ -242,7 +242,7 @@ class PrimalNwcService : Service() {
         )
 
         return NotificationCompat.Builder(this, PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID)
-            .setSmallIcon(R.drawable.primal_wave_logo_summer)
+            .setSmallIcon(R.drawable.primal_wave_logo_winter)
             .setContentTitle(getString(R.string.nwc_service_notification_user_title))
             .setContentText(getString(R.string.nwc_service_notification_text, displayName))
             .setOngoing(true)

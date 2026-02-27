@@ -744,7 +744,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeader(
     @PreviewParameter(FeedPostUiProvider::class)
     feedPostUi: FeedPostUi,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = PrimalTheme.Ice) {
         FeedNoteCard(
             data = feedPostUi,
             state = NoteContract.UiState(activeAccountUserId = ""),
@@ -762,7 +762,7 @@ fun PreviewFeedNoteListItemLightMultiLineHeaderFullWidth(
     @PreviewParameter(FeedPostUiProvider::class)
     feedPostUi: FeedPostUi,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = PrimalTheme.Ice) {
         FeedNoteCard(
             data = feedPostUi,
             state = NoteContract.UiState(activeAccountUserId = ""),
@@ -780,7 +780,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeader(
     @PreviewParameter(FeedPostUiProvider::class)
     feedPostUi: FeedPostUi,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         FeedNoteCard(
             data = feedPostUi,
             state = NoteContract.UiState(activeAccountUserId = ""),
@@ -798,7 +798,7 @@ fun PreviewFeedNoteListItemDarkSingleLineHeaderFullWidth(
     @PreviewParameter(FeedPostUiProvider::class)
     feedPostUi: FeedPostUi,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         FeedNoteCard(
             data = feedPostUi,
             state = NoteContract.UiState(activeAccountUserId = ""),
@@ -816,7 +816,7 @@ fun PreviewFeedNoteListItemLightForcedContentIndentFullWidthSingleLineHeader(
     @PreviewParameter(FeedPostUiProvider::class)
     feedPostUi: FeedPostUi,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = PrimalTheme.Ice) {
         FeedNoteCard(
             data = feedPostUi,
             state = NoteContract.UiState(activeAccountUserId = ""),
@@ -836,7 +836,7 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
     @PreviewParameter(FeedPostUiProvider::class)
     feedPostUi: FeedPostUi,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         FeedNoteCard(
             data = feedPostUi,
             state = NoteContract.UiState(activeAccountUserId = ""),

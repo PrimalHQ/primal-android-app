@@ -654,7 +654,7 @@ private fun String.isPrimalLegendsUrl(): Boolean {
 @Preview
 @Composable
 fun PreviewPostContent() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             NoteContent(
                 data = NoteContentUi(
@@ -695,7 +695,7 @@ fun PreviewPostContent() {
 @Preview
 @Composable
 fun PreviewPostUnknownReferencedEventWithAlt() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface(modifier = Modifier.fillMaxWidth()) {
             NoteContent(
                 data = NoteContentUi(
@@ -731,7 +731,7 @@ fun PreviewPostUnknownReferencedEventWithAlt() {
 @Preview
 @Composable
 fun PreviewPostUnknownReferencedEventWithoutAlt() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface(modifier = Modifier.fillMaxWidth()) {
             NoteContent(
                 data = NoteContentUi(
@@ -768,7 +768,7 @@ fun PreviewPostUnknownReferencedEventWithoutAlt() {
 @Composable
 @Suppress("LongMethod")
 fun PreviewPostContentWithReferencedPost() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             NoteContent(
                 data = NoteContentUi(
@@ -857,7 +857,7 @@ fun PreviewPostContentWithReferencedPost() {
 @Preview
 @Composable
 fun PreviewPostContentWithTweet() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface(modifier = Modifier.fillMaxWidth()) {
             NoteContent(
                 data = NoteContentUi(

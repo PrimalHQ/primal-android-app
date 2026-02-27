@@ -420,7 +420,7 @@ private fun PreviewCreateNewWalletConnectionScreen(
     state: CreateNewWalletConnectionContract.UiState,
 ) {
     PrimalPreview(
-        primalTheme = PrimalTheme.Sunset,
+        primalTheme = PrimalTheme.Midnight,
     ) {
         CreateNewWalletConnectionScreen(
             state = state,

@@ -57,7 +57,7 @@ abstract class PrimalActivity : FragmentActivity() {
     @Composable
     protected fun ConfigureActivity(content: @Composable (isLoggedIn: Boolean) -> Unit) {
         val userTheme = themeStore.userThemeState.collectAsState()
-        primalTheme = userTheme.value ?: defaultPrimalTheme(currentTheme = primalTheme)
+        primalTheme = userTheme.value ?: defaultPrimalTheme()
 
         val contentDisplaySettings = produceState(initialValue = ContentDisplaySettings()) {
             activeAccountStore.activeUserAccount
@@ -105,10 +105,10 @@ abstract class PrimalActivity : FragmentActivity() {
 
     private fun Bundle?.restoreOrDefaultPrimalTheme(): PrimalTheme {
         return when (this) {
-            null -> PrimalTheme.Sunset
+            null -> PrimalTheme.Midnight
             else -> {
-                val themeName = this.getString("primalTheme", PrimalTheme.Sunset.themeName)
-                PrimalTheme.valueOf(themeName = themeName) ?: PrimalTheme.Sunset
+                val themeName = this.getString("primalTheme", PrimalTheme.Midnight.themeName)
+                PrimalTheme.valueOf(themeName = themeName) ?: PrimalTheme.Midnight
             }
         }
     }

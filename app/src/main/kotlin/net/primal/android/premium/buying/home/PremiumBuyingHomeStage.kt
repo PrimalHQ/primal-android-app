@@ -411,7 +411,7 @@ fun PrimalPremiumLogoHeader(modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.Top,
     ) {
         Image(
-            painter = painterResource(id = R.drawable.primal_wave_logo_summer),
+            painter = painterResource(id = R.drawable.primal_wave_logo_winter),
             contentDescription = null,
             modifier = Modifier
                 .clip(CircleShape)

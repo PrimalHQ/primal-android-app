@@ -701,7 +701,7 @@ private fun ReplyToOptions(
 @Preview
 @Composable
 fun ThreadScreenPreview() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         ThreadScreen(
             state = ThreadContract.UiState(
                 activeAccountUserId = "",

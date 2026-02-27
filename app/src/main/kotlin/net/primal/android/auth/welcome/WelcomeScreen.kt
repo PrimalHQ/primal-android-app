@@ -111,7 +111,7 @@ fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
 @Composable
 fun PreviewWelcomeScreen() {
     PrimalTheme(
-        primalTheme = PrimalTheme.Sunset,
+        primalTheme = PrimalTheme.Midnight,
     ) {
         WelcomeScreen(
             callbacks = WelcomeContract.ScreenCallbacks(
