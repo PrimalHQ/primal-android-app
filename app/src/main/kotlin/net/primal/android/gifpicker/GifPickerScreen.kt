@@ -112,55 +112,55 @@ fun GifPickerScreen(
                     .fillMaxSize()
                     .padding(paddingValues),
             ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 12.dp, end = 4.dp, top = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        GifSearchBar(
-                            modifier = Modifier.weight(1f),
-                            query = state.searchQuery,
-                            onQueryChange = { eventPublisher(UiEvent.UpdateSearchQuery(it)) },
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 12.dp, end = 4.dp, top = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    GifSearchBar(
+                        modifier = Modifier.weight(1f),
+                        query = state.searchQuery,
+                        onQueryChange = { eventPublisher(UiEvent.UpdateSearchQuery(it)) },
+                    )
+                    TextButton(onClick = callbacks.onClose) {
+                        Text(
+                            modifier = Modifier.padding(top = 1.dp),
+                            text = stringResource(id = R.string.gif_picker_cancel),
+                            color = AppTheme.colorScheme.onSurface,
                         )
-                        TextButton(onClick = callbacks.onClose) {
-                            Text(
-                                modifier = Modifier.padding(top = 1.dp),
-                                text = stringResource(id = R.string.gif_picker_cancel),
-                                color = AppTheme.colorScheme.onSurface,
-                            )
-                        }
                     }
+                }
 
-                    GifCategoryChips(
-                        categories = state.categories,
-                        selectedCategory = state.selectedCategory,
-                        onCategorySelected = { eventPublisher(UiEvent.SelectCategory(it)) },
-                    )
+                GifCategoryChips(
+                    categories = state.categories,
+                    selectedCategory = state.selectedCategory,
+                    onCategorySelected = { eventPublisher(UiEvent.SelectCategory(it)) },
+                )
 
-                    GifGridContent(
-                        state = state,
-                        eventPublisher = eventPublisher,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                    )
+                GifGridContent(
+                    state = state,
+                    eventPublisher = eventPublisher,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                )
 
-                    Text(
-                        text = buildAnnotatedString {
-                            append(stringResource(id = R.string.gif_picker_powered_by))
-                            append(" ")
-                            withStyle(SpanStyle(color = AppTheme.extraColorScheme.onSurfaceVariantAlt2)) {
-                                append(stringResource(id = R.string.gif_picker_klipy))
-                            }
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp),
-                        textAlign = TextAlign.Center,
-                        style = AppTheme.typography.bodySmall,
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                    )
+                Text(
+                    text = buildAnnotatedString {
+                        append(stringResource(id = R.string.gif_picker_powered_by))
+                        append(" ")
+                        withStyle(SpanStyle(color = AppTheme.extraColorScheme.onSurfaceVariantAlt2)) {
+                            append(stringResource(id = R.string.gif_picker_klipy))
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    textAlign = TextAlign.Center,
+                    style = AppTheme.typography.bodySmall,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                )
             }
         },
     )
