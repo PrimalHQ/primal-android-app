@@ -426,7 +426,7 @@ private fun ReceivePaymentViewer(
         Spacer(modifier = Modifier.height(8.dp))
 
         ViewerActionsRow(
-            modifier = Modifier.fillMaxWidth(fraction = 0.85f),
+            modifier = Modifier.fillMaxWidth(fraction = 0.92f),
             networkDetails = networkDetails,
             onCopyClick = onCopyClick,
             onEditClick = onEditClick,
@@ -460,7 +460,7 @@ private fun ViewerActionsRow(
             onClick = onCopyClick,
         )
 
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(10.dp))
 
         PrimalLoadingButton(
             modifier = Modifier.weight(1f),
@@ -468,6 +468,8 @@ private fun ViewerActionsRow(
             contentColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             fontWeight = FontWeight.SemiBold,
             fontSize = 16.sp,
+            maxLines = 1,
+            textOverflow = TextOverflow.Ellipsis,
             text = if (networkDetails.invoice == null) {
                 stringResource(id = R.string.wallet_receive_transaction_add_details_button)
             } else {
