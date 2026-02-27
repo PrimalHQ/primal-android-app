@@ -372,7 +372,7 @@ private fun PrivateKeyTextTitle(
 @Preview
 @Composable
 fun PreviewSettingsHomeScreen() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         AccountSettingsScreen(
             state = AccountSettingsContract.UiState(
                 avatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),
@@ -387,7 +387,7 @@ fun PreviewSettingsHomeScreen() {
 @Preview
 @Composable
 fun PreviewSettingsHomeScreenNpubLogin() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         AccountSettingsScreen(
             state = AccountSettingsContract.UiState(
                 avatarCdnImage = CdnImage("https://i.imgur.com/Z8dpmvc.png"),

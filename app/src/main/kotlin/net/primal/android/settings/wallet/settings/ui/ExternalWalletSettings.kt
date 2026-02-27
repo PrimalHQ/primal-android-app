@@ -238,7 +238,7 @@ private fun PreviewExternalWalletSettings(
     @PreviewParameter(WalletUiStateProvider::class)
     state: WalletSettingsContract.UiState,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             Column {
                 ExternalWalletSettings(

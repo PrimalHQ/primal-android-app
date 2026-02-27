@@ -320,7 +320,7 @@ private val mockRecentSessionsForPreview = listOf(
 @Preview
 @Composable
 fun PreviewLocalAppDetailsScreen() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         LocalAppDetailsScreen(
             state = LocalAppDetailsContract.UiState(
                 identifier = "local_app_1",

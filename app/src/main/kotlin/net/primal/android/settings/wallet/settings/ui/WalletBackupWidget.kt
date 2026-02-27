@@ -84,7 +84,7 @@ fun WalletBackupWidget(
 @Preview
 @Composable
 private fun PreviewWalletBackupWidget() {
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalTheme(primalTheme = PrimalTheme.Midnight) {
         WalletBackupWidget(
             walletBalanceInBtc = "0.00010101",
             onBackupClick = {},

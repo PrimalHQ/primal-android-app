@@ -145,7 +145,7 @@ private fun GenericLinkThumbnailIcon() {
 @Composable
 private fun PreviewNoteLinkPreview() {
     PrimalPreview(
-        primalTheme = PrimalTheme.Sunrise,
+        primalTheme = PrimalTheme.Ice,
     ) {
         NoteLinkPreview(
             modifier = Modifier,

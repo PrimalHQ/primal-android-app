@@ -23,7 +23,7 @@ class ActiveThemeStore @Inject constructor(
     private val scope = CoroutineScope(dispatchers.io())
 
     val userThemeState: StateFlow<PrimalTheme?> = persistence.data
-        .map { PrimalTheme.valueOf(themeName = it) }
+        .map { rawName -> PrimalTheme.valueOf(themeName = rawName) }
         .stateIn(
             scope = scope,
             started = SharingStarted.Eagerly,
@@ -32,7 +32,12 @@ class ActiveThemeStore @Inject constructor(
 
     private fun initialValue(): PrimalTheme? =
         runBlocking {
-            PrimalTheme.valueOf(themeName = persistence.data.first())
+            val rawName = persistence.data.first()
+            val theme = PrimalTheme.valueOf(themeName = rawName)
+            if (theme != null && theme.themeName != rawName) {
+                persistence.updateData { theme.themeName }
+            }
+            theme
         }
 
     suspend fun setUserTheme(theme: String) {

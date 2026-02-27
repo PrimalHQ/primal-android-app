@@ -573,7 +573,7 @@ private fun PreviewSettingsWalletScreen(
     @PreviewParameter(WalletUiStateProvider::class)
     state: WalletSettingsContract.UiState,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = PrimalTheme.Ice) {
         WalletSettingsScreen(
             state = state,
             onClose = {},

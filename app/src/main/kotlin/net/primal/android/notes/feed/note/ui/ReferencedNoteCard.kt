@@ -95,7 +95,7 @@ private fun referencedNoteCardColors() =
 @Preview
 @Composable
 fun PreviewReferencedPostListItemLight() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = PrimalTheme.Ice) {
         ReferencedNoteCard(
             data = FeedPostUi(
                 postId = "random",
@@ -136,7 +136,7 @@ fun PreviewReferencedPostListItemLight() {
 @Preview
 @Composable
 fun PreviewReferencedPostListItemDark() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         ReferencedNoteCard(
             data = FeedPostUi(
                 postId = "random",

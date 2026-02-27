@@ -156,7 +156,7 @@ private fun InvoiceTitleRow(onCopyClick: () -> Unit) {
 @Preview
 @Composable
 private fun PreviewLightNoteInvoice() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Ice) {
         Surface {
             NoteLightningInvoice(
                 invoice = "lnbc888550n1pnp6fz9pp5als09l5nfj9pkqk7mpj6cz6075nd4v95ljz0p65n8zkz03p75t3sdp9wdshgueqv" +
@@ -171,7 +171,7 @@ private fun PreviewLightNoteInvoice() {
 @Preview
 @Composable
 private fun PreviewDarkNoteInvoice() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         Surface {
             NoteLightningInvoice(
                 invoice = "lnbc888550n1pnp6fz9pp5als09l5nfj9pkqk7mpj6cz6075nd4v95ljz0p65n8zkz03p75t3sdp9wdshgueqv" +

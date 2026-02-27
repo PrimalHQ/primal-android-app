@@ -100,7 +100,7 @@ fun AppIconThumbnail(
 @Composable
 @Preview
 fun PreviewAppIconThumbnailBig() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         AppIconThumbnail(
             appIconUrl = null,
             appName = "Test",
@@ -112,7 +112,7 @@ fun PreviewAppIconThumbnailBig() {
 @Composable
 @Preview
 fun PreviewAppIconThumbnailMedium() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         AppIconThumbnail(
             appIconUrl = null,
             appName = "Test",
@@ -124,7 +124,7 @@ fun PreviewAppIconThumbnailMedium() {
 @Composable
 @Preview
 fun PreviewAppIconThumbnailSmall() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         AppIconThumbnail(
             appIconUrl = null,
             appName = "Test",
@@ -136,7 +136,7 @@ fun PreviewAppIconThumbnailSmall() {
 @Composable
 @Preview
 fun PreviewAppIconThumbnailExtraSmall() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         AppIconThumbnail(
             appIconUrl = null,
             appName = "Test",

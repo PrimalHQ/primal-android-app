@@ -129,7 +129,7 @@ fun missingCameraPermissionColors(
 @Preview(showBackground = true)
 @Composable
 fun MissingCameraPermissionContentPreview() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         MissingCameraPermissionContent(onPermissionChange = {})
     }
 }
