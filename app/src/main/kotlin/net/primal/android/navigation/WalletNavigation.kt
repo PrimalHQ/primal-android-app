@@ -234,6 +234,7 @@ private fun NavGraphBuilder.send(
             navController.navigateToScanCode(ScanMode.Anything, promoCode)
         },
         onCreateTransaction = { draft ->
+            navController.popBackStack()
             navController.navigateToWalletCreateTransaction(draftTransaction = draft)
         },
     )
