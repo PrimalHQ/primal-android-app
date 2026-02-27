@@ -175,14 +175,15 @@ private fun WelcomeStep(onContinue: () -> Unit, onCancel: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.weight(1f, fill = false),
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .weight(1f, fill = false),
         ) {
             Spacer(modifier = Modifier.height(60.dp))
 
