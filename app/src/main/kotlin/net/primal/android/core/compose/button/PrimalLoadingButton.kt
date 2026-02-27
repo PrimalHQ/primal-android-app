@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -40,6 +41,8 @@ fun PrimalLoadingButton(
     leadingIcon: ImageVector? = null,
     trailingIcon: ImageVector? = null,
     fontSize: TextUnit = TextUnit.Unspecified,
+    maxLines: Int = Int.MAX_VALUE,
+    textOverflow: TextOverflow = TextOverflow.Clip,
     fontWeight: FontWeight = FontWeight.SemiBold,
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     containerColor: Color = AppTheme.colorScheme.primary,
@@ -71,6 +74,8 @@ fun PrimalLoadingButton(
                         leadingIcon = leadingIcon,
                         trailingIcon = trailingIcon,
                         fontWeight = fontWeight,
+                        maxLines = maxLines,
+                        overflow = textOverflow,
                     )
                 } else if (icon != null) {
                     Icon(imageVector = icon, contentDescription = null)
