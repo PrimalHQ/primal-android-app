@@ -345,7 +345,7 @@ private fun PrimalTopLevelDestination.label(): String {
 @Preview
 @Composable
 fun PreviewNavigationBar() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         Surface(
             modifier = Modifier.wrapContentSize(),
         ) {
@@ -361,7 +361,7 @@ fun PreviewNavigationBar() {
 @Preview
 @Composable
 fun PreviewNavigationBarLightningBolt() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         Surface(
             modifier = Modifier.wrapContentSize(),
         ) {

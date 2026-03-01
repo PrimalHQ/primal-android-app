@@ -482,7 +482,7 @@ private fun UserInternetIdentifier(modifier: Modifier = Modifier, internetIdenti
 @Preview
 @Composable
 private fun PreviewProfileHeaderDetails() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Ice) {
         Surface {
             ProfileHeaderDetails(
                 state = ProfileDetailsContract.UiState(

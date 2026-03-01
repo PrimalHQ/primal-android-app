@@ -431,7 +431,7 @@ private fun DrawerScreenDestination.icon(): ImageVector {
 @Preview
 @Composable
 fun PrimalDrawerPreview() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         PrimalDrawer(
             state = PrimalDrawerContract.UiState(
                 menuItems = listOf(

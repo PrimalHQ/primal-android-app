@@ -243,7 +243,7 @@ private fun RestoringStage() {
 @Preview
 @Composable
 fun PreviewRestoreWalletScreen() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         RestoreWalletScreen(
             state = UiState(mnemonicValidation = MnemonicValidation.Valid),
             eventPublisher = {},

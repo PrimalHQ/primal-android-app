@@ -72,7 +72,7 @@ fun PrimalButtonPreview(
     @PreviewParameter(PrimalStatePreviewProvider::class)
     state: PrimalButtonPreviewState,
 ) {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         PrimalCircleButton(
             modifier = Modifier.size(64.dp),
             enabled = state.enabled,

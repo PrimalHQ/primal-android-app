@@ -282,7 +282,7 @@ fun NumericPadIconButton(
 @Preview
 @Composable
 fun PreviewPrimalNumericPad() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         Surface {
             PrimalNumericPad(
                 displayedAmount = "0",

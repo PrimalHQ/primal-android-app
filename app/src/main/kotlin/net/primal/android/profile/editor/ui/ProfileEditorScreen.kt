@@ -316,7 +316,7 @@ fun PrimalPremiumAlertDialog(
 @Preview
 @Composable
 fun PreviewEditProfileScreen() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         ProfileEditorScreen(
             state = ProfileEditorContract.UiState(
                 username = "Random Handle",

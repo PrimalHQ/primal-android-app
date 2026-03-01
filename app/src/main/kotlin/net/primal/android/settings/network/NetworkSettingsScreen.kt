@@ -386,7 +386,7 @@ private fun String.isValidRelayUrl() =
 @Composable
 @Preview
 private fun PreviewNetworksScreen() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         NetworkSettingsScreen(
             state = NetworkSettingsContract.UiState(
                 relays = listOf(

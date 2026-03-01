@@ -433,7 +433,7 @@ private fun FollowGroupMemberListItem(member: FollowGroupMember, onClick: () -> 
 @Preview
 @Composable
 private fun PreviewOnboardingFollowsNoticeScreen() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         ColumnWithBackground(
             backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
         ) {
@@ -475,7 +475,7 @@ private fun PreviewOnboardingFollowsNoticeScreen() {
 @Preview
 @Composable
 private fun PreviewOnboardingFollowsCustomizationScreen() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         ColumnWithBackground(
             backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
         ) {

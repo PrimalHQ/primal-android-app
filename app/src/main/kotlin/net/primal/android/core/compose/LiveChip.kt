@@ -86,7 +86,7 @@ fun LiveChip(
 @Preview(name = "Default (uses dynamic min width)")
 @Composable
 fun LiveChipDefaultBehaviorPreview() {
-    PrimalTheme(PrimalTheme.Sunset) {
+    PrimalTheme(PrimalTheme.Midnight) {
         Box(modifier = Modifier.size(40.dp)) {
             LiveChip(
                 modifier = Modifier.align(Alignment.BottomCenter),
@@ -100,7 +100,7 @@ fun LiveChipDefaultBehaviorPreview() {
 @Preview(name = "Can Downscale to Zero (ignores min width)")
 @Composable
 fun LiveChipCanDownscalePreview() {
-    PrimalTheme(PrimalTheme.Sunset) {
+    PrimalTheme(PrimalTheme.Midnight) {
         Box(modifier = Modifier.size(40.dp)) {
             LiveChip(
                 modifier = Modifier.align(Alignment.BottomCenter),
@@ -114,7 +114,7 @@ fun LiveChipCanDownscalePreview() {
 @Preview(name = "Large Size (default behavior)")
 @Composable
 fun LiveChipLargePreview() {
-    PrimalTheme(PrimalTheme.Sunset) {
+    PrimalTheme(PrimalTheme.Midnight) {
         Box(modifier = Modifier.size(120.dp)) {
             LiveChip(
                 modifier = Modifier.align(Alignment.BottomCenter),

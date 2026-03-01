@@ -55,7 +55,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.android.theme.AppTheme
-import net.primal.android.theme.domain.PrimalTheme.Sunset
+import net.primal.android.theme.domain.PrimalTheme.Midnight
 import net.primal.domain.links.ReferencedStream
 import net.primal.domain.notifications.NotificationType
 import net.primal.domain.streams.StreamStatus
@@ -799,7 +799,7 @@ private fun PreviewUnseenNotificationsListItem(
     @PreviewParameter(NotificationsParameterProvider::class)
     notifications: List<NotificationUi>,
 ) {
-    PrimalPreview(primalTheme = Sunset) {
+    PrimalPreview(primalTheme = Midnight) {
         NotificationListItem(
             notifications = notifications,
             type = notifications.first().notificationType,
@@ -815,7 +815,7 @@ private fun PreviewSeenNotificationsListItem(
     @PreviewParameter(NotificationsParameterProvider::class)
     notifications: List<NotificationUi>,
 ) {
-    PrimalPreview(primalTheme = Sunset) {
+    PrimalPreview(primalTheme = Midnight) {
         NotificationListItem(
             notifications = notifications,
             type = notifications.first().notificationType,
