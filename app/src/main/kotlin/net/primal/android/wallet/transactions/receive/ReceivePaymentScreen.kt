@@ -616,7 +616,7 @@ private fun ReceivePaymentEditor(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
 
             TransactionAmountText(
                 amountInBtc = amountInBtc,
@@ -630,7 +630,7 @@ private fun ReceivePaymentEditor(
                 },
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(28.dp))
 
             OutlinedTextField(
                 modifier = Modifier
@@ -662,7 +662,7 @@ private fun ReceivePaymentEditor(
                 ),
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
 
         AnimatedVisibility(
@@ -723,7 +723,7 @@ private fun TransactionActionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 32.dp, top = 48.dp),
+            .padding(bottom = 16.dp, top = 24.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         PrimalLoadingButton(
