@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import net.primal.android.wallet.repository.isValidExchangeRate
+import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.wallet.CurrencyMode
 
 @Composable
@@ -48,6 +49,12 @@ fun WalletDashboardLite(
                     exchangeBtcUsdRate = exchangeBtcUsdRate,
                 )
             } else {
+                val satsLength = (walletBalance ?: BigDecimal.ZERO).toSats().toString().length
+                val balanceTextSize = when {
+                    satsLength > LARGE_BALANCE_DIGITS_THRESHOLD -> 22.sp
+                    satsLength > MEDIUM_BALANCE_DIGITS_THRESHOLD -> 26.sp
+                    else -> 32.sp
+                }
                 BtcAmountText(
                     modifier = Modifier
                         .graphicsLayer {
@@ -56,7 +63,7 @@ fun WalletDashboardLite(
                         }
                         .clickable { onSwitchCurrencyMode(CurrencyMode.FIAT) },
                     amountInBtc = walletBalance ?: BigDecimal.ZERO,
-                    textSize = 32.sp,
+                    textSize = balanceTextSize,
                 )
             }
         }
