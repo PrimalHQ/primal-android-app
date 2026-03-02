@@ -1264,7 +1264,7 @@
     <string name="wallet_dashboard_low_sats_hint">You are running low on sats</string>
     <string name="wallet_dashboard_buy_sats_button">Buy Sats Now</string>
     <string name="wallet_dashboard_backup_notice_title">Important:</string>
-    <string name="wallet_dashboard_backup_notice_description">This wallet has not been backed up. You need to backup your wallet so you don\'t lose access to your funds.</string>
+    <string name="wallet_dashboard_backup_notice_description">This wallet has not been \n backed up. You need to backup your wallet \n so you don\'t lose access to your funds.</string>
     <string name="wallet_dashboard_backup_button">Backup Wallet Now</string>
     <string name="wallet_dashboard_upgrade_header">IMPORTANT</string>
     <string name="wallet_dashboard_upgrade_expires_on">This wallet will expire on</string>
