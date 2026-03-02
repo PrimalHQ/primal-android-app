@@ -163,9 +163,9 @@ fun WalletDashboardScreen(
     val pagingItems = state.transactions.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
-    val canShowWalletPicker = state.userWallets.isNotEmpty() && state.userWallets.size > 1 && state.wallet != null
+    val canShowWalletPicker = false
     var walletPickerVisible by remember { mutableStateOf(false) }
-    if (walletPickerVisible && canShowWalletPicker) {
+    if (walletPickerVisible && canShowWalletPicker && state.wallet != null) {
         WalletPickerBottomSheet(
             wallets = state.userWallets,
             activeWallet = state.wallet,
