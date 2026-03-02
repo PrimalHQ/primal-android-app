@@ -20,6 +20,7 @@ import net.primal.core.utils.fold
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.account.local.dao.apps.AppRequestState
+import net.primal.data.account.local.dao.apps.SignerMethodType
 import net.primal.data.account.repository.builder.RemoteSignerMethodResponseBuilder
 import net.primal.data.account.repository.manager.NostrRelayManager
 import net.primal.data.account.repository.manager.RemoteAppConnectionManager
@@ -27,6 +28,7 @@ import net.primal.data.account.repository.manager.model.RelayEvent
 import net.primal.data.account.repository.mappers.getRequestType
 import net.primal.data.account.repository.repository.internal.InternalRemoteSessionEventRepository
 import net.primal.data.account.repository.repository.internal.model.UpdateAppSessionEventRequest
+import net.primal.data.account.repository.service.model.PendingResponse
 import net.primal.data.account.signer.remote.mappers.mapAsRemoteSignerMethodException
 import net.primal.data.account.signer.remote.mappers.mapAsRemoteSignerMethodResponse
 import net.primal.data.account.signer.remote.model.RemoteSignerMethod
@@ -49,12 +51,12 @@ internal class RemoteSignerServiceImpl internal constructor(
     private val remoteSignerMethodParser: RemoteSignerMethodParser,
     private val remoteAppConnectionManager: RemoteAppConnectionManager,
 ) : RemoteSignerService {
+
     private val scope = CoroutineScope(SupervisorJob())
 
     private val relaySessionMap = AtomicReference<Map<String, List<String>>>(emptyMap())
     private val sessionActivityMap = AtomicReference<MutableMap<String, Instant>>(mutableMapOf())
-    private val retrySendMethodResponseQueue =
-        MutableSharedFlow<RemoteSignerMethodResponse>()
+    private val retrySendMethodResponseQueue = MutableSharedFlow<PendingResponse>()
 
     override fun initialize() {
         Napier.d(tag = "Signer") { "RemoteSignerService started." }
@@ -142,23 +144,31 @@ internal class RemoteSignerServiceImpl internal constructor(
             internalSessionEventRepository.observeRemoteAppPendingResponseEvents(signerPubKey = signerKeyPair.pubKey)
                 .collect { events ->
                     val alreadyResponded = events.mapNotNull { sessionEvent ->
-                        sessionEvent.responsePayload
+                        val response = sessionEvent.responsePayload
                             ?.decrypted
                             ?.decodeFromJsonStringOrNull<RemoteSignerMethodResponse>()
                             ?.assignClientPubKey(clientPubKey = sessionEvent.clientPubKey)
+                            ?: return@mapNotNull null
+                        val rebroadcast = sessionEvent.requestType == SignerMethodType.Connect
+                        PendingResponse(response, rebroadcast = rebroadcast)
                     }
 
                     val toRespond = events.filter { it.responsePayload == null }
                         .mapNotNull {
-                            it.requestPayload?.decrypted?.decodeFromJsonStringOrNull<RemoteSignerMethod>()
+                            val method = it.requestPayload
+                                ?.decrypted
+                                ?.decodeFromJsonStringOrNull<RemoteSignerMethod>()
+                                ?: return@mapNotNull null
+
+                            val response = remoteSignerMethodResponseBuilder.build(method = method)
+                            PendingResponse(response, rebroadcast = method is RemoteSignerMethod.Connect)
                         }
-                        .map { remoteSignerMethodResponseBuilder.build(method = it) }
 
                     (alreadyResponded + toRespond)
-                        .onEach { sendResponseOrAddToFailedQueue(it) }
-                        .also { responses ->
+                        .onEach { sendResponseOrAddToFailedQueue(it.response, rebroadcast = it.rebroadcast) }
+                        .also { pendingResponses ->
                             internalSessionEventRepository.updateRemoteAppSessionEventState(
-                                requests = responses.map { response ->
+                                requests = pendingResponses.map { (response, _) ->
                                     UpdateAppSessionEventRequest(
                                         eventId = response.id,
                                         responsePayload = response.encodeToJsonString(),
@@ -222,8 +232,8 @@ internal class RemoteSignerServiceImpl internal constructor(
             retrySendMethodResponseQueue
                 .batchOnInactivity(inactivityTimeout = 3.seconds)
                 .collect { batchedResponses ->
-                    batchedResponses.forEach {
-                        sendResponse(it)
+                    batchedResponses.forEach { (response, rebroadcast) ->
+                        sendResponse(response = response, rebroadcast = rebroadcast)
                     }
                 }
         }
@@ -279,7 +289,10 @@ internal class RemoteSignerServiceImpl internal constructor(
             Napier.d(tag = "Signer") { "Response $response" }
 
             if (response != null) {
-                sendResponseOrAddToFailedQueue(response = response)
+                sendResponseOrAddToFailedQueue(
+                    response = response,
+                    rebroadcast = method is RemoteSignerMethod.Connect,
+                )
             }
         }
 
@@ -307,14 +320,20 @@ internal class RemoteSignerServiceImpl internal constructor(
         }
     }
 
-    private suspend fun sendResponseOrAddToFailedQueue(response: RemoteSignerMethodResponse): Result<Unit> {
-        return sendResponse(response).onFailure {
+    private suspend fun sendResponseOrAddToFailedQueue(
+        response: RemoteSignerMethodResponse,
+        rebroadcast: Boolean = false,
+    ): Result<Unit> {
+        return sendResponse(response, rebroadcast = rebroadcast).onFailure {
             Napier.d(tag = "Signer") { "Adding response to retry queue: $response" }
-            retrySendMethodResponseQueue.emit(response)
+            retrySendMethodResponseQueue.emit(PendingResponse(response, rebroadcast))
         }
     }
 
-    private suspend fun sendResponse(response: RemoteSignerMethodResponse): Result<Unit> {
+    private suspend fun sendResponse(
+        response: RemoteSignerMethodResponse,
+        rebroadcast: Boolean = false,
+    ): Result<Unit> {
         Napier.d(tag = "Signer") { "Sending response: $response" }
         val relays = connectionRepository
             .getConnectionByClientPubKey(clientPubKey = response.clientPubKey)
@@ -324,6 +343,7 @@ internal class RemoteSignerServiceImpl internal constructor(
         return nostrRelayManager.sendResponse(
             relays = relays,
             response = response,
+            rebroadcast = rebroadcast,
         ).onFailure {
             Napier.d(tag = "Signer") { "Something went wrong while sending response: ${it.message}.\n" }
         }

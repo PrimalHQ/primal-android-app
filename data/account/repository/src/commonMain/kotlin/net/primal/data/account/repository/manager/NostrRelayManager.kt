@@ -115,35 +115,41 @@ internal class NostrRelayManager(
         scope.cancel()
     }
 
-    fun sendResponse(relays: List<String>, response: RemoteSignerMethodResponse) =
-        runCatching {
-            Napier.d(tag = "Signer") { "Sending response: $response" }
-            val event = buildSignedEvent(response = response)
-                .onFailure {
-                    Napier.w(tag = "Signer", throwable = it) {
-                        "Failed to sign event. Something must have gone horribly wrong."
-                    }
-                }.getOrThrow()
-
-            val currentClients = clients.load()
-            val activeClients = relays.mapNotNull { relay -> currentClients[relay] }
-                .also { clients ->
-                    if (clients.isEmpty()) {
-                        error("We don't have active connection to any of the following relays: $relays")
-                    }
+    fun sendResponse(
+        relays: List<String>,
+        response: RemoteSignerMethodResponse,
+        rebroadcast: Boolean = false,
+    ) = runCatching {
+        Napier.d(tag = "Signer") { "Broadcast: $rebroadcast; Sending response: $response" }
+        val event = buildSignedEvent(response = response)
+            .onFailure {
+                Napier.w(tag = "Signer", throwable = it) {
+                    "Failed to sign event. Something must have gone horribly wrong."
                 }
+            }.getOrThrow()
 
-            activeClients.forEach { client ->
-                scope.launch {
-                    client.publishEvent(event = event)
+        val currentClients = clients.load()
+        val activeClients = relays.mapNotNull { relay -> currentClients[relay] }
+            .also { clients ->
+                if (clients.isEmpty()) {
+                    error("We don't have active connection to any of the following relays: $relays")
                 }
             }
 
+        activeClients.forEach { client ->
+            scope.launch {
+                client.publishEvent(event = event)
+            }
+        }
+
+        if (rebroadcast) {
             rebroadcastEvent(event = event, relays = relays)
         }
+    }
 
     private fun rebroadcastEvent(event: NostrEvent, relays: List<String>) {
         scope.launch {
+            Napier.d { "Rebroadcasting event: $event" }
             withTimeoutOrNull(REBROADCAST_TIMEOUT) {
                 repeat(REBROADCAST_COUNT) {
                     delay(REBROADCAST_DELAY)
