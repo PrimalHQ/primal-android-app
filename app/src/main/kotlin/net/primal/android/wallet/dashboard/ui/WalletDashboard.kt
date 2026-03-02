@@ -21,6 +21,9 @@ import net.primal.android.wallet.repository.isValidExchangeRate
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.wallet.CurrencyMode
 
+const val LARGE_BALANCE_DIGITS_THRESHOLD = 8
+const val MEDIUM_BALANCE_DIGITS_THRESHOLD = 6
+
 @Composable
 fun WalletDashboard(
     modifier: Modifier,
@@ -61,14 +64,18 @@ fun WalletDashboard(
             } else {
                 val satsLength = (walletBalance ?: BigDecimal.ZERO).toSats().toString().length
                 val balanceTextSize = when {
-                    satsLength > 8 -> 30.sp
-                    satsLength > 6 -> 38.sp
+                    satsLength > LARGE_BALANCE_DIGITS_THRESHOLD -> 30.sp
+                    satsLength > MEDIUM_BALANCE_DIGITS_THRESHOLD -> 38.sp
                     else -> 48.sp
+                }
+                val balanceStartPadding = when {
+                    satsLength > MEDIUM_BALANCE_DIGITS_THRESHOLD -> 0.dp
+                    else -> 32.dp
                 }
                 BtcAmountText(
                     modifier = Modifier
                         .wrapContentWidth()
-                        .padding(start = 32.dp)
+                        .padding(start = balanceStartPadding)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null,
