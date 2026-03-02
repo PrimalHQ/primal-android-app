@@ -87,6 +87,8 @@ import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.capabilities
 
+private const val WALLET_PICKER_ENABLED = false
+
 private val DATE_OF_WALLET_EXPIRATION = LocalDate.of(2026, 4, 30)
     .atTime(12, 0)
     .toInstant(ZoneOffset.UTC)
@@ -163,9 +165,10 @@ fun WalletDashboardScreen(
     val pagingItems = state.transactions.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
-    val canShowWalletPicker = false
+    val canShowWalletPicker = WALLET_PICKER_ENABLED &&
+        state.userWallets.isNotEmpty() && state.userWallets.size > 1 && state.wallet != null
     var walletPickerVisible by remember { mutableStateOf(false) }
-    if (walletPickerVisible && canShowWalletPicker && state.wallet != null) {
+    if (walletPickerVisible && canShowWalletPicker) {
         WalletPickerBottomSheet(
             wallets = state.userWallets,
             activeWallet = state.wallet,
