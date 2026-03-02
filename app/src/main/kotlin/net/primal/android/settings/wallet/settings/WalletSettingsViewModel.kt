@@ -358,7 +358,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                         targetSparkWalletId = activeWalletId,
                     ).getOrThrow()
                 }
-                walletRepository.ensureAllTransactionsSynced(walletId = activeWalletId)
+                walletRepository.syncAllTransactions(walletId = activeWalletId)
                 walletRepository.allTransactions(walletId = activeWalletId)
             }
                 .onSuccess { transactions ->

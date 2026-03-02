@@ -161,7 +161,7 @@ internal class WalletRepositoryImpl(
             )
         }
 
-    override suspend fun ensureAllTransactionsSynced(walletId: String) =
+    override suspend fun syncAllTransactions(walletId: String) =
         withContext(dispatcherProvider.io()) {
             val walletPO = walletDatabase.wallet().findWallet(walletId = walletId) ?: return@withContext
             val wallet = walletPO.toDomain<Wallet>()
