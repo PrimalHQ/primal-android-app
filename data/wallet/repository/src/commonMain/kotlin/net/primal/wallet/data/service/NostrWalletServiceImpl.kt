@@ -30,6 +30,7 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.rates.fees.OnChainTransactionFeeTier
 import net.primal.domain.transactions.Transaction
+import net.primal.domain.wallet.LightningPaymentResult
 import net.primal.domain.wallet.LnInvoiceCreateRequest
 import net.primal.domain.wallet.LnInvoiceCreateResult
 import net.primal.domain.wallet.NostrWalletConnect
@@ -356,11 +357,11 @@ internal class NostrWalletServiceImpl(
         )
     }
 
-    override suspend fun awaitInvoicePayment(
+    override suspend fun awaitLightningPayment(
         wallet: Wallet.NWC,
-        invoice: String,
+        invoice: String?,
         timeout: Duration,
-    ): Result<Unit> = Result.failure(UnsupportedOperationException("Not supported for NWC wallet"))
+    ): Result<LightningPaymentResult> = Result.failure(UnsupportedOperationException("Not supported for NWC wallet"))
 
     private fun createNwcApiClient(wallet: Wallet.NWC) =
         NwcClientFactory.createNwcApiClient(

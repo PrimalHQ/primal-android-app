@@ -447,7 +447,7 @@ class TxDataProvider : PreviewParameterProvider<TransactionListItemDataUi> {
 @Preview
 @Composable
 fun PreviewTransactionListItem(@PreviewParameter(provider = TxDataProvider::class) tx: TransactionListItemDataUi) {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         Surface {
             TransactionListItem(
                 data = tx,

@@ -68,7 +68,7 @@ fun ProfileAppBarIcon(
 @Preview
 @Composable
 fun PreviewProfileAppBarIcon() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = PrimalTheme.Ice) {
         PrimalScaffold(
             topBar = {
                 Column {

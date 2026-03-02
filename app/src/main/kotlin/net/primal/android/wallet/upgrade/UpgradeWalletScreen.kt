@@ -80,7 +80,6 @@ fun UpgradeWalletScreen(
                                 .fillMaxSize()
                                 .background(color = AppTheme.colorScheme.surfaceVariant)
                                 .padding(paddingValues),
-                            walletBalanceInSats = state.walletBalanceInSats,
                             onStartUpgrade = { eventPublisher(UiEvent.StartUpgrade) },
                             onFaqClick = onFaqClick,
                         )

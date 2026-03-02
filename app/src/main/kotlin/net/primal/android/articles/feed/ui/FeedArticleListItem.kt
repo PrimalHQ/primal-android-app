@@ -133,13 +133,12 @@ private fun ListItemHeader(
     onReportContentClick: ((reportType: ReportType) -> Unit)? = null,
     onRequestDeleteClick: ((eventId: String, articleATag: String, authorId: String) -> Unit)? = null,
 ) {
-    val overflowIconSizeDp = 40.dp
+    val overflowIconSizeDp = 32.dp
     Box(contentAlignment = Alignment.TopEnd) {
         if (enabledDropdownMenu) {
             ArticleDropdownMenu(
                 modifier = Modifier
                     .size(overflowIconSizeDp)
-                    .padding(top = 6.dp)
                     .offset(x = 4.dp)
                     .clip(CircleShape),
                 articleId = data.articleId,
@@ -460,7 +459,7 @@ private fun PreviewFeedArticleListItem(
     @PreviewParameter(provider = FeedArticleUiProvider::class)
     articleUi: FeedArticleUi,
 ) {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         FeedArticleListItem(
             data = articleUi,
             modifier = Modifier.padding(all = 16.dp),

@@ -2,7 +2,6 @@ package net.primal.android.wallet.upgrade
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
 import javax.inject.Inject
@@ -11,14 +10,10 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
-import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.wallet.upgrade.UpgradeWalletContract.UiEvent
 import net.primal.android.wallet.upgrade.UpgradeWalletContract.UiState
-import net.primal.core.utils.CurrencyConversionUtils.toSats
-import net.primal.domain.account.WalletAccountRepository
-import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.migration.MigrationProgress
 import net.primal.domain.wallet.migration.MigrationStep
 import net.primal.wallet.data.repository.handler.MigratePrimalToSparkWalletHandler
@@ -26,7 +21,6 @@ import net.primal.wallet.data.repository.handler.MigratePrimalToSparkWalletHandl
 @HiltViewModel
 class UpgradeWalletViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val walletAccountRepository: WalletAccountRepository,
     private val migratePrimalToSparkWalletHandler: MigratePrimalToSparkWalletHandler,
 ) : ViewModel() {
 
@@ -41,20 +35,7 @@ class UpgradeWalletViewModel @Inject constructor(
 
     init {
         observeEvents()
-        observePrimalWallet()
     }
-
-    private fun observePrimalWallet() =
-        viewModelScope.launch {
-            walletAccountRepository.observeWalletsByUser(userId = activeAccountStore.activeUserId())
-                .mapNotNull { wallets -> wallets.filterIsInstance<Wallet.Primal>().firstOrNull() }
-                .collect { primalWallet ->
-                    primalWallet.balanceInBtc?.let { balanceInBtc ->
-                        val sats = balanceInBtc.toBigDecimal().toSats()
-                        setState { copy(walletBalanceInSats = sats.toLong()) }
-                    }
-                }
-        }
 
     private fun observeEvents() =
         viewModelScope.launch {

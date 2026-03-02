@@ -194,7 +194,7 @@ private fun PreviewCreateNewWalletConnectionScreen(
     state: UiState,
 ) {
     PrimalPreview(
-        primalTheme = PrimalTheme.Sunset,
+        primalTheme = PrimalTheme.Midnight,
     ) {
         LinkPrimalWalletScreen(
             state = state,

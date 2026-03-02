@@ -13,12 +13,14 @@ import net.primal.core.utils.runCatching
 import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.UnclaimedDeposit
 import net.primal.domain.wallet.UnclaimedDepositEvent
+import net.primal.wallet.data.service.SparkSdkEventProvider
+import net.primal.wallet.data.service.model.SparkSdkEvent
 import net.primal.wallet.data.spark.BreezSdkInstanceManager
 import net.primal.wallet.data.validator.RecoveryPhraseValidator
 
 internal class SparkWalletManagerImpl(
     private val breezSdkInstanceManager: BreezSdkInstanceManager,
-) : SparkWalletManager {
+) : SparkWalletManager, SparkSdkEventProvider {
 
     private val recoveryPhraseValidator = RecoveryPhraseValidator()
 
@@ -30,6 +32,9 @@ internal class SparkWalletManagerImpl(
 
     private val _balanceChanged = MutableSharedFlow<String>()
     override val balanceChanged: Flow<String> = _balanceChanged.asSharedFlow()
+
+    private val _sdkEvents = MutableSharedFlow<SparkSdkEvent>()
+    override val sdkEvents: Flow<SparkSdkEvent> = _sdkEvents.asSharedFlow()
 
     override suspend fun initializeWallet(seedWords: String): Result<String> =
         runCatching {
@@ -62,6 +67,7 @@ internal class SparkWalletManagerImpl(
         private val walletId: String,
     ) : EventListener {
         override suspend fun onEvent(event: SdkEvent) {
+            _sdkEvents.emit(SparkSdkEvent(walletId = walletId, event = event))
             when (event) {
                 is SdkEvent.Synced -> {
                     Napier.d { "SdkEvent.Synced walletId=$walletId" }

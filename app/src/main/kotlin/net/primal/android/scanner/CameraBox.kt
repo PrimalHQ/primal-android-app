@@ -52,7 +52,7 @@ fun CameraBox(
 @Preview(showBackground = true)
 @Composable
 fun CameraContentPreview() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         CameraBox(
             cameraVisible = false,
             onQrCodeDetected = {},

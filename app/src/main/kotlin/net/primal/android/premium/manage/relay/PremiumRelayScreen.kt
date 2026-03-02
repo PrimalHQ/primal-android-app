@@ -122,7 +122,7 @@ private fun RelayHeader(modifier: Modifier = Modifier, version: String) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Image(
-            painter = painterResource(id = R.drawable.primal_wave_logo_summer),
+            painter = painterResource(id = R.drawable.primal_wave_logo_winter),
             contentDescription = null,
             modifier = Modifier.size(64.dp),
         )

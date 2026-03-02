@@ -31,8 +31,9 @@ class RestoreSparkWalletUseCase(
                 seedWords = seedWords,
                 walletId = newWalletId,
             )
-            sparkWalletAccountRepository.markWalletAsBackedUp(walletId = newWalletId)
+            sparkWalletAccountRepository.registerSparkWallet(userId = userId, walletId = newWalletId)
             sparkWalletAccountRepository.fetchWalletAccountInfo(userId = userId, walletId = newWalletId)
+            sparkWalletAccountRepository.markWalletAsBackedUp(walletId = newWalletId)
             walletAccountRepository.setActiveWallet(userId = userId, walletId = newWalletId)
 
             newWalletId

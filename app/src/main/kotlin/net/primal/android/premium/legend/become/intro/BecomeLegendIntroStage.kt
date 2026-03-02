@@ -202,7 +202,7 @@ private fun PrimalLegendPerk(
 @Preview
 @Composable
 private fun PreviewIntroDefault() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         BecomeLegendIntroStage(
             modifier = Modifier.fillMaxSize(),
             isPremiumBadgeOrigin = false,
@@ -216,7 +216,7 @@ private fun PreviewIntroDefault() {
 @Preview
 @Composable
 private fun PreviewIntroOriginPremiumBadge() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         BecomeLegendIntroStage(
             modifier = Modifier.fillMaxSize(),
             isPremiumBadgeOrigin = true,

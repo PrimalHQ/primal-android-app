@@ -559,7 +559,7 @@ private fun NotificationSettingsType.toImagePainter(): Painter? =
 @Preview
 @Composable
 fun PreviewNotificationsSettingsScreen() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         NotificationsSettingsScreen(
             state = NotificationsSettingsContract.UiState(),
             onClose = {},

@@ -259,7 +259,7 @@ private fun ThemeBox(
         ) {
             Image(
                 modifier = Modifier.align(alignment = Alignment.Center),
-                painter = painterResource(id = primalTheme.accent.logoId),
+                painter = painterResource(id = primalTheme.logoId),
                 contentDescription = primalTheme.name,
             )
 

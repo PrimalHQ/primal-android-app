@@ -503,7 +503,7 @@ private fun ProfileMutedNotice(profileName: String, onUnmuteClick: () -> Unit) {
 @Preview
 @Composable
 private fun PreviewProfileScreen() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         ProfileDetailsScreen(
             state = ProfileDetailsContract.UiState(
                 profileId = "b10b0d5e5fae9c6c48a8c77f7e5abd42a79e9480e25a4094051d4ba4ce14456b",

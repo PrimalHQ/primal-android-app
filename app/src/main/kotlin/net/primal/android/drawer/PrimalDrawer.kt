@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -122,7 +121,6 @@ fun PrimalDrawer(
         Column(
             modifier = Modifier
                 .systemBarsPadding()
-                .navigationBarsPadding()
                 .width(300.dp)
                 .fillMaxHeight(),
             verticalArrangement = Arrangement.Bottom,
@@ -138,7 +136,7 @@ fun PrimalDrawer(
             DrawerMenu(
                 modifier = Modifier
                     .weight(1.0f)
-                    .padding(vertical = 32.dp),
+                    .padding(top = 32.dp),
                 state = state,
                 showPremiumBadge = state.showPremiumBadge,
                 onDrawerDestinationClick = onDrawerDestinationClick,
@@ -433,7 +431,7 @@ private fun DrawerScreenDestination.icon(): ImageVector {
 @Preview
 @Composable
 fun PrimalDrawerPreview() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         PrimalDrawer(
             state = PrimalDrawerContract.UiState(
                 menuItems = listOf(

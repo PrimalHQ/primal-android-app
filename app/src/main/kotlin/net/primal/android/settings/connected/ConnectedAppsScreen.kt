@@ -279,7 +279,7 @@ private fun LocalAppIconName(appId: String, fallbackAppName: String) {
 @Preview
 @Composable
 fun PreviewConnectedAppsScreen() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         CompositionLocalProvider(LocalStreamState provides StreamState()) {
             ConnectedAppsScreen(
                 state = ConnectedAppsContract.UiState(

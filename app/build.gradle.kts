@@ -53,8 +53,8 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     )
 }
 
-val appVersionCode = 2674
-val appVersionName = "2.7.10"
+val appVersionCode = 2675
+val appVersionName = "3.0.0"
 
 tasks.register("generateReleaseProperties") {
     doLast {
@@ -104,6 +104,18 @@ android {
             type = "String",
             name = "BREEZ_SDK_API_KEY",
             value = "\"${configProperties?.getProperty("api.breez.sdk", "")}\"",
+        )
+
+        buildConfigField(
+            type = "String",
+            name = "KLIPY_API_KEY",
+            value = "\"${configProperties?.getProperty("api.klipy", "")}\"",
+        )
+
+        buildConfigField(
+            type = "String",
+            name = "KLIPY_CLIENT_KEY",
+            value = "\"${configProperties?.getProperty("api.klipy.clientKey", "")}\"",
         )
     }
 

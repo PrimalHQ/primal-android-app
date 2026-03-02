@@ -570,7 +570,7 @@ fun EmojiPicker(onEmojiSelected: (String) -> Unit, onDismissRequest: () -> Unit)
 @Preview
 @Composable
 private fun ZapSettingsPreview() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         ZapSettingsScreen(
             uiState = ZapSettingsContract.UiState(
                 editPresetIndex = 0,

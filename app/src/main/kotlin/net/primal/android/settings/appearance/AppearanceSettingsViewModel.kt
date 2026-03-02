@@ -45,9 +45,7 @@ class AppearanceSettingsViewModel @AssistedInject constructor(
             setState {
                 copy(
                     themes = listOf(
-                        PrimalTheme.Sunset,
                         PrimalTheme.Midnight,
-                        PrimalTheme.Sunrise,
                         PrimalTheme.Ice,
                     ),
                 )
@@ -72,8 +70,7 @@ class AppearanceSettingsViewModel @AssistedInject constructor(
                         if (event.enabled) {
                             setTheme(themeName = "")
                         } else {
-                            val accent = lastUserPickedPrimalTheme.accent
-                            val newTheme = findThemeOrDefault(isDark = event.isSystemInDarkTheme, accent = accent)
+                            val newTheme = findThemeOrDefault(isDark = event.isSystemInDarkTheme)
                             setTheme(themeName = newTheme.themeName)
                         }
                     }

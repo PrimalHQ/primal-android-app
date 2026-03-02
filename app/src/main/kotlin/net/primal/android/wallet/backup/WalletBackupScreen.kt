@@ -175,16 +175,17 @@ private fun WelcomeStep(onContinue: () -> Unit, onCancel: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 32.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(horizontal = 28.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.weight(1f, fill = false),
+            modifier = Modifier
+                .verticalScroll(rememberScrollState())
+                .weight(1f, fill = false),
         ) {
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(50.dp))
 
             Text(
                 text = stringResource(R.string.wallet_backup_welcome_description),
@@ -193,11 +194,11 @@ private fun WelcomeStep(onContinue: () -> Unit, onCancel: () -> Unit) {
                 color = AppTheme.colorScheme.onSurface,
             )
 
-            Spacer(modifier = Modifier.height(60.dp))
+            Spacer(modifier = Modifier.height(50.dp))
 
             RecoveryGraphic(modifier = Modifier.width(260.dp))
 
-            Spacer(modifier = Modifier.height(80.dp))
+            Spacer(modifier = Modifier.height(52.dp))
 
             val importantText = stringResource(R.string.wallet_backup_important)
             val disclaimerPart1 = stringResource(R.string.wallet_backup_disclaimer_part_one)
@@ -224,7 +225,7 @@ private fun WelcomeStep(onContinue: () -> Unit, onCancel: () -> Unit) {
         }
 
         Column(
-            modifier = Modifier.padding(vertical = 24.dp),
+            modifier = Modifier.padding(vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             PrimalLoadingButton(
@@ -232,7 +233,7 @@ private fun WelcomeStep(onContinue: () -> Unit, onCancel: () -> Unit) {
                 onClick = onContinue,
                 modifier = Modifier.fillMaxWidth(),
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             TextButton(onClick = onCancel) {
                 Text(
                     text = stringResource(R.string.wallet_backup_button_cancel),

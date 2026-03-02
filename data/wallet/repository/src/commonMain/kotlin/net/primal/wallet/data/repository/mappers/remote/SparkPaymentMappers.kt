@@ -59,8 +59,8 @@ internal fun Payment.mapAsSparkTransaction(
         is PaymentDetails.Lightning -> {
             // Lightning payment - extract all available SDK data
             onChainTxId = null
-            preimage = details.preimage
-            paymentHash = details.paymentHash
+            preimage = details.htlcDetails.preimage
+            paymentHash = details.htlcDetails.paymentHash
             invoice = details.invoice
 
             // Extract LNURL metadata based on payment direction

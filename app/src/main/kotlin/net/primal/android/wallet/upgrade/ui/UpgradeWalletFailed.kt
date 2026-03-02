@@ -74,9 +74,18 @@ fun UpgradeWalletFailed(
             Spacer(modifier = Modifier.height(35.dp))
 
             Text(
-                text = stringResource(id = R.string.wallet_upgrade_failed_subtitle),
+                text = stringResource(id = R.string.wallet_upgrade_failed_subtitle_1),
                 textAlign = TextAlign.Center,
-                style = AppTheme.typography.bodyLarge,
+                style = AppTheme.typography.bodyLarge.copy(lineHeight = 28.sp),
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = stringResource(id = R.string.wallet_upgrade_failed_subtitle_2),
+                textAlign = TextAlign.Center,
+                style = AppTheme.typography.bodyLarge.copy(lineHeight = 28.sp),
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
 
@@ -132,7 +141,7 @@ private fun SupportMessageWithCopyLogs(onCopyLogsClick: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         text = annotatedString,
         style = AppTheme.typography.bodyLarge.copy(
-            lineHeight = 24.sp,
+            lineHeight = 28.sp,
             textAlign = TextAlign.Center,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         ),

@@ -560,7 +560,8 @@ private fun ArticleContentWithComments(
                     modifier = Modifier
                         .background(color = AppTheme.colorScheme.surface)
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                        .padding(bottom = 8.dp)
+                        .padding(horizontal = 16.dp),
                     authorFollowed = state.isAuthorFollowed,
                     authorCdnImage = state.article.authorAvatarCdnImage,
                     authorBlossoms = state.article.authorBlossoms,

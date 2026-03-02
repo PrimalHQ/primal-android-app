@@ -74,7 +74,7 @@ fun NoteUnknownEvent(
 @Preview
 @Composable
 private fun PreviewLightNoteInvoice() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Ice) {
         Surface(modifier = Modifier.fillMaxWidth()) {
             NoteUnknownEvent(
                 altDescription = "This is unknown event.",
@@ -86,7 +86,7 @@ private fun PreviewLightNoteInvoice() {
 @Preview
 @Composable
 private fun PreviewDarkNoteInvoice() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         Surface(modifier = Modifier.fillMaxWidth()) {
             NoteUnknownEvent(
                 altDescription = "This is unknown event with some very long alt description " +
@@ -99,7 +99,7 @@ private fun PreviewDarkNoteInvoice() {
 @Preview
 @Composable
 private fun PreviewLightNoteInvoiceWithRefresh() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunrise) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Ice) {
         Surface(modifier = Modifier.fillMaxWidth()) {
             NoteUnknownEvent(
                 altDescription = "This is unknown event.",
@@ -112,7 +112,7 @@ private fun PreviewLightNoteInvoiceWithRefresh() {
 @Preview
 @Composable
 private fun PreviewDarkNoteInvoiceWithRefresh() {
-    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         Surface(modifier = Modifier.fillMaxWidth()) {
             NoteUnknownEvent(
                 altDescription = "This is unknown event with some very long alt description " +

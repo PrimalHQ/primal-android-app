@@ -115,7 +115,7 @@ private fun VideoThumbnailImage(
 @Composable
 private fun PreviewNoteVideoLinkPreview() {
     PrimalPreview(
-        primalTheme = PrimalTheme.Sunrise,
+        primalTheme = PrimalTheme.Ice,
     ) {
         NoteVideoLinkPreview(
             title = "Stop Mass Warrantless Surveillance: End Section 70",

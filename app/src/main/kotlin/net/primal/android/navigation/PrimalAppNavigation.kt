@@ -14,6 +14,8 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -80,6 +82,9 @@ import net.primal.android.explore.search.SearchContract
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.explore.search.ui.SearchScreen
+import net.primal.android.gifpicker.GifPickerContract
+import net.primal.android.gifpicker.GifPickerScreen
+import net.primal.android.gifpicker.GifPickerViewModel
 import net.primal.android.media.MediaItemScreen
 import net.primal.android.media.MediaItemViewModel
 import net.primal.android.messages.chat.ChatScreen
@@ -216,6 +221,8 @@ private fun NavController.navigateToAdvancedSearch(
 private fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
     navigate(route = "noteEditor?$NOTE_EDITOR_ARGS=${args?.toJson()?.asBase64Encoded()}")
 }
+
+private fun NavController.navigateToGifPicker() = navigate(route = "gifPicker")
 
 private val NavController.topLevelNavOptions: NavOptions
     @SuppressWarnings("RestrictedApi")
@@ -908,6 +915,11 @@ private fun PrimalAppNavigation(
             navController = navController,
         )
 
+        gifPicker(
+            route = "gifPicker",
+            navController = navController,
+        )
+
         thread(
             route = "thread/{$NOTE_ID}",
             arguments = listOf(
@@ -1112,7 +1124,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
         },
     ) {
         LockToOrientationPortrait()
-        PrimalTheme(PrimalTheme.Sunset) {
+        PrimalTheme(PrimalTheme.Midnight) {
             ApplyEdgeToEdge(isDarkTheme = true)
             WelcomeScreen(
                 callbacks = WelcomeContract.ScreenCallbacks(
@@ -1141,7 +1153,7 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
     ) {
         val viewModel: LoginViewModel = hiltViewModel(it)
         LockToOrientationPortrait()
-        PrimalTheme(PrimalTheme.Sunset) {
+        PrimalTheme(PrimalTheme.Midnight) {
             ApplyEdgeToEdge(isDarkTheme = true)
             LoginScreen(
                 viewModel = viewModel,
@@ -1176,7 +1188,7 @@ private fun NavGraphBuilder.onboarding(route: String, navController: NavControll
         val viewModel: OnboardingViewModel = hiltViewModel(it)
 
         LockToOrientationPortrait()
-        PrimalTheme(PrimalTheme.Sunset) {
+        PrimalTheme(PrimalTheme.Midnight) {
             ApplyEdgeToEdge(isDarkTheme = true)
             OnboardingScreen(
                 viewModel = viewModel,
@@ -1429,6 +1441,17 @@ private fun NavGraphBuilder.noteEditor(
 
     val viewModel = noteEditorViewModel(args = args)
 
+    val gifUrlResult = it.savedStateHandle
+        .getStateFlow<String?>(GIF_URL_RESULT, null)
+        .collectAsState()
+
+    LaunchedEffect(gifUrlResult.value) {
+        gifUrlResult.value?.let { gifUrl ->
+            viewModel.setEvent(NoteEditorContract.UiEvent.InsertGif(gifUrl))
+            it.savedStateHandle[GIF_URL_RESULT] = null
+        }
+    }
+
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
     NoteEditorScreen(
@@ -1438,9 +1461,30 @@ private fun NavGraphBuilder.noteEditor(
                 activity?.intent?.removeExtra(Intent.EXTRA_STREAM)
                 navController.navigateUp()
             },
+            onGifPickerClick = { navController.navigateToGifPicker() },
         ),
     )
 }
+
+private fun NavGraphBuilder.gifPicker(route: String, navController: NavController) =
+    composable(
+        route = route,
+    ) {
+        val viewModel = hiltViewModel<GifPickerViewModel>()
+
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        GifPickerScreen(
+            viewModel = viewModel,
+            callbacks = GifPickerContract.ScreenCallbacks(
+                onClose = { navController.navigateUp() },
+                onGifSelected = { gifUrl ->
+                    navController.previousBackStackEntry?.savedStateHandle?.set(GIF_URL_RESULT, gifUrl)
+                    navController.popBackStack()
+                },
+            ),
+        )
+    }
 
 private fun NavGraphBuilder.explore(
     route: String,
@@ -2289,7 +2333,7 @@ private fun NavGraphBuilder.media(
     popExitTransition = { fadeOut() },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<EventMediaGalleryViewModel>(navBackEntry)
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalTheme(primalTheme = PrimalTheme.Midnight) {
         ApplyEdgeToEdge(isDarkTheme = true)
         UnlockScreenOrientation()
         EventMediaGalleryScreen(
@@ -2310,7 +2354,7 @@ private fun NavGraphBuilder.mediaItem(
 ) {
     val viewModel = hiltViewModel<MediaItemViewModel>()
 
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalTheme(primalTheme = PrimalTheme.Midnight) {
         ApplyEdgeToEdge(isDarkTheme = true)
         UnlockScreenOrientation()
         MediaItemScreen(
@@ -2426,7 +2470,7 @@ private fun NavGraphBuilder.profileQrCodeViewer(
 ) {
     val streamState = LocalStreamState.current
     val viewModel = hiltViewModel<ProfileQrCodeViewModel>()
-    PrimalTheme(primalTheme = PrimalTheme.Sunset) {
+    PrimalTheme(primalTheme = PrimalTheme.Midnight) {
         ApplyEdgeToEdge(isDarkTheme = true)
         LockToOrientationPortrait()
         ProfileQrCodeViewerScreen(

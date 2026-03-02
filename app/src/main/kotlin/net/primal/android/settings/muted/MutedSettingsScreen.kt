@@ -169,7 +169,7 @@ private fun MutedSettingsPager(
 @Preview
 @Composable
 fun PreviewMutedScreen() {
-    PrimalPreview(primalTheme = PrimalTheme.Sunset) {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         MutedSettingsScreen(
             state = MutedSettingsContract.UiState(
                 mutedUsers = listOf(
