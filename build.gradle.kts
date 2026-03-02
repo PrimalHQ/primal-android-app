@@ -25,7 +25,6 @@ buildscript {
 }
 
 dependencies {
-    detektPlugins(libs.ktlint.compose.rules)
     ktlintRuleset(libs.ktlint.compose.rules)
 }
 
