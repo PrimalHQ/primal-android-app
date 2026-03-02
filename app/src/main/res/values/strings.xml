@@ -59,7 +59,7 @@
     <string name="onboarding_title_account_preview">Account Preview</string>
     <string name="onboarding_title_success">Success</string>
     <string name="onboarding_button_next">Next</string>
-    <string name="onboarding_button_continue">Continue</string>
+    <string name="onboarding_button_done">Done!</string>
     <string name="onboarding_button_create_account_now">Create Account Now</string>
     <string name="onboarding_profile_details_hint">Create a public profile on Nostr. Choose any Display Name and say something about yourself. You can easily change these things later.</string>
     <string name="onboarding_profile_details_display_name_hint">Display Name</string>
@@ -795,7 +795,7 @@
     <string name="wallet_picker_title">Wallets</string>
     <string name="wallet_picker_configure_wallets">Configure</string>
     <string name="wallet_primal_title">Primal</string>
-    <string name="wallet_spark_title">Spark</string>
+    <string name="wallet_spark_title">Wallet</string>
     <string name="wallet_primal_description">Built-in wallet</string>
     <string name="wallet_nwc_title">NWC</string>
     <string name="wallet_nwc_description">Your external lightning wallet</string>

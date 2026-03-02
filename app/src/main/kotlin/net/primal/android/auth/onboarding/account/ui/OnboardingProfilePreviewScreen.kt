@@ -157,7 +157,7 @@ private fun ProfilePreviewBottomBar(
     OnboardingBottomBar(
         buttonText = when (accountCreationStep) {
             AccountCreationStep.AccountPreview -> stringResource(id = R.string.onboarding_button_create_account_now)
-            AccountCreationStep.AccountCreated -> stringResource(id = R.string.onboarding_button_continue)
+            AccountCreationStep.AccountCreated -> stringResource(id = R.string.onboarding_button_done)
         },
         buttonEnabled = !isWorking,
         buttonLoading = isWorking,
