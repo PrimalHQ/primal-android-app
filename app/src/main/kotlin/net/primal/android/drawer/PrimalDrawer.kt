@@ -136,7 +136,7 @@ fun PrimalDrawer(
             DrawerMenu(
                 modifier = Modifier
                     .weight(1.0f)
-                    .padding(vertical = 32.dp),
+                    .padding(top = 32.dp),
                 state = state,
                 showPremiumBadge = state.showPremiumBadge,
                 onDrawerDestinationClick = onDrawerDestinationClick,
