@@ -228,7 +228,7 @@ internal class SparkWalletServiceImpl(
 
     private fun Payment.extractPreimage(): String? =
         when (val details = this.details) {
-            is PaymentDetails.Lightning -> details.preimage
+            is PaymentDetails.Lightning -> details.htlcDetails.preimage
             is PaymentDetails.Spark -> details.htlcDetails?.preimage
             else -> null
         }
@@ -250,6 +250,7 @@ internal class SparkWalletServiceImpl(
                         description = request.description ?: "",
                         amountSats = amountSats.toULong(),
                         expirySecs = DEFAULT_INVOICE_EXPIRY_SECS,
+                        paymentHash = null,
                     ),
                 ),
             )
