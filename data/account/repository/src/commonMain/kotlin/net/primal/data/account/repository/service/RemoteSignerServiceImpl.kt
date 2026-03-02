@@ -230,7 +230,7 @@ internal class RemoteSignerServiceImpl internal constructor(
     private fun observeRetryMethodResponseQueue() =
         scope.launch {
             retrySendMethodResponseQueue
-                .batchOnInactivity(inactivityTimeout = 3.seconds)
+                .batchOnInactivity(inactivityTimeout = 8.seconds)
                 .collect { batchedResponses ->
                     batchedResponses.forEach { (response, rebroadcast) ->
                         sendResponse(response = response, rebroadcast = rebroadcast)
