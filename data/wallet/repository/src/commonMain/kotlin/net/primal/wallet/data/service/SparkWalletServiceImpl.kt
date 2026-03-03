@@ -340,7 +340,7 @@ internal class SparkWalletServiceImpl(
                 }
 
                 is TxRequest.Lightning.LnUrl -> {
-                    val payRequest = when (val parsedInput = sdk.parse(request.lnUrl)) {
+                    val payRequest = when (val parsedInput = sdk.parse(request.lud16 ?: request.lnUrl)) {
                         is InputType.LnurlPay -> parsedInput.v1
                         is InputType.LightningAddress -> parsedInput.v1.payRequest
                         else -> error("Invalid LNURL-pay input: expected LnurlPay or LightningAddress")
