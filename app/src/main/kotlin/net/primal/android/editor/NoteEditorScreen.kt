@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -87,16 +88,20 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.Gif
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
+import net.primal.android.core.compose.icons.primaliconpack.Poll
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.multiaccount.ui.AccountSwitcherBottomSheet
+import net.primal.android.editor.NoteEditorContract.PollType
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.ui.NoteAttachmentPreview
 import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
+import net.primal.android.editor.ui.poll.PollEditorSection
 import net.primal.android.nostr.mappers.toReferencedHighlight
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.toNoteContentUi
@@ -181,14 +186,7 @@ fun NoteEditorScreen(
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Normal,
                         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 0.dp),
-                        enabled = !state.publishing && !state.uploadingAttachments &&
-                            state.attachments.none { it.uploadError != null } &&
-                            state.pendingGifUploads.none { it.uploading } &&
-                            state.pendingGifUploads.none { it.uploadFailed } &&
-                            (
-                                state.content.text.isNotBlank() || state.attachments.isNotEmpty() ||
-                                    state.pendingGifUploads.any { it.blossomUrl != null }
-                                ),
+                        enabled = state.isPublishEnabled(),
                         onClick = { eventPublisher(UiEvent.PublishNote) },
                     )
                 },
@@ -235,6 +233,29 @@ private fun NoteEditorContract.UiState.resolvePublishNoteButtonText() =
         }
     }
 
+private fun NoteEditorContract.UiState.isPublishEnabled(): Boolean {
+    val hasBlockingState = publishing || uploadingAttachments ||
+        attachments.any { it.uploadError != null } ||
+        pendingGifUploads.any { it.uploading } ||
+        pendingGifUploads.any { it.uploadFailed }
+
+    if (hasBlockingState) return false
+
+    return if (pollState != null) {
+        content.text.isNotBlank() &&
+            pollState.choices.count { it.text.isNotBlank() } >= 2 &&
+            (
+                pollState.pollType != PollType.ZapPoll ||
+                    pollState.minZapAmountInSats == null ||
+                    pollState.maxZapAmountInSats == null ||
+                    pollState.minZapAmountInSats <= pollState.maxZapAmountInSats
+                )
+    } else {
+        content.text.isNotBlank() || attachments.isNotEmpty() ||
+            pendingGifUploads.any { it.blossomUrl != null }
+    }
+}
+
 @Suppress("LongMethod")
 @ExperimentalMaterial3Api
 @Composable
@@ -278,6 +299,7 @@ private fun NoteEditorBox(
                 .padding(contentPadding)
                 .onSizeChanged { noteEditorMaxHeightPx = it.height },
             state = editorListState,
+            contentPadding = PaddingValues(bottom = with(density) { footerHeight.toDp() }),
         ) {
             if (!state.isQuoting) {
                 referencedEventsAndConversationAsReplyTo(
@@ -300,6 +322,16 @@ private fun NoteEditorBox(
                 )
             }
 
+            if (state.pollState != null) {
+                item(key = "pollEditor") {
+                    PollEditorSection(
+                        pollState = state.pollState,
+                        eventPublisher = eventPublisher,
+                        footerHeightPx = footerHeight,
+                    )
+                }
+            }
+
             nostrUris(
                 nostrUris = state.referencedNostrUris,
                 noteCallbacks = noteCallbacks,
@@ -316,7 +348,6 @@ private fun NoteEditorBox(
             noteEditorBottomItems(
                 attachments = state.attachments,
                 extraSpacing = extraSpacing,
-                footerHeight = footerHeight,
                 onDiscardAttachment = { eventPublisher(UiEvent.DiscardNoteAttachment(it)) },
                 onRetryUpload = { eventPublisher(UiEvent.RetryUpload(it)) },
             )
@@ -330,6 +361,8 @@ private fun NoteEditorBox(
             state = state,
             eventPublisher = eventPublisher,
             onGifClick = onGifClick,
+            showPollToggle = !state.isReply && !state.isQuoting,
+            onPollToggle = { eventPublisher(UiEvent.TogglePollMode) },
         )
     }
 }
@@ -614,7 +647,13 @@ private fun NoteEditorInputArea(
             enabled = !state.publishing,
             placeholder = {
                 Text(
-                    text = stringResource(id = R.string.note_editor_content_placeholder),
+                    text = stringResource(
+                        id = if (state.pollState != null) {
+                            R.string.poll_editor_question_placeholder
+                        } else {
+                            R.string.note_editor_content_placeholder
+                        },
+                    ),
                     color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
                     style = AppTheme.typography.bodyMedium,
                 )
@@ -633,7 +672,10 @@ private fun NoteEditorFooter(
     state: NoteEditorContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onGifClick: () -> Unit,
+    showPollToggle: Boolean,
+    onPollToggle: () -> Unit,
 ) {
+    val isPollMode = state.pollState != null
     Column(modifier = modifier) {
         HorizontalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
 
@@ -666,6 +708,9 @@ private fun NoteEditorFooter(
                     eventPublisher(UiEvent.ToggleSearchUsers(enabled = true))
                 },
                 onGifClick = onGifClick,
+                isPollMode = isPollMode,
+                showPollToggle = showPollToggle,
+                onPollToggle = onPollToggle,
             )
         }
     }
@@ -691,7 +736,6 @@ private fun LazyListScope.pendingGifUploads(
 private fun LazyListScope.noteEditorBottomItems(
     attachments: List<NoteAttachment>,
     extraSpacing: Dp,
-    footerHeight: Int,
     onDiscardAttachment: (UUID) -> Unit,
     onRetryUpload: (UUID) -> Unit,
 ) {
@@ -708,17 +752,6 @@ private fun LazyListScope.noteEditorBottomItems(
 
     item(key = "extraSpacing") {
         Spacer(modifier = Modifier.height(extraSpacing))
-    }
-
-    if (attachments.isNotEmpty()) {
-        item(key = "attachmentSpacing") {
-            val density = LocalDensity.current
-            Spacer(
-                modifier = Modifier.height(
-                    with(density) { footerHeight.toDp() + 8.dp },
-                ),
-            )
-        }
     }
 }
 
@@ -887,6 +920,9 @@ private fun NoteActionRow(
     onPhotosImported: (List<Uri>) -> Unit,
     onUserTag: () -> Unit,
     onGifClick: () -> Unit,
+    isPollMode: Boolean,
+    showPollToggle: Boolean,
+    onPollToggle: () -> Unit,
 ) {
     Row(
         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -913,6 +949,16 @@ private fun NoteActionRow(
             onPhotoTaken = { uri -> onPhotosImported(listOf(uri)) },
         )
 
+        if (showPollToggle) {
+            IconButton(onClick = onPollToggle) {
+                Icon(
+                    imageVector = PrimalIcons.Poll,
+                    contentDescription = stringResource(id = R.string.accessibility_poll_toggle),
+                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                )
+            }
+        }
+
         IconButton(onClick = onUserTag) {
             Icon(
                 imageVector = Icons.Default.AlternateEmail,
@@ -920,8 +966,28 @@ private fun NoteActionRow(
                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
         }
+
+        if (isPollMode) {
+            Spacer(modifier = Modifier.weight(1f))
+            TextButton(onClick = onPollToggle) {
+                Icon(
+                    imageVector = PrimalIcons.Delete,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = RemovePollColor,
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = stringResource(id = R.string.poll_editor_remove_poll),
+                    color = RemovePollColor,
+                    style = AppTheme.typography.bodySmall,
+                )
+            }
+        }
     }
 }
+
+private val RemovePollColor = Color(0xFFFA3C3C)
 
 private val avatarSizeDp = 42.dp
 private val connectionLineOffsetXDp = 40.dp

@@ -9,7 +9,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import io.github.aakira.napier.Napier
-import java.util.*
+import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineStart
@@ -32,6 +32,8 @@ import net.primal.android.articles.highlights.generateNevent
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.files.FileAnalyser
 import net.primal.android.drawer.multiaccount.model.asUserAccountUi
+import net.primal.android.editor.NoteEditorContract.PollChoice
+import net.primal.android.editor.NoteEditorContract.PollEditorState
 import net.primal.android.editor.NoteEditorContract.ReferencedUri
 import net.primal.android.editor.NoteEditorContract.SideEffect
 import net.primal.android.editor.NoteEditorContract.UiEvent
@@ -280,6 +282,15 @@ class NoteEditorViewModel @AssistedInject constructor(
                     is UiEvent.InsertGif -> handleGifSelected(event.gifUrl)
                     is UiEvent.RetryGifUpload -> retryGifUpload(event.gifId)
                     is UiEvent.RemovePendingGif -> removePendingGif(event.gifId)
+
+                    UiEvent.TogglePollMode -> handleTogglePollMode()
+                    is UiEvent.UpdatePollChoice -> handleUpdatePollChoice(event)
+                    UiEvent.AddPollChoice -> handleAddPollChoice()
+                    is UiEvent.RemovePollChoice -> handleRemovePollChoice(event)
+                    is UiEvent.UpdatePollLength -> handleUpdatePollLength(event)
+                    is UiEvent.UpdatePollType -> handleUpdatePollType(event)
+                    is UiEvent.UpdateMinZapAmount -> handleUpdateMinZapAmount(event)
+                    is UiEvent.UpdateMaxZapAmount -> handleUpdateMaxZapAmount(event)
                 }
             }
         }
@@ -300,6 +311,80 @@ class NoteEditorViewModel @AssistedInject constructor(
             }
         }
     }
+
+    private fun handleTogglePollMode() =
+        setState {
+            if (pollState != null) copy(pollState = null) else copy(pollState = PollEditorState())
+        }
+
+    private fun handleUpdatePollChoice(event: UiEvent.UpdatePollChoice) =
+        setState {
+            val pollState = pollState ?: return@setState this
+            copy(
+                pollState = pollState.copy(
+                    choices = pollState.choices.map { choice ->
+                        if (choice.id == event.choiceId) {
+                            choice.copy(text = event.text.take(MAX_POLL_CHOICE_LENGTH))
+                        } else {
+                            choice
+                        }
+                    },
+                ),
+            )
+        }
+
+    private fun handleAddPollChoice() =
+        setState {
+            val pollState = pollState ?: return@setState this
+            if (pollState.choices.size >= MAX_POLL_CHOICES) return@setState this
+            copy(pollState = pollState.copy(choices = pollState.choices + PollChoice()))
+        }
+
+    private fun handleRemovePollChoice(event: UiEvent.RemovePollChoice) =
+        setState {
+            val pollState = pollState ?: return@setState this
+            if (pollState.choices.size <= MIN_POLL_CHOICES) return@setState this
+            copy(
+                pollState = pollState.copy(
+                    choices = pollState.choices.filter { it.id != event.choiceId },
+                ),
+            )
+        }
+
+    private fun handleUpdatePollLength(event: UiEvent.UpdatePollLength) =
+        setState {
+            val pollState = pollState ?: return@setState this
+            val totalMinutes = event.days * HOURS_PER_DAY * MINUTES_PER_HOUR +
+                event.hours * MINUTES_PER_HOUR + event.minutes
+            val maxTotalMinutes = MAX_POLL_LENGTH_DAYS * HOURS_PER_DAY * MINUTES_PER_HOUR
+            val coercedMinutes = totalMinutes.coerceIn(MIN_POLL_LENGTH_MINUTES, maxTotalMinutes)
+            if (coercedMinutes != totalMinutes) return@setState this
+            copy(
+                pollState = pollState.copy(
+                    pollLengthDays = event.days,
+                    pollLengthHours = event.hours,
+                    pollLengthMinutes = event.minutes,
+                ),
+            )
+        }
+
+    private fun handleUpdatePollType(event: UiEvent.UpdatePollType) =
+        setState {
+            val pollState = pollState ?: return@setState this
+            copy(pollState = pollState.copy(pollType = event.pollType))
+        }
+
+    private fun handleUpdateMinZapAmount(event: UiEvent.UpdateMinZapAmount) =
+        setState {
+            val pollState = pollState ?: return@setState this
+            copy(pollState = pollState.copy(minZapAmountInSats = event.amountInSats))
+        }
+
+    private fun handleUpdateMaxZapAmount(event: UiEvent.UpdateMaxZapAmount) =
+        setState {
+            val pollState = pollState ?: return@setState this
+            copy(pollState = pollState.copy(maxZapAmountInSats = event.amountInSats))
+        }
 
     private fun handleGifSelected(gifUrl: String) {
         val pendingGif = NoteEditorContract.PendingGifUpload(originalUrl = gifUrl)
@@ -693,6 +778,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 content = TextFieldValue(),
                 attachments = emptyList(),
                 pendingGifUploads = emptyList(),
+                pollState = null,
             )
         }
         gifUploadJobs.values.forEach { it.cancel() }
@@ -919,5 +1005,15 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun String.concatenateUris(): String {
         return this + state.value.referencedNostrUris.map { it.uri }
             .joinToString(separator = " \n\n", prefix = " \n\n") { it.withNostrPrefix() }
+    }
+
+    companion object {
+        const val MAX_POLL_CHOICES = 5
+        const val MIN_POLL_CHOICES = 2
+        const val MAX_POLL_CHOICE_LENGTH = 35
+        private const val MINUTES_PER_HOUR = 60
+        private const val HOURS_PER_DAY = 24
+        private const val MIN_POLL_LENGTH_MINUTES = 1
+        private const val MAX_POLL_LENGTH_DAYS = 30
     }
 }

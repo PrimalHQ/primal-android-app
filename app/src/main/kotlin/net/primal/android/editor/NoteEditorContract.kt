@@ -17,6 +17,26 @@ import net.primal.domain.nostr.Nevent
 
 interface NoteEditorContract {
 
+    enum class PollType {
+        UserPoll,
+        ZapPoll,
+    }
+
+    data class PollChoice(
+        val id: UUID = UUID.randomUUID(),
+        val text: String = "",
+    )
+
+    data class PollEditorState(
+        val choices: List<PollChoice> = listOf(PollChoice(), PollChoice()),
+        val pollType: PollType = PollType.UserPoll,
+        val pollLengthDays: Int = 1,
+        val pollLengthHours: Int = 0,
+        val pollLengthMinutes: Int = 0,
+        val minZapAmountInSats: Long? = null,
+        val maxZapAmountInSats: Long? = null,
+    )
+
     data class UiState(
         val content: TextFieldValue = TextFieldValue(),
         val replyToConversation: List<FeedPostUi> = emptyList(),
@@ -33,6 +53,7 @@ interface NoteEditorContract {
         val userTaggingState: UserTaggingState = UserTaggingState(),
         val availableAccounts: List<UserAccountUi> = emptyList(),
         val pendingGifUploads: List<PendingGifUpload> = emptyList(),
+        val pollState: PollEditorState? = null,
     ) {
         val isReply: Boolean get() = replyToConversation.isNotEmpty()
         val replyToNote: FeedPostUi? = replyToConversation.lastOrNull()
@@ -57,6 +78,14 @@ interface NoteEditorContract {
         data class RetryGifUpload(val gifId: UUID) : UiEvent()
         data class RemovePendingGif(val gifId: UUID) : UiEvent()
         data object DismissError : UiEvent()
+        data object TogglePollMode : UiEvent()
+        data class UpdatePollChoice(val choiceId: UUID, val text: String) : UiEvent()
+        data object AddPollChoice : UiEvent()
+        data class RemovePollChoice(val choiceId: UUID) : UiEvent()
+        data class UpdatePollLength(val days: Int, val hours: Int, val minutes: Int) : UiEvent()
+        data class UpdatePollType(val pollType: PollType) : UiEvent()
+        data class UpdateMinZapAmount(val amountInSats: Long?) : UiEvent()
+        data class UpdateMaxZapAmount(val amountInSats: Long?) : UiEvent()
     }
 
     sealed class SideEffect {
