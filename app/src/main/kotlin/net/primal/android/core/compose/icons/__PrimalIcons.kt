@@ -45,6 +45,7 @@ import net.primal.android.core.compose.icons.primaliconpack.DrawerBookmarks
 import net.primal.android.core.compose.icons.primaliconpack.DrawerMessages
 import net.primal.android.core.compose.icons.primaliconpack.DrawerPremium
 import net.primal.android.core.compose.icons.primaliconpack.DrawerProfile
+import net.primal.android.core.compose.icons.primaliconpack.DrawerProfileFilled
 import net.primal.android.core.compose.icons.primaliconpack.DrawerSettings
 import net.primal.android.core.compose.icons.primaliconpack.DrawerSignOut
 import net.primal.android.core.compose.icons.primaliconpack.Edit
@@ -121,6 +122,7 @@ import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppForegr
 import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.core.compose.icons.primaliconpack.PhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Play
+import net.primal.android.core.compose.icons.primaliconpack.Poll
 import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeAqua
 import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeBlue
 import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeBrown
@@ -282,6 +284,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             PhotoFromGallery,
             Paste,
             PasteAlt,
+            Poll,
             PrimalPremium,
             Directory,
             Subtract,
@@ -327,6 +330,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             DrawerMessages,
             DrawerPremium,
             DrawerProfile,
+            DrawerProfileFilled,
             DrawerSettings,
             DrawerSignOut,
             Document,

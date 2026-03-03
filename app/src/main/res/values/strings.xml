@@ -616,6 +616,37 @@
     <string name="note_editor_nostr_publish_error">Unable to publish your note. Please check your connection and try again.</string>
     <string name="note_editor_unable_to_locate_event">Unable to preview %1$s event. Tap to retry.</string>
 
+    <!-- Poll Editor -->
+    <string name="poll_editor_question_placeholder">Ask a question…</string>
+    <string name="poll_editor_choice_placeholder">Choice %1$d</string>
+    <string name="poll_editor_add_choice">Add choice</string>
+    <string name="poll_editor_remove_poll">Remove poll</string>
+    <string name="poll_editor_poll_type">Poll type</string>
+    <string name="poll_editor_poll_length">Poll length</string>
+    <string name="poll_editor_min_zap">Min zap</string>
+    <string name="poll_editor_max_zap">Max zap</string>
+    <string name="poll_editor_sats_suffix">sats</string>
+    <plurals name="poll_editor_day_suffix">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <plurals name="poll_editor_hrs_suffix">
+        <item quantity="one">hr</item>
+        <item quantity="other">hrs</item>
+    </plurals>
+    <plurals name="poll_editor_min_suffix">
+        <item quantity="one">min</item>
+        <item quantity="other">mins</item>
+    </plurals>
+    <string name="poll_editor_select_poll_type">Select poll type</string>
+    <string name="poll_editor_user_poll">User Poll</string>
+    <string name="poll_editor_user_poll_description">One vote per user</string>
+    <string name="poll_editor_zap_poll">Zap Poll</string>
+    <string name="poll_editor_zap_poll_description">One zap per user. Option with the highest total sats wins. You can set minimum and maximum zap amounts per vote. Set them equal if you want every vote to carry the same weight.</string>
+    <string name="accessibility_poll_toggle">Toggle poll</string>
+    <string name="accessibility_poll_remove_choice">Remove poll choice</string>
+    <string name="accessibility_poll_add_choice">Add poll choice</string>
+
     <string name="gif_picker_search_placeholder">Search KLIPY</string>
     <string name="gif_picker_cancel">Cancel</string>
     <string name="gif_picker_powered_by">Powered by</string>
