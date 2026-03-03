@@ -85,6 +85,7 @@ abstract class RepositoryFactory {
                 nostrEventSignatureHandler = nostrEventSignatureHandler,
             ),
             profileRepository = profileRepository,
+            lightningPayHelper = lightningPayHelper,
             walletServiceFactory = createWalletServiceFactory(
                 primalWalletApiClient = primalWalletApiClient,
                 nostrEventSignatureHandler = nostrEventSignatureHandler,

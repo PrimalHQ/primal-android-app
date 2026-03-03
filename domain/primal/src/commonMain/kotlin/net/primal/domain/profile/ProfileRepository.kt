@@ -15,6 +15,8 @@ interface ProfileRepository {
 
     suspend fun findProfileDataOrNull(profileId: String): ProfileData?
 
+    suspend fun findProfileDataByLightningAddress(lightningAddress: String): ProfileData?
+
     suspend fun findProfileData(profileIds: List<String>): List<ProfileData>
 
     suspend fun findProfileStats(profileIds: List<String>): List<ProfileStats>

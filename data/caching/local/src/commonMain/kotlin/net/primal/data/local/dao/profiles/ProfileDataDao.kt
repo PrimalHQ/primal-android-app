@@ -56,4 +56,7 @@ interface ProfileDataDao {
 
     @Query("SELECT eventId FROM ProfileData WHERE ownerId = :profileId")
     suspend fun findMetadataEventId(profileId: String): String
+
+    @Query("SELECT * FROM ProfileData WHERE lightningAddress = :lightningAddress LIMIT 1")
+    suspend fun findProfileDataByLightningAddress(lightningAddress: String): ProfileData?
 }

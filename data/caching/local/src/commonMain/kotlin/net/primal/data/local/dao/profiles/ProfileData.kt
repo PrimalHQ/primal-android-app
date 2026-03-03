@@ -1,11 +1,16 @@
 package net.primal.data.local.dao.profiles
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import net.primal.domain.links.CdnImage
 import net.primal.domain.membership.PrimalPremiumInfo
 
-@Entity
+@Entity(
+    indices = [
+        Index(value = ["lightningAddress"]),
+    ],
+)
 data class ProfileData(
     @PrimaryKey
     val ownerId: String,

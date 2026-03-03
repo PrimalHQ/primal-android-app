@@ -60,6 +60,13 @@ class ProfileRepositoryImpl(
                 ?.asProfileDataDO()
         }
 
+    override suspend fun findProfileDataByLightningAddress(lightningAddress: String) =
+        withContext(dispatcherProvider.io()) {
+            database.profiles()
+                .findProfileDataByLightningAddress(lightningAddress = lightningAddress)
+                ?.asProfileDataDO()
+        }
+
     override suspend fun findProfileStats(profileIds: List<String>): List<ProfileStats> =
         withContext(dispatcherProvider.io()) {
             database.profileStats().findProfileStats(profileIds = profileIds)

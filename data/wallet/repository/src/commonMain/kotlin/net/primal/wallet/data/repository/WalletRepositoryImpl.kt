@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
+import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.core.utils.CurrencyConversionUtils.toBtc
 import net.primal.core.utils.Result
@@ -65,6 +66,7 @@ internal class WalletRepositoryImpl(
     private val primalWalletApi: PrimalWalletApi,
     private val walletDatabase: WalletDatabase,
     private val profileRepository: ProfileRepository,
+    private val lightningPayHelper: LightningPayHelper,
 ) : WalletRepository {
 
     private val transactionsHandler = TransactionsHandler(
@@ -72,6 +74,7 @@ internal class WalletRepositoryImpl(
         walletServiceFactory = walletServiceFactory,
         walletDatabase = walletDatabase,
         profileRepository = profileRepository,
+        lightningPayHelper = lightningPayHelper,
     )
 
     override suspend fun upsertWalletSettings(walletId: String, spamThresholdAmountInSats: Long) =
