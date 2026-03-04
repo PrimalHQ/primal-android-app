@@ -99,6 +99,7 @@ import net.primal.android.nostrconnect.active.ActiveSessionsViewModel
 import net.primal.android.nostrconnect.connect.NostrConnectBottomSheet
 import net.primal.android.nostrconnect.connect.NostrConnectViewModel
 import net.primal.android.nostrconnect.utils.NOSTR_CONNECT_SCHEME
+import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract
 import net.primal.android.notes.home.HomeFeedScreen
@@ -2253,6 +2254,31 @@ private fun NavGraphBuilder.thread(
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) { navBackEntry ->
     val viewModel = hiltViewModel<ThreadViewModel>(navBackEntry)
+
+    val gifUrlResult = navBackEntry.savedStateHandle
+        .getStateFlow<String?>(GIF_URL_RESULT, null)
+        .collectAsState()
+
+    LaunchedEffect(gifUrlResult.value) {
+        gifUrlResult.value?.let { gifUrl ->
+            val pendingArgsJson = navBackEntry.savedStateHandle.get<String>(PENDING_GIF_REPLY_ARGS)
+            val pendingArgs = pendingArgsJson?.jsonAsNoteEditorArgs()
+            val state = viewModel.state.value
+            navController.navigateToNoteEditor(
+                NoteEditorArgs(
+                    referencedNoteNevent = state.highlightNote?.asNeventString(),
+                    gifUrl = gifUrl,
+                    content = pendingArgs?.content ?: "",
+                    contentSelectionStart = pendingArgs?.contentSelectionStart ?: 0,
+                    contentSelectionEnd = pendingArgs?.contentSelectionEnd ?: 0,
+                    taggedUsers = pendingArgs?.taggedUsers ?: emptyList(),
+                ),
+            )
+            navBackEntry.savedStateHandle[GIF_URL_RESULT] = null
+            navBackEntry.savedStateHandle[PENDING_GIF_REPLY_ARGS] = null
+        }
+    }
+
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
     ThreadScreen(
@@ -2261,6 +2287,10 @@ private fun NavGraphBuilder.thread(
             onClose = { navController.navigateUp() },
             onGoToWallet = { navController.navigateToWallet() },
             onExpandReply = { args -> navController.navigateToNoteEditor(args) },
+            onGifReply = { args ->
+                navBackEntry.savedStateHandle[PENDING_GIF_REPLY_ARGS] = args.toJson()
+                navController.navigateToGifPicker()
+            },
         ),
         noteCallbacks = noteCallbacksHandler(navController),
     )

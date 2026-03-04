@@ -84,6 +84,7 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.Gif
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Poll
@@ -276,6 +277,27 @@ fun ThreadScreen(
                             NoteEditorArgs(
                                 referencedNoteNevent = state.highlightNote?.asNeventString(),
                                 startWithPoll = true,
+                                content = replyState.content.text,
+                                contentSelectionStart = replyState.content.selection.start,
+                                contentSelectionEnd = replyState.content.selection.end,
+                                taggedUsers = replyState.taggedUsers,
+                            ),
+                        )
+                        uiScope.launch {
+                            delay(250.milliseconds)
+                            noteEditorViewModel.setEvent(
+                                NoteEditorContract.UiEvent.UpdateContent(content = TextFieldValue()),
+                            )
+                        }
+                    },
+                    onGifReply = {
+                        callbacks.onGifReply(
+                            NoteEditorArgs(
+                                referencedNoteNevent = state.highlightNote?.asNeventString(),
+                                content = replyState.content.text,
+                                contentSelectionStart = replyState.content.selection.start,
+                                contentSelectionEnd = replyState.content.selection.end,
+                                taggedUsers = replyState.taggedUsers,
                             ),
                         )
                         uiScope.launch {
@@ -553,6 +575,7 @@ private fun ReplyToBottomBar(
     replyToPost: FeedPostUi,
     onExpandReply: (mediaUris: List<Uri>) -> Unit,
     onPollReply: () -> Unit,
+    onGifReply: () -> Unit,
     replyEventPublisher: (NoteEditorContract.UiEvent) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -608,9 +631,7 @@ private fun ReplyToBottomBar(
             onUserTaggingModeChanged = {
                 replyEventPublisher(NoteEditorContract.UiEvent.ToggleSearchUsers(enabled = it))
             },
-            onUserTagSearch = {
-                replyEventPublisher(NoteEditorContract.UiEvent.SearchUsers(query = it))
-            },
+            onUserTagSearch = { replyEventPublisher(NoteEditorContract.UiEvent.SearchUsers(query = it)) },
         )
 
         ReplyToOptions(
@@ -622,15 +643,17 @@ private fun ReplyToBottomBar(
             replying = replyState.publishing,
             replyEnabled = !replyState.publishing && replyState.content.text.isNotBlank(),
             onPublishReplyClick = { replyEventPublisher(NoteEditorContract.UiEvent.PublishNote) },
-            onPhotosImported = { uris ->
-                onExpandReply(uris)
-            },
+            onPhotosImported = { uris -> onExpandReply(uris) },
             onUserTagClick = {
                 replyEventPublisher(NoteEditorContract.UiEvent.AppendUserTagAtSign)
                 replyEventPublisher(NoteEditorContract.UiEvent.ToggleSearchUsers(enabled = true))
             },
             onPollClick = {
                 onPollReply()
+                keyboardController?.hide()
+            },
+            onGifClick = {
+                onGifReply()
                 keyboardController?.hide()
             },
         )
@@ -665,6 +688,7 @@ private fun ReplyToOptions(
     onPhotosImported: (List<Uri>) -> Unit,
     onUserTagClick: () -> Unit,
     onPollClick: () -> Unit,
+    onGifClick: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -683,6 +707,13 @@ private fun ReplyToOptions(
                 onPhotosImported = onPhotosImported,
             )
 
+            IconButton(onClick = onGifClick) {
+                Icon(
+                    imageVector = PrimalIcons.Gif,
+                    contentDescription = stringResource(id = R.string.accessibility_gif_picker),
+                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                )
+            }
 
             TakePhotoIconButton(
                 imageVector = PrimalIcons.ImportPhotoFromCamera,
