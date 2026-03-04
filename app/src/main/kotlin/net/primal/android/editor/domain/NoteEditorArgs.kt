@@ -17,6 +17,7 @@ data class NoteEditorArgs(
     val contentSelectionEnd: Int = 0,
     val taggedUsers: List<NoteTaggedUser> = emptyList(),
     val isQuoting: Boolean = false,
+    val startWithPoll: Boolean = false,
 ) {
     fun toJson(): String = this.encodeToJsonString()
 
