@@ -86,6 +86,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
+import net.primal.android.core.compose.icons.primaliconpack.Poll
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.pulltorefresh.PrimalIndicator
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -261,6 +262,20 @@ fun ThreadScreen(
                                 contentSelectionStart = replyState.content.selection.start,
                                 contentSelectionEnd = replyState.content.selection.end,
                                 taggedUsers = replyState.taggedUsers,
+                            ),
+                        )
+                        uiScope.launch {
+                            delay(250.milliseconds)
+                            noteEditorViewModel.setEvent(
+                                NoteEditorContract.UiEvent.UpdateContent(content = TextFieldValue()),
+                            )
+                        }
+                    },
+                    onPollReply = {
+                        callbacks.onExpandReply(
+                            NoteEditorArgs(
+                                referencedNoteNevent = state.highlightNote?.asNeventString(),
+                                startWithPoll = true,
                             ),
                         )
                         uiScope.launch {
@@ -537,6 +552,7 @@ private fun ReplyToBottomBar(
     replyState: NoteEditorContract.UiState,
     replyToPost: FeedPostUi,
     onExpandReply: (mediaUris: List<Uri>) -> Unit,
+    onPollReply: () -> Unit,
     replyEventPublisher: (NoteEditorContract.UiEvent) -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -613,6 +629,10 @@ private fun ReplyToBottomBar(
                 replyEventPublisher(NoteEditorContract.UiEvent.AppendUserTagAtSign)
                 replyEventPublisher(NoteEditorContract.UiEvent.ToggleSearchUsers(enabled = true))
             },
+            onPollClick = {
+                onPollReply()
+                keyboardController?.hide()
+            },
         )
     }
 }
@@ -644,6 +664,7 @@ private fun ReplyToOptions(
     onPublishReplyClick: () -> Unit,
     onPhotosImported: (List<Uri>) -> Unit,
     onUserTagClick: () -> Unit,
+    onPollClick: () -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -662,12 +683,21 @@ private fun ReplyToOptions(
                 onPhotosImported = onPhotosImported,
             )
 
+
             TakePhotoIconButton(
                 imageVector = PrimalIcons.ImportPhotoFromCamera,
                 contentDescription = stringResource(id = R.string.accessibility_take_photo),
                 tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 onPhotoTaken = { uri -> onPhotosImported(listOf(uri)) },
             )
+
+            IconButton(onClick = onPollClick) {
+                Icon(
+                    imageVector = PrimalIcons.Poll,
+                    contentDescription = stringResource(id = R.string.accessibility_poll_toggle),
+                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                )
+            }
 
             IconButton(onClick = onUserTagClick) {
                 Icon(

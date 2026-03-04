@@ -110,7 +110,12 @@ class NoteEditorViewModel @AssistedInject constructor(
     private val referencedNoteNevent = args.referencedNoteNevent?.let(Nip19TLV::parseUriAsNeventOrNull)
     private val referencedStreamNaddr = args.referencedStreamNaddr?.let(Nip19TLV::parseUriAsNaddrOrNull)
 
-    private val _state = MutableStateFlow(UiState(isQuoting = args.isQuoting))
+    private val _state = MutableStateFlow(
+        UiState(
+            isQuoting = args.isQuoting,
+            pollState = if (args.startWithPoll) PollEditorState() else null,
+        ),
+    )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
 

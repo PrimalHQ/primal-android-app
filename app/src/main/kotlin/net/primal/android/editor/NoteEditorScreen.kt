@@ -361,7 +361,6 @@ private fun NoteEditorBox(
             state = state,
             eventPublisher = eventPublisher,
             onGifClick = onGifClick,
-            showPollToggle = !state.isReply && !state.isQuoting,
             onPollToggle = { eventPublisher(UiEvent.TogglePollMode) },
         )
     }
@@ -672,7 +671,6 @@ private fun NoteEditorFooter(
     state: NoteEditorContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     onGifClick: () -> Unit,
-    showPollToggle: Boolean,
     onPollToggle: () -> Unit,
 ) {
     val isPollMode = state.pollState != null
@@ -709,7 +707,6 @@ private fun NoteEditorFooter(
                 },
                 onGifClick = onGifClick,
                 isPollMode = isPollMode,
-                showPollToggle = showPollToggle,
                 onPollToggle = onPollToggle,
             )
         }
@@ -921,7 +918,6 @@ private fun NoteActionRow(
     onUserTag: () -> Unit,
     onGifClick: () -> Unit,
     isPollMode: Boolean,
-    showPollToggle: Boolean,
     onPollToggle: () -> Unit,
 ) {
     Row(
@@ -949,14 +945,12 @@ private fun NoteActionRow(
             onPhotoTaken = { uri -> onPhotosImported(listOf(uri)) },
         )
 
-        if (showPollToggle) {
-            IconButton(onClick = onPollToggle) {
-                Icon(
-                    imageVector = PrimalIcons.Poll,
-                    contentDescription = stringResource(id = R.string.accessibility_poll_toggle),
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-                )
-            }
+        IconButton(onClick = onPollToggle) {
+            Icon(
+                imageVector = PrimalIcons.Poll,
+                contentDescription = stringResource(id = R.string.accessibility_poll_toggle),
+                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+            )
         }
 
         IconButton(onClick = onUserTag) {
