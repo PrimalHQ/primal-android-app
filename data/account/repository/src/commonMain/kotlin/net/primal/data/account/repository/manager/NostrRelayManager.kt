@@ -3,18 +3,22 @@ package net.primal.data.account.repository.manager
 import io.github.aakira.napier.Napier
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import net.primal.core.nips.encryption.service.NostrEncryptionService
 import net.primal.core.utils.cache.LruSeenCache
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.getAndClear
+import net.primal.core.utils.onFailure
 import net.primal.core.utils.put
 import net.primal.core.utils.remove
 import net.primal.core.utils.serialization.CommonJsonImplicitNulls
@@ -34,6 +38,9 @@ import net.primal.domain.nostr.cryptography.utils.assureValidNsec
 import net.primal.domain.nostr.cryptography.utils.assureValidPubKeyHex
 
 private const val MAX_CACHE_SIZE = 20
+private const val REBROADCAST_COUNT = 5
+private val REBROADCAST_DELAY = 2.seconds
+private val REBROADCAST_TIMEOUT = 20.seconds
 
 @OptIn(ExperimentalAtomicApi::class)
 internal class NostrRelayManager(
@@ -108,29 +115,60 @@ internal class NostrRelayManager(
         scope.cancel()
     }
 
-    fun sendResponse(relays: List<String>, response: RemoteSignerMethodResponse) =
-        runCatching {
-            Napier.d(tag = "Signer") { "Sending response: $response" }
-            val event = buildSignedEvent(response = response)
-                .onFailure {
-                    Napier.w(tag = "Signer", throwable = it) {
-                        "Failed to sign event. Something must have gone horribly wrong."
-                    }
-                }.getOrThrow()
+    fun sendResponse(
+        relays: List<String>,
+        response: RemoteSignerMethodResponse,
+        rebroadcast: Boolean = false,
+    ) = runCatching {
+        Napier.d(tag = "Signer") { "Broadcast: $rebroadcast; Sending response: $response" }
+        val event = buildSignedEvent(response = response)
+            .onFailure {
+                Napier.w(tag = "Signer", throwable = it) {
+                    "Failed to sign event. Something must have gone horribly wrong."
+                }
+            }.getOrThrow()
 
-            val currentClients = clients.load()
-            relays.mapNotNull { relay -> currentClients[relay] }
-                .also { clients ->
-                    if (clients.isEmpty()) {
-                        error("We don't have active connection to any of the following relays: $relays")
-                    }
+        val currentClients = clients.load()
+        val activeClients = relays.mapNotNull { relay -> currentClients[relay] }
+            .also { clients ->
+                if (clients.isEmpty()) {
+                    error("We don't have active connection to any of the following relays: $relays")
                 }
-                .forEach { client ->
-                    scope.launch {
-                        client.publishEvent(event = event)
-                    }
-                }
+            }
+
+        activeClients.forEach { client ->
+            scope.launch {
+                client.publishEvent(event = event)
+            }
         }
+
+        if (rebroadcast) {
+            rebroadcastEvent(event = event, relays = relays)
+        }
+    }
+
+    private fun rebroadcastEvent(event: NostrEvent, relays: List<String>) {
+        scope.launch {
+            Napier.d { "Rebroadcasting event: $event" }
+            withTimeoutOrNull(REBROADCAST_TIMEOUT) {
+                repeat(REBROADCAST_COUNT) {
+                    delay(REBROADCAST_DELAY)
+                    val currentClients = clients.load()
+                    relays.mapNotNull { relay -> currentClients[relay] }
+                        .forEach { client ->
+                            launch {
+                                client.publishEvent(event = event)
+                                    .onFailure {
+                                        Napier.w(tag = "Signer", throwable = it) {
+                                            "Rebroadcast failed for event: ${event.id}"
+                                        }
+                                    }
+                            }
+                        }
+                }
+            }
+        }
+    }
 
     private fun buildSignedEvent(response: RemoteSignerMethodResponse): Result<NostrEvent> =
         runCatching {
