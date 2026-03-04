@@ -40,7 +40,7 @@ import net.primal.domain.nostr.cryptography.utils.assureValidPubKeyHex
 private const val MAX_CACHE_SIZE = 20
 private const val REBROADCAST_COUNT = 5
 private val REBROADCAST_DELAY = 2.seconds
-private val REBROADCAST_TIMEOUT = 20.seconds
+private val REBROADCAST_TIMEOUT = 30.seconds
 
 @OptIn(ExperimentalAtomicApi::class)
 internal class NostrRelayManager(
@@ -149,7 +149,7 @@ internal class NostrRelayManager(
 
     private fun rebroadcastEvent(event: NostrEvent, relays: List<String>) {
         scope.launch {
-            Napier.d { "Rebroadcasting event: $event" }
+            Napier.d(tag = "Signer") { "Rebroadcasting event: ${event.id}" }
             withTimeoutOrNull(REBROADCAST_TIMEOUT) {
                 repeat(REBROADCAST_COUNT) {
                     delay(REBROADCAST_DELAY)
