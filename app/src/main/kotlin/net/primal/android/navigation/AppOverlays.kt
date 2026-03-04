@@ -11,8 +11,8 @@ import net.primal.android.core.compose.session.RemoteSessionIndicatorOverlay
 import net.primal.android.core.compose.session.RemoteSessionIndicatorViewModel
 import net.primal.android.nostrconnect.approvals.PermissionsBottomSheet
 import net.primal.android.nostrconnect.approvals.PermissionsViewModel
-import net.primal.android.wallet.upgrade.sheet.UpgradeWalletBottomSheet
-import net.primal.android.wallet.upgrade.sheet.UpgradeWalletSheetViewModel
+import net.primal.android.wallet.notice.sheet.WalletNoticeBottomSheet
+import net.primal.android.wallet.notice.sheet.WalletNoticeSheetViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -20,18 +20,20 @@ fun AppOverlays(
     onRemoteSessionClick: () -> Unit,
     onUpgradeWalletClick: () -> Unit,
     onWalletFaqClick: () -> Unit,
+    onRestoreWalletClick: () -> Unit,
     content: @Composable () -> Unit,
 ) {
     val connectionIndicatorViewModel = hiltViewModel<ConnectionIndicatorViewModel>()
     val remoteSessionIndicatorViewModel = hiltViewModel<RemoteSessionIndicatorViewModel>()
     val permissionsViewModel = hiltViewModel<PermissionsViewModel>()
-    val upgradeWalletSheetViewModel = hiltViewModel<UpgradeWalletSheetViewModel>()
+    val walletNoticeSheetViewModel = hiltViewModel<WalletNoticeSheetViewModel>()
     val connectionState by connectionIndicatorViewModel.state.collectAsState()
 
-    UpgradeWalletBottomSheet(
-        viewModel = upgradeWalletSheetViewModel,
+    WalletNoticeBottomSheet(
+        viewModel = walletNoticeSheetViewModel,
         onUpgradeClick = onUpgradeWalletClick,
         onFaqClick = onWalletFaqClick,
+        onRestoreWalletClick = onRestoreWalletClick,
     ) {
         PermissionsBottomSheet(viewModel = permissionsViewModel) {
             ConnectionIndicatorOverlay(viewModel = connectionIndicatorViewModel) {

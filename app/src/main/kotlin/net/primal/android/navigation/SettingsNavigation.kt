@@ -103,7 +103,7 @@ private fun NavController.navigateToRemoteAppPermissions(clientPubKey: String) =
 private fun NavController.navigateToLocalAppPermissions(identifier: String) =
     navigate(route = "connected_apps/local/$identifier/permissions")
 
-private fun NavController.navigateToWalletRestore() = navigate(route = "wallet_settings/restore")
+fun NavController.navigateToWalletRestore() = navigate(route = "wallet_settings/restore")
 
 fun NavController.navigateToLinkPrimalWallet(
     appName: String? = null,

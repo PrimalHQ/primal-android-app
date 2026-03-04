@@ -497,6 +497,7 @@ fun PrimalAppNavigation(navController: NavHostController, startDestination: Stri
             onRemoteSessionClick = { navController.navigateToActiveSessions() },
             onUpgradeWalletClick = { navController.navigateToWalletUpgrade() },
             onWalletFaqClick = { navController.navigateToWalletUpgradeFaq() },
+            onRestoreWalletClick = { navController.navigateToWalletRestore() },
         ) {
             PiPManagerProvider {
                 LiveStreamOverlay(

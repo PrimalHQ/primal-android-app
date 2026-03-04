@@ -1302,11 +1302,24 @@
     <string name="wallet_dashboard_upgrade_please_upgrade">Please upgrade to continue using this wallet.</string>
     <string name="wallet_dashboard_upgrade_button">Upgrade Wallet Now</string>
 
-    <string name="wallet_upgrade_sheet_title">Upgrade Your Wallet!</string>
-    <string name="wallet_upgrade_sheet_description_first">Good news: Primal now features a new self-custodial wallet, which is a required upgrade for all users.</string>
-    <string name="wallet_upgrade_sheet_description_second">With one tap, we\'ll move your funds and full\ntransaction history to your new self-custodial\nwallet - so you fully control your bitcoin.\nQuestions? Check out our </string>
-    <string name="wallet_upgrade_sheet_faqs">FAQs</string>
-    <string name="wallet_upgrade_sheet_button">Start Wallet Upgrade</string>
+    <!-- Wallet Notice: Upgrade (Case 1) -->
+    <string name="wallet_notice_upgrade_title">Upgrade Your Wallet!</string>
+    <string name="wallet_notice_upgrade_description_first">Good news: Primal now features a new self-custodial wallet, which is a required upgrade for all users.</string>
+    <string name="wallet_notice_upgrade_description_second">With one tap, we\'ll move your funds and full\ntransaction history to your new self-custodial\nwallet - so you fully control your bitcoin.\nQuestions? Check out our </string>
+    <string name="wallet_notice_upgrade_faqs">FAQs</string>
+    <string name="wallet_notice_upgrade_button">Start Wallet Upgrade</string>
+
+    <!-- Wallet Notice: Discontinued (Case 2) -->
+    <string name="wallet_notice_discontinued_title">Wallet Discontinued</string>
+    <string name="wallet_notice_discontinued_description">The custodial wallet service has been discontinued. To recover your funds, please contact us at support@primal.net.</string>
+    <string name="wallet_notice_discontinued_close_button">Close</string>
+
+    <!-- Wallet Notice: Detected (Case 3) -->
+    <string name="wallet_notice_detected_title">Wallet Detected</string>
+    <string name="wallet_notice_detected_description">We detected that you already have a self-custodial Primal wallet associated with this Nostr account. To use it on this device, please restore it via the recovery phrase. Alternatively, you can create a new wallet which will be associated with your account.</string>
+    <string name="wallet_notice_detected_restore_button">Restore Existing Wallet</string>
+    <string name="wallet_notice_detected_create_button">Create New Wallet</string>
+
     <string name="wallet_upgrade_title">Wallet Upgrade</string>
     <string name="wallet_upgrade_upgrading_title">Upgrading…</string>
     <string name="wallet_upgrade_upgrading_support" tools:ignore="TypographyEllipsis">transferring your wallet\nbalance &amp; transaction history...</string>
