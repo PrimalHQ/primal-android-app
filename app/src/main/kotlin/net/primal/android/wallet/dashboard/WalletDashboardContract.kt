@@ -13,7 +13,7 @@ interface WalletDashboardContract {
     data class UiState(
         val transactions: Flow<PagingData<TransactionListItemDataUi>> = emptyFlow(),
         val refreshing: Boolean = false,
-        val isNpubLogin: Boolean = false,
+        val dashboardState: WalletDashboardState = WalletDashboardState.Loading,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
         val activeAccountBlossoms: List<String> = emptyList(),
@@ -39,5 +39,14 @@ interface WalletDashboardContract {
         data object DismissError : UiEvent()
         data object CreateWallet : UiEvent()
         data class ChangeActiveWallet(val wallet: Wallet) : UiEvent()
+    }
+
+    enum class WalletDashboardState {
+        Loading,
+        ActiveWallet,
+        WalletDetected,
+        WalletDiscontinued,
+        NoWallet,
+        NoWalletNpubLogin,
     }
 }

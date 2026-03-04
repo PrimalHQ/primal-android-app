@@ -1301,6 +1301,12 @@
     <string name="wallet_dashboard_upgrade_expires_on">This wallet will expire on</string>
     <string name="wallet_dashboard_upgrade_please_upgrade">Please upgrade to continue using this wallet.</string>
     <string name="wallet_dashboard_upgrade_button">Upgrade Wallet Now</string>
+    <string name="wallet_dashboard_detected_title">Wallet Detected</string>
+    <string name="wallet_dashboard_detected_description">We detected that you already have a self-custodial Primal wallet associated with this Nostr account. To use it on this device, please restore it via the recovery phrase. Alternatively, you can create a new wallet which will be associated with your account.</string>
+    <string name="wallet_dashboard_discontinued_title">Wallet Discontinued</string>
+    <string name="wallet_dashboard_discontinued_description">The custodial wallet service has been discontinued. To recover your funds, please contact us at support@primal.net.</string>
+    <string name="wallet_dashboard_restore_button">Restore Existing Wallet</string>
+    <string name="wallet_dashboard_create_new_button">Create New Wallet</string>
 
     <!-- Wallet Notice: Upgrade (Case 1) -->
     <string name="wallet_notice_upgrade_title">Upgrade Your Wallet!</string>

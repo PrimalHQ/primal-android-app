@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -74,12 +76,14 @@ import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState.DashboardError
+import net.primal.android.wallet.dashboard.WalletDashboardContract.WalletDashboardState
 import net.primal.android.wallet.dashboard.ui.WalletAction
 import net.primal.android.wallet.dashboard.ui.WalletCallToActionAnnotatedBox
 import net.primal.android.wallet.dashboard.ui.WalletCallToActionBox
 import net.primal.android.wallet.dashboard.ui.WalletDashboard
 import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
 import net.primal.android.wallet.dashboard.ui.WalletPickerBottomSheet
+import net.primal.android.wallet.dashboard.ui.WalletSetupCallToAction
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
 import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
 import net.primal.domain.utils.isConfigured
@@ -107,6 +111,7 @@ fun WalletDashboardScreen(
     onScanClick: () -> Unit,
     onReceiveClick: () -> Unit,
     onConfigureWalletsClick: () -> Unit,
+    onRestoreWalletClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
     val uiState = viewModel.state.collectAsState()
@@ -136,11 +141,13 @@ fun WalletDashboardScreen(
         onScanClick = onScanClick,
         onReceiveClick = onReceiveClick,
         onConfigureWalletsClick = onConfigureWalletsClick,
+        onRestoreWalletClick = onRestoreWalletClick,
         eventPublisher = { viewModel.setEvents(it) },
         accountSwitcherCallbacks = accountSwitcherCallbacks,
     )
 }
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun WalletDashboardScreen(
@@ -156,6 +163,7 @@ fun WalletDashboardScreen(
     onScanClick: () -> Unit,
     onReceiveClick: () -> Unit,
     onConfigureWalletsClick: () -> Unit,
+    onRestoreWalletClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
@@ -290,7 +298,8 @@ fun WalletDashboardScreen(
                                     .padding(top = 16.dp, bottom = 24.dp)
                                     .animateContentSize(),
                                 walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
-                                enabled = state.wallet.isConfigured() && !state.isNpubLogin,
+                                enabled = state.wallet.isConfigured() &&
+                                    state.dashboardState != WalletDashboardState.NoWalletNpubLogin,
                                 actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
                                 onWalletAction = { action ->
                                     when (action) {
@@ -321,7 +330,8 @@ fun WalletDashboardScreen(
                                     }
                                 },
                                 currencyMode = currencyMode,
-                                enabled = state.wallet.isConfigured() && !state.isNpubLogin,
+                                enabled = state.wallet.isConfigured() &&
+                                    state.dashboardState != WalletDashboardState.NoWalletNpubLogin,
                                 onSwitchCurrencyMode = { currencyMode = it },
                                 exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                             )
@@ -340,8 +350,19 @@ fun WalletDashboardScreen(
                 enabled = state.wallet != null,
                 indicatorPaddingValues = paddingValues,
             ) {
-                when {
-                    state.isNpubLogin -> {
+                when (state.dashboardState) {
+                    WalletDashboardState.Loading -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
+
+                    WalletDashboardState.NoWalletNpubLogin -> {
                         WalletCallToActionBox(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -354,7 +375,37 @@ fun WalletDashboardScreen(
                         )
                     }
 
-                    state.wallet != null -> {
+                    WalletDashboardState.WalletDetected -> {
+                        WalletSetupCallToAction(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .padding(horizontal = 32.dp)
+                                .padding(bottom = 32.dp)
+                                .navigationBarsPadding(),
+                            title = stringResource(id = R.string.wallet_dashboard_detected_title),
+                            description = stringResource(id = R.string.wallet_dashboard_detected_description),
+                            onRestoreWalletClick = onRestoreWalletClick,
+                            onCreateWalletClick = { eventPublisher(UiEvent.CreateWallet) },
+                        )
+                    }
+
+                    WalletDashboardState.WalletDiscontinued -> {
+                        WalletSetupCallToAction(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .padding(horizontal = 32.dp)
+                                .padding(bottom = 32.dp)
+                                .navigationBarsPadding(),
+                            title = stringResource(id = R.string.wallet_dashboard_discontinued_title),
+                            description = stringResource(id = R.string.wallet_dashboard_discontinued_description),
+                            onRestoreWalletClick = onRestoreWalletClick,
+                            onCreateWalletClick = { eventPublisher(UiEvent.CreateWallet) },
+                        )
+                    }
+
+                    WalletDashboardState.ActiveWallet -> {
                         if (
                             pagingItems.loadState.refresh is LoadState.NotLoading &&
                             pagingItems.isEmpty() &&
@@ -377,7 +428,7 @@ fun WalletDashboardScreen(
                                     )
                                 }
 
-                                if (state.wallet.balanceInBtc == 0.0) {
+                                if (state.wallet?.balanceInBtc == 0.0) {
                                     WalletCallToActionBox(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -459,7 +510,7 @@ fun WalletDashboardScreen(
                                                 .animateContentSize(),
                                             message = annotatedMessage,
                                             actionLabel = stringResource(id = R.string.wallet_dashboard_backup_button),
-                                            onActionClick = { onWalletBackupClick(state.wallet.walletId) },
+                                            onActionClick = { state.wallet?.let { onWalletBackupClick(it.walletId) } },
                                         )
                                     } else if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
                                         WalletCallToActionBox(
@@ -492,7 +543,7 @@ fun WalletDashboardScreen(
                         }
                     }
 
-                    else -> {
+                    WalletDashboardState.NoWallet -> {
                         WalletCallToActionBox(
                             modifier = Modifier
                                 .fillMaxSize()

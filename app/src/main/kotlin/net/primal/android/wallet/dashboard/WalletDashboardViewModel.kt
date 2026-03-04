@@ -27,6 +27,7 @@ import net.primal.android.user.repository.UserRepository
 import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiEvent
 import net.primal.android.wallet.dashboard.WalletDashboardContract.UiState
+import net.primal.android.wallet.dashboard.WalletDashboardContract.WalletDashboardState
 import net.primal.android.wallet.di.PendingDepositsSyncerFactory
 import net.primal.android.wallet.di.bindToProcessLifecycle
 import net.primal.android.wallet.repository.ExchangeRateHandler
@@ -38,6 +39,7 @@ import net.primal.core.networking.sockets.errors.NostrNoticeException
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.getIfTypeOrNull
 import net.primal.core.utils.onFailure
+import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.billing.BillingRepository
@@ -63,14 +65,23 @@ class WalletDashboardViewModel @Inject constructor(
     private val exchangeRateHandler: ExchangeRateHandler,
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
+    private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val migratePrimalTransactionsHandler: MigratePrimalTransactionsHandler,
 ) : ViewModel() {
 
     private val activeUserId = activeAccountStore.activeUserId()
     private val pendingDepositsSyncer = pendingDepositsSyncerFactory.create(userId = activeUserId)
 
+    private val isNpubLogin = userRepository.isNpubLogin(userId = activeUserId)
+
     private val _state = MutableStateFlow(
-        value = UiState(isNpubLogin = userRepository.isNpubLogin(userId = activeUserId)),
+        value = UiState(
+            dashboardState = if (isNpubLogin) {
+                WalletDashboardState.NoWalletNpubLogin
+            } else {
+                WalletDashboardState.Loading
+            },
+        ),
     )
     val state = _state.asStateFlow()
     private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
@@ -89,6 +100,7 @@ class WalletDashboardViewModel @Inject constructor(
         subscribeToBadgesUpdates()
         checkForPersistedSparkWallet()
         migratePrimalTransactionsIfNeeded()
+        resolveDashboardState()
         bindToProcessLifecycle(pendingDepositsSyncer)
     }
 
@@ -96,6 +108,24 @@ class WalletDashboardViewModel @Inject constructor(
         viewModelScope.launch {
             val existingWalletId = sparkWalletAccountRepository.findPersistedWalletId(activeUserId)
             setState { copy(hasPersistedSparkWallet = existingWalletId != null) }
+        }
+
+    private fun resolveDashboardState() =
+        viewModelScope.launch {
+            if (isNpubLogin) return@launch
+
+            val hasLocalWallet = sparkWalletAccountRepository.findPersistedWalletId(activeUserId) != null
+            if (hasLocalWallet) return@launch
+
+            val status = primalWalletAccountRepository.fetchWalletStatus(activeUserId).getOrNull()
+                ?: return@launch
+
+            val dashboardState = when {
+                status.hasMigratedToSparkWallet -> WalletDashboardState.WalletDetected
+                status.hasCustodialWallet && status.primalWalletDeprecated -> WalletDashboardState.WalletDiscontinued
+                else -> WalletDashboardState.NoWallet
+            }
+            setState { copy(dashboardState = dashboardState) }
         }
 
     private fun migratePrimalTransactionsIfNeeded() =
@@ -129,9 +159,11 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun createWallet() =
         viewModelScope.launch {
+            val previousState = setState { copy(dashboardState = WalletDashboardState.Loading) }
             ensureSparkWalletExistsUseCase.invoke(userId = activeUserId)
                 .onFailure {
                     Napier.e(it) { "Failed to create wallet." }
+                    setState { copy(dashboardState = previousState.dashboardState) }
                     setErrorState(UiState.DashboardError.WalletCreationFailed(it))
                 }
         }
@@ -173,6 +205,11 @@ class WalletDashboardViewModel @Inject constructor(
                             lowBalance = wallet?.balanceInBtc == 0.0,
                             isWalletBackedUp = !wallet.shouldShowBackup,
                             transactions = transactionsUpdate ?: transactions,
+                            dashboardState = if (wallet != null) {
+                                WalletDashboardState.ActiveWallet
+                            } else {
+                                dashboardState
+                            },
                         )
                     }
                 }
