@@ -18,6 +18,7 @@ data class NoteEditorArgs(
     val taggedUsers: List<NoteTaggedUser> = emptyList(),
     val isQuoting: Boolean = false,
     val startWithPoll: Boolean = false,
+    val gifUrl: String? = null,
 ) {
     fun toJson(): String = this.encodeToJsonString()
 

@@ -27,5 +27,6 @@ interface ThreadContract {
         val onClose: () -> Unit,
         val onGoToWallet: () -> Unit,
         val onExpandReply: (args: NoteEditorArgs) -> Unit,
+        val onGifReply: (args: NoteEditorArgs) -> Unit = {},
     )
 }

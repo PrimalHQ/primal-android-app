@@ -149,6 +149,10 @@ class NoteEditorViewModel @AssistedInject constructor(
             if (args.mediaUris.isNotEmpty()) {
                 importPhotos(args.mediaUris.map { it.toUri() })
             }
+
+            if (args.gifUrl != null) {
+                handleGifSelected(args.gifUrl)
+            }
         }
     }
 
