@@ -48,10 +48,16 @@ class MigratePrimalTransactionsHandler(
         withContext(dispatcherProvider.io()) {
             runCatching {
                 migrationMutex.withLock {
-                    // Check locally if migration is already completed
+                    // Only proceed if migration was explicitly initiated (primalTxsMigrated == false).
+                    // null = migration never initiated for this wallet (e.g. fresh install), skip.
+                    // false = explicitly initiated via upgrade flow, proceed.
+                    // true = already completed, skip.
                     val sparkWalletData = walletDatabase.wallet().findSparkWalletData(targetSparkWalletId)
-                    if (sparkWalletData?.primalTxsMigrated == true) {
-                        Napier.d { "Transaction migration already completed for walletId=$targetSparkWalletId" }
+                    if (sparkWalletData?.primalTxsMigrated != false) {
+                        Napier.d {
+                            "Transaction migration skipped for walletId=$targetSparkWalletId" +
+                                " (primalTxsMigrated=${sparkWalletData?.primalTxsMigrated})"
+                        }
                         return@runCatching
                     }
 
