@@ -58,9 +58,9 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.editor.NoteEditorContract
-import net.primal.android.editor.NoteEditorContract.PollType
 import net.primal.android.editor.NoteEditorViewModel.Companion.MAX_POLL_CHOICES
 import net.primal.android.editor.NoteEditorViewModel.Companion.MIN_POLL_CHOICES
+import net.primal.android.notes.feed.model.PollType
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -239,7 +239,7 @@ private fun PollSettingsSection(
         )
     }
 
-    if (pollState.pollType == PollType.ZapPoll) {
+    if (pollState.pollType == PollType.Zap) {
         HorizontalDivider(
             modifier = Modifier.padding(
                 start = startPadding,
@@ -313,8 +313,8 @@ private fun PollSettingRow(
 private fun PollTypeLabel(pollType: PollType) {
     Text(
         text = when (pollType) {
-            PollType.UserPoll -> stringResource(id = R.string.poll_editor_user_poll)
-            PollType.ZapPoll -> stringResource(id = R.string.poll_editor_zap_poll)
+            PollType.User -> stringResource(id = R.string.poll_editor_user_poll)
+            PollType.Zap -> stringResource(id = R.string.poll_editor_zap_poll)
         },
         style = AppTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.onSurface,

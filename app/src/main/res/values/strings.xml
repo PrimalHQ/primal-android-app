@@ -1755,7 +1755,10 @@
     <string name="wallet_upgrade_failed_support_3">, and include that in your email.</string>
     <string name="wallet_upgrade_try_again_button">Try Again</string>
 
-    <string name="poll_votes_count">%1$d votes</string>
+    <plurals name="poll_votes_count">
+        <item quantity="one">%1$d vote</item>
+        <item quantity="other">%1$d votes</item>
+    </plurals>
     <string name="poll_time_remaining">%1$s left</string>
     <plurals name="poll_time_days">
         <item quantity="one">%1$d day</item>
@@ -1781,4 +1784,6 @@
     <string name="zap_poll_unconstrained_hint">Enter any zap amount</string>
     <string name="zap_poll_header_zap">Zap</string>
     <string name="zap_poll_header_sats">sats</string>
+    <string name="zap_poll_chip_sats_suffix">sats</string>
+    <string name="zap_poll_usd_amount">$%1$s USD</string>
 </resources>

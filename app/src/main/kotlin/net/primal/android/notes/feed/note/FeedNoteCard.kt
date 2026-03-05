@@ -223,21 +223,20 @@ private fun FeedNoteCard(
         )
     }
 
-    var showZapPollBottomSheet by remember { mutableStateOf(false) }
-    var zapPollSelectedOptionId by remember { mutableStateOf("") }
+    var zapPollSelectedOptionId by remember { mutableStateOf<String?>(null) }
     val zapPoll = data.poll
-    if (showZapPollBottomSheet && zapPoll != null) {
+    if (zapPollSelectedOptionId != null && zapPoll != null) {
         ZapPollBottomSheet(
             valueMinimum = zapPoll.valueMinimum,
             valueMaximum = zapPoll.valueMaximum,
             exchangeRate = state.currentExchangeRate,
             defaultZapAmounts = state.zappingState.zapsConfig.map { it.amount },
-            onDismissRequest = { showZapPollBottomSheet = false },
+            onDismissRequest = { zapPollSelectedOptionId = null },
             onVote = { amount, comment ->
                 eventPublisher(
                     UiEvent.ZapPollVoteAction(
                         postId = data.postId,
-                        optionId = zapPollSelectedOptionId,
+                        optionId = zapPollSelectedOptionId ?: return@ZapPollBottomSheet,
                         zapAmount = amount,
                         zapComment = comment,
                         poll = zapPoll,
@@ -506,7 +505,6 @@ private fun FeedNoteCard(
                             val poll = data.poll ?: return@FeedNote
                             if (poll.pollType == PollType.Zap) {
                                 zapPollSelectedOptionId = optionId
-                                showZapPollBottomSheet = true
                             } else {
                                 eventPublisher(
                                     UiEvent.PollVoteAction(
@@ -930,7 +928,6 @@ fun PreviewFeedNoteCardWithSingleChoicePollPending() {
                         PollOptionUi(id = "3", label = "\uD83E\uDD65 Coconut Connoiseurs"),
                         PollOptionUi(id = "4", label = "\uD83D\uDC47 All of the above"),
                     ),
-                    totalVotes = 8,
                     endsAt = Instant.now().plus(Duration.ofDays(2).plusMinutes(56)),
                     state = PollState.Pending,
                 ),
@@ -993,7 +990,6 @@ fun PreviewFeedNoteCardWithSingleChoicePollVoted() {
                             isWinner = true,
                         ),
                     ),
-                    totalVotes = 9,
                     endsAt = Instant.now().plus(Duration.ofDays(2).plusMinutes(56)),
                     state = PollState.Voted,
                     selectedOptionIds = setOf("4"),
@@ -1057,7 +1053,6 @@ fun PreviewFeedNoteCardWithSingleChoicePollEnded() {
                             isWinner = true,
                         ),
                     ),
-                    totalVotes = 1245,
                     endsAt = Instant.now().minus(Duration.ofDays(1)),
                     state = PollState.Ended,
                     selectedOptionIds = setOf("4"),

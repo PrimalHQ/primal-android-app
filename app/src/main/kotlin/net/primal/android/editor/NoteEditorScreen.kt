@@ -95,7 +95,6 @@ import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGalle
 import net.primal.android.core.compose.icons.primaliconpack.Poll
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.multiaccount.ui.AccountSwitcherBottomSheet
-import net.primal.android.editor.NoteEditorContract.PollType
 import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.ui.NoteAttachmentPreview
@@ -104,6 +103,7 @@ import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.editor.ui.poll.PollEditorSection
 import net.primal.android.nostr.mappers.toReferencedHighlight
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.PollType
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteContent
@@ -245,7 +245,7 @@ private fun NoteEditorContract.UiState.isPublishEnabled(): Boolean {
         content.text.isNotBlank() &&
             pollState.choices.count { it.text.isNotBlank() } >= 2 &&
             (
-                pollState.pollType != PollType.ZapPoll ||
+                pollState.pollType != PollType.Zap ||
                     pollState.minZapAmountInSats == null ||
                     pollState.maxZapAmountInSats == null ||
                     pollState.minZapAmountInSats <= pollState.maxZapAmountInSats

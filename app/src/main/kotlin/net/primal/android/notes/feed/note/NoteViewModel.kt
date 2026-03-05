@@ -469,7 +469,7 @@ class NoteViewModel @AssistedInject constructor(
 
     private fun votePoll(action: UiEvent.PollVoteAction) =
         viewModelScope.launch {
-            val currentPoll = state.value.poll ?: action.poll
+            val currentPoll = action.poll
 
             val updatedOptions = currentPoll.options.map { option ->
                 val newCount = option.voteCount + if (option.id == action.optionId) 1 else 0
@@ -484,7 +484,6 @@ class NoteViewModel @AssistedInject constructor(
                     poll = currentPoll.copy(
                         state = PollState.Voted,
                         selectedOptionIds = currentPoll.selectedOptionIds + action.optionId,
-                        totalVotes = totalVotes,
                         options = updatedOptions.map { option ->
                             option.copy(
                                 votePercentage = option.voteCount.toFloat() / totalVotes,
@@ -498,7 +497,7 @@ class NoteViewModel @AssistedInject constructor(
 
     private fun zapPollVote(action: UiEvent.ZapPollVoteAction) =
         viewModelScope.launch {
-            val currentPoll = state.value.poll ?: action.poll
+            val currentPoll = action.poll
             val updatedOptions = currentPoll.options.map { option ->
                 val newSats = option.satsZapped + if (option.id == action.optionId) action.zapAmount else 0
                 option.copy(satsZapped = newSats)
@@ -511,9 +510,9 @@ class NoteViewModel @AssistedInject constructor(
                     poll = currentPoll.copy(
                         state = PollState.Voted,
                         selectedOptionIds = currentPoll.selectedOptionIds + action.optionId,
-                        totalVotes = currentPoll.totalVotes + 1,
                         options = updatedOptions.map { option ->
                             option.copy(
+                                voteCount = option.voteCount + if (option.id == action.optionId) 1 else 0,
                                 votePercentage = if (totalSats > 0) {
                                     option.satsZapped.toFloat() / totalSats
                                 } else {

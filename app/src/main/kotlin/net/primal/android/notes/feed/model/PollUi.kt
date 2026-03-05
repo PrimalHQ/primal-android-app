@@ -3,7 +3,7 @@ package net.primal.android.notes.feed.model
 import java.time.Instant
 
 enum class PollType {
-    Regular,
+    User,
     Zap,
 }
 
@@ -23,12 +23,13 @@ data class PollOptionUi(
 )
 
 data class PollUi(
-    val pollType: PollType = PollType.Regular,
+    val pollType: PollType = PollType.User,
     val options: List<PollOptionUi>,
-    val totalVotes: Int,
     val endsAt: Instant? = null,
     val state: PollState,
     val selectedOptionIds: Set<String> = emptySet(),
     val valueMinimum: Long? = null,
     val valueMaximum: Long? = null,
-)
+) {
+    val totalVotes: Int get() = options.sumOf { it.voteCount }
+}

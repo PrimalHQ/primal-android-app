@@ -91,13 +91,7 @@ fun NotePollContent(
                     animatedVisibilityScope = this@AnimatedContent,
                 )
 
-                PollState.Voted -> PollResultsContent(
-                    poll = poll,
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedVisibilityScope = this@AnimatedContent,
-                )
-
-                PollState.Ended -> PollResultsContent(
+                PollState.Voted, PollState.Ended -> PollResultsContent(
                     poll = poll,
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedVisibilityScope = this@AnimatedContent,
@@ -193,8 +187,7 @@ private fun PollResultsContent(
     ) {
         poll.options.forEach { option ->
             val isUserChoice = option.id in poll.selectedOptionIds
-            val showCheckmark =
-                poll.state == PollState.Ended && option.isWinner
+            val showCheckmark = poll.state == PollState.Ended && option.isWinner
 
             PollResultOption(
                 option = option,
@@ -337,7 +330,7 @@ private fun PollResultPercentage(
                 R.string.poll_sats_format,
                 "%,d".format(option.satsZapped),
             )
-            PollType.Regular -> "%.1f%%".format(option.votePercentage * PERCENTAGE_MULTIPLIER)
+            PollType.User -> "%.1f%%".format(option.votePercentage * PERCENTAGE_MULTIPLIER)
         },
         style = AppTheme.typography.bodyMedium,
         fontWeight = if (option.isWinner) FontWeight.Bold else FontWeight.SemiBold,
@@ -366,7 +359,7 @@ private fun PollFooter(
         modifier = modifier.padding(start = 4.dp, top = 4.dp),
         text = buildAnnotatedString {
             withStyle(SpanStyle(color = AppTheme.colorScheme.primary)) {
-                append(stringResource(R.string.poll_votes_count, totalVotes))
+                append(pluralStringResource(R.plurals.poll_votes_count, totalVotes, totalVotes))
             }
             if (timeText != null) {
                 withStyle(
@@ -437,7 +430,7 @@ private fun PreviewPollPending() {
                             label = "\uD83D\uDC47 All of the above",
                         ),
                     ),
-                    totalVotes = 8,
+
                     endsAt = Instant.now().plus(
                         Duration.ofDays(2).plusMinutes(56),
                     ),
@@ -480,7 +473,7 @@ private fun PreviewPollVoted() {
                             isWinner = true,
                         ),
                     ),
-                    totalVotes = 9,
+
                     endsAt = Instant.now().plus(
                         Duration.ofDays(2).plusMinutes(56),
                     ),
@@ -524,7 +517,7 @@ private fun PreviewPollEnded() {
                             isWinner = true,
                         ),
                     ),
-                    totalVotes = 1245,
+
                     endsAt = Instant.now().minus(Duration.ofDays(1)),
                     state = PollState.Ended,
                     selectedOptionIds = setOf("4"),
@@ -566,7 +559,7 @@ private fun PreviewPollEndedUserLost() {
                             isWinner = true,
                         ),
                     ),
-                    totalVotes = 1245,
+
                     endsAt = Instant.now().minus(Duration.ofDays(1)),
                     state = PollState.Ended,
                     selectedOptionIds = setOf("1"),
@@ -592,7 +585,7 @@ private fun PreviewZapPollPending() {
                         PollOptionUi(id = "3", label = "Blue Wallet"),
                         PollOptionUi(id = "4", label = "Primal"),
                     ),
-                    totalVotes = 15,
+
                     endsAt = Instant.now().plus(Duration.ofDays(1)),
                     state = PollState.Pending,
                     valueMinimum = 21,
@@ -640,7 +633,7 @@ private fun PreviewZapPollVoted() {
                             isWinner = true,
                         ),
                     ),
-                    totalVotes = 16,
+
                     endsAt = Instant.now().plus(Duration.ofDays(1)),
                     state = PollState.Voted,
                     selectedOptionIds = setOf("4"),
@@ -689,7 +682,7 @@ private fun PreviewZapPollEnded() {
                             isWinner = true,
                         ),
                     ),
-                    totalVotes = 1_245,
+
                     endsAt = Instant.now().minus(Duration.ofDays(1)),
                     state = PollState.Ended,
                     selectedOptionIds = setOf("4"),

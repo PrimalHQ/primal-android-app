@@ -12,8 +12,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -54,9 +58,8 @@ import net.primal.android.core.compose.zaps.ZAP_ACTION_DELAY
 import net.primal.android.core.utils.shortened
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
-import net.primal.core.utils.CurrencyConversionUtils.fromSatsToUsd
-import net.primal.core.utils.CurrencyConversionUtils.toBigDecimal
 import net.primal.core.utils.generateAmountChips
+import net.primal.domain.utils.parseSatsToUsd
 
 private const val ZAP_POLL_CHIP_COLUMNS = 3
 private const val MAX_CHIPS = 6
@@ -154,7 +157,7 @@ private fun ZapPollBottomSheetContent(
             onChipSelected = { amount, index ->
                 keyboardController?.hide()
                 selectedAmount = amount
-                customAmountText = amount.toString()
+                customAmountText = ""
                 selectedChipIndex = index
             },
             onCustomAmountChange = { text, amount ->
@@ -299,10 +302,10 @@ private fun ZapPollHeader(amount: Long, exchangeRate: Double) {
         )
 
         if (exchangeRate > 0) {
-            val usdAmount = amount.toString().toBigDecimal().fromSatsToUsd(exchangeRate).toPlainString()
+            val usdAmount = amount.toString().parseSatsToUsd(exchangeRate)
             Text(
                 modifier = Modifier.padding(top = 4.dp),
-                text = "$$usdAmount USD",
+                text = stringResource(R.string.zap_poll_usd_amount, usdAmount),
                 style = AppTheme.typography.bodyMedium,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
                 textAlign = TextAlign.Center,
@@ -389,7 +392,7 @@ private fun ZapPollAmountChip(
                 color = AppTheme.colorScheme.onSurface,
             )
             Text(
-                text = " sats",
+                text = " " + stringResource(R.string.zap_poll_chip_sats_suffix),
                 style = AppTheme.typography.bodySmall,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
@@ -439,6 +442,7 @@ private fun ZapPollCustomAmountField(
     isError: Boolean,
     onValueChange: (String) -> Unit,
 ) {
+    val isEmpty = value.isEmpty()
     val errorBorderColor = AppTheme.colorScheme.error.copy(alpha = 0.2f)
 
     OutlinedTextField(
@@ -449,8 +453,14 @@ private fun ZapPollCustomAmountField(
         singleLine = true,
         isError = isError,
         colors = PrimalDefaults.outlinedTextFieldColors(
+            focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
+            unfocusedContainerColor = if (isEmpty) {
+                AppTheme.extraColorScheme.surfaceVariantAlt1
+            } else {
+                AppTheme.extraColorScheme.surfaceVariantAlt3
+            },
             unfocusedBorderColor = Color.Transparent,
-            focusedBorderColor = Color.Transparent,
+            focusedBorderColor = AppTheme.colorScheme.outline,
             errorBorderColor = errorBorderColor,
         ),
         shape = AppTheme.shapes.extraLarge,
@@ -461,6 +471,20 @@ private fun ZapPollCustomAmountField(
             keyboardType = KeyboardType.Number,
             imeAction = ImeAction.Done,
         ),
+        trailingIcon = if (value.isNotEmpty()) {
+            {
+                Icon(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clickable { onValueChange("") },
+                    imageVector = Icons.Default.Close,
+                    contentDescription = null,
+                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                )
+            }
+        } else {
+            null
+        },
         placeholder = {
             Text(
                 modifier = Modifier.fillMaxWidth(),
