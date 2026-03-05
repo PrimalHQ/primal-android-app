@@ -48,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -63,6 +64,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
@@ -70,6 +72,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.util.*
 import kotlinx.coroutines.android.awaitFrame
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.articles.feed.ui.FeedArticleUi
@@ -87,6 +91,7 @@ import net.primal.android.core.compose.TakePhotoIconButton
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
+import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.Gif
@@ -117,6 +122,8 @@ import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.asATagValue
 
+private const val KEYBOARD_SETTLE_DELAY = 300L
+
 @Composable
 fun NoteEditorScreen(viewModel: NoteEditorViewModel, callbacks: NoteEditorContract.ScreenCallbacks) {
     val uiState = viewModel.state.collectAsState()
@@ -145,6 +152,9 @@ fun NoteEditorScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
+    val keyboardVisible by keyboardVisibilityAsState()
+    val scope = rememberCoroutineScope()
     var showAccountSwitcher by remember { mutableStateOf(false) }
 
     if (showAccountSwitcher && state.selectedAccount != null) {
@@ -204,7 +214,17 @@ fun NoteEditorScreen(
                 eventPublisher = eventPublisher,
                 contentPadding = paddingValues,
                 noteCallbacks = NoteCallbacks(),
-                onShowAccountSwitcher = { showAccountSwitcher = true },
+                onShowAccountSwitcher = {
+                    if (keyboardVisible) {
+                        focusManager.clearFocus()
+                        scope.launch {
+                            delay(KEYBOARD_SETTLE_DELAY)
+                            showAccountSwitcher = true
+                        }
+                    } else {
+                        showAccountSwitcher = true
+                    }
+                },
                 onGifClick = callbacks.onGifPickerClick,
             )
         },

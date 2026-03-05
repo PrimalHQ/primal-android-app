@@ -406,10 +406,10 @@ internal class WalletRepositoryImpl(
             wallet.resolveWalletService()
                 .fetchWalletBalance(wallet = wallet.toDomain())
                 .map { response ->
-                    walletDatabase.wallet().updateWalletBalance(
+                    updateWalletBalance(
                         walletId = walletId,
-                        balanceInBtc = response.balanceInBtc.asEncryptable(),
-                        maxBalanceInBtc = response.maxBalanceInBtc?.asEncryptable(),
+                        balanceInBtc = response.balanceInBtc,
+                        maxBalanceInBtc = response.maxBalanceInBtc,
                     )
                 }
         }
@@ -442,7 +442,7 @@ internal class WalletRepositoryImpl(
             balanceInBtc = balanceInBtc.asEncryptable(),
             maxBalanceInBtc = maxBalanceInBtc?.asEncryptable(),
         )
-        if (previousBalance != null && previousBalance.toBits() != balanceInBtc.toBits()) {
+        if (previousBalance == null || previousBalance.toBits() != balanceInBtc.toBits()) {
             syncLatestTransactions(walletId = walletId)
         }
     }

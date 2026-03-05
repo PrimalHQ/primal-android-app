@@ -7,37 +7,45 @@ import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.core.di.AppNoticePreferences
+import kotlinx.coroutines.withTimeout
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.domain.UserAccount
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.notice.sheet.WalletNoticeSheetContract.UiEvent
 import net.primal.android.wallet.notice.sheet.WalletNoticeSheetContract.UiState
+import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.PrimalWalletStatus
 import net.primal.domain.account.SparkWalletAccountRepository
+import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 
 @HiltViewModel
 class WalletNoticeSheetViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
-    private val appNoticePreferences: AppNoticePreferences,
+    private val userRepository: UserRepository,
+    private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
 ) : ViewModel() {
 
     companion object {
         private val INITIAL_DELAY = 1.seconds
         private val AWAY_THRESHOLD = 5.minutes
+        private val WALLET_CREATION_TIMEOUT = 30.seconds
     }
 
     private var backgroundedAtMillis: Long? = null
@@ -118,7 +126,12 @@ class WalletNoticeSheetViewModel @Inject constructor(
 
                 primalWalletAccountRepository.fetchWalletStatus(userId = userId)
                     .onSuccess { status ->
-                        val noticeType = resolveNoticeType(userId = userId, status = status)
+                        val userAccount = activeAccountStore.activeUserAccount()
+                        val noticeType = resolveNoticeType(
+                            userId = userId,
+                            status = status,
+                            userAccount = userAccount,
+                        )
                         setState { copy(noticeType = noticeType) }
 
                         if (noticeType != null) {
@@ -128,20 +141,24 @@ class WalletNoticeSheetViewModel @Inject constructor(
             }
         }
 
-    private suspend fun resolveNoticeType(userId: String, status: PrimalWalletStatus): WalletNoticeType? {
+    private suspend fun resolveNoticeType(
+        userId: String,
+        status: PrimalWalletStatus,
+        userAccount: UserAccount,
+    ): WalletNoticeType? {
         return when {
             status.hasCustodialWallet && !status.hasMigratedToSparkWallet && !status.primalWalletDeprecated ->
                 WalletNoticeType.UpgradeWallet
 
             status.hasCustodialWallet && !status.hasMigratedToSparkWallet && status.primalWalletDeprecated ->
-                if (!appNoticePreferences.isNoticeDismissed(userId, AppNoticePreferences.NOTICE_WALLET_DISCONTINUED)) {
+                if (userAccount.shouldShowWalletDiscontinuedNotice) {
                     WalletNoticeType.WalletDiscontinued
                 } else {
                     null
                 }
 
             status.hasMigratedToSparkWallet && !localSparkWalletExists(userId) ->
-                if (!appNoticePreferences.isNoticeDismissed(userId, AppNoticePreferences.NOTICE_WALLET_DETECTED)) {
+                if (userAccount.shouldShowWalletDetectedNotice) {
                     WalletNoticeType.WalletDetected
                 } else {
                     null
@@ -160,9 +177,30 @@ class WalletNoticeSheetViewModel @Inject constructor(
             events.collect { event ->
                 when (event) {
                     UiEvent.DismissSheet -> handleDismiss()
+                    UiEvent.CreateWallet -> handleCreateWallet()
+                    UiEvent.DismissError -> setState { copy(error = null) }
                 }
             }
         }
+
+    private fun handleCreateWallet() {
+        setState { copy(creatingWallet = true, error = null) }
+        viewModelScope.launch {
+            try {
+                withTimeout(WALLET_CREATION_TIMEOUT) {
+                    ensureSparkWalletExistsUseCase.invoke(userId = activeAccountStore.activeUserId())
+                }.onSuccess {
+                    handleDismiss()
+                }.onFailure { error ->
+                    Napier.e(throwable = error) { "Failed to create wallet from notice sheet." }
+                    setState { copy(creatingWallet = false, error = UiState.WalletCreationError.Failed(error)) }
+                }
+            } catch (e: TimeoutCancellationException) {
+                Napier.e(throwable = e) { "Wallet creation timed out." }
+                setState { copy(creatingWallet = false, error = UiState.WalletCreationError.Failed(e)) }
+            }
+        }
+    }
 
     private fun handleDismiss() {
         val currentState = _state.value
@@ -173,12 +211,12 @@ class WalletNoticeSheetViewModel @Inject constructor(
                 setState { copy(shouldShowNotice = false) }
             }
             WalletNoticeType.WalletDiscontinued -> {
-                appNoticePreferences.setNoticeDismissed(userId, AppNoticePreferences.NOTICE_WALLET_DISCONTINUED)
-                setState { copy(noticeType = null, shouldShowNotice = false) }
+                viewModelScope.launch { userRepository.dismissWalletDiscontinuedNotice(userId) }
+                setState { copy(noticeType = null, shouldShowNotice = false, creatingWallet = false) }
             }
             WalletNoticeType.WalletDetected -> {
-                appNoticePreferences.setNoticeDismissed(userId, AppNoticePreferences.NOTICE_WALLET_DETECTED)
-                setState { copy(noticeType = null, shouldShowNotice = false) }
+                viewModelScope.launch { userRepository.dismissWalletDetectedNotice(userId) }
+                setState { copy(noticeType = null, shouldShowNotice = false, creatingWallet = false) }
             }
             null -> Unit
         }

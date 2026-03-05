@@ -5,4 +5,7 @@ data class PrimalWalletStatus(
     val hasMigratedToSparkWallet: Boolean,
     val lightningAddress: String? = null,
     val primalWalletDeprecated: Boolean = false,
-)
+) {
+    val isEligibleToRegisterSparkWallet: Boolean
+        get() = !hasCustodialWallet || hasMigratedToSparkWallet || primalWalletDeprecated
+}

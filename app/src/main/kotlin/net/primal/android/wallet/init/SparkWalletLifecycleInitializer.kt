@@ -61,50 +61,53 @@ class SparkWalletLifecycleInitializer @Inject constructor(
         }
     }
 
-    private suspend fun isEligibleForSparkWallet(userId: String): Boolean {
-        val status = primalWalletAccountRepository.fetchWalletStatus(userId).getOrNull() ?: return false
-        return !status.hasCustodialWallet || status.hasMigratedToSparkWallet || status.primalWalletDeprecated
-    }
-
-    private suspend fun hasLocalSparkWallet(userId: String): Boolean {
-        return sparkWalletAccountRepository.findPersistedWalletId(userId) != null
-    }
-
     private suspend fun initializeWallet(userId: String) {
         try {
-            val isEligible = isEligibleForSparkWallet(userId)
-            val hasLocalWallet = hasLocalSparkWallet(userId)
+            val userWalletStatus = primalWalletAccountRepository.fetchWalletStatus(userId).getOrNull()
+            val hasLocalWallet = sparkWalletAccountRepository.findPersistedWalletId(userId) != null
 
-            if (!isEligible && !hasLocalWallet) {
-                Napier.d { "User userId=$userId not eligible for Spark wallet, skipping initialization" }
-                return
-            }
+            when {
+                hasLocalWallet -> {
+                    val shouldRegister = userWalletStatus?.isEligibleToRegisterSparkWallet == true
+                    ensureWalletAndConnect(userId, register = shouldRegister)
+                }
 
-            // Only register if eligible - prevents hijacking lightning address
-            // when user has local Spark wallet but is using Primal custodial
-            val shouldRegister = isEligible
+                userWalletStatus?.hasMigratedToSparkWallet == true -> {
+                    Napier.d { "Spark wallet detected on backend for userId=$userId, skipping auto-create." }
+                }
 
-            suspend {
-                ensureSparkWalletExistsUseCase.invoke(userId, register = shouldRegister)
-            }.retryOnFailureWithAbort(
-                times = MAX_RETRY_ATTEMPTS,
-                initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
-                onRetry = { _, remainingAttempts, delaySeconds, error ->
-                    Napier.w(throwable = error) {
-                        "initializeWallet failed for userId=$userId, " +
-                            "retrying in ${delaySeconds}s ($remainingAttempts attempts left)"
-                    }
-                },
-            ).onFailure { error ->
-                Napier.e(throwable = error) { "initializeWallet failed for userId=$userId" }
-            }.onSuccess { walletId ->
-                currentWalletId = walletId
-                Napier.d { "Wallet initialized for userId=$userId, walletId=$walletId" }
-                migrateTransactions(userId = userId, walletId = walletId)
+                userWalletStatus?.hasCustodialWallet == true -> {
+                    Napier.d { "Custodial wallet found for userId=$userId, skipping Spark wallet creation." }
+                }
+
+                else -> {
+                    ensureWalletAndConnect(userId, register = true)
+                }
             }
         } catch (e: CancellationException) {
             Napier.d { "Wallet initialization cancelled for userId=$userId" }
             throw e
+        }
+    }
+
+    private suspend fun ensureWalletAndConnect(userId: String, register: Boolean) {
+        suspend {
+            ensureSparkWalletExistsUseCase.invoke(userId, register = register)
+        }.retryOnFailureWithAbort(
+            times = MAX_RETRY_ATTEMPTS,
+            initialDelaySeconds = INITIAL_RETRY_DELAY_SECONDS,
+            onRetry = { _, remainingAttempts, delaySeconds, error ->
+                Napier.w(throwable = error) {
+                    "ensureWalletAndConnect failed for userId=$userId, " +
+                        "retrying in ${delaySeconds}s ($remainingAttempts attempts left)"
+                }
+            },
+        ).onFailure { error ->
+            Napier.e(throwable = error) { "ensureWalletAndConnect failed for userId=$userId" }
+        }.onSuccess { walletId ->
+            currentWalletId = walletId
+            Napier.d { "Wallet connected for userId=$userId, walletId=$walletId" }
+            migrateTransactions(userId = userId, walletId = walletId)
         }
     }
 

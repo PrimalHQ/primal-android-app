@@ -181,6 +181,7 @@ private fun NavGraphBuilder.dashboard(
         onScanClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Scan) },
         onReceiveClick = { navController.navigateToWalletReceive() },
         onConfigureWalletsClick = { navController.navigateToWalletSettings() },
+        onRestoreWalletClick = { navController.navigateToWalletRestore() },
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
     )
 }

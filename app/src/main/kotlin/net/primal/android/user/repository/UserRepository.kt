@@ -264,6 +264,18 @@ class UserRepository @Inject constructor(
         }
     }
 
+    suspend fun dismissWalletDetectedNotice(userId: String) {
+        accountsStore.getAndUpdateAccount(userId = userId) {
+            copy(shouldShowWalletDetectedNotice = false)
+        }
+    }
+
+    suspend fun dismissWalletDiscontinuedNotice(userId: String) {
+        accountsStore.getAndUpdateAccount(userId = userId) {
+            copy(shouldShowWalletDiscontinuedNotice = false)
+        }
+    }
+
     suspend fun updateUpgradeDotTimestamp(userId: String) {
         accountsStore.getAndUpdateAccount(userId = userId) {
             copy(lastBuyPremiumTimestampInMillis = Clock.System.now().toEpochMilliseconds())
