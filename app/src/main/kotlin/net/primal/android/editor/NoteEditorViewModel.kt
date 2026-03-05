@@ -40,6 +40,8 @@ import net.primal.android.editor.NoteEditorContract.UiEvent
 import net.primal.android.editor.NoteEditorContract.UiState
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteEditorArgs
+import net.primal.android.editor.domain.PollOption
+import net.primal.android.editor.domain.PollPublishRequest
 import net.primal.android.gifpicker.GifBlossomUploader
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -75,6 +77,7 @@ import net.primal.domain.nostr.utils.takeAsNeventOrNull
 import net.primal.domain.nostr.utils.withNostrPrefix
 import net.primal.domain.posts.FeedPost
 import net.primal.domain.posts.FeedRepository
+import net.primal.domain.publisher.PrimalPublishResult
 import net.primal.domain.reads.Article
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
@@ -703,46 +706,25 @@ class NoteEditorViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setState { copy(publishing = true) }
             try {
-                val noteContent = userMentionHandler.replaceUserMentionsWithUserIds(
-                    content = _state.value.content.text,
-                    users = _state.value.taggedUsers,
-                )
-
-                val gifUrls = _state.value.pendingGifUploads.mapNotNull { it.blossomUrl }
-                val noteContentWithGifs = gifUrls.fold(noteContent) { content, gifUrl ->
-                    if (content.isBlank()) gifUrl else "$content\n$gifUrl"
-                }
-
                 val userId = state.value.selectedAccount?.pubkey ?: activeAccountStore.activeUserId()
-                val publishResult = if (args.isQuoting) {
-                    notePublishHandler.publishShortTextNote(
-                        userId = userId,
-                        content = noteContentWithGifs.concatenateUris(),
-                        attachments = _state.value.attachments,
-                    )
-                } else {
-                    val replyToPost = referencedNoteNevent?.eventId?.let {
-                        feedRepository.findPostsById(it)
-                    }
+                val content = resolveNoteContent()
 
-                    val replyToNoteNevent = replyToPost?.asFeedPostUi()?.asNevent() ?: referencedNoteNevent
-                    val rootNoteNevent = replyToPost?.tags
-                        ?.find { it.hasRootMarker() }
-                        ?.buildNeventFromReplyOrRootNoteTag()
-                        ?: replyToNoteNevent
-
-                    notePublishHandler.publishShortTextNote(
-                        userId = userId,
-                        content = noteContentWithGifs.concatenateUris(),
-                        attachments = _state.value.attachments,
-                        rootNoteNevent = rootNoteNevent,
-                        replyToNoteNevent = replyToNoteNevent,
-                        rootArticleNaddr = referencedArticleNaddr
-                            ?: _state.value.replyToArticle?.generateNaddr(),
-                        rootHighlightNevent = referencedHighlightNevent
-                            ?: _state.value.replyToHighlight?.generateNevent(),
-                    )
+                val replyToPost = referencedNoteNevent?.eventId?.let {
+                    feedRepository.findPostsById(it)
                 }
+                val replyToNoteNevent = replyToPost?.asFeedPostUi()?.asNevent() ?: referencedNoteNevent
+                val rootNoteNevent = replyToPost?.tags
+                    ?.find { it.hasRootMarker() }
+                    ?.buildNeventFromReplyOrRootNoteTag()
+                    ?: replyToNoteNevent
+
+                val publishResult = publishNoteOrPoll(
+                    userId = userId,
+                    content = content,
+                    pollState = state.value.pollState,
+                    rootNoteNevent = rootNoteNevent,
+                    replyToNoteNevent = replyToNoteNevent,
+                )
 
                 if (referencedNoteNevent != null) {
                     if (publishResult.imported) {
@@ -768,6 +750,85 @@ class NoteEditorViewModel @AssistedInject constructor(
                 setState { copy(publishing = false) }
             }
         }
+
+    private suspend fun resolveNoteContent(): String {
+        val noteContent = userMentionHandler.replaceUserMentionsWithUserIds(
+            content = _state.value.content.text,
+            users = _state.value.taggedUsers,
+        )
+
+        val gifUrls = _state.value.pendingGifUploads.mapNotNull { it.blossomUrl }
+        val noteContentWithGifs = gifUrls.fold(noteContent) { content, gifUrl ->
+            if (content.isBlank()) gifUrl else "$content\n$gifUrl"
+        }
+
+        return noteContentWithGifs.concatenateUris()
+    }
+
+    private fun PollEditorState.toPollPublishRequest(): PollPublishRequest {
+        val isZapPoll = pollType == NoteEditorContract.PollType.ZapPoll
+        val filteredChoices = choices
+            .filter { it.text.isNotBlank() }
+            .mapIndexed { index, choice ->
+                PollOption(
+                    id = if (isZapPoll) index.toString() else choice.id.toString(),
+                    label = choice.text,
+                )
+            }
+        val endsAt = System.currentTimeMillis() / MILLIS_IN_SECOND +
+            pollLengthDays * SECONDS_IN_DAY +
+            pollLengthHours * SECONDS_IN_HOUR +
+            pollLengthMinutes * SECONDS_IN_MINUTE
+
+        return PollPublishRequest(
+            isZapPoll = isZapPoll,
+            choices = filteredChoices,
+            endsAt = endsAt,
+            minZapAmountInSats = minZapAmountInSats,
+            maxZapAmountInSats = maxZapAmountInSats,
+        )
+    }
+
+    private suspend fun publishNoteOrPoll(
+        userId: String,
+        content: String,
+        pollState: PollEditorState?,
+        rootNoteNevent: Nevent?,
+        replyToNoteNevent: Nevent?,
+    ): PrimalPublishResult {
+        return if (pollState != null) {
+            notePublishHandler.publishPoll(
+                userId = userId,
+                content = content,
+                attachments = _state.value.attachments,
+                pollRequest = pollState.toPollPublishRequest(),
+                rootNoteNevent = rootNoteNevent,
+                rootArticleNaddr = referencedArticleNaddr
+                    ?: _state.value.replyToArticle?.generateNaddr(),
+                rootHighlightNevent = referencedHighlightNevent
+                    ?: _state.value.replyToHighlight?.generateNevent(),
+                replyToNoteNevent = replyToNoteNevent,
+            )
+        } else if (args.isQuoting) {
+            notePublishHandler.publishShortTextNote(
+                userId = userId,
+                content = content,
+                attachments = _state.value.attachments,
+            )
+        } else {
+            notePublishHandler.publishShortTextNote(
+                userId = userId,
+                content = content,
+                attachments = _state.value.attachments,
+                rootNoteNevent = rootNoteNevent,
+                replyToNoteNevent = replyToNoteNevent,
+                rootArticleNaddr = referencedArticleNaddr
+                    ?: _state.value.replyToArticle?.generateNaddr(),
+                rootHighlightNevent = referencedHighlightNevent
+                    ?: _state.value.replyToHighlight?.generateNevent(),
+            )
+        }
+    }
 
     private fun fetchNoteReplies() {
         if (referencedNoteNevent != null) {
@@ -1020,6 +1081,10 @@ class NoteEditorViewModel @AssistedInject constructor(
         const val MAX_POLL_CHOICES = 5
         const val MIN_POLL_CHOICES = 2
         const val MAX_POLL_CHOICE_LENGTH = 35
+        private const val MILLIS_IN_SECOND = 1000L
+        private const val SECONDS_IN_MINUTE = 60L
+        private const val SECONDS_IN_HOUR = 3600L
+        private const val SECONDS_IN_DAY = 86400L
         private const val MINUTES_PER_HOUR = 60
         private const val HOURS_PER_DAY = 24
         private const val MIN_POLL_LENGTH_MINUTES = 1
