@@ -1754,4 +1754,31 @@
     <string name="wallet_upgrade_failed_support_copy_log">copy the error log</string>
     <string name="wallet_upgrade_failed_support_3">, and include that in your email.</string>
     <string name="wallet_upgrade_try_again_button">Try Again</string>
+
+    <string name="poll_votes_count">%1$d votes</string>
+    <string name="poll_time_remaining">%1$s left</string>
+    <plurals name="poll_time_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <plurals name="poll_time_hours">
+        <item quantity="one">%1$d hour</item>
+        <item quantity="other">%1$d hours</item>
+    </plurals>
+    <plurals name="poll_time_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <string name="poll_time_and">and</string>
+    <string name="poll_final_results">Final results</string>
+    <string name="poll_sats_format">%s sats</string>
+    <string name="zap_poll_vote_button">Vote</string>
+    <string name="zap_poll_add_comment">Add a comment…</string>
+    <string name="zap_poll_fixed_amount">This poll only allows votes of %s sats</string>
+    <string name="zap_poll_range_hint">This poll allows votes between %1$s - %2$s sats</string>
+    <string name="zap_poll_custom_amount_hint">Enter custom zap amount (%1$s - %2$s sats)</string>
+    <string name="zap_poll_enter_custom">enter custom amount</string>
+    <string name="zap_poll_unconstrained_hint">Enter any zap amount</string>
+    <string name="zap_poll_header_zap">Zap</string>
+    <string name="zap_poll_header_sats">sats</string>
 </resources>
