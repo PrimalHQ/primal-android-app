@@ -6,9 +6,14 @@ import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.editor.domain.NoteAttachment
+import net.primal.android.editor.domain.PollOption
+import net.primal.android.editor.domain.PollPublishRequest
 import net.primal.android.editor.domain.asIMetaTag
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.publish.NostrPublisher
+import net.primal.android.user.domain.RelayKind
+import net.primal.android.user.domain.mapToRelayDO
+import net.primal.android.user.repository.RelayRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.nostr.Naddr
@@ -31,18 +36,18 @@ class NotePublishHandler @Inject constructor(
     private val nostrPublisher: NostrPublisher,
     private val eventRelayHintsRepository: EventRelayHintsRepository,
     private val feedRepository: FeedRepository,
+    private val relayRepository: RelayRepository,
 ) {
 
-    @Throws(NostrPublishException::class)
-    suspend fun publishShortTextNote(
-        userId: String,
+    @Suppress("LongParameterList")
+    private suspend fun prepareNote(
         content: String,
-        attachments: List<NoteAttachment> = emptyList(),
-        rootNoteNevent: Nevent? = null,
-        rootArticleNaddr: Naddr? = null,
-        rootHighlightNevent: Nevent? = null,
-        replyToNoteNevent: Nevent? = null,
-    ): PrimalPublishResult {
+        attachments: List<NoteAttachment>,
+        rootNoteNevent: Nevent?,
+        rootArticleNaddr: Naddr?,
+        rootHighlightNevent: Nevent?,
+        replyToNoteNevent: Nevent?,
+    ): PreparedNote {
         val noteContent = content.ensureWhitespaceBeforeUserTag()
 
         /* Event mentions from content */
@@ -50,7 +55,7 @@ class NotePublishHandler @Inject constructor(
         val mentionReplaceableEventTags = noteContent.parseReplaceableEventTags(marker = "mention")
         val allMentionedEventTags = mentionEventTags + mentionReplaceableEventTags
 
-        /* Pubkey mentions from content and referenced pub keys. */
+        /* Pubkey mentions from content and referenced pub keys */
         val mentionPubkeyTags = noteContent.parsePubkeyTags(marker = "mention").toSet()
         val referencedPubkeyTags = resolveReferencedPubkeyTags(
             rootNoteNevent = rootNoteNevent,
@@ -91,21 +96,167 @@ class NotePublishHandler @Inject constructor(
         /* Content */
         val refinedContent = noteContent.appendAttachmentUrls(attachments)
 
-        return withContext(dispatcherProvider.io()) {
-            val outboxRelays = replyToNoteNevent?.eventId?.let { noteId ->
-                relayHintsMap[noteId]?.let { relayUrl -> listOf(relayUrl) }
-            } ?: emptyList()
+        /* Outbox relays */
+        val outboxRelays = replyToNoteNevent?.eventId?.let { noteId ->
+            relayHintsMap[noteId]?.let { relayUrl -> listOf(relayUrl) }
+        } ?: emptyList()
 
+        return PreparedNote(
+            refinedContent = refinedContent,
+            referenceTags = allReferenceTagsWithRelays,
+            hashtagTags = hashtagTags,
+            iMetaTags = iMetaTags,
+            outboxRelays = outboxRelays,
+        )
+    }
+
+    @Throws(NostrPublishException::class)
+    suspend fun publishShortTextNote(
+        userId: String,
+        content: String,
+        attachments: List<NoteAttachment> = emptyList(),
+        rootNoteNevent: Nevent? = null,
+        rootArticleNaddr: Naddr? = null,
+        rootHighlightNevent: Nevent? = null,
+        replyToNoteNevent: Nevent? = null,
+    ): PrimalPublishResult {
+        val prepared = prepareNote(
+            content = content,
+            attachments = attachments,
+            rootNoteNevent = rootNoteNevent,
+            rootArticleNaddr = rootArticleNaddr,
+            rootHighlightNevent = rootHighlightNevent,
+            replyToNoteNevent = replyToNoteNevent,
+        )
+
+        return withContext(dispatcherProvider.io()) {
             nostrPublisher.signPublishImportNostrEvent(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = NostrEventKind.ShortTextNote.value,
-                    tags = (allReferenceTagsWithRelays + hashtagTags + iMetaTags).toList(),
-                    content = refinedContent,
+                    tags = (prepared.referenceTags + prepared.hashtagTags + prepared.iMetaTags).toList(),
+                    content = prepared.refinedContent,
                 ),
-                outboxRelays = outboxRelays,
+                outboxRelays = prepared.outboxRelays,
             )
         }
+    }
+
+    @Throws(NostrPublishException::class)
+    suspend fun publishPoll(
+        userId: String,
+        content: String,
+        attachments: List<NoteAttachment> = emptyList(),
+        pollRequest: PollPublishRequest,
+        rootNoteNevent: Nevent? = null,
+        rootArticleNaddr: Naddr? = null,
+        rootHighlightNevent: Nevent? = null,
+        replyToNoteNevent: Nevent? = null,
+    ): PrimalPublishResult {
+        val prepared = prepareNote(
+            content = content,
+            attachments = attachments,
+            rootNoteNevent = rootNoteNevent,
+            rootArticleNaddr = rootArticleNaddr,
+            rootHighlightNevent = rootHighlightNevent,
+            replyToNoteNevent = replyToNoteNevent,
+        )
+
+        val eventKind = if (pollRequest.isZapPoll) NostrEventKind.ZapPoll else NostrEventKind.Poll
+
+        return withContext(dispatcherProvider.io()) {
+            val writeRelayUrls = relayRepository.findRelays(userId, RelayKind.UserRelay)
+                .map { it.mapToRelayDO() }
+                .filter { it.write }
+                .map { it.url }
+
+            val pollTags = if (pollRequest.isZapPoll) {
+                buildZapPollTags(
+                    userId = userId,
+                    choices = pollRequest.choices,
+                    endsAt = pollRequest.endsAt,
+                    minZapAmountInSats = pollRequest.minZapAmountInSats,
+                    maxZapAmountInSats = pollRequest.maxZapAmountInSats,
+                    writeRelayUrls = writeRelayUrls,
+                )
+            } else {
+                buildUserPollTags(
+                    choices = pollRequest.choices,
+                    endsAt = pollRequest.endsAt,
+                    writeRelayUrls = writeRelayUrls,
+                )
+            }
+
+            nostrPublisher.signPublishImportNostrEvent(
+                unsignedNostrEvent = NostrUnsignedEvent(
+                    pubKey = userId,
+                    kind = eventKind.value,
+                    tags = (prepared.referenceTags + prepared.hashtagTags + prepared.iMetaTags + pollTags).toList(),
+                    content = prepared.refinedContent,
+                ),
+                outboxRelays = prepared.outboxRelays,
+            )
+        }
+    }
+
+    private fun buildUserPollTags(
+        choices: List<PollOption>,
+        endsAt: Long,
+        writeRelayUrls: List<String>,
+    ): List<JsonArray> {
+        val tags = mutableListOf<JsonArray>()
+
+        choices.forEach { (id, label) ->
+            tags.add(JsonArray(listOf(JsonPrimitive("option"), JsonPrimitive(id), JsonPrimitive(label))))
+        }
+
+        tags.add(JsonArray(listOf(JsonPrimitive("polltype"), JsonPrimitive("singlechoice"))))
+        tags.add(JsonArray(listOf(JsonPrimitive("endsAt"), JsonPrimitive(endsAt.toString()))))
+
+        writeRelayUrls.forEach { relayUrl ->
+            tags.add(JsonArray(listOf(JsonPrimitive("relay"), JsonPrimitive(relayUrl))))
+        }
+
+        return tags
+    }
+
+    @Suppress("LongParameterList")
+    private fun buildZapPollTags(
+        userId: String,
+        choices: List<PollOption>,
+        endsAt: Long,
+        minZapAmountInSats: Long?,
+        maxZapAmountInSats: Long?,
+        writeRelayUrls: List<String>,
+    ): List<JsonArray> {
+        val tags = mutableListOf<JsonArray>()
+
+        choices.forEachIndexed { index, choice ->
+            tags.add(
+                JsonArray(
+                    listOf(JsonPrimitive("poll_option"), JsonPrimitive(index.toString()), JsonPrimitive(choice.label)),
+                ),
+            )
+        }
+
+        val firstWriteRelayUrl = writeRelayUrls.firstOrNull()
+        val pTag = if (firstWriteRelayUrl != null) {
+            listOf(JsonPrimitive("p"), JsonPrimitive(userId), JsonPrimitive(firstWriteRelayUrl))
+        } else {
+            listOf(JsonPrimitive("p"), JsonPrimitive(userId))
+        }
+        tags.add(JsonArray(pTag))
+
+        tags.add(JsonArray(listOf(JsonPrimitive("closed_at"), JsonPrimitive(endsAt.toString()))))
+
+        if (minZapAmountInSats != null) {
+            tags.add(JsonArray(listOf(JsonPrimitive("value_minimum"), JsonPrimitive(minZapAmountInSats.toString()))))
+        }
+        if (maxZapAmountInSats != null) {
+            tags.add(JsonArray(listOf(JsonPrimitive("value_maximum"), JsonPrimitive(maxZapAmountInSats.toString()))))
+        }
+
+        return tags
     }
 
     private fun resolveRootEventTag(
@@ -201,4 +352,12 @@ class NotePublishHandler @Inject constructor(
         }
 
     private fun String.ensureWhitespaceBeforeUserTag(): String = this.replace(Regex("([^-\\s])(nostr:npub)"), "$1 $2")
+
+    private data class PreparedNote(
+        val refinedContent: String,
+        val referenceTags: List<JsonArray>,
+        val hashtagTags: Set<JsonArray>,
+        val iMetaTags: List<JsonArray>,
+        val outboxRelays: List<String>,
+    )
 }
