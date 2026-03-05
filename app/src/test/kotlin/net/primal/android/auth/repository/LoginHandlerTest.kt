@@ -22,6 +22,7 @@ import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.cryptography.SignResult
+import net.primal.domain.usecase.EnsurePrimalWalletExistsUseCase
 import org.junit.Rule
 import org.junit.Test
 
@@ -43,6 +44,7 @@ class LoginHandlerTest {
         userRepository: UserRepository = mockk(relaxed = true),
         mutedItemRepository: MutedItemRepository = mockk(relaxed = true),
         bookmarksRepository: PublicBookmarksRepository = mockk(relaxed = true),
+        ensurePrimalWalletExistsUseCase: EnsurePrimalWalletExistsUseCase = mockk(relaxed = true),
         credentialsStore: CredentialsStore = mockk(relaxed = true),
         nostrNotary: NostrNotary = mockk(relaxed = true),
     ): LoginHandler =
@@ -55,6 +57,7 @@ class LoginHandlerTest {
             dispatchers = coroutinesTestRule.dispatcherProvider,
             credentialsStore = credentialsStore,
             nostrNotary = nostrNotary,
+            ensurePrimalWalletExistsUseCase = ensurePrimalWalletExistsUseCase,
         )
 
     private fun createDummyNostrEvent(
@@ -161,6 +164,28 @@ class LoginHandlerTest {
 
             coVerify {
                 mutedItemRepository.fetchAndPersistMuteList(expectedUserId)
+            }
+        }
+
+    @Test
+    fun login_callsEnsurePrimalWalletExistsUseCase() =
+        runTest {
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns expectedUserId
+            }
+            val ensurePrimalWalletExistsUseCase = mockk<EnsurePrimalWalletExistsUseCase>(relaxed = true)
+            val loginHandler = createLoginHandler(
+                ensurePrimalWalletExistsUseCase = ensurePrimalWalletExistsUseCase,
+                credentialsStore = credentialsStore,
+            )
+            loginHandler.login(
+                nostrKey = nsec,
+                credentialType = CredentialType.PrivateKey,
+                authorizationEvent = null,
+            )
+
+            coVerify {
+                ensurePrimalWalletExistsUseCase.invoke(expectedUserId, setAsActive = true)
             }
         }
 
