@@ -407,11 +407,11 @@ fun WalletDashboardScreen(
                     }
 
                     WalletDashboardState.ActiveWallet -> {
-                        if (
-                            pagingItems.loadState.refresh is LoadState.NotLoading &&
-                            pagingItems.isEmpty() &&
+                        val isTransactionListSettled = pagingItems.loadState.refresh is LoadState.NotLoading &&
+                            pagingItems.loadState.append is LoadState.NotLoading &&
                             !state.refreshing
-                        ) {
+
+                        if (isTransactionListSettled && pagingItems.isEmpty()) {
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -479,7 +479,7 @@ fun WalletDashboardScreen(
                                                 .fillMaxSize()
                                                 .animateContentSize()
                                                 .padding(horizontal = 32.dp)
-                                                .padding(bottom = 12.dp),
+                                                .padding(top = 16.dp, bottom = 12.dp),
                                             onUpgradeWalletClick = onUpgradeWalletClick,
                                         )
                                     } else if (!state.isWalletBackedUp) {
