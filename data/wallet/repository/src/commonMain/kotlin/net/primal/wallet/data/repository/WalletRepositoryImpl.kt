@@ -442,7 +442,7 @@ internal class WalletRepositoryImpl(
             balanceInBtc = balanceInBtc.asEncryptable(),
             maxBalanceInBtc = maxBalanceInBtc?.asEncryptable(),
         )
-        if (previousBalance != null && previousBalance.toBits() != balanceInBtc.toBits()) {
+        if (previousBalance == null || previousBalance.toBits() != balanceInBtc.toBits()) {
             syncLatestTransactions(walletId = walletId)
         }
     }
