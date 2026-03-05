@@ -122,6 +122,7 @@ fun WalletDashboardScreen(
                 if (uiState.value.wallet?.capabilities?.supportsBalanceSubscription != true) {
                     viewModel.setEvents(UiEvent.RequestWalletBalanceUpdate)
                 }
+                viewModel.setEvents(UiEvent.RequestLatestTransactionsSync)
             }
 
             else -> Unit
