@@ -17,9 +17,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import net.primal.android.core.di.AppNoticePreferences
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.domain.UserAccount
+import net.primal.android.user.repository.UserRepository
 import net.primal.android.wallet.notice.sheet.WalletNoticeSheetContract.UiEvent
 import net.primal.android.wallet.notice.sheet.WalletNoticeSheetContract.UiState
 import net.primal.core.utils.onSuccess
@@ -32,7 +33,7 @@ class WalletNoticeSheetViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
-    private val appNoticePreferences: AppNoticePreferences,
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     companion object {
@@ -118,7 +119,12 @@ class WalletNoticeSheetViewModel @Inject constructor(
 
                 primalWalletAccountRepository.fetchWalletStatus(userId = userId)
                     .onSuccess { status ->
-                        val noticeType = resolveNoticeType(userId = userId, status = status)
+                        val userAccount = activeAccountStore.activeUserAccount()
+                        val noticeType = resolveNoticeType(
+                            userId = userId,
+                            status = status,
+                            userAccount = userAccount,
+                        )
                         setState { copy(noticeType = noticeType) }
 
                         if (noticeType != null) {
@@ -128,20 +134,24 @@ class WalletNoticeSheetViewModel @Inject constructor(
             }
         }
 
-    private suspend fun resolveNoticeType(userId: String, status: PrimalWalletStatus): WalletNoticeType? {
+    private suspend fun resolveNoticeType(
+        userId: String,
+        status: PrimalWalletStatus,
+        userAccount: UserAccount,
+    ): WalletNoticeType? {
         return when {
             status.hasCustodialWallet && !status.hasMigratedToSparkWallet && !status.primalWalletDeprecated ->
                 WalletNoticeType.UpgradeWallet
 
             status.hasCustodialWallet && !status.hasMigratedToSparkWallet && status.primalWalletDeprecated ->
-                if (!appNoticePreferences.isNoticeDismissed(userId, AppNoticePreferences.NOTICE_WALLET_DISCONTINUED)) {
+                if (userAccount.shouldShowWalletDiscontinuedNotice) {
                     WalletNoticeType.WalletDiscontinued
                 } else {
                     null
                 }
 
             status.hasMigratedToSparkWallet && !localSparkWalletExists(userId) ->
-                if (!appNoticePreferences.isNoticeDismissed(userId, AppNoticePreferences.NOTICE_WALLET_DETECTED)) {
+                if (userAccount.shouldShowWalletDetectedNotice) {
                     WalletNoticeType.WalletDetected
                 } else {
                     null
@@ -173,11 +183,11 @@ class WalletNoticeSheetViewModel @Inject constructor(
                 setState { copy(shouldShowNotice = false) }
             }
             WalletNoticeType.WalletDiscontinued -> {
-                appNoticePreferences.setNoticeDismissed(userId, AppNoticePreferences.NOTICE_WALLET_DISCONTINUED)
+                viewModelScope.launch { userRepository.dismissWalletDiscontinuedNotice(userId) }
                 setState { copy(noticeType = null, shouldShowNotice = false) }
             }
             WalletNoticeType.WalletDetected -> {
-                appNoticePreferences.setNoticeDismissed(userId, AppNoticePreferences.NOTICE_WALLET_DETECTED)
+                viewModelScope.launch { userRepository.dismissWalletDetectedNotice(userId) }
                 setState { copy(noticeType = null, shouldShowNotice = false) }
             }
             null -> Unit

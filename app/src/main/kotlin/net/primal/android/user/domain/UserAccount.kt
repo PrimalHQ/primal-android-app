@@ -51,6 +51,8 @@ data class UserAccount(
     val blossomServers: List<String> = emptyList(),
     val pushNotificationsEnabled: Boolean = false,
     val shouldShowStreamControlPopup: Boolean = true,
+    val shouldShowWalletDetectedNotice: Boolean = true,
+    val shouldShowWalletDiscontinuedNotice: Boolean = true,
 ) {
     companion object {
         val EMPTY = UserAccount(
