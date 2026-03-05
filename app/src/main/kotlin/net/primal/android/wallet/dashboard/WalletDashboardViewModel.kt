@@ -123,6 +123,7 @@ class WalletDashboardViewModel @Inject constructor(
             val dashboardState = when {
                 status.hasMigratedToSparkWallet -> WalletDashboardState.WalletDetected
                 status.hasCustodialWallet && status.primalWalletDeprecated -> WalletDashboardState.WalletDiscontinued
+                status.hasCustodialWallet -> return@launch
                 else -> WalletDashboardState.NoWallet
             }
             setState { copy(dashboardState = dashboardState) }
