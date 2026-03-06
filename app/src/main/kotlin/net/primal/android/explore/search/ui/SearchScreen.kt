@@ -1,11 +1,19 @@
 package net.primal.android.explore.search.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -24,6 +32,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -141,6 +150,41 @@ fun SearchScreen(
                     HorizontalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
                 }
 
+                // Namecoin blockchain resolution (loading or result)
+                if (state.namecoinResolving) {
+                    item(key = "namecoin_loading") {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start,
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(16.dp),
+                                strokeWidth = 2.dp,
+                                color = AppTheme.colorScheme.primary,
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = stringResource(id = R.string.explore_namecoin_resolving),
+                                style = AppTheme.typography.bodySmall,
+                                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                            )
+                        }
+                    }
+                }
+
+                val namecoinUser = state.namecoinResolvedUser
+                if (namecoinUser != null) {
+                    item(key = "namecoin_${namecoinUser.profileId}") {
+                        UserProfileListItem(
+                            data = namecoinUser,
+                            onClick = { item -> callbacks.onProfileClick(item.profileId) },
+                        )
+                    }
+                }
+
                 items(
                     items = state.searchResults.ifEmpty {
                         when (state.searchQuery.isEmpty()) {
@@ -149,6 +193,13 @@ fun SearchScreen(
                                 true -> state.recommendedUsers
                                 false -> state.searchResults
                             }
+                        }
+                    }.let { results ->
+                        // Deduplicate: remove Namecoin user from standard results if present
+                        if (namecoinUser != null) {
+                            results.filter { it.profileId != namecoinUser.profileId }
+                        } else {
+                            results
                         }
                     },
                     key = { it.profileId },
