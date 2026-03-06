@@ -44,6 +44,7 @@ data class FeedPostUi(
     val authorBlossoms: List<String> = emptyList(),
     val eventRelayHints: List<String> = emptyList(),
     val isAuthorLiveStreamingNow: Boolean = false,
+    val poll: PollUi? = null,
 )
 
 fun FeedPost.asFeedPostUi(): FeedPostUi {

@@ -27,7 +27,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.DrawerProfileFilled
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
-import net.primal.android.editor.NoteEditorContract.PollType
+import net.primal.android.notes.feed.model.PollType
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -62,8 +62,8 @@ fun PollTypeDialog(
                 },
                 title = stringResource(id = R.string.poll_editor_user_poll),
                 description = stringResource(id = R.string.poll_editor_user_poll_description),
-                isSelected = selectedType == PollType.UserPoll,
-                onClick = { onTypeSelected(PollType.UserPoll) },
+                isSelected = selectedType == PollType.User,
+                onClick = { onTypeSelected(PollType.User) },
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -79,8 +79,8 @@ fun PollTypeDialog(
                 },
                 title = stringResource(id = R.string.poll_editor_zap_poll),
                 description = stringResource(id = R.string.poll_editor_zap_poll_description),
-                isSelected = selectedType == PollType.ZapPoll,
-                onClick = { onTypeSelected(PollType.ZapPoll) },
+                isSelected = selectedType == PollType.Zap,
+                onClick = { onTypeSelected(PollType.Zap) },
             )
         }
     }

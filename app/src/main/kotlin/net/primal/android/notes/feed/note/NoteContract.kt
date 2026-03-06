@@ -1,6 +1,7 @@
 package net.primal.android.notes.feed.note
 
 import net.primal.android.core.errors.UiError
+import net.primal.android.notes.feed.model.PollUi
 import net.primal.domain.nostr.ReportType
 import net.primal.domain.zaps.ZappingState
 
@@ -11,6 +12,8 @@ interface NoteContract {
         val zappingState: ZappingState = ZappingState(),
         val shouldApproveBookmark: Boolean = false,
         val relayHints: List<String> = emptyList(),
+        val currentExchangeRate: Double = 0.0,
+        val poll: PollUi? = null,
         val error: UiError? = null,
     )
 
@@ -77,6 +80,20 @@ interface NoteContract {
 
         data class UpdateAutoPlayVideoSoundPreference(
             val soundOn: Boolean,
+        ) : UiEvent()
+
+        data class PollVoteAction(
+            val postId: String,
+            val optionId: String,
+            val poll: PollUi,
+        ) : UiEvent()
+
+        data class ZapPollVoteAction(
+            val postId: String,
+            val optionId: String,
+            val zapAmount: Long,
+            val zapComment: String?,
+            val poll: PollUi,
         ) : UiEvent()
 
         data object DismissError : UiEvent()

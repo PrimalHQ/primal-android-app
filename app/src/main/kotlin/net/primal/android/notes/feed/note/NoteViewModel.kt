@@ -19,11 +19,13 @@ import net.primal.android.core.errors.UiError.FailedToPublishZapEvent
 import net.primal.android.core.errors.UiError.GenericError
 import net.primal.android.core.errors.UiError.InvalidZapRequest
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.notes.feed.model.PollState
 import net.primal.android.notes.feed.note.NoteContract.SideEffect
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
+import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.domain.account.WalletAccountRepository
@@ -50,6 +52,7 @@ class NoteViewModel @AssistedInject constructor(
     @Assisted private val noteId: String?,
     private val activeAccountStore: ActiveAccountStore,
     private val zapHandler: ZapHandler,
+    private val exchangeRateHandler: ExchangeRateHandler,
     private val eventInteractionRepository: EventInteractionRepository,
     private val profileRepository: ProfileRepository,
     private val feedRepository: FeedRepository,
@@ -79,6 +82,8 @@ class NoteViewModel @AssistedInject constructor(
     init {
         observeEvents()
         observeActiveWallet()
+        fetchExchangeRate()
+        observeUsdExchangeRate()
         subscribeToActiveAccount()
         if (noteId != null) {
             prepareRelayHints(noteId = noteId)
@@ -90,6 +95,18 @@ class NoteViewModel @AssistedInject constructor(
             val hints = relayHintsRepository.findRelaysByIds(eventIds = listOf(noteId))
             hints.firstOrNull()?.let { relayHints ->
                 setState { copy(relayHints = relayHints.relays.take(n = 2)) }
+            }
+        }
+
+    private fun fetchExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.updateExchangeRate(userId = activeAccountStore.activeUserId())
+        }
+
+    private fun observeUsdExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.usdExchangeRate.collect {
+                setState { copy(currentExchangeRate = it) }
             }
         }
 
@@ -123,6 +140,7 @@ class NoteViewModel @AssistedInject constructor(
             }
         }
 
+    @Suppress("CyclomaticComplexMethod")
     private fun observeEvents() =
         viewModelScope.launch {
             events.collect {
@@ -144,6 +162,8 @@ class NoteViewModel @AssistedInject constructor(
                         repostId = it.repostId,
                         repostAuthorId = it.repostAuthorId,
                     )
+                    is UiEvent.PollVoteAction -> votePoll(it)
+                    is UiEvent.ZapPollVoteAction -> zapPollVote(it)
                 }
             }
         }
@@ -445,5 +465,64 @@ class NoteViewModel @AssistedInject constructor(
     private fun dismissBookmarkConfirmation() =
         viewModelScope.launch {
             setState { copy(shouldApproveBookmark = false) }
+        }
+
+    private fun votePoll(action: UiEvent.PollVoteAction) =
+        viewModelScope.launch {
+            val currentPoll = action.poll
+
+            val updatedOptions = currentPoll.options.map { option ->
+                val newCount = option.voteCount + if (option.id == action.optionId) 1 else 0
+                option.copy(voteCount = newCount)
+            }
+
+            val totalVotes = updatedOptions.sumOf { it.voteCount }.coerceAtLeast(1)
+            val maxCount = updatedOptions.maxOf { it.voteCount }
+
+            setState {
+                copy(
+                    poll = currentPoll.copy(
+                        state = PollState.Voted,
+                        selectedOptionIds = currentPoll.selectedOptionIds + action.optionId,
+                        options = updatedOptions.map { option ->
+                            option.copy(
+                                votePercentage = option.voteCount.toFloat() / totalVotes,
+                                isWinner = option.voteCount == maxCount,
+                            )
+                        },
+                    ),
+                )
+            }
+        }
+
+    private fun zapPollVote(action: UiEvent.ZapPollVoteAction) =
+        viewModelScope.launch {
+            val currentPoll = action.poll
+            val updatedOptions = currentPoll.options.map { option ->
+                val newSats = option.satsZapped + if (option.id == action.optionId) action.zapAmount else 0
+                option.copy(satsZapped = newSats)
+            }
+            val totalSats = updatedOptions.sumOf { it.satsZapped }
+            val maxSats = updatedOptions.maxOf { it.satsZapped }
+
+            setState {
+                copy(
+                    poll = currentPoll.copy(
+                        state = PollState.Voted,
+                        selectedOptionIds = currentPoll.selectedOptionIds + action.optionId,
+                        options = updatedOptions.map { option ->
+                            option.copy(
+                                voteCount = option.voteCount + if (option.id == action.optionId) 1 else 0,
+                                votePercentage = if (totalSats > 0) {
+                                    option.satsZapped.toFloat() / totalSats
+                                } else {
+                                    0f
+                                },
+                                isWinner = option.satsZapped == maxSats,
+                            )
+                        },
+                    ),
+                )
+            }
         }
 }

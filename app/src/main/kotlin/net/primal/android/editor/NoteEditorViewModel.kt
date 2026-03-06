@@ -45,6 +45,7 @@ import net.primal.android.editor.domain.PollPublishRequest
 import net.primal.android.gifpicker.GifBlossomUploader
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.PollType
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.profile.mention.UserMentionHandler
 import net.primal.android.profile.mention.appendUserTagAtSignAtCursorPosition
@@ -766,7 +767,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     }
 
     private fun PollEditorState.toPollPublishRequest(): PollPublishRequest {
-        val isZapPoll = pollType == NoteEditorContract.PollType.ZapPoll
+        val isZapPoll = pollType == PollType.Zap
         val filteredChoices = choices
             .filter { it.text.isNotBlank() }
             .mapIndexed { index, choice ->

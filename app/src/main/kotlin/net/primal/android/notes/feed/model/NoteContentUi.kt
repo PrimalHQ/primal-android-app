@@ -14,6 +14,7 @@ data class NoteContentUi(
     val hashtags: List<String> = emptyList(),
     val invoices: List<String> = emptyList(),
     val blossoms: List<String> = emptyList(),
+    val poll: PollUi? = null,
 )
 
 fun FeedPostUi.toNoteContentUi(): NoteContentUi {
@@ -27,6 +28,7 @@ fun FeedPostUi.toNoteContentUi(): NoteContentUi {
         hashtags = this.hashtags,
         invoices = invoices,
         blossoms = this.authorBlossoms,
+        poll = this.poll,
     )
 }
 
