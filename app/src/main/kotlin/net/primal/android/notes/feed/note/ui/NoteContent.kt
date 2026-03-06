@@ -249,6 +249,9 @@ fun NoteContent(
                     .padding(top = if (contentText.isEmpty()) 4.dp else 6.dp),
                 poll = data.poll,
                 onOptionSelected = { optionId -> onPollOptionSelected?.invoke(optionId) },
+                onVotesClick = noteCallbacks.onPollVotesClick?.let { callback ->
+                    { callback(data.noteId) }
+                },
             )
         }
 
