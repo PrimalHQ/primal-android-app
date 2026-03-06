@@ -72,6 +72,7 @@ fun NotePollContent(
     poll: PollUi,
     modifier: Modifier = Modifier,
     onOptionSelected: (optionId: String) -> Unit = {},
+    onVotesClick: (() -> Unit)? = null,
 ) {
     SharedTransitionLayout(modifier = modifier) {
         AnimatedContent(
@@ -87,12 +88,14 @@ fun NotePollContent(
                 PollState.Pending -> PollPendingContent(
                     poll = poll,
                     onVote = { selectedIds -> onOptionSelected(selectedIds.first()) },
+                    onVotesClick = onVotesClick,
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedVisibilityScope = this@AnimatedContent,
                 )
 
                 PollState.Voted, PollState.Ended -> PollResultsContent(
                     poll = poll,
+                    onVotesClick = onVotesClick,
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedVisibilityScope = this@AnimatedContent,
                 )
@@ -106,6 +109,7 @@ fun NotePollContent(
 private fun PollPendingContent(
     poll: PollUi,
     onVote: (Set<String>) -> Unit,
+    onVotesClick: (() -> Unit)?,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
@@ -126,6 +130,7 @@ private fun PollPendingContent(
             totalVotes = poll.totalVotes,
             endsAt = poll.endsAt,
             isEnded = false,
+            onVotesClick = onVotesClick,
         )
     }
 }
@@ -173,6 +178,7 @@ private fun PollPendingOption(
 @Composable
 private fun PollResultsContent(
     poll: PollUi,
+    onVotesClick: (() -> Unit)?,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
@@ -205,6 +211,7 @@ private fun PollResultsContent(
             totalVotes = poll.totalVotes,
             endsAt = poll.endsAt,
             isEnded = poll.state == PollState.Ended,
+            onVotesClick = onVotesClick,
         )
     }
 }
@@ -347,6 +354,7 @@ private fun PollFooter(
     totalVotes: Int,
     endsAt: Instant?,
     isEnded: Boolean,
+    onVotesClick: (() -> Unit)?,
     modifier: Modifier = Modifier,
 ) {
     val timeText = if (isEnded) {
@@ -356,7 +364,15 @@ private fun PollFooter(
     }
 
     Text(
-        modifier = modifier.padding(start = 4.dp, top = 4.dp),
+        modifier = modifier
+            .padding(start = 4.dp, top = 4.dp)
+            .then(
+                if (onVotesClick != null) {
+                    Modifier.clickable(onClick = onVotesClick)
+                } else {
+                    Modifier
+                },
+            ),
         text = buildAnnotatedString {
             withStyle(SpanStyle(color = AppTheme.colorScheme.primary)) {
                 append(pluralStringResource(R.plurals.poll_votes_count, totalVotes, totalVotes))

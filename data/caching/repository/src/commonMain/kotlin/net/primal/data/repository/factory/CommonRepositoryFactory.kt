@@ -22,6 +22,7 @@ import net.primal.data.repository.messages.ChatRepositoryImpl
 import net.primal.data.repository.messages.processors.MessagesProcessor
 import net.primal.data.repository.mute.MutedItemRepositoryImpl
 import net.primal.data.repository.notifications.NotificationRepositoryImpl
+import net.primal.data.repository.polls.PollsRepositoryImpl
 import net.primal.data.repository.profile.ProfileRepositoryImpl
 import net.primal.data.repository.streams.LiveStreamChatRepositoryImpl
 import net.primal.data.repository.streams.StreamRepositoryImpl
@@ -39,6 +40,7 @@ import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.notifications.NotificationRepository
+import net.primal.domain.polls.PollsRepository
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.premium.PremiumBroadcastRepository
 import net.primal.domain.profile.ProfileRepository
@@ -272,6 +274,13 @@ abstract class CommonRepositoryFactory {
             dispatcherProvider = dispatcherProvider,
             database = resolveCachingDatabase(),
             primalPublisher = primalPublisher,
+        )
+    }
+
+    fun createPollsRepository(cachingPrimalApiClient: PrimalApiClient): PollsRepository {
+        return PollsRepositoryImpl(
+            dispatcherProvider = dispatcherProvider,
+            pollsApi = PrimalApiServiceFactory.createPollsApi(cachingPrimalApiClient),
         )
     }
 }

@@ -1792,4 +1792,10 @@
     <string name="zap_poll_header_sats">sats</string>
     <string name="zap_poll_chip_sats_suffix">sats</string>
     <string name="zap_poll_usd_amount">$%1$s USD</string>
+
+    <string name="poll_votes_title">Votes</string>
+    <string name="poll_votes_no_votes">No votes yet</string>
+    <string name="poll_votes_error">Unable to load votes.</string>
+    <string name="poll_votes_suffix"> votes</string>
+    <string name="poll_votes_sats_suffix"> sats</string>
 </resources>
