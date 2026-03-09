@@ -13,6 +13,7 @@ import net.primal.domain.nostr.utils.formatNip05Identifier
 import net.primal.domain.posts.FeedPost
 import net.primal.domain.posts.FeedPost as FeedPostDO
 import net.primal.domain.posts.FeedPostAuthor
+import net.primal.domain.posts.FeedPostPollInfo
 import net.primal.domain.posts.FeedPostRepostInfo
 import net.primal.domain.posts.FeedPostStats
 
@@ -99,6 +100,25 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
         bookmark = this.bookmark?.asPublicBookmark(),
         isThreadMuted = this.data.isThreadMuted == true,
         eventRelayHints = this.eventRelayHints?.asEventRelayHintsDO(),
+        pollInfo = this.pollData?.let { poll ->
+            FeedPostPollInfo(
+                pollType = when (poll.pollType) {
+                    net.primal.data.local.dao.polls.PollType.User -> FeedPostPollInfo.PollType.User
+                    net.primal.data.local.dao.polls.PollType.Zap -> FeedPostPollInfo.PollType.Zap
+                },
+                options = poll.options.map { option ->
+                    FeedPostPollInfo.PollOptionInfo(
+                        id = option.id,
+                        label = option.label,
+                        voteCount = option.voteCount,
+                        satsZapped = option.satsZapped,
+                    )
+                },
+                endsAt = poll.endsAt,
+                valueMinimum = poll.valueMinimum,
+                valueMaximum = poll.valueMaximum,
+            )
+        },
     )
 }
 

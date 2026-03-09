@@ -157,7 +157,7 @@ class TransactionDetailsViewModel @Inject constructor(
             setState { copy(loading = true) }
             try {
                 withContext(dispatcherProvider.io()) {
-                    feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = noteId)
+                    feedRepository.fetchConversation(userId = activeAccountStore.activeUserId(), noteId = noteId)
                 }
             } catch (error: NetworkException) {
                 Napier.w(throwable = error) { "Failed to fetch zapped note for noteId=$noteId" }

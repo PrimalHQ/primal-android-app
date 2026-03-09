@@ -100,6 +100,20 @@ fun JsonArray.isServerTag() = getOrNull(0)?.jsonPrimitive?.content == "server"
 
 fun JsonArray.isClientTag() = getOrNull(0)?.jsonPrimitive?.content == "client"
 
+fun JsonArray.isResponseTag() = getOrNull(0)?.jsonPrimitive?.content == "response"
+
+fun JsonArray.isOptionTag() = getOrNull(0)?.jsonPrimitive?.content == "option"
+
+fun JsonArray.isPollOptionTag() = getOrNull(0)?.jsonPrimitive?.content == "poll_option"
+
+fun JsonArray.isClosedAtTag() = getOrNull(0)?.jsonPrimitive?.content == "closed_at"
+
+fun JsonArray.isEndsAtTag() = getOrNull(0)?.jsonPrimitive?.content == "endsAt"
+
+fun JsonArray.isValueMinimumTag() = getOrNull(0)?.jsonPrimitive?.content == "value_minimum"
+
+fun JsonArray.isValueMaximumTag() = getOrNull(0)?.jsonPrimitive?.content == "value_maximum"
+
 fun JsonArray.getTagValueOrNull() = getOrNull(1)?.jsonPrimitive?.content
 
 fun JsonArray.getRelayFromReplyOrRootTag() = getOrNull(2)?.jsonPrimitive?.content
@@ -121,6 +135,30 @@ fun List<JsonArray>.findFirstCurrentParticipants() = firstOrNull { it.isCurrentP
 fun List<JsonArray>.findFirstTotalParticipants() = firstOrNull { it.isTotalParticipantsTag() }?.getTagValueOrNull()
 
 fun List<JsonArray>.findAllHashtags() = filter { it.isHashtagTag() }.mapNotNull { it.getTagValueOrNull() }
+
+fun List<JsonArray>.findFirstClosedAt() = firstOrNull { it.isClosedAtTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstEndsAt() = firstOrNull { it.isEndsAtTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstValueMinimum() = firstOrNull { it.isValueMinimumTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.findFirstValueMaximum() = firstOrNull { it.isValueMaximumTag() }?.getTagValueOrNull()
+
+fun List<JsonArray>.isReply(): Boolean {
+    val isQuote = any { it.isQuoteTag() }
+    return !isQuote && (
+        any { it.hasReplyMarker() } ||
+            any { it.hasRootMarker() } ||
+            any { it.isEventIdTag() && !it.hasMentionMarker() }
+        )
+}
+
+fun List<JsonArray>.findReplyTargetId(): String? {
+    if (!isReply()) return null
+    return find { it.hasReplyMarker() }?.getTagValueOrNull()
+        ?: find { it.hasRootMarker() }?.getTagValueOrNull()
+        ?: filterNot { it.hasMentionMarker() }.lastOrNull { it.isEventIdTag() }?.getTagValueOrNull()
+}
 
 fun List<JsonArray>.findFirstHostPubkey() = firstOrNull { it.isPubKeyTag() && it.hasHostMarker() }?.getTagValueOrNull()
 

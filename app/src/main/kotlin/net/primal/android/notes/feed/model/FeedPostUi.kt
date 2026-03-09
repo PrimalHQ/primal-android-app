@@ -17,6 +17,7 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.posts.FeedPost
+import net.primal.domain.posts.FeedPostPollInfo
 
 data class FeedPostUi(
     val postId: String,
@@ -88,13 +89,56 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         authorLegendaryCustomization = this.author.legendProfile?.asLegendaryCustomization(),
         eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
         isAuthorLiveStreamingNow = this.author.isLiveStreamingNow,
+        poll = this.pollInfo?.asPollUi(),
+    )
+}
+
+private fun FeedPostPollInfo.asPollUi(): PollUi {
+    val endsAtInstant = endsAt?.let { Instant.ofEpochSecond(it) }
+    val totalVotes = options.sumOf { it.voteCount }.coerceAtLeast(1)
+    val totalSats = options.sumOf { it.satsZapped }.coerceAtLeast(1)
+    return PollUi(
+        pollType = when (pollType) {
+            FeedPostPollInfo.PollType.User -> PollType.User
+            FeedPostPollInfo.PollType.Zap -> PollType.Zap
+        },
+        options = options.map { option ->
+            PollOptionUi(
+                id = option.id,
+                label = option.label,
+                voteCount = option.voteCount,
+                satsZapped = option.satsZapped,
+                votePercentage = if (pollType == FeedPostPollInfo.PollType.Zap) {
+                    option.satsZapped.toFloat() / totalSats
+                } else {
+                    option.voteCount.toFloat() / totalVotes
+                },
+            )
+        },
+        endsAt = endsAtInstant,
+        state = when {
+            endsAtInstant != null && endsAtInstant < Instant.now() -> PollState.Ended
+            else -> PollState.Pending
+        },
+        valueMinimum = valueMinimum,
+        valueMaximum = valueMaximum,
+    )
+}
+
+fun FeedPostUi.applyUserVotedOptions(userVotedOptionIds: Set<String>): FeedPostUi {
+    if (this.poll == null || userVotedOptionIds.isEmpty()) return this
+    return copy(
+        poll = poll.copy(
+            state = if (poll.state == PollState.Ended) PollState.Ended else PollState.Voted,
+            selectedOptionIds = userVotedOptionIds,
+        ),
     )
 }
 
 fun FeedPostUi.asNeventString(): String {
     return Nevent(
         eventId = this.postId,
-        kind = NostrEventKind.ShortTextNote.value,
+        kind = this.rawKind ?: NostrEventKind.ShortTextNote.value,
         userId = this.authorId,
         relays = this.eventRelayHints.take(MAX_RELAY_HINTS),
     ).toNeventString()

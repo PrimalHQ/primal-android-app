@@ -21,7 +21,7 @@ import net.primal.data.local.queries.ExploreFeedQueryBuilder
 import net.primal.data.local.queries.FeedQueryBuilder
 import net.primal.data.remote.api.feed.FeedApi
 import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
-import net.primal.data.remote.api.feed.model.ThreadRequestBody
+import net.primal.data.remote.api.feed.model.MultiKindThreadRequestBody
 import net.primal.data.repository.feed.paging.NoteFeedRemoteMediator
 import net.primal.data.repository.feed.processors.FeedProcessor
 import net.primal.data.repository.feed.processors.persistNoteRepliesAndArticleCommentsToDatabase
@@ -145,30 +145,28 @@ internal class FeedRepositoryImpl(
         userId: String,
         noteId: String,
         limit: Int,
+        kinds: List<Int>,
     ) {
         withContext(dispatcherProvider.io()) {
             val response = try {
-                feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = limit))
+                feedApi.getMultiKindThread(
+                    MultiKindThreadRequestBody(
+                        eventId = noteId,
+                        userPubKey = userId,
+                        kinds = kinds,
+                        limit = limit,
+                    ),
+                )
             } catch (error: NetworkException) {
                 throw NetworkException(message = error.message, cause = error)
             }
 
             mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
-            response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
+            response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
         }
     }
-
-    override suspend fun fetchReplies(userId: String, noteId: String) =
-        withContext(dispatcherProvider.io()) {
-            val response = feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
-
-            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
-
-            response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
-            response.persistToDatabaseAsTransaction(userId = userId, database = database)
-        }
 
     override suspend fun removeFeedSpec(userId: String, feedSpec: String) =
         withContext(dispatcherProvider.io()) {
@@ -228,8 +226,15 @@ internal class FeedRepositoryImpl(
             postId = noteId,
             userId = userId,
         ).map { list ->
-            list.map { it.mapAsFeedPostDO() }.performTopologicalSortOrThis()
+            list.map { it.mapAsFeedPostDO() }
+                .performTopologicalSortOrThis()
         }
+    }
+
+    override fun observeUserVotedOptions(userId: String, postId: String): Flow<Set<String>> {
+        return database.pollVotes().observeVotesByUser(postId = postId, voterId = userId)
+            .map { votes -> votes.map { it.optionId }.toSet() }
+            .flowOn(dispatcherProvider.io())
     }
 
     @OptIn(ExperimentalPagingApi::class)

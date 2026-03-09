@@ -25,4 +25,5 @@ data class FeedPost(
     val bookmark: PublicBookmark? = null,
     val isThreadMuted: Boolean = false,
     val eventRelayHints: EventRelayHints? = null,
+    val pollInfo: FeedPostPollInfo? = null,
 )

@@ -1,8 +1,10 @@
 package net.primal.data.repository.utils
 
 import net.primal.domain.nostr.getTagValueOrNull
+import net.primal.domain.nostr.hasMentionMarker
 import net.primal.domain.nostr.hasReplyMarker
 import net.primal.domain.nostr.hasRootMarker
+import net.primal.domain.nostr.isEventIdTag
 import net.primal.domain.posts.FeedPost
 
 /**
@@ -27,13 +29,26 @@ fun List<FeedPost>.performTopologicalSort(): List<FeedPost> {
     val finalList = mutableListOf<FeedPost>()
 
     this.forEach { post ->
-        post.tags.find { it.hasReplyMarker() }?.getTagValueOrNull()?.let {
+        val replyTag = post.tags.find { it.hasReplyMarker() }
+        val rootTag = post.tags.find { it.hasRootMarker() }
+
+        replyTag?.getTagValueOrNull()?.let {
             adjacencyMap.getOrPut(key = it) { mutableSetOf() }
                 .add(post.eventId)
         }
-        post.tags.find { it.hasRootMarker() }?.getTagValueOrNull()?.let {
+        rootTag?.getTagValueOrNull()?.let {
             adjacencyMap.getOrPut(key = it) { mutableSetOf() }
                 .add(post.eventId)
+        }
+
+        // Handle bare e tags (deprecated NIP-10 style) when no explicit markers exist
+        if (replyTag == null && rootTag == null) {
+            post.tags.filterNot { it.hasMentionMarker() }
+                .lastOrNull { it.isEventIdTag() }
+                ?.getTagValueOrNull()?.let {
+                    adjacencyMap.getOrPut(key = it) { mutableSetOf() }
+                        .add(post.eventId)
+                }
         }
     }
 

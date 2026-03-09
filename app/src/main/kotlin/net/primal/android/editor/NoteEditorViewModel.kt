@@ -533,7 +533,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun fetchNoteThreadFromNetwork(replyToNoteId: String) =
         viewModelScope.launch {
             try {
-                feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
+                feedRepository.fetchConversation(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
             } catch (error: NetworkException) {
                 Napier.w(throwable = error) { "Failed to fetch note thread for noteId=$replyToNoteId" }
             }

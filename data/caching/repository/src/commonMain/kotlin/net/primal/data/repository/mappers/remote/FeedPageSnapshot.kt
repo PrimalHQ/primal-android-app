@@ -24,6 +24,8 @@ internal fun FeedResponse.asFeedPageSnapshot(): FeedPageSnapshot {
         primalPremiumInfo = this.primalPremiumInfo,
         genericReposts = this.genericReposts,
         pictureNotes = this.pictureNotes,
+        polls = this.polls,
+        pollResponses = this.pollResponses,
     )
 }
 
@@ -47,5 +49,7 @@ internal fun FeedPageSnapshot.asFeedResponse(): FeedResponse {
         primalPremiumInfo = this.primalPremiumInfo,
         genericReposts = this.genericReposts,
         pictureNotes = this.pictureNotes,
+        polls = this.polls,
+        pollResponses = this.pollResponses,
     )
 }
