@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.asUserProfileItemUi
 import net.primal.android.events.polls.votes.PollVotesContract.UiState
+import net.primal.android.events.polls.votes.model.PollOptionUi
+import net.primal.android.events.polls.votes.model.PollVoterUi
 import net.primal.android.navigation.eventIdOrThrow
 import net.primal.domain.polls.PollsRepository
 

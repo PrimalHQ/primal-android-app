@@ -534,9 +534,9 @@ private fun PrimalAppNavigation(
         startDestination = startDestination,
     ) {
         pollVotes(
-            route = "poll_votes/{eventId}",
+            route = "poll_votes/{$EVENT_ID}",
             arguments = listOf(
-                navArgument("eventId") { type = NavType.StringType },
+                navArgument(EVENT_ID) { type = NavType.StringType },
             ),
             navController = navController,
         )
@@ -2577,7 +2577,12 @@ private fun NavGraphBuilder.pollVotes(
 ) = composable(
     route = route,
     arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
+    ApplyEdgeToEdge()
     val viewModel = hiltViewModel<PollVotesViewModel>()
     PollVotesScreen(
         viewModel = viewModel,

@@ -18,7 +18,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,6 +33,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -42,6 +42,8 @@ import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.utils.shortened
+import net.primal.android.events.polls.votes.model.PollOptionUi
+import net.primal.android.events.polls.votes.model.PollVoterUi
 import net.primal.android.explore.search.ui.UserProfileListItem
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -50,12 +52,20 @@ private const val SHORTEN_AMOUNT_THRESHOLD = 100_000L
 
 private fun Long.formatSats(): String = if (this >= SHORTEN_AMOUNT_THRESHOLD) this.shortened() else "%,d".format(this)
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PollVotesScreen(viewModel: PollVotesViewModel, callbacks: PollVotesContract.ScreenCallbacks) {
     val state = viewModel.state.collectAsState()
 
-    Scaffold(
+    PollVotesScreen(
+        state = state.value,
+        callbacks = callbacks,
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PollVotesScreen(state: PollVotesContract.UiState, callbacks: PollVotesContract.ScreenCallbacks) {
+    PrimalScaffold(
         topBar = {
             PrimalTopAppBar(
                 title = stringResource(id = R.string.poll_votes_title),
@@ -65,9 +75,8 @@ fun PollVotesScreen(viewModel: PollVotesViewModel, callbacks: PollVotesContract.
             )
         },
         content = { paddingValues ->
-            val uiState = state.value
             when {
-                uiState.loading -> {
+                state.loading -> {
                     HeightAdjustableLoadingLazyListPlaceholder(
                         modifier = Modifier.fillMaxSize().padding(paddingValues),
                         contentPaddingValues = PaddingValues(0.dp),
@@ -75,7 +84,7 @@ fun PollVotesScreen(viewModel: PollVotesViewModel, callbacks: PollVotesContract.
                     )
                 }
 
-                uiState.error != null -> {
+                state.error != null -> {
                     ListNoContent(
                         modifier = Modifier.fillMaxSize().padding(paddingValues),
                         noContentText = stringResource(id = R.string.poll_votes_error),
@@ -83,7 +92,7 @@ fun PollVotesScreen(viewModel: PollVotesViewModel, callbacks: PollVotesContract.
                     )
                 }
 
-                uiState.pollOptions.isEmpty() -> {
+                state.pollOptions.isEmpty() -> {
                     ListNoContent(
                         modifier = Modifier.fillMaxSize().padding(paddingValues),
                         noContentText = stringResource(id = R.string.poll_votes_no_votes),
@@ -96,8 +105,8 @@ fun PollVotesScreen(viewModel: PollVotesViewModel, callbacks: PollVotesContract.
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
-                        pollOptions = uiState.pollOptions,
-                        isZapPoll = uiState.isZapPoll,
+                        pollOptions = state.pollOptions,
+                        isZapPoll = state.isZapPoll,
                         onProfileClick = callbacks.onProfileClick,
                     )
                 }

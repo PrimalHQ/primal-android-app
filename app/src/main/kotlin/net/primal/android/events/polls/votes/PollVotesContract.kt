@@ -1,6 +1,6 @@
 package net.primal.android.events.polls.votes
 
-import net.primal.android.core.compose.profile.model.UserProfileItemUi
+import net.primal.android.events.polls.votes.model.PollOptionUi
 
 interface PollVotesContract {
     data class UiState(
@@ -15,17 +15,3 @@ interface PollVotesContract {
         val onProfileClick: (String) -> Unit,
     )
 }
-
-data class PollOptionUi(
-    val id: String,
-    val title: String,
-    val voteCount: Int,
-    val totalSats: Long = 0,
-    val voters: List<PollVoterUi>,
-)
-
-data class PollVoterUi(
-    val profile: UserProfileItemUi,
-    val satsZapped: Long = 0,
-    val zapComment: String? = null,
-)
