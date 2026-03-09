@@ -46,6 +46,10 @@ import net.primal.data.local.dao.notes.RepostDao
 import net.primal.data.local.dao.notes.RepostData
 import net.primal.data.local.dao.notifications.NotificationDao
 import net.primal.data.local.dao.notifications.NotificationData
+import net.primal.data.local.dao.polls.PollDao
+import net.primal.data.local.dao.polls.PollData
+import net.primal.data.local.dao.polls.PollVoteDao
+import net.primal.data.local.dao.polls.PollVoteData
 import net.primal.data.local.dao.profiles.ProfileData
 import net.primal.data.local.dao.profiles.ProfileDataDao
 import net.primal.data.local.dao.profiles.ProfileStats
@@ -67,6 +71,7 @@ import net.primal.data.local.dao.threads.NoteConversationCrossRef
 import net.primal.data.local.dao.threads.ThreadConversationDao
 import net.primal.data.local.serialization.CdnTypeConverters
 import net.primal.data.local.serialization.NostrReferenceTypeConverters
+import net.primal.data.local.serialization.PollTypeConverters
 import net.primal.data.local.serialization.ProfileTypeConverters
 import net.primal.data.local.serialization.StreamTypeConverters
 import net.primal.shared.data.local.serialization.EncryptableTypeConverters
@@ -106,8 +111,10 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         StreamData::class,
         StreamChatMessageData::class,
         StreamFollowsCrossRef::class,
+        PollData::class,
+        PollVoteData::class,
     ],
-    version = 22,
+    version = 23,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -118,6 +125,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
     ProfileTypeConverters::class,
     NostrReferenceTypeConverters::class,
     StreamTypeConverters::class,
+    PollTypeConverters::class,
     EncryptableTypeConverters::class,
 )
 abstract class PrimalDatabase : RoomDatabase() {
@@ -179,6 +187,10 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun streamChats(): StreamChatMessageDao
 
     abstract fun streamFollows(): StreamFollowsCrossRefDao
+
+    abstract fun polls(): PollDao
+
+    abstract fun pollVotes(): PollVoteDao
 }
 
 // The Room compiler generates the `actual` implementations.

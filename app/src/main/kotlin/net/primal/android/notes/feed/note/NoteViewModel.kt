@@ -87,6 +87,7 @@ class NoteViewModel @AssistedInject constructor(
         subscribeToActiveAccount()
         if (noteId != null) {
             prepareRelayHints(noteId = noteId)
+            observeUserVotedOptions(noteId = noteId)
         }
     }
 
@@ -95,6 +96,16 @@ class NoteViewModel @AssistedInject constructor(
             val hints = relayHintsRepository.findRelaysByIds(eventIds = listOf(noteId))
             hints.firstOrNull()?.let { relayHints ->
                 setState { copy(relayHints = relayHints.relays.take(n = 2)) }
+            }
+        }
+
+    private fun observeUserVotedOptions(noteId: String) =
+        viewModelScope.launch {
+            feedRepository.observeUserVotedOptions(
+                userId = activeAccountStore.activeUserId(),
+                postId = noteId,
+            ).collect { votedOptionIds ->
+                setState { copy(userVotedOptionIds = votedOptionIds) }
             }
         }
 

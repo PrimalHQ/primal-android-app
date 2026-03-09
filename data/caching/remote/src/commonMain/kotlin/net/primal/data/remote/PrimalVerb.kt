@@ -12,6 +12,7 @@ enum class PrimalVerb(val id: String) {
     GET_DEFAULT_APP_SETTINGS("get_default_app_settings"),
     SET_APP_SETTINGS("set_app_settings"),
     THREAD_VIEW("thread_view"),
+    MULTI_KIND_THREAD_VIEW("multi_kind_thread_view"),
     EVENTS("events"),
     USER_SEARCH("user_search"),
     IMPORT_EVENTS("import_events"),

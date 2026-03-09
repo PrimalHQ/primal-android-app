@@ -134,7 +134,10 @@ class ThreadViewModel @Inject constructor(
             setState { copy(fetching = true) }
             try {
                 withContext(dispatcherProvider.io()) {
-                    feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = highlightPostId)
+                    feedRepository.fetchConversation(
+                        userId = activeAccountStore.activeUserId(),
+                        noteId = highlightPostId,
+                    )
                 }
             } catch (error: NetworkException) {
                 Napier.w(throwable = error) { "Failed to fetch note replies for noteId=$highlightPostId" }

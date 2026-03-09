@@ -14,6 +14,7 @@ interface NoteContract {
         val relayHints: List<String> = emptyList(),
         val currentExchangeRate: Double = 0.0,
         val poll: PollUi? = null,
+        val userVotedOptionIds: Set<String> = emptySet(),
         val error: UiError? = null,
     )
 

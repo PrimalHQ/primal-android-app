@@ -10,6 +10,7 @@ data class PostData(
     val postId: String,
     val authorId: String,
     val createdAt: Long,
+    val kind: Int = 1,
     val tags: List<JsonArray>,
     val content: String,
     val uris: List<String>,

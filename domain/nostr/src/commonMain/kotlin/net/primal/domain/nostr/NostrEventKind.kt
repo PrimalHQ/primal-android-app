@@ -20,6 +20,7 @@ enum class NostrEventKind(val value: Int) {
     ChannelMessage(value = 42),
     ChannelHideMessage(value = 43),
     ChannelMuteUser(value = 44),
+    PollResponse(value = 1018),
     FileMetadata(value = 1063),
     Poll(value = 1068),
     ChatMessage(value = 1311),
