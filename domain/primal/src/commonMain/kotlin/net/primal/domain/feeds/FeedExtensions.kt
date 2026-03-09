@@ -2,12 +2,18 @@ package net.primal.domain.feeds
 
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 
+fun String.migrateFeedSpec(): String {
+    return this
+        .replace("\"kind\":\"notes\"", "\"kinds\":[1]")
+        .replace("\"kind\":\"reads\"", "\"kinds\":[20,30023]")
+}
+
 fun String.isUserNotesFeedSpec(): Boolean {
-    return this == "{\"id\":\"latest\",\"kind\":\"notes\"}"
+    return this == "{\"id\":\"latest\",\"kinds\":[1]}"
 }
 
 fun String.isUserNotesLwrFeedSpec(): Boolean {
-    return this == "{\"id\":\"latest\",\"include_replies\":true,\"kind\":\"notes\"}"
+    return this == "{\"id\":\"latest\",\"include_replies\":true,\"kinds\":[1]}"
 }
 
 private fun String?.isValidProfileId(): Boolean {
@@ -40,21 +46,21 @@ fun String.isPubkeyFeedSpec(prefix: String? = null, suffix: String? = null): Boo
 
 fun String.isProfileNotesFeedSpec(): Boolean {
     return isPubkeyFeedSpec(
-        prefix = "{\"id\":\"feed\",\"kind\":\"notes\"",
+        prefix = "{\"id\":\"feed\",\"kinds\":[1]",
         suffix = "}",
     )
 }
 
 fun String.isProfileAuthoredNotesFeedSpec(): Boolean {
     return isPubkeyFeedSpec(
-        prefix = "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"authored\"",
+        prefix = "{\"id\":\"feed\",\"kinds\":[1],\"notes\":\"authored\"",
         suffix = "}",
     )
 }
 
 fun String.isProfileAuthoredNoteRepliesFeedSpec(): Boolean {
     return isPubkeyFeedSpec(
-        prefix = "{\"id\":\"feed\",\"include_replies\":true,\"kind\":\"notes\",\"notes\":\"authored\"",
+        prefix = "{\"id\":\"feed\",\"include_replies\":true,\"kinds\":[1],\"notes\":\"authored\"",
         suffix = "}",
     )
 }
@@ -67,17 +73,17 @@ fun String.supportsUpwardsNotesPagination(): Boolean {
 fun String.supportsNoteReposts() = supportsUpwardsNotesPagination()
 
 fun buildNotesBookmarksFeedSpec(userId: String): String =
-    "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
+    "{\"id\":\"feed\",\"kinds\":[1],\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
 
 fun String.isNotesBookmarkFeedSpec(): Boolean {
     return isPubkeyFeedSpec(
-        prefix = "{\"id\":\"feed\",\"kind\":\"notes\",\"notes\":\"bookmarks\"",
+        prefix = "{\"id\":\"feed\",\"kinds\":[1],\"notes\":\"bookmarks\"",
         suffix = "}",
     )
 }
 
 fun buildArticleBookmarksFeedSpec(userId: String): String =
-    "{\"id\":\"feed\",\"kind\":\"notes\",\"kinds\":[30023],\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
+    "{\"id\":\"feed\",\"kinds\":[30023],\"notes\":\"bookmarks\",\"pubkey\":\"$userId\"}"
 
 // fun String.isReadsBookmarkFeedSpec(): Boolean {
 //    return isPubkeyFeedSpec(
@@ -86,7 +92,7 @@ fun buildArticleBookmarksFeedSpec(userId: String): String =
 //    )
 // }
 
-fun buildLatestNotesUserFeedSpec(userId: String) = """{"id":"feed","kind":"notes","pubkey":"$userId"}"""
+fun buildLatestNotesUserFeedSpec(userId: String) = """{"id":"feed","kinds":[1],"pubkey":"$userId"}"""
 
 fun String.resolveFeedSpecKind(): FeedSpecKind? {
     return when {
@@ -99,7 +105,7 @@ fun String.resolveFeedSpecKind(): FeedSpecKind? {
     }
 }
 
-fun String.isNotesFeedSpec() = this.contains("\"kind\":\"notes\"") || this.contains("kind:1")
+fun String.isNotesFeedSpec() = this.contains("\"kinds\":[1]") || this.contains("kind:1")
 
 fun String.isImageSpec() = this.contains("\"query\":\"filter:image")
 
@@ -107,7 +113,7 @@ fun String.isVideoSpec() = this.contains("\"query\":\"filter:video")
 
 fun String.isAudioSpec() = this.contains("\"query\":\"filter:audio")
 
-fun String.isReadsFeedSpec() = this.contains("\"kind\":\"reads\"") || this.contains("kind:30023")
+fun String.isReadsFeedSpec() = this.contains("\"kinds\":[20,30023]") || this.contains("kind:30023")
 
 fun String?.buildAdvancedSearchFeedSpec() = """{"id":"advsearch","query":"$this"}"""
 
@@ -118,14 +124,14 @@ fun buildAdvancedSearchReadsFeedSpec(query: String) = """{"id":"advsearch","quer
 fun buildAdvancedSearchNotificationsFeedSpec(query: String) =
     """{"id":"advsearch","query":"kind:1 scope:mynotifications $query"}"""
 
-fun buildReadsTopicFeedSpec(hashtag: String) = """{"kind":"reads","topic":"${hashtag.substring(startIndex = 1)}"}"""
+fun buildReadsTopicFeedSpec(hashtag: String) = """{"kinds":[20,30023],"topic":"${hashtag.substring(startIndex = 1)}"}"""
 
 const val exploreMediaFeedSpec = """{"id":"explore-media"}"""
 
 fun String.extractTopicFromFeedSpec(): String? {
     val noteQueryStartIndex = this.indexOf("\"query\":\"kind:1 #")
     val articleQueryStartIndex = this.indexOf("\"query\":\"kind:30023 #")
-    val articleTopicQueryPrefix = "{\"kind\":\"reads\",\"topic\":\""
+    val articleTopicQueryPrefix = "{\"kinds\":[20,30023],\"topic\":\""
     val articleTopicQueryStartIndex = this.indexOf(articleTopicQueryPrefix)
 
     return if (noteQueryStartIndex != -1) {

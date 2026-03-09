@@ -3,11 +3,12 @@ package net.primal.data.repository.mappers.local
 import net.primal.data.local.dao.feeds.Feed as FeedPO
 import net.primal.data.remote.model.ContentPrimalFeedData
 import net.primal.domain.feeds.PrimalFeed
+import net.primal.domain.feeds.migrateFeedSpec
 
 fun FeedPO.asPrimalFeedDO(): PrimalFeed {
     return PrimalFeed(
         ownerId = this.ownerId,
-        spec = this.spec,
+        spec = this.spec.migrateFeedSpec(),
         specKind = this.specKind,
         feedKind = this.feedKind,
         title = this.title,

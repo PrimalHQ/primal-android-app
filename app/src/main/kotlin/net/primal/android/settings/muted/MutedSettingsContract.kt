@@ -11,7 +11,7 @@ interface MutedSettingsContract {
         val mutedThreads: List<String> = emptyList(),
         val newMutedHashtag: String = "",
         val newMutedWord: String = "",
-        val defaultMuteThreadsFeedSpec: String = "{\"id\":\"muted-threads\",\"kind\":\"notes\"}",
+        val defaultMuteThreadsFeedSpec: String = "{\"id\":\"muted-threads\",\"kinds\":[1]}",
         val error: UiError? = null,
     )
 

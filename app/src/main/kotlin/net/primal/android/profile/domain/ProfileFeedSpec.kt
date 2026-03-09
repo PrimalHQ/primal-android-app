@@ -11,7 +11,7 @@ enum class ProfileFeedSpec {
         return when (this) {
             AuthoredNotes -> {
                 "{\"id\":\"feed\"," +
-                    "\"kind\":\"notes\"," +
+                    "\"kinds\":[1]," +
                     "\"notes\":\"authored\"," +
                     "\"pubkey\":\"$profileId\"}"
             }
@@ -19,20 +19,20 @@ enum class ProfileFeedSpec {
             AuthoredReplies -> {
                 "{\"id\":\"feed\"," +
                     "\"include_replies\":true," +
-                    "\"kind\":\"notes\"," +
+                    "\"kinds\":[1]," +
                     "\"notes\":\"authored\"," +
                     "\"pubkey\":\"$profileId\"}"
             }
 
             AuthoredArticles -> {
-                "{\"kind\":\"reads\"," +
+                "{\"kinds\":[20,30023]," +
                     "\"notes\":\"authored\"," +
                     "\"pubkey\":\"$profileId\"}"
             }
 
             AuthoredMedia -> {
                 "{\"id\":\"feed\"," +
-                    "\"kind\":\"notes\"," +
+                    "\"kinds\":[1]," +
                     "\"notes\":\"user_media_thumbnails\"," +
                     "\"pubkey\":\"$profileId\"}"
             }
