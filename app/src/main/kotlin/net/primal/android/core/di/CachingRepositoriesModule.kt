@@ -23,6 +23,7 @@ import net.primal.domain.nostr.cryptography.MessageCipher
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.notifications.NotificationRepository
+import net.primal.domain.polls.PollsRepository
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.premium.PremiumBroadcastRepository
 import net.primal.domain.profile.ProfileRepository
@@ -216,5 +217,11 @@ object CachingRepositoriesModule {
     fun provideLiveStreamChatRepository(primalPublisher: PrimalPublisher): LiveStreamChatRepository =
         PrimalRepositoryFactory.createStreamChatRepository(
             primalPublisher = primalPublisher,
+        )
+
+    @Provides
+    fun providePollsRepository(@PrimalCacheApiClient primalApiClient: PrimalApiClient): PollsRepository =
+        PrimalRepositoryFactory.createPollsRepository(
+            cachingPrimalApiClient = primalApiClient,
         )
 }

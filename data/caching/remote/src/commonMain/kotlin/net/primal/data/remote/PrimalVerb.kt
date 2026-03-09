@@ -80,4 +80,5 @@ enum class PrimalVerb(val id: String) {
     INVOICES_TO_ZAP_RECEIPTS("invoices_to_zap_receipts"),
     UPDATE_PUSH_NOTIFICATION_TOKEN_FOR_NIP46("update_push_notification_token_for_nip46"),
     EVENTS_NIP46("events_nip46"),
+    POLL_VOTES("poll_votes"),
 }
