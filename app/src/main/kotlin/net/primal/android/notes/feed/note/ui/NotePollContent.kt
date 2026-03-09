@@ -1,10 +1,6 @@
 package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibilityScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -37,6 +33,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.pluralStringResource
@@ -48,6 +45,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import java.time.Duration
 import java.time.Instant
 import net.primal.android.R
@@ -59,14 +57,14 @@ import net.primal.android.notes.feed.model.PollUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
-private const val PROGRESS_ANIMATION_DURATION_MS = 600
+private const val PROGRESS_ANIMATION_DURATION_MS = 400
 private const val STATE_TRANSITION_DURATION_MS = 300
 private const val MIN_RESULT_BAR_FRACTION = 0.02f
+private const val RESULT_TEXT_TARGET_BIAS = -0.9f
 private const val PERCENTAGE_MULTIPLIER = 100
 private const val HOURS_PER_DAY = 24
 private const val MINUTES_PER_HOUR = 60
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun NotePollContent(
     poll: PollUi,
@@ -74,7 +72,7 @@ fun NotePollContent(
     onOptionSelected: (optionId: String) -> Unit = {},
     onVotesClick: (() -> Unit)? = null,
 ) {
-    SharedTransitionLayout(modifier = modifier) {
+    Box(modifier = modifier) {
         AnimatedContent(
             targetState = poll.state,
             transitionSpec = {
@@ -89,29 +87,22 @@ fun NotePollContent(
                     poll = poll,
                     onVote = { selectedIds -> onOptionSelected(selectedIds.first()) },
                     onVotesClick = onVotesClick,
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedVisibilityScope = this@AnimatedContent,
                 )
 
                 PollState.Voted, PollState.Ended -> PollResultsContent(
                     poll = poll,
                     onVotesClick = onVotesClick,
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedVisibilityScope = this@AnimatedContent,
                 )
             }
         }
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun PollPendingContent(
     poll: PollUi,
     onVote: (Set<String>) -> Unit,
     onVotesClick: (() -> Unit)?,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -121,8 +112,6 @@ private fun PollPendingContent(
             PollPendingOption(
                 option = option,
                 onClick = { onVote(setOf(option.id)) },
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope,
             )
         }
 
@@ -135,13 +124,10 @@ private fun PollPendingContent(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun PollPendingOption(
     option: PollOptionUi,
     onClick: () -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -159,29 +145,17 @@ private fun PollPendingOption(
             .padding(horizontal = 16.dp),
         contentAlignment = Alignment.Center,
     ) {
-        with(sharedTransitionScope) {
-            Text(
-                modifier = Modifier.sharedBounds(
-                    sharedContentState = rememberSharedContentState(key = "poll_text_${option.id}"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                ),
-                text = option.label,
-                style = AppTheme.typography.bodyMedium,
-                color = AppTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
-            )
-        }
+        Text(
+            text = option.label,
+            style = AppTheme.typography.bodyMedium,
+            color = AppTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-private fun PollResultsContent(
-    poll: PollUi,
-    onVotesClick: (() -> Unit)?,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
-) {
+private fun PollResultsContent(poll: PollUi, onVotesClick: (() -> Unit)?) {
     var animationStarted by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { animationStarted = true }
 
@@ -202,8 +176,6 @@ private fun PollResultsContent(
                 showCheckmark = showCheckmark,
                 hasWinner = hasWinner,
                 animationStarted = animationStarted,
-                sharedTransitionScope = sharedTransitionScope,
-                animatedVisibilityScope = animatedVisibilityScope,
             )
         }
 
@@ -216,7 +188,6 @@ private fun PollResultsContent(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 private fun PollResultOption(
     option: PollOptionUi,
@@ -225,8 +196,6 @@ private fun PollResultOption(
     showCheckmark: Boolean,
     hasWinner: Boolean,
     animationStarted: Boolean,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedVisibilityScope,
     modifier: Modifier = Modifier,
 ) {
     val targetProgress = if (animationStarted) {
@@ -270,26 +239,39 @@ private fun PollResultOption(
 
             Row(
                 modifier = Modifier
-                    .height(36.dp)
-                    .padding(start = 16.dp),
+                    .fillMaxWidth()
+                    .height(36.dp),
                 verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
             ) {
-                with(sharedTransitionScope) {
-                    Text(
-                        modifier = Modifier.sharedBounds(
-                            sharedContentState = rememberSharedContentState(key = "poll_text_${option.id}"),
-                            animatedVisibilityScope = animatedVisibilityScope,
-                        ),
-                        text = option.label,
-                        style = AppTheme.typography.bodyMedium,
-                        fontWeight = if (option.isWinner) FontWeight.SemiBold else FontWeight.Normal,
-                        color = AppTheme.colorScheme.onSurface,
-                    )
-                }
+                val offsetProgress by animateFloatAsState(
+                    targetValue = if (animationStarted) 1f else 0f,
+                    animationSpec = tween(durationMillis = PROGRESS_ANIMATION_DURATION_MS),
+                    label = "textAlignment",
+                )
 
-                if (showCheckmark) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    PollWinnerCheckmark(isUserChoice = isUserChoice)
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = BiasAlignment(
+                        horizontalBias = lerp(0f, RESULT_TEXT_TARGET_BIAS, offsetProgress),
+                        verticalBias = 0f,
+                    ),
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = option.label,
+                            style = AppTheme.typography.bodyMedium,
+                            fontWeight = if (option.isWinner) FontWeight.SemiBold else FontWeight.Normal,
+                            color = AppTheme.colorScheme.onSurface,
+                        )
+
+                        if (showCheckmark) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            PollWinnerCheckmark(isUserChoice = isUserChoice)
+                        }
+                    }
                 }
             }
         }
