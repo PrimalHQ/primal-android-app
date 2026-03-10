@@ -37,6 +37,7 @@ enum class PrimalVerb(val id: String) {
     ARTICLE_THREAD_VIEW("long_form_content_thread_view"),
     GET_HIGHLIGHTS("get_highlights"),
     MEGA_FEED_DIRECTIVE("mega_feed_directive"),
+    MULTI_KIND_MEGA_FEED_DIRECTIVE("multi_kind_mega_feed_directive"),
     GET_FEATURED_DVM_FEEDS("get_featured_dvm_feeds"),
     GET_DEFAULT_APP_SUB_SETTINGS("get_default_app_subsettings"),
     GET_APP_SUB_SETTINGS("get_app_subsettings"),
