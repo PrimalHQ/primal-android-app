@@ -325,7 +325,10 @@ internal class SparkWalletServiceImpl(
                 }
 
                 is TxRequest.Lightning.LnInvoice -> {
-                    val prepareRequest = PrepareSendPaymentRequest(paymentRequest = request.lnInvoice)
+                    val prepareRequest = PrepareSendPaymentRequest(
+                        paymentRequest = request.lnInvoice,
+                        amount = request.amountSats.toBigInteger(),
+                    )
                     val prepareResponse = sdk.prepareSendPayment(prepareRequest)
                     sdk.sendPayment(
                         SendPaymentRequest(
