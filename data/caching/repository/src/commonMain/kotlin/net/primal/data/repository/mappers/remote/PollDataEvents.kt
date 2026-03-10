@@ -1,11 +1,15 @@
 package net.primal.data.repository.mappers.remote
 
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonPrimitive
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.toLong
 import net.primal.data.local.dao.polls.PollData
 import net.primal.data.local.dao.polls.PollOption
 import net.primal.data.local.dao.polls.PollType
 import net.primal.data.local.dao.polls.PollVoteData
+import net.primal.data.remote.model.ContentPrimalPollOptionStats
+import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.findFirstBolt11
@@ -67,24 +71,29 @@ fun List<NostrEvent>.mapAsZapPollVotes(): List<PollVoteData> {
                 optionId = pollOptionId,
                 voterId = zapRequest.pubKey,
                 amountInSats = amountInSats,
+                zapComment = zapRequest.content.takeIf { it.isNotBlank() },
                 createdAt = zapReceipt.createdAt,
             )
         }
 }
 
-fun List<PollData>.applyVoteCounts(votes: List<PollVoteData>): List<PollData> {
-    if (votes.isEmpty()) return this
-    val votesByPollId = votes.groupBy { it.postId }
+internal typealias PollStatsMap = Map<String, Map<String, ContentPrimalPollOptionStats>>
+
+fun PrimalEvent?.parseAndMapPrimalPollStats(): PollStatsMap {
+    return this?.content?.decodeFromJsonStringOrNull<PollStatsMap>() ?: emptyMap()
+}
+
+fun List<PollData>.applyPollStats(statsMap: PollStatsMap): List<PollData> {
+    if (statsMap.isEmpty()) return this
     return map { poll ->
-        val pollVotes = votesByPollId[poll.postId] ?: return@map poll
-        val votesByOption = pollVotes.groupBy { it.optionId }
+        val optionStatsMap = statsMap[poll.postId] ?: return@map poll
         poll.copy(
             options = poll.options.map { option ->
-                val optionVotes = votesByOption[option.id]
-                if (optionVotes != null) {
+                val optionStats = optionStatsMap[option.id]
+                if (optionStats != null) {
                     option.copy(
-                        voteCount = optionVotes.size,
-                        satsZapped = optionVotes.sumOf { it.amountInSats ?: 0L },
+                        voteCount = optionStats.votes,
+                        satsZapped = optionStats.satsZapped,
                     )
                 } else {
                     option
@@ -106,24 +115,13 @@ private fun NostrEvent.asPollData(): PollData {
         },
         valueMinimum = if (isZapPoll) tags.findFirstValueMinimum()?.toLongOrNull() else null,
         valueMaximum = if (isZapPoll) tags.findFirstValueMaximum()?.toLongOrNull() else null,
-        options = if (isZapPoll) parseZapPollOptions() else parseUserPollOptions(),
+        options = if (isZapPoll) parsePollOptions { it.isPollOptionTag() } else parsePollOptions { it.isOptionTag() },
     )
 }
 
-private fun NostrEvent.parseUserPollOptions(): List<PollOption> {
+private fun NostrEvent.parsePollOptions(tagFilter: (JsonArray) -> Boolean): List<PollOption> {
     return tags
-        .filter { it.isOptionTag() && it.size >= 3 }
-        .map { tag ->
-            PollOption(
-                id = tag[1].jsonPrimitive.content,
-                label = tag[2].jsonPrimitive.content,
-            )
-        }
-}
-
-private fun NostrEvent.parseZapPollOptions(): List<PollOption> {
-    return tags
-        .filter { it.isPollOptionTag() && it.size >= 3 }
+        .filter { tagFilter(it) && it.size >= 3 }
         .map { tag ->
             PollOption(
                 id = tag[1].jsonPrimitive.content,

@@ -67,8 +67,6 @@ interface FeedRepository {
 
     suspend fun findConversation(userId: String, noteId: String): List<FeedPost>
 
-    fun observeUserVotedOptions(userId: String, postId: String): Flow<Set<String>>
-
     companion object {
         const val DEFAULT_PAGE_SIZE = 25
 

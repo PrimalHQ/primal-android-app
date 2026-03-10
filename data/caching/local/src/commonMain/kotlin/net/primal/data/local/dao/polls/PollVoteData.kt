@@ -17,5 +17,6 @@ data class PollVoteData(
     val optionId: String,
     val voterId: String,
     val amountInSats: Long? = null,
+    val zapComment: String? = null,
     val createdAt: Long,
 )

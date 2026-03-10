@@ -42,6 +42,10 @@ internal class FeedApiImpl(
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
             genericReposts = queryResult.filterNostrEvents(NostrEventKind.GenericRepost),
             pictureNotes = queryResult.filterNostrEvents(NostrEventKind.PictureNote),
+            polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
+                queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
+            pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
+            primalPollStats = queryResult.findPrimalEvent(NostrEventKind.PrimalPollStats),
             liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
         )
     }
@@ -73,6 +77,10 @@ internal class FeedApiImpl(
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
             genericReposts = emptyList(),
             pictureNotes = queryResult.filterNostrEvents(NostrEventKind.PictureNote),
+            polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
+                queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
+            pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
+            primalPollStats = queryResult.findPrimalEvent(NostrEventKind.PrimalPollStats),
             liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
         )
     }
@@ -92,6 +100,7 @@ internal class FeedApiImpl(
             polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
                 queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
             pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
+            primalPollStats = queryResult.findPrimalEvent(NostrEventKind.PrimalPollStats),
             articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
             reposts = emptyList(),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
@@ -141,6 +150,10 @@ internal class FeedApiImpl(
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
             genericReposts = emptyList(),
             pictureNotes = queryResult.filterNostrEvents(NostrEventKind.PictureNote),
+            polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
+                queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
+            pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
+            primalPollStats = queryResult.findPrimalEvent(NostrEventKind.PrimalPollStats),
             liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
         )
     }

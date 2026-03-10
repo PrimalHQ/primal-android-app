@@ -1,6 +1,6 @@
 package net.primal.android.events.polls.votes.model
 
-data class PollOptionUi(
+data class PollVoteOptionUi(
     val id: String,
     val title: String,
     val voteCount: Int,
