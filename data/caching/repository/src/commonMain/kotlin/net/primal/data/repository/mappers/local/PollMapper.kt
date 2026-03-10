@@ -2,6 +2,7 @@ package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.polls.PollData
 import net.primal.data.local.dao.polls.PollType
+import net.primal.domain.polls.PollOptionInfo
 import net.primal.domain.posts.FeedPostPollInfo
 
 fun PollData.asFeedPostPollInfo(): FeedPostPollInfo {
@@ -11,7 +12,7 @@ fun PollData.asFeedPostPollInfo(): FeedPostPollInfo {
             PollType.Zap -> FeedPostPollInfo.PollType.Zap
         },
         options = this.options.map { option ->
-            FeedPostPollInfo.PollOptionInfo(
+            PollOptionInfo(
                 id = option.id,
                 label = option.label,
                 voteCount = option.voteCount,
