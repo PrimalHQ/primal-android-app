@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -139,6 +140,9 @@ private fun PollChoicesSection(
     onFocusedChoiceIdChange: (UUID?) -> Unit,
     eventPublisher: (NoteEditorContract.UiEvent) -> Unit,
 ) {
+    var pendingFocusChoiceCount by remember { mutableIntStateOf(-1) }
+    var pendingFocusChoiceId by remember { mutableStateOf<UUID?>(null) }
+
     pollState.choices.forEachIndexed { index, choice ->
         key(choice.id) {
             PollChoiceField(
@@ -153,7 +157,22 @@ private fun PollChoicesSection(
                     if (focused) onFocusedChoiceIdChange(choice.id)
                 },
                 onRemove = {
+                    if (focusedChoiceId == choice.id) {
+                        val neighborIndex = (index - 1).coerceAtLeast(0)
+                        pendingFocusChoiceId = pollState.choices
+                            .filterNot { it.id == choice.id }
+                            .getOrNull(neighborIndex)?.id
+                    }
                     eventPublisher(NoteEditorContract.UiEvent.RemovePollChoice(choice.id))
+                },
+                shouldRequestFocus = (
+                    pollState.choices.size == pendingFocusChoiceCount &&
+                        index == pollState.choices.lastIndex
+                    ) ||
+                    choice.id == pendingFocusChoiceId,
+                onFocusRequested = {
+                    pendingFocusChoiceCount = -1
+                    pendingFocusChoiceId = null
                 },
             )
 
@@ -165,7 +184,10 @@ private fun PollChoicesSection(
         Row(
             modifier = Modifier
                 .padding(start = startPadding, end = endPadding)
-                .clickable { eventPublisher(NoteEditorContract.UiEvent.AddPollChoice) }
+                .clickable {
+                    eventPublisher(NoteEditorContract.UiEvent.AddPollChoice)
+                    pendingFocusChoiceCount = pollState.choices.size + 1
+                }
                 .padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),

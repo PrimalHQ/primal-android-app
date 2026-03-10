@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,12 +20,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
@@ -48,7 +56,11 @@ fun PollChoiceField(
     onTextChange: (String) -> Unit,
     onFocusChange: (Boolean) -> Unit,
     onRemove: () -> Unit,
+    shouldRequestFocus: Boolean = false,
+    onFocusRequested: () -> Unit = {},
 ) {
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
     val interactionSource = remember { MutableInteractionSource() }
     val colors = PrimalDefaults.outlinedTextFieldColors(
         focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
@@ -74,8 +86,13 @@ fun PollChoiceField(
                 modifier = Modifier
                     .weight(1f)
                     .height(44.dp)
+                    .focusRequester(focusRequester)
                     .onFocusChanged { onFocusChange(it.isFocused) },
                 singleLine = true,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                keyboardActions = KeyboardActions(
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) },
+                ),
                 textStyle = AppTheme.typography.bodyMedium.copy(
                     color = AppTheme.colorScheme.onSurface,
                 ),
@@ -105,6 +122,13 @@ fun PollChoiceField(
 
         if (canRemove) {
             RemovePollButton(onRemove = onRemove)
+        }
+    }
+
+    LaunchedEffect(shouldRequestFocus) {
+        if (shouldRequestFocus) {
+            focusRequester.requestFocus()
+            onFocusRequested()
         }
     }
 }
