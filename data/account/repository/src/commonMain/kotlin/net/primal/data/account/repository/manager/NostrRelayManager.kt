@@ -128,6 +128,10 @@ internal class NostrRelayManager(
                 }
             }.getOrThrow()
 
+        if (rebroadcast) {
+            rebroadcastEvent(event = event, relays = relays)
+        }
+
         val currentClients = clients.load()
         val activeClients = relays.mapNotNull { relay -> currentClients[relay] }
             .also { clients ->
@@ -140,10 +144,6 @@ internal class NostrRelayManager(
             scope.launch {
                 client.publishEvent(event = event)
             }
-        }
-
-        if (rebroadcast) {
-            rebroadcastEvent(event = event, relays = relays)
         }
     }
 
