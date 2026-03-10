@@ -114,7 +114,7 @@ fun PollChoiceField(
                             )
                         },
                         placeholder = { PollChoiceFieldPlaceholder(index = index) },
-                        trailingIcon = { PollChoiceFieldLengthIndicator(isFocused = isFocused, choice = choice) },
+                        trailingIcon = { PollChoiceFieldLengthIndicator(choice = choice) },
                     )
                 },
             )
@@ -134,14 +134,12 @@ fun PollChoiceField(
 }
 
 @Composable
-private fun PollChoiceFieldLengthIndicator(isFocused: Boolean, choice: NoteEditorContract.PollChoice) {
-    if (isFocused) {
-        Text(
-            text = "${choice.text.length}/$MAX_POLL_CHOICE_LENGTH",
-            style = AppTheme.typography.bodySmall,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-        )
-    }
+private fun PollChoiceFieldLengthIndicator(choice: NoteEditorContract.PollChoice) {
+    Text(
+        text = "${choice.text.length}/$MAX_POLL_CHOICE_LENGTH",
+        style = AppTheme.typography.bodySmall,
+        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+    )
 }
 
 @Composable
