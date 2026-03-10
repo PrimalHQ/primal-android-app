@@ -67,6 +67,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -941,7 +942,7 @@ private fun NoteActionRow(
     onPollToggle: () -> Unit,
 ) {
     Row(
-        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        modifier = Modifier.padding(horizontal = 2.dp, vertical = 4.dp),
     ) {
         ImportPhotosIconButton(
             imageVector = PrimalIcons.ImportPhotoFromGallery,
@@ -995,6 +996,8 @@ private fun NoteActionRow(
                     text = stringResource(id = R.string.poll_editor_remove_poll),
                     color = RemovePollColor,
                     style = AppTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                 )
             }
         }
