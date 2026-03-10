@@ -11,7 +11,7 @@ import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
 import net.primal.data.remote.mapper.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
-import net.primal.data.repository.mappers.remote.applyVoteCounts
+import net.primal.data.repository.mappers.remote.applyPollStats
 import net.primal.data.repository.mappers.remote.flatMapAsEventHintsPO
 import net.primal.data.repository.mappers.remote.flatMapPostsAsEventUriPO
 import net.primal.data.repository.mappers.remote.flatMapPostsAsReferencedNostrUriDO
@@ -31,6 +31,7 @@ import net.primal.data.repository.mappers.remote.mapReferencedEventsAsArticleDat
 import net.primal.data.repository.mappers.remote.mapReferencedEventsAsHighlightDataPO
 import net.primal.data.repository.mappers.remote.mapReferencedNostrUriAsEventUriNostrPO
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalPollStats
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.domain.nostr.NostrEvent
@@ -99,8 +100,9 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
     val refEvents = referencedEvents.mapNotNull { it.content.decodeFromJsonStringOrNull<NostrEvent>() }
     val streamData = liveActivity.mapNotNullAsStreamDataPO() + refEvents.mapNotNullAsStreamDataPO()
 
+    val pollStatsMap = this.primalPollStats.parseAndMapPrimalPollStats()
+    val pollData = (this.polls + refEvents).mapNotNullAsPollDataPO().applyPollStats(pollStatsMap)
     val pollVotes = this.pollResponses.mapAsPollResponseVotes() + this.zaps.mapAsZapPollVotes()
-    val pollData = (this.polls + refEvents).mapNotNullAsPollDataPO().applyVoteCounts(pollVotes)
 
     val noteNostrUris = allPosts.flatMapPostsAsReferencedNostrUriDO(
         eventIdToNostrEvent = refEvents.associateBy { it.id },

@@ -231,12 +231,6 @@ internal class FeedRepositoryImpl(
         }
     }
 
-    override fun observeUserVotedOptions(userId: String, postId: String): Flow<Set<String>> {
-        return database.pollVotes().observeVotesByUser(postId = postId, voterId = userId)
-            .map { votes -> votes.map { it.optionId }.toSet() }
-            .flowOn(dispatcherProvider.io())
-    }
-
     @OptIn(ExperimentalPagingApi::class)
     private fun createPager(
         userId: String,
