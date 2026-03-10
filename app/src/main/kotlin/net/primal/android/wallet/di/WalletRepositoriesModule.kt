@@ -25,6 +25,7 @@ import net.primal.domain.rates.fees.TransactionFeeRepository
 import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.nwc.NwcLogRepository
+import net.primal.wallet.data.repository.WalletSessionProvider
 import net.primal.wallet.data.repository.factory.WalletRepositoryFactory
 
 @Suppress("TooManyFunctions")
@@ -140,4 +141,17 @@ object WalletRepositoriesModule {
     @Provides
     @Singleton
     fun provideNwcLogRepository(): NwcLogRepository = WalletRepositoryFactory.createNwcLogRepository()
+
+    @Provides
+    @Singleton
+    fun providesWalletSessionProvider(
+        @PrimalWalletApiClient primalApiClient: PrimalApiClient,
+        nostrNotary: NostrNotary,
+        profileRepository: ProfileRepository,
+    ): WalletSessionProvider =
+        WalletRepositoryFactory.createWalletSessionProvider(
+            primalWalletApiClient = primalApiClient,
+            nostrEventSignatureHandler = nostrNotary,
+            profileRepository = profileRepository,
+        )
 }

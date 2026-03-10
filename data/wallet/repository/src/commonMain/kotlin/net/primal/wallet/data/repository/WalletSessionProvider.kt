@@ -1,15 +1,11 @@
-package net.primal.android.wallet.init
+package net.primal.wallet.data.repository
 
 import io.github.aakira.napier.Napier
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
@@ -21,10 +17,8 @@ import net.primal.domain.wallet.SparkWalletManager
 import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 
 @Suppress("LongParameterList")
-@Singleton
-class SparkWalletLifecycleInitializer @Inject constructor(
+class WalletSessionProvider internal constructor(
     dispatchers: DispatcherProvider,
-    private val activeAccountStore: ActiveAccountStore,
     private val sparkWalletManager: SparkWalletManager,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
@@ -34,13 +28,13 @@ class SparkWalletLifecycleInitializer @Inject constructor(
 
     private val scope = CoroutineScope(dispatchers.io())
 
+    private val activeUserId = MutableStateFlow<String?>(null)
+
     private var currentWalletId: String? = null
 
     fun start() {
         scope.launch {
-            activeAccountStore.activeUserId
-                .map { it.takeIf { id -> id.isNotBlank() } }
-                .distinctUntilChanged()
+            activeUserId
                 .collectLatest { userIdOrNull ->
                     disconnectCurrentWalletIfNeeded()
 
@@ -48,6 +42,10 @@ class SparkWalletLifecycleInitializer @Inject constructor(
                     initializeWallet(userId)
                 }
         }
+    }
+
+    fun setActiveUserId(userId: String?) {
+        activeUserId.value = userId?.takeIf { it.isNotBlank() }
     }
 
     private suspend fun disconnectCurrentWalletIfNeeded() {
