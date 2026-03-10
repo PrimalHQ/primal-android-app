@@ -20,7 +20,7 @@ import net.primal.data.local.queries.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.data.local.queries.ExploreFeedQueryBuilder
 import net.primal.data.local.queries.FeedQueryBuilder
 import net.primal.data.remote.api.feed.FeedApi
-import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
+import net.primal.data.remote.api.feed.model.MultiKindFeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.MultiKindThreadRequestBody
 import net.primal.data.repository.feed.paging.NoteFeedRemoteMediator
 import net.primal.data.repository.feed.processors.FeedProcessor
@@ -49,9 +49,10 @@ internal class FeedRepositoryImpl(
     override fun feedBySpec(
         userId: String,
         feedSpec: String,
+        kinds: List<Int>,
         allowMutedThreads: Boolean,
     ): Flow<PagingData<FeedPostDO>> {
-        return createPager(userId = userId, feedSpec = feedSpec) {
+        return createPager(userId = userId, feedSpec = feedSpec, kinds = kinds) {
             database.feedPosts().feedQuery(
                 query = feedQueryBuilder(
                     userId = userId,
@@ -193,6 +194,7 @@ internal class FeedRepositoryImpl(
     override suspend fun fetchFeedPageSnapshot(
         userId: String,
         feedSpec: String,
+        kinds: List<Int>,
         notes: String?,
         until: Long?,
         since: Long?,
@@ -200,10 +202,11 @@ internal class FeedRepositoryImpl(
         limit: Int,
     ): FeedPageSnapshot =
         withContext(dispatcherProvider.io()) {
-            val response = feedApi.getFeedBySpec(
-                body = FeedBySpecRequestBody(
+            val response = feedApi.getMultiKindFeedBySpec(
+                body = MultiKindFeedBySpecRequestBody(
                     spec = feedSpec,
                     userPubKey = userId,
+                    kinds = kinds,
                     notes = notes,
                     until = until,
                     since = since,
@@ -235,6 +238,7 @@ internal class FeedRepositoryImpl(
     private fun createPager(
         userId: String,
         feedSpec: String,
+        kinds: List<Int> = FeedRepository.DEFAULT_FEED_KINDS,
         pagingSourceFactory: () -> PagingSource<Int, FeedPostPO>,
     ) = Pager(
         config = PagingConfig(
@@ -250,6 +254,7 @@ internal class FeedRepositoryImpl(
             feedApi = feedApi,
             database = database,
             mediaCacher = mediaCacher,
+            kinds = kinds,
         ),
         pagingSourceFactory = pagingSourceFactory,
     )
