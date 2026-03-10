@@ -36,6 +36,14 @@ fun UiError.resolveUiErrorMessage(context: Context): String {
             R.string.post_action_repost_failed,
         )
 
+        is UiError.FailedToVotePoll -> context.getString(R.string.post_action_poll_vote_failed)
+
+        is UiError.PollAlreadyVoted -> context.getString(R.string.post_action_poll_already_voted)
+
+        is UiError.PollExpired -> context.getString(R.string.post_action_poll_expired)
+
+        is UiError.PollAuthorCannotVote -> context.getString(R.string.post_action_poll_author_cannot_vote)
+
         is UiError.FailedToMuteUser -> context.getString(R.string.app_error_muting_user)
 
         is UiError.FailedToUnmuteUser -> context.getString(R.string.app_error_unmuting_user)

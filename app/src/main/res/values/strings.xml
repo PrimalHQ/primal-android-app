@@ -674,6 +674,10 @@
     <string name="post_action_like_failed">Unable to like. Please try again.</string>
     <string name="post_action_repost_failed">Unable to repost. Please try again.</string>
     <string name="post_action_delete_failed">Unable to delete. Please try again.</string>
+    <string name="post_action_poll_vote_failed">Unable to vote. Please try again.</string>
+    <string name="post_action_poll_already_voted">You have already voted on this poll.</string>
+    <string name="post_action_poll_expired">This poll has ended.</string>
+    <string name="post_action_poll_author_cannot_vote">Poll authors cannot vote on their own zap poll.</string>
 
     <string name="thread_title">Thread</string>
     <string name="thread_reply_to">Reply to %1$s</string>

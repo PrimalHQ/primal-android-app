@@ -222,10 +222,12 @@ object CachingRepositoriesModule {
     @Provides
     fun providePollsRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
         mediaCacher: MediaCacher?,
     ): PollsRepository =
         PrimalRepositoryFactory.createPollsRepository(
             cachingPrimalApiClient = primalApiClient,
+            primalPublisher = primalPublisher,
             mediaCacher = mediaCacher,
         )
 }

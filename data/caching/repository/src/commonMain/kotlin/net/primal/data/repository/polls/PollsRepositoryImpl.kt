@@ -1,13 +1,17 @@
 package net.primal.data.repository.polls
 
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
 import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.dao.polls.PollType
+import net.primal.data.local.dao.polls.PollVoteData
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.polls.PollsApi
 import net.primal.data.remote.api.polls.model.PollVotesRequestBody
@@ -26,16 +30,22 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.asEventIdTag
+import net.primal.domain.polls.PollAlreadyVotedException
+import net.primal.domain.polls.PollExpiredException
 import net.primal.domain.polls.PollOptionInfo
 import net.primal.domain.polls.PollOptionStats
 import net.primal.domain.polls.PollVoteStats
 import net.primal.domain.polls.PollVoter
 import net.primal.domain.polls.PollsRepository
+import net.primal.domain.publisher.PrimalPublisher
 import net.primal.shared.data.local.db.withTransaction
 
 class PollsRepositoryImpl(
     private val dispatcherProvider: DispatcherProvider,
     private val pollsApi: PollsApi,
+    private val primalPublisher: PrimalPublisher,
     private val database: PrimalDatabase,
     private val mediaCacher: MediaCacher? = null,
 ) : PollsRepository {
@@ -78,6 +88,70 @@ class PollsRepositoryImpl(
                 database.pollVotes().upsertAll(data = pollVotes)
             }
         }
+
+    private suspend fun validatePollExpiration(pollEventId: String) {
+        val pollData = database.polls().findByPostId(postId = pollEventId)
+        val endsAt = pollData?.endsAt
+        if (endsAt != null) {
+            val now = Clock.System.now().epochSeconds
+            if (endsAt <= now) throw PollExpiredException()
+        }
+    }
+
+    private suspend fun validateUserPollVote(userId: String, pollEventId: String) {
+        val existingVotes = database.pollVotes().findVotesByUser(postId = pollEventId, voterId = userId)
+        if (existingVotes.isNotEmpty()) throw PollAlreadyVotedException()
+        validatePollExpiration(pollEventId)
+    }
+
+    override suspend fun votePoll(
+        userId: String,
+        pollEventId: String,
+        optionId: String,
+    ) = withContext(dispatcherProvider.io()) {
+        validateUserPollVote(userId = userId, pollEventId = pollEventId)
+
+        val responseTag = buildJsonArray {
+            add("response")
+            add(optionId)
+        }
+
+        val publishResult = primalPublisher.signPublishImportNostrEvent(
+            unsignedNostrEvent = NostrUnsignedEvent(
+                pubKey = userId,
+                kind = NostrEventKind.PollResponse.value,
+                tags = listOf(pollEventId.asEventIdTag(), responseTag),
+                content = "",
+            ),
+        )
+
+        database.withTransaction {
+            database.pollVotes().upsertAll(
+                data = listOf(
+                    PollVoteData(
+                        eventId = publishResult.nostrEvent.id,
+                        postId = pollEventId,
+                        optionId = optionId,
+                        voterId = userId,
+                        amountInSats = null,
+                        createdAt = Clock.System.now().epochSeconds,
+                    ),
+                ),
+            )
+
+            val existingPoll = database.polls().findByPostId(postId = pollEventId)
+            if (existingPoll != null) {
+                val updatedOptions = existingPoll.options.map { option ->
+                    if (option.id == optionId) {
+                        option.copy(voteCount = option.voteCount + 1)
+                    } else {
+                        option
+                    }
+                }
+                database.polls().upsertAll(listOf(existingPoll.copy(options = updatedOptions)))
+            }
+        }
+    }
 
     override fun observeUserVotedOptions(userId: String, postId: String): Flow<Set<String>> {
         return database.pollVotes().observeVotesByUser(postId = postId, voterId = userId)

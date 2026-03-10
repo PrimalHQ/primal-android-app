@@ -14,6 +14,10 @@ sealed class UiError {
     data class FailedToPublishRepostEvent(val cause: Throwable) : UiError()
     data class FailedToPublishLikeEvent(val cause: Throwable) : UiError()
     data class FailedToPublishDeleteEvent(val cause: Throwable) : UiError()
+    data class FailedToVotePoll(val cause: Throwable) : UiError()
+    data object PollAlreadyVoted : UiError()
+    data object PollExpired : UiError()
+    data object PollAuthorCannotVote : UiError()
 
     data class FailedToUpdateFollowList(val cause: Throwable) : UiError()
     data class FailedToMuteUser(val cause: Throwable) : UiError()
