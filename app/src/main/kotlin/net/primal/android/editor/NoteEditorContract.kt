@@ -29,8 +29,8 @@ interface NoteEditorContract {
         val pollLengthDays: Int = 1,
         val pollLengthHours: Int = 0,
         val pollLengthMinutes: Int = 0,
-        val minZapAmountInSats: Long? = null,
-        val maxZapAmountInSats: Long? = null,
+        val minZapAmountInSats: Long? = 21L,
+        val maxZapAmountInSats: Long? = 21_000L,
     )
 
     data class UiState(
