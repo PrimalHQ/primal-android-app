@@ -12,6 +12,7 @@ interface FeedRepository {
     fun feedBySpec(
         userId: String,
         feedSpec: String,
+        kinds: List<Int> = DEFAULT_FEED_KINDS,
         allowMutedThreads: Boolean = false,
     ): Flow<PagingData<FeedPost>>
 
@@ -50,6 +51,7 @@ interface FeedRepository {
     suspend fun fetchFeedPageSnapshot(
         userId: String,
         feedSpec: String,
+        kinds: List<Int> = DEFAULT_FEED_KINDS,
         notes: String? = null,
         until: Long? = null,
         since: Long? = null,
@@ -78,6 +80,13 @@ interface FeedRepository {
             NostrEventKind.ZapPoll.value,
             NostrEventKind.ZapRequest.value,
             NostrEventKind.Zap.value,
+        )
+
+        val DEFAULT_FEED_KINDS = listOf(
+            NostrEventKind.ShortTextNote.value,
+            NostrEventKind.ShortTextNoteRepost.value,
+            NostrEventKind.Poll.value,
+            NostrEventKind.ZapPoll.value,
         )
     }
 }
