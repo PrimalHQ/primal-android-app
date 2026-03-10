@@ -42,7 +42,7 @@ import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.utils.shortened
-import net.primal.android.events.polls.votes.model.PollOptionUi
+import net.primal.android.events.polls.votes.model.PollVoteOptionUi
 import net.primal.android.events.polls.votes.model.PollVoterUi
 import net.primal.android.explore.search.ui.UserProfileListItem
 import net.primal.android.theme.AppTheme
@@ -76,7 +76,7 @@ private fun PollVotesScreen(state: PollVotesContract.UiState, callbacks: PollVot
         },
         content = { paddingValues ->
             when {
-                state.loading -> {
+                state.loading && state.pollOptions.isEmpty() -> {
                     HeightAdjustableLoadingLazyListPlaceholder(
                         modifier = Modifier.fillMaxSize().padding(paddingValues),
                         contentPaddingValues = PaddingValues(0.dp),
@@ -117,7 +117,7 @@ private fun PollVotesScreen(state: PollVotesContract.UiState, callbacks: PollVot
 
 @Composable
 private fun PollVotesList(
-    pollOptions: List<PollOptionUi>,
+    pollOptions: List<PollVoteOptionUi>,
     isZapPoll: Boolean,
     onProfileClick: (String) -> Unit,
     modifier: Modifier = Modifier,
@@ -152,7 +152,7 @@ private fun PollVotesList(
 
 @Composable
 private fun PollOptionHeader(
-    option: PollOptionUi,
+    option: PollVoteOptionUi,
     isZapPoll: Boolean,
     modifier: Modifier = Modifier,
 ) {
@@ -282,7 +282,7 @@ private fun PreviewPollVotesList() {
         Surface {
             PollVotesList(
                 pollOptions = listOf(
-                    PollOptionUi(
+                    PollVoteOptionUi(
                         id = "1",
                         title = "\uD83D\uDC40 Conspiracy Contemplators",
                         voteCount = 5,
@@ -310,7 +310,7 @@ private fun PreviewPollVotesList() {
                             ),
                         ),
                     ),
-                    PollOptionUi(
+                    PollVoteOptionUi(
                         id = "2",
                         title = "\uD83C\uDF3D Corn Conglomerators",
                         voteCount = 12,
@@ -347,7 +347,7 @@ private fun PreviewZapPollVotesList() {
         Surface {
             PollVotesList(
                 pollOptions = listOf(
-                    PollOptionUi(
+                    PollVoteOptionUi(
                         id = "1",
                         title = "\uD83D\uDC40 Conspiracy Contemplat\u2026",
                         voteCount = 5,

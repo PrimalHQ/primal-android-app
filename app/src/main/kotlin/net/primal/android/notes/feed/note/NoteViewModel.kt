@@ -43,6 +43,7 @@ import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
+import net.primal.domain.polls.PollsRepository
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.utils.isConfigured
@@ -56,6 +57,7 @@ class NoteViewModel @AssistedInject constructor(
     private val eventInteractionRepository: EventInteractionRepository,
     private val profileRepository: ProfileRepository,
     private val feedRepository: FeedRepository,
+    private val pollsRepository: PollsRepository,
     private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
@@ -101,7 +103,7 @@ class NoteViewModel @AssistedInject constructor(
 
     private fun observeUserVotedOptions(noteId: String) =
         viewModelScope.launch {
-            feedRepository.observeUserVotedOptions(
+            pollsRepository.observeUserVotedOptions(
                 userId = activeAccountStore.activeUserId(),
                 postId = noteId,
             ).collect { votedOptionIds ->

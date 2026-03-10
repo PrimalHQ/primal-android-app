@@ -5,7 +5,8 @@ import net.primal.domain.nostr.NostrEvent
 
 data class PollVotesResponse(
     val profiles: List<NostrEvent> = emptyList(),
-    val votes: List<NostrEvent> = emptyList(),
+    val pollResponses: List<NostrEvent> = emptyList(),
+    val zaps: List<NostrEvent> = emptyList(),
     val pollStats: PrimalEvent? = null,
     val cdnResources: List<PrimalEvent> = emptyList(),
     val primalUserNames: PrimalEvent? = null,

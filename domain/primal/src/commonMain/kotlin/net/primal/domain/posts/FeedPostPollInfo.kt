@@ -1,5 +1,7 @@
 package net.primal.domain.posts
 
+import net.primal.domain.polls.PollOptionInfo
+
 data class FeedPostPollInfo(
     val pollType: PollType,
     val options: List<PollOptionInfo>,
@@ -8,11 +10,4 @@ data class FeedPostPollInfo(
     val valueMaximum: Long? = null,
 ) {
     enum class PollType { User, Zap }
-
-    data class PollOptionInfo(
-        val id: String,
-        val label: String,
-        val voteCount: Int = 0,
-        val satsZapped: Long = 0,
-    )
 }

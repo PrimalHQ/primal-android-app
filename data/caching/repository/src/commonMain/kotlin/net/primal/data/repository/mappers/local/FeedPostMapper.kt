@@ -10,6 +10,7 @@ import net.primal.data.repository.mappers.usernameUiFriendly
 import net.primal.domain.events.EventZap
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.nostr.utils.formatNip05Identifier
+import net.primal.domain.polls.PollOptionInfo
 import net.primal.domain.posts.FeedPost
 import net.primal.domain.posts.FeedPost as FeedPostDO
 import net.primal.domain.posts.FeedPostAuthor
@@ -107,7 +108,7 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
                     net.primal.data.local.dao.polls.PollType.Zap -> FeedPostPollInfo.PollType.Zap
                 },
                 options = poll.options.map { option ->
-                    FeedPostPollInfo.PollOptionInfo(
+                    PollOptionInfo(
                         id = option.id,
                         label = option.label,
                         voteCount = option.voteCount,

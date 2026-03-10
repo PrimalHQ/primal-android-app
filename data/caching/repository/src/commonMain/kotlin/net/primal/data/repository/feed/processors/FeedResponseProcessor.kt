@@ -11,7 +11,7 @@ import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
 import net.primal.data.remote.mapper.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
-import net.primal.data.repository.mappers.remote.applyVoteCounts
+import net.primal.data.repository.mappers.remote.applyPollStats
 import net.primal.data.repository.mappers.remote.flatMapAsEventHintsPO
 import net.primal.data.repository.mappers.remote.flatMapPostsAsEventUriPO
 import net.primal.data.repository.mappers.remote.flatMapPostsAsReferencedNostrUriDO
@@ -31,6 +31,7 @@ import net.primal.data.repository.mappers.remote.mapReferencedEventsAsArticleDat
 import net.primal.data.repository.mappers.remote.mapReferencedEventsAsHighlightDataPO
 import net.primal.data.repository.mappers.remote.mapReferencedNostrUriAsEventUriNostrPO
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalPollStats
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.domain.nostr.NostrEvent
@@ -115,8 +116,10 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
     val postStats = primalEventStats.mapNotNullAsEventStatsPO()
     val userPostStats = primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
 
-    val pollVotes = this.pollResponses.mapAsPollResponseVotes() + this.zaps.mapAsZapPollVotes()
-    val pollData = this.polls.mapNotNullAsPollDataPO().applyVoteCounts(pollVotes)
+    val pollStatsMap = this.primalPollStats.parseAndMapPrimalPollStats()
+    val pollData = this.polls.mapNotNullAsPollDataPO().applyPollStats(pollStatsMap)
+    val pollVotes = this.pollResponses.mapAsPollResponseVotes() +
+        this.zaps.mapAsZapPollVotes()
 
     database.profiles().insertOrUpdateAll(data = profiles)
     database.posts().upsertAll(data = allPosts)
