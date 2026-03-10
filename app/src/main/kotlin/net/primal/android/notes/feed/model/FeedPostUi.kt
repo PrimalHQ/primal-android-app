@@ -93,7 +93,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
     )
 }
 
-private fun FeedPostPollInfo.asPollUi(): PollUi {
+internal fun FeedPostPollInfo.asPollUi(): PollUi {
     val endsAtInstant = endsAt?.let { Instant.ofEpochSecond(it) }
     val totalVotes = options.sumOf { it.voteCount }.coerceAtLeast(1)
     val totalSats = options.sumOf { it.satsZapped }.coerceAtLeast(1)

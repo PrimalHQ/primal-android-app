@@ -1,5 +1,8 @@
 package net.primal.domain.polls
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class PollOptionInfo(
     val id: String,
     val label: String,

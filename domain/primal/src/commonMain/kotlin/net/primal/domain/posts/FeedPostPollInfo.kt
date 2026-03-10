@@ -1,7 +1,9 @@
 package net.primal.domain.posts
 
+import kotlinx.serialization.Serializable
 import net.primal.domain.polls.PollOptionInfo
 
+@Serializable
 data class FeedPostPollInfo(
     val pollType: PollType,
     val options: List<PollOptionInfo>,
