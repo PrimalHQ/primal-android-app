@@ -80,6 +80,7 @@ fun ReferencedNoteCard(
             noteCallbacks = noteCallbacks,
             couldAutoPlay = couldAutoPlay,
             onVideoSoundToggle = onVideoSoundToggle,
+            onPollOptionSelected = { noteCallbacks.onNoteClick?.invoke(data.postId) },
         )
 
         Spacer(modifier = Modifier.height(12.dp))

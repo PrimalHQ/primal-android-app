@@ -5,10 +5,12 @@ import net.primal.core.utils.toDouble
 import net.primal.data.local.dao.events.EventUriNostr
 import net.primal.data.local.dao.messages.DirectMessageData
 import net.primal.data.local.dao.notes.PostData
+import net.primal.data.local.dao.polls.PollData
 import net.primal.data.local.dao.profiles.ProfileData
 import net.primal.data.local.dao.reads.ArticleData
 import net.primal.data.local.dao.streams.StreamData
 import net.primal.data.repository.mappers.authorNameUiFriendly
+import net.primal.data.repository.mappers.local.asFeedPostPollInfo
 import net.primal.data.repository.mappers.usernameUiFriendly
 import net.primal.domain.links.CdnResource
 import net.primal.domain.links.EventLinkPreviewData
@@ -73,6 +75,7 @@ fun List<PostData>.flatMapPostsAsReferencedNostrUriDO(
     cdnResources: Map<String, CdnResource>,
     linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
+    postIdToPollDataMap: Map<String, PollData> = emptyMap(),
 ): List<EventUriNostrReference> =
     flatMap { postData ->
         postData.uris.mapAsReferencedNostrUriDO(
@@ -85,6 +88,7 @@ fun List<PostData>.flatMapPostsAsReferencedNostrUriDO(
             cdnResources = cdnResources,
             linkPreviews = linkPreviews,
             videoThumbnails = videoThumbnails,
+            postIdToPollDataMap = postIdToPollDataMap,
         )
     }
 
@@ -97,6 +101,7 @@ fun List<DirectMessageData>.flatMapMessagesAsReferencedNostrUriDO(
     cdnResources: Map<String, CdnResource>,
     linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
+    postIdToPollDataMap: Map<String, PollData> = emptyMap(),
 ) = flatMap { messageData ->
     messageData.uris.decrypted.mapAsReferencedNostrUriDO(
         eventId = messageData.messageId,
@@ -108,6 +113,7 @@ fun List<DirectMessageData>.flatMapMessagesAsReferencedNostrUriDO(
         cdnResources = cdnResources,
         linkPreviews = linkPreviews,
         videoThumbnails = videoThumbnails,
+        postIdToPollDataMap = postIdToPollDataMap,
     )
 }
 
@@ -121,6 +127,7 @@ fun List<String>.mapAsReferencedNostrUriDO(
     cdnResources: Map<String, CdnResource>,
     linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
+    postIdToPollDataMap: Map<String, PollData> = emptyMap(),
 ) = filter { it.isNostrUri() }.map { link ->
     val refUserProfileId = link.extractProfileId()
 
@@ -173,6 +180,7 @@ fun List<String>.mapAsReferencedNostrUriDO(
             articleIdToArticle = articleIdToArticle,
             profileIdToProfileDataMap = profileIdToProfileDataMap,
             streamIdToStreamData = streamIdToStreamData,
+            postIdToPollDataMap = postIdToPollDataMap,
         ),
         referencedArticle = takeAsReferencedArticleOrNull(refNaddr, refArticle, refNaddrAuthor),
         referencedZap = takeAsReferencedZapOrNull(
@@ -237,6 +245,7 @@ private fun takeAsReferencedNoteOrNull(
     articleIdToArticle: Map<String, ArticleData>,
     streamIdToStreamData: Map<String, StreamData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
+    postIdToPollDataMap: Map<String, PollData> = emptyMap(),
 ) = if (refNote != null && refPostAuthor != null) {
     ReferencedNote(
         postId = refNote.postId,
@@ -264,6 +273,7 @@ private fun takeAsReferencedNoteOrNull(
             videoThumbnails = videoThumbnails,
         ),
         raw = refNote.raw,
+        pollInfo = postIdToPollDataMap[refNote.postId]?.asFeedPostPollInfo(),
     )
 } else {
     null
