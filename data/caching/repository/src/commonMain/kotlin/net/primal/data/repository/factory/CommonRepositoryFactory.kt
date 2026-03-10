@@ -279,11 +279,13 @@ abstract class CommonRepositoryFactory {
 
     fun createPollsRepository(
         cachingPrimalApiClient: PrimalApiClient,
+        primalPublisher: PrimalPublisher,
         mediaCacher: MediaCacher? = null,
     ): PollsRepository {
         return PollsRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
             pollsApi = PrimalApiServiceFactory.createPollsApi(cachingPrimalApiClient),
+            primalPublisher = primalPublisher,
             database = resolveCachingDatabase(),
             mediaCacher = mediaCacher,
         )

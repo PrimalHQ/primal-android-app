@@ -13,4 +13,7 @@ interface PollVoteDao {
 
     @Query("SELECT * FROM PollVoteData WHERE postId = :postId AND voterId = :voterId")
     fun observeVotesByUser(postId: String, voterId: String): Flow<List<PollVoteData>>
+
+    @Query("SELECT * FROM PollVoteData WHERE postId = :postId AND voterId = :voterId")
+    suspend fun findVotesByUser(postId: String, voterId: String): List<PollVoteData>
 }

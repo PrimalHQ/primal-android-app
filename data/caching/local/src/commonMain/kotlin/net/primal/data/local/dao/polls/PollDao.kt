@@ -12,6 +12,9 @@ interface PollDao {
     @Upsert
     suspend fun upsertAll(data: List<PollData>)
 
+    @Query("SELECT * FROM PollData WHERE postId = :postId")
+    suspend fun findByPostId(postId: String): PollData?
+
     @Transaction
     @Query("SELECT * FROM PollData WHERE postId = :postId")
     fun observePollByPostId(postId: String): Flow<Poll?>

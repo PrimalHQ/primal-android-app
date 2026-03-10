@@ -43,6 +43,10 @@ import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
+import net.primal.domain.polls.PollAlreadyVotedException
+import net.primal.domain.polls.PollAuthorCannotVoteException
+import net.primal.domain.polls.PollExpiredException
+import net.primal.domain.polls.PollMissingLightningAddressException
 import net.primal.domain.polls.PollsRepository
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.profile.ProfileRepository
@@ -506,36 +510,63 @@ class NoteViewModel @AssistedInject constructor(
                     ),
                 )
             }
+
+            runCatching {
+                pollsRepository.votePoll(
+                    userId = activeAccountStore.activeUserId(),
+                    pollEventId = action.postId,
+                    optionId = action.optionId,
+                )
+            }.onFailure { error ->
+                Napier.w(throwable = error) { "Failed to publish poll vote." }
+                setState { copy(poll = null) }
+                when (error) {
+                    is PollAlreadyVotedException -> setState { copy(error = UiError.PollAlreadyVoted) }
+                    is PollExpiredException -> setState { copy(error = UiError.PollExpired) }
+                    is PollAuthorCannotVoteException -> setState { copy(error = UiError.PollAuthorCannotVote) }
+                    is PollMissingLightningAddressException -> setState {
+                        copy(
+                            error = UiError.MissingLightningAddress(error),
+                        )
+                    }
+                    is NostrPublishException -> setState { copy(error = UiError.FailedToVotePoll(error)) }
+                    is MissingRelaysException -> setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+                    is SigningKeyNotFoundException -> setState { copy(error = UiError.MissingPrivateKey) }
+                    is SigningRejectedException -> setState { copy(error = UiError.NostrSignUnauthorized) }
+                    else -> setState { copy(error = UiError.FailedToVotePoll(error)) }
+                }
+            }
         }
 
     private fun zapPollVote(action: UiEvent.ZapPollVoteAction) =
         viewModelScope.launch {
-            val currentPoll = action.poll
-            val updatedOptions = currentPoll.options.map { option ->
-                val newSats = option.satsZapped + if (option.id == action.optionId) action.zapAmount else 0
-                option.copy(satsZapped = newSats)
-            }
-            val totalSats = updatedOptions.sumOf { it.satsZapped }
-            val maxSats = updatedOptions.maxOf { it.satsZapped }
-
-            setState {
-                copy(
-                    poll = currentPoll.copy(
-                        state = PollState.Voted,
-                        selectedOptionIds = currentPoll.selectedOptionIds + action.optionId,
-                        options = updatedOptions.map { option ->
-                            option.copy(
-                                voteCount = option.voteCount + if (option.id == action.optionId) 1 else 0,
-                                votePercentage = if (totalSats > 0) {
-                                    option.satsZapped.toFloat() / totalSats
-                                } else {
-                                    0f
-                                },
-                                isWinner = option.satsZapped == maxSats,
-                            )
-                        },
-                    ),
-                )
-            }
+            applyOptimisticZapPollUpdate(action)
+            // Handle Zap Vote Logic
         }
+
+    private fun applyOptimisticZapPollUpdate(action: UiEvent.ZapPollVoteAction) {
+        val currentPoll = action.poll
+        val updatedOptions = currentPoll.options.map { option ->
+            val newSats = option.satsZapped + if (option.id == action.optionId) action.zapAmount else 0
+            option.copy(satsZapped = newSats)
+        }
+        val totalSats = updatedOptions.sumOf { it.satsZapped }
+        val maxSats = updatedOptions.maxOf { it.satsZapped }
+
+        setState {
+            copy(
+                poll = currentPoll.copy(
+                    state = PollState.Voted,
+                    selectedOptionIds = currentPoll.selectedOptionIds + action.optionId,
+                    options = updatedOptions.map { option ->
+                        option.copy(
+                            voteCount = option.voteCount + if (option.id == action.optionId) 1 else 0,
+                            votePercentage = if (totalSats > 0) option.satsZapped.toFloat() / totalSats else 0f,
+                            isWinner = option.satsZapped == maxSats,
+                        )
+                    },
+                ),
+            )
+        }
+    }
 }
