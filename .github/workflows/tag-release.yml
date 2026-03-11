@@ -155,6 +155,6 @@ jobs:
         tag_name: ${{ github.ref_name }}
         name: Primal ${{ github.ref_name }}
         draft: true
-        prerelease: true
+        prerelease: false
         body_path: app/src/main/github/release-notes/github.md
         files: primal-${{ github.ref_name }}*
