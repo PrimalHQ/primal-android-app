@@ -237,10 +237,10 @@ private fun PollResultOption(
 
     val isDarkTheme = isAppInDarkPrimalTheme()
     val progressColor = if (isUserChoice) {
-        AppTheme.colorScheme.primary
+        AppTheme.colorScheme.primary.let { if (!isDarkTheme) it.copy(alpha = 0.50f) else it }
     } else {
-        AppTheme.extraColorScheme.onSurfaceVariantAlt3
-    }.let { if (!isDarkTheme) it.copy(alpha = 0.25f) else it }
+        AppTheme.extraColorScheme.onSurfaceVariantAlt3.let { if (!isDarkTheme) it.copy(alpha = 0.25f) else it }
+    }
 
     val barShape = AppTheme.shapes.small
 
