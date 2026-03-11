@@ -42,6 +42,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -302,6 +303,8 @@ private fun PollOptionWithBar(
             ) {
                 Text(
                     text = option.label,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     style = AppTheme.typography.bodyMedium,
                     fontWeight = if (option.isWinner) FontWeight.SemiBold else FontWeight.Normal,
                     color = AppTheme.colorScheme.onSurface,
