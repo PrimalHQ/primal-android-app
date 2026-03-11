@@ -62,7 +62,9 @@ import com.wajahatkarim.flippable.FlippableState
 import com.wajahatkarim.flippable.rememberFlipController
 import net.primal.android.R
 import net.primal.android.core.compose.DefaultAvatarThumbnailPlaceholderListItemImage
+import net.primal.android.core.compose.PrimalDarkTextColor
 import net.primal.android.core.compose.PrimalLoadingSpinner
+import net.primal.android.core.compose.PrimalSecondaryTextColor
 import net.primal.android.core.compose.UiDensityMode
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
@@ -115,7 +117,7 @@ fun ProfileQrCodeViewer(
 
         Text(
             text = profileDetails?.authorDisplayName ?: profileId.asEllipsizedNpub(),
-            color = Color.White,
+            color = PrimalDarkTextColor,
             style = AppTheme.typography.bodyLarge.copy(
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
@@ -127,7 +129,7 @@ fun ProfileQrCodeViewer(
         if (profileDetails?.internetIdentifier != null) {
             Text(
                 text = profileDetails.internetIdentifier.formatNip05Identifier(),
-                color = Color.White,
+                color = PrimalSecondaryTextColor,
                 style = AppTheme.typography.bodyLarge.copy(
                     fontSize = 18.sp,
                 ),
@@ -193,7 +195,7 @@ private fun QrCodeViewer(
                 onQrCodeValueChanged(lud16)
                 flipController.flipToBack()
             },
-            indicatorColor = Color.White,
+            indicatorColor = PrimalDarkTextColor,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -333,7 +335,7 @@ private fun CopyText(
             style = AppTheme.typography.bodyMedium.copy(
                 fontSize = 16.sp,
             ),
-            color = Color.White,
+            color = PrimalDarkTextColor,
         )
 
         Box(
@@ -342,7 +344,7 @@ private fun CopyText(
         ) {
             Image(
                 imageVector = PrimalIcons.Copy,
-                colorFilter = ColorFilter.tint(color = Color.White),
+                colorFilter = ColorFilter.tint(color = PrimalDarkTextColor),
                 contentDescription = stringResource(id = R.string.accessibility_copy_content),
             )
         }
@@ -445,6 +447,6 @@ private fun QrCodeTab(
         text = text,
         style = AppTheme.typography.bodyMedium,
         fontWeight = FontWeight.SemiBold,
-        color = AppTheme.colorScheme.onSurface,
+        color = PrimalDarkTextColor,
     )
 }
