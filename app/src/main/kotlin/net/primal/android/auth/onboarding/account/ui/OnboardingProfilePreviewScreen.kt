@@ -480,7 +480,7 @@ private fun ProfileCreatedSuccessBox(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = Color.Black.copy(alpha = 0.35f),
+                    color = Color.White.copy(alpha = 0.60f),
                     shape = AppTheme.shapes.large,
                 )
                 .padding(vertical = 24.dp),
