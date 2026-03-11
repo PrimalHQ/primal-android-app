@@ -1,6 +1,10 @@
 package net.primal.android.editor.ui.poll
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -252,7 +256,11 @@ private fun PollSettingsSection(
         },
     )
 
-    AnimatedVisibility(visible = showPollLengthPicker) {
+    AnimatedVisibility(
+        visible = showPollLengthPicker,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut(),
+    ) {
         PollLengthPicker(
             days = pollState.pollLengthDays,
             hours = pollState.pollLengthHours,
@@ -264,44 +272,57 @@ private fun PollSettingsSection(
     }
 
     if (pollState.pollType == PollType.Zap) {
-        HorizontalDivider(
-            modifier = Modifier.padding(
-                start = startPadding,
-                end = endPadding,
-                top = 4.dp,
-                bottom = 4.dp,
-            ),
-            color = AppTheme.colorScheme.outline,
-        )
-
-        ZapAmountRow(
-            label = stringResource(id = R.string.poll_editor_min_zap),
-            amountInSats = pollState.minZapAmountInSats,
-            onAmountChanged = { amount ->
-                eventPublisher(NoteEditorContract.UiEvent.UpdateMinZapAmount(amount))
-            },
-            footerHeightPx = footerHeightPx,
-        )
-
-        HorizontalDivider(
-            modifier = Modifier.padding(
-                start = startPadding,
-                end = endPadding,
-                top = 4.dp,
-                bottom = 4.dp,
-            ),
-            color = AppTheme.colorScheme.outline,
-        )
-
-        ZapAmountRow(
-            label = stringResource(id = R.string.poll_editor_max_zap),
-            amountInSats = pollState.maxZapAmountInSats,
-            onAmountChanged = { amount ->
-                eventPublisher(NoteEditorContract.UiEvent.UpdateMaxZapAmount(amount))
-            },
+        ZapPollOptions(
+            pollState = pollState,
+            eventPublisher = eventPublisher,
             footerHeightPx = footerHeightPx,
         )
     }
+}
+
+@Composable
+private fun ZapPollOptions(
+    pollState: NoteEditorContract.PollEditorState,
+    eventPublisher: (NoteEditorContract.UiEvent) -> Unit,
+    footerHeightPx: Int,
+) {
+    HorizontalDivider(
+        modifier = Modifier.padding(
+            start = startPadding,
+            end = endPadding,
+            top = 4.dp,
+            bottom = 4.dp,
+        ),
+        color = AppTheme.colorScheme.outline,
+    )
+
+    ZapAmountRow(
+        label = stringResource(id = R.string.poll_editor_min_zap),
+        amountInSats = pollState.minZapAmountInSats,
+        onAmountChanged = { amount ->
+            eventPublisher(NoteEditorContract.UiEvent.UpdateMinZapAmount(amount))
+        },
+        footerHeightPx = footerHeightPx,
+    )
+
+    HorizontalDivider(
+        modifier = Modifier.padding(
+            start = startPadding,
+            end = endPadding,
+            top = 4.dp,
+            bottom = 4.dp,
+        ),
+        color = AppTheme.colorScheme.outline,
+    )
+
+    ZapAmountRow(
+        label = stringResource(id = R.string.poll_editor_max_zap),
+        amountInSats = pollState.maxZapAmountInSats,
+        onAmountChanged = { amount ->
+            eventPublisher(NoteEditorContract.UiEvent.UpdateMaxZapAmount(amount))
+        },
+        footerHeightPx = footerHeightPx,
+    )
 }
 
 @Composable
@@ -315,7 +336,15 @@ private fun PollSettingRow(
             .fillMaxWidth()
             .height(44.dp)
             .then(
-                if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
+                if (onClick != null) {
+                    Modifier.clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onClick,
+                    )
+                } else {
+                    Modifier
+                },
             )
             .padding(start = startPadding, end = endPadding),
         verticalAlignment = Alignment.CenterVertically,
