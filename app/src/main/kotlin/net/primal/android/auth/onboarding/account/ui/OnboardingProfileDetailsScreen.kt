@@ -52,6 +52,7 @@ import coil3.request.ImageRequest
 import net.primal.android.R
 import net.primal.android.auth.compose.DefaultOnboardingAvatar
 import net.primal.android.auth.compose.OnboardingBottomBar
+import net.primal.android.auth.compose.OnboardingTextColor
 import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.auth.onboarding.account.OnboardingContract
@@ -62,6 +63,8 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.theme.AppTheme
+
+private val OnboardingPhotoLabelColor = Color(0xFF1A295A).copy(alpha = 0.7f)
 
 @ExperimentalMaterial3Api
 @Composable
@@ -80,10 +83,10 @@ fun OnboardingProfileDetailsScreen(
                     scrolledContainerColor = Color.Transparent,
                 ),
                 title = stringResource(id = R.string.onboarding_title_create_account),
-                textColor = Color.White,
+                textColor = OnboardingTextColor,
                 showDivider = false,
                 navigationIcon = PrimalIcons.ArrowBack,
-                navigationIconTintColor = Color.White,
+                navigationIconTintColor = OnboardingTextColor,
                 onNavigationIconClick = onBack,
             )
         },
@@ -196,7 +199,7 @@ private fun ProfileDetailsAvatarColumn(
             }.lowercase(),
             style = AppTheme.typography.bodyMedium,
             fontWeight = FontWeight.SemiBold,
-            color = Color.White,
+            color = OnboardingPhotoLabelColor,
         )
     }
 }
@@ -240,7 +243,7 @@ private fun ProfileDetailsFormColumn(
             ),
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(48.dp))
 
         if (!keyboardVisible) {
             Text(
@@ -286,7 +289,6 @@ fun OnboardingOutlinedTextField(
                 text = placeholderText,
                 style = AppTheme.typography.bodyLarge.copy(
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
                 ),
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
             )
