@@ -49,6 +49,7 @@ import androidx.compose.ui.util.lerp
 import java.time.Duration
 import java.time.Instant
 import net.primal.android.R
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -224,11 +225,12 @@ private fun PollResultOption(
         label = "pollProgress",
     )
 
+    val isDarkTheme = isAppInDarkPrimalTheme()
     val progressColor = if (isUserChoice) {
         AppTheme.colorScheme.primary
     } else {
         AppTheme.extraColorScheme.onSurfaceVariantAlt3
-    }
+    }.let { if (!isDarkTheme) it.copy(alpha = 0.25f) else it }
 
     val barShape = AppTheme.shapes.small
 
@@ -252,43 +254,12 @@ private fun PollResultOption(
                     .background(progressColor),
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(36.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                val offsetProgress by animateFloatAsState(
-                    targetValue = if (animationStarted) 1f else 0f,
-                    animationSpec = tween(durationMillis = PROGRESS_ANIMATION_DURATION_MS),
-                    label = "textAlignment",
-                )
-
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = BiasAlignment(
-                        horizontalBias = lerp(0f, RESULT_TEXT_TARGET_BIAS, offsetProgress),
-                        verticalBias = 0f,
-                    ),
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = option.label,
-                            style = AppTheme.typography.bodyMedium,
-                            fontWeight = if (option.isWinner) FontWeight.SemiBold else FontWeight.Normal,
-                            color = AppTheme.colorScheme.onSurface,
-                        )
-
-                        if (showCheckmark) {
-                            Spacer(modifier = Modifier.width(4.dp))
-                            PollWinnerCheckmark(isUserChoice = isUserChoice)
-                        }
-                    }
-                }
-            }
+            PollOptionWithBar(
+                animationStarted = animationStarted,
+                option = option,
+                showCheckmark = showCheckmark,
+                isUserChoice = isUserChoice,
+            )
         }
 
         PollResultPercentage(
@@ -296,6 +267,52 @@ private fun PollResultOption(
             pollType = pollType,
             hasWinner = hasWinner,
         )
+    }
+}
+
+@Composable
+private fun PollOptionWithBar(
+    animationStarted: Boolean,
+    option: PollOptionUi,
+    showCheckmark: Boolean,
+    isUserChoice: Boolean,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+    ) {
+        val offsetProgress by animateFloatAsState(
+            targetValue = if (animationStarted) 1f else 0f,
+            animationSpec = tween(durationMillis = PROGRESS_ANIMATION_DURATION_MS),
+            label = "textAlignment",
+        )
+
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = BiasAlignment(
+                horizontalBias = lerp(0f, RESULT_TEXT_TARGET_BIAS, offsetProgress),
+                verticalBias = 0f,
+            ),
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    text = option.label,
+                    style = AppTheme.typography.bodyMedium,
+                    fontWeight = if (option.isWinner) FontWeight.SemiBold else FontWeight.Normal,
+                    color = AppTheme.colorScheme.onSurface,
+                )
+
+                if (showCheckmark) {
+                    Spacer(modifier = Modifier.width(4.dp))
+                    PollWinnerCheckmark(isUserChoice = isUserChoice)
+                }
+            }
+        }
     }
 }
 
