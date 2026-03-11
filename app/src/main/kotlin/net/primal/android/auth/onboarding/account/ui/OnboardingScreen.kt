@@ -9,13 +9,13 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
+import net.primal.android.auth.compose.OnboardingBackgroundColor
+import net.primal.android.auth.compose.OnboardingGradientAlpha
+import net.primal.android.auth.compose.onboardingGradientBrush
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.OnboardingViewModel
@@ -66,7 +66,9 @@ private fun OnboardingScreen(
         },
     ) { onboardingStep ->
         ColumnWithBackground(
-            backgroundPainter = onboardingStep.backgroundPainter(),
+            backgroundBrushProvider = ::onboardingGradientBrush,
+            brushAlpha = OnboardingGradientAlpha,
+            backgroundColor = OnboardingBackgroundColor,
         ) {
             when (onboardingStep) {
                 OnboardingStep.Details -> OnboardingProfileDetailsScreen(
@@ -95,16 +97,6 @@ private fun OnboardingScreen(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun OnboardingStep.backgroundPainter(): Painter {
-    return when (this) {
-        OnboardingStep.Details -> painterResource(id = R.drawable.onboarding_spot2)
-        OnboardingStep.Interests -> painterResource(id = R.drawable.onboarding_spot3)
-        OnboardingStep.Follows -> painterResource(id = R.drawable.onboarding_spot4)
-        OnboardingStep.Preview -> painterResource(id = R.drawable.onboarding_spot5)
     }
 }
 

@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -25,7 +24,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
+import net.primal.android.auth.compose.OnboardingBackgroundColor
 import net.primal.android.auth.compose.OnboardingButton
+import net.primal.android.auth.compose.OnboardingGradientAlpha
+import net.primal.android.auth.compose.OnboardingTextColor
+import net.primal.android.auth.compose.onboardingGradientBrush
 import net.primal.android.core.compose.MAX_COMPONENT_WIDTH
 import net.primal.android.core.compose.ONE_HALF
 import net.primal.android.core.compose.TWO_FIFTHS
@@ -39,7 +42,9 @@ import net.primal.android.theme.domain.PrimalTheme
 fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
     ColumnWithBackground(
         modifier = Modifier.semantics { testTagsAsResourceId = true },
-        backgroundPainter = painterResource(id = R.drawable.onboarding_spot1),
+        backgroundBrushProvider = ::onboardingGradientBrush,
+        brushAlpha = OnboardingGradientAlpha,
+        backgroundColor = OnboardingBackgroundColor,
     ) { size ->
         val uiMode = size.height.detectUiDensityModeFromMaxHeight()
         Box(modifier = Modifier.fillMaxSize()) {
@@ -72,9 +77,9 @@ fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
                 Spacer(
                     modifier = Modifier.height(
                         when (uiMode) {
-                            UiDensityMode.Normal -> 24.dp
-                            UiDensityMode.Comfortable -> 20.dp
-                            else -> 16.dp
+                            UiDensityMode.Normal -> 40.dp
+                            UiDensityMode.Comfortable -> 36.dp
+                            else -> 32.dp
                         },
                     ),
                 )
@@ -85,7 +90,7 @@ fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
                     onClick = callbacks.onSignInClick,
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 OnboardingButton(
                     text = stringResource(id = R.string.welcome_create_account_button_title),
@@ -98,9 +103,9 @@ fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
                     .widthIn(0.dp, MAX_COMPONENT_WIDTH.dp)
                     .fillMaxWidth()
                     .padding(bottom = 32.dp, top = 16.dp),
-                color = Color.White,
+                color = OnboardingTextColor,
                 fontSize = 16.sp,
-                linksColor = Color.White,
+                linksColor = OnboardingTextColor,
                 tosPrefix = stringResource(id = R.string.welcome_tos_prefix),
             )
         }
