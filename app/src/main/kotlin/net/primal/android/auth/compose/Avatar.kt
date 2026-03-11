@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.Color
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 
-val defaultOnboardingAvatarBackground = Color(0xFF7E382C)
-val defaultAvatarForeground = Color(0xFFFDB7AB)
+val defaultOnboardingAvatarBackground = Color(0xFFFFFFFF)
+val defaultAvatarForeground = Color(0xFF1A295A).copy(0.7f)
 
 @Composable
 fun DefaultOnboardingAvatar() {
