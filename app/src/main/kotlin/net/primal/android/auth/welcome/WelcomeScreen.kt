@@ -23,18 +23,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.auth.compose.ColumnWithBackground
-import net.primal.android.auth.compose.OnboardingBackgroundColor
 import net.primal.android.auth.compose.OnboardingButton
-import net.primal.android.auth.compose.OnboardingGradientAlpha
-import net.primal.android.auth.compose.OnboardingTextColor
-import net.primal.android.auth.compose.onboardingGradientBrush
+import net.primal.android.core.compose.ColumnWithBackground
 import net.primal.android.core.compose.MAX_COMPONENT_WIDTH
 import net.primal.android.core.compose.ONE_HALF
+import net.primal.android.core.compose.PrimalDarkTextColor
+import net.primal.android.core.compose.PrimalGradientAlpha
+import net.primal.android.core.compose.PrimalGradientBackgroundColor
 import net.primal.android.core.compose.TWO_FIFTHS
 import net.primal.android.core.compose.ToSAndPrivacyPolicyText
 import net.primal.android.core.compose.UiDensityMode
 import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
+import net.primal.android.core.compose.primalGradientBrush
 import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -42,9 +42,9 @@ import net.primal.android.theme.domain.PrimalTheme
 fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
     ColumnWithBackground(
         modifier = Modifier.semantics { testTagsAsResourceId = true },
-        backgroundBrushProvider = ::onboardingGradientBrush,
-        brushAlpha = OnboardingGradientAlpha,
-        backgroundColor = OnboardingBackgroundColor,
+        backgroundBrushProvider = ::primalGradientBrush,
+        brushAlpha = PrimalGradientAlpha,
+        backgroundColor = PrimalGradientBackgroundColor,
     ) { size ->
         val uiMode = size.height.detectUiDensityModeFromMaxHeight()
         Box(modifier = Modifier.fillMaxSize()) {
@@ -103,9 +103,9 @@ fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
                     .widthIn(0.dp, MAX_COMPONENT_WIDTH.dp)
                     .fillMaxWidth()
                     .padding(bottom = 32.dp, top = 16.dp),
-                color = OnboardingTextColor,
+                color = PrimalDarkTextColor,
                 fontSize = 16.sp,
-                linksColor = OnboardingTextColor,
+                linksColor = PrimalDarkTextColor,
                 tosPrefix = stringResource(id = R.string.welcome_tos_prefix),
             )
         }
