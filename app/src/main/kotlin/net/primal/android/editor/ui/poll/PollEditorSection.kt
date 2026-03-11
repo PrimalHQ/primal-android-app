@@ -44,8 +44,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -397,6 +399,14 @@ private fun PollNumericField(
     focusModifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
+    var textFieldValue by remember {
+        mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length)))
+    }
+
+    if (textFieldValue.text != value) {
+        textFieldValue = textFieldValue.copy(text = value)
+    }
+
     val colors = PrimalDefaults.outlinedTextFieldColors(
         focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         unfocusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
@@ -405,11 +415,21 @@ private fun PollNumericField(
     )
 
     BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
+        value = textFieldValue,
+        onValueChange = { newValue ->
+            textFieldValue = newValue
+            onValueChange(newValue.text)
+        },
         modifier = modifier
             .height(44.dp)
-            .then(focusModifier),
+            .then(focusModifier)
+            .onFocusChanged { focusState ->
+                if (focusState.isFocused) {
+                    textFieldValue = textFieldValue.copy(
+                        selection = TextRange(0, textFieldValue.text.length),
+                    )
+                }
+            },
         singleLine = true,
         textStyle = AppTheme.typography.bodySmall.copy(
             textAlign = TextAlign.Start,
@@ -420,7 +440,7 @@ private fun PollNumericField(
         interactionSource = interactionSource,
         decorationBox = { innerTextField ->
             OutlinedTextFieldDefaults.DecorationBox(
-                value = value,
+                value = textFieldValue.text,
                 innerTextField = innerTextField,
                 enabled = true,
                 singleLine = true,
