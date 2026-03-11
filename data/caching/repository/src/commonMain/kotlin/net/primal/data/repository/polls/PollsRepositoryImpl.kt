@@ -1,5 +1,10 @@
 package net.primal.data.repository.polls
 
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.map
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -16,6 +21,7 @@ import net.primal.data.remote.api.polls.PollsApi
 import net.primal.data.remote.api.polls.model.PollVotesRequestBody
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
+import net.primal.data.repository.mappers.local.asPollInfo
 import net.primal.data.repository.mappers.local.asProfileDataDO
 import net.primal.data.repository.mappers.remote.applyPollStats
 import net.primal.data.repository.mappers.remote.mapAsPollResponseVotes
@@ -26,6 +32,7 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPollStats
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
+import net.primal.data.repository.polls.paging.PollVotersRemoteMediator
 import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -35,11 +42,13 @@ import net.primal.domain.nostr.asResponseTag
 import net.primal.domain.polls.PollAlreadyVotedException
 import net.primal.domain.polls.PollAuthorCannotVoteException
 import net.primal.domain.polls.PollExpiredException
+import net.primal.domain.polls.PollInfo
 import net.primal.domain.polls.PollOptionInfo
 import net.primal.domain.polls.PollOptionStats
 import net.primal.domain.polls.PollVoteStats
 import net.primal.domain.polls.PollVoter
 import net.primal.domain.polls.PollsRepository
+import net.primal.domain.profile.ProfileData
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.shared.data.local.db.withTransaction
 
@@ -50,6 +59,10 @@ class PollsRepositoryImpl(
     private val database: PrimalDatabase,
     private val mediaCacher: MediaCacher? = null,
 ) : PollsRepository {
+
+    companion object {
+        private const val VOTERS_PAGE_SIZE = 20
+    }
 
     override suspend fun fetchPollVotes(eventId: String) =
         withContext(dispatcherProvider.io()) {
@@ -260,4 +273,43 @@ class PollsRepositoryImpl(
                 )
             }
     }
+
+    @OptIn(ExperimentalPagingApi::class)
+    override fun createVotersPager(eventId: String, optionId: String): Flow<PagingData<PollVoter>> =
+        Pager(
+            config = PagingConfig(
+                pageSize = VOTERS_PAGE_SIZE,
+                prefetchDistance = VOTERS_PAGE_SIZE * 2,
+                initialLoadSize = VOTERS_PAGE_SIZE * 2,
+                enablePlaceholders = false,
+            ),
+            remoteMediator = PollVotersRemoteMediator(
+                postId = eventId,
+                optionId = optionId,
+                pollsApi = pollsApi,
+                database = database,
+                dispatcherProvider = dispatcherProvider,
+                mediaCacher = mediaCacher,
+            ),
+            pagingSourceFactory = {
+                database.pollVotes().pagingSourceByPostIdAndOptionId(
+                    postId = eventId,
+                    optionId = optionId,
+                )
+            },
+        ).flow.map { pagingData ->
+            pagingData.map { voteWithProfile ->
+                PollVoter(
+                    eventId = voteWithProfile.vote.eventId,
+                    profile = voteWithProfile.profile?.asProfileDataDO()
+                        ?: ProfileData(profileId = voteWithProfile.vote.voterId),
+                    satsZapped = voteWithProfile.vote.amountInSats ?: 0L,
+                    zapComment = voteWithProfile.vote.zapComment,
+                )
+            }
+        }
+
+    override fun observePollData(eventId: String): Flow<PollInfo?> =
+        database.polls().observePollDataByPostId(postId = eventId)
+            .map { pollData -> pollData?.asPollInfo() }
 }

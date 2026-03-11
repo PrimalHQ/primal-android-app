@@ -50,6 +50,8 @@ import net.primal.data.local.dao.polls.PollDao
 import net.primal.data.local.dao.polls.PollData
 import net.primal.data.local.dao.polls.PollVoteDao
 import net.primal.data.local.dao.polls.PollVoteData
+import net.primal.data.local.dao.polls.PollVoterRemoteKey
+import net.primal.data.local.dao.polls.PollVoterRemoteKeyDao
 import net.primal.data.local.dao.profiles.ProfileData
 import net.primal.data.local.dao.profiles.ProfileDataDao
 import net.primal.data.local.dao.profiles.ProfileStats
@@ -113,8 +115,9 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         StreamFollowsCrossRef::class,
         PollData::class,
         PollVoteData::class,
+        PollVoterRemoteKey::class,
     ],
-    version = 25,
+    version = 26,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -191,6 +194,8 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun polls(): PollDao
 
     abstract fun pollVotes(): PollVoteDao
+
+    abstract fun pollVoterRemoteKeys(): PollVoterRemoteKeyDao
 }
 
 // The Room compiler generates the `actual` implementations.

@@ -1,14 +1,20 @@
 package net.primal.android.events.polls.votes
 
-import net.primal.android.events.polls.votes.model.PollVoteOptionUi
+import net.primal.android.notes.feed.model.PollUi
 
 interface PollVotesContract {
+
     data class UiState(
         val loading: Boolean = true,
-        val pollOptions: List<PollVoteOptionUi> = emptyList(),
+        val pollUi: PollUi? = null,
+        val selectedOptionId: String? = null,
         val isZapPoll: Boolean = false,
         val error: Throwable? = null,
     )
+
+    sealed class UiEvent {
+        data class SelectOption(val optionId: String) : UiEvent()
+    }
 
     data class ScreenCallbacks(
         val onClose: () -> Unit,

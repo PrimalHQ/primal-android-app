@@ -3,6 +3,7 @@ package net.primal.android.events.polls.votes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -13,7 +14,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -22,13 +26,27 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
+import androidx.paging.PagingData
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ListNoContent
@@ -36,15 +54,21 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.utils.shortened
-import net.primal.android.events.polls.votes.model.PollVoteOptionUi
+import net.primal.android.events.polls.votes.PollVotesContract.UiEvent
 import net.primal.android.events.polls.votes.model.PollVoterUi
+import net.primal.android.events.polls.votes.ui.PollVotesOptionSelector
+import net.primal.android.events.polls.votes.ui.ScrollToTopButton
 import net.primal.android.explore.search.ui.UserProfileListItem
+import net.primal.android.notes.feed.model.PollOptionUi
+import net.primal.android.notes.feed.model.PollState
+import net.primal.android.notes.feed.model.PollType
+import net.primal.android.notes.feed.model.PollUi
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -55,16 +79,24 @@ private fun Long.formatSats(): String = if (this >= SHORTEN_AMOUNT_THRESHOLD) th
 @Composable
 fun PollVotesScreen(viewModel: PollVotesViewModel, callbacks: PollVotesContract.ScreenCallbacks) {
     val state = viewModel.state.collectAsState()
+    val votersPagingItems = viewModel.votersPagingData.collectAsLazyPagingItems()
 
     PollVotesScreen(
         state = state.value,
+        votersPagingItems = votersPagingItems,
+        eventPublisher = viewModel::setEvent,
         callbacks = callbacks,
     )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun PollVotesScreen(state: PollVotesContract.UiState, callbacks: PollVotesContract.ScreenCallbacks) {
+private fun PollVotesScreen(
+    state: PollVotesContract.UiState,
+    eventPublisher: (UiEvent) -> Unit,
+    callbacks: PollVotesContract.ScreenCallbacks,
+    votersPagingItems: LazyPagingItems<PollVoterUi>? = null,
+) {
     PrimalScaffold(
         topBar = {
             PrimalTopAppBar(
@@ -76,9 +108,11 @@ private fun PollVotesScreen(state: PollVotesContract.UiState, callbacks: PollVot
         },
         content = { paddingValues ->
             when {
-                state.loading && state.pollOptions.isEmpty() -> {
+                state.loading && state.pollUi == null -> {
                     HeightAdjustableLoadingLazyListPlaceholder(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                         contentPaddingValues = PaddingValues(0.dp),
                         repeat = 7,
                     )
@@ -86,29 +120,45 @@ private fun PollVotesScreen(state: PollVotesContract.UiState, callbacks: PollVot
 
                 state.error != null -> {
                     ListNoContent(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                         noContentText = stringResource(id = R.string.poll_votes_error),
                         refreshButtonVisible = false,
                     )
                 }
 
-                state.pollOptions.isEmpty() -> {
-                    ListNoContent(
-                        modifier = Modifier.fillMaxSize().padding(paddingValues),
-                        noContentText = stringResource(id = R.string.poll_votes_no_votes),
-                        refreshButtonVisible = false,
-                    )
-                }
+                state.pollUi != null -> {
+                    val listState = rememberLazyListState()
+                    val coroutineScope = rememberCoroutineScope()
+                    val showScrollToTop by remember {
+                        derivedStateOf { listState.firstVisibleItemIndex > 0 }
+                    }
 
-                else -> {
-                    PollVotesList(
+                    Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
-                        pollOptions = state.pollOptions,
-                        isZapPoll = state.isZapPoll,
-                        onProfileClick = callbacks.onProfileClick,
-                    )
+                    ) {
+                        PollVotesContent(
+                            poll = state.pollUi,
+                            selectedOptionId = state.selectedOptionId,
+                            isZapPoll = state.isZapPoll,
+                            votersPagingItems = votersPagingItems,
+                            listState = listState,
+                            onOptionSelected = { eventPublisher(UiEvent.SelectOption(it)) },
+                            onProfileClick = callbacks.onProfileClick,
+                        )
+
+                        ScrollToTopButton(
+                            visible = showScrollToTop,
+                            onClick = {
+                                coroutineScope.launch {
+                                    listState.animateScrollToItem(0)
+                                }
+                            },
+                        )
+                    }
                 }
             }
         },
@@ -116,96 +166,188 @@ private fun PollVotesScreen(state: PollVotesContract.UiState, callbacks: PollVot
 }
 
 @Composable
-private fun PollVotesList(
-    pollOptions: List<PollVoteOptionUi>,
+private fun PollVotesContent(
+    poll: PollUi,
+    selectedOptionId: String?,
+    isZapPoll: Boolean,
+    votersPagingItems: LazyPagingItems<PollVoterUi>?,
+    listState: LazyListState,
+    onOptionSelected: (String) -> Unit,
+    onProfileClick: (String) -> Unit,
+) {
+    val selectedOption = poll.options.find { it.id == selectedOptionId }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        state = listState,
+    ) {
+        item(key = "poll_options") {
+            PollVotesOptionSelector(
+                poll = poll,
+                selectedOptionId = selectedOptionId,
+                onOptionSelected = onOptionSelected,
+            )
+        }
+
+        item(key = "divider") {
+            PrimalDivider()
+        }
+
+        stickyHeader(key = "selected_option_header") {
+            SelectedOptionHeader(
+                option = selectedOption,
+                isZapPoll = isZapPoll,
+            )
+        }
+
+        if (votersPagingItems != null) {
+            voterItems(
+                votersPagingItems = votersPagingItems,
+                isZapPoll = isZapPoll,
+                onProfileClick = onProfileClick,
+            )
+        }
+    }
+}
+
+private fun LazyListScope.voterItems(
+    votersPagingItems: LazyPagingItems<PollVoterUi>,
     isZapPoll: Boolean,
     onProfileClick: (String) -> Unit,
-    modifier: Modifier = Modifier,
 ) {
-    LazyColumn(modifier = modifier) {
-        pollOptions.forEach { option ->
-            item(key = "header_${option.id}") {
-                PollOptionHeader(option = option, isZapPoll = isZapPoll)
-                PrimalDivider(color = AppTheme.colorScheme.outline)
+    items(
+        count = votersPagingItems.itemCount,
+        key = { index -> votersPagingItems.peek(index)?.eventId ?: "voter_$index" },
+    ) { index ->
+        val voter = votersPagingItems[index]
+        if (voter != null) {
+            if (isZapPoll) {
+                ZapVoterListItem(
+                    voter = voter,
+                    onClick = { onProfileClick(voter.profile.profileId) },
+                )
+            } else {
+                UserProfileListItem(
+                    data = voter.profile,
+                    onClick = { onProfileClick(it.profileId) },
+                )
             }
+            PrimalDivider()
+        }
+    }
 
-            items(
-                items = option.voters,
-                key = { voter -> "${option.id}_${voter.eventId}" },
-            ) { voter ->
-                if (isZapPoll) {
-                    ZapVoterListItem(
-                        voter = voter,
-                        onClick = { onProfileClick(voter.profile.profileId) },
-                    )
-                } else {
-                    UserProfileListItem(
-                        data = voter.profile,
-                        onClick = { onProfileClick(it.profileId) },
-                    )
-                }
-                PrimalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
+    if (votersPagingItems.loadState.append is LoadState.Loading) {
+        item(key = "loading_indicator") {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.dp,
+                )
+            }
+        }
+    }
+
+    when {
+        votersPagingItems.loadState.refresh is LoadState.Loading &&
+            votersPagingItems.itemCount == 0 -> {
+            heightAdjustableLoadingLazyListPlaceholder()
+        }
+
+        votersPagingItems.loadState.refresh is LoadState.Error -> {
+            item(key = "voters_error") {
+                ListNoContent(
+                    modifier = Modifier.fillMaxWidth(),
+                    noContentText = stringResource(id = R.string.poll_votes_error),
+                    refreshButtonVisible = true,
+                    onRefresh = { votersPagingItems.refresh() },
+                    verticalArrangement = Arrangement.Top,
+                    contentPadding = PaddingValues(top = 16.dp),
+                )
+            }
+        }
+
+        votersPagingItems.itemCount == 0 -> {
+            item(key = "voters_no_content") {
+                ListNoContent(
+                    modifier = Modifier.fillMaxWidth(),
+                    noContentText = stringResource(id = R.string.poll_votes_no_voters),
+                    refreshButtonVisible = false,
+                    verticalArrangement = Arrangement.Top,
+                    contentPadding = PaddingValues(top = 16.dp),
+                )
             }
         }
     }
 }
 
 @Composable
-private fun PollOptionHeader(
-    option: PollVoteOptionUi,
+private fun SelectedOptionHeader(
+    option: PollOptionUi?,
     isZapPoll: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Row(
+    Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(AppTheme.colorScheme.background)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically,
+            .background(AppTheme.colorScheme.surface),
     ) {
-        Text(
-            modifier = Modifier.weight(1f),
-            text = option.title,
-            style = AppTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold,
-            color = AppTheme.colorScheme.onBackground,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
-                modifier = Modifier.padding(end = 3.dp),
-                text = "${option.voteCount}",
-                style = AppTheme.typography.bodyMedium,
+                text = option?.label.orEmpty(),
+                style = AppTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
-                color = AppTheme.colorScheme.onBackground,
+                color = AppTheme.colorScheme.onSurface,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
             )
-            Text(
-                text = stringResource(id = R.string.poll_votes_suffix),
-                style = AppTheme.typography.bodyMedium,
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            )
-            if (isZapPoll) {
-                Text(
-                    text = " · ",
-                    style = AppTheme.typography.bodyMedium,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                )
-                Text(
-                    modifier = Modifier.padding(end = 3.dp),
-                    text = option.totalSats.formatSats(),
-                    style = AppTheme.typography.bodyMedium,
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            if (option != null) {
+                val suffixColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2
+                val valueStyle = SpanStyle(
+                    color = AppTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold,
-                    color = AppTheme.colorScheme.onBackground,
                 )
                 Text(
-                    text = stringResource(id = R.string.poll_votes_sats_suffix),
-                    style = AppTheme.typography.bodyMedium,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    text = buildAnnotatedString {
+                        withStyle(valueStyle) { append("${option.voteCount}") }
+                        withStyle(SpanStyle(color = suffixColor)) {
+                            append(
+                                " ${
+                                    pluralStringResource(
+                                        R.plurals.poll_votes_count_suffix,
+                                        option.voteCount,
+                                        option.voteCount,
+                                    )
+                                }",
+                            )
+                        }
+                        if (isZapPoll) {
+                            withStyle(SpanStyle(color = suffixColor)) { append(" \u2022 ") }
+                            withStyle(valueStyle) { append(option.satsZapped.formatSats()) }
+                            withStyle(SpanStyle(color = suffixColor)) {
+                                append(" ${stringResource(R.string.poll_votes_sats_suffix)}")
+                            }
+                        }
+                    },
+                    style = AppTheme.typography.bodySmall,
                 )
             }
         }
+        PrimalDivider()
     }
 }
 
@@ -277,68 +419,16 @@ private fun ZapVoterListItem(
 @Suppress("MagicNumber")
 @Preview
 @Composable
-private fun PreviewPollVotesList() {
+private fun PreviewPollVotesScreenLoading() {
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
-            PollVotesList(
-                pollOptions = listOf(
-                    PollVoteOptionUi(
-                        id = "1",
-                        title = "\uD83D\uDC40 Conspiracy Contemplators",
-                        voteCount = 5,
-                        voters = listOf(
-                            PollVoterUi(
-                                eventId = "e1",
-                                profile = UserProfileItemUi(
-                                    profileId = "p1",
-                                    displayName = "miljan",
-                                    internetIdentifier = "miljan@primal.net",
-                                ),
-                            ),
-                            PollVoterUi(
-                                eventId = "e2",
-                                profile = UserProfileItemUi(
-                                    profileId = "p2",
-                                    displayName = "alex",
-                                    internetIdentifier = "alex@primal.net",
-                                ),
-                            ),
-                            PollVoterUi(
-                                eventId = "e3",
-                                profile = UserProfileItemUi(
-                                    profileId = "p3",
-                                    displayName = "marko",
-                                    internetIdentifier = "marko@primal.net",
-                                ),
-                            ),
-                        ),
-                    ),
-                    PollVoteOptionUi(
-                        id = "2",
-                        title = "\uD83C\uDF3D Corn Conglomerators",
-                        voteCount = 12,
-                        voters = listOf(
-                            PollVoterUi(
-                                eventId = "e4",
-                                profile = UserProfileItemUi(
-                                    profileId = "p4",
-                                    displayName = "nikola",
-                                    internetIdentifier = "nikola@primal.net",
-                                ),
-                            ),
-                            PollVoterUi(
-                                eventId = "e5",
-                                profile = UserProfileItemUi(
-                                    profileId = "p5",
-                                    displayName = "stefan",
-                                    internetIdentifier = "stefan@primal.net",
-                                ),
-                            ),
-                        ),
-                    ),
+            PollVotesScreen(
+                state = PollVotesContract.UiState(loading = true),
+                eventPublisher = {},
+                callbacks = PollVotesContract.ScreenCallbacks(
+                    onClose = {},
+                    onProfileClick = {},
                 ),
-                isZapPoll = false,
-                onProfileClick = {},
             )
         }
     }
@@ -347,46 +437,84 @@ private fun PreviewPollVotesList() {
 @Suppress("MagicNumber")
 @Preview
 @Composable
-private fun PreviewZapPollVotesList() {
+private fun PreviewPollVotesScreenWithContent() {
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
-            PollVotesList(
-                pollOptions = listOf(
-                    PollVoteOptionUi(
-                        id = "1",
-                        title = "\uD83D\uDC40 Conspiracy Contemplat\u2026",
-                        voteCount = 5,
-                        totalSats = 3_452,
-                        voters = listOf(
-                            PollVoterUi(
-                                eventId = "ze1",
-                                profile = UserProfileItemUi(profileId = "p1", displayName = "miljan"),
-                                satsZapped = 21_21200,
-                                zapComment = "Big day today. One of many to co\u2026",
+            PollVotesScreen(
+                state = PollVotesContract.UiState(
+                    loading = false,
+                    pollUi = PollUi(
+                        options = listOf(
+                            PollOptionUi(
+                                id = "1",
+                                label = "Option A",
+                                voteCount = 42,
+                                votePercentage = 0.6f,
+                                isWinner = true,
                             ),
-                            PollVoterUi(
-                                eventId = "ze2",
-                                profile = UserProfileItemUi(profileId = "p2", displayName = "miljan"),
-                                satsZapped = 2_12100,
-                                zapComment = "Big day today. One of many to co\u2026",
-                            ),
-                            PollVoterUi(
-                                eventId = "ze3",
-                                profile = UserProfileItemUi(profileId = "p3", displayName = "miljan"),
-                                satsZapped = 2100,
-                                zapComment = "Big day today. One of many to co\u2026",
-                            ),
-                            PollVoterUi(
-                                eventId = "ze4",
-                                profile = UserProfileItemUi(profileId = "p4", displayName = "miljan"),
-                                satsZapped = 210,
-                                zapComment = "Big day today. One of many to co\u2026",
+                            PollOptionUi(
+                                id = "2",
+                                label = "Option B",
+                                voteCount = 28,
+                                votePercentage = 0.4f,
                             ),
                         ),
+                        state = PollState.Voted,
+                        selectedOptionIds = setOf("1"),
                     ),
+                    selectedOptionId = "1",
                 ),
-                isZapPoll = true,
-                onProfileClick = {},
+                eventPublisher = {},
+                votersPagingItems = flowOf(PagingData.empty<PollVoterUi>()).collectAsLazyPagingItems(),
+                callbacks = PollVotesContract.ScreenCallbacks(
+                    onClose = {},
+                    onProfileClick = {},
+                ),
+            )
+        }
+    }
+}
+
+@Suppress("MagicNumber")
+@Preview
+@Composable
+private fun PreviewPollVotesScreenZapPoll() {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
+        Surface {
+            PollVotesScreen(
+                state = PollVotesContract.UiState(
+                    loading = false,
+                    isZapPoll = true,
+                    pollUi = PollUi(
+                        pollType = PollType.Zap,
+                        options = listOf(
+                            PollOptionUi(
+                                id = "1",
+                                label = "Phoenix",
+                                voteCount = 10,
+                                votePercentage = 0.576f,
+                                satsZapped = 89_000,
+                                isWinner = true,
+                            ),
+                            PollOptionUi(
+                                id = "2",
+                                label = "Primal",
+                                voteCount = 5,
+                                votePercentage = 0.291f,
+                                satsZapped = 45_000,
+                            ),
+                        ),
+                        state = PollState.Voted,
+                        selectedOptionIds = setOf("1"),
+                    ),
+                    selectedOptionId = "1",
+                ),
+                eventPublisher = {},
+                votersPagingItems = flowOf(PagingData.empty<PollVoterUi>()).collectAsLazyPagingItems(),
+                callbacks = PollVotesContract.ScreenCallbacks(
+                    onClose = {},
+                    onProfileClick = {},
+                ),
             )
         }
     }

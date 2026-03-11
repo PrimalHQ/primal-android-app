@@ -8,6 +8,7 @@ import androidx.room.PrimaryKey
     indices = [
         Index(value = ["postId"]),
         Index(value = ["voterId"]),
+        Index(value = ["postId", "optionId", "createdAt"]),
     ],
 )
 data class PollVoteData(

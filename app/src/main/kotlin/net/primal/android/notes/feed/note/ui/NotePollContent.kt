@@ -20,9 +20,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,24 +33,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
 import java.time.Duration
 import java.time.Instant
-import net.primal.android.R
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.events.polls.ui.MIN_RESULT_BAR_FRACTION
+import net.primal.android.events.polls.ui.PollFooter
+import net.primal.android.events.polls.ui.PollOptionBar
+import net.primal.android.events.polls.ui.PollPercentageText
+import net.primal.android.events.polls.ui.PollWinnerCheckmark
 import net.primal.android.notes.feed.model.PollOptionUi
 import net.primal.android.notes.feed.model.PollState
 import net.primal.android.notes.feed.model.PollType
@@ -63,11 +59,7 @@ import net.primal.android.theme.domain.PrimalTheme
 
 private const val PROGRESS_ANIMATION_DURATION_MS = 400
 private const val STATE_TRANSITION_DURATION_MS = 300
-private const val MIN_RESULT_BAR_FRACTION = 0.02f
 private const val RESULT_TEXT_TARGET_BIAS = -0.9f
-private const val PERCENTAGE_MULTIPLIER = 100
-private const val HOURS_PER_DAY = 24
-private const val MINUTES_PER_HOUR = 60
 
 @Composable
 fun NotePollContent(
@@ -239,7 +231,7 @@ private fun PollResultOption(
     val progressColor = if (isUserChoice) {
         AppTheme.colorScheme.primary.let { if (!isDarkTheme) it.copy(alpha = 0.50f) else it }
     } else {
-        AppTheme.extraColorScheme.onSurfaceVariantAlt3.let { if (!isDarkTheme) it.copy(alpha = 0.25f) else it }
+        AppTheme.colorScheme.outline
     }
 
     val barShape = AppTheme.shapes.small
@@ -251,196 +243,61 @@ private fun PollResultOption(
             .height(36.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
+        PollOptionBar(
             modifier = Modifier
                 .weight(1f)
                 .height(36.dp),
+            progress = animatedProgress,
+            progressColor = progressColor,
+            barShape = barShape,
         ) {
-            Box(
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth(fraction = animatedProgress)
-                    .height(36.dp)
-                    .clip(barShape)
-                    .background(progressColor),
-            )
+                    .fillMaxWidth()
+                    .height(36.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                val offsetProgress by animateFloatAsState(
+                    targetValue = if (animationStarted) 1f else 0f,
+                    animationSpec = tween(durationMillis = PROGRESS_ANIMATION_DURATION_MS),
+                    label = "textAlignment",
+                )
 
-            PollOptionWithBar(
-                animationStarted = animationStarted,
-                option = option,
-                showCheckmark = showCheckmark,
-                isUserChoice = isUserChoice,
-            )
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = BiasAlignment(
+                        horizontalBias = lerp(0f, RESULT_TEXT_TARGET_BIAS, offsetProgress),
+                        verticalBias = 0f,
+                    ),
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = option.label,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = AppTheme.typography.bodyMedium,
+                            fontWeight = if (option.isWinner) FontWeight.SemiBold else FontWeight.Normal,
+                            color = AppTheme.colorScheme.onSurface,
+                        )
+
+                        if (showCheckmark) {
+                            Spacer(modifier = Modifier.width(4.dp))
+                            PollWinnerCheckmark()
+                        }
+                    }
+                }
+            }
         }
 
-        PollResultPercentage(
+        PollPercentageText(
+            modifier = Modifier.padding(horizontal = 16.dp),
             option = option,
             pollType = pollType,
             hasWinner = hasWinner,
+            style = AppTheme.typography.bodyMedium,
         )
     }
-}
-
-@Composable
-private fun PollOptionWithBar(
-    animationStarted: Boolean,
-    option: PollOptionUi,
-    showCheckmark: Boolean,
-    isUserChoice: Boolean,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(36.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
-    ) {
-        val offsetProgress by animateFloatAsState(
-            targetValue = if (animationStarted) 1f else 0f,
-            animationSpec = tween(durationMillis = PROGRESS_ANIMATION_DURATION_MS),
-            label = "textAlignment",
-        )
-
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = BiasAlignment(
-                horizontalBias = lerp(0f, RESULT_TEXT_TARGET_BIAS, offsetProgress),
-                verticalBias = 0f,
-            ),
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    text = option.label,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    style = AppTheme.typography.bodyMedium,
-                    fontWeight = if (option.isWinner) FontWeight.SemiBold else FontWeight.Normal,
-                    color = AppTheme.colorScheme.onSurface,
-                )
-
-                if (showCheckmark) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    PollWinnerCheckmark(isUserChoice = isUserChoice)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun PollWinnerCheckmark(isUserChoice: Boolean) {
-    Box(
-        modifier = Modifier.size(18.dp),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (!isUserChoice) {
-            Box(
-                modifier = Modifier
-                    .size(14.dp)
-                    .background(AppTheme.colorScheme.primary, CircleShape),
-            )
-        }
-        Icon(
-            imageVector = Icons.Filled.CheckCircle,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp),
-            tint = AppTheme.colorScheme.onSurface,
-        )
-    }
-}
-
-@Composable
-private fun PollResultPercentage(
-    option: PollOptionUi,
-    pollType: PollType,
-    hasWinner: Boolean,
-) {
-    Text(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        text = when (pollType) {
-            PollType.Zap -> stringResource(
-                R.string.poll_sats_format,
-                "%,d".format(option.satsZapped),
-            )
-            PollType.User -> "%.1f%%".format(option.votePercentage * PERCENTAGE_MULTIPLIER)
-        },
-        style = AppTheme.typography.bodyMedium,
-        fontWeight = if (option.isWinner) FontWeight.Bold else FontWeight.SemiBold,
-        color = if (hasWinner && !option.isWinner) {
-            AppTheme.extraColorScheme.onSurfaceVariantAlt2
-        } else {
-            AppTheme.colorScheme.onSurface
-        },
-    )
-}
-
-@Composable
-private fun PollFooter(
-    totalVotes: Int,
-    endsAt: Instant?,
-    isEnded: Boolean,
-    onVotesClick: (() -> Unit)?,
-    modifier: Modifier = Modifier,
-) {
-    val timeText = if (isEnded) {
-        stringResource(R.string.poll_final_results)
-    } else {
-        endsAt?.let { formatTimeRemaining(it) }
-    }
-
-    Text(
-        modifier = modifier
-            .padding(start = 4.dp, top = 4.dp)
-            .then(
-                if (onVotesClick != null) {
-                    Modifier.clickable(onClick = onVotesClick)
-                } else {
-                    Modifier
-                },
-            ),
-        text = buildAnnotatedString {
-            withStyle(SpanStyle(color = AppTheme.colorScheme.primary)) {
-                append(pluralStringResource(R.plurals.poll_votes_count, totalVotes, totalVotes))
-            }
-            if (timeText != null) {
-                withStyle(
-                    SpanStyle(
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                    ),
-                ) {
-                    append(" • $timeText")
-                }
-            }
-        },
-        style = AppTheme.typography.bodySmall,
-    )
-}
-
-@Composable
-private fun formatTimeRemaining(endsAt: Instant): String {
-    val now = Instant.now()
-    val duration = Duration.between(now, endsAt)
-    if (duration.isNegative) {
-        return stringResource(R.string.poll_final_results)
-    }
-
-    val days = duration.toDays()
-    val hours = duration.toHours() % HOURS_PER_DAY
-    val minutes = duration.toMinutes() % MINUTES_PER_HOUR
-
-    val parts = buildList {
-        if (days > 0) add(pluralStringResource(R.plurals.poll_time_days, days.toInt(), days))
-        if (hours > 0) add(pluralStringResource(R.plurals.poll_time_hours, hours.toInt(), hours))
-        if (minutes > 0 || (days == 0L && hours == 0L)) {
-            add(pluralStringResource(R.plurals.poll_time_minutes, minutes.toInt(), minutes))
-        }
-    }
-
-    return stringResource(
-        R.string.poll_time_remaining,
-        parts.joinToString(" " + stringResource(R.string.poll_time_and) + " "),
-    )
 }
 
 // region Previews

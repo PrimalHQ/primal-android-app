@@ -23,4 +23,7 @@ interface PollDao {
     @Transaction
     @Query("SELECT * FROM PollData WHERE postId = :postId")
     fun observePollByPostId(postId: String): Flow<Poll?>
+
+    @Query("SELECT * FROM PollData WHERE postId = :postId")
+    fun observePollDataByPostId(postId: String): Flow<PollData?>
 }

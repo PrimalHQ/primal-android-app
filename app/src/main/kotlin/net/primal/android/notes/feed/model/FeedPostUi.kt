@@ -97,31 +97,40 @@ internal fun FeedPostPollInfo.asPollUi(): PollUi {
     val endsAtInstant = endsAt?.let { Instant.ofEpochSecond(it) }
     val totalVotes = options.sumOf { it.voteCount }.coerceAtLeast(1)
     val totalSats = options.sumOf { it.satsZapped }.coerceAtLeast(1)
+    val state = when {
+        endsAtInstant != null && endsAtInstant < Instant.now() -> PollState.Ended
+        else -> PollState.Pending
+    }
+    val pollType = when (pollType) {
+        FeedPostPollInfo.PollType.User -> PollType.User
+        FeedPostPollInfo.PollType.Zap -> PollType.Zap
+    }
+
+    val winner = when (pollType) {
+        PollType.User -> options.maxBy { it.voteCount }.takeIf { it.voteCount != 0 }
+        PollType.Zap -> options.maxBy { it.satsZapped }.takeIf { it.satsZapped != 0L }
+    }
+
     return PollUi(
         authorId = authorId,
         zapRecipientId = zapRecipientId,
-        pollType = when (pollType) {
-            FeedPostPollInfo.PollType.User -> PollType.User
-            FeedPostPollInfo.PollType.Zap -> PollType.Zap
-        },
+        pollType = pollType,
         options = options.map { option ->
             PollOptionUi(
                 id = option.id,
                 label = option.label,
                 voteCount = option.voteCount,
                 satsZapped = option.satsZapped,
-                votePercentage = if (pollType == FeedPostPollInfo.PollType.Zap) {
+                votePercentage = if (pollType == PollType.Zap) {
                     option.satsZapped.toFloat() / totalSats
                 } else {
                     option.voteCount.toFloat() / totalVotes
                 },
+                isWinner = state == PollState.Ended && winner == option,
             )
         },
         endsAt = endsAtInstant,
-        state = when {
-            endsAtInstant != null && endsAtInstant < Instant.now() -> PollState.Ended
-            else -> PollState.Pending
-        },
+        state = state,
         valueMinimum = valueMinimum,
         valueMaximum = valueMaximum,
     )
