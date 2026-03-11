@@ -49,6 +49,8 @@ import androidx.compose.ui.util.lerp
 import java.time.Duration
 import java.time.Instant
 import net.primal.android.R
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.notes.feed.model.PollOptionUi
 import net.primal.android.notes.feed.model.PollState
@@ -111,6 +113,7 @@ private fun PollPendingContent(
         poll.options.forEach { option ->
             PollPendingOption(
                 option = option,
+                pollType = poll.pollType,
                 onClick = { onVote(setOf(option.id)) },
             )
         }
@@ -127,6 +130,7 @@ private fun PollPendingContent(
 @Composable
 private fun PollPendingOption(
     option: PollOptionUi,
+    pollType: PollType,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -151,6 +155,17 @@ private fun PollPendingOption(
             color = AppTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
         )
+
+        if (pollType == PollType.Zap) {
+            Icon(
+                imageVector = PrimalIcons.LightningBolt,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(16.dp)
+                    .align(Alignment.CenterEnd),
+                tint = AppTheme.colorScheme.outline,
+            )
+        }
     }
 }
 
