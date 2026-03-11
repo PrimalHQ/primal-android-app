@@ -377,6 +377,7 @@ private fun QrCodeTabs(
             ) {
                 QrCodeTab(
                     text = stringResource(id = R.string.profile_qr_code_profile_tab).uppercase(),
+                    selected = isProfileTabSelected,
                     onSizeChanged = { size -> profileTabWidth = size.width },
                     onClick = onProfileTabClick,
                 )
@@ -385,6 +386,7 @@ private fun QrCodeTabs(
 
                 QrCodeTab(
                     text = stringResource(id = R.string.profile_qr_code_lightning_tab).uppercase(),
+                    selected = !isProfileTabSelected,
                     onSizeChanged = { size -> lightningAddressTabWidth = size.width },
                     onClick = onLightningTabClick,
                 )
@@ -430,6 +432,7 @@ private fun QrCodeTabs(
 @Composable
 private fun QrCodeTab(
     text: String,
+    selected: Boolean,
     onSizeChanged: (IntSize) -> Unit,
     onClick: () -> Unit,
 ) {
@@ -446,7 +449,7 @@ private fun QrCodeTab(
             ),
         text = text,
         style = AppTheme.typography.bodyMedium,
-        fontWeight = FontWeight.SemiBold,
+        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal,
         color = PrimalDarkTextColor,
     )
 }
