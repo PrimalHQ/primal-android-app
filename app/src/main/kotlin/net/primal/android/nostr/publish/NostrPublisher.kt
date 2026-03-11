@@ -2,10 +2,14 @@ package net.primal.android.nostr.publish
 
 import io.github.aakira.napier.Napier
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.domain.Relay
+import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.global.CachingImportRepository
 import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
@@ -16,35 +20,38 @@ import net.primal.domain.publisher.PrimalPublishResult
 import net.primal.domain.publisher.PrimalPublisher
 
 class NostrPublisher @Inject constructor(
+    dispatcherProvider: DispatcherProvider,
     private val relaysSocketManager: RelaysSocketManager,
     private val nostrNotary: NostrNotary,
     private val cachingImportRepository: CachingImportRepository,
 ) : PrimalPublisher {
 
-    private suspend fun importEvent(event: NostrEvent): Boolean {
-        val result = runCatching {
-            cachingImportRepository.importEvents(events = listOf(event))
+    private val scope = CoroutineScope(SupervisorJob() + dispatcherProvider.io())
+
+    private fun importEvent(event: NostrEvent) {
+        scope.launch {
+            runCatching {
+                cachingImportRepository.importEvents(events = listOf(event))
+            }.onFailure { error ->
+                Napier.w(throwable = error) { "Failed to import event ${event.id} to caching server." }
+            }
         }
-        return result.isSuccess
     }
 
     @Throws(NostrPublishException::class)
-    private suspend fun publishAndImportEvent(
-        signedNostrEvent: NostrEvent,
-        outboxRelays: List<String> = emptyList(),
-    ): Boolean {
+    private suspend fun publishAndImportEvent(signedNostrEvent: NostrEvent, outboxRelays: List<String> = emptyList()) {
         relaysSocketManager.publishEvent(signedNostrEvent)
+        importEvent(signedNostrEvent)
         if (outboxRelays.isNotEmpty()) {
-            try {
+            runCatching {
                 relaysSocketManager.publishEvent(
                     nostrEvent = signedNostrEvent,
                     relays = outboxRelays.map { Relay(url = it, read = false, write = true) },
                 )
-            } catch (error: NostrPublishException) {
+            }.onFailure { error ->
                 Napier.w(throwable = error) { "Failed to publish to outbox relays." }
             }
         }
-        return importEvent(signedNostrEvent)
     }
 
     @Throws(NostrPublishException::class, SignatureException::class)
@@ -53,10 +60,9 @@ class NostrPublisher @Inject constructor(
         outboxRelays: List<String>,
     ): PrimalPublishResult {
         val signedNostrEvent = nostrNotary.signNostrEvent(unsignedNostrEvent = unsignedNostrEvent).unwrapOrThrow()
-        val imported = publishAndImportEvent(signedNostrEvent = signedNostrEvent, outboxRelays = outboxRelays)
+        publishAndImportEvent(signedNostrEvent = signedNostrEvent, outboxRelays = outboxRelays)
         return PrimalPublishResult(
             nostrEvent = signedNostrEvent,
-            imported = imported,
         )
     }
 

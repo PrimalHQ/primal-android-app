@@ -78,7 +78,6 @@ import net.primal.domain.nostr.utils.takeAsNeventOrNull
 import net.primal.domain.nostr.utils.withNostrPrefix
 import net.primal.domain.posts.FeedPost
 import net.primal.domain.posts.FeedRepository
-import net.primal.domain.publisher.PrimalPublishResult
 import net.primal.domain.reads.Article
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
@@ -719,7 +718,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                     ?.buildNeventFromReplyOrRootNoteTag()
                     ?: replyToNoteNevent
 
-                val publishResult = publishNoteOrPoll(
+                publishNoteOrPoll(
                     userId = userId,
                     content = content,
                     pollState = state.value.pollState,
@@ -728,11 +727,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 )
 
                 if (referencedNoteNevent != null) {
-                    if (publishResult.imported) {
-                        fetchNoteReplies()
-                    } else {
-                        scheduleFetchReplies()
-                    }
+                    scheduleFetchReplies()
                 }
 
                 resetState()
@@ -796,8 +791,8 @@ class NoteEditorViewModel @AssistedInject constructor(
         pollState: PollEditorState?,
         rootNoteNevent: Nevent?,
         replyToNoteNevent: Nevent?,
-    ): PrimalPublishResult {
-        return if (pollState != null) {
+    ) {
+        if (pollState != null) {
             notePublishHandler.publishPoll(
                 userId = userId,
                 content = content,
