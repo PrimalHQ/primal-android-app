@@ -1138,7 +1138,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
     ) {
         LockToOrientationPortrait()
         PrimalTheme(PrimalTheme.Midnight) {
-            ApplyEdgeToEdge(isDarkTheme = true)
+            ApplyEdgeToEdge(isDarkTheme = false)
             WelcomeScreen(
                 callbacks = WelcomeContract.ScreenCallbacks(
                     onSignInClick = { navController.navigateToLogin() },
@@ -1167,7 +1167,7 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
         val viewModel: LoginViewModel = hiltViewModel(it)
         LockToOrientationPortrait()
         PrimalTheme(PrimalTheme.Midnight) {
-            ApplyEdgeToEdge(isDarkTheme = true)
+            ApplyEdgeToEdge(isDarkTheme = false)
             LoginScreen(
                 viewModel = viewModel,
                 callbacks = LoginContract.ScreenCallbacks(
@@ -1202,7 +1202,7 @@ private fun NavGraphBuilder.onboarding(route: String, navController: NavControll
 
         LockToOrientationPortrait()
         PrimalTheme(PrimalTheme.Midnight) {
-            ApplyEdgeToEdge(isDarkTheme = true)
+            ApplyEdgeToEdge(isDarkTheme = false)
             OnboardingScreen(
                 viewModel = viewModel,
                 callbacks = OnboardingContract.ScreenCallbacks(
@@ -2513,7 +2513,7 @@ private fun NavGraphBuilder.profileQrCodeViewer(
     val streamState = LocalStreamState.current
     val viewModel = hiltViewModel<ProfileQrCodeViewModel>()
     PrimalTheme(primalTheme = PrimalTheme.Midnight) {
-        ApplyEdgeToEdge(isDarkTheme = true)
+        ApplyEdgeToEdge(isDarkTheme = false)
         LockToOrientationPortrait()
         ProfileQrCodeViewerScreen(
             viewModel = viewModel,
