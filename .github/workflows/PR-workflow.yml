@@ -5,9 +5,8 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  ktlint:
     runs-on: macos-latest
-
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -34,17 +33,92 @@ jobs:
     - name: Check ktlint formatting
       run: ./gradlew ktlintCheck
 
+  lint:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Cache gradle
+      uses: actions/cache@v4
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Unpack secrets
+      run: |
+        openssl base64 -d -out app/src/aosp/google-services.json <<< "${{ secrets.GOOGLE_SERVICES_FLAVOR_AOSP }}"
+        openssl base64 -d -out app/src/google/google-services.json <<< "${{ secrets.GOOGLE_SERVICES_FLAVOR_GOOGLE }}"
+
     - name: Check detekt
       run: ./gradlew detekt
 
     - name: Check lint
       run: ./gradlew lint
 
+  tests:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Cache gradle
+      uses: actions/cache@v4
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Unpack secrets
+      run: |
+        openssl base64 -d -out app/src/aosp/google-services.json <<< "${{ secrets.GOOGLE_SERVICES_FLAVOR_AOSP }}"
+        openssl base64 -d -out app/src/google/google-services.json <<< "${{ secrets.GOOGLE_SERVICES_FLAVOR_GOOGLE }}"
+
     - name: Run tests on AOSP flavour
       run: ./gradlew testAospDebugUnitTest
 
     - name: Run KMP module tests
       run: ./gradlew allTests
+
+  compile:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Cache gradle
+      uses: actions/cache@v4
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+
+    - name: Unpack secrets
+      run: |
+        openssl base64 -d -out app/src/aosp/google-services.json <<< "${{ secrets.GOOGLE_SERVICES_FLAVOR_AOSP }}"
+        openssl base64 -d -out app/src/google/google-services.json <<< "${{ secrets.GOOGLE_SERVICES_FLAVOR_GOOGLE }}"
 
     - name: Compile AOSP debug build to verify no-compilation errors
       run: ./gradlew compileAospDebugKotlin
