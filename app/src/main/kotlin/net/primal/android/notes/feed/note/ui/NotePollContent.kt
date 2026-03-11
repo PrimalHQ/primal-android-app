@@ -76,6 +76,8 @@ fun NotePollContent(
     onOptionSelected: (optionId: String) -> Unit = {},
     onVotesClick: (() -> Unit)? = null,
 ) {
+    val initialState = remember { poll.state }
+
     Box(modifier = modifier) {
         AnimatedContent(
             targetState = poll.state,
@@ -95,6 +97,7 @@ fun NotePollContent(
 
                 PollState.Voted, PollState.Ended -> PollResultsContent(
                     poll = poll,
+                    animate = initialState == PollState.Pending,
                     onVotesClick = onVotesClick,
                 )
             }
@@ -172,9 +175,15 @@ private fun PollPendingOption(
 }
 
 @Composable
-private fun PollResultsContent(poll: PollUi, onVotesClick: (() -> Unit)?) {
-    var animationStarted by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { animationStarted = true }
+private fun PollResultsContent(
+    poll: PollUi,
+    animate: Boolean,
+    onVotesClick: (() -> Unit)?,
+) {
+    var animationStarted by remember { mutableStateOf(!animate) }
+    if (animate) {
+        LaunchedEffect(Unit) { animationStarted = true }
+    }
 
     val hasWinner = poll.state == PollState.Ended && poll.options.any { it.isWinner }
 
