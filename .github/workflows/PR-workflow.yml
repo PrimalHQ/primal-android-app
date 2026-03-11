@@ -43,6 +43,9 @@ jobs:
     - name: Run tests on AOSP flavour
       run: ./gradlew testAospDebugUnitTest
 
+    - name: Run KMP module tests
+      run: ./gradlew allTests
+
     - name: Compile AOSP debug build to verify no-compilation errors
       run: ./gradlew compileAospDebugKotlin
 
