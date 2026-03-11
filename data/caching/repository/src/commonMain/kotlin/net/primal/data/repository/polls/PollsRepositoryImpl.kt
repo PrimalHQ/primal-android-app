@@ -5,11 +5,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.add
-import kotlinx.serialization.json.buildJsonArray
 import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.data.local.dao.polls.PollData
 import net.primal.data.local.dao.polls.PollType
 import net.primal.data.local.dao.polls.PollVoteData
 import net.primal.data.local.db.PrimalDatabase
@@ -32,7 +31,9 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asEventIdTag
+import net.primal.domain.nostr.asResponseTag
 import net.primal.domain.polls.PollAlreadyVotedException
+import net.primal.domain.polls.PollAuthorCannotVoteException
 import net.primal.domain.polls.PollExpiredException
 import net.primal.domain.polls.PollOptionInfo
 import net.primal.domain.polls.PollOptionStats
@@ -76,8 +77,12 @@ class PollsRepositoryImpl(
                 .filter { it.kind == NostrEventKind.Poll.value || it.kind == NostrEventKind.ZapPoll.value }
 
             val pollData = pollEvents.mapNotNullAsPollDataPO()
-            val pollVotes = response.pollResponses.mapAsPollResponseVotes() +
+            val isZapPoll = pollData.any { it.pollType == PollType.Zap }
+            val pollVotes = if (isZapPoll) {
                 response.zaps.mapAsZapPollVotes()
+            } else {
+                response.pollResponses.mapAsPollResponseVotes()
+            }
 
             val statsMap = response.pollStats.parseAndMapPrimalPollStats()
             val pollDataWithCounts = pollData.applyPollStats(statsMap)
@@ -89,69 +94,125 @@ class PollsRepositoryImpl(
             }
         }
 
-    private suspend fun validatePollExpiration(pollEventId: String) {
-        val pollData = database.polls().findByPostId(postId = pollEventId)
-        val endsAt = pollData?.endsAt
-        if (endsAt != null) {
-            val now = Clock.System.now().epochSeconds
-            if (endsAt <= now) throw PollExpiredException()
-        }
+    private suspend fun fetchPollOrThrow(pollEventId: String): PollData {
+        return database.polls().findByPostId(postId = pollEventId)
+            ?: error("Poll not found: $pollEventId")
     }
 
-    private suspend fun validateUserPollVote(userId: String, pollEventId: String) {
+    private fun validateNotExpired(poll: PollData) {
+        val endsAt = poll.endsAt ?: return
+        if (endsAt <= Clock.System.now().epochSeconds) throw PollExpiredException()
+    }
+
+    private fun validateNotOwnPoll(userId: String, poll: PollData) {
+        if (poll.authorId == userId) throw PollAuthorCannotVoteException()
+    }
+
+    private suspend fun validateNotAlreadyVoted(userId: String, pollEventId: String) {
         val existingVotes = database.pollVotes().findVotesByUser(postId = pollEventId, voterId = userId)
         if (existingVotes.isNotEmpty()) throw PollAlreadyVotedException()
-        validatePollExpiration(pollEventId)
     }
 
     override suspend fun votePoll(
         userId: String,
         pollEventId: String,
         optionId: String,
-    ) = withContext(dispatcherProvider.io()) {
-        validateUserPollVote(userId = userId, pollEventId = pollEventId)
+    ): Result<Unit> =
+        withContext(dispatcherProvider.io()) {
+            runCatching {
+                val poll = fetchPollOrThrow(pollEventId)
+                validateNotExpired(poll)
+                validateNotAlreadyVoted(userId, pollEventId)
 
-        val responseTag = buildJsonArray {
-            add("response")
-            add(optionId)
-        }
-
-        val publishResult = primalPublisher.signPublishImportNostrEvent(
-            unsignedNostrEvent = NostrUnsignedEvent(
-                pubKey = userId,
-                kind = NostrEventKind.PollResponse.value,
-                tags = listOf(pollEventId.asEventIdTag(), responseTag),
-                content = "",
-            ),
-        )
-
-        database.withTransaction {
-            database.pollVotes().upsertAll(
-                data = listOf(
-                    PollVoteData(
-                        eventId = publishResult.nostrEvent.id,
-                        postId = pollEventId,
-                        optionId = optionId,
-                        voterId = userId,
-                        amountInSats = null,
-                        createdAt = Clock.System.now().epochSeconds,
+                val publishResult = primalPublisher.signPublishImportNostrEvent(
+                    unsignedNostrEvent = NostrUnsignedEvent(
+                        pubKey = userId,
+                        kind = NostrEventKind.PollResponse.value,
+                        tags = listOf(pollEventId.asEventIdTag(), optionId.asResponseTag()),
+                        content = "",
                     ),
-                ),
-            )
+                )
 
-            val existingPoll = database.polls().findByPostId(postId = pollEventId)
-            if (existingPoll != null) {
-                val updatedOptions = existingPoll.options.map { option ->
-                    if (option.id == optionId) {
-                        option.copy(voteCount = option.voteCount + 1)
-                    } else {
-                        option
+                database.withTransaction {
+                    database.pollVotes().upsertAll(
+                        data = listOf(
+                            PollVoteData(
+                                eventId = publishResult.nostrEvent.id,
+                                postId = pollEventId,
+                                optionId = optionId,
+                                voterId = userId,
+                                amountInSats = null,
+                                createdAt = publishResult.nostrEvent.createdAt,
+                            ),
+                        ),
+                    )
+
+                    val existingPoll = database.polls().findByPostId(postId = pollEventId)
+                    if (existingPoll != null) {
+                        val updatedOptions = existingPoll.options.map { option ->
+                            if (option.id == optionId) {
+                                option.copy(voteCount = option.voteCount + 1)
+                            } else {
+                                option
+                            }
+                        }
+                        database.polls().upsertAll(listOf(existingPoll.copy(options = updatedOptions)))
                     }
                 }
-                database.polls().upsertAll(listOf(existingPoll.copy(options = updatedOptions)))
             }
         }
-    }
+
+    override suspend fun validateZapPollVote(userId: String, pollEventId: String): Result<Unit> =
+        withContext(dispatcherProvider.io()) {
+            runCatching {
+                val poll = fetchPollOrThrow(pollEventId)
+                validateNotExpired(poll)
+                validateNotOwnPoll(userId, poll)
+                validateNotAlreadyVoted(userId, pollEventId)
+            }
+        }
+
+    override suspend fun recordZapPollVote(
+        userId: String,
+        pollEventId: String,
+        optionId: String,
+        amountInSats: Long,
+        zapComment: String?,
+    ): Result<Unit> =
+        withContext(dispatcherProvider.io()) {
+            runCatching {
+                database.withTransaction {
+                    database.pollVotes().upsertAll(
+                        data = listOf(
+                            PollVoteData(
+                                eventId = "${pollEventId}_${userId}_zap",
+                                postId = pollEventId,
+                                optionId = optionId,
+                                voterId = userId,
+                                amountInSats = amountInSats,
+                                zapComment = zapComment,
+                                createdAt = Clock.System.now().epochSeconds,
+                            ),
+                        ),
+                    )
+
+                    val existingPoll = database.polls().findByPostId(postId = pollEventId)
+                    if (existingPoll != null) {
+                        val updatedOptions = existingPoll.options.map { option ->
+                            if (option.id == optionId) {
+                                option.copy(
+                                    voteCount = option.voteCount + 1,
+                                    satsZapped = option.satsZapped + amountInSats,
+                                )
+                            } else {
+                                option
+                            }
+                        }
+                        database.polls().upsertAll(listOf(existingPoll.copy(options = updatedOptions)))
+                    }
+                }
+            }
+        }
 
     override fun observeUserVotedOptions(userId: String, postId: String): Flow<Set<String>> {
         return database.pollVotes().observeVotesByUser(postId = postId, voterId = userId)
@@ -187,6 +248,7 @@ class PollsRepositoryImpl(
                             voters = optionVotes.mapNotNull { vote ->
                                 profilesMap[vote.voterId]?.asProfileDataDO()?.let { profile ->
                                     PollVoter(
+                                        eventId = vote.eventId,
                                         profile = profile,
                                         satsZapped = vote.amountInSats ?: 0,
                                         zapComment = vote.zapComment,

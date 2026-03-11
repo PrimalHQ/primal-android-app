@@ -7,6 +7,8 @@ import androidx.room.PrimaryKey
 data class PollData(
     @PrimaryKey
     val postId: String,
+    val authorId: String,
+    val zapRecipientId: String? = null,
     val pollType: PollType,
     val endsAt: Long? = null,
     val valueMinimum: Long? = null,

@@ -131,7 +131,7 @@ private fun PollVotesList(
 
             items(
                 items = option.voters,
-                key = { voter -> "${option.id}_${voter.profile.profileId}" },
+                key = { voter -> "${option.id}_${voter.eventId}" },
             ) { voter ->
                 if (isZapPoll) {
                     ZapVoterListItem(
@@ -288,6 +288,7 @@ private fun PreviewPollVotesList() {
                         voteCount = 5,
                         voters = listOf(
                             PollVoterUi(
+                                eventId = "e1",
                                 profile = UserProfileItemUi(
                                     profileId = "p1",
                                     displayName = "miljan",
@@ -295,6 +296,7 @@ private fun PreviewPollVotesList() {
                                 ),
                             ),
                             PollVoterUi(
+                                eventId = "e2",
                                 profile = UserProfileItemUi(
                                     profileId = "p2",
                                     displayName = "alex",
@@ -302,6 +304,7 @@ private fun PreviewPollVotesList() {
                                 ),
                             ),
                             PollVoterUi(
+                                eventId = "e3",
                                 profile = UserProfileItemUi(
                                     profileId = "p3",
                                     displayName = "marko",
@@ -316,6 +319,7 @@ private fun PreviewPollVotesList() {
                         voteCount = 12,
                         voters = listOf(
                             PollVoterUi(
+                                eventId = "e4",
                                 profile = UserProfileItemUi(
                                     profileId = "p4",
                                     displayName = "nikola",
@@ -323,6 +327,7 @@ private fun PreviewPollVotesList() {
                                 ),
                             ),
                             PollVoterUi(
+                                eventId = "e5",
                                 profile = UserProfileItemUi(
                                     profileId = "p5",
                                     displayName = "stefan",
@@ -354,21 +359,25 @@ private fun PreviewZapPollVotesList() {
                         totalSats = 3_452,
                         voters = listOf(
                             PollVoterUi(
+                                eventId = "ze1",
                                 profile = UserProfileItemUi(profileId = "p1", displayName = "miljan"),
                                 satsZapped = 21_21200,
                                 zapComment = "Big day today. One of many to co\u2026",
                             ),
                             PollVoterUi(
+                                eventId = "ze2",
                                 profile = UserProfileItemUi(profileId = "p2", displayName = "miljan"),
                                 satsZapped = 2_12100,
                                 zapComment = "Big day today. One of many to co\u2026",
                             ),
                             PollVoterUi(
+                                eventId = "ze3",
                                 profile = UserProfileItemUi(profileId = "p3", displayName = "miljan"),
                                 satsZapped = 2100,
                                 zapComment = "Big day today. One of many to co\u2026",
                             ),
                             PollVoterUi(
+                                eventId = "ze4",
                                 profile = UserProfileItemUi(profileId = "p4", displayName = "miljan"),
                                 satsZapped = 210,
                                 zapComment = "Big day today. One of many to co\u2026",

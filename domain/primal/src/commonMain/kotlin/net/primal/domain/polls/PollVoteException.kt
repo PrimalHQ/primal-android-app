@@ -8,6 +8,4 @@ class PollExpiredException : PollVoteException()
 
 class PollAuthorCannotVoteException : PollVoteException()
 
-class PollMissingLightningAddressException : PollVoteException()
-
 class PollNotFoundException : PollVoteException()

@@ -114,7 +114,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         PollData::class,
         PollVoteData::class,
     ],
-    version = 24,
+    version = 25,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)

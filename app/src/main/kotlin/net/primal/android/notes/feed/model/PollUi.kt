@@ -23,6 +23,8 @@ data class PollOptionUi(
 )
 
 data class PollUi(
+    val authorId: String = "",
+    val zapRecipientId: String? = null,
     val pollType: PollType = PollType.User,
     val options: List<PollOptionUi>,
     val endsAt: Instant? = null,

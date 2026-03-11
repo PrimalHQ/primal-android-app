@@ -228,16 +228,17 @@ private fun FeedNoteCard(
     val zapPoll = data.poll
     if (zapPollSelectedOptionId != null && zapPoll != null) {
         ZapPollBottomSheet(
+            optionId = zapPollSelectedOptionId ?: "",
             valueMinimum = zapPoll.valueMinimum,
             valueMaximum = zapPoll.valueMaximum,
             exchangeRate = state.currentExchangeRate,
             defaultZapAmounts = state.zappingState.zapsConfig.map { it.amount },
             onDismissRequest = { zapPollSelectedOptionId = null },
-            onVote = { amount, comment ->
+            onVote = { optionId, amount, comment ->
                 eventPublisher(
                     UiEvent.ZapPollVoteAction(
                         postId = data.postId,
-                        optionId = zapPollSelectedOptionId ?: return@ZapPollBottomSheet,
+                        optionId = optionId,
                         zapAmount = amount,
                         zapComment = comment,
                         poll = zapPoll,

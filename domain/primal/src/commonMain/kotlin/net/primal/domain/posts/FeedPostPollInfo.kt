@@ -5,6 +5,8 @@ import net.primal.domain.polls.PollOptionInfo
 
 @Serializable
 data class FeedPostPollInfo(
+    val authorId: String,
+    val zapRecipientId: String? = null,
     val pollType: PollType,
     val options: List<PollOptionInfo>,
     val endsAt: Long? = null,

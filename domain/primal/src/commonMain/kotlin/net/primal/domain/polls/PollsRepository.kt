@@ -9,7 +9,17 @@ interface PollsRepository {
         userId: String,
         pollEventId: String,
         optionId: String,
-    )
+    ): Result<Unit>
+
+    suspend fun validateZapPollVote(userId: String, pollEventId: String): Result<Unit>
+
+    suspend fun recordZapPollVote(
+        userId: String,
+        pollEventId: String,
+        optionId: String,
+        amountInSats: Long,
+        zapComment: String?,
+    ): Result<Unit>
 
     fun observePollVotes(eventId: String): Flow<PollVoteStats>
 

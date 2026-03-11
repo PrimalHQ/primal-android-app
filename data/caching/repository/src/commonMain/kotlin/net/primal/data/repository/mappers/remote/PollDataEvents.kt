@@ -16,6 +16,7 @@ import net.primal.domain.nostr.findFirstBolt11
 import net.primal.domain.nostr.findFirstClosedAt
 import net.primal.domain.nostr.findFirstEndsAt
 import net.primal.domain.nostr.findFirstEventId
+import net.primal.domain.nostr.findFirstUnmarkedPubkey
 import net.primal.domain.nostr.findFirstValueMaximum
 import net.primal.domain.nostr.findFirstValueMinimum
 import net.primal.domain.nostr.getTagValueOrNull
@@ -107,6 +108,12 @@ private fun NostrEvent.asPollData(): PollData {
     val isZapPoll = this.kind == NostrEventKind.ZapPoll.value
     return PollData(
         postId = this.id,
+        authorId = this.pubKey,
+        zapRecipientId = if (isZapPoll) {
+            this.tags.findFirstUnmarkedPubkey() ?: this.pubKey
+        } else {
+            null
+        },
         pollType = if (isZapPoll) PollType.Zap else PollType.User,
         endsAt = if (isZapPoll) {
             tags.findFirstClosedAt()?.toLongOrNull()
