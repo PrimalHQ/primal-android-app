@@ -51,16 +51,15 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.compose.DefaultOnboardingAvatar
-import net.primal.android.auth.compose.OnboardingBackgroundColor
 import net.primal.android.auth.compose.OnboardingButton
-import net.primal.android.auth.compose.OnboardingGradientAlpha
-import net.primal.android.auth.compose.OnboardingTextColor
 import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
-import net.primal.android.auth.compose.onboardingGradientBrush
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.ColumnWithBackground
+import net.primal.android.core.compose.PrimalDarkTextColor
 import net.primal.android.core.compose.PrimalDefaults
+import net.primal.android.core.compose.PrimalGradientAlpha
+import net.primal.android.core.compose.PrimalGradientBackgroundColor
 import net.primal.android.core.compose.UiDensityMode
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -70,6 +69,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.primalGradientBrush
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.signer.client.event.buildAppSpecificDataEvent
 import net.primal.android.signer.client.launchGetPublicKey
@@ -136,17 +136,17 @@ fun LoginScreen(
     BackHandler(enabled = state.loading) { }
     ColumnWithBackground(
         modifier = Modifier.semantics { testTagsAsResourceId = true },
-        backgroundBrushProvider = ::onboardingGradientBrush,
-        brushAlpha = OnboardingGradientAlpha,
-        backgroundColor = OnboardingBackgroundColor,
+        backgroundBrushProvider = ::primalGradientBrush,
+        brushAlpha = PrimalGradientAlpha,
+        backgroundColor = PrimalGradientBackgroundColor,
     ) { size ->
         val uiMode = size.height.detectUiDensityModeFromMaxHeight()
 
         CenterAlignedTopAppBar(
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = Color.Transparent,
-                titleContentColor = OnboardingTextColor,
-                navigationIconContentColor = OnboardingTextColor,
+                titleContentColor = PrimalDarkTextColor,
+                navigationIconContentColor = PrimalDarkTextColor,
             ),
             title = {
                 Text(text = stringResource(id = R.string.login_title))
@@ -262,7 +262,7 @@ fun LoginContent(
                         .height(56.dp)
                         .fillMaxWidth(),
                     containerColor = Color.Transparent,
-                    contentColor = OnboardingTextColor,
+                    contentColor = PrimalDarkTextColor,
                     onClick = onLoginWithAmberClick,
                     text = "Login with Amber",
                 )
@@ -434,7 +434,7 @@ private fun EnterYourKeyNotice(modifier: Modifier = Modifier, loginInput: String
             },
             textAlign = TextAlign.Center,
             style = AppTheme.typography.bodyMedium,
-            color = OnboardingTextColor,
+            color = PrimalDarkTextColor,
         )
     }
 }
@@ -473,13 +473,13 @@ private fun ProfileDetailsColumn(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
             ),
-            color = OnboardingTextColor,
+            color = PrimalDarkTextColor,
         )
 
         Text(
             text = profileDetails.internetIdentifier ?: "",
             style = AppTheme.typography.bodyLarge,
-            color = OnboardingTextColor,
+            color = PrimalDarkTextColor,
         )
 
         Spacer(modifier = Modifier.height(32.dp))

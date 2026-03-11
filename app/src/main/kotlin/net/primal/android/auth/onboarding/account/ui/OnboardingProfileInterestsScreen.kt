@@ -24,11 +24,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.auth.compose.OnboardingBottomBar
-import net.primal.android.auth.compose.OnboardingTextColor
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
+import net.primal.android.core.compose.PrimalDarkTextColor
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -53,10 +53,10 @@ fun OnboardingProfileInterestsScreen(
                     scrolledContainerColor = Color.Transparent,
                 ),
                 title = stringResource(id = R.string.onboarding_title_your_interests),
-                textColor = OnboardingTextColor,
+                textColor = PrimalDarkTextColor,
                 showDivider = false,
                 navigationIcon = PrimalIcons.ArrowBack,
-                navigationIconTintColor = OnboardingTextColor,
+                navigationIconTintColor = PrimalDarkTextColor,
                 onNavigationIconClick = onBack,
             )
         },

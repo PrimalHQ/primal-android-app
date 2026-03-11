@@ -44,18 +44,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.auth.compose.ColumnWithBackground
-import net.primal.android.auth.compose.OnboardingBackgroundColor
 import net.primal.android.auth.compose.OnboardingBottomBar
-import net.primal.android.auth.compose.OnboardingGradientAlpha
-import net.primal.android.auth.compose.OnboardingTextColor
-import net.primal.android.auth.compose.onboardingGradientBrush
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
+import net.primal.android.core.compose.ColumnWithBackground
 import net.primal.android.core.compose.NostrUserText
+import net.primal.android.core.compose.PrimalDarkTextColor
+import net.primal.android.core.compose.PrimalGradientAlpha
+import net.primal.android.core.compose.PrimalGradientBackgroundColor
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
@@ -63,6 +62,7 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.primalGradientBrush
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
@@ -95,10 +95,10 @@ fun OnboardingProfileFollowsScreen(
                     scrolledContainerColor = Color.Transparent,
                 ),
                 title = stringResource(id = R.string.onboarding_title_your_follows),
-                textColor = OnboardingTextColor,
+                textColor = PrimalDarkTextColor,
                 showDivider = false,
                 navigationIcon = PrimalIcons.ArrowBack,
-                navigationIconTintColor = OnboardingTextColor,
+                navigationIconTintColor = PrimalDarkTextColor,
                 onNavigationIconClick = { backSequence() },
             )
         },
@@ -438,9 +438,9 @@ private fun FollowGroupMemberListItem(member: FollowGroupMember, onClick: () -> 
 private fun PreviewOnboardingFollowsNoticeScreen() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         ColumnWithBackground(
-            backgroundBrushProvider = ::onboardingGradientBrush,
-            brushAlpha = OnboardingGradientAlpha,
-            backgroundColor = OnboardingBackgroundColor,
+            backgroundBrushProvider = ::primalGradientBrush,
+            brushAlpha = PrimalGradientAlpha,
+            backgroundColor = PrimalGradientBackgroundColor,
         ) {
             OnboardingProfileFollowsScreen(
                 state = OnboardingContract.UiState(
@@ -482,9 +482,9 @@ private fun PreviewOnboardingFollowsNoticeScreen() {
 private fun PreviewOnboardingFollowsCustomizationScreen() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         ColumnWithBackground(
-            backgroundBrushProvider = ::onboardingGradientBrush,
-            brushAlpha = OnboardingGradientAlpha,
-            backgroundColor = OnboardingBackgroundColor,
+            backgroundBrushProvider = ::primalGradientBrush,
+            brushAlpha = PrimalGradientAlpha,
+            backgroundColor = PrimalGradientBackgroundColor,
         ) {
             OnboardingProfileFollowsScreen(
                 state = OnboardingContract.UiState(

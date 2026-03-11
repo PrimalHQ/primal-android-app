@@ -12,15 +12,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import net.primal.android.auth.compose.ColumnWithBackground
-import net.primal.android.auth.compose.OnboardingBackgroundColor
-import net.primal.android.auth.compose.OnboardingGradientAlpha
-import net.primal.android.auth.compose.onboardingGradientBrush
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.OnboardingViewModel
 import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
+import net.primal.android.core.compose.ColumnWithBackground
+import net.primal.android.core.compose.PrimalGradientAlpha
+import net.primal.android.core.compose.PrimalGradientBackgroundColor
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.primalGradientBrush
 import net.primal.android.stream.player.hideStreamMiniPlayer
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -66,9 +66,9 @@ private fun OnboardingScreen(
         },
     ) { onboardingStep ->
         ColumnWithBackground(
-            backgroundBrushProvider = ::onboardingGradientBrush,
-            brushAlpha = OnboardingGradientAlpha,
-            backgroundColor = OnboardingBackgroundColor,
+            backgroundBrushProvider = ::primalGradientBrush,
+            brushAlpha = PrimalGradientAlpha,
+            backgroundColor = PrimalGradientBackgroundColor,
         ) {
             when (onboardingStep) {
                 OnboardingStep.Details -> OnboardingProfileDetailsScreen(

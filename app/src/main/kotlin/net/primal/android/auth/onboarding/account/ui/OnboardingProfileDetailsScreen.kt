@@ -52,11 +52,11 @@ import coil3.request.ImageRequest
 import net.primal.android.R
 import net.primal.android.auth.compose.DefaultOnboardingAvatar
 import net.primal.android.auth.compose.OnboardingBottomBar
-import net.primal.android.auth.compose.OnboardingTextColor
 import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
+import net.primal.android.core.compose.PrimalDarkTextColor
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
@@ -83,10 +83,10 @@ fun OnboardingProfileDetailsScreen(
                     scrolledContainerColor = Color.Transparent,
                 ),
                 title = stringResource(id = R.string.onboarding_title_create_account),
-                textColor = OnboardingTextColor,
+                textColor = PrimalDarkTextColor,
                 showDivider = false,
                 navigationIcon = PrimalIcons.ArrowBack,
-                navigationIconTintColor = OnboardingTextColor,
+                navigationIconTintColor = PrimalDarkTextColor,
                 onNavigationIconClick = onBack,
             )
         },

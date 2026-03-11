@@ -1,4 +1,4 @@
-package net.primal.android.auth.compose
+package net.primal.android.core.compose
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
