@@ -20,10 +20,10 @@ import androidx.compose.ui.unit.sp
 import net.primal.android.core.compose.PrimalClickableText
 import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.core.ext.openUriSafely
-import net.primal.android.core.utils.parseHashtags
 import net.primal.android.stream.LiveStreamContract
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.detectUrls
+import net.primal.domain.nostr.utils.parseHashtags
 import net.primal.domain.nostr.utils.parseNostrUris
 
 private const val URL_ANNOTATION_TAG = "url"
