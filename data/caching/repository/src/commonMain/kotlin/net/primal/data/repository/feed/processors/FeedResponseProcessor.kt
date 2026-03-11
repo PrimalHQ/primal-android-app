@@ -101,7 +101,10 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
     val streamData = liveActivity.mapNotNullAsStreamDataPO() + refEvents.mapNotNullAsStreamDataPO()
 
     val pollStatsMap = this.primalPollStats.parseAndMapPrimalPollStats()
-    val pollData = (this.polls + refEvents).mapNotNullAsPollDataPO().applyPollStats(pollStatsMap)
+    val allPollData = (this.polls + refEvents).mapNotNullAsPollDataPO()
+    val pollDataWithStats = allPollData.filter { it.postId in pollStatsMap }.applyPollStats(pollStatsMap)
+    val pollDataWithoutStats = allPollData.filter { it.postId !in pollStatsMap }
+    val pollData = pollDataWithStats + pollDataWithoutStats
     val pollVotes = this.pollResponses.mapAsPollResponseVotes() + this.zaps.mapAsZapPollVotes()
 
     val noteNostrUris = allPosts.flatMapPostsAsReferencedNostrUriDO(
@@ -123,7 +126,8 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
 
     database.profiles().insertOrUpdateAll(data = profiles)
     database.posts().upsertAll(data = allPosts)
-    database.polls().upsertAll(data = pollData)
+    database.polls().upsertAll(data = pollDataWithStats)
+    database.polls().insertAllOrIgnore(data = pollDataWithoutStats)
     database.pollVotes().upsertAll(data = pollVotes)
     database.eventUris().upsertAllEventUris(data = noteAttachments)
     database.eventUris().upsertAllEventNostrUris(data = noteNostrUris)

@@ -71,12 +71,13 @@ private const val CUSTOM_AMOUNT_MAX_DIGITS = 8
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZapPollBottomSheet(
+    optionId: String,
     valueMinimum: Long?,
     valueMaximum: Long?,
     exchangeRate: Double,
     defaultZapAmounts: List<Long> = emptyList(),
     onDismissRequest: () -> Unit,
-    onVote: (amount: Long, comment: String?) -> Unit,
+    onVote: (optionId: String, amount: Long, comment: String?) -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
@@ -87,6 +88,7 @@ fun ZapPollBottomSheet(
         sheetState = sheetState,
     ) {
         ZapPollBottomSheetContent(
+            optionId = optionId,
             valueMinimum = valueMinimum,
             valueMaximum = valueMaximum,
             exchangeRate = exchangeRate,
@@ -99,12 +101,13 @@ fun ZapPollBottomSheet(
 
 @Composable
 private fun ZapPollBottomSheetContent(
+    optionId: String,
     valueMinimum: Long?,
     valueMaximum: Long?,
     exchangeRate: Double,
     defaultZapAmounts: List<Long> = emptyList(),
     onDismissRequest: () -> Unit,
-    onVote: (amount: Long, comment: String?) -> Unit,
+    onVote: (optionId: String, amount: Long, comment: String?) -> Unit,
 ) {
     val hasConstraints = valueMinimum != null || valueMaximum != null
     val isFixedAmount = hasConstraints && valueMinimum == valueMaximum
@@ -179,7 +182,7 @@ private fun ZapPollBottomSheetContent(
             onVote = {
                 isVoteCooldownActive = true
                 onDismissRequest()
-                onVote(selectedAmount, comment.ifBlank { null })
+                onVote(optionId, selectedAmount, comment.ifBlank { null })
             },
         )
     }
@@ -536,11 +539,12 @@ private fun PreviewZapPollBottomSheetFixedAmount() {
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             ZapPollBottomSheet(
+                optionId = "0",
                 valueMinimum = 21,
                 valueMaximum = 21,
                 exchangeRate = 43_000.0,
                 onDismissRequest = {},
-                onVote = { _, _ -> },
+                onVote = { _, _, _ -> },
             )
         }
     }
@@ -553,11 +557,12 @@ private fun PreviewZapPollBottomSheetTwoItems() {
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             ZapPollBottomSheet(
+                optionId = "0",
                 valueMinimum = 21,
                 valueMaximum = 22,
                 exchangeRate = 43_000.0,
                 onDismissRequest = {},
-                onVote = { _, _ -> },
+                onVote = { _, _, _ -> },
             )
         }
     }
@@ -570,11 +575,12 @@ private fun PreviewZapPollBottomSheetThreeItems() {
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             ZapPollBottomSheet(
+                optionId = "0",
                 valueMinimum = 21,
                 valueMaximum = 23,
                 exchangeRate = 43_000.0,
                 onDismissRequest = {},
-                onVote = { _, _ -> },
+                onVote = { _, _, _ -> },
             )
         }
     }
@@ -587,11 +593,12 @@ private fun PreviewZapPollBottomSheetFourItems() {
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             ZapPollBottomSheet(
+                optionId = "0",
                 valueMinimum = 21,
                 valueMaximum = 24,
                 exchangeRate = 43_000.0,
                 onDismissRequest = {},
-                onVote = { _, _ -> },
+                onVote = { _, _, _ -> },
             )
         }
     }
@@ -604,11 +611,12 @@ private fun PreviewZapPollBottomSheetFiveItems() {
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             ZapPollBottomSheet(
+                optionId = "0",
                 valueMinimum = 21,
                 valueMaximum = 25,
                 exchangeRate = 43_000.0,
                 onDismissRequest = {},
-                onVote = { _, _ -> },
+                onVote = { _, _, _ -> },
             )
         }
     }
@@ -621,11 +629,12 @@ private fun PreviewZapPollBottomSheetSixItems() {
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             ZapPollBottomSheet(
+                optionId = "0",
                 valueMinimum = 21,
                 valueMaximum = 26,
                 exchangeRate = 43_000.0,
                 onDismissRequest = {},
-                onVote = { _, _ -> },
+                onVote = { _, _, _ -> },
             )
         }
     }
@@ -638,11 +647,12 @@ private fun PreviewZapPollBottomSheetLargeRange() {
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             ZapPollBottomSheet(
+                optionId = "0",
                 valueMinimum = 21,
                 valueMaximum = 21_000,
                 exchangeRate = 43_000.0,
                 onDismissRequest = {},
-                onVote = { _, _ -> },
+                onVote = { _, _, _ -> },
             )
         }
     }
@@ -654,12 +664,13 @@ private fun PreviewZapPollBottomSheetUnconstrained() {
     PrimalPreview(primalTheme = PrimalTheme.Midnight) {
         Surface {
             ZapPollBottomSheet(
+                optionId = "0",
                 valueMinimum = null,
                 valueMaximum = null,
                 exchangeRate = 43_000.0,
                 defaultZapAmounts = previewDefaultZapAmounts,
                 onDismissRequest = {},
-                onVote = { _, _ -> },
+                onVote = { _, _, _ -> },
             )
         }
     }

@@ -98,6 +98,8 @@ internal fun FeedPostPollInfo.asPollUi(): PollUi {
     val totalVotes = options.sumOf { it.voteCount }.coerceAtLeast(1)
     val totalSats = options.sumOf { it.satsZapped }.coerceAtLeast(1)
     return PollUi(
+        authorId = authorId,
+        zapRecipientId = zapRecipientId,
         pollType = when (pollType) {
             FeedPostPollInfo.PollType.User -> PollType.User
             FeedPostPollInfo.PollType.Zap -> PollType.Zap

@@ -50,6 +50,7 @@ class PollVotesViewModel @Inject constructor(
                                     totalSats = option.optionInfo.satsZapped,
                                     voters = option.voters.map { voter ->
                                         PollVoterUi(
+                                            eventId = voter.eventId,
                                             profile = voter.profile.asUserProfileItemUi(),
                                             satsZapped = voter.satsZapped,
                                             zapComment = voter.zapComment,

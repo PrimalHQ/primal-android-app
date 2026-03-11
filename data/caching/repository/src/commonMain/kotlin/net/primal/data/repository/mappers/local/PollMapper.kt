@@ -7,6 +7,8 @@ import net.primal.domain.posts.FeedPostPollInfo
 
 fun PollData.asFeedPostPollInfo(): FeedPostPollInfo {
     return FeedPostPollInfo(
+        authorId = this.authorId,
+        zapRecipientId = this.zapRecipientId,
         pollType = when (this.pollType) {
             PollType.User -> FeedPostPollInfo.PollType.User
             PollType.Zap -> FeedPostPollInfo.PollType.Zap

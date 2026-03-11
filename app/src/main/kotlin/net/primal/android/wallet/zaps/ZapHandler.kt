@@ -6,6 +6,7 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlinx.serialization.json.JsonArray
 import net.primal.android.networking.relays.FALLBACK_RELAYS
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.user.accounts.UserAccountsStore
@@ -33,6 +34,7 @@ class ZapHandler @Inject constructor(
         target: ZapTarget,
         amountInSats: ULong? = null,
         comment: String? = null,
+        optionalTags: List<JsonArray> = emptyList(),
     ) = withContext(dispatcherProvider.io()) {
         val userAccount = accountsStore.findByIdOrNull(userId = userId)
 
@@ -51,6 +53,7 @@ class ZapHandler @Inject constructor(
             comment = zapComment,
             target = target,
             relays = userRelays,
+            optionalTags = optionalTags,
         ).getOrNull() ?: return@withContext ZapResult.Failure(error = ZapError.FailedToSignEvent)
 
         runCatching {

@@ -37,6 +37,7 @@ import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
+import net.primal.domain.nostr.asPollOptionTag
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
@@ -46,7 +47,6 @@ import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.polls.PollAlreadyVotedException
 import net.primal.domain.polls.PollAuthorCannotVoteException
 import net.primal.domain.polls.PollExpiredException
-import net.primal.domain.polls.PollMissingLightningAddressException
 import net.primal.domain.polls.PollsRepository
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.profile.ProfileRepository
@@ -179,6 +179,7 @@ class NoteViewModel @AssistedInject constructor(
                         repostId = it.repostId,
                         repostAuthorId = it.repostAuthorId,
                     )
+
                     is UiEvent.PollVoteAction -> votePoll(it)
                     is UiEvent.ZapPollVoteAction -> zapPollVote(it)
                 }
@@ -511,24 +512,17 @@ class NoteViewModel @AssistedInject constructor(
                 )
             }
 
-            runCatching {
-                pollsRepository.votePoll(
-                    userId = activeAccountStore.activeUserId(),
-                    pollEventId = action.postId,
-                    optionId = action.optionId,
-                )
-            }.onFailure { error ->
+            pollsRepository.votePoll(
+                userId = activeAccountStore.activeUserId(),
+                pollEventId = action.postId,
+                optionId = action.optionId,
+            ).onFailure { error ->
                 Napier.w(throwable = error) { "Failed to publish poll vote." }
                 setState { copy(poll = null) }
                 when (error) {
                     is PollAlreadyVotedException -> setState { copy(error = UiError.PollAlreadyVoted) }
                     is PollExpiredException -> setState { copy(error = UiError.PollExpired) }
                     is PollAuthorCannotVoteException -> setState { copy(error = UiError.PollAuthorCannotVote) }
-                    is PollMissingLightningAddressException -> setState {
-                        copy(
-                            error = UiError.MissingLightningAddress(error),
-                        )
-                    }
                     is NostrPublishException -> setState { copy(error = UiError.FailedToVotePoll(error)) }
                     is MissingRelaysException -> setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
                     is SigningKeyNotFoundException -> setState { copy(error = UiError.MissingPrivateKey) }
@@ -541,7 +535,80 @@ class NoteViewModel @AssistedInject constructor(
     private fun zapPollVote(action: UiEvent.ZapPollVoteAction) =
         viewModelScope.launch {
             applyOptimisticZapPollUpdate(action)
-            // Handle Zap Vote Logic
+
+            val zapRecipientId = action.poll.zapRecipientId
+            if (zapRecipientId == null) {
+                setState { copy(poll = null) }
+                val error = IllegalStateException("Missing zap recipient")
+                setState { copy(error = UiError.MissingLightningAddress(error)) }
+                return@launch
+            }
+
+            val recipientProfileData = profileRepository.findProfileDataOrNull(
+                profileId = zapRecipientId,
+            )
+            val lnUrlDecoded = recipientProfileData?.lnUrlDecoded
+            if (lnUrlDecoded == null) {
+                setState { copy(poll = null) }
+                val error = IllegalStateException("Missing ln url")
+                setState { copy(error = UiError.MissingLightningAddress(error)) }
+                return@launch
+            }
+
+            val walletId = walletAccountRepository.getActiveWallet(
+                userId = activeAccountStore.activeUserId(),
+            )?.walletId ?: return@launch
+
+            pollsRepository.validateZapPollVote(
+                userId = activeAccountStore.activeUserId(),
+                pollEventId = action.postId,
+            ).onFailure { error ->
+                Napier.w(throwable = error) { "Failed to validate zap poll vote." }
+                setState { copy(poll = null) }
+                when (error) {
+                    is PollAlreadyVotedException -> setState { copy(error = UiError.PollAlreadyVoted) }
+                    is PollExpiredException -> setState { copy(error = UiError.PollExpired) }
+                    is PollAuthorCannotVoteException -> setState { copy(error = UiError.PollAuthorCannotVote) }
+                    else -> setState { copy(error = UiError.FailedToVotePoll(error)) }
+                }
+                return@launch
+            }
+
+            val result = zapHandler.zap(
+                userId = activeAccountStore.activeUserId(),
+                walletId = walletId,
+                comment = action.zapComment ?: "",
+                amountInSats = action.zapAmount.toULong(),
+                target = ZapTarget.Event(
+                    eventId = action.postId,
+                    recipientUserId = zapRecipientId,
+                    recipientLnUrlDecoded = lnUrlDecoded,
+                ),
+                optionalTags = listOf(action.optionId.asPollOptionTag()),
+            )
+
+            if (result is ZapResult.Failure) {
+                setState { copy(poll = null) }
+                when (result.error) {
+                    is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
+                    is ZapError.FailedToFetchZapInvoice,
+                    -> setState { copy(error = InvalidZapRequest()) }
+
+                    is ZapError.FailedToPayZap, ZapError.FailedToPublishEvent,
+                    ZapError.FailedToSignEvent, is ZapError.Timeout,
+                    -> setState { copy(error = FailedToPublishZapEvent()) }
+
+                    is ZapError.Unknown -> setState { copy(error = GenericError()) }
+                }
+            } else {
+                pollsRepository.recordZapPollVote(
+                    userId = activeAccountStore.activeUserId(),
+                    pollEventId = action.postId,
+                    optionId = action.optionId,
+                    amountInSats = action.zapAmount,
+                    zapComment = action.zapComment,
+                )
+            }
         }
 
     private fun applyOptimisticZapPollUpdate(action: UiEvent.ZapPollVoteAction) {
