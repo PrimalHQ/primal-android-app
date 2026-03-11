@@ -1767,6 +1767,10 @@
         <item quantity="one">%1$d vote</item>
         <item quantity="other">%1$d votes</item>
     </plurals>
+    <plurals name="poll_votes_count_suffix">
+        <item quantity="one">vote</item>
+        <item quantity="other">votes</item>
+    </plurals>
     <string name="poll_time_remaining">%1$s left</string>
     <plurals name="poll_time_days">
         <item quantity="one">%1$d day</item>
@@ -1796,8 +1800,8 @@
     <string name="zap_poll_usd_amount">$%1$s USD</string>
 
     <string name="poll_votes_title">Votes</string>
-    <string name="poll_votes_no_votes">No votes yet</string>
     <string name="poll_votes_error">Unable to load votes.</string>
-    <string name="poll_votes_suffix"> votes</string>
-    <string name="poll_votes_sats_suffix"> sats</string>
+    <string name="poll_votes_no_voters">Voters will show up here.</string>
+    <string name="poll_votes_sats_suffix">sats</string>
+    <string name="poll_votes_see_votes">see votes</string>
 </resources>

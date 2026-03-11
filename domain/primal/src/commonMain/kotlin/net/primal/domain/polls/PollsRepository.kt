@@ -1,5 +1,6 @@
 package net.primal.domain.polls
 
+import androidx.paging.PagingData
 import kotlinx.coroutines.flow.Flow
 
 interface PollsRepository {
@@ -24,4 +25,8 @@ interface PollsRepository {
     fun observePollVotes(eventId: String): Flow<PollVoteStats>
 
     fun observeUserVotedOptions(userId: String, postId: String): Flow<Set<String>>
+
+    fun createVotersPager(eventId: String, optionId: String): Flow<PagingData<PollVoter>>
+
+    fun observePollData(eventId: String): Flow<PollInfo?>
 }

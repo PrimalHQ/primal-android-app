@@ -1,5 +1,6 @@
 package net.primal.data.remote.api.polls.model
 
+import net.primal.domain.common.ContentPrimalPaging
 import net.primal.domain.common.PrimalEvent
 import net.primal.domain.nostr.NostrEvent
 
@@ -14,4 +15,5 @@ data class PollVotesResponse(
     val primalPremiumInfo: PrimalEvent? = null,
     val blossomServers: List<NostrEvent> = emptyList(),
     val referencedEvents: List<PrimalEvent> = emptyList(),
+    val paging: ContentPrimalPaging? = null,
 )

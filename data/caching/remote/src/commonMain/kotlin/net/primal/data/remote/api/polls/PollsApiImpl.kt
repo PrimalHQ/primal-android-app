@@ -2,6 +2,7 @@ package net.primal.data.remote.api.polls
 
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.PrimalVerb
 import net.primal.data.remote.api.polls.model.PollVotesRequestBody
@@ -31,6 +32,7 @@ internal class PollsApiImpl(
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
             referencedEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
+            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)?.content?.decodeFromJsonStringOrNull(),
         )
     }
 }
