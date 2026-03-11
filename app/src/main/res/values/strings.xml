@@ -1218,11 +1218,11 @@
     <string name="profile_zap_bottom_sheet_fallback_title">Profile</string>
     <string name="profile_zap_sent_message">Zap sent successfully.</string>
 
-    <string name="profile_qr_code_profile_tab">Profile</string>
+    <string name="profile_qr_code_profile_tab">Public Key</string>
     <string name="profile_qr_code_lightning_tab">Lightning Address</string>
     <string name="profile_qr_code_scan_qr_code">Scan QR Code</string>
     <string name="profile_qr_code_view_qr_code">View QR Code</string>
-    <string name="profile_qr_code_scan_qr_code_hint">Scan a user, event, or article QR\ncode to find them on Nostr</string>
+    <string name="profile_qr_code_scan_qr_code_hint">Scan a user\'s QR code to find\nthem on Nostr</string>
 
     <string name="profile_editor_set_banner">set banner</string>
     <string name="profile_editor_change_banner">change banner</string>

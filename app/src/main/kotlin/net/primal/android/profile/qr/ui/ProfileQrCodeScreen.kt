@@ -23,20 +23,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
-import net.primal.android.auth.compose.ColumnWithBackground
+import net.primal.android.core.compose.ColumnWithBackground
 import net.primal.android.core.compose.MAX_COMPONENT_WIDTH
+import net.primal.android.core.compose.PrimalDarkButtonColor
+import net.primal.android.core.compose.PrimalDarkTextColor
+import net.primal.android.core.compose.PrimalGradientAlpha
+import net.primal.android.core.compose.PrimalGradientBackgroundColor
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.primalGradientBrush
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.profile.qr.ProfileQrCodeContract
 import net.primal.android.profile.qr.ProfileQrCodeViewModel
@@ -80,15 +84,19 @@ private fun ProfileQrCodeViewerScreen(
         callbacks.onClose()
     }
     var qrCodeMode by remember { mutableStateOf(QrCodeMode.Viewer) }
-    ColumnWithBackground(backgroundPainter = painterResource(id = R.drawable.profile_qrcode_background)) {
+    ColumnWithBackground(
+        backgroundBrushProvider = ::primalGradientBrush,
+        brushAlpha = PrimalGradientAlpha,
+        backgroundColor = PrimalGradientBackgroundColor,
+    ) {
         PrimalScaffold(
             containerColor = Color.Transparent,
             topBar = {
                 PrimalTopAppBar(
                     title = qrCodeMode.toTitle(),
-                    textColor = Color.White,
+                    textColor = PrimalDarkTextColor,
                     navigationIcon = PrimalIcons.ArrowBack,
-                    navigationIconTintColor = Color.White,
+                    navigationIconTintColor = PrimalDarkTextColor,
                     onNavigationIconClick = {
                         isClosing = true
                         callbacks.onClose()
@@ -133,23 +141,31 @@ private fun ProfileQrCodeViewerScreen(
                 }
             },
             bottomBar = {
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    PrimalLoadingButton(
-                        modifier = Modifier
-                            .widthIn(240.dp, MAX_COMPONENT_WIDTH.dp)
-                            .fillMaxWidth()
-                            .padding(bottom = 32.dp),
-                        text = qrCodeMode.toActionButtonText(),
-                        containerColor = profileQrCodeButtonBackgroundColor,
-                        disabledContainerColor = profileQrCodeButtonBackgroundColor,
-                        contentColor = Color.White,
-                        onClick = { qrCodeMode = qrCodeMode.invert() },
-                    )
-                }
+                QrCodeModeBottomBar(
+                    qrCodeMode = qrCodeMode,
+                    onModeChange = { qrCodeMode = qrCodeMode.invert() },
+                )
             },
+        )
+    }
+}
+
+@Composable
+private fun QrCodeModeBottomBar(qrCodeMode: QrCodeMode, onModeChange: () -> Unit) {
+    Box(
+        modifier = Modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center,
+    ) {
+        PrimalLoadingButton(
+            modifier = Modifier
+                .widthIn(240.dp, MAX_COMPONENT_WIDTH.dp)
+                .fillMaxWidth()
+                .padding(bottom = 32.dp),
+            text = qrCodeMode.toActionButtonText(),
+            containerColor = PrimalDarkButtonColor,
+            disabledContainerColor = PrimalDarkButtonColor,
+            contentColor = Color.White,
+            onClick = onModeChange,
         )
     }
 }
@@ -159,13 +175,11 @@ private fun ScanningHint(modifier: Modifier) {
     Text(
         modifier = modifier,
         text = stringResource(id = R.string.profile_qr_code_scan_qr_code_hint),
-        color = Color.White,
+        color = PrimalDarkTextColor,
         textAlign = TextAlign.Center,
         style = AppTheme.typography.bodyLarge,
     )
 }
-
-val profileQrCodeButtonBackgroundColor = Color(0xFF4B002D)
 
 @Composable
 private fun QrCodeMode.toTitle(): String {
