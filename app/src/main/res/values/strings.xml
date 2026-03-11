@@ -61,7 +61,7 @@
     <string name="onboarding_button_next">Next</string>
     <string name="onboarding_button_done">Done!</string>
     <string name="onboarding_button_create_account_now">Create Account Now</string>
-    <string name="onboarding_profile_details_hint">Create a public profile on Nostr. Choose any Display Name and say something about yourself. You can easily change these things later.</string>
+    <string name="onboarding_profile_details_hint">Create a public profile on Nostr. Choose any display name and say something about yourself.</string>
     <string name="onboarding_profile_details_display_name_hint">Display Name</string>
     <string name="onboarding_profile_details_about_you_hint">About You</string>
     <string name="onboarding_profile_details_add_photo">Add Photo</string>
