@@ -36,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,7 +45,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
+import net.primal.android.auth.compose.OnboardingBackgroundColor
 import net.primal.android.auth.compose.OnboardingBottomBar
+import net.primal.android.auth.compose.OnboardingGradientAlpha
+import net.primal.android.auth.compose.OnboardingTextColor
+import net.primal.android.auth.compose.onboardingGradientBrush
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
@@ -92,10 +95,10 @@ fun OnboardingProfileFollowsScreen(
                     scrolledContainerColor = Color.Transparent,
                 ),
                 title = stringResource(id = R.string.onboarding_title_your_follows),
-                textColor = Color.White,
+                textColor = OnboardingTextColor,
                 showDivider = false,
                 navigationIcon = PrimalIcons.ArrowBack,
-                navigationIconTintColor = Color.White,
+                navigationIconTintColor = OnboardingTextColor,
                 onNavigationIconClick = { backSequence() },
             )
         },
@@ -435,7 +438,9 @@ private fun FollowGroupMemberListItem(member: FollowGroupMember, onClick: () -> 
 private fun PreviewOnboardingFollowsNoticeScreen() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         ColumnWithBackground(
-            backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
+            backgroundBrushProvider = ::onboardingGradientBrush,
+            brushAlpha = OnboardingGradientAlpha,
+            backgroundColor = OnboardingBackgroundColor,
         ) {
             OnboardingProfileFollowsScreen(
                 state = OnboardingContract.UiState(
@@ -477,7 +482,9 @@ private fun PreviewOnboardingFollowsNoticeScreen() {
 private fun PreviewOnboardingFollowsCustomizationScreen() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         ColumnWithBackground(
-            backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
+            backgroundBrushProvider = ::onboardingGradientBrush,
+            brushAlpha = OnboardingGradientAlpha,
+            backgroundColor = OnboardingBackgroundColor,
         ) {
             OnboardingProfileFollowsScreen(
                 state = OnboardingContract.UiState(

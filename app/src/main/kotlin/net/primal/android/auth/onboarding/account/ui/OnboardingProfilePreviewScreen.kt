@@ -51,7 +51,11 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
+import net.primal.android.auth.compose.OnboardingBackgroundColor
 import net.primal.android.auth.compose.OnboardingBottomBar
+import net.primal.android.auth.compose.OnboardingGradientAlpha
+import net.primal.android.auth.compose.OnboardingTextColor
+import net.primal.android.auth.compose.onboardingGradientBrush
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.auth.onboarding.account.AccountCreationStep
 import net.primal.android.auth.onboarding.account.OnboardingContract
@@ -103,10 +107,10 @@ fun OnboardingProfilePreviewScreen(
                     scrolledContainerColor = Color.Transparent,
                 ),
                 title = state.resolveAppBarTitle(),
-                textColor = Color.White,
+                textColor = OnboardingTextColor,
                 showDivider = false,
                 navigationIcon = if (canGoBack) PrimalIcons.ArrowBack else null,
-                navigationIconTintColor = Color.White,
+                navigationIconTintColor = OnboardingTextColor,
                 onNavigationIconClick = { if (canGoBack) onBack() },
             )
         },
@@ -224,7 +228,7 @@ private fun ProfileAccountPreviewContent(
                 text = stringResource(id = R.string.onboarding_profile_preview_hint),
                 textAlign = TextAlign.Center,
                 style = onboardingTextHintTypography(),
-                color = Color.White.copy(alpha = 0.8f),
+                color = OnboardingTextColor.copy(alpha = 0.8f),
             )
         }
     }
@@ -438,7 +442,7 @@ private fun ProfileAccountCreatedContent(modifier: Modifier = Modifier, state: O
                 text = stringResource(id = R.string.onboarding_profile_success_hint),
                 textAlign = TextAlign.Center,
                 style = onboardingTextHintTypography(),
-                color = Color.White.copy(alpha = 0.8f),
+                color = OnboardingTextColor.copy(alpha = 0.8f),
             )
         }
     }
@@ -466,7 +470,7 @@ private fun ProfileCreatedSuccessBox(
             style = AppTheme.typography.bodyLarge.copy(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = OnboardingTextColor,
             ),
         )
 
@@ -486,7 +490,7 @@ private fun ProfileCreatedSuccessBox(
             Image(
                 imageVector = PrimalIcons.CheckCircleOutline,
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(color = Color.White),
+                colorFilter = ColorFilter.tint(color = OnboardingTextColor),
                 modifier = Modifier.padding(start = 26.dp, end = 22.dp),
             )
             Text(
@@ -495,7 +499,7 @@ private fun ProfileCreatedSuccessBox(
                     fontSize = 18.sp,
                     lineHeight = 22.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.White.copy(alpha = 0.8f),
+                    color = OnboardingTextColor.copy(alpha = 0.8f),
                 ),
                 textAlign = TextAlign.Center,
             )
@@ -544,7 +548,9 @@ private fun SuccessAvatarBox(modifier: Modifier = Modifier, avatarUri: Uri?) {
 private fun PreviewOnboardingProfilePreviewScreen() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         ColumnWithBackground(
-            backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
+            backgroundBrushProvider = ::onboardingGradientBrush,
+            brushAlpha = OnboardingGradientAlpha,
+            backgroundColor = OnboardingBackgroundColor,
         ) {
             OnboardingProfilePreviewScreen(
                 state = OnboardingContract.UiState(
@@ -569,7 +575,9 @@ private fun PreviewOnboardingProfilePreviewScreen() {
 private fun PreviewOnboardingProfileSuccessScreen() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         ColumnWithBackground(
-            backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
+            backgroundBrushProvider = ::onboardingGradientBrush,
+            brushAlpha = OnboardingGradientAlpha,
+            backgroundColor = OnboardingBackgroundColor,
         ) {
             OnboardingProfilePreviewScreen(
                 state = OnboardingContract.UiState(

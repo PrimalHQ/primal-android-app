@@ -34,7 +34,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -54,8 +53,12 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.compose.DefaultOnboardingAvatar
+import net.primal.android.auth.compose.OnboardingBackgroundColor
 import net.primal.android.auth.compose.OnboardingButton
+import net.primal.android.auth.compose.OnboardingGradientAlpha
+import net.primal.android.auth.compose.OnboardingTextColor
 import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
+import net.primal.android.auth.compose.onboardingGradientBrush
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.UiDensityMode
@@ -133,15 +136,17 @@ fun LoginScreen(
     BackHandler(enabled = state.loading) { }
     ColumnWithBackground(
         modifier = Modifier.semantics { testTagsAsResourceId = true },
-        backgroundPainter = painterResource(id = R.drawable.onboarding_spot2),
+        backgroundBrushProvider = ::onboardingGradientBrush,
+        brushAlpha = OnboardingGradientAlpha,
+        backgroundColor = OnboardingBackgroundColor,
     ) { size ->
         val uiMode = size.height.detectUiDensityModeFromMaxHeight()
 
         CenterAlignedTopAppBar(
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = Color.Transparent,
-                titleContentColor = Color.White,
-                navigationIconContentColor = Color.White,
+                titleContentColor = OnboardingTextColor,
+                navigationIconContentColor = OnboardingTextColor,
             ),
             title = {
                 Text(text = stringResource(id = R.string.login_title))
@@ -257,7 +262,7 @@ fun LoginContent(
                         .height(56.dp)
                         .fillMaxWidth(),
                     containerColor = Color.Transparent,
-                    contentColor = Color.White,
+                    contentColor = OnboardingTextColor,
                     onClick = onLoginWithAmberClick,
                     text = "Login with Amber",
                 )
@@ -429,8 +434,7 @@ private fun EnterYourKeyNotice(modifier: Modifier = Modifier, loginInput: String
             },
             textAlign = TextAlign.Center,
             style = AppTheme.typography.bodyMedium,
-            color = Color.White,
-            fontWeight = FontWeight.SemiBold,
+            color = OnboardingTextColor,
         )
     }
 }
@@ -469,13 +473,13 @@ private fun ProfileDetailsColumn(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
             ),
-            color = Color.White,
+            color = OnboardingTextColor,
         )
 
         Text(
             text = profileDetails.internetIdentifier ?: "",
             style = AppTheme.typography.bodyLarge,
-            color = Color.White,
+            color = OnboardingTextColor,
         )
 
         Spacer(modifier = Modifier.height(32.dp))
