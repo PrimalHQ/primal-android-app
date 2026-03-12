@@ -172,7 +172,11 @@ private fun ProfilePreviewBottomBar(
             }
         },
         footer = {
-            OnboardingStepsIndicator(currentPage = OnboardingStep.Preview.index)
+            val currentPage = when (accountCreationStep) {
+                AccountCreationStep.AccountPreview -> OnboardingStep.Preview.index
+                AccountCreationStep.AccountCreated -> OnboardingStep.Preview.index + 1
+            }
+            OnboardingStepsIndicator(currentPage = currentPage)
         },
     )
 }

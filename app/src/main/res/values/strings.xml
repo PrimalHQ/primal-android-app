@@ -54,8 +54,6 @@
     <string name="legal_privacy_policy_hint_highlighted_word">Privacy Policy</string>
 
     <string name="onboarding_title_create_account">Create Account</string>
-    <string name="onboarding_title_your_interests">Your Interests</string>
-    <string name="onboarding_title_your_follows">Your Follows</string>
     <string name="onboarding_title_account_preview">Account Preview</string>
     <string name="onboarding_title_success">Success</string>
     <string name="onboarding_button_next">Next</string>
@@ -66,21 +64,6 @@
     <string name="onboarding_profile_details_about_you_hint">About You</string>
     <string name="onboarding_profile_details_add_photo">Add Photo</string>
     <string name="onboarding_profile_details_change_photo">Change Photo</string>
-    <string name="onboarding_profile_interests_hint">Tells us about your interests and we will create your initial follow list:</string>
-    <plurals name="onboarding_profile_interests_selection_count">
-        <item quantity="zero">0 interests selected</item>
-        <item quantity="one">1 interest selected</item>
-        <item quantity="other">%1$s interests selected</item>
-    </plurals>
-    <string name="onboarding_profile_follows_hint">We followed %1$s Nostr accounts based on the interests you selected.</string>
-    <string name="onboarding_profile_follows_keep_follows_headline_text">Keep the recommended follows</string>
-    <string name="onboarding_profile_follows_keep_follows_support_text">(you can update this later)</string>
-    <string name="onboarding_profile_follows_customize_follows_headline_text">Customize follows now</string>
-    <string name="onboarding_profile_follows_customize_follows_support_text">(edit the recommended follows)</string>
-    <string name="onboarding_profile_follow_button">Follow</string>
-    <string name="onboarding_profile_unfollow_button">Unfollow</string>
-    <string name="onboarding_profile_follow_all_button">Follow All</string>
-    <string name="onboarding_profile_unfollow_all_button">Unfollow All</string>
 
     <string name="onboarding_profile_preview_hint">We will use this info to create your Nostr account. If you wish to make any changes, you can always do so in your profile settings.</string>
     <string name="onboarding_profile_preview_change_banner">Change Banner</string>
@@ -88,6 +71,16 @@
     <string name="onboarding_profile_success_description">Account created!</string>
     <string name="onboarding_profile_create_error_image_upload">Unable to upload photo. Please try again.</string>
     <string name="onboarding_profile_create_error_failed_to_create">Something went wrong while creating your account. Please try again.</string>
+
+    <string name="onboarding_follow_packs_title">Follow People</string>
+    <string name="onboarding_follow_packs_follow_all">Follow all</string>
+    <string name="onboarding_follow_packs_following_all">Following all</string>
+    <string name="onboarding_follow_packs_follow">Follow</string>
+    <string name="onboarding_follow_packs_following">Following</string>
+    <plurals name="onboarding_follow_packs_user_count">
+        <item quantity="one">%d user</item>
+        <item quantity="other">%d users</item>
+    </plurals>
 
     <string name="login_title">Sign In</string>
     <string name="login_description">Enter your Nostr key to sign in:</string>
