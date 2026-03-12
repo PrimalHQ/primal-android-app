@@ -80,8 +80,9 @@ fun List<NostrEvent>.mapAsZapPollVotes(): List<PollVoteData> {
 
 internal typealias PollStatsMap = Map<String, Map<String, ContentPrimalPollOptionStats>>
 
-fun PrimalEvent?.parseAndMapPrimalPollStats(): PollStatsMap {
-    return this?.content?.decodeFromJsonStringOrNull<PollStatsMap>() ?: emptyMap()
+fun List<PrimalEvent>.parseAndMapPrimalPollStats(): PollStatsMap {
+    return this.mapNotNull { it.content.decodeFromJsonStringOrNull<PollStatsMap>() }
+        .fold(emptyMap()) { acc, map -> acc + map }
 }
 
 fun List<PollData>.applyPollStats(statsMap: PollStatsMap): List<PollData> {
