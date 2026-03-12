@@ -283,7 +283,7 @@ private fun LoginInputFieldContent(
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
         AnimatedContent(
-            modifier = Modifier.weight(weight = 0.5f),
+            modifier = Modifier.weight(weight = if (keyboardVisible) 0.53f else 0.5f),
             targetState = state.profileDetails,
             label = "LoginHeader",
         ) { profileDetails ->
@@ -309,7 +309,7 @@ private fun LoginInputFieldContent(
         }
 
         Box(
-            modifier = Modifier.weight(weight = 0.5f),
+            modifier = Modifier.weight(weight = if (keyboardVisible) 0.47f else 0.5f),
             contentAlignment = Alignment.TopCenter,
         ) {
             LoginInputField(
