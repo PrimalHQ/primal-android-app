@@ -13,10 +13,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import net.primal.android.core.advanceUntilIdleAndDelay
-import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.core.serialization.datastore.StringSerializer
 import net.primal.android.theme.active.ActiveThemeStore
+import net.primal.core.testing.CoroutinesTestRule
+import net.primal.core.testing.advanceUntilIdleAndDelay
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

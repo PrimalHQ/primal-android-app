@@ -11,13 +11,13 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.test.runTest
-import net.primal.android.core.advanceUntilIdleAndDelay
-import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.core.serialization.datastore.StringSerializer
 import net.primal.android.security.NoEncryption
 import net.primal.android.user.accounts.UserAccountsSerialization
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.domain.UserAccount
+import net.primal.core.testing.CoroutinesTestRule
+import net.primal.core.testing.advanceUntilIdleAndDelay
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

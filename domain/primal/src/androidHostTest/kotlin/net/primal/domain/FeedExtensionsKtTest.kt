@@ -122,20 +122,4 @@ class FeedExtensionsKtTest {
         val spec = "{\"id\":\"advsearch\",\"query\":\"filter:audio music pas:1\"}"
         spec.isAudioSpec() shouldBe true
     }
-
-//    @Test
-//    fun isReadsBookmarkFeedSpec_forProperFeedSpec_returnsTrue() {
-//        println(buildArticleBookmarksFeedSpec(userId = profileId))
-//        val spec = "{\"id\":\"feed\",\"kind\":\"reads\"," +
-//            "\"kinds\":[30023],\"notes\":\"bookmarks\",\"pubkey\":\"$profileId\"}"
-//        println(spec)
-//        spec.isReadsBookmarkFeedSpec() shouldBe true
-//    }
-//
-//    @Test
-//    fun isReadsBookmarkFeedSpec_forInvalidProfileIdInInFeedSpec_returnsFalse() {
-//        val spec = "{\"id\":\"feed\",\"kind\":\"reads\"," +
-//            "\"kinds\":[30023],\"notes\":\"bookmarks\",\"pubkey\":\"abc\"}"
-//        spec.isReadsBookmarkFeedSpec() shouldBe false
-//    }
 }

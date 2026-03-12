@@ -1,4 +1,4 @@
-package net.primal.android.nostr.notary
+package net.primal.core.testing
 
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrUnsignedEvent

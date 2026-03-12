@@ -7,8 +7,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import net.primal.android.core.FakeDataStore
-import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -16,6 +14,8 @@ import net.primal.android.user.credentials.CredentialsStore
 import net.primal.android.user.domain.Credential
 import net.primal.android.user.domain.CredentialType
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.testing.CoroutinesTestRule
+import net.primal.core.testing.FakeDataStore
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.mutes.MutedItemRepository

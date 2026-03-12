@@ -1,122 +1,181 @@
 package net.primal.networking.sockets
 
+import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.shouldNotBe
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.websocket.DefaultClientWebSocketSession
+import io.ktor.client.plugins.websocket.webSocketSession
+import io.ktor.websocket.Frame
+import io.mockk.Runs
+import io.mockk.coEvery
+import io.mockk.coVerify
+import io.mockk.every
+import io.mockk.just
+import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.slot
+import io.mockk.unmockkStatic
+import kotlin.coroutines.CoroutineContext
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import net.primal.core.coroutines.CoroutinesTestRule
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.buildJsonObject
+import net.primal.core.networking.sockets.NostrSocketClientImpl
+import net.primal.core.networking.sockets.toPrimalSubscriptionId
+import net.primal.core.testing.CoroutinesTestRule
+import net.primal.domain.common.exception.NetworkException
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NostrSocketClientImplTest {
 
-    @get:org.junit.Rule
+    @get:Rule
     val coroutinesTestRule = CoroutinesTestRule()
 
-    // TODO Fix NostrSocketClientImplTest
+    private val mockHttpClient = mockk<HttpClient>(relaxed = true)
+    private val activeJob = Job()
+    private val mockWebSocketSession = mockk<DefaultClientWebSocketSession>(relaxed = true) {
+        every { coroutineContext } returns (activeJob as CoroutineContext)
+    }
 
-//    private fun buildFakeNostrSocketClient(webSocket: FakeWebSocket) =
-//        NostrSocketClientImpl(
-//            dispatcherProvider = coroutinesTestRule.dispatcherProvider,
-//            okHttpClient = FakeWebSocketOkHttpClient(webSocket = webSocket),
-//            wssRequest = mockk(relaxed = true),
-//        )
-//
-//    private fun buildSuccessfulNostrSocketClient() =
-//        buildFakeNostrSocketClient(webSocket = FakeWebSocket(sendResponse = true))
-//
-//    private fun buildFailingNostrSocketClient() =
-//        buildFakeNostrSocketClient(webSocket = FakeWebSocket(sendResponse = false))
+    @Before
+    fun setUp() {
+        mockkStatic("io.ktor.client.plugins.websocket.BuildersKt")
+        coEvery {
+            mockHttpClient.webSocketSession(urlString = any<String>())
+        } returns mockWebSocketSession
+    }
 
-//    @Test
-//    fun sendREQWithSubscriptionId_returnsTrueIfMessageWasSent() =
-//        runTest {
-//            val client = buildSuccessfulNostrSocketClient()
-//            client.ensureSocketConnection()
-//            val actual = client.sendREQ(
-//                subscriptionId = Uuid.random().toPrimalSubscriptionId(),
-//                data = buildJsonObject {},
-//            )
-//            actual shouldBe true
-//        }
-//
-//    @Test
-//    fun sendREQWithSubscriptionId_returnsFalseIfMessageWasNotSent() =
-//        runTest {
-//            val client = buildFailingNostrSocketClient()
-//            client.ensureSocketConnection()
-//            val actual = client.sendREQ(
-//                subscriptionId = Uuid.random().toPrimalSubscriptionId(),
-//                data = buildJsonObject {},
-//            )
-//            actual shouldBe false
-//        }
-//
-//    @Test
-//    fun sendEVENT_returnsTrueIfMessageWasSent() =
-//        runTest {
-//            val client = buildSuccessfulNostrSocketClient()
-//            client.ensureSocketConnection()
-//            val actual = client.sendEVENT(signedEvent = buildJsonObject {})
-//            actual shouldBe true
-//        }
-//
-//    @Test
-//    fun sendEVENT_returnsFalseIfMessageWasNotSent() =
-//        runTest {
-//            val client = buildFailingNostrSocketClient()
-//            client.ensureSocketConnection()
-//            val actual = client.sendEVENT(signedEvent = buildJsonObject {})
-//            actual shouldBe false
-//        }
-//
-//    @Test
-//    fun sendAUTH_returnsTrueIfMessageWasSent() =
-//        runTest {
-//            val client = buildSuccessfulNostrSocketClient()
-//            client.ensureSocketConnection()
-//            val actual = client.sendAUTH(signedEvent = buildJsonObject {})
-//            actual shouldBe true
-//        }
-//
-//    @Test
-//    fun sendAUTH_returnsFalseIfMessageWasNotSent() =
-//        runTest {
-//            val client = buildFailingNostrSocketClient()
-//            client.ensureSocketConnection()
-//            val actual = client.sendAUTH(signedEvent = buildJsonObject {})
-//            actual shouldBe false
-//        }
-//
-//    @Test
-//    fun sendCOUNT_returnsSubscriptionIdIfMessageWasSent() =
-//        runTest {
-//            val client = buildSuccessfulNostrSocketClient()
-//            client.ensureSocketConnection()
-//            val actual = client.sendCOUNT(data = buildJsonObject {})
-//            actual.shouldNotBeNull()
-//        }
-//
-//    @Test
-//    fun sendCOUNT_returnsNullIfMessageWasNotSent() =
-//        runTest {
-//            val client = buildFailingNostrSocketClient()
-//            client.ensureSocketConnection()
-//            val actual = client.sendCOUNT(data = buildJsonObject {})
-//            actual.shouldBeNull()
-//        }
+    @After
+    fun tearDown() {
+        unmockkStatic("io.ktor.client.plugins.websocket.BuildersKt")
+        activeJob.cancel()
+    }
 
-//    @Test
-//    fun sendCLOSE_callsSendOnWebSocket() =
-//        runTest {
-//            val mockWebSocket = mockk<FakeWebSocket>(relaxed = true)
-//            val fakeNostrSocketClient = buildFakeNostrSocketClient(webSocket = mockWebSocket)
-//            fakeNostrSocketClient.ensureSocketConnection()
-//            val subscriptionId = Uuid.random().toPrimalSubscriptionId(),
-//            fakeNostrSocketClient.sendCLOSE(subscriptionId = subscriptionId)
-//
-//            verify {
-//                mockWebSocket.send(
-//                    withArg<String> {
-//                        it shouldBe subscriptionId.buildNostrCLOSEMessage()
-//                    },
-//                )
-//            }
-//        }
+    private fun buildNostrSocketClient(httpClient: HttpClient = mockHttpClient) =
+        NostrSocketClientImpl(
+            dispatcherProvider = coroutinesTestRule.dispatcherProvider,
+            httpClient = httpClient,
+            wssUrl = "wss://relay.primal.net",
+        )
+
+    @Test
+    fun sendREQ_sendsTextFrameToWebSocket() =
+        runTest {
+            val frameSlot = slot<Frame>()
+            coEvery { mockWebSocketSession.send(capture(frameSlot)) } just Runs
+            val client = buildNostrSocketClient()
+            client.ensureSocketConnectionOrThrow()
+
+            val subscriptionId = Uuid.random().toPrimalSubscriptionId()
+            client.sendREQ(
+                subscriptionId = subscriptionId,
+                data = buildJsonObject {},
+            )
+
+            coVerify { mockWebSocketSession.send(any<Frame>()) }
+            val sentFrame = frameSlot.captured
+            sentFrame shouldNotBe null
+        }
+
+    @Test
+    fun sendEVENT_sendsTextFrameToWebSocket() =
+        runTest {
+            coEvery { mockWebSocketSession.send(any<Frame>()) } just Runs
+            val client = buildNostrSocketClient()
+            client.ensureSocketConnectionOrThrow()
+
+            client.sendEVENT(signedEvent = buildJsonObject {})
+
+            coVerify { mockWebSocketSession.send(any<Frame>()) }
+        }
+
+    @Test
+    fun sendAUTH_sendsTextFrameToWebSocket() =
+        runTest {
+            coEvery { mockWebSocketSession.send(any<Frame>()) } just Runs
+            val client = buildNostrSocketClient()
+            client.ensureSocketConnectionOrThrow()
+
+            client.sendAUTH(signedEvent = buildJsonObject {})
+
+            coVerify { mockWebSocketSession.send(any<Frame>()) }
+        }
+
+    @Test
+    fun sendCOUNT_returnsSubscriptionId() =
+        runTest {
+            coEvery { mockWebSocketSession.send(any<Frame>()) } just Runs
+            val client = buildNostrSocketClient()
+            client.ensureSocketConnectionOrThrow()
+
+            val subscriptionId = client.sendCOUNT(data = buildJsonObject {})
+
+            subscriptionId shouldNotBe null
+            coVerify { mockWebSocketSession.send(any<Frame>()) }
+        }
+
+    @Test
+    fun sendCLOSE_sendsTextFrameToWebSocket() =
+        runTest {
+            coEvery { mockWebSocketSession.send(any<Frame>()) } just Runs
+            val client = buildNostrSocketClient()
+            client.ensureSocketConnectionOrThrow()
+
+            val subscriptionId = Uuid.random().toPrimalSubscriptionId()
+            client.sendCLOSE(subscriptionId = subscriptionId)
+
+            coVerify { mockWebSocketSession.send(any<Frame>()) }
+        }
+
+    @Test
+    fun ensureSocketConnection_connectsViaHttpClient() =
+        runTest {
+            val client = buildNostrSocketClient()
+
+            client.ensureSocketConnectionOrThrow()
+
+            coVerify { mockHttpClient.webSocketSession(urlString = any<String>()) }
+        }
+
+    @Test
+    fun ensureSocketConnection_whenConnectionFails_throwsNetworkException() =
+        runTest {
+            val failingHttpClient = mockk<HttpClient>(relaxed = true)
+            coEvery {
+                failingHttpClient.webSocketSession(urlString = any<String>())
+            } throws RuntimeException("Connection failed")
+            val client = buildNostrSocketClient(httpClient = failingHttpClient)
+
+            shouldThrow<NetworkException> {
+                client.ensureSocketConnectionOrThrow()
+            }
+        }
+
+    @Test
+    fun socketUrl_cleansHttpsToWss() {
+        val client = NostrSocketClientImpl(
+            dispatcherProvider = coroutinesTestRule.dispatcherProvider,
+            httpClient = mockHttpClient,
+            wssUrl = "https://relay.primal.net/v1",
+        )
+
+        client.socketUrl shouldBe "wss://relay.primal.net/v1"
+    }
+
+    @Test
+    fun socketUrl_removesTrailingSlash() {
+        val client = NostrSocketClientImpl(
+            dispatcherProvider = coroutinesTestRule.dispatcherProvider,
+            httpClient = mockHttpClient,
+            wssUrl = "wss://relay.primal.net/v1/",
+        )
+
+        client.socketUrl shouldBe "wss://relay.primal.net/v1"
+    }
 }

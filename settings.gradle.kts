@@ -32,6 +32,7 @@ include(":core:networking-http")
 include(":core:networking-primal")
 include(":core:networking-upload")
 include(":core:caching")
+include(":core:testing")
 
 include(":data:shared:local")
 

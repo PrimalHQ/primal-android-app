@@ -5,7 +5,7 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import net.primal.android.core.coroutines.CoroutinesTestRule
+import net.primal.core.testing.CoroutinesTestRule
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.notifications.NotificationRepository

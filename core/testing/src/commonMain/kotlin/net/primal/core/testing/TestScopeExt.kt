@@ -1,4 +1,4 @@
-package net.primal.android.core
+package net.primal.core.testing
 
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi

@@ -14,11 +14,11 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.core.networking.sockets.NostrIncomingMessage
 import net.primal.core.networking.sockets.NostrSocketClient
 import net.primal.core.networking.sockets.NostrSocketClientFactory
+import net.primal.core.testing.CoroutinesTestRule
 import net.primal.core.utils.Result
 import net.primal.domain.global.BroadcastEventResponse
 import net.primal.domain.global.CachingImportRepository

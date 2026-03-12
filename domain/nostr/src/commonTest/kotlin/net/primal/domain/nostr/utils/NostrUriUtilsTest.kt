@@ -129,7 +129,6 @@ class NostrUriUtilsTest {
                 "npub17nd4yu9anyd3004pumgrtazaacujjxwzj36thtqsxskjy0r5urgqf6950x " +
                 "and some footer text."
             ).parseNostrUris()
-        println(parsed)
         parsed shouldContain "note17lf0wvdd4v2wvckrx550waytxryeq5k9cr9q8swnf43wrjhhhk0sh82aez"
         parsed shouldContain "npub17nd4yu9anyd3004pumgrtazaacujjxwzj36thtqsxskjy0r5urgqf6950x"
         parsed.size shouldBe 2

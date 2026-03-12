@@ -11,10 +11,10 @@ import io.kotest.matchers.equals.shouldBeEqual
 import io.kotest.matchers.shouldBe
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import net.primal.android.core.advanceUntilIdleAndDelay
-import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.security.NoEncryption
 import net.primal.android.user.domain.Credential
+import net.primal.core.testing.CoroutinesTestRule
+import net.primal.core.testing.advanceUntilIdleAndDelay
 import net.primal.domain.nostr.cryptography.utils.Bech32
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.domain.nostr.cryptography.utils.InvalidNostrPrivateKeyException
