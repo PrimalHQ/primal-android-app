@@ -68,6 +68,10 @@ class NotificationsApiImpl(
             primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
             liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
+            polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
+                queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
+            pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
+            primalPollStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalPollStats),
         )
     }
 }

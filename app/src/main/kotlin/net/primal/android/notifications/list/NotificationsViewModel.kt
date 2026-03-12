@@ -20,6 +20,7 @@ import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.core.utils.isOnlyEmoji
 import net.primal.android.core.utils.usernameUiFriendly
+import net.primal.android.events.polls.votes.asPollUi
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -222,6 +223,7 @@ class NotificationsViewModel @Inject constructor(
                 stats = EventStatsUi.from(actionOnPost.stats),
                 hashtags = actionOnPost.hashtags,
                 rawNostrEventJson = actionOnPost.rawNostrEvent,
+                poll = actionOnPost.pollInfo?.asPollUi(),
             )
         }
     }
