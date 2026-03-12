@@ -405,8 +405,6 @@ dependencies {
     debugImplementation(libs.compose.ui.test.manifest)
 
     testImplementation(project(":core:testing"))
-    testImplementation(project(":data:caching:local"))
-    testImplementation(project(":data:shared:local"))
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.runner)
     testImplementation(libs.androidx.test.ext.junit)
