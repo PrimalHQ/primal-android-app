@@ -8,9 +8,6 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import net.primal.android.core.FakeDataStore
-import net.primal.android.core.coroutines.CoroutinesTestRule
-import net.primal.android.nostr.notary.FakeNostrNotary
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.accounts.UserAccountsStore
@@ -20,6 +17,9 @@ import net.primal.android.user.domain.Credential
 import net.primal.android.user.repository.BlossomRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
+import net.primal.core.testing.CoroutinesTestRule
+import net.primal.core.testing.FakeDataStore
+import net.primal.core.testing.FakeNostrNotary
 import net.primal.core.utils.Result
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.repository.ConnectionRepository
@@ -203,8 +203,6 @@ class CreateAccountHandlerTest {
                 userRepository.setFollowList(
                     withArg { it shouldBe keyPair.pubKey },
                     withArg {
-                        println(it)
-                        println(expectedMemberIds)
                         it shouldContainOnly expectedMemberIds
                     },
                 )

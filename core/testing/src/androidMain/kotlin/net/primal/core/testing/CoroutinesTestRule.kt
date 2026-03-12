@@ -1,4 +1,4 @@
-package net.primal.android.core.coroutines
+package net.primal.core.testing
 
 import io.mockk.every
 import io.mockk.mockk
