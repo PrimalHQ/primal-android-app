@@ -13,11 +13,14 @@ import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.nostr.findFirstProfileId
 import net.primal.domain.nostr.findFirstZapAmount
 import net.primal.domain.nostr.findFirstZapRequest
+import net.primal.domain.nostr.isPollOptionTag
 import net.primal.domain.nostr.utils.LnInvoiceUtils
 
 fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
     mapNotNull { zapReceipt ->
         val zapRequest = zapReceipt.extractZapRequestOrNull()
+
+        if (zapRequest?.tags?.any { it.isPollOptionTag() } == true) return@mapNotNull null
 
         val receiverId = zapReceipt.tags.findFirstProfileId()
             ?: return@mapNotNull null
