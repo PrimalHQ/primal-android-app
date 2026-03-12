@@ -106,7 +106,7 @@ fun SignerConnectBottomSheet(
     var selectedTab by remember { mutableStateOf(SignerConnectTab.Login) }
     var trustLevel by remember { mutableStateOf(TrustLevel.Medium) }
     var selectedAccount by remember(accounts) { mutableStateOf(accounts.firstOrNull()) }
-    var dailyBudget by remember { mutableStateOf<Long?>(0L) }
+    var dailyBudget by remember { mutableStateOf<Long?>(SignerConnectBottomSheet.DEFAULT_DAILY_BUDGET) }
     var showDailyBudgetPicker by remember { mutableStateOf(false) }
     var tempSelectedBudget by remember { mutableStateOf<Long?>(null) }
 
@@ -786,6 +786,7 @@ private fun ActionButtons(
 }
 
 object SignerConnectBottomSheet {
+    const val DEFAULT_DAILY_BUDGET = 10_000L
     val DAILY_BUDGET_OPTIONS = listOf(0L, 1000L, 5000L, 10_000L, 20_000L, 50_000L, 100_000L)
     val DAILY_BUDGET_PICKER_OPTIONS = DAILY_BUDGET_OPTIONS + listOf(null)
 }
