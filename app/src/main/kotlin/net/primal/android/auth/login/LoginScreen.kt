@@ -209,8 +209,9 @@ fun LoginContent(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
         ) {
+            Spacer(modifier = Modifier.weight(1f))
+
             LoginInputFieldContent(
                 state = state,
                 uiMode = uiMode,
@@ -218,6 +219,8 @@ fun LoginContent(
                 onLoginInputChanged = onLoginInputChanged,
                 onLoginClick = onLoginClick,
             )
+
+            Spacer(modifier = Modifier.weight(weight = if (keyboardVisible) 2f else 3f))
         }
 
         Column(
@@ -280,10 +283,9 @@ private fun LoginInputFieldContent(
     onLoginClick: () -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AnimatedContent(
-            modifier = Modifier.weight(weight = if (keyboardVisible) 0.53f else 0.5f),
             targetState = state.profileDetails,
             label = "LoginHeader",
         ) { profileDetails ->
@@ -308,18 +310,14 @@ private fun LoginInputFieldContent(
             }
         }
 
-        Box(
-            modifier = Modifier.weight(weight = if (keyboardVisible) 0.47f else 0.5f),
-            contentAlignment = Alignment.TopCenter,
-        ) {
-            LoginInputField(
-                loginInput = state.loginInput,
-                isValidKey = state.isValidKey,
-                keyboardVisible = keyboardVisible,
-                onLoginInputChanged = onLoginInputChanged,
-                onLoginClick = onLoginClick,
-            )
-        }
+        LoginInputField(
+            modifier = Modifier.fillMaxWidth(),
+            loginInput = state.loginInput,
+            isValidKey = state.isValidKey,
+            keyboardVisible = keyboardVisible,
+            onLoginInputChanged = onLoginInputChanged,
+            onLoginClick = onLoginClick,
+        )
     }
 }
 
