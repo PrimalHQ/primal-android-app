@@ -8,7 +8,6 @@ interface PollVotesContract {
         val loading: Boolean = true,
         val pollUi: PollUi? = null,
         val selectedOptionId: String? = null,
-        val isZapPoll: Boolean = false,
         val error: Throwable? = null,
     )
 

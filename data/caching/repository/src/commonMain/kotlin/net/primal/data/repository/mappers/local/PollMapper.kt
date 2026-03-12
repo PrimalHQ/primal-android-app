@@ -1,39 +1,16 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.polls.PollData
-import net.primal.data.local.dao.polls.PollType
+import net.primal.data.local.dao.polls.asDO
 import net.primal.domain.polls.PollInfo
 import net.primal.domain.polls.PollOptionInfo
-import net.primal.domain.posts.FeedPostPollInfo
-
-fun PollData.asFeedPostPollInfo(): FeedPostPollInfo {
-    return FeedPostPollInfo(
-        authorId = this.authorId,
-        zapRecipientId = this.zapRecipientId,
-        pollType = when (this.pollType) {
-            PollType.User -> FeedPostPollInfo.PollType.User
-            PollType.Zap -> FeedPostPollInfo.PollType.Zap
-        },
-        options = this.options.map { option ->
-            PollOptionInfo(
-                id = option.id,
-                label = option.label,
-                voteCount = option.voteCount,
-                satsZapped = option.satsZapped,
-            )
-        },
-        endsAt = this.endsAt,
-        valueMinimum = this.valueMinimum,
-        valueMaximum = this.valueMaximum,
-    )
-}
 
 fun PollData.asPollInfo(): PollInfo {
     return PollInfo(
         postId = this.postId,
         authorId = this.authorId,
         zapRecipientId = this.zapRecipientId,
-        isZapPoll = this.pollType == PollType.Zap,
+        pollType = this.pollType.asDO(),
         endsAt = this.endsAt,
         valueMinimum = this.valueMinimum,
         valueMaximum = this.valueMaximum,

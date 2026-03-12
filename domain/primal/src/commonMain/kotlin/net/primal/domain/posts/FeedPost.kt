@@ -7,6 +7,7 @@ import net.primal.domain.events.EventRelayHints
 import net.primal.domain.events.EventZap
 import net.primal.domain.links.EventLink
 import net.primal.domain.links.EventUriNostrReference
+import net.primal.domain.polls.PollInfo
 
 data class FeedPost(
     val eventId: String,
@@ -25,5 +26,5 @@ data class FeedPost(
     val bookmark: PublicBookmark? = null,
     val isThreadMuted: Boolean = false,
     val eventRelayHints: EventRelayHints? = null,
-    val pollInfo: FeedPostPollInfo? = null,
+    val pollInfo: PollInfo? = null,
 )

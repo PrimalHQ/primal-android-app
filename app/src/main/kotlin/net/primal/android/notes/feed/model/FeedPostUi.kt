@@ -4,6 +4,7 @@ import java.time.Instant
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.events.polls.votes.asPollUi
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.premium.legend.domain.LegendaryCustomization
@@ -17,7 +18,6 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.posts.FeedPost
-import net.primal.domain.posts.FeedPostPollInfo
 
 data class FeedPostUi(
     val postId: String,
@@ -90,49 +90,6 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
         isAuthorLiveStreamingNow = this.author.isLiveStreamingNow,
         poll = this.pollInfo?.asPollUi(),
-    )
-}
-
-internal fun FeedPostPollInfo.asPollUi(): PollUi {
-    val endsAtInstant = endsAt?.let { Instant.ofEpochSecond(it) }
-    val totalVotes = options.sumOf { it.voteCount }.coerceAtLeast(1)
-    val totalSats = options.sumOf { it.satsZapped }.coerceAtLeast(1)
-    val state = when {
-        endsAtInstant != null && endsAtInstant < Instant.now() -> PollState.Ended
-        else -> PollState.Pending
-    }
-    val pollType = when (pollType) {
-        FeedPostPollInfo.PollType.User -> PollType.User
-        FeedPostPollInfo.PollType.Zap -> PollType.Zap
-    }
-
-    val winner = when (pollType) {
-        PollType.User -> options.maxBy { it.voteCount }.takeIf { it.voteCount != 0 }
-        PollType.Zap -> options.maxBy { it.satsZapped }.takeIf { it.satsZapped != 0L }
-    }
-
-    return PollUi(
-        authorId = authorId,
-        zapRecipientId = zapRecipientId,
-        pollType = pollType,
-        options = options.map { option ->
-            PollOptionUi(
-                id = option.id,
-                label = option.label,
-                voteCount = option.voteCount,
-                satsZapped = option.satsZapped,
-                votePercentage = if (pollType == PollType.Zap) {
-                    option.satsZapped.toFloat() / totalSats
-                } else {
-                    option.voteCount.toFloat() / totalVotes
-                },
-                isWinner = state == PollState.Ended && winner == option,
-            )
-        },
-        endsAt = endsAtInstant,
-        state = state,
-        valueMinimum = valueMinimum,
-        valueMaximum = valueMaximum,
     )
 }
 

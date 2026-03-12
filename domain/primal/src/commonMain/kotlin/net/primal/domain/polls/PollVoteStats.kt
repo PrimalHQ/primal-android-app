@@ -2,6 +2,6 @@ package net.primal.domain.polls
 
 data class PollVoteStats(
     val eventId: String,
-    val isZapPoll: Boolean = false,
+    val pollType: PollType = PollType.User,
     val options: List<PollOptionStats>,
 )

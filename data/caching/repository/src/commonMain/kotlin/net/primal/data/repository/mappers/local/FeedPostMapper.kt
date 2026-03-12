@@ -99,7 +99,7 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
         bookmark = this.bookmark?.asPublicBookmark(),
         isThreadMuted = this.data.isThreadMuted == true,
         eventRelayHints = this.eventRelayHints?.asEventRelayHintsDO(),
-        pollInfo = this.pollData?.asFeedPostPollInfo(),
+        pollInfo = this.pollData?.asPollInfo(),
     )
 }
 

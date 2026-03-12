@@ -1,11 +1,18 @@
 package net.primal.android.notes.feed.model
 
 import java.time.Instant
+import net.primal.domain.polls.PollType as DomainPollType
 
 enum class PollType {
     User,
     Zap,
 }
+
+fun DomainPollType.asUiModel(): PollType =
+    when (this) {
+        DomainPollType.User -> PollType.User
+        DomainPollType.Zap -> PollType.Zap
+    }
 
 enum class PollState {
     Pending,

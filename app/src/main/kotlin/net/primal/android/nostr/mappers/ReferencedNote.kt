@@ -2,10 +2,10 @@ package net.primal.android.nostr.mappers
 
 import java.time.Instant
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
+import net.primal.android.events.polls.votes.asPollUi
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asNoteNostrUriUi
-import net.primal.android.notes.feed.model.asPollUi
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.domain.links.ReferencedNote
 import net.primal.domain.nostr.utils.parseHashtags
