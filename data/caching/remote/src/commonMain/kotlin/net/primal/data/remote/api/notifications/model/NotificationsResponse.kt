@@ -18,4 +18,7 @@ data class NotificationsResponse(
     val primalLegendProfiles: PrimalEvent? = null,
     val primalPremiumInfo: PrimalEvent? = null,
     val liveActivity: List<NostrEvent>,
+    val polls: List<NostrEvent> = emptyList(),
+    val pollResponses: List<NostrEvent> = emptyList(),
+    val primalPollStats: List<PrimalEvent> = emptyList(),
 )
