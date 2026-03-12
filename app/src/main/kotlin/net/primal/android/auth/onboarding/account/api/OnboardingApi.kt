@@ -4,6 +4,6 @@ import retrofit2.http.GET
 
 interface OnboardingApi {
 
-    @GET("https://media.primal.net/api/suggestions")
+    @GET("https://media.primal.net/api/suggestions_2")
     suspend fun getFollowSuggestions(): FollowSuggestionsResponse
 }

@@ -11,7 +11,11 @@ data class FollowSuggestionsResponse(
 )
 
 @Serializable
-data class Suggestion(val group: String, val members: List<SuggestionMember>)
+data class Suggestion(
+    val name: String,
+    val coverUrl: String? = null,
+    val people: List<SuggestionMember>,
+)
 
 @Serializable
 data class SuggestionMember(
