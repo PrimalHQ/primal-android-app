@@ -17,8 +17,7 @@ import kotlinx.coroutines.withContext
 import net.primal.android.auth.onboarding.account.OnboardingContract.UiEvent
 import net.primal.android.auth.onboarding.account.OnboardingContract.UiState
 import net.primal.android.auth.onboarding.account.api.OnboardingApi
-import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
-import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
+import net.primal.android.auth.onboarding.account.api.asFollowPacks
 import net.primal.android.auth.repository.CreateAccountHandler
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
@@ -26,9 +25,7 @@ import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.signOrThrow
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
@@ -58,73 +55,45 @@ class OnboardingViewModel @Inject constructor(
 
     init {
         observeEvents()
-        fetchInterests()
+        fetchFollowPacks()
     }
 
     private fun observeEvents() =
         viewModelScope.launch {
             events.collect { event ->
                 when (event) {
-                    is UiEvent.InterestSelected -> addFollowGroupByInterest(event)
-
-                    is UiEvent.InterestUnselected -> removeFollowGroupByInterest(event)
-
                     is UiEvent.ProfileAboutYouUpdated -> setState { copy(profileAboutYou = event.aboutYou) }
-
                     is UiEvent.ProfileAvatarUriChanged -> updateAvatarPhoto(event.avatarUri)
-
                     is UiEvent.ProfileBannerUriChanged -> updateBannerPhoto(event.bannerUri)
-
                     is UiEvent.ProfileDisplayNameUpdated -> setState { copy(profileDisplayName = event.displayName) }
-
                     UiEvent.RequestNextStep -> setState { copy(currentStep = this.currentStep.nextStep()) }
-
                     UiEvent.RequestPreviousStep -> setState { copy(currentStep = this.currentStep.previousStep()) }
-
                     UiEvent.CreateNostrProfile -> createNostrAccount()
-
                     UiEvent.DismissError -> setState { copy(error = null) }
-
-                    is UiEvent.SetFollowsCustomizing -> setState { copy(customizeFollows = event.customizing) }
-
-                    is UiEvent.ToggleFollowEvent -> toggleFollowMemberFollowing(event)
-
-                    is UiEvent.ToggleGroupFollowEvent -> toggleFollowGroupFollowing(event)
-
-                    UiEvent.KeepRecommendedFollows -> keepRecommendedFollows()
+                    is UiEvent.TogglePackExpanded -> togglePackExpanded(event)
+                    is UiEvent.ToggleFollowUser -> toggleFollowUser(event)
+                    is UiEvent.ToggleFollowAllInPack -> toggleFollowAllInPack(event)
                 }
             }
         }
 
-    private fun fetchInterests() =
+    private fun fetchFollowPacks() =
         viewModelScope.launch {
-            try {
-                setState { copy(working = true) }
-                val response = retry(times = 3) {
+            setState { copy(working = true) }
+            runCatching {
+                retry(times = 3) {
                     withContext(dispatcherProvider.io()) {
                         onboardingApi.getFollowSuggestions()
                     }
                 }
-
-                val allGroupSuggestions = response.suggestions.map {
-                    FollowGroup(
-                        name = it.group,
-                        members = it.members.map { member ->
-                            FollowGroupMember(
-                                name = member.name,
-                                userId = member.userId,
-                                metadata = response.metadata[member.userId]?.content
-                                    .decodeFromJsonStringOrNull<ContentMetadata>(),
-                            )
-                        },
-                    )
-                }
-                setState { copy(allSuggestions = allGroupSuggestions) }
-            } catch (error: IOException) {
-                Napier.e(throwable = error) { "Failed to fetch follow suggestions." }
-            } finally {
-                setState { copy(working = false) }
             }
+                .onSuccess { response ->
+                    setState { copy(followPacks = response.asFollowPacks()) }
+                }
+                .onFailure { error ->
+                    Napier.e(throwable = error) { "Failed to fetch follow packs." }
+                }
+            setState { copy(working = false) }
         }
 
     private suspend fun <T> retry(times: Int, block: suspend (Int) -> T): T {
@@ -149,7 +118,7 @@ class OnboardingViewModel @Inject constructor(
                 createAccountHandler.createNostrAccount(
                     privateKey = keyPair.privateKey,
                     profileMetadata = uiState.asProfileMetadata(),
-                    interests = uiState.selectedSuggestions,
+                    followedUserIds = uiState.followedUserIds,
                 )
                 setState { copy(accountCreated = true, accountCreationStep = AccountCreationStep.AccountCreated) }
             } catch (error: BlossomException) {
@@ -236,91 +205,45 @@ class OnboardingViewModel @Inject constructor(
 
     private fun UploadJob?.cancel() = this?.job?.cancel()
 
-    private fun toggleFollowMemberFollowing(event: UiEvent.ToggleFollowEvent) {
+    private fun togglePackExpanded(event: UiEvent.TogglePackExpanded) {
         setState {
-            copy(
-                selectedSuggestions = this.selectedSuggestions.toMutableList().apply {
-                    val groupIndex = indexOfFirst { it.name == event.groupName }
-                    val group = if (groupIndex != -1) this[groupIndex] else null
-
-                    val memberIndex = group?.members?.indexOfFirst { it.userId == event.userId } ?: -1
-                    val member = if (memberIndex != -1) group?.members?.get(memberIndex) else null
-
-                    val updatedMember = member?.copy(followed = !member.followed)
-
-                    if (updatedMember != null) {
-                        this[groupIndex] = this[groupIndex].copy(
-                            members = this[groupIndex].members.toMutableList().apply {
-                                this[memberIndex] = updatedMember
-                            },
-                        )
-                    }
-                },
-            )
-        }
-    }
-
-    private fun toggleFollowGroupFollowing(event: UiEvent.ToggleGroupFollowEvent) {
-        val groupIndex = _state.value.selectedSuggestions.indexOfFirst { it.name == event.groupName }
-        val group = if (groupIndex != -1) _state.value.selectedSuggestions[groupIndex] else null
-
-        if (group != null) {
-            val isFollowingAll = group.members.all { it.followed }
-            setState {
-                copy(
-                    selectedSuggestions = this.selectedSuggestions.toMutableList().apply {
-                        this[groupIndex] = this[groupIndex].copy(
-                            members = this[groupIndex].members.map {
-                                it.copy(followed = !isFollowingAll)
-                            },
-                        )
-                    },
-                )
+            val newExpanded = if (event.packName in expandedPackNames) {
+                expandedPackNames - event.packName
+            } else {
+                expandedPackNames + event.packName
             }
+            copy(expandedPackNames = newExpanded)
         }
     }
 
-    private fun removeFollowGroupByInterest(event: UiEvent.InterestUnselected) {
+    private fun toggleFollowUser(event: UiEvent.ToggleFollowUser) {
         setState {
-            copy(
-                selectedSuggestions = selectedSuggestions.toMutableList().apply {
-                    removeIf { it.name == event.groupName }
-                },
-            )
-        }
-    }
-
-    private fun addFollowGroupByInterest(event: UiEvent.InterestSelected) {
-        val followGroup = _state.value.allSuggestions.find { it.name == event.groupName }
-        if (followGroup != null) {
-            setState {
-                copy(
-                    selectedSuggestions = selectedSuggestions.toMutableList().apply {
-                        add(followGroup)
-                    },
-                )
+            val newFollowed = if (event.userId in followedUserIds) {
+                followedUserIds - event.userId
+            } else {
+                followedUserIds + event.userId
             }
+            copy(followedUserIds = newFollowed)
         }
     }
 
-    private fun keepRecommendedFollows() {
+    private fun toggleFollowAllInPack(event: UiEvent.ToggleFollowAllInPack) {
         setState {
-            copy(
-                selectedSuggestions = this.selectedSuggestions.toMutableList().apply {
-                    forEachIndexed { index, followGroup ->
-                        this[index] = followGroup.copy(
-                            members = followGroup.members.map {
-                                it.copy(followed = true)
-                            },
-                        )
-                    }
-                },
-            )
+            val pack = followPacks.find { it.name == event.packName } ?: return@setState this
+            val allMemberIds = pack.members.map { it.userId }.toSet()
+            val allFollowed = allMemberIds.all { it in followedUserIds }
+            val newFollowed = if (allFollowed) {
+                followedUserIds - allMemberIds
+            } else {
+                followedUserIds + allMemberIds
+            }
+            copy(followedUserIds = newFollowed)
         }
     }
 
     companion object {
         private const val DELAY = 300L
-        private const val DEFAULT_BANNER_URL = "https://m.primal.net/HQTd.jpg"
+        internal const val DEFAULT_BANNER_URL =
+            "https://blossom.primal.net/c15e22a2a8d1c7971f86adc758f944f3cbec6ef791fafd2604d85ee6beadaabb.png"
     }
 }

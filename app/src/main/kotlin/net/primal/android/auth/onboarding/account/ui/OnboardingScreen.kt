@@ -5,7 +5,6 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -15,7 +14,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.OnboardingViewModel
-import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.core.compose.ColumnWithBackground
 import net.primal.android.core.compose.PrimalGradientAlpha
 import net.primal.android.core.compose.PrimalGradientBackgroundColor
@@ -46,7 +44,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, callbacks: OnboardingContra
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun OnboardingScreen(
     state: OnboardingContract.UiState,
@@ -77,13 +75,7 @@ private fun OnboardingScreen(
                     onBack = onBack,
                 )
 
-                OnboardingStep.Interests -> OnboardingProfileInterestsScreen(
-                    state = state,
-                    eventPublisher = eventPublisher,
-                    onBack = onBack,
-                )
-
-                OnboardingStep.Follows -> OnboardingProfileFollowsScreen(
+                OnboardingStep.FollowPacks -> OnboardingFollowPacksScreen(
                     state = state,
                     eventPublisher = eventPublisher,
                     onBack = onBack,
@@ -106,25 +98,7 @@ private class UiStateProvider(
             currentStep = OnboardingStep.Details,
         ),
         OnboardingContract.UiState(
-            currentStep = OnboardingStep.Interests,
-            allSuggestions = listOf(
-                FollowGroup(name = "art", members = emptyList()),
-                FollowGroup(name = "bitcoin", members = emptyList()),
-                FollowGroup(name = "memes", members = emptyList()),
-                FollowGroup(name = "primal", members = emptyList()),
-                FollowGroup(name = "android", members = emptyList()),
-                FollowGroup(name = "nostr", members = emptyList()),
-                FollowGroup(name = "developers", members = emptyList()),
-                FollowGroup(name = "designers", members = emptyList()),
-                FollowGroup(name = "human rights", members = emptyList()),
-            ),
-            selectedSuggestions = listOf(
-                FollowGroup(name = "bitcoin", members = emptyList()),
-                FollowGroup(name = "memes", members = emptyList()),
-            ),
-        ),
-        OnboardingContract.UiState(
-            currentStep = OnboardingStep.Follows,
+            currentStep = OnboardingStep.FollowPacks,
         ),
         OnboardingContract.UiState(
             currentStep = OnboardingStep.Preview,
