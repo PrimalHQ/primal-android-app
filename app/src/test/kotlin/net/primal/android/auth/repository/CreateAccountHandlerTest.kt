@@ -8,8 +8,6 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
-import net.primal.android.auth.onboarding.account.ui.model.FollowGroupMember
 import net.primal.android.core.FakeDataStore
 import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.nostr.notary.FakeNostrNotary
@@ -107,7 +105,7 @@ class CreateAccountHandlerTest {
             handler.createNostrAccount(
                 privateKey = keyPair.privateKey,
                 profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-                interests = emptyList(),
+                followedUserIds = emptySet(),
             )
 
             coVerify {
@@ -135,7 +133,7 @@ class CreateAccountHandlerTest {
             handler.createNostrAccount(
                 privateKey = keyPair.privateKey,
                 profileMetadata = expectedProfileMetadata,
-                interests = emptyList(),
+                followedUserIds = emptySet(),
             )
 
             coVerify {
@@ -164,7 +162,7 @@ class CreateAccountHandlerTest {
             handler.createNostrAccount(
                 privateKey = keyPair.privateKey,
                 profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-                interests = emptyList(),
+                followedUserIds = emptySet(),
             )
 
             coVerify {
@@ -189,19 +187,16 @@ class CreateAccountHandlerTest {
                 credentialsStore = credentialsStore,
             )
 
-            val partiallyFollowedMembers = primalTeamMembers.mapIndexed { index, followGroupMember ->
-                followGroupMember.copy(followed = index % 2 == 0)
-            }
-            val partiallyFollowedInterestsList = listOf(FollowGroup(name = "dev", members = partiallyFollowedMembers))
+            val followedUserIds = primalTeamMemberIds.filterIndexed { index, _ ->
+                index % 2 == 0
+            }.toSet()
 
-            val expectedMemberIds = partiallyFollowedMembers
-                .filter { it.followed }
-                .map { member -> member.userId } + keyPair.pubKey
+            val expectedMemberIds = followedUserIds + keyPair.pubKey
 
             handler.createNostrAccount(
                 privateKey = keyPair.privateKey,
                 profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-                interests = partiallyFollowedInterestsList,
+                followedUserIds = followedUserIds,
             )
 
             coVerify {
@@ -233,7 +228,7 @@ class CreateAccountHandlerTest {
             handler.createNostrAccount(
                 privateKey = keyPair.privateKey,
                 profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-                interests = emptyList(),
+                followedUserIds = emptySet(),
             )
 
             coVerify {
@@ -263,7 +258,7 @@ class CreateAccountHandlerTest {
             handler.createNostrAccount(
                 privateKey = keyPair.privateKey,
                 profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-                interests = emptyList(),
+                followedUserIds = emptySet(),
             )
 
             coVerify {
@@ -291,7 +286,7 @@ class CreateAccountHandlerTest {
             handler.createNostrAccount(
                 privateKey = keyPair.privateKey,
                 profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-                interests = emptyList(),
+                followedUserIds = emptySet(),
             )
 
             coVerify {
@@ -329,7 +324,7 @@ class CreateAccountHandlerTest {
                 handler.createNostrAccount(
                     privateKey = keyPair.privateKey,
                     profileMetadata = ProfileMetadata(displayName = "Test", username = null),
-                    interests = emptyList(),
+                    followedUserIds = emptySet(),
                 )
             } catch (_: CreateAccountHandler.AccountCreationException) {
             }
@@ -338,30 +333,12 @@ class CreateAccountHandlerTest {
             activeAccountPersistence.latestData shouldBe ""
         }
 
-    private val primalTeamMembers = listOf(
-        FollowGroupMember(
-            name = "alex",
-            userId = "npub1ky9s6hjl46wxcj9gcalhuk4ag2nea9yqufdyp9q9r496fns5g44sw0alex",
-        ),
-        FollowGroupMember(
-            name = "moysie",
-            userId = "npub19f2765hdx8u9lz777w7azed2wsn9mqkf2gvn67mkldx8dnxvggcsmhe9da",
-        ),
-        FollowGroupMember(
-            name = "pavle",
-            userId = "npub1k6tqlj78cpznd0yc74wy3k0elmj4nql87a3uzfz98tmj3tuzxywsf0dhk6",
-        ),
-        FollowGroupMember(
-            name = "pedja",
-            userId = "npub1mkde3807tcyyp2f98re7n7z0va8979atqkfja7avknvwdjg97vpq6ef0jp",
-        ),
-        FollowGroupMember(
-            name = "marko",
-            userId = "npub1zga04e73s7ard4kaektaha9vckdwll3y8auztyhl3uj764ua7vrqc7ppvc",
-        ),
-        FollowGroupMember(
-            name = "miljan",
-            userId = "npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr",
-        ),
+    private val primalTeamMemberIds = listOf(
+        "npub1ky9s6hjl46wxcj9gcalhuk4ag2nea9yqufdyp9q9r496fns5g44sw0alex",
+        "npub19f2765hdx8u9lz777w7azed2wsn9mqkf2gvn67mkldx8dnxvggcsmhe9da",
+        "npub1k6tqlj78cpznd0yc74wy3k0elmj4nql87a3uzfz98tmj3tuzxywsf0dhk6",
+        "npub1mkde3807tcyyp2f98re7n7z0va8979atqkfja7avknvwdjg97vpq6ef0jp",
+        "npub1zga04e73s7ard4kaektaha9vckdwll3y8auztyhl3uj764ua7vrqc7ppvc",
+        "npub16c0nh3dnadzqpm76uctf5hqhe2lny344zsmpm6feee9p5rdxaa9q586nvr",
     )
 }

@@ -4,7 +4,6 @@ import io.github.aakira.napier.Napier
 import java.io.IOException
 import javax.inject.Inject
 import kotlinx.coroutines.withContext
-import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.settings.repository.SettingsRepository
@@ -42,14 +41,14 @@ class CreateAccountHandler @Inject constructor(
     suspend fun createNostrAccount(
         privateKey: String,
         profileMetadata: ProfileMetadata,
-        interests: List<FollowGroup>,
+        followedUserIds: Set<String>,
     ) = withContext(dispatchers.io()) {
         runCatching {
             val userId = credentialsStore.saveNsec(nostrKey = privateKey)
             relayRepository.bootstrapUserRelays(userId)
             blossomRepository.ensureBlossomServerList(userId)
             userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata)
-            val contacts = setOf(userId) + interests.mapToContacts()
+            val contacts = setOf(userId) + followedUserIds
             userRepository.setFollowList(userId = userId, contacts = contacts)
             ensureSparkWalletExistsUseCase.invoke(userId = userId)
                 .onSuccess { setLightningAddress(userId = userId, walletId = it) }
@@ -70,15 +69,6 @@ class CreateAccountHandler @Inject constructor(
         }.onSuccess {
             authRepository.loginWithNsec(nostrKey = privateKey)
         }
-    }
-
-    private fun List<FollowGroup>.mapToContacts(): Set<String> {
-        return flatMap {
-            it.members
-                .filter { member -> member.followed }
-                .map { member -> member.userId }
-        }
-            .toSet()
     }
 
     private suspend fun setLightningAddress(userId: String, walletId: String) {
