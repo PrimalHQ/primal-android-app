@@ -26,6 +26,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -514,6 +515,7 @@ private fun LightningNoteToRecipientTextField(
                 },
             value = noteRecipientText,
             onValueChange = onNoteRecipientTextChanged,
+            textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
             colors = PrimalDefaults.outlinedTextFieldColors(),
             shape = AppTheme.shapes.extraLarge,
             maxLines = if (keyboardVisible) 2 else 3,
@@ -573,6 +575,7 @@ private fun NoteToSelfTextField(
             },
         value = noteSelfText,
         onValueChange = onNoteSelfTextChanged,
+        textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
         colors = PrimalDefaults.outlinedTextFieldColors(),
         shape = AppTheme.shapes.extraLarge,
         maxLines = if (keyboardVisible) 2 else 3,

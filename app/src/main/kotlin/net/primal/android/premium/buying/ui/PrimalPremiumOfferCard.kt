@@ -7,7 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.TextUnit
 import net.primal.android.R
-import net.primal.android.premium.buying.home.PREMIUM_PINK
+import net.primal.android.premium.buying.home.PREMIUM_BLUE
 import net.primal.android.premium.buying.utils.calculateDiscountPercent
 import net.primal.android.premium.ui.toPricingString
 import net.primal.android.wallet.store.domain.SubscriptionBillingPeriod
@@ -46,14 +46,14 @@ fun PrimalPremiumOfferCard(
         modifier = modifier,
         paddingValues = paddingValues,
         titleSuffix = stringResource(R.string.subscription_primal_premium_title),
-        titleColor = PREMIUM_PINK,
+        titleColor = PREMIUM_BLUE,
         priceText = if (loading) "---" else premiumMonthly?.toPricingString() ?: "---",
         billingText = stringResource(
             R.string.subscription_billed_annually,
             if (loading) "---" else premiumYearly?.toPricingString() ?: "---",
         ),
 
-        badgeColor = PREMIUM_PINK,
+        badgeColor = PREMIUM_BLUE,
         descriptionItems = listOf(
             stringResource(R.string.subscription_primal_premium_perk_verified_nostr_address),
             stringResource(R.string.subscription_primal_premium_perk_custom_lightning_address),
