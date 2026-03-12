@@ -100,10 +100,13 @@ class ThreadViewModel @Inject constructor(
                     }
 
                     val thread = conversation.subList(0, highlightPostIndex + 1)
-                    val replies = conversation.subList(highlightPostIndex + 1, conversation.size)
+                    val rootAuthorId = conversation.firstOrNull()?.authorId
+                    val sortedReplies = conversation.subList(highlightPostIndex + 1, conversation.size)
+                        .sortedByDescending { it.timestamp }
+                    val (authorReplies, otherReplies) = sortedReplies.partition { it.authorId == rootAuthorId }
                     setState {
                         copy(
-                            conversation = thread + replies.sortedByDescending { it.timestamp },
+                            conversation = thread + authorReplies + otherReplies,
                             highlightPostIndex = highlightPostIndex,
                         )
                     }
