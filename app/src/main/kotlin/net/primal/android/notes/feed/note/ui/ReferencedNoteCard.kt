@@ -25,6 +25,12 @@ import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.links.CdnImage
 import net.primal.domain.nostr.NostrEventKind
 
+private val clickableNoteKinds = setOf(
+    NostrEventKind.ShortTextNote.value,
+    NostrEventKind.Poll.value,
+    NostrEventKind.ZapPoll.value,
+)
+
 @Composable
 fun ReferencedNoteCard(
     data: FeedPostUi,
@@ -41,7 +47,7 @@ fun ReferencedNoteCard(
         modifier = modifier
             .wrapContentHeight()
             .clickable(
-                enabled = noteCallbacks.onNoteClick != null && data.rawKind == NostrEventKind.ShortTextNote.value,
+                enabled = noteCallbacks.onNoteClick != null && data.rawKind in clickableNoteKinds,
                 onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
             ),
         colors = colors,
