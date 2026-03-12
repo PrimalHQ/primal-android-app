@@ -110,6 +110,8 @@ class RelaysSocketManagerTest {
             val invalidRelays = listOf(
                 Relay(url = "abcdefghijkl", read = true, write = true),
                 Relay(url = "wss://nostr-relay.untethr.me\t", read = true, write = true),
+                Relay(url = "⬤ wss://nostr-pub.wellorder.net", read = true, write = true),
+                Relay(url = "wss://filter.nostr.wine/npubxyz\n", read = true, write = true),
             )
             val relayPOs = invalidRelays.map {
                 RelayPO(
