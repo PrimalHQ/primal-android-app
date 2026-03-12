@@ -45,7 +45,7 @@ internal class FeedApiImpl(
             polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
                 queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
             pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
-            primalPollStats = queryResult.findPrimalEvent(NostrEventKind.PrimalPollStats),
+            primalPollStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalPollStats),
             liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
         )
     }
@@ -80,7 +80,7 @@ internal class FeedApiImpl(
             polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
                 queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
             pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
-            primalPollStats = queryResult.findPrimalEvent(NostrEventKind.PrimalPollStats),
+            primalPollStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalPollStats),
             liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
         )
     }
@@ -100,7 +100,7 @@ internal class FeedApiImpl(
             polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
                 queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
             pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
-            primalPollStats = queryResult.findPrimalEvent(NostrEventKind.PrimalPollStats),
+            primalPollStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalPollStats),
             articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
             reposts = emptyList(),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
@@ -153,7 +153,7 @@ internal class FeedApiImpl(
             polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
                 queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
             pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
-            primalPollStats = queryResult.findPrimalEvent(NostrEventKind.PrimalPollStats),
+            primalPollStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalPollStats),
             liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
         )
     }

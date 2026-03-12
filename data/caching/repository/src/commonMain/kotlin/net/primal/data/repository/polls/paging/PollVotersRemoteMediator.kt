@@ -126,7 +126,7 @@ internal class PollVotersRemoteMediator(
             .mapNotNull { it.content.decodeFromJsonStringOrNull<NostrEvent>() }
             .filter { it.kind == NostrEventKind.Poll.value || it.kind == NostrEventKind.ZapPoll.value }
             .mapNotNullAsPollDataPO()
-        val statsMap = response.pollStats.parseAndMapPrimalPollStats()
+        val statsMap = listOfNotNull(response.pollStats).parseAndMapPrimalPollStats()
         val pollDataWithStats = pollData.applyPollStats(statsMap)
 
         val remoteKeys = buildRemoteKeys(allVotes = allVotes, paging = response.paging)

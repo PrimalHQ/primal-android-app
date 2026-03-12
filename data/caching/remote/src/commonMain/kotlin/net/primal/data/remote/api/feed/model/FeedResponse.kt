@@ -25,6 +25,6 @@ data class FeedResponse(
     val pictureNotes: List<NostrEvent> = emptyList(),
     val polls: List<NostrEvent> = emptyList(),
     val pollResponses: List<NostrEvent> = emptyList(),
-    val primalPollStats: PrimalEvent? = null,
+    val primalPollStats: List<PrimalEvent> = emptyList(),
     val liveActivity: List<NostrEvent> = emptyList(),
 )

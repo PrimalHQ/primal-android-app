@@ -98,7 +98,7 @@ class PollsRepositoryImpl(
                 response.pollResponses.mapAsPollResponseVotes()
             }
 
-            val statsMap = response.pollStats.parseAndMapPrimalPollStats()
+            val statsMap = listOfNotNull(response.pollStats).parseAndMapPrimalPollStats()
             val pollDataWithCounts = pollData.applyPollStats(statsMap)
 
             database.withTransaction {
