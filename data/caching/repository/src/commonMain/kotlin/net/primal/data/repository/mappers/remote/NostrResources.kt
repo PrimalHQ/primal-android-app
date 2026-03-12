@@ -10,7 +10,7 @@ import net.primal.data.local.dao.profiles.ProfileData
 import net.primal.data.local.dao.reads.ArticleData
 import net.primal.data.local.dao.streams.StreamData
 import net.primal.data.repository.mappers.authorNameUiFriendly
-import net.primal.data.repository.mappers.local.asFeedPostPollInfo
+import net.primal.data.repository.mappers.local.asPollInfo
 import net.primal.data.repository.mappers.usernameUiFriendly
 import net.primal.domain.links.CdnResource
 import net.primal.domain.links.EventLinkPreviewData
@@ -273,7 +273,7 @@ private fun takeAsReferencedNoteOrNull(
             videoThumbnails = videoThumbnails,
         ),
         raw = refNote.raw,
-        pollInfo = postIdToPollDataMap[refNote.postId]?.asFeedPostPollInfo(),
+        pollInfo = postIdToPollDataMap[refNote.postId]?.asPollInfo(),
     )
 } else {
     null

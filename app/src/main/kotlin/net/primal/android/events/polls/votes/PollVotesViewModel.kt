@@ -81,7 +81,6 @@ class PollVotesViewModel @Inject constructor(
                             copy(
                                 loading = false,
                                 pollUi = pollUi,
-                                isZapPoll = pollInfo.isZapPoll,
                                 selectedOptionId = selectedOptionId
                                     ?: pollInfo.options.firstOrNull()?.id,
                             )

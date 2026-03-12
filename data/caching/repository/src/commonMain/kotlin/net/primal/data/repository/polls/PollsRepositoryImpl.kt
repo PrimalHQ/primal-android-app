@@ -16,6 +16,7 @@ import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.data.local.dao.polls.PollData
 import net.primal.data.local.dao.polls.PollType
 import net.primal.data.local.dao.polls.PollVoteData
+import net.primal.data.local.dao.polls.asDO
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.polls.PollsApi
 import net.primal.data.remote.api.polls.model.PollVotesRequestBody
@@ -248,7 +249,7 @@ class PollsRepositoryImpl(
 
                 PollVoteStats(
                     eventId = eventId,
-                    isZapPoll = poll.data.pollType == PollType.Zap,
+                    pollType = poll.data.pollType.asDO(),
                     options = poll.data.options.map { option ->
                         val optionVotes = votesByOption[option.id] ?: emptyList()
                         PollOptionStats(

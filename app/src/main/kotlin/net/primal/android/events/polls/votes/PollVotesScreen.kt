@@ -143,7 +143,6 @@ private fun PollVotesScreen(
                         PollVotesContent(
                             poll = state.pollUi,
                             selectedOptionId = state.selectedOptionId,
-                            isZapPoll = state.isZapPoll,
                             votersPagingItems = votersPagingItems,
                             listState = listState,
                             onOptionSelected = { eventPublisher(UiEvent.SelectOption(it)) },
@@ -169,12 +168,12 @@ private fun PollVotesScreen(
 private fun PollVotesContent(
     poll: PollUi,
     selectedOptionId: String?,
-    isZapPoll: Boolean,
     votersPagingItems: LazyPagingItems<PollVoterUi>?,
     listState: LazyListState,
     onOptionSelected: (String) -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
+    val isZapPoll = poll.pollType == PollType.Zap
     val selectedOption = poll.options.find { it.id == selectedOptionId }
 
     LazyColumn(
@@ -484,7 +483,6 @@ private fun PreviewPollVotesScreenZapPoll() {
             PollVotesScreen(
                 state = PollVotesContract.UiState(
                     loading = false,
-                    isZapPoll = true,
                     pollUi = PollUi(
                         pollType = PollType.Zap,
                         options = listOf(

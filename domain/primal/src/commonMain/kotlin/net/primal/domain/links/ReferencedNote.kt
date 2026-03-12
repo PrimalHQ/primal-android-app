@@ -2,7 +2,7 @@ package net.primal.domain.links
 
 import kotlinx.serialization.Serializable
 import net.primal.domain.membership.PrimalLegendProfile
-import net.primal.domain.posts.FeedPostPollInfo
+import net.primal.domain.polls.PollInfo
 
 @Serializable
 data class ReferencedNote(
@@ -18,5 +18,5 @@ data class ReferencedNote(
     val attachments: List<EventLink>,
     val nostrUris: List<EventUriNostrReference>,
     val raw: String,
-    val pollInfo: FeedPostPollInfo? = null,
+    val pollInfo: PollInfo? = null,
 )

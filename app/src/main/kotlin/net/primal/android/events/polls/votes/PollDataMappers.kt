@@ -3,15 +3,16 @@ package net.primal.android.events.polls.votes
 import java.time.Instant
 import net.primal.android.notes.feed.model.PollOptionUi
 import net.primal.android.notes.feed.model.PollState
-import net.primal.android.notes.feed.model.PollType
+import net.primal.android.notes.feed.model.PollType as UiPollType
 import net.primal.android.notes.feed.model.PollUi
+import net.primal.android.notes.feed.model.asUiModel
 import net.primal.domain.polls.PollInfo
 
-internal fun PollInfo.asPollUi(userVotedOptionIds: Set<String> = emptySet()): PollUi {
+fun PollInfo.asPollUi(userVotedOptionIds: Set<String> = emptySet()): PollUi {
     val endsAtInstant = endsAt?.let { Instant.ofEpochSecond(it) }
     val totalVotes = options.sumOf { it.voteCount }.coerceAtLeast(1)
     val totalSats = options.sumOf { it.satsZapped }.coerceAtLeast(1)
-    val pollType = if (isZapPoll) PollType.Zap else PollType.User
+    val pollType = pollType.asUiModel()
 
     val state = when {
         endsAtInstant != null && endsAtInstant < Instant.now() -> PollState.Ended
@@ -20,8 +21,8 @@ internal fun PollInfo.asPollUi(userVotedOptionIds: Set<String> = emptySet()): Po
     }
 
     val winner = when (pollType) {
-        PollType.User -> options.maxBy { it.voteCount }.takeIf { it.voteCount != 0 }
-        PollType.Zap -> options.maxBy { it.satsZapped }.takeIf { it.satsZapped != 0L }
+        UiPollType.User -> options.maxBy { it.voteCount }.takeIf { it.voteCount != 0 }
+        UiPollType.Zap -> options.maxBy { it.satsZapped }.takeIf { it.satsZapped != 0L }
     }
 
     return PollUi(
@@ -35,8 +36,8 @@ internal fun PollInfo.asPollUi(userVotedOptionIds: Set<String> = emptySet()): Po
                 voteCount = option.voteCount,
                 satsZapped = option.satsZapped,
                 votePercentage = when (pollType) {
-                    PollType.User -> option.voteCount.toFloat() / totalVotes
-                    PollType.Zap -> option.satsZapped.toFloat() / totalSats
+                    UiPollType.User -> option.voteCount.toFloat() / totalVotes
+                    UiPollType.Zap -> option.satsZapped.toFloat() / totalSats
                 },
                 isWinner = state == PollState.Ended && winner == option,
             )
