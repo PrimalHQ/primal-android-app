@@ -25,6 +25,7 @@ class ExploreFeedQueryBuilder(
                 EventUserStats.replied AS userReplied,
                 EventUserStats.reposted AS userReposted,
                 EventUserStats.zapped AS userZapped,
+                EventUserStats.votedForOption AS userVotedForOption,
                 NULL AS feedCreatedAt,
                 CASE WHEN MutedUser.item IS NOT NULL THEN 1 ELSE 0 END AS isAuthorMuted,
                 CASE WHEN MutedThread.item IS NOT NULL THEN 1 ELSE 0 END AS isThreadMuted,

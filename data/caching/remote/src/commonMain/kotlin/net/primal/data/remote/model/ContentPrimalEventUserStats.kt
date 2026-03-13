@@ -10,4 +10,5 @@ data class ContentPrimalEventUserStats(
     @SerialName("liked") val liked: Boolean,
     @SerialName("reposted") val reposted: Boolean,
     @SerialName("zapped") val zapped: Boolean,
+    @SerialName("voted_for_option") val votedForOption: String? = null,
 )

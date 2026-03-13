@@ -117,7 +117,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         PollVoteData::class,
         PollVoterRemoteKey::class,
     ],
-    version = 26,
+    version = 27,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)

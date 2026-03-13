@@ -11,4 +11,5 @@ data class FeedPostStats(
     val repostsCount: Long = 0,
     val userReposted: Boolean = false,
     val userBookmarked: Boolean = false,
+    val userVotedForOption: String? = null,
 )

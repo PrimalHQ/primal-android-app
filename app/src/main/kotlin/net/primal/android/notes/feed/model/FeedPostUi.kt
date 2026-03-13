@@ -89,7 +89,9 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         authorLegendaryCustomization = this.author.legendProfile?.asLegendaryCustomization(),
         eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
         isAuthorLiveStreamingNow = this.author.isLiveStreamingNow,
-        poll = this.pollInfo?.asPollUi(),
+        poll = this.pollInfo?.asPollUi(
+            userVotedOptionIds = this.stats?.userVotedForOption?.let { setOf(it) } ?: emptySet(),
+        ),
     )
 }
 

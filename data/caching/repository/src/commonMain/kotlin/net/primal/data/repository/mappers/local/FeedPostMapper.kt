@@ -114,4 +114,5 @@ private fun buildFeedPostStats(eventStats: EventStats?, feedPostUserStats: FeedP
         userLiked = feedPostUserStats?.userLiked == true,
         repostsCount = eventStats?.reposts ?: 0,
         userReposted = feedPostUserStats?.userReposted == true,
+        userVotedForOption = feedPostUserStats?.userVotedForOption,
     )
