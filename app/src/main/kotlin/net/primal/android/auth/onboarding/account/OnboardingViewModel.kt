@@ -5,26 +5,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.aakira.napier.Napier
-import java.io.IOException
 import javax.inject.Inject
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.primal.android.auth.onboarding.account.OnboardingContract.UiEvent
 import net.primal.android.auth.onboarding.account.OnboardingContract.UiState
-import net.primal.android.auth.onboarding.account.api.OnboardingApi
-import net.primal.android.auth.onboarding.account.api.asFollowPacks
 import net.primal.android.auth.repository.CreateAccountHandler
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.core.networking.blossom.AndroidPrimalBlossomUploadService
 import net.primal.core.networking.blossom.BlossomException
 import net.primal.core.networking.blossom.UploadJob
 import net.primal.core.networking.blossom.UploadResult
-import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.nostr.cryptography.signOrThrow
@@ -33,8 +27,7 @@ import net.primal.domain.nostr.cryptography.utils.hexToNsecHrp
 
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
-    private val dispatcherProvider: DispatcherProvider,
-    private val onboardingApi: OnboardingApi,
+    private val onboardingRepository: OnboardingRepository,
     private val createAccountHandler: CreateAccountHandler,
     private val primalUploadService: AndroidPrimalBlossomUploadService,
 ) : ViewModel() {
@@ -80,33 +73,15 @@ class OnboardingViewModel @Inject constructor(
     private fun fetchFollowPacks() =
         viewModelScope.launch {
             setState { copy(working = true) }
-            runCatching {
-                retry(times = 3) {
-                    withContext(dispatcherProvider.io()) {
-                        onboardingApi.getFollowSuggestions()
-                    }
-                }
-            }
-                .onSuccess { response ->
-                    setState { copy(followPacks = response.asFollowPacks()) }
+            runCatching { onboardingRepository.fetchFollowPacks() }
+                .onSuccess { followPacks ->
+                    setState { copy(followPacks = followPacks) }
                 }
                 .onFailure { error ->
                     Napier.e(throwable = error) { "Failed to fetch follow packs." }
                 }
             setState { copy(working = false) }
         }
-
-    private suspend fun <T> retry(times: Int, block: suspend (Int) -> T): T {
-        repeat(times) {
-            try {
-                return block(it)
-            } catch (error: IOException) {
-                Napier.w(throwable = error) { "Retry attempt failed." }
-                delay(DELAY * (it + 1))
-            }
-        }
-        return block(times)
-    }
 
     private fun createNostrAccount() =
         viewModelScope.launch {
@@ -242,7 +217,6 @@ class OnboardingViewModel @Inject constructor(
     }
 
     companion object {
-        private const val DELAY = 300L
         internal const val DEFAULT_BANNER_URL =
             "https://blossom.primal.net/c15e22a2a8d1c7971f86adc758f944f3cbec6ef791fafd2604d85ee6beadaabb.png"
     }
