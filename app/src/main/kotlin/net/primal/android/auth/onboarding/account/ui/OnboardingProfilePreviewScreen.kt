@@ -51,6 +51,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import net.primal.android.R
 import net.primal.android.auth.compose.OnboardingBottomBar
+import net.primal.android.auth.compose.defaultAvatarForeground
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.auth.onboarding.account.AccountCreationStep
 import net.primal.android.auth.onboarding.account.OnboardingContract
@@ -60,6 +61,7 @@ import net.primal.android.core.compose.PrimalDarkTextColor
 import net.primal.android.core.compose.PrimalGradientAlpha
 import net.primal.android.core.compose.PrimalGradientBackgroundColor
 import net.primal.android.core.compose.PrimalScaffold
+import net.primal.android.core.compose.PrimalSecondaryTextColor
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -316,7 +318,7 @@ private fun ProfilePreviewBox(
                 Text(
                     text = aboutYou,
                     style = AppTheme.typography.bodySmall,
-                    color = Color.Black,
+                    color = PrimalSecondaryTextColor,
                 )
             }
         }
@@ -527,6 +529,7 @@ private fun SuccessAvatarBox(modifier: Modifier = Modifier, avatarUri: Uri?) {
                         imageVector = PrimalIcons.AvatarDefault,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
+                        tint = defaultAvatarForeground,
                     )
                 }
 

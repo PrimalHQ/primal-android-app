@@ -102,7 +102,7 @@ private fun FollowPackHeader(
     val avatarCdnImages = pack.members
         .take(MaxHighlightedAvatars)
         .map { it.avatarUrl?.let { url -> CdnImage(sourceUrl = url) } }
-    val avatarSize = 24.dp
+    val avatarSize = 28.dp
     val avatarsShown = avatarCdnImages.size
     val avatarRowWidth = avatarSize * (1f - AvatarOverlapPercentage) * (avatarsShown - 1) + avatarSize
 

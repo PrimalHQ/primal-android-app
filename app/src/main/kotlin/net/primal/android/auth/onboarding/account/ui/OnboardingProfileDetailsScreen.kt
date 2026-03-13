@@ -58,6 +58,7 @@ import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.core.compose.PrimalDarkTextColor
 import net.primal.android.core.compose.PrimalScaffold
+import net.primal.android.core.compose.PrimalSecondaryTextColor
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -290,7 +291,7 @@ fun OnboardingOutlinedTextField(
                 style = AppTheme.typography.bodyLarge.copy(
                     fontSize = 16.sp,
                 ),
-                color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                color = PrimalSecondaryTextColor,
             )
         },
         keyboardOptions = keyboardOptions,
