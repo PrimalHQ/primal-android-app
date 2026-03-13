@@ -1,11 +1,7 @@
 package net.primal.android.auth.onboarding.account.ui
 
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,7 +43,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
 
 private val BannerPlaceholderColor = Color(0xFFCCCCCC)
-private val SubtleBorderColor = Color(0xFFE5E5E5)
+internal val SubtleBorderColor = Color(0xFFE5E5E5)
 private val BannerHeight = 120.dp
 private const val MaxHighlightedAvatars = 5
 private const val AvatarOverlapPercentage = 0.25f
@@ -59,17 +54,28 @@ fun FollowPackCard(
     isExpanded: Boolean,
     followedUserIds: Set<String>,
     onToggleExpanded: () -> Unit,
-    onFollowUser: (String) -> Unit,
     onFollowAll: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val followedCountInPack = pack.members.count { it.userId in followedUserIds }
     val allFollowed = followedCountInPack == pack.members.size
 
+    val bottomCornerRadius by animateDpAsState(
+        targetValue = if (isExpanded) 0.dp else 12.dp,
+        label = "BottomCornerRadius",
+    )
+
+    val shape = RoundedCornerShape(
+        topStart = 12.dp,
+        topEnd = 12.dp,
+        bottomStart = bottomCornerRadius,
+        bottomEnd = bottomCornerRadius,
+    )
+
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(shape)
             .background(Color.White),
     ) {
         FollowPackBanner(coverUrl = pack.coverUrl)
@@ -80,13 +86,6 @@ fun FollowPackCard(
             allFollowed = allFollowed,
             onToggleExpanded = onToggleExpanded,
             onFollowAll = onFollowAll,
-        )
-
-        ExpandedMembersList(
-            isExpanded = isExpanded,
-            pack = pack,
-            followedUserIds = followedUserIds,
-            onFollowUser = onFollowUser,
         )
     }
 }
@@ -153,31 +152,6 @@ private fun FollowPackHeader(
                 allFollowed = allFollowed,
                 onClick = onFollowAll,
             )
-        }
-    }
-}
-
-@Composable
-private fun ExpandedMembersList(
-    isExpanded: Boolean,
-    pack: OnboardingFollowPack,
-    followedUserIds: Set<String>,
-    onFollowUser: (String) -> Unit,
-) {
-    AnimatedVisibility(
-        visible = isExpanded,
-        enter = expandVertically() + fadeIn(),
-        exit = shrinkVertically() + fadeOut(),
-    ) {
-        Column {
-            HorizontalDivider(color = SubtleBorderColor)
-            pack.members.forEach { member ->
-                FollowPackMemberRow(
-                    member = member,
-                    isFollowed = member.userId in followedUserIds,
-                    onFollowClick = { onFollowUser(member.userId) },
-                )
-            }
         }
     }
 }
