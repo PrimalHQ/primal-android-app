@@ -231,7 +231,7 @@ private fun LazyListScope.voterItems(
                     onClick = { onProfileClick(it.profileId) },
                 )
             }
-            PrimalDivider()
+            PrimalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
         }
     }
 
@@ -346,7 +346,7 @@ private fun SelectedOptionHeader(
                 )
             }
         }
-        PrimalDivider()
+        PrimalDivider(color = AppTheme.extraColorScheme.surfaceVariantAlt1)
     }
 }
 
