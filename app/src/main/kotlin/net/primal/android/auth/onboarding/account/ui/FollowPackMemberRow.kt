@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.auth.compose.DefaultOnboardingAvatar
 import net.primal.android.auth.onboarding.account.ui.model.FollowPackMember
 import net.primal.android.core.compose.PrimalDarkTextColor
 import net.primal.android.core.compose.UniversalAvatarThumbnail
@@ -45,6 +46,7 @@ fun FollowPackMemberRow(
             avatarSize = 40.dp,
             avatarCdnImage = member.avatarUrl?.let { CdnImage(sourceUrl = it) },
             legendaryCustomization = null,
+            defaultAvatar = { DefaultOnboardingAvatar() },
         )
 
         Column(

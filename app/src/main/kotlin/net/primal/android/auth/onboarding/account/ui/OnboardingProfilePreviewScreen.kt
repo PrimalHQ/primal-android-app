@@ -350,6 +350,7 @@ private fun PreviewAvatarBox(modifier: Modifier = Modifier, avatarUri: Uri?) {
                         modifier = Modifier.fillMaxSize(),
                         imageVector = PrimalIcons.AvatarDefault,
                         contentDescription = null,
+                        tint = defaultAvatarForeground,
                     )
                 }
 
