@@ -566,14 +566,18 @@
 
     <string name="feed_context_unmute_thread">Unmute Thread</string>
     <string name="feed_context_share_note">Share Note</string>
+    <string name="feed_context_share_poll">Share Poll</string>
     <string name="feed_context_share_note_as_image">Share as Image</string>
     <string name="feed_context_copy_note_link">Copy Note Link</string>
+    <string name="feed_context_copy_poll_link">Copy Poll Link</string>
     <string name="feed_context_add_to_bookmark">Add Bookmark</string>
     <string name="feed_context_bookmark_added">Note added to your bookmarks.</string>
     <string name="feed_context_remove_from_bookmark">Remove Bookmark</string>
     <string name="feed_context_bookmark_removed">Note removed from your bookmarks.</string>
     <string name="feed_context_copy_note_text">Copy Note Text</string>
+    <string name="feed_context_copy_poll_question">Copy Poll Question</string>
     <string name="feed_context_copy_note_id">Copy Note ID</string>
+    <string name="feed_context_copy_poll_id">Copy Poll ID</string>
     <string name="feed_context_copy_raw_data">Copy Raw Data</string>
     <string name="feed_context_report_user">Report user</string>
     <string name="feed_context_mute_user">Mute User</string>

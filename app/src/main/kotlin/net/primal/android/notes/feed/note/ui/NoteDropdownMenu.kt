@@ -58,6 +58,7 @@ fun NoteDropdownMenuIcon(
     isBookmarked: Boolean,
     isThreadMuted: Boolean,
     isNoteAuthor: Boolean,
+    isPoll: Boolean = false,
     relayHints: List<String> = emptyList(),
     noteGraphicsLayer: GraphicsLayer,
     enabled: Boolean = true,
@@ -107,7 +108,9 @@ fun NoteDropdownMenuIcon(
             }
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextShare,
-                text = stringResource(id = R.string.feed_context_share_note),
+                text = stringResource(
+                    id = if (isPoll) R.string.feed_context_share_poll else R.string.feed_context_share_note,
+                ),
                 onClick = {
                     systemShareText(
                         context = context,
@@ -149,7 +152,9 @@ fun NoteDropdownMenuIcon(
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyNoteLink,
-                text = stringResource(id = R.string.feed_context_copy_note_link),
+                text = stringResource(
+                    id = if (isPoll) R.string.feed_context_copy_poll_link else R.string.feed_context_copy_note_link,
+                ),
                 onClick = {
                     copyText(context = context, text = resolvePrimalNoteLink(noteId = noteId))
                     menuVisible = false
@@ -164,7 +169,9 @@ fun NoteDropdownMenuIcon(
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyNoteText,
-                text = stringResource(id = R.string.feed_context_copy_note_text),
+                text = stringResource(
+                    id = if (isPoll) R.string.feed_context_copy_poll_question else R.string.feed_context_copy_note_text,
+                ),
                 onClick = {
                     copyText(context = context, text = noteContent)
                     menuVisible = false
@@ -179,7 +186,9 @@ fun NoteDropdownMenuIcon(
             )
             DropdownPrimalMenuItem(
                 trailingIconVector = PrimalIcons.ContextCopyNoteId,
-                text = stringResource(id = R.string.feed_context_copy_note_id),
+                text = stringResource(
+                    id = if (isPoll) R.string.feed_context_copy_poll_id else R.string.feed_context_copy_note_id,
+                ),
                 onClick = {
                     val nevent = Nevent(
                         eventId = noteId,
