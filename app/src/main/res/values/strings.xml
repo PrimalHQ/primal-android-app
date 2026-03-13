@@ -55,7 +55,7 @@
 
     <string name="onboarding_title_create_account">Create Account</string>
     <string name="onboarding_title_account_preview">Account Preview</string>
-    <string name="onboarding_title_success">Success</string>
+    <string name="onboarding_title_success">Success!</string>
     <string name="onboarding_button_next">Next</string>
     <string name="onboarding_button_done">Done!</string>
     <string name="onboarding_button_create_account_now">Create Account Now</string>

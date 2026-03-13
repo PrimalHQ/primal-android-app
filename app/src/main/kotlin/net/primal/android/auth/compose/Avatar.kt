@@ -7,11 +7,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 
-val defaultOnboardingAvatarBackground = Color(0xFFFFFFFF)
+val defaultOnboardingAvatarBackground = Color(0xFFFFFFFF).copy(alpha = 0.3f)
 val defaultAvatarForeground = Color(0xFF1A295A).copy(0.7f)
 
 @Composable

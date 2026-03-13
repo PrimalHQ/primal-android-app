@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.PrimalDarkTextColor
@@ -20,7 +19,7 @@ fun OnboardingStepsIndicator(currentPage: Int) {
         pagesCount = TOTAL_ONBOARDING_STEPS,
         predecessorsColor = PrimalDarkTextColor,
         currentColor = PrimalDarkTextColor,
-        successorsColor = Color.White,
+        successorsColor = PrimalDarkTextColor.copy(alpha = 0.25f),
         currentPage = currentPage,
     )
 }

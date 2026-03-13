@@ -32,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import java.util.Locale
 import net.primal.android.R
+import net.primal.android.auth.compose.DefaultOnboardingAvatar
 import net.primal.android.auth.onboarding.account.ui.model.OnboardingFollowPack
 import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
@@ -101,7 +102,7 @@ private fun FollowPackHeader(
     val avatarCdnImages = pack.members
         .take(MaxHighlightedAvatars)
         .map { it.avatarUrl?.let { url -> CdnImage(sourceUrl = url) } }
-    val avatarSize = 24.dp
+    val avatarSize = 28.dp
     val avatarsShown = avatarCdnImages.size
     val avatarRowWidth = avatarSize * (1f - AvatarOverlapPercentage) * (avatarsShown - 1) + avatarSize
 
@@ -139,6 +140,7 @@ private fun FollowPackHeader(
                     avatarBorderSize = 1.dp,
                     maxAvatarsToShow = MaxHighlightedAvatars,
                     displayAvatarOverflowIndicator = false,
+                    defaultAvatar = { DefaultOnboardingAvatar() },
                 )
 
                 UserCountChevron(
