@@ -21,7 +21,7 @@ fun FollowSuggestionsResponse.asFollowPacks(): List<OnboardingFollowPack> {
                     about = metadata?.about,
                     avatarUrl = metadata?.picture,
                 )
-            },
+            }.distinctBy { it.userId },
         )
     }
 }
