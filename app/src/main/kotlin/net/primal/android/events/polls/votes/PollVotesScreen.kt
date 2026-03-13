@@ -229,6 +229,7 @@ private fun LazyListScope.voterItems(
                 UserProfileListItem(
                     data = voter.profile,
                     onClick = { onProfileClick(it.profileId) },
+                    internetIdentifierColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 )
             }
             PrimalDivider()
@@ -404,7 +405,7 @@ private fun ZapVoterListItem(
             if (!voter.zapComment.isNullOrEmpty()) {
                 Text(
                     text = voter.zapComment,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt4,
+                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
