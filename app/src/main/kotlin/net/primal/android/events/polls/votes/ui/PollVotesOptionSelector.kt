@@ -143,6 +143,8 @@ private fun SelectablePollOption(
             }
         }
 
+        Spacer(modifier = Modifier.width(8.dp))
+
         OptionTrailingContent(
             option = option,
             pollType = pollType,
