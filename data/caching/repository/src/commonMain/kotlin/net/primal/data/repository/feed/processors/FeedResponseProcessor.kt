@@ -11,15 +11,19 @@ import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
 import net.primal.data.remote.mapper.flatMapNotNullAsLinkPreviewResource
 import net.primal.data.remote.mapper.flatMapNotNullAsVideoThumbnailsMap
 import net.primal.data.remote.mapper.mapAsMapPubkeyToListOfBlossomServers
+import net.primal.data.repository.mappers.remote.applyPollStats
 import net.primal.data.repository.mappers.remote.flatMapAsEventHintsPO
 import net.primal.data.repository.mappers.remote.flatMapPostsAsEventUriPO
 import net.primal.data.repository.mappers.remote.flatMapPostsAsReferencedNostrUriDO
 import net.primal.data.repository.mappers.remote.mapAsEventZapDO
+import net.primal.data.repository.mappers.remote.mapAsPollResponseVotes
 import net.primal.data.repository.mappers.remote.mapAsPostDataPO
 import net.primal.data.repository.mappers.remote.mapAsProfileDataPO
+import net.primal.data.repository.mappers.remote.mapAsZapPollVotes
 import net.primal.data.repository.mappers.remote.mapNotNullAsArticleDataPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsEventStatsPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsEventUserStatsPO
+import net.primal.data.repository.mappers.remote.mapNotNullAsPollDataPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsPostDataPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsRepostDataPO
 import net.primal.data.repository.mappers.remote.mapNotNullAsStreamDataPO
@@ -27,9 +31,11 @@ import net.primal.data.repository.mappers.remote.mapReferencedEventsAsArticleDat
 import net.primal.data.repository.mappers.remote.mapReferencedEventsAsHighlightDataPO
 import net.primal.data.repository.mappers.remote.mapReferencedNostrUriAsEventUriNostrPO
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalLegendProfiles
+import net.primal.data.repository.mappers.remote.parseAndMapPrimalPollStats
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalPremiumInfo
 import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.findReplyTargetId
 import net.primal.shared.data.local.db.withTransaction
 
 internal suspend fun FeedResponse.persistToDatabaseAsTransaction(userId: String, database: PrimalDatabase) {
@@ -55,7 +61,7 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
         referencedArticles = allArticles,
         referencedHighlights = referencedHighlights,
     )
-    val feedPosts = notes.mapAsPostDataPO(
+    val feedPosts = (notes + polls).mapAsPostDataPO(
         referencedPosts = referencedPostsWithReplyTo,
         referencedArticles = allArticles,
         referencedHighlights = referencedHighlights,
@@ -94,6 +100,13 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
     val refEvents = referencedEvents.mapNotNull { it.content.decodeFromJsonStringOrNull<NostrEvent>() }
     val streamData = liveActivity.mapNotNullAsStreamDataPO() + refEvents.mapNotNullAsStreamDataPO()
 
+    val pollStatsMap = this.primalPollStats.parseAndMapPrimalPollStats()
+    val allPollData = (this.polls + refEvents).mapNotNullAsPollDataPO()
+    val pollDataWithStats = allPollData.filter { it.postId in pollStatsMap }.applyPollStats(pollStatsMap)
+    val pollDataWithoutStats = allPollData.filter { it.postId !in pollStatsMap }
+    val pollData = pollDataWithStats + pollDataWithoutStats
+    val pollVotes = this.pollResponses.mapAsPollResponseVotes() + this.zaps.mapAsZapPollVotes()
+
     val noteNostrUris = allPosts.flatMapPostsAsReferencedNostrUriDO(
         eventIdToNostrEvent = refEvents.associateBy { it.id },
         postIdToPostDataMap = allPosts.associateBy { it.postId },
@@ -103,6 +116,7 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
         cdnResources = cdnResources,
         videoThumbnails = videoThumbnails,
         linkPreviews = linkPreviews,
+        postIdToPollDataMap = pollData.associateBy { it.postId },
     ).mapReferencedNostrUriAsEventUriNostrPO()
 
     val eventZaps = zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })
@@ -112,6 +126,9 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
 
     database.profiles().insertOrUpdateAll(data = profiles)
     database.posts().upsertAll(data = allPosts)
+    database.polls().upsertAll(data = pollDataWithStats)
+    database.polls().insertAllOrIgnore(data = pollDataWithoutStats)
+    database.pollVotes().upsertAll(data = pollVotes)
     database.eventUris().upsertAllEventUris(data = noteAttachments)
     database.eventUris().upsertAllEventNostrUris(data = noteNostrUris)
     database.reposts().upsertAll(data = reposts)
@@ -153,14 +170,31 @@ internal suspend fun FeedResponse.persistNoteRepliesAndArticleCommentsToDatabase
     val articles = this.articles.mapNotNullAsArticleDataPO(cdnResources = cdnResources)
 
     database.withTransaction {
-        database.threadConversations().connectNoteWithReply(
-            data = notes.map {
-                NoteConversationCrossRef(
-                    noteId = noteId,
-                    replyNoteId = it.id,
-                )
-            },
-        )
+        val eventsById = (notes + polls).associateBy { it.id }
+
+        // Walk ancestor chain upward from noteId and connect ancestors to this conversation
+        val ancestors = mutableSetOf<String>()
+        var currentId: String? = noteId
+        while (currentId != null) {
+            val event = eventsById[currentId]
+            val parentId = event?.tags?.findReplyTargetId()
+            if (parentId != null && parentId != currentId && ancestors.add(parentId)) {
+                currentId = parentId
+            } else {
+                break
+            }
+        }
+
+        if (ancestors.isNotEmpty()) {
+            database.threadConversations().connectNoteWithReply(
+                data = ancestors.map {
+                    NoteConversationCrossRef(
+                        noteId = noteId,
+                        replyNoteId = it,
+                    )
+                },
+            )
+        }
         database.threadConversations().connectArticleWithComment(
             data = articles.map { article ->
                 ArticleCommentCrossRef(

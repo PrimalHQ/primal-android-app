@@ -37,6 +37,7 @@ fun AvatarThumbnailsRow(
     maxAvatarsToShow: Int? = null,
     displayAvatarOverflowIndicator: Boolean = true,
     onClick: ((Int) -> Unit)? = null,
+    defaultAvatar: @Composable () -> Unit = { DefaultAvatarThumbnailPlaceholderListItemImage() },
 ) {
     val avatarVisibleWidth = if (avatarOverlap.isNone()) {
         avatarSize + avatarSpacing
@@ -84,6 +85,7 @@ fun AvatarThumbnailsRow(
                         } else {
                             null
                         },
+                        defaultAvatar = defaultAvatar,
                     )
                 }
             }

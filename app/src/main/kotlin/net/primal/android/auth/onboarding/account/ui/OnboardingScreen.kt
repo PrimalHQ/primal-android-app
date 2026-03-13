@@ -5,22 +5,20 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import net.primal.android.R
-import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.OnboardingViewModel
-import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
+import net.primal.android.core.compose.ColumnWithBackground
+import net.primal.android.core.compose.PrimalGradientAlpha
+import net.primal.android.core.compose.PrimalGradientBackgroundColor
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.primalGradientBrush
 import net.primal.android.stream.player.hideStreamMiniPlayer
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -46,7 +44,7 @@ fun OnboardingScreen(viewModel: OnboardingViewModel, callbacks: OnboardingContra
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun OnboardingScreen(
     state: OnboardingContract.UiState,
@@ -66,7 +64,9 @@ private fun OnboardingScreen(
         },
     ) { onboardingStep ->
         ColumnWithBackground(
-            backgroundPainter = onboardingStep.backgroundPainter(),
+            backgroundBrushProvider = ::primalGradientBrush,
+            brushAlpha = PrimalGradientAlpha,
+            backgroundColor = PrimalGradientBackgroundColor,
         ) {
             when (onboardingStep) {
                 OnboardingStep.Details -> OnboardingProfileDetailsScreen(
@@ -75,13 +75,7 @@ private fun OnboardingScreen(
                     onBack = onBack,
                 )
 
-                OnboardingStep.Interests -> OnboardingProfileInterestsScreen(
-                    state = state,
-                    eventPublisher = eventPublisher,
-                    onBack = onBack,
-                )
-
-                OnboardingStep.Follows -> OnboardingProfileFollowsScreen(
+                OnboardingStep.FollowPacks -> OnboardingFollowPacksScreen(
                     state = state,
                     eventPublisher = eventPublisher,
                     onBack = onBack,
@@ -98,41 +92,13 @@ private fun OnboardingScreen(
     }
 }
 
-@Composable
-private fun OnboardingStep.backgroundPainter(): Painter {
-    return when (this) {
-        OnboardingStep.Details -> painterResource(id = R.drawable.onboarding_spot2)
-        OnboardingStep.Interests -> painterResource(id = R.drawable.onboarding_spot3)
-        OnboardingStep.Follows -> painterResource(id = R.drawable.onboarding_spot4)
-        OnboardingStep.Preview -> painterResource(id = R.drawable.onboarding_spot5)
-    }
-}
-
 private class UiStateProvider(
     override val values: Sequence<OnboardingContract.UiState> = sequenceOf(
         OnboardingContract.UiState(
             currentStep = OnboardingStep.Details,
         ),
         OnboardingContract.UiState(
-            currentStep = OnboardingStep.Interests,
-            allSuggestions = listOf(
-                FollowGroup(name = "art", members = emptyList()),
-                FollowGroup(name = "bitcoin", members = emptyList()),
-                FollowGroup(name = "memes", members = emptyList()),
-                FollowGroup(name = "primal", members = emptyList()),
-                FollowGroup(name = "android", members = emptyList()),
-                FollowGroup(name = "nostr", members = emptyList()),
-                FollowGroup(name = "developers", members = emptyList()),
-                FollowGroup(name = "designers", members = emptyList()),
-                FollowGroup(name = "human rights", members = emptyList()),
-            ),
-            selectedSuggestions = listOf(
-                FollowGroup(name = "bitcoin", members = emptyList()),
-                FollowGroup(name = "memes", members = emptyList()),
-            ),
-        ),
-        OnboardingContract.UiState(
-            currentStep = OnboardingStep.Follows,
+            currentStep = OnboardingStep.FollowPacks,
         ),
         OnboardingContract.UiState(
             currentStep = OnboardingStep.Preview,

@@ -83,6 +83,7 @@ internal class BreezSdkInstanceManager(
             syncIntervalSecs = 15.toUInt()
             privateEnabledDefault = true
             preferSparkOverLightning = true
+            supportLnurlVerify = true
         }
 
         val storageDir = storageProvider.getStorageDirectory(walletId)

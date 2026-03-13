@@ -19,11 +19,13 @@ import net.primal.android.core.errors.UiError.FailedToPublishZapEvent
 import net.primal.android.core.errors.UiError.GenericError
 import net.primal.android.core.errors.UiError.InvalidZapRequest
 import net.primal.android.networking.relays.errors.NostrPublishException
+import net.primal.android.notes.feed.model.PollState
 import net.primal.android.notes.feed.note.NoteContract.SideEffect
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.NoteContract.UiState
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
+import net.primal.android.wallet.repository.ExchangeRateHandler
 import net.primal.android.wallet.zaps.ZapHandler
 import net.primal.core.utils.CurrencyConversionUtils.formatAsString
 import net.primal.domain.account.WalletAccountRepository
@@ -35,12 +37,17 @@ import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
+import net.primal.domain.nostr.asPollOptionTag
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapResult
 import net.primal.domain.nostr.zaps.ZapTarget
+import net.primal.domain.polls.PollAlreadyVotedException
+import net.primal.domain.polls.PollAuthorCannotVoteException
+import net.primal.domain.polls.PollExpiredException
+import net.primal.domain.polls.PollsRepository
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.utils.isConfigured
@@ -50,9 +57,11 @@ class NoteViewModel @AssistedInject constructor(
     @Assisted private val noteId: String?,
     private val activeAccountStore: ActiveAccountStore,
     private val zapHandler: ZapHandler,
+    private val exchangeRateHandler: ExchangeRateHandler,
     private val eventInteractionRepository: EventInteractionRepository,
     private val profileRepository: ProfileRepository,
     private val feedRepository: FeedRepository,
+    private val pollsRepository: PollsRepository,
     private val mutedItemRepository: MutedItemRepository,
     private val bookmarksRepository: PublicBookmarksRepository,
     private val relayHintsRepository: EventRelayHintsRepository,
@@ -79,9 +88,12 @@ class NoteViewModel @AssistedInject constructor(
     init {
         observeEvents()
         observeActiveWallet()
+        fetchExchangeRate()
+        observeUsdExchangeRate()
         subscribeToActiveAccount()
         if (noteId != null) {
             prepareRelayHints(noteId = noteId)
+            observeUserVotedOptions(noteId = noteId)
         }
     }
 
@@ -90,6 +102,28 @@ class NoteViewModel @AssistedInject constructor(
             val hints = relayHintsRepository.findRelaysByIds(eventIds = listOf(noteId))
             hints.firstOrNull()?.let { relayHints ->
                 setState { copy(relayHints = relayHints.relays.take(n = 2)) }
+            }
+        }
+
+    private fun observeUserVotedOptions(noteId: String) =
+        viewModelScope.launch {
+            pollsRepository.observeUserVotedOptions(
+                userId = activeAccountStore.activeUserId(),
+                postId = noteId,
+            ).collect { votedOptionIds ->
+                setState { copy(userVotedOptionIds = votedOptionIds) }
+            }
+        }
+
+    private fun fetchExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.updateExchangeRate(userId = activeAccountStore.activeUserId())
+        }
+
+    private fun observeUsdExchangeRate() =
+        viewModelScope.launch {
+            exchangeRateHandler.usdExchangeRate.collect {
+                setState { copy(currentExchangeRate = it) }
             }
         }
 
@@ -123,6 +157,7 @@ class NoteViewModel @AssistedInject constructor(
             }
         }
 
+    @Suppress("CyclomaticComplexMethod")
     private fun observeEvents() =
         viewModelScope.launch {
             events.collect {
@@ -144,6 +179,9 @@ class NoteViewModel @AssistedInject constructor(
                         repostId = it.repostId,
                         repostAuthorId = it.repostAuthorId,
                     )
+
+                    is UiEvent.PollVoteAction -> votePoll(it)
+                    is UiEvent.ZapPollVoteAction -> zapPollVote(it)
                 }
             }
         }
@@ -446,4 +484,156 @@ class NoteViewModel @AssistedInject constructor(
         viewModelScope.launch {
             setState { copy(shouldApproveBookmark = false) }
         }
+
+    private fun votePoll(action: UiEvent.PollVoteAction) =
+        viewModelScope.launch {
+            val currentPoll = action.poll
+
+            val updatedOptions = currentPoll.options.map { option ->
+                val newCount = option.voteCount + if (option.id == action.optionId) 1 else 0
+                option.copy(voteCount = newCount)
+            }
+
+            val totalVotes = updatedOptions.sumOf { it.voteCount }.coerceAtLeast(1)
+            val maxCount = updatedOptions.maxOf { it.voteCount }
+
+            setState {
+                copy(
+                    poll = currentPoll.copy(
+                        state = PollState.Voted,
+                        selectedOptionIds = currentPoll.selectedOptionIds + action.optionId,
+                        options = updatedOptions.map { option ->
+                            option.copy(
+                                votePercentage = option.voteCount.toFloat() / totalVotes,
+                                isWinner = option.voteCount == maxCount,
+                            )
+                        },
+                    ),
+                )
+            }
+
+            pollsRepository.votePoll(
+                userId = activeAccountStore.activeUserId(),
+                pollEventId = action.postId,
+                optionId = action.optionId,
+            ).onFailure { error ->
+                Napier.w(throwable = error) { "Failed to publish poll vote." }
+                setState { copy(poll = null) }
+                when (error) {
+                    is PollAlreadyVotedException -> setState { copy(error = UiError.PollAlreadyVoted) }
+                    is PollExpiredException -> setState { copy(error = UiError.PollExpired) }
+                    is PollAuthorCannotVoteException -> setState { copy(error = UiError.PollAuthorCannotVote) }
+                    is NostrPublishException -> setState { copy(error = UiError.FailedToVotePoll(error)) }
+                    is MissingRelaysException -> setState { copy(error = UiError.MissingRelaysConfiguration(error)) }
+                    is SigningKeyNotFoundException -> setState { copy(error = UiError.MissingPrivateKey) }
+                    is SigningRejectedException -> setState { copy(error = UiError.NostrSignUnauthorized) }
+                    else -> setState { copy(error = UiError.FailedToVotePoll(error)) }
+                }
+            }
+        }
+
+    private fun zapPollVote(action: UiEvent.ZapPollVoteAction) =
+        viewModelScope.launch {
+            applyOptimisticZapPollUpdate(action)
+
+            val zapRecipientId = action.poll.zapRecipientId
+            if (zapRecipientId == null) {
+                setState { copy(poll = null) }
+                val error = IllegalStateException("Missing zap recipient")
+                setState { copy(error = UiError.MissingLightningAddress(error)) }
+                return@launch
+            }
+
+            val recipientProfileData = profileRepository.findProfileDataOrNull(
+                profileId = zapRecipientId,
+            )
+            val lnUrlDecoded = recipientProfileData?.lnUrlDecoded
+            if (lnUrlDecoded == null) {
+                setState { copy(poll = null) }
+                val error = IllegalStateException("Missing ln url")
+                setState { copy(error = UiError.MissingLightningAddress(error)) }
+                return@launch
+            }
+
+            val walletId = walletAccountRepository.getActiveWallet(
+                userId = activeAccountStore.activeUserId(),
+            )?.walletId ?: return@launch
+
+            pollsRepository.validateZapPollVote(
+                userId = activeAccountStore.activeUserId(),
+                pollEventId = action.postId,
+            ).onFailure { error ->
+                Napier.w(throwable = error) { "Failed to validate zap poll vote." }
+                setState { copy(poll = null) }
+                when (error) {
+                    is PollAlreadyVotedException -> setState { copy(error = UiError.PollAlreadyVoted) }
+                    is PollExpiredException -> setState { copy(error = UiError.PollExpired) }
+                    is PollAuthorCannotVoteException -> setState { copy(error = UiError.PollAuthorCannotVote) }
+                    else -> setState { copy(error = UiError.FailedToVotePoll(error)) }
+                }
+                return@launch
+            }
+
+            val result = zapHandler.zap(
+                userId = activeAccountStore.activeUserId(),
+                walletId = walletId,
+                comment = action.zapComment ?: "",
+                amountInSats = action.zapAmount.toULong(),
+                target = ZapTarget.Event(
+                    eventId = action.postId,
+                    recipientUserId = zapRecipientId,
+                    recipientLnUrlDecoded = lnUrlDecoded,
+                ),
+                optionalTags = listOf(action.optionId.asPollOptionTag()),
+            )
+
+            if (result is ZapResult.Failure) {
+                setState { copy(poll = null) }
+                when (result.error) {
+                    is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
+                    is ZapError.FailedToFetchZapInvoice,
+                    -> setState { copy(error = InvalidZapRequest()) }
+
+                    is ZapError.FailedToPayZap, ZapError.FailedToPublishEvent,
+                    ZapError.FailedToSignEvent, is ZapError.Timeout,
+                    -> setState { copy(error = FailedToPublishZapEvent()) }
+
+                    is ZapError.Unknown -> setState { copy(error = GenericError()) }
+                }
+            } else {
+                pollsRepository.recordZapPollVote(
+                    userId = activeAccountStore.activeUserId(),
+                    pollEventId = action.postId,
+                    optionId = action.optionId,
+                    amountInSats = action.zapAmount,
+                    zapComment = action.zapComment,
+                )
+            }
+        }
+
+    private fun applyOptimisticZapPollUpdate(action: UiEvent.ZapPollVoteAction) {
+        val currentPoll = action.poll
+        val updatedOptions = currentPoll.options.map { option ->
+            val newSats = option.satsZapped + if (option.id == action.optionId) action.zapAmount else 0
+            option.copy(satsZapped = newSats)
+        }
+        val totalSats = updatedOptions.sumOf { it.satsZapped }
+        val maxSats = updatedOptions.maxOf { it.satsZapped }
+
+        setState {
+            copy(
+                poll = currentPoll.copy(
+                    state = PollState.Voted,
+                    selectedOptionIds = currentPoll.selectedOptionIds + action.optionId,
+                    options = updatedOptions.map { option ->
+                        option.copy(
+                            voteCount = option.voteCount + if (option.id == action.optionId) 1 else 0,
+                            votePercentage = if (totalSats > 0) option.satsZapped.toFloat() / totalSats else 0f,
+                            isWinner = option.satsZapped == maxSats,
+                        )
+                    },
+                ),
+            )
+        }
+    }
 }

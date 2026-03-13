@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import net.primal.android.core.compose.foundation.KeepScreenOn
-import net.primal.android.profile.qr.ui.profileQrCodeButtonBackgroundColor
 import net.primal.android.scanner.domain.QrCodeResult
 
 @Composable
@@ -61,12 +60,6 @@ fun QrCodeScanner(
         } else {
             MissingCameraPermissionContent(
                 modifier = Modifier.fillMaxSize(),
-                colors = missingCameraPermissionColors(
-                    iconContainerColor = Color.White,
-                    buttonContainerColor = profileQrCodeButtonBackgroundColor,
-                    buttonContentColor = Color.White,
-                    textColor = Color.White,
-                ),
                 onPermissionChange = { allowed ->
                     hasCameraPermission = allowed
                 },

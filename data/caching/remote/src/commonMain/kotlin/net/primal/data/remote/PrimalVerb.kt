@@ -12,6 +12,7 @@ enum class PrimalVerb(val id: String) {
     GET_DEFAULT_APP_SETTINGS("get_default_app_settings"),
     SET_APP_SETTINGS("set_app_settings"),
     THREAD_VIEW("thread_view"),
+    MULTI_KIND_THREAD_VIEW("multi_kind_thread_view"),
     EVENTS("events"),
     USER_SEARCH("user_search"),
     IMPORT_EVENTS("import_events"),
@@ -36,6 +37,7 @@ enum class PrimalVerb(val id: String) {
     ARTICLE_THREAD_VIEW("long_form_content_thread_view"),
     GET_HIGHLIGHTS("get_highlights"),
     MEGA_FEED_DIRECTIVE("mega_feed_directive"),
+    MULTI_KIND_MEGA_FEED_DIRECTIVE("multi_kind_mega_feed_directive"),
     GET_FEATURED_DVM_FEEDS("get_featured_dvm_feeds"),
     GET_DEFAULT_APP_SUB_SETTINGS("get_default_app_subsettings"),
     GET_APP_SUB_SETTINGS("get_app_subsettings"),
@@ -80,4 +82,5 @@ enum class PrimalVerb(val id: String) {
     INVOICES_TO_ZAP_RECEIPTS("invoices_to_zap_receipts"),
     UPDATE_PUSH_NOTIFICATION_TOKEN_FOR_NIP46("update_push_notification_token_for_nip46"),
     EVENTS_NIP46("events_nip46"),
+    POLL_VOTES("poll_votes"),
 }

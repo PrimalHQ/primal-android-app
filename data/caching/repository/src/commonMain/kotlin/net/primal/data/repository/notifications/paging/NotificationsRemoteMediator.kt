@@ -138,6 +138,9 @@ class NotificationsRemoteMediator(
                 primalLegendProfiles = response.primalLegendProfiles,
                 primalPremiumInfo = response.primalPremiumInfo,
                 blossomServers = response.blossomServers,
+                polls = response.polls,
+                pollResponses = response.pollResponses,
+                primalPollStats = response.primalPollStats,
             ).persistToDatabaseAsTransaction(
                 userId = userId,
                 database = database,

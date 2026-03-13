@@ -176,6 +176,7 @@ fun NoteContent(
     onClick: ((offset: Offset) -> Unit)? = null,
     onUrlClick: ((url: String) -> Unit)? = null,
     onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
+    onPollOptionSelected: ((optionId: String) -> Unit)? = null,
 ) {
     val isDarkTheme = LocalPrimalTheme.current.isDarkTheme
     val displaySettings = LocalContentDisplaySettings.current
@@ -238,6 +239,19 @@ fun NoteContent(
                 overflow = overflow,
                 textSelectable = textSelectable,
                 onClick = clickHandler,
+            )
+        }
+
+        if (data.poll != null) {
+            NotePollContent(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = if (contentText.isEmpty()) 4.dp else 6.dp),
+                poll = data.poll,
+                onOptionSelected = { optionId -> onPollOptionSelected?.invoke(optionId) },
+                onVotesClick = noteCallbacks.onPollVotesClick?.let { callback ->
+                    { callback(data.noteId) }
+                },
             )
         }
 

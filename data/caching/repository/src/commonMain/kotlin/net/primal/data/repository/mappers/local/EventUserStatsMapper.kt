@@ -11,5 +11,6 @@ fun EventUserStats.asNostrEventUserStats(): NostrEventUserStats {
         liked = this.liked,
         reposted = this.reposted,
         zapped = this.zapped,
+        votedForOption = this.votedForOption,
     )
 }

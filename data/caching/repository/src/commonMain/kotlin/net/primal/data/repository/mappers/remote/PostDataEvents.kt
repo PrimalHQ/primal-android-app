@@ -10,14 +10,11 @@ import net.primal.domain.common.PrimalEvent
 import net.primal.domain.common.util.takeContentOrNull
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.findReplyTargetId
 import net.primal.domain.nostr.getPubkeyFromReplyOrRootTag
-import net.primal.domain.nostr.getTagValueOrNull
-import net.primal.domain.nostr.hasMentionMarker
 import net.primal.domain.nostr.hasReplyMarker
 import net.primal.domain.nostr.hasRootMarker
-import net.primal.domain.nostr.isEventIdTag
 import net.primal.domain.nostr.isIMetaTag
-import net.primal.domain.nostr.isQuoteTag
 import net.primal.domain.nostr.serialization.toNostrJsonObject
 import net.primal.domain.nostr.utils.parseHashtags
 import net.primal.domain.nostr.utils.parseNostrUris
@@ -30,8 +27,8 @@ fun List<NostrEvent>.mapAsPostDataPO(
     val referencedPostsMap = referencedPosts.associateBy { it.postId }
     val referencedArticlesMap = referencedArticles.associateBy { it.articleId }
     val referencedHighlightsMap = referencedHighlights.associateBy { it.highlightId }
-    return map {
-        it.shortTextNoteAsPost(
+    return map { event ->
+        event.nostrEventAsPost(
             referencedPostsMap = referencedPostsMap,
             referencedArticlesMap = referencedArticlesMap,
             referencedHighlightsMap = referencedHighlightsMap,
@@ -48,11 +45,18 @@ fun List<PrimalEvent>.mapNotNullAsPostDataPO(
     val referencedArticlesMap = referencedArticles.associateBy { it.articleId }
     val referencedHighlightsMap = referencedHighlights.associateBy { it.highlightId }
 
+    val postKinds = setOf(
+        NostrEventKind.ShortTextNote.value,
+        NostrEventKind.Poll.value,
+        NostrEventKind.ZapPoll.value,
+    )
+
     val events = this.mapNotNull { it.takeContentOrNull<NostrEvent>() }
-    val notes = events
-        .filter { event -> event.kind == NostrEventKind.ShortTextNote.value }
+
+    val posts = events
+        .filter { event -> event.kind in postKinds }
         .map {
-            it.shortTextNoteAsPost(
+            it.nostrEventAsPost(
                 referencedPostsMap = referencedPostsMap,
                 referencedArticlesMap = referencedArticlesMap,
                 referencedHighlightsMap = referencedHighlightsMap,
@@ -63,23 +67,21 @@ fun List<PrimalEvent>.mapNotNullAsPostDataPO(
         .filter { event -> event.kind == NostrEventKind.PictureNote.value }
         .map { it.pictureNoteAsPost() }
 
-    return notes + pictures
+    return posts + pictures
 }
 
-private fun NostrEvent.shortTextNoteAsPost(
-    referencedPostsMap: Map<String, PostData>,
-    referencedArticlesMap: Map<String, ArticleData>,
-    referencedHighlightsMap: Map<String, HighlightData>,
-): PostData {
-    val isQuote = this.tags.any { it.isQuoteTag() }
-    val isReply = !isQuote && (
-        this.tags.any { it.hasReplyMarker() } || this.tags.any { it.hasRootMarker() } ||
-            this.tags.any { it.isEventIdTag() && !it.hasMentionMarker() }
-        )
+private data class ReplyReference(
+    val replyToPostId: String?,
+    val replyToAuthorId: String?,
+)
 
-    val referencedNoteId = this.tags.find { it.hasReplyMarker() }?.getTagValueOrNull()
-        ?: this.tags.find { it.hasRootMarker() }?.getTagValueOrNull()
-        ?: this.tags.filterNot { it.hasMentionMarker() }.lastOrNull { it.isEventIdTag() }?.getTagValueOrNull()
+private fun NostrEvent.resolveReplyReference(
+    referencedPostsMap: Map<String, PostData> = emptyMap(),
+    referencedArticlesMap: Map<String, ArticleData> = emptyMap(),
+    referencedHighlightsMap: Map<String, HighlightData> = emptyMap(),
+): ReplyReference {
+    val referencedNoteId = this.tags.findReplyTargetId()
+        ?: return ReplyReference(replyToPostId = null, replyToAuthorId = null)
 
     val referencedNoteAuthorId = this.tags.find { it.hasReplyMarker() }?.getPubkeyFromReplyOrRootTag()
         ?: this.tags.find { it.hasRootMarker() }?.getPubkeyFromReplyOrRootTag()
@@ -87,18 +89,33 @@ private fun NostrEvent.shortTextNoteAsPost(
         ?: referencedArticlesMap[referencedNoteId]?.authorId
         ?: referencedHighlightsMap[referencedNoteId]?.authorId
 
+    return ReplyReference(replyToPostId = referencedNoteId, replyToAuthorId = referencedNoteAuthorId)
+}
+
+private fun NostrEvent.nostrEventAsPost(
+    referencedPostsMap: Map<String, PostData> = emptyMap(),
+    referencedArticlesMap: Map<String, ArticleData> = emptyMap(),
+    referencedHighlightsMap: Map<String, HighlightData> = emptyMap(),
+): PostData {
+    val reply = resolveReplyReference(
+        referencedPostsMap = referencedPostsMap,
+        referencedArticlesMap = referencedArticlesMap,
+        referencedHighlightsMap = referencedHighlightsMap,
+    )
+
     return PostData(
         postId = this.id,
         authorId = this.pubKey,
         createdAt = this.createdAt,
+        kind = this.kind,
         tags = this.tags,
         content = this.content,
         uris = this.content.detectUrls() + this.content.parseNostrUris(),
         hashtags = this.parseHashtags(),
         sig = this.sig,
         raw = this.toNostrJsonObject().encodeToJsonString(),
-        replyToPostId = if (isReply) referencedNoteId else null,
-        replyToAuthorId = if (isReply) referencedNoteAuthorId else null,
+        replyToPostId = reply.replyToPostId,
+        replyToAuthorId = reply.replyToAuthorId,
     )
 }
 
@@ -110,6 +127,7 @@ private fun NostrEvent.pictureNoteAsPost(): PostData {
         postId = this.id,
         authorId = this.pubKey,
         createdAt = this.createdAt,
+        kind = this.kind,
         tags = this.tags,
         content = content,
         uris = content.detectUrls() + content.parseNostrUris(),

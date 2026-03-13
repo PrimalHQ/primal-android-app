@@ -63,6 +63,9 @@ import net.primal.android.editor.domain.NoteEditorArgs
 import net.primal.android.editor.domain.NoteEditorArgs.Companion.jsonAsNoteEditorArgs
 import net.primal.android.events.gallery.EventMediaGalleryScreen
 import net.primal.android.events.gallery.EventMediaGalleryViewModel
+import net.primal.android.events.polls.votes.PollVotesContract
+import net.primal.android.events.polls.votes.PollVotesScreen
+import net.primal.android.events.polls.votes.PollVotesViewModel
 import net.primal.android.events.reactions.ReactionsContract
 import net.primal.android.events.reactions.ReactionsViewModel
 import net.primal.android.events.reactions.ui.ReactionsScreen
@@ -457,6 +460,7 @@ fun noteCallbacksHandler(navController: NavController) =
         onEventReactionsClick = { eventId, initialTab, articleATag ->
             navController.navigateToReactions(eventId = eventId, initialTab = initialTab, articleATag = articleATag)
         },
+        onPollVotesClick = { eventId -> navController.navigateToPollVotes(eventId = eventId) },
         onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
         onPrimalLegendsLeaderboardClick = { navController.navigateToPremiumLegendLeaderboard() },
     )
@@ -529,6 +533,13 @@ private fun PrimalAppNavigation(
         navController = navController,
         startDestination = startDestination,
     ) {
+        pollVotes(
+            route = "poll_votes/{$EVENT_ID}",
+            arguments = listOf(
+                navArgument(EVENT_ID) { type = NavType.StringType },
+            ),
+            navController = navController,
+        )
         welcome(route = "welcome", navController = navController)
 
         login(route = "login", navController = navController)
@@ -1127,7 +1138,7 @@ private fun NavGraphBuilder.welcome(route: String, navController: NavController)
     ) {
         LockToOrientationPortrait()
         PrimalTheme(PrimalTheme.Midnight) {
-            ApplyEdgeToEdge(isDarkTheme = true)
+            ApplyEdgeToEdge(isDarkTheme = false)
             WelcomeScreen(
                 callbacks = WelcomeContract.ScreenCallbacks(
                     onSignInClick = { navController.navigateToLogin() },
@@ -1156,7 +1167,7 @@ private fun NavGraphBuilder.login(route: String, navController: NavController) =
         val viewModel: LoginViewModel = hiltViewModel(it)
         LockToOrientationPortrait()
         PrimalTheme(PrimalTheme.Midnight) {
-            ApplyEdgeToEdge(isDarkTheme = true)
+            ApplyEdgeToEdge(isDarkTheme = false)
             LoginScreen(
                 viewModel = viewModel,
                 callbacks = LoginContract.ScreenCallbacks(
@@ -1191,7 +1202,7 @@ private fun NavGraphBuilder.onboarding(route: String, navController: NavControll
 
         LockToOrientationPortrait()
         PrimalTheme(PrimalTheme.Midnight) {
-            ApplyEdgeToEdge(isDarkTheme = true)
+            ApplyEdgeToEdge(isDarkTheme = false)
             OnboardingScreen(
                 viewModel = viewModel,
                 callbacks = OnboardingContract.ScreenCallbacks(
@@ -2502,7 +2513,7 @@ private fun NavGraphBuilder.profileQrCodeViewer(
     val streamState = LocalStreamState.current
     val viewModel = hiltViewModel<ProfileQrCodeViewModel>()
     PrimalTheme(primalTheme = PrimalTheme.Midnight) {
-        ApplyEdgeToEdge(isDarkTheme = true)
+        ApplyEdgeToEdge(isDarkTheme = false)
         LockToOrientationPortrait()
         ProfileQrCodeViewerScreen(
             viewModel = viewModel,
@@ -2553,6 +2564,31 @@ private fun NavGraphBuilder.logout(
             onClose = { navController.popBackStack() },
             navigateToHome = { navController.navigateToHome() },
             navigateToWelcome = { navController.navigateToWelcome() },
+        ),
+    )
+}
+
+fun NavController.navigateToPollVotes(eventId: String) = navigate(route = "poll_votes/$eventId")
+
+private fun NavGraphBuilder.pollVotes(
+    route: String,
+    arguments: List<NamedNavArgument>,
+    navController: NavController,
+) = composable(
+    route = route,
+    arguments = arguments,
+    enterTransition = { primalSlideInHorizontallyFromEnd },
+    exitTransition = { primalScaleOut },
+    popEnterTransition = { primalScaleIn },
+    popExitTransition = { primalSlideOutHorizontallyToEnd },
+) {
+    ApplyEdgeToEdge()
+    val viewModel = hiltViewModel<PollVotesViewModel>()
+    PollVotesScreen(
+        viewModel = viewModel,
+        callbacks = PollVotesContract.ScreenCallbacks(
+            onClose = { navController.navigateUp() },
+            onProfileClick = { profileId -> navController.navigateToProfile(profileId = profileId) },
         ),
     )
 }

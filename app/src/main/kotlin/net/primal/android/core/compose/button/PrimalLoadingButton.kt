@@ -48,6 +48,7 @@ fun PrimalLoadingButton(
     containerColor: Color = AppTheme.colorScheme.primary,
     contentColor: Color = Color.White,
     disabledContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+    disabledContentColor: Color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
 ) {
     PrimalFilledButton(
         modifier = modifier,
@@ -60,6 +61,7 @@ fun PrimalLoadingButton(
         contentPadding = contentPadding,
         containerColor = containerColor,
         disabledContainerColor = disabledContainerColor,
+        disabledContentColor = disabledContentColor,
         content = {
             if (loading) {
                 LoadingContent(

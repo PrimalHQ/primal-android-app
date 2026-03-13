@@ -50,13 +50,18 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import net.primal.android.R
-import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.compose.OnboardingBottomBar
+import net.primal.android.auth.compose.defaultAvatarForeground
 import net.primal.android.auth.compose.onboardingTextHintTypography
 import net.primal.android.auth.onboarding.account.AccountCreationStep
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
+import net.primal.android.core.compose.ColumnWithBackground
+import net.primal.android.core.compose.PrimalDarkTextColor
+import net.primal.android.core.compose.PrimalGradientAlpha
+import net.primal.android.core.compose.PrimalGradientBackgroundColor
 import net.primal.android.core.compose.PrimalScaffold
+import net.primal.android.core.compose.PrimalSecondaryTextColor
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -64,6 +69,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.CheckCircleOutline
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.primalGradientBrush
 import net.primal.android.theme.AppTheme
 
 @ExperimentalMaterial3Api
@@ -103,10 +109,10 @@ fun OnboardingProfilePreviewScreen(
                     scrolledContainerColor = Color.Transparent,
                 ),
                 title = state.resolveAppBarTitle(),
-                textColor = Color.White,
+                textColor = PrimalDarkTextColor,
                 showDivider = false,
                 navigationIcon = if (canGoBack) PrimalIcons.ArrowBack else null,
-                navigationIconTintColor = Color.White,
+                navigationIconTintColor = PrimalDarkTextColor,
                 onNavigationIconClick = { if (canGoBack) onBack() },
             )
         },
@@ -168,7 +174,11 @@ private fun ProfilePreviewBottomBar(
             }
         },
         footer = {
-            OnboardingStepsIndicator(currentPage = OnboardingStep.Preview.index)
+            val currentPage = when (accountCreationStep) {
+                AccountCreationStep.AccountPreview -> OnboardingStep.Preview.index
+                AccountCreationStep.AccountCreated -> OnboardingStep.Preview.index + 1
+            }
+            OnboardingStepsIndicator(currentPage = currentPage)
         },
     )
 }
@@ -224,7 +234,7 @@ private fun ProfileAccountPreviewContent(
                 text = stringResource(id = R.string.onboarding_profile_preview_hint),
                 textAlign = TextAlign.Center,
                 style = onboardingTextHintTypography(),
-                color = Color.White.copy(alpha = 0.8f),
+                color = PrimalDarkTextColor.copy(alpha = 0.8f),
             )
         }
     }
@@ -308,7 +318,7 @@ private fun ProfilePreviewBox(
                 Text(
                     text = aboutYou,
                     style = AppTheme.typography.bodySmall,
-                    color = Color.Black,
+                    color = PrimalSecondaryTextColor,
                 )
             }
         }
@@ -340,6 +350,7 @@ private fun PreviewAvatarBox(modifier: Modifier = Modifier, avatarUri: Uri?) {
                         modifier = Modifier.fillMaxSize(),
                         imageVector = PrimalIcons.AvatarDefault,
                         contentDescription = null,
+                        tint = defaultAvatarForeground,
                     )
                 }
 
@@ -438,7 +449,7 @@ private fun ProfileAccountCreatedContent(modifier: Modifier = Modifier, state: O
                 text = stringResource(id = R.string.onboarding_profile_success_hint),
                 textAlign = TextAlign.Center,
                 style = onboardingTextHintTypography(),
-                color = Color.White.copy(alpha = 0.8f),
+                color = PrimalDarkTextColor.copy(alpha = 0.8f),
             )
         }
     }
@@ -466,7 +477,7 @@ private fun ProfileCreatedSuccessBox(
             style = AppTheme.typography.bodyLarge.copy(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = PrimalDarkTextColor,
             ),
         )
 
@@ -476,7 +487,7 @@ private fun ProfileCreatedSuccessBox(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    color = Color.Black.copy(alpha = 0.35f),
+                    color = Color.White.copy(alpha = 0.60f),
                     shape = AppTheme.shapes.large,
                 )
                 .padding(vertical = 24.dp),
@@ -486,7 +497,7 @@ private fun ProfileCreatedSuccessBox(
             Image(
                 imageVector = PrimalIcons.CheckCircleOutline,
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(color = Color.White),
+                colorFilter = ColorFilter.tint(color = PrimalDarkTextColor),
                 modifier = Modifier.padding(start = 26.dp, end = 22.dp),
             )
             Text(
@@ -495,7 +506,7 @@ private fun ProfileCreatedSuccessBox(
                     fontSize = 18.sp,
                     lineHeight = 22.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.White.copy(alpha = 0.8f),
+                    color = PrimalDarkTextColor.copy(alpha = 0.8f),
                 ),
                 textAlign = TextAlign.Center,
             )
@@ -519,6 +530,7 @@ private fun SuccessAvatarBox(modifier: Modifier = Modifier, avatarUri: Uri?) {
                         imageVector = PrimalIcons.AvatarDefault,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
+                        tint = defaultAvatarForeground,
                     )
                 }
 
@@ -544,7 +556,9 @@ private fun SuccessAvatarBox(modifier: Modifier = Modifier, avatarUri: Uri?) {
 private fun PreviewOnboardingProfilePreviewScreen() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         ColumnWithBackground(
-            backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
+            backgroundBrushProvider = ::primalGradientBrush,
+            brushAlpha = PrimalGradientAlpha,
+            backgroundColor = PrimalGradientBackgroundColor,
         ) {
             OnboardingProfilePreviewScreen(
                 state = OnboardingContract.UiState(
@@ -569,7 +583,9 @@ private fun PreviewOnboardingProfilePreviewScreen() {
 private fun PreviewOnboardingProfileSuccessScreen() {
     PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
         ColumnWithBackground(
-            backgroundPainter = painterResource(id = R.drawable.onboarding_spot4),
+            backgroundBrushProvider = ::primalGradientBrush,
+            brushAlpha = PrimalGradientAlpha,
+            backgroundColor = PrimalGradientBackgroundColor,
         ) {
             OnboardingProfilePreviewScreen(
                 state = OnboardingContract.UiState(

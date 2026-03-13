@@ -1,12 +1,14 @@
 package net.primal.android.auth.compose
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.MAX_COMPONENT_WIDTH
+import net.primal.android.core.compose.PrimalDarkButtonColor
 import net.primal.android.core.compose.button.PrimalLoadingButton
 
 @Composable
@@ -20,10 +22,12 @@ fun OnboardingButton(
     PrimalLoadingButton(
         modifier = modifier
             .widthIn(240.dp, MAX_COMPONENT_WIDTH.dp)
+            .height(50.dp)
             .fillMaxWidth(),
-        containerColor = Color.Black.copy(alpha = 0.8f),
-        disabledContainerColor = Color.Black.copy(alpha = 0.20f),
+        containerColor = PrimalDarkButtonColor,
+        disabledContainerColor = PrimalDarkButtonColor.copy(alpha = 0.20f),
         contentColor = Color.White,
+        disabledContentColor = Color.White,
         enabled = enabled,
         loading = loading,
         onClick = onClick,

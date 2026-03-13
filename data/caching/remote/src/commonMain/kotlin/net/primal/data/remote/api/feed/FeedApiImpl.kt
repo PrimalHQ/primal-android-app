@@ -4,8 +4,9 @@ import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
-import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
 import net.primal.data.remote.api.feed.model.FeedResponse
+import net.primal.data.remote.api.feed.model.MultiKindFeedBySpecRequestBody
+import net.primal.data.remote.api.feed.model.MultiKindThreadRequestBody
 import net.primal.data.remote.api.feed.model.NotesRequestBody
 import net.primal.data.remote.api.feed.model.ThreadRequestBody
 import net.primal.domain.nostr.NostrEventKind
@@ -14,10 +15,10 @@ internal class FeedApiImpl(
     private val primalApiClient: PrimalApiClient,
 ) : FeedApi {
 
-    override suspend fun getFeedBySpec(body: FeedBySpecRequestBody): FeedResponse {
+    override suspend fun getMultiKindFeedBySpec(body: MultiKindFeedBySpecRequestBody): FeedResponse {
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
-                primalVerb = net.primal.data.remote.PrimalVerb.MEGA_FEED_DIRECTIVE.id,
+                primalVerb = net.primal.data.remote.PrimalVerb.MULTI_KIND_MEGA_FEED_DIRECTIVE.id,
                 optionsJson = body.encodeToJsonString(),
             ),
         )
@@ -26,7 +27,7 @@ internal class FeedApiImpl(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)?.content.decodeFromJsonStringOrNull(),
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
-            articles = emptyList(),
+            articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
             reposts = queryResult.filterNostrEvents(NostrEventKind.ShortTextNoteRepost),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
             primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
@@ -41,6 +42,10 @@ internal class FeedApiImpl(
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
             genericReposts = queryResult.filterNostrEvents(NostrEventKind.GenericRepost),
             pictureNotes = queryResult.filterNostrEvents(NostrEventKind.PictureNote),
+            polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
+                queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
+            pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
+            primalPollStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalPollStats),
             liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
         )
     }
@@ -57,6 +62,45 @@ internal class FeedApiImpl(
             paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)?.content.decodeFromJsonStringOrNull(),
             metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
+            reposts = emptyList(),
+            zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
+            primalEventStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventStats),
+            primalEventUserStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalEventUserStats),
+            cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
+            primalLinkPreviews = queryResult.filterPrimalEvents(NostrEventKind.PrimalLinkPreview),
+            referencedEvents = queryResult.filterPrimalEvents(NostrEventKind.PrimalReferencedEvent),
+            primalRelayHints = queryResult.filterPrimalEvents(NostrEventKind.PrimalRelayHint),
+            primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
+            primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
+            primalPremiumInfo = queryResult.findPrimalEvent(NostrEventKind.PrimalPremiumInfo),
+            blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
+            genericReposts = emptyList(),
+            pictureNotes = queryResult.filterNostrEvents(NostrEventKind.PictureNote),
+            polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
+                queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
+            pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
+            primalPollStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalPollStats),
+            liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
+        )
+    }
+
+    override suspend fun getMultiKindThread(body: MultiKindThreadRequestBody): FeedResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = net.primal.data.remote.PrimalVerb.MULTI_KIND_THREAD_VIEW.id,
+                optionsJson = body.encodeToJsonString(),
+            ),
+        )
+
+        return FeedResponse(
+            paging = queryResult.findPrimalEvent(NostrEventKind.PrimalPaging)?.content.decodeFromJsonStringOrNull(),
+            metadata = queryResult.filterNostrEvents(NostrEventKind.Metadata),
+            notes = queryResult.filterNostrEvents(NostrEventKind.ShortTextNote),
+            polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
+                queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
+            pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
+            primalPollStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalPollStats),
             articles = queryResult.filterNostrEvents(NostrEventKind.LongFormContent),
             reposts = emptyList(),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
@@ -106,6 +150,10 @@ internal class FeedApiImpl(
             blossomServers = queryResult.filterNostrEvents(NostrEventKind.BlossomServerList),
             genericReposts = emptyList(),
             pictureNotes = queryResult.filterNostrEvents(NostrEventKind.PictureNote),
+            polls = queryResult.filterNostrEvents(NostrEventKind.Poll) +
+                queryResult.filterNostrEvents(NostrEventKind.ZapPoll),
+            pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
+            primalPollStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalPollStats),
             liveActivity = queryResult.filterNostrEvents(NostrEventKind.LiveActivity),
         )
     }

@@ -1,7 +1,7 @@
 package net.primal.android.auth.onboarding.account
 
 import android.net.Uri
-import net.primal.android.auth.onboarding.account.ui.model.FollowGroup
+import net.primal.android.auth.onboarding.account.ui.model.OnboardingFollowPack
 
 interface OnboardingContract {
 
@@ -16,9 +16,9 @@ interface OnboardingContract {
         val accountCreated: Boolean = false,
         val accountCreationStep: AccountCreationStep = AccountCreationStep.AccountPreview,
         val working: Boolean = false,
-        val allSuggestions: List<FollowGroup> = emptyList(),
-        val selectedSuggestions: List<FollowGroup> = emptyList(),
-        val customizeFollows: Boolean = false,
+        val followPacks: List<OnboardingFollowPack> = emptyList(),
+        val expandedPackNames: Set<String> = emptySet(),
+        val followedUserIds: Set<String> = emptySet(),
         val error: OnboardingError? = null,
     ) {
         sealed class OnboardingError {
@@ -32,12 +32,9 @@ interface OnboardingContract {
         data class ProfileAboutYouUpdated(val aboutYou: String) : UiEvent()
         data class ProfileAvatarUriChanged(val avatarUri: Uri?) : UiEvent()
         data class ProfileBannerUriChanged(val bannerUri: Uri?) : UiEvent()
-        data class InterestSelected(val groupName: String) : UiEvent()
-        data class InterestUnselected(val groupName: String) : UiEvent()
-        data class SetFollowsCustomizing(val customizing: Boolean) : UiEvent()
-        data class ToggleGroupFollowEvent(val groupName: String) : UiEvent()
-        data class ToggleFollowEvent(val groupName: String, val userId: String) : UiEvent()
-        data object KeepRecommendedFollows : UiEvent()
+        data class TogglePackExpanded(val packName: String) : UiEvent()
+        data class ToggleFollowUser(val userId: String) : UiEvent()
+        data class ToggleFollowAllInPack(val packName: String) : UiEvent()
         data object CreateNostrProfile : UiEvent()
         data object RequestNextStep : UiEvent()
         data object RequestPreviousStep : UiEvent()

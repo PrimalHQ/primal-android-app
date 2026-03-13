@@ -74,7 +74,6 @@ import net.primal.android.core.compose.icons.primaliconpack.NewDM
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.core.utils.parseHashtags
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent.ChangeRelation
 import net.primal.android.messages.conversation.MessageConversationListContract.UiEvent.MarkAllConversationsAsRead
@@ -83,6 +82,7 @@ import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.note.ui.renderContentAsAnnotatedString
 import net.primal.android.theme.AppTheme
 import net.primal.domain.messages.ConversationRelation
+import net.primal.domain.nostr.utils.parseHashtags
 
 @Composable
 fun MessageListScreen(

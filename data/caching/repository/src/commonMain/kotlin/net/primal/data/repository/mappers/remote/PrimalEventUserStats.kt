@@ -13,6 +13,7 @@ fun ContentPrimalEventUserStats.asEventUserStatsPO(userId: String) =
         zapped = this.zapped,
         reposted = this.reposted,
         replied = this.replied,
+        votedForOption = this.votedForOption,
     )
 
 fun List<PrimalEvent>.mapNotNullAsEventUserStatsPO(userId: String) =

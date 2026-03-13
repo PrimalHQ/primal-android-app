@@ -45,6 +45,7 @@ import net.primal.android.editor.domain.PollPublishRequest
 import net.primal.android.gifpicker.GifBlossomUploader
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.PollType
 import net.primal.android.notes.feed.model.asFeedPostUi
 import net.primal.android.profile.mention.UserMentionHandler
 import net.primal.android.profile.mention.appendUserTagAtSignAtCursorPosition
@@ -77,7 +78,6 @@ import net.primal.domain.nostr.utils.takeAsNeventOrNull
 import net.primal.domain.nostr.utils.withNostrPrefix
 import net.primal.domain.posts.FeedPost
 import net.primal.domain.posts.FeedRepository
-import net.primal.domain.publisher.PrimalPublishResult
 import net.primal.domain.reads.Article
 import net.primal.domain.reads.ArticleRepository
 import net.primal.domain.reads.HighlightRepository
@@ -532,7 +532,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     private fun fetchNoteThreadFromNetwork(replyToNoteId: String) =
         viewModelScope.launch {
             try {
-                feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
+                feedRepository.fetchConversation(userId = activeAccountStore.activeUserId(), noteId = replyToNoteId)
             } catch (error: NetworkException) {
                 Napier.w(throwable = error) { "Failed to fetch note thread for noteId=$replyToNoteId" }
             }
@@ -718,7 +718,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                     ?.buildNeventFromReplyOrRootNoteTag()
                     ?: replyToNoteNevent
 
-                val publishResult = publishNoteOrPoll(
+                publishNoteOrPoll(
                     userId = userId,
                     content = content,
                     pollState = state.value.pollState,
@@ -727,11 +727,7 @@ class NoteEditorViewModel @AssistedInject constructor(
                 )
 
                 if (referencedNoteNevent != null) {
-                    if (publishResult.imported) {
-                        fetchNoteReplies()
-                    } else {
-                        scheduleFetchReplies()
-                    }
+                    scheduleFetchReplies()
                 }
 
                 resetState()
@@ -766,7 +762,7 @@ class NoteEditorViewModel @AssistedInject constructor(
     }
 
     private fun PollEditorState.toPollPublishRequest(): PollPublishRequest {
-        val isZapPoll = pollType == NoteEditorContract.PollType.ZapPoll
+        val isZapPoll = pollType == PollType.Zap
         val filteredChoices = choices
             .filter { it.text.isNotBlank() }
             .mapIndexed { index, choice ->
@@ -795,8 +791,8 @@ class NoteEditorViewModel @AssistedInject constructor(
         pollState: PollEditorState?,
         rootNoteNevent: Nevent?,
         replyToNoteNevent: Nevent?,
-    ): PrimalPublishResult {
-        return if (pollState != null) {
+    ) {
+        if (pollState != null) {
             notePublishHandler.publishPoll(
                 userId = userId,
                 content = content,

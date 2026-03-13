@@ -99,6 +99,7 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
         bookmark = this.bookmark?.asPublicBookmark(),
         isThreadMuted = this.data.isThreadMuted == true,
         eventRelayHints = this.eventRelayHints?.asEventRelayHintsDO(),
+        pollInfo = this.pollData?.asPollInfo(),
     )
 }
 
@@ -113,4 +114,5 @@ private fun buildFeedPostStats(eventStats: EventStats?, feedPostUserStats: FeedP
         userLiked = feedPostUserStats?.userLiked == true,
         repostsCount = eventStats?.reposts ?: 0,
         userReposted = feedPostUserStats?.userReposted == true,
+        userVotedForOption = feedPostUserStats?.userVotedForOption,
     )

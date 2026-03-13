@@ -11,7 +11,8 @@ import kotlinx.io.IOException
 import net.primal.core.config.api.ApiConfigResponse
 import net.primal.core.config.api.WellKnownApi
 import net.primal.core.config.store.AppConfigDataStore
-import net.primal.core.coroutines.CoroutinesTestRule
+import net.primal.core.testing.CoroutinesTestRule
+import net.primal.core.testing.FakeDataStore
 import org.junit.Rule
 import org.junit.Test
 
@@ -47,11 +48,6 @@ class AppConfigHandlerTest {
         runTest {
             val wellKnownApi = mockk<WellKnownApi>(relaxed = true) {
                 coEvery { fetchApiConfig() } throws IOException()
-                // TODO This needs to be ported properly
-//                    mockk<Response<String>>(
-//                        relaxed = true
-//                    )
-//                )
             }
             val appConfigHandler = AppConfigHandler(
                 dispatcherProvider = coroutinesTestRule.dispatcherProvider,

@@ -183,13 +183,14 @@ class NostrNotary @Inject constructor(
         comment: String,
         target: ZapTarget,
         relays: List<Relay>,
+        optionalTags: List<JsonArray> = emptyList(),
     ): SignResult {
         return signNostrEvent(
             unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 kind = NostrEventKind.ZapRequest.value,
                 content = comment,
-                tags = target.toTags() + listOf(relays.toZapTag()),
+                tags = target.toTags() + listOf(relays.toZapTag()) + optionalTags,
             ),
         )
     }

@@ -167,15 +167,6 @@ private fun NetworkLazyColumn(
 
     val keyboardController = LocalSoftwareKeyboardController.current
     LazyColumn(modifier = modifier) {
-        enhancedPrivacyItem(
-            checked = state.cachingProxyEnabled,
-            onCheckedChanged = { enabled ->
-                eventsPublisher(NetworkSettingsContract.UiEvent.UpdateCachingProxyFlag(enabled = enabled))
-            },
-        )
-
-        item { PrimalDivider() }
-
         if (state.cachingService != null) {
             cachingServiceSectionItems(
                 state = state,
@@ -193,6 +184,15 @@ private fun NetworkLazyColumn(
             onRestoreDefaultRelaysClick = { confirmingRestoreDefaultRelaysDialog = true },
             keyboardController = keyboardController,
             eventsPublisher = eventsPublisher,
+        )
+
+        item { PrimalDivider() }
+
+        enhancedPrivacyItem(
+            checked = state.cachingProxyEnabled,
+            onCheckedChanged = { enabled ->
+                eventsPublisher(NetworkSettingsContract.UiEvent.UpdateCachingProxyFlag(enabled = enabled))
+            },
         )
 
         item { Spacer(modifier = Modifier.height(32.dp)) }

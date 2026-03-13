@@ -5,7 +5,7 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.getTagValueOrNull
 import net.primal.domain.nostr.isHashtagTag
 
-private val hashtagRegex = Regex("#\\w+")
+private val hashtagRegex = Regex("#(?!\\d{1,2}\\b)\\w+")
 
 private val nip08MentionRegex = Regex("\\#\\[([0-9]*)\\]")
 

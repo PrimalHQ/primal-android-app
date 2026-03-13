@@ -53,8 +53,8 @@ fun extractSigningConfigProperties(storeName: String): SigningConfigProperties? 
     )
 }
 
-val appVersionCode = 2678
-val appVersionName = "3.0.3"
+val appVersionCode = 2682
+val appVersionName = "3.0.7"
 
 tasks.register("generateReleaseProperties") {
     doLast {
@@ -404,6 +404,7 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     debugImplementation(libs.compose.ui.test.manifest)
 
+    testImplementation(project(":core:testing"))
     testImplementation(libs.junit)
     testImplementation(libs.androidx.test.runner)
     testImplementation(libs.androidx.test.ext.junit)

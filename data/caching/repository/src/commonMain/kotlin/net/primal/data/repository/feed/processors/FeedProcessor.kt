@@ -40,7 +40,7 @@ internal class FeedProcessor(
             }
 
             response.persistToDatabase(userId = userId, database = database)
-            val feedEvents = response.notes + response.reposts
+            val feedEvents = response.notes + response.polls + response.reposts
             feedEvents.processRemoteKeys(userId = userId, pagingEvent = pagingEvent)
             feedEvents.orderByPagingIfNotNull(pagingEvent = pagingEvent)
                 .processFeedConnections(userId = userId)

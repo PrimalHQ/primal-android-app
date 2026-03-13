@@ -5,12 +5,14 @@ import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.flow.Flow
 import net.primal.core.utils.Result
 import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.nostr.NostrEventKind
 
 interface FeedRepository {
 
     fun feedBySpec(
         userId: String,
         feedSpec: String,
+        kinds: List<Int> = DEFAULT_FEED_KINDS,
         allowMutedThreads: Boolean = false,
     ): Flow<PagingData<FeedPost>>
 
@@ -35,9 +37,6 @@ interface FeedRepository {
 
     suspend fun findPostsById(postId: String): FeedPost?
 
-    @Throws(NetworkException::class, CancellationException::class)
-    suspend fun fetchReplies(userId: String, noteId: String)
-
     fun observeConversation(userId: String, noteId: String): Flow<List<FeedPost>>
 
     suspend fun removeFeedSpec(userId: String, feedSpec: String)
@@ -52,6 +51,7 @@ interface FeedRepository {
     suspend fun fetchFeedPageSnapshot(
         userId: String,
         feedSpec: String,
+        kinds: List<Int> = DEFAULT_FEED_KINDS,
         notes: String? = null,
         until: Long? = null,
         since: Long? = null,
@@ -64,11 +64,29 @@ interface FeedRepository {
         userId: String,
         noteId: String,
         limit: Int = 100,
+        kinds: List<Int> = DEFAULT_THREAD_KINDS,
     )
 
     suspend fun findConversation(userId: String, noteId: String): List<FeedPost>
 
     companion object {
         const val DEFAULT_PAGE_SIZE = 25
+
+        val DEFAULT_THREAD_KINDS = listOf(
+            NostrEventKind.ShortTextNote.value,
+            NostrEventKind.PictureNote.value,
+            NostrEventKind.Poll.value,
+            NostrEventKind.PollResponse.value,
+            NostrEventKind.ZapPoll.value,
+            NostrEventKind.ZapRequest.value,
+            NostrEventKind.Zap.value,
+        )
+
+        val DEFAULT_FEED_KINDS = listOf(
+            NostrEventKind.ShortTextNote.value,
+            NostrEventKind.ShortTextNoteRepost.value,
+            NostrEventKind.Poll.value,
+            NostrEventKind.ZapPoll.value,
+        )
     }
 }

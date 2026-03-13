@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
+import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
@@ -65,6 +66,11 @@ import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.PollOptionUi
+import net.primal.android.notes.feed.model.PollState
+import net.primal.android.notes.feed.model.PollType
+import net.primal.android.notes.feed.model.PollUi
+import net.primal.android.notes.feed.model.applyUserVotedOptions
 import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
@@ -77,6 +83,7 @@ import net.primal.android.notes.feed.note.ui.RepostedNotice
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
+import net.primal.android.notes.feed.zaps.ZapPollBottomSheet
 import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
@@ -217,6 +224,30 @@ private fun FeedNoteCard(
         )
     }
 
+    var zapPollSelectedOptionId by remember { mutableStateOf<String?>(null) }
+    val zapPoll = data.poll
+    if (zapPollSelectedOptionId != null && zapPoll != null) {
+        ZapPollBottomSheet(
+            optionId = zapPollSelectedOptionId ?: "",
+            valueMinimum = zapPoll.valueMinimum,
+            valueMaximum = zapPoll.valueMaximum,
+            exchangeRate = state.currentExchangeRate,
+            defaultZapAmounts = state.zappingState.zapsConfig.map { it.amount },
+            onDismissRequest = { zapPollSelectedOptionId = null },
+            onVote = { optionId, amount, comment ->
+                eventPublisher(
+                    UiEvent.ZapPollVoteAction(
+                        postId = data.postId,
+                        optionId = optionId,
+                        zapAmount = amount,
+                        zapComment = comment,
+                        poll = zapPoll,
+                    ),
+                )
+            },
+        )
+    }
+
     var deleteDialogVisible by remember { mutableStateOf(false) }
     if (deleteDialogVisible) {
         ConfirmActionAlertDialog(
@@ -341,6 +372,7 @@ private fun FeedNoteCard(
                 isBookmarked = data.isBookmarked,
                 isThreadMuted = data.isThreadMuted,
                 isNoteAuthor = data.authorId == state.activeAccountUserId,
+                isPoll = data.poll != null,
                 relayHints = state.relayHints,
                 enabled = noteOptionsMenuEnabled,
                 noteGraphicsLayer = graphicsLayer,
@@ -395,8 +427,10 @@ private fun FeedNoteCard(
                             bottom = notePaddingDp,
                         ),
                 ) {
+                    val noteData = state.poll?.let { data.copy(poll = it) }
+                        ?: data.applyUserVotedOptions(state.userVotedOptionIds)
                     FeedNote(
-                        data = data,
+                        data = noteData,
                         fullWidthContent = fullWidthContent,
                         avatarSizeDp = avatarSizeDp,
                         avatarPaddingValues = PaddingValues(start = avatarPaddingDp, top = avatarPaddingDp),
@@ -471,6 +505,20 @@ private fun FeedNoteCard(
                             eventPublisher(UiEvent.UpdateAutoPlayVideoSoundPreference(soundPref))
                         },
                         contentFooter = contentFooter,
+                        onPollOptionSelected = { optionId ->
+                            val poll = data.poll ?: return@FeedNote
+                            if (poll.pollType == PollType.Zap) {
+                                zapPollSelectedOptionId = optionId
+                            } else {
+                                eventPublisher(
+                                    UiEvent.PollVoteAction(
+                                        postId = data.postId,
+                                        optionId = optionId,
+                                        poll = poll,
+                                    ),
+                                )
+                            }
+                        },
                     )
                 }
             }
@@ -548,6 +596,7 @@ private fun FeedNote(
     onPostLongClickAction: ((FeedPostAction) -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
     onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
+    onPollOptionSelected: ((optionId: String) -> Unit)? = null,
 ) {
     val localUriHandler = LocalUriHandler.current
     val uiScope = rememberCoroutineScope()
@@ -627,6 +676,7 @@ private fun FeedNote(
                 couldAutoPlay = couldAutoPlay,
                 noteCallbacks = noteCallbacks,
                 onVideoSoundToggle = onVideoSoundToggle,
+                onPollOptionSelected = onPollOptionSelected,
             )
 
             contentFooter()
@@ -845,6 +895,177 @@ fun PreviewFeedNoteListItemDarkForcedContentIndentSingleLineHeader(
             fullWidthContent = false,
             forceContentIndent = true,
             drawLineBelowAvatar = true,
+        )
+    }
+}
+
+@Suppress("MagicNumber")
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun PreviewFeedNoteCardWithSingleChoicePollPending() {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
+        FeedNoteCard(
+            data = FeedPostUi(
+                postId = "pollPost1",
+                content = "What type of people love Nostr the most? #nostr #polloftheday",
+                authorId = "npubMiljan",
+                authorName = "miljan",
+                authorHandle = "miljan@primal.net",
+                authorInternetIdentifier = "miljan@primal.net",
+                authorAvatarCdnImage = CdnImage(sourceUrl = "https://i.imgur.com/Z8dpmvc.png"),
+                timestamp = Instant.now().minus(4, ChronoUnit.MINUTES),
+                nostrUris = emptyList(),
+                stats = EventStatsUi(
+                    repliesCount = 22,
+                    likesCount = 56,
+                    repostsCount = 14,
+                    satsZapped = 2475,
+                    zapsCount = 8,
+                ),
+                hashtags = listOf("#nostr", "#polloftheday"),
+                rawNostrEventJson = "",
+                poll = PollUi(
+                    options = listOf(
+                        PollOptionUi(id = "1", label = "\uD83D\uDC40 Conspiracy Contemplators"),
+                        PollOptionUi(id = "2", label = "\uD83C\uDF3D Corn Conglomerators"),
+                        PollOptionUi(id = "3", label = "\uD83E\uDD65 Coconut Connoiseurs"),
+                        PollOptionUi(id = "4", label = "\uD83D\uDC47 All of the above"),
+                    ),
+                    endsAt = Instant.now().plus(Duration.ofDays(2).plusMinutes(56)),
+                    state = PollState.Pending,
+                ),
+            ),
+            state = NoteContract.UiState(activeAccountUserId = ""),
+            eventPublisher = {},
+            headerSingleLine = true,
+            fullWidthContent = false,
+        )
+    }
+}
+
+@Suppress("MagicNumber")
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun PreviewFeedNoteCardWithSingleChoicePollVoted() {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
+        FeedNoteCard(
+            data = FeedPostUi(
+                postId = "pollPost2",
+                content = "What type of people love Nostr the most? #nostr #polloftheday",
+                authorId = "npubMiljan",
+                authorName = "miljan",
+                authorHandle = "miljan@primal.net",
+                authorInternetIdentifier = "miljan@primal.net",
+                authorAvatarCdnImage = CdnImage(sourceUrl = "https://i.imgur.com/Z8dpmvc.png"),
+                timestamp = Instant.now().minus(4, ChronoUnit.MINUTES),
+                nostrUris = emptyList(),
+                stats = EventStatsUi(
+                    repliesCount = 22,
+                    likesCount = 56,
+                    repostsCount = 14,
+                    satsZapped = 2475,
+                    zapsCount = 8,
+                ),
+                hashtags = listOf("#nostr", "#polloftheday"),
+                rawNostrEventJson = "",
+                poll = PollUi(
+                    options = listOf(
+                        PollOptionUi(
+                            id = "1",
+                            label = "\uD83D\uDC40 Conspiracy Contemplators",
+                            votePercentage = 0f,
+                        ),
+                        PollOptionUi(
+                            id = "2",
+                            label = "\uD83C\uDF3D Corn Conglomerators",
+                            votePercentage = 0.222f,
+                        ),
+                        PollOptionUi(
+                            id = "3",
+                            label = "\uD83E\uDD65 Coconut Connoiseurs",
+                            votePercentage = 0.111f,
+                        ),
+                        PollOptionUi(
+                            id = "4",
+                            label = "\uD83D\uDC47 All of the above",
+                            votePercentage = 0.666f,
+                            isWinner = true,
+                        ),
+                    ),
+                    endsAt = Instant.now().plus(Duration.ofDays(2).plusMinutes(56)),
+                    state = PollState.Voted,
+                    selectedOptionIds = setOf("4"),
+                ),
+            ),
+            state = NoteContract.UiState(activeAccountUserId = ""),
+            eventPublisher = {},
+            headerSingleLine = true,
+            fullWidthContent = false,
+        )
+    }
+}
+
+@Suppress("MagicNumber")
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun PreviewFeedNoteCardWithSingleChoicePollEnded() {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
+        FeedNoteCard(
+            data = FeedPostUi(
+                postId = "pollPost3",
+                content = "What type of people love Nostr the most? #nostr #polloftheday",
+                authorId = "npubMiljan",
+                authorName = "miljan",
+                authorHandle = "miljan@primal.net",
+                authorInternetIdentifier = "miljan@primal.net",
+                authorAvatarCdnImage = CdnImage(sourceUrl = "https://i.imgur.com/Z8dpmvc.png"),
+                timestamp = Instant.now().minus(4, ChronoUnit.MINUTES),
+                nostrUris = emptyList(),
+                stats = EventStatsUi(
+                    repliesCount = 22,
+                    likesCount = 56,
+                    repostsCount = 14,
+                    satsZapped = 2475,
+                    zapsCount = 8,
+                ),
+                hashtags = listOf("#nostr", "#polloftheday"),
+                rawNostrEventJson = "",
+                poll = PollUi(
+                    options = listOf(
+                        PollOptionUi(
+                            id = "1",
+                            label = "\uD83D\uDC40 Conspiracy Contemplators",
+                            votePercentage = 0.035f,
+                        ),
+                        PollOptionUi(
+                            id = "2",
+                            label = "\uD83C\uDF3D Corn Conglomerators",
+                            votePercentage = 0.243f,
+                        ),
+                        PollOptionUi(
+                            id = "3",
+                            label = "\uD83E\uDD65 Coconut Connoiseurs",
+                            votePercentage = 0.093f,
+                        ),
+                        PollOptionUi(
+                            id = "4",
+                            label = "\uD83D\uDC47 All of the above",
+                            votePercentage = 0.629f,
+                            isWinner = true,
+                        ),
+                    ),
+                    endsAt = Instant.now().minus(Duration.ofDays(1)),
+                    state = PollState.Ended,
+                    selectedOptionIds = setOf("4"),
+                ),
+            ),
+            state = NoteContract.UiState(activeAccountUserId = ""),
+            eventPublisher = {},
+            headerSingleLine = true,
+            fullWidthContent = false,
         )
     }
 }

@@ -23,5 +23,8 @@ data class FeedResponse(
     val primalPremiumInfo: PrimalEvent? = null,
     val genericReposts: List<NostrEvent> = emptyList(),
     val pictureNotes: List<NostrEvent> = emptyList(),
+    val polls: List<NostrEvent> = emptyList(),
+    val pollResponses: List<NostrEvent> = emptyList(),
+    val primalPollStats: List<PrimalEvent> = emptyList(),
     val liveActivity: List<NostrEvent> = emptyList(),
 )

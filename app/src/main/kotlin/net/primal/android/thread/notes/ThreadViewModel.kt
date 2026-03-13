@@ -100,10 +100,13 @@ class ThreadViewModel @Inject constructor(
                     }
 
                     val thread = conversation.subList(0, highlightPostIndex + 1)
-                    val replies = conversation.subList(highlightPostIndex + 1, conversation.size)
+                    val rootAuthorId = conversation.firstOrNull()?.authorId
+                    val sortedReplies = conversation.subList(highlightPostIndex + 1, conversation.size)
+                        .sortedByDescending { it.timestamp }
+                    val (authorReplies, otherReplies) = sortedReplies.partition { it.authorId == rootAuthorId }
                     setState {
                         copy(
-                            conversation = thread + replies.sortedByDescending { it.timestamp },
+                            conversation = thread + authorReplies + otherReplies,
                             highlightPostIndex = highlightPostIndex,
                         )
                     }
@@ -134,7 +137,10 @@ class ThreadViewModel @Inject constructor(
             setState { copy(fetching = true) }
             try {
                 withContext(dispatcherProvider.io()) {
-                    feedRepository.fetchReplies(userId = activeAccountStore.activeUserId(), noteId = highlightPostId)
+                    feedRepository.fetchConversation(
+                        userId = activeAccountStore.activeUserId(),
+                        noteId = highlightPostId,
+                    )
                 }
             } catch (error: NetworkException) {
                 Napier.w(throwable = error) { "Failed to fetch note replies for noteId=$highlightPostId" }

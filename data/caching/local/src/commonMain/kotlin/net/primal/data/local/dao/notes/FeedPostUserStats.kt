@@ -5,4 +5,5 @@ data class FeedPostUserStats(
     val userReplied: Boolean = false,
     val userReposted: Boolean = false,
     val userZapped: Boolean = false,
+    val userVotedForOption: String? = null,
 )

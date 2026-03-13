@@ -20,4 +20,5 @@ data class EventUserStats(
     val liked: Boolean = false,
     val reposted: Boolean = false,
     val zapped: Boolean = false,
+    val votedForOption: String? = null,
 )

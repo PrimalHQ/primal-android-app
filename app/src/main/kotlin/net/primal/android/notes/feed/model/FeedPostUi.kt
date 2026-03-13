@@ -4,6 +4,7 @@ import java.time.Instant
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.asEventUriUiModel
 import net.primal.android.core.utils.formatNip05Identifier
+import net.primal.android.events.polls.votes.asPollUi
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.events.ui.asEventZapUiModel
 import net.primal.android.premium.legend.domain.LegendaryCustomization
@@ -44,6 +45,7 @@ data class FeedPostUi(
     val authorBlossoms: List<String> = emptyList(),
     val eventRelayHints: List<String> = emptyList(),
     val isAuthorLiveStreamingNow: Boolean = false,
+    val poll: PollUi? = null,
 )
 
 fun FeedPost.asFeedPostUi(): FeedPostUi {
@@ -87,13 +89,26 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         authorLegendaryCustomization = this.author.legendProfile?.asLegendaryCustomization(),
         eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
         isAuthorLiveStreamingNow = this.author.isLiveStreamingNow,
+        poll = this.pollInfo?.asPollUi(
+            userVotedOptionIds = this.stats?.userVotedForOption?.let { setOf(it) } ?: emptySet(),
+        ),
+    )
+}
+
+fun FeedPostUi.applyUserVotedOptions(userVotedOptionIds: Set<String>): FeedPostUi {
+    if (this.poll == null || userVotedOptionIds.isEmpty()) return this
+    return copy(
+        poll = poll.copy(
+            state = if (poll.state == PollState.Ended) PollState.Ended else PollState.Voted,
+            selectedOptionIds = userVotedOptionIds,
+        ),
     )
 }
 
 fun FeedPostUi.asNeventString(): String {
     return Nevent(
         eventId = this.postId,
-        kind = NostrEventKind.ShortTextNote.value,
+        kind = this.rawKind ?: NostrEventKind.ShortTextNote.value,
         userId = this.authorId,
         relays = this.eventRelayHints.take(MAX_RELAY_HINTS),
     ).toNeventString()

@@ -18,7 +18,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.jsonPrimitive
-import net.primal.android.core.coroutines.CoroutinesTestRule
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.PollOption
 import net.primal.android.editor.domain.PollPublishRequest
@@ -26,6 +25,7 @@ import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.db.Relay as RelayPO
 import net.primal.android.user.domain.RelayKind
 import net.primal.android.user.repository.RelayRepository
+import net.primal.core.testing.CoroutinesTestRule
 import net.primal.domain.events.EventRelayHints
 import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.nostr.Naddr

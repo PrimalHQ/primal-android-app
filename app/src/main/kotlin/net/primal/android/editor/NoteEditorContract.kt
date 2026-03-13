@@ -10,17 +10,13 @@ import net.primal.android.drawer.multiaccount.model.UserAccountUi
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.notes.feed.model.FeedPostUi
+import net.primal.android.notes.feed.model.PollType
 import net.primal.android.profile.mention.UserTaggingState
 import net.primal.domain.links.ReferencedStream
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 
 interface NoteEditorContract {
-
-    enum class PollType {
-        UserPoll,
-        ZapPoll,
-    }
 
     data class PollChoice(
         val id: UUID = UUID.randomUUID(),
@@ -29,12 +25,12 @@ interface NoteEditorContract {
 
     data class PollEditorState(
         val choices: List<PollChoice> = listOf(PollChoice(), PollChoice()),
-        val pollType: PollType = PollType.UserPoll,
+        val pollType: PollType = PollType.User,
         val pollLengthDays: Int = 1,
         val pollLengthHours: Int = 0,
         val pollLengthMinutes: Int = 0,
-        val minZapAmountInSats: Long? = null,
-        val maxZapAmountInSats: Long? = null,
+        val minZapAmountInSats: Long? = 21L,
+        val maxZapAmountInSats: Long? = 21_000L,
     )
 
     data class UiState(

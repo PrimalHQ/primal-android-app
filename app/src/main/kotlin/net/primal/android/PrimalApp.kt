@@ -12,7 +12,7 @@ import javax.inject.Inject
 import net.primal.android.core.crash.PrimalCrashReporter
 import net.primal.android.core.images.PrimalImageLoaderFactory
 import net.primal.android.core.utils.isGoogleBuild
-import net.primal.android.wallet.init.SparkWalletLifecycleInitializer
+import net.primal.android.wallet.init.WalletSessionBridge
 import net.primal.core.config.store.AppConfigInitializer
 import net.primal.data.account.repository.repository.factory.AccountRepositoryFactory
 import net.primal.data.repository.factory.PrimalRepositoryFactory
@@ -31,7 +31,7 @@ class PrimalApp : Application() {
     lateinit var crashReporter: PrimalCrashReporter
 
     @Inject
-    lateinit var sparkWalletLifecycleInitializer: Lazy<SparkWalletLifecycleInitializer>
+    lateinit var walletSessionBridge: Lazy<WalletSessionBridge>
 
     override fun onCreate() {
         super.onCreate()
@@ -58,7 +58,7 @@ class PrimalApp : Application() {
             initNotificationChannels()
         }
 
-        sparkWalletLifecycleInitializer.get().start()
+        walletSessionBridge.get().start()
     }
 
     private fun initNotificationChannels() {

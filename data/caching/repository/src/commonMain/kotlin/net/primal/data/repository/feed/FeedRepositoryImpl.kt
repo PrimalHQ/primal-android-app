@@ -20,8 +20,8 @@ import net.primal.data.local.queries.ChronologicalFeedWithRepostsQueryBuilder
 import net.primal.data.local.queries.ExploreFeedQueryBuilder
 import net.primal.data.local.queries.FeedQueryBuilder
 import net.primal.data.remote.api.feed.FeedApi
-import net.primal.data.remote.api.feed.model.FeedBySpecRequestBody
-import net.primal.data.remote.api.feed.model.ThreadRequestBody
+import net.primal.data.remote.api.feed.model.MultiKindFeedBySpecRequestBody
+import net.primal.data.remote.api.feed.model.MultiKindThreadRequestBody
 import net.primal.data.repository.feed.paging.NoteFeedRemoteMediator
 import net.primal.data.repository.feed.processors.FeedProcessor
 import net.primal.data.repository.feed.processors.persistNoteRepliesAndArticleCommentsToDatabase
@@ -49,9 +49,10 @@ internal class FeedRepositoryImpl(
     override fun feedBySpec(
         userId: String,
         feedSpec: String,
+        kinds: List<Int>,
         allowMutedThreads: Boolean,
     ): Flow<PagingData<FeedPostDO>> {
-        return createPager(userId = userId, feedSpec = feedSpec) {
+        return createPager(userId = userId, feedSpec = feedSpec, kinds = kinds) {
             database.feedPosts().feedQuery(
                 query = feedQueryBuilder(
                     userId = userId,
@@ -145,30 +146,28 @@ internal class FeedRepositoryImpl(
         userId: String,
         noteId: String,
         limit: Int,
+        kinds: List<Int>,
     ) {
         withContext(dispatcherProvider.io()) {
             val response = try {
-                feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = limit))
+                feedApi.getMultiKindThread(
+                    MultiKindThreadRequestBody(
+                        eventId = noteId,
+                        userPubKey = userId,
+                        kinds = kinds,
+                        limit = limit,
+                    ),
+                )
             } catch (error: NetworkException) {
                 throw NetworkException(message = error.message, cause = error)
             }
 
             mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
-            response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
             response.persistToDatabaseAsTransaction(userId = userId, database = database)
+            response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
         }
     }
-
-    override suspend fun fetchReplies(userId: String, noteId: String) =
-        withContext(dispatcherProvider.io()) {
-            val response = feedApi.getThread(ThreadRequestBody(postId = noteId, userPubKey = userId, limit = 100))
-
-            mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
-
-            response.persistNoteRepliesAndArticleCommentsToDatabase(noteId = noteId, database = database)
-            response.persistToDatabaseAsTransaction(userId = userId, database = database)
-        }
 
     override suspend fun removeFeedSpec(userId: String, feedSpec: String) =
         withContext(dispatcherProvider.io()) {
@@ -195,6 +194,7 @@ internal class FeedRepositoryImpl(
     override suspend fun fetchFeedPageSnapshot(
         userId: String,
         feedSpec: String,
+        kinds: List<Int>,
         notes: String?,
         until: Long?,
         since: Long?,
@@ -202,10 +202,11 @@ internal class FeedRepositoryImpl(
         limit: Int,
     ): FeedPageSnapshot =
         withContext(dispatcherProvider.io()) {
-            val response = feedApi.getFeedBySpec(
-                body = FeedBySpecRequestBody(
+            val response = feedApi.getMultiKindFeedBySpec(
+                body = MultiKindFeedBySpecRequestBody(
                     spec = feedSpec,
                     userPubKey = userId,
+                    kinds = kinds,
                     notes = notes,
                     until = until,
                     since = since,
@@ -228,7 +229,8 @@ internal class FeedRepositoryImpl(
             postId = noteId,
             userId = userId,
         ).map { list ->
-            list.map { it.mapAsFeedPostDO() }.performTopologicalSortOrThis()
+            list.map { it.mapAsFeedPostDO() }
+                .performTopologicalSortOrThis()
         }
     }
 
@@ -236,6 +238,7 @@ internal class FeedRepositoryImpl(
     private fun createPager(
         userId: String,
         feedSpec: String,
+        kinds: List<Int> = FeedRepository.DEFAULT_FEED_KINDS,
         pagingSourceFactory: () -> PagingSource<Int, FeedPostPO>,
     ) = Pager(
         config = PagingConfig(
@@ -251,6 +254,7 @@ internal class FeedRepositoryImpl(
             feedApi = feedApi,
             database = database,
             mediaCacher = mediaCacher,
+            kinds = kinds,
         ),
         pagingSourceFactory = pagingSourceFactory,
     )

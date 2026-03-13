@@ -54,33 +54,16 @@
     <string name="legal_privacy_policy_hint_highlighted_word">Privacy Policy</string>
 
     <string name="onboarding_title_create_account">Create Account</string>
-    <string name="onboarding_title_your_interests">Your Interests</string>
-    <string name="onboarding_title_your_follows">Your Follows</string>
     <string name="onboarding_title_account_preview">Account Preview</string>
-    <string name="onboarding_title_success">Success</string>
+    <string name="onboarding_title_success">Success!</string>
     <string name="onboarding_button_next">Next</string>
     <string name="onboarding_button_done">Done!</string>
     <string name="onboarding_button_create_account_now">Create Account Now</string>
-    <string name="onboarding_profile_details_hint">Create a public profile on Nostr. Choose any Display Name and say something about yourself. You can easily change these things later.</string>
+    <string name="onboarding_profile_details_hint">Create a public profile on Nostr. Choose any display name and say something about yourself.</string>
     <string name="onboarding_profile_details_display_name_hint">Display Name</string>
     <string name="onboarding_profile_details_about_you_hint">About You</string>
     <string name="onboarding_profile_details_add_photo">Add Photo</string>
     <string name="onboarding_profile_details_change_photo">Change Photo</string>
-    <string name="onboarding_profile_interests_hint">Tells us about your interests and we will create your initial follow list:</string>
-    <plurals name="onboarding_profile_interests_selection_count">
-        <item quantity="zero">0 interests selected</item>
-        <item quantity="one">1 interest selected</item>
-        <item quantity="other">%1$s interests selected</item>
-    </plurals>
-    <string name="onboarding_profile_follows_hint">We followed %1$s Nostr accounts based on the interests you selected.</string>
-    <string name="onboarding_profile_follows_keep_follows_headline_text">Keep the recommended follows</string>
-    <string name="onboarding_profile_follows_keep_follows_support_text">(you can update this later)</string>
-    <string name="onboarding_profile_follows_customize_follows_headline_text">Customize follows now</string>
-    <string name="onboarding_profile_follows_customize_follows_support_text">(edit the recommended follows)</string>
-    <string name="onboarding_profile_follow_button">Follow</string>
-    <string name="onboarding_profile_unfollow_button">Unfollow</string>
-    <string name="onboarding_profile_follow_all_button">Follow All</string>
-    <string name="onboarding_profile_unfollow_all_button">Unfollow All</string>
 
     <string name="onboarding_profile_preview_hint">We will use this info to create your Nostr account. If you wish to make any changes, you can always do so in your profile settings.</string>
     <string name="onboarding_profile_preview_change_banner">Change Banner</string>
@@ -88,6 +71,16 @@
     <string name="onboarding_profile_success_description">Account created!</string>
     <string name="onboarding_profile_create_error_image_upload">Unable to upload photo. Please try again.</string>
     <string name="onboarding_profile_create_error_failed_to_create">Something went wrong while creating your account. Please try again.</string>
+
+    <string name="onboarding_follow_packs_title">Follow People</string>
+    <string name="onboarding_follow_packs_follow_all">Follow all</string>
+    <string name="onboarding_follow_packs_following_all">Following all</string>
+    <string name="onboarding_follow_packs_follow">Follow</string>
+    <string name="onboarding_follow_packs_following">Following</string>
+    <plurals name="onboarding_follow_packs_user_count">
+        <item quantity="one">%d user</item>
+        <item quantity="other">%d users</item>
+    </plurals>
 
     <string name="login_title">Sign In</string>
     <string name="login_description">Enter your Nostr key to sign in:</string>
@@ -573,14 +566,18 @@
 
     <string name="feed_context_unmute_thread">Unmute Thread</string>
     <string name="feed_context_share_note">Share Note</string>
+    <string name="feed_context_share_poll">Share Poll</string>
     <string name="feed_context_share_note_as_image">Share as Image</string>
     <string name="feed_context_copy_note_link">Copy Note Link</string>
+    <string name="feed_context_copy_poll_link">Copy Poll Link</string>
     <string name="feed_context_add_to_bookmark">Add Bookmark</string>
     <string name="feed_context_bookmark_added">Note added to your bookmarks.</string>
     <string name="feed_context_remove_from_bookmark">Remove Bookmark</string>
     <string name="feed_context_bookmark_removed">Note removed from your bookmarks.</string>
     <string name="feed_context_copy_note_text">Copy Note Text</string>
+    <string name="feed_context_copy_poll_question">Copy Poll Question</string>
     <string name="feed_context_copy_note_id">Copy Note ID</string>
+    <string name="feed_context_copy_poll_id">Copy Poll ID</string>
     <string name="feed_context_copy_raw_data">Copy Raw Data</string>
     <string name="feed_context_report_user">Report user</string>
     <string name="feed_context_mute_user">Mute User</string>
@@ -674,6 +671,10 @@
     <string name="post_action_like_failed">Unable to like. Please try again.</string>
     <string name="post_action_repost_failed">Unable to repost. Please try again.</string>
     <string name="post_action_delete_failed">Unable to delete. Please try again.</string>
+    <string name="post_action_poll_vote_failed">Unable to vote. Please try again.</string>
+    <string name="post_action_poll_already_voted">You have already voted on this poll.</string>
+    <string name="post_action_poll_expired">This poll has ended.</string>
+    <string name="post_action_poll_author_cannot_vote">Poll authors cannot vote on their own zap poll.</string>
 
     <string name="thread_title">Thread</string>
     <string name="thread_reply_to">Reply to %1$s</string>
@@ -955,8 +956,6 @@
     <string name="settings_wallet_backup_wallet_subtitle">Write down your wallet recovery phrase so you don\'t lose access to your funds</string>
     <string name="settings_wallet_restore_wallet_title">Restore existing wallet</string>
     <string name="settings_wallet_restore_wallet_subtitle">If you have an existing wallet that you wish to use with your Nostr account, you can restore it here using your 12–24 wallet recovery phrase</string>
-    <string name="settings_wallet_revert_to_primal_title">Revert to Primal Wallet</string>
-    <string name="settings_wallet_revert_to_primal_subtitle">Unregister Spark wallet and switch back to custodial Primal wallet for testing. CAUTION: You MUST manually transfer your funds from Spark wallet before you do this.</string>
     <string name="settings_wallet_export_transactions_title">Export transaction history</string>
     <string name="settings_wallet_export_transactions_subtitle">Download your entire wallet transaction history in CSV format</string>
     <string name="settings_wallet_export_nwc_logs_title">Export NWC logs</string>
@@ -1217,11 +1216,11 @@
     <string name="profile_zap_bottom_sheet_fallback_title">Profile</string>
     <string name="profile_zap_sent_message">Zap sent successfully.</string>
 
-    <string name="profile_qr_code_profile_tab">Profile</string>
+    <string name="profile_qr_code_profile_tab">Public Key</string>
     <string name="profile_qr_code_lightning_tab">Lightning Address</string>
     <string name="profile_qr_code_scan_qr_code">Scan QR Code</string>
     <string name="profile_qr_code_view_qr_code">View QR Code</string>
-    <string name="profile_qr_code_scan_qr_code_hint">Scan a user, event, or article QR\ncode to find them on Nostr</string>
+    <string name="profile_qr_code_scan_qr_code_hint">Scan a user\'s QR code to find\nthem on Nostr</string>
 
     <string name="profile_editor_set_banner">set banner</string>
     <string name="profile_editor_change_banner">change banner</string>
@@ -1761,4 +1760,46 @@
     <string name="wallet_upgrade_failed_support_copy_log">copy the error log</string>
     <string name="wallet_upgrade_failed_support_3">, and include that in your email.</string>
     <string name="wallet_upgrade_try_again_button">Try Again</string>
+
+    <plurals name="poll_votes_count">
+        <item quantity="one">%1$d vote</item>
+        <item quantity="other">%1$d votes</item>
+    </plurals>
+    <plurals name="poll_votes_count_suffix">
+        <item quantity="one">vote</item>
+        <item quantity="other">votes</item>
+    </plurals>
+    <string name="poll_time_remaining">%1$s left</string>
+    <plurals name="poll_time_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <plurals name="poll_time_hours">
+        <item quantity="one">%1$d hour</item>
+        <item quantity="other">%1$d hours</item>
+    </plurals>
+    <plurals name="poll_time_minutes">
+        <item quantity="one">%1$d minute</item>
+        <item quantity="other">%1$d minutes</item>
+    </plurals>
+    <string name="poll_time_and">and</string>
+    <string name="poll_final_results">Final results</string>
+    <string name="poll_sats_format">%s sats</string>
+    <string name="zap_poll_vote_button">Vote</string>
+    <string name="zap_poll_add_comment">Add a comment…</string>
+    <string name="zap_poll_fixed_amount">This poll only allows votes of %s sats</string>
+    <string name="zap_poll_range_hint">This poll allows votes between %1$s - %2$s sats</string>
+    <string name="zap_poll_custom_amount_hint">Enter custom zap amount (%1$s - %2$s sats)</string>
+    <string name="zap_poll_enter_custom">enter custom amount</string>
+    <string name="zap_poll_unconstrained_hint">Enter any zap amount</string>
+    <string name="zap_poll_header_zap">Zap</string>
+    <string name="zap_poll_header_sats">sats</string>
+    <string name="zap_poll_chip_sats_suffix">sats</string>
+    <string name="zap_poll_usd_amount">$%1$s USD</string>
+
+    <string name="poll_votes_title">Votes</string>
+    <string name="poll_votes_error">Unable to load votes.</string>
+    <string name="poll_votes_no_voters">Voters will show up here.</string>
+    <string name="poll_votes_sats_suffix">sats</string>
+    <string name="poll_votes_see_votes">see votes</string>
 </resources>

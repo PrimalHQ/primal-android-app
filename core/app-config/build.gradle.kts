@@ -84,6 +84,7 @@ kotlin {
 
         getByName("androidHostTest") {
             dependencies {
+                implementation(project(":core:testing"))
                 implementation(libs.junit)
                 implementation(libs.androidx.test.core)
                 implementation(libs.androidx.test.runner)

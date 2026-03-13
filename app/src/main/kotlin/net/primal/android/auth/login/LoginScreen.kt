@@ -34,7 +34,6 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -52,12 +51,15 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.auth.compose.ColumnWithBackground
 import net.primal.android.auth.compose.DefaultOnboardingAvatar
 import net.primal.android.auth.compose.OnboardingButton
 import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.ColumnWithBackground
+import net.primal.android.core.compose.PrimalDarkTextColor
 import net.primal.android.core.compose.PrimalDefaults
+import net.primal.android.core.compose.PrimalGradientAlpha
+import net.primal.android.core.compose.PrimalGradientBackgroundColor
 import net.primal.android.core.compose.UiDensityMode
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -67,6 +69,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.compose.primalGradientBrush
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
 import net.primal.android.signer.client.event.buildAppSpecificDataEvent
 import net.primal.android.signer.client.launchGetPublicKey
@@ -133,15 +136,17 @@ fun LoginScreen(
     BackHandler(enabled = state.loading) { }
     ColumnWithBackground(
         modifier = Modifier.semantics { testTagsAsResourceId = true },
-        backgroundPainter = painterResource(id = R.drawable.onboarding_spot2),
+        backgroundBrushProvider = ::primalGradientBrush,
+        brushAlpha = PrimalGradientAlpha,
+        backgroundColor = PrimalGradientBackgroundColor,
     ) { size ->
         val uiMode = size.height.detectUiDensityModeFromMaxHeight()
 
         CenterAlignedTopAppBar(
             colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                 containerColor = Color.Transparent,
-                titleContentColor = Color.White,
-                navigationIconContentColor = Color.White,
+                titleContentColor = PrimalDarkTextColor,
+                navigationIconContentColor = PrimalDarkTextColor,
             ),
             title = {
                 Text(text = stringResource(id = R.string.login_title))
@@ -204,8 +209,9 @@ fun LoginContent(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
         ) {
+            Spacer(modifier = Modifier.weight(1f))
+
             LoginInputFieldContent(
                 state = state,
                 uiMode = uiMode,
@@ -213,6 +219,8 @@ fun LoginContent(
                 onLoginInputChanged = onLoginInputChanged,
                 onLoginClick = onLoginClick,
             )
+
+            Spacer(modifier = Modifier.weight(weight = if (keyboardVisible) 2f else 3f))
         }
 
         Column(
@@ -257,7 +265,7 @@ fun LoginContent(
                         .height(56.dp)
                         .fillMaxWidth(),
                     containerColor = Color.Transparent,
-                    contentColor = Color.White,
+                    contentColor = PrimalDarkTextColor,
                     onClick = onLoginWithAmberClick,
                     text = "Login with Amber",
                 )
@@ -275,10 +283,9 @@ private fun LoginInputFieldContent(
     onLoginClick: () -> Unit,
 ) {
     Column(
-        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AnimatedContent(
-            modifier = Modifier.weight(weight = 0.5f),
             targetState = state.profileDetails,
             label = "LoginHeader",
         ) { profileDetails ->
@@ -303,18 +310,14 @@ private fun LoginInputFieldContent(
             }
         }
 
-        Box(
-            modifier = Modifier.weight(weight = 0.5f),
-            contentAlignment = Alignment.TopCenter,
-        ) {
-            LoginInputField(
-                loginInput = state.loginInput,
-                isValidKey = state.isValidKey,
-                keyboardVisible = keyboardVisible,
-                onLoginInputChanged = onLoginInputChanged,
-                onLoginClick = onLoginClick,
-            )
-        }
+        LoginInputField(
+            modifier = Modifier.fillMaxWidth(),
+            loginInput = state.loginInput,
+            isValidKey = state.isValidKey,
+            keyboardVisible = keyboardVisible,
+            onLoginInputChanged = onLoginInputChanged,
+            onLoginClick = onLoginClick,
+        )
     }
 }
 
@@ -429,8 +432,7 @@ private fun EnterYourKeyNotice(modifier: Modifier = Modifier, loginInput: String
             },
             textAlign = TextAlign.Center,
             style = AppTheme.typography.bodyMedium,
-            color = Color.White,
-            fontWeight = FontWeight.SemiBold,
+            color = PrimalDarkTextColor,
         )
     }
 }
@@ -469,13 +471,13 @@ private fun ProfileDetailsColumn(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
             ),
-            color = Color.White,
+            color = PrimalDarkTextColor,
         )
 
         Text(
             text = profileDetails.internetIdentifier ?: "",
             style = AppTheme.typography.bodyLarge,
-            color = Color.White,
+            color = PrimalDarkTextColor,
         )
 
         Spacer(modifier = Modifier.height(32.dp))

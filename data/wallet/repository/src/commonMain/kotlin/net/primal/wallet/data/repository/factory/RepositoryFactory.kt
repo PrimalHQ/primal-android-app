@@ -22,6 +22,7 @@ import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.nwc.NwcLogRepository
+import net.primal.wallet.data.generator.RecoveryPhraseGenerator
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.nwc.builder.NwcWalletResponseBuilder
 import net.primal.wallet.data.nwc.manager.NwcBudgetManager
@@ -41,6 +42,7 @@ import net.primal.wallet.data.repository.SparkWalletManagerImpl
 import net.primal.wallet.data.repository.TransactionFeeRepositoryImpl
 import net.primal.wallet.data.repository.WalletAccountRepositoryImpl
 import net.primal.wallet.data.repository.WalletRepositoryImpl
+import net.primal.wallet.data.repository.WalletSessionProvider
 import net.primal.wallet.data.repository.handler.MigratePrimalToSparkWalletHandler
 import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 import net.primal.wallet.data.service.factory.WalletServiceFactoryImpl
@@ -48,6 +50,7 @@ import net.primal.wallet.data.spark.BreezApiKeyProvider
 import net.primal.wallet.data.spark.BreezSdkInstanceManager
 import net.primal.wallet.data.spark.BreezSdkStorageProvider
 
+@Suppress("TooManyFunctions")
 abstract class RepositoryFactory {
 
     private val dispatcherProvider = createDispatcherProvider()
@@ -274,6 +277,51 @@ abstract class RepositoryFactory {
             walletDatabase = resolveWalletDatabase(),
             profileRepository = profileRepository,
             dispatcherProvider = dispatcherProvider,
+        )
+    }
+
+    fun createWalletSessionProvider(
+        primalWalletApiClient: PrimalApiClient,
+        nostrEventSignatureHandler: NostrEventSignatureHandler,
+        profileRepository: ProfileRepository? = null,
+    ): WalletSessionProvider {
+        val primalWalletApi = WalletApiServiceFactory.createPrimalWalletApi(
+            primalApiClient = primalWalletApiClient,
+            nostrEventSignatureHandler = nostrEventSignatureHandler,
+        )
+        return WalletSessionProvider(
+            dispatchers = dispatcherProvider,
+            sparkWalletManager = sparkWalletManager,
+            primalWalletAccountRepository = PrimalWalletAccountRepositoryImpl(
+                dispatcherProvider = dispatcherProvider,
+                walletDatabase = resolveWalletDatabase(),
+                primalWalletApi = primalWalletApi,
+                signatureHandler = nostrEventSignatureHandler,
+            ),
+            sparkWalletAccountRepository = SparkWalletAccountRepositoryImpl(
+                dispatcherProvider = dispatcherProvider,
+                walletApi = primalWalletApi,
+                walletDatabase = resolveWalletDatabase(),
+            ),
+            ensureSparkWalletExistsUseCase = EnsureSparkWalletExistsUseCase(
+                sparkWalletManager = sparkWalletManager,
+                sparkWalletAccountRepository = SparkWalletAccountRepositoryImpl(
+                    dispatcherProvider = dispatcherProvider,
+                    walletApi = primalWalletApi,
+                    walletDatabase = resolveWalletDatabase(),
+                ),
+                walletAccountRepository = WalletAccountRepositoryImpl(
+                    dispatcherProvider = dispatcherProvider,
+                    walletDatabase = resolveWalletDatabase(),
+                ),
+                seedPhraseGenerator = RecoveryPhraseGenerator(),
+            ),
+            migratePrimalTransactionsHandler = MigratePrimalTransactionsHandler(
+                primalWalletApi = primalWalletApi,
+                walletDatabase = resolveWalletDatabase(),
+                profileRepository = profileRepository,
+                dispatcherProvider = dispatcherProvider,
+            ),
         )
     }
 

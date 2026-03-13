@@ -88,11 +88,20 @@ kotlin {
 
         commonTest {
             dependencies {
+                implementation(libs.kotlin.test)
                 implementation(libs.junit)
                 implementation(libs.kotest.assertions.core)
                 implementation(libs.kotest.assertions.json)
                 implementation(libs.kotlinx.coroutines.test)
             }
+        }
+
+        val desktopTest by getting
+        desktopTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotest.assertions.core)
+            implementation(libs.kotlinx.coroutines.test)
+            implementation(libs.mockk)
         }
     }
 }

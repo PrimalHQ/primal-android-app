@@ -66,7 +66,7 @@ import net.primal.android.wallet.store.domain.SubscriptionTier
 
 internal val PREMIUM_TINT_DARK = Color(0xFFDDDDDD)
 internal val PREMIUM_TINT_LIGHT = Color(0xFF222222)
-internal val PREMIUM_PINK = Color(0xFFCA077C)
+internal val PREMIUM_BLUE = Color(0xFF2394EF)
 internal val PRO_ORANGE = Color(0xFFE47C00)
 
 private const val PAGE_PREMIUM = 0
@@ -256,7 +256,7 @@ private fun OfferPagerIndicators(pagerState: PagerState) {
         repeat(2) { index ->
             val selected = pagerState.currentPage == index
             val color = when {
-                selected && pagerState.currentPage == 0 -> PREMIUM_PINK
+                selected && pagerState.currentPage == 0 -> PREMIUM_BLUE
                 selected -> PRO_ORANGE
                 else -> AppTheme.extraColorScheme.onSurfaceVariantAlt2
             }

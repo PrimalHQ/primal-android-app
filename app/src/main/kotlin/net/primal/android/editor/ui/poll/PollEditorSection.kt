@@ -1,6 +1,10 @@
 package net.primal.android.editor.ui.poll
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +32,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,8 +48,10 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,9 +65,9 @@ import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.editor.NoteEditorContract
-import net.primal.android.editor.NoteEditorContract.PollType
 import net.primal.android.editor.NoteEditorViewModel.Companion.MAX_POLL_CHOICES
 import net.primal.android.editor.NoteEditorViewModel.Companion.MIN_POLL_CHOICES
+import net.primal.android.notes.feed.model.PollType
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 
@@ -139,6 +146,9 @@ private fun PollChoicesSection(
     onFocusedChoiceIdChange: (UUID?) -> Unit,
     eventPublisher: (NoteEditorContract.UiEvent) -> Unit,
 ) {
+    var pendingFocusChoiceCount by remember { mutableIntStateOf(-1) }
+    var pendingFocusChoiceId by remember { mutableStateOf<UUID?>(null) }
+
     pollState.choices.forEachIndexed { index, choice ->
         key(choice.id) {
             PollChoiceField(
@@ -153,7 +163,22 @@ private fun PollChoicesSection(
                     if (focused) onFocusedChoiceIdChange(choice.id)
                 },
                 onRemove = {
+                    if (focusedChoiceId == choice.id) {
+                        val neighborIndex = (index - 1).coerceAtLeast(0)
+                        pendingFocusChoiceId = pollState.choices
+                            .filterNot { it.id == choice.id }
+                            .getOrNull(neighborIndex)?.id
+                    }
                     eventPublisher(NoteEditorContract.UiEvent.RemovePollChoice(choice.id))
+                },
+                shouldRequestFocus = (
+                    pollState.choices.size == pendingFocusChoiceCount &&
+                        index == pollState.choices.lastIndex
+                    ) ||
+                    choice.id == pendingFocusChoiceId,
+                onFocusRequested = {
+                    pendingFocusChoiceCount = -1
+                    pendingFocusChoiceId = null
                 },
             )
 
@@ -165,7 +190,10 @@ private fun PollChoicesSection(
         Row(
             modifier = Modifier
                 .padding(start = startPadding, end = endPadding)
-                .clickable { eventPublisher(NoteEditorContract.UiEvent.AddPollChoice) }
+                .clickable {
+                    eventPublisher(NoteEditorContract.UiEvent.AddPollChoice)
+                    pendingFocusChoiceCount = pollState.choices.size + 1
+                }
                 .padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp),
@@ -228,7 +256,11 @@ private fun PollSettingsSection(
         },
     )
 
-    AnimatedVisibility(visible = showPollLengthPicker) {
+    AnimatedVisibility(
+        visible = showPollLengthPicker,
+        enter = expandVertically() + fadeIn(),
+        exit = shrinkVertically() + fadeOut(),
+    ) {
         PollLengthPicker(
             days = pollState.pollLengthDays,
             hours = pollState.pollLengthHours,
@@ -239,45 +271,58 @@ private fun PollSettingsSection(
         )
     }
 
-    if (pollState.pollType == PollType.ZapPoll) {
-        HorizontalDivider(
-            modifier = Modifier.padding(
-                start = startPadding,
-                end = endPadding,
-                top = 4.dp,
-                bottom = 4.dp,
-            ),
-            color = AppTheme.colorScheme.outline,
-        )
-
-        ZapAmountRow(
-            label = stringResource(id = R.string.poll_editor_min_zap),
-            amountInSats = pollState.minZapAmountInSats,
-            onAmountChanged = { amount ->
-                eventPublisher(NoteEditorContract.UiEvent.UpdateMinZapAmount(amount))
-            },
-            footerHeightPx = footerHeightPx,
-        )
-
-        HorizontalDivider(
-            modifier = Modifier.padding(
-                start = startPadding,
-                end = endPadding,
-                top = 4.dp,
-                bottom = 4.dp,
-            ),
-            color = AppTheme.colorScheme.outline,
-        )
-
-        ZapAmountRow(
-            label = stringResource(id = R.string.poll_editor_max_zap),
-            amountInSats = pollState.maxZapAmountInSats,
-            onAmountChanged = { amount ->
-                eventPublisher(NoteEditorContract.UiEvent.UpdateMaxZapAmount(amount))
-            },
+    if (pollState.pollType == PollType.Zap) {
+        ZapPollOptions(
+            pollState = pollState,
+            eventPublisher = eventPublisher,
             footerHeightPx = footerHeightPx,
         )
     }
+}
+
+@Composable
+private fun ZapPollOptions(
+    pollState: NoteEditorContract.PollEditorState,
+    eventPublisher: (NoteEditorContract.UiEvent) -> Unit,
+    footerHeightPx: Int,
+) {
+    HorizontalDivider(
+        modifier = Modifier.padding(
+            start = startPadding,
+            end = endPadding,
+            top = 4.dp,
+            bottom = 4.dp,
+        ),
+        color = AppTheme.colorScheme.outline,
+    )
+
+    ZapAmountRow(
+        label = stringResource(id = R.string.poll_editor_min_zap),
+        amountInSats = pollState.minZapAmountInSats,
+        onAmountChanged = { amount ->
+            eventPublisher(NoteEditorContract.UiEvent.UpdateMinZapAmount(amount))
+        },
+        footerHeightPx = footerHeightPx,
+    )
+
+    HorizontalDivider(
+        modifier = Modifier.padding(
+            start = startPadding,
+            end = endPadding,
+            top = 4.dp,
+            bottom = 4.dp,
+        ),
+        color = AppTheme.colorScheme.outline,
+    )
+
+    ZapAmountRow(
+        label = stringResource(id = R.string.poll_editor_max_zap),
+        amountInSats = pollState.maxZapAmountInSats,
+        onAmountChanged = { amount ->
+            eventPublisher(NoteEditorContract.UiEvent.UpdateMaxZapAmount(amount))
+        },
+        footerHeightPx = footerHeightPx,
+    )
 }
 
 @Composable
@@ -291,7 +336,15 @@ private fun PollSettingRow(
             .fillMaxWidth()
             .height(44.dp)
             .then(
-                if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier,
+                if (onClick != null) {
+                    Modifier.clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = onClick,
+                    )
+                } else {
+                    Modifier
+                },
             )
             .padding(start = startPadding, end = endPadding),
         verticalAlignment = Alignment.CenterVertically,
@@ -313,8 +366,8 @@ private fun PollSettingRow(
 private fun PollTypeLabel(pollType: PollType) {
     Text(
         text = when (pollType) {
-            PollType.UserPoll -> stringResource(id = R.string.poll_editor_user_poll)
-            PollType.ZapPoll -> stringResource(id = R.string.poll_editor_zap_poll)
+            PollType.User -> stringResource(id = R.string.poll_editor_user_poll)
+            PollType.Zap -> stringResource(id = R.string.poll_editor_zap_poll)
         },
         style = AppTheme.typography.bodyMedium,
         color = AppTheme.colorScheme.onSurface,
@@ -375,6 +428,14 @@ private fun PollNumericField(
     focusModifier: Modifier = Modifier,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
+    var textFieldValue by remember {
+        mutableStateOf(TextFieldValue(text = value, selection = TextRange(value.length)))
+    }
+
+    if (textFieldValue.text != value) {
+        textFieldValue = textFieldValue.copy(text = value)
+    }
+
     val colors = PrimalDefaults.outlinedTextFieldColors(
         focusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         unfocusedContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
@@ -383,11 +444,21 @@ private fun PollNumericField(
     )
 
     BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
+        value = textFieldValue,
+        onValueChange = { newValue ->
+            textFieldValue = newValue
+            onValueChange(newValue.text)
+        },
         modifier = modifier
             .height(44.dp)
-            .then(focusModifier),
+            .then(focusModifier)
+            .onFocusChanged { focusState ->
+                if (focusState.isFocused) {
+                    textFieldValue = textFieldValue.copy(
+                        selection = TextRange(0, textFieldValue.text.length),
+                    )
+                }
+            },
         singleLine = true,
         textStyle = AppTheme.typography.bodySmall.copy(
             textAlign = TextAlign.Start,
@@ -398,7 +469,7 @@ private fun PollNumericField(
         interactionSource = interactionSource,
         decorationBox = { innerTextField ->
             OutlinedTextFieldDefaults.DecorationBox(
-                value = value,
+                value = textFieldValue.text,
                 innerTextField = innerTextField,
                 enabled = true,
                 singleLine = true,
