@@ -9,7 +9,7 @@ on:
       zsp-version:
         description: "zsp version to use for publishing"
         required: true
-        default: "0.4.1"
+        default: "0.4.2"
 
 jobs:
   publish:
