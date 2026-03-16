@@ -184,7 +184,7 @@ private fun PollResultsContent(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         poll.options.forEach { option ->
-            val isUserChoice = option.id in poll.selectedOptionIds
+            val isUserChoice = option.id == poll.userVotedOptionId
             val showCheckmark = poll.state == PollState.Ended && option.isWinner
 
             PollResultOption(
@@ -377,7 +377,7 @@ private fun PreviewPollVoted() {
                         Duration.ofDays(2).plusMinutes(56),
                     ),
                     state = PollState.Voted,
-                    selectedOptionIds = setOf("4"),
+                    userVotedOptionId = "4",
                 ),
             )
         }
@@ -419,7 +419,7 @@ private fun PreviewPollEnded() {
 
                     endsAt = Instant.now().minus(Duration.ofDays(1)),
                     state = PollState.Ended,
-                    selectedOptionIds = setOf("4"),
+                    userVotedOptionId = "4",
                 ),
             )
         }
@@ -461,7 +461,7 @@ private fun PreviewPollEndedUserLost() {
 
                     endsAt = Instant.now().minus(Duration.ofDays(1)),
                     state = PollState.Ended,
-                    selectedOptionIds = setOf("1"),
+                    userVotedOptionId = "1",
                 ),
             )
         }
@@ -535,7 +535,7 @@ private fun PreviewZapPollVoted() {
 
                     endsAt = Instant.now().plus(Duration.ofDays(1)),
                     state = PollState.Voted,
-                    selectedOptionIds = setOf("4"),
+                    userVotedOptionId = "4",
                     valueMinimum = 21,
                     valueMaximum = 21_000,
                 ),
@@ -584,7 +584,7 @@ private fun PreviewZapPollEnded() {
 
                     endsAt = Instant.now().minus(Duration.ofDays(1)),
                     state = PollState.Ended,
-                    selectedOptionIds = setOf("4"),
+                    userVotedOptionId = "4",
                     valueMinimum = 21,
                     valueMaximum = 21_000,
                 ),

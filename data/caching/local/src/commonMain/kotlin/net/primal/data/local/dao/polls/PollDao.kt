@@ -26,4 +26,14 @@ interface PollDao {
 
     @Query("SELECT * FROM PollData WHERE postId = :postId")
     fun observePollDataByPostId(postId: String): Flow<PollData?>
+
+    @Query(
+        """
+        SELECT PollData.*, EventUserStats.votedForOption AS userVotedForOption
+        FROM PollData
+        LEFT JOIN EventUserStats ON EventUserStats.eventId = PollData.postId AND EventUserStats.userId = :userId
+        WHERE PollData.postId = :postId
+        """,
+    )
+    fun observePollDataByPostIdAndUserId(postId: String, userId: String): Flow<PollDataWithUserVote?>
 }

@@ -7,12 +7,14 @@ import androidx.paging.PagingData
 import androidx.paging.map
 import kotlin.time.Clock
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.withContext
 import net.primal.core.caching.MediaCacher
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
+import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.polls.PollData
 import net.primal.data.local.dao.polls.PollType
 import net.primal.data.local.dao.polls.PollVoteData
@@ -125,7 +127,39 @@ class PollsRepositoryImpl(
     private suspend fun validateNotAlreadyVoted(userId: String, pollEventId: String) {
         val existingVotes = database.pollVotes().findVotesByUser(postId = pollEventId, voterId = userId)
         if (existingVotes.isNotEmpty()) throw PollAlreadyVotedException()
+
+        val userStats = database.eventUserStats().find(eventId = pollEventId, userId = userId)
+        if (userStats?.votedForOption != null) throw PollAlreadyVotedException()
     }
+
+    private suspend fun markVotedInUserStats(
+        userId: String,
+        eventId: String,
+        optionId: String,
+    ) {
+        val existing = database.eventUserStats().find(eventId = eventId, userId = userId)
+            ?: EventUserStats(eventId = eventId, userId = userId)
+        database.eventUserStats().upsert(existing.copy(votedForOption = optionId))
+    }
+
+    private suspend fun revertVotedInUserStats(userId: String, eventId: String) {
+        val existing = database.eventUserStats().find(eventId = eventId, userId = userId)
+            ?: return
+        database.eventUserStats().upsert(existing.copy(votedForOption = null))
+    }
+
+    override suspend fun markPollVoted(
+        userId: String,
+        pollEventId: String,
+        optionId: String,
+    ) = withContext(dispatcherProvider.io()) {
+        markVotedInUserStats(userId = userId, eventId = pollEventId, optionId = optionId)
+    }
+
+    override suspend fun revertPollVoted(userId: String, pollEventId: String) =
+        withContext(dispatcherProvider.io()) {
+            revertVotedInUserStats(userId = userId, eventId = pollEventId)
+        }
 
     override suspend fun votePoll(
         userId: String,
@@ -138,41 +172,47 @@ class PollsRepositoryImpl(
                 validateNotExpired(poll)
                 validateNotAlreadyVoted(userId, pollEventId)
 
-                val publishResult = primalPublisher.signPublishImportNostrEvent(
-                    unsignedNostrEvent = NostrUnsignedEvent(
-                        pubKey = userId,
-                        kind = NostrEventKind.PollResponse.value,
-                        tags = listOf(pollEventId.asEventIdTag(), optionId.asResponseTag()),
-                        content = "",
-                    ),
-                )
+                markVotedInUserStats(userId = userId, eventId = pollEventId, optionId = optionId)
 
-                database.withTransaction {
-                    database.pollVotes().upsertAll(
-                        data = listOf(
-                            PollVoteData(
-                                eventId = publishResult.nostrEvent.id,
-                                postId = pollEventId,
-                                optionId = optionId,
-                                voterId = userId,
-                                amountInSats = null,
-                                createdAt = publishResult.nostrEvent.createdAt,
-                            ),
+                runCatching {
+                    val publishResult = primalPublisher.signPublishImportNostrEvent(
+                        unsignedNostrEvent = NostrUnsignedEvent(
+                            pubKey = userId,
+                            kind = NostrEventKind.PollResponse.value,
+                            tags = listOf(pollEventId.asEventIdTag(), optionId.asResponseTag()),
+                            content = "",
                         ),
                     )
 
-                    val existingPoll = database.polls().findByPostId(postId = pollEventId)
-                    if (existingPoll != null) {
-                        val updatedOptions = existingPoll.options.map { option ->
-                            if (option.id == optionId) {
-                                option.copy(voteCount = option.voteCount + 1)
-                            } else {
-                                option
+                    database.withTransaction {
+                        database.pollVotes().upsertAll(
+                            data = listOf(
+                                PollVoteData(
+                                    eventId = publishResult.nostrEvent.id,
+                                    postId = pollEventId,
+                                    optionId = optionId,
+                                    voterId = userId,
+                                    amountInSats = null,
+                                    createdAt = publishResult.nostrEvent.createdAt,
+                                ),
+                            ),
+                        )
+
+                        val existingPoll = database.polls().findByPostId(postId = pollEventId)
+                        if (existingPoll != null) {
+                            val updatedOptions = existingPoll.options.map { option ->
+                                if (option.id == optionId) {
+                                    option.copy(voteCount = option.voteCount + 1)
+                                } else {
+                                    option
+                                }
                             }
+                            database.polls().upsertAll(listOf(existingPoll.copy(options = updatedOptions)))
                         }
-                        database.polls().upsertAll(listOf(existingPoll.copy(options = updatedOptions)))
                     }
-                }
+                }.onFailure {
+                    revertVotedInUserStats(userId = userId, eventId = pollEventId)
+                }.getOrThrow()
             }
         }
 
@@ -227,11 +267,6 @@ class PollsRepositoryImpl(
                 }
             }
         }
-
-    override fun observeUserVotedOptions(userId: String, postId: String): Flow<Set<String>> {
-        return database.pollVotes().observeVotesByUser(postId = postId, voterId = userId)
-            .map { votes -> votes.map { it.optionId }.toSet() }
-    }
 
     override fun observePollVotes(eventId: String): Flow<PollVoteStats> {
         return database.polls().observePollByPostId(eventId)
@@ -310,7 +345,8 @@ class PollsRepositoryImpl(
             }
         }
 
-    override fun observePollData(eventId: String): Flow<PollInfo?> =
-        database.polls().observePollDataByPostId(postId = eventId)
-            .map { pollData -> pollData?.asPollInfo() }
+    override fun observePollData(eventId: String, userId: String): Flow<PollInfo?> =
+        database.polls().observePollDataByPostIdAndUserId(postId = eventId, userId = userId)
+            .distinctUntilChanged()
+            .map { it?.asPollInfo() }
 }

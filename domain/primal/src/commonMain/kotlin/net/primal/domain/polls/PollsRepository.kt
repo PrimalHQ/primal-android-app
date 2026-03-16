@@ -24,9 +24,15 @@ interface PollsRepository {
 
     fun observePollVotes(eventId: String): Flow<PollVoteStats>
 
-    fun observeUserVotedOptions(userId: String, postId: String): Flow<Set<String>>
+    suspend fun markPollVoted(
+        userId: String,
+        pollEventId: String,
+        optionId: String,
+    )
+
+    suspend fun revertPollVoted(userId: String, pollEventId: String)
 
     fun createVotersPager(eventId: String, optionId: String): Flow<PagingData<PollVoter>>
 
-    fun observePollData(eventId: String): Flow<PollInfo?>
+    fun observePollData(eventId: String, userId: String): Flow<PollInfo?>
 }

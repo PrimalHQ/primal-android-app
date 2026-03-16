@@ -93,7 +93,6 @@ class NoteViewModel @AssistedInject constructor(
         subscribeToActiveAccount()
         if (noteId != null) {
             prepareRelayHints(noteId = noteId)
-            observeUserVotedOptions(noteId = noteId)
         }
     }
 
@@ -102,16 +101,6 @@ class NoteViewModel @AssistedInject constructor(
             val hints = relayHintsRepository.findRelaysByIds(eventIds = listOf(noteId))
             hints.firstOrNull()?.let { relayHints ->
                 setState { copy(relayHints = relayHints.relays.take(n = 2)) }
-            }
-        }
-
-    private fun observeUserVotedOptions(noteId: String) =
-        viewModelScope.launch {
-            pollsRepository.observeUserVotedOptions(
-                userId = activeAccountStore.activeUserId(),
-                postId = noteId,
-            ).collect { votedOptionIds ->
-                setState { copy(userVotedOptionIds = votedOptionIds) }
             }
         }
 
@@ -501,7 +490,7 @@ class NoteViewModel @AssistedInject constructor(
                 copy(
                     poll = currentPoll.copy(
                         state = PollState.Voted,
-                        selectedOptionIds = currentPoll.selectedOptionIds + action.optionId,
+                        userVotedOptionId = action.optionId,
                         options = updatedOptions.map { option ->
                             option.copy(
                                 votePercentage = option.voteCount.toFloat() / totalVotes,
@@ -574,6 +563,12 @@ class NoteViewModel @AssistedInject constructor(
                 return@launch
             }
 
+            pollsRepository.markPollVoted(
+                userId = activeAccountStore.activeUserId(),
+                pollEventId = action.postId,
+                optionId = action.optionId,
+            )
+
             val result = zapHandler.zap(
                 userId = activeAccountStore.activeUserId(),
                 walletId = walletId,
@@ -589,6 +584,10 @@ class NoteViewModel @AssistedInject constructor(
 
             if (result is ZapResult.Failure) {
                 setState { copy(poll = null) }
+                pollsRepository.revertPollVoted(
+                    userId = activeAccountStore.activeUserId(),
+                    pollEventId = action.postId,
+                )
                 when (result.error) {
                     is ZapError.InvalidZap, is ZapError.FailedToFetchZapPayRequest,
                     is ZapError.FailedToFetchZapInvoice,
@@ -624,7 +623,7 @@ class NoteViewModel @AssistedInject constructor(
             copy(
                 poll = currentPoll.copy(
                     state = PollState.Voted,
-                    selectedOptionIds = currentPoll.selectedOptionIds + action.optionId,
+                    userVotedOptionId = action.optionId,
                     options = updatedOptions.map { option ->
                         option.copy(
                             voteCount = option.voteCount + if (option.id == action.optionId) 1 else 0,

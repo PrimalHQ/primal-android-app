@@ -12,4 +12,5 @@ data class PollInfo(
     val valueMinimum: Long? = null,
     val valueMaximum: Long? = null,
     val options: List<PollOptionInfo>,
+    val userVotedForOption: String? = null,
 )
