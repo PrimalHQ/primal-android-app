@@ -61,7 +61,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
@@ -611,8 +610,6 @@ private fun NoteEditorInputArea(
     eventPublisher: (UiEvent) -> Unit,
     onShowAccountSwitcher: () -> Unit,
 ) {
-    val clipboardManager = LocalClipboardManager.current
-
     Row {
         UniversalAvatarThumbnail(
             modifier = Modifier
@@ -656,8 +653,8 @@ private fun NoteEditorInputArea(
                 .onSizeChanged { onReplyNoteHeightChanged(it.height) },
             value = state.content,
             onValueChange = {
-                val clipboardText = clipboardManager.getText()
-                if (clipboardText != null && it.text.contains(clipboardText.text)) {
+                val charsDelta = it.text.length - state.content.text.length
+                if (charsDelta > 1) {
                     eventPublisher(UiEvent.PasteContent(content = it))
                 } else {
                     eventPublisher(UiEvent.UpdateContent(content = it))
