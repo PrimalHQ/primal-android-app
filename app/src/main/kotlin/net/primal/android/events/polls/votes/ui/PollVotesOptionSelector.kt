@@ -48,7 +48,7 @@ fun PollVotesOptionSelector(
     ) {
         poll.options.forEach { option ->
             val isSelected = option.id == selectedOptionId
-            val isVotedByUser = poll.selectedOptionIds.contains(option.id)
+            val isVotedByUser = option.id == poll.userVotedOptionId
             SelectablePollOption(
                 option = option,
                 pollType = poll.pollType,

@@ -65,18 +65,10 @@ class PollVotesViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching {
                 val userId = activeAccountStore.activeUserId()
-                val votedOptionsFlow = pollsRepository.observeUserVotedOptions(
-                    userId = userId,
-                    postId = eventId,
-                )
-
-                pollsRepository.observePollData(eventId = eventId)
+                pollsRepository.observePollData(eventId = eventId, userId = userId)
                     .filterNotNull()
-                    .flatMapLatest { pollInfo ->
-                        votedOptionsFlow.map { votedOptions -> pollInfo to votedOptions }
-                    }
-                    .collect { (pollInfo, votedOptions) ->
-                        val pollUi = pollInfo.asPollUi(userVotedOptionIds = votedOptions)
+                    .collect { pollInfo ->
+                        val pollUi = pollInfo.asPollUi()
                         setState {
                             copy(
                                 loading = false,

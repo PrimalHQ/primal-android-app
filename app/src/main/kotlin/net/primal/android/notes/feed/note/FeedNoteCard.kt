@@ -70,7 +70,6 @@ import net.primal.android.notes.feed.model.PollOptionUi
 import net.primal.android.notes.feed.model.PollState
 import net.primal.android.notes.feed.model.PollType
 import net.primal.android.notes.feed.model.PollUi
-import net.primal.android.notes.feed.model.applyUserVotedOptions
 import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.model.toNoteContentUi
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
@@ -427,8 +426,7 @@ private fun FeedNoteCard(
                             bottom = notePaddingDp,
                         ),
                 ) {
-                    val noteData = state.poll?.let { data.copy(poll = it) }
-                        ?: data.applyUserVotedOptions(state.userVotedOptionIds)
+                    val noteData = state.poll?.let { data.copy(poll = it) } ?: data
                     FeedNote(
                         data = noteData,
                         fullWidthContent = fullWidthContent,
@@ -996,7 +994,7 @@ fun PreviewFeedNoteCardWithSingleChoicePollVoted() {
                     ),
                     endsAt = Instant.now().plus(Duration.ofDays(2).plusMinutes(56)),
                     state = PollState.Voted,
-                    selectedOptionIds = setOf("4"),
+                    userVotedOptionId = "4",
                 ),
             ),
             state = NoteContract.UiState(activeAccountUserId = ""),
@@ -1059,7 +1057,7 @@ fun PreviewFeedNoteCardWithSingleChoicePollEnded() {
                     ),
                     endsAt = Instant.now().minus(Duration.ofDays(1)),
                     state = PollState.Ended,
-                    selectedOptionIds = setOf("4"),
+                    userVotedOptionId = "4",
                 ),
             ),
             state = NoteContract.UiState(activeAccountUserId = ""),

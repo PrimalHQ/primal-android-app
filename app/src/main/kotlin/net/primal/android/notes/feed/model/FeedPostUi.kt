@@ -89,19 +89,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
         authorLegendaryCustomization = this.author.legendProfile?.asLegendaryCustomization(),
         eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
         isAuthorLiveStreamingNow = this.author.isLiveStreamingNow,
-        poll = this.pollInfo?.asPollUi(
-            userVotedOptionIds = this.stats?.userVotedForOption?.let { setOf(it) } ?: emptySet(),
-        ),
-    )
-}
-
-fun FeedPostUi.applyUserVotedOptions(userVotedOptionIds: Set<String>): FeedPostUi {
-    if (this.poll == null || userVotedOptionIds.isEmpty()) return this
-    return copy(
-        poll = poll.copy(
-            state = if (poll.state == PollState.Ended) PollState.Ended else PollState.Voted,
-            selectedOptionIds = userVotedOptionIds,
-        ),
+        poll = this.pollInfo?.asPollUi(),
     )
 }
 

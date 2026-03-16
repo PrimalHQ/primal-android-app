@@ -76,6 +76,7 @@ fun List<PostData>.flatMapPostsAsReferencedNostrUriDO(
     linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
     postIdToPollDataMap: Map<String, PollData> = emptyMap(),
+    postIdToUserVotedOption: Map<String, String?> = emptyMap(),
 ): List<EventUriNostrReference> =
     flatMap { postData ->
         postData.uris.mapAsReferencedNostrUriDO(
@@ -89,6 +90,7 @@ fun List<PostData>.flatMapPostsAsReferencedNostrUriDO(
             linkPreviews = linkPreviews,
             videoThumbnails = videoThumbnails,
             postIdToPollDataMap = postIdToPollDataMap,
+            postIdToUserVotedOption = postIdToUserVotedOption,
         )
     }
 
@@ -102,6 +104,7 @@ fun List<DirectMessageData>.flatMapMessagesAsReferencedNostrUriDO(
     linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
     postIdToPollDataMap: Map<String, PollData> = emptyMap(),
+    postIdToUserVotedOption: Map<String, String> = emptyMap(),
 ) = flatMap { messageData ->
     messageData.uris.decrypted.mapAsReferencedNostrUriDO(
         eventId = messageData.messageId,
@@ -114,6 +117,7 @@ fun List<DirectMessageData>.flatMapMessagesAsReferencedNostrUriDO(
         linkPreviews = linkPreviews,
         videoThumbnails = videoThumbnails,
         postIdToPollDataMap = postIdToPollDataMap,
+        postIdToUserVotedOption = postIdToUserVotedOption,
     )
 }
 
@@ -128,6 +132,7 @@ fun List<String>.mapAsReferencedNostrUriDO(
     linkPreviews: Map<String, EventLinkPreviewData>,
     videoThumbnails: Map<String, String>,
     postIdToPollDataMap: Map<String, PollData> = emptyMap(),
+    postIdToUserVotedOption: Map<String, String?> = emptyMap(),
 ) = filter { it.isNostrUri() }.map { link ->
     val refUserProfileId = link.extractProfileId()
 
@@ -181,6 +186,7 @@ fun List<String>.mapAsReferencedNostrUriDO(
             profileIdToProfileDataMap = profileIdToProfileDataMap,
             streamIdToStreamData = streamIdToStreamData,
             postIdToPollDataMap = postIdToPollDataMap,
+            postIdToUserVotedOption = postIdToUserVotedOption,
         ),
         referencedArticle = takeAsReferencedArticleOrNull(refNaddr, refArticle, refNaddrAuthor),
         referencedZap = takeAsReferencedZapOrNull(
@@ -246,6 +252,7 @@ private fun takeAsReferencedNoteOrNull(
     streamIdToStreamData: Map<String, StreamData>,
     profileIdToProfileDataMap: Map<String, ProfileData>,
     postIdToPollDataMap: Map<String, PollData> = emptyMap(),
+    postIdToUserVotedOption: Map<String, String?> = emptyMap(),
 ) = if (refNote != null && refPostAuthor != null) {
     ReferencedNote(
         postId = refNote.postId,
@@ -273,7 +280,9 @@ private fun takeAsReferencedNoteOrNull(
             videoThumbnails = videoThumbnails,
         ),
         raw = refNote.raw,
-        pollInfo = postIdToPollDataMap[refNote.postId]?.asPollInfo(),
+        pollInfo = postIdToPollDataMap[refNote.postId]?.asPollInfo(
+            userVotedForOption = postIdToUserVotedOption[refNote.postId],
+        ),
     )
 } else {
     null

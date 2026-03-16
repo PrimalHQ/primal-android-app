@@ -1,11 +1,12 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.polls.PollData
+import net.primal.data.local.dao.polls.PollDataWithUserVote
 import net.primal.data.local.dao.polls.asDO
 import net.primal.domain.polls.PollInfo
 import net.primal.domain.polls.PollOptionInfo
 
-fun PollData.asPollInfo(): PollInfo {
+fun PollData.asPollInfo(userVotedForOption: String? = null): PollInfo {
     return PollInfo(
         postId = this.postId,
         authorId = this.authorId,
@@ -22,5 +23,10 @@ fun PollData.asPollInfo(): PollInfo {
                 satsZapped = option.satsZapped,
             )
         },
+        userVotedForOption = userVotedForOption,
     )
+}
+
+fun PollDataWithUserVote.asPollInfo(): PollInfo {
+    return pollData.asPollInfo(userVotedForOption = userVotedForOption)
 }

@@ -8,7 +8,7 @@ import net.primal.android.notes.feed.model.PollUi
 import net.primal.android.notes.feed.model.asUiModel
 import net.primal.domain.polls.PollInfo
 
-fun PollInfo.asPollUi(userVotedOptionIds: Set<String> = emptySet()): PollUi {
+fun PollInfo.asPollUi(): PollUi {
     val endsAtInstant = endsAt?.let { Instant.ofEpochSecond(it) }
     val totalVotes = options.sumOf { it.voteCount }.coerceAtLeast(1)
     val totalSats = options.sumOf { it.satsZapped }.coerceAtLeast(1)
@@ -16,7 +16,7 @@ fun PollInfo.asPollUi(userVotedOptionIds: Set<String> = emptySet()): PollUi {
 
     val state = when {
         endsAtInstant != null && endsAtInstant < Instant.now() -> PollState.Ended
-        userVotedOptionIds.isNotEmpty() -> PollState.Voted
+        userVotedForOption != null -> PollState.Voted
         else -> PollState.Pending
     }
 
@@ -44,7 +44,7 @@ fun PollInfo.asPollUi(userVotedOptionIds: Set<String> = emptySet()): PollUi {
         },
         endsAt = endsAtInstant,
         state = state,
-        selectedOptionIds = userVotedOptionIds,
+        userVotedOptionId = userVotedForOption,
         valueMinimum = valueMinimum,
         valueMaximum = valueMaximum,
     )

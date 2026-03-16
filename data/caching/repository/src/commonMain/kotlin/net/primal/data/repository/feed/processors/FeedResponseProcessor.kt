@@ -107,6 +107,15 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
     val pollData = pollDataWithStats + pollDataWithoutStats
     val pollVotes = this.pollResponses.mapAsPollResponseVotes() + this.zaps.mapAsZapPollVotes()
 
+    val eventZaps = zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })
+    val reposts = reposts.mapNotNullAsRepostDataPO()
+    val postStats = primalEventStats.mapNotNullAsEventStatsPO()
+    val userPostStats = primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
+
+    val userVotedOptionMap = userPostStats
+        .filter { it.votedForOption != null }
+        .associate { it.eventId to it.votedForOption }
+
     val noteNostrUris = allPosts.flatMapPostsAsReferencedNostrUriDO(
         eventIdToNostrEvent = refEvents.associateBy { it.id },
         postIdToPostDataMap = allPosts.associateBy { it.postId },
@@ -117,12 +126,8 @@ internal suspend inline fun FeedResponse.persistToDatabase(userId: String, datab
         videoThumbnails = videoThumbnails,
         linkPreviews = linkPreviews,
         postIdToPollDataMap = pollData.associateBy { it.postId },
+        postIdToUserVotedOption = userVotedOptionMap,
     ).mapReferencedNostrUriAsEventUriNostrPO()
-
-    val eventZaps = zaps.mapAsEventZapDO(profilesMap = profiles.associateBy { it.ownerId })
-    val reposts = reposts.mapNotNullAsRepostDataPO()
-    val postStats = primalEventStats.mapNotNullAsEventStatsPO()
-    val userPostStats = primalEventUserStats.mapNotNullAsEventUserStatsPO(userId = userId)
 
     database.profiles().insertOrUpdateAll(data = profiles)
     database.posts().upsertAll(data = allPosts)

@@ -36,7 +36,7 @@ data class PollUi(
     val options: List<PollOptionUi>,
     val endsAt: Instant? = null,
     val state: PollState,
-    val selectedOptionIds: Set<String> = emptySet(),
+    val userVotedOptionId: String? = null,
     val valueMinimum: Long? = null,
     val valueMaximum: Long? = null,
 ) {
