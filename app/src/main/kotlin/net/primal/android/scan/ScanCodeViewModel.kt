@@ -10,6 +10,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -58,6 +59,8 @@ class ScanCodeViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private val qrCodeEvents = MutableSharedFlow<String>()
+
     private val _effects = Channel<SideEffect>()
     val effects = _effects.receiveAsFlow()
     private fun setEffect(effect: SideEffect) = viewModelScope.launch { _effects.send(effect) }
@@ -74,6 +77,7 @@ class ScanCodeViewModel @Inject constructor(
         }
         observeEvents()
         observeActiveAccount()
+        observeQrCodeEvents()
     }
 
     private fun observeEvents() =
@@ -87,9 +91,14 @@ class ScanCodeViewModel @Inject constructor(
                     is UiEvent.ApplyPromoCode -> applyPromoCode(it.code)
                     UiEvent.DismissError -> setState { copy(error = null, showErrorBadge = false) }
                     UiEvent.PreviousStage -> setState { copy(stageStack = stageStack.popStage()) }
-                    is UiEvent.QrCodeDetected -> processCode(it.result.value)
+                    is UiEvent.QrCodeDetected -> viewModelScope.launch { qrCodeEvents.emit(it.result.value) }
                 }
             }
+        }
+
+    private fun observeQrCodeEvents() =
+        viewModelScope.launch {
+            qrCodeEvents.distinctUntilChanged().collect { processCode(it) }
         }
 
     private fun observeActiveAccount() =
