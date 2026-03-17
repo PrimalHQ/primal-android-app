@@ -102,6 +102,7 @@ import net.primal.android.nostrconnect.active.ActiveSessionsViewModel
 import net.primal.android.nostrconnect.connect.NostrConnectBottomSheet
 import net.primal.android.nostrconnect.connect.NostrConnectViewModel
 import net.primal.android.nostrconnect.utils.NOSTR_CONNECT_SCHEME
+import net.primal.android.nostrconnect.utils.PRIMAL_CONNECT_SCHEME
 import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.notes.home.HomeFeedContract
@@ -641,6 +642,9 @@ private fun PrimalAppNavigation(
                 },
                 navDeepLink {
                     uriPattern = "$NOSTR_CONNECT_SCHEME://.*"
+                },
+                navDeepLink {
+                    uriPattern = "$PRIMAL_CONNECT_SCHEME://.*"
                 },
             ),
         )
@@ -1317,10 +1321,14 @@ private fun NavGraphBuilder.home(
     },
 ) { navBackEntry ->
     val activity = LocalActivity.current
-    val nostrConnectUri = activity?.intent?.data?.toString()
-    if (nostrConnectUri?.startsWith(NOSTR_CONNECT_SCHEME) == true) {
-        navController.navigateToNostrConnectBottomSheet(url = nostrConnectUri.asUrlDecoded())
-        activity.intent = null
+    val connectUri = activity?.intent?.data?.toString()
+    if (connectUri != null) {
+        val isConnectUri = connectUri.startsWith(NOSTR_CONNECT_SCHEME) ||
+            connectUri.startsWith(PRIMAL_CONNECT_SCHEME)
+        if (isConnectUri) {
+            navController.navigateToNostrConnectBottomSheet(url = connectUri.asUrlDecoded())
+            activity.intent = null
+        }
     }
 
     val viewModel = hiltViewModel<HomeFeedViewModel>(navBackEntry)
