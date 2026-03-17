@@ -191,34 +191,30 @@ internal class SparkWalletServiceImpl(
 
         val payments = response.payments
 
-        val sentLightningInvoices = payments.extractSentInvoices()
-        val zapReceiptsMap = if (sentLightningInvoices.isNotEmpty()) {
-            eventRepository.getZapReceipts(invoices = sentLightningInvoices).getOrNull()
+        val lightningInvoices = payments.extractInvoices()
+        val zapReceiptsMap = if (lightningInvoices.isNotEmpty()) {
+            eventRepository.getZapReceipts(invoices = lightningInvoices).getOrNull()
         } else {
             null
         }
 
         return payments.mapNotNull { payment ->
-            val txInvoice = payment.extractSentInvoice()
+            val txInvoice = payment.extractInvoice()
             val zapRequestFallback = txInvoice?.let { zapReceiptsMap?.get(it) }
 
             payment.mapAsSparkTransaction(
                 userId = wallet.userId,
                 walletId = wallet.walletId,
-                walletAddress = wallet.lightningAddress,
                 zapRequestFallback = zapRequestFallback,
             )
         }
     }
 
-    private fun List<Payment>.extractSentInvoices(): List<String> {
-        return this
-            .filter { it.paymentType == PaymentType.SEND }
-            .mapNotNull { it.extractSentInvoice() }
+    private fun List<Payment>.extractInvoices(): List<String> {
+        return this.mapNotNull { it.extractInvoice() }
     }
 
-    private fun Payment.extractSentInvoice(): String? {
-        if (this.paymentType != PaymentType.SEND) return null
+    private fun Payment.extractInvoice(): String? {
         return when (val details = this.details) {
             is PaymentDetails.Lightning -> details.invoice
             is PaymentDetails.Spark -> details.invoiceDetails?.invoice
