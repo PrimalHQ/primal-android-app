@@ -21,6 +21,7 @@ private data class TransactionCsvRecord(
     @SerialName("Note") val note: String,
     @SerialName("TransactionId") val transactionId: String,
     @SerialName("Invoice") val invoice: String,
+    @SerialName("Address") val address: String,
 )
 
 suspend fun saveTransactionsToUri(
@@ -44,5 +45,6 @@ private fun Transaction.toCsvRecord(): TransactionCsvRecord {
         note = note ?: "",
         transactionId = transactionId,
         invoice = invoice ?: "",
+        address = if (this is Transaction.OnChain) this.onChainAddress ?: "" else "",
     )
 }
