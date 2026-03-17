@@ -238,13 +238,13 @@ internal class SparkWalletServiceImpl(
             requireNotNull(amountInBtc) { "Amount is required for Spark lightning invoices." }
 
             val sdk = breezSdkInstanceManager.requireInstance(wallet.walletId)
-            val amountSats = (amountInBtc.toDouble() * 100_000_000).toLong()
+            val amountSats = amountInBtc.toSats()
 
             val response = sdk.receivePayment(
                 ReceivePaymentRequest(
                     paymentMethod = ReceivePaymentMethod.Bolt11Invoice(
                         description = request.description ?: "",
-                        amountSats = amountSats.toULong(),
+                        amountSats = amountSats,
                         expirySecs = DEFAULT_INVOICE_EXPIRY_SECS,
                         paymentHash = null,
                     ),
