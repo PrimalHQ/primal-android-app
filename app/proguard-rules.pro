@@ -27,12 +27,6 @@
 
 -keep class net.zetetic.** { *; }
 
-# ZBar Library
--keepclassmembers class net.sourceforge.zbar.ImageScanner { *; }
--keepclassmembers class net.sourceforge.zbar.Image { *; }
--keepclassmembers class net.sourceforge.zbar.Symbol { *; }
--keepclassmembers class net.sourceforge.zbar.SymbolSet { *; }
-
 # BicoinJ-Core
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 

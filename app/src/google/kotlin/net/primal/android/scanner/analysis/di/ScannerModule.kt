@@ -11,5 +11,5 @@ import net.primal.android.scanner.analysis.QrCodeResultDecoder
 @InstallIn(SingletonComponent::class)
 abstract class ScannerModule {
     @Binds
-    abstract fun provideTokenUpdater(updater: GoogleBarcodeScanner): QrCodeResultDecoder
+    abstract fun provideQrCodeResultDecoder(impl: GoogleBarcodeScanner): QrCodeResultDecoder
 }

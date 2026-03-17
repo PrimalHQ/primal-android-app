@@ -5,11 +5,11 @@ import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import net.primal.android.scanner.analysis.QrCodeResultDecoder
-import net.primal.android.scanner.analysis.ZbarQrCodeScanner
+import net.primal.android.scanner.analysis.ZxingQrCodeScanner
 
 @Module
 @InstallIn(SingletonComponent::class)
 abstract class ScannerModule {
     @Binds
-    abstract fun provideTokenUpdater(updater: ZbarQrCodeScanner): QrCodeResultDecoder
+    abstract fun provideQrCodeResultDecoder(impl: ZxingQrCodeScanner): QrCodeResultDecoder
 }
