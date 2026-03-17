@@ -131,6 +131,7 @@ fun PrimalDrawer(
                 legendaryCustomization = state.legendaryCustomization,
                 accountSwitcherCallbacks = accountSwitcherCallbacks,
                 onLogoutClick = { onDrawerDestinationClick(DrawerScreenDestination.SignOut(it)) },
+                onProfileClick = { onDrawerDestinationClick(DrawerScreenDestination.Profile(it)) },
             )
 
             DrawerMenu(
@@ -163,6 +164,7 @@ private fun DrawerHeader(
     onQrCodeClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
     onLogoutClick: (String) -> Unit,
+    onProfileClick: (String) -> Unit,
 ) {
     ConstraintLayout(
         modifier = Modifier.fillMaxWidth(),
@@ -186,6 +188,7 @@ private fun DrawerHeader(
                 avatarCdnImage = userAccount?.avatarCdnImage,
                 avatarBlossoms = userAccount?.blossomServers ?: emptyList(),
                 legendaryCustomization = legendaryCustomization,
+                onClick = userAccount?.pubkey?.let { pubkey -> { onProfileClick(pubkey) } },
             )
 
             AccountSwitcher(callbacks = accountSwitcherCallbacks, onLogoutClick = onLogoutClick)
