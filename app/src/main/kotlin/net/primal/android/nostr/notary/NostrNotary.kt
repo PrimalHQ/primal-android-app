@@ -168,7 +168,8 @@ class NostrNotary @Inject constructor(
         contacts: Set<String>,
         content: String,
     ): SignResult {
-        val tags = contacts.map { it.asPubkeyTag() }
+        val tags = contacts.map { it.asPubkeyTag() } +
+            listOf(UserAgentProvider.CLIENT_NAME.asClientTag())
         return signNostrEvent(
             unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
@@ -224,7 +225,7 @@ class NostrNotary @Inject constructor(
                             it.write -> add("write")
                         }
                     }
-                },
+                } + listOf(UserAgentProvider.CLIENT_NAME.asClientTag()),
             ),
         )
     }
