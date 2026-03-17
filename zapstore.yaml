@@ -1,10 +1,9 @@
+repository: https://github.com/PrimalHQ/primal-android-app
+match: primal-\d+\.\d+\.\d+\.apk$
 name: Primal
 description: Bitcoin wallet and Nostr social media in one app.
 license: MIT
-remote_metadata:
+website: https://primal.net
+metadata_sources:
   - github
   - playstore
-homepage: https://primal.net
-repository: https://github.com/PrimalHQ/primal-android-app
-assets:
-  - primal-\d+\.\d+\.\d+.apk$

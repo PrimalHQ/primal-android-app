@@ -1,34 +1,30 @@
-name: 'Manual: Publish latest release to Zapstore'
+name: "Manual: Publish latest release to Zapstore"
 
 on:
   workflow_dispatch:
     inputs:
-      zapstore-version:
-        description: 'Zapstore CLI version to be used to publish the event'
+      zsp-version:
+        description: "zsp version to be used to publish the event"
         required: true
-        default: '0.2.4'
+        default: '0.4.2'
 
 jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Check out code
         uses: actions/checkout@v4
         with:
           ref: main
 
-      - name: Install SQLite dependency
-        run: sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev
-
-      - name: Download & install zapstore-cli
+      - name: Download & install zsp
         run: |
-          DOWNLOAD_URL="https://github.com/zapstore/zapstore-cli/releases/download/${{ github.event.inputs.zapstore-version }}/zapstore-cli-${{ github.event.inputs.zapstore-version }}-linux-amd64"
-          curl -fsSL "$DOWNLOAD_URL" -o zapstore
-          sudo chmod +x zapstore
-          sudo mv zapstore /usr/local/bin/zapstore
+          DOWNLOAD_URL="https://github.com/zapstore/zsp/releases/download/v${{ github.event.inputs.zsp-version }}/zsp-${{ github.event.inputs.zsp-version }}-linux-amd64"
+          curl -fsSL "$DOWNLOAD_URL" -o zsp
+          sudo chmod +x zsp
+          sudo mv zsp /usr/local/bin/zsp
 
       - name: Publish to Zapstore
         env:
           SIGN_WITH: ${{ secrets.ZAPSTORE_SIGN_WITH }}
-        run: zapstore publish --indexer-mode
-
+        run: zsp publish -q
