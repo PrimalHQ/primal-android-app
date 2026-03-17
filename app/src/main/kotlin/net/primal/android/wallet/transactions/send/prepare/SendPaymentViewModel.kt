@@ -10,6 +10,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
@@ -53,8 +54,11 @@ class SendPaymentViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
+    private val qrCodeEvents = MutableSharedFlow<QrCodeResult>()
+
     init {
         subscribeToEvents()
+        observeQrCodeEvents()
     }
 
     private fun subscribeToEvents() =
@@ -64,18 +68,20 @@ class SendPaymentViewModel @Inject constructor(
                     is UiEvent.ProcessTextData -> processTextData(text = it.text)
                     is UiEvent.ProcessProfileData -> processProfileData(profileId = it.profileId)
                     UiEvent.DismissError -> setState { copy(error = null) }
-                    is UiEvent.QrCodeDetected -> handleQrCodeDetected(it.result)
+                    is UiEvent.QrCodeDetected -> viewModelScope.launch { qrCodeEvents.emit(it.result) }
                 }
             }
         }
 
-    private fun handleQrCodeDetected(result: QrCodeResult) =
+    private fun observeQrCodeEvents() =
         viewModelScope.launch {
-            when (result.type) {
-                QrCodeDataType.PROMO_CODE ->
-                    setEffect(SideEffect.PromoCodeDetected(result.value.getPromoCodeFromUrl()))
+            qrCodeEvents.distinctUntilChanged().collect { result ->
+                when (result.type) {
+                    QrCodeDataType.PROMO_CODE ->
+                        setEffect(SideEffect.PromoCodeDetected(result.value.getPromoCodeFromUrl()))
 
-                else -> processTextData(text = result.value)
+                    else -> processTextData(text = result.value)
+                }
             }
         }
 
