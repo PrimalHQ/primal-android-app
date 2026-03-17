@@ -13,14 +13,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import net.primal.android.R
@@ -30,6 +34,7 @@ import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.core.logging.AppLogExporter
 import net.primal.android.settings.developer.DeveloperToolsContract.SideEffect
@@ -88,6 +93,7 @@ private fun DeveloperToolsScreen(
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
 
     PrimalScaffold(
         modifier = Modifier,
@@ -124,6 +130,28 @@ private fun DeveloperToolsScreen(
                     },
                     onClick = {
                         eventPublisher(UiEvent.ToggleLogging(enabled = !state.isLoggingEnabled))
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                SettingsItem(
+                    headlineText = stringResource(id = R.string.settings_developer_tools_wallet_id_title),
+                    supportText = state.activeWalletId ?: "—",
+                    trailingContent = {
+                        IconButton(
+                            onClick = {
+                                clipboardManager.setText(AnnotatedString(state.activeWalletId ?: ""))
+                            },
+                            enabled = state.activeWalletId != null,
+                        ) {
+                            Icon(
+                                imageVector = PrimalIcons.Copy,
+                                contentDescription = stringResource(
+                                    id = R.string.settings_developer_tools_wallet_id_copy,
+                                ),
+                            )
+                        }
                     },
                 )
 

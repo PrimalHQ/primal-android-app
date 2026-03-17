@@ -23,8 +23,11 @@ import net.primal.android.core.logging.AppLogRecorder
 import net.primal.android.settings.developer.DeveloperToolsContract.SideEffect
 import net.primal.android.settings.developer.DeveloperToolsContract.UiEvent
 import net.primal.android.settings.developer.DeveloperToolsContract.UiState
+import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.domain.account.WalletAccountRepository
 
+@Suppress("LongParameterList")
 @HiltViewModel
 class DeveloperToolsViewModel @Inject constructor(
     @ApplicationContext appContext: Context,
@@ -32,6 +35,8 @@ class DeveloperToolsViewModel @Inject constructor(
     private val logController: AppLogController,
     private val logRecorder: AppLogRecorder,
     private val logExporter: AppLogExporter,
+    private val activeAccountStore: ActiveAccountStore,
+    private val walletAccountRepository: WalletAccountRepository,
 ) : ViewModel() {
 
     private val cacheDir: File by lazy { appContext.externalCacheDir ?: appContext.cacheDir }
@@ -50,6 +55,7 @@ class DeveloperToolsViewModel @Inject constructor(
     init {
         observeEvents()
         refreshLogStats()
+        observeActiveWalletId()
     }
 
     private fun observeEvents() =
@@ -102,5 +108,14 @@ class DeveloperToolsViewModel @Inject constructor(
         viewModelScope.launch {
             logRecorder.clearLogs()
             refreshLogStats()
+        }
+
+    private fun observeActiveWalletId() =
+        viewModelScope.launch {
+            walletAccountRepository
+                .observeActiveWalletId(activeAccountStore.activeUserId())
+                .collect { walletId ->
+                    setState { copy(activeWalletId = walletId) }
+                }
         }
 }

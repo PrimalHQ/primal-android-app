@@ -8,6 +8,7 @@ interface DeveloperToolsContract {
         val logFileCount: Int = 0,
         val totalLogSizeBytes: Long = 0L,
         val isExporting: Boolean = false,
+        val activeWalletId: String? = null,
     )
 
     sealed class UiEvent {
