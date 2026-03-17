@@ -21,6 +21,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.PollOption
 import net.primal.android.editor.domain.PollPublishRequest
+import net.primal.android.networking.UserAgentProvider
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.db.Relay as RelayPO
 import net.primal.android.user.domain.RelayKind
@@ -34,6 +35,7 @@ import net.primal.domain.nostr.Nip19TLV.toNaddrString
 import net.primal.domain.nostr.Nip19TLV.toNeventString
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.asATagValue
+import net.primal.domain.nostr.asClientTag
 import net.primal.domain.nostr.asEventIdTag
 import net.primal.domain.nostr.asEventTag
 import net.primal.domain.nostr.asPubkeyTag
@@ -595,6 +597,7 @@ class NotePublishHandlerTest {
             val expectedContent = "some simple content $quotedNoteUri $quotedNoteUri"
             val expectedTags = listOf<JsonArray>(
                 quotedNoteId.asEventIdTag(marker = "mention"),
+                UserAgentProvider.CLIENT_NAME.asClientTag(),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
@@ -610,7 +613,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.pubKey shouldBe expectedUserId
                         it.content shouldBe expectedContent
-                        it.tags.filterNot { tag -> tag[0].jsonPrimitive.content == "client" } shouldBe expectedTags
+                        it.tags shouldBe expectedTags
                     },
                     any(),
                 )
@@ -709,6 +712,7 @@ class NotePublishHandlerTest {
             val expectedContent = "some simple content ${naddr.toNaddrString()} ${naddr.toNaddrString()}"
             val expectedTags = listOf<JsonArray>(
                 naddr.asReplaceableEventTag(marker = "mention"),
+                UserAgentProvider.CLIENT_NAME.asClientTag(),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
@@ -724,7 +728,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.pubKey shouldBe expectedUserId
                         it.content shouldBe expectedContent
-                        it.tags.filterNot { tag -> tag[0].jsonPrimitive.content == "client" } shouldBe expectedTags
+                        it.tags shouldBe expectedTags
                     },
                     any(),
                 )
@@ -1072,6 +1076,7 @@ class NotePublishHandlerTest {
             val expectedContent = "some simple content $mentionedUserNpub"
             val expectedTags = listOf<JsonArray>(
                 mentionedUserId.asPubkeyTag(optional = "mention"),
+                UserAgentProvider.CLIENT_NAME.asClientTag(),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
@@ -1087,7 +1092,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.pubKey shouldBe expectedUserId
                         it.content shouldBe expectedContent
-                        it.tags.filterNot { tag -> tag[0].jsonPrimitive.content == "client" } shouldBe expectedTags
+                        it.tags shouldBe expectedTags
                     },
                     any(),
                 )
@@ -1107,6 +1112,7 @@ class NotePublishHandlerTest {
             val expectedTags = listOf<JsonArray>(
                 firstMentionedUserId.asPubkeyTag(optional = "mention"),
                 secondMentionedUserId.asPubkeyTag(optional = "mention"),
+                UserAgentProvider.CLIENT_NAME.asClientTag(),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
@@ -1122,7 +1128,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.pubKey shouldBe expectedUserId
                         it.content shouldBe expectedContent
-                        it.tags.filterNot { tag -> tag[0].jsonPrimitive.content == "client" } shouldBe expectedTags
+                        it.tags shouldBe expectedTags
                     },
                     any(),
                 )
@@ -1139,6 +1145,7 @@ class NotePublishHandlerTest {
             val expectedContent = "some simple content $mentionedUserNpub $mentionedUserNpub"
             val expectedTags = listOf<JsonArray>(
                 mentionedUserId.asPubkeyTag(optional = "mention"),
+                UserAgentProvider.CLIENT_NAME.asClientTag(),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
@@ -1154,7 +1161,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.pubKey shouldBe expectedUserId
                         it.content shouldBe expectedContent
-                        it.tags.filterNot { tag -> tag[0].jsonPrimitive.content == "client" } shouldBe expectedTags
+                        it.tags shouldBe expectedTags
                     },
                     any(),
                 )
@@ -1280,6 +1287,7 @@ class NotePublishHandlerTest {
             val expectedTags = listOf<JsonArray>(
                 highlightNevent.asEventTag(marker = "mention"),
                 naddr.asReplaceableEventTag(marker = "mention"),
+                UserAgentProvider.CLIENT_NAME.asClientTag(),
             )
 
             val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
@@ -1295,7 +1303,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.pubKey shouldBe expectedUserId
                         it.content shouldBe expectedContent
-                        it.tags.filterNot { tag -> tag[0].jsonPrimitive.content == "client" } shouldBe expectedTags
+                        it.tags shouldBe expectedTags
                     },
                     any(),
                 )

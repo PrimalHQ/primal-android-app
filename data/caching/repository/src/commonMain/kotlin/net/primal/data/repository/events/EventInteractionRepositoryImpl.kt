@@ -52,8 +52,11 @@ class EventInteractionRepositoryImpl(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = NostrEventKind.Reaction.value,
-                    tags = listOf(eventId.asEventIdTag(), eventAuthorId.asPubkeyTag()) + optionalTags +
-                        listOf(appBuildHelper.getClientName().asClientTag()),
+                    tags = listOf(
+                        eventId.asEventIdTag(),
+                        eventAuthorId.asPubkeyTag(),
+                        appBuildHelper.getClientName().asClientTag(),
+                    ) + optionalTags,
                     content = "+",
                 ),
             )
@@ -93,8 +96,11 @@ class EventInteractionRepositoryImpl(
                     } else {
                         NostrEventKind.GenericRepost.value
                     },
-                    tags = listOf(eventId.asEventIdTag(), eventAuthorId.asPubkeyTag()) + optionalTags +
-                        listOf(appBuildHelper.getClientName().asClientTag()),
+                    tags = listOf(
+                        eventId.asEventIdTag(),
+                        eventAuthorId.asPubkeyTag(),
+                        appBuildHelper.getClientName().asClientTag(),
+                    ) + optionalTags,
                     content = eventRawNostrEvent,
                 ),
             )
