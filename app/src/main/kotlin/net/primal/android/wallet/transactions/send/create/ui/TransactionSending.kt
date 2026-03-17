@@ -41,6 +41,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.AnimatedRawResImage
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.button.PrimalLoadingButton
+import net.primal.android.core.compose.foundation.isAppInDarkPrimalTheme
 import net.primal.android.theme.AppTheme
 
 private enum class AnimationPhase { START, LOOP, END }
@@ -148,6 +149,8 @@ private fun AnimatedLightningSendingIcon(sendingCompleted: Boolean, onAnimationF
     var phase by remember { mutableStateOf(AnimationPhase.START) }
     var loopKey by remember { mutableIntStateOf(0) }
 
+    val isDarkTheme = isAppInDarkPrimalTheme()
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -158,7 +161,11 @@ private fun AnimatedLightningSendingIcon(sendingCompleted: Boolean, onAnimationF
             when (phase) {
                 AnimationPhase.START -> {
                     AnimatedRawResImage(
-                        resId = R.raw.wallet_sending_start,
+                        resId = if (isDarkTheme) {
+                            R.raw.wallet_sending_start_dark
+                        } else {
+                            R.raw.wallet_sending_start_light
+                        },
                         repeatCount = 0,
                         onAnimationEnd = {
                             phase = if (sendingCompleted) AnimationPhase.END else AnimationPhase.LOOP
@@ -169,7 +176,11 @@ private fun AnimatedLightningSendingIcon(sendingCompleted: Boolean, onAnimationF
                 AnimationPhase.LOOP -> {
                     key(loopKey) {
                         AnimatedRawResImage(
-                            resId = R.raw.wallet_sending_loop,
+                            resId = if (isDarkTheme) {
+                                R.raw.wallet_sending_loop_dark
+                            } else {
+                                R.raw.wallet_sending_loop_light
+                            },
                             repeatCount = 0,
                             onAnimationEnd = {
                                 if (sendingCompleted) {
@@ -184,7 +195,11 @@ private fun AnimatedLightningSendingIcon(sendingCompleted: Boolean, onAnimationF
 
                 AnimationPhase.END -> {
                     AnimatedRawResImage(
-                        resId = R.raw.wallet_sending_end,
+                        resId = if (isDarkTheme) {
+                            R.raw.wallet_sending_end_dark
+                        } else {
+                            R.raw.wallet_sending_end_light
+                        },
                         repeatCount = 0,
                         onAnimationEnd = onAnimationFinished,
                     )
