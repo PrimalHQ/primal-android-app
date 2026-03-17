@@ -1,4 +1,12 @@
-## Features
-- Self-custodial wallet
-- Implemented GIF button
-- Regular Polls. Zap Polls!
+## Fixes
+- Added profile navigation from drawer avatar (#971)
+- Added on-chain address to wallet transaction CSV export (#970)
+- Added NIP-89 client tag to specific event kinds (#968)
+- Fixed the floating-point truncation error when creating LN invoices
+- Implemented `primalconnect://` deep-linking (#969)
+- Fixed processing same QR code data in parallel (#967)
+- Updated transaction sending animation with light and dark variants (#966)
+- Fixed fetching zap receipts for all transactions (#965)
+- Migrated to ZXing scanner for AOSP (#963)
+- Migrated user voted poll logic to EventUserStats (#964)
+- Fixed the note editor reading clipboard on every keystroke (#962)
