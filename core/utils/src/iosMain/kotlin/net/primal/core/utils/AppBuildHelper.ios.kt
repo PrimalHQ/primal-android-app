@@ -16,6 +16,8 @@ class IosAppBuildHelper : AppBuildHelper {
     override fun getAppName(): String = "Primal-iOS"
 
     override fun getPlatformName(): String = "iOS"
+
+    override fun getClientName(): String = "Primal iOS"
 }
 
 actual fun createAppBuildHelper(): AppBuildHelper = IosAppBuildHelper()

@@ -706,4 +706,16 @@ class TagsTest {
         actualFirst[1].jsonPrimitive.content shouldBe naddr.asATagValue()
         actualFirst[2].jsonPrimitive.content shouldBe naddr.relays.first()
     }
+
+    @Test
+    fun `asClientTag returns proper JsonArray tag`() {
+        val clientName = "Primal Android"
+
+        val actual = clientName.asClientTag()
+
+        actual shouldBe instanceOf(JsonArray::class)
+        actual.size shouldBe 2
+        actual[0].jsonPrimitive.content shouldBe "client"
+        actual[1].jsonPrimitive.content shouldBe clientName
+    }
 }

@@ -12,6 +12,10 @@ class DesktopAppBuildHelper : AppBuildHelper {
     override fun getPlatformName(): String {
         throw NotImplementedError()
     }
+
+    override fun getClientName(): String {
+        throw NotImplementedError()
+    }
 }
 
 actual fun createAppBuildHelper(): AppBuildHelper = DesktopAppBuildHelper()

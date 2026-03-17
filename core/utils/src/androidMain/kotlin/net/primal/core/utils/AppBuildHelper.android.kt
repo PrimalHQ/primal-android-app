@@ -7,6 +7,8 @@ class AndroidAppBuildHelper : AppBuildHelper {
     override fun getAppName(): String = "Primal-Android"
 
     override fun getPlatformName(): String = "Android"
+
+    override fun getClientName(): String = "Primal Android"
 }
 
 actual fun createAppBuildHelper(): AppBuildHelper = AndroidAppBuildHelper()

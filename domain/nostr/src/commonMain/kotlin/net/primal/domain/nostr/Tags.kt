@@ -314,6 +314,12 @@ fun String.asServerTag(): JsonArray =
         add(this@asServerTag)
     }
 
+fun String.asClientTag(): JsonArray =
+    buildJsonArray {
+        add("client")
+        add(this@asClientTag)
+    }
+
 fun Naddr.asReplaceableEventTag(marker: String? = null): JsonArray =
     this.asATagValue().asReplaceableEventTag(
         relayHint = this.relays.firstOrNull(),

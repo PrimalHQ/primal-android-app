@@ -13,6 +13,7 @@ import kotlin.test.Test
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.createAppBuildHelper
 import net.primal.data.local.dao.events.EventStats
 import net.primal.data.local.dao.events.EventStatsDao
 import net.primal.data.local.dao.events.EventUserStats
@@ -22,6 +23,7 @@ import net.primal.data.local.db.PrimalDatabase
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
+import net.primal.domain.nostr.isClientTag
 import net.primal.domain.nostr.publisher.NostrPublishException
 import net.primal.domain.nostr.zaps.NostrZapperFactory
 import net.primal.domain.publisher.PrimalPublishResult
@@ -57,6 +59,10 @@ class EventInteractionRepositoryImplTest {
     @BeforeTest
     fun setUp() {
         mockkStatic("net.primal.shared.data.local.db.RoomDatabaseExtKt")
+        mockkStatic("net.primal.core.utils.AppBuildHelper_desktopKt")
+        every { createAppBuildHelper() } returns mockk {
+            every { getClientName() } returns "Primal Test"
+        }
 
         dispatcherProvider = mockk {
             every { io() } returns testDispatcher
@@ -84,6 +90,7 @@ class EventInteractionRepositoryImplTest {
     @AfterTest
     fun tearDown() {
         unmockkStatic("net.primal.shared.data.local.db.RoomDatabaseExtKt")
+        unmockkStatic("net.primal.core.utils.AppBuildHelper_desktopKt")
     }
 
     private fun buildRepository(
@@ -238,6 +245,52 @@ class EventInteractionRepositoryImplTest {
                     eventAuthorId = eventAuthorId,
                     eventKind = NostrEventKind.ShortTextNote.value,
                     eventRawNostrEvent = "{}",
+                )
+            }
+        }
+
+    @Test
+    fun `likePost includes client tag in published event`() =
+        runTest(testDispatcher) {
+            val mockPublisher = mockk<PrimalPublisher> {
+                coEvery { signPublishImportNostrEvent(any(), any()) } returns dummyPublishResult
+            }
+            val repository = buildRepository(primalPublisher = mockPublisher)
+
+            repository.likeEvent(
+                userId = userId,
+                eventId = eventId,
+                eventAuthorId = eventAuthorId,
+            )
+
+            coVerify {
+                mockPublisher.signPublishImportNostrEvent(
+                    match { event -> event.tags.any { it.isClientTag() } },
+                    any(),
+                )
+            }
+        }
+
+    @Test
+    fun `repostPost includes client tag in published event`() =
+        runTest(testDispatcher) {
+            val mockPublisher = mockk<PrimalPublisher> {
+                coEvery { signPublishImportNostrEvent(any(), any()) } returns dummyPublishResult
+            }
+            val repository = buildRepository(primalPublisher = mockPublisher)
+
+            repository.repostEvent(
+                userId = userId,
+                eventId = eventId,
+                eventAuthorId = eventAuthorId,
+                eventKind = NostrEventKind.ShortTextNote.value,
+                eventRawNostrEvent = "{}",
+            )
+
+            coVerify {
+                mockPublisher.signPublishImportNostrEvent(
+                    match { event -> event.tags.any { it.isClientTag() } },
+                    any(),
                 )
             }
         }
