@@ -4,11 +4,13 @@ import io.github.aakira.napier.Napier
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonArray
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.createAppBuildHelper
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.domain.events.EventInteractionRepository
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.asClientTag
 import net.primal.domain.nostr.asEventIdTag
 import net.primal.domain.nostr.asKindTag
 import net.primal.domain.nostr.asPubkeyTag
@@ -29,6 +31,8 @@ class EventInteractionRepositoryImpl(
     private val database: PrimalDatabase,
 ) : EventInteractionRepository {
 
+    private val appBuildHelper = createAppBuildHelper()
+
     override suspend fun likeEvent(
         userId: String,
         eventId: String,
@@ -48,7 +52,11 @@ class EventInteractionRepositoryImpl(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = NostrEventKind.Reaction.value,
-                    tags = listOf(eventId.asEventIdTag(), eventAuthorId.asPubkeyTag()) + optionalTags,
+                    tags = listOf(
+                        eventId.asEventIdTag(),
+                        eventAuthorId.asPubkeyTag(),
+                        appBuildHelper.getClientName().asClientTag(),
+                    ) + optionalTags,
                     content = "+",
                 ),
             )
@@ -88,7 +96,11 @@ class EventInteractionRepositoryImpl(
                     } else {
                         NostrEventKind.GenericRepost.value
                     },
-                    tags = listOf(eventId.asEventIdTag(), eventAuthorId.asPubkeyTag()) + optionalTags,
+                    tags = listOf(
+                        eventId.asEventIdTag(),
+                        eventAuthorId.asPubkeyTag(),
+                        appBuildHelper.getClientName().asClientTag(),
+                    ) + optionalTags,
                     content = eventRawNostrEvent,
                 ),
             )

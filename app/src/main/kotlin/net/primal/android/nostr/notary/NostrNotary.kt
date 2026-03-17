@@ -27,6 +27,7 @@ import net.primal.domain.nostr.ContentMetadata
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.asClientTag
 import net.primal.domain.nostr.asIdentifierTag
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.cryptography.NostrEventSignatureHandler
@@ -119,7 +120,7 @@ class NostrNotary @Inject constructor(
             unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
                 kind = NostrEventKind.Metadata.value,
-                tags = tags,
+                tags = tags + listOf(UserAgentProvider.CLIENT_NAME.asClientTag()),
                 content = NostrNotaryJson.encodeToString(metadata),
             ),
         )
@@ -167,7 +168,8 @@ class NostrNotary @Inject constructor(
         contacts: Set<String>,
         content: String,
     ): SignResult {
-        val tags = contacts.map { it.asPubkeyTag() }
+        val tags = contacts.map { it.asPubkeyTag() } +
+            listOf(UserAgentProvider.CLIENT_NAME.asClientTag())
         return signNostrEvent(
             unsignedNostrEvent = NostrUnsignedEvent(
                 pubKey = userId,
@@ -190,7 +192,8 @@ class NostrNotary @Inject constructor(
                 pubKey = userId,
                 kind = NostrEventKind.ZapRequest.value,
                 content = comment,
-                tags = target.toTags() + listOf(relays.toZapTag()) + optionalTags,
+                tags = target.toTags() + listOf(relays.toZapTag()) + optionalTags +
+                    listOf(UserAgentProvider.CLIENT_NAME.asClientTag()),
             ),
         )
     }
@@ -222,7 +225,7 @@ class NostrNotary @Inject constructor(
                             it.write -> add("write")
                         }
                     }
-                },
+                } + listOf(UserAgentProvider.CLIENT_NAME.asClientTag()),
             ),
         )
     }

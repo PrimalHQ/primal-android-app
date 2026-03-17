@@ -9,6 +9,7 @@ import net.primal.android.editor.domain.NoteAttachment
 import net.primal.android.editor.domain.PollOption
 import net.primal.android.editor.domain.PollPublishRequest
 import net.primal.android.editor.domain.asIMetaTag
+import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.relays.errors.NostrPublishException
 import net.primal.android.nostr.publish.NostrPublisher
 import net.primal.android.user.domain.RelayKind
@@ -20,6 +21,7 @@ import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
+import net.primal.domain.nostr.asClientTag
 import net.primal.domain.nostr.asEventTag
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.asReplaceableEventTag
@@ -134,7 +136,8 @@ class NotePublishHandler @Inject constructor(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = NostrEventKind.ShortTextNote.value,
-                    tags = (prepared.referenceTags + prepared.hashtagTags + prepared.iMetaTags).toList(),
+                    tags = (prepared.referenceTags + prepared.hashtagTags + prepared.iMetaTags).toList() +
+                        listOf(UserAgentProvider.CLIENT_NAME.asClientTag()),
                     content = prepared.refinedContent,
                 ),
                 outboxRelays = prepared.outboxRelays,
@@ -191,7 +194,8 @@ class NotePublishHandler @Inject constructor(
                 unsignedNostrEvent = NostrUnsignedEvent(
                     pubKey = userId,
                     kind = eventKind.value,
-                    tags = (prepared.referenceTags + prepared.hashtagTags + prepared.iMetaTags + pollTags).toList(),
+                    tags = (prepared.referenceTags + prepared.hashtagTags + prepared.iMetaTags + pollTags).toList() +
+                        listOf(UserAgentProvider.CLIENT_NAME.asClientTag()),
                     content = prepared.refinedContent,
                 ),
                 outboxRelays = prepared.outboxRelays,

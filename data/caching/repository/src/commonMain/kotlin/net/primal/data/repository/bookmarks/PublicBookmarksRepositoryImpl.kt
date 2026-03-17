@@ -6,6 +6,7 @@ import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.createAppBuildHelper
 import net.primal.data.local.dao.bookmarks.PublicBookmark as PublicBookmarkPO
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.users.UsersApi
@@ -15,6 +16,7 @@ import net.primal.domain.bookmarks.TagBookmark
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
+import net.primal.domain.nostr.asClientTag
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.shared.data.local.db.withTransaction
 
@@ -24,6 +26,8 @@ class PublicBookmarksRepositoryImpl(
     private val primalPublisher: PrimalPublisher,
     private val usersApi: UsersApi,
 ) : PublicBookmarksRepository {
+
+    private val appBuildHelper = createAppBuildHelper()
 
     private suspend fun fetchLatestPublicBookmarks(userId: String): Set<TagBookmark>? {
         val bookmarksResponse = withContext(dispatcherProvider.io()) {
@@ -163,7 +167,7 @@ class PublicBookmarksRepositoryImpl(
                     pubKey = userId,
                     kind = NostrEventKind.BookmarksList.value,
                     content = "",
-                    tags = bookmarksTags,
+                    tags = bookmarksTags + listOf(appBuildHelper.getClientName().asClientTag()),
                 ),
             )
         }
