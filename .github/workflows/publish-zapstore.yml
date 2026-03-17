@@ -6,7 +6,7 @@ on:
       zsp-version:
         description: "zsp version to be used to publish the event"
         required: true
-        default: '0.4.2'
+        default: '0.4.3'
 
 jobs:
   publish:
