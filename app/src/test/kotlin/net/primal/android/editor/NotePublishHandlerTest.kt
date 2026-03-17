@@ -340,7 +340,8 @@ class NotePublishHandlerTest {
             coVerify {
                 nostrPublisher.signPublishImportNostrEvent(
                     withArg { event ->
-                        val tagValues = event.tags.map { tag -> tag[1].jsonPrimitive.content }
+                        val tagValues = event.tags.filter { tag -> tag[0].jsonPrimitive.content == "t" }
+                            .map { tag -> tag[1].jsonPrimitive.content }
                         tagValues shouldBe hashtags.map { it.removePrefix("#") }
                     },
                     any(),
@@ -503,9 +504,10 @@ class NotePublishHandlerTest {
             coVerify {
                 nostrPublisher.signPublishImportNostrEvent(
                     withArg { event ->
-                        val pubkeyToRelayHintMap = event.tags.map { tag ->
-                            tag[1].jsonPrimitive.content to tag[2].jsonPrimitive.content
-                        }
+                        val pubkeyToRelayHintMap = event.tags
+                            .filter { tag -> tag[0].jsonPrimitive.content == "p" }.map { tag ->
+                                tag[1].jsonPrimitive.content to tag[2].jsonPrimitive.content
+                            }
                         pubkeyToRelayHintMap.forEach { (pubkey, actualRelayHint) ->
                             val expectedRelay = expectedEventHints.find { it.eventId == pubkey }?.relays?.firstOrNull()
                             actualRelayHint shouldBe expectedRelay
@@ -608,7 +610,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.pubKey shouldBe expectedUserId
                         it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
+                        it.tags.filterNot { tag -> tag[0].jsonPrimitive.content == "client" } shouldBe expectedTags
                     },
                     any(),
                 )
@@ -722,7 +724,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.pubKey shouldBe expectedUserId
                         it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
+                        it.tags.filterNot { tag -> tag[0].jsonPrimitive.content == "client" } shouldBe expectedTags
                     },
                     any(),
                 )
@@ -1085,7 +1087,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.pubKey shouldBe expectedUserId
                         it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
+                        it.tags.filterNot { tag -> tag[0].jsonPrimitive.content == "client" } shouldBe expectedTags
                     },
                     any(),
                 )
@@ -1120,7 +1122,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.pubKey shouldBe expectedUserId
                         it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
+                        it.tags.filterNot { tag -> tag[0].jsonPrimitive.content == "client" } shouldBe expectedTags
                     },
                     any(),
                 )
@@ -1152,7 +1154,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.pubKey shouldBe expectedUserId
                         it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
+                        it.tags.filterNot { tag -> tag[0].jsonPrimitive.content == "client" } shouldBe expectedTags
                     },
                     any(),
                 )
@@ -1293,7 +1295,7 @@ class NotePublishHandlerTest {
                     withArg {
                         it.pubKey shouldBe expectedUserId
                         it.content shouldBe expectedContent
-                        it.tags shouldBe expectedTags
+                        it.tags.filterNot { tag -> tag[0].jsonPrimitive.content == "client" } shouldBe expectedTags
                     },
                     any(),
                 )
