@@ -22,12 +22,11 @@ import net.primal.domain.wallet.WalletType
  * Returns null for Token transactions which are not supported.
  *
  * @param zapRequestFallback Optional zap request from external source (e.g., eventRepository).
- *                           Used as fallback when SDK doesn't provide zap data (e.g., for sent zaps).
+ *                           Used as fallback when SDK doesn't provide zap data (e.g., for zaps).
  */
 internal fun Payment.mapAsSparkTransaction(
     userId: String,
     walletId: String,
-    walletAddress: String?,
     zapRequestFallback: NostrEvent?,
 ): Transaction? {
     val details = this.details
@@ -121,7 +120,6 @@ internal fun Payment.mapAsSparkTransaction(
     // Prefer SDK zap request, fallback to external source
     val zapRequest = sdkZapRequest ?: zapRequestFallback
     val zappedEntity = zapRequest?.toNostrEntity()
-    val description = sdkDescription
 
     val timestampSeconds = this.timestamp.toLong()
     val completedAt = if (txState == TxState.SUCCEEDED) timestampSeconds else null
@@ -146,7 +144,7 @@ internal fun Payment.mapAsSparkTransaction(
                     updatedAt = timestampSeconds,
                     completedAt = completedAt,
                     userId = userId,
-                    note = description,
+                    note = zapRequest.content,
                     invoice = invoice,
                     amountInBtc = this.amount.longValue().toBtc(),
                     amountInUsd = null,
@@ -155,7 +153,7 @@ internal fun Payment.mapAsSparkTransaction(
                     zappedEntity = zappedEntity,
                     otherUserId = otherUserId,
                     otherLightningAddress = otherLightningAddress,
-                    zappedByUserId = zapRequest?.pubKey,
+                    zappedByUserId = zapRequest.pubKey,
                     otherUserProfile = null,
                     preimage = preimage,
                     paymentHash = paymentHash,
@@ -171,7 +169,7 @@ internal fun Payment.mapAsSparkTransaction(
                     updatedAt = timestampSeconds,
                     completedAt = completedAt,
                     userId = userId,
-                    note = description,
+                    note = sdkDescription,
                     invoice = invoice,
                     amountInBtc = this.amount.longValue().toBtc(),
                     amountInUsd = null,
@@ -196,7 +194,7 @@ internal fun Payment.mapAsSparkTransaction(
                 updatedAt = timestampSeconds,
                 completedAt = completedAt,
                 userId = userId,
-                note = description,
+                note = sdkDescription,
                 invoice = invoice,
                 amountInBtc = this.amount.longValue().toBtc(),
                 amountInUsd = null,
@@ -218,7 +216,7 @@ internal fun Payment.mapAsSparkTransaction(
                     updatedAt = timestampSeconds,
                     completedAt = completedAt,
                     userId = userId,
-                    note = description,
+                    note = sdkDescription,
                     invoice = invoice,
                     amountInBtc = this.amount.longValue().toBtc(),
                     amountInUsd = null,
@@ -243,7 +241,7 @@ internal fun Payment.mapAsSparkTransaction(
                     updatedAt = timestampSeconds,
                     completedAt = completedAt,
                     userId = userId,
-                    note = description,
+                    note = sdkDescription,
                     invoice = invoice,
                     amountInBtc = this.amount.longValue().toBtc(),
                     amountInUsd = null,
