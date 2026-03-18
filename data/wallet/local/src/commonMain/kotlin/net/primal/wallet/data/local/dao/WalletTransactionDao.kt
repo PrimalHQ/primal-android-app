@@ -17,7 +17,7 @@ interface WalletTransactionDao {
     @Query(
         """
             SELECT * FROM WalletTransactionData
-            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED", "FAILED", "CANCELED") AND walletId IS :walletId
+            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED") AND walletId IS :walletId
             ORDER BY updatedAt DESC
         """,
     )
@@ -26,7 +26,7 @@ interface WalletTransactionDao {
     @Query(
         """
             SELECT * FROM WalletTransactionData
-            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED", "FAILED", "CANCELED") AND walletId IS :walletId
+            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED") AND walletId IS :walletId
             ORDER BY updatedAt DESC LIMIT :limit
         """,
     )
@@ -36,7 +36,7 @@ interface WalletTransactionDao {
     @Query(
         """
             SELECT * FROM WalletTransactionData
-            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED", "FAILED", "CANCELED")
+            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED")
                 AND walletId IS :walletId
                 AND (:type IS NULL OR type IS :type)
                 AND (:from IS NULL OR createdAt >= :from)
@@ -58,7 +58,7 @@ interface WalletTransactionDao {
     @Query(
         """
             SELECT * FROM WalletTransactionData
-            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED", "FAILED", "CANCELED") AND walletId IS :walletId
+            WHERE state IN ("SUCCEEDED", "PROCESSING", "CREATED") AND walletId IS :walletId
             ORDER BY createdAt DESC
         """,
     )
