@@ -78,6 +78,13 @@ class WalletSessionProvider internal constructor(
                     Napier.d { "Custodial wallet found for userId=$userId, skipping Spark wallet creation." }
                 }
 
+                userWalletStatus == null -> {
+                    Napier.w {
+                        "Cannot determine wallet status for userId=$userId, " +
+                            "skipping wallet initialization to prevent accidental wallet creation."
+                    }
+                }
+
                 else -> {
                     Napier.d {
                         "Initialize wallet in else branch for userId=$userId.\n" +
