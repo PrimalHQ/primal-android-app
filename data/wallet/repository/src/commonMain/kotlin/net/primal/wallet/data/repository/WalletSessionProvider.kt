@@ -79,6 +79,12 @@ class WalletSessionProvider internal constructor(
                 }
 
                 else -> {
+                    Napier.d {
+                        "Initialize wallet in else branch for userId=$userId.\n" +
+                            "userWalletStatus=$userWalletStatus\n" +
+                            "hasLocalWallet=$hasLocalWallet\n" +
+                            "auto-creating new spark wallet"
+                    }
                     ensureWalletAndConnect(userId, register = true)
                 }
             }
