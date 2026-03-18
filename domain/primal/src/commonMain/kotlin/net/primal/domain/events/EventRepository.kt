@@ -34,7 +34,7 @@ interface EventRepository {
 
     suspend fun fetchReplaceableEvents(naddrs: List<Naddr>): Result<Unit>
 
-    suspend fun getZapReceipts(invoices: List<String>): Result<Map<String, NostrEvent>>
+    suspend fun getZapRequests(invoices: List<String>): Result<Map<String, NostrEvent>>
 
     suspend fun saveZapRequest(invoice: String, zapRequestEvent: NostrEvent)
 
