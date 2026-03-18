@@ -108,21 +108,24 @@ class WalletNoticeSheetViewModel @Inject constructor(
         viewModelScope.launch {
             val userId = activeAccountStore.activeUserId()
             if (userId.isEmpty()) return@launch
-
-            primalWalletAccountRepository.fetchWalletStatus(userId = userId)
-                .onSuccess { status ->
-                    val userAccount = activeAccountStore.activeUserAccount()
-                    val noticeType = resolveNoticeType(
-                        userId = userId,
-                        status = status,
-                        userAccount = userAccount,
-                    )
-                    setState { copy(noticeType = noticeType, shouldShowNotice = false) }
-                    if (noticeType != null) {
-                        scheduleNoticeIfEligible()
-                    }
-                }
+            fetchAndUpdateNoticeType(userId)
         }
+    }
+
+    private suspend fun fetchAndUpdateNoticeType(userId: String) {
+        primalWalletAccountRepository.fetchWalletStatus(userId = userId)
+            .onSuccess { status ->
+                val userAccount = activeAccountStore.activeUserAccount()
+                val noticeType = resolveNoticeType(
+                    userId = userId,
+                    status = status,
+                    userAccount = userAccount,
+                )
+                setState { copy(noticeType = noticeType, shouldShowNotice = false) }
+                if (noticeType != null) {
+                    scheduleNoticeIfEligible()
+                }
+            }
     }
 
     private fun observeActiveAccount() =
@@ -145,20 +148,7 @@ class WalletNoticeSheetViewModel @Inject constructor(
                 setState { copy(noticeType = null, shouldShowNotice = false) }
                 showDelayJob?.cancel()
 
-                primalWalletAccountRepository.fetchWalletStatus(userId = userId)
-                    .onSuccess { status ->
-                        val userAccount = activeAccountStore.activeUserAccount()
-                        val noticeType = resolveNoticeType(
-                            userId = userId,
-                            status = status,
-                            userAccount = userAccount,
-                        )
-                        setState { copy(noticeType = noticeType) }
-
-                        if (noticeType != null) {
-                            scheduleNoticeIfEligible()
-                        }
-                    }
+                fetchAndUpdateNoticeType(userId)
             }
         }
 
