@@ -260,6 +260,10 @@ class NotePublishHandler @Inject constructor(
             tags.add(JsonArray(listOf(JsonPrimitive("value_maximum"), JsonPrimitive(maxZapAmountInSats.toString()))))
         }
 
+        writeRelayUrls.forEach { relayUrl ->
+            tags.add(JsonArray(listOf(JsonPrimitive("relay"), JsonPrimitive(relayUrl))))
+        }
+
         return tags
     }
 

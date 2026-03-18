@@ -1785,5 +1785,42 @@ class NotePublishHandlerTest {
             }
         }
 
+    @Test
+    fun publishPoll_createsRelayTags_forZapPoll() =
+        runTest {
+            val nostrPublisher = mockk<NostrPublisher>(relaxed = true)
+            val relayUrls = listOf("wss://relay1.example.com", "wss://relay2.example.com")
+            val relayRepository = mockk<RelayRepository> {
+                every { findRelays(any(), any()) } returns buildWriteRelayPOs(expectedUserId, *relayUrls.toTypedArray())
+            }
+            val notePublishHandler = buildNotePublishHandler(
+                nostrPublisher = nostrPublisher,
+                relayRepository = relayRepository,
+            )
+
+            notePublishHandler.publishPoll(
+                userId = expectedUserId,
+                content = "Zap poll",
+                pollRequest = PollPublishRequest(
+                    isZapPoll = true,
+                    choices = listOf(PollOption(id = "1", label = "A")),
+                    endsAt = 1700000000,
+                ),
+            )
+
+            coVerify {
+                nostrPublisher.signPublishImportNostrEvent(
+                    withArg { event ->
+                        val relayTags = event.tags.filter { it[0].jsonPrimitive.content == "relay" }
+                        relayTags.size shouldBe relayUrls.size
+                        relayUrls.forEach { url ->
+                            relayTags.any { it[1].jsonPrimitive.content == url } shouldBe true
+                        }
+                    },
+                    any(),
+                )
+            }
+        }
+
     // endregion
 }
