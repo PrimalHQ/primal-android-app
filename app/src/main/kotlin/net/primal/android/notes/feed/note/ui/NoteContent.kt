@@ -242,19 +242,6 @@ fun NoteContent(
             )
         }
 
-        if (data.poll != null) {
-            NotePollContent(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = if (contentText.isEmpty()) 4.dp else 6.dp),
-                poll = data.poll,
-                onOptionSelected = { optionId -> onPollOptionSelected?.invoke(optionId) },
-                onVotesClick = noteCallbacks.onPollVotesClick?.let { callback ->
-                    { callback(data.noteId) }
-                },
-            )
-        }
-
         val referencedStreams = remember(data.nostrUris) {
             data.nostrUris
                 .filter(type = EventUriNostrType.Stream)
@@ -431,6 +418,19 @@ fun NoteContent(
                     Spacer(modifier = Modifier.height(4.dp))
                 }
             }
+        }
+
+        if (data.poll != null) {
+            NotePollContent(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = if (contentText.isEmpty()) 4.dp else 6.dp),
+                poll = data.poll,
+                onOptionSelected = { optionId -> onPollOptionSelected?.invoke(optionId) },
+                onVotesClick = noteCallbacks.onPollVotesClick?.let { callback ->
+                    { callback(data.noteId) }
+                },
+            )
         }
     }
 }
