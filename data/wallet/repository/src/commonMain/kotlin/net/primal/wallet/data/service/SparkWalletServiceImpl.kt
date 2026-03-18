@@ -192,15 +192,15 @@ internal class SparkWalletServiceImpl(
         val payments = response.payments
 
         val lightningInvoices = payments.extractInvoices()
-        val zapReceiptsMap = if (lightningInvoices.isNotEmpty()) {
-            eventRepository.getZapReceipts(invoices = lightningInvoices).getOrNull()
+        val zapRequestsMap = if (lightningInvoices.isNotEmpty()) {
+            eventRepository.getZapRequests(invoices = lightningInvoices).getOrNull()
         } else {
             null
         }
 
         return payments.mapNotNull { payment ->
             val txInvoice = payment.extractInvoice()
-            val zapRequestFallback = txInvoice?.let { zapReceiptsMap?.get(it) }
+            val zapRequestFallback = txInvoice?.let { zapRequestsMap?.get(it) }
 
             payment.mapAsSparkTransaction(
                 userId = wallet.userId,

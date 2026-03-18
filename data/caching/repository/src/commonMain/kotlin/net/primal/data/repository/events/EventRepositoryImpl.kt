@@ -41,6 +41,7 @@ import net.primal.data.repository.mappers.local.asEventZapDO
 import net.primal.data.repository.mappers.local.asNostrEventStats
 import net.primal.data.repository.mappers.local.asNostrEventUserStats
 import net.primal.data.repository.mappers.local.asProfileDataDO
+import net.primal.data.repository.mappers.remote.extractZapRequestOrNull
 import net.primal.data.repository.mappers.remote.flatMapAsEventHintsPO
 import net.primal.data.repository.mappers.remote.flatMapAsWordCount
 import net.primal.data.repository.mappers.remote.mapAsEventZapDO
@@ -58,6 +59,7 @@ import net.primal.domain.events.EventZap as EventZapDO
 import net.primal.domain.events.NostrEventAction
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.NostrEvent
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.findFirstATag
 import net.primal.domain.nostr.findFirstEventId
 import net.primal.domain.nostr.findFirstProfileId
@@ -215,7 +217,7 @@ class EventRepositoryImpl(
         }
     }
 
-    override suspend fun getZapReceipts(invoices: List<String>): Result<Map<String, NostrEvent>> =
+    override suspend fun getZapRequests(invoices: List<String>): Result<Map<String, NostrEvent>> =
         withContext(dispatcherProvider.io()) {
             if (invoices.isEmpty()) return@withContext Result.success(emptyMap())
 
@@ -223,7 +225,12 @@ class EventRepositoryImpl(
             val localMap = localZapReceipts.mapNotNull { zapEvent ->
                 val invoice = zapEvent.invoice
                 val nostrEvent = zapEvent.rawNostrEvent?.decodeFromJsonStringOrNull<NostrEvent>()
-                if (invoice != null && nostrEvent != null) invoice to nostrEvent else null
+                val zapRequest = if (nostrEvent?.kind == NostrEventKind.Zap.value) {
+                    nostrEvent.extractZapRequestOrNull()
+                } else {
+                    nostrEvent
+                }
+                if (invoice != null && zapRequest != null) invoice to zapRequest else null
             }.toMap()
 
             val missingZapReceiptsByInvoice = invoices.toSet() - localZapReceipts.mapNotNull { it.invoice }.toSet()
@@ -231,13 +238,16 @@ class EventRepositoryImpl(
             if (missingZapReceiptsByInvoice.isNotEmpty()) {
                 eventStatsApi.getZapReceipts(invoices = missingZapReceiptsByInvoice.toList())
                     .mapCatching { response ->
-                        val map = response.mapEvent?.content?.decodeFromJsonStringOrNull<Map<String, NostrEvent>>()
+                        val receiptsMap = response.mapEvent?.content
+                            ?.decodeFromJsonStringOrNull<Map<String, NostrEvent>>()
                             ?: throw IllegalArgumentException("failed to parse invoices map.")
 
                         database.eventZaps()
-                            .upsertAll(data = map.values.toList().mapAsEventZapDO(profilesMap = emptyMap()))
+                            .upsertAll(data = receiptsMap.values.toList().mapAsEventZapDO(profilesMap = emptyMap()))
 
-                        map
+                        receiptsMap.entries.mapNotNull { (invoice, receipt) ->
+                            receipt.extractZapRequestOrNull()?.let { invoice to it }
+                        }.toMap()
                     }
             } else {
                 Result.success(emptyMap())

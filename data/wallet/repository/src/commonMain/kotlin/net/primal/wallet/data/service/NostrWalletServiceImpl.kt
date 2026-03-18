@@ -191,13 +191,13 @@ internal class NostrWalletServiceImpl(
         ).getOrThrow()
 
         val invoices = response.transactions.mapNotNull { it.invoice }
-        val zapReceiptsMap = eventRepository.getZapReceipts(invoices = invoices).getOrNull()
+        val zapRequestsMap = eventRepository.getZapRequests(invoices = invoices).getOrNull()
 
         return response.transactions.map { transaction ->
             val zapRequest = (transaction.metadata?.get("nostr") ?: transaction.metadata?.get("zap_request"))
                 ?.jsonObject?.toString()
                 ?.decodeFromJsonStringOrNull<NostrEvent>()
-                ?: zapReceiptsMap?.get(transaction.invoice)
+                ?: zapRequestsMap?.get(transaction.invoice)
 
             val zappedEntity = zapRequest?.toNostrEntity()
 
