@@ -238,10 +238,60 @@ fun String.asResponseTag(): JsonArray =
         add(this@asResponseTag)
     }
 
+fun String.asOptionTag(label: String): JsonArray =
+    buildJsonArray {
+        add("option")
+        add(this@asOptionTag)
+        add(label)
+    }
+
+fun String.asPollTypeTag(): JsonArray =
+    buildJsonArray {
+        add("polltype")
+        add(this@asPollTypeTag)
+    }
+
+fun String.asEndsAtTag(): JsonArray =
+    buildJsonArray {
+        add("endsAt")
+        add(this@asEndsAtTag)
+    }
+
 fun String.asPollOptionTag(): JsonArray =
     buildJsonArray {
         add("poll_option")
         add(this@asPollOptionTag)
+    }
+
+fun String.asPollOptionTag(label: String): JsonArray =
+    buildJsonArray {
+        add("poll_option")
+        add(this@asPollOptionTag)
+        add(label)
+    }
+
+fun String.asClosedAtTag(): JsonArray =
+    buildJsonArray {
+        add("closed_at")
+        add(this@asClosedAtTag)
+    }
+
+fun String.asValueMinimumTag(): JsonArray =
+    buildJsonArray {
+        add("value_minimum")
+        add(this@asValueMinimumTag)
+    }
+
+fun String.asValueMaximumTag(): JsonArray =
+    buildJsonArray {
+        add("value_maximum")
+        add(this@asValueMaximumTag)
+    }
+
+fun String.asRelayTag(): JsonArray =
+    buildJsonArray {
+        add("relay")
+        add(this@asRelayTag)
     }
 
 fun String.asEncryptionTag(): JsonArray =
