@@ -71,7 +71,7 @@ class WalletNoticeSheetViewModel @Inject constructor(
                 if (backgroundedAt != null) {
                     val elapsedMillis = System.currentTimeMillis() - backgroundedAt
                     if (elapsedMillis >= AWAY_THRESHOLD.inWholeMilliseconds) {
-                        scheduleNoticeIfEligible()
+                        refreshNoticeFromServer()
                     }
                 }
             }
@@ -101,6 +101,27 @@ class WalletNoticeSheetViewModel @Inject constructor(
                 delay(INITIAL_DELAY)
                 setState { copy(shouldShowNotice = true) }
             }
+        }
+    }
+
+    private fun refreshNoticeFromServer() {
+        viewModelScope.launch {
+            val userId = activeAccountStore.activeUserId()
+            if (userId.isEmpty()) return@launch
+
+            primalWalletAccountRepository.fetchWalletStatus(userId = userId)
+                .onSuccess { status ->
+                    val userAccount = activeAccountStore.activeUserAccount()
+                    val noticeType = resolveNoticeType(
+                        userId = userId,
+                        status = status,
+                        userAccount = userAccount,
+                    )
+                    setState { copy(noticeType = noticeType, shouldShowNotice = false) }
+                    if (noticeType != null) {
+                        scheduleNoticeIfEligible()
+                    }
+                }
         }
     }
 
