@@ -148,6 +148,8 @@ private fun PollPendingOption(
     ) {
         Text(
             text = option.label,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             style = AppTheme.typography.bodyMedium,
             color = AppTheme.colorScheme.onSurface,
             textAlign = TextAlign.Center,
