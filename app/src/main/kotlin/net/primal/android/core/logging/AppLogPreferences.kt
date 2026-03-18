@@ -22,6 +22,9 @@ class AppLogPreferences @Inject constructor(
     val developerToolsEnabled: Boolean
         get() = prefs.getBoolean(KEY_DEVELOPER_TOOLS_ENABLED, false)
 
+    val walletPickerEnabled: Boolean
+        get() = prefs.getBoolean(KEY_WALLET_PICKER_ENABLED, false)
+
     fun setLoggingEnabled(enabled: Boolean) {
         prefs.edit(commit = true) {
             putBoolean(KEY_IS_LOGGING_ENABLED, enabled)
@@ -34,9 +37,16 @@ class AppLogPreferences @Inject constructor(
         }
     }
 
+    fun setWalletPickerEnabled(enabled: Boolean) {
+        prefs.edit(commit = true) {
+            putBoolean(KEY_WALLET_PICKER_ENABLED, enabled)
+        }
+    }
+
     companion object {
         private const val PREFS_NAME = "dev_tools"
         private const val KEY_IS_LOGGING_ENABLED = "is_logging_enabled"
         private const val KEY_DEVELOPER_TOOLS_ENABLED = "developer_tools_enabled"
+        private const val KEY_WALLET_PICKER_ENABLED = "wallet_picker_enabled"
     }
 }

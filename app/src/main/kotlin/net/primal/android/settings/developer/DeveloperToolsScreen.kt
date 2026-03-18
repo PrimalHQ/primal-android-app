@@ -136,6 +136,24 @@ private fun DeveloperToolsScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 SettingsItem(
+                    headlineText = stringResource(id = R.string.settings_developer_tools_wallet_picker_title),
+                    supportText = stringResource(id = R.string.settings_developer_tools_wallet_picker_description),
+                    trailingContent = {
+                        PrimalSwitch(
+                            checked = state.isWalletPickerEnabled,
+                            onCheckedChange = {
+                                eventPublisher(UiEvent.ToggleWalletPicker(enabled = it))
+                            },
+                        )
+                    },
+                    onClick = {
+                        eventPublisher(UiEvent.ToggleWalletPicker(enabled = !state.isWalletPickerEnabled))
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                SettingsItem(
                     headlineText = stringResource(id = R.string.settings_developer_tools_wallet_id_title),
                     supportText = state.activeWalletId ?: "—",
                     trailingContent = {

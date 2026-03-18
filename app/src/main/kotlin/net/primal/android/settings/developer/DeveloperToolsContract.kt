@@ -5,6 +5,7 @@ import java.io.File
 interface DeveloperToolsContract {
     data class UiState(
         val isLoggingEnabled: Boolean = false,
+        val isWalletPickerEnabled: Boolean = false,
         val logFileCount: Int = 0,
         val totalLogSizeBytes: Long = 0L,
         val isExporting: Boolean = false,
@@ -13,6 +14,7 @@ interface DeveloperToolsContract {
 
     sealed class UiEvent {
         data class ToggleLogging(val enabled: Boolean) : UiEvent()
+        data class ToggleWalletPicker(val enabled: Boolean) : UiEvent()
         data object ExportLogs : UiEvent()
         data object ClearLogs : UiEvent()
     }

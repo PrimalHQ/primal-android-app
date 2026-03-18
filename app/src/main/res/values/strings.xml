@@ -1182,6 +1182,8 @@
     <string name="settings_developer_tools_clear">Clear Logs</string>
     <string name="settings_developer_tools_error_no_logs">No logs to export</string>
     <string name="settings_developer_tools_error_export_failed">Failed to export logs</string>
+    <string name="settings_developer_tools_wallet_picker_title">Wallet Picker</string>
+    <string name="settings_developer_tools_wallet_picker_description">Show wallet picker on the wallet dashboard</string>
     <string name="settings_developer_tools_wallet_id_title">Active Wallet ID</string>
     <string name="settings_developer_tools_wallet_id_copy">Copy wallet ID</string>
 

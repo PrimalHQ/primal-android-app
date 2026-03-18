@@ -21,6 +21,7 @@ interface WalletDashboardContract {
         val badges: Badges = Badges(),
         val wallet: Wallet? = null,
         val exchangeBtcUsdRate: Double? = null,
+        val walletPickerEnabled: Boolean = false,
         val lowBalance: Boolean = false,
         val isWalletBackedUp: Boolean = false,
         val hasPersistedSparkWallet: Boolean = false,

@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.core.logging.AppLogController
 import net.primal.android.core.logging.AppLogExporter
+import net.primal.android.core.logging.AppLogPreferences
 import net.primal.android.core.logging.AppLogRecorder
 import net.primal.android.settings.developer.DeveloperToolsContract.SideEffect
 import net.primal.android.settings.developer.DeveloperToolsContract.UiEvent
@@ -35,6 +36,7 @@ class DeveloperToolsViewModel @Inject constructor(
     private val logController: AppLogController,
     private val logRecorder: AppLogRecorder,
     private val logExporter: AppLogExporter,
+    private val appLogPreferences: AppLogPreferences,
     private val activeAccountStore: ActiveAccountStore,
     private val walletAccountRepository: WalletAccountRepository,
 ) : ViewModel() {
@@ -63,6 +65,7 @@ class DeveloperToolsViewModel @Inject constructor(
             events.collect { event ->
                 when (event) {
                     is UiEvent.ToggleLogging -> toggleLogging(event.enabled)
+                    is UiEvent.ToggleWalletPicker -> toggleWalletPicker(event.enabled)
                     UiEvent.ExportLogs -> exportLogs()
                     UiEvent.ClearLogs -> clearLogs()
                 }
@@ -73,6 +76,7 @@ class DeveloperToolsViewModel @Inject constructor(
         setState {
             copy(
                 isLoggingEnabled = logController.loggingEnabled,
+                isWalletPickerEnabled = appLogPreferences.walletPickerEnabled,
                 logFileCount = logRecorder.getLogFileCount(),
                 totalLogSizeBytes = logRecorder.getTotalLogSize(),
             )
@@ -82,6 +86,11 @@ class DeveloperToolsViewModel @Inject constructor(
     private fun toggleLogging(enabled: Boolean) {
         logController.setLoggingEnabled(enabled)
         refreshLogStats()
+    }
+
+    private fun toggleWalletPicker(enabled: Boolean) {
+        appLogPreferences.setWalletPickerEnabled(enabled)
+        setState { copy(isWalletPickerEnabled = enabled) }
     }
 
     private fun exportLogs() =

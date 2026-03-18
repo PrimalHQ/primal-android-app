@@ -20,6 +20,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import net.primal.android.core.logging.AppLogPreferences
 import net.primal.android.core.utils.authorNameUiFriendly
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
@@ -54,6 +55,7 @@ import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandle
 @Suppress("LongParameterList")
 @HiltViewModel
 class WalletDashboardViewModel @Inject constructor(
+    appLogPreferences: AppLogPreferences,
     userRepository: UserRepository,
     pendingDepositsSyncerFactory: PendingDepositsSyncerFactory,
     private val activeAccountStore: ActiveAccountStore,
@@ -76,6 +78,7 @@ class WalletDashboardViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(
         value = UiState(
+            walletPickerEnabled = appLogPreferences.walletPickerEnabled,
             dashboardState = if (isNpubLogin) {
                 WalletDashboardState.NoWalletNpubLogin
             } else {
