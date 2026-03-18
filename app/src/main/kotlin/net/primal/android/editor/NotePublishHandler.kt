@@ -22,9 +22,17 @@ import net.primal.domain.nostr.Nevent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.NostrUnsignedEvent
 import net.primal.domain.nostr.asClientTag
+import net.primal.domain.nostr.asClosedAtTag
+import net.primal.domain.nostr.asEndsAtTag
 import net.primal.domain.nostr.asEventTag
+import net.primal.domain.nostr.asOptionTag
+import net.primal.domain.nostr.asPollOptionTag
+import net.primal.domain.nostr.asPollTypeTag
 import net.primal.domain.nostr.asPubkeyTag
+import net.primal.domain.nostr.asRelayTag
 import net.primal.domain.nostr.asReplaceableEventTag
+import net.primal.domain.nostr.asValueMaximumTag
+import net.primal.domain.nostr.asValueMinimumTag
 import net.primal.domain.nostr.isPubKeyTag
 import net.primal.domain.nostr.parseEventTags
 import net.primal.domain.nostr.parseHashtagTags
@@ -211,14 +219,14 @@ class NotePublishHandler @Inject constructor(
         val tags = mutableListOf<JsonArray>()
 
         choices.forEach { (id, label) ->
-            tags.add(JsonArray(listOf(JsonPrimitive("option"), JsonPrimitive(id), JsonPrimitive(label))))
+            tags.add(id.asOptionTag(label))
         }
 
-        tags.add(JsonArray(listOf(JsonPrimitive("polltype"), JsonPrimitive("singlechoice"))))
-        tags.add(JsonArray(listOf(JsonPrimitive("endsAt"), JsonPrimitive(endsAt.toString()))))
+        tags.add("singlechoice".asPollTypeTag())
+        tags.add(endsAt.toString().asEndsAtTag())
 
         writeRelayUrls.forEach { relayUrl ->
-            tags.add(JsonArray(listOf(JsonPrimitive("relay"), JsonPrimitive(relayUrl))))
+            tags.add(relayUrl.asRelayTag())
         }
 
         return tags
@@ -236,32 +244,22 @@ class NotePublishHandler @Inject constructor(
         val tags = mutableListOf<JsonArray>()
 
         choices.forEachIndexed { index, choice ->
-            tags.add(
-                JsonArray(
-                    listOf(JsonPrimitive("poll_option"), JsonPrimitive(index.toString()), JsonPrimitive(choice.label)),
-                ),
-            )
+            tags.add(index.toString().asPollOptionTag(label = choice.label))
         }
 
-        val firstWriteRelayUrl = writeRelayUrls.firstOrNull()
-        val pTag = if (firstWriteRelayUrl != null) {
-            listOf(JsonPrimitive("p"), JsonPrimitive(userId), JsonPrimitive(firstWriteRelayUrl))
-        } else {
-            listOf(JsonPrimitive("p"), JsonPrimitive(userId))
-        }
-        tags.add(JsonArray(pTag))
+        tags.add(userId.asPubkeyTag(relayHint = writeRelayUrls.firstOrNull()))
 
-        tags.add(JsonArray(listOf(JsonPrimitive("closed_at"), JsonPrimitive(endsAt.toString()))))
+        tags.add(endsAt.toString().asClosedAtTag())
 
         if (minZapAmountInSats != null) {
-            tags.add(JsonArray(listOf(JsonPrimitive("value_minimum"), JsonPrimitive(minZapAmountInSats.toString()))))
+            tags.add(minZapAmountInSats.toString().asValueMinimumTag())
         }
         if (maxZapAmountInSats != null) {
-            tags.add(JsonArray(listOf(JsonPrimitive("value_maximum"), JsonPrimitive(maxZapAmountInSats.toString()))))
+            tags.add(maxZapAmountInSats.toString().asValueMaximumTag())
         }
 
         writeRelayUrls.forEach { relayUrl ->
-            tags.add(JsonArray(listOf(JsonPrimitive("relay"), JsonPrimitive(relayUrl))))
+            tags.add(relayUrl.asRelayTag())
         }
 
         return tags
