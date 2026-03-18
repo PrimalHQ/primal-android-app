@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.events.polls.ui.MIN_RESULT_BAR_FRACTION
@@ -131,6 +132,8 @@ private fun SelectablePollOption(
             ) {
                 Text(
                     text = option.label,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     style = AppTheme.typography.bodyMedium,
                     fontWeight = if (option.isWinner) FontWeight.SemiBold else FontWeight.Normal,
                     color = AppTheme.colorScheme.onSurface,
