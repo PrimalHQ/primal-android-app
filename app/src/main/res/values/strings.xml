@@ -824,13 +824,23 @@
     <string name="asearch_filters_custom">Custom</string>
 
     <string name="wallet_title">Wallet</string>
-    <string name="wallet_picker_title">Wallets</string>
-    <string name="wallet_picker_configure_wallets">Configure</string>
     <string name="wallet_primal_title">Legacy Wallet</string>
     <string name="wallet_spark_title">Wallet</string>
-    <string name="wallet_primal_description">Built-in wallet</string>
-    <string name="wallet_nwc_title">NWC</string>
-    <string name="wallet_nwc_description">Your external lightning wallet</string>
+    <string name="wallet_nwc_title">NWC Wallet</string>
+    <string name="wallet_picker_title">Wallets</string>
+    <string name="wallet_picker_configure_wallets">Configure</string>
+    <string name="wallet_picker_configure_title">Wallets</string>
+    <string name="wallet_picker_cancel">Cancel</string>
+    <string name="wallet_picker_done">Done</string>
+    <string name="wallet_picker_reassign_confirm_title">Reassign Lightning Address</string>
+    <string name="wallet_picker_reassign_confirm_text">Lightning payments will be routed to %s. Continue?</string>
+    <string name="wallet_picker_reassign_confirm_button">Reassign</string>
+    <string name="wallet_picker_reassign_error">Failed to reassign Lightning address. Please try again.</string>
+    <string name="wallet_picker_nwc_title">NWC Wallet</string>
+    <string name="wallet_picker_spark_title">Spark Wallet</string>
+    <string name="wallet_picker_legacy_title">Legacy Wallet</string>
+    <string name="wallet_picker_no_lightning_address">[ no lightning address]</string>
+    <string name="wallet_picker_nwc_description">Your external lightning wallet</string>
 
     <string name="notifications_title">Notifications</string>
     <string name="notifications_no_content">Your notifications will appear here.</string>

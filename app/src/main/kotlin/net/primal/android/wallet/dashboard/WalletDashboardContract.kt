@@ -17,7 +17,6 @@ interface WalletDashboardContract {
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
         val activeAccountBlossoms: List<String> = emptyList(),
-        val userWallets: List<Wallet> = emptyList(),
         val badges: Badges = Badges(),
         val wallet: Wallet? = null,
         val exchangeBtcUsdRate: Double? = null,
@@ -39,7 +38,6 @@ interface WalletDashboardContract {
         data object RequestLatestTransactionsSync : UiEvent()
         data object DismissError : UiEvent()
         data object CreateWallet : UiEvent()
-        data class ChangeActiveWallet(val wallet: Wallet) : UiEvent()
     }
 
     enum class WalletDashboardState {

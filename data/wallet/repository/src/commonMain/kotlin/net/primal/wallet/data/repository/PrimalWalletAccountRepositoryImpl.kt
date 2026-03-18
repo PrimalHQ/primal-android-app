@@ -98,12 +98,49 @@ internal class PrimalWalletAccountRepositoryImpl(
         withContext(dispatcherProvider.io()) {
             runCatching {
                 val response = primalWalletApi.getWalletStatus(userId)
+
+                response.lightningAddress?.let {
+                    correctLightningAddressAssignment(
+                        userId = userId,
+                        registeredWalletId = response.sparkPubkey ?: userId,
+                        lightningAddress = it,
+                    )
+                }
+
                 PrimalWalletStatus(
                     hasCustodialWallet = response.hasCustodialWallet,
                     hasMigratedToSparkWallet = response.hasSparkWallet,
                     lightningAddress = response.lightningAddress,
                     primalWalletDeprecated = response.mustMigrate,
+                    registeredSparkWalletId = response.sparkPubkey,
                 )
             }
         }
+
+    private suspend fun correctLightningAddressAssignment(
+        userId: String,
+        registeredWalletId: String,
+        lightningAddress: String,
+    ) {
+        walletDatabase.withTransaction {
+            val walletDao = walletDatabase.wallet()
+            val allWallets = walletDao.findWalletInfosByUserId(userId)
+
+            for (wallet in allWallets) {
+                if (wallet.type == WalletType.NWC) continue
+
+                if (wallet.walletId == registeredWalletId) {
+                    walletDao.updateWalletLightningAddress(
+                        walletId = wallet.walletId,
+                        lightningAddress = lightningAddress.asEncryptable(),
+                    )
+                } else if (wallet.lightningAddress?.decrypted == lightningAddress) {
+                    walletDao.updateWalletLightningAddress(
+                        walletId = wallet.walletId,
+                        lightningAddress = null,
+                    )
+                }
+            }
+        }
+    }
 }

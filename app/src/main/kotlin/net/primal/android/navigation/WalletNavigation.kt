@@ -1,11 +1,13 @@
 package net.primal.android.navigation
 
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import net.primal.android.core.compose.ApplyEdgeToEdge
@@ -19,6 +21,8 @@ import net.primal.android.wallet.backup.WalletBackupViewModel
 import net.primal.android.wallet.dashboard.WalletDashboardScreen
 import net.primal.android.wallet.dashboard.WalletDashboardViewModel
 import net.primal.android.wallet.faq.WalletUpgradeFaqScreen
+import net.primal.android.wallet.picker.WalletPickerBottomSheet
+import net.primal.android.wallet.picker.WalletPickerViewModel
 import net.primal.android.wallet.transactions.details.TransactionDetailsScreen
 import net.primal.android.wallet.transactions.details.TransactionDetailsViewModel
 import net.primal.android.wallet.transactions.receive.ReceivePaymentScreen
@@ -60,6 +64,8 @@ fun NavController.navigateToWalletUpgradeFaq() = navigate(route = "walletUpgrade
 
 private fun NavController.navigateToTransactionDetails(txId: String) = navigate(route = "walletTransaction/$txId")
 
+fun NavController.navigateToWalletPicker() = navigate(route = "walletPicker")
+
 fun NavGraphBuilder.walletNavigation(
     route: String,
     navController: NavController,
@@ -75,6 +81,8 @@ fun NavGraphBuilder.walletNavigation(
         onDrawerDestinationClick = onDrawerScreenClick,
         navController = navController,
     )
+
+    walletPicker(navController = navController)
 
     backup(
         route = "walletBackup/{$WALLET_ID}",
@@ -180,7 +188,7 @@ private fun NavGraphBuilder.dashboard(
         onSendClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Nostr) },
         onScanClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Scan) },
         onReceiveClick = { navController.navigateToWalletReceive() },
-        onConfigureWalletsClick = { navController.navigateToWalletSettings() },
+        onWalletPickerClick = { navController.navigateToWalletPicker() },
         onRestoreWalletClick = { navController.navigateToWalletRestore() },
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
     )
@@ -335,3 +343,17 @@ private fun NavGraphBuilder.transactionDetails(
         noteCallbacks = noteCallbacksHandler(navController),
     )
 }
+
+private fun NavGraphBuilder.walletPicker(navController: NavController) =
+    dialog(
+        route = "walletPicker",
+        dialogProperties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        val viewModel = hiltViewModel<WalletPickerViewModel>()
+        ApplyEdgeToEdge()
+        LockToOrientationPortrait()
+        WalletPickerBottomSheet(
+            viewModel = viewModel,
+            onDismissRequest = { navController.popBackStack() },
+        )
+    }

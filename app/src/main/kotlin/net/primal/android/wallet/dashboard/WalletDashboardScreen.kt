@@ -82,7 +82,6 @@ import net.primal.android.wallet.dashboard.ui.WalletCallToActionAnnotatedBox
 import net.primal.android.wallet.dashboard.ui.WalletCallToActionBox
 import net.primal.android.wallet.dashboard.ui.WalletDashboard
 import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
-import net.primal.android.wallet.dashboard.ui.WalletPickerBottomSheet
 import net.primal.android.wallet.dashboard.ui.WalletSetupCallToAction
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
 import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
@@ -108,7 +107,7 @@ fun WalletDashboardScreen(
     onSendClick: () -> Unit,
     onScanClick: () -> Unit,
     onReceiveClick: () -> Unit,
-    onConfigureWalletsClick: () -> Unit,
+    onWalletPickerClick: () -> Unit,
     onRestoreWalletClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
@@ -139,7 +138,7 @@ fun WalletDashboardScreen(
         onSendClick = onSendClick,
         onScanClick = onScanClick,
         onReceiveClick = onReceiveClick,
-        onConfigureWalletsClick = onConfigureWalletsClick,
+        onWalletPickerClick = onWalletPickerClick,
         onRestoreWalletClick = onRestoreWalletClick,
         eventPublisher = { viewModel.setEvents(it) },
         accountSwitcherCallbacks = accountSwitcherCallbacks,
@@ -161,7 +160,7 @@ fun WalletDashboardScreen(
     onSendClick: () -> Unit,
     onScanClick: () -> Unit,
     onReceiveClick: () -> Unit,
-    onConfigureWalletsClick: () -> Unit,
+    onWalletPickerClick: () -> Unit,
     onRestoreWalletClick: () -> Unit,
     eventPublisher: (UiEvent) -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
@@ -172,20 +171,7 @@ fun WalletDashboardScreen(
     val pagingItems = state.transactions.collectAsLazyPagingItems()
     val listState = pagingItems.rememberLazyListStatePagingWorkaround()
 
-    val canShowWalletPicker = state.walletPickerEnabled &&
-        state.userWallets.isNotEmpty() && state.userWallets.size > 1 && state.wallet != null
-    var walletPickerVisible by remember { mutableStateOf(false) }
-    if (walletPickerVisible && canShowWalletPicker) {
-        WalletPickerBottomSheet(
-            wallets = state.userWallets,
-            activeWallet = state.wallet,
-            onDismissRequest = { walletPickerVisible = false },
-            onConfigureWalletsClick = onConfigureWalletsClick,
-            onActiveWalletChanged = {
-                eventPublisher(UiEvent.ChangeActiveWallet(it))
-            },
-        )
-    }
+    val canShowWalletPicker = state.walletPickerEnabled && state.wallet != null
 
     var inAppPurchaseVisible by remember { mutableStateOf(false) }
     if (inAppPurchaseVisible) {
@@ -264,7 +250,11 @@ fun WalletDashboardScreen(
                 } else {
                     null
                 },
-                onTitleClick = { walletPickerVisible = true },
+                onTitleClick = if (canShowWalletPicker) {
+                    { onWalletPickerClick() }
+                } else {
+                    null
+                },
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = {
                     uiScope.launch { drawerState.open() }

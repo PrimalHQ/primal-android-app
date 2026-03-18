@@ -11,7 +11,6 @@ import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -48,7 +47,6 @@ import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.nostr.cryptography.SignatureException
 import net.primal.domain.transactions.Transaction
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
-import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
 import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 
@@ -91,8 +89,6 @@ class WalletDashboardViewModel @Inject constructor(
 
     private val events = MutableSharedFlow<UiEvent>()
     fun setEvents(event: UiEvent) = viewModelScope.launch { events.emit(event) }
-
-    private var userWalletsObserveJob: Job? = null
 
     init {
         observeUsdExchangeRate()
@@ -154,8 +150,6 @@ class WalletDashboardViewModel @Inject constructor(
                         syncLatestTransactions(walletId = wallet.walletId)
                     }
 
-                    is UiEvent.ChangeActiveWallet -> changeActiveWallet(wallet = it.wallet)
-
                     UiEvent.CreateWallet -> createWallet()
                 }
             }
@@ -170,20 +164,6 @@ class WalletDashboardViewModel @Inject constructor(
                     setState { copy(dashboardState = previousState.dashboardState) }
                     setErrorState(UiState.DashboardError.WalletCreationFailed(it))
                 }
-        }
-
-    private fun observeUserWallets(userId: String) {
-        userWalletsObserveJob?.cancel()
-        userWalletsObserveJob = viewModelScope.launch {
-            walletAccountRepository
-                .observeWalletsByUser(userId = userId)
-                .collect { setState { copy(userWallets = it) } }
-        }
-    }
-
-    private fun changeActiveWallet(wallet: Wallet) =
-        viewModelScope.launch {
-            walletAccountRepository.setActiveWallet(userId = activeUserId, walletId = wallet.walletId)
         }
 
     private fun subscribeToActiveWalletData() =
@@ -229,7 +209,6 @@ class WalletDashboardViewModel @Inject constructor(
                         activeAccountBlossoms = it.blossomServers,
                     )
                 }
-                observeUserWallets(userId = it.pubkey)
             }
         }
 
