@@ -10,3 +10,11 @@
 - Migrated to ZXing scanner for AOSP (#963)
 - Migrated user voted poll logic to EventUserStats (#964)
 - Fixed the note editor reading clipboard on every keystroke (#962)
+- Implement re-assigning lightning address in wallet picker
+- Added relay hint tags to zap poll events (#973)
+- Fixed poll options rendering to appear after attachments (#974)
+- Set maxLines=1 on poll option labels (#976)
+- Fixed using zap receipts instead of zap requests for zap data parsing (#977)
+- Fixed WalletSessionProvider to handle missing user wallet status
+- Implemented wallet picker flag in dev tools
+- Added wallet id indicator in Dev Tools
