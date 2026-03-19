@@ -25,6 +25,8 @@ import net.primal.wallet.data.local.dao.WalletTransactionDao
 import net.primal.wallet.data.local.dao.WalletTransactionData
 import net.primal.wallet.data.local.dao.WalletTransactionRemoteKey
 import net.primal.wallet.data.local.dao.WalletTransactionRemoteKeyDao
+import net.primal.wallet.data.local.dao.ZapEnrichmentTracker
+import net.primal.wallet.data.local.dao.ZapEnrichmentTrackerDao
 import net.primal.wallet.data.local.dao.nwc.NwcConnectionDao
 import net.primal.wallet.data.local.dao.nwc.NwcConnectionData
 import net.primal.wallet.data.local.dao.nwc.NwcDailyBudgetData
@@ -54,11 +56,13 @@ import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLogDao
         NwcInvoiceData::class,
         NwcPendingEventData::class,
         ReceiveRequestData::class,
+        ZapEnrichmentTracker::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
+        AutoMigration(from = 4, to = 5),
     ],
 )
 @TypeConverters(ListsTypeConverters::class, EncryptableTypeConverters::class)
@@ -74,6 +78,7 @@ abstract class WalletDatabase : RoomDatabase() {
     abstract fun nwcPendingEvents(): NwcPendingEventDao
     abstract fun nwcLogs(): NwcWalletRequestLogDao
     abstract fun receiveRequests(): ReceiveRequestDao
+    abstract fun zapEnrichmentTracker(): ZapEnrichmentTrackerDao
 
     companion object {
         val MIGRATION_2_3 = object : Migration(2, 3) {
