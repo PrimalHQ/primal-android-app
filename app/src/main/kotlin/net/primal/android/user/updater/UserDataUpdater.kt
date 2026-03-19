@@ -70,6 +70,7 @@ class UserDataUpdater @AssistedInject constructor(
         runCatching { pushNotificationsTokenUpdater.updateTokenForRemoteSigner() }
         runCatching { pushNotificationsTokenUpdater.updateTokenForNwcService() }
         runCatching { mutedItemRepository.fetchAndPersistMuteList(userId = userId) }
+        runCatching { walletRepository.enrichUnenrichedTransactions() }
         mutedItemRepository.fetchAndPersistStreamMuteList(userId = userId)
 
         return Result.success(Unit)

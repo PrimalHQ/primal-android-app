@@ -151,6 +151,7 @@ class WalletDashboardViewModel @Inject constructor(
                     }
 
                     UiEvent.CreateWallet -> createWallet()
+                    UiEvent.EnrichTransactions -> enrichTransactions()
                 }
             }
         }
@@ -242,9 +243,16 @@ class WalletDashboardViewModel @Inject constructor(
             }.onFailure { error ->
                 Napier.w(throwable = error) { "Failed to sync latest transactions." }
             }
+            enrichTransactions()
 
             delay(150.milliseconds)
             setState { copy(refreshing = false) }
+        }
+
+    private fun enrichTransactions() =
+        viewModelScope.launch {
+            runCatching { walletRepository.enrichUnenrichedTransactions() }
+                .onFailure { Napier.w(throwable = it) { "Failed to enrich transactions." } }
         }
 
     private fun observeUsdExchangeRate() {
