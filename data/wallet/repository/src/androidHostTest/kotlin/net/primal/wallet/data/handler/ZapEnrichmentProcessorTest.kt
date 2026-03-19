@@ -108,7 +108,7 @@ class ZapEnrichmentProcessorTest {
     @Test
     fun discoveryCreatesPendingTrackersForSparkWithInvoice() =
         runTest {
-            insertTransaction(txKind = TxKind.SPARK, invoice = "lnbc2invoice")
+            insertTransaction(txKind = TxKind.SPARK, invoice = "lnbc2invoice", createdAt = 1772438400L)
 
             processor.processEnrichment()
 
@@ -150,6 +150,40 @@ class ZapEnrichmentProcessorTest {
 
             val trackers = allPendingTrackers()
             trackers.shouldBeEmpty()
+        }
+
+    @Test
+    fun discoverySkipsSparkTransactionsBeforeCutoffDate() =
+        runTest {
+            insertTransaction(txKind = TxKind.SPARK, invoice = "lnbc-old-spark", createdAt = 1772438399L)
+
+            processor.processEnrichment()
+
+            val trackers = allPendingTrackers()
+            trackers.shouldBeEmpty()
+        }
+
+    @Test
+    fun discoveryIncludesLightningTransactionsRegardlessOfDate() =
+        runTest {
+            insertTransaction(txKind = TxKind.LIGHTNING, invoice = "lnbc-old-lightning", createdAt = 1000L)
+
+            processor.processEnrichment()
+
+            val trackers = allPendingTrackers()
+            trackers shouldHaveSize 1
+        }
+
+    @Test
+    fun singleTxEnrichmentSkipsSparkTransactionsBeforeCutoffDate() =
+        runTest {
+            val txId =
+                insertTransaction(txKind = TxKind.SPARK, invoice = "lnbc-old-spark-single", createdAt = 1772438399L)
+
+            val result = processor.enrichTransaction(txId)
+
+            result shouldBe false
+            fakeEventRepository.getZapRequestsCallCount shouldBe 0
         }
 
     @Test

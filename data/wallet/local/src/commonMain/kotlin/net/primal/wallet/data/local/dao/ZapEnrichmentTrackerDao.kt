@@ -17,9 +17,12 @@ interface ZapEnrichmentTrackerDao {
         FROM WalletTransactionData t
         LEFT JOIN ZapEnrichmentTracker z ON t.transactionId = z.transactionId
         WHERE z.transactionId IS NULL
-            AND t.txKind IN ('LIGHTNING', 'SPARK')
             AND t.invoice IS NOT NULL
             AND t.walletType != 'PRIMAL'
+            AND (
+                t.txKind = 'LIGHTNING'
+                OR (t.txKind = 'SPARK' AND t.createdAt >= 1772438400)
+            )
         ORDER BY t.createdAt DESC
         """,
     )
