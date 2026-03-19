@@ -120,6 +120,7 @@ fun WalletDashboardScreen(
                     viewModel.setEvents(UiEvent.RequestWalletBalanceUpdate)
                 }
                 viewModel.setEvents(UiEvent.RequestLatestTransactionsSync)
+                viewModel.setEvents(UiEvent.EnrichTransactions)
             }
 
             else -> Unit

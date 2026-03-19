@@ -67,8 +67,17 @@ class TransactionDetailsViewModel @Inject constructor(
 
     private fun loadTransaction() =
         viewModelScope.launch {
-            val tx = walletRepository.findTransactionByIdOrNull(txId = transactionId)
+            var tx = walletRepository.findTransactionByIdOrNull(txId = transactionId)
             setState { copy(loading = false, txData = tx?.mapAsTransactionDataUi()) }
+
+            if (tx != null) {
+                val enriched = walletRepository.enrichTransaction(transactionId)
+                if (enriched) {
+                    tx = walletRepository.findTransactionByIdOrNull(txId = transactionId)
+                    setState { copy(txData = tx?.mapAsTransactionDataUi()) }
+                }
+            }
+
             if (tx is Transaction.Zap) {
                 tx.zappedEntity.let { entity ->
                     when (entity) {

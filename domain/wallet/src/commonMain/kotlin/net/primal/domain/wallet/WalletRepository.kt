@@ -56,6 +56,10 @@ interface WalletRepository {
 
     suspend fun deleteAllUserData(userId: String)
 
+    suspend fun enrichUnenrichedTransactions()
+
+    suspend fun enrichTransaction(transactionId: String): Boolean
+
     suspend fun pay(walletId: String, request: TxRequest): Result<PayResult>
 
     suspend fun createLightningInvoice(

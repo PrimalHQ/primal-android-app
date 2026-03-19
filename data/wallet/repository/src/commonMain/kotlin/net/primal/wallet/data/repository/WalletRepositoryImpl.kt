@@ -21,6 +21,7 @@ import net.primal.core.utils.Result
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.map
 import net.primal.core.utils.onSuccess
+import net.primal.domain.events.EventRepository
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.LightningPaymentResult
@@ -43,6 +44,7 @@ import net.primal.domain.wallet.model.WalletBalanceResult
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.handler.TransactionsHandler
+import net.primal.wallet.data.handler.ZapEnrichmentProcessor
 import net.primal.wallet.data.local.dao.NostrWalletData
 import net.primal.wallet.data.local.dao.ReceiveRequestData
 import net.primal.wallet.data.local.dao.ReceiveRequestType
@@ -67,7 +69,15 @@ internal class WalletRepositoryImpl(
     private val walletDatabase: WalletDatabase,
     private val profileRepository: ProfileRepository,
     private val lightningPayHelper: LightningPayHelper,
+    private val eventRepository: EventRepository,
 ) : WalletRepository {
+
+    private val zapEnrichmentProcessor = ZapEnrichmentProcessor(
+        dispatchers = dispatcherProvider,
+        walletDatabase = walletDatabase,
+        eventRepository = eventRepository,
+        profileRepository = profileRepository,
+    )
 
     private val transactionsHandler = TransactionsHandler(
         dispatchers = dispatcherProvider,
@@ -290,12 +300,16 @@ internal class WalletRepositoryImpl(
 
     override suspend fun deleteAllTransactions(userId: String) =
         withContext(dispatcherProvider.io()) {
-            walletDatabase.walletTransactions().deleteAllTransactions(userId = userId)
+            walletDatabase.withTransaction {
+                walletDatabase.zapEnrichmentTracker().deleteByUserId(userId)
+                walletDatabase.walletTransactions().deleteAllTransactions(userId = userId)
+            }
         }
 
     override suspend fun deleteAllUserData(userId: String) =
         withContext(dispatcherProvider.io()) {
             walletDatabase.withTransaction {
+                walletDatabase.zapEnrichmentTracker().deleteByUserId(userId)
                 val wallets = walletDatabase.wallet().findWalletInfosByUserId(userId = userId)
                 val walletIds = wallets.map { it.walletId }
                 val connectionIds = walletDatabase.nwcConnections().findConnectionIdsByUserId(userId)
@@ -321,6 +335,14 @@ internal class WalletRepositoryImpl(
                 walletDatabase.wallet().clearActiveWallet(userId)
             }
         }
+
+    override suspend fun enrichUnenrichedTransactions() {
+        zapEnrichmentProcessor.processEnrichment()
+    }
+
+    override suspend fun enrichTransaction(transactionId: String): Boolean {
+        return zapEnrichmentProcessor.enrichTransaction(transactionId)
+    }
 
     override suspend fun pay(walletId: String, request: TxRequest): Result<PayResult> =
         withContext(dispatcherProvider.io()) {
