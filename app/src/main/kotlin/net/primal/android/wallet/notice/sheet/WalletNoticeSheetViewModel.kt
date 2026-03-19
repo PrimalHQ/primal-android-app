@@ -71,7 +71,7 @@ class WalletNoticeSheetViewModel @Inject constructor(
                 if (backgroundedAt != null) {
                     val elapsedMillis = System.currentTimeMillis() - backgroundedAt
                     if (elapsedMillis >= AWAY_THRESHOLD.inWholeMilliseconds) {
-                        scheduleNoticeIfEligible()
+                        refreshNoticeFromServer()
                     }
                 }
             }
@@ -104,6 +104,30 @@ class WalletNoticeSheetViewModel @Inject constructor(
         }
     }
 
+    private fun refreshNoticeFromServer() {
+        viewModelScope.launch {
+            val userId = activeAccountStore.activeUserId()
+            if (userId.isEmpty()) return@launch
+            fetchAndUpdateNoticeType(userId)
+        }
+    }
+
+    private suspend fun fetchAndUpdateNoticeType(userId: String) {
+        primalWalletAccountRepository.fetchWalletStatus(userId = userId)
+            .onSuccess { status ->
+                val userAccount = activeAccountStore.activeUserAccount()
+                val noticeType = resolveNoticeType(
+                    userId = userId,
+                    status = status,
+                    userAccount = userAccount,
+                )
+                setState { copy(noticeType = noticeType, shouldShowNotice = false) }
+                if (noticeType != null) {
+                    scheduleNoticeIfEligible()
+                }
+            }
+    }
+
     private fun observeActiveAccount() =
         viewModelScope.launch {
             activeAccountStore.activeUserAccount.collect { userAccount ->
@@ -124,20 +148,7 @@ class WalletNoticeSheetViewModel @Inject constructor(
                 setState { copy(noticeType = null, shouldShowNotice = false) }
                 showDelayJob?.cancel()
 
-                primalWalletAccountRepository.fetchWalletStatus(userId = userId)
-                    .onSuccess { status ->
-                        val userAccount = activeAccountStore.activeUserAccount()
-                        val noticeType = resolveNoticeType(
-                            userId = userId,
-                            status = status,
-                            userAccount = userAccount,
-                        )
-                        setState { copy(noticeType = noticeType) }
-
-                        if (noticeType != null) {
-                            scheduleNoticeIfEligible()
-                        }
-                    }
+                fetchAndUpdateNoticeType(userId)
             }
         }
 
