@@ -15,6 +15,7 @@
 - Fixed poll options rendering to appear after attachments (#974)
 - Set maxLines=1 on poll option labels (#976)
 - Fixed using zap receipts instead of zap requests for zap data parsing (#977)
-- Fixed WalletSessionProvider to handle missing user wallet status
-- Implemented wallet picker flag in dev tools
-- Added wallet id indicator in Dev Tools
+- Fixed WalletSessionProvider to handle missing user wallet status s
+- Fixed missing zaps in the transactions list
+- Fixed wallet upgrade notice shown after successful migration (#972)
+- Implement rendering wallets in the dev tools
