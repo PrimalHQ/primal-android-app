@@ -36,7 +36,7 @@ internal class SparkWalletAccountRepositoryImpl(
                             type = WalletType.SPARK,
                         ),
                     )
-                    // Updating in separate call to avoid losing balance state
+                    // Updating in a separate call to avoid losing balance state
                     walletDatabase.wallet().updateWalletLightningAddress(
                         walletId = walletId,
                         lightningAddress = lightningAddress?.asEncryptable(),
@@ -65,15 +65,19 @@ internal class SparkWalletAccountRepositoryImpl(
                 .firstOrNull()?.walletId
         }
 
+    override suspend fun findAllPersistedWalletIds(userId: String): List<String> =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet().findAllSparkWalletDataByUserId(userId)
+                .map { it.walletId }
+        }
+
     override suspend fun getPersistedSeedWords(walletId: String): Result<List<String>> =
         runCatching {
             withContext(dispatcherProvider.io()) {
                 val data = walletDatabase.wallet().findSparkWalletData(walletId)
                     ?: error("No spark wallet data found for walletId=$walletId")
 
-                data.seedWords.decrypted
-                    .split(" ")
-                    .filter { it.isNotBlank() }
+                data.seedWords.decrypted.toSeedWordList()
             }
         }
 
@@ -157,3 +161,5 @@ internal class SparkWalletAccountRepositoryImpl(
             sparkWalletData?.primalTxsMigrated != false
         }
 }
+
+private fun String.toSeedWordList(): List<String> = split(" ").filter { it.isNotBlank() }

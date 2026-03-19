@@ -425,6 +425,7 @@ private class FakeSparkWalletAccountRepository(
     override suspend fun deleteSparkWalletByUserId(userId: String): Result<String> = Result.success("")
     override suspend fun unregisterSparkWallet(userId: String, walletId: String): Result<Unit> = Result.success(Unit)
     override suspend fun getLightningAddress(walletId: String): String? = null
+    override suspend fun findAllPersistedWalletIds(userId: String): List<String> = emptyList()
     override suspend fun isPrimalTxsMigrationCompleted(walletId: String): Boolean = true
 }
 

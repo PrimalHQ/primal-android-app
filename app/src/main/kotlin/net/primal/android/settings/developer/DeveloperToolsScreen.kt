@@ -5,28 +5,40 @@ import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
+import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalSwitch
@@ -35,18 +47,23 @@ import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Copy
+import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.core.logging.AppLogExporter
+import net.primal.android.core.utils.ellipsizeMiddle
+import net.primal.android.settings.developer.DeveloperToolsContract.DevWalletInfo
 import net.primal.android.settings.developer.DeveloperToolsContract.SideEffect
 import net.primal.android.settings.developer.DeveloperToolsContract.UiEvent
 import net.primal.android.settings.developer.DeveloperToolsContract.UiState
 import net.primal.android.theme.AppTheme
+import net.primal.domain.wallet.WalletType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DeveloperToolsScreen(viewModel: DeveloperToolsViewModel, onClose: () -> Unit) {
     val uiState = viewModel.uiState.collectAsState()
     val context = LocalContext.current
+    val clipboardManager = LocalClipboardManager.current
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -70,6 +87,21 @@ fun DeveloperToolsScreen(viewModel: DeveloperToolsViewModel, onClose: () -> Unit
                     Toast.makeText(
                         context,
                         context.getString(R.string.settings_developer_tools_error_export_failed),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+                is SideEffect.SeedWordsCopied -> {
+                    clipboardManager.setText(AnnotatedString(effect.seedWords))
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.settings_developer_tools_seed_words_copied),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+                is SideEffect.SeedWordsCopyFailed -> {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.settings_developer_tools_seed_words_copy_failed),
                         Toast.LENGTH_SHORT,
                     ).show()
                 }
@@ -117,6 +149,7 @@ private fun DeveloperToolsScreen(
             ) {
                 Spacer(modifier = Modifier.height(16.dp))
 
+                // Logging section
                 SettingsItem(
                     headlineText = stringResource(id = R.string.settings_developer_tools_logging_title),
                     supportText = stringResource(id = R.string.settings_developer_tools_logging_description),
@@ -130,46 +163,6 @@ private fun DeveloperToolsScreen(
                     },
                     onClick = {
                         eventPublisher(UiEvent.ToggleLogging(enabled = !state.isLoggingEnabled))
-                    },
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                SettingsItem(
-                    headlineText = stringResource(id = R.string.settings_developer_tools_wallet_picker_title),
-                    supportText = stringResource(id = R.string.settings_developer_tools_wallet_picker_description),
-                    trailingContent = {
-                        PrimalSwitch(
-                            checked = state.isWalletPickerEnabled,
-                            onCheckedChange = {
-                                eventPublisher(UiEvent.ToggleWalletPicker(enabled = it))
-                            },
-                        )
-                    },
-                    onClick = {
-                        eventPublisher(UiEvent.ToggleWalletPicker(enabled = !state.isWalletPickerEnabled))
-                    },
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                SettingsItem(
-                    headlineText = stringResource(id = R.string.settings_developer_tools_wallet_id_title),
-                    supportText = state.activeWalletId ?: "—",
-                    trailingContent = {
-                        IconButton(
-                            onClick = {
-                                clipboardManager.setText(AnnotatedString(state.activeWalletId ?: ""))
-                            },
-                            enabled = state.activeWalletId != null,
-                        ) {
-                            Icon(
-                                imageVector = PrimalIcons.Copy,
-                                contentDescription = stringResource(
-                                    id = R.string.settings_developer_tools_wallet_id_copy,
-                                ),
-                            )
-                        }
                     },
                 )
 
@@ -188,7 +181,7 @@ private fun DeveloperToolsScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
                 PrimalFilledButton(
                     modifier = Modifier
@@ -223,7 +216,153 @@ private fun DeveloperToolsScreen(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Wallet section
+                SettingsItem(
+                    headlineText = stringResource(id = R.string.settings_developer_tools_wallet_picker_title),
+                    supportText = stringResource(id = R.string.settings_developer_tools_wallet_picker_description),
+                    trailingContent = {
+                        PrimalSwitch(
+                            checked = state.isWalletPickerEnabled,
+                            onCheckedChange = {
+                                eventPublisher(UiEvent.ToggleWalletPicker(enabled = it))
+                            },
+                        )
+                    },
+                    onClick = {
+                        eventPublisher(UiEvent.ToggleWalletPicker(enabled = !state.isWalletPickerEnabled))
+                    },
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                state.wallets.forEach { wallet ->
+                    WalletItem(
+                        wallet = wallet,
+                        onCopyWalletId = {
+                            clipboardManager.setText(AnnotatedString(wallet.walletId))
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.settings_developer_tools_wallet_id_copied),
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        },
+                        onCopySeedWords = {
+                            eventPublisher(UiEvent.CopySeedWords(walletId = wallet.walletId))
+                        },
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
             }
         },
     )
 }
+
+@Suppress("LongMethod")
+@Composable
+private fun WalletItem(
+    wallet: DevWalletInfo,
+    onCopyWalletId: () -> Unit,
+    onCopySeedWords: () -> Unit,
+) {
+    val numberFormat = remember { NumberFormat.getNumberInstance() }
+
+    val supportText = buildString {
+        if (!wallet.lightningAddress.isNullOrBlank()) {
+            append(wallet.lightningAddress)
+            append(" · ")
+        }
+        append(wallet.walletId.ellipsizeMiddle(size = 8))
+    }
+
+    ListItem(
+        headlineContent = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 4.dp),
+            ) {
+                Text(
+                    text = wallet.type.toDisplayName(),
+                    style = AppTheme.typography.bodyLarge,
+                    color = AppTheme.colorScheme.onPrimary,
+                )
+                if (wallet.balanceInSats != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "${numberFormat.format(wallet.balanceInSats)} ${
+                            stringResource(id = R.string.wallet_sats_suffix)
+                        }",
+                        style = AppTheme.typography.bodySmall,
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    )
+                }
+                if (wallet.isActive) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "ACTIVE",
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        style = AppTheme.typography.bodySmall,
+                        color = AppTheme.colorScheme.onPrimary,
+                        modifier = Modifier
+                            .padding(bottom = 2.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(AppTheme.colorScheme.primary)
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                            .padding(top = 3.dp),
+                    )
+                }
+            }
+        },
+        supportingContent = {
+            Text(
+                modifier = Modifier.padding(top = 4.dp),
+                text = supportText,
+                style = AppTheme.typography.bodySmall,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+            )
+        },
+        trailingContent = {
+            Row {
+                IconButton(onClick = onCopyWalletId) {
+                    Icon(
+                        modifier = Modifier.size(24.dp),
+                        imageVector = PrimalIcons.Copy,
+                        contentDescription = stringResource(
+                            id = R.string.settings_developer_tools_wallet_id_copy,
+                        ),
+                    )
+                }
+                if (wallet.type == WalletType.SPARK) {
+                    IconButton(onClick = onCopySeedWords) {
+                        Icon(
+                            imageVector = PrimalIcons.Key,
+                            contentDescription = stringResource(
+                                id = R.string.settings_developer_tools_seed_words_copy,
+                            ),
+                        )
+                    }
+                }
+            }
+        },
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.colorScheme.surfaceVariant,
+        ),
+    )
+}
+
+private fun WalletType.toDisplayName(): String =
+    when (this) {
+        WalletType.PRIMAL -> "Primal Wallet"
+        WalletType.SPARK -> "Spark Wallet"
+        WalletType.NWC -> "NWC Wallet"
+    }

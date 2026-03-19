@@ -12,6 +12,8 @@ interface SparkWalletAccountRepository {
 
     suspend fun findPersistedWalletId(userId: String): String?
 
+    suspend fun findAllPersistedWalletIds(userId: String): List<String>
+
     suspend fun getPersistedSeedWords(walletId: String): Result<List<String>>
 
     suspend fun persistSeedWords(
