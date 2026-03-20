@@ -20,10 +20,11 @@ interface ZapEnrichmentTrackerDao {
             AND t.txKind IN ('LIGHTNING', 'SPARK')
             AND t.invoice IS NOT NULL
             AND t.walletType != 'PRIMAL'
+            AND (t.createdAt >= :minCreatedAt OR t.walletType = 'NWC')
         ORDER BY t.createdAt DESC
         """,
     )
-    suspend fun findUntrackedCandidates(): List<UntrackedCandidate>
+    suspend fun findUntrackedCandidates(minCreatedAt: Long): List<UntrackedCandidate>
 
     @Query(
         """

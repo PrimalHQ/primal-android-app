@@ -21,6 +21,7 @@ import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.wallet.TxType
 import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
+import net.primal.wallet.data.local.ENRICHMENT_CUTOFF_EPOCH_SECONDS
 import net.primal.wallet.data.local.TxKind
 import net.primal.wallet.data.local.dao.EnrichmentAttemptEntry
 import net.primal.wallet.data.local.dao.EnrichmentAttemptVerdict
@@ -58,7 +59,9 @@ internal class ZapEnrichmentProcessor(
     }
 
     private suspend fun discoverCandidates() {
-        val candidates = walletDatabase.zapEnrichmentTracker().findUntrackedCandidates()
+        val candidates = walletDatabase.zapEnrichmentTracker().findUntrackedCandidates(
+            minCreatedAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS,
+        )
         if (candidates.isEmpty()) return
 
         val trackers = candidates.map { candidate ->
