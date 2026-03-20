@@ -33,4 +33,6 @@ interface SparkWalletAccountRepository {
     suspend fun deleteSparkWalletByUserId(userId: String): Result<String>
 
     suspend fun isPrimalTxsMigrationCompleted(walletId: String): Boolean
+
+    suspend fun ensureWalletInfoExists(userId: String, walletId: String)
 }
