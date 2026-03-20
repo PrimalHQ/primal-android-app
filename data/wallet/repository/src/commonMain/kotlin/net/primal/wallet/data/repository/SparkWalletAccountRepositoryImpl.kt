@@ -160,6 +160,19 @@ internal class SparkWalletAccountRepositoryImpl(
             // null = new user (no migration needed), true = fully migrated, false = in progress
             sparkWalletData?.primalTxsMigrated != false
         }
+
+    override suspend fun ensureWalletInfoExists(userId: String, walletId: String) {
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet().insertOrIgnoreWalletInfo(
+                WalletInfo(
+                    walletId = walletId,
+                    userId = userId,
+                    lightningAddress = null,
+                    type = WalletType.SPARK,
+                ),
+            )
+        }
+    }
 }
 
 private fun String.toSeedWordList(): List<String> = split(" ").filter { it.isNotBlank() }

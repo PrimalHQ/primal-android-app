@@ -2,6 +2,7 @@ package net.primal.domain.usecase
 
 import net.primal.core.utils.Result
 import net.primal.core.utils.fold
+import net.primal.core.utils.onFailure
 import net.primal.core.utils.runCatching
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
@@ -33,6 +34,9 @@ class RestoreSparkWalletUseCase(
             )
             sparkWalletAccountRepository.registerSparkWallet(userId = userId, walletId = newWalletId)
             sparkWalletAccountRepository.fetchWalletAccountInfo(userId = userId, walletId = newWalletId)
+                .onFailure {
+                    sparkWalletAccountRepository.ensureWalletInfoExists(userId = userId, walletId = newWalletId)
+                }
             sparkWalletAccountRepository.markWalletAsBackedUp(walletId = newWalletId)
             walletAccountRepository.setActiveWallet(userId = userId, walletId = newWalletId)
 
