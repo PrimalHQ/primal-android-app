@@ -35,8 +35,7 @@ interface ZapEnrichmentTrackerDao {
                 (attempts = 0) OR
                 (attempts = 1 AND lastAttemptAt <= :threshold1) OR
                 (attempts = 2 AND lastAttemptAt <= :threshold2) OR
-                (attempts = 3 AND lastAttemptAt <= :threshold3) OR
-                (attempts = 4 AND lastAttemptAt <= :threshold4)
+                (attempts = 3 AND lastAttemptAt <= :threshold3)
             )
         ORDER BY transactionCreatedAt DESC
         LIMIT :limit
@@ -47,7 +46,6 @@ interface ZapEnrichmentTrackerDao {
         threshold1: Long,
         threshold2: Long,
         threshold3: Long,
-        threshold4: Long,
         limit: Int,
     ): List<ZapEnrichmentTracker>
 
