@@ -21,18 +21,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
 import net.primal.android.core.compose.ColumnWithBackground
 import net.primal.android.core.compose.MAX_COMPONENT_WIDTH
+import net.primal.android.core.compose.PrimalDarkButtonColor
+import net.primal.android.core.compose.PrimalDarkTextColor
+import net.primal.android.core.compose.PrimalGradientAlpha
+import net.primal.android.core.compose.PrimalGradientBackgroundColor
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.primalGradientBrush
 import net.primal.android.scanner.QrCodeScanner
 import net.primal.android.settings.wallet.nwc.scan.NwcQrCodeScannerContract.UiEvent
 import net.primal.android.theme.AppTheme
@@ -60,15 +64,19 @@ private fun NwcQrCodeScannerScreen(onClose: () -> Unit, eventPublisher: (UiEvent
         isClosing = true
         onClose()
     }
-    ColumnWithBackground(backgroundPainter = painterResource(id = R.drawable.profile_qrcode_background)) {
+    ColumnWithBackground(
+        backgroundBrushProvider = ::primalGradientBrush,
+        brushAlpha = PrimalGradientAlpha,
+        backgroundColor = PrimalGradientBackgroundColor,
+    ) {
         PrimalScaffold(
             containerColor = Color.Transparent,
             topBar = {
                 PrimalTopAppBar(
                     title = stringResource(id = R.string.settings_wallet_nwc_qr_code_scan_title),
-                    textColor = Color.White,
+                    textColor = PrimalDarkTextColor,
                     navigationIcon = PrimalIcons.ArrowBack,
-                    navigationIconTintColor = Color.White,
+                    navigationIconTintColor = PrimalDarkTextColor,
                     onNavigationIconClick = {
                         isClosing = true
                         onClose()
@@ -92,7 +100,7 @@ private fun NwcQrCodeScannerScreen(onClose: () -> Unit, eventPublisher: (UiEvent
                         Text(
                             modifier = Modifier.padding(horizontal = 64.dp),
                             text = stringResource(id = R.string.settings_wallet_nwc_qr_code_scan_hint),
-                            color = Color.White,
+                            color = PrimalDarkTextColor.copy(alpha = 0.8f),
                             textAlign = TextAlign.Center,
                             style = AppTheme.typography.bodyLarge,
                         )
@@ -111,8 +119,8 @@ private fun NwcQrCodeScannerScreen(onClose: () -> Unit, eventPublisher: (UiEvent
                             .fillMaxWidth()
                             .padding(bottom = 32.dp),
                         text = stringResource(id = R.string.settings_wallet_nwc_qr_code_scan_paste),
-                        containerColor = profileQrCodeButtonBackgroundColor,
-                        disabledContainerColor = profileQrCodeButtonBackgroundColor,
+                        containerColor = PrimalDarkButtonColor,
+                        disabledContainerColor = PrimalDarkButtonColor.copy(alpha = 0.20f),
                         contentColor = Color.White,
                         onClick = {
                             val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
@@ -124,5 +132,3 @@ private fun NwcQrCodeScannerScreen(onClose: () -> Unit, eventPublisher: (UiEvent
         )
     }
 }
-
-val profileQrCodeButtonBackgroundColor = Color(0xFF4B002D)
