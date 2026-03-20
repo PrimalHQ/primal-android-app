@@ -35,6 +35,7 @@ import net.primal.domain.wallet.TxState
 import net.primal.domain.wallet.TxType
 import net.primal.domain.wallet.WalletType
 import net.primal.shared.data.local.encryption.asEncryptable
+import net.primal.wallet.data.local.ENRICHMENT_CUTOFF_EPOCH_SECONDS
 import net.primal.wallet.data.local.TxKind
 import net.primal.wallet.data.local.dao.EnrichmentAttemptEntry
 import net.primal.wallet.data.local.dao.EnrichmentAttemptVerdict
@@ -42,6 +43,7 @@ import net.primal.wallet.data.local.dao.WalletTransactionData
 import net.primal.wallet.data.local.dao.ZapEnrichmentStatus
 import net.primal.wallet.data.local.dao.ZapEnrichmentTracker
 import net.primal.wallet.data.local.db.WalletDatabase
+import net.primal.wallet.data.local.isEligibleForZapEnrichment
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -166,6 +168,102 @@ class ZapEnrichmentProcessorTest {
             processor.processEnrichment()
             val trackersAfterSecond = allPendingTrackers()
             trackersAfterSecond shouldHaveSize 1
+        }
+
+    @Test
+    fun discoverySkipsSparkTransactionsBeforeCutoffDate() =
+        runTest {
+            insertTransaction(
+                txKind = TxKind.LIGHTNING,
+                invoice = "lnbc-old-spark",
+                walletType = WalletType.SPARK,
+                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS - 1,
+            )
+
+            processor.processEnrichment()
+
+            val trackers = allPendingTrackers()
+            trackers.shouldBeEmpty()
+        }
+
+    @Test
+    fun discoveryIncludesSparkTransactionsAtCutoffDate() =
+        runTest {
+            insertTransaction(
+                txKind = TxKind.LIGHTNING,
+                invoice = "lnbc-boundary-spark",
+                walletType = WalletType.SPARK,
+                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS,
+            )
+
+            processor.processEnrichment()
+
+            val trackers = allPendingTrackers()
+            trackers shouldHaveSize 1
+        }
+
+    @Test
+    fun discoveryIncludesSparkTransactionsAfterCutoffDate() =
+        runTest {
+            insertTransaction(
+                txKind = TxKind.LIGHTNING,
+                invoice = "lnbc-new-spark",
+                walletType = WalletType.SPARK,
+                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS + 1,
+            )
+
+            processor.processEnrichment()
+
+            val trackers = allPendingTrackers()
+            trackers shouldHaveSize 1
+        }
+
+    @Test
+    fun discoveryIncludesNwcTransactionsBeforeCutoffDate() =
+        runTest {
+            insertTransaction(
+                txKind = TxKind.LIGHTNING,
+                invoice = "lnbc-old-nwc",
+                walletType = WalletType.NWC,
+                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS - 1,
+            )
+
+            processor.processEnrichment()
+
+            val trackers = allPendingTrackers()
+            trackers shouldHaveSize 1
+        }
+
+    @Test
+    fun discoveryIncludesNwcTransactionsAfterCutoffDate() =
+        runTest {
+            insertTransaction(
+                txKind = TxKind.LIGHTNING,
+                invoice = "lnbc-new-nwc",
+                walletType = WalletType.NWC,
+                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS + 1,
+            )
+
+            processor.processEnrichment()
+
+            val trackers = allPendingTrackers()
+            trackers shouldHaveSize 1
+        }
+
+    @Test
+    fun discoverySkipsPrimalWalletTransactionsAfterCutoffDate() =
+        runTest {
+            insertTransaction(
+                txKind = TxKind.LIGHTNING,
+                invoice = "lnbc-primal-post-cutoff",
+                walletType = WalletType.PRIMAL,
+                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS + 1,
+            )
+
+            processor.processEnrichment()
+
+            val trackers = allPendingTrackers()
+            trackers.shouldBeEmpty()
         }
 
     @Test
@@ -564,6 +662,45 @@ class ZapEnrichmentProcessorTest {
             fakeEventRepository.getZapRequestsCallCount shouldBe 0
         }
 
+    @Test
+    fun enrichTransactionRejectsPreCutoffSparkTransaction() =
+        runTest {
+            val invoice = "lnbc-single-old-spark"
+            val txId = insertTransaction(
+                txKind = TxKind.LIGHTNING,
+                invoice = invoice,
+                walletType = WalletType.SPARK,
+                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS - 1,
+            )
+            val zapRequest = buildZapRequestEvent()
+            fakeEventRepository.zapRequestsToReturn = mapOf(invoice to zapRequest)
+
+            val result = processor.enrichTransaction(txId)
+
+            result shouldBe false
+            fakeEventRepository.getZapRequestsCallCount shouldBe 0
+        }
+
+    @Test
+    fun enrichTransactionAcceptsPreCutoffNwcTransaction() =
+        runTest {
+            val invoice = "lnbc-single-old-nwc"
+            val txId = insertTransaction(
+                txKind = TxKind.LIGHTNING,
+                invoice = invoice,
+                walletType = WalletType.NWC,
+                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS - 1,
+            )
+            val zapRequest = buildZapRequestEvent()
+            fakeEventRepository.zapRequestsToReturn = mapOf(invoice to zapRequest)
+
+            val result = processor.enrichTransaction(txId)
+
+            result shouldBe true
+            val tx = database.walletTransactions().findTransactionById(txId)!!
+            tx.txKind shouldBe TxKind.ZAP
+        }
+
     // endregion
 
     // region Attempt history tests
@@ -673,6 +810,62 @@ class ZapEnrichmentProcessorTest {
 
     // endregion
 
+    // region isEligibleForZapEnrichment tests
+
+    @Test
+    fun isEligibleReturnsFalseForPreCutoffSparkTransaction() =
+        runTest {
+            val txId = insertTransaction(
+                txKind = TxKind.LIGHTNING,
+                invoice = "lnbc-elig-old-spark",
+                walletType = WalletType.SPARK,
+                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS - 1,
+            )
+            val tx = database.walletTransactions().findTransactionById(txId)!!
+            tx.isEligibleForZapEnrichment() shouldBe false
+        }
+
+    @Test
+    fun isEligibleReturnsTrueForPostCutoffSparkTransaction() =
+        runTest {
+            val txId = insertTransaction(
+                txKind = TxKind.LIGHTNING,
+                invoice = "lnbc-elig-new-spark",
+                walletType = WalletType.SPARK,
+                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS + 1,
+            )
+            val tx = database.walletTransactions().findTransactionById(txId)!!
+            tx.isEligibleForZapEnrichment() shouldBe true
+        }
+
+    @Test
+    fun isEligibleReturnsTrueForPreCutoffNwcTransaction() =
+        runTest {
+            val txId = insertTransaction(
+                txKind = TxKind.LIGHTNING,
+                invoice = "lnbc-elig-old-nwc",
+                walletType = WalletType.NWC,
+                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS - 1,
+            )
+            val tx = database.walletTransactions().findTransactionById(txId)!!
+            tx.isEligibleForZapEnrichment() shouldBe true
+        }
+
+    @Test
+    fun isEligibleReturnsFalseForPrimalTransaction() =
+        runTest {
+            val txId = insertTransaction(
+                txKind = TxKind.LIGHTNING,
+                invoice = "lnbc-elig-primal",
+                walletType = WalletType.PRIMAL,
+                createdAt = ENRICHMENT_CUTOFF_EPOCH_SECONDS + 1,
+            )
+            val tx = database.walletTransactions().findTransactionById(txId)!!
+            tx.isEligibleForZapEnrichment() shouldBe false
+        }
+
+    // endregion
+
     // region Helpers
 
     private suspend fun getAttemptHistory(transactionId: String): List<EnrichmentAttemptEntry> {
@@ -707,7 +900,7 @@ class ZapEnrichmentProcessorTest {
         invoice: String?,
         walletType: WalletType = WalletType.SPARK,
         txType: TxType = TxType.DEPOSIT,
-        createdAt: Long = 1000L,
+        createdAt: Long = ENRICHMENT_CUTOFF_EPOCH_SECONDS + 1000,
     ): String {
         val txId = UUID.randomUUID().toString()
         database.walletTransactions().upsertAll(
