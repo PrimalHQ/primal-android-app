@@ -882,7 +882,6 @@ class ZapEnrichmentProcessorTest {
             threshold1 = Long.MAX_VALUE,
             threshold2 = Long.MAX_VALUE,
             threshold3 = Long.MAX_VALUE,
-            threshold4 = Long.MAX_VALUE,
             limit = 100,
         )
     }

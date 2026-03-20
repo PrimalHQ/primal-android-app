@@ -3,8 +3,6 @@ package net.primal.wallet.data.handler
 import io.github.aakira.napier.Napier
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
@@ -80,10 +78,9 @@ internal class ZapEnrichmentProcessor(
         while (true) {
             val batch = walletDatabase.zapEnrichmentTracker().findEligiblePending(
                 maxAttempts = MAX_ATTEMPTS,
-                threshold1 = now - RETRY_DELAYS_SECONDS[1],
-                threshold2 = now - RETRY_DELAYS_SECONDS[2],
-                threshold3 = now - RETRY_DELAYS_SECONDS[3],
-                threshold4 = now - RETRY_DELAYS_SECONDS[4],
+                threshold1 = now - RETRY_DELAYS_SECONDS[0],
+                threshold2 = now - RETRY_DELAYS_SECONDS[1],
+                threshold3 = now - RETRY_DELAYS_SECONDS[2],
                 limit = BATCH_SIZE,
             )
             if (batch.isEmpty()) break
@@ -272,7 +269,7 @@ internal class ZapEnrichmentProcessor(
     }
 
     companion object {
-        internal const val MAX_ATTEMPTS = 5
+        internal const val MAX_ATTEMPTS = 4
         internal const val BATCH_SIZE = 25
         internal val BATCH_DELAY = 500.milliseconds
 
@@ -280,8 +277,6 @@ internal class ZapEnrichmentProcessor(
             30.seconds,
             1.minutes,
             10.minutes,
-            6.hours,
-            1.days,
         ).map { it.inWholeSeconds }
     }
 }
