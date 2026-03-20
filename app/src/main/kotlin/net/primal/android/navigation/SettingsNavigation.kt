@@ -355,6 +355,7 @@ private fun NavGraphBuilder.scanNwcUrl(route: String, navController: NavControll
         popExitTransition = { primalSlideOutHorizontallyToEnd },
     ) {
         val viewModel = hiltViewModel<NwcQrCodeScannerViewModel>()
+        ApplyEdgeToEdge(isDarkTheme = false)
         LockToOrientationPortrait()
         NwcQrCodeScannerScreen(
             viewModel = viewModel,
