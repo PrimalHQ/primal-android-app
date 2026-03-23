@@ -21,3 +21,5 @@
 - Implement rendering wallets in the dev tools
 - Fixed poll stats sometimes missing on the poll votes screen
 - Fixed card background color mismatch in transaction details
+- Show the keyboard button when camera permission is denied on the scan screens (#987)
+- Fixed zap votes show up as top zaps
