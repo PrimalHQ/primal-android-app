@@ -26,8 +26,8 @@ class PrimalWalletNostrZapper(
                     userId = data.zapperUserId,
                     body = WithdrawRequestBody(
                         subWallet = SubWallet.Open,
-                        targetLnUrl = data.recipientLnUrlDecoded.urlToLnUrlHrp(),
-                        targetPubKey = data.recipientUserId,
+                        targetLnUrl = data.target.recipientLnUrlDecoded.urlToLnUrlHrp(),
+                        targetPubKey = data.target.recipientUserId,
                         amountBtc = data.zapAmountInSats.toBtc().formatAsString(),
                         noteRecipient = data.zapComment.ifBlank { null },
                         noteSelf = data.zapComment.ifBlank { null },

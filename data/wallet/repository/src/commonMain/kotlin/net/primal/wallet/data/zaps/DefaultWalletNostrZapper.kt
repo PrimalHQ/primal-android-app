@@ -9,6 +9,7 @@ import net.primal.domain.nostr.zaps.NostrZapper
 import net.primal.domain.nostr.zaps.ZapError
 import net.primal.domain.nostr.zaps.ZapRequestData
 import net.primal.domain.nostr.zaps.ZapResult
+import net.primal.domain.nostr.zaps.ZapTarget
 import net.primal.domain.wallet.TxRequest
 import net.primal.domain.wallet.WalletRepository
 
@@ -20,7 +21,7 @@ class DefaultWalletNostrZapper(
 
     override suspend fun zap(walletId: String, data: ZapRequestData): ZapResult {
         val zapPayRequest = runCatching {
-            lightningPayHelper.fetchPayRequest(data.recipientLnUrlDecoded)
+            lightningPayHelper.fetchPayRequest(data.target.recipientLnUrlDecoded)
         }.getOrElse {
             Napier.e(it) { "FailedToFetchZapPayRequest." }
             return ZapResult.Failure(error = ZapError.FailedToFetchZapPayRequest(cause = it))
@@ -38,7 +39,9 @@ class DefaultWalletNostrZapper(
             return ZapResult.Failure(error = ZapError.FailedToFetchZapInvoice(cause = it))
         }
 
-        runCatching { eventRepository?.saveZapRequest(invoice.invoice, data.userZapRequestEvent) }
+        if (data.target !is ZapTarget.PollEvent) {
+            runCatching { eventRepository?.saveZapRequest(invoice.invoice, data.userZapRequestEvent) }
+        }
 
         runCatching {
             walletRepository.pay(

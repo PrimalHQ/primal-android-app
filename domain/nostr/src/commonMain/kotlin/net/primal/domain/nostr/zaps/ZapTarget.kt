@@ -2,6 +2,7 @@ package net.primal.domain.nostr.zaps
 
 import kotlinx.serialization.json.JsonArray
 import net.primal.domain.nostr.asEventIdTag
+import net.primal.domain.nostr.asPollOptionTag
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.asReplaceableEventTag
 
@@ -35,6 +36,16 @@ sealed class ZapTarget(
         recipientUserId = recipientUserId,
         recipientLnUrlDecoded = recipientLnUrlDecoded,
     )
+
+    data class PollEvent(
+        val eventId: String,
+        val optionId: String,
+        override val recipientUserId: String,
+        override val recipientLnUrlDecoded: String,
+    ) : ZapTarget(
+        recipientUserId = recipientUserId,
+        recipientLnUrlDecoded = recipientLnUrlDecoded,
+    )
 }
 
 fun ZapTarget.toTags(): List<JsonArray> {
@@ -50,6 +61,11 @@ fun ZapTarget.toTags(): List<JsonArray> {
         is ZapTarget.ReplaceableEvent -> {
             tags.add(aTag.asReplaceableEventTag())
             tags.add(eventId.asEventIdTag())
+        }
+
+        is ZapTarget.PollEvent -> {
+            tags.add(eventId.asEventIdTag())
+            tags.add(optionId.asPollOptionTag())
         }
     }
 

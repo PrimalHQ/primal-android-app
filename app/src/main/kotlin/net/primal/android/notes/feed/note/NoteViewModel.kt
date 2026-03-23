@@ -37,7 +37,6 @@ import net.primal.domain.events.EventRelayHintsRepository
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.PublicBookmarksNotFoundException
-import net.primal.domain.nostr.asPollOptionTag
 import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
 import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.nostr.publisher.MissingRelaysException
@@ -574,12 +573,12 @@ class NoteViewModel @AssistedInject constructor(
                 walletId = walletId,
                 comment = action.zapComment ?: "",
                 amountInSats = action.zapAmount.toULong(),
-                target = ZapTarget.Event(
+                target = ZapTarget.PollEvent(
                     eventId = action.postId,
+                    optionId = action.optionId,
                     recipientUserId = zapRecipientId,
                     recipientLnUrlDecoded = lnUrlDecoded,
                 ),
-                optionalTags = listOf(action.optionId.asPollOptionTag()),
             )
 
             if (result is ZapResult.Failure) {
