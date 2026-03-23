@@ -6,9 +6,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +34,7 @@ import androidx.core.content.ContextCompat
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import net.primal.android.R
+import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Keyboard
@@ -68,19 +73,44 @@ fun ScanCameraStage(
             onEnterCodeClick = onEnterCodeClick,
         )
     } else {
-        MissingCameraPermissionContent(
+        Box(
             modifier = modifier
                 .fillMaxSize()
                 .background(color = AppTheme.colorScheme.background),
-            colors = missingCameraPermissionColors(
-                textColor = AppTheme.colorScheme.onSurface,
-                iconContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
-                iconContentColor = AppTheme.colorScheme.onSurface,
-            ),
-            onPermissionChange = { allowed ->
-                hasCameraPermission = allowed
-            },
-        )
+        ) {
+            MissingCameraPermissionContent(
+                modifier = Modifier.fillMaxSize(),
+                colors = missingCameraPermissionColors(
+                    textColor = AppTheme.colorScheme.onSurface,
+                    iconContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                    iconContentColor = AppTheme.colorScheme.onSurface,
+                ),
+                onPermissionChange = { allowed ->
+                    hasCameraPermission = allowed
+                },
+            )
+            PrimalFilledButton(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 32.dp)
+                    .height(40.dp),
+                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                contentColor = AppTheme.colorScheme.onSurface,
+                onClick = onEnterCodeClick,
+            ) {
+                Icon(
+                    modifier = Modifier.size(18.dp),
+                    imageVector = PrimalIcons.Keyboard,
+                    contentDescription = null,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(id = R.string.scan_code_use_keyboard_button),
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 15.sp,
+                )
+            }
+        }
     }
 }
 
