@@ -127,7 +127,8 @@ internal class PollVotersRemoteMediator(
             .filter { it.kind == NostrEventKind.Poll.value || it.kind == NostrEventKind.ZapPoll.value }
             .mapNotNullAsPollDataPO()
         val statsMap = listOfNotNull(response.pollStats).parseAndMapPrimalPollStats()
-        val pollDataWithStats = pollData.applyPollStats(statsMap)
+        val pollDataWithStats = pollData.filter { it.postId in statsMap }.applyPollStats(statsMap)
+        val pollDataWithoutStats = pollData.filter { it.postId !in statsMap }
 
         val remoteKeys = buildRemoteKeys(allVotes = allVotes, paging = response.paging)
 
@@ -140,6 +141,9 @@ internal class PollVotersRemoteMediator(
                 database.profiles().insertOrUpdateAll(data = profiles)
                 if (pollDataWithStats.isNotEmpty()) {
                     database.polls().upsertAll(data = pollDataWithStats)
+                }
+                if (pollDataWithoutStats.isNotEmpty()) {
+                    database.polls().insertAllOrIgnore(data = pollDataWithoutStats)
                 }
                 database.pollVotes().upsertAll(data = allVotes)
                 if (remoteKeys.isNotEmpty()) {
