@@ -8,7 +8,7 @@ data class PollVotesResponse(
     val profiles: List<NostrEvent> = emptyList(),
     val pollResponses: List<NostrEvent> = emptyList(),
     val zaps: List<NostrEvent> = emptyList(),
-    val pollStats: PrimalEvent? = null,
+    val pollStats: List<PrimalEvent> = emptyList(),
     val cdnResources: List<PrimalEvent> = emptyList(),
     val primalUserNames: PrimalEvent? = null,
     val primalLegendProfiles: PrimalEvent? = null,

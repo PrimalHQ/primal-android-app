@@ -25,7 +25,7 @@ internal class PollsApiImpl(
             profiles = queryResult.filterNostrEvents(NostrEventKind.Metadata),
             pollResponses = queryResult.filterNostrEvents(NostrEventKind.PollResponse),
             zaps = queryResult.filterNostrEvents(NostrEventKind.Zap),
-            pollStats = queryResult.findPrimalEvent(NostrEventKind.PrimalPollStats),
+            pollStats = queryResult.filterPrimalEvents(NostrEventKind.PrimalPollStats),
             cdnResources = queryResult.filterPrimalEvents(NostrEventKind.PrimalCdnResource),
             primalUserNames = queryResult.findPrimalEvent(NostrEventKind.PrimalUserNames),
             primalLegendProfiles = queryResult.findPrimalEvent(NostrEventKind.PrimalLegendProfiles),
