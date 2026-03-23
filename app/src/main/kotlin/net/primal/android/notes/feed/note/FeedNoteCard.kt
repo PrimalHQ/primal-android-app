@@ -415,6 +415,7 @@ private fun FeedNoteCard(
                     modifier = Modifier
                         .shareableGraphics(
                             graphicsLayer = graphicsLayer,
+                            backgroundColor = colors.containerColor,
                             drawLineAboveAvatar = drawLineAboveAvatar,
                             drawLineBelowAvatar = drawLineBelowAvatar,
                             outlineColor = AppTheme.colorScheme.outline,
