@@ -19,3 +19,5 @@
 - Fixed missing zaps in the transactions list
 - Fixed wallet upgrade notice shown after successful migration (#972)
 - Implement rendering wallets in the dev tools
+- Fixed poll stats sometimes missing on the poll votes screen
+- Fixed card background color mismatch in transaction details
