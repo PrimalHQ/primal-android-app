@@ -242,8 +242,8 @@ class EventRepositoryImpl(
                             ?.decodeFromJsonStringOrNull<Map<String, NostrEvent>>()
                             ?: throw IllegalArgumentException("failed to parse invoices map.")
 
-                        database.eventZaps()
-                            .upsertAll(data = receiptsMap.values.toList().mapAsEventZapDO(profilesMap = emptyMap()))
+                        val zapReceipts = receiptsMap.values.toList().mapAsEventZapDO(profilesMap = emptyMap())
+                        database.eventZaps().upsertAll(data = zapReceipts)
 
                         receiptsMap.entries.mapNotNull { (invoice, receipt) ->
                             receipt.extractZapRequestOrNull()?.let { invoice to it }
@@ -266,6 +266,7 @@ class EventRepositoryImpl(
                 ?: LnInvoiceUtils.getAmountInSatsOrNull(invoice)
                 ?: return@withContext
 
+            val zapSender = database.profiles().findProfileData(profileId = senderId)
             val data = EventZapPO(
                 eventId = eventId,
                 zapSenderId = senderId,
@@ -276,6 +277,11 @@ class EventRepositoryImpl(
                 message = zapRequestEvent.content,
                 invoice = invoice,
                 rawNostrEvent = zapRequestEvent.encodeToJsonString(),
+                zapSenderAvatarCdnImage = zapSender?.avatarCdnImage,
+                zapSenderHandle = zapSender?.handle,
+                zapSenderDisplayName = zapSender?.displayName,
+                zapSenderInternetIdentifier = zapSender?.internetIdentifier,
+                zapSenderPrimalLegendProfile = zapSender?.primalPremiumInfo?.legendProfile,
             )
             database.eventZaps().upsertAll(data = listOf(data))
         }
