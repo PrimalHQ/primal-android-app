@@ -22,4 +22,4 @@
 - Fixed poll stats sometimes missing on the poll votes screen
 - Fixed card background color mismatch in transaction details
 - Show the keyboard button when camera permission is denied on the scan screens (#987)
-- Fixed zap votes show up as top zaps
+- Fixed zaps showing the default avatar sometimes (#988)
