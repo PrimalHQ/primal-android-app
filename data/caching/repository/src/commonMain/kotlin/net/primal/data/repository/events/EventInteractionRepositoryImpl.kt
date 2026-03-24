@@ -161,7 +161,8 @@ class EventInteractionRepositoryImpl(
             walletId = walletId,
             data = ZapRequestData(
                 zapperUserId = userId,
-                target = target,
+                recipientUserId = target.recipientUserId,
+                recipientLnUrlDecoded = target.recipientLnUrlDecoded,
                 zapAmountInSats = amountInSats,
                 zapComment = comment,
                 userZapRequestEvent = zapRequestEvent,
@@ -196,8 +197,6 @@ class EventInteractionRepositoryImpl(
                 eventAuthorId = this.recipientUserId,
                 database = database,
             )
-
-            is ZapTarget.PollEvent -> null
 
             is ZapTarget.Profile -> null
         }
