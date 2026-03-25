@@ -1,6 +1,11 @@
 package net.primal.data.repository.factory
 
+import io.ktor.client.plugins.HttpTimeout
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
 import net.primal.core.caching.MediaCacher
+import net.primal.core.networking.factory.HttpClientFactory
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.utils.coroutines.createDispatcherProvider
 import net.primal.data.local.db.PrimalDatabase
@@ -21,6 +26,7 @@ import net.primal.data.repository.importer.CachingImportRepositoryImpl
 import net.primal.data.repository.messages.ChatRepositoryImpl
 import net.primal.data.repository.messages.processors.MessagesProcessor
 import net.primal.data.repository.mute.MutedItemRepositoryImpl
+import net.primal.data.repository.nip05.Nip05VerificationServiceImpl
 import net.primal.data.repository.notifications.NotificationRepositoryImpl
 import net.primal.data.repository.polls.PollsRepositoryImpl
 import net.primal.data.repository.profile.ProfileRepositoryImpl
@@ -43,6 +49,7 @@ import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.polls.PollsRepository
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.premium.PremiumBroadcastRepository
+import net.primal.domain.profile.Nip05VerificationService
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
@@ -224,10 +231,33 @@ abstract class CommonRepositoryFactory {
         )
     }
 
+    fun createNip05VerificationService(): Nip05VerificationService {
+        val nip05HttpClient = HttpClientFactory.createHttpClient {
+            followRedirects = false
+            install(ContentNegotiation) {
+                json(
+                    json = Json {
+                        ignoreUnknownKeys = true
+                        isLenient = true
+                    },
+                )
+            }
+            install(HttpTimeout) {
+                requestTimeoutMillis = 10_000
+                connectTimeoutMillis = 10_000
+            }
+        }
+        return Nip05VerificationServiceImpl(
+            httpClient = nip05HttpClient,
+            verificationDao = resolveCachingDatabase().nip05Verifications(),
+        )
+    }
+
     fun createProfileRepository(
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
         mediaCacher: MediaCacher? = null,
+        nip05VerificationService: Nip05VerificationService,
     ): ProfileRepository {
         return ProfileRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
@@ -236,6 +266,7 @@ abstract class CommonRepositoryFactory {
             wellKnownApi = PrimalApiServiceFactory.createUserWellKnownApi(),
             primalPublisher = primalPublisher,
             mediaCacher = mediaCacher,
+            nip05VerificationService = nip05VerificationService,
         )
     }
 
@@ -260,12 +291,18 @@ abstract class CommonRepositoryFactory {
     fun createStreamRepository(
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
+        nip05VerificationService: Nip05VerificationService,
         mediaCacher: MediaCacher? = null,
     ): StreamRepository =
         StreamRepositoryImpl(
             database = resolveCachingDatabase(),
             dispatcherProvider = dispatcherProvider,
-            profileRepository = createProfileRepository(cachingPrimalApiClient, primalPublisher, mediaCacher),
+            profileRepository = createProfileRepository(
+                cachingPrimalApiClient = cachingPrimalApiClient,
+                primalPublisher = primalPublisher,
+                mediaCacher = mediaCacher,
+                nip05VerificationService = nip05VerificationService,
+            ),
             liveStreamApi = PrimalApiServiceFactory.createStreamMonitor(cachingPrimalApiClient),
         )
 

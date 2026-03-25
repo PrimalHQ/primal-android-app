@@ -22,4 +22,5 @@ data class ProfileData(
     val primalName: String? = null,
     val primalPremiumInfo: PrimalPremiumInfo? = null,
     val blossoms: List<String> = emptyList(),
+    val nip05Status: Nip05VerificationStatus? = null,
 )

@@ -1,5 +1,6 @@
 package net.primal.data.repository.profile
 
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -33,6 +34,7 @@ import net.primal.domain.nostr.ReportType
 import net.primal.domain.nostr.asEventIdTag
 import net.primal.domain.nostr.asPubkeyTag
 import net.primal.domain.nostr.asReplaceableEventTag
+import net.primal.domain.profile.Nip05VerificationService
 import net.primal.domain.profile.ProfileData
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.profile.ProfileStats
@@ -46,6 +48,7 @@ class ProfileRepositoryImpl(
     private val wellKnownApi: UserWellKnownApi,
     private val primalPublisher: PrimalPublisher,
     private val mediaCacher: MediaCacher? = null,
+    private val nip05VerificationService: Nip05VerificationService,
 ) : ProfileRepository {
 
     override suspend fun fetchProfileId(primalName: String): String? =
@@ -55,16 +58,17 @@ class ProfileRepositoryImpl(
 
     override suspend fun findProfileDataOrNull(profileId: String) =
         withContext(dispatcherProvider.io()) {
-            database.profiles()
-                .findProfileData(profileId = profileId)
-                ?.asProfileDataDO()
+            val profile = database.profiles().findProfileData(profileId = profileId)
+            val nip05Data = profile?.let { database.nip05Verifications().find(it.ownerId) }
+            profile?.asProfileDataDO(nip05Status = nip05Data?.status)
         }
 
     override suspend fun findProfileDataByLightningAddress(lightningAddress: String) =
         withContext(dispatcherProvider.io()) {
-            database.profiles()
+            val profile = database.profiles()
                 .findProfileDataByLightningAddress(lightningAddress = lightningAddress)
-                ?.asProfileDataDO()
+            val nip05Data = profile?.let { database.nip05Verifications().find(it.ownerId) }
+            profile?.asProfileDataDO(nip05Status = nip05Data?.status)
         }
 
     override suspend fun findProfileStats(profileIds: List<String>): List<ProfileStats> =
@@ -75,18 +79,27 @@ class ProfileRepositoryImpl(
 
     override suspend fun findProfileData(profileIds: List<String>) =
         withContext(dispatcherProvider.io()) {
-            database.profiles().findProfileData(profileIds = profileIds)
-                .map { it.asProfileDataDO() }
+            val profiles = database.profiles().findProfileData(profileIds = profileIds)
+            val verifications = database.nip05Verifications().findAll(profileIds).associateBy { it.ownerId }
+            profiles.map { it.asProfileDataDO(nip05Status = verifications[it.ownerId]?.status) }
         }
 
     override fun observeProfileData(profileId: String) =
-        database.profiles().observeProfileData(profileId = profileId)
-            .filterNotNull()
-            .map { it.asProfileDataDO() }
+        combine(
+            database.profiles().observeProfileData(profileId = profileId).filterNotNull(),
+            database.nip05Verifications().observe(profileId),
+        ) { profilePO, nip05Data ->
+            profilePO.asProfileDataDO(nip05Status = nip05Data?.status)
+        }
 
     override fun observeProfileData(profileIds: List<String>) =
-        database.profiles().observeProfilesData(profileIds = profileIds)
-            .map { it.map { it.asProfileDataDO() } }
+        combine(
+            database.profiles().observeProfilesData(profileIds = profileIds),
+            database.nip05Verifications().observeAll(profileIds),
+        ) { profiles, verifications ->
+            val verificationsMap = verifications.associateBy { it.ownerId }
+            profiles.map { it.asProfileDataDO(nip05Status = verificationsMap[it.ownerId]?.status) }
+        }
 
     override fun observeProfileStats(profileId: String) =
         database.profileStats().observeProfileStats(profileId = profileId)
@@ -162,6 +175,13 @@ class ProfileRepositoryImpl(
                 if (streamData.isNotEmpty()) {
                     database.streams().upsertStreamData(data = streamData)
                 }
+            }
+
+            if (profileMetadata?.internetIdentifier != null) {
+                nip05VerificationService.verifyIfNeeded(
+                    pubkey = profileId,
+                    internetIdentifier = profileMetadata.internetIdentifier!!,
+                )
             }
 
             profileMetadata?.asProfileDataDO()

@@ -20,6 +20,8 @@ import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.bookmarks.PublicBookmarksRepository
 import net.primal.domain.mutes.MutedItemRepository
 import net.primal.domain.nostr.cryptography.utils.unwrapOrThrow
+import net.primal.domain.profile.Nip05VerificationService
+import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.usecase.EnsurePrimalWalletExistsUseCase
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.WalletRepository
@@ -39,6 +41,8 @@ class UserDataUpdater @AssistedInject constructor(
     private val mutedItemRepository: MutedItemRepository,
     private val nostrNotary: NostrNotary,
     private val pushNotificationsTokenUpdater: PushNotificationsTokenUpdater,
+    private val profileRepository: ProfileRepository,
+    private val nip05VerificationService: Nip05VerificationService,
 ) : Updater() {
 
     override suspend fun doUpdate(): Result<Unit> {
@@ -64,6 +68,15 @@ class UserDataUpdater @AssistedInject constructor(
         runCatching { premiumRepository.fetchMembershipStatus(userId = userId) }
         runCatching { relayRepository.fetchAndUpdateUserRelays(userId = userId) }
         runCatching { userRepository.fetchAndUpdateUserAccount(userId = userId) }
+        runCatching {
+            val profile = profileRepository.findProfileDataOrNull(profileId = userId)
+            profile?.internetIdentifier?.let { identifier ->
+                nip05VerificationService.verifyEagerly(
+                    pubkey = userId,
+                    internetIdentifier = identifier,
+                )
+            }
+        }
         runCatching { bookmarksRepository.fetchAndPersistBookmarks(userId = userId) }
         runCatching { ensurePrimalWalletExistsUseCase.invoke(userId = userId) }
         runCatching { pushNotificationsTokenUpdater.updateTokenForAllUsers() }

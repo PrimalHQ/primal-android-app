@@ -9,6 +9,7 @@ import net.primal.data.local.dao.events.EventUri
 import net.primal.data.local.dao.events.EventUriNostr
 import net.primal.data.local.dao.events.EventZap
 import net.primal.data.local.dao.polls.PollData
+import net.primal.data.local.dao.profiles.Nip05VerificationData
 import net.primal.data.local.dao.profiles.ProfileData
 import net.primal.data.local.dao.streams.StreamData
 
@@ -34,6 +35,12 @@ data class FeedPost(
         parentColumn = "authorId",
     )
     val author: ProfileData? = null,
+
+    @Relation(
+        entityColumn = "ownerId",
+        parentColumn = "authorId",
+    )
+    val authorNip05Verification: Nip05VerificationData? = null,
 
     @Relation(
         entityColumn = "eventId",
