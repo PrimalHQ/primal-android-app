@@ -3,7 +3,8 @@ package net.primal.android.auth.onboarding.account
 enum class OnboardingStep(val index: Int) {
     Details(index = 0),
     FollowPacks(index = 1),
-    Preview(index = 2),
+    ImportFollows(index = 2),
+    Preview(index = 3),
     ;
 
     companion object {

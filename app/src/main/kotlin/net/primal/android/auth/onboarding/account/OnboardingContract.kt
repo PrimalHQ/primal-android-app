@@ -39,6 +39,7 @@ interface OnboardingContract {
         data object RequestNextStep : UiEvent()
         data object RequestPreviousStep : UiEvent()
         data object DismissError : UiEvent()
+        data class ImportedFollowsApplied(val userIds: Set<String>) : UiEvent()
     }
 
     data class ScreenCallbacks(
