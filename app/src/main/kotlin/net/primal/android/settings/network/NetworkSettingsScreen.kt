@@ -48,6 +48,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.settings.DecoratedSettingsOutlinedTextField
 import net.primal.android.core.compose.settings.SettingsItem
+import net.primal.android.namecoin.ui.NamecoinSettingsSection
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -194,6 +195,26 @@ private fun NetworkLazyColumn(
                 eventsPublisher(NetworkSettingsContract.UiEvent.UpdateCachingProxyFlag(enabled = enabled))
             },
         )
+
+        item { PrimalDivider() }
+
+        item {
+            NamecoinSettingsSection(
+                settings = state.namecoinSettings,
+                onToggleEnabled = { enabled ->
+                    eventsPublisher(NetworkSettingsContract.UiEvent.NamecoinToggleEnabled(enabled = enabled))
+                },
+                onAddServer = { server ->
+                    eventsPublisher(NetworkSettingsContract.UiEvent.NamecoinAddServer(server = server))
+                },
+                onRemoveServer = { server ->
+                    eventsPublisher(NetworkSettingsContract.UiEvent.NamecoinRemoveServer(server = server))
+                },
+                onReset = {
+                    eventsPublisher(NetworkSettingsContract.UiEvent.NamecoinResetServers)
+                },
+            )
+        }
 
         item { Spacer(modifier = Modifier.height(32.dp)) }
     }

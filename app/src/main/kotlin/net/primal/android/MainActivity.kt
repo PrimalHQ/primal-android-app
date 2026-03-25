@@ -23,6 +23,8 @@ import net.primal.android.core.activity.PrimalActivity
 import net.primal.android.navigation.PrimalAppNavigation
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.android.nostr.notary.NostrNotary.NotarySideEffect
+import net.primal.android.namecoin.NamecoinNameService
+import net.primal.android.namecoin.ui.LocalNamecoinNameService
 import net.primal.android.scanner.analysis.QrCodeResultDecoder
 import net.primal.android.signer.client.launchSignEvent
 import net.primal.android.signer.client.rememberAmberSignerLauncher
@@ -31,6 +33,9 @@ import net.primal.android.signer.client.rememberAmberSignerLauncher
 class MainActivity : PrimalActivity() {
     @Inject
     lateinit var nostrNotary: NostrNotary
+
+    @Inject
+    lateinit var namecoinNameService: NamecoinNameService
 
     @Inject
     lateinit var qrCodeResultDecoder: QrCodeResultDecoder
@@ -81,7 +86,10 @@ class MainActivity : PrimalActivity() {
             }
 
             ConfigureActivity { isLoggedIn ->
-                CompositionLocalProvider(LocalQrCodeDecoder provides qrCodeResultDecoder) {
+                CompositionLocalProvider(
+                    LocalQrCodeDecoder provides qrCodeResultDecoder,
+                    LocalNamecoinNameService provides namecoinNameService,
+                ) {
                     PrimalAppNavigation(
                         navController = navController,
                         startDestination = if (isLoggedIn) "home" else "welcome",
