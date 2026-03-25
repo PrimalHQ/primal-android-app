@@ -16,12 +16,14 @@ import net.primal.android.drawer.multiaccount.model.asUserAccountUi
 import net.primal.android.user.accounts.UserAccountsStore
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
+import net.primal.domain.profile.Nip05VerificationService
 
 @HiltViewModel
 class AccountSwitcherViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val activeAccountStore: ActiveAccountStore,
     private val accountsStore: UserAccountsStore,
+    private val nip05VerificationService: Nip05VerificationService,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AccountSwitcherContract.UiState())
@@ -61,10 +63,11 @@ class AccountSwitcherViewModel @Inject constructor(
         viewModelScope.launch {
             activeAccountStore.activeUserAccount
                 .collect { activeAccount ->
+                    val nip05Status = nip05VerificationService.getStatus(activeAccount.pubkey)
                     setState {
                         copy(
                             userAccounts = userAccounts.sortAndFilterAccounts(activeUserId = activeAccount.pubkey),
-                            activeAccount = activeAccount.asUserAccountUi(),
+                            activeAccount = activeAccount.asUserAccountUi().copy(nip05Status = nip05Status),
                         )
                     }
                 }
@@ -73,11 +76,13 @@ class AccountSwitcherViewModel @Inject constructor(
     private fun observeUserAccounts() =
         viewModelScope.launch {
             accountsStore.userAccounts
-                .collect {
+                .collect { accounts ->
+                    val statuses = nip05VerificationService.getStatuses(accounts.map { it.pubkey })
                     setState {
                         copy(
-                            userAccounts = it.map { it.asUserAccountUi() }
-                                .sortAndFilterAccounts(activeUserId = activeAccount?.pubkey),
+                            userAccounts = accounts.map {
+                                it.asUserAccountUi().copy(nip05Status = statuses[it.pubkey])
+                            }.sortAndFilterAccounts(activeUserId = activeAccount?.pubkey),
                         )
                     }
                 }

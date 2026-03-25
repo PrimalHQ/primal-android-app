@@ -4,6 +4,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.domain.links.CdnImage
 import net.primal.domain.membership.LeaderboardLegendEntry
+import net.primal.domain.profile.Nip05VerificationStatus
 
 data class LeaderboardUiLegend(
     val userId: String,
@@ -13,6 +14,7 @@ data class LeaderboardUiLegend(
     val legendSince: Long?,
     val legendaryCustomization: LegendaryCustomization?,
     val donatedSats: ULong,
+    val nip05Status: Nip05VerificationStatus? = null,
 )
 
 fun LeaderboardLegendEntry.toUiModel() =

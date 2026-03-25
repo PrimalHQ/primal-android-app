@@ -154,6 +154,7 @@ class MessageConversationListViewModel @Inject constructor(
             participantAvatarCdnImage = this.participant.avatarCdnImage,
             participantLegendaryCustomization = this.participant.primalPremiumInfo
                 ?.legendProfile?.asLegendaryCustomization(),
+            participantNip05Status = this.participant.nip05Status,
             unreadMessagesCount = this.unreadMessagesCount,
         )
 }

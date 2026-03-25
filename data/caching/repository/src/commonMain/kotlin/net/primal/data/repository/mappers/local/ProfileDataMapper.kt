@@ -1,9 +1,10 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.profiles.ProfileData as ProfileDataPO
+import net.primal.domain.profile.Nip05VerificationStatus
 import net.primal.domain.profile.ProfileData as ProfileDataDO
 
-fun ProfileDataPO.asProfileDataDO(): ProfileDataDO {
+fun ProfileDataPO.asProfileDataDO(nip05Status: Nip05VerificationStatus? = null): ProfileDataDO {
     return ProfileDataDO(
         profileId = this.ownerId,
         metadataEventId = this.eventId,
@@ -23,5 +24,6 @@ fun ProfileDataPO.asProfileDataDO(): ProfileDataDO {
         primalName = this.primalName,
         primalPremiumInfo = this.primalPremiumInfo,
         blossoms = this.blossoms,
+        nip05Status = nip05Status,
     )
 }

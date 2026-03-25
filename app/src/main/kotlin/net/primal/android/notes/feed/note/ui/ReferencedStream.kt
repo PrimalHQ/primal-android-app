@@ -98,6 +98,8 @@ private fun StreamInfo(stream: ReferencedStream, showHostInfo: Boolean = true) {
                 displayName = stream.mainHostName,
                 internetIdentifier = stream.mainHostInternetIdentifier,
                 legendaryCustomization = stream.mainHostLegendProfile?.asLegendaryCustomization(),
+                nip05Status = stream.mainHostNip05Status,
+                profileId = stream.mainHostId,
             )
         }
 

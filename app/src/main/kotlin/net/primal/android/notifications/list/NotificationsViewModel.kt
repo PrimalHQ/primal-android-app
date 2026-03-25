@@ -193,6 +193,7 @@ class NotificationsViewModel @Inject constructor(
             actionUserAvatarCdnImage = this.actionByUser?.avatarCdnImage,
             actionUserLegendaryCustomization = this.actionByUser?.primalPremiumInfo
                 ?.legendProfile?.asLegendaryCustomization(),
+            actionUserNip05Status = this.actionByUser?.nip05Status,
             actionUserSatsZapped = this.satsZapped,
             actionPost = this.extractFeedPostUi(),
             referencedStream = this.extractReferencedStream(),

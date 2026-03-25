@@ -88,6 +88,7 @@ class PrimalDrawerViewModel @Inject constructor(
                         legendaryCustomization = it.primalPremiumInfo
                             ?.legendProfile
                             ?.asLegendaryCustomization(),
+                        activeUserNip05Status = it.nip05Status,
                     )
                 }
             }

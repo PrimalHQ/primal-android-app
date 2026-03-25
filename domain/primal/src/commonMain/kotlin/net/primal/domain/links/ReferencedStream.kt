@@ -2,6 +2,7 @@ package net.primal.domain.links
 
 import kotlinx.serialization.Serializable
 import net.primal.domain.membership.PrimalLegendProfile
+import net.primal.domain.profile.Nip05VerificationStatus
 import net.primal.domain.streams.StreamStatus
 
 @Serializable
@@ -19,6 +20,7 @@ data class ReferencedStream(
     val mainHostAvatarCdnImage: CdnImage?,
     val mainHostLegendProfile: PrimalLegendProfile?,
     val mainHostInternetIdentifier: String?,
+    val mainHostNip05Status: Nip05VerificationStatus? = null,
 ) {
     val duration
         get() = startedAt?.let { started ->

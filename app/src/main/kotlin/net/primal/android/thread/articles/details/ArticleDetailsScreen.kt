@@ -568,6 +568,8 @@ private fun ArticleContentWithComments(
                     authorDisplayName = state.article.authorDisplayName,
                     authorInternetIdentifier = state.article.authorInternetIdentifier,
                     authorLegendaryCustomization = state.article.authorLegendaryCustomization,
+                    authorNip05Status = state.article.authorNip05Status,
+                    authorId = state.article.authorId,
                     onAuthorAvatarClick = { noteCallbacks.onProfileClick?.invoke(state.article.authorId) },
                     onFollowUnfollowClick = { detailsEventPublisher(UiEvent.ToggleAuthorFollows) },
                 )

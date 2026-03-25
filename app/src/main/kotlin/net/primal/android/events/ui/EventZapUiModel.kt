@@ -4,6 +4,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.domain.events.EventZap
 import net.primal.domain.links.CdnImage
+import net.primal.domain.profile.Nip05VerificationStatus
 
 data class EventZapUiModel(
     val id: String,
@@ -16,6 +17,7 @@ data class EventZapUiModel(
     val zapperInternetIdentifier: String? = null,
     val zapperAvatarCdnImage: CdnImage? = null,
     val zapperLegendaryCustomization: LegendaryCustomization? = null,
+    val zapperNip05Status: Nip05VerificationStatus? = null,
 ) {
     companion object {
         val DefaultComparator = compareByDescending<EventZapUiModel> { it.amountInSats }.thenBy { it.zappedAt }
