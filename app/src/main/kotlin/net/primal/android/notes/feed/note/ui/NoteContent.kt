@@ -57,6 +57,27 @@ private const val URL_ANNOTATION_TAG = "url"
 private const val NOTE_ANNOTATION_TAG = "note"
 private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 private const val NOSTR_ADDRESS_ANNOTATION_TAG = "naddr"
+private const val NAMECOIN_ANNOTATION_TAG = "namecoin"
+
+/**
+ * Namecoin blue (#4A90D9) — matches the color used in Amethyst for Namecoin identifiers.
+ */
+private val NamecoinBlue = Color(0xFF4A90D9)
+
+/**
+ * Regex matching Namecoin identifiers in note text:
+ * - d/name, id/name (namespace prefixes)
+ * - user@domain.bit (NIP-05 style)
+ * - @domain.bit (shorthand for _@domain.bit)
+ * - domain.bit (bare .bit domain)
+ *
+ * Excludes URLs with http(s):// scheme — those open in the browser normally.
+ * Trailing punctuation is stripped before matching.
+ */
+private val NAMECOIN_IDENTIFIER_REGEX = Regex(
+    """(?<![a-zA-Z0-9/:.@])(?:(?:d|id)/[a-zA-Z0-9_-]+|(?:[a-zA-Z0-9._-]+@)?[a-zA-Z0-9_-]+\.bit)""",
+    RegexOption.IGNORE_CASE,
+)
 
 private fun List<NoteNostrUriUi>.filter(type: EventUriNostrType) = filter { it.type == type }
 
@@ -198,10 +219,13 @@ fun NoteContent(
 
             val clickHandler = remember(contentText, noteCallbacks, onUrlClick, onClick) {
                 { position: Int, offset: Offset ->
-                    val annotation = contentText.getStringAnnotations(
+                    val annotations = contentText.getStringAnnotations(
                         start = position,
                         end = position,
-                    ).firstOrNull()
+                    )
+                    // Prefer Namecoin annotations over URL annotations
+                    val annotation = annotations.firstOrNull { it.tag == NAMECOIN_ANNOTATION_TAG }
+                        ?: annotations.firstOrNull()
 
                     annotation?.handleAnnotationClick(
                         onProfileClick = noteCallbacks.onProfileClick,
@@ -215,6 +239,7 @@ fun NoteContent(
                         onPostClick = noteCallbacks.onNoteClick,
                         onHashtagClick = noteCallbacks.onHashtagClick,
                         onArticleClick = noteCallbacks.onArticleClick,
+                        onNamecoinIdentifierClick = noteCallbacks.onNamecoinIdentifierClick,
                     ) ?: onClick?.invoke(offset) ?: Unit
                 }
             }
@@ -459,11 +484,13 @@ private fun AnnotatedString.Range<String>.handleAnnotationClick(
     onPostClick: ((String) -> Unit)?,
     onHashtagClick: ((String) -> Unit)?,
     onArticleClick: ((naddr: String) -> Unit)?,
+    onNamecoinIdentifierClick: ((identifier: String) -> Unit)?,
 ) = when (this.tag) {
     PROFILE_ID_ANNOTATION_TAG -> onProfileClick?.invoke(this.item)
     URL_ANNOTATION_TAG -> onUrlClick?.invoke(this.item)
     NOTE_ANNOTATION_TAG -> onPostClick?.invoke(this.item)
     HASHTAG_ANNOTATION_TAG -> onHashtagClick?.invoke(this.item)
+    NAMECOIN_ANNOTATION_TAG -> onNamecoinIdentifierClick?.invoke(this.item)
     NOSTR_ADDRESS_ANNOTATION_TAG -> {
         this.item.split(":").lastOrNull()?.let { address ->
             onArticleClick?.invoke(address)
@@ -531,6 +558,11 @@ fun renderContentAsAnnotatedString(
         data.uris
             .filterNot { it.isMediaUri() }
             .map { it.url }
+            .filterNot { url ->
+                // Skip bare .bit domains — Namecoin annotation handles them
+                val lc = url.lowercase()
+                !lc.startsWith("http://") && !lc.startsWith("https://") && lc.endsWith(".bit")
+            }
             .forEach {
                 addUrlAnnotation(
                     url = it,
@@ -560,6 +592,32 @@ fun renderContentAsAnnotatedString(
                     highlightColor = highlightColor,
                 )
             }
+
+        addNamecoinAnnotations(content = refinedContent)
+    }
+}
+
+/**
+ * Scans the content for Namecoin identifiers (d/name, id/name, user@domain.bit, domain.bit)
+ * and adds styled annotations so they render as clickable Namecoin-blue links.
+ *
+ * URLs with http(s):// scheme are excluded — the negative lookbehind in the regex
+ * prevents matching identifiers that are part of a full URL.
+ */
+private fun AnnotatedString.Builder.addNamecoinAnnotations(content: String) {
+    NAMECOIN_IDENTIFIER_REGEX.findAll(content).forEach { match ->
+        val identifier = match.value.trimEnd('.', ',', '!', '?', ')', ']')
+        addStyle(
+            style = SpanStyle(color = NamecoinBlue),
+            start = match.range.first,
+            end = match.range.first + identifier.length,
+        )
+        addStringAnnotation(
+            tag = NAMECOIN_ANNOTATION_TAG,
+            annotation = identifier,
+            start = match.range.first,
+            end = match.range.first + identifier.length,
+        )
     }
 }
 

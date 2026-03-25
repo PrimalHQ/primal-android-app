@@ -8,7 +8,7 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.PrimalDarkTextColor
 
-private const val TOTAL_ONBOARDING_STEPS = 4
+private const val TOTAL_ONBOARDING_STEPS = 5
 
 @Composable
 fun OnboardingStepsIndicator(currentPage: Int) {

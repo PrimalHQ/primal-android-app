@@ -11,9 +11,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
 import net.primal.android.auth.onboarding.account.OnboardingViewModel
+import net.primal.android.auth.onboarding.account.followimport.ImportFollowListScreen
+import net.primal.android.auth.onboarding.account.followimport.ImportFollowListViewModel
 import net.primal.android.core.compose.ColumnWithBackground
 import net.primal.android.core.compose.PrimalGradientAlpha
 import net.primal.android.core.compose.PrimalGradientBackgroundColor
@@ -80,6 +83,19 @@ private fun OnboardingScreen(
                     eventPublisher = eventPublisher,
                     onBack = onBack,
                 )
+
+                OnboardingStep.ImportFollows -> {
+                    val importViewModel: ImportFollowListViewModel = hiltViewModel()
+                    ImportFollowListScreen(
+                        viewModel = importViewModel,
+                        onBack = onBack,
+                        onNext = { eventPublisher(OnboardingContract.UiEvent.RequestNextStep) },
+                        onApplyFollows = { entries ->
+                            val userIds = entries.map { it.pubkeyHex }.toSet()
+                            eventPublisher(OnboardingContract.UiEvent.ImportedFollowsApplied(userIds))
+                        },
+                    )
+                }
 
                 OnboardingStep.Preview -> OnboardingProfilePreviewScreen(
                     state = state,

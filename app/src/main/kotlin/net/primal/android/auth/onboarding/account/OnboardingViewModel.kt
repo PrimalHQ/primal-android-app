@@ -63,6 +63,7 @@ class OnboardingViewModel @Inject constructor(
                     UiEvent.RequestPreviousStep -> setState { copy(currentStep = this.currentStep.previousStep()) }
                     UiEvent.CreateNostrProfile -> createNostrAccount()
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.ImportedFollowsApplied -> applyImportedFollows(event.userIds)
                     is UiEvent.TogglePackExpanded -> togglePackExpanded(event)
                     is UiEvent.ToggleFollowUser -> toggleFollowUser(event)
                     is UiEvent.ToggleFollowAllInPack -> toggleFollowAllInPack(event)
@@ -179,6 +180,10 @@ class OnboardingViewModel @Inject constructor(
         )
 
     private fun UploadJob?.cancel() = this?.job?.cancel()
+
+    private fun applyImportedFollows(userIds: Set<String>) {
+        setState { copy(followedUserIds = followedUserIds + userIds) }
+    }
 
     private fun togglePackExpanded(event: UiEvent.TogglePackExpanded) {
         setState {

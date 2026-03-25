@@ -1,6 +1,12 @@
 package net.primal.android.navigation
 
 import android.content.Intent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import net.primal.android.namecoin.NamecoinNameService
+import net.primal.android.namecoin.ui.LocalNamecoinNameService
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import android.net.Uri
 import android.os.Build
 import androidx.activity.compose.LocalActivity
@@ -391,7 +397,11 @@ fun accountSwitcherCallbacksHandler(navController: NavController) =
         onCreateNewAccountClick = { navController.navigateToOnboarding() },
     )
 
-fun noteCallbacksHandler(navController: NavController) =
+fun noteCallbacksHandler(
+    navController: NavController,
+    namecoinNameService: NamecoinNameService? = null,
+    coroutineScope: CoroutineScope? = null,
+) =
     NoteCallbacks(
         onNoteClick = { noteId -> navController.navigateToThread(noteId = noteId) },
         onNoteReplyClick = { referencedNoteEvent ->
@@ -448,6 +458,23 @@ fun noteCallbacksHandler(navController: NavController) =
         onHashtagClick = { hashtag ->
             navController.navigateToExploreFeed(feedSpec = buildAdvancedSearchNotesFeedSpec(query = hashtag))
         },
+        onNamecoinIdentifierClick = if (namecoinNameService != null && coroutineScope != null) {
+            { identifier ->
+                coroutineScope.launch {
+                    try {
+                        val result = namecoinNameService.resolve(identifier)
+                        if (result != null) {
+                            navController.navigateToProfile(profileId = result.pubkey)
+                        }
+                    } catch (_: Exception) {
+                        // Resolution failed — silently ignore
+                    }
+                }
+                Unit
+            }
+        } else {
+            null
+        },
         onMediaClick = {
             navController.navigateToMediaGallery(
                 noteId = it.noteId,
@@ -465,6 +492,23 @@ fun noteCallbacksHandler(navController: NavController) =
         onGetPrimalPremiumClick = { navController.navigateToPremiumBuying() },
         onPrimalLegendsLeaderboardClick = { navController.navigateToPremiumLegendLeaderboard() },
     )
+
+/**
+ * Composable wrapper for [noteCallbacksHandler] that provides [NamecoinNameService]
+ * and a [CoroutineScope] for async Namecoin identifier resolution.
+ */
+@Composable
+fun rememberNoteCallbacksHandler(navController: NavController): NoteCallbacks {
+    val namecoinNameService = LocalNamecoinNameService.current
+    val scope = rememberCoroutineScope()
+    return remember(navController, namecoinNameService, scope) {
+        noteCallbacksHandler(
+            navController = navController,
+            namecoinNameService = namecoinNameService,
+            coroutineScope = scope,
+        )
+    }
+}
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -507,7 +551,7 @@ fun PrimalAppNavigation(navController: NavHostController, startDestination: Stri
             PiPManagerProvider {
                 LiveStreamOverlay(
                     navController = navController,
-                    noteCallbacks = noteCallbacksHandler(navController = navController),
+                    noteCallbacks = rememberNoteCallbacksHandler(navController = navController),
                 ) {
                     PrimalAppNavigation(
                         navController = navController,
@@ -1338,7 +1382,7 @@ private fun NavGraphBuilder.home(
         viewModel = viewModel,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
-        noteCallbacks = noteCallbacksHandler(navController),
+        noteCallbacks = rememberNoteCallbacksHandler(navController),
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
         callbacks = HomeFeedContract.ScreenCallbacks(
             onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
@@ -1543,7 +1587,7 @@ private fun NavGraphBuilder.explore(
         viewModel = viewModel,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
-        noteCallbacks = noteCallbacksHandler(navController),
+        noteCallbacks = rememberNoteCallbacksHandler(navController),
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
         callbacks = ExploreHomeContract.ScreenCallbacks(
             onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
@@ -1606,7 +1650,7 @@ private fun NavGraphBuilder.exploreFeed(
     LockToOrientationPortrait()
     ExploreFeedScreen(
         viewModel = viewModel,
-        noteCallbacks = noteCallbacksHandler(navController),
+        noteCallbacks = rememberNoteCallbacksHandler(navController),
         callbacks = ExploreFeedContract.ScreenCallbacks(
             onClose = { navController.navigateUp() },
             onGoToWallet = { navController.navigateToWallet() },
@@ -2159,7 +2203,7 @@ private fun NavGraphBuilder.bookmarks(
     LockToOrientationPortrait()
     BookmarksScreen(
         viewModel = viewModel,
-        noteCallbacks = noteCallbacksHandler(navController),
+        noteCallbacks = rememberNoteCallbacksHandler(navController),
         callbacks = BookmarksContract.ScreenCallbacks(
             onClose = { navController.navigateUp() },
             onGoToWallet = { navController.navigateToWallet() },
@@ -2185,7 +2229,7 @@ private fun NavGraphBuilder.chat(
     ChatScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        noteCallbacks = noteCallbacksHandler(navController),
+        noteCallbacks = rememberNoteCallbacksHandler(navController),
     )
 }
 
@@ -2248,7 +2292,7 @@ private fun NavGraphBuilder.notifications(
         viewModel = viewModel,
         onTopLevelDestinationChanged = onTopLevelDestinationChanged,
         onDrawerScreenClick = onDrawerScreenClick,
-        noteCallbacks = noteCallbacksHandler(navController),
+        noteCallbacks = rememberNoteCallbacksHandler(navController),
         accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
         callbacks = NotificationsContract.ScreenCallbacks(
             onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.MyNotifications) },
@@ -2312,7 +2356,7 @@ private fun NavGraphBuilder.thread(
                 navController.navigateToGifPicker()
             },
         ),
-        noteCallbacks = noteCallbacksHandler(navController),
+        noteCallbacks = rememberNoteCallbacksHandler(navController),
     )
 }
 
@@ -2342,7 +2386,7 @@ private fun NavGraphBuilder.articleDetails(
             },
             onGoToWallet = { navController.navigateToWallet() },
         ),
-        noteCallbacks = noteCallbacksHandler(navController),
+        noteCallbacks = rememberNoteCallbacksHandler(navController),
     )
 }
 
@@ -2458,7 +2502,7 @@ private fun NavGraphBuilder.profile(
             onNewPostClick = { navController.navigateToNoteEditor(null) },
             onLiveStreamClick = { naddr -> streamState.start(naddr) },
         ),
-        noteCallbacks = noteCallbacksHandler(navController),
+        noteCallbacks = rememberNoteCallbacksHandler(navController),
     )
 }
 

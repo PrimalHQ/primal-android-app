@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import net.primal.android.namecoin.NamecoinPreferences
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.networking.relays.RelaysSocketManager
 import net.primal.android.networking.relays.errors.NostrPublishException
@@ -33,6 +34,7 @@ class NetworkSettingsViewModel @Inject constructor(
     private val relayRepository: RelayRepository,
     private val appConfigHandler: AppConfigHandler,
     private val userRepository: UserRepository,
+    private val namecoinPreferences: NamecoinPreferences,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UiState())
@@ -51,6 +53,7 @@ class NetworkSettingsViewModel @Inject constructor(
         observeCachingServiceConnection()
         observeUserRelays()
         observeCachingProxy()
+        observeNamecoinSettings()
     }
 
     private fun observeUserRelays() =
@@ -92,6 +95,10 @@ class NetworkSettingsViewModel @Inject constructor(
                     is UiEvent.UpdateNewCachingServiceUrl -> setState { copy(newCachingServiceUrl = it.url) }
                     is UiEvent.UpdateCachingProxyFlag -> updateCachingServiceFlag(enabled = it.enabled)
                     UiEvent.DismissError -> setState { copy(error = null) }
+                    is UiEvent.NamecoinToggleEnabled -> namecoinPreferences.setEnabled(it.enabled)
+                    is UiEvent.NamecoinAddServer -> namecoinPreferences.addServer(it.server)
+                    is UiEvent.NamecoinRemoveServer -> namecoinPreferences.removeServer(it.server)
+                    UiEvent.NamecoinResetServers -> namecoinPreferences.reset()
                 }
             }
         }
@@ -203,5 +210,12 @@ class NetworkSettingsViewModel @Inject constructor(
                 enabled = enabled,
             )
             setState { copy(cachingProxyEnabled = enabled) }
+        }
+
+    private fun observeNamecoinSettings() =
+        viewModelScope.launch {
+            namecoinPreferences.settings.collect { settings ->
+                setState { copy(namecoinSettings = settings) }
+            }
         }
 }
