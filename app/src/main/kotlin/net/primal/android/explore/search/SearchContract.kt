@@ -11,6 +11,9 @@ interface SearchContract {
         val searchResults: List<UserProfileItemUi> = emptyList(),
         val recentUsers: List<UserProfileItemUi> = emptyList(),
         val popularUsers: List<UserProfileItemUi> = emptyList(),
+        val namecoinResolvedUser: UserProfileItemUi? = null,
+        val namecoinResolving: Boolean = false,
+        val namecoinError: String? = null,
     ) {
         val recommendedUsers: List<UserProfileItemUi> get() = (recentUsers + popularUsers).distinctBy { it.profileId }
     }
