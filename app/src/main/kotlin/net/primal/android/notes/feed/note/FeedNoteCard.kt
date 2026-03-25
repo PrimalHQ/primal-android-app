@@ -633,8 +633,10 @@ private fun FeedNote(
                 authorDisplayName = data.authorName,
                 authorAvatarCdnImage = data.authorAvatarCdnImage,
                 authorInternetIdentifier = data.authorInternetIdentifier,
+                authorNip05Status = data.authorNip05Status,
                 authorLegendaryCustomization = data.authorLegendaryCustomization,
                 authorBlossoms = data.authorBlossoms,
+                authorId = data.authorId,
                 replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
                 isLive = data.isAuthorLiveStreamingNow,
                 onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {

@@ -45,6 +45,7 @@ import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.connections.nostr.NwcRepository
 import net.primal.domain.connections.primal.PrimalWalletNwcRepository
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
+import net.primal.domain.profile.Nip05VerificationService
 import net.primal.domain.wallet.Wallet
 
 @Suppress("LongParameterList")
@@ -61,6 +62,7 @@ class NostrConnectViewModel @Inject constructor(
     private val nwcRepository: NwcRepository,
     private val walletAccountRepository: WalletAccountRepository,
     private val tokenUpdater: PushNotificationsTokenUpdater,
+    private val nip05VerificationService: Nip05VerificationService,
 ) : ViewModel() {
 
     private val connectionUrl = savedStateHandle.nostrConnectUri
@@ -122,9 +124,14 @@ class NostrConnectViewModel @Inject constructor(
                     credential?.type == CredentialType.PrivateKey
                 }
 
+                val statuses = nip05VerificationService.getStatuses(
+                    nsecOnlyUserAccounts.map { it.pubkey },
+                )
                 val accounts = nsecOnlyUserAccounts
                     .sortedByDescending { it.lastAccessedAt }
-                    .map { it.asUserAccountUi() }
+                    .map {
+                        it.asUserAccountUi().copy(nip05Status = statuses[it.pubkey])
+                    }
 
                 setState { copy(accounts = accounts) }
             }

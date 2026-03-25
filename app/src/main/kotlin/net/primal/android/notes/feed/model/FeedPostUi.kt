@@ -18,6 +18,7 @@ import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.posts.FeedPost
+import net.primal.domain.profile.Nip05VerificationStatus
 
 data class FeedPostUi(
     val postId: String,
@@ -42,6 +43,7 @@ data class FeedPostUi(
     val isThreadMuted: Boolean = false,
     val eventZaps: List<EventZapUiModel> = emptyList(),
     val authorLegendaryCustomization: LegendaryCustomization? = null,
+    val authorNip05Status: Nip05VerificationStatus? = null,
     val authorBlossoms: List<String> = emptyList(),
     val eventRelayHints: List<String> = emptyList(),
     val isAuthorLiveStreamingNow: Boolean = false,
@@ -87,6 +89,7 @@ fun FeedPost.asFeedPostUi(): FeedPostUi {
             .map { it.asEventZapUiModel() }
             .sortedWith(EventZapUiModel.DefaultComparator),
         authorLegendaryCustomization = this.author.legendProfile?.asLegendaryCustomization(),
+        authorNip05Status = this.author.nip05Status,
         eventRelayHints = this.eventRelayHints?.relays ?: emptyList(),
         isAuthorLiveStreamingNow = this.author.isLiveStreamingNow,
         poll = this.pollInfo?.asPollUi(),

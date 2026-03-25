@@ -36,6 +36,7 @@ import net.primal.android.theme.PrimalTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.ContentDisplaySettings
 import net.primal.domain.links.CdnImage
+import net.primal.domain.profile.Nip05VerificationStatus
 
 @Composable
 fun FeedNoteHeader(
@@ -47,8 +48,10 @@ fun FeedNoteHeader(
     authorAvatarVisible: Boolean = true,
     authorAvatarCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
+    authorNip05Status: Nip05VerificationStatus? = null,
     authorLegendaryCustomization: LegendaryCustomization? = null,
     authorBlossoms: List<String> = emptyList(),
+    authorId: String? = null,
     replyToAuthor: String? = null,
     label: String? = authorInternetIdentifier,
     labelStyle: TextStyle? = null,
@@ -95,6 +98,8 @@ fun FeedNoteHeader(
             NoteAuthorBadgeAndTimestampSection(
                 authorDisplayName = authorDisplayName,
                 authorInternetIdentifier = authorInternetIdentifier,
+                authorNip05Status = authorNip05Status,
+                authorId = authorId,
                 suffixText = suffixText,
                 topRowTextStyle = topRowTextStyle,
                 authorLegendaryCustomization = authorLegendaryCustomization,
@@ -128,6 +133,8 @@ fun FeedNoteHeader(
 private fun NoteAuthorBadgeAndTimestampSection(
     authorDisplayName: String,
     authorInternetIdentifier: String?,
+    authorNip05Status: Nip05VerificationStatus?,
+    authorId: String? = null,
     suffixText: AnnotatedString,
     topRowTextStyle: TextStyle,
     authorLegendaryCustomization: LegendaryCustomization?,
@@ -139,6 +146,8 @@ private fun NoteAuthorBadgeAndTimestampSection(
             NostrUserText(
                 displayName = authorDisplayName,
                 internetIdentifier = authorInternetIdentifier,
+                nip05Status = authorNip05Status,
+                profileId = authorId,
                 annotatedStringSuffixBuilder = {
                     append(suffixText)
                 },

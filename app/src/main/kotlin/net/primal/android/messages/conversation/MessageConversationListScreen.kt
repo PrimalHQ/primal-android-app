@@ -301,8 +301,10 @@ private fun ConversationListItem(
                     NostrUserText(
                         displayName = conversation.participantUsername,
                         internetIdentifier = conversation.participantInternetIdentifier,
+                        profileId = conversation.participantId,
                         annotatedStringSuffixBuilder = { append(suffixText) },
                         legendaryCustomization = conversation.participantLegendaryCustomization,
+                        nip05Status = conversation.participantNip05Status,
                         style = AppTheme.typography.bodyMedium,
                     )
                 }

@@ -7,6 +7,7 @@ import net.primal.android.profile.details.ui.model.PremiumProfileDataUi
 import net.primal.domain.links.CdnImage
 import net.primal.domain.membership.PrimalPremiumInfo
 import net.primal.domain.nostr.utils.asEllipsizedNpub
+import net.primal.domain.profile.Nip05VerificationStatus
 import net.primal.domain.profile.ProfileData as ProfileDataDO
 
 data class ProfileDetailsUi(
@@ -25,6 +26,7 @@ data class ProfileDetailsUi(
     val lnUrlDecoded: String? = null,
     val premiumDetails: PremiumProfileDataUi? = null,
     val profileBlossoms: List<String> = emptyList(),
+    val nip05Status: Nip05VerificationStatus? = null,
 )
 
 fun ProfileDataDO.asProfileDetailsUi() =
@@ -44,6 +46,7 @@ fun ProfileDataDO.asProfileDetailsUi() =
         lnUrlDecoded = this.lnUrlDecoded,
         premiumDetails = this.primalPremiumInfo?.asPremiumProfileDataUi(),
         profileBlossoms = this.blossoms,
+        nip05Status = this.nip05Status,
     )
 
 fun PrimalPremiumInfo.asPremiumProfileDataUi() =

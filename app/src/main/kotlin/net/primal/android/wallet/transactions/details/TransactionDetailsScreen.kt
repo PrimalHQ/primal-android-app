@@ -444,6 +444,7 @@ private fun TransactionCard(
                 authorAvatarCdnImage = txData.otherUserAvatarCdnImage,
                 authorInternetIdentifier = txData.otherUserInternetIdentifier,
                 authorLegendaryCustomization = txData.otherUserLegendaryCustomization,
+                authorId = txData.otherUserId,
                 onAuthorAvatarClick = { txData.otherUserId?.let(onProfileClick) },
                 label = txData.otherUserLightningAddress,
                 labelStyle = AppTheme.typography.bodyMedium,

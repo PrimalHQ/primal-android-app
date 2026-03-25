@@ -29,6 +29,7 @@ import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.premium.leaderboard.legend.ui.model.LeaderboardUiLegend
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
+import net.primal.domain.profile.Nip05VerificationStatus
 
 @Composable
 fun LegendLeaderboardItem(
@@ -71,6 +72,8 @@ fun LegendLeaderboardItem(
                 internetIdentifier = item.internetIdentifier,
                 legendaryCustomization = item.legendaryCustomization,
                 satsDonated = item.donatedSats,
+                nip05Status = item.nip05Status,
+                profileId = item.userId,
             )
         },
         supportingContent = {
@@ -104,6 +107,8 @@ private fun DisplayNameAndSatsDonatedRow(
     internetIdentifier: String?,
     legendaryCustomization: LegendaryCustomization?,
     satsDonated: ULong,
+    nip05Status: Nip05VerificationStatus? = null,
+    profileId: String? = null,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
 
@@ -121,6 +126,8 @@ private fun DisplayNameAndSatsDonatedRow(
                 internetIdentifier = internetIdentifier,
                 internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
                 legendaryCustomization = legendaryCustomization,
+                nip05Status = nip05Status,
+                profileId = profileId,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

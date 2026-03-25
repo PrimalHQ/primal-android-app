@@ -69,6 +69,7 @@ fun ReferencedNoteCard(
             authorLegendaryCustomization = data.authorLegendaryCustomization,
             authorInternetIdentifier = data.authorInternetIdentifier,
             authorBlossoms = data.authorBlossoms,
+            authorId = data.authorId,
             onAuthorAvatarClick = { noteCallbacks.onProfileClick?.invoke(data.authorId) },
         )
 

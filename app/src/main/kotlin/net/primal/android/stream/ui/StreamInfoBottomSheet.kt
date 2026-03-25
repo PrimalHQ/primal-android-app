@@ -164,9 +164,11 @@ private fun HostProfileSummary(
                 NostrUserText(
                     displayName = profileDetails.userDisplayName,
                     internetIdentifier = profileDetails.internetIdentifier,
+                    profileId = profileDetails.pubkey,
                     internetIdentifierBadgeSize = 13.dp,
                     internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
                     legendaryCustomization = profileDetails.premiumDetails?.legendaryCustomization,
+                    nip05Status = profileDetails.nip05Status,
                     style = AppTheme.typography.bodyLarge.copy(
                         fontSize = 16.sp,
                         lineHeight = 16.sp,
