@@ -1,5 +1,7 @@
 package net.primal.android.settings.network
 
+import net.primal.android.namecoin.NamecoinSettings
+
 interface NetworkSettingsContract {
     data class UiState(
         val relays: List<SocketDestinationUiState> = emptyList(),
@@ -9,6 +11,7 @@ interface NetworkSettingsContract {
         val updatingCachingService: Boolean = false,
         val newRelayUrl: String = "",
         val newCachingServiceUrl: String = "",
+        val namecoinSettings: NamecoinSettings = NamecoinSettings.DEFAULT,
         val error: NetworkSettingsError? = null,
     ) {
         sealed class NetworkSettingsError {
@@ -26,5 +29,9 @@ interface NetworkSettingsContract {
         data class UpdateNewRelayUrl(val url: String) : UiEvent()
         data class UpdateNewCachingServiceUrl(val url: String) : UiEvent()
         data class UpdateCachingProxyFlag(val enabled: Boolean) : UiEvent()
+        data class NamecoinToggleEnabled(val enabled: Boolean) : UiEvent()
+        data class NamecoinAddServer(val server: String) : UiEvent()
+        data class NamecoinRemoveServer(val server: String) : UiEvent()
+        data object NamecoinResetServers : UiEvent()
     }
 }
