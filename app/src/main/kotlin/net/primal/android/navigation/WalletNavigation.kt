@@ -332,6 +332,6 @@ private fun NavGraphBuilder.transactionDetails(
     TransactionDetailsScreen(
         viewModel = viewModel,
         onClose = { navController.navigateUp() },
-        noteCallbacks = noteCallbacksHandler(navController),
+        noteCallbacks = rememberNoteCallbacksHandler(navController),
     )
 }
