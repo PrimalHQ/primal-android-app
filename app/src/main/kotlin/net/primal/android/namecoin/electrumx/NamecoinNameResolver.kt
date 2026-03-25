@@ -8,7 +8,7 @@
  */
 package net.primal.android.namecoin.electrumx
 
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
@@ -50,9 +50,16 @@ class NamecoinNameResolver(
         }
     }
 
-    suspend fun resolve(identifier: String): NamecoinNostrResult? {
-        val parsed = parseIdentifier(identifier) ?: return null
-        return withTimeoutOrNull(lookupTimeoutMs) {
+    /**
+     * Resolve a Namecoin identifier to a Nostr pubkey.
+     *
+     * @throws NamecoinLookupException for all definitive failure types
+     * @throws kotlinx.coroutines.TimeoutCancellationException if resolution takes too long
+     */
+    suspend fun resolve(identifier: String): NamecoinNostrResult {
+        val parsed = parseIdentifier(identifier)
+            ?: throw NamecoinLookupException.NameNotFound(identifier)
+        return withTimeout(lookupTimeoutMs) {
             performLookup(parsed)
         }
     }
@@ -97,14 +104,20 @@ class NamecoinNameResolver(
 
     // ── Lookup & Value Parsing ─────────────────────────────────────────
 
-    private suspend fun performLookup(parsed: ParsedIdentifier): NamecoinNostrResult? {
-        val nameResult = electrumxClient.nameShowWithFallback(parsed.namecoinName, serverListProvider()) ?: return null
-        val valueJson = tryParseJson(nameResult.value) ?: return null
+    /**
+     * @throws NamecoinLookupException for definitive failures (not found, expired, unreachable)
+     * @throws NamecoinLookupException.NoNostrKey if the name exists but has no valid Nostr pubkey
+     */
+    private suspend fun performLookup(parsed: ParsedIdentifier): NamecoinNostrResult {
+        // nameShowWithFallback throws NamecoinLookupException on failure
+        val nameResult = electrumxClient.nameShowWithFallback(parsed.namecoinName, serverListProvider())
+        val valueJson = tryParseJson(nameResult.value)
+            ?: throw NamecoinLookupException.NoNostrKey(parsed.namecoinName)
 
         return when (parsed.namespace) {
             Namespace.DOMAIN -> extractFromDomainValue(valueJson, parsed)
             Namespace.IDENTITY -> extractFromIdentityValue(valueJson, parsed)
-        }
+        } ?: throw NamecoinLookupException.NoNostrKey(parsed.namecoinName)
     }
 
     private fun extractFromDomainValue(value: JsonObject, parsed: ParsedIdentifier): NamecoinNostrResult? {

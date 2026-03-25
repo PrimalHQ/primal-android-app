@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
+import net.primal.android.namecoin.NamecoinCertStore
 import net.primal.android.namecoin.electrumx.ElectrumxClient
 import net.primal.android.namecoin.electrumx.NamecoinNameResolver
 
@@ -14,7 +15,21 @@ object NamecoinModule {
 
     @Provides
     @Singleton
-    fun provideElectrumxClient(): ElectrumxClient = ElectrumxClient()
+    fun provideElectrumxClient(
+        certStore: NamecoinCertStore,
+    ): ElectrumxClient {
+        val client = ElectrumxClient()
+        // Load user-pinned certs from disk on startup
+        try {
+            val pinnedCerts = certStore.loadPinnedCerts()
+            if (pinnedCerts.isNotEmpty()) {
+                client.setDynamicCerts(pinnedCerts)
+            }
+        } catch (_: Exception) {
+            // Non-fatal — defaults will still work
+        }
+        return client
+    }
 
     @Provides
     @Singleton

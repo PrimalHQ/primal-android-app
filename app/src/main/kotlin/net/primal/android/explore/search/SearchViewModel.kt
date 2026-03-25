@@ -7,6 +7,7 @@ import io.github.aakira.napier.Napier
 import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -15,7 +16,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.compose.profile.model.asUserProfileItemUi
@@ -23,6 +26,7 @@ import net.primal.android.core.compose.profile.model.mapAsUserProfileUi
 import net.primal.android.explore.search.SearchContract.UiEvent
 import net.primal.android.explore.search.SearchContract.UiState
 import net.primal.android.namecoin.NamecoinNameService
+import net.primal.android.namecoin.electrumx.NamecoinLookupException
 import net.primal.android.namecoin.electrumx.NamecoinNameResolver
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
@@ -46,11 +50,10 @@ class SearchViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
-    private var namecoinJob: Job? = null
-
     init {
         observeEvents()
         observeDebouncedQueryChanges()
+        observeNamecoinResolution()
         observeRecentUsers()
         fetchRecommendedUsers()
     }
@@ -73,52 +76,100 @@ class SearchViewModel @Inject constructor(
                 .debounce(0.42.seconds)
                 .collect {
                     onSearchQueryChanged(query = it.query)
-                    resolveNamecoinIfNeeded(query = it.query)
                 }
         }
 
-    private fun resolveNamecoinIfNeeded(query: String) {
-        // Cancel any in-flight Namecoin lookup before starting a new one
-        namecoinJob?.cancel()
-
-        if (!NamecoinNameResolver.isNamecoinIdentifier(query)) {
-            setState { copy(namecoinResolvedUser = null, namecoinResolving = false) }
-            return
-        }
-
-        namecoinJob = viewModelScope.launch {
-            setState { copy(namecoinResolving = true, namecoinResolvedUser = null) }
-            try {
-                val result = namecoinNameService.resolve(query)
-                if (result != null) {
-                    // Fetch actual Nostr profile for the resolved pubkey
-                    val profileData = try {
-                        profileRepository.fetchProfile(profileId = result.pubkey)
-                    } catch (_: Exception) {
-                        null
+    /**
+     * Uses mapLatest to automatically cancel in-flight Namecoin lookups
+     * when a new query arrives, preventing race conditions.
+     */
+    @OptIn(FlowPreview::class)
+    private fun observeNamecoinResolution() =
+        viewModelScope.launch {
+            events.filterIsInstance<UiEvent.SearchQueryUpdated>()
+                .debounce(0.42.seconds)
+                .distinctUntilChanged()
+                .mapLatest { event ->
+                    val query = event.query
+                    if (!NamecoinNameResolver.isNamecoinIdentifier(query)) {
+                        setState { copy(namecoinResolvedUser = null, namecoinResolving = false, namecoinError = null) }
+                        return@mapLatest
                     }
-                    val namecoinUser = if (profileData != null) {
-                        profileData.asUserProfileItemUi().copy(
-                            internetIdentifier = profileData.internetIdentifier ?: query,
-                        )
-                    } else {
-                        UserProfileItemUi(
-                            profileId = result.pubkey,
-                            displayName = query,
-                            internetIdentifier = query,
-                        )
+
+                    setState { copy(namecoinResolving = true, namecoinResolvedUser = null, namecoinError = null) }
+                    try {
+                        val result = namecoinNameService.resolve(query)
+                        val profileData = try {
+                            profileRepository.fetchProfile(profileId = result.pubkey)
+                        } catch (_: Exception) {
+                            null
+                        }
+                        val namecoinUser = if (profileData != null) {
+                            profileData.asUserProfileItemUi().copy(
+                                internetIdentifier = profileData.internetIdentifier ?: query,
+                            )
+                        } else {
+                            UserProfileItemUi(
+                                profileId = result.pubkey,
+                                displayName = query,
+                                internetIdentifier = query,
+                            )
+                        }
+                        setState { copy(namecoinResolvedUser = namecoinUser, namecoinResolving = false) }
+                    } catch (e: CancellationException) {
+                        throw e
+                    } catch (e: NamecoinLookupException.NameNotFound) {
+                        setState {
+                            copy(
+                                namecoinResolvedUser = null,
+                                namecoinResolving = false,
+                                namecoinError = "Name not found on the Namecoin blockchain",
+                            )
+                        }
+                    } catch (e: NamecoinLookupException.NameExpired) {
+                        setState {
+                            copy(
+                                namecoinResolvedUser = null,
+                                namecoinResolving = false,
+                                namecoinError = "Name expired on the Namecoin blockchain",
+                            )
+                        }
+                    } catch (e: NamecoinLookupException.NoNostrKey) {
+                        setState {
+                            copy(
+                                namecoinResolvedUser = null,
+                                namecoinResolving = false,
+                                namecoinError = "Name exists but has no Nostr key",
+                            )
+                        }
+                    } catch (e: NamecoinLookupException.ServersUnreachable) {
+                        setState {
+                            copy(
+                                namecoinResolvedUser = null,
+                                namecoinResolving = false,
+                                namecoinError = "ElectrumX servers unreachable",
+                            )
+                        }
+                    } catch (e: NamecoinLookupException.ParseError) {
+                        setState {
+                            copy(
+                                namecoinResolvedUser = null,
+                                namecoinResolving = false,
+                                namecoinError = "Invalid response from ElectrumX server",
+                            )
+                        }
+                    } catch (e: Exception) {
+                        setState {
+                            copy(
+                                namecoinResolvedUser = null,
+                                namecoinResolving = false,
+                                namecoinError = "Resolution failed: ${e.message ?: "unknown error"}",
+                            )
+                        }
                     }
-                    setState { copy(namecoinResolvedUser = namecoinUser, namecoinResolving = false) }
-                } else {
-                    setState { copy(namecoinResolvedUser = null, namecoinResolving = false) }
-                }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                setState { copy(namecoinResolvedUser = null, namecoinResolving = false) }
-            }
+                }.flowOn(Dispatchers.IO)
+                .collect { /* state updates happen inside mapLatest */ }
         }
-    }
 
     private fun onSearchQueryChanged(query: String) =
         viewModelScope.launch {

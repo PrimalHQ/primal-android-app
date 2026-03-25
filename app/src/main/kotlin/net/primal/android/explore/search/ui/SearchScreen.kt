@@ -16,6 +16,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.OutlinedTextField
@@ -182,6 +184,33 @@ fun SearchScreen(
                             data = namecoinUser,
                             onClick = { item -> callbacks.onProfileClick(item.profileId) },
                         )
+                    }
+                }
+
+                // Namecoin error display
+                val namecoinError = state.namecoinError
+                if (namecoinError != null && !state.namecoinResolving && namecoinUser == null) {
+                    item(key = "namecoin_error") {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Start,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Info,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp),
+                                tint = AppTheme.colorScheme.error,
+                            )
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                text = namecoinError,
+                                style = AppTheme.typography.bodySmall,
+                                color = AppTheme.colorScheme.error,
+                            )
+                        }
                     }
                 }
 
