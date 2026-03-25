@@ -9,6 +9,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.domain.links.CdnImage
 import net.primal.domain.nostr.utils.asEllipsizedNpub
+import net.primal.domain.profile.Nip05VerificationStatus
 import net.primal.domain.reads.Article
 
 data class ArticleDetailsUi(
@@ -32,6 +33,7 @@ data class ArticleDetailsUi(
     val isBookmarked: Boolean = false,
     val eventStatsUi: EventStatsUi = EventStatsUi(),
     val authorLegendaryCustomization: LegendaryCustomization? = null,
+    val authorNip05Status: Nip05VerificationStatus? = null,
     val highlights: List<HighlightUi> = emptyList(),
     val client: String? = null,
 )
@@ -58,6 +60,7 @@ fun Article.mapAsArticleDetailsUi(): ArticleDetailsUi {
         isBookmarked = this.bookmark != null,
         eventStatsUi = EventStatsUi.from(eventStats = this.eventStats, userStats = this.userEventStats),
         authorLegendaryCustomization = this.author?.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+        authorNip05Status = this.author?.nip05Status,
         highlights = this.highlights.map { it.asHighlightUi() },
         client = this.client,
     )

@@ -104,6 +104,8 @@ private fun FollowPackAuthorRow(
             style = AppTheme.typography.bodyMedium,
             internetIdentifier = author.internetIdentifier,
             legendaryCustomization = author.legendaryCustomization,
+            nip05Status = author.nip05Status,
+            profileId = author.profileId,
         )
     }
 }

@@ -6,6 +6,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.domain.links.CdnImage
 import net.primal.domain.links.ReferencedStream
 import net.primal.domain.notifications.NotificationType
+import net.primal.domain.profile.Nip05VerificationStatus
 
 data class NotificationUi(
     val notificationId: String,
@@ -18,6 +19,7 @@ data class NotificationUi(
     val actionUserInternetIdentifier: String? = null,
     val actionUserAvatarCdnImage: CdnImage? = null,
     val actionUserLegendaryCustomization: LegendaryCustomization? = null,
+    val actionUserNip05Status: Nip05VerificationStatus? = null,
     val actionPost: FeedPostUi? = null,
     val actionUserSatsZapped: Long? = null,
     val referencedStream: ReferencedStream? = null,

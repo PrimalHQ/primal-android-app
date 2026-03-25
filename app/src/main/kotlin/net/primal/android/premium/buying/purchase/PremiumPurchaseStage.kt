@@ -154,6 +154,8 @@ fun PremiumPurchaseStage(
                     } else {
                         state.profile.premiumDetails?.legendaryCustomization
                     },
+                    nip05Status = state.profile.nip05Status,
+                    profileId = state.profile.pubkey,
                 )
 
                 if (state.subscriptionTier.isProTier()) {

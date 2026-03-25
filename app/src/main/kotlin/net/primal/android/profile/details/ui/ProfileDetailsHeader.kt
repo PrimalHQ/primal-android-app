@@ -59,6 +59,7 @@ import net.primal.android.profile.details.ui.model.shouldShowPremiumBadge
 import net.primal.android.profile.domain.ProfileFollowsType
 import net.primal.android.theme.AppTheme
 import net.primal.domain.nostr.utils.asEllipsizedNpub
+import net.primal.domain.profile.Nip05VerificationStatus
 import net.primal.domain.utils.isLightningAddress
 import net.primal.domain.wallet.DraftTx
 
@@ -125,6 +126,7 @@ fun ProfileHeaderDetails(
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun ProfileHeaderDetails(
     state: ProfileDetailsContract.UiState,
@@ -169,6 +171,7 @@ private fun ProfileHeaderDetails(
                 profileId = profileId,
                 displayName = state.profileDetails?.authorDisplayName ?: profileId.asEllipsizedNpub(),
                 internetIdentifier = state.profileDetails?.internetIdentifier,
+                nip05Status = state.profileDetails?.nip05Status,
                 profilePremiumDetails = state.profileDetails?.premiumDetails,
                 onPremiumBadgeClick = onPremiumBadgeClick,
             )
@@ -356,6 +359,7 @@ private fun UserDisplayName(
     profileId: String,
     displayName: String,
     internetIdentifier: String?,
+    nip05Status: Nip05VerificationStatus?,
     profilePremiumDetails: PremiumProfileDataUi?,
     onPremiumBadgeClick: (tier: String, profileId: String) -> Unit,
 ) {
@@ -369,6 +373,7 @@ private fun UserDisplayName(
                 .padding(start = 14.dp, end = 6.dp),
             displayName = displayName,
             internetIdentifier = internetIdentifier,
+            nip05Status = nip05Status,
             internetIdentifierBadgeSize = 21.dp,
             autoResizeToFit = true,
             internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
@@ -378,6 +383,7 @@ private fun UserDisplayName(
                 fontWeight = FontWeight.Bold,
             ),
             legendaryCustomization = profilePremiumDetails?.legendaryCustomization,
+            profileId = profileId,
         )
 
         if (profilePremiumDetails?.shouldShowPremiumBadge() == true) {

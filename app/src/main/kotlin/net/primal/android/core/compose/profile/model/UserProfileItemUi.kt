@@ -6,6 +6,7 @@ import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.domain.common.UserProfileSearchItem
 import net.primal.domain.explore.FollowPackProfileData
 import net.primal.domain.links.CdnImage
+import net.primal.domain.profile.Nip05VerificationStatus
 import net.primal.domain.profile.ProfileData as ProfileDataDO
 
 data class UserProfileItemUi(
@@ -19,6 +20,7 @@ data class UserProfileItemUi(
     val isFollowed: Boolean? = null,
     val legendaryCustomization: LegendaryCustomization? = null,
     val isLive: Boolean = false,
+    val nip05Status: Nip05VerificationStatus? = null,
 )
 
 fun UserProfileSearchItem.mapAsUserProfileUi() =
@@ -32,6 +34,7 @@ fun UserProfileSearchItem.mapAsUserProfileUi() =
         score = this.score,
         legendaryCustomization = this.metadata.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
         isLive = this.isLive,
+        nip05Status = this.metadata.nip05Status,
     )
 
 fun FollowPackProfileData.mapAsUserProfileUi() =
@@ -42,6 +45,7 @@ fun FollowPackProfileData.mapAsUserProfileUi() =
         avatarCdnImage = avatarCdnImage,
         followersCount = followersCount,
         legendaryCustomization = primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+        nip05Status = nip05Status,
     )
 
 fun ProfileDataDO.asUserProfileItemUi() =
@@ -55,4 +59,5 @@ fun ProfileDataDO.asUserProfileItemUi() =
         score = null,
         isFollowed = null,
         legendaryCustomization = this.primalPremiumInfo?.legendProfile?.asLegendaryCustomization(),
+        nip05Status = this.nip05Status,
     )

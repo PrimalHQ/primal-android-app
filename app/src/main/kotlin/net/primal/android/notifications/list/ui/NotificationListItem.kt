@@ -459,6 +459,8 @@ private fun HeaderContent(
             append(appendText)
         },
         legendaryCustomization = firstNotification.actionUserLegendaryCustomization,
+        nip05Status = firstNotification.actionUserNip05Status,
+        profileId = firstNotification.actionUserId,
     )
 }
 

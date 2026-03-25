@@ -913,6 +913,7 @@ private fun ReplyToNote(replyToNote: FeedPostUi, connectionLineColor: Color) {
             authorAvatarCdnImage = replyToNote.authorAvatarCdnImage,
             authorInternetIdentifier = replyToNote.authorInternetIdentifier,
             authorLegendaryCustomization = replyToNote.authorLegendaryCustomization,
+            authorId = replyToNote.authorId,
             onAuthorAvatarClick = {},
         )
 

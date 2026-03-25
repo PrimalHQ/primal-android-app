@@ -6,6 +6,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.domain.links.CdnImage
 import net.primal.domain.posts.FeedPost
+import net.primal.domain.profile.Nip05VerificationStatus
 
 data class HighlightCommentUi(
     val commentId: String,
@@ -17,6 +18,7 @@ data class HighlightCommentUi(
     val authorBlossoms: List<String> = emptyList(),
     val content: String,
     val createdAt: Instant,
+    val authorNip05Status: Nip05VerificationStatus? = null,
 )
 
 fun FeedPost.toHighlightCommentUi() =
@@ -30,4 +32,5 @@ fun FeedPost.toHighlightCommentUi() =
         authorBlossoms = this.author.blossomServers,
         content = this.content,
         createdAt = this.timestamp.toJavaInstant(),
+        authorNip05Status = this.author.nip05Status,
     )

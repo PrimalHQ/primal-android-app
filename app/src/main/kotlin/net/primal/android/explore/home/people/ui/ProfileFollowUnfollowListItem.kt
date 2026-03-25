@@ -27,6 +27,7 @@ import net.primal.android.core.compose.profile.model.UserProfileItemUi
 import net.primal.android.core.utils.shortened
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
+import net.primal.domain.profile.Nip05VerificationStatus
 
 @Composable
 fun ProfileFollowUnfollowListItem(
@@ -62,6 +63,8 @@ fun ProfileFollowUnfollowListItem(
                 displayName = data.displayName,
                 internetIdentifier = data.internetIdentifier,
                 legendaryCustomization = data.legendaryCustomization,
+                nip05Status = data.nip05Status,
+                profileId = data.profileId,
             )
 
             if (data.followersCount != null && data.followersCount != 0) {
@@ -105,6 +108,8 @@ private fun UserDisplayNameInternetIdentifier(
     internetIdentifier: String?,
     legendaryCustomization: LegendaryCustomization?,
     modifier: Modifier = Modifier,
+    nip05Status: Nip05VerificationStatus? = null,
+    profileId: String? = null,
 ) {
     Column(
         modifier = modifier,
@@ -117,6 +122,8 @@ private fun UserDisplayNameInternetIdentifier(
             style = AppTheme.typography.bodyLarge,
             internetIdentifier = internetIdentifier,
             legendaryCustomization = legendaryCustomization,
+            nip05Status = nip05Status,
+            profileId = profileId,
         )
 
         if (internetIdentifier != null && internetIdentifier.isNotEmpty()) {

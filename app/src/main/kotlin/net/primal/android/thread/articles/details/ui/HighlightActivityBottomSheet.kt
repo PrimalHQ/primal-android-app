@@ -173,6 +173,8 @@ fun CommentRow(modifier: Modifier = Modifier, comment: HighlightCommentUi) {
                     displayName = comment.authorDisplayName ?: "",
                     internetIdentifier = comment.authorInternetIdentifier,
                     legendaryCustomization = comment.authorLegendaryCustomization,
+                    nip05Status = comment.authorNip05Status,
+                    profileId = comment.authorId,
                 )
                 Text(
                     text = stringResource(id = R.string.article_details_highlight_activity_commented),

@@ -5,6 +5,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.domain.UserAccount
 import net.primal.domain.links.CdnImage
+import net.primal.domain.profile.Nip05VerificationStatus
 
 data class UserAccountUi(
     val pubkey: String,
@@ -13,6 +14,7 @@ data class UserAccountUi(
     val avatarCdnImage: CdnImage? = null,
     val avatarBlossoms: List<String> = emptyList(),
     val legendaryCustomization: LegendaryCustomization? = null,
+    val nip05Status: Nip05VerificationStatus? = null,
     val lastAccessedAt: Long,
 )
 
