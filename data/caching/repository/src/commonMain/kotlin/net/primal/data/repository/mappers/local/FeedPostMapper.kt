@@ -53,6 +53,7 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
             legendProfile = this.author?.primalPremiumInfo?.legendProfile,
             blossomServers = this.author?.blossoms ?: emptyList(),
             isLiveStreamingNow = this.streams.count { it.isLive() } > 0,
+            nip05Status = this.authorNip05Verification?.status,
         ),
         content = this.data.content,
         tags = this.data.tags,

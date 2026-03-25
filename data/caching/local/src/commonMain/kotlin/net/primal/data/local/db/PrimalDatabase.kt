@@ -52,6 +52,8 @@ import net.primal.data.local.dao.polls.PollVoteDao
 import net.primal.data.local.dao.polls.PollVoteData
 import net.primal.data.local.dao.polls.PollVoterRemoteKey
 import net.primal.data.local.dao.polls.PollVoterRemoteKeyDao
+import net.primal.data.local.dao.profiles.Nip05VerificationData
+import net.primal.data.local.dao.profiles.Nip05VerificationDataDao
 import net.primal.data.local.dao.profiles.ProfileData
 import net.primal.data.local.dao.profiles.ProfileDataDao
 import net.primal.data.local.dao.profiles.ProfileStats
@@ -72,6 +74,7 @@ import net.primal.data.local.dao.threads.ArticleCommentCrossRef
 import net.primal.data.local.dao.threads.NoteConversationCrossRef
 import net.primal.data.local.dao.threads.ThreadConversationDao
 import net.primal.data.local.serialization.CdnTypeConverters
+import net.primal.data.local.serialization.Nip05TypeConverters
 import net.primal.data.local.serialization.NostrReferenceTypeConverters
 import net.primal.data.local.serialization.PollTypeConverters
 import net.primal.data.local.serialization.ProfileTypeConverters
@@ -116,8 +119,9 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         PollData::class,
         PollVoteData::class,
         PollVoterRemoteKey::class,
+        Nip05VerificationData::class,
     ],
-    version = 28,
+    version = 29,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -129,6 +133,7 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
     NostrReferenceTypeConverters::class,
     StreamTypeConverters::class,
     PollTypeConverters::class,
+    Nip05TypeConverters::class,
     EncryptableTypeConverters::class,
 )
 abstract class PrimalDatabase : RoomDatabase() {
@@ -196,6 +201,8 @@ abstract class PrimalDatabase : RoomDatabase() {
     abstract fun pollVotes(): PollVoteDao
 
     abstract fun pollVoterRemoteKeys(): PollVoterRemoteKeyDao
+
+    abstract fun nip05Verifications(): Nip05VerificationDataDao
 }
 
 // The Room compiler generates the `actual` implementations.
