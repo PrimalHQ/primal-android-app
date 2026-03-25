@@ -702,6 +702,17 @@
     <string name="explore_search_notifications">Search Notifications</string>
     <string name="explore_enter_query">Enter text to search</string>
     <string name="explore_namecoin_resolving">Resolving via Namecoin blockchain…</string>
+    <string name="namecoin_test_connection">Test Connection</string>
+    <string name="namecoin_testing">Testing servers…</string>
+    <string name="namecoin_test_success">Connected</string>
+    <string name="namecoin_test_failed">Failed</string>
+    <string name="namecoin_test_results">Test Results</string>
+    <string name="namecoin_diagnostics">Diagnostics</string>
+    <string name="namecoin_last_test">Last test</string>
+    <string name="namecoin_device_info">Device Info</string>
+    <string name="namecoin_tls_info">TLS Info</string>
+    <string name="namecoin_no_test_yet">No test run yet</string>
+    <string name="namecoin_response_time">%dms</string>
     <string name="explore_trending_topics_no_content">Trending topics will appear here.</string>
     <string name="explore_feed_search_results">Search Results</string>
     <string name="explore_feed_fallback_title">Feed</string>
