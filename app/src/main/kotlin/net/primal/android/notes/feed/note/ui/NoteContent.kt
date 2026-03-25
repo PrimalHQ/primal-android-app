@@ -219,10 +219,13 @@ fun NoteContent(
 
             val clickHandler = remember(contentText, noteCallbacks, onUrlClick, onClick) {
                 { position: Int, offset: Offset ->
-                    val annotation = contentText.getStringAnnotations(
+                    val annotations = contentText.getStringAnnotations(
                         start = position,
                         end = position,
-                    ).firstOrNull()
+                    )
+                    // Prefer Namecoin annotations over URL annotations
+                    val annotation = annotations.firstOrNull { it.tag == NAMECOIN_ANNOTATION_TAG }
+                        ?: annotations.firstOrNull()
 
                     annotation?.handleAnnotationClick(
                         onProfileClick = noteCallbacks.onProfileClick,
@@ -555,6 +558,11 @@ fun renderContentAsAnnotatedString(
         data.uris
             .filterNot { it.isMediaUri() }
             .map { it.url }
+            .filterNot { url ->
+                // Skip bare .bit domains — Namecoin annotation handles them
+                val lc = url.lowercase()
+                !lc.startsWith("http://") && !lc.startsWith("https://") && lc.endsWith(".bit")
+            }
             .forEach {
                 addUrlAnnotation(
                     url = it,
