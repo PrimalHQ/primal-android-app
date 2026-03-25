@@ -31,6 +31,7 @@ import net.primal.core.utils.onSuccess
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.PrimalWalletStatus
 import net.primal.domain.account.SparkWalletAccountRepository
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 
 @HiltViewModel
@@ -38,6 +39,7 @@ class WalletNoticeSheetViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val primalWalletAccountRepository: PrimalWalletAccountRepository,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
+    private val walletAccountRepository: WalletAccountRepository,
     private val userRepository: UserRepository,
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
 ) : ViewModel() {
@@ -169,7 +171,7 @@ class WalletNoticeSheetViewModel @Inject constructor(
                 }
 
             status.hasMigratedToSparkWallet && !localSparkWalletExists(userId) ->
-                if (userAccount.shouldShowWalletDetectedNotice) {
+                if (userAccount.shouldShowWalletDetectedNotice && !hasActiveWalletWithPositiveBalance(userId)) {
                     WalletNoticeType.WalletDetected
                 } else {
                     null
@@ -181,6 +183,11 @@ class WalletNoticeSheetViewModel @Inject constructor(
 
     private suspend fun localSparkWalletExists(userId: String): Boolean {
         return sparkWalletAccountRepository.findPersistedWalletId(userId) != null
+    }
+
+    private suspend fun hasActiveWalletWithPositiveBalance(userId: String): Boolean {
+        val wallet = walletAccountRepository.getActiveWallet(userId)
+        return wallet != null && (wallet.balanceInBtc ?: 0.0) > 0.0
     }
 
     private fun observeEvents() =

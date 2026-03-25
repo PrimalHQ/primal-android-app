@@ -114,7 +114,9 @@ class WalletDashboardViewModel @Inject constructor(
             if (isNpubLogin) return@launch
 
             val hasLocalWallet = sparkWalletAccountRepository.findPersistedWalletId(activeUserId) != null
-            if (hasLocalWallet) return@launch
+            val activeWallet = walletAccountRepository.getActiveWallet(activeUserId)
+            val hasWalletWithBalance = activeWallet != null && (activeWallet.balanceInBtc ?: 0.0) > 0.0
+            if (hasLocalWallet || hasWalletWithBalance) return@launch
 
             val status = primalWalletAccountRepository.fetchWalletStatus(activeUserId).getOrNull()
                 ?: return@launch
