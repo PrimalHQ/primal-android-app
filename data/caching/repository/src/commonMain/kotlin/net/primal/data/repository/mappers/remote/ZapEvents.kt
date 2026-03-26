@@ -6,6 +6,7 @@ import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.core.utils.toDouble
 import net.primal.data.local.dao.events.EventZap
 import net.primal.data.local.dao.profiles.ProfileData
+import net.primal.domain.events.ZapKind
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.findFirstATag
 import net.primal.domain.nostr.findFirstBolt11
@@ -20,7 +21,11 @@ fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
     mapNotNull { zapReceipt ->
         val zapRequest = zapReceipt.extractZapRequestOrNull()
 
-        if (zapRequest?.tags?.any { it.isPollOptionTag() } == true) return@mapNotNull null
+        val zapKind = if (zapRequest?.tags?.any { it.isPollOptionTag() } == true) {
+            ZapKind.VOTE
+        } else {
+            ZapKind.GENERIC
+        }
 
         val receiverId = zapReceipt.tags.findFirstProfileId()
             ?: return@mapNotNull null
@@ -55,6 +60,7 @@ fun List<NostrEvent>.mapAsEventZapDO(profilesMap: Map<String, ProfileData>) =
             message = zapRequest.content,
             invoice = zapReceipt.tags.findFirstBolt11(),
             rawNostrEvent = zapReceipt.encodeToJsonString(),
+            zapKind = zapKind,
         )
     }
 

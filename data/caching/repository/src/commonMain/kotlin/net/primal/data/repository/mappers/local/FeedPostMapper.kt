@@ -8,6 +8,7 @@ import net.primal.data.local.dao.notes.PostData
 import net.primal.data.repository.mappers.authorNameUiFriendly
 import net.primal.data.repository.mappers.usernameUiFriendly
 import net.primal.domain.events.EventZap
+import net.primal.domain.events.ZapKind
 import net.primal.domain.nostr.utils.asEllipsizedNpub
 import net.primal.domain.nostr.utils.formatNip05Identifier
 import net.primal.domain.posts.FeedPost
@@ -95,7 +96,10 @@ internal fun FeedPostPO.mapAsFeedPostDO(): FeedPostDO {
         nostrUris = this.nostrUris.sortedBy { it.position }.mapIndexed { index, eventUriNostr ->
             eventUriNostr.asReferencedNostrUriDO(forcePosition = index)
         },
-        eventZaps = this.eventZaps.map { it.asEventZapDO() }.sortedWith(EventZap.DefaultComparator),
+        eventZaps = this.eventZaps
+            .filter { it.zapKind == ZapKind.GENERIC }
+            .map { it.asEventZapDO() }
+            .sortedWith(EventZap.DefaultComparator),
         bookmark = this.bookmark?.asPublicBookmark(),
         isThreadMuted = this.data.isThreadMuted == true,
         eventRelayHints = this.eventRelayHints?.asEventRelayHintsDO(),

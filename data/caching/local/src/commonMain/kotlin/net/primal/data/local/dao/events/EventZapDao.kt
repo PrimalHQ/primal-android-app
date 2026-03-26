@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import net.primal.domain.events.ZapKind
 
 @Dao
 interface EventZapDao {
@@ -41,15 +42,15 @@ interface EventZapDao {
     suspend fun deleteByInvoice(invoice: String)
 
     @Transaction
-    @Query("SELECT * FROM EventZap WHERE eventId = :eventId")
-    fun observeAllByEventId(eventId: String): Flow<List<EventZap>>
+    @Query("SELECT * FROM EventZap WHERE eventId = :eventId AND zapKind = :zapKind")
+    fun observeAllByEventId(eventId: String, zapKind: ZapKind = ZapKind.GENERIC): Flow<List<EventZap>>
 
     @Transaction
     @Query(
         """
-            SELECT * FROM EventZap WHERE eventId = :eventId
+            SELECT * FROM EventZap WHERE eventId = :eventId AND zapKind = :zapKind
             ORDER BY CAST(amountInBtc AS REAL) DESC, zapReceiptAt ASC
         """,
     )
-    fun pagedEventZaps(eventId: String): PagingSource<Int, EventZap>
+    fun pagedEventZaps(eventId: String, zapKind: ZapKind = ZapKind.GENERIC): PagingSource<Int, EventZap>
 }
