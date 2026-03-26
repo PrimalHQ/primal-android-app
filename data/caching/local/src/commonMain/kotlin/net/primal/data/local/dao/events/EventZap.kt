@@ -1,6 +1,7 @@
 package net.primal.data.local.dao.events
 
 import androidx.room.Entity
+import net.primal.domain.events.ZapKind
 import net.primal.domain.links.CdnImage
 import net.primal.domain.membership.PrimalLegendProfile
 
@@ -26,4 +27,5 @@ data class EventZap(
     val zapSenderInternetIdentifier: String? = null,
     val zapSenderAvatarCdnImage: CdnImage? = null,
     val zapSenderPrimalLegendProfile: PrimalLegendProfile? = null,
+    val zapKind: ZapKind = ZapKind.GENERIC,
 )

@@ -57,6 +57,7 @@ import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.events.EventRepository
 import net.primal.domain.events.EventZap as EventZapDO
 import net.primal.domain.events.NostrEventAction
+import net.primal.domain.events.ZapKind
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.NostrEventKind
@@ -141,16 +142,17 @@ class EventRepositoryImpl(
         userId: String,
         eventId: String,
         articleATag: String?,
+        zapKind: ZapKind,
     ): Flow<PagingData<EventZapDO>> {
         return createPager(userId = userId, eventId = eventId) {
-            database.eventZaps().pagedEventZaps(eventId = articleATag ?: eventId)
+            database.eventZaps().pagedEventZaps(eventId = articleATag ?: eventId, zapKind = zapKind)
         }.flow.map { it.map { it.asEventZapDO() } }
             .flowOn(dispatcherProvider.io())
     }
 
-    override suspend fun observeZapsByEventId(eventId: String): Flow<List<EventZapDO>> =
+    override suspend fun observeZapsByEventId(eventId: String, zapKind: ZapKind): Flow<List<EventZapDO>> =
         withContext(dispatcherProvider.io()) {
-            database.eventZaps().observeAllByEventId(eventId = eventId)
+            database.eventZaps().observeAllByEventId(eventId = eventId, zapKind = zapKind)
                 .distinctUntilChanged()
                 .map { list -> list.map { it.asEventZapDO() } }
         }
@@ -254,37 +256,41 @@ class EventRepositoryImpl(
             }.map { it + localMap }.recover { localMap }
         }
 
-    override suspend fun saveZapRequest(invoice: String, zapRequestEvent: NostrEvent) =
-        withContext(dispatcherProvider.io()) {
-            val senderId = zapRequestEvent.pubKey
-            val receiverId = zapRequestEvent.tags.findFirstProfileId() ?: return@withContext
-            val eventId = zapRequestEvent.tags.findFirstATag()
-                ?: zapRequestEvent.tags.findFirstEventId()
-                ?: receiverId
+    override suspend fun saveZapRequest(
+        invoice: String,
+        zapRequestEvent: NostrEvent,
+        zapKind: ZapKind,
+    ) = withContext(dispatcherProvider.io()) {
+        val senderId = zapRequestEvent.pubKey
+        val receiverId = zapRequestEvent.tags.findFirstProfileId() ?: return@withContext
+        val eventId = zapRequestEvent.tags.findFirstATag()
+            ?: zapRequestEvent.tags.findFirstEventId()
+            ?: receiverId
 
-            val amountInSats = zapRequestEvent.tags.findFirstZapAmount()?.toBigDecimal()
-                ?: LnInvoiceUtils.getAmountInSatsOrNull(invoice)
-                ?: return@withContext
+        val amountInSats = zapRequestEvent.tags.findFirstZapAmount()?.toBigDecimal()
+            ?: LnInvoiceUtils.getAmountInSatsOrNull(invoice)
+            ?: return@withContext
 
-            val zapSender = database.profiles().findProfileData(profileId = senderId)
-            val data = EventZapPO(
-                eventId = eventId,
-                zapSenderId = senderId,
-                zapReceiverId = receiverId,
-                zapRequestAt = zapRequestEvent.createdAt,
-                zapReceiptAt = 0,
-                amountInBtc = amountInSats.toBtc().toDouble(),
-                message = zapRequestEvent.content,
-                invoice = invoice,
-                rawNostrEvent = zapRequestEvent.encodeToJsonString(),
-                zapSenderAvatarCdnImage = zapSender?.avatarCdnImage,
-                zapSenderHandle = zapSender?.handle,
-                zapSenderDisplayName = zapSender?.displayName,
-                zapSenderInternetIdentifier = zapSender?.internetIdentifier,
-                zapSenderPrimalLegendProfile = zapSender?.primalPremiumInfo?.legendProfile,
-            )
-            database.eventZaps().upsertAll(data = listOf(data))
-        }
+        val zapSender = database.profiles().findProfileData(profileId = senderId)
+        val data = EventZapPO(
+            eventId = eventId,
+            zapSenderId = senderId,
+            zapReceiverId = receiverId,
+            zapRequestAt = zapRequestEvent.createdAt,
+            zapReceiptAt = 0,
+            amountInBtc = amountInSats.toBtc().toDouble(),
+            message = zapRequestEvent.content,
+            invoice = invoice,
+            rawNostrEvent = zapRequestEvent.encodeToJsonString(),
+            zapSenderAvatarCdnImage = zapSender?.avatarCdnImage,
+            zapSenderHandle = zapSender?.handle,
+            zapSenderDisplayName = zapSender?.displayName,
+            zapSenderInternetIdentifier = zapSender?.internetIdentifier,
+            zapSenderPrimalLegendProfile = zapSender?.primalPremiumInfo?.legendProfile,
+            zapKind = zapKind,
+        )
+        database.eventZaps().upsertAll(data = listOf(data))
+    }
 
     override suspend fun deleteZapRequest(invoice: String) =
         withContext(dispatcherProvider.io()) {
