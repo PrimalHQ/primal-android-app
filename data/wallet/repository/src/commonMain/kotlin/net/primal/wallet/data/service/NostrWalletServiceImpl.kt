@@ -224,7 +224,7 @@ internal class NostrWalletServiceImpl(
                     createdAt = transaction.createdAt,
                     updatedAt = transaction.settledAt ?: transaction.createdAt,
                     completedAt = transaction.settledAt,
-                    userId = wallet.userId,
+
                     note = note,
                     invoice = transaction.invoice,
                     amountInBtc = transaction.amount.msatsToBtc(),
@@ -249,7 +249,7 @@ internal class NostrWalletServiceImpl(
                     createdAt = transaction.createdAt,
                     updatedAt = transaction.settledAt ?: transaction.createdAt,
                     completedAt = transaction.settledAt,
-                    userId = wallet.userId,
+
                     note = note,
                     invoice = transaction.invoice,
                     amountInBtc = transaction.amount.msatsToBtc(),
@@ -366,7 +366,7 @@ internal class NostrWalletServiceImpl(
     private fun createNwcApiClient(wallet: Wallet.NWC) =
         NwcClientFactory.createNwcApiClient(
             nwcData = NostrWalletConnect(
-                lightningAddress = wallet.lightningAddress,
+                lightningAddress = null,
                 relays = wallet.relays,
                 pubkey = wallet.pubkey,
                 keypair = wallet.keypair,

@@ -203,7 +203,6 @@ internal class SparkWalletServiceImpl(
             val zapRequestFallback = txInvoice?.let { zapRequestsMap?.get(it) }
 
             payment.mapAsSparkTransaction(
-                userId = wallet.userId,
                 walletId = wallet.walletId,
                 zapRequestFallback = zapRequestFallback,
             )

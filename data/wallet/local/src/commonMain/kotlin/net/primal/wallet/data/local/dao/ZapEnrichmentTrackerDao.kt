@@ -73,16 +73,6 @@ interface ZapEnrichmentTrackerDao {
         maxAttempts: Int,
     )
 
-    @Query(
-        """
-        DELETE FROM ZapEnrichmentTracker
-        WHERE transactionId IN (
-            SELECT transactionId FROM WalletTransactionData WHERE userId = :userId
-        )
-        """,
-    )
-    suspend fun deleteByUserId(userId: String)
-
     @Query("UPDATE ZapEnrichmentTracker SET lastAttemptAt = :lastAttemptAt WHERE transactionId = :transactionId")
     suspend fun updateLastAttemptAt(transactionId: String, lastAttemptAt: Long)
 

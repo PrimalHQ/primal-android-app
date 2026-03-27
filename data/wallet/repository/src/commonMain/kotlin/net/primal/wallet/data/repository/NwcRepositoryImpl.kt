@@ -13,6 +13,7 @@ import net.primal.domain.connections.nostr.handler.Nip47EventsHandler
 import net.primal.domain.connections.nostr.model.NwcConnection
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.shared.data.local.encryption.asEncryptable
+import net.primal.wallet.data.local.dao.UserWalletPreferences
 import net.primal.wallet.data.local.dao.nwc.NwcConnectionData
 import net.primal.wallet.data.local.dao.nwc.NwcPendingEventData
 import net.primal.wallet.data.local.db.WalletDatabase
@@ -55,8 +56,12 @@ internal class NwcRepositoryImpl(
             val secretKeyPair = CryptoUtils.generateHexEncodedKeypair()
             val serviceKeyPair = CryptoUtils.generateHexEncodedKeypair()
 
-            val walletInfo = database.wallet().findWalletInfo(walletId = walletId)
-                ?: return@withContext Result.failure<String>(IllegalArgumentException("Couldn't find given wallet id."))
+            val walletExists = database.wallet().findWalletInfo(walletId = walletId) != null
+            if (!walletExists) {
+                return@withContext Result.failure<String>(IllegalArgumentException("Couldn't find given wallet id."))
+            }
+
+            val lightningAddress = database.wallet().findWalletUserLink(userId, walletId)?.lightningAddress?.decrypted
 
             database.nwcConnections().upsert(
                 data = NwcConnectionData(
@@ -74,7 +79,7 @@ internal class NwcRepositoryImpl(
             buildNwcString(
                 servicePubKey = serviceKeyPair.pubKey,
                 secret = secretKeyPair.privateKey,
-                lightningAddress = walletInfo.lightningAddress?.decrypted,
+                lightningAddress = lightningAddress,
             ).asSuccess()
         }
 
@@ -97,7 +102,7 @@ internal class NwcRepositoryImpl(
 
     override suspend fun getAutoStartConnections(userId: String): List<NwcConnection> =
         withContext(dispatcherProvider.io()) {
-            val autoStartEnabled = database.wallet().isNwcAutoStartEnabled(userId = userId) ?: false
+            val autoStartEnabled = database.userWalletPreferences().isNwcAutoStartEnabled(userId = userId) ?: false
             if (autoStartEnabled) {
                 database.nwcConnections()
                     .getAllConnectionsByUser(userId = userId)
@@ -109,17 +114,19 @@ internal class NwcRepositoryImpl(
 
     override suspend fun updateAutoStartForUser(userId: String, autoStart: Boolean) {
         withContext(dispatcherProvider.io()) {
-            database.wallet().updateNwcAutoStart(userId = userId, autoStart = autoStart)
+            database.userWalletPreferences().upsertPreferences(
+                UserWalletPreferences(userId = userId, nwcAutoStart = autoStart),
+            )
         }
     }
 
     override suspend fun isAutoStartEnabledForUser(userId: String): Boolean =
         withContext(dispatcherProvider.io()) {
-            database.wallet().isNwcAutoStartEnabled(userId = userId) ?: false
+            database.userWalletPreferences().isNwcAutoStartEnabled(userId = userId) ?: false
         }
 
     override fun observeAutoStartEnabled(userId: String): Flow<Boolean> =
-        database.wallet().observeNwcAutoStart(userId = userId)
+        database.userWalletPreferences().observeNwcAutoStart(userId = userId)
             .map { it ?: false }
 
     override suspend fun notifyMissedNwcEvents(userId: String, eventIds: List<String>): Result<Unit> =

@@ -119,7 +119,8 @@ class NoteViewModel @AssistedInject constructor(
     private fun observeActiveWallet() =
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { wallet ->
+                .collect { userWallet ->
+                    val wallet = userWallet?.wallet
                     setState {
                         copy(
                             zappingState = zappingState.copy(
@@ -232,8 +233,8 @@ class NoteViewModel @AssistedInject constructor(
                 return@launch
             }
 
-            val walletId = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())?.walletId
-                ?: return@launch
+            val walletId = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())
+                ?.wallet?.walletId ?: return@launch
 
             val result = zapHandler.zap(
                 userId = activeAccountStore.activeUserId(),
@@ -546,7 +547,7 @@ class NoteViewModel @AssistedInject constructor(
 
             val walletId = walletAccountRepository.getActiveWallet(
                 userId = activeAccountStore.activeUserId(),
-            )?.walletId ?: return@launch
+            )?.wallet?.walletId ?: return@launch
 
             pollsRepository.validateZapPollVote(
                 userId = activeAccountStore.activeUserId(),

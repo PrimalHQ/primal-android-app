@@ -77,18 +77,18 @@ class ReceivePaymentViewModel @Inject constructor(
     private fun observeActiveWallet() =
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { wallet ->
+                .collect { userWallet ->
                     setState {
                         copy(
-                            activeWallet = wallet,
+                            activeWallet = userWallet,
                             lightningNetworkDetails = lightningNetworkDetails.copy(
-                                address = wallet?.lightningAddress ?: lightningNetworkDetails.address,
+                                address = userWallet?.lightningAddress ?: lightningNetworkDetails.address,
                             ),
                         )
                     }
 
-                    if (wallet?.capabilities?.canAwaitLightningPayment == true && awaitPaymentJob == null) {
-                        awaitPayment(walletId = wallet.walletId)
+                    if (userWallet?.wallet?.capabilities?.canAwaitLightningPayment == true && awaitPaymentJob == null) {
+                        awaitPayment(walletId = userWallet.wallet.walletId)
                     }
                 }
         }
@@ -125,9 +125,9 @@ class ReceivePaymentViewModel @Inject constructor(
         viewModelScope.launch {
             setState { copy(loading = true) }
             runCatching {
-                val wallet = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())
-                checkNotNull(wallet)
-                walletRepository.createOnChainAddress(walletId = wallet.walletId).getOrThrow()
+                val userWallet = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())
+                checkNotNull(userWallet)
+                walletRepository.createOnChainAddress(walletId = userWallet.wallet.walletId).getOrThrow()
             }.fold(
                 onSuccess = {
                     setState {
@@ -150,7 +150,7 @@ class ReceivePaymentViewModel @Inject constructor(
         comment: String?,
     ) = viewModelScope.launch {
         setState { copy(creatingInvoice = true) }
-        val activeWalletId = state.value.activeWallet?.walletId ?: return@launch
+        val activeWalletId = state.value.activeWallet?.wallet?.walletId ?: return@launch
 
         walletRepository.createLightningInvoice(
             walletId = activeWalletId,
@@ -176,7 +176,7 @@ class ReceivePaymentViewModel @Inject constructor(
                 )
             }
 
-            val wallet = _state.value.activeWallet
+            val wallet = _state.value.activeWallet?.wallet
             if (wallet?.capabilities?.canAwaitLightningPayment == true) {
                 awaitPayment(walletId = activeWalletId, invoice = result.invoice)
             }

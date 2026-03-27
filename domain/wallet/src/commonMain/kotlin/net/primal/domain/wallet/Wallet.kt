@@ -3,8 +3,6 @@ package net.primal.domain.wallet
 sealed class Wallet(
     open val walletId: String,
     private val walletType: WalletType,
-    open val userId: String,
-    open val lightningAddress: String?,
     open val spamThresholdAmountInSats: Long,
     open val balanceInBtc: Double? = null,
     open val maxBalanceInBtc: Double? = null,
@@ -14,8 +12,6 @@ sealed class Wallet(
 
     data class NWC(
         override val walletId: String,
-        override val userId: String,
-        override val lightningAddress: String?,
         override val spamThresholdAmountInSats: Long,
         override val balanceInBtc: Double?,
         override val maxBalanceInBtc: Double?,
@@ -26,8 +22,6 @@ sealed class Wallet(
     ) : Wallet(
         walletId = walletId,
         walletType = WalletType.NWC,
-        userId = userId,
-        lightningAddress = lightningAddress,
         spamThresholdAmountInSats = spamThresholdAmountInSats,
         balanceInBtc = balanceInBtc,
         maxBalanceInBtc = maxBalanceInBtc,
@@ -36,8 +30,6 @@ sealed class Wallet(
 
     data class Primal(
         override val walletId: String,
-        override val userId: String,
-        override val lightningAddress: String?,
         override val spamThresholdAmountInSats: Long,
         override val balanceInBtc: Double?,
         override val maxBalanceInBtc: Double?,
@@ -46,8 +38,6 @@ sealed class Wallet(
     ) : Wallet(
         walletId = walletId,
         walletType = WalletType.PRIMAL,
-        userId = userId,
-        lightningAddress = lightningAddress,
         spamThresholdAmountInSats = spamThresholdAmountInSats,
         balanceInBtc = balanceInBtc,
         maxBalanceInBtc = maxBalanceInBtc,
@@ -56,8 +46,6 @@ sealed class Wallet(
 
     data class Spark(
         override val walletId: String,
-        override val userId: String,
-        override val lightningAddress: String?,
         override val spamThresholdAmountInSats: Long,
         override val balanceInBtc: Double?,
         override val maxBalanceInBtc: Double?,
@@ -66,8 +54,6 @@ sealed class Wallet(
     ) : Wallet(
         walletId = walletId,
         walletType = WalletType.SPARK,
-        userId = userId,
-        lightningAddress = lightningAddress,
         spamThresholdAmountInSats = spamThresholdAmountInSats,
         balanceInBtc = balanceInBtc,
         maxBalanceInBtc = maxBalanceInBtc,

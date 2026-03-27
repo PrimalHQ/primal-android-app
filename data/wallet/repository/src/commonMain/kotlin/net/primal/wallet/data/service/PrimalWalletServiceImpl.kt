@@ -78,7 +78,6 @@ internal class PrimalWalletServiceImpl(
 
             val transactions = response.transactions.mapAsPrimalTransactions(
                 walletId = wallet.walletId,
-                userId = wallet.userId,
             )
 
             val requestedLimit = request.limit ?: DEFAULT_PAGE_SIZE
@@ -107,7 +106,7 @@ internal class PrimalWalletServiceImpl(
     ): Result<LnInvoiceCreateResult> =
         runCatching {
             val response = primalWalletApi.createLightningInvoice(
-                userId = wallet.userId,
+                userId = wallet.walletId,
                 body = DepositRequestBody(
                     subWallet = SubWallet.Open,
                     amountBtc = request.amountInBtc,
@@ -121,7 +120,7 @@ internal class PrimalWalletServiceImpl(
     override suspend fun createOnChainAddress(wallet: Wallet.Primal): Result<OnChainAddressResult> =
         runCatching {
             val response = primalWalletApi.createOnChainAddress(
-                userId = wallet.userId,
+                userId = wallet.walletId,
                 body = DepositRequestBody(subWallet = SubWallet.Open, network = Network.Bitcoin),
             )
             OnChainAddressResult(address = response.onChainAddress)
@@ -130,7 +129,7 @@ internal class PrimalWalletServiceImpl(
     override suspend fun pay(wallet: Wallet.Primal, request: TxRequest): Result<PayResult> =
         runCatching {
             primalWalletApi.withdraw(
-                userId = wallet.userId,
+                userId = wallet.walletId,
                 body = WithdrawRequestBody(
                     subWallet = SubWallet.Open,
                     targetLud16 = request.getIfTypeOrNull(TxRequest.Lightning.LnUrl::lud16),
@@ -155,7 +154,7 @@ internal class PrimalWalletServiceImpl(
     ): Result<List<OnChainTransactionFeeTier>> =
         runCatching {
             primalWalletApi.getMiningFees(
-                userId = wallet.userId,
+                userId = wallet.walletId,
                 onChainAddress = onChainAddress,
                 amountInBtc = amountInBtc,
             ).map { it.asOnChainTxFeeTierDO() }

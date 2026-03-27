@@ -11,7 +11,7 @@ import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.wallet.SeedPhraseGenerator
 import net.primal.domain.wallet.SparkWalletManager
 import net.primal.domain.wallet.UnclaimedDepositEvent
-import net.primal.domain.wallet.Wallet
+import net.primal.domain.wallet.UserWallet
 import net.primal.domain.wallet.WalletType
 
 class EnsureSparkWalletExistsUseCaseTest {
@@ -298,14 +298,12 @@ class EnsureSparkWalletExistsUseCaseTest {
     @Test
     fun newWallet_passesCorrectArgumentsToPersistSeedWords() =
         runTest {
-            var capturedUserId: String? = null
             var capturedWalletId: String? = null
             var capturedSeedWords: String? = null
             val useCase = buildUseCase(
                 sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
                     persistedWalletId = null,
-                    onPersistSeedWords = { uid, wid, sw ->
-                        capturedUserId = uid
+                    onPersistSeedWords = { wid, sw ->
                         capturedWalletId = wid
                         capturedSeedWords = sw
                     },
@@ -316,7 +314,6 @@ class EnsureSparkWalletExistsUseCaseTest {
 
             useCase.invoke(userId)
 
-            capturedUserId shouldBe userId
             capturedWalletId shouldBe walletId
             capturedSeedWords shouldBe seedPhrase
         }
@@ -370,7 +367,7 @@ private class FakeSparkWalletAccountRepository(
     private val fetchWalletAccountInfoError: Throwable? = null,
     private val getPersistedSeedWordsError: Throwable? = null,
     private val callLog: MutableList<String>? = null,
-    private val onPersistSeedWords: ((String, String, String) -> Unit)? = null,
+    private val onPersistSeedWords: ((String, String) -> Unit)? = null,
 ) : SparkWalletAccountRepository {
 
     override suspend fun findPersistedWalletId(userId: String): String? {
@@ -387,13 +384,9 @@ private class FakeSparkWalletAccountRepository(
         }
     }
 
-    override suspend fun persistSeedWords(
-        userId: String,
-        walletId: String,
-        seedWords: String,
-    ): Result<Unit> {
+    override suspend fun persistSeedWords(walletId: String, seedWords: String): Result<Unit> {
         callLog?.add("persistSeedWords")
-        onPersistSeedWords?.invoke(userId, walletId, seedWords)
+        onPersistSeedWords?.invoke(walletId, seedWords)
         return if (persistSeedWordsError != null) Result.failure(persistSeedWordsError) else Result.success(Unit)
     }
 
@@ -415,16 +408,15 @@ private class FakeSparkWalletAccountRepository(
         }
     }
 
-    override suspend fun isRegistered(walletId: String): Boolean {
+    override suspend fun isRegistered(userId: String, walletId: String): Boolean {
         callLog?.add("isRegistered")
         return isRegistered
     }
 
     override suspend fun isWalletBackedUp(walletId: String): Boolean = false
     override suspend fun markWalletAsBackedUp(walletId: String): Result<Unit> = Result.success(Unit)
-    override suspend fun deleteSparkWalletByUserId(userId: String): Result<String> = Result.success("")
     override suspend fun unregisterSparkWallet(userId: String, walletId: String): Result<Unit> = Result.success(Unit)
-    override suspend fun getLightningAddress(walletId: String): String? = null
+    override suspend fun getLightningAddress(userId: String, walletId: String): String? = null
     override suspend fun findAllPersistedWalletIds(userId: String): List<String> = emptyList()
     override suspend fun isPrimalTxsMigrationCompleted(walletId: String): Boolean = true
     override suspend fun ensureWalletInfoExists(userId: String, walletId: String) = Unit
@@ -438,10 +430,10 @@ private class FakeWalletAccountRepository(
     }
 
     override suspend fun clearActiveWallet(userId: String) = Unit
-    override fun observeWalletsByUser(userId: String): Flow<List<Wallet>> = emptyFlow()
-    override suspend fun findLastUsedWallet(userId: String, type: WalletType): Wallet? = null
-    override suspend fun findLastUsedWallet(userId: String, type: Set<WalletType>): Wallet? = null
-    override suspend fun getActiveWallet(userId: String): Wallet? = null
-    override fun observeActiveWallet(userId: String): Flow<Wallet?> = emptyFlow()
+    override fun observeWalletsByUser(userId: String): Flow<List<UserWallet>> = emptyFlow()
+    override suspend fun findLastUsedWallet(userId: String, type: WalletType): UserWallet? = null
+    override suspend fun findLastUsedWallet(userId: String, type: Set<WalletType>): UserWallet? = null
+    override suspend fun getActiveWallet(userId: String): UserWallet? = null
+    override fun observeActiveWallet(userId: String): Flow<UserWallet?> = emptyFlow()
     override fun observeActiveWalletId(userId: String): Flow<String?> = emptyFlow()
 }

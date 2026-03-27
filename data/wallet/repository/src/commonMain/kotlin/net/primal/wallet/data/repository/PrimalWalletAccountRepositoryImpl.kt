@@ -20,6 +20,7 @@ import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.local.dao.PrimalWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
+import net.primal.wallet.data.local.dao.WalletUserLink
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.PromoCodeRequestBody
@@ -47,17 +48,17 @@ internal class PrimalWalletAccountRepositoryImpl(
                     walletDatabase.wallet().insertOrIgnoreWalletInfo(
                         info = WalletInfo(
                             walletId = userId,
-                            userId = userId,
-                            lightningAddress = lightningAddress.asEncryptable(),
                             type = WalletType.PRIMAL,
                         ),
                     )
-
-                    walletDatabase.wallet().updateWalletLightningAddress(
+                    walletDatabase.wallet().insertWalletUserLink(
+                        WalletUserLink(userId = userId, walletId = userId),
+                    )
+                    walletDatabase.wallet().updateLinkLightningAddress(
+                        userId = userId,
                         walletId = userId,
                         lightningAddress = lightningAddress.asEncryptable(),
                     )
-
                     walletDatabase.wallet().upsertPrimalWalletData(
                         data = PrimalWalletData(
                             walletId = userId,
@@ -130,15 +131,20 @@ internal class PrimalWalletAccountRepositoryImpl(
                 if (wallet.type == WalletType.NWC) continue
 
                 if (wallet.walletId == registeredWalletId) {
-                    walletDao.updateWalletLightningAddress(
+                    walletDao.updateLinkLightningAddress(
+                        userId = userId,
                         walletId = wallet.walletId,
                         lightningAddress = lightningAddress.asEncryptable(),
                     )
-                } else if (wallet.lightningAddress?.decrypted == lightningAddress) {
-                    walletDao.updateWalletLightningAddress(
-                        walletId = wallet.walletId,
-                        lightningAddress = null,
-                    )
+                } else {
+                    val link = walletDao.findWalletUserLink(userId, wallet.walletId)
+                    if (link?.lightningAddress?.decrypted == lightningAddress) {
+                        walletDao.updateLinkLightningAddress(
+                            userId = userId,
+                            walletId = wallet.walletId,
+                            lightningAddress = null,
+                        )
+                    }
                 }
             }
         }

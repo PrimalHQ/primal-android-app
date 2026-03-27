@@ -28,10 +28,4 @@ interface ReceiveRequestDao {
 
     @Query("UPDATE ReceiveRequestData SET fulfilledAt = :fulfilledAt WHERE id = :id")
     suspend fun markFulfilled(id: Long, fulfilledAt: Long)
-
-    @Query("DELETE FROM ReceiveRequestData WHERE userId = :userId")
-    suspend fun deleteAllByUserId(userId: String)
-
-    @Query("DELETE FROM ReceiveRequestData WHERE walletId = :walletId")
-    suspend fun deleteByWalletId(walletId: String)
 }

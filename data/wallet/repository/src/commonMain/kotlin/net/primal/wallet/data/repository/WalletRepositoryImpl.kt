@@ -52,6 +52,7 @@ import net.primal.wallet.data.local.dao.Wallet as WalletPO
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletTransactionData
+import net.primal.wallet.data.local.dao.WalletUserLink
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.repository.mappers.local.asDO
@@ -104,37 +105,42 @@ internal class WalletRepositoryImpl(
                 ?: Result.failure(WalletException.WalletNotFound())
         }
 
-    override suspend fun deleteWalletById(walletId: String) =
-        withContext(dispatcherProvider.io()) {
-            walletDatabase.wallet().deleteWalletsByIds(walletIds = listOf(walletId))
-        }
-
-    override suspend fun upsertNostrWallet(userId: String, wallet: Wallet.NWC) =
-        withContext(dispatcherProvider.io()) {
-            walletDatabase.withTransaction {
-                walletDatabase.wallet().upsertWalletInfo(
-                    info = WalletInfo(
-                        walletId = wallet.walletId,
-                        userId = userId,
-                        lightningAddress = wallet.lightningAddress?.asEncryptable(),
-                        type = WalletType.NWC,
-                        balanceInBtc = wallet.balanceInBtc?.asEncryptable(),
-                        maxBalanceInBtc = wallet.maxBalanceInBtc?.asEncryptable(),
-                        lastUpdatedAt = wallet.lastUpdatedAt,
-                    ),
-                )
-
-                walletDatabase.wallet().upsertNostrWalletData(
-                    data = NostrWalletData(
-                        walletId = wallet.walletId,
-                        relays = wallet.relays.asEncryptable(),
-                        pubkey = wallet.pubkey.asEncryptable(),
-                        walletPubkey = wallet.keypair.pubkey.asEncryptable(),
-                        walletPrivateKey = wallet.keypair.privateKey.asEncryptable(),
-                    ),
+    override suspend fun upsertNostrWallet(
+        userId: String,
+        wallet: Wallet.NWC,
+        lightningAddress: String?,
+    ) = withContext(dispatcherProvider.io()) {
+        walletDatabase.withTransaction {
+            walletDatabase.wallet().upsertWalletInfo(
+                info = WalletInfo(
+                    walletId = wallet.walletId,
+                    type = WalletType.NWC,
+                    balanceInBtc = wallet.balanceInBtc?.asEncryptable(),
+                    maxBalanceInBtc = wallet.maxBalanceInBtc?.asEncryptable(),
+                    lastUpdatedAt = wallet.lastUpdatedAt,
+                ),
+            )
+            walletDatabase.wallet().insertWalletUserLink(
+                WalletUserLink(userId = userId, walletId = wallet.walletId),
+            )
+            if (lightningAddress != null) {
+                walletDatabase.wallet().updateLinkLightningAddress(
+                    userId = userId,
+                    walletId = wallet.walletId,
+                    lightningAddress = lightningAddress.asEncryptable(),
                 )
             }
+            walletDatabase.wallet().upsertNostrWalletData(
+                data = NostrWalletData(
+                    walletId = wallet.walletId,
+                    relays = wallet.relays.asEncryptable(),
+                    pubkey = wallet.pubkey.asEncryptable(),
+                    walletPubkey = wallet.keypair.pubkey.asEncryptable(),
+                    walletPrivateKey = wallet.keypair.privateKey.asEncryptable(),
+                ),
+            )
         }
+    }
 
     override fun latestTransactions(walletId: String): Flow<PagingData<Transaction>> {
         return createTransactionsPager(walletId) {
@@ -298,44 +304,6 @@ internal class WalletRepositoryImpl(
             txData.toDomain(otherProfile = profile)
         }
 
-    override suspend fun deleteAllTransactions(userId: String) =
-        withContext(dispatcherProvider.io()) {
-            walletDatabase.withTransaction {
-                walletDatabase.zapEnrichmentTracker().deleteByUserId(userId)
-                walletDatabase.walletTransactions().deleteAllTransactions(userId = userId)
-            }
-        }
-
-    override suspend fun deleteAllUserData(userId: String) =
-        withContext(dispatcherProvider.io()) {
-            walletDatabase.withTransaction {
-                walletDatabase.zapEnrichmentTracker().deleteByUserId(userId)
-                val wallets = walletDatabase.wallet().findWalletInfosByUserId(userId = userId)
-                val walletIds = wallets.map { it.walletId }
-                val connectionIds = walletDatabase.nwcConnections().findConnectionIdsByUserId(userId)
-
-                if (walletIds.isNotEmpty()) {
-                    walletDatabase.walletSettings().deleteWalletSettings(walletIds)
-                    walletDatabase.wallet().deleteWalletsByIds(walletIds)
-                    walletDatabase.walletTransactionRemoteKeys().deleteByWalletIds(walletIds)
-                    walletDatabase.nwcInvoices().deleteByWalletIds(walletIds)
-                }
-
-                if (connectionIds.isNotEmpty()) {
-                    walletDatabase.nwcPaymentHolds().deleteHoldsByConnectionIds(connectionIds)
-                    walletDatabase.nwcPaymentHolds().deleteDailyBudgetsByConnectionIds(connectionIds)
-                }
-
-                walletDatabase.nwcLogs().deleteAllByUserId(userId)
-
-                walletDatabase.nwcPendingEvents().deleteAllByUserId(userId)
-                walletDatabase.nwcConnections().deleteAllByUserId(userId)
-                walletDatabase.receiveRequests().deleteAllByUserId(userId)
-                walletDatabase.walletTransactions().deleteAllTransactions(userId = userId)
-                walletDatabase.wallet().clearActiveWallet(userId)
-            }
-        }
-
     override suspend fun enrichUnenrichedTransactions() {
         zapEnrichmentProcessor.processEnrichment()
     }
@@ -380,7 +348,6 @@ internal class WalletRepositoryImpl(
                     walletDatabase.receiveRequests().insertOrReplace(
                         ReceiveRequestData(
                             walletId = walletId,
-                            userId = wallet.info.userId,
                             type = ReceiveRequestType.LIGHTNING,
                             createdAt = Clock.System.now().epochSeconds,
                             payload = invoiceResult.invoice,
@@ -407,7 +374,6 @@ internal class WalletRepositoryImpl(
                     walletDatabase.receiveRequests().insertOrReplace(
                         ReceiveRequestData(
                             walletId = walletId,
-                            userId = wallet.info.userId,
                             type = ReceiveRequestType.ON_CHAIN,
                             createdAt = Clock.System.now().epochSeconds,
                             payload = addressResult.address,

@@ -318,12 +318,7 @@ class MigratePrimalToSparkWalletHandler(
             logWarning("Failed to fetch wallet info after all retries: ${error.message}")
         }
 
-        // Delete old Primal wallet (best-effort, no retry)
-        runCatching {
-            walletRepository.deleteWalletById(walletId = userId)
-        }.onFailure { error ->
-            logError("Failed to delete Primal wallet.", error)
-        }
+        // Old Primal wallet data persists (wallet data is never deleted)
     }
 
     private suspend fun importTransactionHistory(

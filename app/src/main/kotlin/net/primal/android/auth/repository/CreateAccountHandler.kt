@@ -73,7 +73,7 @@ class CreateAccountHandler @Inject constructor(
 
     private suspend fun setLightningAddress(userId: String, walletId: String) {
         runCatching {
-            val lightningAddress = sparkWalletAccountRepository.getLightningAddress(walletId)
+            val lightningAddress = sparkWalletAccountRepository.getLightningAddress(userId, walletId)
             if (!lightningAddress.isNullOrBlank()) {
                 userRepository.setLightningAddress(userId = userId, lightningAddress = lightningAddress)
             }

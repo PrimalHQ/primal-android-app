@@ -136,18 +136,19 @@ class DeveloperToolsViewModel @Inject constructor(
             }
             val balanceByWalletId = walletAccountRepository.observeWalletsByUser(userId)
                 .first()
-                .associate { it.walletId to it.balanceInBtc }
+                .associate { it.wallet.walletId to it.wallet.balanceInBtc }
 
             walletAccountRepository.observeActiveWallet(userId)
-                .collect { activeWallet ->
+                .collect { activeUserWallet ->
+                    val activeWallet = activeUserWallet?.wallet
                     val wallets = buildList {
-                        if (activeWallet != null) {
+                        if (activeUserWallet != null && activeWallet != null) {
                             add(
                                 DevWalletInfo(
                                     walletId = activeWallet.walletId,
                                     type = activeWallet.type,
                                     isActive = true,
-                                    lightningAddress = activeWallet.lightningAddress,
+                                    lightningAddress = activeUserWallet.lightningAddress,
                                     balanceInSats = activeWallet.balanceInBtc?.toSats()?.toLong(),
                                 ),
                             )
@@ -156,7 +157,7 @@ class DeveloperToolsViewModel @Inject constructor(
                             .filter { it != activeWallet?.walletId }
                             .forEach { walletId ->
                                 val address = withContext(dispatcherProvider.io()) {
-                                    sparkWalletAccountRepository.getLightningAddress(walletId)
+                                    sparkWalletAccountRepository.getLightningAddress(userId, walletId)
                                 }
                                 add(
                                     DevWalletInfo(

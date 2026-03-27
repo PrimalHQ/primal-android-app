@@ -44,7 +44,7 @@ internal class NostrZapperFactoryImpl(
     private fun Wallet.NWC.createNwcNostrZapper(): NostrZapper {
         return NwcClientFactory.createNwcNostrZapper(
             nwcData = NostrWalletConnect(
-                lightningAddress = this.lightningAddress,
+                lightningAddress = null,
                 relays = this.relays,
                 pubkey = this.pubkey,
                 keypair = this.keypair,

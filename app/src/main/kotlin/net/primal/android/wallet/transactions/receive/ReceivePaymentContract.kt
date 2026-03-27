@@ -6,11 +6,11 @@ import net.primal.android.wallet.transactions.receive.model.PaymentDetails
 import net.primal.android.wallet.transactions.receive.tabs.ReceivePaymentTab
 import net.primal.domain.wallet.CurrencyMode
 import net.primal.domain.wallet.Network
-import net.primal.domain.wallet.Wallet
+import net.primal.domain.wallet.UserWallet
 
 interface ReceivePaymentContract {
     data class UiState(
-        val activeWallet: Wallet? = null,
+        val activeWallet: UserWallet? = null,
         val initialTab: ReceivePaymentTab,
         val currentTab: ReceivePaymentTab = initialTab,
         val loading: Boolean = true,

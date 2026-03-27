@@ -130,8 +130,8 @@ class LegendContributeViewModel @Inject constructor(
     private fun observeActiveWallet() =
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { wallet ->
-                    setState { copy(activeWallet = wallet) }
+                .collect { userWallet ->
+                    setState { copy(activeWallet = userWallet?.wallet) }
                 }
         }
 

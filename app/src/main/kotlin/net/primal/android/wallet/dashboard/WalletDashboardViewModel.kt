@@ -171,7 +171,8 @@ class WalletDashboardViewModel @Inject constructor(
         viewModelScope.launch {
             var previousWalletId: String? = null
             walletAccountRepository.observeActiveWallet(userId = activeUserId)
-                .collect { wallet ->
+                .collect { userWallet ->
+                    val wallet = userWallet?.wallet
                     val transactionsUpdate = wallet?.walletId?.let { walletId ->
                         if (walletId != previousWalletId) {
                             previousWalletId = walletId

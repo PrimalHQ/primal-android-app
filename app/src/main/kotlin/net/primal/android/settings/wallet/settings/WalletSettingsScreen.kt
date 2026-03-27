@@ -75,6 +75,7 @@ import net.primal.android.wallet.utils.saveNwcLogsToUri
 import net.primal.android.wallet.utils.saveTransactionsToUri
 import net.primal.domain.links.CdnImage
 import net.primal.domain.wallet.NostrWalletKeypair
+import net.primal.domain.wallet.UserWallet
 import net.primal.domain.wallet.Wallet
 import net.primal.domain.wallet.capabilities
 
@@ -125,7 +126,7 @@ fun WalletSettingsScreen(
         viewModel.effects.collect { effect ->
             when (effect) {
                 WalletSettingsContract.SideEffect.TransactionsReadyForExport -> {
-                    val fileName = "${uiState.value.activeWallet?.type}_transactions.csv"
+                    val fileName = "${uiState.value.activeWallet?.wallet?.type}_transactions.csv"
                     saveFileLauncher.launch(fileName)
                 }
                 WalletSettingsContract.SideEffect.NwcLogsReadyForExport -> {
@@ -186,9 +187,9 @@ fun WalletSettingsScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     WalletBackupWidget(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        walletBalanceInBtc = state.activeWallet?.balanceInBtc?.toString(),
+                        walletBalanceInBtc = state.activeWallet?.wallet?.balanceInBtc?.toString(),
                         onBackupClick = {
-                            state.activeWallet?.walletId?.let(onBackupWalletClick)
+                            state.activeWallet?.wallet?.walletId?.let(onBackupWalletClick)
                         },
                     )
                 }
@@ -211,7 +212,7 @@ fun WalletSettingsScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                if (state.activeWallet is Wallet.Spark) {
+                if (state.activeWallet?.wallet is Wallet.Spark) {
                     SettingsItem(
                         headlineText = stringResource(id = R.string.settings_wallet_restore_wallet_title),
                         supportText = stringResource(id = R.string.settings_wallet_restore_wallet_subtitle),
@@ -248,7 +249,7 @@ fun WalletSettingsScreen(
                     },
                 )
 
-                if (state.activeWallet?.capabilities?.supportsNwcConnections == true) {
+                if (state.activeWallet?.wallet?.capabilities?.supportsNwcConnections == true) {
                     ConnectedAppsSettings(
                         primalNwcConnectionInfos = state.nwcConnectionsInfo,
                         onRevokeConnectedApp = { eventPublisher(UiEvent.RevokeConnection(it)) },
@@ -277,7 +278,7 @@ fun WalletSettingsScreen(
                     onClick = { eventPublisher(UiEvent.RequestNwcLogsExport) },
                 )
 
-                if (state.activeWallet is Wallet.Spark) {
+                if (state.activeWallet?.wallet is Wallet.Spark) {
                     AutoStartNwcListItem(
                         isAutoStartEnabled = state.isAutoStartEnabled,
                         onAutoStartChanged = { value ->
@@ -376,7 +377,8 @@ private fun WalletSpecificSettingsItems(
             true -> {
                 val clipboardManager = LocalClipboardManager.current
                 ExternalWalletSettings(
-                    nwcWallet = state.activeWallet,
+                    nwcWallet = state.activeWallet?.wallet,
+                    nwcLightningAddress = state.activeWallet?.lightningAddress,
                     onExternalWalletDisconnect = { eventPublisher(UiEvent.DisconnectWallet) },
                     onPasteNwcClick = {
                         val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
@@ -525,20 +527,21 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletSettingsContract.Ui
             ),
             WalletSettingsContract.UiState(
                 activeUserId = "",
-                activeWallet = Wallet.NWC(
-                    relays = listOf("wss://relay.getalby.com/v1"),
-                    lightningAddress = "miljan@getalby.com",
-                    walletId = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
-                    userId = "someUserId",
-                    spamThresholdAmountInSats = 1L,
-                    balanceInBtc = 0.0,
-                    maxBalanceInBtc = 0.0,
-                    lastUpdatedAt = null,
-                    pubkey = "somePubkey",
-                    keypair = NostrWalletKeypair(
-                        privateKey = "7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd",
-                        pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
+                activeWallet = UserWallet(
+                    wallet = Wallet.NWC(
+                        relays = listOf("wss://relay.getalby.com/v1"),
+                        walletId = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
+                        spamThresholdAmountInSats = 1L,
+                        balanceInBtc = 0.0,
+                        maxBalanceInBtc = 0.0,
+                        lastUpdatedAt = null,
+                        pubkey = "somePubkey",
+                        keypair = NostrWalletKeypair(
+                            privateKey = "7c0dabd065b2de3299a0d0e1c26b8ac7047dae6b20aba3a62b23650eb601bbfd",
+                            pubkey = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
+                        ),
                     ),
+                    lightningAddress = "miljan@getalby.com",
                 ),
             ),
         )

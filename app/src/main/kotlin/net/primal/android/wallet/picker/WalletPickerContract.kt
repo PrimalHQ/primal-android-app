@@ -1,10 +1,10 @@
 package net.primal.android.wallet.picker
 
-import net.primal.domain.wallet.Wallet
+import net.primal.domain.wallet.UserWallet
 
 interface WalletPickerContract {
     data class UiState(
-        val wallets: List<Wallet> = emptyList(),
+        val wallets: List<UserWallet> = emptyList(),
         val activeWalletId: String? = null,
         val registeredWalletId: String? = null,
         val registeredLightningAddress: String? = null,
@@ -15,10 +15,10 @@ interface WalletPickerContract {
     )
 
     sealed class UiEvent {
-        data class ChangeActiveWallet(val wallet: Wallet) : UiEvent()
+        data class ChangeActiveWallet(val userWallet: UserWallet) : UiEvent()
         data object EnterEditMode : UiEvent()
         data object CancelEditMode : UiEvent()
-        data class SelectWalletForReassignment(val wallet: Wallet) : UiEvent()
+        data class SelectWalletForReassignment(val userWallet: UserWallet) : UiEvent()
         data object ConfirmReassignment : UiEvent()
         data object DismissError : UiEvent()
     }

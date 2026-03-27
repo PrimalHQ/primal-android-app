@@ -10,6 +10,12 @@ data class Wallet(
         parentColumn = "walletId",
         entityColumn = "walletId",
     )
+    val links: List<WalletUserLink> = emptyList(),
+
+    @Relation(
+        parentColumn = "walletId",
+        entityColumn = "walletId",
+    )
     val primal: PrimalWalletData? = null,
 
     @Relation(

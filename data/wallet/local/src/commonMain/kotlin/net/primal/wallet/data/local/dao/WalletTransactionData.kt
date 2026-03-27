@@ -25,7 +25,6 @@ data class WalletTransactionData(
     val createdAt: Long,
     val updatedAt: Long,
     val completedAt: Encryptable<Long>?,
-    val userId: String,
     val note: Encryptable<String>?,
     val invoice: String?,
     val amountInBtc: Encryptable<Double>,

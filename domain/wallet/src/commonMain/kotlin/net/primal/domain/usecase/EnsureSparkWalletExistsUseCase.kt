@@ -38,12 +38,12 @@ class EnsureSparkWalletExistsUseCase(
             val walletId = sparkWalletManager.initializeWallet(seedWords).getOrThrow()
 
             if (isNewWallet) {
-                sparkWalletAccountRepository.persistSeedWords(userId, walletId, seedWords).getOrThrow()
+                sparkWalletAccountRepository.persistSeedWords(walletId, seedWords).getOrThrow()
             }
 
             if (register) {
                 // Register wallet with server if not already registered
-                if (!sparkWalletAccountRepository.isRegistered(walletId)) {
+                if (!sparkWalletAccountRepository.isRegistered(userId, walletId)) {
                     sparkWalletAccountRepository.registerSparkWallet(userId, walletId).getOrThrow()
                 }
             }

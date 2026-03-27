@@ -144,7 +144,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
                     }
 
                     UiEvent.RequestFetchWalletConnections -> {
-                        val wallet = state.value.activeWallet
+                        val wallet = state.value.activeWallet?.wallet
                         if (wallet is Wallet.Primal) {
                             connectionsJob?.cancel()
                             connectionsJob = fetchPrimalWalletConnections(wallet)
@@ -166,7 +166,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
 
     private fun revokeNwcConnection(nwcPubkey: String) =
         viewModelScope.launch {
-            when (state.value.activeWallet) {
+            when (state.value.activeWallet?.wallet) {
                 is Wallet.Spark -> {
                     runCatching {
                         nwcRepository.revokeConnection(activeAccountStore.activeUserId(), nwcPubkey)
@@ -209,11 +209,12 @@ class WalletSettingsViewModel @AssistedInject constructor(
             var lastFetchedWalletId: String? = null
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
                 .distinctUntilChanged()
-                .collect { wallet ->
+                .collect { userWallet ->
+                    val wallet = userWallet?.wallet
                     val shouldShowBackup = wallet.shouldShowBackup
                     setState {
                         copy(
-                            activeWallet = wallet,
+                            activeWallet = userWallet,
                             useExternalWallet = wallet == null || wallet is Wallet.NWC,
                             showBackupWidget = shouldShowBackup,
                             showBackupListItem = wallet?.capabilities?.supportsWalletBackup == true &&
@@ -294,9 +295,6 @@ class WalletSettingsViewModel @AssistedInject constructor(
         }
 
     private suspend fun disconnectWallet() {
-        state.value.activeWallet?.walletId?.let { walletId ->
-            walletRepository.deleteWalletById(walletId = walletId)
-        }
         walletAccountRepository.clearActiveWallet(userId = activeAccountStore.activeUserId())
     }
 
@@ -306,7 +304,7 @@ class WalletSettingsViewModel @AssistedInject constructor(
             if (useExternalWallet) {
                 val lastUsedNWC = walletAccountRepository.findLastUsedWallet(userId = userId, type = WalletType.NWC)
                 if (lastUsedNWC != null) {
-                    walletAccountRepository.setActiveWallet(userId = userId, walletId = lastUsedNWC.walletId)
+                    walletAccountRepository.setActiveWallet(userId = userId, walletId = lastUsedNWC.wallet.walletId)
                 } else {
                     walletAccountRepository.clearActiveWallet(userId = userId)
                 }
@@ -317,7 +315,10 @@ class WalletSettingsViewModel @AssistedInject constructor(
                 )
 
                 if (lastUsedInternalWallet != null) {
-                    walletAccountRepository.setActiveWallet(userId = userId, walletId = lastUsedInternalWallet.walletId)
+                    walletAccountRepository.setActiveWallet(
+                        userId = userId,
+                        walletId = lastUsedInternalWallet.wallet.walletId,
+                    )
                 } else {
                     walletAccountRepository.setActiveWallet(userId = userId, walletId = userId)
                 }
@@ -327,18 +328,17 @@ class WalletSettingsViewModel @AssistedInject constructor(
     private fun updateSpamThresholdAmount(amountInSats: Long) =
         viewModelScope.launch {
             walletRepository.upsertWalletSettings(
-                walletId = state.value.activeWallet?.walletId ?: activeAccountStore.activeUserId(),
+                walletId = state.value.activeWallet?.wallet?.walletId ?: activeAccountStore.activeUserId(),
                 spamThresholdAmountInSats = amountInSats,
             )
-            walletRepository.deleteAllTransactions(userId = activeAccountStore.activeUserId())
         }
 
     private fun exportTransactions() =
         viewModelScope.launch {
-            val activeWalletId = state.value.activeWallet?.walletId ?: return@launch
+            val activeWalletId = state.value.activeWallet?.wallet?.walletId ?: return@launch
             setState { copy(isExportingTransactions = true) }
             runCatching {
-                if (state.value.activeWallet is Wallet.Spark) {
+                if (state.value.activeWallet?.wallet is Wallet.Spark) {
                     migratePrimalTransactionsHandler.invoke(
                         userId = activeAccountStore.activeUserId(),
                         targetSparkWalletId = activeWalletId,

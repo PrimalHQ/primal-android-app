@@ -51,6 +51,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.picker.WalletPickerContract.UiEvent
 import net.primal.android.wallet.picker.WalletPickerContract.UiState
 import net.primal.core.utils.CurrencyConversionUtils.toSats
+import net.primal.domain.wallet.UserWallet
 import net.primal.domain.wallet.Wallet
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -86,15 +87,15 @@ fun WalletPickerBottomSheet(viewModel: WalletPickerViewModel, onDismissRequest: 
 
             WalletPickerContent(
                 state = state.value,
-                onWalletClick = { wallet ->
+                onWalletClick = { userWallet ->
                     if (state.value.isEditMode) {
-                        viewModel.setEvent(UiEvent.SelectWalletForReassignment(wallet))
+                        viewModel.setEvent(UiEvent.SelectWalletForReassignment(userWallet))
                     } else {
                         sheetState.hideAndRun(
                             coroutineScope = scope,
                             onDismissRequest = onDismissRequest,
                         ) {
-                            viewModel.setEvent(UiEvent.ChangeActiveWallet(wallet))
+                            viewModel.setEvent(UiEvent.ChangeActiveWallet(userWallet))
                         }
                     }
                 },
@@ -136,7 +137,7 @@ private fun WalletPickerTopBar(isEditMode: Boolean) {
 }
 
 @Composable
-private fun WalletPickerContent(state: UiState, onWalletClick: (Wallet) -> Unit) {
+private fun WalletPickerContent(state: UiState, onWalletClick: (UserWallet) -> Unit) {
     val effectiveRegisteredId = if (state.isEditMode) {
         state.previewRegisteredWalletId
     } else {
@@ -150,7 +151,8 @@ private fun WalletPickerContent(state: UiState, onWalletClick: (Wallet) -> Unit)
         verticalArrangement = Arrangement.spacedBy(1.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        state.wallets.forEach { wallet ->
+        state.wallets.forEach { userWallet ->
+            val wallet = userWallet.wallet
             val isNwc = wallet is Wallet.NWC
             val isNotTappableInEditMode = state.isEditMode && isNwc
 
@@ -161,7 +163,7 @@ private fun WalletPickerContent(state: UiState, onWalletClick: (Wallet) -> Unit)
                     null
                 }
             } else {
-                wallet.lightningAddress
+                userWallet.lightningAddress
             }
 
             WalletListItem(
@@ -171,7 +173,7 @@ private fun WalletPickerContent(state: UiState, onWalletClick: (Wallet) -> Unit)
                     .clip(AppTheme.shapes.large)
                     .then(
                         if (!isNotTappableInEditMode) {
-                            Modifier.clickable(onClick = { onWalletClick(wallet) })
+                            Modifier.clickable(onClick = { onWalletClick(userWallet) })
                         } else {
                             Modifier
                         },
@@ -223,7 +225,7 @@ private const val LightningAddressEllipsizeThreshold = 55
 private fun WalletListItem(
     modifier: Modifier = Modifier,
     wallet: Wallet,
-    lightningAddressOverride: String? = wallet.lightningAddress,
+    lightningAddressOverride: String? = null,
     selected: Boolean,
     showBoltIcon: Boolean = false,
     boltIconAlpha: Float = 1f,

@@ -14,7 +14,6 @@ data class ReceiveRequestData(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val walletId: String,
-    val userId: String,
     val type: ReceiveRequestType,
     val createdAt: Long,
     val fulfilledAt: Long? = null,

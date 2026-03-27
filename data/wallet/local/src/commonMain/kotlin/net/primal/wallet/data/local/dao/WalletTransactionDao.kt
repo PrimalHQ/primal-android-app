@@ -92,7 +92,4 @@ interface WalletTransactionDao {
 
     @Query("DELETE FROM WalletTransactionData WHERE walletId IS :walletId")
     suspend fun deleteByWalletId(walletId: String)
-
-    @Query("DELETE FROM WalletTransactionData WHERE userId IS :userId")
-    suspend fun deleteAllTransactions(userId: String)
 }

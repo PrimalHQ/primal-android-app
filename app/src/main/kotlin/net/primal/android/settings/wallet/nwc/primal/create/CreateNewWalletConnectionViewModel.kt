@@ -92,7 +92,7 @@ class CreateNewWalletConnectionViewModel @Inject constructor(
             setState { copy(creatingSecret = true) }
             runCatching {
                 val userId = activeAccountStore.activeUserId()
-                when (val activeWallet = walletAccountRepository.getActiveWallet(userId)) {
+                when (val activeWallet = walletAccountRepository.getActiveWallet(userId)?.wallet) {
                     is Wallet.Spark -> {
                         val uri = nwcRepository.createNewWalletConnection(
                             userId = userId,

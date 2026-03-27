@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.domain.account.WalletAccountRepository
-import net.primal.domain.wallet.Wallet
+import net.primal.domain.wallet.UserWallet
 import net.primal.domain.wallet.WalletType
 import net.primal.wallet.data.local.dao.ActiveWalletData
 import net.primal.wallet.data.local.db.WalletDatabase
@@ -27,12 +27,12 @@ internal class WalletAccountRepositoryImpl(
             walletDatabase.wallet().clearActiveWallet(userId = userId)
         }
 
-    override fun observeWalletsByUser(userId: String): Flow<List<Wallet>> =
+    override fun observeWalletsByUser(userId: String): Flow<List<UserWallet>> =
         walletDatabase.wallet()
             .observeWalletsByUserId(userId = userId)
-            .map { list -> list.map { it.toDomain() } }
+            .map { list -> list.map { it.toDomain(userId) } }
 
-    override suspend fun getActiveWallet(userId: String): Wallet? =
+    override suspend fun getActiveWallet(userId: String): UserWallet? =
         withContext(dispatcherProvider.io()) {
             walletDatabase.wallet().getActiveWallet(userId = userId)?.toDomain()
         }
@@ -46,17 +46,17 @@ internal class WalletAccountRepositoryImpl(
         walletDatabase.wallet().observeActiveWalletId(userId = userId)
             .distinctUntilChanged()
 
-    override suspend fun findLastUsedWallet(userId: String, type: WalletType): Wallet? =
+    override suspend fun findLastUsedWallet(userId: String, type: WalletType): UserWallet? =
         withContext(dispatcherProvider.io()) {
             walletDatabase.wallet()
                 .findLastUsedWalletByType(userId = userId, type = type)
-                ?.toDomain()
+                ?.toDomain(userId)
         }
 
-    override suspend fun findLastUsedWallet(userId: String, type: Set<WalletType>): Wallet? =
+    override suspend fun findLastUsedWallet(userId: String, type: Set<WalletType>): UserWallet? =
         withContext(dispatcherProvider.io()) {
             walletDatabase.wallet()
                 .findLastUsedWalletByTypes(userId = userId, type = type)
-                ?.toDomain()
+                ?.toDomain(userId)
         }
 }

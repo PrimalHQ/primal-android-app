@@ -10,6 +10,7 @@ import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.local.dao.SparkWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
+import net.primal.wallet.data.local.dao.WalletUserLink
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.validator.RecoveryPhraseValidator
@@ -31,13 +32,14 @@ internal class SparkWalletAccountRepositoryImpl(
                     walletDatabase.wallet().insertOrIgnoreWalletInfo(
                         info = WalletInfo(
                             walletId = walletId,
-                            userId = userId,
-                            lightningAddress = lightningAddress?.asEncryptable(),
                             type = WalletType.SPARK,
                         ),
                     )
-                    // Updating in a separate call to avoid losing balance state
-                    walletDatabase.wallet().updateWalletLightningAddress(
+                    walletDatabase.wallet().insertWalletUserLink(
+                        WalletUserLink(userId = userId, walletId = walletId),
+                    )
+                    walletDatabase.wallet().updateLinkLightningAddress(
+                        userId = userId,
                         walletId = walletId,
                         lightningAddress = lightningAddress?.asEncryptable(),
                     )
@@ -81,11 +83,7 @@ internal class SparkWalletAccountRepositoryImpl(
             }
         }
 
-    override suspend fun persistSeedWords(
-        userId: String,
-        walletId: String,
-        seedWords: String,
-    ): Result<Unit> =
+    override suspend fun persistSeedWords(walletId: String, seedWords: String): Result<Unit> =
         runCatching {
             withContext(dispatcherProvider.io()) {
                 if (!recoveryPhraseValidator.isValid(seedWords)) {
@@ -94,22 +92,21 @@ internal class SparkWalletAccountRepositoryImpl(
                 walletDatabase.wallet().upsertSparkWalletData(
                     SparkWalletData(
                         walletId = walletId,
-                        userId = userId,
                         seedWords = seedWords.asEncryptable(),
                     ),
                 )
             }
         }
 
-    override suspend fun getLightningAddress(walletId: String): String? =
+    override suspend fun getLightningAddress(userId: String, walletId: String): String? =
         withContext(dispatcherProvider.io()) {
-            walletDatabase.wallet().findWalletInfo(walletId)?.lightningAddress?.decrypted
+            walletDatabase.wallet().findWalletUserLink(userId, walletId)?.lightningAddress?.decrypted
         }
 
-    override suspend fun isRegistered(walletId: String): Boolean =
+    override suspend fun isRegistered(userId: String, walletId: String): Boolean =
         withContext(dispatcherProvider.io()) {
-            val info = walletDatabase.wallet().findWalletInfo(walletId)
-            info?.lightningAddress?.decrypted?.isNotBlank() == true
+            val link = walletDatabase.wallet().findWalletUserLink(userId, walletId)
+            link?.lightningAddress?.decrypted?.isNotBlank() == true
         }
 
     override suspend fun isWalletBackedUp(walletId: String): Boolean =
@@ -124,35 +121,6 @@ internal class SparkWalletAccountRepositoryImpl(
             }
         }
 
-    override suspend fun deleteSparkWalletByUserId(userId: String): Result<String> =
-        runCatching {
-            withContext(dispatcherProvider.io()) {
-                walletDatabase.withTransaction {
-                    val walletId = walletDatabase.wallet().deleteSparkWalletByUserId(userId = userId)
-                        ?: throw NoSuchElementException("No spark wallet found for $userId user.")
-
-                    val connectionIds = walletDatabase.nwcConnections()
-                        .findConnectionIdsByWalletId(walletId)
-
-                    walletDatabase.walletSettings().deleteWalletSettings(listOf(walletId))
-                    walletDatabase.walletTransactionRemoteKeys().deleteByWalletId(walletId)
-                    walletDatabase.walletTransactions().deleteByWalletId(walletId)
-                    walletDatabase.nwcInvoices().deleteByWalletIds(listOf(walletId))
-                    walletDatabase.receiveRequests().deleteByWalletId(walletId)
-
-                    if (connectionIds.isNotEmpty()) {
-                        walletDatabase.nwcPaymentHolds().deleteHoldsByConnectionIds(connectionIds)
-                        walletDatabase.nwcPaymentHolds().deleteDailyBudgetsByConnectionIds(connectionIds)
-                        walletDatabase.nwcPendingEvents().deleteAllByConnectionIds(connectionIds)
-                    }
-                    walletDatabase.nwcConnections().deleteAllByWalletId(walletId)
-                    walletDatabase.nwcLogs().deleteByWalletId(walletId)
-
-                    walletId
-                }
-            }
-        }
-
     override suspend fun isPrimalTxsMigrationCompleted(walletId: String): Boolean =
         withContext(dispatcherProvider.io()) {
             val sparkWalletData = walletDatabase.wallet().findSparkWalletData(walletId)
@@ -163,14 +131,17 @@ internal class SparkWalletAccountRepositoryImpl(
 
     override suspend fun ensureWalletInfoExists(userId: String, walletId: String) {
         withContext(dispatcherProvider.io()) {
-            walletDatabase.wallet().insertOrIgnoreWalletInfo(
-                WalletInfo(
-                    walletId = walletId,
-                    userId = userId,
-                    lightningAddress = null,
-                    type = WalletType.SPARK,
-                ),
-            )
+            walletDatabase.withTransaction {
+                walletDatabase.wallet().insertOrIgnoreWalletInfo(
+                    WalletInfo(
+                        walletId = walletId,
+                        type = WalletType.SPARK,
+                    ),
+                )
+                walletDatabase.wallet().insertWalletUserLink(
+                    WalletUserLink(userId = userId, walletId = walletId),
+                )
+            }
         }
     }
 }

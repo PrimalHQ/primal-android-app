@@ -1,7 +1,6 @@
 package net.primal.domain.usecase
 
 import net.primal.core.utils.Result
-import net.primal.core.utils.fold
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.runCatching
 import net.primal.domain.account.SparkWalletAccountRepository
@@ -15,22 +14,16 @@ class RestoreSparkWalletUseCase(
 ) {
     suspend fun invoke(seedWords: String, userId: String): Result<String> =
         runCatching {
-            val deleteResult = sparkWalletAccountRepository.deleteSparkWalletByUserId(userId = userId)
+            val currentWalletId = sparkWalletAccountRepository.findPersistedWalletId(userId)
+            if (currentWalletId != null) {
+                sparkWalletManager.disconnectWallet(walletId = currentWalletId)
+            }
 
-            val newWalletId = deleteResult.fold(
-                onSuccess = { oldWalletId ->
-                    sparkWalletManager.disconnectWallet(walletId = oldWalletId)
-                    sparkWalletManager.initializeWallet(seedWords = seedWords).getOrThrow()
-                },
-                onFailure = {
-                    sparkWalletManager.initializeWallet(seedWords = seedWords).getOrThrow()
-                },
-            )
+            val newWalletId = sparkWalletManager.initializeWallet(seedWords = seedWords).getOrThrow()
 
             sparkWalletAccountRepository.persistSeedWords(
-                userId = userId,
-                seedWords = seedWords,
                 walletId = newWalletId,
+                seedWords = seedWords,
             )
             sparkWalletAccountRepository.registerSparkWallet(userId = userId, walletId = newWalletId)
             sparkWalletAccountRepository.fetchWalletAccountInfo(userId = userId, walletId = newWalletId)
