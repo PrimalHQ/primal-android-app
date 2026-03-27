@@ -76,6 +76,31 @@ fun rememberManagedMediaController(
     return controller
 }
 
+@Composable
+fun rememberAudioController(mediaId: String): MediaController? {
+    val context = LocalContext.current
+    val appContext = remember(context) { context.applicationContext }
+    var controller by remember(mediaId) { mutableStateOf<MediaController?>(null) }
+
+    DisposableEffect(mediaId) {
+        val token = SessionToken(
+            appContext,
+            ComponentName(appContext, PrimalMediaSessionService::class.java),
+        )
+        val future = MediaController.Builder(appContext, token).buildAsync()
+        val setController = { runCatching { controller = future.get() }.getOrDefault(Unit) }
+        future.addListener(setController, MoreExecutors.directExecutor())
+
+        onDispose {
+            controller?.release()
+            MediaController.releaseFuture(future)
+            controller = null
+        }
+    }
+
+    return controller
+}
+
 fun MediaController.toggle() =
     if (isPlaying) {
         pause()
