@@ -48,6 +48,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.common.util.isPrimalIdentifier
 import net.primal.domain.links.EventUriNostrType
+import net.primal.domain.links.EventUriType
 import net.primal.domain.links.ReferencedNote
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
@@ -500,6 +501,7 @@ fun renderContentAsAnnotatedString(
         .clearAtSignFromNostrUris()
         .remove(texts = mediaAttachments.map { it.url })
         .remove(texts = linkAttachments.filter { it.title?.isNotEmpty() == true }.map { it.url })
+        .remove(texts = linkAttachments.filter { it.type == EventUriType.Audio }.map { it.url })
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .remove(texts = if (!shouldKeepNostrNoteUris) effectiveNostrUris.map { it.uri } else emptyList())
         .remove(texts = data.invoices)
@@ -530,6 +532,7 @@ fun renderContentAsAnnotatedString(
 
         data.uris
             .filterNot { it.isMediaUri() }
+            .filterNot { it.type == EventUriType.Audio }
             .map { it.url }
             .forEach {
                 addUrlAnnotation(
