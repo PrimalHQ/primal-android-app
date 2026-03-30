@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -17,6 +18,7 @@ fun OnboardingBottomBar(
     onButtonClick: () -> Unit,
     buttonEnabled: Boolean = true,
     buttonLoading: Boolean = false,
+    buttonTestTag: String = "",
     footer: @Composable ColumnScope.() -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -30,6 +32,7 @@ fun OnboardingBottomBar(
         OnboardingButton(
             text = buttonText,
             modifier = Modifier
+                .then(if (buttonTestTag.isNotEmpty()) Modifier.testTag(buttonTestTag) else Modifier)
                 .fillMaxWidth()
                 .height(56.dp)
                 .align(alignment = Alignment.CenterHorizontally),

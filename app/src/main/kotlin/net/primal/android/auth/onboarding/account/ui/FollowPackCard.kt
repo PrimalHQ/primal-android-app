@@ -26,12 +26,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import java.util.Locale
 import net.primal.android.R
+import net.primal.android.auth.OnboardingTestTags
 import net.primal.android.auth.compose.DefaultOnboardingAvatar
 import net.primal.android.auth.onboarding.account.ui.model.OnboardingFollowPack
 import net.primal.android.core.compose.AvatarOverlap
@@ -161,6 +163,7 @@ private fun FollowPackHeader(
 @Composable
 private fun FollowAllButton(allFollowed: Boolean, onClick: () -> Unit) {
     PrimalFilledButton(
+        modifier = Modifier.testTag(OnboardingTestTags.FOLLOW_ALL_BUTTON),
         height = 32.dp,
         containerColor = if (allFollowed) SubtleBorderColor else PrimalDarkTextColor,
         contentColor = if (allFollowed) PrimalDarkTextColor else Color.White,

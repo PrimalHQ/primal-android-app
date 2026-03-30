@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.auth.OnboardingTestTags
 import net.primal.android.auth.compose.OnboardingButton
 import net.primal.android.core.compose.ColumnWithBackground
 import net.primal.android.core.compose.MAX_COMPONENT_WIDTH
@@ -93,6 +94,7 @@ fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
                 Spacer(modifier = Modifier.height(16.dp))
 
                 OnboardingButton(
+                    modifier = Modifier.testTag(OnboardingTestTags.WELCOME_CREATE_ACCOUNT_BUTTON),
                     text = stringResource(id = R.string.welcome_create_account_button_title),
                     onClick = callbacks.onCreateAccountClick,
                 )

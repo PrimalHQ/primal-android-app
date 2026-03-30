@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.R
+import net.primal.android.auth.OnboardingTestTags
 import net.primal.android.auth.compose.OnboardingBottomBar
 import net.primal.android.auth.onboarding.account.OnboardingContract
 import net.primal.android.auth.onboarding.account.OnboardingStep
@@ -81,6 +82,7 @@ fun OnboardingFollowPacksScreen(
                 buttonText = stringResource(id = R.string.onboarding_button_next),
                 buttonEnabled = state.followedUserIds.isNotEmpty(),
                 onButtonClick = { eventPublisher(OnboardingContract.UiEvent.RequestNextStep) },
+                buttonTestTag = OnboardingTestTags.NEXT_BUTTON,
                 footer = { OnboardingStepsIndicator(currentPage = OnboardingStep.FollowPacks.index) },
             )
         },
