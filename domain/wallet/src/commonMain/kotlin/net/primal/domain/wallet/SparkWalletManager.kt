@@ -12,6 +12,8 @@ interface SparkWalletManager {
     suspend fun initializeWallet(seedWords: String): Result<String>
 
     suspend fun disconnectWallet(walletId: String): Result<Unit>
+
+    suspend fun hasInstance(walletId: String): Boolean
 }
 
 data class UnclaimedDeposit(

@@ -54,7 +54,7 @@ internal class PrimalWalletAccountRepositoryImpl(
                     walletDatabase.wallet().insertWalletUserLink(
                         WalletUserLink(userId = userId, walletId = userId),
                     )
-                    walletDatabase.wallet().updateLinkLightningAddress(
+                    walletDatabase.wallet().assignLightningAddress(
                         userId = userId,
                         walletId = userId,
                         lightningAddress = lightningAddress.asEncryptable(),
@@ -100,12 +100,20 @@ internal class PrimalWalletAccountRepositoryImpl(
             runCatching {
                 val response = primalWalletApi.getWalletStatus(userId)
 
-                response.lightningAddress?.let {
-                    correctLightningAddressAssignment(
-                        userId = userId,
-                        registeredWalletId = response.sparkPubkey ?: userId,
-                        lightningAddress = it,
+                val sparkWalletId = response.sparkPubkey
+                val lightningAddress = response.lightningAddress
+
+                if (sparkWalletId != null) {
+                    walletDatabase.wallet().insertWalletUserLink(
+                        WalletUserLink(userId = userId, walletId = sparkWalletId),
                     )
+                    if (lightningAddress != null) {
+                        walletDatabase.wallet().assignLightningAddress(
+                            userId = userId,
+                            walletId = sparkWalletId,
+                            lightningAddress = lightningAddress.asEncryptable(),
+                        )
+                    }
                 }
 
                 PrimalWalletStatus(
@@ -117,36 +125,4 @@ internal class PrimalWalletAccountRepositoryImpl(
                 )
             }
         }
-
-    private suspend fun correctLightningAddressAssignment(
-        userId: String,
-        registeredWalletId: String,
-        lightningAddress: String,
-    ) {
-        walletDatabase.withTransaction {
-            val walletDao = walletDatabase.wallet()
-            val allWallets = walletDao.findWalletInfosByUserId(userId)
-
-            for (wallet in allWallets) {
-                if (wallet.type == WalletType.NWC) continue
-
-                if (wallet.walletId == registeredWalletId) {
-                    walletDao.updateLinkLightningAddress(
-                        userId = userId,
-                        walletId = wallet.walletId,
-                        lightningAddress = lightningAddress.asEncryptable(),
-                    )
-                } else {
-                    val link = walletDao.findWalletUserLink(userId, wallet.walletId)
-                    if (link?.lightningAddress?.decrypted == lightningAddress) {
-                        walletDao.updateLinkLightningAddress(
-                            userId = userId,
-                            walletId = wallet.walletId,
-                            lightningAddress = null,
-                        )
-                    }
-                }
-            }
-        }
-    }
 }

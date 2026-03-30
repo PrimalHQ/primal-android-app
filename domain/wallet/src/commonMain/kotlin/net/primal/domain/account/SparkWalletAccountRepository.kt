@@ -10,9 +10,11 @@ interface SparkWalletAccountRepository {
 
     suspend fun unregisterSparkWallet(userId: String, walletId: String): Result<Unit>
 
-    suspend fun findPersistedWalletId(userId: String): String?
-
     suspend fun findAllPersistedWalletIds(userId: String): List<String>
+
+    suspend fun hasPersistedSparkWallet(userId: String): Boolean
+
+    suspend fun findRegisteredSparkWalletId(userId: String): String?
 
     suspend fun getPersistedSeedWords(walletId: String): Result<List<String>>
 

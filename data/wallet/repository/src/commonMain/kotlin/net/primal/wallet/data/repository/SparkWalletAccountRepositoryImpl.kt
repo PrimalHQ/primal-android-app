@@ -38,11 +38,13 @@ internal class SparkWalletAccountRepositoryImpl(
                     walletDatabase.wallet().insertWalletUserLink(
                         WalletUserLink(userId = userId, walletId = walletId),
                     )
-                    walletDatabase.wallet().updateLinkLightningAddress(
-                        userId = userId,
-                        walletId = walletId,
-                        lightningAddress = lightningAddress?.asEncryptable(),
-                    )
+                    if (lightningAddress != null) {
+                        walletDatabase.wallet().assignLightningAddress(
+                            userId = userId,
+                            walletId = walletId,
+                            lightningAddress = lightningAddress.asEncryptable(),
+                        )
+                    }
                 }
             }
         }
@@ -61,16 +63,20 @@ internal class SparkWalletAccountRepositoryImpl(
             }
         }
 
-    override suspend fun findPersistedWalletId(userId: String): String? =
-        withContext(dispatcherProvider.io()) {
-            walletDatabase.wallet().findAllSparkWalletDataByUserId(userId)
-                .firstOrNull()?.walletId
-        }
-
     override suspend fun findAllPersistedWalletIds(userId: String): List<String> =
         withContext(dispatcherProvider.io()) {
             walletDatabase.wallet().findAllSparkWalletDataByUserId(userId)
                 .map { it.walletId }
+        }
+
+    override suspend fun hasPersistedSparkWallet(userId: String): Boolean =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet().hasSparkWalletDataByUserId(userId)
+        }
+
+    override suspend fun findRegisteredSparkWalletId(userId: String): String? =
+        withContext(dispatcherProvider.io()) {
+            walletDatabase.wallet().findRegisteredWalletIdByType(userId, WalletType.SPARK)
         }
 
     override suspend fun getPersistedSeedWords(walletId: String): Result<List<String>> =

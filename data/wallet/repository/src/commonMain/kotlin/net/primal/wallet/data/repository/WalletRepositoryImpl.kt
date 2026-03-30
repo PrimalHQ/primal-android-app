@@ -124,7 +124,7 @@ internal class WalletRepositoryImpl(
                 WalletUserLink(userId = userId, walletId = wallet.walletId),
             )
             if (lightningAddress != null) {
-                walletDatabase.wallet().updateLinkLightningAddress(
+                walletDatabase.wallet().assignLightningAddress(
                     userId = userId,
                     walletId = wallet.walletId,
                     lightningAddress = lightningAddress.asEncryptable(),

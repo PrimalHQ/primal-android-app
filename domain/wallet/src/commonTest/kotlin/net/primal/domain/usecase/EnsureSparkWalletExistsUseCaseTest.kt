@@ -2,17 +2,12 @@ package net.primal.domain.usecase
 
 import io.kotest.matchers.shouldBe
 import kotlin.test.Test
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.test.runTest
 import net.primal.core.utils.Result
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.wallet.SeedPhraseGenerator
 import net.primal.domain.wallet.SparkWalletManager
-import net.primal.domain.wallet.UnclaimedDepositEvent
-import net.primal.domain.wallet.UserWallet
-import net.primal.domain.wallet.WalletType
 
 class EnsureSparkWalletExistsUseCaseTest {
 
@@ -30,7 +25,6 @@ class EnsureSparkWalletExistsUseCaseTest {
             val callOrder = mutableListOf<String>()
             val useCase = buildUseCase(
                 sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
-                    persistedWalletId = null,
                     callLog = callOrder,
                 ),
                 walletAccountRepository = FakeWalletAccountRepository(callLog = callOrder),
@@ -42,7 +36,8 @@ class EnsureSparkWalletExistsUseCaseTest {
 
             result.getOrThrow() shouldBe walletId
             callOrder shouldBe listOf(
-                "findPersistedWalletId",
+                "findRegisteredSparkWalletId",
+                "findAllPersistedWalletIds",
                 "initializeWallet",
                 "persistSeedWords",
                 "isRegistered",
@@ -58,7 +53,7 @@ class EnsureSparkWalletExistsUseCaseTest {
             val callOrder = mutableListOf<String>()
             val useCase = buildUseCase(
                 sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
-                    persistedWalletId = walletId,
+                    registeredWalletId = walletId,
                     persistedSeedWords = seedWords,
                     isRegistered = true,
                     callLog = callOrder,
@@ -72,7 +67,7 @@ class EnsureSparkWalletExistsUseCaseTest {
 
             result.getOrThrow() shouldBe walletId
             callOrder shouldBe listOf(
-                "findPersistedWalletId",
+                "findRegisteredSparkWalletId",
                 "getPersistedSeedWords",
                 "initializeWallet",
                 "isRegistered",
@@ -87,7 +82,7 @@ class EnsureSparkWalletExistsUseCaseTest {
             val callOrder = mutableListOf<String>()
             val useCase = buildUseCase(
                 sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
-                    persistedWalletId = walletId,
+                    registeredWalletId = walletId,
                     persistedSeedWords = seedWords,
                     isRegistered = false,
                     callLog = callOrder,
@@ -101,7 +96,7 @@ class EnsureSparkWalletExistsUseCaseTest {
 
             result.getOrThrow() shouldBe walletId
             callOrder shouldBe listOf(
-                "findPersistedWalletId",
+                "findRegisteredSparkWalletId",
                 "getPersistedSeedWords",
                 "initializeWallet",
                 "isRegistered",
@@ -112,12 +107,100 @@ class EnsureSparkWalletExistsUseCaseTest {
         }
 
     @Test
+    fun noRegisteredWallet_unregisteredExists_fallsBackToUnregistered() =
+        runTest {
+            val callOrder = mutableListOf<String>()
+            val useCase = buildUseCase(
+                sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
+                    registeredWalletId = null,
+                    allPersistedWalletIds = listOf(walletId),
+                    persistedSeedWords = seedWords,
+                    isRegistered = false,
+                    callLog = callOrder,
+                ),
+                walletAccountRepository = FakeWalletAccountRepository(callLog = callOrder),
+                sparkWalletManager = FakeSparkWalletManager(walletId = walletId, callLog = callOrder),
+                seedPhraseGenerator = FakeSeedPhraseGenerator(seedWords = seedWords),
+            )
+
+            val result = useCase.invoke(userId)
+
+            result.getOrThrow() shouldBe walletId
+            callOrder shouldBe listOf(
+                "findRegisteredSparkWalletId",
+                "findAllPersistedWalletIds",
+                "getPersistedSeedWords",
+                "initializeWallet",
+                "isRegistered",
+                "registerSparkWallet",
+                "fetchWalletAccountInfo",
+                "setActiveWallet",
+            )
+        }
+
+    @Test
+    fun noRegisteredWallet_multipleUnregistered_usesFirst() =
+        runTest {
+            val otherWalletId = "other_wallet"
+            val callOrder = mutableListOf<String>()
+            var capturedGetSeedWordsWalletId: String? = null
+            val useCase = buildUseCase(
+                sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
+                    registeredWalletId = null,
+                    allPersistedWalletIds = listOf(walletId, otherWalletId),
+                    persistedSeedWords = seedWords,
+                    isRegistered = false,
+                    callLog = callOrder,
+                    onGetPersistedSeedWords = { capturedGetSeedWordsWalletId = it },
+                ),
+                walletAccountRepository = FakeWalletAccountRepository(callLog = callOrder),
+                sparkWalletManager = FakeSparkWalletManager(walletId = walletId, callLog = callOrder),
+                seedPhraseGenerator = FakeSeedPhraseGenerator(seedWords = seedWords),
+            )
+
+            val result = useCase.invoke(userId)
+
+            result.getOrThrow() shouldBe walletId
+            capturedGetSeedWordsWalletId shouldBe walletId
+        }
+
+    @Test
+    fun registeredWalletExists_withUnregistered_usesRegistered_skipsFallback() =
+        runTest {
+            val callOrder = mutableListOf<String>()
+            val useCase = buildUseCase(
+                sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
+                    registeredWalletId = walletId,
+                    allPersistedWalletIds = listOf("other1", "other2"),
+                    persistedSeedWords = seedWords,
+                    isRegistered = true,
+                    callLog = callOrder,
+                ),
+                walletAccountRepository = FakeWalletAccountRepository(callLog = callOrder),
+                sparkWalletManager = FakeSparkWalletManager(walletId = walletId, callLog = callOrder),
+                seedPhraseGenerator = FakeSeedPhraseGenerator(seedWords = seedWords),
+            )
+
+            val result = useCase.invoke(userId)
+
+            result.getOrThrow() shouldBe walletId
+            callOrder shouldBe listOf(
+                "findRegisteredSparkWalletId",
+                "getPersistedSeedWords",
+                "initializeWallet",
+                "isRegistered",
+                "fetchWalletAccountInfo",
+                "setActiveWallet",
+            )
+            callOrder.contains("findAllPersistedWalletIds") shouldBe false
+        }
+
+    @Test
     fun registerFalse_skipsRegistrationButStillFetchesInfo() =
         runTest {
             val callOrder = mutableListOf<String>()
             val useCase = buildUseCase(
                 sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
-                    persistedWalletId = null,
                     callLog = callOrder,
                 ),
                 walletAccountRepository = FakeWalletAccountRepository(callLog = callOrder),
@@ -129,7 +212,8 @@ class EnsureSparkWalletExistsUseCaseTest {
 
             result.getOrThrow() shouldBe walletId
             callOrder shouldBe listOf(
-                "findPersistedWalletId",
+                "findRegisteredSparkWalletId",
+                "findAllPersistedWalletIds",
                 "initializeWallet",
                 "persistSeedWords",
                 "fetchWalletAccountInfo",
@@ -159,7 +243,7 @@ class EnsureSparkWalletExistsUseCaseTest {
         runTest {
             val error = RuntimeException("wallet init failed")
             val useCase = buildUseCase(
-                sparkWalletManager = FakeSparkWalletManager(error = error),
+                sparkWalletManager = FakeSparkWalletManager(initError = error),
             )
 
             val result = useCase.invoke(userId)
@@ -175,7 +259,6 @@ class EnsureSparkWalletExistsUseCaseTest {
             val callOrder = mutableListOf<String>()
             val useCase = buildUseCase(
                 sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
-                    persistedWalletId = null,
                     persistSeedWordsError = error,
                     callLog = callOrder,
                 ),
@@ -199,7 +282,6 @@ class EnsureSparkWalletExistsUseCaseTest {
             val callOrder = mutableListOf<String>()
             val useCase = buildUseCase(
                 sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
-                    persistedWalletId = null,
                     registerSparkWalletError = error,
                     callLog = callOrder,
                 ),
@@ -223,7 +305,6 @@ class EnsureSparkWalletExistsUseCaseTest {
             val callOrder = mutableListOf<String>()
             val useCase = buildUseCase(
                 sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
-                    persistedWalletId = null,
                     fetchWalletAccountInfoError = error,
                     callLog = callOrder,
                 ),
@@ -245,7 +326,7 @@ class EnsureSparkWalletExistsUseCaseTest {
             val error = RuntimeException("fetch failed")
             val useCase = buildUseCase(
                 sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
-                    persistedWalletId = walletId,
+                    registeredWalletId = walletId,
                     persistedSeedWords = seedWords,
                     fetchWalletAccountInfoError = error,
                 ),
@@ -265,7 +346,7 @@ class EnsureSparkWalletExistsUseCaseTest {
             val error = RuntimeException("seed words not found")
             val useCase = buildUseCase(
                 sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
-                    persistedWalletId = walletId,
+                    registeredWalletId = walletId,
                     getPersistedSeedWordsError = error,
                 ),
                 sparkWalletManager = FakeSparkWalletManager(walletId = walletId),
@@ -302,7 +383,6 @@ class EnsureSparkWalletExistsUseCaseTest {
             var capturedSeedWords: String? = null
             val useCase = buildUseCase(
                 sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
-                    persistedWalletId = null,
                     onPersistSeedWords = { wid, sw ->
                         capturedWalletId = wid
                         capturedSeedWords = sw
@@ -337,103 +417,4 @@ private class FakeSeedPhraseGenerator(
 ) : SeedPhraseGenerator {
     override fun generate(wordCount: Int): Result<List<String>> =
         if (error != null) Result.failure(error) else Result.success(seedWords)
-}
-
-private class FakeSparkWalletManager(
-    private val walletId: String = "",
-    private val error: Throwable? = null,
-    private val callLog: MutableList<String>? = null,
-    private val onInitialize: ((String) -> Unit)? = null,
-) : SparkWalletManager {
-    override val unclaimedDeposits: Flow<UnclaimedDepositEvent> = emptyFlow()
-    override val balanceChanged: Flow<String> = emptyFlow()
-
-    override suspend fun initializeWallet(seedWords: String): Result<String> {
-        callLog?.add("initializeWallet")
-        onInitialize?.invoke(seedWords)
-        return if (error != null) Result.failure(error) else Result.success(walletId)
-    }
-
-    override suspend fun disconnectWallet(walletId: String): Result<Unit> = Result.success(Unit)
-}
-
-@Suppress("LongParameterList")
-private class FakeSparkWalletAccountRepository(
-    private val persistedWalletId: String? = null,
-    private val persistedSeedWords: List<String> = emptyList(),
-    private val isRegistered: Boolean = false,
-    private val persistSeedWordsError: Throwable? = null,
-    private val registerSparkWalletError: Throwable? = null,
-    private val fetchWalletAccountInfoError: Throwable? = null,
-    private val getPersistedSeedWordsError: Throwable? = null,
-    private val callLog: MutableList<String>? = null,
-    private val onPersistSeedWords: ((String, String) -> Unit)? = null,
-) : SparkWalletAccountRepository {
-
-    override suspend fun findPersistedWalletId(userId: String): String? {
-        callLog?.add("findPersistedWalletId")
-        return persistedWalletId
-    }
-
-    override suspend fun getPersistedSeedWords(walletId: String): Result<List<String>> {
-        callLog?.add("getPersistedSeedWords")
-        return if (getPersistedSeedWordsError != null) {
-            Result.failure(getPersistedSeedWordsError)
-        } else {
-            Result.success(persistedSeedWords)
-        }
-    }
-
-    override suspend fun persistSeedWords(walletId: String, seedWords: String): Result<Unit> {
-        callLog?.add("persistSeedWords")
-        onPersistSeedWords?.invoke(walletId, seedWords)
-        return if (persistSeedWordsError != null) Result.failure(persistSeedWordsError) else Result.success(Unit)
-    }
-
-    override suspend fun registerSparkWallet(userId: String, walletId: String): Result<Unit> {
-        callLog?.add("registerSparkWallet")
-        return if (registerSparkWalletError != null) {
-            Result.failure(registerSparkWalletError)
-        } else {
-            Result.success(Unit)
-        }
-    }
-
-    override suspend fun fetchWalletAccountInfo(userId: String, walletId: String): Result<Unit> {
-        callLog?.add("fetchWalletAccountInfo")
-        return if (fetchWalletAccountInfoError != null) {
-            Result.failure(fetchWalletAccountInfoError)
-        } else {
-            Result.success(Unit)
-        }
-    }
-
-    override suspend fun isRegistered(userId: String, walletId: String): Boolean {
-        callLog?.add("isRegistered")
-        return isRegistered
-    }
-
-    override suspend fun isWalletBackedUp(walletId: String): Boolean = false
-    override suspend fun markWalletAsBackedUp(walletId: String): Result<Unit> = Result.success(Unit)
-    override suspend fun unregisterSparkWallet(userId: String, walletId: String): Result<Unit> = Result.success(Unit)
-    override suspend fun getLightningAddress(userId: String, walletId: String): String? = null
-    override suspend fun findAllPersistedWalletIds(userId: String): List<String> = emptyList()
-    override suspend fun isPrimalTxsMigrationCompleted(walletId: String): Boolean = true
-    override suspend fun ensureWalletInfoExists(userId: String, walletId: String) = Unit
-}
-
-private class FakeWalletAccountRepository(
-    private val callLog: MutableList<String>? = null,
-) : WalletAccountRepository {
-    override suspend fun setActiveWallet(userId: String, walletId: String) {
-        callLog?.add("setActiveWallet")
-    }
-
-    override suspend fun clearActiveWallet(userId: String) = Unit
-    override fun observeWalletsByUser(userId: String): Flow<List<UserWallet>> = emptyFlow()
-    override suspend fun findLastUsedWallet(userId: String, type: WalletType): UserWallet? = null
-    override suspend fun findLastUsedWallet(userId: String, type: Set<WalletType>): UserWallet? = null
-    override suspend fun getActiveWallet(userId: String): UserWallet? = null
-    override fun observeActiveWallet(userId: String): Flow<UserWallet?> = emptyFlow()
-    override fun observeActiveWalletId(userId: String): Flow<String?> = emptyFlow()
 }

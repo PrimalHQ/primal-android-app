@@ -46,15 +46,33 @@ interface WalletDao {
 
     @Query(
         """
+        UPDATE WalletUserLink SET lightningAddress = NULL
+        WHERE lightningAddress = :lightningAddress
+        """,
+    )
+    suspend fun nullOutLightningAddress(lightningAddress: Encryptable<String>)
+
+    @Query(
+        """
         UPDATE WalletUserLink SET lightningAddress = :lightningAddress
         WHERE userId = :userId AND walletId = :walletId
         """,
     )
-    suspend fun updateLinkLightningAddress(
+    suspend fun setLightningAddress(
         userId: String,
         walletId: String,
-        lightningAddress: Encryptable<String>?,
+        lightningAddress: Encryptable<String>,
     )
+
+    @Transaction
+    suspend fun assignLightningAddress(
+        userId: String,
+        walletId: String,
+        lightningAddress: Encryptable<String>,
+    ) {
+        nullOutLightningAddress(lightningAddress)
+        setLightningAddress(userId, walletId, lightningAddress)
+    }
 
     @Query("SELECT * FROM WalletUserLink WHERE userId = :userId AND walletId = :walletId")
     suspend fun findWalletUserLink(userId: String, walletId: String): WalletUserLink?
@@ -82,6 +100,29 @@ interface WalletDao {
         """,
     )
     suspend fun findAllSparkWalletDataByUserId(userId: String): List<SparkWalletData>
+
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT 1 FROM SparkWalletData swd
+            INNER JOIN WalletUserLink wul ON swd.walletId = wul.walletId
+            WHERE wul.userId = :userId
+        )
+        """,
+    )
+    suspend fun hasSparkWalletDataByUserId(userId: String): Boolean
+
+    @Query(
+        """
+        SELECT wul.walletId FROM WalletUserLink wul
+        INNER JOIN WalletInfo wi ON wul.walletId = wi.walletId
+        WHERE wul.userId = :userId
+          AND wi.type = :type
+          AND wul.lightningAddress IS NOT NULL
+        LIMIT 1
+        """,
+    )
+    suspend fun findRegisteredWalletIdByType(userId: String, type: WalletType): String?
 
     @Query("UPDATE SparkWalletData SET backedUp = :backedUp WHERE walletId = :walletId")
     suspend fun updateSparkWalletBackedUp(walletId: String, backedUp: Boolean)

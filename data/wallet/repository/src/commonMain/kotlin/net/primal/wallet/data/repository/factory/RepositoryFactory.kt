@@ -323,6 +323,10 @@ abstract class RepositoryFactory {
                 profileRepository = profileRepository,
                 dispatcherProvider = dispatcherProvider,
             ),
+            walletAccountRepository = WalletAccountRepositoryImpl(
+                dispatcherProvider = dispatcherProvider,
+                walletDatabase = resolveWalletDatabase(),
+            ),
         )
     }
 

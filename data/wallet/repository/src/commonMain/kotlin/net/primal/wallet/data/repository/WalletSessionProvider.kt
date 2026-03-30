@@ -12,8 +12,10 @@ import net.primal.core.utils.onSuccess
 import net.primal.core.utils.retryOnFailureWithAbort
 import net.primal.domain.account.PrimalWalletAccountRepository
 import net.primal.domain.account.SparkWalletAccountRepository
+import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.usecase.EnsureSparkWalletExistsUseCase
 import net.primal.domain.wallet.SparkWalletManager
+import net.primal.domain.wallet.Wallet
 import net.primal.wallet.data.repository.handler.MigratePrimalTransactionsHandler
 
 @Suppress("LongParameterList")
@@ -24,6 +26,7 @@ class WalletSessionProvider internal constructor(
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
     private val migratePrimalTransactionsHandler: MigratePrimalTransactionsHandler,
+    private val walletAccountRepository: WalletAccountRepository,
 ) {
 
     private val scope = CoroutineScope(dispatchers.io())
@@ -40,6 +43,20 @@ class WalletSessionProvider internal constructor(
 
                     val userId = userIdOrNull ?: return@collectLatest
                     initializeWallet(userId)
+                }
+        }
+
+        scope.launch {
+            activeUserId
+                .collectLatest { userIdOrNull ->
+                    val userId = userIdOrNull ?: return@collectLatest
+                    walletAccountRepository.observeActiveWallet(userId)
+                        .collect { userWallet ->
+                            val wallet = userWallet?.wallet ?: return@collect
+                            if (wallet is Wallet.Spark) {
+                                ensureSdkInitialized(wallet.walletId)
+                            }
+                        }
                 }
         }
     }
@@ -59,10 +76,25 @@ class WalletSessionProvider internal constructor(
         }
     }
 
+    private suspend fun ensureSdkInitialized(walletId: String) {
+        if (sparkWalletManager.hasInstance(walletId)) return
+
+        val seedWords = sparkWalletAccountRepository
+            .getPersistedSeedWords(walletId)
+            .getOrNull()
+            ?.joinToString(separator = " ")
+            ?: return
+
+        sparkWalletManager.initializeWallet(seedWords)
+            .onFailure { error ->
+                Napier.e(throwable = error) { "ensureSdkInitialized failed for walletId=$walletId" }
+            }
+    }
+
     private suspend fun initializeWallet(userId: String) {
         try {
             val userWalletStatus = primalWalletAccountRepository.fetchWalletStatus(userId).getOrNull()
-            val hasLocalWallet = sparkWalletAccountRepository.findPersistedWalletId(userId) != null
+            val hasLocalWallet = sparkWalletAccountRepository.hasPersistedSparkWallet(userId)
 
             when {
                 hasLocalWallet -> {

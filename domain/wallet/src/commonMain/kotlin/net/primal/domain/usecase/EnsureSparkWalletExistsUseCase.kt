@@ -26,7 +26,8 @@ class EnsureSparkWalletExistsUseCase(
      */
     suspend fun invoke(userId: String, register: Boolean = true): Result<String> =
         runCatching {
-            val existingWalletId = sparkWalletAccountRepository.findPersistedWalletId(userId)
+            val existingWalletId = sparkWalletAccountRepository.findRegisteredSparkWalletId(userId)
+                ?: sparkWalletAccountRepository.findAllPersistedWalletIds(userId).firstOrNull()
             val isNewWallet = existingWalletId == null
 
             val seedWords = if (isNewWallet) {

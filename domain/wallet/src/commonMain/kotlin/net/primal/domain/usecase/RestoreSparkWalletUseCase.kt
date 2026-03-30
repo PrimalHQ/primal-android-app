@@ -14,11 +14,6 @@ class RestoreSparkWalletUseCase(
 ) {
     suspend fun invoke(seedWords: String, userId: String): Result<String> =
         runCatching {
-            val currentWalletId = sparkWalletAccountRepository.findPersistedWalletId(userId)
-            if (currentWalletId != null) {
-                sparkWalletManager.disconnectWallet(walletId = currentWalletId)
-            }
-
             val newWalletId = sparkWalletManager.initializeWallet(seedWords = seedWords).getOrThrow()
 
             sparkWalletAccountRepository.persistSeedWords(
