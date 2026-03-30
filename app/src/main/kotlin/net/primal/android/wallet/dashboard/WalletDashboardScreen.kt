@@ -275,56 +275,56 @@ fun WalletDashboardScreen(
                 scrollBehavior = scrollBehaviour,
                 showDivider = !LocalPrimalTheme.current.isDarkTheme,
                 footer = {
-                    AnimatedContent(
-                        modifier = Modifier.onSizeChanged { topBarFooterHeight = it.height },
-                        targetState = dashboardExpanded,
-                        label = "DashboardAnimation",
-                    ) { expanded ->
-                        when (expanded) {
-                            true -> WalletDashboard(
-                                modifier = Modifier
-                                    .wrapContentSize(align = Alignment.Center)
-                                    .padding(horizontal = 32.dp)
-                                    .padding(top = 16.dp, bottom = 24.dp)
-                                    .animateContentSize(),
-                                walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
-                                enabled = state.wallet.isConfigured() &&
-                                    state.dashboardState != WalletDashboardState.NoWalletNpubLogin,
-                                actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
-                                onWalletAction = { action ->
-                                    when (action) {
-                                        WalletAction.Send -> onSendClick()
-                                        WalletAction.Scan -> onScanClick()
-                                        WalletAction.Receive -> onReceiveClick()
-                                    }
-                                },
-                                currencyMode = currencyMode,
-                                onSwitchCurrencyMode = { currencyMode = it },
-                                exchangeBtcUsdRate = state.exchangeBtcUsdRate,
-                            )
+                    if (state.dashboardState == WalletDashboardState.ActiveWallet) {
+                        AnimatedContent(
+                            modifier = Modifier.onSizeChanged { topBarFooterHeight = it.height },
+                            targetState = dashboardExpanded,
+                            label = "DashboardAnimation",
+                        ) { expanded ->
+                            when (expanded) {
+                                true -> WalletDashboard(
+                                    modifier = Modifier
+                                        .wrapContentSize(align = Alignment.Center)
+                                        .padding(horizontal = 32.dp)
+                                        .padding(top = 16.dp, bottom = 24.dp)
+                                        .animateContentSize(),
+                                    walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
+                                    enabled = state.wallet.isConfigured(),
+                                    actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                                    onWalletAction = { action ->
+                                        when (action) {
+                                            WalletAction.Send -> onSendClick()
+                                            WalletAction.Scan -> onScanClick()
+                                            WalletAction.Receive -> onReceiveClick()
+                                        }
+                                    },
+                                    currencyMode = currencyMode,
+                                    onSwitchCurrencyMode = { currencyMode = it },
+                                    exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                                )
 
-                            false -> WalletDashboardLite(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(dashboardLiteHeightDp)
-                                    .background(color = AppTheme.colorScheme.surface)
-                                    .padding(horizontal = 10.dp, vertical = 16.dp)
-                                    .animateContentSize(),
-                                walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
-                                actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
-                                onWalletAction = { action ->
-                                    when (action) {
-                                        WalletAction.Send -> onSendClick()
-                                        WalletAction.Scan -> onScanClick()
-                                        WalletAction.Receive -> onReceiveClick()
-                                    }
-                                },
-                                currencyMode = currencyMode,
-                                enabled = state.wallet.isConfigured() &&
-                                    state.dashboardState != WalletDashboardState.NoWalletNpubLogin,
-                                onSwitchCurrencyMode = { currencyMode = it },
-                                exchangeBtcUsdRate = state.exchangeBtcUsdRate,
-                            )
+                                false -> WalletDashboardLite(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(dashboardLiteHeightDp)
+                                        .background(color = AppTheme.colorScheme.surface)
+                                        .padding(horizontal = 10.dp, vertical = 16.dp)
+                                        .animateContentSize(),
+                                    walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
+                                    actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                                    onWalletAction = { action ->
+                                        when (action) {
+                                            WalletAction.Send -> onSendClick()
+                                            WalletAction.Scan -> onScanClick()
+                                            WalletAction.Receive -> onReceiveClick()
+                                        }
+                                    },
+                                    currencyMode = currencyMode,
+                                    enabled = state.wallet.isConfigured(),
+                                    onSwitchCurrencyMode = { currencyMode = it },
+                                    exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                                )
+                            }
                         }
                     }
                 },
