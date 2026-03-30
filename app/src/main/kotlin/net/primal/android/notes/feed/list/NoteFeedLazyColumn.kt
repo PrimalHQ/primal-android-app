@@ -130,7 +130,7 @@ fun NoteFeedLazyColumn(
                         data = item,
                         shape = RectangleShape,
                         cardPadding = PaddingValues(all = 0.dp),
-                        fullWidthContent = false,
+                        fullWidthContent = true,
                         enableTweetsMode = true,
                         nestingCutOffLimit = FEED_NESTED_NOTES_CUT_OFF_LIMIT,
                         showReplyTo = showReplyTo,

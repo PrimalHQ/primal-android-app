@@ -60,7 +60,7 @@ fun PrimalTopAppBar(
     avatarBlossoms: List<String> = emptyList(),
     legendaryCustomization: LegendaryCustomization? = null,
     actions: (@Composable RowScope.() -> Unit)? = null,
-    showDivider: Boolean = false,
+    showDivider: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     onTitleClick: (() -> Unit)? = null,
     onTitleLongClick: (() -> Unit)? = null,
