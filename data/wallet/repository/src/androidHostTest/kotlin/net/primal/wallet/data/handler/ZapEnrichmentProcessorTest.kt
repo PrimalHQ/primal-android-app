@@ -25,6 +25,7 @@ import net.primal.domain.events.EventZap
 import net.primal.domain.events.NostrEventAction
 import net.primal.domain.events.NostrEventStats
 import net.primal.domain.events.NostrEventUserStats
+import net.primal.domain.events.ZapKind
 import net.primal.domain.nostr.Naddr
 import net.primal.domain.nostr.NostrEvent
 import net.primal.domain.nostr.ReportType
@@ -982,9 +983,11 @@ class ZapEnrichmentProcessorTest {
             userId: String,
             eventId: String,
             articleATag: String?,
+            zapKind: ZapKind,
         ): Flow<PagingData<EventZap>> = throw NotImplementedError()
 
-        override suspend fun observeZapsByEventId(eventId: String): Flow<List<EventZap>> = throw NotImplementedError()
+        override suspend fun observeZapsByEventId(eventId: String, zapKind: ZapKind): Flow<List<EventZap>> =
+            throw NotImplementedError()
 
         override fun observeEventStats(eventIds: List<String>): Flow<List<NostrEventStats>> =
             throw NotImplementedError()
@@ -1005,7 +1008,11 @@ class ZapEnrichmentProcessorTest {
 
         override suspend fun fetchReplaceableEvents(naddrs: List<Naddr>): Result<Unit> = throw NotImplementedError()
 
-        override suspend fun saveZapRequest(invoice: String, zapRequestEvent: NostrEvent) = throw NotImplementedError()
+        override suspend fun saveZapRequest(
+            invoice: String,
+            zapRequestEvent: NostrEvent,
+            zapKind: ZapKind,
+        ) = throw NotImplementedError()
 
         override suspend fun deleteZapRequest(invoice: String) = throw NotImplementedError()
     }

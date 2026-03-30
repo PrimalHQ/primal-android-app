@@ -1,6 +1,7 @@
 package net.primal.data.repository.mappers.local
 
 import net.primal.data.local.dao.reads.Article as ArticlePO
+import net.primal.domain.events.ZapKind
 import net.primal.domain.reads.Article as ArticleDO
 
 fun ArticlePO.asArticleDO(): ArticleDO {
@@ -23,7 +24,7 @@ fun ArticlePO.asArticleDO(): ArticleDO {
         author = this.author?.asProfileDataDO(),
         eventStats = this.eventStats?.asNostrEventStats(),
         userEventStats = this.userEventStats?.asNostrEventUserStats(),
-        eventZaps = this.eventZaps.map { it.asEventZapDO() },
+        eventZaps = this.eventZaps.filter { it.zapKind == ZapKind.GENERIC }.map { it.asEventZapDO() },
         bookmark = this.bookmark?.asPublicBookmark(),
         highlights = this.highlights.map { it.asHighlightDO() },
         client = this.data.client,

@@ -13,9 +13,10 @@ interface EventRepository {
         userId: String,
         eventId: String,
         articleATag: String?,
+        zapKind: ZapKind = ZapKind.GENERIC,
     ): Flow<PagingData<EventZap>>
 
-    suspend fun observeZapsByEventId(eventId: String): Flow<List<EventZap>>
+    suspend fun observeZapsByEventId(eventId: String, zapKind: ZapKind = ZapKind.GENERIC): Flow<List<EventZap>>
 
     fun observeEventStats(eventIds: List<String>): Flow<List<NostrEventStats>>
     fun observeUserEventStatus(eventIds: List<String>, userId: String): Flow<List<NostrEventUserStats>>
@@ -36,7 +37,11 @@ interface EventRepository {
 
     suspend fun getZapRequests(invoices: List<String>): Result<Map<String, NostrEvent>>
 
-    suspend fun saveZapRequest(invoice: String, zapRequestEvent: NostrEvent)
+    suspend fun saveZapRequest(
+        invoice: String,
+        zapRequestEvent: NostrEvent,
+        zapKind: ZapKind = ZapKind.GENERIC,
+    )
 
     suspend fun deleteZapRequest(invoice: String)
 }
