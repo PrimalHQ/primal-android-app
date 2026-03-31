@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import net.primal.android.R
+import net.primal.android.auth.OnboardingTestTags
 import net.primal.android.auth.compose.OnboardingBottomBar
 import net.primal.android.auth.compose.defaultAvatarForeground
 import net.primal.android.auth.compose.onboardingTextHintTypography
@@ -172,6 +173,10 @@ private fun ProfilePreviewBottomBar(
                 AccountCreationStep.AccountPreview -> onCreateAccountClick()
                 AccountCreationStep.AccountCreated -> onFinishOnboardingClick()
             }
+        },
+        buttonTestTag = when (accountCreationStep) {
+            AccountCreationStep.AccountPreview -> OnboardingTestTags.CREATE_ACCOUNT_NOW_BUTTON
+            AccountCreationStep.AccountCreated -> OnboardingTestTags.DONE_BUTTON
         },
         footer = {
             val currentPage = when (accountCreationStep) {

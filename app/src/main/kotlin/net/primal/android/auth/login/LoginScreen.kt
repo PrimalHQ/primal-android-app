@@ -51,6 +51,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.auth.OnboardingTestTags
 import net.primal.android.auth.compose.DefaultOnboardingAvatar
 import net.primal.android.auth.compose.OnboardingButton
 import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
@@ -239,7 +240,7 @@ fun LoginContent(
                 modifier = Modifier
                     .run {
                         if (state.isValidKey) {
-                            this.testTag("loginSignInButton")
+                            this.testTag(OnboardingTestTags.LOGIN_SIGN_IN_BUTTON)
                         } else {
                             this
                         }

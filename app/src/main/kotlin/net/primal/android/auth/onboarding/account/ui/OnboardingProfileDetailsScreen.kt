@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -50,6 +51,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import net.primal.android.R
+import net.primal.android.auth.OnboardingTestTags
 import net.primal.android.auth.compose.DefaultOnboardingAvatar
 import net.primal.android.auth.compose.OnboardingBottomBar
 import net.primal.android.auth.compose.defaultOnboardingAvatarBackground
@@ -127,6 +129,7 @@ fun OnboardingProfileDetailsScreen(
                 buttonText = stringResource(id = R.string.onboarding_button_next),
                 buttonEnabled = state.profileDisplayName.isNotEmpty() && state.profileAboutYou.isNotEmpty(),
                 onButtonClick = { eventPublisher(OnboardingContract.UiEvent.RequestNextStep) },
+                buttonTestTag = OnboardingTestTags.NEXT_BUTTON,
                 footer = { OnboardingStepsIndicator(currentPage = OnboardingStep.Details.index) },
             )
         },
@@ -149,6 +152,7 @@ private fun ProfileDetailsAvatarColumn(
     ) {
         Box(
             modifier = Modifier
+                .testTag(OnboardingTestTags.AVATAR_PICKER)
                 .padding(horizontal = 16.dp)
                 .size(size = 108.dp)
                 .clip(shape = CircleShape)
@@ -224,6 +228,7 @@ private fun ProfileDetailsFormColumn(
             value = displayName,
             onValueChange = onDisplayNameChanged,
             placeholderText = stringResource(id = R.string.onboarding_profile_details_display_name_hint),
+            modifier = Modifier.testTag(OnboardingTestTags.DISPLAY_NAME_INPUT),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Text,
                 capitalization = KeyboardCapitalization.Words,
@@ -237,6 +242,7 @@ private fun ProfileDetailsFormColumn(
             value = aboutYou,
             onValueChange = onAboutYouChanged,
             placeholderText = stringResource(id = R.string.onboarding_profile_details_about_you_hint),
+            modifier = Modifier.testTag(OnboardingTestTags.ABOUT_YOU_INPUT),
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Text,
                 capitalization = KeyboardCapitalization.Sentences,
@@ -264,11 +270,12 @@ fun OnboardingOutlinedTextField(
     value: String,
     onValueChange: (String) -> Unit,
     placeholderText: String,
+    modifier: Modifier = Modifier,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
 ) {
     OutlinedTextField(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         shape = AppTheme.shapes.extraLarge,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = Color.White,
