@@ -53,6 +53,7 @@ inline fun <reified T : WalletDO> WalletPO.toDomain(): T =
 fun WalletPO.toDomain(userId: String): UserWallet {
     val lightningAddress = links.find { it.userId == userId }?.lightningAddress?.decrypted
     return UserWallet(
+        userId = userId,
         wallet = toDomain(),
         lightningAddress = lightningAddress,
     )

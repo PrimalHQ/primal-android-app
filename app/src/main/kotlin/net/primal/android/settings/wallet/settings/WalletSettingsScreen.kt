@@ -528,6 +528,7 @@ class WalletUiStateProvider : PreviewParameterProvider<WalletSettingsContract.Ui
             WalletSettingsContract.UiState(
                 activeUserId = "",
                 activeWallet = UserWallet(
+                    userId = "",
                     wallet = Wallet.NWC(
                         relays = listOf("wss://relay.getalby.com/v1"),
                         walletId = "69effe7b49a6dd5cf525bd0905917a5005ffe480b58eeb8e861418cf3ae760d9",
