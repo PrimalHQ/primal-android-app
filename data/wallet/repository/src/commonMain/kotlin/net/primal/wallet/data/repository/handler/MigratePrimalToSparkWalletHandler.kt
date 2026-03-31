@@ -322,7 +322,7 @@ class MigratePrimalToSparkWalletHandler(
         runCatching {
             walletRepository.deleteWalletById(walletId = userId)
         }.onFailure { error ->
-            logError("Failed to delete Primal wallet: ${error.message}")
+            logError("Failed to delete Primal wallet.", error)
         }
     }
 

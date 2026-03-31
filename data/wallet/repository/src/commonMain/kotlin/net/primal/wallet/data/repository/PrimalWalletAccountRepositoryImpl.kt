@@ -20,7 +20,6 @@ import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.local.dao.PrimalWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
-import net.primal.wallet.data.local.dao.WalletUserLink
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.remote.model.PromoCodeRequestBody
@@ -52,7 +51,8 @@ internal class PrimalWalletAccountRepositoryImpl(
                         ),
                     )
                     walletDatabase.wallet().insertWalletUserLink(
-                        WalletUserLink(userId = userId, walletId = userId),
+                        userId = userId,
+                        walletId = userId,
                     )
                     walletDatabase.wallet().assignLightningAddress(
                         userId = userId,
@@ -105,7 +105,8 @@ internal class PrimalWalletAccountRepositoryImpl(
 
                 if (sparkWalletId != null) {
                     walletDatabase.wallet().insertWalletUserLink(
-                        WalletUserLink(userId = userId, walletId = sparkWalletId),
+                        userId = userId,
+                        walletId = sparkWalletId,
                     )
                     if (lightningAddress != null) {
                         walletDatabase.wallet().assignLightningAddress(

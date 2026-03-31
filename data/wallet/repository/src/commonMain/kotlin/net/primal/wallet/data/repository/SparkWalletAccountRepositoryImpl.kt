@@ -10,7 +10,6 @@ import net.primal.shared.data.local.db.withTransaction
 import net.primal.shared.data.local.encryption.asEncryptable
 import net.primal.wallet.data.local.dao.SparkWalletData
 import net.primal.wallet.data.local.dao.WalletInfo
-import net.primal.wallet.data.local.dao.WalletUserLink
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.validator.RecoveryPhraseValidator
@@ -36,7 +35,8 @@ internal class SparkWalletAccountRepositoryImpl(
                         ),
                     )
                     walletDatabase.wallet().insertWalletUserLink(
-                        WalletUserLink(userId = userId, walletId = walletId),
+                        userId = userId,
+                        walletId = walletId,
                     )
                     if (lightningAddress != null) {
                         walletDatabase.wallet().assignLightningAddress(
@@ -145,7 +145,8 @@ internal class SparkWalletAccountRepositoryImpl(
                     ),
                 )
                 walletDatabase.wallet().insertWalletUserLink(
-                    WalletUserLink(userId = userId, walletId = walletId),
+                    userId = userId,
+                    walletId = walletId,
                 )
             }
         }

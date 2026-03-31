@@ -52,7 +52,6 @@ import net.primal.wallet.data.local.dao.Wallet as WalletPO
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
 import net.primal.wallet.data.local.dao.WalletTransactionData
-import net.primal.wallet.data.local.dao.WalletUserLink
 import net.primal.wallet.data.local.db.WalletDatabase
 import net.primal.wallet.data.remote.api.PrimalWalletApi
 import net.primal.wallet.data.repository.mappers.local.asDO
@@ -109,12 +108,7 @@ internal class WalletRepositoryImpl(
         withContext(dispatcherProvider.io()) {
             val walletIds = listOf(walletId)
             walletDatabase.withTransaction {
-                walletDatabase.wallet().deleteWalletInfosByIds(walletIds)
-                walletDatabase.wallet().deletePrimalWalletDataByIds(walletIds)
-                walletDatabase.wallet().deleteNostrWalletDataByIds(walletIds)
-                walletDatabase.wallet().deleteSparkWalletDataByIds(walletIds)
-                walletDatabase.wallet().deleteWalletUserLinksByIds(walletIds)
-                walletDatabase.wallet().deleteActiveWalletDataByIds(walletIds)
+                walletDatabase.wallet().deleteWalletsByIds(walletIds)
                 walletDatabase.walletSettings().deleteWalletSettings(walletIds)
                 walletDatabase.walletTransactions().deleteByWalletId(walletId)
                 walletDatabase.walletTransactionRemoteKeys().deleteByWalletId(walletId)
@@ -141,7 +135,8 @@ internal class WalletRepositoryImpl(
                 ),
             )
             walletDatabase.wallet().insertWalletUserLink(
-                WalletUserLink(userId = userId, walletId = wallet.walletId),
+                userId = userId,
+                walletId = wallet.walletId,
             )
             if (lightningAddress != null) {
                 walletDatabase.wallet().assignLightningAddress(
