@@ -36,7 +36,7 @@ fun HeightAdjustableLoadingLazyListPlaceholder(
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
-            .testTag("lazyListPlaceholder")
+            .testTag(CommonTestTags.LAZY_LIST_PLACEHOLDER)
             .clipToBounds()
             .padding(16.dp)
             .padding(contentPaddingValues),

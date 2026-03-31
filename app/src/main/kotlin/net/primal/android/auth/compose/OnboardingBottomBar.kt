@@ -18,7 +18,7 @@ fun OnboardingBottomBar(
     onButtonClick: () -> Unit,
     buttonEnabled: Boolean = true,
     buttonLoading: Boolean = false,
-    buttonTestTag: String = "",
+    buttonTestTag: String? = null,
     footer: @Composable ColumnScope.() -> Unit,
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -32,7 +32,7 @@ fun OnboardingBottomBar(
         OnboardingButton(
             text = buttonText,
             modifier = Modifier
-                .then(if (buttonTestTag.isNotEmpty()) Modifier.testTag(buttonTestTag) else Modifier)
+                .then(if (buttonTestTag != null) Modifier.testTag(buttonTestTag) else Modifier)
                 .fillMaxWidth()
                 .height(56.dp)
                 .align(alignment = Alignment.CenterHorizontally),

@@ -1,7 +1,9 @@
 package net.primal.android.auth
 
 object OnboardingTestTags {
+    const val WELCOME_SIGN_IN_BUTTON = "welcomeSignInButton"
     const val WELCOME_CREATE_ACCOUNT_BUTTON = "welcomeCreateAccountButton"
+    const val LOGIN_SIGN_IN_BUTTON = "loginSignInButton"
     const val AVATAR_PICKER = "onboardingAvatarPicker"
     const val DISPLAY_NAME_INPUT = "onboardingDisplayNameInput"
     const val ABOUT_YOU_INPUT = "onboardingAboutYouInput"

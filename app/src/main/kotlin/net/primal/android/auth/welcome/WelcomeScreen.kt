@@ -86,7 +86,7 @@ fun WelcomeScreen(callbacks: WelcomeContract.ScreenCallbacks) {
                 )
 
                 OnboardingButton(
-                    modifier = Modifier.testTag("welcomeSignInButton"),
+                    modifier = Modifier.testTag(OnboardingTestTags.WELCOME_SIGN_IN_BUTTON),
                     text = stringResource(id = R.string.welcome_sign_in_button_title),
                     onClick = callbacks.onSignInClick,
                 )

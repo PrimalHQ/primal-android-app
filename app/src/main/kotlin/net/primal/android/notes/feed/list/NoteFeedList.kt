@@ -65,6 +65,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.R
 import net.primal.android.core.compose.AvatarThumbnailsRow
+import net.primal.android.core.compose.CommonTestTags
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.pulltorefresh.PrimalPullToRefreshBox
@@ -370,7 +371,7 @@ fun NoteFeedList(
     ) {
         NoteFeedLazyColumn(
             modifier = Modifier
-                .testTag("noteFeedLazyColumn")
+                .testTag(CommonTestTags.NOTE_FEED_LAZY_COLUMN)
                 .background(color = AppTheme.colorScheme.surfaceVariant)
                 .fillMaxSize(),
             contentPadding = paddingValues,
