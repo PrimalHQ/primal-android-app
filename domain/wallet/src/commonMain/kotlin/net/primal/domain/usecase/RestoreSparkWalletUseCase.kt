@@ -14,13 +14,15 @@ class RestoreSparkWalletUseCase(
 ) {
     suspend fun invoke(seedWords: String, userId: String): Result<String> =
         runCatching {
+            disconnectExistingWallets(userId)
+
             val newWalletId = sparkWalletManager.initializeWallet(seedWords = seedWords).getOrThrow()
 
             sparkWalletAccountRepository.persistSeedWords(
                 walletId = newWalletId,
                 seedWords = seedWords,
-            )
-            sparkWalletAccountRepository.registerSparkWallet(userId = userId, walletId = newWalletId)
+            ).getOrThrow()
+            sparkWalletAccountRepository.registerSparkWallet(userId = userId, walletId = newWalletId).getOrThrow()
             sparkWalletAccountRepository.fetchWalletAccountInfo(userId = userId, walletId = newWalletId)
                 .onFailure {
                     sparkWalletAccountRepository.ensureWalletInfoExists(userId = userId, walletId = newWalletId)
@@ -30,4 +32,13 @@ class RestoreSparkWalletUseCase(
 
             newWalletId
         }
+
+    private suspend fun disconnectExistingWallets(userId: String) {
+        val existingWalletIds = sparkWalletAccountRepository.findAllPersistedWalletIds(userId)
+        for (walletId in existingWalletIds) {
+            if (sparkWalletManager.hasInstance(walletId)) {
+                sparkWalletManager.disconnectWallet(walletId)
+            }
+        }
+    }
 }
