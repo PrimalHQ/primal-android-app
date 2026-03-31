@@ -29,6 +29,7 @@ class RestoreSparkWalletUseCaseTest {
 
             result.getOrThrow() shouldBe newWalletId
             callOrder shouldBe listOf(
+                "findAllPersistedWalletIds",
                 "initializeWallet",
                 "persistSeedWords",
                 "registerSparkWallet",
@@ -83,6 +84,7 @@ class RestoreSparkWalletUseCaseTest {
 
             result.getOrThrow() shouldBe newWalletId
             callOrder shouldBe listOf(
+                "findAllPersistedWalletIds",
                 "initializeWallet",
                 "persistSeedWords",
                 "registerSparkWallet",
