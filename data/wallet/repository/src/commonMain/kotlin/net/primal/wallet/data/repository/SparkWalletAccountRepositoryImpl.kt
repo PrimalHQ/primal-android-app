@@ -76,7 +76,7 @@ internal class SparkWalletAccountRepositoryImpl(
 
     override suspend fun findRegisteredSparkWalletId(userId: String): String? =
         withContext(dispatcherProvider.io()) {
-            walletDatabase.wallet().findRegisteredWalletIdByType(userId, WalletType.SPARK)
+            walletDatabase.wallet().findRegisteredSparkWalletId(userId)
         }
 
     override suspend fun getPersistedSeedWords(walletId: String): Result<List<String>> =

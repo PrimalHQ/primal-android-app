@@ -43,13 +43,7 @@ class WalletSessionProvider internal constructor(
 
                     val userId = userIdOrNull ?: return@collectLatest
                     initializeWallet(userId)
-                }
-        }
 
-        scope.launch {
-            activeUserId
-                .collectLatest { userIdOrNull ->
-                    val userId = userIdOrNull ?: return@collectLatest
                     walletAccountRepository.observeActiveWallet(userId)
                         .collect { userWallet ->
                             val wallet = userWallet?.wallet ?: return@collect
