@@ -14,15 +14,18 @@ class RestoreSparkWalletUseCase(
 ) {
     suspend fun invoke(seedWords: String, userId: String): Result<String> =
         runCatching {
-            disconnectExistingWallets(userId)
-
             val newWalletId = sparkWalletManager.initializeWallet(seedWords = seedWords).getOrThrow()
 
             sparkWalletAccountRepository.persistSeedWords(
                 walletId = newWalletId,
                 seedWords = seedWords,
-            ).getOrThrow()
-            sparkWalletAccountRepository.registerSparkWallet(userId = userId, walletId = newWalletId).getOrThrow()
+            ).onFailure { sparkWalletManager.disconnectWallet(newWalletId) }
+                .getOrThrow()
+
+            sparkWalletAccountRepository.registerSparkWallet(userId = userId, walletId = newWalletId)
+                .onFailure { sparkWalletManager.disconnectWallet(newWalletId) }
+                .getOrThrow()
+
             sparkWalletAccountRepository.fetchWalletAccountInfo(userId = userId, walletId = newWalletId)
                 .onFailure {
                     sparkWalletAccountRepository.ensureWalletInfoExists(userId = userId, walletId = newWalletId)
@@ -30,13 +33,15 @@ class RestoreSparkWalletUseCase(
             sparkWalletAccountRepository.markWalletAsBackedUp(walletId = newWalletId)
             walletAccountRepository.setActiveWallet(userId = userId, walletId = newWalletId)
 
+            disconnectOtherWallets(userId = userId, excludeWalletId = newWalletId)
+
             newWalletId
         }
 
-    private suspend fun disconnectExistingWallets(userId: String) {
+    private suspend fun disconnectOtherWallets(userId: String, excludeWalletId: String) {
         val existingWalletIds = sparkWalletAccountRepository.findAllPersistedWalletIds(userId)
         for (walletId in existingWalletIds) {
-            if (sparkWalletManager.hasInstance(walletId)) {
+            if (walletId != excludeWalletId && sparkWalletManager.hasInstance(walletId)) {
                 sparkWalletManager.disconnectWallet(walletId)
             }
         }

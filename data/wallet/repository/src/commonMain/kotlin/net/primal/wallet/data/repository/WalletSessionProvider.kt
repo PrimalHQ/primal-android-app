@@ -5,6 +5,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.launch
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
@@ -33,23 +34,21 @@ class WalletSessionProvider internal constructor(
 
     private val activeUserId = MutableStateFlow<String?>(null)
 
-    private var currentWalletId: String? = null
+    private var currentSparkWalletId: String? = null
 
     fun start() {
         scope.launch {
             activeUserId
                 .collectLatest { userIdOrNull ->
-                    disconnectCurrentWalletIfNeeded()
+                    disconnectCurrentSparkWalletIfNeeded()
 
                     val userId = userIdOrNull ?: return@collectLatest
                     initializeWallet(userId)
 
                     walletAccountRepository.observeActiveWallet(userId)
-                        .collect { userWallet ->
-                            val wallet = userWallet?.wallet ?: return@collect
-                            if (wallet is Wallet.Spark) {
-                                ensureSdkInitialized(wallet.walletId)
-                            }
+                        .mapNotNull { it?.wallet as? Wallet.Spark }
+                        .collect { sparkWallet ->
+                            initializeSparkWallet(sparkWallet.walletId)
                         }
                 }
         }
@@ -59,15 +58,21 @@ class WalletSessionProvider internal constructor(
         activeUserId.value = userId?.takeIf { it.isNotBlank() }
     }
 
-    private suspend fun disconnectCurrentWalletIfNeeded() {
-        currentWalletId?.let { walletId ->
-            runCatching {
-                sparkWalletManager.disconnectWallet(walletId).getOrThrow()
-            }.onFailure { t ->
-                Napier.e(throwable = t) { "disconnectWallet failed for walletId=$walletId" }
-            }
-            currentWalletId = null
+    private suspend fun disconnectCurrentSparkWalletIfNeeded() {
+        currentSparkWalletId?.let { walletId ->
+            sparkWalletManager.disconnectWallet(walletId)
+                .onFailure { t ->
+                    Napier.e(throwable = t) { "disconnectWallet failed for walletId=$walletId" }
+                }
+            currentSparkWalletId = null
         }
+    }
+
+    private suspend fun initializeSparkWallet(walletId: String) {
+        if (walletId == currentSparkWalletId) return
+        disconnectCurrentSparkWalletIfNeeded()
+        ensureSdkInitialized(walletId)
+        currentSparkWalletId = walletId
     }
 
     private suspend fun ensureSdkInitialized(walletId: String) {
@@ -142,7 +147,7 @@ class WalletSessionProvider internal constructor(
         ).onFailure { error ->
             Napier.e(throwable = error) { "ensureWalletAndConnect failed for userId=$userId" }
         }.onSuccess { walletId ->
-            currentWalletId = walletId
+            currentSparkWalletId = walletId
             Napier.d { "Wallet connected for userId=$userId, walletId=$walletId" }
             migrateTransactions(userId = userId, walletId = walletId)
         }
