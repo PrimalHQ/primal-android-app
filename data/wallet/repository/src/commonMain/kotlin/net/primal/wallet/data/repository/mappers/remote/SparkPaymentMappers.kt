@@ -139,7 +139,6 @@ internal fun Payment.mapAsSparkTransaction(walletId: String, zapRequestFallback:
                     createdAt = timestampSeconds,
                     updatedAt = timestampSeconds,
                     completedAt = completedAt,
-
                     note = zapRequest.content,
                     invoice = invoice,
                     amountInBtc = this.amount.longValue().toBtc(),
@@ -164,7 +163,6 @@ internal fun Payment.mapAsSparkTransaction(walletId: String, zapRequestFallback:
                     createdAt = timestampSeconds,
                     updatedAt = timestampSeconds,
                     completedAt = completedAt,
-
                     note = sdkDescription,
                     invoice = invoice,
                     amountInBtc = this.amount.longValue().toBtc(),
@@ -210,7 +208,6 @@ internal fun Payment.mapAsSparkTransaction(walletId: String, zapRequestFallback:
                     createdAt = timestampSeconds,
                     updatedAt = timestampSeconds,
                     completedAt = completedAt,
-
                     note = sdkDescription,
                     invoice = invoice,
                     amountInBtc = this.amount.longValue().toBtc(),
@@ -235,7 +232,6 @@ internal fun Payment.mapAsSparkTransaction(walletId: String, zapRequestFallback:
                     createdAt = timestampSeconds,
                     updatedAt = timestampSeconds,
                     completedAt = completedAt,
-
                     note = sdkDescription,
                     invoice = invoice,
                     amountInBtc = this.amount.longValue().toBtc(),
