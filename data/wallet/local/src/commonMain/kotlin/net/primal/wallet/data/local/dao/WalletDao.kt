@@ -117,12 +117,12 @@ interface WalletDao {
         SELECT wul.walletId FROM WalletUserLink wul
         INNER JOIN WalletInfo wi ON wul.walletId = wi.walletId
         WHERE wul.userId = :userId
-          AND wi.type = :type
+          AND wi.type = 'SPARK'
           AND wul.lightningAddress IS NOT NULL
         LIMIT 1
         """,
     )
-    suspend fun findRegisteredWalletIdByType(userId: String, type: WalletType): String?
+    suspend fun findRegisteredSparkWalletId(userId: String): String?
 
     @Query("UPDATE SparkWalletData SET backedUp = :backedUp WHERE walletId = :walletId")
     suspend fun updateSparkWalletBackedUp(walletId: String, backedUp: Boolean)
@@ -196,4 +196,22 @@ interface WalletDao {
         """,
     )
     suspend fun findLastUsedWalletByTypes(userId: String, type: Set<WalletType>): Wallet?
+
+    @Query("DELETE FROM WalletInfo WHERE walletId IN (:walletIds)")
+    suspend fun deleteWalletInfosByIds(walletIds: List<String>)
+
+    @Query("DELETE FROM PrimalWalletData WHERE walletId IN (:walletIds)")
+    suspend fun deletePrimalWalletDataByIds(walletIds: List<String>)
+
+    @Query("DELETE FROM NostrWalletData WHERE walletId IN (:walletIds)")
+    suspend fun deleteNostrWalletDataByIds(walletIds: List<String>)
+
+    @Query("DELETE FROM SparkWalletData WHERE walletId IN (:walletIds)")
+    suspend fun deleteSparkWalletDataByIds(walletIds: List<String>)
+
+    @Query("DELETE FROM WalletUserLink WHERE walletId IN (:walletIds)")
+    suspend fun deleteWalletUserLinksByIds(walletIds: List<String>)
+
+    @Query("DELETE FROM ActiveWalletData WHERE walletId IN (:walletIds)")
+    suspend fun deleteActiveWalletDataByIds(walletIds: List<String>)
 }

@@ -105,6 +105,26 @@ internal class WalletRepositoryImpl(
                 ?: Result.failure(WalletException.WalletNotFound())
         }
 
+    override suspend fun deleteWalletById(walletId: String) =
+        withContext(dispatcherProvider.io()) {
+            val walletIds = listOf(walletId)
+            walletDatabase.withTransaction {
+                walletDatabase.wallet().deleteWalletInfosByIds(walletIds)
+                walletDatabase.wallet().deletePrimalWalletDataByIds(walletIds)
+                walletDatabase.wallet().deleteNostrWalletDataByIds(walletIds)
+                walletDatabase.wallet().deleteSparkWalletDataByIds(walletIds)
+                walletDatabase.wallet().deleteWalletUserLinksByIds(walletIds)
+                walletDatabase.wallet().deleteActiveWalletDataByIds(walletIds)
+                walletDatabase.walletSettings().deleteWalletSettings(walletIds)
+                walletDatabase.walletTransactions().deleteByWalletId(walletId)
+                walletDatabase.walletTransactionRemoteKeys().deleteByWalletId(walletId)
+                walletDatabase.receiveRequests().deleteByWalletId(walletId)
+                walletDatabase.nwcConnections().deleteAllByWalletId(walletId)
+                walletDatabase.nwcInvoices().deleteByWalletIds(walletIds)
+                walletDatabase.nwcLogs().deleteByWalletId(walletId)
+            }
+        }
+
     override suspend fun upsertNostrWallet(
         userId: String,
         wallet: Wallet.NWC,
