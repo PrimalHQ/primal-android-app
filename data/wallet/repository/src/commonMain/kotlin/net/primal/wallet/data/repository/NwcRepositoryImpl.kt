@@ -13,7 +13,6 @@ import net.primal.domain.connections.nostr.handler.Nip47EventsHandler
 import net.primal.domain.connections.nostr.model.NwcConnection
 import net.primal.domain.nostr.cryptography.utils.CryptoUtils
 import net.primal.shared.data.local.encryption.asEncryptable
-import net.primal.wallet.data.local.dao.UserWalletPreferences
 import net.primal.wallet.data.local.dao.nwc.NwcConnectionData
 import net.primal.wallet.data.local.dao.nwc.NwcPendingEventData
 import net.primal.wallet.data.local.db.WalletDatabase
@@ -114,9 +113,7 @@ internal class NwcRepositoryImpl(
 
     override suspend fun updateAutoStartForUser(userId: String, autoStart: Boolean) {
         withContext(dispatcherProvider.io()) {
-            database.userWalletPreferences().upsertPreferences(
-                UserWalletPreferences(userId = userId, nwcAutoStart = autoStart),
-            )
+            database.userWalletPreferences().updateNwcAutoStart(userId = userId, autoStart = autoStart)
         }
     }
 
