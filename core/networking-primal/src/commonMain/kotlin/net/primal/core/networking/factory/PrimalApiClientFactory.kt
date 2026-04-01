@@ -11,7 +11,9 @@ import net.primal.domain.global.PrimalServerType
 
 internal val defaultSocketsHttpClient by lazy {
     HttpClientFactory.createHttpClientWithDefaultConfig {
-        install(WebSockets)
+        install(WebSockets) {
+            pingIntervalMillis = 20_000
+        }
     }
 }
 
