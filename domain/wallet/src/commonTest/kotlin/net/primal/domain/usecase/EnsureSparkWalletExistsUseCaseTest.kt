@@ -8,6 +8,8 @@ import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
 import net.primal.domain.wallet.SeedPhraseGenerator
 import net.primal.domain.wallet.SparkWalletManager
+import net.primal.domain.wallet.UserWallet
+import net.primal.domain.wallet.Wallet
 
 class EnsureSparkWalletExistsUseCaseTest {
 
@@ -396,6 +398,40 @@ class EnsureSparkWalletExistsUseCaseTest {
 
             capturedWalletId shouldBe walletId
             capturedSeedWords shouldBe seedPhrase
+        }
+
+    @Test
+    fun activeWalletAlreadyExists_skipsSetActiveWallet() =
+        runTest {
+            val callOrder = mutableListOf<String>()
+            val existingActiveWallet = UserWallet(
+                userId = userId,
+                wallet = Wallet.Spark(
+                    walletId = "existing_wallet",
+                    spamThresholdAmountInSats = 1L,
+                    balanceInBtc = null,
+                    maxBalanceInBtc = null,
+                    lastUpdatedAt = null,
+                    isBackedUp = false,
+                ),
+                lightningAddress = null,
+            )
+            val useCase = buildUseCase(
+                sparkWalletAccountRepository = FakeSparkWalletAccountRepository(
+                    callLog = callOrder,
+                ),
+                walletAccountRepository = FakeWalletAccountRepository(
+                    activeWallet = existingActiveWallet,
+                    callLog = callOrder,
+                ),
+                sparkWalletManager = FakeSparkWalletManager(walletId = walletId, callLog = callOrder),
+                seedPhraseGenerator = FakeSeedPhraseGenerator(seedWords = seedWords),
+            )
+
+            val result = useCase.invoke(userId)
+
+            result.getOrThrow() shouldBe walletId
+            callOrder.contains("setActiveWallet") shouldBe false
         }
 
     private fun buildUseCase(

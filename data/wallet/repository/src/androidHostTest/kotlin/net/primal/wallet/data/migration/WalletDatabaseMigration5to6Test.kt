@@ -343,6 +343,57 @@ class WalletDatabaseMigration5to6Test {
             ("walletId" in columns) shouldBe true
         }
 
+    @Test
+    fun `migration creates separate WalletUserLink rows for multiple wallets per user`() =
+        runTest {
+            val v5 = createV5Database()
+            v5.execSQL(
+                """INSERT INTO WalletInfo (walletId, userId, lightningAddress, type)
+                VALUES ('spark_wallet', 'user1', '"user1@primal.net"', 'SPARK')""",
+            )
+            v5.execSQL(
+                """INSERT INTO WalletInfo (walletId, userId, lightningAddress, type)
+                VALUES ('nwc_wallet', 'user1', NULL, 'NWC')""",
+            )
+            v5.execSQL(
+                """INSERT INTO WalletInfo (walletId, userId, lightningAddress, type)
+                VALUES ('other_spark', 'user2', '"user2@primal.net"', 'SPARK')""",
+            )
+            v5.close()
+
+            val database = openDatabaseWithMigration()
+
+            val user1Spark = database.wallet().findWalletUserLink("user1", "spark_wallet")
+            user1Spark shouldBe notNull()
+            user1Spark!!.lightningAddress!!.decrypted shouldBe "user1@primal.net"
+
+            val user1Nwc = database.wallet().findWalletUserLink("user1", "nwc_wallet")
+            user1Nwc shouldBe notNull()
+            user1Nwc!!.lightningAddress shouldBe null
+
+            val user2Spark = database.wallet().findWalletUserLink("user2", "other_spark")
+            user2Spark shouldBe notNull()
+            user2Spark!!.lightningAddress!!.decrypted shouldBe "user2@primal.net"
+
+            // Cross-user links should not exist
+            val crossLink = database.wallet().findWalletUserLink("user1", "other_spark")
+            crossLink shouldBe null
+
+            database.close()
+        }
+
+    @Test
+    fun `migration handles empty database without errors`() =
+        runTest {
+            val v5 = createV5Database()
+            v5.close()
+
+            val database = openDatabaseWithMigration()
+            val wallets = database.wallet().findWalletInfosByUserId("nonexistent")
+            wallets shouldBe emptyList()
+            database.close()
+        }
+
     private fun openDatabaseWithMigration(): WalletDatabase {
         return Room.databaseBuilder<WalletDatabase>(
             context = context,

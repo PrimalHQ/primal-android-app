@@ -13,8 +13,10 @@ import net.primal.domain.wallet.WalletType
 internal class FakeSparkWalletManager(
     private val walletId: String = "",
     private val initError: Throwable? = null,
+    private val activeInstances: MutableSet<String> = mutableSetOf(),
     private val callLog: MutableList<String>? = null,
     private val onInitialize: ((String) -> Unit)? = null,
+    private val onDisconnect: ((String) -> Unit)? = null,
 ) : SparkWalletManager {
     override val unclaimedDeposits: Flow<UnclaimedDepositEvent> = emptyFlow()
     override val balanceChanged: Flow<String> = emptyFlow()
@@ -22,12 +24,19 @@ internal class FakeSparkWalletManager(
     override suspend fun initializeWallet(seedWords: String): Result<String> {
         callLog?.add("initializeWallet")
         onInitialize?.invoke(seedWords)
-        return if (initError != null) Result.failure(initError) else Result.success(walletId)
+        if (initError != null) return Result.failure(initError)
+        activeInstances.add(walletId)
+        return Result.success(walletId)
     }
 
-    override suspend fun disconnectWallet(walletId: String): Result<Unit> = Result.success(Unit)
+    override suspend fun disconnectWallet(walletId: String): Result<Unit> {
+        callLog?.add("disconnectWallet")
+        onDisconnect?.invoke(walletId)
+        activeInstances.remove(walletId)
+        return Result.success(Unit)
+    }
 
-    override suspend fun hasInstance(walletId: String): Boolean = false
+    override suspend fun hasInstance(walletId: String): Boolean = walletId in activeInstances
 }
 
 @Suppress("LongParameterList")
@@ -114,6 +123,7 @@ internal class FakeSparkWalletAccountRepository(
 }
 
 internal class FakeWalletAccountRepository(
+    private val activeWallet: UserWallet? = null,
     private val callLog: MutableList<String>? = null,
     private val onSetActiveWallet: ((String, String) -> Unit)? = null,
 ) : WalletAccountRepository {
@@ -126,7 +136,7 @@ internal class FakeWalletAccountRepository(
     override fun observeWalletsByUser(userId: String): Flow<List<UserWallet>> = emptyFlow()
     override suspend fun findLastUsedWallet(userId: String, type: WalletType): UserWallet? = null
     override suspend fun findLastUsedWallet(userId: String, type: Set<WalletType>): UserWallet? = null
-    override suspend fun getActiveWallet(userId: String): UserWallet? = null
+    override suspend fun getActiveWallet(userId: String): UserWallet? = activeWallet
     override fun observeActiveWallet(userId: String): Flow<UserWallet?> = emptyFlow()
     override fun observeActiveWalletId(userId: String): Flow<String?> = emptyFlow()
 }
