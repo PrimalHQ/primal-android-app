@@ -13,6 +13,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
@@ -33,6 +34,7 @@ import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.account.WalletAccountRepository
+import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletType
 
 @Suppress("LongParameterList")
@@ -47,6 +49,7 @@ class DeveloperToolsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
     private val walletAccountRepository: WalletAccountRepository,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
+    private val walletRepository: WalletRepository,
 ) : ViewModel() {
 
     private val cacheDir: File by lazy { appContext.externalCacheDir ?: appContext.cacheDir }
@@ -77,6 +80,7 @@ class DeveloperToolsViewModel @Inject constructor(
                     UiEvent.ExportLogs -> exportLogs()
                     UiEvent.ClearLogs -> clearLogs()
                     is UiEvent.CopySeedWords -> copySeedWords(event.walletId)
+                    is UiEvent.DeleteWallet -> deleteWallet(event.walletId)
                 }
             }
         }
@@ -131,47 +135,27 @@ class DeveloperToolsViewModel @Inject constructor(
     private fun observeWallets() =
         viewModelScope.launch {
             val userId = activeAccountStore.activeUserId()
-            val sparkWalletIds = withContext(dispatcherProvider.io()) {
-                sparkWalletAccountRepository.findAllPersistedWalletIds(userId)
-            }
-            val balanceByWalletId = walletAccountRepository.observeWalletsByUser(userId)
-                .first()
-                .associate { it.wallet.walletId to it.wallet.balanceInBtc }
 
-            walletAccountRepository.observeActiveWallet(userId)
-                .collect { activeUserWallet ->
-                    val activeWallet = activeUserWallet?.wallet
-                    val wallets = buildList {
-                        if (activeUserWallet != null && activeWallet != null) {
-                            add(
-                                DevWalletInfo(
-                                    walletId = activeWallet.walletId,
-                                    type = activeWallet.type,
-                                    isActive = true,
-                                    lightningAddress = activeUserWallet.lightningAddress,
-                                    balanceInSats = activeWallet.balanceInBtc?.toSats()?.toLong(),
-                                ),
-                            )
-                        }
-                        sparkWalletIds
-                            .filter { it != activeWallet?.walletId }
-                            .forEach { walletId ->
-                                val address = withContext(dispatcherProvider.io()) {
-                                    sparkWalletAccountRepository.getLightningAddress(userId, walletId)
-                                }
-                                add(
-                                    DevWalletInfo(
-                                        walletId = walletId,
-                                        type = WalletType.SPARK,
-                                        isActive = false,
-                                        lightningAddress = address,
-                                        balanceInSats = balanceByWalletId[walletId]?.toSats()?.toLong(),
-                                    ),
-                                )
-                            }
+            combine(
+                walletAccountRepository.observeWalletsByUser(userId),
+                walletAccountRepository.observeActiveWallet(userId),
+            ) { allWallets, activeUserWallet ->
+                val activeWalletId = activeUserWallet?.wallet?.walletId
+
+                allWallets
+                    .filter { it.wallet.type == WalletType.SPARK || it.wallet.walletId == activeWalletId }
+                    .map { userWallet ->
+                        DevWalletInfo(
+                            walletId = userWallet.wallet.walletId,
+                            type = userWallet.wallet.type,
+                            isActive = userWallet.wallet.walletId == activeWalletId,
+                            lightningAddress = userWallet.lightningAddress,
+                            balanceInSats = userWallet.wallet.balanceInBtc?.toSats()?.toLong(),
+                        )
                     }
-                    setState { copy(wallets = wallets) }
-                }
+            }.collect { wallets ->
+                setState { copy(wallets = wallets) }
+            }
         }
 
     private fun copySeedWords(walletId: String) =
@@ -183,5 +167,48 @@ class DeveloperToolsViewModel @Inject constructor(
                 .onFailure {
                     setEffect(SideEffect.SeedWordsCopyFailed)
                 }
+        }
+
+    private fun deleteWallet(walletId: String) =
+        viewModelScope.launch {
+            runCatching {
+                val userId = activeAccountStore.activeUserId()
+
+                // 1. Unregister if this is the registered Spark wallet
+                val registeredWalletId = sparkWalletAccountRepository.findRegisteredSparkWalletId(userId)
+                if (registeredWalletId == walletId) {
+                    sparkWalletAccountRepository.unregisterSparkWallet(userId, walletId)
+                }
+
+                // 2. Delete all local data
+                walletRepository.deleteWalletById(walletId)
+
+                // 3. Re-register first available Spark wallet if none registered
+                val newRegisteredId = sparkWalletAccountRepository.findRegisteredSparkWalletId(userId)
+                if (newRegisteredId == null) {
+                    val remainingSparkIds = sparkWalletAccountRepository.findAllPersistedWalletIds(userId)
+                    val firstSparkId = remainingSparkIds.firstOrNull()
+                    if (firstSparkId != null) {
+                        sparkWalletAccountRepository.registerSparkWallet(userId, firstSparkId)
+                        sparkWalletAccountRepository.fetchWalletAccountInfo(userId, firstSparkId)
+                    }
+                }
+
+                // 4. Handle active wallet (independent from registration)
+                val activeWallet = walletAccountRepository.observeActiveWallet(userId).first()
+                if (activeWallet == null || activeWallet.wallet.walletId == walletId) {
+                    val remainingSparkIds = sparkWalletAccountRepository.findAllPersistedWalletIds(userId)
+                    val newActiveId = remainingSparkIds.firstOrNull()
+                        ?: walletAccountRepository.observeWalletsByUser(userId).first().firstOrNull()?.wallet?.walletId
+
+                    if (newActiveId != null) {
+                        walletAccountRepository.setActiveWallet(userId, newActiveId)
+                    }
+                }
+
+                setEffect(SideEffect.WalletDeleted)
+            }.onFailure {
+                setEffect(SideEffect.WalletDeleteFailed)
+            }
         }
 }

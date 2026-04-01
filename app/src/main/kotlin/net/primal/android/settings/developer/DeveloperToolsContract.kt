@@ -28,6 +28,7 @@ interface DeveloperToolsContract {
         data object ExportLogs : UiEvent()
         data object ClearLogs : UiEvent()
         data class CopySeedWords(val walletId: String) : UiEvent()
+        data class DeleteWallet(val walletId: String) : UiEvent()
     }
 
     sealed class SideEffect {
@@ -36,5 +37,7 @@ interface DeveloperToolsContract {
         data object ExportFailed : SideEffect()
         data class SeedWordsCopied(val seedWords: String) : SideEffect()
         data object SeedWordsCopyFailed : SideEffect()
+        data object WalletDeleted : SideEffect()
+        data object WalletDeleteFailed : SideEffect()
     }
 }
