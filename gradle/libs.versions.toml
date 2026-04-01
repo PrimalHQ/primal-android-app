@@ -22,6 +22,7 @@ compose-lottie = "6.7.1"
 compose-navigation = "2.9.6"
 constraintlayout = "2.2.1"
 constraintlayout-compose = "1.1.1"
+connectivity = "2.3.0"
 coil = "3.3.0"
 core-ktx = "1.17.0"
 core-splashscreen = "1.2.0"
@@ -126,6 +127,8 @@ compose-placeholder-foundation = { module = "io.github.fornewid:placeholder-foun
 compose-placeholder-material3 = { module = "io.github.fornewid:placeholder-material3", version.ref = "placeholder" }
 constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
 compose-constraintlayout = { module = "androidx.constraintlayout:constraintlayout-compose", version.ref = "constraintlayout-compose" }
+connectivity-core = { module = "dev.jordond.connectivity:connectivity-core", version.ref = "connectivity" }
+connectivity-device = { module = "dev.jordond.connectivity:connectivity-device", version.ref = "connectivity" }
 
 androidx-emoji2 = { group = "androidx.emoji2", name = "emoji2", version.ref = "emoji2" }
 androidx-emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
