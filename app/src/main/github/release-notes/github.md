@@ -1,25 +1,7 @@
 ## Fixes
-- Added profile navigation from drawer avatar (#971)
-- Added on-chain address to wallet transaction CSV export (#970)
-- Added NIP-89 client tag to specific event kinds (#968)
-- Fixed the floating-point truncation error when creating LN invoices
-- Implemented `primalconnect://` deep-linking (#969)
-- Fixed processing same QR code data in parallel (#967)
-- Updated transaction sending animation with light and dark variants (#966)
-- Fixed fetching zap receipts for all transactions (#965)
-- Migrated to ZXing scanner for AOSP (#963)
-- Migrated user voted poll logic to EventUserStats (#964)
-- Fixed the note editor reading clipboard on every keystroke (#962)
-- Implement re-assigning lightning address in wallet picker
-- Added relay hint tags to zap poll events (#973)
-- Fixed poll options rendering to appear after attachments (#974)
-- Set maxLines=1 on poll option labels (#976)
-- Fixed using zap receipts instead of zap requests for zap data parsing (#977)
-- Fixed WalletSessionProvider to handle missing user wallet status s
-- Fixed missing zaps in the transactions list
-- Fixed wallet upgrade notice shown after successful migration (#972)
-- Implement rendering wallets in the dev tools
-- Fixed poll stats sometimes missing on the poll votes screen
-- Fixed card background color mismatch in transaction details
-- Show the keyboard button when camera permission is denied on the scan screens (#987)
-- Fixed zaps showing the default avatar sometimes (#988)
+- Implemented overflow menu and delete wallet in Dev Tools (#1002)
+- Implemented wallet multi-account sharing (#999)
+- Added test tags to the onboarding flow for QA (#1001)
+- Fixed poll zap votes appearing as Top Zaps (#995)
+- Mapped WalletException types to error codes in NWC responses (#1000)
+- Hide wallet balance and action buttons when no wallet exists (#998)
