@@ -76,30 +76,27 @@ fun PrimalNavigationBar(
     onActiveDestinationClick: (() -> Unit)? = null,
     badges: Badges = Badges(),
 ) {
-    Column(modifier = modifier) {
-        PrimalDivider()
-        NavigationBar(
-            modifier = Modifier.height(80.dp),
-            tonalElevation = 0.dp,
-            containerColor = AppTheme.colorScheme.surface,
-        ) {
-            val badgesMap = mapOf(
-                Pair(PrimalTopLevelDestination.Notifications, badges.unreadNotificationsCount),
+    NavigationBar(
+        modifier = modifier,
+        tonalElevation = 0.dp,
+        containerColor = AppTheme.colorScheme.surface,
+    ) {
+        val badgesMap = mapOf(
+            Pair(PrimalTopLevelDestination.Notifications, badges.unreadNotificationsCount),
+        )
+        PrimalTopLevelDestination.entries.forEach {
+            PrimalNavigationBarItem(
+                primaryDestination = it,
+                activeDestination = activeDestination,
+                onClick = {
+                    if (activeDestination != it) {
+                        onTopLevelDestinationChanged(it)
+                    } else {
+                        onActiveDestinationClick?.invoke()
+                    }
+                },
+                badge = badgesMap.getOrDefault(it, 0),
             )
-            PrimalTopLevelDestination.entries.forEach {
-                PrimalNavigationBarItem(
-                    primaryDestination = it,
-                    activeDestination = activeDestination,
-                    onClick = {
-                        if (activeDestination != it) {
-                            onTopLevelDestinationChanged(it)
-                        } else {
-                            onActiveDestinationClick?.invoke()
-                        }
-                    },
-                    badge = badgesMap.getOrDefault(it, 0),
-                )
-            }
         }
     }
 }

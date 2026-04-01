@@ -5,6 +5,8 @@ import net.primal.core.networking.nwc.nip47.NwcMethod
 import net.primal.core.networking.nwc.wallet.model.WalletNwcRequest
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.wallet.exception.WalletConnectionException
+import net.primal.domain.wallet.exception.WalletException
+import net.primal.domain.wallet.exception.WalletFeesException
 import net.primal.domain.wallet.exception.WalletInvoiceException
 import net.primal.domain.wallet.exception.WalletPaymentException
 import net.primal.domain.wallet.nwc.model.NwcRequestLog
@@ -90,9 +92,18 @@ internal fun Throwable.resolveNwcErrorCode(): String =
         is WalletPaymentException.InsufficientBalance -> NwcError.INSUFFICIENT_BALANCE
         is WalletPaymentException.OperationNotSupported -> NwcError.NOT_IMPLEMENTED
         is WalletPaymentException.InvalidPaymentRequest -> NwcError.OTHER
+        is WalletPaymentException.PaymentFailed -> NwcError.OTHER
+        is WalletPaymentException.PaymentTimeout -> NwcError.OTHER
         is WalletInvoiceException.InvalidInvoiceAmount -> NwcError.OTHER
+        is WalletInvoiceException.FailedToCreateInvoice -> NwcError.OTHER
+        is WalletFeesException.FeeQuoteExpired -> NwcError.OTHER
+        is WalletFeesException.FailedToFetchFees -> NwcError.OTHER
+        is WalletException.WalletNotFound -> NwcError.NOT_FOUND
+        is WalletException.WalletNotInitialized -> NwcError.NOT_FOUND
+        is WalletException.WalletNetworkException -> NwcError.OTHER
         is WalletConnectionException.RateLimited -> NwcError.RATE_LIMITED
         is WalletConnectionException.Unauthorized -> NwcError.UNAUTHORIZED
         is WalletConnectionException.QuotaExceeded -> NwcError.QUOTA_EXCEEDED
+        is WalletConnectionException.ConnectionFailed -> NwcError.OTHER
         else -> NwcError.INTERNAL
     }
