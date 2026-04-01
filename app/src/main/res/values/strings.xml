@@ -839,7 +839,7 @@
     <string name="wallet_picker_nwc_title">NWC Wallet</string>
     <string name="wallet_picker_spark_title">Spark Wallet</string>
     <string name="wallet_picker_legacy_title">Legacy Wallet</string>
-    <string name="wallet_picker_no_lightning_address">[ no lightning address]</string>
+    <string name="wallet_picker_no_lightning_address">[ no lightning address ]</string>
     <string name="wallet_picker_nwc_description">Your external lightning wallet</string>
 
     <string name="notifications_title">Notifications</string>
