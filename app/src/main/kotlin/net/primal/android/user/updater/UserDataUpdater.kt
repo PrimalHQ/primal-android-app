@@ -85,8 +85,6 @@ class UserDataUpdater @AssistedInject constructor(
                         userId = userAccount.pubkey,
                         wallet = Wallet.NWC(
                             walletId = walletId,
-                            userId = userAccount.pubkey,
-                            lightningAddress = nwcData.lightningAddress,
                             spamThresholdAmountInSats = 0L,
                             balanceInBtc = null,
                             maxBalanceInBtc = null,
@@ -95,6 +93,7 @@ class UserDataUpdater @AssistedInject constructor(
                             relays = nwcData.relays,
                             keypair = nwcData.keypair,
                         ),
+                        lightningAddress = nwcData.lightningAddress,
                     )
 
                     walletAccountRepository.setActiveWallet(userId = userAccount.pubkey, walletId = walletId)

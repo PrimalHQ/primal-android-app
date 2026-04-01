@@ -13,7 +13,11 @@ interface WalletRepository {
 
     suspend fun deleteWalletById(walletId: String)
 
-    suspend fun upsertNostrWallet(userId: String, wallet: Wallet.NWC)
+    suspend fun upsertNostrWallet(
+        userId: String,
+        wallet: Wallet.NWC,
+        lightningAddress: String? = null,
+    )
 
     suspend fun upsertWalletSettings(walletId: String, spamThresholdAmountInSats: Long)
 
@@ -51,10 +55,6 @@ interface WalletRepository {
     suspend fun findTransactionByInvoice(invoice: String): Transaction?
 
     suspend fun findTransactionByPaymentHash(paymentHash: String): Transaction?
-
-    suspend fun deleteAllTransactions(userId: String)
-
-    suspend fun deleteAllUserData(userId: String)
 
     suspend fun enrichUnenrichedTransactions()
 

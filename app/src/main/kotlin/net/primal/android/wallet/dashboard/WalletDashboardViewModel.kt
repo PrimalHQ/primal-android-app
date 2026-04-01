@@ -105,15 +105,15 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun checkForPersistedSparkWallet() =
         viewModelScope.launch {
-            val existingWalletId = sparkWalletAccountRepository.findPersistedWalletId(activeUserId)
-            setState { copy(hasPersistedSparkWallet = existingWalletId != null) }
+            val hasWallet = sparkWalletAccountRepository.hasPersistedSparkWallet(activeUserId)
+            setState { copy(hasPersistedSparkWallet = hasWallet) }
         }
 
     private fun resolveDashboardState() =
         viewModelScope.launch {
             if (isNpubLogin) return@launch
 
-            val hasLocalWallet = sparkWalletAccountRepository.findPersistedWalletId(activeUserId) != null
+            val hasLocalWallet = sparkWalletAccountRepository.hasPersistedSparkWallet(activeUserId)
             if (hasLocalWallet) return@launch
 
             val status = primalWalletAccountRepository.fetchWalletStatus(activeUserId).getOrNull()
@@ -130,7 +130,7 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun migratePrimalTransactionsIfNeeded() =
         viewModelScope.launch {
-            val sparkWalletId = sparkWalletAccountRepository.findPersistedWalletId(activeUserId) ?: return@launch
+            val sparkWalletId = sparkWalletAccountRepository.findRegisteredSparkWalletId(activeUserId) ?: return@launch
             migratePrimalTransactionsHandler.invoke(
                 userId = activeUserId,
                 targetSparkWalletId = sparkWalletId,
@@ -171,7 +171,8 @@ class WalletDashboardViewModel @Inject constructor(
         viewModelScope.launch {
             var previousWalletId: String? = null
             walletAccountRepository.observeActiveWallet(userId = activeUserId)
-                .collect { wallet ->
+                .collect { userWallet ->
+                    val wallet = userWallet?.wallet
                     val transactionsUpdate = wallet?.walletId?.let { walletId ->
                         if (walletId != previousWalletId) {
                             previousWalletId = walletId

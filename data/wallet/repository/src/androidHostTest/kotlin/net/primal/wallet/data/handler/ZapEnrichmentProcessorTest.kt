@@ -914,7 +914,6 @@ class ZapEnrichmentProcessorTest {
                     createdAt = createdAt,
                     updatedAt = createdAt,
                     completedAt = createdAt.asEncryptable(),
-                    userId = "user-1",
                     note = "test note".asEncryptable(),
                     invoice = invoice,
                     amountInBtc = 0.001.asEncryptable(),

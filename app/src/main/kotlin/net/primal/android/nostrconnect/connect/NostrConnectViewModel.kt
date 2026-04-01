@@ -172,7 +172,7 @@ class NostrConnectViewModel @Inject constructor(
             if (currentState.hasNwcRequest && dailyBudget != 0L) {
                 runCatching {
                     val appName = currentState.appName ?: "External App"
-                    val wallet = walletAccountRepository.getActiveWallet(userId)
+                    val wallet = walletAccountRepository.getActiveWallet(userId)?.wallet
                     activeWallet = wallet
                     when (wallet) {
                         is Wallet.Spark -> {

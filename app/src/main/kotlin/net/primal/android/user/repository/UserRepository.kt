@@ -42,7 +42,6 @@ import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
 import net.primal.domain.user.UserDataCleanupRepository
-import net.primal.domain.wallet.WalletRepository
 import net.primal.domain.wallet.WalletSettings
 import net.primal.domain.wallet.WalletState
 
@@ -58,7 +57,6 @@ class UserRepository @Inject constructor(
     private val profileRepository: ProfileRepository,
     private val userDataCleanupRepository: UserDataCleanupRepository,
     private val cachingImportRepository: CachingImportRepository,
-    private val walletRepository: WalletRepository,
     private val streamRepository: StreamRepository,
 ) {
     suspend fun setActiveAccount(userId: String) =
@@ -133,7 +131,6 @@ class UserRepository @Inject constructor(
     suspend fun clearAllUserRelatedData(userId: String) =
         withContext(dispatchers.io()) {
             userDataCleanupRepository.clearUserData(userId)
-            walletRepository.deleteAllUserData(userId)
             usersDatabase.withTransaction {
                 usersDatabase.userProfileInteractions().deleteAllByOwnerId(ownerId = userId)
                 usersDatabase.relays().deleteAll(userId = userId)

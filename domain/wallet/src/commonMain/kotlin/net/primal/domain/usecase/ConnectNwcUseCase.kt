@@ -26,8 +26,6 @@ class ConnectNwcUseCase(
                 userId = userId,
                 wallet = Wallet.NWC(
                     walletId = walletId,
-                    userId = userId,
-                    lightningAddress = nostrWalletConnect.lightningAddress,
                     balanceInBtc = null,
                     maxBalanceInBtc = null,
                     spamThresholdAmountInSats = 1L,
@@ -39,6 +37,7 @@ class ConnectNwcUseCase(
                         pubkey = nostrWalletConnect.keypair.pubkey,
                     ),
                 ),
+                lightningAddress = nostrWalletConnect.lightningAddress,
             )
 
             if (autoSetAsDefaultWallet) {

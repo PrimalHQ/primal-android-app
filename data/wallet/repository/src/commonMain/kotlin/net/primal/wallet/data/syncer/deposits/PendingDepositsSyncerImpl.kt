@@ -62,13 +62,14 @@ internal class PendingDepositsSyncerImpl(
         activeWalletObserverJob = scope.launch {
             walletAccountRepository.observeActiveWallet(userId)
                 .distinctUntilWalletIdChanged()
-                .collect { wallet ->
+                .collect { userWallet ->
                     mempoolMonitorJob?.cancel()
+                    val wallet = userWallet?.wallet
                     if (wallet != null && wallet.capabilities.supportsReceivableTracking) {
                         mempoolMonitorJob = scope.launch {
-                            initialFetch(walletId = wallet.walletId, userId = userId)
+                            initialFetch(walletId = wallet.walletId)
                             cleanupStalePendingTransactions(walletId = wallet.walletId)
-                            webSocketLoop(walletId = wallet.walletId, userId = userId)
+                            webSocketLoop(walletId = wallet.walletId)
                         }
                     }
                 }
@@ -82,11 +83,6 @@ internal class PendingDepositsSyncerImpl(
     }
 
     private suspend fun handleUnclaimedDeposits(event: UnclaimedDepositEvent) {
-        val userId = walletDatabase.wallet().findWalletInfo(event.walletId)?.userId ?: run {
-            Napier.w(tag = TAG) { "Cannot resolve userId for walletId=${event.walletId}, skipping unclaimed deposits" }
-            return
-        }
-
         val now = Clock.System.now().epochSeconds
 
         val transactionRows = event.deposits.map { deposit ->
@@ -99,7 +95,6 @@ internal class PendingDepositsSyncerImpl(
                 createdAt = now,
                 updatedAt = now,
                 completedAt = null,
-                userId = userId,
                 note = null,
                 invoice = null,
                 amountInBtc = deposit.amountSats.toBtc().asEncryptable(),
@@ -124,7 +119,7 @@ internal class PendingDepositsSyncerImpl(
         }
     }
 
-    private suspend fun initialFetch(walletId: String, userId: String) {
+    private suspend fun initialFetch(walletId: String) {
         val createdAfter = Clock.System.now().epochSeconds - ADDRESS_TTL.inWholeSeconds
         val allRequests = walletDatabase.receiveRequests().findAll(
             walletId = walletId,
@@ -150,7 +145,7 @@ internal class PendingDepositsSyncerImpl(
                 }
 
                 for (tx in mempoolTxs) {
-                    if (processMempoolDeposit(tx, address, walletId, userId, now, request.id)) {
+                    if (processMempoolDeposit(tx, address, walletId, now, request.id)) {
                         depositsDetected = true
                     }
                 }
@@ -180,7 +175,7 @@ internal class PendingDepositsSyncerImpl(
         }
     }
 
-    private suspend fun webSocketLoop(walletId: String, userId: String) {
+    private suspend fun webSocketLoop(walletId: String) {
         var reconnectDelay = RECONNECT_DELAY_INITIAL
         while (scope.isActive) {
             val address = resolveNewestAddress(walletId)
@@ -194,7 +189,7 @@ internal class PendingDepositsSyncerImpl(
             try {
                 mempoolWebSocketClient.observeAddress(address).collect { event ->
                     reconnectDelay = RECONNECT_DELAY_INITIAL
-                    handleMempoolEvent(event, walletId, userId, address)
+                    handleMempoolEvent(event, walletId, address)
                 }
             } catch (e: Exception) {
                 Napier.w(throwable = e, tag = TAG) { "WebSocket disconnected: ${e.message}" }
@@ -219,7 +214,6 @@ internal class PendingDepositsSyncerImpl(
     private suspend fun handleMempoolEvent(
         event: MempoolAddressEvent,
         walletId: String,
-        userId: String,
         address: String,
     ) {
         val transactions = when (event) {
@@ -231,7 +225,7 @@ internal class PendingDepositsSyncerImpl(
         var depositsDetected = false
 
         for (tx in transactions) {
-            if (processMempoolDeposit(tx, address, walletId, userId, now)) {
+            if (processMempoolDeposit(tx, address, walletId, now)) {
                 depositsDetected = true
             }
         }
@@ -245,7 +239,6 @@ internal class PendingDepositsSyncerImpl(
         tx: MempoolTransaction,
         address: String,
         walletId: String,
-        userId: String,
         now: Long,
         requestId: Long? = null,
     ): Boolean {
@@ -267,7 +260,6 @@ internal class PendingDepositsSyncerImpl(
                     createdAt = now,
                     updatedAt = now,
                     completedAt = null,
-                    userId = userId,
                     note = null,
                     invoice = null,
                     amountInBtc = amountSats.toBtc().asEncryptable(),

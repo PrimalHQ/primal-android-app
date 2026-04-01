@@ -4,14 +4,14 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.settings.wallet.settings.ui.model.WalletNwcConnectionUi
 import net.primal.domain.links.CdnImage
 import net.primal.domain.transactions.Transaction
-import net.primal.domain.wallet.Wallet
+import net.primal.domain.wallet.UserWallet
 import net.primal.domain.wallet.nwc.model.NwcRequestLog
 
 interface WalletSettingsContract {
     data class UiState(
         val activeUserId: String,
         val isServiceRunningForCurrentUser: Boolean = false,
-        val activeWallet: Wallet? = null,
+        val activeWallet: UserWallet? = null,
         val useExternalWallet: Boolean? = null,
         val nwcConnectionsInfo: List<WalletNwcConnectionUi> = emptyList(),
         val connectionsState: ConnectionsState = ConnectionsState.Loading,

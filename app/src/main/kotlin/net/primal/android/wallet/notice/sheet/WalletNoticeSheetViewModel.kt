@@ -180,7 +180,7 @@ class WalletNoticeSheetViewModel @Inject constructor(
     }
 
     private suspend fun localSparkWalletExists(userId: String): Boolean {
-        return sparkWalletAccountRepository.findPersistedWalletId(userId) != null
+        return sparkWalletAccountRepository.hasPersistedSparkWallet(userId)
     }
 
     private fun observeEvents() =

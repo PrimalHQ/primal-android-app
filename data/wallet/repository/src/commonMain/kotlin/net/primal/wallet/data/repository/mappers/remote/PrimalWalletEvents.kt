@@ -6,33 +6,24 @@ import net.primal.domain.transactions.Transaction
 import net.primal.domain.wallet.WalletType
 import net.primal.wallet.data.remote.nostr.ContentWalletTransaction
 
-internal fun List<ContentWalletTransaction>.mapAsPrimalTransactions(
-    walletId: String,
-    userId: String,
-): List<Transaction> =
+internal fun List<ContentWalletTransaction>.mapAsPrimalTransactions(walletId: String): List<Transaction> =
     map {
         it.asPrimalTransaction(
             walletId = walletId,
-            userId = userId,
             walletType = WalletType.PRIMAL,
         )
     }
 
-internal fun List<ContentWalletTransaction>.mapForMigration(
-    targetWalletId: String,
-    userId: String,
-): List<Transaction> =
+internal fun List<ContentWalletTransaction>.mapForMigration(targetWalletId: String): List<Transaction> =
     map {
         it.asPrimalTransaction(
             walletId = targetWalletId,
-            userId = userId,
             walletType = WalletType.SPARK,
         )
     }
 
 private fun ContentWalletTransaction.asPrimalTransaction(
     walletId: String,
-    userId: String,
     walletType: WalletType = WalletType.PRIMAL,
 ): Transaction {
     val zapEvent = this.zapRequestRawJson.decodeFromJsonStringOrNull<NostrEvent>()
@@ -54,7 +45,7 @@ private fun ContentWalletTransaction.asPrimalTransaction(
             createdAt = this.createdAt,
             updatedAt = this.updatedAt,
             completedAt = this.completedAt,
-            userId = userId,
+
             note = this.note,
             invoice = this.invoice,
             amountInBtc = this.amountInBtc,
@@ -72,7 +63,7 @@ private fun ContentWalletTransaction.asPrimalTransaction(
             createdAt = this.createdAt,
             updatedAt = this.updatedAt,
             completedAt = this.completedAt,
-            userId = userId,
+
             note = this.note,
             invoice = this.invoice,
             amountInBtc = this.amountInBtc,
@@ -97,7 +88,7 @@ private fun ContentWalletTransaction.asPrimalTransaction(
             createdAt = this.createdAt,
             updatedAt = this.updatedAt,
             completedAt = this.completedAt,
-            userId = userId,
+
             note = this.note,
             invoice = this.invoice,
             amountInBtc = this.amountInBtc,
@@ -117,7 +108,7 @@ private fun ContentWalletTransaction.asPrimalTransaction(
             createdAt = this.createdAt,
             updatedAt = this.updatedAt,
             completedAt = this.completedAt,
-            userId = userId,
+
             note = this.note,
             invoice = this.invoice,
             amountInBtc = this.amountInBtc,

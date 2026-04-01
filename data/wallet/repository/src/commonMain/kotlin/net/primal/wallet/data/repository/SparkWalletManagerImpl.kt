@@ -63,6 +63,8 @@ internal class SparkWalletManagerImpl(
             }
         }
 
+    override suspend fun hasInstance(walletId: String): Boolean = breezSdkInstanceManager.hasInstance(walletId)
+
     private inner class SdkEventListener(
         private val walletId: String,
     ) : EventListener {

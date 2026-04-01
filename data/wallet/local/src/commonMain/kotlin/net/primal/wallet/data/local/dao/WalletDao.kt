@@ -31,12 +31,53 @@ interface WalletDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertOrIgnoreWalletInfo(info: WalletInfo)
 
+    @Query("INSERT OR IGNORE INTO WalletUserLink (userId, walletId) VALUES (:userId, :walletId)")
+    suspend fun insertWalletUserLink(userId: String, walletId: String)
+
     @Transaction
-    @Query("SELECT * FROM WalletInfo WHERE userId = :userId")
+    @Query(
+        """
+        SELECT wi.* FROM WalletInfo wi
+        INNER JOIN WalletUserLink wul ON wi.walletId = wul.walletId
+        WHERE wul.userId = :userId
+        """,
+    )
     fun observeWalletsByUserId(userId: String): Flow<List<Wallet>>
 
-    @Query("UPDATE WalletInfo SET lightningAddress = :lightningAddress WHERE walletId = :walletId")
-    suspend fun updateWalletLightningAddress(walletId: String, lightningAddress: Encryptable<String>?)
+    @Suppress("FunctionName")
+    @Query(
+        """
+        UPDATE WalletUserLink SET lightningAddress = NULL
+        WHERE lightningAddress = :lightningAddress
+        """,
+    )
+    suspend fun _nullOutLightningAddress(lightningAddress: Encryptable<String>)
+
+    @Suppress("FunctionName")
+    @Query(
+        """
+        UPDATE WalletUserLink SET lightningAddress = :lightningAddress
+        WHERE userId = :userId AND walletId = :walletId
+        """,
+    )
+    suspend fun _setLightningAddress(
+        userId: String,
+        walletId: String,
+        lightningAddress: Encryptable<String>,
+    )
+
+    @Transaction
+    suspend fun assignLightningAddress(
+        userId: String,
+        walletId: String,
+        lightningAddress: Encryptable<String>,
+    ) {
+        _nullOutLightningAddress(lightningAddress)
+        _setLightningAddress(userId, walletId, lightningAddress)
+    }
+
+    @Query("SELECT * FROM WalletUserLink WHERE userId = :userId AND walletId = :walletId")
+    suspend fun findWalletUserLink(userId: String, walletId: String): WalletUserLink?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertWalletInfo(info: WalletInfo)
@@ -53,8 +94,37 @@ interface WalletDao {
     @Query("SELECT * FROM SparkWalletData WHERE walletId = :walletId")
     suspend fun findSparkWalletData(walletId: String): SparkWalletData?
 
-    @Query("SELECT * FROM SparkWalletData WHERE userId = :userId")
+    @Query(
+        """
+        SELECT swd.* FROM SparkWalletData swd
+        INNER JOIN WalletUserLink wul ON swd.walletId = wul.walletId
+        WHERE wul.userId = :userId
+        """,
+    )
     suspend fun findAllSparkWalletDataByUserId(userId: String): List<SparkWalletData>
+
+    @Query(
+        """
+        SELECT EXISTS(
+            SELECT 1 FROM SparkWalletData swd
+            INNER JOIN WalletUserLink wul ON swd.walletId = wul.walletId
+            WHERE wul.userId = :userId
+        )
+        """,
+    )
+    suspend fun hasSparkWalletDataByUserId(userId: String): Boolean
+
+    @Query(
+        """
+        SELECT wul.walletId FROM WalletUserLink wul
+        INNER JOIN WalletInfo wi ON wul.walletId = wi.walletId
+        WHERE wul.userId = :userId
+          AND wi.type = 'SPARK'
+          AND wul.lightningAddress IS NOT NULL
+        LIMIT 1
+        """,
+    )
+    suspend fun findRegisteredSparkWalletId(userId: String): String?
 
     @Query("UPDATE SparkWalletData SET backedUp = :backedUp WHERE walletId = :walletId")
     suspend fun updateSparkWalletBackedUp(walletId: String, backedUp: Boolean)
@@ -64,15 +134,6 @@ interface WalletDao {
 
     @Query("UPDATE SparkWalletData SET primalTxsMigratedUntil = :until WHERE walletId = :walletId")
     suspend fun updatePrimalTxsMigratedUntil(walletId: String, until: Long?)
-
-    @Query("UPDATE SparkWalletData SET nwcAutoStart = :autoStart WHERE userId = :userId")
-    suspend fun updateNwcAutoStart(userId: String, autoStart: Boolean)
-
-    @Query("SELECT nwcAutoStart FROM SparkWalletData WHERE userId = :userId LIMIT 1")
-    suspend fun isNwcAutoStartEnabled(userId: String): Boolean?
-
-    @Query("SELECT nwcAutoStart FROM SparkWalletData WHERE userId = :userId LIMIT 1")
-    fun observeNwcAutoStart(userId: String): Flow<Boolean?>
 
     @Query(
         """
@@ -100,51 +161,16 @@ interface WalletDao {
     @Query("UPDATE WalletInfo SET lastUpdatedAt = CAST(strftime('%s','now') AS INTEGER) WHERE walletId = :walletId")
     suspend fun touchLastUpdatedAt(walletId: String)
 
-    @Suppress("FunctionName")
-    @Query("DELETE FROM WalletInfo WHERE walletId IN (:walletIds)")
-    suspend fun _deleteWalletInfosByIds(walletIds: List<String>)
-
-    @Suppress("FunctionName")
-    @Query("DELETE FROM PrimalWalletData WHERE walletId IN (:walletIds)")
-    suspend fun _deletePrimalWalletsByIds(walletIds: List<String>)
-
-    @Suppress("FunctionName")
-    @Query("DELETE FROM NostrWalletData WHERE walletId IN (:walletIds)")
-    suspend fun _deleteNostrWalletsByIds(walletIds: List<String>)
-
-    @Suppress("FunctionName")
-    @Query("DELETE FROM SparkWalletData WHERE walletId IN (:walletIds)")
-    suspend fun _deleteSparkWalletsByIds(walletIds: List<String>)
-
-    @Suppress("FunctionName")
-    @Query("DELETE FROM WalletInfo WHERE userId = :userId AND type = 'SPARK'")
-    suspend fun _deleteSparkWalletInfoByUserId(userId: String)
-
-    @Suppress("FunctionName")
-    @Query("DELETE FROM SparkWalletData WHERE userId = :userId")
-    suspend fun _deleteSparkWalletDataByUserId(userId: String)
-
-    @Transaction
-    suspend fun deleteSparkWalletByUserId(userId: String): String? {
-        val walletId = findLastUsedWalletByType(userId = userId, type = WalletType.SPARK)
-        _deleteSparkWalletInfoByUserId(userId = userId)
-        _deleteSparkWalletDataByUserId(userId = userId)
-
-        return walletId?.info?.walletId
-    }
-
-    @Transaction
-    suspend fun deleteWalletsByIds(walletIds: List<String>) {
-        _deleteWalletInfosByIds(walletIds = walletIds)
-        _deleteNostrWalletsByIds(walletIds = walletIds)
-        _deletePrimalWalletsByIds(walletIds = walletIds)
-        _deleteSparkWalletsByIds(walletIds = walletIds)
-    }
-
     @Query("SELECT * FROM WalletInfo WHERE walletId = :walletId")
     suspend fun findWalletInfo(walletId: String): WalletInfo?
 
-    @Query("SELECT * FROM WalletInfo WHERE userId = :userId")
+    @Query(
+        """
+        SELECT wi.* FROM WalletInfo wi
+        INNER JOIN WalletUserLink wul ON wi.walletId = wul.walletId
+        WHERE wul.userId = :userId
+        """,
+    )
     suspend fun findWalletInfosByUserId(userId: String): List<WalletInfo>
 
     @Transaction
@@ -154,9 +180,10 @@ interface WalletDao {
     @Transaction
     @Query(
         """
-        SELECT * FROM WalletInfo
-        WHERE userId = :userId AND type = :type
-        ORDER BY lastUpdatedAt DESC LIMIT 1
+        SELECT wi.* FROM WalletInfo wi
+        INNER JOIN WalletUserLink wul ON wi.walletId = wul.walletId
+        WHERE wul.userId = :userId AND wi.type = :type
+        ORDER BY wi.lastUpdatedAt DESC LIMIT 1
         """,
     )
     suspend fun findLastUsedWalletByType(userId: String, type: WalletType): Wallet?
@@ -164,10 +191,45 @@ interface WalletDao {
     @Transaction
     @Query(
         """
-        SELECT * FROM WalletInfo
-        WHERE userId = :userId AND type in (:type)
-        ORDER BY lastUpdatedAt DESC LIMIT 1
+        SELECT wi.* FROM WalletInfo wi
+        INNER JOIN WalletUserLink wul ON wi.walletId = wul.walletId
+        WHERE wul.userId = :userId AND wi.type in (:type)
+        ORDER BY wi.lastUpdatedAt DESC LIMIT 1
         """,
     )
     suspend fun findLastUsedWalletByTypes(userId: String, type: Set<WalletType>): Wallet?
+
+    @Transaction
+    suspend fun deleteWalletsByIds(walletIds: List<String>) {
+        _deleteWalletInfosByIds(walletIds)
+        _deletePrimalWalletDataByIds(walletIds)
+        _deleteNostrWalletDataByIds(walletIds)
+        _deleteSparkWalletDataByIds(walletIds)
+        _deleteWalletUserLinksByIds(walletIds)
+        _deleteActiveWalletDataByIds(walletIds)
+    }
+
+    @Suppress("FunctionName")
+    @Query("DELETE FROM WalletInfo WHERE walletId IN (:walletIds)")
+    suspend fun _deleteWalletInfosByIds(walletIds: List<String>)
+
+    @Suppress("FunctionName")
+    @Query("DELETE FROM PrimalWalletData WHERE walletId IN (:walletIds)")
+    suspend fun _deletePrimalWalletDataByIds(walletIds: List<String>)
+
+    @Suppress("FunctionName")
+    @Query("DELETE FROM NostrWalletData WHERE walletId IN (:walletIds)")
+    suspend fun _deleteNostrWalletDataByIds(walletIds: List<String>)
+
+    @Suppress("FunctionName")
+    @Query("DELETE FROM SparkWalletData WHERE walletId IN (:walletIds)")
+    suspend fun _deleteSparkWalletDataByIds(walletIds: List<String>)
+
+    @Suppress("FunctionName")
+    @Query("DELETE FROM WalletUserLink WHERE walletId IN (:walletIds)")
+    suspend fun _deleteWalletUserLinksByIds(walletIds: List<String>)
+
+    @Suppress("FunctionName")
+    @Query("DELETE FROM ActiveWalletData WHERE walletId IN (:walletIds)")
+    suspend fun _deleteActiveWalletDataByIds(walletIds: List<String>)
 }

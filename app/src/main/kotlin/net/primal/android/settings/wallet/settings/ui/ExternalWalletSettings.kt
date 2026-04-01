@@ -41,6 +41,7 @@ import net.primal.domain.wallet.Wallet
 @Composable
 fun ExternalWalletSettings(
     nwcWallet: Wallet?,
+    nwcLightningAddress: String? = null,
     onExternalWalletDisconnect: () -> Unit,
     onPasteNwcClick: () -> Unit,
     onScanNwcClick: () -> Unit,
@@ -52,6 +53,7 @@ fun ExternalWalletSettings(
 
         ExternalWalletSection(
             nwcWallet = nwcWallet,
+            nwcLightningAddress = nwcLightningAddress,
             onExternalWalletDisconnect = onExternalWalletDisconnect,
             onPasteNwcClick = onPasteNwcClick,
             onScanNwcClick = onScanNwcClick,
@@ -64,6 +66,7 @@ fun ExternalWalletSettings(
 @Composable
 private fun ExternalWalletSection(
     nwcWallet: Wallet?,
+    nwcLightningAddress: String? = null,
     onExternalWalletDisconnect: () -> Unit,
     onPasteNwcClick: () -> Unit,
     onScanNwcClick: () -> Unit,
@@ -94,7 +97,7 @@ private fun ExternalWalletSection(
                 .fillMaxSize()
                 .padding(horizontal = 16.dp),
             relay = nwcWallet.relays.firstOrNull() ?: "",
-            lightningAddress = nwcWallet.lightningAddress ?: "",
+            lightningAddress = nwcLightningAddress ?: "",
             disconnectWallet = onExternalWalletDisconnect,
         )
     } else {
@@ -242,7 +245,8 @@ private fun PreviewExternalWalletSettings(
         Surface {
             Column {
                 ExternalWalletSettings(
-                    nwcWallet = state.activeWallet,
+                    nwcWallet = state.activeWallet?.wallet,
+                    nwcLightningAddress = state.activeWallet?.lightningAddress,
                     onExternalWalletDisconnect = {},
                     onPasteNwcClick = {},
                     onScanNwcClick = {},

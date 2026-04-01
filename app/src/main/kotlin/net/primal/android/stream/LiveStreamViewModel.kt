@@ -629,7 +629,8 @@ class LiveStreamViewModel @AssistedInject constructor(
     private fun observeActiveWallet() =
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { wallet ->
+                .collect { userWallet ->
+                    val wallet = userWallet?.wallet
                     setState {
                         copy(
                             zappingState = zappingState.copy(
@@ -673,7 +674,7 @@ class LiveStreamViewModel @AssistedInject constructor(
             }
 
             val walletId = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())
-                ?.walletId ?: return@launch
+                ?.wallet?.walletId ?: return@launch
 
             val tempZapId = addZapOptimistically(zapAction = zapAction, activeAccount = activeAccount)
 

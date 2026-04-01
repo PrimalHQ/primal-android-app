@@ -104,7 +104,7 @@ class MigratePrimalTransactionsHandler(
 
                         // Map transactions for migration (sets walletType = SPARK)
                         val mapped = response.transactions
-                            .mapForMigration(targetWalletId = targetSparkWalletId, userId = userId)
+                            .mapForMigration(targetWalletId = targetSparkWalletId)
                             .map { it.toWalletTransactionData() }
 
                         walletDatabase.walletTransactions().upsertAll(mapped)

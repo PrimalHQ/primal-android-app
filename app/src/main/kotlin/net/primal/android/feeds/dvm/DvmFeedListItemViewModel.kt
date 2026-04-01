@@ -65,12 +65,13 @@ class DvmFeedListItemViewModel @Inject constructor(
     private fun observeActiveWallet() =
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect {
+                .collect { userWallet ->
+                    val wallet = userWallet?.wallet
                     setState {
                         copy(
                             zappingState = zappingState.copy(
-                                walletConnected = it.isConfigured(),
-                                walletBalanceInBtc = it?.balanceInBtc?.formatAsString(),
+                                walletConnected = wallet.isConfigured(),
+                                walletBalanceInBtc = wallet?.balanceInBtc?.formatAsString(),
                             ),
                         )
                     }
@@ -123,8 +124,8 @@ class DvmFeedListItemViewModel @Inject constructor(
                 setState { copy(error = UiError.MissingLightningAddress(IllegalStateException("Missing ln url"))) }
                 return@launch
             }
-            val walletId = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())?.walletId
-                ?: return@launch
+            val walletId = walletAccountRepository.getActiveWallet(userId = activeAccountStore.activeUserId())
+                ?.wallet?.walletId ?: return@launch
 
             val result = zapHandler.zap(
                 userId = activeAccountStore.activeUserId(),

@@ -26,7 +26,8 @@ class EnsureSparkWalletExistsUseCase(
      */
     suspend fun invoke(userId: String, register: Boolean = true): Result<String> =
         runCatching {
-            val existingWalletId = sparkWalletAccountRepository.findPersistedWalletId(userId)
+            val existingWalletId = sparkWalletAccountRepository.findRegisteredSparkWalletId(userId)
+                ?: sparkWalletAccountRepository.findAllPersistedWalletIds(userId).firstOrNull()
             val isNewWallet = existingWalletId == null
 
             val seedWords = if (isNewWallet) {
@@ -38,12 +39,12 @@ class EnsureSparkWalletExistsUseCase(
             val walletId = sparkWalletManager.initializeWallet(seedWords).getOrThrow()
 
             if (isNewWallet) {
-                sparkWalletAccountRepository.persistSeedWords(userId, walletId, seedWords).getOrThrow()
+                sparkWalletAccountRepository.persistSeedWords(walletId, seedWords).getOrThrow()
             }
 
             if (register) {
                 // Register wallet with server if not already registered
-                if (!sparkWalletAccountRepository.isRegistered(walletId)) {
+                if (!sparkWalletAccountRepository.isRegistered(userId, walletId)) {
                     sparkWalletAccountRepository.registerSparkWallet(userId, walletId).getOrThrow()
                 }
             }

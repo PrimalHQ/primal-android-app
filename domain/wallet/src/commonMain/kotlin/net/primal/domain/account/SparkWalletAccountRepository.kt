@@ -10,27 +10,23 @@ interface SparkWalletAccountRepository {
 
     suspend fun unregisterSparkWallet(userId: String, walletId: String): Result<Unit>
 
-    suspend fun findPersistedWalletId(userId: String): String?
-
     suspend fun findAllPersistedWalletIds(userId: String): List<String>
+
+    suspend fun hasPersistedSparkWallet(userId: String): Boolean
+
+    suspend fun findRegisteredSparkWalletId(userId: String): String?
 
     suspend fun getPersistedSeedWords(walletId: String): Result<List<String>>
 
-    suspend fun persistSeedWords(
-        userId: String,
-        walletId: String,
-        seedWords: String,
-    ): Result<Unit>
+    suspend fun persistSeedWords(walletId: String, seedWords: String): Result<Unit>
 
-    suspend fun getLightningAddress(walletId: String): String?
+    suspend fun getLightningAddress(userId: String, walletId: String): String?
 
-    suspend fun isRegistered(walletId: String): Boolean
+    suspend fun isRegistered(userId: String, walletId: String): Boolean
 
     suspend fun isWalletBackedUp(walletId: String): Boolean
 
     suspend fun markWalletAsBackedUp(walletId: String): Result<Unit>
-
-    suspend fun deleteSparkWalletByUserId(userId: String): Result<String>
 
     suspend fun isPrimalTxsMigrationCompleted(walletId: String): Boolean
 

@@ -47,7 +47,7 @@ class SettingsHomeViewModel @Inject constructor(
     private fun observeActiveWalletData() =
         viewModelScope.launch {
             walletAccountRepository.observeActiveWallet(userId = activeAccountStore.activeUserId())
-                .collect { wallet -> setState { copy(walletNeedsBackup = wallet.shouldShowBackup) } }
+                .collect { userWallet -> setState { copy(walletNeedsBackup = userWallet?.wallet.shouldShowBackup) } }
         }
 
     private fun observeEvents() =

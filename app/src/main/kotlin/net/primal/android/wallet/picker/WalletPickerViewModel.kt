@@ -50,7 +50,7 @@ class WalletPickerViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect { event ->
                 when (event) {
-                    is UiEvent.ChangeActiveWallet -> changeActiveWallet(event.wallet)
+                    is UiEvent.ChangeActiveWallet -> changeActiveWallet(event.userWallet.wallet)
                     is UiEvent.EnterEditMode -> setState {
                         copy(isEditMode = true, previewRegisteredWalletId = registeredWalletId)
                     }
@@ -60,7 +60,7 @@ class WalletPickerViewModel @Inject constructor(
                     }
 
                     is UiEvent.SelectWalletForReassignment -> setState {
-                        copy(previewRegisteredWalletId = event.wallet.walletId)
+                        copy(previewRegisteredWalletId = event.userWallet.wallet.walletId)
                     }
 
                     is UiEvent.ConfirmReassignment -> confirmReassignment()
@@ -124,7 +124,7 @@ class WalletPickerViewModel @Inject constructor(
                 return@launch
             }
 
-            val targetWallet = currentState.wallets.find { it.walletId == previewWalletId }
+            val targetWallet = currentState.wallets.find { it.wallet.walletId == previewWalletId }?.wallet
                 ?: return@launch
 
             setState { copy(isReassigning = true) }

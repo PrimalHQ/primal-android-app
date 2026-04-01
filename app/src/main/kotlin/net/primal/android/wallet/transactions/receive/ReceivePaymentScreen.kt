@@ -224,7 +224,7 @@ private fun ReceivePaymentTopBar(
 
 @Composable
 private fun ReceivePaymentBottomBar(state: UiState, eventPublisher: (ReceivePaymentContract.UiEvent) -> Unit) {
-    if (!state.paymentReceived && state.activeWallet?.capabilities?.supportsOnChainReceive == true) {
+    if (!state.paymentReceived && state.activeWallet?.wallet?.capabilities?.supportsOnChainReceive == true) {
         Column {
             PrimalDivider()
             WalletTabsBar(

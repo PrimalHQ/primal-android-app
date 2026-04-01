@@ -111,7 +111,7 @@ class ScanCodeViewModel @Inject constructor(
 
     private suspend fun resolveUserState(userAccount: UserAccount): ScanCodeContract.UserState {
         if (userAccount == UserAccount.EMPTY) return ScanCodeContract.UserState.NoUser
-        val wallet = walletAccountRepository.getActiveWallet(userId = userAccount.pubkey)
+        val wallet = walletAccountRepository.getActiveWallet(userId = userAccount.pubkey)?.wallet
 
         return when (wallet) {
             is Wallet.NWC, is Wallet.Spark, null,

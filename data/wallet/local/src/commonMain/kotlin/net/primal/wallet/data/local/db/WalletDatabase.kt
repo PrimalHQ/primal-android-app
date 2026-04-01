@@ -17,6 +17,8 @@ import net.primal.wallet.data.local.dao.PrimalWalletData
 import net.primal.wallet.data.local.dao.ReceiveRequestDao
 import net.primal.wallet.data.local.dao.ReceiveRequestData
 import net.primal.wallet.data.local.dao.SparkWalletData
+import net.primal.wallet.data.local.dao.UserWalletPreferences
+import net.primal.wallet.data.local.dao.UserWalletPreferencesDao
 import net.primal.wallet.data.local.dao.WalletDao
 import net.primal.wallet.data.local.dao.WalletInfo
 import net.primal.wallet.data.local.dao.WalletSettings
@@ -25,6 +27,7 @@ import net.primal.wallet.data.local.dao.WalletTransactionDao
 import net.primal.wallet.data.local.dao.WalletTransactionData
 import net.primal.wallet.data.local.dao.WalletTransactionRemoteKey
 import net.primal.wallet.data.local.dao.WalletTransactionRemoteKeyDao
+import net.primal.wallet.data.local.dao.WalletUserLink
 import net.primal.wallet.data.local.dao.ZapEnrichmentTracker
 import net.primal.wallet.data.local.dao.ZapEnrichmentTrackerDao
 import net.primal.wallet.data.local.dao.nwc.NwcConnectionDao
@@ -57,8 +60,10 @@ import net.primal.wallet.data.local.dao.nwc.NwcWalletRequestLogDao
         NwcPendingEventData::class,
         ReceiveRequestData::class,
         ZapEnrichmentTracker::class,
+        WalletUserLink::class,
+        UserWalletPreferences::class,
     ],
-    version = 5,
+    version = 6,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
@@ -79,6 +84,7 @@ abstract class WalletDatabase : RoomDatabase() {
     abstract fun nwcLogs(): NwcWalletRequestLogDao
     abstract fun receiveRequests(): ReceiveRequestDao
     abstract fun zapEnrichmentTracker(): ZapEnrichmentTrackerDao
+    abstract fun userWalletPreferences(): UserWalletPreferencesDao
 
     companion object {
         val MIGRATION_2_3 = object : Migration(2, 3) {
@@ -114,6 +120,177 @@ abstract class WalletDatabase : RoomDatabase() {
                 } finally {
                     stmt.close()
                 }
+            }
+        }
+
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(connection: SQLiteConnection) {
+                // Create new tables
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS WalletUserLink (
+                        userId TEXT NOT NULL,
+                        walletId TEXT NOT NULL,
+                        lightningAddress TEXT,
+                        PRIMARY KEY (userId, walletId)
+                    )
+                    """,
+                )
+                connection.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_WalletUserLink_walletId ON WalletUserLink (walletId)",
+                )
+                connection.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS " +
+                        "index_WalletUserLink_lightningAddress ON WalletUserLink (lightningAddress)",
+                )
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS UserWalletPreferences (
+                        userId TEXT NOT NULL,
+                        nwcAutoStart INTEGER NOT NULL DEFAULT 1,
+                        PRIMARY KEY (userId)
+                    )
+                    """,
+                )
+
+                // Populate new tables from existing data
+                connection.execSQL(
+                    "INSERT OR IGNORE INTO WalletUserLink (userId, walletId, lightningAddress) " +
+                        "SELECT userId, walletId, lightningAddress FROM WalletInfo",
+                )
+                connection.execSQL(
+                    "INSERT OR IGNORE INTO UserWalletPreferences (userId, nwcAutoStart) " +
+                        "SELECT userId, nwcAutoStart FROM SparkWalletData",
+                )
+
+                // Recreate WalletInfo without userId
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS WalletInfo_new (
+                        walletId TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        balanceInBtc TEXT,
+                        maxBalanceInBtc TEXT,
+                        lastUpdatedAt INTEGER,
+                        PRIMARY KEY(walletId)
+                    )
+                    """,
+                )
+                connection.execSQL(
+                    """
+                    INSERT INTO WalletInfo_new (walletId, type, balanceInBtc, maxBalanceInBtc, lastUpdatedAt)
+                    SELECT walletId, type, balanceInBtc, maxBalanceInBtc, lastUpdatedAt FROM WalletInfo
+                    """,
+                )
+                connection.execSQL("DROP TABLE WalletInfo")
+                connection.execSQL("ALTER TABLE WalletInfo_new RENAME TO WalletInfo")
+
+                // Recreate SparkWalletData without userId and nwcAutoStart
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS SparkWalletData_new (
+                        walletId TEXT NOT NULL,
+                        seedWords TEXT NOT NULL,
+                        backedUp INTEGER NOT NULL,
+                        primalTxsMigrated INTEGER,
+                        primalTxsMigratedUntil INTEGER,
+                        PRIMARY KEY(walletId)
+                    )
+                    """,
+                )
+                connection.execSQL(
+                    """
+                    INSERT INTO SparkWalletData_new (walletId, seedWords, backedUp, primalTxsMigrated, primalTxsMigratedUntil)
+                    SELECT walletId, seedWords, backedUp, primalTxsMigrated, primalTxsMigratedUntil FROM SparkWalletData
+                    """,
+                )
+                connection.execSQL("DROP TABLE SparkWalletData")
+                connection.execSQL("ALTER TABLE SparkWalletData_new RENAME TO SparkWalletData")
+
+                // Recreate WalletTransactionData without userId
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS WalletTransactionData_new (
+                        transactionId TEXT NOT NULL,
+                        walletId TEXT NOT NULL,
+                        walletType TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        state TEXT NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        updatedAt INTEGER NOT NULL,
+                        completedAt TEXT,
+                        note TEXT,
+                        invoice TEXT,
+                        amountInBtc TEXT NOT NULL,
+                        totalFeeInBtc TEXT,
+                        otherUserId TEXT,
+                        zappedEntity TEXT,
+                        zappedByUserId TEXT,
+                        txKind TEXT NOT NULL,
+                        onChainAddress TEXT,
+                        onChainTxId TEXT,
+                        preimage TEXT,
+                        paymentHash TEXT,
+                        amountInUsd TEXT,
+                        exchangeRate TEXT,
+                        otherLightningAddress TEXT,
+                        PRIMARY KEY(transactionId)
+                    )
+                    """,
+                )
+                connection.execSQL(
+                    """
+                    INSERT INTO WalletTransactionData_new (
+                        transactionId, walletId, walletType, type, state, createdAt, updatedAt,
+                        completedAt, note, invoice, amountInBtc, totalFeeInBtc, otherUserId,
+                        zappedEntity, zappedByUserId, txKind, onChainAddress, onChainTxId,
+                        preimage, paymentHash, amountInUsd, exchangeRate, otherLightningAddress
+                    )
+                    SELECT
+                        transactionId, walletId, walletType, type, state, createdAt, updatedAt,
+                        completedAt, note, invoice, amountInBtc, totalFeeInBtc, otherUserId,
+                        zappedEntity, zappedByUserId, txKind, onChainAddress, onChainTxId,
+                        preimage, paymentHash, amountInUsd, exchangeRate, otherLightningAddress
+                    FROM WalletTransactionData
+                    """,
+                )
+                connection.execSQL("DROP TABLE WalletTransactionData")
+                connection.execSQL("ALTER TABLE WalletTransactionData_new RENAME TO WalletTransactionData")
+                connection.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_WalletTransactionData_invoice ON WalletTransactionData (invoice)",
+                )
+                connection.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_WalletTransactionData_paymentHash " +
+                        "ON WalletTransactionData (paymentHash)",
+                )
+
+                // Recreate ReceiveRequestData without userId
+                connection.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS ReceiveRequestData_new (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        walletId TEXT NOT NULL,
+                        type TEXT NOT NULL,
+                        createdAt INTEGER NOT NULL,
+                        fulfilledAt INTEGER,
+                        payload TEXT NOT NULL,
+                        amountInBtc TEXT
+                    )
+                    """,
+                )
+                connection.execSQL(
+                    """
+                    INSERT INTO ReceiveRequestData_new (id, walletId, type, createdAt, fulfilledAt, payload, amountInBtc)
+                    SELECT id, walletId, type, createdAt, fulfilledAt, payload, amountInBtc FROM ReceiveRequestData
+                    """,
+                )
+                connection.execSQL("DROP TABLE ReceiveRequestData")
+                connection.execSQL("ALTER TABLE ReceiveRequestData_new RENAME TO ReceiveRequestData")
+                connection.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS " +
+                        "index_ReceiveRequestData_walletId_type_payload " +
+                        "ON ReceiveRequestData (walletId, type, payload)",
+                )
             }
         }
 

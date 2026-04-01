@@ -35,7 +35,7 @@ private fun WalletTransactionData.toZapTransaction(otherProfile: ProfileData?): 
             createdAt = this.createdAt,
             updatedAt = this.updatedAt,
             completedAt = this.completedAt?.decrypted,
-            userId = this.userId,
+
             note = this.note?.decrypted,
             invoice = this.invoice,
             amountInBtc = this.amountInBtc.decrypted,
@@ -65,7 +65,7 @@ private fun WalletTransactionData.toStorePurchaseTransaction() =
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
         completedAt = this.completedAt?.decrypted,
-        userId = this.userId,
+
         note = this.note?.decrypted,
         invoice = this.invoice,
         amountInBtc = this.amountInBtc.decrypted,
@@ -84,7 +84,7 @@ private fun WalletTransactionData.toOnChainTransaction() =
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
         completedAt = this.completedAt?.decrypted,
-        userId = this.userId,
+
         note = this.note?.decrypted,
         invoice = this.invoice,
         amountInBtc = this.amountInBtc.decrypted,
@@ -105,7 +105,7 @@ private fun WalletTransactionData.toLightningTransaction(otherProfile: ProfileDa
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
         completedAt = this.completedAt?.decrypted,
-        userId = this.userId,
+
         note = this.note?.decrypted,
         invoice = this.invoice,
         amountInBtc = this.amountInBtc.decrypted,
@@ -129,7 +129,7 @@ private fun WalletTransactionData.toSparkTransaction() =
         createdAt = this.createdAt,
         updatedAt = this.updatedAt,
         completedAt = this.completedAt?.decrypted,
-        userId = this.userId,
+
         note = this.note?.decrypted,
         invoice = this.invoice,
         amountInBtc = this.amountInBtc.decrypted,
@@ -155,7 +155,6 @@ internal fun Transaction.toWalletTransactionData(): WalletTransactionData =
         updatedAt = this.updatedAt,
         completedAt = this.completedAt?.asEncryptable(),
         amountInBtc = this.amountInBtc.asEncryptable(),
-        userId = this.userId,
         note = this.note?.asEncryptable(),
         invoice = this.invoice,
         totalFeeInBtc = this.totalFeeInBtc?.asEncryptable(),

@@ -47,17 +47,18 @@ internal class PrimalWalletAccountRepositoryImpl(
                     walletDatabase.wallet().insertOrIgnoreWalletInfo(
                         info = WalletInfo(
                             walletId = userId,
-                            userId = userId,
-                            lightningAddress = lightningAddress.asEncryptable(),
                             type = WalletType.PRIMAL,
                         ),
                     )
-
-                    walletDatabase.wallet().updateWalletLightningAddress(
+                    walletDatabase.wallet().insertWalletUserLink(
+                        userId = userId,
+                        walletId = userId,
+                    )
+                    walletDatabase.wallet().assignLightningAddress(
+                        userId = userId,
                         walletId = userId,
                         lightningAddress = lightningAddress.asEncryptable(),
                     )
-
                     walletDatabase.wallet().upsertPrimalWalletData(
                         data = PrimalWalletData(
                             walletId = userId,
@@ -99,12 +100,21 @@ internal class PrimalWalletAccountRepositoryImpl(
             runCatching {
                 val response = primalWalletApi.getWalletStatus(userId)
 
-                response.lightningAddress?.let {
-                    correctLightningAddressAssignment(
+                val sparkWalletId = response.sparkPubkey
+                val lightningAddress = response.lightningAddress
+
+                if (sparkWalletId != null) {
+                    walletDatabase.wallet().insertWalletUserLink(
                         userId = userId,
-                        registeredWalletId = response.sparkPubkey ?: userId,
-                        lightningAddress = it,
+                        walletId = sparkWalletId,
                     )
+                    if (lightningAddress != null) {
+                        walletDatabase.wallet().assignLightningAddress(
+                            userId = userId,
+                            walletId = sparkWalletId,
+                            lightningAddress = lightningAddress.asEncryptable(),
+                        )
+                    }
                 }
 
                 PrimalWalletStatus(
@@ -116,31 +126,4 @@ internal class PrimalWalletAccountRepositoryImpl(
                 )
             }
         }
-
-    private suspend fun correctLightningAddressAssignment(
-        userId: String,
-        registeredWalletId: String,
-        lightningAddress: String,
-    ) {
-        walletDatabase.withTransaction {
-            val walletDao = walletDatabase.wallet()
-            val allWallets = walletDao.findWalletInfosByUserId(userId)
-
-            for (wallet in allWallets) {
-                if (wallet.type == WalletType.NWC) continue
-
-                if (wallet.walletId == registeredWalletId) {
-                    walletDao.updateWalletLightningAddress(
-                        walletId = wallet.walletId,
-                        lightningAddress = lightningAddress.asEncryptable(),
-                    )
-                } else if (wallet.lightningAddress?.decrypted == lightningAddress) {
-                    walletDao.updateWalletLightningAddress(
-                        walletId = wallet.walletId,
-                        lightningAddress = null,
-                    )
-                }
-            }
-        }
-    }
 }
