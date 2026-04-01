@@ -1,6 +1,5 @@
 package net.primal.wallet.data.repository.factory
 
-import dev.jordond.connectivity.Connectivity
 import net.primal.core.lightning.LightningPayHelper
 import net.primal.core.networking.nwc.wallet.NwcWalletRequestParser
 import net.primal.core.networking.primal.PrimalApiClient
@@ -263,7 +262,6 @@ abstract class RepositoryFactory {
             ),
             responseBuilder = responseBuilder,
             budgetManager = budgetManager,
-            connectivity = Connectivity(),
         )
     }
 

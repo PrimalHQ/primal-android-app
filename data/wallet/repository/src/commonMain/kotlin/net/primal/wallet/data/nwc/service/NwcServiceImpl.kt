@@ -59,10 +59,10 @@ class NwcServiceImpl internal constructor(
     private val requestProcessor: NwcRequestProcessor,
     private val responseBuilder: NwcWalletResponseBuilder,
     private val budgetManager: NwcBudgetManager,
-    private val connectivity: Connectivity,
 ) : NwcService {
 
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
+    private val connectivity = Connectivity()
     private val cache: LruSeenCache<String> = LruSeenCache(maxEntries = MAX_CACHE_SIZE)
     private val retrySendResponseQueue = MutableSharedFlow<PendingNwcResponse>()
     private val _relayConnected = MutableStateFlow(false)
@@ -145,7 +145,9 @@ class NwcServiceImpl internal constructor(
                 onSocketConnectionClosed = { url, _ ->
                     _relayConnected.value = false
                     Napier.d(tag = TAG) { "Disconnected from NWC relay: $url" }
-                    scheduleReconnect(relayUrl)
+                    if (reconnectJob?.isActive != true) {
+                        scheduleReconnect(relayUrl)
+                    }
                 },
             )
 
@@ -179,12 +181,14 @@ class NwcServiceImpl internal constructor(
     private fun scheduleReconnect(relayUrl: String) {
         scope.launch {
             reconnectMutex.withLock {
-                if (reconnectJob?.isActive == true) return@launch
+                reconnectJob?.cancel()
                 reconnectJob = scope.launch {
                     var reconnectDelay = RECONNECT_DELAY_INITIAL
                     while (isActive) {
                         Napier.d(tag = TAG) { "Scheduling reconnect to NWC relay in $reconnectDelay" }
                         delay(reconnectDelay)
+
+                        if (_relayConnected.value) break
 
                         Napier.d(tag = TAG) { "Attempting reconnect to NWC relay: $relayUrl" }
                         clientMutex.withLock {
@@ -198,7 +202,7 @@ class NwcServiceImpl internal constructor(
                         connectToRelay(relayUrl)
 
                         if (_relayConnected.value) {
-                            val connections = reconnectMutex.withLock { lastConnections }
+                            val connections = lastConnections
                             if (connections.isNotEmpty()) {
                                 runCatching { nwcClient?.updateConnections(connections) }
                                 ensureInfoEventsArePublished(connections)
@@ -224,11 +228,7 @@ class NwcServiceImpl internal constructor(
                             tag = TAG,
                         ) { "Connection: servicePubKey=${conn.serviceKeyPair.pubKey.take(8)}..., relay=${conn.relay}" }
                     }
-                    reconnectMutex.withLock {
-                        reconnectJob?.cancel()
-                        reconnectJob = null
-                        lastConnections = connections
-                    }
+                    lastConnections = connections
                     val relayUrl = connections.first().relay
                     connectToRelay(relayUrl)
                     runCatching { nwcClient?.updateConnections(connections) }
@@ -252,13 +252,7 @@ class NwcServiceImpl internal constructor(
                 .distinctUntilChanged()
                 .collect { status ->
                     if (status is Connectivity.Status.Connected && !_relayConnected.value) {
-                        val relayUrl = reconnectMutex.withLock {
-                            if (reconnectJob?.isActive != true) return@collect
-                            reconnectJob?.cancel()
-                            reconnectJob = null
-                            lastConnections
-                        }.firstOrNull()?.relay ?: return@collect
-
+                        val relayUrl = lastConnections.firstOrNull()?.relay ?: return@collect
                         Napier.d(tag = TAG) { "Internet restored, triggering immediate reconnect." }
                         scheduleReconnect(relayUrl)
                     }
