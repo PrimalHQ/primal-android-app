@@ -4,6 +4,7 @@ import android.text.format.Formatter
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,11 +12,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -26,7 +28,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,13 +46,17 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import java.text.NumberFormat
 import net.primal.android.R
+import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalSwitch
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalFilledButton
+import net.primal.android.core.compose.dropdown.DropdownPrimalMenu
+import net.primal.android.core.compose.dropdown.DropdownPrimalMenuItem
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.icons.primaliconpack.Copy
+import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.core.logging.AppLogExporter
@@ -102,6 +112,20 @@ fun DeveloperToolsScreen(viewModel: DeveloperToolsViewModel, onClose: () -> Unit
                     Toast.makeText(
                         context,
                         context.getString(R.string.settings_developer_tools_seed_words_copy_failed),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+                is SideEffect.WalletDeleted -> {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.settings_developer_tools_wallet_deleted),
+                        Toast.LENGTH_SHORT,
+                    ).show()
+                }
+                is SideEffect.WalletDeleteFailed -> {
+                    Toast.makeText(
+                        context,
+                        context.getString(R.string.settings_developer_tools_wallet_delete_failed),
                         Toast.LENGTH_SHORT,
                     ).show()
                 }
@@ -257,6 +281,9 @@ private fun DeveloperToolsScreen(
                         onCopySeedWords = {
                             eventPublisher(UiEvent.CopySeedWords(walletId = wallet.walletId))
                         },
+                        onDeleteWallet = {
+                            eventPublisher(UiEvent.DeleteWallet(walletId = wallet.walletId))
+                        },
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
@@ -273,8 +300,25 @@ private fun WalletItem(
     wallet: DevWalletInfo,
     onCopyWalletId: () -> Unit,
     onCopySeedWords: () -> Unit,
+    onDeleteWallet: () -> Unit,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
+    var menuVisible by rememberSaveable { mutableStateOf(false) }
+    var deleteDialogVisible by rememberSaveable { mutableStateOf(false) }
+
+    if (deleteDialogVisible) {
+        ConfirmActionAlertDialog(
+            dialogTitle = stringResource(id = R.string.settings_developer_tools_delete_wallet_title),
+            dialogText = stringResource(id = R.string.settings_developer_tools_delete_wallet_text),
+            confirmText = stringResource(id = R.string.context_confirm_delete_positive),
+            dismissText = stringResource(id = R.string.context_confirm_delete_negative),
+            onConfirmation = {
+                deleteDialogVisible = false
+                onDeleteWallet()
+            },
+            onDismissRequest = { deleteDialogVisible = false },
+        )
+    }
 
     val supportText = buildString {
         if (!wallet.lightningAddress.isNullOrBlank()) {
@@ -332,23 +376,46 @@ private fun WalletItem(
             )
         },
         trailingContent = {
-            Row {
-                IconButton(onClick = onCopyWalletId) {
+            Box {
+                IconButton(onClick = { menuVisible = true }) {
                     Icon(
-                        modifier = Modifier.size(24.dp),
-                        imageVector = PrimalIcons.Copy,
-                        contentDescription = stringResource(
-                            id = R.string.settings_developer_tools_wallet_id_copy,
-                        ),
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = null,
                     )
                 }
-                if (wallet.type == WalletType.SPARK) {
-                    IconButton(onClick = onCopySeedWords) {
-                        Icon(
-                            imageVector = PrimalIcons.Key,
-                            contentDescription = stringResource(
-                                id = R.string.settings_developer_tools_seed_words_copy,
-                            ),
+
+                DropdownPrimalMenu(
+                    expanded = menuVisible,
+                    onDismissRequest = { menuVisible = false },
+                ) {
+                    DropdownPrimalMenuItem(
+                        trailingIconVector = PrimalIcons.Copy,
+                        iconSize = 20.dp,
+                        text = stringResource(id = R.string.settings_developer_tools_wallet_id_copy),
+                        onClick = {
+                            menuVisible = false
+                            onCopyWalletId()
+                        },
+                    )
+                    if (wallet.type == WalletType.SPARK) {
+                        DropdownPrimalMenuItem(
+                            trailingIconVector = PrimalIcons.Key,
+                            iconSize = 20.dp,
+                            text = stringResource(id = R.string.settings_developer_tools_seed_words_copy),
+                            onClick = {
+                                menuVisible = false
+                                onCopySeedWords()
+                            },
+                        )
+                        DropdownPrimalMenuItem(
+                            trailingIconVector = PrimalIcons.Delete,
+                            iconSize = 20.dp,
+                            tint = AppTheme.colorScheme.error,
+                            text = stringResource(id = R.string.settings_developer_tools_delete_wallet),
+                            onClick = {
+                                menuVisible = false
+                                deleteDialogVisible = true
+                            },
                         )
                     }
                 }
