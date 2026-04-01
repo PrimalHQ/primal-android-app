@@ -453,6 +453,7 @@
 
     <string name="feed_reposted_suffix">reposted</string>
     <string name="feed_see_more">See more…</string>
+    <string name="feed_more">more</string>
 
     <string name="timestamp_since_just_now">now</string>
     <string name="timestamp_since_minutes">%1$sm</string>
