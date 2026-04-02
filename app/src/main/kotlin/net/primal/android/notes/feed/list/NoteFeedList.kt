@@ -248,7 +248,7 @@ private fun NoteFeedList(
                     NewPostsButton(
                         streamsSyncStats = state.streamsSyncStats,
                         notesSyncStats = state.notesSyncStats,
-                        onClick = { eventPublisher(UiEvent.ShowLatestNotes) },
+                        onClick = { eventPublisher(UiEvent.NewPostsPillClick) },
                     )
                 }
             }

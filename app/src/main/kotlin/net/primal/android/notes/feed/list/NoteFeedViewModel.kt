@@ -141,7 +141,7 @@ class NoteFeedViewModel @AssistedInject constructor(
                     UiEvent.FeedScrolledToTop -> handleScrolledToTop()
                     UiEvent.StartPolling -> startPollingIfSupported()
                     UiEvent.StopPolling -> stopPolling()
-                    UiEvent.ShowLatestNotes -> showLatestNotes()
+                    UiEvent.NewPostsPillClick -> showLatestNotesAndScrollToTop()
                     is UiEvent.UpdateCurrentTopVisibleNote -> {
                         topVisibleNote = it.noteId to it.repostId
                     }
@@ -273,7 +273,7 @@ class NoteFeedViewModel @AssistedInject constructor(
         }
     }
 
-    private fun showLatestNotes() =
+    private fun showLatestNotesAndScrollToTop() =
         viewModelScope.launch {
             latestFeedResponse?.let { latestFeed ->
                 feedRepository.replaceFeed(
@@ -281,14 +281,14 @@ class NoteFeedViewModel @AssistedInject constructor(
                     feedSpec = feedSpec,
                     snapshot = latestFeed,
                 )
+            }
 
-                delay(187.milliseconds)
-                setState { copy(notesSyncStats = FeedPostsSyncStats(), shouldAnimateScrollToTop = true) }
+            delay(187.milliseconds)
+            setState { copy(notesSyncStats = FeedPostsSyncStats(), shouldAnimateScrollToTop = true) }
 
-                viewModelScope.launch {
-                    delay(1.seconds)
-                    setState { copy(shouldAnimateScrollToTop = false) }
-                }
+            viewModelScope.launch {
+                delay(1.seconds)
+                setState { copy(shouldAnimateScrollToTop = false) }
             }
         }
 
