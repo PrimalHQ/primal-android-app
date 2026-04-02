@@ -68,7 +68,6 @@ class NwcServiceImpl internal constructor(
     private val _relayConnected = MutableStateFlow(false)
 
     private val clientMutex = Mutex()
-    private val reconnectMutex = Mutex()
     private var nwcClient: NwcWalletClient? = null
     private var clientJob: Job? = null
     private var reconnectJob: Job? = null
@@ -145,6 +144,15 @@ class NwcServiceImpl internal constructor(
                 onSocketConnectionClosed = { url, _ ->
                     _relayConnected.value = false
                     Napier.d(tag = TAG) { "Disconnected from NWC relay: $url" }
+                    scope.launch {
+                        clientMutex.withLock {
+                            clientJob?.cancel()
+                            clientJob = null
+                            nwcClient?.destroy()
+                            nwcClient = null
+                            publishedInfoPubKeys.clear()
+                        }
+                    }
                     if (reconnectJob?.isActive != true) {
                         scheduleReconnect(relayUrl)
                     }
@@ -163,10 +171,8 @@ class NwcServiceImpl internal constructor(
         }
 
     private suspend fun disconnectFromRelay() {
-        reconnectMutex.withLock {
-            reconnectJob?.cancel()
-            reconnectJob = null
-        }
+        reconnectJob?.cancel()
+        reconnectJob = null
         clientMutex.withLock {
             clientJob?.cancel()
             clientJob = null
@@ -179,40 +185,28 @@ class NwcServiceImpl internal constructor(
     }
 
     private fun scheduleReconnect(relayUrl: String) {
-        scope.launch {
-            reconnectMutex.withLock {
-                reconnectJob?.cancel()
-                reconnectJob = scope.launch {
-                    var reconnectDelay = RECONNECT_DELAY_INITIAL
-                    while (isActive) {
-                        Napier.d(tag = TAG) { "Scheduling reconnect to NWC relay in $reconnectDelay" }
-                        delay(reconnectDelay)
+        reconnectJob?.cancel()
+        reconnectJob = scope.launch {
+            var reconnectDelay = RECONNECT_DELAY_INITIAL
+            while (isActive) {
+                Napier.d(tag = TAG) { "Scheduling reconnect to NWC relay in $reconnectDelay" }
+                delay(reconnectDelay)
 
-                        if (_relayConnected.value) break
+                if (_relayConnected.value) break
 
-                        Napier.d(tag = TAG) { "Attempting reconnect to NWC relay: $relayUrl" }
-                        clientMutex.withLock {
-                            clientJob?.cancel()
-                            clientJob = null
-                            nwcClient?.destroy()
-                            nwcClient = null
-                            publishedInfoPubKeys.clear()
-                        }
+                Napier.d(tag = TAG) { "Attempting reconnect to NWC relay: $relayUrl" }
+                connectToRelay(relayUrl)
 
-                        connectToRelay(relayUrl)
-
-                        if (_relayConnected.value) {
-                            val connections = lastConnections
-                            if (connections.isNotEmpty()) {
-                                runCatching { nwcClient?.updateConnections(connections) }
-                                ensureInfoEventsArePublished(connections)
-                            }
-                            Napier.d(tag = TAG) { "Reconnected to NWC relay successfully." }
-                            break
-                        }
-                        reconnectDelay = (reconnectDelay * 2).coerceAtMost(RECONNECT_DELAY_MAX)
+                if (_relayConnected.value) {
+                    val connections = lastConnections
+                    if (connections.isNotEmpty()) {
+                        runCatching { nwcClient?.updateConnections(connections) }
+                        ensureInfoEventsArePublished(connections)
                     }
+                    Napier.d(tag = TAG) { "Reconnected to NWC relay successfully." }
+                    break
                 }
+                reconnectDelay = (reconnectDelay * 2).coerceAtMost(RECONNECT_DELAY_MAX)
             }
         }
     }
