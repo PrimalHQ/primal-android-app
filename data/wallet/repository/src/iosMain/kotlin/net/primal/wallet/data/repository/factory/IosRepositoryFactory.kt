@@ -5,6 +5,8 @@ import io.github.aakira.napier.Napier
 import kotlin.experimental.ExperimentalObjCName
 import net.primal.shared.data.local.db.LocalDatabaseFactory
 import net.primal.wallet.data.local.db.WalletDatabase
+import net.primal.wallet.data.logging.CallbackAntilog
+import net.primal.wallet.data.logging.LogEntry
 import net.primal.wallet.data.spark.BreezApiKeyProvider
 import net.primal.wallet.data.spark.BreezSdkStorageProvider
 import net.primal.wallet.data.spark.IosBreezSdkStorageProvider
@@ -23,16 +25,30 @@ object IosRepositoryFactory : RepositoryFactory() {
         )
     }
 
+    private var callbackAntilog: CallbackAntilog? = null
+
     fun init(
         enableDbEncryption: Boolean,
-        enableLogs: Boolean,
+        enableConsoleLogs: Boolean,
         breezApiKey: String,
     ) {
         WalletDatabase.setEncryption(enableEncryption = enableDbEncryption)
         BreezApiKeyProvider.init(breezApiKey)
-        if (enableLogs) {
+        if (enableConsoleLogs) {
             Napier.base(antilog = DebugAntilog())
         }
+    }
+
+    fun setLogWriter(writer: (LogEntry) -> Unit) {
+        removeLogWriter()
+        val antilog = CallbackAntilog(writer)
+        callbackAntilog = antilog
+        Napier.base(antilog = antilog)
+    }
+
+    fun removeLogWriter() {
+        callbackAntilog?.let { Napier.takeLogarithm(it) }
+        callbackAntilog = null
     }
 
     override fun resolveWalletDatabase(): WalletDatabase = walletDatabase

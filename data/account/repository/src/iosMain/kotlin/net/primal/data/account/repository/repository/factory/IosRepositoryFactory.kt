@@ -20,9 +20,9 @@ object IosRepositoryFactory : RepositoryFactory() {
         )
     }
 
-    fun init(enableDbEncryption: Boolean, enableLogs: Boolean) {
+    fun init(enableDbEncryption: Boolean, enableConsoleLogs: Boolean) {
         AccountDatabase.setEncryption(enableEncryption = enableDbEncryption)
-        if (enableLogs) {
+        if (enableConsoleLogs) {
             Napier.base(antilog = DebugAntilog())
         }
     }
