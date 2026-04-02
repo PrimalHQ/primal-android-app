@@ -1,5 +1,6 @@
 package net.primal.data.account.repository.service
 
+import dev.jordond.connectivity.Connectivity
 import io.github.aakira.napier.Napier
 import kotlin.concurrent.atomics.AtomicReference
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -13,6 +14,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import net.primal.core.utils.batchOnInactivity
@@ -53,6 +55,7 @@ internal class RemoteSignerServiceImpl internal constructor(
 ) : RemoteSignerService {
 
     private val scope = CoroutineScope(SupervisorJob())
+    private val connectivity = Connectivity()
 
     private val relaySessionMap = AtomicReference<Map<String, List<String>>>(emptyMap())
     private val sessionActivityMap = AtomicReference<MutableMap<String, Instant>>(mutableMapOf())
@@ -68,6 +71,8 @@ internal class RemoteSignerServiceImpl internal constructor(
         observeErrors()
         observeRetryMethodResponseQueue()
         observeReconnectionRequests()
+        connectivity.start()
+        observeConnectivity()
         if (sessionInactivityTimeoutInMinutes > 0) {
             startInactivityLoop()
         }
@@ -257,6 +262,21 @@ internal class RemoteSignerServiceImpl internal constructor(
             }
         }
 
+    private fun observeConnectivity() =
+        scope.launch {
+            connectivity.statusUpdates
+                .distinctUntilChanged()
+                .collect { status ->
+                    if (status is Connectivity.Status.Connected) {
+                        val relays = relaySessionMap.load().keys
+                        if (relays.isNotEmpty()) {
+                            Napier.d(tag = "Signer") { "Internet restored, reconnecting to relays: $relays" }
+                            nostrRelayManager.reconnectToRelays(relays = relays)
+                        }
+                    }
+                }
+        }
+
     private fun processMethod(method: RemoteSignerMethod) =
         scope.launch {
             val sessionId = sessionRepository.findFirstOpenSessionByAppIdentifier(
@@ -351,6 +371,7 @@ internal class RemoteSignerServiceImpl internal constructor(
 
     override fun destroy() {
         Napier.d(tag = "Signer") { "RemoteSignerService stopped." }
+        connectivity.stop()
         scope.launch {
             sessionRepository.endAllActiveSessions()
             nostrRelayManager.disconnectFromAll()
