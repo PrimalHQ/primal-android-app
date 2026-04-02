@@ -143,7 +143,9 @@ class NwcServiceImpl internal constructor(
                 },
                 onSocketConnectionClosed = { _, _ ->
                     scope.launch { disconnectFromRelay() }
-                    scheduleReconnect(relayUrl)
+                    if (reconnectJob?.isActive != true) {
+                        scheduleReconnect(relayUrl)
+                    }
                 },
             )
 
