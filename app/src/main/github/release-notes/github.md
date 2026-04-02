@@ -5,3 +5,7 @@
 - Fixed poll zap votes appearing as Top Zaps (#995)
 - Mapped WalletException types to error codes in NWC responses (#1000)
 - Hide wallet balance and action buttons when no wallet exists (#998)
+- Implemented auto-reconnect in remote signer (#1006)
+- Implemented CallbackAntilog for iOS in wallet repo
+- Implemented auto-reconnect in wallet service (#1003)
+- Fixed the new posts pill not scrolling to top on non-latest feeds (#1005)
