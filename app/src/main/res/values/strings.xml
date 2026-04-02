@@ -941,7 +941,7 @@
     <string name="settings_wallet_nwc_profile_lightning_address_hint">You can change your Nostr Lightning Address (for receiving zaps) in your</string>
     <string name="settings_wallet_nwc_profile_lightning_address_hint_suffix">profile settings</string>
     <string name="settings_wallet_max_wallet_balance">Max wallet balance</string>
-    <string name="settings_wallet_max_wallet_balance_hint">Primal Wallet is a transactional wallet, designed for handling small amounts. We recommend self custody for larger amounts.</string>
+    <string name="settings_wallet_max_wallet_balance_hint">Primal Wallet is a transactional wallet, designed for handling small amounts. We recommend self-custody for larger amounts.</string>
     <string name="settings_wallet_hide_transactions_below">Hide transactions below</string>
     <string name="settings_wallet_nwc_connections_header_app">App</string>
     <string name="settings_wallet_nwc_connections_header_daily_budget">Daily Budget</string>
@@ -1323,7 +1323,7 @@
     <string name="wallet_dashboard_upgrade_please_upgrade">Please upgrade to continue using this wallet.</string>
     <string name="wallet_dashboard_upgrade_button">Upgrade Wallet Now</string>
     <string name="wallet_dashboard_detected_title">Wallet Detected</string>
-    <string name="wallet_dashboard_detected_description">We detected that you already have a self-custodial Primal wallet associated with this Nostr account. To use it on this device, please restore it via the recovery phrase. Alternatively, you can create a new wallet which will be associated with your account.</string>
+    <string name="wallet_dashboard_detected_description">We detected that you already have a non-custodial Primal wallet associated with this Nostr account. To use it on this device, please restore it via the recovery phrase. Alternatively, you can create a new wallet which will be associated with your account.</string>
     <string name="wallet_dashboard_discontinued_title">Wallet Discontinued</string>
     <string name="wallet_dashboard_discontinued_description">The custodial wallet service has been discontinued. To recover your funds, please contact us at support@primal.net.</string>
     <string name="wallet_dashboard_restore_button">Restore Existing Wallet</string>
@@ -1331,8 +1331,8 @@
 
     <!-- Wallet Notice: Upgrade (Case 1) -->
     <string name="wallet_notice_upgrade_title">Upgrade Your Wallet!</string>
-    <string name="wallet_notice_upgrade_description_first">Good news: Primal now features a new self-custodial wallet, which is a required upgrade for all users.</string>
-    <string name="wallet_notice_upgrade_description_second">With one tap, we\'ll move your funds and full\ntransaction history to your new self-custodial\nwallet - so you fully control your bitcoin.\nQuestions? Check out our </string>
+    <string name="wallet_notice_upgrade_description_first">Good news: Primal now features a new non-custodial wallet, which is a required upgrade for all users.</string>
+    <string name="wallet_notice_upgrade_description_second">With one tap, we\'ll move your funds and full\ntransaction history to your new non-custodial\nwallet - so you fully control your bitcoin.\nQuestions? Check out our </string>
     <string name="wallet_notice_upgrade_faqs">FAQs</string>
     <string name="wallet_notice_upgrade_button">Start Wallet Upgrade</string>
 
@@ -1343,7 +1343,7 @@
 
     <!-- Wallet Notice: Detected (Case 3) -->
     <string name="wallet_notice_detected_title">Wallet Detected</string>
-    <string name="wallet_notice_detected_description">We detected that you already have a self-custodial Primal wallet associated with this Nostr account. To use it on this device, please restore it via the recovery phrase. Alternatively, you can create a new wallet which will be associated with your account.</string>
+    <string name="wallet_notice_detected_description">We detected that you already have a non-custodial Primal wallet associated with this Nostr account. To use it on this device, please restore it via the recovery phrase. Alternatively, you can create a new wallet which will be associated with your account.</string>
     <string name="wallet_notice_detected_restore_button">Restore Existing Wallet</string>
     <string name="wallet_notice_detected_create_button">Create New Wallet</string>
 
@@ -1359,7 +1359,7 @@
     <string name="wallet_upgrade_retry_button">Retry</string>
     <string name="wallet_upgrade_share_logs">Share error logs</string>
     <string name="wallet_upgrade_ready_headline">Ready to Upgrade</string>
-    <string name="wallet_upgrade_ready_description">We\'ll transfer your existing wallet balance and transaction history to your new self-custodial wallet.\n\nPlease don\'t close the app during the upgrade.</string>
+    <string name="wallet_upgrade_ready_description">We\'ll transfer your existing wallet balance and transaction history to your new non-custodial wallet.\n\nPlease don\'t close the app during the upgrade.</string>
     <string name="wallet_upgrade_start_button">Start Upgrade</string>
     <string name="wallet_upgrade_step_creating_wallet">Creating your new wallet…</string>
     <string name="wallet_upgrade_step_registering_wallet">Registering wallet…</string>
@@ -1387,9 +1387,9 @@
     <string name="wallet_upgrade_faq_seventh_question">Which technology is the new Primal wallet built on?</string>
     <string name="wallet_upgrade_faq_seventh_answer">The new Primal wallet is built on the Spark network technology. For more information, you can visit: https://spark.money.</string>
     <string name="wallet_upgrade_faq_eighth_question">Are there any transaction fees that I need to pay to upgrade?</string>
-    <string name="wallet_upgrade_faq_eighth_answer">No. Primal will cover all transaction fees required to upgrade all our users to their new self-custodial wallets.</string>
+    <string name="wallet_upgrade_faq_eighth_answer">No. Primal will cover all transaction fees required to upgrade all our users to their new non-custodial wallets.</string>
     <string name="wallet_upgrade_faq_ninth_question">Does the new wallet support Nostr Wallet Connect?</string>
-    <string name="wallet_upgrade_faq_ninth_answer">Yes. The new Primal wallet does support Nostr Wallet Connect, however it works a bit differently than the old one. Since the new wallet is self-custodial, the Primal mobile app needs to be running in order to sign NWC events. The NWC feature is best used in conjunction with the Primal remote signer.</string>
+    <string name="wallet_upgrade_faq_ninth_answer">Yes. The new Primal wallet does support Nostr Wallet Connect, however it works a bit differently than the old one. Since the new wallet is non-custodial, the Primal mobile app needs to be running in order to sign NWC events. The NWC feature is best used in conjunction with the Primal remote signer.</string>
     <string name="wallet_upgrade_faq_tenth_question">I have existing NWC connections to the old Primal wallet. Will I have to re-create those with the new wallet?</string>
     <string name="wallet_upgrade_faq_tenth_answer">Yes. Old NWC connections will stop working when the old wallet is deprecated on April 30, 2026.</string>
 
