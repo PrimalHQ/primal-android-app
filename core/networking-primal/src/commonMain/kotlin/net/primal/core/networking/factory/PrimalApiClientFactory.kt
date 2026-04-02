@@ -15,6 +15,14 @@ internal val defaultSocketsHttpClient by lazy {
     }
 }
 
+internal val keepAliveSocketsHttpClient by lazy {
+    HttpClientFactory.createHttpClientWithDefaultConfig {
+        install(WebSockets) {
+            pingIntervalMillis = 20_000
+        }
+    }
+}
+
 object PrimalApiClientFactory {
 
     private val clients: MutableMap<PrimalServerType, PrimalApiClient> = mutableMapOf()

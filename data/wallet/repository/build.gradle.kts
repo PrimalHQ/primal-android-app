@@ -81,6 +81,10 @@ kotlin {
 
                 // WebSocket
                 implementation(libs.ktor.client.websockets)
+
+                // Connectivity
+                implementation(libs.connectivity.core)
+                implementation(libs.connectivity.device)
             }
         }
 
