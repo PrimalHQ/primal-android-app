@@ -44,6 +44,7 @@ class RemoteSignerClient(
     private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
     private val nostrSocketClient = NostrSocketClientFactory.create(
         wssUrl = relayUrl,
+        keepAliveEnabled = true,
         onSocketConnectionOpened = onSocketConnectionOpened,
         onSocketConnectionClosed = onSocketConnectionClosed,
     )

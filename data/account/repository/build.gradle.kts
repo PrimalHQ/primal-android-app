@@ -73,6 +73,10 @@ kotlin {
 
                 // Logging
                 implementation(libs.napier)
+
+                // Connectivity
+                implementation(libs.connectivity.core)
+                implementation(libs.connectivity.device)
             }
         }
 
