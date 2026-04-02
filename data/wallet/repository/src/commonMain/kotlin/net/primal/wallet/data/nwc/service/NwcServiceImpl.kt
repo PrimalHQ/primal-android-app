@@ -141,21 +141,9 @@ class NwcServiceImpl internal constructor(
                     _relayConnected.value = true
                     Napier.d(tag = TAG) { "Connected to NWC relay: $url" }
                 },
-                onSocketConnectionClosed = { url, _ ->
-                    _relayConnected.value = false
-                    Napier.d(tag = TAG) { "Disconnected from NWC relay: $url" }
-                    scope.launch {
-                        clientMutex.withLock {
-                            clientJob?.cancel()
-                            clientJob = null
-                            nwcClient?.destroy()
-                            nwcClient = null
-                            publishedInfoPubKeys.clear()
-                        }
-                    }
-                    if (reconnectJob?.isActive != true) {
-                        scheduleReconnect(relayUrl)
-                    }
+                onSocketConnectionClosed = { _, _ ->
+                    scope.launch { disconnectFromRelay() }
+                    scheduleReconnect(relayUrl)
                 },
             )
 
@@ -171,8 +159,6 @@ class NwcServiceImpl internal constructor(
         }
 
     private suspend fun disconnectFromRelay() {
-        reconnectJob?.cancel()
-        reconnectJob = null
         clientMutex.withLock {
             clientJob?.cancel()
             clientJob = null
@@ -192,12 +178,12 @@ class NwcServiceImpl internal constructor(
                 Napier.d(tag = TAG) { "Scheduling reconnect to NWC relay in $reconnectDelay" }
                 delay(reconnectDelay)
 
-                if (_relayConnected.value) break
+                if (clientMutex.withLock { _relayConnected.value }) break
 
                 Napier.d(tag = TAG) { "Attempting reconnect to NWC relay: $relayUrl" }
                 connectToRelay(relayUrl)
 
-                if (_relayConnected.value) {
+                if (clientMutex.withLock { _relayConnected.value }) {
                     val connections = lastConnections
                     if (connections.isNotEmpty()) {
                         runCatching { nwcClient?.updateConnections(connections) }
