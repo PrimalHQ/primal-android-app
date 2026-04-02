@@ -52,6 +52,7 @@ class NwcWalletClient(
 
     private val nostrSocketClient = NostrSocketClientFactory.create(
         wssUrl = relayUrl,
+        keepAliveEnabled = true,
         onSocketConnectionOpened = { url ->
             onSocketConnectionOpened?.invoke(url)
             scope.launch {

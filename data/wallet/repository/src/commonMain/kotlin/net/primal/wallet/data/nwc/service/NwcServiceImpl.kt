@@ -142,9 +142,11 @@ class NwcServiceImpl internal constructor(
                     Napier.d(tag = TAG) { "Connected to NWC relay: $url" }
                 },
                 onSocketConnectionClosed = { _, _ ->
-                    scope.launch { disconnectFromRelay() }
-                    if (reconnectJob?.isActive != true) {
-                        scheduleReconnect(relayUrl)
+                    scope.launch {
+                        disconnectFromRelay()
+                        if (reconnectJob?.isActive != true) {
+                            scheduleReconnect(relayUrl)
+                        }
                     }
                 },
             )
@@ -415,6 +417,7 @@ class NwcServiceImpl internal constructor(
 
     override fun destroy() {
         Napier.d(tag = TAG) { "NwcService stopping." }
+        reconnectJob?.cancel()
         connectivity.stop()
         scope.launch {
             disconnectFromRelay()
