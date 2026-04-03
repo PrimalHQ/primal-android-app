@@ -11,11 +11,11 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -27,12 +27,15 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.layer.GraphicsLayer
+import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
@@ -96,7 +99,6 @@ private val ActionIconSize = 17.sp
 private const val ZapIconSizeMultiplier = 1.2f
 private val ActionSpacing = 20.dp
 private const val MORE_TEXT_THRESHOLD = 80
-private val SmallSpacing = 4.dp
 private val MediumSpacing = 10.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -136,7 +138,7 @@ fun PhotoFeedCard(
         onGoToWallet = onGoToWallet,
     )
 
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by rememberSaveable { mutableStateOf(false) }
 
     PhotoFeedCardBody(
         data = data,
@@ -167,6 +169,10 @@ private fun PhotoFeedCardBody(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .drawWithContent {
+                graphicsLayer.record { this@drawWithContent.drawContent() }
+                drawLayer(graphicsLayer)
+            }
             .background(AppTheme.colorScheme.surfaceVariant)
             .clickable(enabled = noteCallbacks.onNoteClick != null) {
                 noteCallbacks.onNoteClick?.invoke(data.postId)
@@ -340,19 +346,21 @@ private fun PhotoFeedHeader(
 private fun PhotoFeedImagePager(mediaUris: List<EventUriUi>, onMediaClick: ((MediaClickEvent) -> Unit)?) {
     val pagerState = rememberPagerState(pageCount = { mediaUris.size })
 
-    Column {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.fillMaxWidth(),
-        ) { page ->
-            val media = mediaUris[page]
-            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                val imageSizeDp = findImageSize(eventUri = media)
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val pagerHeight = findImageSize(eventUri = mediaUris.first()).height
+
+        Column {
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(pagerHeight),
+            ) { page ->
+                val media = mediaUris[page]
                 PrimalAsyncImage(
                     model = media.url,
                     modifier = Modifier
-                        .width(imageSizeDp.width)
-                        .height(imageSizeDp.height)
+                        .fillMaxSize()
                         .then(
                             if (onMediaClick != null) {
                                 Modifier.clickable {
@@ -373,13 +381,13 @@ private fun PhotoFeedImagePager(mediaUris: List<EventUriUi>, onMediaClick: ((Med
                     contentDescription = null,
                 )
             }
-        }
 
-        if (mediaUris.size > 1) {
-            PageIndicatorDots(
-                pageCount = mediaUris.size,
-                currentPage = pagerState.currentPage,
-            )
+            if (mediaUris.size > 1) {
+                PageIndicatorDots(
+                    pageCount = mediaUris.size,
+                    currentPage = pagerState.currentPage,
+                )
+            }
         }
     }
 }
@@ -389,7 +397,7 @@ private fun PageIndicatorDots(pageCount: Int, currentPage: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(top = SmallSpacing),
+            .padding(top = MediumSpacing),
         horizontalArrangement = Arrangement.Center,
     ) {
         repeat(pageCount) { index ->
@@ -424,6 +432,12 @@ private fun PhotoFeedContentSection(
 ) {
     val localUriHandler = LocalUriHandler.current
     val highlightColor = AppTheme.colorScheme.secondary
+    val displaySettings = LocalContentDisplaySettings.current
+    val contentTextStyle = AppTheme.typography.bodyMedium.copy(
+        fontSize = displaySettings.contentAppearance.noteUsernameSize,
+        lineHeight = displaySettings.contentAppearance.noteUsernameSize,
+        color = AppTheme.colorScheme.onSurface,
+    )
 
     Column(
         modifier = Modifier
@@ -449,7 +463,7 @@ private fun PhotoFeedContentSection(
         val maxLines = if (expanded) Int.MAX_VALUE else 2
         PrimalClickableText(
             text = annotatedText,
-            style = AppTheme.typography.labelSmall.copy(color = AppTheme.colorScheme.onSurface),
+            style = contentTextStyle,
             maxLines = maxLines,
             overflow = if (expanded) TextOverflow.Clip else TextOverflow.Ellipsis,
             onClick = { position, _ ->
@@ -466,7 +480,7 @@ private fun PhotoFeedContentSection(
             Text(
                 text = stringResource(id = R.string.feed_more),
                 modifier = Modifier.clickable { onExpandClick() },
-                style = AppTheme.typography.labelSmall,
+                style = contentTextStyle,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
         }
@@ -474,8 +488,8 @@ private fun PhotoFeedContentSection(
         if (timestamp != null) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = timestamp.asBeforeNowFormat(),
-                style = AppTheme.typography.labelSmall,
+                text = timestamp.asBeforeNowFormat(shortFormat = false),
+                style = contentTextStyle,
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
         }
@@ -558,7 +572,8 @@ private fun PhotoFeedActionsRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp),
+            .padding(horizontal = 12.dp)
+            .padding(top = 2.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Row(
