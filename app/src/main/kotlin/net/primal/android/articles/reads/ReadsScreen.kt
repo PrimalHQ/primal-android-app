@@ -19,6 +19,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -86,33 +87,23 @@ private fun ReadsScreen(
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
     callbacks: ReadsScreenContract.ScreenCallbacks,
 ) {
-    val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val snackbarHostState = remember { SnackbarHostState() }
 
-    var shouldAnimateScrollToTop by remember { mutableStateOf(false) }
-    var activeFeed by remember { mutableStateOf<FeedUi?>(null) }
-    val pagerState = rememberPagerState(pageCount = { state.feeds.size })
-
-    LaunchedEffect(pagerState, state.feeds) {
-        snapshotFlow { pagerState.currentPage }
-            .collect { index ->
-                if (state.feeds.isNotEmpty()) {
-                    activeFeed = state.feeds[index]
-                }
-            }
-    }
+    val shouldAnimateScrollToTop = remember { mutableStateOf(false) }
+    var topBarActiveFeed by remember { mutableStateOf<FeedUi?>(null) }
+    val scrollToFeed = remember { mutableStateOf<FeedUi?>(null) }
 
     PrimalDrawerScaffold(
         drawerState = drawerState,
         drawerOpenGestureEnabled = false,
         activeDestination = PrimalTopLevelDestination.Reads,
         onActiveDestinationClick = {
-            shouldAnimateScrollToTop = true
+            shouldAnimateScrollToTop.value = true
             uiScope.launch {
                 delay(500.milliseconds)
-                shouldAnimateScrollToTop = false
+                shouldAnimateScrollToTop.value = false
             }
         },
         accountSwitcherCallbacks = accountSwitcherCallbacks,
@@ -123,60 +114,28 @@ private fun ReadsScreen(
         focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
         topAppBar = { scrollBehavior ->
             ArticleFeedTopAppBar(
-                title = activeFeed?.title ?: "",
-                activeFeed = activeFeed,
+                title = topBarActiveFeed?.title ?: "",
+                activeFeed = topBarActiveFeed,
                 avatarCdnImage = state.activeAccountAvatarCdnImage,
                 avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
                 avatarBlossoms = state.activeAccountBlossoms,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
                 onSearchClick = callbacks.onSearchClick,
-                onFeedChanged = { feed ->
-                    val pageIndex = state.feeds.indexOf(feed)
-                    uiScope.launch { pagerState.scrollToPage(page = pageIndex) }
-                },
+                onFeedChanged = { feed -> scrollToFeed.value = feed },
                 scrollBehavior = scrollBehavior,
             )
         },
         content = { paddingValues ->
-            if (state.feeds.isNotEmpty()) {
-                HorizontalPager(
-                    state = pagerState,
-                    key = { index -> state.feeds.getOrNull(index)?.spec ?: Unit },
-                    pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
-                        state = pagerState,
-                        orientation = Orientation.Horizontal,
-                    ),
-                ) { index ->
-                    ArticleFeedList(
-                        feedSpec = state.feeds[index].spec,
-                        contentPadding = paddingValues,
-                        shouldAnimateScrollToTop = shouldAnimateScrollToTop,
-                        onArticleClick = callbacks.onArticleClick,
-                        onGetPremiumClick = callbacks.onGetPremiumClick,
-                        onUiError = { uiError: UiError ->
-                            uiScope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = uiError.resolveUiErrorMessage(context),
-                                    duration = SnackbarDuration.Short,
-                                )
-                            }
-                        },
-                    )
-                }
-            } else if (state.loading) {
-                HeightAdjustableLoadingLazyListPlaceholder(
-                    height = 128.dp,
-                    contentPaddingValues = paddingValues,
-                    itemPadding = PaddingValues(horizontal = 16.dp),
-                )
-            } else {
-                FeedsErrorColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    text = stringResource(id = R.string.feeds_error_loading_user_feeds),
-                    onRefresh = { eventPublisher(ReadsScreenContract.UiEvent.RefreshReadsFeeds) },
-                    onRestoreDefaultFeeds = { eventPublisher(ReadsScreenContract.UiEvent.RestoreDefaultFeeds) },
-                )
-            }
+            ReadsContent(
+                state = state,
+                eventPublisher = eventPublisher,
+                onActiveFeedChanged = { topBarActiveFeed = it },
+                shouldAnimateScrollToTop = shouldAnimateScrollToTop,
+                scrollToFeed = scrollToFeed,
+                snackbarHostState = snackbarHostState,
+                paddingValues = paddingValues,
+                callbacks = callbacks,
+            )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -184,9 +143,88 @@ private fun ReadsScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ReadsContent(
+    state: ReadsScreenContract.UiState,
+    eventPublisher: (ReadsScreenContract.UiEvent) -> Unit,
+    onActiveFeedChanged: (FeedUi?) -> Unit,
+    shouldAnimateScrollToTop: MutableState<Boolean>,
+    scrollToFeed: MutableState<FeedUi?> = remember { mutableStateOf(null) },
+    snackbarHostState: SnackbarHostState,
+    paddingValues: PaddingValues,
+    callbacks: ReadsScreenContract.ScreenCallbacks,
+) {
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(pageCount = { state.feeds.size })
+
+    var activeFeed by remember { mutableStateOf<FeedUi?>(null) }
+
+    LaunchedEffect(pagerState, state.feeds) {
+        snapshotFlow { pagerState.currentPage }
+            .collect { index ->
+                if (state.feeds.isNotEmpty()) {
+                    val feed = state.feeds[index]
+                    activeFeed = feed
+                    onActiveFeedChanged(feed)
+                }
+            }
+    }
+
+    LaunchedEffect(scrollToFeed.value) {
+        val feed = scrollToFeed.value ?: return@LaunchedEffect
+        val pageIndex = state.feeds.indexOf(feed)
+        if (pageIndex >= 0) {
+            pagerState.scrollToPage(page = pageIndex)
+        }
+        scrollToFeed.value = null
+    }
+
+    if (state.feeds.isNotEmpty()) {
+        HorizontalPager(
+            state = pagerState,
+            key = { index -> state.feeds.getOrNull(index)?.spec ?: Unit },
+            pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
+                state = pagerState,
+                orientation = Orientation.Horizontal,
+            ),
+        ) { index ->
+            ArticleFeedList(
+                feedSpec = state.feeds[index].spec,
+                contentPadding = paddingValues,
+                shouldAnimateScrollToTop = shouldAnimateScrollToTop.value,
+                onArticleClick = callbacks.onArticleClick,
+                onGetPremiumClick = callbacks.onGetPremiumClick,
+                onUiError = { uiError: UiError ->
+                    uiScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = uiError.resolveUiErrorMessage(context),
+                            duration = SnackbarDuration.Short,
+                        )
+                    }
+                },
+            )
+        }
+    } else if (state.loading) {
+        HeightAdjustableLoadingLazyListPlaceholder(
+            height = 128.dp,
+            contentPaddingValues = paddingValues,
+            itemPadding = PaddingValues(horizontal = 16.dp),
+        )
+    } else {
+        FeedsErrorColumn(
+            modifier = Modifier.fillMaxSize(),
+            text = stringResource(id = R.string.feeds_error_loading_user_feeds),
+            onRefresh = { eventPublisher(ReadsScreenContract.UiEvent.RefreshReadsFeeds) },
+            onRestoreDefaultFeeds = { eventPublisher(ReadsScreenContract.UiEvent.RestoreDefaultFeeds) },
+        )
+    }
+}
+
 @ExperimentalMaterial3Api
 @Composable
-private fun ArticleFeedTopAppBar(
+internal fun ArticleFeedTopAppBar(
     title: String,
     avatarCdnImage: CdnImage?,
     onAvatarClick: () -> Unit,

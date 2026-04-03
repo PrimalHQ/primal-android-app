@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberDrawerState
@@ -124,6 +125,93 @@ fun NotificationsScreen(
         }
     }
 
+    PrimalDrawerScaffold(
+        drawerState = drawerState,
+        activeDestination = PrimalTopLevelDestination.Notifications,
+        onActiveDestinationClick = {
+            uiScope.launch {
+                notificationsListState.animateScrollToItem(
+                    0,
+                )
+            }
+        },
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
+        onPrimaryDestinationChanged = onPrimaryDestinationChanged,
+        onDrawerDestinationClick = onDrawerDestinationClick,
+        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
+        badges = state.badges,
+        focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
+        topAppBar = {
+            NotificationsTopAppBar(
+                state = state,
+                scrollBehavior = it,
+                onNavigationIconClick = {
+                    uiScope.launch { drawerState.open() }
+                },
+                onSearchClick = callbacks.onSearchClick,
+            )
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
+        content = { paddingValues ->
+            NotificationsContent(
+                state = state,
+                noteState = noteState,
+                seenPagingItems = seenNotificationsPagingItems,
+                notificationsListState = notificationsListState,
+                paddingValues = paddingValues,
+                noteCallbacks = noteCallbacks,
+                noteEventPublisher = noteEventPublisher,
+                callbacks = callbacks,
+            )
+        },
+        floatingActionButton = {
+            NewPostFloatingActionButton(onNewPostClick = callbacks.onNewPostClick)
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun NotificationsTopAppBar(
+    state: NotificationsContract.UiState,
+    scrollBehavior: TopAppBarScrollBehavior?,
+    onNavigationIconClick: () -> Unit,
+    onSearchClick: () -> Unit,
+) {
+    PrimalTopAppBar(
+        title = stringResource(id = R.string.notifications_title),
+        avatarCdnImage = state.activeAccountAvatarCdnImage,
+        legendaryCustomization = state.activeAccountLegendaryCustomization,
+        avatarBlossoms = state.activeAccountBlossoms,
+        navigationIcon = PrimalIcons.AvatarDefault,
+        onNavigationIconClick = onNavigationIconClick,
+        scrollBehavior = scrollBehavior,
+        actions = {
+            AppBarIcon(
+                icon = PrimalIcons.Search,
+                onClick = onSearchClick,
+                appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
+            )
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun NotificationsContent(
+    state: NotificationsContract.UiState,
+    noteState: NoteContract.UiState,
+    seenPagingItems: LazyPagingItems<NotificationUi>,
+    notificationsListState: LazyListState,
+    paddingValues: PaddingValues,
+    noteCallbacks: NoteCallbacks,
+    noteEventPublisher: (NoteContract.UiEvent) -> Unit,
+    callbacks: NotificationsContract.ScreenCallbacks,
+) {
+    val uiScope = rememberCoroutineScope()
+
     var hasUserEverScrolled by remember { mutableStateOf(false) }
     var isAutoScrolling by remember { mutableStateOf(false) }
 
@@ -155,103 +243,58 @@ fun NotificationsScreen(
         }
     }
 
-    PrimalDrawerScaffold(
-        drawerState = drawerState,
-        activeDestination = PrimalTopLevelDestination.Notifications,
-        onActiveDestinationClick = {
-            uiScope.launch {
-                notificationsListState.animateScrollToItem(
-                    0,
-                )
-            }
-        },
-        accountSwitcherCallbacks = accountSwitcherCallbacks,
-        onPrimaryDestinationChanged = onPrimaryDestinationChanged,
-        onDrawerDestinationClick = onDrawerDestinationClick,
-        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
-        badges = state.badges,
-        focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
-        topAppBar = {
-            PrimalTopAppBar(
-                title = stringResource(id = R.string.notifications_title),
-                avatarCdnImage = state.activeAccountAvatarCdnImage,
-                legendaryCustomization = state.activeAccountLegendaryCustomization,
-                avatarBlossoms = state.activeAccountBlossoms,
-                navigationIcon = PrimalIcons.AvatarDefault,
-                onNavigationIconClick = {
-                    uiScope.launch { drawerState.open() }
-                },
-                scrollBehavior = it,
-                actions = {
-                    AppBarIcon(
-                        icon = PrimalIcons.Search,
-                        onClick = callbacks.onSearchClick,
-                        appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
-                    )
-                },
+    NotificationsList(
+        state = state,
+        noteState = noteState,
+        seenPagingItems = seenPagingItems,
+        paddingValues = paddingValues,
+        listState = notificationsListState,
+        onGoToWallet = callbacks.onGoToWallet,
+        onPostLikeClick = {
+            noteEventPublisher(
+                NoteContract.UiEvent.PostLikeAction(
+                    postId = it.postId,
+                    postAuthorId = it.authorId,
+                ),
             )
         },
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
-        content = { paddingValues ->
-            NotificationsList(
-                state = state,
-                noteState = noteState,
-                seenPagingItems = seenNotificationsPagingItems,
-                paddingValues = paddingValues,
-                listState = notificationsListState,
-                onGoToWallet = callbacks.onGoToWallet,
-                onPostLikeClick = {
-                    noteEventPublisher(
-                        NoteContract.UiEvent.PostLikeAction(
-                            postId = it.postId,
-                            postAuthorId = it.authorId,
-                        ),
-                    )
-                },
-                onRepostClick = {
-                    noteEventPublisher(
-                        NoteContract.UiEvent.RepostAction(
-                            postId = it.postId,
-                            postAuthorId = it.authorId,
-                            postNostrEvent = it.rawNostrEventJson,
-                        ),
-                    )
-                },
-                onDeleteRepostClick = {
-                    noteEventPublisher(
-                        NoteContract.UiEvent.DeleteRepostAction(
-                            postId = it.postId,
-                            repostId = it.repostId,
-                            repostAuthorId = it.repostAuthorId,
-                        ),
-                    )
-                },
-                onZapClick = { postData, amount, description ->
-                    noteEventPublisher(
-                        NoteContract.UiEvent.ZapAction(
-                            postId = postData.postId,
-                            postAuthorId = postData.authorId,
-                            zapAmount = amount,
-                            zapDescription = description,
-                        ),
-                    )
-                },
-                onPostQuoteClick = {
-                    noteCallbacks.onNoteQuoteClick?.invoke(
-                        it.asNeventString(),
-                    )
-                },
-                onBookmarkClick = {
-                    noteEventPublisher(NoteContract.UiEvent.BookmarkAction(noteId = it.postId))
-                },
-                noteCallbacks = noteCallbacks,
+        onRepostClick = {
+            noteEventPublisher(
+                NoteContract.UiEvent.RepostAction(
+                    postId = it.postId,
+                    postAuthorId = it.authorId,
+                    postNostrEvent = it.rawNostrEventJson,
+                ),
             )
         },
-        floatingActionButton = {
-            NewPostFloatingActionButton(onNewPostClick = callbacks.onNewPostClick)
+        onDeleteRepostClick = {
+            noteEventPublisher(
+                NoteContract.UiEvent.DeleteRepostAction(
+                    postId = it.postId,
+                    repostId = it.repostId,
+                    repostAuthorId = it.repostAuthorId,
+                ),
+            )
         },
+        onZapClick = { postData, amount, description ->
+            noteEventPublisher(
+                NoteContract.UiEvent.ZapAction(
+                    postId = postData.postId,
+                    postAuthorId = postData.authorId,
+                    zapAmount = amount,
+                    zapDescription = description,
+                ),
+            )
+        },
+        onPostQuoteClick = {
+            noteCallbacks.onNoteQuoteClick?.invoke(
+                it.asNeventString(),
+            )
+        },
+        onBookmarkClick = {
+            noteEventPublisher(NoteContract.UiEvent.BookmarkAction(noteId = it.postId))
+        },
+        noteCallbacks = noteCallbacks,
     )
 }
 

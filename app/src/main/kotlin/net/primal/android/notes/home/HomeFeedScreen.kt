@@ -20,6 +20,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -110,7 +111,7 @@ fun HomeFeedScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeFeedScreen(
+private fun HomeFeedScreen(
     state: HomeFeedContract.UiState,
     onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
     onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
@@ -131,9 +132,9 @@ fun HomeFeedScreen(
         onErrorDismiss = { eventPublisher(UiEvent.DismissError) },
     )
 
-    var shouldAnimateScrollToTop by remember { mutableStateOf(false) }
-    var activeFeed by remember { mutableStateOf<FeedUi?>(null) }
-    val pagerState = rememberPagerState(pageCount = { state.feeds.size })
+    val shouldAnimateScrollToTop = remember { mutableStateOf(false) }
+    var topBarActiveFeed by remember { mutableStateOf<FeedUi?>(null) }
+    val scrollToFeed = remember { mutableStateOf<FeedUi?>(null) }
 
     val topAppBarState = remember {
         TopAppBarState(
@@ -142,6 +143,84 @@ fun HomeFeedScreen(
             initialContentOffset = 0f,
         )
     }
+
+    PrimalDrawerScaffold(
+        modifier = Modifier.semantics {
+            testTagsAsResourceId = true
+        },
+        drawerState = drawerState,
+        drawerOpenGestureEnabled = false,
+        activeDestination = PrimalTopLevelDestination.Home,
+        onActiveDestinationClick = {
+            shouldAnimateScrollToTop.value = true
+            uiScope.launch {
+                delay(500.milliseconds)
+                shouldAnimateScrollToTop.value = false
+            }
+        },
+        accountSwitcherCallbacks = accountSwitcherCallbacks,
+        onPrimaryDestinationChanged = onTopLevelDestinationChanged,
+        onDrawerDestinationClick = onDrawerScreenClick,
+        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
+        badges = state.badges,
+        focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
+        topAppBarState = topAppBarState,
+        topAppBar = { scrollBehavior ->
+            NoteFeedTopAppBar(
+                title = topBarActiveFeed?.title ?: "",
+                activeFeed = topBarActiveFeed,
+                avatarCdnImage = state.activeAccountAvatarCdnImage,
+                avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
+                avatarBlossoms = state.activeAccountBlossoms,
+                onAvatarClick = { uiScope.launch { drawerState.open() } },
+                onSearchClick = callbacks.onSearchClick,
+                onFeedChanged = { feed -> scrollToFeed.value = feed },
+                scrollBehavior = scrollBehavior,
+                onGoToWallet = callbacks.onGoToWallet,
+            )
+        },
+        content = { paddingValues ->
+            HomeFeedContent(
+                state = state,
+                noteCallbacks = noteCallbacks,
+                eventPublisher = eventPublisher,
+                onActiveFeedChanged = { topBarActiveFeed = it },
+                topAppBarCollapsedFraction = topAppBarState.collapsedFraction,
+                shouldAnimateScrollToTop = shouldAnimateScrollToTop,
+                scrollToFeed = scrollToFeed,
+                snackbarHostState = snackbarHostState,
+                paddingValues = paddingValues,
+                onGoToWallet = callbacks.onGoToWallet,
+            )
+        },
+        floatingActionButton = {
+            NewPostFloatingActionButton(onNewPostClick = callbacks.onNewPostClick)
+        },
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun HomeFeedContent(
+    state: HomeFeedContract.UiState,
+    noteCallbacks: NoteCallbacks,
+    eventPublisher: (UiEvent) -> Unit,
+    onActiveFeedChanged: (FeedUi?) -> Unit,
+    topAppBarCollapsedFraction: Float,
+    shouldAnimateScrollToTop: MutableState<Boolean>,
+    scrollToFeed: MutableState<FeedUi?> = remember { mutableStateOf(null) },
+    snackbarHostState: SnackbarHostState,
+    paddingValues: PaddingValues,
+    onGoToWallet: () -> Unit,
+) {
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
+    val pagerState = rememberPagerState(pageCount = { state.feeds.size })
+
+    var activeFeed by remember { mutableStateOf<FeedUi?>(null) }
 
     val pollingStates by remember(activeFeed, state.feeds) {
         derivedStateOf {
@@ -155,108 +234,72 @@ fun HomeFeedScreen(
         snapshotFlow { pagerState.currentPage }
             .collect { index ->
                 if (state.feeds.isNotEmpty()) {
-                    activeFeed = state.feeds[index]
+                    val feed = state.feeds[index]
+                    activeFeed = feed
+                    onActiveFeedChanged(feed)
                 }
             }
     }
 
-    PrimalDrawerScaffold(
-        modifier = Modifier.semantics {
-            testTagsAsResourceId = true
-        },
-        drawerState = drawerState,
-        drawerOpenGestureEnabled = false,
-        activeDestination = PrimalTopLevelDestination.Home,
-        onActiveDestinationClick = {
-            shouldAnimateScrollToTop = true
-            uiScope.launch {
-                delay(500.milliseconds)
-                shouldAnimateScrollToTop = false
-            }
-        },
-        accountSwitcherCallbacks = accountSwitcherCallbacks,
-        onPrimaryDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerDestinationClick = onDrawerScreenClick,
-        onDrawerQrCodeClick = callbacks.onDrawerQrCodeClick,
-        badges = state.badges,
-        focusModeEnabled = LocalContentDisplaySettings.current.focusModeEnabled,
-        topAppBarState = topAppBarState,
-        topAppBar = { scrollBehavior ->
-            NoteFeedTopAppBar(
-                title = activeFeed?.title ?: "",
-                activeFeed = activeFeed,
-                avatarCdnImage = state.activeAccountAvatarCdnImage,
-                avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
-                avatarBlossoms = state.activeAccountBlossoms,
-                onAvatarClick = { uiScope.launch { drawerState.open() } },
-                onSearchClick = callbacks.onSearchClick,
-                onFeedChanged = { feed ->
-                    val pageIndex = state.feeds.indexOf(feed)
-                    uiScope.launch { pagerState.scrollToPage(page = pageIndex) }
+    LaunchedEffect(scrollToFeed.value) {
+        val feed = scrollToFeed.value ?: return@LaunchedEffect
+        val pageIndex = state.feeds.indexOf(feed)
+        if (pageIndex >= 0) {
+            pagerState.scrollToPage(page = pageIndex)
+        }
+        scrollToFeed.value = null
+    }
+
+    if (state.feeds.isNotEmpty()) {
+        HorizontalPager(
+            state = pagerState,
+            key = { index -> state.feeds.getOrNull(index)?.spec ?: Unit },
+            pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
+                state = pagerState,
+                orientation = Orientation.Horizontal,
+            ),
+        ) { index ->
+            val feedUi = state.feeds[index]
+            NoteFeedList(
+                feedSpec = feedUi.spec,
+                pollingEnabled = pollingStates[feedUi] ?: false,
+                noteCallbacks = noteCallbacks,
+                showTopZaps = true,
+                bigPillStreams = state.streams,
+                showStreamsInNewPill = true,
+                newNotesNoticeAlpha = (1 - topAppBarCollapsedFraction) * 1.0f,
+                onGoToWallet = onGoToWallet,
+                contentPadding = paddingValues,
+                shouldAnimateScrollToTop = shouldAnimateScrollToTop.value,
+                onUiError = { uiError ->
+                    uiScope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = uiError.resolveUiErrorMessage(context),
+                            duration = SnackbarDuration.Short,
+                        )
+                    }
                 },
-                scrollBehavior = scrollBehavior,
-                onGoToWallet = callbacks.onGoToWallet,
             )
-        },
-        content = { paddingValues ->
-            if (state.feeds.isNotEmpty()) {
-                HorizontalPager(
-                    state = pagerState,
-                    key = { index -> state.feeds.getOrNull(index)?.spec ?: Unit },
-                    pageNestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
-                        state = pagerState,
-                        orientation = Orientation.Horizontal,
-                    ),
-                ) { index ->
-                    val feedUi = state.feeds[index]
-                    NoteFeedList(
-                        feedSpec = feedUi.spec,
-                        pollingEnabled = pollingStates[feedUi] ?: false,
-                        noteCallbacks = noteCallbacks,
-                        showTopZaps = true,
-                        bigPillStreams = state.streams,
-                        showStreamsInNewPill = true,
-                        newNotesNoticeAlpha = (1 - topAppBarState.collapsedFraction) * 1.0f,
-                        onGoToWallet = callbacks.onGoToWallet,
-                        contentPadding = paddingValues,
-                        shouldAnimateScrollToTop = shouldAnimateScrollToTop,
-                        onUiError = { uiError ->
-                            uiScope.launch {
-                                snackbarHostState.showSnackbar(
-                                    message = uiError.resolveUiErrorMessage(context),
-                                    duration = SnackbarDuration.Short,
-                                )
-                            }
-                        },
-                    )
-                }
-            } else if (state.loading) {
-                HeightAdjustableLoadingLazyListPlaceholder(
-                    height = 128.dp,
-                    contentPaddingValues = paddingValues,
-                    itemPadding = PaddingValues(horizontal = 16.dp),
-                )
-            } else {
-                FeedsErrorColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    text = stringResource(id = R.string.feeds_error_loading_user_feeds),
-                    onRefresh = { eventPublisher(UiEvent.RefreshNoteFeeds) },
-                    onRestoreDefaultFeeds = { eventPublisher(UiEvent.RestoreDefaultNoteFeeds) },
-                )
-            }
-        },
-        floatingActionButton = {
-            NewPostFloatingActionButton(onNewPostClick = callbacks.onNewPostClick)
-        },
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
-    )
+        }
+    } else if (state.loading) {
+        HeightAdjustableLoadingLazyListPlaceholder(
+            height = 128.dp,
+            contentPaddingValues = paddingValues,
+            itemPadding = PaddingValues(horizontal = 16.dp),
+        )
+    } else {
+        FeedsErrorColumn(
+            modifier = Modifier.fillMaxSize(),
+            text = stringResource(id = R.string.feeds_error_loading_user_feeds),
+            onRefresh = { eventPublisher(UiEvent.RefreshNoteFeeds) },
+            onRestoreDefaultFeeds = { eventPublisher(UiEvent.RestoreDefaultNoteFeeds) },
+        )
+    }
 }
 
 @ExperimentalMaterial3Api
 @Composable
-private fun NoteFeedTopAppBar(
+internal fun NoteFeedTopAppBar(
     title: String,
     avatarCdnImage: CdnImage?,
     onAvatarClick: () -> Unit,

@@ -6,6 +6,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.CircularProgressIndicator
@@ -21,6 +23,7 @@ import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,9 +47,12 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import java.time.LocalDate
@@ -84,6 +90,7 @@ import net.primal.android.wallet.dashboard.ui.WalletDashboard
 import net.primal.android.wallet.dashboard.ui.WalletDashboardLite
 import net.primal.android.wallet.dashboard.ui.WalletSetupCallToAction
 import net.primal.android.wallet.store.inapp.InAppPurchaseBuyBottomSheet
+import net.primal.android.wallet.transactions.list.TransactionListItemDataUi
 import net.primal.android.wallet.transactions.list.TransactionsLazyColumn
 import net.primal.domain.utils.isConfigured
 import net.primal.domain.wallet.CurrencyMode
@@ -235,337 +242,413 @@ fun WalletDashboardScreen(
         focusModeEnabled = false,
         accountSwitcherCallbacks = accountSwitcherCallbacks,
         topAppBar = { scrollBehaviour ->
-            PrimalTopAppBar(
-                modifier = Modifier.onSizeChanged { topBarHeight = it.height },
-                title = when (state.wallet) {
-                    is Wallet.NWC -> stringResource(id = R.string.wallet_nwc_title)
-                    is Wallet.Primal -> stringResource(id = R.string.wallet_primal_title)
-                    is Wallet.Spark -> stringResource(id = R.string.wallet_spark_title)
-                    null -> stringResource(id = R.string.wallet_title)
-                },
-                avatarCdnImage = state.activeAccountAvatarCdnImage,
-                legendaryCustomization = state.activeAccountLegendaryCustomization,
-                avatarBlossoms = state.activeAccountBlossoms,
-                titleTrailingIcon = if (canShowWalletPicker) {
-                    Icons.Default.ExpandMore
-                } else {
-                    null
-                },
-                onTitleClick = if (canShowWalletPicker) {
-                    { onWalletPickerClick() }
-                } else {
-                    null
-                },
-                navigationIcon = PrimalIcons.AvatarDefault,
-                onNavigationIconClick = {
-                    uiScope.launch { drawerState.open() }
-                },
-                actions = {
-                    if (canBuySats) {
-                        AppBarIcon(
-                            icon = PrimalIcons.WalletPurchaseSats,
-                            onClick = {
-                                inAppPurchaseVisible = true
-                            },
-                        )
-                    } else {
-                        InvisibleAppBarIcon()
-                    }
-                },
+            WalletDashboardTopAppBar(
+                state = state,
+                canShowWalletPicker = canShowWalletPicker,
+                canBuySats = canBuySats,
+                dashboardExpanded = dashboardExpanded,
+                dashboardLiteHeightDp = dashboardLiteHeightDp,
+                currencyMode = currencyMode,
                 scrollBehavior = scrollBehaviour,
-                showDivider = !LocalPrimalTheme.current.isDarkTheme,
-                footer = {
-                    if (state.dashboardState == WalletDashboardState.ActiveWallet) {
-                        AnimatedContent(
-                            modifier = Modifier.onSizeChanged { topBarFooterHeight = it.height },
-                            targetState = dashboardExpanded,
-                            label = "DashboardAnimation",
-                        ) { expanded ->
-                            when (expanded) {
-                                true -> WalletDashboard(
-                                    modifier = Modifier
-                                        .wrapContentSize(align = Alignment.Center)
-                                        .padding(horizontal = 32.dp)
-                                        .padding(top = 16.dp, bottom = 24.dp)
-                                        .animateContentSize(),
-                                    walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
-                                    enabled = state.wallet.isConfigured(),
-                                    actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
-                                    onWalletAction = { action ->
-                                        when (action) {
-                                            WalletAction.Send -> onSendClick()
-                                            WalletAction.Scan -> onScanClick()
-                                            WalletAction.Receive -> onReceiveClick()
-                                        }
-                                    },
-                                    currencyMode = currencyMode,
-                                    onSwitchCurrencyMode = { currencyMode = it },
-                                    exchangeBtcUsdRate = state.exchangeBtcUsdRate,
-                                )
-
-                                false -> WalletDashboardLite(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(dashboardLiteHeightDp)
-                                        .background(color = AppTheme.colorScheme.surface)
-                                        .padding(horizontal = 10.dp, vertical = 16.dp)
-                                        .animateContentSize(),
-                                    walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
-                                    actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
-                                    onWalletAction = { action ->
-                                        when (action) {
-                                            WalletAction.Send -> onSendClick()
-                                            WalletAction.Scan -> onScanClick()
-                                            WalletAction.Receive -> onReceiveClick()
-                                        }
-                                    },
-                                    currencyMode = currencyMode,
-                                    enabled = state.wallet.isConfigured(),
-                                    onSwitchCurrencyMode = { currencyMode = it },
-                                    exchangeBtcUsdRate = state.exchangeBtcUsdRate,
-                                )
-                            }
-                        }
-                    }
-                },
+                onTopBarHeightChanged = { topBarHeight = it },
+                onTopBarFooterHeightChanged = { topBarFooterHeight = it },
+                onCurrencyModeToggle = { currencyMode = it },
+                onAvatarClick = { uiScope.launch { drawerState.open() } },
+                onWalletPickerClick = onWalletPickerClick,
+                onSendClick = onSendClick,
+                onScanClick = onScanClick,
+                onReceiveClick = onReceiveClick,
+                onBuySatsClick = { inAppPurchaseVisible = true },
             )
         },
         content = { paddingValues ->
-            PrimalPullToRefreshBox(
-                isRefreshing = state.refreshing,
-                onRefresh = {
-                    eventPublisher(UiEvent.RequestLatestTransactionsSync)
-                    eventPublisher(UiEvent.RequestWalletBalanceUpdate)
-                },
-                enabled = state.wallet != null,
-                indicatorPaddingValues = paddingValues,
-            ) {
-                when (state.dashboardState) {
-                    WalletDashboardState.Loading -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-
-                    WalletDashboardState.NoWalletNpubLogin -> {
-                        WalletCallToActionBox(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .animateContentSize()
-                                .padding(paddingValues)
-                                .padding(horizontal = 32.dp)
-                                .padding(bottom = 32.dp)
-                                .navigationBarsPadding(),
-                            message = stringResource(id = R.string.app_npub_login_error),
-                        )
-                    }
-
-                    WalletDashboardState.WalletDetected -> {
-                        WalletSetupCallToAction(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues)
-                                .padding(horizontal = 32.dp)
-                                .padding(bottom = 32.dp)
-                                .navigationBarsPadding(),
-                            title = stringResource(id = R.string.wallet_dashboard_detected_title),
-                            description = stringResource(id = R.string.wallet_dashboard_detected_description),
-                            onRestoreWalletClick = onRestoreWalletClick,
-                            onCreateWalletClick = { eventPublisher(UiEvent.CreateWallet) },
-                        )
-                    }
-
-                    WalletDashboardState.WalletDiscontinued -> {
-                        WalletSetupCallToAction(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues)
-                                .padding(horizontal = 32.dp)
-                                .padding(bottom = 32.dp)
-                                .navigationBarsPadding(),
-                            title = stringResource(id = R.string.wallet_dashboard_discontinued_title),
-                            description = stringResource(id = R.string.wallet_dashboard_discontinued_description),
-                            onRestoreWalletClick = onRestoreWalletClick,
-                            onCreateWalletClick = { eventPublisher(UiEvent.CreateWallet) },
-                        )
-                    }
-
-                    WalletDashboardState.ActiveWallet -> {
-                        val isTransactionListSettled = pagingItems.loadState.refresh is LoadState.NotLoading &&
-                            pagingItems.loadState.append is LoadState.NotLoading &&
-                            !state.refreshing
-
-                        if (isTransactionListSettled && pagingItems.isEmpty()) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(paddingValues)
-                                    .navigationBarsPadding(),
-                            ) {
-                                if (state.wallet is Wallet.Primal) {
-                                    DashboardUpgradeNotice(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .animateContentSize()
-                                            .padding(horizontal = 32.dp)
-                                            .padding(vertical = 16.dp),
-                                        onUpgradeWalletClick = onUpgradeWalletClick,
-                                    )
-                                }
-
-                                if (state.wallet?.balanceInBtc == 0.0) {
-                                    WalletCallToActionBox(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .weight(1f)
-                                            .animateContentSize()
-                                            .padding(horizontal = 32.dp)
-                                            .padding(bottom = 32.dp),
-                                        message = stringResource(id = R.string.wallet_dashboard_no_sats_hint),
-                                        actionLabel = if (canBuySats) {
-                                            stringResource(id = R.string.wallet_dashboard_buy_sats_button)
-                                        } else {
-                                            null
-                                        },
-                                        onActionClick = {
-                                            inAppPurchaseVisible = true
-                                        },
-                                    )
-                                } else {
-                                    WalletCallToActionBox(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .weight(1f)
-                                            .animateContentSize()
-                                            .padding(horizontal = 32.dp)
-                                            .padding(bottom = 32.dp),
-                                        message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
-                                    )
-                                }
-                            }
-                        } else {
-                            TransactionsLazyColumn(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(color = AppTheme.colorScheme.surfaceVariant)
-                                    .padding(top = with(LocalDensity.current) { topBarHeight.toDp() }),
-                                pagingItems = pagingItems,
-                                isRefreshing = state.refreshing,
-                                currencyMode = currencyMode,
-                                exchangeBtcUsdRate = state.exchangeBtcUsdRate,
-                                listState = listState,
-                                onProfileClick = onProfileClick,
-                                onTransactionClick = onTransactionClick,
-                                header = {
-                                    if (state.wallet is Wallet.Primal) {
-                                        DashboardUpgradeNotice(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .animateContentSize()
-                                                .padding(horizontal = 32.dp)
-                                                .padding(top = 16.dp, bottom = 12.dp),
-                                            onUpgradeWalletClick = onUpgradeWalletClick,
-                                        )
-                                    } else if (!state.isWalletBackedUp) {
-                                        val titleText = stringResource(
-                                            id = R.string.wallet_dashboard_backup_notice_title,
-                                        )
-                                        val descriptionText = stringResource(
-                                            id = R.string.wallet_dashboard_backup_notice_description,
-                                        )
-
-                                        val annotatedMessage = buildAnnotatedString {
-                                            withStyle(
-                                                SpanStyle(
-                                                    fontWeight = FontWeight.Bold,
-                                                    textDecoration = TextDecoration.Underline,
-                                                ),
-                                            ) {
-                                                append(titleText.uppercase())
-                                            }
-                                            append(" ")
-                                            append(descriptionText)
-                                        }
-
-                                        WalletCallToActionAnnotatedBox(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 16.dp)
-                                                .padding(bottom = 16.dp)
-                                                .animateContentSize(),
-                                            message = annotatedMessage,
-                                            actionLabel = stringResource(id = R.string.wallet_dashboard_backup_button),
-                                            onActionClick = { state.wallet?.let { onWalletBackupClick(it.walletId) } },
-                                        )
-                                    } else if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
-                                        WalletCallToActionBox(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .animateContentSize()
-                                                .padding(horizontal = 32.dp)
-                                                .padding(bottom = 32.dp),
-                                            message = stringResource(id = R.string.wallet_dashboard_low_sats_hint),
-                                            actionLabel = stringResource(
-                                                id = R.string.wallet_dashboard_buy_sats_button,
-                                            ),
-                                            onActionClick = {
-                                                inAppPurchaseVisible = true
-                                            },
-                                        )
-                                    }
-                                },
-                                footer = {
-                                    if (shouldAddFooter) {
-                                        val systemNavigationBarDp = 48.dp
-                                        val spacerHeight = with(density) {
-                                            (topBarHeight - topBarFooterHeight).toDp() + dashboardLiteHeightDp +
-                                                NavigationBarFullHeightDp + systemNavigationBarDp
-                                        }
-                                        Spacer(modifier = Modifier.height(spacerHeight))
-                                    }
-                                },
-                            )
-                        }
-                    }
-
-                    WalletDashboardState.NoWallet -> {
-                        WalletCallToActionBox(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .animateContentSize()
-                                .padding(paddingValues)
-                                .padding(horizontal = 32.dp)
-                                .padding(bottom = 32.dp)
-                                .navigationBarsPadding(),
-                            message = stringResource(
-                                id = if (state.hasPersistedSparkWallet) {
-                                    R.string.wallet_dashboard_activate_wallet_hint
-                                } else {
-                                    R.string.wallet_dashboard_create_wallet_hint
-                                },
-                            ),
-                            actionLabel = stringResource(
-                                id = if (state.hasPersistedSparkWallet) {
-                                    R.string.wallet_dashboard_activate_wallet_button
-                                } else {
-                                    R.string.wallet_dashboard_create_wallet_button
-                                },
-                            ),
-                            onActionClick = { eventPublisher(UiEvent.CreateWallet) },
-                        )
-                    }
-                }
-            }
+            WalletDashboardContent(
+                state = state,
+                pagingItems = pagingItems,
+                listState = listState,
+                canBuySats = canBuySats,
+                currencyMode = currencyMode,
+                topBarHeight = topBarHeight,
+                topBarFooterHeight = topBarFooterHeight,
+                dashboardLiteHeightDp = dashboardLiteHeightDp,
+                shouldAddFooter = shouldAddFooter,
+                density = density,
+                paddingValues = paddingValues,
+                eventPublisher = eventPublisher,
+                onProfileClick = onProfileClick,
+                onTransactionClick = onTransactionClick,
+                onUpgradeWalletClick = onUpgradeWalletClick,
+                onWalletBackupClick = onWalletBackupClick,
+                onRestoreWalletClick = onRestoreWalletClick,
+                onBuySatsClick = { inAppPurchaseVisible = true },
+            )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
         },
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun WalletDashboardTopAppBar(
+    state: WalletDashboardContract.UiState,
+    canShowWalletPicker: Boolean,
+    canBuySats: Boolean,
+    dashboardExpanded: Boolean,
+    dashboardLiteHeightDp: Dp,
+    currencyMode: CurrencyMode,
+    scrollBehavior: TopAppBarScrollBehavior?,
+    onTopBarHeightChanged: (Int) -> Unit,
+    onTopBarFooterHeightChanged: (Int) -> Unit,
+    onCurrencyModeToggle: (CurrencyMode) -> Unit,
+    onAvatarClick: () -> Unit,
+    onWalletPickerClick: () -> Unit,
+    onSendClick: () -> Unit,
+    onScanClick: () -> Unit,
+    onReceiveClick: () -> Unit,
+    onBuySatsClick: () -> Unit,
+) {
+    PrimalTopAppBar(
+        modifier = Modifier.onSizeChanged { onTopBarHeightChanged(it.height) },
+        title = when (state.wallet) {
+            is Wallet.NWC -> stringResource(id = R.string.wallet_nwc_title)
+            is Wallet.Primal -> stringResource(id = R.string.wallet_primal_title)
+            is Wallet.Spark -> stringResource(id = R.string.wallet_spark_title)
+            null -> stringResource(id = R.string.wallet_title)
+        },
+        avatarCdnImage = state.activeAccountAvatarCdnImage,
+        legendaryCustomization = state.activeAccountLegendaryCustomization,
+        avatarBlossoms = state.activeAccountBlossoms,
+        titleTrailingIcon = if (canShowWalletPicker) {
+            Icons.Default.ExpandMore
+        } else {
+            null
+        },
+        onTitleClick = if (canShowWalletPicker) {
+            { onWalletPickerClick() }
+        } else {
+            null
+        },
+        navigationIcon = PrimalIcons.AvatarDefault,
+        onNavigationIconClick = onAvatarClick,
+        actions = {
+            if (canBuySats) {
+                AppBarIcon(
+                    icon = PrimalIcons.WalletPurchaseSats,
+                    onClick = onBuySatsClick,
+                )
+            } else {
+                InvisibleAppBarIcon()
+            }
+        },
+        scrollBehavior = scrollBehavior,
+        showDivider = !LocalPrimalTheme.current.isDarkTheme,
+        footer = {
+            if (state.dashboardState == WalletDashboardState.ActiveWallet) {
+                AnimatedContent(
+                    modifier = Modifier.onSizeChanged { onTopBarFooterHeightChanged(it.height) },
+                    targetState = dashboardExpanded,
+                    label = "DashboardAnimation",
+                ) { expanded ->
+                    when (expanded) {
+                        true -> WalletDashboard(
+                            modifier = Modifier
+                                .wrapContentSize(align = Alignment.Center)
+                                .padding(horizontal = 32.dp)
+                                .padding(top = 16.dp, bottom = 24.dp)
+                                .animateContentSize(),
+                            walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
+                            enabled = state.wallet.isConfigured(),
+                            actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                            onWalletAction = { action ->
+                                when (action) {
+                                    WalletAction.Send -> onSendClick()
+                                    WalletAction.Scan -> onScanClick()
+                                    WalletAction.Receive -> onReceiveClick()
+                                }
+                            },
+                            currencyMode = currencyMode,
+                            onSwitchCurrencyMode = onCurrencyModeToggle,
+                            exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                        )
+
+                        false -> WalletDashboardLite(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(dashboardLiteHeightDp)
+                                .background(color = AppTheme.colorScheme.surface)
+                                .padding(horizontal = 10.dp, vertical = 16.dp)
+                                .animateContentSize(),
+                            walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
+                            actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                            onWalletAction = { action ->
+                                when (action) {
+                                    WalletAction.Send -> onSendClick()
+                                    WalletAction.Scan -> onScanClick()
+                                    WalletAction.Receive -> onReceiveClick()
+                                }
+                            },
+                            currencyMode = currencyMode,
+                            enabled = state.wallet.isConfigured(),
+                            onSwitchCurrencyMode = onCurrencyModeToggle,
+                            exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                        )
+                    }
+                }
+            }
+        },
+    )
+}
+
+@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Composable
+internal fun WalletDashboardContent(
+    state: WalletDashboardContract.UiState,
+    pagingItems: LazyPagingItems<TransactionListItemDataUi>,
+    listState: LazyListState,
+    canBuySats: Boolean,
+    currencyMode: CurrencyMode,
+    topBarHeight: Int,
+    topBarFooterHeight: Int,
+    dashboardLiteHeightDp: Dp,
+    shouldAddFooter: Boolean,
+    density: Density,
+    paddingValues: PaddingValues,
+    eventPublisher: (UiEvent) -> Unit,
+    onProfileClick: (String) -> Unit,
+    onTransactionClick: (String) -> Unit,
+    onUpgradeWalletClick: () -> Unit,
+    onWalletBackupClick: (String) -> Unit,
+    onRestoreWalletClick: () -> Unit,
+    onBuySatsClick: () -> Unit,
+) {
+    PrimalPullToRefreshBox(
+        isRefreshing = state.refreshing,
+        onRefresh = {
+            eventPublisher(UiEvent.RequestLatestTransactionsSync)
+            eventPublisher(UiEvent.RequestWalletBalanceUpdate)
+        },
+        enabled = state.wallet != null,
+        indicatorPaddingValues = paddingValues,
+    ) {
+        when (state.dashboardState) {
+            WalletDashboardState.Loading -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
+
+            WalletDashboardState.NoWalletNpubLogin -> {
+                WalletCallToActionBox(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .animateContentSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 32.dp)
+                        .padding(bottom = 32.dp)
+                        .navigationBarsPadding(),
+                    message = stringResource(id = R.string.app_npub_login_error),
+                )
+            }
+
+            WalletDashboardState.WalletDetected -> {
+                WalletSetupCallToAction(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 32.dp)
+                        .padding(bottom = 32.dp)
+                        .navigationBarsPadding(),
+                    title = stringResource(id = R.string.wallet_dashboard_detected_title),
+                    description = stringResource(id = R.string.wallet_dashboard_detected_description),
+                    onRestoreWalletClick = onRestoreWalletClick,
+                    onCreateWalletClick = { eventPublisher(UiEvent.CreateWallet) },
+                )
+            }
+
+            WalletDashboardState.WalletDiscontinued -> {
+                WalletSetupCallToAction(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 32.dp)
+                        .padding(bottom = 32.dp)
+                        .navigationBarsPadding(),
+                    title = stringResource(id = R.string.wallet_dashboard_discontinued_title),
+                    description = stringResource(id = R.string.wallet_dashboard_discontinued_description),
+                    onRestoreWalletClick = onRestoreWalletClick,
+                    onCreateWalletClick = { eventPublisher(UiEvent.CreateWallet) },
+                )
+            }
+
+            WalletDashboardState.ActiveWallet -> {
+                val isTransactionListSettled = pagingItems.loadState.refresh is LoadState.NotLoading &&
+                    pagingItems.loadState.append is LoadState.NotLoading &&
+                    !state.refreshing
+
+                if (isTransactionListSettled && pagingItems.isEmpty()) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .navigationBarsPadding(),
+                    ) {
+                        if (state.wallet is Wallet.Primal) {
+                            DashboardUpgradeNotice(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateContentSize()
+                                    .padding(horizontal = 32.dp)
+                                    .padding(vertical = 16.dp),
+                                onUpgradeWalletClick = onUpgradeWalletClick,
+                            )
+                        }
+
+                        if (state.wallet?.balanceInBtc == 0.0) {
+                            WalletCallToActionBox(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                                    .animateContentSize()
+                                    .padding(horizontal = 32.dp)
+                                    .padding(bottom = 32.dp),
+                                message = stringResource(id = R.string.wallet_dashboard_no_sats_hint),
+                                actionLabel = if (canBuySats) {
+                                    stringResource(id = R.string.wallet_dashboard_buy_sats_button)
+                                } else {
+                                    null
+                                },
+                                onActionClick = onBuySatsClick,
+                            )
+                        } else {
+                            WalletCallToActionBox(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                                    .animateContentSize()
+                                    .padding(horizontal = 32.dp)
+                                    .padding(bottom = 32.dp),
+                                message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
+                            )
+                        }
+                    }
+                } else {
+                    TransactionsLazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(color = AppTheme.colorScheme.surfaceVariant)
+                            .padding(top = with(LocalDensity.current) { topBarHeight.toDp() }),
+                        pagingItems = pagingItems,
+                        isRefreshing = state.refreshing,
+                        currencyMode = currencyMode,
+                        exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                        listState = listState,
+                        onProfileClick = onProfileClick,
+                        onTransactionClick = onTransactionClick,
+                        header = {
+                            if (state.wallet is Wallet.Primal) {
+                                DashboardUpgradeNotice(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .animateContentSize()
+                                        .padding(horizontal = 32.dp)
+                                        .padding(top = 16.dp, bottom = 12.dp),
+                                    onUpgradeWalletClick = onUpgradeWalletClick,
+                                )
+                            } else if (!state.isWalletBackedUp) {
+                                val titleText = stringResource(
+                                    id = R.string.wallet_dashboard_backup_notice_title,
+                                )
+                                val descriptionText = stringResource(
+                                    id = R.string.wallet_dashboard_backup_notice_description,
+                                )
+
+                                val annotatedMessage = buildAnnotatedString {
+                                    withStyle(
+                                        SpanStyle(
+                                            fontWeight = FontWeight.Bold,
+                                            textDecoration = TextDecoration.Underline,
+                                        ),
+                                    ) {
+                                        append(titleText.uppercase())
+                                    }
+                                    append(" ")
+                                    append(descriptionText)
+                                }
+
+                                WalletCallToActionAnnotatedBox(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp)
+                                        .padding(bottom = 16.dp)
+                                        .animateContentSize(),
+                                    message = annotatedMessage,
+                                    actionLabel = stringResource(id = R.string.wallet_dashboard_backup_button),
+                                    onActionClick = { state.wallet?.let { onWalletBackupClick(it.walletId) } },
+                                )
+                            } else if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
+                                WalletCallToActionBox(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .animateContentSize()
+                                        .padding(horizontal = 32.dp)
+                                        .padding(bottom = 32.dp),
+                                    message = stringResource(id = R.string.wallet_dashboard_low_sats_hint),
+                                    actionLabel = stringResource(
+                                        id = R.string.wallet_dashboard_buy_sats_button,
+                                    ),
+                                    onActionClick = onBuySatsClick,
+                                )
+                            }
+                        },
+                        footer = {
+                            if (shouldAddFooter) {
+                                val systemNavigationBarDp = 48.dp
+                                val spacerHeight = with(density) {
+                                    (topBarHeight - topBarFooterHeight).toDp() + dashboardLiteHeightDp +
+                                        NavigationBarFullHeightDp + systemNavigationBarDp
+                                }
+                                Spacer(modifier = Modifier.height(spacerHeight))
+                            }
+                        },
+                    )
+                }
+            }
+
+            WalletDashboardState.NoWallet -> {
+                WalletCallToActionBox(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .animateContentSize()
+                        .padding(paddingValues)
+                        .padding(horizontal = 32.dp)
+                        .padding(bottom = 32.dp)
+                        .navigationBarsPadding(),
+                    message = stringResource(
+                        id = if (state.hasPersistedSparkWallet) {
+                            R.string.wallet_dashboard_activate_wallet_hint
+                        } else {
+                            R.string.wallet_dashboard_create_wallet_hint
+                        },
+                    ),
+                    actionLabel = stringResource(
+                        id = if (state.hasPersistedSparkWallet) {
+                            R.string.wallet_dashboard_activate_wallet_button
+                        } else {
+                            R.string.wallet_dashboard_create_wallet_button
+                        },
+                    ),
+                    onActionClick = { eventPublisher(UiEvent.CreateWallet) },
+                )
+            }
+        }
+    }
 }
 
 @Composable

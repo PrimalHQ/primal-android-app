@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -114,7 +115,6 @@ private fun ExploreHomeScreen(
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
     callbacks: ExploreHomeContract.ScreenCallbacks,
 ) {
-    val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
     val snackbarHostState = remember { SnackbarHostState() }
@@ -150,61 +150,14 @@ private fun ExploreHomeScreen(
             )
         },
         content = { paddingValues ->
-            HorizontalPager(
-                state = pagerState,
-            ) { pageIndex ->
-                when (pageIndex) {
-                    PEOPLE_INDEX -> {
-                        ExplorePeople(
-                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
-                            paddingValues = paddingValues,
-                            onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
-                            onFollowPackClick = callbacks.onFollowPackClick,
-                        )
-                    }
-
-                    FEEDS_INDEX -> {
-                        ExploreFeeds(
-                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
-                            paddingValues = paddingValues,
-                            onGoToWallet = callbacks.onGoToWallet,
-                            onUiError = { uiError: UiError ->
-                                uiScope.launch {
-                                    snackbarHostState.showSnackbar(
-                                        message = uiError.resolveUiErrorMessage(context),
-                                        duration = SnackbarDuration.Short,
-                                    )
-                                }
-                            },
-                        )
-                    }
-
-                    ZAPS_INDEX -> {
-                        ExploreZaps(
-                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
-                            paddingValues = paddingValues,
-                            noteCallbacks = noteCallbacks,
-                        )
-                    }
-
-                    MEDIA_INDEX -> {
-                        MediaFeedGrid(
-                            feedSpec = exploreMediaFeedSpec,
-                            contentPadding = paddingValues,
-                            onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
-                            onGetPrimalPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
-                        )
-                    }
-
-                    TOPICS_INDEX -> {
-                        ExploreTopics(
-                            modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
-                            paddingValues = paddingValues,
-                            onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
-                        )
-                    }
-                }
-            }
+            ExploreContent(
+                pagerState = pagerState,
+                paddingValues = paddingValues,
+                noteCallbacks = noteCallbacks,
+                snackbarHostState = snackbarHostState,
+                onFollowPackClick = callbacks.onFollowPackClick,
+                onGoToWallet = callbacks.onGoToWallet,
+            )
         },
         snackbarHost = {
             SnackbarHost(hostState = snackbarHostState)
@@ -215,9 +168,78 @@ private fun ExploreHomeScreen(
     )
 }
 
+@Composable
+internal fun ExploreContent(
+    pagerState: PagerState,
+    paddingValues: PaddingValues,
+    noteCallbacks: NoteCallbacks,
+    snackbarHostState: SnackbarHostState,
+    onFollowPackClick: (profileId: String, identifier: String) -> Unit,
+    onGoToWallet: () -> Unit,
+) {
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
+
+    HorizontalPager(
+        state = pagerState,
+    ) { pageIndex ->
+        when (pageIndex) {
+            PEOPLE_INDEX -> {
+                ExplorePeople(
+                    modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                    paddingValues = paddingValues,
+                    onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
+                    onFollowPackClick = onFollowPackClick,
+                )
+            }
+
+            FEEDS_INDEX -> {
+                ExploreFeeds(
+                    modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                    paddingValues = paddingValues,
+                    onGoToWallet = onGoToWallet,
+                    onUiError = { uiError: UiError ->
+                        uiScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = uiError.resolveUiErrorMessage(context),
+                                duration = SnackbarDuration.Short,
+                            )
+                        }
+                    },
+                )
+            }
+
+            ZAPS_INDEX -> {
+                ExploreZaps(
+                    modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                    paddingValues = paddingValues,
+                    noteCallbacks = noteCallbacks,
+                )
+            }
+
+            MEDIA_INDEX -> {
+                MediaFeedGrid(
+                    feedSpec = exploreMediaFeedSpec,
+                    contentPadding = paddingValues,
+                    onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
+                    onGetPrimalPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
+                )
+            }
+
+            TOPICS_INDEX -> {
+                ExploreTopics(
+                    modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                    paddingValues = paddingValues,
+                    onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
+                )
+            }
+        }
+    }
+}
+
 @ExperimentalMaterial3Api
 @Composable
-private fun ExploreTopAppBar(
+internal fun ExploreTopAppBar(
     modifier: Modifier = Modifier,
     pagerState: PagerState,
     avatarCdnImage: CdnImage?,
