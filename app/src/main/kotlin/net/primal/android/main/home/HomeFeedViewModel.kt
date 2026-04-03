@@ -1,0 +1,208 @@
+package net.primal.android.main.home
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
+import javax.inject.Inject
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
+import net.primal.android.core.errors.UiError
+import net.primal.android.core.updater.DataUpdater
+import net.primal.android.feeds.list.ui.model.asFeedUi
+import net.primal.android.main.home.HomeFeedContract.UiEvent
+import net.primal.android.main.home.HomeFeedContract.UiState
+import net.primal.android.navigation.identifier
+import net.primal.android.navigation.npub
+import net.primal.android.navigation.primalName
+import net.primal.android.navigation.streamNaddr
+import net.primal.android.notes.feed.model.asStreamPillUi
+import net.primal.android.premium.legend.domain.asLegendaryCustomization
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.android.user.subscriptions.SubscriptionsManager
+import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
+import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
+import net.primal.domain.nostr.toNostrString
+import net.primal.domain.nostr.utils.npubToPubkey
+import net.primal.domain.profile.ProfileRepository
+import net.primal.domain.streams.StreamRepository
+
+@HiltViewModel
+class HomeFeedViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    private val dataUpdater: DataUpdater,
+    private val activeAccountStore: ActiveAccountStore,
+    private val subscriptionsManager: SubscriptionsManager,
+    private val feedsRepository: FeedsRepository,
+    private val profileRepository: ProfileRepository,
+    private val streamRepository: StreamRepository,
+) : ViewModel() {
+
+    private val hostNpub = savedStateHandle.npub
+    private val streamIdentifier = savedStateHandle.identifier
+    private val hostPrimalName = savedStateHandle.primalName
+    private val streamNaddr = savedStateHandle.streamNaddr
+
+    private val _state = MutableStateFlow(UiState())
+    val state = _state.asStateFlow()
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
+
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    private val _effects = Channel<HomeFeedContract.SideEffect>()
+    val effects = _effects.receiveAsFlow()
+    private fun setEffect(effect: HomeFeedContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
+
+    init {
+        resolveStreamParams()
+        observeLiveEventsFromFollows()
+        observeEvents()
+        observeActiveAccount()
+        observeBadgesUpdates()
+        observeFeeds()
+        fetchAndPersistNoteFeeds()
+    }
+
+    private fun resolveStreamParams() =
+        viewModelScope.launch {
+            if (streamNaddr != null) {
+                setEffect(HomeFeedContract.SideEffect.StartStream(naddr = streamNaddr))
+                return@launch
+            }
+
+            if (streamIdentifier == null) return@launch
+
+            val hostPubkey = when {
+                hostNpub != null -> hostNpub.npubToPubkey()
+
+                hostPrimalName != null ->
+                    runCatching { profileRepository.fetchProfileId(primalName = hostPrimalName) }.getOrNull()
+
+                else -> null
+            }
+
+            if (hostPubkey != null) {
+                streamRepository.findStreamNaddr(hostPubkey = hostPubkey, identifier = streamIdentifier)
+                    .onSuccess { naddr ->
+                        setEffect(HomeFeedContract.SideEffect.StartStream(naddr = naddr.toNostrString()))
+                    }
+                    .onFailure {
+                        Napier.w(throwable = it) { "Failed to find stream naddr for hostPubkey=$hostPubkey." }
+                        setState { copy(uiError = UiError.StreamNotFound) }
+                    }
+            } else {
+                setState { copy(uiError = UiError.InvalidNaddr) }
+            }
+        }
+
+    @OptIn(FlowPreview::class)
+    private fun observeLiveEventsFromFollows() =
+        viewModelScope.launch {
+            streamRepository.observeLiveEventsFromFollows(userId = activeAccountStore.activeUserId())
+                .collectLatest { streams -> setState { copy(streams = streams.map { it.asStreamPillUi() }) } }
+        }
+
+    private fun observeEvents() {
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    UiEvent.RequestUserDataUpdate -> dataUpdater.updateData()
+                    UiEvent.RefreshNoteFeeds -> fetchAndPersistNoteFeeds()
+                    UiEvent.RestoreDefaultNoteFeeds -> restoreDefaultNoteFeeds()
+                    UiEvent.DismissError -> setState { copy(uiError = null) }
+                }
+            }
+        }
+    }
+
+    private fun restoreDefaultNoteFeeds() =
+        viewModelScope.launch {
+            try {
+                setState { copy(loading = true) }
+                val userId = activeAccountStore.activeUserId()
+                feedsRepository.fetchAndPersistDefaultFeeds(
+                    userId = userId,
+                    specKind = FeedSpecKind.Notes,
+                    givenDefaultFeeds = emptyList(),
+                )
+            } catch (error: SignatureException) {
+                Napier.w(throwable = error) { "Failed to restore default feeds due to signature error." }
+            } catch (error: NetworkException) {
+                Napier.w(throwable = error) { "Failed to restore default feeds due to network error." }
+            } finally {
+                setState { copy(loading = false) }
+            }
+        }
+
+    private fun fetchAndPersistNoteFeeds() =
+        viewModelScope.launch {
+            setState { copy(loading = true) }
+            try {
+                val userId = activeAccountStore.activeUserId()
+                retryNetworkCall {
+                    feedsRepository.fetchAndPersistNoteFeeds(userId = userId)
+                }
+            } catch (error: SigningRejectedException) {
+                Napier.w(throwable = error) { "Signing rejected while fetching and persisting feeds." }
+            } catch (error: SigningKeyNotFoundException) {
+                restoreDefaultNoteFeeds()
+                Napier.w(throwable = error) { "Signing key not found while fetching and persisting feeds." }
+            } catch (error: NetworkException) {
+                Napier.w(throwable = error) { "Network error while fetching and persisting feeds." }
+            } finally {
+                setState { copy(loading = false) }
+            }
+        }
+
+    private fun observeFeeds() =
+        viewModelScope.launch {
+            feedsRepository.observeNotesFeeds(userId = activeAccountStore.activeUserId())
+                .collect { feeds ->
+                    setState {
+                        copy(
+                            feeds = feeds
+                                .filter { it.enabled }
+                                .map { it.asFeedUi() },
+                        )
+                    }
+                }
+        }
+
+    private fun observeActiveAccount() =
+        viewModelScope.launch {
+            activeAccountStore.activeUserAccount.collect {
+                setState {
+                    copy(
+                        activeAccountAvatarCdnImage = it.avatarCdnImage,
+                        activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
+                        activeAccountBlossoms = it.blossomServers,
+                    )
+                }
+            }
+        }
+
+    private fun observeBadgesUpdates() =
+        viewModelScope.launch {
+            subscriptionsManager.badges.collect {
+                setState {
+                    copy(badges = it)
+                }
+            }
+        }
+}

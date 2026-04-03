@@ -1,0 +1,268 @@
+package net.primal.android.main.explore
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
+import net.primal.android.R
+import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.IconText
+import net.primal.android.core.compose.InvisibleAppBarIcon
+import net.primal.android.core.compose.PrimalDivider
+import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
+import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.errors.UiError
+import net.primal.android.core.errors.resolveUiErrorMessage
+import net.primal.android.main.explore.feeds.ExploreFeeds
+import net.primal.android.main.explore.people.ExplorePeople
+import net.primal.android.main.explore.topics.ExploreTopics
+import net.primal.android.main.explore.ui.EXPLORE_HOME_TAB_COUNT
+import net.primal.android.main.explore.ui.ExploreHomeTabs
+import net.primal.android.main.explore.ui.FEEDS_INDEX
+import net.primal.android.main.explore.ui.MEDIA_INDEX
+import net.primal.android.main.explore.ui.PEOPLE_INDEX
+import net.primal.android.main.explore.ui.TOPICS_INDEX
+import net.primal.android.main.explore.ui.ZAPS_INDEX
+import net.primal.android.main.explore.zaps.ExploreZaps
+import net.primal.android.notes.feed.grid.MediaFeedGrid
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.android.theme.AppTheme
+import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.feeds.exploreMediaFeedSpec
+import net.primal.domain.links.CdnImage
+
+@Composable
+internal fun ExploreHomeContent(
+    pagerState: PagerState,
+    paddingValues: PaddingValues,
+    noteCallbacks: NoteCallbacks,
+    snackbarHostState: SnackbarHostState,
+    onFollowPackClick: (profileId: String, identifier: String) -> Unit,
+    onGoToWallet: () -> Unit,
+) {
+    val context = LocalContext.current
+    val uiScope = rememberCoroutineScope()
+
+    HorizontalPager(
+        state = pagerState,
+    ) { pageIndex ->
+        when (pageIndex) {
+            PEOPLE_INDEX -> {
+                ExplorePeople(
+                    modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                    paddingValues = paddingValues,
+                    onProfileClick = { noteCallbacks.onProfileClick?.invoke(it) },
+                    onFollowPackClick = onFollowPackClick,
+                )
+            }
+
+            FEEDS_INDEX -> {
+                ExploreFeeds(
+                    modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                    paddingValues = paddingValues,
+                    onGoToWallet = onGoToWallet,
+                    onUiError = { uiError: UiError ->
+                        uiScope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = uiError.resolveUiErrorMessage(context),
+                                duration = SnackbarDuration.Short,
+                            )
+                        }
+                    },
+                )
+            }
+
+            ZAPS_INDEX -> {
+                ExploreZaps(
+                    modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                    paddingValues = paddingValues,
+                    noteCallbacks = noteCallbacks,
+                )
+            }
+
+            MEDIA_INDEX -> {
+                MediaFeedGrid(
+                    feedSpec = exploreMediaFeedSpec,
+                    contentPadding = paddingValues,
+                    onNoteClick = { noteCallbacks.onNoteClick?.invoke(it) },
+                    onGetPrimalPremiumClick = { noteCallbacks.onGetPrimalPremiumClick?.invoke() },
+                )
+            }
+
+            TOPICS_INDEX -> {
+                ExploreTopics(
+                    modifier = Modifier.background(color = AppTheme.colorScheme.surfaceVariant),
+                    paddingValues = paddingValues,
+                    onHashtagClick = { noteCallbacks.onHashtagClick?.invoke(it) },
+                )
+            }
+        }
+    }
+}
+
+@ExperimentalMaterial3Api
+@Composable
+internal fun ExploreTopAppBar(
+    modifier: Modifier = Modifier,
+    pagerState: PagerState,
+    avatarCdnImage: CdnImage?,
+    navigationIcon: ImageVector?,
+    actionIcon: ImageVector,
+    onNavigationIconClick: () -> Unit,
+    onActionIconClick: () -> Unit,
+    onSearchClick: () -> Unit,
+    avatarLegendaryCustomization: LegendaryCustomization? = null,
+    avatarBlossoms: List<String> = emptyList(),
+    navigationIconTintColor: Color = LocalContentColor.current,
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+) {
+    val scope = rememberCoroutineScope()
+
+    Column(
+        modifier = modifier
+            .background(AppTheme.colorScheme.background)
+            .wrapContentHeight(),
+    ) {
+        TopAppBar(
+            title = {
+                SearchBar(
+                    onClick = onSearchClick,
+                )
+            },
+            navigationIcon = {
+                if (avatarCdnImage != null) {
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .clip(CircleShape),
+                    ) {
+                        UniversalAvatarThumbnail(
+                            avatarCdnImage = avatarCdnImage,
+                            avatarSize = 32.dp,
+                            avatarBlossoms = avatarBlossoms,
+                            onClick = onNavigationIconClick,
+                            legendaryCustomization = avatarLegendaryCustomization,
+                        )
+                    }
+                } else if (navigationIcon != null) {
+                    AppBarIcon(
+                        icon = navigationIcon,
+                        iconSize = 22.dp,
+                        onClick = onNavigationIconClick,
+                        tint = navigationIconTintColor,
+                    )
+                } else {
+                    InvisibleAppBarIcon()
+                }
+            },
+            actions = {
+                IconButton(
+                    onClick = onActionIconClick,
+                ) {
+                    Icon(
+                        imageVector = actionIcon,
+                        contentDescription = null,
+                    )
+                }
+            },
+            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = AppTheme.colorScheme.surface,
+                scrolledContainerColor = AppTheme.colorScheme.surface,
+            ),
+            scrollBehavior = scrollBehavior,
+        )
+        ExploreHomeTabs(
+            selectedTabIndex = pagerState.currentPage,
+            onPeopleTabClick = { scope.launch { pagerState.animateScrollToPage(PEOPLE_INDEX) } },
+            onFeedsTabClick = { scope.launch { pagerState.animateScrollToPage(FEEDS_INDEX) } },
+            onZapsTabClick = { scope.launch { pagerState.animateScrollToPage(ZAPS_INDEX) } },
+            onMediaTabClick = { scope.launch { pagerState.animateScrollToPage(MEDIA_INDEX) } },
+            onTopicsTabClick = { scope.launch { pagerState.animateScrollToPage(TOPICS_INDEX) } },
+        )
+        PrimalDivider()
+    }
+}
+
+@Composable
+private fun SearchBar(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .height(34.dp)
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp)
+            .clip(AppTheme.shapes.extraLarge)
+            .clickable { onClick() }
+            .background(
+                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
+                shape = AppTheme.shapes.extraLarge,
+            ),
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        IconText(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            leadingIcon = Icons.Default.Search,
+            leadingIconTintColor = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            text = stringResource(id = R.string.explore_search_nostr).lowercase(),
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            style = AppTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Medium,
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview
+@Composable
+fun PreviewExploreTopAppBar() {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
+        Surface {
+            ExploreTopAppBar(
+                avatarCdnImage = null,
+                navigationIcon = PrimalIcons.AvatarDefault,
+                onSearchClick = {},
+                onActionIconClick = {},
+                onNavigationIconClick = {},
+                actionIcon = Icons.Filled.Tune,
+                pagerState = rememberPagerState { EXPLORE_HOME_TAB_COUNT },
+            )
+        }
+    }
+}
