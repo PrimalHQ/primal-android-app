@@ -73,6 +73,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.domain.UserAccount
+import net.primal.domain.profile.Nip05VerificationStatus
 
 @Composable
 fun PrimalDrawer(
@@ -129,6 +130,7 @@ fun PrimalDrawer(
                 userAccount = state.activeUserAccount,
                 onQrCodeClick = onQrCodeClick,
                 legendaryCustomization = state.legendaryCustomization,
+                nip05Status = state.activeUserNip05Status,
                 accountSwitcherCallbacks = accountSwitcherCallbacks,
                 onLogoutClick = { onDrawerDestinationClick(DrawerScreenDestination.SignOut(it)) },
                 onProfileClick = { onDrawerDestinationClick(DrawerScreenDestination.Profile(it)) },
@@ -161,6 +163,7 @@ fun PrimalDrawer(
 private fun DrawerHeader(
     userAccount: UserAccount?,
     legendaryCustomization: LegendaryCustomization?,
+    nip05Status: Nip05VerificationStatus?,
     onQrCodeClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
     onLogoutClick: (String) -> Unit,
@@ -198,6 +201,8 @@ private fun DrawerHeader(
             displayName = userAccount?.authorDisplayName ?: "",
             internetIdentifier = userAccount?.internetIdentifier,
             internetIdentifierBadgeSize = 24.dp,
+            profileId = userAccount?.pubkey,
+            nip05Status = nip05Status,
             modifier = Modifier.constrainAs(usernameRef) {
                 start.linkTo(startGuideline)
                 top.linkTo(avatarRef.bottom, margin = 16.dp)

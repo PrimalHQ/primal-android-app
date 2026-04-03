@@ -87,6 +87,8 @@ private fun GenericReactionListItem(
                 displayName = item.profile.authorDisplayName,
                 internetIdentifier = item.profile.internetIdentifier,
                 legendaryCustomization = item.profile.premiumDetails?.legendaryCustomization,
+                nip05Status = item.profile.nip05Status,
+                profileId = item.profile.pubkey,
             )
         },
         trailingContent = {

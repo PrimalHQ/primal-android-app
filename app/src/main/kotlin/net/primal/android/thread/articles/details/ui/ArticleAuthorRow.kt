@@ -36,6 +36,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
+import net.primal.domain.profile.Nip05VerificationStatus
 
 @Composable
 fun ArticleAuthorRow(
@@ -45,7 +46,9 @@ fun ArticleAuthorRow(
     authorCdnImage: CdnImage? = null,
     authorInternetIdentifier: String? = null,
     authorLegendaryCustomization: LegendaryCustomization? = null,
+    authorNip05Status: Nip05VerificationStatus? = null,
     authorBlossoms: List<String> = emptyList(),
+    authorId: String? = null,
     onAuthorAvatarClick: (() -> Unit)? = null,
     onFollowUnfollowClick: (() -> Unit)? = null,
 ) {
@@ -75,6 +78,8 @@ fun ArticleAuthorRow(
                     lineHeight = 16.sp,
                 ),
                 legendaryCustomization = authorLegendaryCustomization,
+                nip05Status = authorNip05Status,
+                profileId = authorId,
             )
 
             if (!authorInternetIdentifier.isNullOrBlank()) {

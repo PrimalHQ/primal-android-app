@@ -26,6 +26,8 @@ import net.primal.android.nostr.notary.NostrNotary.NotarySideEffect
 import net.primal.android.scanner.analysis.QrCodeResultDecoder
 import net.primal.android.signer.client.launchSignEvent
 import net.primal.android.signer.client.rememberAmberSignerLauncher
+import net.primal.domain.profile.Nip05VerificationService
+import net.primal.domain.profile.Nip05VerificationStatus
 
 @AndroidEntryPoint
 class MainActivity : PrimalActivity() {
@@ -34,6 +36,9 @@ class MainActivity : PrimalActivity() {
 
     @Inject
     lateinit var qrCodeResultDecoder: QrCodeResultDecoder
+
+    @Inject
+    lateinit var nip05VerificationService: Nip05VerificationService
 
     private val deepLinkIntents = MutableSharedFlow<Intent>(
         extraBufferCapacity = 1,
@@ -81,7 +86,10 @@ class MainActivity : PrimalActivity() {
             }
 
             ConfigureActivity { isLoggedIn ->
-                CompositionLocalProvider(LocalQrCodeDecoder provides qrCodeResultDecoder) {
+                CompositionLocalProvider(
+                    LocalQrCodeDecoder provides qrCodeResultDecoder,
+                    LocalNip05VerificationService provides nip05VerificationService,
+                ) {
                     PrimalAppNavigation(
                         navController = navController,
                         startDestination = if (isLoggedIn) "home" else "welcome",
@@ -106,3 +114,13 @@ class MainActivity : PrimalActivity() {
 }
 
 val LocalQrCodeDecoder = compositionLocalOf<QrCodeResultDecoder> { error("No QrCodeResultDecoder provided.") }
+
+val LocalNip05VerificationService = compositionLocalOf<Nip05VerificationService> {
+    object : Nip05VerificationService {
+        override suspend fun getStatus(pubkey: String) = null
+        override suspend fun getStatuses(pubkeys: List<String>) = emptyMap<String, Nip05VerificationStatus?>()
+        override fun observeStatus(pubkey: String) = kotlinx.coroutines.flow.emptyFlow<Nip05VerificationStatus?>()
+        override suspend fun verifyIfNeeded(pubkey: String, internetIdentifier: String) = Unit
+        override suspend fun verifyEagerly(pubkey: String, internetIdentifier: String) = Unit
+    }
+}

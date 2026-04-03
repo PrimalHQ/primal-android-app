@@ -453,7 +453,9 @@ private fun AccountListItem(
                 displayName = account.displayName,
                 internetIdentifier = account.internetIdentifier,
                 legendaryCustomization = account.legendaryCustomization,
+                nip05Status = account.nip05Status,
                 displayNameColor = AppTheme.colorScheme.onSurface,
+                profileId = account.pubkey,
             )
         },
         supportingContent = account.internetIdentifier?.let {

@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import javax.inject.Singleton
 import net.primal.android.networking.di.PrimalCacheApiClient
 import net.primal.android.nostr.notary.NostrNotary
 import net.primal.core.caching.MediaCacher
@@ -26,6 +27,7 @@ import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.polls.PollsRepository
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.premium.PremiumBroadcastRepository
+import net.primal.domain.profile.Nip05VerificationService
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
@@ -153,15 +155,22 @@ object CachingRepositoriesModule {
         )
 
     @Provides
+    @Singleton
+    fun provideNip05VerificationService(): Nip05VerificationService =
+        PrimalRepositoryFactory.createNip05VerificationService()
+
+    @Provides
     fun provideProfileRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
         mediaCacher: MediaCacher?,
+        nip05VerificationService: Nip05VerificationService,
     ): ProfileRepository =
         PrimalRepositoryFactory.createProfileRepository(
             cachingPrimalApiClient = primalApiClient,
             primalPublisher = primalPublisher,
             mediaCacher = mediaCacher,
+            nip05VerificationService = nip05VerificationService,
         )
 
     @Provides
@@ -205,11 +214,13 @@ object CachingRepositoriesModule {
     fun provideStreamRepository(
         @PrimalCacheApiClient primalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
+        nip05VerificationService: Nip05VerificationService,
         mediaCacher: MediaCacher?,
     ): StreamRepository =
         PrimalRepositoryFactory.createStreamRepository(
             cachingPrimalApiClient = primalApiClient,
             primalPublisher = primalPublisher,
+            nip05VerificationService = nip05VerificationService,
             mediaCacher = mediaCacher,
         )
 

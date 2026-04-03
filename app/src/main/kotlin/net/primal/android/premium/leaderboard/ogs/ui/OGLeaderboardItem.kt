@@ -24,6 +24,7 @@ import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.utils.formatToDefaultDateFormat
 import net.primal.android.theme.AppTheme
 import net.primal.domain.membership.OGLeaderboardEntry
+import net.primal.domain.profile.Nip05VerificationStatus
 
 @Composable
 fun OGLeaderboardItem(
@@ -48,6 +49,8 @@ fun OGLeaderboardItem(
                 firstCohort = item.firstCohort,
                 displayName = item.displayName,
                 internetIdentifier = item.internetIdentifier,
+                nip05Status = item.nip05Status,
+                profileId = item.userId,
             )
         },
         supportingContent = {
@@ -82,6 +85,8 @@ private fun DisplayNameAndFirstCohortRow(
     displayName: String?,
     internetIdentifier: String?,
     firstCohort: String?,
+    nip05Status: Nip05VerificationStatus? = null,
+    profileId: String? = null,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -96,6 +101,8 @@ private fun DisplayNameAndFirstCohortRow(
                 displayName = displayName,
                 internetIdentifier = internetIdentifier,
                 internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
+                nip05Status = nip05Status,
+                profileId = profileId,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

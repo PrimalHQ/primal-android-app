@@ -10,6 +10,7 @@ import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isUnspecified
 import androidx.compose.ui.unit.sp
+import net.primal.android.LocalNip05VerificationService
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeAqua
 import net.primal.android.core.compose.icons.primaliconpack.PrimalBadgeBlue
@@ -51,6 +53,7 @@ import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.premium.legend.domain.LegendaryStyle
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
+import net.primal.domain.profile.Nip05VerificationStatus
 
 @Composable
 fun NostrUserText(
@@ -71,10 +74,19 @@ fun NostrUserText(
     internetIdentifierBadgeSize: Dp = 14.dp,
     internetIdentifierBadgeAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.Center,
     legendaryCustomization: LegendaryCustomization? = null,
+    nip05Status: Nip05VerificationStatus? = null,
+    profileId: String? = null,
     annotatedStringPrefixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
     annotatedStringSuffixBuilder: (AnnotatedString.Builder.() -> Unit)? = null,
 ) {
-    val verifiedBadge = !internetIdentifier.isNullOrEmpty()
+    val nip05Service = LocalNip05VerificationService.current
+    LaunchedEffect(profileId, internetIdentifier) {
+        if (profileId != null && !internetIdentifier.isNullOrEmpty()) {
+            nip05Service.verifyIfNeeded(profileId, internetIdentifier)
+        }
+    }
+
+    val verifiedBadge = !internetIdentifier.isNullOrEmpty() && nip05Status != Nip05VerificationStatus.FAILED
     var resizedTextStyle by remember { mutableStateOf(style) }
 
     val customBadgeStyle = if (legendaryCustomization?.customBadge == true) {
@@ -98,6 +110,8 @@ fun NostrUserText(
         if (verifiedBadge) {
             append(' ')
             appendInlineContent("verifiedBadge", "[badge]")
+            append(' ')
+        } else if (annotatedStringSuffixBuilder != null) {
             append(' ')
         }
         annotatedStringSuffixBuilder?.invoke(this)
@@ -128,26 +142,24 @@ fun NostrUserText(
                     tint = Color.Unspecified,
                 )
             } else {
-                val surfaceColor = AppTheme.colorScheme.surface
+                val (badgeColor, bgColor) = if (internetIdentifier.isPrimalIdentifier()) {
+                    AppTheme.colorScheme.tertiary to Color.White
+                } else {
+                    AppTheme.extraColorScheme.onSurfaceVariantAlt2 to AppTheme.colorScheme.surface
+                }
                 Image(
                     modifier = Modifier
                         .padding(bottom = 1.dp)
                         .size(internetIdentifierBadgeSize)
                         .drawBehind {
                             drawCircle(
-                                color = if (internetIdentifier.isPrimalIdentifier()) Color.White else surfaceColor,
+                                color = bgColor,
                                 radius = size.minDimension / 4.0f,
                             )
                         },
                     imageVector = PrimalIcons.Verified,
                     contentDescription = null,
-                    colorFilter = ColorFilter.tint(
-                        color = if (internetIdentifier.isPrimalIdentifier()) {
-                            AppTheme.colorScheme.tertiary
-                        } else {
-                            AppTheme.extraColorScheme.onSurfaceVariantAlt2
-                        },
-                    ),
+                    colorFilter = ColorFilter.tint(color = badgeColor),
                 )
             }
         },
@@ -255,6 +267,48 @@ fun PreviewNostrUserTextWithCustomBadge() {
                     avatarGlow = true,
                     legendaryStyle = LegendaryStyle.GOLD,
                 ),
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewNostrUserTextVerified() {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
+        Surface {
+            NostrUserText(
+                displayName = "Verified User",
+                internetIdentifier = "user@example.com",
+                nip05Status = Nip05VerificationStatus.VERIFIED,
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewNostrUserTextUnknown() {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
+        Surface {
+            NostrUserText(
+                displayName = "Unknown User",
+                internetIdentifier = "user@example.com",
+                nip05Status = null,
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewNostrUserTextFailed() {
+    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
+        Surface {
+            NostrUserText(
+                displayName = "Failed User",
+                internetIdentifier = "user@unknown.com",
+                nip05Status = Nip05VerificationStatus.FAILED,
             )
         }
     }

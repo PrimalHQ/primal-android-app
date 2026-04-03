@@ -28,6 +28,7 @@ import net.primal.data.account.signer.local.model.LocalSignerMethod
 import net.primal.domain.account.model.LocalApp
 import net.primal.domain.account.model.TrustLevel
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
+import net.primal.domain.profile.Nip05VerificationService
 
 @HiltViewModel
 class AndroidConnectViewModel @Inject constructor(
@@ -35,6 +36,7 @@ class AndroidConnectViewModel @Inject constructor(
     private val accountsStore: UserAccountsStore,
     private val credentialsStore: CredentialsStore,
     private val localSignerService: LocalSignerService,
+    private val nip05VerificationService: Nip05VerificationService,
 ) : ViewModel() {
 
     private val method: LocalSignerMethod.GetPublicKey = savedStateHandle.localSignerMethodOrThrow
@@ -66,9 +68,14 @@ class AndroidConnectViewModel @Inject constructor(
                     credential?.type == CredentialType.PrivateKey
                 }
 
+                val statuses = nip05VerificationService.getStatuses(
+                    nsecOnlyUserAccounts.map { it.pubkey },
+                )
                 val accounts = nsecOnlyUserAccounts
                     .sortedByDescending { it.lastAccessedAt }
-                    .map { it.asUserAccountUi() }
+                    .map {
+                        it.asUserAccountUi().copy(nip05Status = statuses[it.pubkey])
+                    }
 
                 setState { copy(accounts = accounts) }
             }
