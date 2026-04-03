@@ -3,6 +3,8 @@ package net.primal.android.notes.feed.note.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,13 +16,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -29,7 +37,8 @@ import androidx.media3.common.MediaMetadata
 import kotlin.random.Random
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Play
-import net.primal.android.core.video.rememberAudioController
+import net.primal.android.core.compose.icons.primaliconpack.VideoPauseMini
+import net.primal.android.core.video.rememberAudioPlayerState
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.extractTLD
 
@@ -40,6 +49,9 @@ private val WaveformBarWidth = 3.dp
 private val WaveformBarSpacing = 2.dp
 private const val WaveformMinHeight = 0.2f
 private const val WaveformHeightRange = 0.8f
+private const val MILLIS_PER_SECOND = 1000
+private const val SECONDS_PER_MINUTE = 60
+private const val SECONDS_PER_HOUR = 3600
 
 @Suppress("LongMethod")
 @Composable
@@ -49,7 +61,16 @@ fun NoteAudioPlayerPreview(
     title: String?,
     url: String,
 ) {
-    val controller = rememberAudioController(mediaId = eventId)
+    val audioState = rememberAudioPlayerState(mediaId = eventId)
+    var isScrubbing by remember { mutableStateOf(false) }
+    var scrubProgress by remember { mutableFloatStateOf(0f) }
+
+    val displayProgress = if (isScrubbing) scrubProgress else audioState.progress
+    val displayPositionMs = if (isScrubbing) {
+        (scrubProgress * audioState.durationMs).toLong()
+    } else {
+        audioState.currentPositionMs
+    }
 
     Row(
         modifier = modifier
@@ -65,24 +86,6 @@ fun NoteAudioPlayerPreview(
                 shape = AppTheme.shapes.small,
             )
             .clip(AppTheme.shapes.small)
-            .clickable {
-                controller?.let { c ->
-                    val mediaItem = MediaItem.Builder()
-                        .setUri(url)
-                        .setMediaId(eventId)
-                        .setMediaMetadata(
-                            MediaMetadata.Builder()
-                                .setTitle(title)
-                                .setArtist(url.extractTLD())
-                                .build(),
-                        )
-                        .build()
-                    c.clearMediaItems()
-                    c.setMediaItem(mediaItem)
-                    c.prepare()
-                    c.play()
-                }
-            }
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -92,15 +95,44 @@ fun NoteAudioPlayerPreview(
                 .background(
                     color = AppTheme.colorScheme.secondary,
                     shape = CircleShape,
-                ),
+                )
+                .clip(CircleShape)
+                .clickable {
+                    if (audioState.isPlaying) {
+                        audioState.pause()
+                    } else if (audioState.isActiveForMediaId) {
+                        audioState.play()
+                    } else {
+                        val mediaItem = MediaItem.Builder()
+                            .setUri(url)
+                            .setMediaId(eventId)
+                            .setMediaMetadata(
+                                MediaMetadata.Builder()
+                                    .setTitle(title)
+                                    .setArtist(url.extractTLD())
+                                    .build(),
+                            )
+                            .build()
+                        audioState.playMediaItem(mediaItem)
+                    }
+                },
             contentAlignment = Alignment.Center,
         ) {
-            Icon(
-                modifier = Modifier.size(20.dp),
-                imageVector = PrimalIcons.Play,
-                contentDescription = null,
-                tint = AppTheme.colorScheme.onSecondary,
-            )
+            if (audioState.isBuffering) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp,
+                    color = AppTheme.colorScheme.onSecondary,
+                )
+            } else {
+                val isShowingPause = audioState.playWhenReady
+                Icon(
+                    modifier = Modifier.size(if (isShowingPause) 32.dp else 20.dp),
+                    imageVector = if (isShowingPause) PrimalIcons.VideoPauseMini else PrimalIcons.Play,
+                    contentDescription = null,
+                    tint = AppTheme.colorScheme.onSecondary,
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(12.dp))
@@ -109,22 +141,49 @@ fun NoteAudioPlayerPreview(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center,
         ) {
-            DecorativeWaveform(
+            ProgressWaveform(
                 modifier = Modifier.fillMaxWidth(),
                 seed = url.hashCode(),
+                progress = displayProgress,
+                isInteractive = audioState.isActiveForMediaId && audioState.durationMs > 0L,
+                onScrub = { progress ->
+                    isScrubbing = true
+                    scrubProgress = progress
+                },
+                onScrubEnd = {
+                    val seekPosition = (scrubProgress * audioState.durationMs).toLong()
+                    audioState.seekTo(seekPosition)
+                    isScrubbing = false
+                },
             )
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            val displayTitle = title ?: url.substringAfterLast("/").substringBefore("?")
-            Text(
-                text = displayTitle,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                color = AppTheme.colorScheme.onSurface,
-                style = AppTheme.typography.bodyMedium,
-                fontSize = 14.sp,
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                val displayTitle = title ?: url.substringAfterLast("/").substringBefore("?")
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = displayTitle,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = AppTheme.colorScheme.onSurface,
+                    style = AppTheme.typography.bodyMedium,
+                    fontSize = 14.sp,
+                )
+
+                if (audioState.durationMs > 0L) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "${formatDuration(displayPositionMs)} / ${formatDuration(audioState.durationMs)}",
+                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                        style = AppTheme.typography.bodySmall,
+                        fontSize = 11.sp,
+                    )
+                }
+            }
 
             val tld = url.extractTLD()
             if (tld != null) {
@@ -141,27 +200,82 @@ fun NoteAudioPlayerPreview(
 }
 
 @Composable
-private fun DecorativeWaveform(modifier: Modifier = Modifier, seed: Int) {
+private fun ProgressWaveform(
+    modifier: Modifier = Modifier,
+    seed: Int,
+    progress: Float,
+    isInteractive: Boolean = false,
+    onScrub: (Float) -> Unit = {},
+    onScrubEnd: () -> Unit = {},
+) {
     val barHeights = remember(seed) {
         val random = Random(seed)
         List(WaveformBarCount) { WaveformMinHeight + random.nextFloat() * WaveformHeightRange }
     }
 
     Row(
-        modifier = modifier.height(24.dp),
+        modifier = modifier
+            .height(24.dp)
+            .then(
+                if (isInteractive) {
+                    Modifier
+                        .pointerInput(Unit) {
+                            detectTapGestures { offset ->
+                                val newProgress = (offset.x / size.width).coerceIn(0f, 1f)
+                                onScrub(newProgress)
+                                onScrubEnd()
+                            }
+                        }
+                        .pointerInput(Unit) {
+                            detectDragGestures(
+                                onDragStart = { offset ->
+                                    val newProgress = (offset.x / size.width).coerceIn(0f, 1f)
+                                    onScrub(newProgress)
+                                },
+                                onDrag = { change, _ ->
+                                    change.consume()
+                                    val newProgress = (change.position.x / size.width).coerceIn(0f, 1f)
+                                    onScrub(newProgress)
+                                },
+                                onDragEnd = { onScrubEnd() },
+                                onDragCancel = { onScrubEnd() },
+                            )
+                        }
+                } else {
+                    Modifier
+                },
+            ),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(WaveformBarSpacing),
     ) {
-        barHeights.forEach { heightFraction ->
+        barHeights.forEachIndexed { index, heightFraction ->
+            val barProgress = index.toFloat() / barHeights.size
+            val isPlayed = barProgress < progress
             Box(
                 modifier = Modifier
                     .width(WaveformBarWidth)
                     .height(24.dp * heightFraction)
                     .background(
-                        color = AppTheme.colorScheme.secondary.copy(alpha = 0.7f),
+                        color = if (isPlayed) {
+                            AppTheme.colorScheme.secondary
+                        } else {
+                            AppTheme.colorScheme.secondary.copy(alpha = 0.3f)
+                        },
                         shape = AppTheme.shapes.extraSmall,
                     ),
             )
         }
+    }
+}
+
+private fun formatDuration(ms: Long): String {
+    val totalSeconds = ms / MILLIS_PER_SECOND
+    val hours = totalSeconds / SECONDS_PER_HOUR
+    val minutes = (totalSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE
+    val seconds = totalSeconds % SECONDS_PER_MINUTE
+    return if (hours > 0) {
+        "%d:%02d:%02d".format(hours, minutes, seconds)
+    } else {
+        "%d:%02d".format(minutes, seconds)
     }
 }
