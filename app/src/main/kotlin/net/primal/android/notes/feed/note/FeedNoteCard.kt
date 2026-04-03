@@ -41,7 +41,6 @@ import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -53,16 +52,12 @@ import java.time.Duration
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import kotlinx.coroutines.launch
-import net.primal.android.R
 import net.primal.android.core.activity.LocalContentDisplaySettings
-import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.UniversalAvatarThumbnail
 import net.primal.android.core.compose.preview.PrimalPreview
-import net.primal.android.core.compose.profile.approvals.ApproveBookmarkAlertDialog
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.ext.openUriSafely
-import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostAction
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -80,10 +75,7 @@ import net.primal.android.notes.feed.note.ui.NoteDropdownMenuIcon
 import net.primal.android.notes.feed.note.ui.NoteSurfaceCard
 import net.primal.android.notes.feed.note.ui.RepostedNotice
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
-import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
-import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapPollBottomSheet
-import net.primal.android.profile.report.ReportUserDialog
 import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.links.CdnImage
@@ -189,39 +181,17 @@ private fun FeedNoteCard(
     onGoToWallet: (() -> Unit)? = null,
     contentFooter: @Composable () -> Unit = {},
 ) {
+    val dialogsState = rememberNoteCardDialogsState()
+    NoteCardDialogs(
+        dialogsState = dialogsState,
+        data = data,
+        noteState = state,
+        eventPublisher = eventPublisher,
+        noteCallbacks = noteCallbacks,
+        onGoToWallet = onGoToWallet,
+    )
+
     val interactionSource = remember { MutableInteractionSource() }
-
-    var showCantZapWarning by remember { mutableStateOf(false) }
-    if (showCantZapWarning) {
-        UnableToZapBottomSheet(
-            zappingState = state.zappingState,
-            onDismissRequest = { showCantZapWarning = false },
-            onGoToWallet = { onGoToWallet?.invoke() },
-        )
-    }
-
-    var showZapOptions by remember { mutableStateOf(false) }
-    if (showZapOptions) {
-        ZapBottomSheet(
-            onDismissRequest = { showZapOptions = false },
-            receiverName = data.authorName,
-            zappingState = state.zappingState,
-            onZap = { zapAmount, zapDescription ->
-                if (state.zappingState.canZap(zapAmount)) {
-                    eventPublisher(
-                        UiEvent.ZapAction(
-                            postId = data.postId,
-                            postAuthorId = data.authorId,
-                            zapAmount = zapAmount.toULong(),
-                            zapDescription = zapDescription,
-                        ),
-                    )
-                } else {
-                    showCantZapWarning = true
-                }
-            },
-        )
-    }
 
     var zapPollSelectedOptionId by remember { mutableStateOf<String?>(null) }
     val zapPoll = data.poll
@@ -243,85 +213,6 @@ private fun FeedNoteCard(
                         poll = zapPoll,
                     ),
                 )
-            },
-        )
-    }
-
-    var deleteDialogVisible by remember { mutableStateOf(false) }
-    if (deleteDialogVisible) {
-        ConfirmActionAlertDialog(
-            confirmText = stringResource(id = R.string.context_confirm_delete_positive),
-            dismissText = stringResource(id = R.string.context_confirm_delete_negative),
-            dialogTitle = stringResource(id = R.string.context_confirm_delete_note_title),
-            dialogText = stringResource(id = R.string.context_confirm_delete_note_text),
-            onConfirmation = {
-                deleteDialogVisible = false
-                eventPublisher(UiEvent.RequestDeleteAction(noteId = data.postId, userId = data.authorId))
-            },
-            onDismissRequest = { deleteDialogVisible = false },
-        )
-    }
-
-    var reportDialogVisible by remember { mutableStateOf(false) }
-    if (reportDialogVisible) {
-        ReportUserDialog(
-            onDismissRequest = { reportDialogVisible = false },
-            onReportClick = { type ->
-                reportDialogVisible = false
-                eventPublisher(
-                    UiEvent.ReportAbuse(
-                        reportType = type,
-                        profileId = data.authorId,
-                        noteId = data.postId,
-                    ),
-                )
-            },
-        )
-    }
-
-    var showRepostOrQuoteConfirmation by remember { mutableStateOf(false) }
-    if (showRepostOrQuoteConfirmation) {
-        NoteRepostOrQuoteBottomSheet(
-            isReposted = data.stats.userReposted,
-            onDismiss = { showRepostOrQuoteConfirmation = false },
-            onRepostClick = {
-                eventPublisher(
-                    UiEvent.RepostAction(
-                        postId = data.postId,
-                        postAuthorId = data.authorId,
-                        postNostrEvent = data.rawNostrEventJson,
-                    ),
-                )
-            },
-            onDeleteRepostClick = {
-                eventPublisher(
-                    UiEvent.DeleteRepostAction(
-                        postId = data.postId,
-                        repostId = data.repostId,
-                        repostAuthorId = data.repostAuthorId,
-                    ),
-                )
-            },
-            onPostQuoteClick = {
-                noteCallbacks.onNoteQuoteClick?.invoke(
-                    data.asNeventString(),
-                )
-            },
-        )
-    }
-
-    if (state.shouldApproveBookmark) {
-        ApproveBookmarkAlertDialog(
-            onBookmarkConfirmed = {
-                eventPublisher(
-                    UiEvent.BookmarkAction(
-                        noteId = data.postId,
-                        forceUpdate = true,
-                    ),
-                )
-            },
-            onClose = {
-                eventPublisher(UiEvent.DismissBookmarkConfirmation(noteId = data.postId))
             },
         )
     }
@@ -388,10 +279,10 @@ private fun FeedNoteCard(
                     eventPublisher(UiEvent.UnmuteThreadAction(postId = data.postId))
                 },
                 onRequestDeleteClick = {
-                    deleteDialogVisible = true
+                    dialogsState.showDeleteDialog = true
                 },
                 onReportContentClick = {
-                    reportDialogVisible = true
+                    dialogsState.showReportDialog = true
                 },
             )
 
@@ -465,7 +356,7 @@ private fun FeedNoteCard(
                                             ),
                                         )
                                     } else {
-                                        showCantZapWarning = true
+                                        dialogsState.showCantZapWarning = true
                                     }
                                 }
 
@@ -479,7 +370,7 @@ private fun FeedNoteCard(
                                 }
 
                                 FeedPostAction.Repost -> {
-                                    showRepostOrQuoteConfirmation = true
+                                    dialogsState.showRepostConfirmation = true
                                 }
 
                                 FeedPostAction.Bookmark -> {
@@ -491,9 +382,9 @@ private fun FeedNoteCard(
                             when (postAction) {
                                 FeedPostAction.Zap -> {
                                     if (state.zappingState.walletConnected) {
-                                        showZapOptions = true
+                                        dialogsState.showZapOptions = true
                                     } else {
-                                        showCantZapWarning = true
+                                        dialogsState.showCantZapWarning = true
                                     }
                                 }
 
