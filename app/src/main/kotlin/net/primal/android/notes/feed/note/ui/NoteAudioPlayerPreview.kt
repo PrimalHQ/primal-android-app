@@ -53,7 +53,6 @@ private const val MILLIS_PER_SECOND = 1000
 private const val SECONDS_PER_MINUTE = 60
 private const val SECONDS_PER_HOUR = 3600
 
-@Suppress("LongMethod")
 @Composable
 fun NoteAudioPlayerPreview(
     modifier: Modifier = Modifier,
@@ -89,51 +88,12 @@ fun NoteAudioPlayerPreview(
             .padding(horizontal = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Box(
-            modifier = Modifier
-                .size(PlayButtonSize)
-                .background(
-                    color = AppTheme.colorScheme.secondary,
-                    shape = CircleShape,
-                )
-                .clip(CircleShape)
-                .clickable {
-                    if (audioState.isPlaying) {
-                        audioState.pause()
-                    } else if (audioState.isActiveForMediaId) {
-                        audioState.play()
-                    } else {
-                        val mediaItem = MediaItem.Builder()
-                            .setUri(url)
-                            .setMediaId(eventId)
-                            .setMediaMetadata(
-                                MediaMetadata.Builder()
-                                    .setTitle(title)
-                                    .setArtist(url.extractTLD())
-                                    .build(),
-                            )
-                            .build()
-                        audioState.playMediaItem(mediaItem)
-                    }
-                },
-            contentAlignment = Alignment.Center,
-        ) {
-            if (audioState.isBuffering) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(20.dp),
-                    strokeWidth = 2.dp,
-                    color = AppTheme.colorScheme.onSecondary,
-                )
-            } else {
-                val isShowingPause = audioState.playWhenReady
-                Icon(
-                    modifier = Modifier.size(if (isShowingPause) 32.dp else 20.dp),
-                    imageVector = if (isShowingPause) PrimalIcons.VideoPauseMini else PrimalIcons.Play,
-                    contentDescription = null,
-                    tint = AppTheme.colorScheme.onSecondary,
-                )
-            }
-        }
+        PlayPauseButton(
+            audioState = audioState,
+            eventId = eventId,
+            title = title,
+            url = url,
+        )
 
         Spacer(modifier = Modifier.width(12.dp))
 
@@ -159,43 +119,112 @@ fun NoteAudioPlayerPreview(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                val displayTitle = title ?: url.substringAfterLast("/").substringBefore("?")
-                Text(
-                    modifier = Modifier.weight(1f),
-                    text = displayTitle,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = AppTheme.colorScheme.onSurface,
-                    style = AppTheme.typography.bodyMedium,
-                    fontSize = 14.sp,
-                )
-
-                if (audioState.durationMs > 0L) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "${formatDuration(displayPositionMs)} / ${formatDuration(audioState.durationMs)}",
-                        color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                        style = AppTheme.typography.bodySmall,
-                        fontSize = 11.sp,
-                    )
-                }
-            }
-
-            val tld = url.extractTLD()
-            if (tld != null) {
-                Text(
-                    text = tld,
-                    maxLines = 1,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                    style = AppTheme.typography.bodySmall,
-                    fontSize = 12.sp,
-                )
-            }
+            AudioInfoRow(
+                title = title,
+                url = url,
+                displayPositionMs = displayPositionMs,
+                durationMs = audioState.durationMs,
+            )
         }
+    }
+}
+
+@Composable
+private fun PlayPauseButton(
+    audioState: AudioPlayerState,
+    eventId: String,
+    title: String?,
+    url: String,
+) {
+    Box(
+        modifier = Modifier
+            .size(PlayButtonSize)
+            .background(
+                color = AppTheme.colorScheme.secondary,
+                shape = CircleShape,
+            )
+            .clip(CircleShape)
+            .clickable {
+                if (audioState.isPlaying) {
+                    audioState.pause()
+                } else if (audioState.isActiveForMediaId) {
+                    audioState.play()
+                } else {
+                    val mediaItem = MediaItem.Builder()
+                        .setUri(url)
+                        .setMediaId(eventId)
+                        .setMediaMetadata(
+                            MediaMetadata.Builder()
+                                .setTitle(title)
+                                .setArtist(url.extractTLD())
+                                .build(),
+                        )
+                        .build()
+                    audioState.playMediaItem(mediaItem)
+                }
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        if (audioState.isBuffering) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                strokeWidth = 2.dp,
+                color = AppTheme.colorScheme.onSecondary,
+            )
+        } else {
+            val isShowingPause = audioState.playWhenReady
+            Icon(
+                modifier = Modifier.size(if (isShowingPause) 32.dp else 20.dp),
+                imageVector = if (isShowingPause) PrimalIcons.VideoPauseMini else PrimalIcons.Play,
+                contentDescription = null,
+                tint = AppTheme.colorScheme.onSecondary,
+            )
+        }
+    }
+}
+
+@Composable
+private fun AudioInfoRow(
+    title: String?,
+    url: String,
+    displayPositionMs: Long,
+    durationMs: Long,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        val displayTitle = title ?: url.substringAfterLast("/").substringBefore("?")
+        Text(
+            modifier = Modifier.weight(1f),
+            text = displayTitle,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            color = AppTheme.colorScheme.onSurface,
+            style = AppTheme.typography.bodyMedium,
+            fontSize = 14.sp,
+        )
+
+        if (durationMs > 0L) {
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "${formatDuration(displayPositionMs)} / ${formatDuration(durationMs)}",
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+                style = AppTheme.typography.bodySmall,
+                fontSize = 11.sp,
+            )
+        }
+    }
+
+    val tld = url.extractTLD()
+    if (tld != null) {
+        Text(
+            text = tld,
+            maxLines = 1,
+            color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
+            style = AppTheme.typography.bodySmall,
+            fontSize = 12.sp,
+        )
     }
 }
 
