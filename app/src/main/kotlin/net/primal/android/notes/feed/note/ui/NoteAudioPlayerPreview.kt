@@ -45,7 +45,6 @@ import net.primal.core.utils.extractTLD
 private val CardHeight = 90.dp
 private val PlayButtonSize = 42.dp
 private const val WaveformBarCount = 40
-private val WaveformBarWidth = 3.dp
 private val WaveformBarSpacing = 2.dp
 private const val WaveformMinHeight = 0.2f
 private const val WaveformHeightRange = 0.8f
@@ -282,7 +281,7 @@ private fun ProgressWaveform(
             val isPlayed = barProgress < progress
             Box(
                 modifier = Modifier
-                    .width(WaveformBarWidth)
+                    .weight(1f)
                     .height(24.dp * heightFraction)
                     .background(
                         color = if (isPlayed) {
