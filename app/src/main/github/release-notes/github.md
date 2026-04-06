@@ -9,3 +9,4 @@
 - Implemented CallbackAntilog for iOS in wallet repo
 - Implemented auto-reconnect in wallet service (#1003)
 - Fixed the new posts pill not scrolling to top on non-latest feeds (#1005)
+- Fixed the poll crash when the options list is empty (#1007)
