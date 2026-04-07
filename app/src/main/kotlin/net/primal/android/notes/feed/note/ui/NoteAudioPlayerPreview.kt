@@ -30,10 +30,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlin.random.Random
+import net.primal.android.R
 import net.primal.android.audio.player.AudioPlayerState
 import net.primal.android.audio.player.LocalAudioPlayerState
 import net.primal.android.core.compose.icons.PrimalIcons
@@ -191,7 +193,7 @@ private fun AudioInfoRow(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         val tld = url.extractTLD()
-        val displayTitle = title ?: tld ?: "Audio"
+        val displayTitle = title ?: tld ?: stringResource(R.string.feed_note_render_unknown_audio_title)
         Text(
             modifier = Modifier.weight(1f),
             text = displayTitle,
