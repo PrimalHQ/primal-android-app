@@ -53,7 +53,9 @@ import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.UnlockScreenOrientation
+import net.primal.android.audio.player.AudioPlayerStateProvider
 import net.primal.android.core.pip.PiPManagerProvider
+import net.primal.android.core.video.AudioPlayerOverlay
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.editor.NoteEditorContract
@@ -505,16 +507,20 @@ fun PrimalAppNavigation(navController: NavHostController, startDestination: Stri
             onRestoreWalletClick = { navController.navigateToWalletRestore() },
         ) {
             PiPManagerProvider {
-                LiveStreamOverlay(
-                    navController = navController,
-                    noteCallbacks = noteCallbacksHandler(navController = navController),
-                ) {
-                    PrimalAppNavigation(
-                        navController = navController,
-                        startDestination = startDestination,
-                        drawerDestinationHandler = drawerDestinationHandler,
-                        topLevelDestinationHandler = topLevelDestinationHandler,
-                    )
+                AudioPlayerStateProvider {
+                    AudioPlayerOverlay {
+                        LiveStreamOverlay(
+                            navController = navController,
+                            noteCallbacks = noteCallbacksHandler(navController = navController),
+                        ) {
+                            PrimalAppNavigation(
+                                navController = navController,
+                                startDestination = startDestination,
+                                drawerDestinationHandler = drawerDestinationHandler,
+                                topLevelDestinationHandler = topLevelDestinationHandler,
+                            )
+                        }
+                    }
                 }
             }
         }

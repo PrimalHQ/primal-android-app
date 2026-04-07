@@ -28,17 +28,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import kotlin.random.Random
+import net.primal.android.audio.player.AudioPlayerState
+import net.primal.android.audio.player.LocalAudioPlayerState
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.Play
 import net.primal.android.core.compose.icons.primaliconpack.VideoPauseMini
-import net.primal.android.core.video.rememberAudioPlayerState
+import net.primal.android.core.compose.icons.primaliconpack.VideoPlayMini
 import net.primal.android.theme.AppTheme
 import net.primal.core.utils.extractTLD
 
@@ -55,19 +55,23 @@ private const val SECONDS_PER_HOUR = 3600
 @Composable
 fun NoteAudioPlayerPreview(
     modifier: Modifier = Modifier,
-    eventId: String,
     title: String?,
     url: String,
 ) {
-    val audioState = rememberAudioPlayerState(mediaId = eventId)
+    val audioState = LocalAudioPlayerState.current
+    val isActive = audioState.isActiveForUrl(url)
     var isScrubbing by remember { mutableStateOf(false) }
     var scrubProgress by remember { mutableFloatStateOf(0f) }
 
-    val displayProgress = if (isScrubbing) scrubProgress else audioState.progress
+    val progress = if (isActive) audioState.progress else 0f
+    val displayProgress = if (isScrubbing) scrubProgress else progress
+    val durationMs = if (isActive) audioState.durationMs else 0L
     val displayPositionMs = if (isScrubbing) {
-        (scrubProgress * audioState.durationMs).toLong()
-    } else {
+        (scrubProgress * durationMs).toLong()
+    } else if (isActive) {
         audioState.currentPositionMs
+    } else {
+        0L
     }
 
     Row(
@@ -89,7 +93,7 @@ fun NoteAudioPlayerPreview(
     ) {
         PlayPauseButton(
             audioState = audioState,
-            eventId = eventId,
+            isActive = isActive,
             title = title,
             url = url,
         )
@@ -104,13 +108,13 @@ fun NoteAudioPlayerPreview(
                 modifier = Modifier.fillMaxWidth(),
                 seed = url.hashCode(),
                 progress = displayProgress,
-                isInteractive = audioState.isActiveForMediaId && audioState.durationMs > 0L,
-                onScrub = { progress ->
+                isInteractive = isActive && durationMs > 0L,
+                onScrub = { scrubValue ->
                     isScrubbing = true
-                    scrubProgress = progress
+                    scrubProgress = scrubValue
                 },
                 onScrubEnd = {
-                    val seekPosition = (scrubProgress * audioState.durationMs).toLong()
+                    val seekPosition = (scrubProgress * durationMs).toLong()
                     audioState.seekTo(seekPosition)
                     isScrubbing = false
                 },
@@ -122,7 +126,7 @@ fun NoteAudioPlayerPreview(
                 title = title,
                 url = url,
                 displayPositionMs = displayPositionMs,
-                durationMs = audioState.durationMs,
+                durationMs = durationMs,
             )
         }
     }
@@ -131,7 +135,7 @@ fun NoteAudioPlayerPreview(
 @Composable
 private fun PlayPauseButton(
     audioState: AudioPlayerState,
-    eventId: String,
+    isActive: Boolean,
     title: String?,
     url: String,
 ) {
@@ -144,39 +148,29 @@ private fun PlayPauseButton(
             )
             .clip(CircleShape)
             .clickable {
-                if (audioState.isPlaying) {
+                if (isActive && audioState.isPlaying) {
                     audioState.pause()
-                } else if (audioState.isActiveForMediaId) {
-                    audioState.play()
+                } else if (isActive) {
+                    audioState.resume()
                 } else {
-                    val mediaItem = MediaItem.Builder()
-                        .setUri(url)
-                        .setMediaId(eventId)
-                        .setMediaMetadata(
-                            MediaMetadata.Builder()
-                                .setTitle(title)
-                                .setArtist(url.extractTLD())
-                                .build(),
-                        )
-                        .build()
-                    audioState.playMediaItem(mediaItem)
+                    audioState.play(url = url, title = title, artist = url.extractTLD())
                 }
             },
         contentAlignment = Alignment.Center,
     ) {
-        if (audioState.isBuffering) {
+        if (isActive && audioState.isBuffering) {
             CircularProgressIndicator(
                 modifier = Modifier.size(20.dp),
                 strokeWidth = 2.dp,
-                color = AppTheme.colorScheme.onSecondary,
+                color = Color.White,
             )
         } else {
-            val isShowingPause = audioState.playWhenReady
+            val isShowingPause = isActive && audioState.playWhenReady
             Icon(
-                modifier = Modifier.size(if (isShowingPause) 32.dp else 20.dp),
-                imageVector = if (isShowingPause) PrimalIcons.VideoPauseMini else PrimalIcons.Play,
+                modifier = Modifier.size(32.dp),
+                imageVector = if (isShowingPause) PrimalIcons.VideoPauseMini else PrimalIcons.VideoPlayMini,
                 contentDescription = null,
-                tint = AppTheme.colorScheme.onSecondary,
+                tint = Color.White,
             )
         }
     }
@@ -193,7 +187,7 @@ private fun AudioInfoRow(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val displayTitle = title ?: url.substringAfterLast("/").substringBefore("?")
+        val displayTitle = title ?: url.extractTLD() ?: "Audio"
         Text(
             modifier = Modifier.weight(1f),
             text = displayTitle,

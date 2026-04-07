@@ -93,6 +93,7 @@ import net.primal.android.core.compose.immersive.rememberImmersiveModeState
 import net.primal.android.core.di.rememberFeedVideoCache
 import net.primal.android.core.utils.copyBitmapToClipboard
 import net.primal.android.core.utils.copyText
+import net.primal.android.audio.player.PauseAudioPlayer
 import net.primal.android.core.video.initializePlayer
 import net.primal.android.stream.player.PauseStreamMiniPlayer
 import net.primal.android.stream.player.hideStreamMiniPlayer
@@ -512,6 +513,7 @@ private fun AttachmentsHorizontalPager(
 
                 EventUriType.Video -> {
                     PauseStreamMiniPlayer()
+                    PauseAudioPlayer()
                     hideStreamMiniPlayer()
 
                     VideoScreen(

@@ -80,8 +80,11 @@ class PrimalMediaSessionService : MediaSessionService() {
             .build()
     }
 
+    private fun isAudioMediaId(mediaId: String): Boolean = mediaId.startsWith("http")
+
     private fun deepLinkPendingIntent(context: Context, mediaId: String): PendingIntent {
-        val uri = "primal://live/$mediaId".toUri()
+        val scheme = if (isAudioMediaId(mediaId)) "primal://audio" else "primal://live"
+        val uri = "$scheme/$mediaId".toUri()
         val intent = Intent(Intent.ACTION_VIEW, uri, context, MainActivity::class.java).apply {
             addFlags(
                 Intent.FLAG_ACTIVITY_SINGLE_TOP or

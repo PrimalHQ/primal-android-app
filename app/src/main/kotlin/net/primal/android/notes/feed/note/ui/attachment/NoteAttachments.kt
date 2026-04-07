@@ -158,7 +158,6 @@ private fun NoteLinkAttachment(
             EventUriType.Audio -> {
                 NoteAudioPlayerPreview(
                     modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
-                    eventId = eventUri.eventId,
                     title = eventUri.title,
                     url = eventUri.url,
                 )
