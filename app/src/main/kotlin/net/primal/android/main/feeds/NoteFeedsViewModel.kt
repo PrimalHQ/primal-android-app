@@ -1,4 +1,4 @@
-package net.primal.android.main.home
+package net.primal.android.main.feeds
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -16,18 +16,15 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.core.errors.UiError
-import net.primal.android.core.updater.DataUpdater
 import net.primal.android.feeds.list.ui.model.asFeedUi
-import net.primal.android.main.home.HomeFeedContract.UiEvent
-import net.primal.android.main.home.HomeFeedContract.UiState
+import net.primal.android.main.feeds.NoteFeedsContract.UiEvent
+import net.primal.android.main.feeds.NoteFeedsContract.UiState
 import net.primal.android.navigation.identifier
 import net.primal.android.navigation.npub
 import net.primal.android.navigation.primalName
 import net.primal.android.navigation.streamNaddr
 import net.primal.android.notes.feed.model.asStreamPillUi
-import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
@@ -43,11 +40,9 @@ import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.streams.StreamRepository
 
 @HiltViewModel
-class HomeFeedViewModel @Inject constructor(
+class NoteFeedsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val dataUpdater: DataUpdater,
     private val activeAccountStore: ActiveAccountStore,
-    private val subscriptionsManager: SubscriptionsManager,
     private val feedsRepository: FeedsRepository,
     private val profileRepository: ProfileRepository,
     private val streamRepository: StreamRepository,
@@ -65,16 +60,14 @@ class HomeFeedViewModel @Inject constructor(
     private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
-    private val _effects = Channel<HomeFeedContract.SideEffect>()
+    private val _effects = Channel<NoteFeedsContract.SideEffect>()
     val effects = _effects.receiveAsFlow()
-    private fun setEffect(effect: HomeFeedContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
+    private fun setEffect(effect: NoteFeedsContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
         resolveStreamParams()
         observeLiveEventsFromFollows()
         observeEvents()
-        observeActiveAccount()
-        observeBadgesUpdates()
         observeFeeds()
         fetchAndPersistNoteFeeds()
     }
@@ -82,7 +75,7 @@ class HomeFeedViewModel @Inject constructor(
     private fun resolveStreamParams() =
         viewModelScope.launch {
             if (streamNaddr != null) {
-                setEffect(HomeFeedContract.SideEffect.StartStream(naddr = streamNaddr))
+                setEffect(NoteFeedsContract.SideEffect.StartStream(naddr = streamNaddr))
                 return@launch
             }
 
@@ -100,7 +93,7 @@ class HomeFeedViewModel @Inject constructor(
             if (hostPubkey != null) {
                 streamRepository.findStreamNaddr(hostPubkey = hostPubkey, identifier = streamIdentifier)
                     .onSuccess { naddr ->
-                        setEffect(HomeFeedContract.SideEffect.StartStream(naddr = naddr.toNostrString()))
+                        setEffect(NoteFeedsContract.SideEffect.StartStream(naddr = naddr.toNostrString()))
                     }
                     .onFailure {
                         Napier.w(throwable = it) { "Failed to find stream naddr for hostPubkey=$hostPubkey." }
@@ -122,7 +115,6 @@ class HomeFeedViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    UiEvent.RequestUserDataUpdate -> dataUpdater.updateData()
                     UiEvent.RefreshNoteFeeds -> fetchAndPersistNoteFeeds()
                     UiEvent.RestoreDefaultNoteFeeds -> restoreDefaultNoteFeeds()
                     UiEvent.DismissError -> setState { copy(uiError = null) }
@@ -182,27 +174,5 @@ class HomeFeedViewModel @Inject constructor(
                         )
                     }
                 }
-        }
-
-    private fun observeActiveAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                setState {
-                    copy(
-                        activeAccountAvatarCdnImage = it.avatarCdnImage,
-                        activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
-                        activeAccountBlossoms = it.blossomServers,
-                    )
-                }
-            }
-        }
-
-    private fun observeBadgesUpdates() =
-        viewModelScope.launch {
-            subscriptionsManager.badges.collect {
-                setState {
-                    copy(badges = it)
-                }
-            }
         }
 }

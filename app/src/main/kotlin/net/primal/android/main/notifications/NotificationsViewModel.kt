@@ -67,7 +67,6 @@ class NotificationsViewModel @Inject constructor(
 
     init {
         subscribeToEvents()
-        subscribeToActiveAccount()
         subscribeToBadgesUpdates()
         observeUnseenNotifications()
     }
@@ -77,19 +76,6 @@ class NotificationsViewModel @Inject constructor(
             events.collect {
                 when (it) {
                     NotificationsSeen -> handleNotificationsSeen()
-                }
-            }
-        }
-
-    private fun subscribeToActiveAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                setState {
-                    copy(
-                        activeAccountAvatarCdnImage = it.avatarCdnImage,
-                        activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
-                        activeAccountBlossoms = it.blossomServers,
-                    )
                 }
             }
         }

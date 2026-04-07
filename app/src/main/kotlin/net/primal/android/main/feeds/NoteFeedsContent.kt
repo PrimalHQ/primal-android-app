@@ -1,4 +1,4 @@
-package net.primal.android.main.home
+package net.primal.android.main.feeds
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.PaddingValues
@@ -41,7 +41,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.feeds.list.FeedsBottomSheet
 import net.primal.android.feeds.list.ui.model.FeedUi
-import net.primal.android.main.home.HomeFeedContract.UiEvent
+import net.primal.android.main.feeds.NoteFeedsContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
@@ -50,8 +50,8 @@ import net.primal.domain.links.CdnImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun HomeFeedContent(
-    state: HomeFeedContract.UiState,
+internal fun NoteFeedsContent(
+    state: NoteFeedsContract.UiState,
     noteCallbacks: NoteCallbacks,
     eventPublisher: (UiEvent) -> Unit,
     onActiveFeedChanged: (FeedUi?) -> Unit,

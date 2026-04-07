@@ -38,6 +38,7 @@ import androidx.navigation.NavController
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.primal.android.R
 import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -53,21 +54,20 @@ import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.main.explore.ExploreHomeContent
-import net.primal.android.main.explore.ExploreHomeViewModel
 import net.primal.android.main.explore.ExploreTopAppBar
 import net.primal.android.main.explore.ui.EXPLORE_HOME_TAB_COUNT
-import net.primal.android.main.home.HomeFeedContent
-import net.primal.android.main.home.HomeFeedContract
-import net.primal.android.main.home.HomeFeedViewModel
-import net.primal.android.main.home.NoteFeedTopAppBar
+import net.primal.android.main.feeds.NoteFeedTopAppBar
+import net.primal.android.main.feeds.NoteFeedsContent
+import net.primal.android.main.feeds.NoteFeedsContract
+import net.primal.android.main.feeds.NoteFeedsViewModel
 import net.primal.android.main.notifications.NotificationsContent
 import net.primal.android.main.notifications.NotificationsTopAppBar
-import net.primal.android.main.notifications.NotificationsViewModel
 import net.primal.android.main.reads.ArticleFeedTopAppBar
 import net.primal.android.main.reads.ReadsContent
-import net.primal.android.main.reads.ReadsViewModel
 import net.primal.android.main.wallet.WalletDashboardContent
+import net.primal.android.main.wallet.WalletDashboardContract
 import net.primal.android.main.wallet.WalletDashboardTopAppBar
+import net.primal.android.main.wallet.WalletDashboardViewModel
 import net.primal.android.navigation.accountSwitcherCallbacksHandler
 import net.primal.android.navigation.navigateToAdvancedSearch
 import net.primal.android.navigation.navigateToFollowPack
@@ -77,7 +77,9 @@ import net.primal.android.navigation.navigateToSearch
 import net.primal.android.navigation.navigateToWallet
 import net.primal.android.navigation.noteCallbacksHandler
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
+import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.stream.player.LocalStreamState
+import net.primal.domain.links.CdnImage
 import net.primal.domain.wallet.CurrencyMode
 
 internal const val REQUESTED_TAB_KEY = "requestedTab"
@@ -94,10 +96,6 @@ fun MainScreen(
 
     // Tab state management
     var activeTab by rememberSaveable { mutableStateOf(PrimalTopLevelDestination.Home) }
-    var tabBackStack by rememberSaveable {
-        mutableStateOf(listOf(PrimalTopLevelDestination.Home))
-    }
-
     // Observe requestedTab from external navigation
     val requestedTab = navBackStackEntry.savedStateHandle
         .getStateFlow<String?>(REQUESTED_TAB_KEY, null)
@@ -108,7 +106,6 @@ fun MainScreen(
         val destination = PrimalTopLevelDestination.entries.find { it.name == tabName }
         if (destination != null && destination != activeTab) {
             activeTab = destination
-            tabBackStack = tabBackStack.filter { it != destination } + destination
         }
         navBackStackEntry.savedStateHandle[REQUESTED_TAB_KEY] = null
     }
@@ -117,11 +114,15 @@ fun MainScreen(
     val noteCallbacks = noteCallbacksHandler(navController)
     val accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController)
 
-    // Home ViewModel (always composed, provides badges for all tabs)
-    val homeFeedViewModel = hiltViewModel<HomeFeedViewModel>(navBackStackEntry)
-    val homeState by homeFeedViewModel.state.collectAsState()
+    val mainViewModel = hiltViewModel<MainViewModel>(navBackStackEntry)
+    val mainState by mainViewModel.state.collectAsState()
 
-    MainScreenHomeEffects(homeFeedViewModel)
+    MainScreenSharedEffects(mainViewModel)
+
+    val noteFeedsViewModel = hiltViewModel<NoteFeedsViewModel>(navBackStackEntry)
+    val noteFeedsState by noteFeedsViewModel.state.collectAsState()
+
+    MainScreenHomeEffects(noteFeedsViewModel)
 
     val homeTopAppBarState = rememberHomeTopAppBarState()
     val currentTopAppBarState = rememberPerTabTopAppBarState(activeTab, homeTopAppBarState)
@@ -129,25 +130,21 @@ fun MainScreen(
     val sharedState = rememberMainScreenSharedState()
 
     SnackbarErrorHandler(
-        error = homeState.uiError,
+        error = noteFeedsState.uiError,
         snackbarHostState = sharedState.snackbarHostState,
         errorMessageResolver = { it.resolveUiErrorMessage(context = LocalContext.current) },
-        onErrorDismiss = { homeFeedViewModel.setEvent(HomeFeedContract.UiEvent.DismissError) },
+        onErrorDismiss = { noteFeedsViewModel.setEvent(NoteFeedsContract.UiEvent.DismissError) },
     )
 
+    WalletErrorHandler(navBackStackEntry, sharedState.snackbarHostState)
+
     val onActiveDestinationClick: () -> Unit = {
-        handleActiveDestinationClick(
-            activeTab,
-            sharedState.homeShouldAnimateScrollToTop,
-            sharedState.readsShouldAnimateScrollToTop,
-            uiScope,
-        )
+        handleActiveDestinationClick(activeTab, sharedState, uiScope)
     }
 
     val onTabChanged: (PrimalTopLevelDestination) -> Unit = { destination ->
         if (destination != activeTab) {
             activeTab = destination
-            tabBackStack = tabBackStack.filter { it != destination } + destination
         }
     }
 
@@ -156,17 +153,16 @@ fun MainScreen(
         else -> LocalContentDisplaySettings.current.focusModeEnabled
     }
 
-    BackHandler(enabled = tabBackStack.size > 1) {
-        val newStack = tabBackStack.dropLast(1)
-        tabBackStack = newStack
-        activeTab = newStack.last()
+    BackHandler(enabled = activeTab != PrimalTopLevelDestination.Home) {
+        activeTab = PrimalTopLevelDestination.Home
     }
 
     MainScreenScaffold(
         activeTab = activeTab,
         drawerState = drawerState,
-        homeState = homeState,
-        homeEventPublisher = homeFeedViewModel::setEvent,
+        mainState = mainState,
+        homeState = noteFeedsState,
+        homeEventPublisher = noteFeedsViewModel::setEvent,
         homeTopAppBarState = homeTopAppBarState,
         currentTopAppBarState = currentTopAppBarState,
         sharedState = sharedState,
@@ -186,7 +182,9 @@ private fun MainScreenTopAppBar(
     activeTab: PrimalTopLevelDestination,
     scrollBehavior: TopAppBarScrollBehavior?,
     drawerState: DrawerState,
-    homeState: HomeFeedContract.UiState,
+    avatarCdnImage: CdnImage?,
+    avatarLegendaryCustomization: LegendaryCustomization?,
+    avatarBlossoms: List<String>,
     homeActiveFeed: FeedUi?,
     homeScrollToFeed: MutableState<FeedUi?>,
     readsActiveFeed: FeedUi?,
@@ -206,9 +204,9 @@ private fun MainScreenTopAppBar(
             NoteFeedTopAppBar(
                 title = homeActiveFeed?.title ?: "",
                 activeFeed = homeActiveFeed,
-                avatarCdnImage = homeState.activeAccountAvatarCdnImage,
-                avatarLegendaryCustomization = homeState.activeAccountLegendaryCustomization,
-                avatarBlossoms = homeState.activeAccountBlossoms,
+                avatarCdnImage = avatarCdnImage,
+                avatarLegendaryCustomization = avatarLegendaryCustomization,
+                avatarBlossoms = avatarBlossoms,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
                 onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
                 onFeedChanged = { feed -> homeScrollToFeed.value = feed },
@@ -218,14 +216,12 @@ private fun MainScreenTopAppBar(
         }
 
         PrimalTopLevelDestination.Reads -> {
-            val readsViewModel = hiltViewModel<ReadsViewModel>()
-            val readsState by readsViewModel.state.collectAsState()
             ArticleFeedTopAppBar(
                 title = readsActiveFeed?.title ?: "",
                 activeFeed = readsActiveFeed,
-                avatarCdnImage = readsState.activeAccountAvatarCdnImage,
-                avatarLegendaryCustomization = readsState.activeAccountLegendaryCustomization,
-                avatarBlossoms = readsState.activeAccountBlossoms,
+                avatarCdnImage = avatarCdnImage,
+                avatarLegendaryCustomization = avatarLegendaryCustomization,
+                avatarBlossoms = avatarBlossoms,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
                 onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Reads) },
                 onFeedChanged = { feed -> readsScrollToFeed.value = feed },
@@ -234,14 +230,12 @@ private fun MainScreenTopAppBar(
         }
 
         PrimalTopLevelDestination.Explore -> {
-            val exploreViewModel = hiltViewModel<ExploreHomeViewModel>()
-            val exploreState by exploreViewModel.state.collectAsState()
             ExploreTopAppBar(
                 pagerState = explorePagerState,
                 actionIcon = PrimalIcons.AdvancedSearch,
-                avatarCdnImage = exploreState.activeAccountAvatarCdnImage,
-                avatarLegendaryCustomization = exploreState.activeAccountLegendaryCustomization,
-                avatarBlossoms = exploreState.activeAccountBlossoms,
+                avatarCdnImage = avatarCdnImage,
+                avatarLegendaryCustomization = avatarLegendaryCustomization,
+                avatarBlossoms = avatarBlossoms,
                 navigationIcon = PrimalIcons.AvatarDefault,
                 onNavigationIconClick = { uiScope.launch { drawerState.open() } },
                 onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
@@ -251,10 +245,10 @@ private fun MainScreenTopAppBar(
         }
 
         PrimalTopLevelDestination.Notifications -> {
-            val notificationsViewModel = hiltViewModel<NotificationsViewModel>()
-            val notificationsState by notificationsViewModel.state.collectAsState()
             NotificationsTopAppBar(
-                state = notificationsState,
+                avatarCdnImage = avatarCdnImage,
+                avatarLegendaryCustomization = avatarLegendaryCustomization,
+                avatarBlossoms = avatarBlossoms,
                 scrollBehavior = scrollBehavior,
                 onNavigationIconClick = { uiScope.launch { drawerState.open() } },
                 onSearchClick = {
@@ -284,8 +278,8 @@ private fun MainScreenContent(
     paddingValues: PaddingValues,
     snackbarHostState: SnackbarHostState,
     noteCallbacks: NoteCallbacks,
-    homeState: HomeFeedContract.UiState,
-    homeEventPublisher: (HomeFeedContract.UiEvent) -> Unit,
+    homeState: NoteFeedsContract.UiState,
+    homeEventPublisher: (NoteFeedsContract.UiEvent) -> Unit,
     onHomeActiveFeedChanged: (FeedUi?) -> Unit,
     homeShouldAnimateScrollToTop: MutableState<Boolean>,
     homeScrollToFeed: MutableState<FeedUi?>,
@@ -298,6 +292,8 @@ private fun MainScreenContent(
     walletTopBarHeight: Int,
     walletTopBarFooterHeight: Int,
     onWalletScrolledToTopChanged: (Boolean) -> Unit,
+    walletShouldAnimateScrollToTop: MutableState<Boolean>,
+    notificationsShouldAnimateScrollToTop: MutableState<Boolean>,
     navController: NavController,
     onGoToWallet: () -> Unit,
 ) {
@@ -309,7 +305,7 @@ private fun MainScreenContent(
                 Modifier
             },
         ) {
-            HomeFeedContent(
+            NoteFeedsContent(
                 state = homeState,
                 noteCallbacks = noteCallbacks,
                 eventPublisher = homeEventPublisher,
@@ -350,7 +346,7 @@ private fun MainScreenContent(
                         paddingValues = paddingValues,
                         noteCallbacks = noteCallbacks,
                         onGoToWallet = onGoToWallet,
-                        navController = navController,
+                        shouldAnimateScrollToTop = notificationsShouldAnimateScrollToTop,
                     )
 
                     PrimalTopLevelDestination.Wallet -> WalletDashboardContent(
@@ -358,6 +354,7 @@ private fun MainScreenContent(
                         topBarHeight = walletTopBarHeight,
                         topBarFooterHeight = walletTopBarFooterHeight,
                         onScrolledToTopChanged = onWalletScrolledToTopChanged,
+                        shouldAnimateScrollToTop = walletShouldAnimateScrollToTop,
                         paddingValues = paddingValues,
                         navController = navController,
                     )
@@ -383,6 +380,8 @@ private class MainScreenSharedState(
     val walletTopBarHeight: MutableState<Int>,
     val walletTopBarFooterHeight: MutableState<Int>,
     val walletIsScrolledToTop: MutableState<Boolean>,
+    val walletShouldAnimateScrollToTop: MutableState<Boolean>,
+    val notificationsShouldAnimateScrollToTop: MutableState<Boolean>,
 )
 
 @Composable
@@ -400,6 +399,8 @@ private fun rememberMainScreenSharedState(): MainScreenSharedState {
         walletTopBarHeight = remember { mutableIntStateOf(0) },
         walletTopBarFooterHeight = remember { mutableIntStateOf(0) },
         walletIsScrolledToTop = remember { mutableStateOf(true) },
+        walletShouldAnimateScrollToTop = remember { mutableStateOf(false) },
+        notificationsShouldAnimateScrollToTop = remember { mutableStateOf(false) },
     )
 }
 
@@ -408,8 +409,9 @@ private fun rememberMainScreenSharedState(): MainScreenSharedState {
 private fun MainScreenScaffold(
     activeTab: PrimalTopLevelDestination,
     drawerState: DrawerState,
-    homeState: HomeFeedContract.UiState,
-    homeEventPublisher: (HomeFeedContract.UiEvent) -> Unit,
+    mainState: MainContract.UiState,
+    homeState: NoteFeedsContract.UiState,
+    homeEventPublisher: (NoteFeedsContract.UiEvent) -> Unit,
     homeTopAppBarState: TopAppBarState,
     currentTopAppBarState: TopAppBarState,
     sharedState: MainScreenSharedState,
@@ -433,7 +435,7 @@ private fun MainScreenScaffold(
         onPrimaryDestinationChanged = onTabChanged,
         onDrawerDestinationClick = onDrawerDestinationClick,
         onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-        badges = homeState.badges,
+        badges = mainState.badges,
         focusModeEnabled = focusModeEnabled,
         topAppBarState = currentTopAppBarState,
         topAppBar = { scrollBehavior ->
@@ -441,7 +443,9 @@ private fun MainScreenScaffold(
                 activeTab = activeTab,
                 scrollBehavior = scrollBehavior,
                 drawerState = drawerState,
-                homeState = homeState,
+                avatarCdnImage = mainState.activeAccountAvatarCdnImage,
+                avatarLegendaryCustomization = mainState.activeAccountLegendaryCustomization,
+                avatarBlossoms = mainState.activeAccountBlossoms,
                 homeActiveFeed = sharedState.homeActiveFeed.value,
                 homeScrollToFeed = sharedState.homeScrollToFeed,
                 readsActiveFeed = sharedState.readsActiveFeed.value,
@@ -476,6 +480,8 @@ private fun MainScreenScaffold(
                 walletTopBarHeight = sharedState.walletTopBarHeight.value,
                 walletTopBarFooterHeight = sharedState.walletTopBarFooterHeight.value,
                 onWalletScrolledToTopChanged = { sharedState.walletIsScrolledToTop.value = it },
+                walletShouldAnimateScrollToTop = sharedState.walletShouldAnimateScrollToTop,
+                notificationsShouldAnimateScrollToTop = sharedState.notificationsShouldAnimateScrollToTop,
                 navController = navController,
                 onGoToWallet = { onTabChanged(PrimalTopLevelDestination.Wallet) },
             )
@@ -499,25 +505,52 @@ private fun MainScreenScaffold(
 }
 
 @Composable
-private fun MainScreenHomeEffects(homeFeedViewModel: HomeFeedViewModel) {
-    val streamState = LocalStreamState.current
-    LaunchedEffect(homeFeedViewModel, homeFeedViewModel.effects) {
-        homeFeedViewModel.effects.collect {
-            when (it) {
-                is HomeFeedContract.SideEffect.StartStream -> streamState.start(naddr = it.naddr)
-            }
-        }
-    }
-
-    DisposableLifecycleObserverEffect(homeFeedViewModel) {
+private fun MainScreenSharedEffects(mainViewModel: MainViewModel) {
+    DisposableLifecycleObserverEffect(mainViewModel) {
         when (it) {
             Lifecycle.Event.ON_START -> {
-                homeFeedViewModel.setEvent(HomeFeedContract.UiEvent.RequestUserDataUpdate)
+                mainViewModel.setEvent(MainContract.UiEvent.RequestUserDataUpdate)
             }
 
             else -> Unit
         }
     }
+}
+
+@Composable
+private fun MainScreenHomeEffects(noteFeedsViewModel: NoteFeedsViewModel) {
+    val streamState = LocalStreamState.current
+    LaunchedEffect(noteFeedsViewModel, noteFeedsViewModel.effects) {
+        noteFeedsViewModel.effects.collect {
+            when (it) {
+                is NoteFeedsContract.SideEffect.StartStream -> streamState.start(naddr = it.naddr)
+            }
+        }
+    }
+}
+
+@Composable
+private fun WalletErrorHandler(navBackStackEntry: NavBackStackEntry, snackbarHostState: SnackbarHostState) {
+    val walletViewModel = hiltViewModel<WalletDashboardViewModel>(navBackStackEntry)
+    val walletState by walletViewModel.state.collectAsState()
+    val context = LocalContext.current
+    SnackbarErrorHandler(
+        error = walletState.error,
+        snackbarHostState = snackbarHostState,
+        errorMessageResolver = {
+            when (it) {
+                is WalletDashboardContract.UiState.DashboardError.InAppPurchaseNoticeError ->
+                    it.message ?: context.getString(R.string.app_generic_error)
+
+                is WalletDashboardContract.UiState.DashboardError.InAppPurchaseConfirmationFailed ->
+                    context.getString(R.string.wallet_in_app_purchase_error_confirmation_failed)
+
+                is WalletDashboardContract.UiState.DashboardError.WalletCreationFailed ->
+                    context.getString(R.string.wallet_dashboard_create_wallet_error)
+            }
+        },
+        onErrorDismiss = { walletViewModel.setEvents(WalletDashboardContract.UiEvent.DismissError) },
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -554,27 +587,21 @@ private fun rememberPerTabTopAppBarState(
 
 private fun handleActiveDestinationClick(
     activeTab: PrimalTopLevelDestination,
-    homeShouldAnimateScrollToTop: MutableState<Boolean>,
-    readsShouldAnimateScrollToTop: MutableState<Boolean>,
+    sharedState: MainScreenSharedState,
     scope: kotlinx.coroutines.CoroutineScope,
 ) {
-    when (activeTab) {
-        PrimalTopLevelDestination.Home -> {
-            homeShouldAnimateScrollToTop.value = true
-            scope.launch {
-                delay(500.milliseconds)
-                homeShouldAnimateScrollToTop.value = false
-            }
+    val target = when (activeTab) {
+        PrimalTopLevelDestination.Home -> sharedState.homeShouldAnimateScrollToTop
+        PrimalTopLevelDestination.Reads -> sharedState.readsShouldAnimateScrollToTop
+        PrimalTopLevelDestination.Wallet -> sharedState.walletShouldAnimateScrollToTop
+        PrimalTopLevelDestination.Notifications -> sharedState.notificationsShouldAnimateScrollToTop
+        else -> null
+    }
+    target?.let {
+        it.value = true
+        scope.launch {
+            delay(500.milliseconds)
+            it.value = false
         }
-
-        PrimalTopLevelDestination.Reads -> {
-            readsShouldAnimateScrollToTop.value = true
-            scope.launch {
-                delay(500.milliseconds)
-                readsShouldAnimateScrollToTop.value = false
-            }
-        }
-
-        else -> {}
     }
 }

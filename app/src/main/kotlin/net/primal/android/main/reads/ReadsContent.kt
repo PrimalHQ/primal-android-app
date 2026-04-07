@@ -42,20 +42,17 @@ import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
-import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.feeds.list.FeedsBottomSheet
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.navigation.navigateToArticleDetails
 import net.primal.android.navigation.navigateToPremiumBuying
-import net.primal.android.navigation.navigateToProfileQrCodeViewer
-import net.primal.android.navigation.navigateToSearch
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.links.CdnImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun ReadsContent(
+fun ReadsContent(
     onActiveFeedChanged: (FeedUi?) -> Unit,
     shouldAnimateScrollToTop: MutableState<Boolean>,
     scrollToFeed: MutableState<FeedUi?>,
@@ -74,12 +71,8 @@ internal fun ReadsContent(
         scrollToFeed = scrollToFeed,
         snackbarHostState = snackbarHostState,
         paddingValues = paddingValues,
-        callbacks = ReadsScreenContract.ScreenCallbacks(
-            onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-            onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Reads) },
-            onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
-            onGetPremiumClick = { navController.navigateToPremiumBuying() },
-        ),
+        onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
+        onGetPremiumClick = { navController.navigateToPremiumBuying() },
     )
 }
 
@@ -93,7 +86,8 @@ private fun ReadsContent(
     scrollToFeed: MutableState<FeedUi?> = remember { mutableStateOf(null) },
     snackbarHostState: SnackbarHostState,
     paddingValues: PaddingValues,
-    callbacks: ReadsScreenContract.ScreenCallbacks,
+    onArticleClick: (String) -> Unit,
+    onGetPremiumClick: () -> Unit,
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
@@ -134,8 +128,8 @@ private fun ReadsContent(
                 feedSpec = state.feeds[index].spec,
                 contentPadding = paddingValues,
                 shouldAnimateScrollToTop = shouldAnimateScrollToTop.value,
-                onArticleClick = callbacks.onArticleClick,
-                onGetPremiumClick = callbacks.onGetPremiumClick,
+                onArticleClick = onArticleClick,
+                onGetPremiumClick = onGetPremiumClick,
                 onUiError = { uiError: UiError ->
                     uiScope.launch {
                         snackbarHostState.showSnackbar(

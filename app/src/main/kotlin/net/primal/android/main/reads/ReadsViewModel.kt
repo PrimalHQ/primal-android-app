@@ -13,9 +13,7 @@ import kotlinx.coroutines.launch
 import net.primal.android.feeds.list.ui.model.asFeedUi
 import net.primal.android.main.reads.ReadsScreenContract.UiEvent
 import net.primal.android.main.reads.ReadsScreenContract.UiState
-import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
-import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.FeedSpecKind
@@ -27,7 +25,6 @@ import net.primal.domain.nostr.cryptography.SigningRejectedException
 @HiltViewModel
 class ReadsViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val subscriptionsManager: SubscriptionsManager,
     private val feedsRepository: FeedsRepository,
 ) : ViewModel() {
 
@@ -39,8 +36,6 @@ class ReadsViewModel @Inject constructor(
     fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
 
     init {
-        observeActiveAccount()
-        observeBadgesUpdates()
         observeFeeds()
         observeEvents()
         fetchAndPersistReadsFeeds()
@@ -106,28 +101,6 @@ class ReadsViewModel @Inject constructor(
                 Napier.w(throwable = error) { "Network error while fetching feeds" }
             } finally {
                 setState { copy(loading = false) }
-            }
-        }
-
-    private fun observeActiveAccount() =
-        viewModelScope.launch {
-            activeAccountStore.activeUserAccount.collect {
-                setState {
-                    copy(
-                        activeAccountAvatarCdnImage = it.avatarCdnImage,
-                        activeAccountLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),
-                        activeAccountBlossoms = it.blossomServers,
-                    )
-                }
-            }
-        }
-
-    private fun observeBadgesUpdates() =
-        viewModelScope.launch {
-            subscriptionsManager.badges.collect {
-                setState {
-                    copy(badges = it)
-                }
             }
         }
 }

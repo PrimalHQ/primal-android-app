@@ -27,7 +27,6 @@ import net.primal.android.main.wallet.WalletDashboardContract.WalletDashboardSta
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.repository.UserRepository
-import net.primal.android.user.subscriptions.SubscriptionsManager
 import net.primal.android.wallet.di.PendingDepositsSyncerFactory
 import net.primal.android.wallet.di.bindToProcessLifecycle
 import net.primal.android.wallet.repository.ExchangeRateHandler
@@ -61,7 +60,6 @@ class WalletDashboardViewModel @Inject constructor(
     private val walletRepository: WalletRepository,
     private val primalBillingClient: PrimalBillingClient,
     private val billingRepository: BillingRepository,
-    private val subscriptionsManager: SubscriptionsManager,
     private val exchangeRateHandler: ExchangeRateHandler,
     private val ensureSparkWalletExistsUseCase: EnsureSparkWalletExistsUseCase,
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
@@ -96,7 +94,6 @@ class WalletDashboardViewModel @Inject constructor(
         subscribeToActiveWalletData()
         subscribeToActiveAccount()
         subscribeToPurchases()
-        subscribeToBadgesUpdates()
         checkForPersistedSparkWallet()
         migratePrimalTransactionsIfNeeded()
         resolveDashboardState()
@@ -218,15 +215,6 @@ class WalletDashboardViewModel @Inject constructor(
         viewModelScope.launch {
             primalBillingClient.satsPurchases.collect { purchase ->
                 confirmPurchase(purchase = purchase)
-            }
-        }
-
-    private fun subscribeToBadgesUpdates() =
-        viewModelScope.launch {
-            subscriptionsManager.badges.collect {
-                setState {
-                    copy(badges = it)
-                }
             }
         }
 

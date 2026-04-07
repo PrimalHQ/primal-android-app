@@ -8,6 +8,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -20,7 +21,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
-import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -42,10 +42,6 @@ import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
-import net.primal.android.explore.search.ui.SearchScope
-import net.primal.android.navigation.navigateToNoteEditor
-import net.primal.android.navigation.navigateToProfileQrCodeViewer
-import net.primal.android.navigation.navigateToSearch
 import net.primal.android.notes.feed.NoteRepostOrQuoteBottomSheet
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.asNeventString
@@ -56,6 +52,8 @@ import net.primal.android.notes.feed.zaps.UnableToZapBottomSheet
 import net.primal.android.notes.feed.zaps.ZapBottomSheet
 import net.primal.android.notifications.list.ui.NotificationListItem
 import net.primal.android.notifications.list.ui.NotificationUi
+import net.primal.android.premium.legend.domain.LegendaryCustomization
+import net.primal.domain.links.CdnImage
 import net.primal.domain.utils.canZap
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,12 +62,16 @@ internal fun NotificationsContent(
     paddingValues: PaddingValues,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
-    navController: NavController,
+    shouldAnimateScrollToTop: MutableState<Boolean>,
 ) {
     val notificationsViewModel = hiltViewModel<NotificationsViewModel>()
     val notificationsState by notificationsViewModel.state.collectAsState()
     val noteViewModel = hiltViewModel<NoteViewModel, NoteViewModel.Factory> { it.create() }
     val noteState by noteViewModel.state.collectAsState()
+
+    LaunchedEffect(Unit) {
+        notificationsViewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
+    }
 
     DisposableLifecycleObserverEffect(notificationsViewModel) {
         when (it) {
@@ -83,6 +85,13 @@ internal fun NotificationsContent(
 
     val seenPagingItems = notificationsState.seenNotifications.collectAsLazyPagingItems()
     val notificationsListState = seenPagingItems.rememberLazyListStatePagingWorkaround()
+    val uiScope = rememberCoroutineScope()
+
+    LaunchedEffect(shouldAnimateScrollToTop.value) {
+        if (shouldAnimateScrollToTop.value) {
+            uiScope.launch { notificationsListState.animateScrollToItem(0) }
+        }
+    }
 
     LaunchedEffect(seenPagingItems, notificationsState.badges) {
         if (notificationsState.badges.unreadNotificationsCount > 0) {
@@ -98,17 +107,11 @@ internal fun NotificationsContent(
         paddingValues = paddingValues,
         noteCallbacks = noteCallbacks,
         noteEventPublisher = noteViewModel::setEvent,
-        callbacks = NotificationsContract.ScreenCallbacks(
-            onSearchClick = {
-                navController.navigateToSearch(searchScope = SearchScope.MyNotifications)
-            },
-            onGoToWallet = onGoToWallet,
-            onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-            onNewPostClick = { navController.navigateToNoteEditor(null) },
-        ),
+        onGoToWallet = onGoToWallet,
     )
 }
 
+@Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun NotificationsContent(
@@ -119,7 +122,7 @@ private fun NotificationsContent(
     paddingValues: PaddingValues,
     noteCallbacks: NoteCallbacks,
     noteEventPublisher: (NoteContract.UiEvent) -> Unit,
-    callbacks: NotificationsContract.ScreenCallbacks,
+    onGoToWallet: () -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
 
@@ -160,7 +163,7 @@ private fun NotificationsContent(
         seenPagingItems = seenPagingItems,
         paddingValues = paddingValues,
         listState = notificationsListState,
-        onGoToWallet = callbacks.onGoToWallet,
+        onGoToWallet = onGoToWallet,
         onPostLikeClick = {
             noteEventPublisher(
                 NoteContract.UiEvent.PostLikeAction(
@@ -402,16 +405,18 @@ private fun NotificationsList(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun NotificationsTopAppBar(
-    state: NotificationsContract.UiState,
+    avatarCdnImage: CdnImage?,
+    avatarLegendaryCustomization: LegendaryCustomization?,
+    avatarBlossoms: List<String>,
     scrollBehavior: TopAppBarScrollBehavior?,
     onNavigationIconClick: () -> Unit,
     onSearchClick: () -> Unit,
 ) {
     PrimalTopAppBar(
         title = stringResource(id = R.string.notifications_title),
-        avatarCdnImage = state.activeAccountAvatarCdnImage,
-        legendaryCustomization = state.activeAccountLegendaryCustomization,
-        avatarBlossoms = state.activeAccountBlossoms,
+        avatarCdnImage = avatarCdnImage,
+        legendaryCustomization = avatarLegendaryCustomization,
+        avatarBlossoms = avatarBlossoms,
         navigationIcon = PrimalIcons.AvatarDefault,
         onNavigationIconClick = onNavigationIconClick,
         scrollBehavior = scrollBehavior,

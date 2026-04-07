@@ -21,11 +21,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -51,6 +53,7 @@ import com.ionspin.kotlin.bignum.decimal.toBigDecimal
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.FormatStyle
+import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.activity.LocalPrimalTheme
 import net.primal.android.core.compose.AppBarIcon
@@ -101,6 +104,7 @@ internal fun WalletDashboardContent(
     topBarHeight: Int,
     topBarFooterHeight: Int,
     onScrolledToTopChanged: (Boolean) -> Unit,
+    shouldAnimateScrollToTop: MutableState<Boolean>,
     paddingValues: PaddingValues,
     navController: NavController,
 ) {
@@ -135,6 +139,13 @@ internal fun WalletDashboardContent(
 
     LaunchedEffect(isScrolledToTop) {
         onScrolledToTopChanged(isScrolledToTop)
+    }
+
+    val uiScope = rememberCoroutineScope()
+    LaunchedEffect(shouldAnimateScrollToTop.value) {
+        if (shouldAnimateScrollToTop.value) {
+            uiScope.launch { listState.animateScrollToItem(0) }
+        }
     }
 
     val dashboardLiteHeightDp = 80.dp
