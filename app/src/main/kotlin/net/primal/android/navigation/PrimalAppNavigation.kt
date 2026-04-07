@@ -35,6 +35,7 @@ import androidx.navigation.navOptions
 import net.primal.android.articles.reads.ReadsScreen
 import net.primal.android.articles.reads.ReadsScreenContract
 import net.primal.android.articles.reads.ReadsViewModel
+import net.primal.android.audio.player.AudioPlayerStateProvider
 import net.primal.android.auth.login.LoginContract
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
@@ -53,9 +54,7 @@ import net.primal.android.core.compose.ApplyEdgeToEdge
 import net.primal.android.core.compose.LockToOrientationPortrait
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.UnlockScreenOrientation
-import net.primal.android.audio.player.AudioPlayerStateProvider
 import net.primal.android.core.pip.PiPManagerProvider
-import net.primal.android.core.video.AudioPlayerOverlay
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.editor.NoteEditorContract
@@ -508,18 +507,16 @@ fun PrimalAppNavigation(navController: NavHostController, startDestination: Stri
         ) {
             PiPManagerProvider {
                 AudioPlayerStateProvider {
-                    AudioPlayerOverlay {
-                        LiveStreamOverlay(
+                    LiveStreamOverlay(
+                        navController = navController,
+                        noteCallbacks = noteCallbacksHandler(navController = navController),
+                    ) {
+                        PrimalAppNavigation(
                             navController = navController,
-                            noteCallbacks = noteCallbacksHandler(navController = navController),
-                        ) {
-                            PrimalAppNavigation(
-                                navController = navController,
-                                startDestination = startDestination,
-                                drawerDestinationHandler = drawerDestinationHandler,
-                                topLevelDestinationHandler = topLevelDestinationHandler,
-                            )
-                        }
+                            startDestination = startDestination,
+                            drawerDestinationHandler = drawerDestinationHandler,
+                            topLevelDestinationHandler = topLevelDestinationHandler,
+                        )
                     }
                 }
             }

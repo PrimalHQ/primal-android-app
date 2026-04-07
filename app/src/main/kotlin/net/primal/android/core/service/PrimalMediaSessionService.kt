@@ -18,6 +18,7 @@ import com.google.common.util.concurrent.ListenableFuture
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 import net.primal.android.MainActivity
+import net.primal.android.audio.player.EXTRA_NOTE_ID
 
 @AndroidEntryPoint
 class PrimalMediaSessionService : MediaSessionService() {
@@ -45,12 +46,15 @@ class PrimalMediaSessionService : MediaSessionService() {
                         startIndex: Int,
                         startPositionMs: Long,
                     ): ListenableFuture<MediaSession.MediaItemsWithStartPosition> {
-                        mediaItems.firstOrNull()?.let {
+                        mediaItems.firstOrNull()?.let { mediaItem ->
+                            val noteId = mediaItem.mediaMetadata.extras?.getString(EXTRA_NOTE_ID)
+                            val uri = if (noteId != null) {
+                                "https://primal.net/e/$noteId"
+                            } else {
+                                "primal://live/${mediaItem.mediaId}"
+                            }
                             mediaSession.setSessionActivity(
-                                deepLinkPendingIntent(
-                                    this@PrimalMediaSessionService,
-                                    it.mediaId,
-                                ),
+                                deepLinkPendingIntent(this@PrimalMediaSessionService, uri),
                             )
                         }
 
@@ -80,12 +84,8 @@ class PrimalMediaSessionService : MediaSessionService() {
             .build()
     }
 
-    private fun isAudioMediaId(mediaId: String): Boolean = mediaId.startsWith("http")
-
-    private fun deepLinkPendingIntent(context: Context, mediaId: String): PendingIntent {
-        val scheme = if (isAudioMediaId(mediaId)) "primal://audio" else "primal://live"
-        val uri = "$scheme/$mediaId".toUri()
-        val intent = Intent(Intent.ACTION_VIEW, uri, context, MainActivity::class.java).apply {
+    private fun deepLinkPendingIntent(context: Context, uri: String): PendingIntent {
+        val intent = Intent(Intent.ACTION_VIEW, uri.toUri(), context, MainActivity::class.java).apply {
             addFlags(
                 Intent.FLAG_ACTIVITY_SINGLE_TOP or
                     Intent.FLAG_ACTIVITY_CLEAR_TOP or
@@ -94,7 +94,7 @@ class PrimalMediaSessionService : MediaSessionService() {
         }
         return PendingIntent.getActivity(
             context,
-            mediaId.hashCode(),
+            uri.hashCode(),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )

@@ -55,6 +55,7 @@ private const val SECONDS_PER_HOUR = 3600
 @Composable
 fun NoteAudioPlayerPreview(
     modifier: Modifier = Modifier,
+    noteId: String? = null,
     title: String?,
     url: String,
 ) {
@@ -94,6 +95,7 @@ fun NoteAudioPlayerPreview(
         PlayPauseButton(
             audioState = audioState,
             isActive = isActive,
+            noteId = noteId,
             title = title,
             url = url,
         )
@@ -136,6 +138,7 @@ fun NoteAudioPlayerPreview(
 private fun PlayPauseButton(
     audioState: AudioPlayerState,
     isActive: Boolean,
+    noteId: String?,
     title: String?,
     url: String,
 ) {
@@ -153,7 +156,7 @@ private fun PlayPauseButton(
                 } else if (isActive) {
                     audioState.resume()
                 } else {
-                    audioState.play(url = url, title = title, artist = url.extractTLD())
+                    audioState.play(url = url, title = title, artist = url.extractTLD(), noteId = noteId)
                 }
             },
         contentAlignment = Alignment.Center,
@@ -187,7 +190,8 @@ private fun AudioInfoRow(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        val displayTitle = title ?: url.extractTLD() ?: "Audio"
+        val tld = url.extractTLD()
+        val displayTitle = title ?: tld ?: "Audio"
         Text(
             modifier = Modifier.weight(1f),
             text = displayTitle,
@@ -210,7 +214,7 @@ private fun AudioInfoRow(
     }
 
     val tld = url.extractTLD()
-    if (tld != null) {
+    if (tld != null && title != null) {
         Text(
             text = tld,
             maxLines = 1,

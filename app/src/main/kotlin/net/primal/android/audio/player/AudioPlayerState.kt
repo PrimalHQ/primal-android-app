@@ -21,6 +21,7 @@ class AudioPlayerState internal constructor(
     initialUrl: String? = null,
     initialTitle: String? = null,
     initialArtist: String? = null,
+    initialNoteId: String? = null,
 ) {
     private val scope = CoroutineScope(Dispatchers.Main)
 
@@ -30,17 +31,19 @@ class AudioPlayerState internal constructor(
         private set
     var currentArtist by mutableStateOf(initialArtist)
         private set
+    var currentNoteId by mutableStateOf(initialNoteId)
+        private set
 
     var isPlaying by mutableStateOf(false)
-        internal set
+        private set
     var playWhenReady by mutableStateOf(false)
-        internal set
+        private set
     var isBuffering by mutableStateOf(false)
-        internal set
+        private set
     var currentPositionMs by mutableLongStateOf(0L)
-        internal set
+        private set
     var durationMs by mutableLongStateOf(0L)
-        internal set
+        private set
 
     val progress: Float
         get() = if (durationMs > 0L) {
@@ -51,17 +54,42 @@ class AudioPlayerState internal constructor(
 
     fun isActiveForUrl(url: String): Boolean = currentUrl == url
 
+    internal fun updatePlaybackState(
+        isPlaying: Boolean,
+        playWhenReady: Boolean,
+        isBuffering: Boolean,
+        currentPositionMs: Long,
+        durationMs: Long,
+    ) {
+        this.isPlaying = isPlaying
+        this.playWhenReady = playWhenReady
+        this.isBuffering = isBuffering
+        this.currentPositionMs = currentPositionMs
+        this.durationMs = durationMs
+    }
+
+    internal fun updatePosition(currentPositionMs: Long, durationMs: Long) {
+        this.currentPositionMs = currentPositionMs
+        this.durationMs = durationMs
+    }
+
     private val _pauseHolders = AtomicInt(0)
 
     private val _commands = Channel<AudioPlayerCommand>()
     val commands = _commands.receiveAsFlow()
     private fun sendCommand(command: AudioPlayerCommand) = scope.launch { _commands.send(command) }
 
-    fun play(url: String, title: String?, artist: String?) {
+    fun play(
+        url: String,
+        title: String?,
+        artist: String?,
+        noteId: String? = null,
+    ) {
         currentUrl = url
         currentTitle = title
         currentArtist = artist
-        sendCommand(AudioPlayerCommand.PlayUrl(url = url, title = title, artist = artist))
+        currentNoteId = noteId
+        sendCommand(AudioPlayerCommand.PlayUrl(url = url, title = title, artist = artist, noteId = noteId))
     }
 
     fun resume() {
@@ -82,6 +110,7 @@ class AudioPlayerState internal constructor(
         currentUrl = null
         currentTitle = null
         currentArtist = null
+        currentNoteId = null
         isPlaying = false
         playWhenReady = false
         isBuffering = false
