@@ -8,6 +8,7 @@ import net.primal.domain.links.CdnImage
 interface LegendaryProfileCustomizationContract {
 
     data class UiState(
+        val profileId: String? = null,
         val avatarCdnImage: CdnImage? = null,
         val membership: PremiumMembership? = null,
         val avatarLegendaryCustomization: LegendaryCustomization = LegendaryCustomization(),

@@ -93,6 +93,7 @@ class PremiumChangePrimalNameViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
+                        profileId = it.pubkey,
                         primalName = it.premiumMembership?.premiumName,
                         profileAvatarCdnImage = it.avatarCdnImage,
                         profileLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization(),

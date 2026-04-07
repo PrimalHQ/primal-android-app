@@ -198,6 +198,7 @@ private fun DrawerHeader(
             displayName = userAccount?.authorDisplayName ?: "",
             internetIdentifier = userAccount?.internetIdentifier,
             internetIdentifierBadgeSize = 24.dp,
+            profileId = userAccount?.pubkey,
             modifier = Modifier.constrainAs(usernameRef) {
                 start.linkTo(startGuideline)
                 top.linkTo(avatarRef.bottom, margin = 16.dp)

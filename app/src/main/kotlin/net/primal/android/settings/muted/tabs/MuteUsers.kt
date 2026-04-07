@@ -96,6 +96,7 @@ fun MutedUserListItem(
                 fontSize = 14.sp,
                 internetIdentifier = item.internetIdentifier,
                 legendaryCustomization = item.premiumDetails?.legendaryCustomization,
+                profileId = item.pubkey,
             )
         },
         supportingContent = {

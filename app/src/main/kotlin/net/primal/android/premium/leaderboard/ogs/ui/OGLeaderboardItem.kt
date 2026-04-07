@@ -48,6 +48,7 @@ fun OGLeaderboardItem(
                 firstCohort = item.firstCohort,
                 displayName = item.displayName,
                 internetIdentifier = item.internetIdentifier,
+                profileId = item.userId,
             )
         },
         supportingContent = {
@@ -82,6 +83,7 @@ private fun DisplayNameAndFirstCohortRow(
     displayName: String?,
     internetIdentifier: String?,
     firstCohort: String?,
+    profileId: String? = null,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -96,6 +98,7 @@ private fun DisplayNameAndFirstCohortRow(
                 displayName = displayName,
                 internetIdentifier = internetIdentifier,
                 internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
+                profileId = profileId,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

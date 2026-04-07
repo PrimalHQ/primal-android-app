@@ -115,6 +115,7 @@ class PremiumBecomeLegendViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
+                        profileId = it.pubkey,
                         avatarCdnImage = it.avatarCdnImage,
                         userHandle = it.userDisplayName,
                         isPremiumUser = it.premiumMembership?.isExpired() == false,

@@ -98,6 +98,7 @@ private fun StreamInfo(stream: ReferencedStream, showHostInfo: Boolean = true) {
                 displayName = stream.mainHostName,
                 internetIdentifier = stream.mainHostInternetIdentifier,
                 legendaryCustomization = stream.mainHostLegendProfile?.asLegendaryCustomization(),
+                profileId = stream.mainHostId,
             )
         }
 

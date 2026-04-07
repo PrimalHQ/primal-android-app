@@ -165,6 +165,7 @@ private fun ChangePremiumNameConfirmationStage(
                     .fillMaxSize(),
                 contentPadding = paddingValues,
                 primalName = state.primalName,
+                profileId = state.profileId,
                 profileAvatarCdnImage = state.profileAvatarCdnImage,
                 profileLegendaryCustomization = state.profileLegendaryCustomization,
             )

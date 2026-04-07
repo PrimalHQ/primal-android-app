@@ -62,6 +62,7 @@ fun ProfileFollowUnfollowListItem(
                 displayName = data.displayName,
                 internetIdentifier = data.internetIdentifier,
                 legendaryCustomization = data.legendaryCustomization,
+                profileId = data.profileId,
             )
 
             if (data.followersCount != null && data.followersCount != 0) {
@@ -105,6 +106,7 @@ private fun UserDisplayNameInternetIdentifier(
     internetIdentifier: String?,
     legendaryCustomization: LegendaryCustomization?,
     modifier: Modifier = Modifier,
+    profileId: String? = null,
 ) {
     Column(
         modifier = modifier,
@@ -117,6 +119,7 @@ private fun UserDisplayNameInternetIdentifier(
             style = AppTheme.typography.bodyLarge,
             internetIdentifier = internetIdentifier,
             legendaryCustomization = legendaryCustomization,
+            profileId = profileId,
         )
 
         if (internetIdentifier != null && internetIdentifier.isNotEmpty()) {

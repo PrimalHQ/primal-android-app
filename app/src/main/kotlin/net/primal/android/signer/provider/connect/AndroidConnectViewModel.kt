@@ -68,7 +68,9 @@ class AndroidConnectViewModel @Inject constructor(
 
                 val accounts = nsecOnlyUserAccounts
                     .sortedByDescending { it.lastAccessedAt }
-                    .map { it.asUserAccountUi() }
+                    .map {
+                        it.asUserAccountUi()
+                    }
 
                 setState { copy(accounts = accounts) }
             }

@@ -301,6 +301,7 @@ private fun ConversationListItem(
                     NostrUserText(
                         displayName = conversation.participantUsername,
                         internetIdentifier = conversation.participantInternetIdentifier,
+                        profileId = conversation.participantId,
                         annotatedStringSuffixBuilder = { append(suffixText) },
                         legendaryCustomization = conversation.participantLegendaryCustomization,
                         style = AppTheme.typography.bodyMedium,

@@ -81,6 +81,7 @@ class LegendaryProfileCustomizationViewModel @Inject constructor(
             activeAccountStore.activeUserAccount.collect {
                 setState {
                     copy(
+                        profileId = it.pubkey,
                         avatarCdnImage = it.avatarCdnImage,
                         membership = it.premiumMembership,
                         avatarLegendaryCustomization = it.primalLegendProfile?.asLegendaryCustomization()

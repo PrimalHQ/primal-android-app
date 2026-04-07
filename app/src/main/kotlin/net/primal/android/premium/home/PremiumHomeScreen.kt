@@ -165,6 +165,7 @@ private fun PremiumHomeContent(
             primalName = state.membership?.premiumName ?: "",
             avatarCdnImage = state.avatarCdnImage,
             avatarLegendaryCustomization = state.avatarLegendaryCustomization,
+            profileId = state.profileId,
         )
 
         if (state.membership != null) {
@@ -257,6 +258,7 @@ private fun PremiumAvatarHeader(
     primalName: String,
     avatarCdnImage: CdnImage? = null,
     avatarLegendaryCustomization: LegendaryCustomization? = null,
+    profileId: String? = null,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -274,6 +276,7 @@ private fun PremiumAvatarHeader(
             internetIdentifierBadgeSize = 24.dp,
             fontSize = 20.sp,
             legendaryCustomization = avatarLegendaryCustomization,
+            profileId = profileId,
         )
     }
 }
