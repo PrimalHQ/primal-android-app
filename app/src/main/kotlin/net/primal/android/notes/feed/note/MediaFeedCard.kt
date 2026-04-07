@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
@@ -86,6 +87,7 @@ import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteDropdownMenuIcon
+import net.primal.android.notes.feed.note.ui.attachment.NoteAttachmentVideoPreview
 import net.primal.android.notes.feed.note.ui.attachment.findImageSize
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -100,17 +102,27 @@ private const val ZapIconSizeMultiplier = 1.2f
 private val ActionSpacing = 20.dp
 private const val MORE_TEXT_THRESHOLD = 80
 private val MediumSpacing = 10.dp
+private const val PORTRAIT_THRESHOLD = 1.2f
+private val PortraitGradientHeight = 120.dp
+
+private fun isPortraitVideo(eventUri: EventUriUi): Boolean {
+    if (eventUri.type != EventUriType.Video) return false
+    val w = eventUri.originalWidth ?: eventUri.variants?.firstOrNull()?.width
+    val h = eventUri.originalHeight ?: eventUri.variants?.firstOrNull()?.height
+    return w != null && h != null && w > 0 && h.toFloat() / w.toFloat() >= PORTRAIT_THRESHOLD
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhotoFeedCard(
+fun MediaFeedCard(
     data: FeedPostUi,
     noteCallbacks: NoteCallbacks = NoteCallbacks(),
+    couldAutoPlay: Boolean = false,
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     val viewModel = hiltViewModel<NoteViewModel, NoteViewModel.Factory>(
-        key = "photoNoteViewModel\$${data.postId}",
+        key = "mediaNoteViewModel\$${data.postId}",
         creationCallback = { it.create(noteId = data.postId) },
     )
     val uiState by viewModel.state.collectAsState()
@@ -140,31 +152,40 @@ fun PhotoFeedCard(
 
     var expanded by rememberSaveable { mutableStateOf(false) }
 
-    PhotoFeedCardBody(
+    MediaFeedCardBody(
         data = data,
         state = uiState,
         eventPublisher = viewModel::setEvent,
         noteCallbacks = noteCallbacks,
         dialogsState = dialogsState,
+        couldAutoPlay = couldAutoPlay,
         expanded = expanded,
         onExpandClick = { expanded = true },
     )
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-private fun PhotoFeedCardBody(
+private fun MediaFeedCardBody(
     data: FeedPostUi,
     state: NoteContract.UiState,
     eventPublisher: (UiEvent) -> Unit,
     noteCallbacks: NoteCallbacks,
     dialogsState: NoteCardDialogsState,
+    couldAutoPlay: Boolean,
     expanded: Boolean,
     onExpandClick: () -> Unit,
 ) {
     val graphicsLayer = rememberGraphicsLayer()
     val displaySettings = LocalContentDisplaySettings.current
     val avatarSizeDp = displaySettings.contentAppearance.noteAvatarSize
+
+    val mediaUris = remember(data.uris) {
+        data.uris.filter { it.type == EventUriType.Image || it.type == EventUriType.Video }
+    }
+    val isPortrait = remember(mediaUris) {
+        mediaUris.firstOrNull()?.let { isPortraitVideo(it) } == true
+    }
 
     Column(
         modifier = Modifier
@@ -178,24 +199,31 @@ private fun PhotoFeedCardBody(
                 noteCallbacks.onNoteClick?.invoke(data.postId)
             },
     ) {
-        PhotoFeedHeader(
-            data = data,
-            state = state,
-            avatarSizeDp = avatarSizeDp,
-            graphicsLayer = graphicsLayer,
-            eventPublisher = eventPublisher,
-            noteCallbacks = noteCallbacks,
-            onShowDeleteDialog = { dialogsState.showDeleteDialog = true },
-            onShowReportDialog = { dialogsState.showReportDialog = true },
-        )
-
-        val mediaUris = data.uris.filter {
-            it.type == EventUriType.Image || it.type == EventUriType.Video
+        if (!isPortrait) {
+            MediaFeedHeader(
+                data = data,
+                state = state,
+                avatarSizeDp = avatarSizeDp,
+                graphicsLayer = graphicsLayer,
+                eventPublisher = eventPublisher,
+                noteCallbacks = noteCallbacks,
+                onShowDeleteDialog = { dialogsState.showDeleteDialog = true },
+                onShowReportDialog = { dialogsState.showReportDialog = true },
+            )
         }
+
         if (mediaUris.isNotEmpty()) {
-            PhotoFeedImagePager(
+            MediaFeedMediaSection(
+                data = data,
+                state = state,
                 mediaUris = mediaUris,
-                onMediaClick = noteCallbacks.onMediaClick,
+                isPortrait = isPortrait,
+                couldAutoPlay = couldAutoPlay,
+                avatarSizeDp = avatarSizeDp,
+                graphicsLayer = graphicsLayer,
+                eventPublisher = eventPublisher,
+                noteCallbacks = noteCallbacks,
+                dialogsState = dialogsState,
             )
         }
 
@@ -214,7 +242,7 @@ private fun PhotoFeedCardBody(
             Spacer(modifier = Modifier.height(MediumSpacing))
         }
 
-        PhotoFeedActionsRow(
+        MediaFeedActionsRow(
             eventStats = data.stats,
             isBookmarked = data.isBookmarked,
             onPostAction = { postAction ->
@@ -265,7 +293,7 @@ private fun PhotoFeedCardBody(
 
         Spacer(modifier = Modifier.height(MediumSpacing))
 
-        PhotoFeedContentSection(
+        MediaFeedContentSection(
             authorName = data.authorName,
             content = data.content,
             hashtags = data.hashtags,
@@ -278,7 +306,62 @@ private fun PhotoFeedCardBody(
 }
 
 @Composable
-private fun PhotoFeedHeader(
+private fun MediaFeedMediaSection(
+    data: FeedPostUi,
+    state: NoteContract.UiState,
+    mediaUris: List<EventUriUi>,
+    isPortrait: Boolean,
+    couldAutoPlay: Boolean,
+    avatarSizeDp: Dp,
+    graphicsLayer: GraphicsLayer,
+    eventPublisher: (UiEvent) -> Unit,
+    noteCallbacks: NoteCallbacks,
+    dialogsState: NoteCardDialogsState,
+) {
+    if (isPortrait) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            MediaFeedPager(
+                mediaUris = mediaUris,
+                couldAutoPlay = couldAutoPlay,
+                onMediaClick = noteCallbacks.onMediaClick,
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(PortraitGradientHeight)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black.copy(alpha = 0.5f),
+                                Color.Transparent,
+                            ),
+                        ),
+                    ),
+            )
+
+            MediaFeedHeader(
+                data = data,
+                state = state,
+                avatarSizeDp = avatarSizeDp,
+                graphicsLayer = graphicsLayer,
+                eventPublisher = eventPublisher,
+                noteCallbacks = noteCallbacks,
+                onShowDeleteDialog = { dialogsState.showDeleteDialog = true },
+                onShowReportDialog = { dialogsState.showReportDialog = true },
+            )
+        }
+    } else {
+        MediaFeedPager(
+            mediaUris = mediaUris,
+            couldAutoPlay = couldAutoPlay,
+            onMediaClick = noteCallbacks.onMediaClick,
+        )
+    }
+}
+
+@Composable
+private fun MediaFeedHeader(
     data: FeedPostUi,
     state: NoteContract.UiState,
     avatarSizeDp: Dp,
@@ -343,7 +426,11 @@ private fun PhotoFeedHeader(
 }
 
 @Composable
-private fun PhotoFeedImagePager(mediaUris: List<EventUriUi>, onMediaClick: ((MediaClickEvent) -> Unit)?) {
+private fun MediaFeedPager(
+    mediaUris: List<EventUriUi>,
+    couldAutoPlay: Boolean,
+    onMediaClick: ((MediaClickEvent) -> Unit)?,
+) {
     val pagerState = rememberPagerState(pageCount = { mediaUris.size })
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -357,29 +444,48 @@ private fun PhotoFeedImagePager(mediaUris: List<EventUriUi>, onMediaClick: ((Med
                     .height(pagerHeight),
             ) { page ->
                 val media = mediaUris[page]
-                PrimalAsyncImage(
-                    model = media.url,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .then(
-                            if (onMediaClick != null) {
-                                Modifier.clickable {
-                                    onMediaClick(
-                                        MediaClickEvent(
-                                            noteId = media.eventId,
-                                            eventUriType = media.type,
-                                            mediaUrl = media.url,
-                                            positionMs = 0L,
-                                        ),
-                                    )
-                                }
-                            } else {
-                                Modifier
-                            },
-                        ),
-                    contentScale = ContentScale.Crop,
-                    contentDescription = null,
-                )
+                if (media.type == EventUriType.Video) {
+                    NoteAttachmentVideoPreview(
+                        modifier = Modifier.fillMaxSize(),
+                        eventUri = media,
+                        onVideoClick = { positionMs ->
+                            onMediaClick?.invoke(
+                                MediaClickEvent(
+                                    noteId = media.eventId,
+                                    eventUriType = media.type,
+                                    mediaUrl = media.url,
+                                    positionMs = positionMs,
+                                ),
+                            )
+                        },
+                        allowAutoPlay = true,
+                        couldAutoPlay = couldAutoPlay && pagerState.currentPage == page,
+                    )
+                } else {
+                    PrimalAsyncImage(
+                        model = media.url,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .then(
+                                if (onMediaClick != null) {
+                                    Modifier.clickable {
+                                        onMediaClick(
+                                            MediaClickEvent(
+                                                noteId = media.eventId,
+                                                eventUriType = media.type,
+                                                mediaUrl = media.url,
+                                                positionMs = 0L,
+                                            ),
+                                        )
+                                    }
+                                } else {
+                                    Modifier
+                                },
+                            ),
+                        contentScale = ContentScale.Crop,
+                        contentDescription = null,
+                    )
+                }
             }
 
             if (mediaUris.size > 1) {
@@ -421,7 +527,7 @@ private fun PageIndicatorDots(pageCount: Int, currentPage: Int) {
 }
 
 @Composable
-private fun PhotoFeedContentSection(
+private fun MediaFeedContentSection(
     authorName: String,
     content: String,
     hashtags: List<String>,
@@ -452,7 +558,7 @@ private fun PhotoFeedContentSection(
             .trim()
 
         val annotatedText = remember(authorName, displayContent, hashtags, highlightColor) {
-            buildPhotoFeedAnnotatedString(
+            buildMediaFeedAnnotatedString(
                 authorName = authorName,
                 displayContent = displayContent,
                 hashtags = hashtags,
@@ -499,7 +605,7 @@ private fun PhotoFeedContentSection(
 private const val HASHTAG_ANNOTATION_TAG = "hashtag"
 private const val URL_ANNOTATION_TAG = "url"
 
-private fun buildPhotoFeedAnnotatedString(
+private fun buildMediaFeedAnnotatedString(
     authorName: String,
     displayContent: String,
     hashtags: List<String>,
@@ -553,7 +659,7 @@ private fun buildPhotoFeedAnnotatedString(
 @Suppress("LongMethod")
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun PhotoFeedActionsRow(
+private fun MediaFeedActionsRow(
     eventStats: EventStatsUi,
     isBookmarked: Boolean,
     onPostAction: (FeedPostAction) -> Unit,
