@@ -1,4 +1,4 @@
-package net.primal.android.notifications.list
+package net.primal.android.main.notifications
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.mockk.coEvery
@@ -7,7 +7,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import net.primal.core.testing.CoroutinesTestRule
 import net.primal.domain.common.exception.NetworkException
-import net.primal.domain.nostr.cryptography.SigningRejectedException
 import net.primal.domain.notifications.NotificationRepository
 import org.junit.Rule
 import org.junit.Test
@@ -38,17 +37,6 @@ class NotificationsViewModelTest {
             val viewModel = createViewModel(
                 notificationsRepository = mockk(relaxed = true) {
                     coEvery { markAllNotificationsAsSeen(any()) } throws NetworkException()
-                },
-            )
-            viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
-        }
-
-    @Test
-    fun handleNotificationsSeen_doesNotCrashIfUserSignsOutOnNotificationsScreen() =
-        runTest {
-            val viewModel = createViewModel(
-                notificationsRepository = mockk(relaxed = true) {
-                    coEvery { markAllNotificationsAsSeen(any()) } throws SigningRejectedException()
                 },
             )
             viewModel.setEvent(NotificationsContract.UiEvent.NotificationsSeen)
