@@ -15,10 +15,11 @@ private const val VISIBILITY_THRESHOLD = 0.3F
 @Composable
 fun rememberFirstVisibleVideoPlayingItemIndex(
     listState: LazyListState,
+    itemIndexOffset: Int = 0,
     hasVideo: (index: Int) -> Boolean = { false },
 ): MutableState<Int?> {
     val currentlyFirstVisibleIndex = remember { mutableStateOf<Int?>(null) }
-    LaunchedEffect(listState, hasVideo) {
+    LaunchedEffect(listState, itemIndexOffset, hasVideo) {
         snapshotFlow { listState.layoutInfo }
             .map { layoutInfo ->
                 layoutInfo.visibleItemsInfo
@@ -37,11 +38,12 @@ fun rememberFirstVisibleVideoPlayingItemIndex(
                         } else {
                             0f
                         }
-                        Triple(item.index, visibilityRatio, hasVideo(item.index))
+                        val pagingIndex = item.index - itemIndexOffset
+                        Triple(pagingIndex, visibilityRatio, hasVideo(pagingIndex))
                     }
                     .filter { (_, ratio, _) -> ratio >= VISIBILITY_THRESHOLD }
                     .filter { (_, _, isVideo) -> isVideo }
-                    .firstOrNull()
+                    .maxByOrNull { (_, ratio, _) -> ratio }
                     ?.first
             }
             .distinctUntilChanged()
