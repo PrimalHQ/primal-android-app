@@ -1,5 +1,6 @@
 package net.primal.android.core.compose
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -16,10 +17,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -37,19 +40,31 @@ fun PrimalTopLevelAppBar(
     onAvatarClick: () -> Unit,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
+    titleOverride: String? = null,
+    subtitleOverride: String? = null,
     showTitleChevron: Boolean = false,
+    chevronExpanded: Boolean = false,
     onTitleClick: (() -> Unit)? = null,
     showDivider: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
+    val effectiveTitle = titleOverride ?: title
+    val effectiveSubtitle = subtitleOverride ?: subtitle
+    val effectiveShowChevron = if (titleOverride != null) false else showTitleChevron
+    val effectiveOnTitleClick = if (titleOverride != null) null else onTitleClick
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (chevronExpanded) 180f else 0f,
+        label = "ChevronRotation",
+    )
+
     Column(modifier = modifier) {
         TopAppBar(
             title = {
-                val titleColumnModifier = if (onTitleClick != null) {
+                val titleColumnModifier = if (effectiveOnTitleClick != null) {
                     Modifier.clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = onTitleClick,
+                        onClick = effectiveOnTitleClick,
                     )
                 } else {
                     Modifier
@@ -61,22 +76,23 @@ fun PrimalTopLevelAppBar(
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            text = title,
+                            text = effectiveTitle,
                             style = AppTheme.typography.headlineSmall,
                             fontWeight = FontWeight.Bold,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                         )
-                        if (showTitleChevron) {
+                        if (effectiveShowChevron) {
                             Icon(
+                                modifier = Modifier.rotate(chevronRotation),
                                 imageVector = Icons.Default.ExpandMore,
                                 contentDescription = null,
                             )
                         }
                     }
-                    if (!subtitle.isNullOrBlank()) {
+                    if (!effectiveSubtitle.isNullOrBlank()) {
                         Text(
-                            text = subtitle,
+                            text = effectiveSubtitle,
                             style = AppTheme.typography.bodySmall,
                             color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                             fontWeight = FontWeight.SemiBold,

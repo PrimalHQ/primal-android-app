@@ -10,7 +10,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarScrollBehavior
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -19,7 +18,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -32,13 +30,11 @@ import net.primal.android.core.compose.FeedsErrorColumn
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.PrimalTopLevelAppBar
 import net.primal.android.core.errors.resolveUiErrorMessage
-import net.primal.android.feeds.list.FeedsBottomSheet
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.main.feeds.NoteFeedsContract.UiEvent
 import net.primal.android.notes.feed.list.NoteFeedList
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
-import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.links.CdnImage
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -142,36 +138,25 @@ internal fun NoteFeedTopAppBar(
     title: String,
     avatarCdnImage: CdnImage?,
     onAvatarClick: () -> Unit,
+    onFeedPickerRequest: () -> Unit,
     activeFeed: FeedUi?,
-    onFeedChanged: (FeedUi) -> Unit,
     avatarLegendaryCustomization: LegendaryCustomization? = null,
     avatarBlossoms: List<String> = emptyList(),
     scrollBehavior: TopAppBarScrollBehavior? = null,
-    onGoToWallet: (() -> Unit)? = null,
+    titleOverride: String? = null,
+    subtitleOverride: String? = null,
+    chevronExpanded: Boolean = false,
 ) {
-    var feedPickerVisible by rememberSaveable { mutableStateOf(false) }
-
-    if (feedPickerVisible && activeFeed != null) {
-        FeedsBottomSheet(
-            activeFeed = activeFeed,
-            feedSpecKind = FeedSpecKind.Notes,
-            onFeedClick = { feed ->
-                feedPickerVisible = false
-                onFeedChanged(feed)
-            },
-            onDismissRequest = { feedPickerVisible = false },
-            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            onGoToWallet = onGoToWallet,
-        )
-    }
-
     PrimalTopLevelAppBar(
         title = title,
         subtitle = activeFeed?.description?.ifBlank { null },
+        titleOverride = titleOverride,
+        subtitleOverride = subtitleOverride,
         showTitleChevron = true,
+        chevronExpanded = chevronExpanded,
         onTitleClick = {
             if (activeFeed != null) {
-                feedPickerVisible = true
+                onFeedPickerRequest()
             }
         },
         avatarCdnImage = avatarCdnImage,

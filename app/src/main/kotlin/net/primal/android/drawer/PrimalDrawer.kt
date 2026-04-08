@@ -1,6 +1,5 @@
 package net.primal.android.drawer
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -21,7 +20,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.DrawerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -33,7 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.luminance
@@ -50,7 +47,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.NumberFormat
-import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
 import net.primal.android.core.compose.UniversalAvatarThumbnail
@@ -76,17 +72,12 @@ import net.primal.android.user.domain.UserAccount
 
 @Composable
 fun PrimalDrawer(
-    drawerState: DrawerState,
+    onDismiss: () -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onQrCodeClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
-    val uiScope = rememberCoroutineScope()
     val viewModel = hiltViewModel<PrimalDrawerViewModel>()
-
-    BackHandler(enabled = drawerState.isOpen) {
-        uiScope.launch { drawerState.close() }
-    }
 
     val uiState = viewModel.state.collectAsState()
 
@@ -96,13 +87,13 @@ fun PrimalDrawer(
         onDrawerDestinationClick = {
             when (it) {
                 is DrawerScreenDestination.SignOut -> Unit
-                else -> uiScope.launch { drawerState.close() }
+                else -> onDismiss()
             }
             onDrawerDestinationClick(it)
         },
         eventPublisher = { viewModel.setEvent(it) },
         onQrCodeClick = {
-            uiScope.launch { drawerState.close() }
+            onDismiss()
             onQrCodeClick()
         },
     )

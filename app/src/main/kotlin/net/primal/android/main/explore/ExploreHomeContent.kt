@@ -123,6 +123,8 @@ internal fun ExploreTopAppBar(
     avatarLegendaryCustomization: LegendaryCustomization? = null,
     avatarBlossoms: List<String> = emptyList(),
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    titleOverride: String? = null,
+    subtitleOverride: String? = null,
 ) {
     val scope = rememberCoroutineScope()
 
@@ -134,6 +136,8 @@ internal fun ExploreTopAppBar(
         PrimalTopLevelAppBar(
             title = stringResource(id = R.string.explore_title),
             subtitle = stringResource(id = R.string.explore_top_app_bar_subtitle),
+            titleOverride = titleOverride,
+            subtitleOverride = subtitleOverride,
             avatarCdnImage = avatarCdnImage,
             avatarBlossoms = avatarBlossoms,
             avatarLegendaryCustomization = avatarLegendaryCustomization,

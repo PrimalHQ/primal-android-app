@@ -35,7 +35,6 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelAppBar
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
-import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -407,10 +406,14 @@ internal fun NotificationsTopAppBar(
     avatarBlossoms: List<String>,
     scrollBehavior: TopAppBarScrollBehavior?,
     onAvatarClick: () -> Unit,
+    titleOverride: String? = null,
+    subtitleOverride: String? = null,
 ) {
     PrimalTopLevelAppBar(
         title = stringResource(id = R.string.notifications_title),
         subtitle = stringResource(id = R.string.alerts_top_app_bar_subtitle),
+        titleOverride = titleOverride,
+        subtitleOverride = subtitleOverride,
         avatarCdnImage = avatarCdnImage,
         avatarBlossoms = avatarBlossoms,
         avatarLegendaryCustomization = avatarLegendaryCustomization,
