@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -33,13 +31,9 @@ import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ArticleFeedList
-import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.FeedsErrorColumn
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
-import net.primal.android.core.compose.PrimalTopAppBar
-import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
-import net.primal.android.core.compose.icons.primaliconpack.Search
+import net.primal.android.core.compose.PrimalTopLevelAppBar
 import net.primal.android.core.errors.UiError
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.feeds.list.FeedsBottomSheet
@@ -162,7 +156,6 @@ internal fun ArticleFeedTopAppBar(
     title: String,
     avatarCdnImage: CdnImage?,
     onAvatarClick: () -> Unit,
-    onSearchClick: () -> Unit,
     activeFeed: FeedUi?,
     onFeedChanged: (FeedUi) -> Unit,
     avatarLegendaryCustomization: LegendaryCustomization? = null,
@@ -184,9 +177,10 @@ internal fun ArticleFeedTopAppBar(
         )
     }
 
-    PrimalTopAppBar(
+    PrimalTopLevelAppBar(
         title = title,
-        titleTrailingIcon = Icons.Default.ExpandMore,
+        subtitle = activeFeed?.description?.ifBlank { null },
+        showTitleChevron = true,
         onTitleClick = {
             if (activeFeed != null) {
                 feedPickerVisible = true
@@ -194,16 +188,8 @@ internal fun ArticleFeedTopAppBar(
         },
         avatarCdnImage = avatarCdnImage,
         avatarBlossoms = avatarBlossoms,
-        legendaryCustomization = avatarLegendaryCustomization,
-        navigationIcon = PrimalIcons.AvatarDefault,
-        onNavigationIconClick = onAvatarClick,
-        actions = {
-            AppBarIcon(
-                icon = PrimalIcons.Search,
-                onClick = onSearchClick,
-                appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
-            )
-        },
+        avatarLegendaryCustomization = avatarLegendaryCustomization,
+        onAvatarClick = onAvatarClick,
         scrollBehavior = scrollBehavior,
     )
 }

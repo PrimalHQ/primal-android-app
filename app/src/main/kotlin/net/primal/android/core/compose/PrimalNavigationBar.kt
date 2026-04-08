@@ -30,8 +30,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,8 +40,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import net.primal.android.R
-import net.primal.android.core.compose.foundation.ClickDebounce
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ExploreFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedPickerFilled
@@ -54,7 +52,7 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.Badges
 
-val NavigationBarFullHeightDp = 56.dp
+val NavigationBarFullHeightDp = 72.dp
 
 @Composable
 fun PrimalNavigationBar(
@@ -64,42 +62,45 @@ fun PrimalNavigationBar(
     onActiveDestinationClick: (() -> Unit)? = null,
     badges: Badges = Badges(),
 ) {
-    val clickDebounce by remember(onTopLevelDestinationChanged) { mutableStateOf(ClickDebounce()) }
     val badgesMap = mapOf(
         Pair(PrimalTopLevelDestination.Alerts, badges.unreadNotificationsCount),
     )
 
-    Surface(color = AppTheme.colorScheme.surface) {
+    Surface(color = Color.Transparent) {
         Column(modifier = modifier) {
             PrimalDivider()
 
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(color = AppTheme.colorScheme.surface)
                     .height(NavigationBarFullHeightDp),
             ) {
-                val itemWidth = maxWidth / PrimalTopLevelDestination.entries.size
+                val horizontalPadding = 12.dp
+                val topPadding = 4.dp
+                val pillWidth = 80.dp
+                val itemWidth = (maxWidth - horizontalPadding * 2) / PrimalTopLevelDestination.entries.size
                 val selectedIndex = PrimalTopLevelDestination.entries.indexOf(activeDestination)
 
                 val pillOffset by animateDpAsState(
-                    targetValue = itemWidth * selectedIndex,
+                    targetValue = horizontalPadding + itemWidth * selectedIndex + (itemWidth - pillWidth) / 2,
                     animationSpec = spring(
                         dampingRatio = 0.75f,
-                        stiffness = Spring.StiffnessLow,
+                        stiffness = Spring.StiffnessMedium,
                     ),
                     label = "pillOffset",
                 )
 
                 Box(
                     modifier = Modifier
-                        .offset(x = pillOffset)
-                        .width(itemWidth)
+                        .offset(x = pillOffset, y = topPadding)
                         .fillMaxHeight(),
                     contentAlignment = Alignment.Center,
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .height(60.dp)
+                            .width(pillWidth)
                             .background(
                                 color = AppTheme.extraColorScheme.surfaceVariantAlt1,
                                 shape = CircleShape,
@@ -108,7 +109,10 @@ fun PrimalNavigationBar(
                 }
 
                 Row(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .padding(top = topPadding)
+                        .padding(horizontal = horizontalPadding)
+                        .fillMaxSize(),
                 ) {
                     PrimalTopLevelDestination.entries.forEach { destination ->
                         PrimalNavigationBarItem(
@@ -117,12 +121,10 @@ fun PrimalNavigationBar(
                             selected = destination == activeDestination,
                             badge = badgesMap.getOrDefault(destination, 0),
                             onClick = {
-                                clickDebounce.processEvent {
-                                    if (activeDestination != destination) {
-                                        onTopLevelDestinationChanged(destination)
-                                    } else {
-                                        onActiveDestinationClick?.invoke()
-                                    }
+                                if (activeDestination != destination) {
+                                    onTopLevelDestinationChanged(destination)
+                                } else {
+                                    onActiveDestinationClick?.invoke()
                                 }
                             },
                         )
@@ -135,7 +137,7 @@ fun PrimalNavigationBar(
             }
             Spacer(
                 modifier = Modifier
-                    .background(color = Color.Transparent)
+                    .background(color = AppTheme.colorScheme.surface)
                     .fillMaxWidth()
                     .height(navBarHeight),
             )
@@ -161,7 +163,7 @@ private fun PrimalNavigationBarItem(
         modifier = modifier
             .fillMaxHeight()
             .clip(CircleShape)
-            .clickable(onClick = onClick),
+            .clickable(indication = null, interactionSource = null, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -180,11 +182,11 @@ private fun PrimalNavigationBarItem(
             )
         }
 
-        Spacer(modifier = Modifier.height(2.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = destination.label(),
-            style = AppTheme.typography.bodySmall,
+            style = AppTheme.typography.bodySmall.copy(fontSize = 10.sp, lineHeight = 10.sp),
             color = tint,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
@@ -221,7 +223,6 @@ private fun PrimalTopLevelDestination.label(): String {
     }
 }
 
-
 @Preview
 @Composable
 fun PreviewNavigationBar() {
@@ -229,6 +230,62 @@ fun PreviewNavigationBar() {
         Surface(modifier = Modifier.wrapContentSize()) {
             PrimalNavigationBar(
                 activeDestination = PrimalTopLevelDestination.Feeds,
+                onTopLevelDestinationChanged = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewNavigationBarReads() {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
+        Surface(modifier = Modifier.wrapContentSize()) {
+            PrimalNavigationBar(
+                activeDestination = PrimalTopLevelDestination.Reads,
+                badges = Badges(unreadNotificationsCount = 1),
+                onTopLevelDestinationChanged = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewNavigationBarWallet() {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
+        Surface(modifier = Modifier.wrapContentSize()) {
+            PrimalNavigationBar(
+                activeDestination = PrimalTopLevelDestination.Wallet,
+                badges = Badges(unreadNotificationsCount = 1),
+                onTopLevelDestinationChanged = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewNavigationBarAlerts() {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
+        Surface(modifier = Modifier.wrapContentSize()) {
+            PrimalNavigationBar(
+                activeDestination = PrimalTopLevelDestination.Alerts,
+                badges = Badges(unreadNotificationsCount = 1),
+                onTopLevelDestinationChanged = {},
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+fun PreviewNavigationBarExplore() {
+    PrimalPreview(primalTheme = net.primal.android.theme.domain.PrimalTheme.Midnight) {
+        Surface(modifier = Modifier.wrapContentSize()) {
+            PrimalNavigationBar(
+                activeDestination = PrimalTopLevelDestination.Explore,
+                badges = Badges(unreadNotificationsCount = 1),
                 onTopLevelDestinationChanged = {},
             )
         }
