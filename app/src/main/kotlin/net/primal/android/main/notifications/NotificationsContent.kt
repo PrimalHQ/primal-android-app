@@ -29,16 +29,13 @@ import androidx.paging.compose.itemKey
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import net.primal.android.R
-import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.ListLoadingError
 import net.primal.android.core.compose.ListNoContent
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.PrimalTopAppBar
+import net.primal.android.core.compose.PrimalTopLevelAppBar
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
-import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.isEmpty
 import net.primal.android.core.compose.isNotEmpty
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -409,23 +406,16 @@ internal fun NotificationsTopAppBar(
     avatarLegendaryCustomization: LegendaryCustomization?,
     avatarBlossoms: List<String>,
     scrollBehavior: TopAppBarScrollBehavior?,
-    onNavigationIconClick: () -> Unit,
-    onSearchClick: () -> Unit,
+    onAvatarClick: () -> Unit,
 ) {
-    PrimalTopAppBar(
+    PrimalTopLevelAppBar(
         title = stringResource(id = R.string.notifications_title),
+        subtitle = stringResource(id = R.string.alerts_top_app_bar_subtitle),
         avatarCdnImage = avatarCdnImage,
-        legendaryCustomization = avatarLegendaryCustomization,
         avatarBlossoms = avatarBlossoms,
-        navigationIcon = PrimalIcons.AvatarDefault,
-        onNavigationIconClick = onNavigationIconClick,
+        avatarLegendaryCustomization = avatarLegendaryCustomization,
+        onAvatarClick = onAvatarClick,
+        showDivider = false,
         scrollBehavior = scrollBehavior,
-        actions = {
-            AppBarIcon(
-                icon = PrimalIcons.Search,
-                onClick = onSearchClick,
-                appBarIconContentDescription = stringResource(id = R.string.accessibility_search),
-            )
-        },
     )
 }

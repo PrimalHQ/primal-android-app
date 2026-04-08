@@ -43,15 +43,11 @@ import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.fab.NewPostFloatingActionButton
-import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
-import net.primal.android.core.compose.icons.primaliconpack.AvatarDefault
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawerScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
-import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.main.explore.ExploreHomeContent
 import net.primal.android.main.explore.ExploreTopAppBar
@@ -69,11 +65,9 @@ import net.primal.android.main.wallet.WalletDashboardContract
 import net.primal.android.main.wallet.WalletDashboardTopAppBar
 import net.primal.android.main.wallet.WalletDashboardViewModel
 import net.primal.android.navigation.accountSwitcherCallbacksHandler
-import net.primal.android.navigation.navigateToAdvancedSearch
 import net.primal.android.navigation.navigateToFollowPack
 import net.primal.android.navigation.navigateToNoteEditor
 import net.primal.android.navigation.navigateToProfileQrCodeViewer
-import net.primal.android.navigation.navigateToSearch
 import net.primal.android.navigation.navigateToWallet
 import net.primal.android.navigation.noteCallbacksHandler
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
@@ -208,7 +202,6 @@ private fun MainScreenTopAppBar(
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
-                onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
                 onFeedChanged = { feed -> homeScrollToFeed.value = feed },
                 scrollBehavior = scrollBehavior,
                 onGoToWallet = { navController.navigateToWallet() },
@@ -223,7 +216,6 @@ private fun MainScreenTopAppBar(
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
                 onAvatarClick = { uiScope.launch { drawerState.open() } },
-                onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Reads) },
                 onFeedChanged = { feed -> readsScrollToFeed.value = feed },
                 scrollBehavior = scrollBehavior,
             )
@@ -232,14 +224,10 @@ private fun MainScreenTopAppBar(
         PrimalTopLevelDestination.Explore -> {
             ExploreTopAppBar(
                 pagerState = explorePagerState,
-                actionIcon = PrimalIcons.AdvancedSearch,
                 avatarCdnImage = avatarCdnImage,
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
-                navigationIcon = PrimalIcons.AvatarDefault,
-                onNavigationIconClick = { uiScope.launch { drawerState.open() } },
-                onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
-                onActionIconClick = { navController.navigateToAdvancedSearch() },
+                onAvatarClick = { uiScope.launch { drawerState.open() } },
                 scrollBehavior = scrollBehavior,
             )
         }
@@ -250,10 +238,7 @@ private fun MainScreenTopAppBar(
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
                 scrollBehavior = scrollBehavior,
-                onNavigationIconClick = { uiScope.launch { drawerState.open() } },
-                onSearchClick = {
-                    navController.navigateToSearch(searchScope = SearchScope.MyNotifications)
-                },
+                onAvatarClick = { uiScope.launch { drawerState.open() } },
             )
         }
 

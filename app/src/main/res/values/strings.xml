@@ -705,6 +705,8 @@
     <string name="explore_trending_topics_no_content">Trending topics will appear here.</string>
     <string name="explore_feed_search_results">Search Results</string>
     <string name="explore_feed_fallback_title">Feed</string>
+    <string name="explore_title">Explore</string>
+    <string name="explore_top_app_bar_subtitle">All of Nostr</string>
     <string name="explore_feed_save_feed">Save</string>
     <string name="explore_feed_remove_feed">Remove</string>
     <string name="explore_feeds_tab">Feeds</string>
@@ -842,8 +844,10 @@
     <string name="wallet_picker_legacy_title">Legacy Wallet</string>
     <string name="wallet_picker_no_lightning_address">[ no lightning address ]</string>
     <string name="wallet_picker_nwc_description">Your external lightning wallet</string>
+    <string name="wallet_top_app_bar_subtitle">All transactions</string>
 
-    <string name="notifications_title">Notifications</string>
+    <string name="notifications_title">Alerts</string>
+    <string name="alerts_top_app_bar_subtitle">All notifications</string>
     <string name="notifications_no_content">Your notifications will appear here.</string>
     <string name="notifications_initial_loading_error">Unable to load notifications. Please try again.</string>
     <plurals name="notification_list_item_and_others">
