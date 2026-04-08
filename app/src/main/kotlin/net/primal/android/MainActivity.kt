@@ -142,7 +142,7 @@ class MainActivity : PrimalActivity() {
         return when (uri.path) {
             "/reads" -> PrimalTopLevelDestination.Reads
             "/explore" -> PrimalTopLevelDestination.Explore
-            "/notifications" -> PrimalTopLevelDestination.Notifications
+            "/notifications" -> PrimalTopLevelDestination.Alerts
             else -> null
         }
     }

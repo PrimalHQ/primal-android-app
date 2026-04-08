@@ -95,7 +95,7 @@ fun MainScreen(
     val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
 
     // Tab state management
-    var activeTab by rememberSaveable { mutableStateOf(PrimalTopLevelDestination.Home) }
+    var activeTab by rememberSaveable { mutableStateOf(PrimalTopLevelDestination.Feeds) }
     // Observe requestedTab from external navigation
     val requestedTab = navBackStackEntry.savedStateHandle
         .getStateFlow<String?>(REQUESTED_TAB_KEY, null)
@@ -153,8 +153,8 @@ fun MainScreen(
         else -> LocalContentDisplaySettings.current.focusModeEnabled
     }
 
-    BackHandler(enabled = activeTab != PrimalTopLevelDestination.Home) {
-        activeTab = PrimalTopLevelDestination.Home
+    BackHandler(enabled = activeTab != PrimalTopLevelDestination.Feeds) {
+        activeTab = PrimalTopLevelDestination.Feeds
     }
 
     MainScreenScaffold(
@@ -200,7 +200,7 @@ private fun MainScreenTopAppBar(
     val uiScope = rememberCoroutineScope()
 
     when (activeTab) {
-        PrimalTopLevelDestination.Home -> {
+        PrimalTopLevelDestination.Feeds -> {
             NoteFeedTopAppBar(
                 title = homeActiveFeed?.title ?: "",
                 activeFeed = homeActiveFeed,
@@ -244,7 +244,7 @@ private fun MainScreenTopAppBar(
             )
         }
 
-        PrimalTopLevelDestination.Notifications -> {
+        PrimalTopLevelDestination.Alerts -> {
             NotificationsTopAppBar(
                 avatarCdnImage = avatarCdnImage,
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
@@ -299,7 +299,7 @@ private fun MainScreenContent(
 ) {
     Box {
         Box(
-            modifier = if (activeTab != PrimalTopLevelDestination.Home) {
+            modifier = if (activeTab != PrimalTopLevelDestination.Feeds) {
                 Modifier.graphicsLayer { alpha = 0f }
             } else {
                 Modifier
@@ -319,7 +319,7 @@ private fun MainScreenContent(
             )
         }
 
-        if (activeTab != PrimalTopLevelDestination.Home) {
+        if (activeTab != PrimalTopLevelDestination.Feeds) {
             saveableStateHolder.SaveableStateProvider(activeTab.name) {
                 when (activeTab) {
                     PrimalTopLevelDestination.Reads -> ReadsContent(
@@ -342,7 +342,7 @@ private fun MainScreenContent(
                         onGoToWallet = onGoToWallet,
                     )
 
-                    PrimalTopLevelDestination.Notifications -> NotificationsContent(
+                    PrimalTopLevelDestination.Alerts -> NotificationsContent(
                         paddingValues = paddingValues,
                         noteCallbacks = noteCallbacks,
                         onGoToWallet = onGoToWallet,
@@ -488,9 +488,9 @@ private fun MainScreenScaffold(
         },
         floatingActionButton = {
             when (activeTab) {
-                PrimalTopLevelDestination.Home,
+                PrimalTopLevelDestination.Feeds,
                 PrimalTopLevelDestination.Explore,
-                PrimalTopLevelDestination.Notifications,
+                PrimalTopLevelDestination.Alerts,
                 -> NewPostFloatingActionButton(
                     onNewPostClick = { navController.navigateToNoteEditor(null) },
                 )
@@ -577,10 +577,10 @@ private fun rememberPerTabTopAppBarState(
     val walletTopAppBarState = rememberTopAppBarState()
 
     return when (activeTab) {
-        PrimalTopLevelDestination.Home -> homeTopAppBarState
+        PrimalTopLevelDestination.Feeds -> homeTopAppBarState
         PrimalTopLevelDestination.Reads -> readsTopAppBarState
         PrimalTopLevelDestination.Explore -> exploreTopAppBarState
-        PrimalTopLevelDestination.Notifications -> notificationsTopAppBarState
+        PrimalTopLevelDestination.Alerts -> notificationsTopAppBarState
         PrimalTopLevelDestination.Wallet -> walletTopAppBarState
     }
 }
@@ -591,10 +591,10 @@ private fun handleActiveDestinationClick(
     scope: kotlinx.coroutines.CoroutineScope,
 ) {
     val target = when (activeTab) {
-        PrimalTopLevelDestination.Home -> sharedState.homeShouldAnimateScrollToTop
+        PrimalTopLevelDestination.Feeds -> sharedState.homeShouldAnimateScrollToTop
         PrimalTopLevelDestination.Reads -> sharedState.readsShouldAnimateScrollToTop
         PrimalTopLevelDestination.Wallet -> sharedState.walletShouldAnimateScrollToTop
-        PrimalTopLevelDestination.Notifications -> sharedState.notificationsShouldAnimateScrollToTop
+        PrimalTopLevelDestination.Alerts -> sharedState.notificationsShouldAnimateScrollToTop
         else -> null
     }
     target?.let {

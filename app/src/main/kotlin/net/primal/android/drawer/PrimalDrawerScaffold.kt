@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.NavigationBarFullHeightDp
-import net.primal.android.core.compose.PrimalNavigationBarLightningBolt
+import net.primal.android.core.compose.PrimalNavigationBar
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
@@ -178,7 +178,7 @@ fun PrimalDrawerScaffold(
                         enter = EnterTransition.None,
                         exit = ExitTransition.None,
                     ) {
-                        PrimalNavigationBarLightningBolt(
+                        PrimalNavigationBar(
                             modifier = if (bottomBarInitialHeight.isZeroOrNavigationBarFullHeight()) {
                                 bottomBarMeasureHeightModifier
                             } else {
