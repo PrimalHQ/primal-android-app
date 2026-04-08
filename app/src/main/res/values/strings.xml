@@ -124,10 +124,10 @@
     <string name="logout_cancel_button">Cancel</string>
     <string name="logout_button">Sign out</string>
 
-    <string name="primary_destination_feed_label">Feed</string>
+    <string name="primary_destination_feed_label">Feeds</string>
     <string name="primary_destination_reads_label">Reads</string>
     <string name="primary_destination_wallet_label">Wallet</string>
-    <string name="primary_destination_notifications_label">Notifications</string>
+    <string name="primary_destination_notifications_label">Alerts</string>
     <string name="primary_destination_explore_label">Explore</string>
 
     <string name="drawer_destination_profile">Profile</string>

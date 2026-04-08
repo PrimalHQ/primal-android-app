@@ -3,8 +3,6 @@ package net.primal.android.core.compose.fab
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -15,12 +13,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import net.primal.android.R
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.theme.AppTheme
 
 @Composable
-fun NewPostFloatingActionButton(onNewPostClick: () -> Unit) {
+fun SearchFloatingActionButton(onSearchClick: () -> Unit) {
     FloatingActionButton(
-        onClick = onNewPostClick,
+        onClick = onSearchClick,
         modifier = Modifier
             .size(54.dp)
             .clip(CircleShape)
@@ -29,8 +29,8 @@ fun NewPostFloatingActionButton(onNewPostClick: () -> Unit) {
         containerColor = Color.Unspecified,
         content = {
             Icon(
-                modifier = Modifier.size(28.dp),
-                imageVector = Icons.Outlined.Add,
+                modifier = Modifier.size(20.dp),
+                imageVector = PrimalIcons.Search,
                 contentDescription = stringResource(id = R.string.accessibility_new_post),
                 tint = Color.White,
             )
