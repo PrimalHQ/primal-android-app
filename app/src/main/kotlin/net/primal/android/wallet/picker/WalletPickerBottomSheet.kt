@@ -6,12 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -19,18 +18,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -39,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalDivider
@@ -46,7 +43,6 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBolt
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.core.utils.ellipsizeMiddle
-import net.primal.android.core.utils.hideAndRun
 import net.primal.android.theme.AppTheme
 import net.primal.android.wallet.picker.WalletPickerContract.UiEvent
 import net.primal.android.wallet.picker.WalletPickerContract.UiState
@@ -54,12 +50,10 @@ import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.domain.wallet.UserWallet
 import net.primal.domain.wallet.Wallet
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WalletPickerBottomSheet(viewModel: WalletPickerViewModel, onDismissRequest: () -> Unit) {
+fun WalletPickerOverlayContent(onDismiss: () -> Unit) {
+    val viewModel = hiltViewModel<WalletPickerViewModel>()
     val state = viewModel.state.collectAsState()
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
     val errorMessage = stringResource(id = R.string.wallet_picker_reassign_error)
@@ -70,48 +64,37 @@ fun WalletPickerBottomSheet(viewModel: WalletPickerViewModel, onDismissRequest: 
         }
     }
 
-    ModalBottomSheet(
-        modifier = Modifier.statusBarsPadding(),
-        sheetState = sheetState,
-        onDismissRequest = onDismissRequest,
-        containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-        contentColor = AppTheme.colorScheme.onSurfaceVariant,
-        tonalElevation = 0.dp,
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        Column(
-            modifier = Modifier.background(AppTheme.extraColorScheme.surfaceVariantAlt2),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            WalletPickerTopBar(isEditMode = state.value.isEditMode)
+        WalletPickerTopBar(isEditMode = state.value.isEditMode)
 
-            WalletPickerContent(
-                state = state.value,
-                onWalletClick = { userWallet ->
-                    if (state.value.isEditMode) {
-                        viewModel.setEvent(UiEvent.SelectWalletForReassignment(userWallet))
-                    } else {
-                        sheetState.hideAndRun(
-                            coroutineScope = scope,
-                            onDismissRequest = onDismissRequest,
-                        ) {
-                            viewModel.setEvent(UiEvent.ChangeActiveWallet(userWallet))
-                        }
-                    }
-                },
-            )
+        WalletPickerContent(
+            state = state.value,
+            onWalletClick = { userWallet ->
+                if (state.value.isEditMode) {
+                    viewModel.setEvent(UiEvent.SelectWalletForReassignment(userWallet))
+                } else {
+                    viewModel.setEvent(UiEvent.ChangeActiveWallet(userWallet))
+                    onDismiss()
+                }
+            },
+        )
 
-            Spacer(modifier = Modifier.height(150.dp))
+        Spacer(modifier = Modifier.weight(1f))
 
-            SnackbarHost(hostState = snackbarHostState)
+        SnackbarHost(hostState = snackbarHostState)
 
-            WalletPickerBottomBar(
-                isEditMode = state.value.isEditMode,
-                onConfigureClick = { viewModel.setEvent(UiEvent.EnterEditMode) },
-                onCancelClick = { viewModel.setEvent(UiEvent.CancelEditMode) },
-                onDoneClick = { viewModel.setEvent(UiEvent.ConfirmReassignment) },
-            )
-        }
+        WalletPickerBottomBar(
+            isEditMode = state.value.isEditMode,
+            onConfigureClick = { viewModel.setEvent(UiEvent.EnterEditMode) },
+            onCancelClick = { viewModel.setEvent(UiEvent.CancelEditMode) },
+            onDoneClick = { viewModel.setEvent(UiEvent.ConfirmReassignment) },
+        )
     }
 }
 

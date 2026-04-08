@@ -3,23 +3,20 @@ package net.primal.android.main
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.TopAppBarState
-import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -29,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,13 +38,18 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.activity.LocalContentDisplaySettings
+import net.primal.android.core.compose.PrimalOverlay
 import net.primal.android.core.compose.PrimalTopLevelDestination
+import net.primal.android.feeds.list.FeedsOverlayContent
+import net.primal.android.wallet.picker.WalletPickerOverlayContent
+import net.primal.domain.feeds.FeedSpecKind
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.fab.NewPostFloatingActionButton
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
-import net.primal.android.drawer.PrimalDrawerScaffold
+import net.primal.android.drawer.PrimalDrawer
+import net.primal.android.drawer.PrimalMainScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.main.explore.ExploreHomeContent
@@ -68,7 +71,6 @@ import net.primal.android.navigation.accountSwitcherCallbacksHandler
 import net.primal.android.navigation.navigateToFollowPack
 import net.primal.android.navigation.navigateToNoteEditor
 import net.primal.android.navigation.navigateToProfileQrCodeViewer
-import net.primal.android.navigation.navigateToWallet
 import net.primal.android.navigation.noteCallbacksHandler
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
@@ -86,7 +88,6 @@ fun MainScreen(
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) {
     val uiScope = rememberCoroutineScope()
-    val drawerState: DrawerState = rememberDrawerState(DrawerValue.Closed)
 
     // Tab state management
     var activeTab by rememberSaveable { mutableStateOf(PrimalTopLevelDestination.Feeds) }
@@ -153,7 +154,6 @@ fun MainScreen(
 
     MainScreenScaffold(
         activeTab = activeTab,
-        drawerState = drawerState,
         mainState = mainState,
         homeState = noteFeedsState,
         homeEventPublisher = noteFeedsViewModel::setEvent,
@@ -175,24 +175,20 @@ fun MainScreen(
 private fun MainScreenTopAppBar(
     activeTab: PrimalTopLevelDestination,
     scrollBehavior: TopAppBarScrollBehavior?,
-    drawerState: DrawerState,
+    onAvatarClick: () -> Unit,
+    onFeedPickerRequest: () -> Unit,
+    onReadPickerRequest: () -> Unit,
+    onWalletPickerRequest: () -> Unit,
+    titleOverride: String? = null,
+    subtitleOverride: String? = null,
+    chevronExpanded: Boolean = false,
     avatarCdnImage: CdnImage?,
     avatarLegendaryCustomization: LegendaryCustomization?,
     avatarBlossoms: List<String>,
     homeActiveFeed: FeedUi?,
-    homeScrollToFeed: MutableState<FeedUi?>,
     readsActiveFeed: FeedUi?,
-    readsScrollToFeed: MutableState<FeedUi?>,
     explorePagerState: PagerState,
-    walletIsScrolledToTop: Boolean,
-    walletCurrencyMode: CurrencyMode,
-    onWalletTopBarHeightChanged: (Int) -> Unit,
-    onWalletTopBarFooterHeightChanged: (Int) -> Unit,
-    onWalletCurrencyModeToggle: (CurrencyMode) -> Unit,
-    navController: NavController,
 ) {
-    val uiScope = rememberCoroutineScope()
-
     when (activeTab) {
         PrimalTopLevelDestination.Feeds -> {
             NoteFeedTopAppBar(
@@ -201,10 +197,12 @@ private fun MainScreenTopAppBar(
                 avatarCdnImage = avatarCdnImage,
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
-                onAvatarClick = { uiScope.launch { drawerState.open() } },
-                onFeedChanged = { feed -> homeScrollToFeed.value = feed },
+                onAvatarClick = onAvatarClick,
+                onFeedPickerRequest = onFeedPickerRequest,
                 scrollBehavior = scrollBehavior,
-                onGoToWallet = { navController.navigateToWallet() },
+                titleOverride = titleOverride,
+                subtitleOverride = subtitleOverride,
+                chevronExpanded = chevronExpanded,
             )
         }
 
@@ -215,9 +213,12 @@ private fun MainScreenTopAppBar(
                 avatarCdnImage = avatarCdnImage,
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
-                onAvatarClick = { uiScope.launch { drawerState.open() } },
-                onFeedChanged = { feed -> readsScrollToFeed.value = feed },
+                onAvatarClick = onAvatarClick,
+                onFeedPickerRequest = onReadPickerRequest,
                 scrollBehavior = scrollBehavior,
+                titleOverride = titleOverride,
+                subtitleOverride = subtitleOverride,
+                chevronExpanded = chevronExpanded,
             )
         }
 
@@ -227,8 +228,10 @@ private fun MainScreenTopAppBar(
                 avatarCdnImage = avatarCdnImage,
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
-                onAvatarClick = { uiScope.launch { drawerState.open() } },
+                onAvatarClick = onAvatarClick,
                 scrollBehavior = scrollBehavior,
+                titleOverride = titleOverride,
+                subtitleOverride = subtitleOverride,
             )
         }
 
@@ -238,19 +241,19 @@ private fun MainScreenTopAppBar(
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
                 scrollBehavior = scrollBehavior,
-                onAvatarClick = { uiScope.launch { drawerState.open() } },
+                onAvatarClick = onAvatarClick,
+                titleOverride = titleOverride,
+                subtitleOverride = subtitleOverride,
             )
         }
 
         PrimalTopLevelDestination.Wallet -> WalletDashboardTopAppBar(
-            isScrolledToTop = walletIsScrolledToTop,
-            currencyMode = walletCurrencyMode,
             scrollBehavior = scrollBehavior,
-            onTopBarHeightChanged = onWalletTopBarHeightChanged,
-            onTopBarFooterHeightChanged = onWalletTopBarFooterHeightChanged,
-            onCurrencyModeToggle = onWalletCurrencyModeToggle,
-            onAvatarClick = { uiScope.launch { drawerState.open() } },
-            navController = navController,
+            onAvatarClick = onAvatarClick,
+            onWalletPickerRequest = onWalletPickerRequest,
+            titleOverride = titleOverride,
+            subtitleOverride = subtitleOverride,
+            chevronExpanded = chevronExpanded,
         )
     }
 }
@@ -274,8 +277,7 @@ private fun MainScreenContent(
     readsScrollToFeed: MutableState<FeedUi?>,
     explorePagerState: PagerState,
     walletCurrencyMode: CurrencyMode,
-    walletTopBarHeight: Int,
-    walletTopBarFooterHeight: Int,
+    onWalletCurrencyModeToggle: (CurrencyMode) -> Unit,
     onWalletScrolledToTopChanged: (Boolean) -> Unit,
     walletShouldAnimateScrollToTop: MutableState<Boolean>,
     notificationsShouldAnimateScrollToTop: MutableState<Boolean>,
@@ -336,8 +338,7 @@ private fun MainScreenContent(
 
                     PrimalTopLevelDestination.Wallet -> WalletDashboardContent(
                         currencyMode = walletCurrencyMode,
-                        topBarHeight = walletTopBarHeight,
-                        topBarFooterHeight = walletTopBarFooterHeight,
+                        onCurrencyModeToggle = onWalletCurrencyModeToggle,
                         onScrolledToTopChanged = onWalletScrolledToTopChanged,
                         shouldAnimateScrollToTop = walletShouldAnimateScrollToTop,
                         paddingValues = paddingValues,
@@ -362,8 +363,6 @@ private class MainScreenSharedState(
     val readsShouldAnimateScrollToTop: MutableState<Boolean>,
     val readsScrollToFeed: MutableState<FeedUi?>,
     val walletCurrencyMode: MutableState<CurrencyMode>,
-    val walletTopBarHeight: MutableState<Int>,
-    val walletTopBarFooterHeight: MutableState<Int>,
     val walletIsScrolledToTop: MutableState<Boolean>,
     val walletShouldAnimateScrollToTop: MutableState<Boolean>,
     val notificationsShouldAnimateScrollToTop: MutableState<Boolean>,
@@ -381,8 +380,6 @@ private fun rememberMainScreenSharedState(): MainScreenSharedState {
         readsShouldAnimateScrollToTop = remember { mutableStateOf(false) },
         readsScrollToFeed = remember { mutableStateOf(null) },
         walletCurrencyMode = rememberSaveable { mutableStateOf(CurrencyMode.SATS) },
-        walletTopBarHeight = remember { mutableIntStateOf(0) },
-        walletTopBarFooterHeight = remember { mutableIntStateOf(0) },
         walletIsScrolledToTop = remember { mutableStateOf(true) },
         walletShouldAnimateScrollToTop = remember { mutableStateOf(false) },
         notificationsShouldAnimateScrollToTop = remember { mutableStateOf(false) },
@@ -393,7 +390,6 @@ private fun rememberMainScreenSharedState(): MainScreenSharedState {
 @Composable
 private fun MainScreenScaffold(
     activeTab: PrimalTopLevelDestination,
-    drawerState: DrawerState,
     mainState: MainContract.UiState,
     homeState: NoteFeedsContract.UiState,
     homeEventPublisher: (NoteFeedsContract.UiEvent) -> Unit,
@@ -410,38 +406,54 @@ private fun MainScreenScaffold(
 ) {
     val saveableStateHolder = rememberSaveableStateHolder()
 
-    PrimalDrawerScaffold(
+    var activeOverlay by rememberSaveable { mutableStateOf<ActiveOverlay?>(null) }
+
+    val feedPickerVisible = activeOverlay == ActiveOverlay.FeedPicker
+    val readPickerVisible = activeOverlay == ActiveOverlay.ReadPicker
+    val walletPickerVisible = activeOverlay == ActiveOverlay.WalletPicker
+    val accountDrawerVisible = activeOverlay == ActiveOverlay.AccountDrawer
+
+    val streamState = LocalStreamState.current
+    LaunchedEffect(accountDrawerVisible) {
+        if (accountDrawerVisible) {
+            streamState.acquireHide()
+        } else {
+            streamState.releaseHide()
+        }
+    }
+
+    fun toggleOverlay(overlay: ActiveOverlay) {
+        activeOverlay = if (activeOverlay == overlay) null else overlay
+    }
+
+    PrimalMainScaffold(
         modifier = Modifier.semantics { testTagsAsResourceId = true },
-        drawerState = drawerState,
-        drawerOpenGestureEnabled = false,
         activeDestination = activeTab,
         onActiveDestinationClick = onActiveDestinationClick,
-        accountSwitcherCallbacks = accountSwitcherCallbacks,
         onPrimaryDestinationChanged = onTabChanged,
-        onDrawerDestinationClick = onDrawerDestinationClick,
-        onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
         badges = mainState.badges,
         focusModeEnabled = focusModeEnabled,
         topAppBarState = currentTopAppBarState,
         topAppBar = { scrollBehavior ->
+            val drawerTitle = if (accountDrawerVisible) stringResource(id = R.string.account_drawer_title) else null
+            val drawerSubtitle = if (accountDrawerVisible) stringResource(id = R.string.account_drawer_subtitle) else null
+
             MainScreenTopAppBar(
                 activeTab = activeTab,
                 scrollBehavior = scrollBehavior,
-                drawerState = drawerState,
+                onAvatarClick = { toggleOverlay(ActiveOverlay.AccountDrawer) },
+                onFeedPickerRequest = { toggleOverlay(ActiveOverlay.FeedPicker) },
+                onReadPickerRequest = { toggleOverlay(ActiveOverlay.ReadPicker) },
+                onWalletPickerRequest = { toggleOverlay(ActiveOverlay.WalletPicker) },
+                titleOverride = drawerTitle,
+                subtitleOverride = drawerSubtitle,
+                chevronExpanded = feedPickerVisible || readPickerVisible || walletPickerVisible,
                 avatarCdnImage = mainState.activeAccountAvatarCdnImage,
                 avatarLegendaryCustomization = mainState.activeAccountLegendaryCustomization,
                 avatarBlossoms = mainState.activeAccountBlossoms,
                 homeActiveFeed = sharedState.homeActiveFeed.value,
-                homeScrollToFeed = sharedState.homeScrollToFeed,
                 readsActiveFeed = sharedState.readsActiveFeed.value,
-                readsScrollToFeed = sharedState.readsScrollToFeed,
                 explorePagerState = sharedState.explorePagerState,
-                walletIsScrolledToTop = sharedState.walletIsScrolledToTop.value,
-                walletCurrencyMode = sharedState.walletCurrencyMode.value,
-                onWalletTopBarHeightChanged = { sharedState.walletTopBarHeight.value = it },
-                onWalletTopBarFooterHeightChanged = { sharedState.walletTopBarFooterHeight.value = it },
-                onWalletCurrencyModeToggle = { sharedState.walletCurrencyMode.value = it },
-                navController = navController,
             )
         },
         content = { paddingValues ->
@@ -462,14 +474,72 @@ private fun MainScreenScaffold(
                 readsScrollToFeed = sharedState.readsScrollToFeed,
                 explorePagerState = sharedState.explorePagerState,
                 walletCurrencyMode = sharedState.walletCurrencyMode.value,
-                walletTopBarHeight = sharedState.walletTopBarHeight.value,
-                walletTopBarFooterHeight = sharedState.walletTopBarFooterHeight.value,
+                onWalletCurrencyModeToggle = { sharedState.walletCurrencyMode.value = it },
                 onWalletScrolledToTopChanged = { sharedState.walletIsScrolledToTop.value = it },
                 walletShouldAnimateScrollToTop = sharedState.walletShouldAnimateScrollToTop,
                 notificationsShouldAnimateScrollToTop = sharedState.notificationsShouldAnimateScrollToTop,
                 navController = navController,
                 onGoToWallet = { onTabChanged(PrimalTopLevelDestination.Wallet) },
             )
+        },
+        overlay = {
+            val dismissOverlay = { activeOverlay = null }
+
+            PrimalOverlay(
+                visible = accountDrawerVisible,
+                onDismiss = dismissOverlay,
+            ) {
+                PrimalDrawer(
+                    onDismiss = dismissOverlay,
+                    onDrawerDestinationClick = onDrawerDestinationClick,
+                    onQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
+                    accountSwitcherCallbacks = accountSwitcherCallbacks,
+                )
+            }
+
+            val homeActiveFeed = sharedState.homeActiveFeed.value
+            if (homeActiveFeed != null) {
+                PrimalOverlay(
+                    visible = feedPickerVisible,
+                    onDismiss = dismissOverlay,
+                ) {
+                    FeedsOverlayContent(
+                        activeFeed = homeActiveFeed,
+                        feedSpecKind = FeedSpecKind.Notes,
+                        onFeedClick = { feed ->
+                            activeOverlay = null
+                            sharedState.homeScrollToFeed.value = feed
+                        },
+                        onGoToWallet = { onTabChanged(PrimalTopLevelDestination.Wallet) },
+                    )
+                }
+            }
+
+            val readsActiveFeed = sharedState.readsActiveFeed.value
+            if (readsActiveFeed != null) {
+                PrimalOverlay(
+                    visible = readPickerVisible,
+                    onDismiss = dismissOverlay,
+                ) {
+                    FeedsOverlayContent(
+                        activeFeed = readsActiveFeed,
+                        feedSpecKind = FeedSpecKind.Reads,
+                        onFeedClick = { feed ->
+                            activeOverlay = null
+                            sharedState.readsScrollToFeed.value = feed
+                        },
+                    )
+                }
+            }
+
+            PrimalOverlay(
+                visible = walletPickerVisible,
+                onDismiss = dismissOverlay,
+            ) {
+                WalletPickerOverlayContent(
+                    onDismiss = dismissOverlay,
+                )
+            }
         },
         floatingActionButton = {
             when (activeTab) {
@@ -589,4 +659,11 @@ private fun handleActiveDestinationClick(
             it.value = false
         }
     }
+}
+
+private enum class ActiveOverlay {
+    AccountDrawer,
+    FeedPicker,
+    ReadPicker,
+    WalletPicker,
 }

@@ -26,19 +26,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -66,7 +62,6 @@ import net.primal.android.main.wallet.WalletDashboardContract.WalletDashboardSta
 import net.primal.android.navigation.navigateToProfile
 import net.primal.android.navigation.navigateToTransactionDetails
 import net.primal.android.navigation.navigateToWalletBackup
-import net.primal.android.navigation.navigateToWalletPicker
 import net.primal.android.navigation.navigateToWalletReceive
 import net.primal.android.navigation.navigateToWalletRestore
 import net.primal.android.navigation.navigateToWalletSendPayment
@@ -93,8 +88,7 @@ private val DATE_OF_WALLET_EXPIRATION = LocalDate.of(2026, 4, 30)
 @Composable
 internal fun WalletDashboardContent(
     currencyMode: CurrencyMode,
-    topBarHeight: Int,
-    topBarFooterHeight: Int,
+    onCurrencyModeToggle: (CurrencyMode) -> Unit,
     onScrolledToTopChanged: (Boolean) -> Unit,
     shouldAnimateScrollToTop: MutableState<Boolean>,
     paddingValues: PaddingValues,
@@ -141,7 +135,6 @@ internal fun WalletDashboardContent(
     }
 
     val dashboardLiteHeightDp = 80.dp
-    val density = LocalDensity.current
 
     var shouldAddFooter by remember { mutableStateOf(false) }
     LaunchedEffect(pagingItems.itemCount, listState) {
@@ -159,11 +152,10 @@ internal fun WalletDashboardContent(
         listState = listState,
         canBuySats = canBuySats,
         currencyMode = currencyMode,
-        topBarHeight = topBarHeight,
-        topBarFooterHeight = topBarFooterHeight,
+        onCurrencyModeToggle = onCurrencyModeToggle,
+        dashboardExpanded = isScrolledToTop,
         dashboardLiteHeightDp = dashboardLiteHeightDp,
         shouldAddFooter = shouldAddFooter,
-        density = density,
         paddingValues = paddingValues,
         eventPublisher = walletViewModel::setEvents,
         onProfileClick = { profileId -> navController.navigateToProfile(profileId) },
@@ -172,6 +164,9 @@ internal fun WalletDashboardContent(
         onWalletBackupClick = { walletId -> navController.navigateToWalletBackup(walletId) },
         onRestoreWalletClick = { navController.navigateToWalletRestore() },
         onBuySatsClick = {},
+        onSendClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Nostr) },
+        onScanClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Scan) },
+        onReceiveClick = { navController.navigateToWalletReceive() },
     )
 }
 
@@ -183,11 +178,10 @@ private fun WalletDashboardContent(
     listState: LazyListState,
     canBuySats: Boolean,
     currencyMode: CurrencyMode,
-    topBarHeight: Int,
-    topBarFooterHeight: Int,
+    onCurrencyModeToggle: (CurrencyMode) -> Unit,
+    dashboardExpanded: Boolean,
     dashboardLiteHeightDp: Dp,
     shouldAddFooter: Boolean,
-    density: Density,
     paddingValues: PaddingValues,
     eventPublisher: (UiEvent) -> Unit,
     onProfileClick: (String) -> Unit,
@@ -196,6 +190,9 @@ private fun WalletDashboardContent(
     onWalletBackupClick: (String) -> Unit,
     onRestoreWalletClick: () -> Unit,
     onBuySatsClick: () -> Unit,
+    onSendClick: () -> Unit,
+    onScanClick: () -> Unit,
+    onReceiveClick: () -> Unit,
 ) {
     PrimalPullToRefreshBox(
         isRefreshing = state.refreshing,
@@ -313,85 +310,99 @@ private fun WalletDashboardContent(
                         }
                     }
                 } else {
-                    TransactionsLazyColumn(
+                    Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .background(color = AppTheme.colorScheme.surfaceVariant)
-                            .padding(top = with(LocalDensity.current) { topBarHeight.toDp() }),
-                        pagingItems = pagingItems,
-                        isRefreshing = state.refreshing,
-                        currencyMode = currencyMode,
-                        exchangeBtcUsdRate = state.exchangeBtcUsdRate,
-                        listState = listState,
-                        onProfileClick = onProfileClick,
-                        onTransactionClick = onTransactionClick,
-                        header = {
-                            if (state.wallet is Wallet.Primal) {
-                                DashboardUpgradeNotice(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .animateContentSize()
-                                        .padding(horizontal = 32.dp)
-                                        .padding(top = 16.dp, bottom = 12.dp),
-                                    onUpgradeWalletClick = onUpgradeWalletClick,
-                                )
-                            } else if (!state.isWalletBackedUp) {
-                                val titleText = stringResource(
-                                    id = R.string.wallet_dashboard_backup_notice_title,
-                                )
-                                val descriptionText = stringResource(
-                                    id = R.string.wallet_dashboard_backup_notice_description,
-                                )
+                            .padding(paddingValues),
+                    ) {
+                        WalletDashboardSection(
+                            state = state,
+                            dashboardExpanded = dashboardExpanded,
+                            dashboardLiteHeightDp = dashboardLiteHeightDp,
+                            currencyMode = currencyMode,
+                            onCurrencyModeToggle = onCurrencyModeToggle,
+                            onSendClick = onSendClick,
+                            onScanClick = onScanClick,
+                            onReceiveClick = onReceiveClick,
+                        )
 
-                                val annotatedMessage = buildAnnotatedString {
-                                    withStyle(
-                                        SpanStyle(
-                                            fontWeight = FontWeight.Bold,
-                                            textDecoration = TextDecoration.Underline,
-                                        ),
-                                    ) {
-                                        append(titleText.uppercase())
+                        TransactionsLazyColumn(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(color = AppTheme.colorScheme.surfaceVariant),
+                            pagingItems = pagingItems,
+                            isRefreshing = state.refreshing,
+                            currencyMode = currencyMode,
+                            exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                            listState = listState,
+                            onProfileClick = onProfileClick,
+                            onTransactionClick = onTransactionClick,
+                            header = {
+                                if (state.wallet is Wallet.Primal) {
+                                    DashboardUpgradeNotice(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .animateContentSize()
+                                            .padding(horizontal = 32.dp)
+                                            .padding(top = 16.dp, bottom = 12.dp),
+                                        onUpgradeWalletClick = onUpgradeWalletClick,
+                                    )
+                                } else if (!state.isWalletBackedUp) {
+                                    val titleText = stringResource(
+                                        id = R.string.wallet_dashboard_backup_notice_title,
+                                    )
+                                    val descriptionText = stringResource(
+                                        id = R.string.wallet_dashboard_backup_notice_description,
+                                    )
+
+                                    val annotatedMessage = buildAnnotatedString {
+                                        withStyle(
+                                            SpanStyle(
+                                                fontWeight = FontWeight.Bold,
+                                                textDecoration = TextDecoration.Underline,
+                                            ),
+                                        ) {
+                                            append(titleText.uppercase())
+                                        }
+                                        append(" ")
+                                        append(descriptionText)
                                     }
-                                    append(" ")
-                                    append(descriptionText)
-                                }
 
-                                WalletCallToActionAnnotatedBox(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp)
-                                        .padding(bottom = 16.dp)
-                                        .animateContentSize(),
-                                    message = annotatedMessage,
-                                    actionLabel = stringResource(id = R.string.wallet_dashboard_backup_button),
-                                    onActionClick = { state.wallet?.let { onWalletBackupClick(it.walletId) } },
-                                )
-                            } else if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
-                                WalletCallToActionBox(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .animateContentSize()
-                                        .padding(horizontal = 32.dp)
-                                        .padding(bottom = 32.dp),
-                                    message = stringResource(id = R.string.wallet_dashboard_low_sats_hint),
-                                    actionLabel = stringResource(
-                                        id = R.string.wallet_dashboard_buy_sats_button,
-                                    ),
-                                    onActionClick = onBuySatsClick,
-                                )
-                            }
-                        },
-                        footer = {
-                            if (shouldAddFooter) {
-                                val systemNavigationBarDp = 48.dp
-                                val spacerHeight = with(density) {
-                                    (topBarHeight - topBarFooterHeight).toDp() + dashboardLiteHeightDp +
-                                        NavigationBarFullHeightDp + systemNavigationBarDp
+                                    WalletCallToActionAnnotatedBox(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp)
+                                            .padding(bottom = 16.dp)
+                                            .animateContentSize(),
+                                        message = annotatedMessage,
+                                        actionLabel = stringResource(id = R.string.wallet_dashboard_backup_button),
+                                        onActionClick = { state.wallet?.let { onWalletBackupClick(it.walletId) } },
+                                    )
+                                } else if (state.lowBalance && pagingItems.itemCount > 0 && canBuySats) {
+                                    WalletCallToActionBox(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .animateContentSize()
+                                            .padding(horizontal = 32.dp)
+                                            .padding(bottom = 32.dp),
+                                        message = stringResource(id = R.string.wallet_dashboard_low_sats_hint),
+                                        actionLabel = stringResource(
+                                            id = R.string.wallet_dashboard_buy_sats_button,
+                                        ),
+                                        onActionClick = onBuySatsClick,
+                                    )
                                 }
-                                Spacer(modifier = Modifier.height(spacerHeight))
-                            }
-                        },
-                    )
+                            },
+                            footer = {
+                                if (shouldAddFooter) {
+                                    val systemNavigationBarDp = 48.dp
+                                    val spacerHeight = dashboardLiteHeightDp +
+                                        NavigationBarFullHeightDp + systemNavigationBarDp
+                                    Spacer(modifier = Modifier.height(spacerHeight))
+                                }
+                            },
+                        )
+                    }
                 }
             }
 
@@ -419,6 +430,70 @@ private fun WalletDashboardContent(
                         },
                     ),
                     onActionClick = { eventPublisher(UiEvent.CreateWallet) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun WalletDashboardSection(
+    state: WalletDashboardContract.UiState,
+    dashboardExpanded: Boolean,
+    dashboardLiteHeightDp: Dp,
+    currencyMode: CurrencyMode,
+    onCurrencyModeToggle: (CurrencyMode) -> Unit,
+    onSendClick: () -> Unit,
+    onScanClick: () -> Unit,
+    onReceiveClick: () -> Unit,
+) {
+    if (state.dashboardState == WalletDashboardState.ActiveWallet) {
+        AnimatedContent(
+            targetState = dashboardExpanded,
+            label = "DashboardAnimation",
+        ) { expanded ->
+            when (expanded) {
+                true -> WalletDashboard(
+                    modifier = Modifier
+                        .wrapContentSize(align = Alignment.Center)
+                        .padding(horizontal = 32.dp)
+                        .padding(top = 16.dp, bottom = 24.dp)
+                        .animateContentSize(),
+                    walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
+                    enabled = state.wallet.isConfigured(),
+                    actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                    onWalletAction = { action ->
+                        when (action) {
+                            WalletAction.Send -> onSendClick()
+                            WalletAction.Scan -> onScanClick()
+                            WalletAction.Receive -> onReceiveClick()
+                        }
+                    },
+                    currencyMode = currencyMode,
+                    onSwitchCurrencyMode = onCurrencyModeToggle,
+                    exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                )
+
+                false -> WalletDashboardLite(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(dashboardLiteHeightDp)
+                        .background(color = AppTheme.colorScheme.surface)
+                        .padding(horizontal = 10.dp, vertical = 16.dp)
+                        .animateContentSize(),
+                    walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
+                    actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                    onWalletAction = { action ->
+                        when (action) {
+                            WalletAction.Send -> onSendClick()
+                            WalletAction.Scan -> onScanClick()
+                            WalletAction.Receive -> onReceiveClick()
+                        }
+                    },
+                    currencyMode = currencyMode,
+                    enabled = state.wallet.isConfigured(),
+                    onSwitchCurrencyMode = onCurrencyModeToggle,
+                    exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                 )
             }
         }
@@ -473,38 +548,26 @@ private fun DashboardUpgradeNotice(onUpgradeWalletClick: () -> Unit, modifier: M
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun WalletDashboardTopAppBar(
-    isScrolledToTop: Boolean,
-    currencyMode: CurrencyMode,
     scrollBehavior: TopAppBarScrollBehavior?,
-    onTopBarHeightChanged: (Int) -> Unit,
-    onTopBarFooterHeightChanged: (Int) -> Unit,
-    onCurrencyModeToggle: (CurrencyMode) -> Unit,
     onAvatarClick: () -> Unit,
-    navController: NavController,
+    onWalletPickerRequest: () -> Unit,
+    titleOverride: String? = null,
+    subtitleOverride: String? = null,
+    chevronExpanded: Boolean = false,
 ) {
     val walletViewModel = hiltViewModel<WalletDashboardViewModel>()
     val walletState by walletViewModel.state.collectAsState()
     val canShowWalletPicker = walletState.walletPickerEnabled && walletState.wallet != null
 
-    val dashboardExpanded by rememberSaveable(isScrolledToTop) {
-        mutableStateOf(isScrolledToTop)
-    }
-
     WalletDashboardTopAppBar(
         state = walletState,
         canShowWalletPicker = canShowWalletPicker,
-        dashboardExpanded = dashboardExpanded,
-        dashboardLiteHeightDp = 80.dp,
-        currencyMode = currencyMode,
         scrollBehavior = scrollBehavior,
-        onTopBarHeightChanged = onTopBarHeightChanged,
-        onTopBarFooterHeightChanged = onTopBarFooterHeightChanged,
-        onCurrencyModeToggle = onCurrencyModeToggle,
         onAvatarClick = onAvatarClick,
-        onWalletPickerClick = { navController.navigateToWalletPicker() },
-        onSendClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Nostr) },
-        onScanClick = { navController.navigateToWalletSendPayment(tab = SendPaymentTab.Scan) },
-        onReceiveClick = { navController.navigateToWalletReceive() },
+        onWalletPickerRequest = onWalletPickerRequest,
+        titleOverride = titleOverride,
+        subtitleOverride = subtitleOverride,
+        chevronExpanded = chevronExpanded,
     )
 }
 
@@ -513,85 +576,25 @@ internal fun WalletDashboardTopAppBar(
 private fun WalletDashboardTopAppBar(
     state: WalletDashboardContract.UiState,
     canShowWalletPicker: Boolean,
-    dashboardExpanded: Boolean,
-    dashboardLiteHeightDp: Dp,
-    currencyMode: CurrencyMode,
     scrollBehavior: TopAppBarScrollBehavior?,
-    onTopBarHeightChanged: (Int) -> Unit,
-    onTopBarFooterHeightChanged: (Int) -> Unit,
-    onCurrencyModeToggle: (CurrencyMode) -> Unit,
     onAvatarClick: () -> Unit,
-    onWalletPickerClick: () -> Unit,
-    onSendClick: () -> Unit,
-    onScanClick: () -> Unit,
-    onReceiveClick: () -> Unit,
+    onWalletPickerRequest: () -> Unit,
+    titleOverride: String? = null,
+    subtitleOverride: String? = null,
+    chevronExpanded: Boolean = false,
 ) {
-    Column(
-        modifier = Modifier.onSizeChanged { onTopBarHeightChanged(it.height) },
-    ) {
-        PrimalTopLevelAppBar(
-            title = stringResource(id = R.string.wallet_title),
-            subtitle = stringResource(id = R.string.wallet_top_app_bar_subtitle),
-            showTitleChevron = canShowWalletPicker,
-            onTitleClick = if (canShowWalletPicker) onWalletPickerClick else null,
-            avatarCdnImage = state.activeAccountAvatarCdnImage,
-            avatarBlossoms = state.activeAccountBlossoms,
-            avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
-            onAvatarClick = onAvatarClick,
-            scrollBehavior = scrollBehavior,
-        )
-
-        if (state.dashboardState == WalletDashboardState.ActiveWallet) {
-            AnimatedContent(
-                modifier = Modifier.onSizeChanged { onTopBarFooterHeightChanged(it.height) },
-                targetState = dashboardExpanded,
-                label = "DashboardAnimation",
-            ) { expanded ->
-                when (expanded) {
-                    true -> WalletDashboard(
-                        modifier = Modifier
-                            .wrapContentSize(align = Alignment.Center)
-                            .padding(horizontal = 32.dp)
-                            .padding(top = 16.dp, bottom = 24.dp)
-                            .animateContentSize(),
-                        walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
-                        enabled = state.wallet.isConfigured(),
-                        actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
-                        onWalletAction = { action ->
-                            when (action) {
-                                WalletAction.Send -> onSendClick()
-                                WalletAction.Scan -> onScanClick()
-                                WalletAction.Receive -> onReceiveClick()
-                            }
-                        },
-                        currencyMode = currencyMode,
-                        onSwitchCurrencyMode = onCurrencyModeToggle,
-                        exchangeBtcUsdRate = state.exchangeBtcUsdRate,
-                    )
-
-                    false -> WalletDashboardLite(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(dashboardLiteHeightDp)
-                            .background(color = AppTheme.colorScheme.surface)
-                            .padding(horizontal = 10.dp, vertical = 16.dp)
-                            .animateContentSize(),
-                        walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
-                        actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
-                        onWalletAction = { action ->
-                            when (action) {
-                                WalletAction.Send -> onSendClick()
-                                WalletAction.Scan -> onScanClick()
-                                WalletAction.Receive -> onReceiveClick()
-                            }
-                        },
-                        currencyMode = currencyMode,
-                        enabled = state.wallet.isConfigured(),
-                        onSwitchCurrencyMode = onCurrencyModeToggle,
-                        exchangeBtcUsdRate = state.exchangeBtcUsdRate,
-                    )
-                }
-            }
-        }
-    }
+    PrimalTopLevelAppBar(
+        title = stringResource(id = R.string.wallet_title),
+        subtitle = stringResource(id = R.string.wallet_top_app_bar_subtitle),
+        titleOverride = titleOverride,
+        subtitleOverride = subtitleOverride,
+        showTitleChevron = canShowWalletPicker,
+        chevronExpanded = chevronExpanded,
+        onTitleClick = if (canShowWalletPicker) onWalletPickerRequest else null,
+        avatarCdnImage = state.activeAccountAvatarCdnImage,
+        avatarBlossoms = state.activeAccountBlossoms,
+        avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
+        onAvatarClick = onAvatarClick,
+        scrollBehavior = scrollBehavior,
+    )
 }
