@@ -8,7 +8,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -69,10 +68,10 @@ import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.CompactTextField
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.ListNoContent
-import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -99,7 +98,6 @@ import net.primal.android.core.utils.formatToDefaultTimeFormat
 import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
-import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -596,7 +594,7 @@ private fun ReplyToBottomBar(
             )
         }
 
-        NoteOutlinedTextField(
+        CompactTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
@@ -609,7 +607,7 @@ private fun ReplyToBottomBar(
             placeholder = {
                 ReplyTextFieldPlaceholder(
                     isKeyboardVisible = isKeyboardVisible,
-                    replyToPost = replyToPost,
+                    replyToAuthorName = replyToPost.authorName,
                 )
             },
             trailingIcon = {
@@ -624,9 +622,6 @@ private fun ReplyToBottomBar(
                     )
                 }
             },
-            textStyle = AppTheme.typography.bodyMedium,
-            colors = PrimalDefaults.outlinedTextFieldColors(),
-            shape = AppTheme.shapes.extraLarge,
             taggedUsers = replyState.taggedUsers,
             onUserTaggingModeChanged = {
                 replyEventPublisher(NoteEditorContract.UiEvent.ToggleSearchUsers(enabled = it))
@@ -661,7 +656,7 @@ private fun ReplyToBottomBar(
 }
 
 @Composable
-private fun ColumnScope.ReplyTextFieldPlaceholder(isKeyboardVisible: Boolean, replyToPost: FeedPostUi) {
+private fun ReplyTextFieldPlaceholder(isKeyboardVisible: Boolean, replyToAuthorName: String) {
     AnimatedVisibility(
         visible = !isKeyboardVisible,
         exit = fadeOut(),
@@ -670,7 +665,7 @@ private fun ColumnScope.ReplyTextFieldPlaceholder(isKeyboardVisible: Boolean, re
         Text(
             text = stringResource(
                 id = R.string.thread_reply_to,
-                replyToPost.authorName,
+                replyToAuthorName,
             ),
             maxLines = 1,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,

@@ -45,7 +45,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -83,7 +82,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -102,10 +100,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.activity.LocalPrimalTheme
+import net.primal.android.core.compose.CompactTextField
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.IconText
 import net.primal.android.core.compose.PrimalClickableText
-import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalSeekBar
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -124,7 +122,6 @@ import net.primal.android.core.ext.onDragDownBeyond
 import net.primal.android.core.ext.openUriSafely
 import net.primal.android.core.pip.rememberIsInPipMode
 import net.primal.android.core.video.toggle
-import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.events.ui.EventZapUiModel
 import net.primal.android.notes.feed.model.NoteNostrUriUi
@@ -1073,7 +1070,7 @@ private fun LiveChatCommentInput(
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        NoteOutlinedTextField(
+        CompactTextField(
             modifier = Modifier.weight(1.0f),
             value = state.comment,
             onValueChange = onCommentChanged,
@@ -1086,12 +1083,6 @@ private fun LiveChatCommentInput(
                     style = AppTheme.typography.bodyMedium,
                 )
             },
-            textStyle = AppTheme.typography.bodyMedium,
-            colors = PrimalDefaults.outlinedTextFieldColors(),
-            shape = AppTheme.shapes.extraLarge,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                capitalization = KeyboardCapitalization.Sentences,
-            ),
             taggedUsers = state.taggedUsers,
             onUserTaggingModeChanged = onUserTaggingModeChanged,
             onUserTagSearch = onUserTagSearch,
@@ -1104,7 +1095,7 @@ private fun LiveChatCommentInput(
             IconButton(
                 modifier = Modifier
                     .padding(start = 8.dp)
-                    .size(46.dp),
+                    .size(40.dp),
                 onClick = { onSendMessage(state.comment.text) },
                 enabled = !state.sendingMessage,
             ) {
