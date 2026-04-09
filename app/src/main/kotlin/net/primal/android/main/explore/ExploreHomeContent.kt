@@ -120,6 +120,7 @@ internal fun ExploreTopAppBar(
     pagerState: PagerState,
     avatarCdnImage: CdnImage?,
     onAvatarClick: () -> Unit,
+    onAvatarSwipeDown: (() -> Unit)? = null,
     avatarLegendaryCustomization: LegendaryCustomization? = null,
     avatarBlossoms: List<String> = emptyList(),
     scrollBehavior: TopAppBarScrollBehavior? = null,
@@ -142,6 +143,7 @@ internal fun ExploreTopAppBar(
             avatarBlossoms = avatarBlossoms,
             avatarLegendaryCustomization = avatarLegendaryCustomization,
             onAvatarClick = onAvatarClick,
+            onAvatarSwipeDown = onAvatarSwipeDown,
             showDivider = false,
             scrollBehavior = scrollBehavior,
         )

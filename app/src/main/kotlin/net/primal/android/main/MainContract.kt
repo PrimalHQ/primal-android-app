@@ -11,9 +11,15 @@ interface MainContract {
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
         val activeAccountBlossoms: List<String> = emptyList(),
         val badges: Badges = Badges(),
+        val hasMultipleAccounts: Boolean = false,
     )
 
     sealed class UiEvent {
         data object RequestUserDataUpdate : UiEvent()
+        data object SwitchToNextAccount : UiEvent()
+    }
+
+    sealed class SideEffect {
+        data object AccountSwitched : SideEffect()
     }
 }

@@ -406,6 +406,7 @@ internal fun NotificationsTopAppBar(
     avatarBlossoms: List<String>,
     scrollBehavior: TopAppBarScrollBehavior?,
     onAvatarClick: () -> Unit,
+    onAvatarSwipeDown: (() -> Unit)? = null,
     titleOverride: String? = null,
     subtitleOverride: String? = null,
 ) {
@@ -418,6 +419,7 @@ internal fun NotificationsTopAppBar(
         avatarBlossoms = avatarBlossoms,
         avatarLegendaryCustomization = avatarLegendaryCustomization,
         onAvatarClick = onAvatarClick,
+        onAvatarSwipeDown = onAvatarSwipeDown,
         showDivider = false,
         scrollBehavior = scrollBehavior,
     )
