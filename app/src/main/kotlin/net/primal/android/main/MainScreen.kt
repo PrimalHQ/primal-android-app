@@ -3,7 +3,6 @@ package net.primal.android.main
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,7 +39,7 @@ import net.primal.android.R
 import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.compose.PrimalOverlay
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.feeds.list.FeedsOverlayContent
+import net.primal.android.feeds.list.FeedListOverlayContent
 import net.primal.android.wallet.picker.WalletPickerOverlayContent
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.android.core.compose.SnackbarErrorHandler
@@ -503,13 +502,14 @@ private fun MainScreenScaffold(
                     visible = feedPickerVisible,
                     onDismiss = dismissOverlay,
                 ) {
-                    FeedsOverlayContent(
+                    FeedListOverlayContent(
                         activeFeed = homeActiveFeed,
                         feedSpecKind = FeedSpecKind.Notes,
                         onFeedClick = { feed ->
                             activeOverlay = null
                             sharedState.homeScrollToFeed.value = feed
                         },
+                        onDismiss = dismissOverlay,
                         onGoToWallet = { onTabChanged(PrimalTopLevelDestination.Wallet) },
                     )
                 }
@@ -521,13 +521,14 @@ private fun MainScreenScaffold(
                     visible = readPickerVisible,
                     onDismiss = dismissOverlay,
                 ) {
-                    FeedsOverlayContent(
+                    FeedListOverlayContent(
                         activeFeed = readsActiveFeed,
                         feedSpecKind = FeedSpecKind.Reads,
                         onFeedClick = { feed ->
                             activeOverlay = null
                             sharedState.readsScrollToFeed.value = feed
                         },
+                        onDismiss = dismissOverlay,
                     )
                 }
             }
