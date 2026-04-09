@@ -15,9 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
-import net.primal.android.R
 import net.primal.android.feeds.list.FeedListContract.UiState.FeedMarketplaceStage
 import net.primal.android.feeds.list.ui.DvmFeedDetails
 import net.primal.android.feeds.list.ui.DvmFeedMarketplace
@@ -31,6 +29,7 @@ fun FeedsOverlayContent(
     activeFeed: FeedUi,
     feedSpecKind: FeedSpecKind,
     onFeedClick: (FeedUi) -> Unit,
+    onDismiss: () -> Unit,
     onGoToWallet: (() -> Unit)? = null,
 ) {
     val viewModel = hiltViewModel<FeedListViewModel, FeedListViewModel.Factory>(
@@ -42,6 +41,7 @@ fun FeedsOverlayContent(
     FeedsOverlayContent(
         state = uiState.value,
         onFeedClick = onFeedClick,
+        onDismiss = onDismiss,
         eventPublisher = viewModel::setEvent,
         onGoToWallet = onGoToWallet,
     )
@@ -51,6 +51,7 @@ fun FeedsOverlayContent(
 private fun FeedsOverlayContent(
     state: FeedListContract.UiState,
     onFeedClick: (FeedUi) -> Unit,
+    onDismiss: () -> Unit,
     eventPublisher: (FeedListContract.UiEvent) -> Unit,
     onGoToWallet: (() -> Unit)? = null,
 ) {
@@ -58,6 +59,8 @@ private fun FeedsOverlayContent(
         when (state.feedMarketplaceStage) {
             FeedMarketplaceStage.FeedList -> if (state.isEditMode) {
                 eventPublisher(FeedListContract.UiEvent.CloseEditMode)
+            } else {
+                onDismiss()
             }
             FeedMarketplaceStage.FeedMarketplace -> eventPublisher(FeedListContract.UiEvent.CloseFeedMarketplace)
             FeedMarketplaceStage.FeedDetails -> eventPublisher(FeedListContract.UiEvent.CloseFeedDetails)
@@ -104,10 +107,7 @@ private fun FeedListStage(
 ) {
     FeedList(
         modifier = Modifier.fillMaxSize(),
-        title = when (state.specKind) {
-                        FeedSpecKind.Reads -> stringResource(id = R.string.reads_feeds_title)
-                        FeedSpecKind.Notes -> stringResource(id = R.string.home_feeds_title)
-                    },feeds = state.feeds,
+        feeds = state.feeds,
         activeFeed = state.activeFeed,
         onFeedClick = { feed ->
             if (state.isEditMode) {

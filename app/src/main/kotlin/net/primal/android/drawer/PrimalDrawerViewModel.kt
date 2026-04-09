@@ -5,19 +5,14 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.Instant
 import javax.inject.Inject
-import kotlin.time.Clock
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.days
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import net.primal.android.premium.legend.domain.asLegendaryCustomization
 import net.primal.android.premium.utils.isPrimalLegendTier
-import net.primal.android.theme.active.ActiveThemeStore
-import net.primal.android.theme.domain.PrimalTheme
 import net.primal.android.user.accounts.active.ActiveAccountStore
 import net.primal.android.user.domain.UserAccount
 import net.primal.android.user.subscriptions.SubscriptionsManager
@@ -26,7 +21,6 @@ import net.primal.domain.profile.ProfileRepository
 @HiltViewModel
 class PrimalDrawerViewModel @Inject constructor(
     private val activeAccountStore: ActiveAccountStore,
-    private val activeThemeStore: ActiveThemeStore,
     private val subscriptionsManager: SubscriptionsManager,
     private val profileRepository: ProfileRepository,
 ) : ViewModel() {
@@ -42,26 +36,11 @@ class PrimalDrawerViewModel @Inject constructor(
         _state.getAndUpdate { it.reducer() }
     }
 
-    private val events: MutableSharedFlow<PrimalDrawerContract.UiEvent> = MutableSharedFlow()
-    fun setEvent(event: PrimalDrawerContract.UiEvent) {
-        viewModelScope.launch { events.emit(event) }
-    }
-
     init {
-        subscribeToEvents()
         observeActiveAccount()
         observeProfile()
         subscribeToBadgesUpdates()
     }
-
-    private fun subscribeToEvents() =
-        viewModelScope.launch {
-            events.collect {
-                when (it) {
-                    is PrimalDrawerContract.UiEvent.ThemeSwitchClick -> invertTheme(it)
-                }
-            }
-        }
 
     private fun observeActiveAccount() =
         viewModelScope.launch {
@@ -107,17 +86,6 @@ class PrimalDrawerViewModel @Inject constructor(
                 }
             }
         }
-
-    private suspend fun invertTheme(event: PrimalDrawerContract.UiEvent.ThemeSwitchClick) {
-        val activeTheme = activeThemeStore.userThemeState.firstOrNull()
-        val newThemeName = activeTheme?.inverse?.themeName
-            ?: when (event.isSystemInDarkTheme) {
-                true -> PrimalTheme.Ice.themeName
-                false -> PrimalTheme.Midnight.themeName
-            }
-        activeThemeStore.setUserTheme(theme = newThemeName)
-        setState { copy(themeManuallyInvertedTimestamp = Clock.System.now().toEpochMilliseconds()) }
-    }
 
     private fun buildDrawerMenuItems(hasPremium: Boolean = false, userId: String) =
         listOf(
