@@ -5,10 +5,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,13 +19,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AlternateEmail
-import androidx.compose.material.icons.outlined.OpenInFull
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -68,11 +68,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.articles.feed.ui.FeedArticleListItem
-import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.CompactTextField
 import net.primal.android.core.compose.HeightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.ImportPhotosIconButton
 import net.primal.android.core.compose.ListNoContent
-import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -84,6 +83,7 @@ import net.primal.android.core.compose.foundation.keyboardVisibilityAsState
 import net.primal.android.core.compose.heightAdjustableLoadingLazyListPlaceholder
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
+import net.primal.android.core.compose.icons.primaliconpack.Expand
 import net.primal.android.core.compose.icons.primaliconpack.Gif
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromCamera
 import net.primal.android.core.compose.icons.primaliconpack.ImportPhotoFromGallery
@@ -99,7 +99,6 @@ import net.primal.android.core.utils.formatToDefaultTimeFormat
 import net.primal.android.editor.NoteEditorContract
 import net.primal.android.editor.di.noteEditorViewModel
 import net.primal.android.editor.domain.NoteEditorArgs
-import net.primal.android.editor.ui.NoteOutlinedTextField
 import net.primal.android.editor.ui.NoteTagUserLazyColumn
 import net.primal.android.notes.feed.model.EventStatsUi
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -591,16 +590,16 @@ private fun ReplyToBottomBar(
             ReplyingToText(
                 modifier = Modifier
                     .padding(horizontal = 16.dp)
-                    .padding(top = 8.dp),
+                    .padding(top = 16.dp),
                 replyToUsername = replyToPost.authorHandle,
             )
         }
 
-        NoteOutlinedTextField(
+        CompactTextField(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .padding(top = 8.dp)
+                .padding(top = if (isKeyboardVisible) 8.dp else 16.dp)
                 .imePadding(),
             value = replyState.content,
             onValueChange = { replyEventPublisher(NoteEditorContract.UiEvent.UpdateContent(content = it)) },
@@ -609,24 +608,24 @@ private fun ReplyToBottomBar(
             placeholder = {
                 ReplyTextFieldPlaceholder(
                     isKeyboardVisible = isKeyboardVisible,
-                    replyToPost = replyToPost,
+                    replyToAuthorName = replyToPost.authorName,
                 )
             },
             trailingIcon = {
                 AnimatedVisibility(visible = isKeyboardVisible) {
-                    AppBarIcon(
-                        icon = Icons.Outlined.OpenInFull,
-                        onClick = {
-                            onExpandReply(emptyList())
-                            keyboardController?.hide()
-                        },
+                    Icon(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .clickable {
+                                onExpandReply(emptyList())
+                                keyboardController?.hide()
+                            },
+                        imageVector = PrimalIcons.Expand,
+                        contentDescription = null,
                         tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                     )
                 }
             },
-            textStyle = AppTheme.typography.bodyMedium,
-            colors = PrimalDefaults.outlinedTextFieldColors(),
-            shape = AppTheme.shapes.extraLarge,
             taggedUsers = replyState.taggedUsers,
             onUserTaggingModeChanged = {
                 replyEventPublisher(NoteEditorContract.UiEvent.ToggleSearchUsers(enabled = it))
@@ -661,7 +660,7 @@ private fun ReplyToBottomBar(
 }
 
 @Composable
-private fun ColumnScope.ReplyTextFieldPlaceholder(isKeyboardVisible: Boolean, replyToPost: FeedPostUi) {
+private fun ReplyTextFieldPlaceholder(isKeyboardVisible: Boolean, replyToAuthorName: String) {
     AnimatedVisibility(
         visible = !isKeyboardVisible,
         exit = fadeOut(),
@@ -670,7 +669,7 @@ private fun ColumnScope.ReplyTextFieldPlaceholder(isKeyboardVisible: Boolean, re
         Text(
             text = stringResource(
                 id = R.string.thread_reply_to,
-                replyToPost.authorName,
+                replyToAuthorName,
             ),
             maxLines = 1,
             color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
@@ -703,7 +702,7 @@ private fun ReplyToOptions(
             ImportPhotosIconButton(
                 imageVector = PrimalIcons.ImportPhotoFromGallery,
                 contentDescription = stringResource(id = R.string.accessibility_import_photo_from_gallery),
-                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                tint = AppTheme.colorScheme.onSurface,
                 onPhotosImported = onPhotosImported,
             )
 
@@ -711,14 +710,14 @@ private fun ReplyToOptions(
                 Icon(
                     imageVector = PrimalIcons.Gif,
                     contentDescription = stringResource(id = R.string.accessibility_gif_picker),
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    tint = AppTheme.colorScheme.onSurface,
                 )
             }
 
             TakePhotoIconButton(
                 imageVector = PrimalIcons.ImportPhotoFromCamera,
                 contentDescription = stringResource(id = R.string.accessibility_take_photo),
-                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                tint = AppTheme.colorScheme.onSurface,
                 onPhotoTaken = { uri -> onPhotosImported(listOf(uri)) },
             )
 
@@ -726,7 +725,7 @@ private fun ReplyToOptions(
                 Icon(
                     imageVector = PrimalIcons.Poll,
                     contentDescription = stringResource(id = R.string.accessibility_poll_toggle),
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    tint = AppTheme.colorScheme.onSurface,
                 )
             }
 
@@ -734,7 +733,7 @@ private fun ReplyToOptions(
                 Icon(
                     imageVector = Icons.Default.AlternateEmail,
                     contentDescription = stringResource(id = R.string.accessibility_tag_user),
-                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                    tint = AppTheme.colorScheme.onSurface,
                 )
             }
         }

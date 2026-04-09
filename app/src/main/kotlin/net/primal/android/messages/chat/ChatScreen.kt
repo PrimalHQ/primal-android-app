@@ -1,6 +1,7 @@
 package net.primal.android.messages.chat
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,12 +23,11 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowUpward
 import androidx.compose.material.icons.outlined.HourglassBottom
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -42,7 +43,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Lifecycle
@@ -53,9 +53,8 @@ import androidx.paging.compose.itemKey
 import java.time.Instant
 import kotlin.time.Duration.Companion.minutes
 import net.primal.android.R
-import net.primal.android.core.compose.AppBarIcon
+import net.primal.android.core.compose.CompactTextField
 import net.primal.android.core.compose.ListNoContent
-import net.primal.android.core.compose.PrimalDefaults
 import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
@@ -421,44 +420,37 @@ private fun MessageOutlinedTextField(
         modifier = modifier,
         verticalAlignment = Alignment.Bottom,
     ) {
-        OutlinedTextField(
+        CompactTextField(
             modifier = Modifier.weight(1.0f),
             value = value,
             onValueChange = onValueChange,
-            maxLines = 10,
             enabled = !sending,
-            placeholder = {
-                Text(
-                    text = stringResource(
-                        id = R.string.chat_message_hint,
-                        participantUsername,
-                    ),
-                    maxLines = 1,
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt3,
-                    style = AppTheme.typography.bodyMedium,
-                )
-            },
-            textStyle = AppTheme.typography.bodyMedium,
-            colors = PrimalDefaults.outlinedTextFieldColors(),
-            shape = AppTheme.shapes.medium,
-            keyboardOptions = KeyboardOptions.Default.copy(
-                capitalization = KeyboardCapitalization.Sentences,
+            placeholder = stringResource(
+                id = R.string.chat_message_hint,
+                participantUsername,
             ),
         )
 
-        AppBarIcon(
-            modifier = Modifier.padding(bottom = 4.dp, start = 8.dp),
-            icon = if (sending) Icons.Outlined.HourglassBottom else Icons.Outlined.ArrowUpward,
-            appBarIconContentDescription = if (sending) {
-                stringResource(id = R.string.accessibility_message_being_sent)
-            } else {
-                stringResource(id = R.string.accessibility_send_message)
-            },
-            enabledBackgroundColor = AppTheme.colorScheme.primary,
-            tint = Color.White,
-            enabled = sendEnabled,
-            onClick = onSend,
-        )
+        Box(
+            modifier = Modifier
+                .padding(start = 8.dp)
+                .size(40.dp)
+                .clip(CircleShape)
+                .background(if (sendEnabled) AppTheme.colorScheme.primary else AppTheme.colorScheme.outline)
+                .clickable(enabled = sendEnabled, onClick = onSend),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                imageVector = if (sending) Icons.Outlined.HourglassBottom else Icons.Outlined.ArrowUpward,
+                contentDescription = if (sending) {
+                    stringResource(id = R.string.accessibility_message_being_sent)
+                } else {
+                    stringResource(id = R.string.accessibility_send_message)
+                },
+                tint = Color.White,
+            )
+        }
     }
 }
 

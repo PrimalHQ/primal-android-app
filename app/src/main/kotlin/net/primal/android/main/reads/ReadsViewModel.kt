@@ -1,0 +1,106 @@
+package net.primal.android.main.reads
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
+import javax.inject.Inject
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.launch
+import net.primal.android.feeds.list.ui.model.asFeedUi
+import net.primal.android.main.reads.ReadsScreenContract.UiEvent
+import net.primal.android.main.reads.ReadsScreenContract.UiState
+import net.primal.android.user.accounts.active.ActiveAccountStore
+import net.primal.core.networking.utils.retryNetworkCall
+import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.feeds.FeedSpecKind
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.nostr.cryptography.SignatureException
+import net.primal.domain.nostr.cryptography.SigningKeyNotFoundException
+import net.primal.domain.nostr.cryptography.SigningRejectedException
+
+@HiltViewModel
+class ReadsViewModel @Inject constructor(
+    private val activeAccountStore: ActiveAccountStore,
+    private val feedsRepository: FeedsRepository,
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(UiState())
+    val state = _state.asStateFlow()
+    private fun setState(reducer: UiState.() -> UiState) = _state.getAndUpdate { it.reducer() }
+
+    private val events: MutableSharedFlow<UiEvent> = MutableSharedFlow()
+    fun setEvent(event: UiEvent) = viewModelScope.launch { events.emit(event) }
+
+    init {
+        observeFeeds()
+        observeEvents()
+        fetchAndPersistReadsFeeds()
+    }
+
+    private fun observeFeeds() =
+        viewModelScope.launch {
+            feedsRepository.observeReadsFeeds(userId = activeAccountStore.activeUserId())
+                .collect { feeds ->
+                    setState {
+                        copy(
+                            feeds = feeds
+                                .filter { it.enabled }
+                                .map { it.asFeedUi() },
+                        )
+                    }
+                }
+        }
+
+    private fun observeEvents() =
+        viewModelScope.launch {
+            events.collect {
+                when (it) {
+                    UiEvent.RefreshReadsFeeds -> fetchAndPersistReadsFeeds()
+                    UiEvent.RestoreDefaultFeeds -> restoreDefaultReadsFeeds()
+                }
+            }
+        }
+
+    private fun restoreDefaultReadsFeeds() =
+        viewModelScope.launch {
+            try {
+                setState { copy(loading = true) }
+                val userId = activeAccountStore.activeUserId()
+                feedsRepository.fetchAndPersistDefaultFeeds(
+                    userId = userId,
+                    specKind = FeedSpecKind.Reads,
+                    givenDefaultFeeds = emptyList(),
+                )
+            } catch (error: SignatureException) {
+                Napier.w(throwable = error) { "Failed to restore default feeds" }
+            } catch (error: NetworkException) {
+                Napier.w(throwable = error) { "Failed to restore default feeds" }
+            } finally {
+                setState { copy(loading = false) }
+            }
+        }
+
+    private fun fetchAndPersistReadsFeeds() =
+        viewModelScope.launch {
+            setState { copy(loading = true) }
+            val userId = activeAccountStore.activeUserId()
+            try {
+                retryNetworkCall {
+                    feedsRepository.fetchAndPersistArticleFeeds(userId = userId)
+                }
+            } catch (error: SigningRejectedException) {
+                Napier.w(throwable = error) { "Signing rejected while fetching feeds" }
+            } catch (error: SigningKeyNotFoundException) {
+                restoreDefaultReadsFeeds()
+                Napier.w(throwable = error) { "Signing key not found while fetching feeds" }
+            } catch (error: NetworkException) {
+                Napier.w(throwable = error) { "Network error while fetching feeds" }
+            } finally {
+                setState { copy(loading = false) }
+            }
+        }
+}

@@ -3,6 +3,7 @@ package net.primal.android.wallet.dashboard.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -36,11 +37,17 @@ fun BtcAmountText(
         horizontalArrangement = Arrangement.Start,
     ) {
         Text(
+            modifier = Modifier.weight(1f, fill = false),
             text = amountInBtc?.toSats()?.let { numberFormat.format(it.toLong()) } ?: "⌛",
             textAlign = TextAlign.Center,
             style = AppTheme.typography.displayMedium,
             fontSize = textSize,
             color = amountColor,
+            maxLines = 1,
+            autoSize = TextAutoSize.StepBased(
+                minFontSize = (textSize.value * 0.5f).sp,
+                maxFontSize = textSize,
+            ),
         )
 
         if (amountInBtc != null) {

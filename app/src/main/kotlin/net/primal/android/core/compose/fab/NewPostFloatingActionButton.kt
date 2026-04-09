@@ -22,13 +22,14 @@ fun NewPostFloatingActionButton(onNewPostClick: () -> Unit) {
     FloatingActionButton(
         onClick = onNewPostClick,
         modifier = Modifier
-            .size(64.dp)
+            .size(54.dp)
             .clip(CircleShape)
             .background(color = AppTheme.colorScheme.primary, shape = CircleShape),
         elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
         containerColor = Color.Unspecified,
         content = {
             Icon(
+                modifier = Modifier.size(28.dp),
                 imageVector = Icons.Outlined.Add,
                 contentDescription = stringResource(id = R.string.accessibility_new_post),
                 tint = Color.White,

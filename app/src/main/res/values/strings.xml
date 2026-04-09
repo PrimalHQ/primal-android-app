@@ -124,10 +124,10 @@
     <string name="logout_cancel_button">Cancel</string>
     <string name="logout_button">Sign out</string>
 
-    <string name="primary_destination_feed_label">Feed</string>
+    <string name="primary_destination_feed_label">Feeds</string>
     <string name="primary_destination_reads_label">Reads</string>
     <string name="primary_destination_wallet_label">Wallet</string>
-    <string name="primary_destination_notifications_label">Notifications</string>
+    <string name="primary_destination_notifications_label">Alerts</string>
     <string name="primary_destination_explore_label">Explore</string>
 
     <string name="drawer_destination_profile">Profile</string>
@@ -140,6 +140,7 @@
     <string name="drawer_destination_sign_out">Sign Out</string>
     <string name="drawer_followers_suffix">Followers</string>
     <string name="drawer_following_suffix">Following</string>
+    <string name="drawer_action_close">Close</string>
 
     <string name="account_switcher_sheet_title">Accounts</string>
     <string name="account_switcher_done">Done</string>
@@ -705,6 +706,11 @@
     <string name="explore_trending_topics_no_content">Trending topics will appear here.</string>
     <string name="explore_feed_search_results">Search Results</string>
     <string name="explore_feed_fallback_title">Feed</string>
+    <string name="explore_title">Explore</string>
+    <string name="explore_top_app_bar_subtitle">All of Nostr</string>
+
+    <string name="account_drawer_title">Account</string>
+    <string name="account_drawer_subtitle">Options and settings</string>
     <string name="explore_feed_save_feed">Save</string>
     <string name="explore_feed_remove_feed">Remove</string>
     <string name="explore_feeds_tab">Feeds</string>
@@ -842,8 +848,10 @@
     <string name="wallet_picker_legacy_title">Legacy Wallet</string>
     <string name="wallet_picker_no_lightning_address">[ no lightning address ]</string>
     <string name="wallet_picker_nwc_description">Your external lightning wallet</string>
+    <string name="wallet_top_app_bar_subtitle">All transactions</string>
 
-    <string name="notifications_title">Notifications</string>
+    <string name="notifications_title">Alerts</string>
+    <string name="alerts_top_app_bar_subtitle">All notifications</string>
     <string name="notifications_no_content">Your notifications will appear here.</string>
     <string name="notifications_initial_loading_error">Unable to load notifications. Please try again.</string>
     <plurals name="notification_list_item_and_others">

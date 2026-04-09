@@ -220,7 +220,11 @@ private fun FeedNoteCard(
     val displaySettings = LocalContentDisplaySettings.current
     val notePaddingDp = 4.dp
     val avatarPaddingDp = 8.dp
-    val avatarSizeDp = displaySettings.contentAppearance.noteAvatarSize
+    val avatarSizeDp = if (fullWidthContent) {
+        displaySettings.contentAppearance.noteAvatarSize
+    } else {
+        displaySettings.contentAppearance.replyAvatarSize
+    }
     val overflowIconSizeDp = 40.dp
 
     val graphicsLayer = rememberGraphicsLayer()
@@ -239,7 +243,9 @@ private fun FeedNoteCard(
         colors = colors,
     ) {
         Box(
-            modifier = Modifier.padding(horizontal = notePaddingDp),
+            modifier = Modifier.padding(
+                horizontal = if (fullWidthContent && forceContentIndent) 0.dp else notePaddingDp,
+            ),
             contentAlignment = Alignment.TopEnd,
         ) {
             NoteDropdownMenuIcon(
@@ -250,6 +256,7 @@ private fun FeedNoteCard(
                         top = when {
                             data.repostAuthorName != null -> 7.dp
                             !fullWidthContent -> 11.dp
+                            forceContentIndent -> 14.dp
                             else -> 18.dp
                         },
                     )
@@ -491,9 +498,123 @@ private fun FeedNote(
     val localUriHandler = LocalUriHandler.current
     val uiScope = rememberCoroutineScope()
     val interactionSource = remember { MutableInteractionSource() }
+    val isFeedLayout = fullWidthContent && forceContentIndent
+    val contentIndentDp = if (isFeedLayout) avatarSizeDp + 10.dp else 0.dp
 
-    Row {
-        if (!fullWidthContent) {
+    Box {
+        Row {
+            if (!fullWidthContent) {
+                UniversalAvatarThumbnail(
+                    modifier = Modifier.padding(avatarPaddingValues),
+                    avatarSize = avatarSizeDp,
+                    avatarCdnImage = data.authorAvatarCdnImage,
+                    legendaryCustomization = data.authorLegendaryCustomization,
+                    avatarBlossoms = data.authorBlossoms,
+                    onClick = if (noteCallbacks.onProfileClick != null) {
+                        { noteCallbacks.onProfileClick.invoke(data.authorId) }
+                    } else {
+                        null
+                    },
+                    isLive = data.isAuthorLiveStreamingNow,
+                )
+            }
+
+            Column(
+                modifier = Modifier.padding(start = 0.dp),
+            ) {
+                FeedNoteHeader(
+                    modifier = Modifier
+                        .padding(notePaddingValues)
+                        .padding(start = if (isFeedLayout) avatarSizeDp + 10.dp else 0.dp)
+                        .padding(top = if (isFeedLayout) 3.dp else 0.dp)
+                        .padding(end = 4.dp)
+                        .fillMaxWidth(),
+                    postTimestamp = data.timestamp,
+                    singleLine = headerSingleLine,
+                    authorAvatarVisible = fullWidthContent && !forceContentIndent,
+                    authorAvatarSize = avatarSizeDp,
+                    authorDisplayName = data.authorName,
+                    authorAvatarCdnImage = data.authorAvatarCdnImage,
+                    authorInternetIdentifier = data.authorInternetIdentifier,
+                    authorLegendaryCustomization = data.authorLegendaryCustomization,
+                    authorBlossoms = data.authorBlossoms,
+                    authorId = data.authorId,
+                replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
+                isLive = data.isAuthorLiveStreamingNow,
+                onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
+                    { noteCallbacks.onProfileClick.invoke(data.authorId) }
+                } else {
+                    null
+                },
+            )
+
+                val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
+                val launchRippleEffect: (Offset) -> Unit = {
+                    uiScope.launch {
+                        val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
+                        interactionSource.emit(press)
+                        interactionSource.emit(PressInteraction.Release(press))
+                    }
+                }
+
+                NoteContent(
+                    modifier = Modifier
+                        .padding(horizontal = if (fullWidthContent && !forceContentIndent) 10.dp else 8.dp)
+                        .padding(start = contentIndentDp)
+                        .padding(
+                            top = if ((fullWidthContent && !forceContentIndent) || !headerSingleLine) 10.dp else 5.dp,
+                        ),
+                    data = data.toNoteContentUi(),
+                    expanded = expanded,
+                    enableTweetsMode = enableTweetsMode,
+                    textSelectable = textSelectable,
+                    nestingCutOffLimit = nestingCutOffLimit,
+                    onClick = if (noteCallbacks.onNoteClick != null) {
+                        {
+                            launchRippleEffect(it)
+                            noteCallbacks.onNoteClick.invoke(data.postId)
+                        }
+                    } else {
+                        null
+                    },
+                    onUrlClick = { localUriHandler.openUriSafely(it) },
+                    couldAutoPlay = couldAutoPlay,
+                    noteCallbacks = noteCallbacks,
+                    onVideoSoundToggle = onVideoSoundToggle,
+                    onPollOptionSelected = onPollOptionSelected,
+                )
+
+                if (isFeedLayout) {
+                    Box(modifier = Modifier.padding(start = contentIndentDp)) {
+                        contentFooter()
+                    }
+                } else {
+                    contentFooter()
+                }
+
+                if (!showNoteStatCounts) {
+                    PrimalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                }
+
+                FeedNoteActionsRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = if (showNoteStatCounts) 12.dp else 16.dp)
+                        .padding(start = contentIndentDp)
+                        .padding(vertical = if (showNoteStatCounts) 8.dp else 12.dp)
+                        .padding(top = if (showNoteStatCounts) 4.dp else 0.dp),
+                    eventStats = data.stats,
+                    showCounts = showNoteStatCounts,
+                    highlightedNote = !showNoteStatCounts,
+                    isBookmarked = data.isBookmarked,
+                    onPostAction = onPostAction,
+                    onPostLongPressAction = onPostLongClickAction,
+                    showBookmark = fullWidthContent,
+                )
+            }
+        }
+
+        if (isFeedLayout) {
             UniversalAvatarThumbnail(
                 modifier = Modifier.padding(avatarPaddingValues),
                 avatarSize = avatarSizeDp,
@@ -506,89 +627,6 @@ private fun FeedNote(
                     null
                 },
                 isLive = data.isAuthorLiveStreamingNow,
-            )
-        }
-
-        Column(
-            modifier = Modifier.padding(start = 0.dp),
-        ) {
-            FeedNoteHeader(
-                modifier = Modifier
-                    .padding(notePaddingValues)
-                    .padding(end = 4.dp)
-                    .fillMaxWidth(),
-                postTimestamp = data.timestamp,
-                singleLine = headerSingleLine,
-                authorAvatarVisible = fullWidthContent,
-                authorAvatarSize = avatarSizeDp,
-                authorDisplayName = data.authorName,
-                authorAvatarCdnImage = data.authorAvatarCdnImage,
-                authorInternetIdentifier = data.authorInternetIdentifier,
-                authorLegendaryCustomization = data.authorLegendaryCustomization,
-                authorBlossoms = data.authorBlossoms,
-                authorId = data.authorId,
-                replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
-                isLive = data.isAuthorLiveStreamingNow,
-                onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
-                    { noteCallbacks.onProfileClick.invoke(data.authorId) }
-                } else {
-                    null
-                },
-            )
-
-            val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
-            val launchRippleEffect: (Offset) -> Unit = {
-                uiScope.launch {
-                    val press = PressInteraction.Press(it.copy(y = it.y + postAuthorGuessHeight))
-                    interactionSource.emit(press)
-                    interactionSource.emit(PressInteraction.Release(press))
-                }
-            }
-
-            NoteContent(
-                modifier = Modifier
-                    .padding(horizontal = if (fullWidthContent) 10.dp else 8.dp)
-                    .padding(start = if (forceContentIndent && fullWidthContent) avatarSizeDp + 6.dp else 0.dp)
-                    .padding(top = if (fullWidthContent || !headerSingleLine) 10.dp else 5.dp),
-                data = data.toNoteContentUi(),
-                expanded = expanded,
-                enableTweetsMode = enableTweetsMode,
-                textSelectable = textSelectable,
-                nestingCutOffLimit = nestingCutOffLimit,
-                onClick = if (noteCallbacks.onNoteClick != null) {
-                    {
-                        launchRippleEffect(it)
-                        noteCallbacks.onNoteClick.invoke(data.postId)
-                    }
-                } else {
-                    null
-                },
-                onUrlClick = { localUriHandler.openUriSafely(it) },
-                couldAutoPlay = couldAutoPlay,
-                noteCallbacks = noteCallbacks,
-                onVideoSoundToggle = onVideoSoundToggle,
-                onPollOptionSelected = onPollOptionSelected,
-            )
-
-            contentFooter()
-
-            if (!showNoteStatCounts) {
-                PrimalDivider(modifier = Modifier.padding(vertical = 4.dp))
-            }
-
-            FeedNoteActionsRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = if (showNoteStatCounts) 12.dp else 16.dp)
-                    .padding(vertical = if (showNoteStatCounts) 8.dp else 12.dp)
-                    .padding(top = if (showNoteStatCounts) 4.dp else 0.dp),
-                eventStats = data.stats,
-                showCounts = showNoteStatCounts,
-                highlightedNote = !showNoteStatCounts,
-                isBookmarked = data.isBookmarked,
-                onPostAction = onPostAction,
-                onPostLongPressAction = onPostLongClickAction,
-                showBookmark = fullWidthContent,
             )
         }
     }
