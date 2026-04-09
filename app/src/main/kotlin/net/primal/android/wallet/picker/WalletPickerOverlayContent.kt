@@ -13,8 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.TextAutoSize
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -22,7 +20,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -67,12 +64,11 @@ fun WalletPickerOverlayContent(onDismiss: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .padding(top = 16.dp)
             .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        WalletPickerTopBar(isEditMode = state.value.isEditMode)
-
         WalletPickerContent(
             state = state.value,
             onWalletClick = { userWallet ->
@@ -96,27 +92,6 @@ fun WalletPickerOverlayContent(onDismiss: () -> Unit) {
             onDoneClick = { viewModel.setEvent(UiEvent.ConfirmReassignment) },
         )
     }
-}
-
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun WalletPickerTopBar(isEditMode: Boolean) {
-    CenterAlignedTopAppBar(
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-        ),
-        title = {
-            Text(
-                text = stringResource(
-                    id = if (isEditMode) {
-                        R.string.wallet_picker_configure_title
-                    } else {
-                        R.string.wallet_picker_title
-                    },
-                ),
-            )
-        },
-    )
 }
 
 @Composable
@@ -152,7 +127,7 @@ private fun WalletPickerContent(state: UiState, onWalletClick: (UserWallet) -> U
             WalletListItem(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = 16.dp)
                     .clip(AppTheme.shapes.large)
                     .then(
                         if (!isNotTappableInEditMode) {
