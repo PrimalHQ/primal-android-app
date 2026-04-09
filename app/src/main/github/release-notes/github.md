@@ -1,11 +1,9 @@
+## Features
+- Redesigned app shell with a new top and bottom bars
+- Redesigned feed picker
+- Redesigned side menu as account options menu
+- Performance improvement on the main screen
+- Improved feed layout
+
 ## Fixes
-- Implemented overflow menu and delete wallet in Dev Tools (#1002)
-- Implemented wallet multi-account sharing (#999)
-- Added test tags to the onboarding flow for QA (#1001)
-- Fixed poll zap votes appearing as Top Zaps (#995)
-- Mapped WalletException types to error codes in NWC responses (#1000)
-- Hide wallet balance and action buttons when no wallet exists (#998)
-- Implemented auto-reconnect in remote signer (#1006)
-- Implemented CallbackAntilog for iOS in wallet repo
-- Implemented auto-reconnect in wallet service (#1003)
-- Fixed the new posts pill not scrolling to top on non-latest feeds (#1005)
+- Fixed wallet text amount overflowing on smaller screens using TextAutoSize (#1014)
