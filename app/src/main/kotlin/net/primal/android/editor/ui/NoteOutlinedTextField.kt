@@ -12,14 +12,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import net.primal.android.core.utils.TextMatcher
 import net.primal.android.editor.domain.NoteTaggedUser
 import net.primal.android.theme.AppTheme
 
@@ -57,32 +53,17 @@ fun NoteOutlinedTextField(
 ) {
     OutlinedTextField(
         modifier = modifier,
-        value = value.copy(
-            annotatedString = value.text.asAnnotatedStringWithTaggedUsers(
-                taggedUsers = taggedUsers,
-                highlightColor = taggedUserColor,
-            ),
+        value = value.annotateWithTaggedUsers(
+            taggedUsers = taggedUsers,
+            highlightColor = taggedUserColor,
         ),
-        onValueChange = {
-            val cursorPosition = it.selection.start
-            val textUntilCursor = it.text.substring(startIndex = 0, endIndex = cursorPosition)
-            val lastIndexOfUserTaggingSign = textUntilCursor.lastIndexOf("@")
-            if (lastIndexOfUserTaggingSign != -1) {
-                val query = it.text.substring(
-                    startIndex = lastIndexOfUserTaggingSign + 1,
-                    endIndex = cursorPosition,
-                )
-
-                if (query.hasStopCharacter()) {
-                    onUserTaggingModeChanged(false)
-                } else {
-                    onUserTagSearch(query)
-                }
-            } else {
-                onUserTaggingModeChanged(false)
-            }
-
-            onValueChange(it.copy(text = it.text))
+        onValueChange = { newValue ->
+            processUserTagChange(
+                newValue = newValue,
+                onUserTaggingModeChanged = onUserTaggingModeChanged,
+                onUserTagSearch = onUserTagSearch,
+                onValueChange = onValueChange,
+            )
         },
         enabled = enabled,
         readOnly = readOnly,
@@ -105,37 +86,4 @@ fun NoteOutlinedTextField(
         shape = shape,
         colors = colors,
     )
-}
-
-private fun String.hasStopCharacter(): Boolean {
-    return when {
-        contains(' ') -> true
-        contains('\n') -> true
-        contains('\t') -> true
-        else -> false
-    }
-}
-
-private fun String.asAnnotatedStringWithTaggedUsers(
-    taggedUsers: List<NoteTaggedUser>,
-    highlightColor: Color,
-): AnnotatedString {
-    val text = this
-    return buildAnnotatedString {
-        append(text)
-        TextMatcher(content = text, texts = taggedUsers.map { it.displayUsername }).matches()
-            .forEach {
-                addStyle(
-                    style = SpanStyle(color = highlightColor),
-                    start = it.startIndex,
-                    end = it.endIndex,
-                )
-                addStringAnnotation(
-                    tag = "Mentions",
-                    annotation = it.value,
-                    start = it.startIndex,
-                    end = it.endIndex,
-                )
-            }
-    }
 }
