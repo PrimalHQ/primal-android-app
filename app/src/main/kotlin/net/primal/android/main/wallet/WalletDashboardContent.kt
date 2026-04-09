@@ -550,6 +550,7 @@ private fun DashboardUpgradeNotice(onUpgradeWalletClick: () -> Unit, modifier: M
 internal fun WalletDashboardTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior?,
     onAvatarClick: () -> Unit,
+    onAvatarSwipeDown: (() -> Unit)? = null,
     onWalletPickerRequest: () -> Unit,
     titleOverride: String? = null,
     subtitleOverride: String? = null,
@@ -564,6 +565,7 @@ internal fun WalletDashboardTopAppBar(
         canShowWalletPicker = canShowWalletPicker,
         scrollBehavior = scrollBehavior,
         onAvatarClick = onAvatarClick,
+        onAvatarSwipeDown = onAvatarSwipeDown,
         onWalletPickerRequest = onWalletPickerRequest,
         titleOverride = titleOverride,
         subtitleOverride = subtitleOverride,
@@ -578,6 +580,7 @@ private fun WalletDashboardTopAppBar(
     canShowWalletPicker: Boolean,
     scrollBehavior: TopAppBarScrollBehavior?,
     onAvatarClick: () -> Unit,
+    onAvatarSwipeDown: (() -> Unit)? = null,
     onWalletPickerRequest: () -> Unit,
     titleOverride: String? = null,
     subtitleOverride: String? = null,
@@ -595,6 +598,7 @@ private fun WalletDashboardTopAppBar(
         avatarBlossoms = state.activeAccountBlossoms,
         avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
         onAvatarClick = onAvatarClick,
+        onAvatarSwipeDown = onAvatarSwipeDown,
         scrollBehavior = scrollBehavior,
     )
 }

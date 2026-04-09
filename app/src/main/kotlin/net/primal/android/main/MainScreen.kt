@@ -39,9 +39,6 @@ import net.primal.android.R
 import net.primal.android.core.activity.LocalContentDisplaySettings
 import net.primal.android.core.compose.PrimalOverlay
 import net.primal.android.core.compose.PrimalTopLevelDestination
-import net.primal.android.feeds.list.FeedListOverlayContent
-import net.primal.android.wallet.picker.WalletPickerOverlayContent
-import net.primal.domain.feeds.FeedSpecKind
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.fab.NewPostFloatingActionButton
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
@@ -50,6 +47,7 @@ import net.primal.android.drawer.DrawerScreenDestination
 import net.primal.android.drawer.PrimalDrawer
 import net.primal.android.drawer.PrimalMainScaffold
 import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
+import net.primal.android.feeds.list.FeedListOverlayContent
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.main.explore.ExploreHomeContent
 import net.primal.android.main.explore.ExploreTopAppBar
@@ -68,12 +66,15 @@ import net.primal.android.main.wallet.WalletDashboardTopAppBar
 import net.primal.android.main.wallet.WalletDashboardViewModel
 import net.primal.android.navigation.accountSwitcherCallbacksHandler
 import net.primal.android.navigation.navigateToFollowPack
+import net.primal.android.navigation.navigateToHome
 import net.primal.android.navigation.navigateToNoteEditor
 import net.primal.android.navigation.navigateToProfileQrCodeViewer
 import net.primal.android.navigation.noteCallbacksHandler
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.stream.player.LocalStreamState
+import net.primal.android.wallet.picker.WalletPickerOverlayContent
+import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.links.CdnImage
 import net.primal.domain.wallet.CurrencyMode
 
@@ -111,7 +112,7 @@ fun MainScreen(
     val mainViewModel = hiltViewModel<MainViewModel>(navBackStackEntry)
     val mainState by mainViewModel.state.collectAsState()
 
-    MainScreenSharedEffects(mainViewModel)
+    MainScreenSharedEffects(mainViewModel, navController)
 
     val noteFeedsViewModel = hiltViewModel<NoteFeedsViewModel>(navBackStackEntry)
     val noteFeedsState by noteFeedsViewModel.state.collectAsState()
@@ -154,6 +155,7 @@ fun MainScreen(
     MainScreenScaffold(
         activeTab = activeTab,
         mainState = mainState,
+        mainEventPublisher = mainViewModel::setEvent,
         homeState = noteFeedsState,
         homeEventPublisher = noteFeedsViewModel::setEvent,
         homeTopAppBarState = homeTopAppBarState,
@@ -175,6 +177,7 @@ private fun MainScreenTopAppBar(
     activeTab: PrimalTopLevelDestination,
     scrollBehavior: TopAppBarScrollBehavior?,
     onAvatarClick: () -> Unit,
+    onAvatarSwipeDown: (() -> Unit)? = null,
     onFeedPickerRequest: () -> Unit,
     onReadPickerRequest: () -> Unit,
     onWalletPickerRequest: () -> Unit,
@@ -197,6 +200,7 @@ private fun MainScreenTopAppBar(
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
                 onAvatarClick = onAvatarClick,
+                onAvatarSwipeDown = onAvatarSwipeDown,
                 onFeedPickerRequest = onFeedPickerRequest,
                 scrollBehavior = scrollBehavior,
                 titleOverride = titleOverride,
@@ -213,6 +217,7 @@ private fun MainScreenTopAppBar(
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
                 onAvatarClick = onAvatarClick,
+                onAvatarSwipeDown = onAvatarSwipeDown,
                 onFeedPickerRequest = onReadPickerRequest,
                 scrollBehavior = scrollBehavior,
                 titleOverride = titleOverride,
@@ -228,6 +233,7 @@ private fun MainScreenTopAppBar(
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
                 onAvatarClick = onAvatarClick,
+                onAvatarSwipeDown = onAvatarSwipeDown,
                 scrollBehavior = scrollBehavior,
                 titleOverride = titleOverride,
                 subtitleOverride = subtitleOverride,
@@ -241,6 +247,7 @@ private fun MainScreenTopAppBar(
                 avatarBlossoms = avatarBlossoms,
                 scrollBehavior = scrollBehavior,
                 onAvatarClick = onAvatarClick,
+                onAvatarSwipeDown = onAvatarSwipeDown,
                 titleOverride = titleOverride,
                 subtitleOverride = subtitleOverride,
             )
@@ -249,6 +256,7 @@ private fun MainScreenTopAppBar(
         PrimalTopLevelDestination.Wallet -> WalletDashboardTopAppBar(
             scrollBehavior = scrollBehavior,
             onAvatarClick = onAvatarClick,
+            onAvatarSwipeDown = onAvatarSwipeDown,
             onWalletPickerRequest = onWalletPickerRequest,
             titleOverride = titleOverride,
             subtitleOverride = subtitleOverride,
@@ -390,6 +398,7 @@ private fun rememberMainScreenSharedState(): MainScreenSharedState {
 private fun MainScreenScaffold(
     activeTab: PrimalTopLevelDestination,
     mainState: MainContract.UiState,
+    mainEventPublisher: (MainContract.UiEvent) -> Unit,
     homeState: NoteFeedsContract.UiState,
     homeEventPublisher: (NoteFeedsContract.UiEvent) -> Unit,
     homeTopAppBarState: TopAppBarState,
@@ -435,12 +444,23 @@ private fun MainScreenScaffold(
         topAppBarState = currentTopAppBarState,
         topAppBar = { scrollBehavior ->
             val drawerTitle = if (accountDrawerVisible) stringResource(id = R.string.account_drawer_title) else null
-            val drawerSubtitle = if (accountDrawerVisible) stringResource(id = R.string.account_drawer_subtitle) else null
+            val drawerSubtitle = if (accountDrawerVisible) {
+                stringResource(
+                    id = R.string.account_drawer_subtitle,
+                )
+            } else {
+                null
+            }
 
             MainScreenTopAppBar(
                 activeTab = activeTab,
                 scrollBehavior = scrollBehavior,
                 onAvatarClick = { toggleOverlay(ActiveOverlay.AccountDrawer) },
+                onAvatarSwipeDown = if (mainState.hasMultipleAccounts) {
+                    { mainEventPublisher(MainContract.UiEvent.SwitchToNextAccount) }
+                } else {
+                    null
+                },
                 onFeedPickerRequest = { toggleOverlay(ActiveOverlay.FeedPicker) },
                 onReadPickerRequest = { toggleOverlay(ActiveOverlay.ReadPicker) },
                 onWalletPickerRequest = { toggleOverlay(ActiveOverlay.WalletPicker) },
@@ -561,7 +581,7 @@ private fun MainScreenScaffold(
 }
 
 @Composable
-private fun MainScreenSharedEffects(mainViewModel: MainViewModel) {
+private fun MainScreenSharedEffects(mainViewModel: MainViewModel, navController: NavController) {
     DisposableLifecycleObserverEffect(mainViewModel) {
         when (it) {
             Lifecycle.Event.ON_START -> {
@@ -569,6 +589,14 @@ private fun MainScreenSharedEffects(mainViewModel: MainViewModel) {
             }
 
             else -> Unit
+        }
+    }
+
+    LaunchedEffect(mainViewModel, mainViewModel.effects) {
+        mainViewModel.effects.collect {
+            when (it) {
+                MainContract.SideEffect.AccountSwitched -> navController.navigateToHome()
+            }
         }
     }
 }

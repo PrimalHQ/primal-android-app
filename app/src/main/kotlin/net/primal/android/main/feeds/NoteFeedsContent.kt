@@ -138,6 +138,7 @@ internal fun NoteFeedTopAppBar(
     title: String,
     avatarCdnImage: CdnImage?,
     onAvatarClick: () -> Unit,
+    onAvatarSwipeDown: (() -> Unit)? = null,
     onFeedPickerRequest: () -> Unit,
     activeFeed: FeedUi?,
     avatarLegendaryCustomization: LegendaryCustomization? = null,
@@ -163,6 +164,7 @@ internal fun NoteFeedTopAppBar(
         avatarBlossoms = avatarBlossoms,
         avatarLegendaryCustomization = avatarLegendaryCustomization,
         onAvatarClick = onAvatarClick,
+        onAvatarSwipeDown = onAvatarSwipeDown,
         scrollBehavior = scrollBehavior,
     )
 }
