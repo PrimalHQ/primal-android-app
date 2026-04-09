@@ -120,6 +120,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Notrich
 import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppConnection
 import net.primal.android.core.compose.icons.primaliconpack.NwcExternalAppForeground
 import net.primal.android.core.compose.icons.primaliconpack.Paste
+import net.primal.android.core.compose.icons.primaliconpack.PencilUnderline
 import net.primal.android.core.compose.icons.primaliconpack.PhotoFromGallery
 import net.primal.android.core.compose.icons.primaliconpack.Play
 import net.primal.android.core.compose.icons.primaliconpack.Poll
@@ -317,6 +318,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             FeedBookmarkFilled,
             GenericLinkIcon,
             LegendaryProfileNoCustomization,
+            PencilUnderline,
             PrimalBadgeGold,
             PrimalBadgeBlue,
             PrimalBadgeSilver,
