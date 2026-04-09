@@ -383,6 +383,7 @@ private fun MediaFeedHeader(
             authorInternetIdentifier = data.authorInternetIdentifier,
             authorLegendaryCustomization = data.authorLegendaryCustomization,
             authorBlossoms = data.authorBlossoms,
+            authorId = data.authorId,
             isLive = data.isAuthorLiveStreamingNow,
             onAuthorAvatarClick = noteCallbacks.onProfileClick?.let {
                 { it(data.authorId) }

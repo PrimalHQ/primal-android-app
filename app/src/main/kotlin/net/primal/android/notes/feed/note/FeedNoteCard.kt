@@ -539,14 +539,14 @@ private fun FeedNote(
                     authorLegendaryCustomization = data.authorLegendaryCustomization,
                     authorBlossoms = data.authorBlossoms,
                     authorId = data.authorId,
-                replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
-                isLive = data.isAuthorLiveStreamingNow,
-                onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
-                    { noteCallbacks.onProfileClick.invoke(data.authorId) }
-                } else {
-                    null
-                },
-            )
+                    replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
+                    isLive = data.isAuthorLiveStreamingNow,
+                    onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
+                        { noteCallbacks.onProfileClick.invoke(data.authorId) }
+                    } else {
+                        null
+                    },
+                )
 
                 val postAuthorGuessHeight = with(LocalDensity.current) { 128.dp.toPx() }
                 val launchRippleEffect: (Offset) -> Unit = {
