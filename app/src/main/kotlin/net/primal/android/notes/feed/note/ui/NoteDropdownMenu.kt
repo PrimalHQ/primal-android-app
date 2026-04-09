@@ -89,6 +89,7 @@ fun NoteDropdownMenuIcon(
                 .wrapContentSize(align = Alignment.TopEnd),
             imageVector = PrimalIcons.More,
             contentDescription = stringResource(id = R.string.accessibility_note_drop_down),
+            tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
         )
 
         DropdownPrimalMenu(
