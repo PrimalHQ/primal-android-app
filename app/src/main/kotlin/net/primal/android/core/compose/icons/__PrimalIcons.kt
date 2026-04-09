@@ -49,6 +49,7 @@ import net.primal.android.core.compose.icons.primaliconpack.DrawerProfileFilled
 import net.primal.android.core.compose.icons.primaliconpack.DrawerSettings
 import net.primal.android.core.compose.icons.primaliconpack.DrawerSignOut
 import net.primal.android.core.compose.icons.primaliconpack.Edit
+import net.primal.android.core.compose.icons.primaliconpack.Expand
 import net.primal.android.core.compose.icons.primaliconpack.Explore
 import net.primal.android.core.compose.icons.primaliconpack.ExploreFilled
 import net.primal.android.core.compose.icons.primaliconpack.FeedBookmark
@@ -357,6 +358,7 @@ val PrimalIcons.PrimalIcons: ____KtList<ImageVector>
             NostrConnectSession,
             RemoteLogin,
             Gif,
+            Expand,
         )
         return __PrimalIcons!!
     }
