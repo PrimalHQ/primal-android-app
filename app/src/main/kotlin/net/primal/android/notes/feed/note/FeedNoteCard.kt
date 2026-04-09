@@ -220,10 +220,10 @@ private fun FeedNoteCard(
     val displaySettings = LocalContentDisplaySettings.current
     val notePaddingDp = 4.dp
     val avatarPaddingDp = 8.dp
-    val avatarSizeDp = if (fullWidthContent && forceContentIndent) {
-        displaySettings.contentAppearance.feedAvatarSize
-    } else {
+    val avatarSizeDp = if (fullWidthContent) {
         displaySettings.contentAppearance.noteAvatarSize
+    } else {
+        displaySettings.contentAppearance.replyAvatarSize
     }
     val overflowIconSizeDp = 40.dp
 
@@ -256,7 +256,7 @@ private fun FeedNoteCard(
                         top = when {
                             data.repostAuthorName != null -> 7.dp
                             !fullWidthContent -> 11.dp
-                            forceContentIndent -> 11.dp
+                            forceContentIndent -> 14.dp
                             else -> 18.dp
                         },
                     )
@@ -526,6 +526,7 @@ private fun FeedNote(
                     modifier = Modifier
                         .padding(notePaddingValues)
                         .padding(start = if (isFeedLayout) avatarSizeDp + 10.dp else 0.dp)
+                        .padding(top = if (isFeedLayout) 3.dp else 0.dp)
                         .padding(end = 4.dp)
                         .fillMaxWidth(),
                     postTimestamp = data.timestamp,
