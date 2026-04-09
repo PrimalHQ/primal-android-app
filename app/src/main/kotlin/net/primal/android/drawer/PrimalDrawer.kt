@@ -3,18 +3,16 @@ package net.primal.android.drawer
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -25,15 +23,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -43,22 +41,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.NumberFormat
 import net.primal.android.R
 import net.primal.android.core.compose.NostrUserText
-import net.primal.android.core.compose.UniversalAvatarThumbnail
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.icons.PrimalIcons
-import net.primal.android.core.compose.icons.primaliconpack.DarkMode
 import net.primal.android.core.compose.icons.primaliconpack.DrawerBookmarks
 import net.primal.android.core.compose.icons.primaliconpack.DrawerMessages
 import net.primal.android.core.compose.icons.primaliconpack.DrawerPremium
 import net.primal.android.core.compose.icons.primaliconpack.DrawerProfile
 import net.primal.android.core.compose.icons.primaliconpack.DrawerSettings
 import net.primal.android.core.compose.icons.primaliconpack.DrawerSignOut
-import net.primal.android.core.compose.icons.primaliconpack.LightMode
 import net.primal.android.core.compose.icons.primaliconpack.QrCode
 import net.primal.android.core.compose.icons.primaliconpack.RemoteLogin
 import net.primal.android.core.compose.preview.PrimalPreview
@@ -84,6 +78,7 @@ fun PrimalDrawer(
     PrimalDrawer(
         state = uiState.value,
         accountSwitcherCallbacks = accountSwitcherCallbacks,
+        onDismiss = onDismiss,
         onDrawerDestinationClick = {
             when (it) {
                 is DrawerScreenDestination.SignOut -> Unit
@@ -91,7 +86,6 @@ fun PrimalDrawer(
             }
             onDrawerDestinationClick(it)
         },
-        eventPublisher = { viewModel.setEvent(it) },
         onQrCodeClick = {
             onDismiss()
             onQrCodeClick()
@@ -99,142 +93,107 @@ fun PrimalDrawer(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PrimalDrawer(
+private fun PrimalDrawer(
     state: PrimalDrawerContract.UiState,
-    eventPublisher: (PrimalDrawerContract.UiEvent) -> Unit,
+    onDismiss: () -> Unit,
     onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
     onQrCodeClick: () -> Unit,
     accountSwitcherCallbacks: AccountSwitcherCallbacks,
 ) {
-    val isSystemInDarkTheme = isSystemInDarkTheme()
-    Surface {
-        Column(
-            modifier = Modifier
-                .systemBarsPadding()
-                .width(300.dp)
-                .fillMaxHeight(),
-            verticalArrangement = Arrangement.Bottom,
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null,
+                onClick = {},
+            )
+            .navigationBarsPadding()
+            .padding(top = 16.dp),
+    ) {
+        Row(
+            modifier = Modifier.weight(1f),
         ) {
-            DrawerHeader(
-                userAccount = state.activeUserAccount,
-                onQrCodeClick = onQrCodeClick,
-                legendaryCustomization = state.legendaryCustomization,
-                accountSwitcherCallbacks = accountSwitcherCallbacks,
-                onLogoutClick = { onDrawerDestinationClick(DrawerScreenDestination.SignOut(it)) },
-                onProfileClick = { onDrawerDestinationClick(DrawerScreenDestination.Profile(it)) },
-            )
-
-            DrawerMenu(
+            Column(
                 modifier = Modifier
-                    .weight(1.0f)
-                    .padding(top = 32.dp),
-                state = state,
-                showPremiumBadge = state.showPremiumBadge,
-                onDrawerDestinationClick = onDrawerDestinationClick,
-            )
+                    .weight(1f)
+                    .fillMaxHeight(),
+            ) {
+                DrawerHeader(
+                    userAccount = state.activeUserAccount,
+                    onQrCodeClick = onQrCodeClick,
+                    legendaryCustomization = state.legendaryCustomization,
+                )
 
-            DrawerFooter(
-                onThemeSwitch = {
-                    eventPublisher(
-                        PrimalDrawerContract.UiEvent.ThemeSwitchClick(
-                            isSystemInDarkTheme = isSystemInDarkTheme,
-                        ),
-                    )
-                },
+                DrawerMenu(
+                    modifier = Modifier
+                        .weight(1.0f)
+                        .padding(top = 32.dp),
+                    state = state,
+                    showPremiumBadge = state.showPremiumBadge,
+                    onDrawerDestinationClick = onDrawerDestinationClick,
+                )
+            }
+
+            AccountSwitcher(
+                callbacks = accountSwitcherCallbacks,
+                onLogoutClick = { onDrawerDestinationClick(DrawerScreenDestination.SignOut(it)) },
             )
         }
+
+        PrimalDivider()
+        DrawerFooter(onCloseClick = onDismiss)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DrawerHeader(
     userAccount: UserAccount?,
     legendaryCustomization: LegendaryCustomization?,
     onQrCodeClick: () -> Unit,
-    accountSwitcherCallbacks: AccountSwitcherCallbacks,
-    onLogoutClick: (String) -> Unit,
-    onProfileClick: (String) -> Unit,
 ) {
-    ConstraintLayout(
-        modifier = Modifier.fillMaxWidth(),
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 24.dp),
     ) {
-        val startGuideline = createGuidelineFromStart(24.dp)
-        val (avatarRef, usernameRef, iconRef, identifierRef, statsRef) = createRefs()
-
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .constrainAs(avatarRef) {
-                    start.linkTo(startGuideline)
-                    top.linkTo(parent.top, margin = 16.dp)
-                    width = Dimension.preferredValue(260.dp)
-                },
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            UniversalAvatarThumbnail(
-                avatarSize = 52.dp,
-                avatarCdnImage = userAccount?.avatarCdnImage,
-                avatarBlossoms = userAccount?.blossomServers ?: emptyList(),
+            NostrUserText(
+                displayName = userAccount?.authorDisplayName ?: "",
+                internetIdentifier = userAccount?.internetIdentifier,
+                internetIdentifierBadgeSize = 24.dp,
                 legendaryCustomization = legendaryCustomization,
-                onClick = userAccount?.pubkey?.let { pubkey -> { onProfileClick(pubkey) } },
             )
 
-            AccountSwitcher(callbacks = accountSwitcherCallbacks, onLogoutClick = onLogoutClick)
+            IconButton(onClick = onQrCodeClick) {
+                Icon(
+                    imageVector = PrimalIcons.QrCode,
+                    contentDescription = stringResource(id = R.string.accessibility_qr_code),
+                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                )
+            }
         }
 
-        NostrUserText(
-            displayName = userAccount?.authorDisplayName ?: "",
-            internetIdentifier = userAccount?.internetIdentifier,
-            internetIdentifierBadgeSize = 24.dp,
-            modifier = Modifier.constrainAs(usernameRef) {
-                start.linkTo(startGuideline)
-                top.linkTo(avatarRef.bottom, margin = 16.dp)
-                width = Dimension.preferredValue(220.dp)
-            },
-            legendaryCustomization = legendaryCustomization,
-        )
-
-        IconButton(
-            modifier = Modifier.constrainAs(iconRef) {
-                centerVerticallyTo(usernameRef)
-                start.linkTo(usernameRef.end)
-                width = Dimension.preferredWrapContent
-            },
-            onClick = {
-            },
-        ) {
-            Icon(
-                modifier = Modifier.clickable { onQrCodeClick() },
-                imageVector = PrimalIcons.QrCode,
-                contentDescription = stringResource(id = R.string.accessibility_qr_code),
+        val formattedIdentifier = userAccount?.internetIdentifier?.formatNip05Identifier()
+        if (!formattedIdentifier.isNullOrBlank()) {
+            Text(
+                text = formattedIdentifier,
+                style = AppTheme.typography.labelLarge,
+                color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
             )
         }
 
         Text(
-            text = userAccount?.internetIdentifier?.formatNip05Identifier() ?: "",
+            text = buildStatsAnnotatedString(
+                followersCount = userAccount?.followersCount,
+                followingCount = userAccount?.followingCount,
+            ),
             style = AppTheme.typography.labelLarge,
-            color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            modifier = Modifier.constrainAs(identifierRef) {
-                start.linkTo(startGuideline)
-                top.linkTo(usernameRef.bottom, margin = 8.dp)
-            },
-        )
-
-        val statsAnnotatedString = buildStatsAnnotatedString(
-            followersCount = userAccount?.followersCount,
-            followingCount = userAccount?.followingCount,
-        )
-
-        Text(
-            text = statsAnnotatedString,
-            style = AppTheme.typography.labelLarge,
-            modifier = Modifier.constrainAs(statsRef) {
-                start.linkTo(startGuideline)
-                top.linkTo(identifierRef.bottom, margin = 16.dp)
-            },
+            modifier = Modifier.padding(top = 16.dp),
         )
     }
 }
@@ -247,7 +206,7 @@ private fun buildStatsAnnotatedString(followingCount: Int?, followersCount: Int?
             AnnotatedString(
                 text = followingCount?.let { numberFormat.format(it) } ?: "-",
                 spanStyle = SpanStyle(
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    color = AppTheme.extraColorScheme.onBrand,
                     fontStyle = AppTheme.typography.labelLarge.fontStyle,
                 ),
             ),
@@ -266,7 +225,7 @@ private fun buildStatsAnnotatedString(followingCount: Int?, followersCount: Int?
             AnnotatedString(
                 text = followersCount?.let { numberFormat.format(it) } ?: "-",
                 spanStyle = SpanStyle(
-                    color = AppTheme.extraColorScheme.onSurfaceVariantAlt1,
+                    color = AppTheme.extraColorScheme.onBrand,
                     fontStyle = AppTheme.typography.labelLarge.fontStyle,
                 ),
             ),
@@ -302,7 +261,7 @@ private fun DrawerMenu(
             val isPressed by interactionSource.collectIsPressedAsState()
             ListItem(
                 colors = ListItemDefaults.colors(
-                    containerColor = AppTheme.colorScheme.surface,
+                    containerColor = Color.Transparent,
                     leadingIconColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                     headlineColor = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 ),
@@ -365,20 +324,15 @@ private fun DrawerMenu(
 }
 
 @Composable
-private fun DrawerFooter(onThemeSwitch: () -> Unit) {
-    Box(
-        modifier = Modifier.padding(vertical = 16.dp, horizontal = 24.dp),
+private fun DrawerFooter(onCloseClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.End,
     ) {
-        val isDarkTheme = AppTheme.colorScheme.surface.luminance() < 0.5f
-        val iconVector = if (isDarkTheme) PrimalIcons.DarkMode else PrimalIcons.LightMode
-        IconButton(
-            onClick = onThemeSwitch,
-        ) {
-            Icon(
-                imageVector = iconVector,
-                contentDescription = stringResource(id = R.string.accessibility_toggle_between_dark_and_light_mode),
-                tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
-            )
+        TextButton(onClick = onCloseClick) {
+            Text(text = stringResource(id = R.string.drawer_action_close))
         }
     }
 }
@@ -437,7 +391,7 @@ fun PrimalDrawerPreview() {
                     DrawerScreenDestination.SignOut(userId = "none"),
                 ),
             ),
-            eventPublisher = {},
+            onDismiss = {},
             onDrawerDestinationClick = {},
             onQrCodeClick = {},
             accountSwitcherCallbacks = AccountSwitcherCallbacks(

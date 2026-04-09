@@ -140,6 +140,7 @@
     <string name="drawer_destination_sign_out">Sign Out</string>
     <string name="drawer_followers_suffix">Followers</string>
     <string name="drawer_following_suffix">Following</string>
+    <string name="drawer_action_close">Close</string>
 
     <string name="account_switcher_sheet_title">Accounts</string>
     <string name="account_switcher_done">Done</string>

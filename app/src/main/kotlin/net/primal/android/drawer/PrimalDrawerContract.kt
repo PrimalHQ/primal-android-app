@@ -13,10 +13,5 @@ interface PrimalDrawerContract {
         val badges: Badges = Badges(),
         val showPremiumBadge: Boolean = false,
         val legendaryCustomization: LegendaryCustomization? = null,
-        val themeManuallyInvertedTimestamp: Long? = null,
     )
-
-    sealed class UiEvent {
-        data class ThemeSwitchClick(val isSystemInDarkTheme: Boolean) : UiEvent()
-    }
 }
