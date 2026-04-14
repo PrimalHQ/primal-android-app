@@ -24,6 +24,7 @@ import net.primal.data.remote.model.ContentPrimalFeedData
 import net.primal.data.repository.mappers.local.asContentPrimalFeedData
 import net.primal.data.repository.mappers.local.asFeedPO
 import net.primal.data.repository.mappers.local.asPrimalFeedDO
+import net.primal.data.repository.mappers.remote.asAdvancedSearchParsedQuery
 import net.primal.data.repository.mappers.remote.asEventStatsPO
 import net.primal.data.repository.mappers.remote.asEventUserStatsPO
 import net.primal.data.repository.mappers.remote.asFeedPO
@@ -34,6 +35,7 @@ import net.primal.data.repository.mappers.remote.parseAndMapPrimalUserNames
 import net.primal.data.repository.mappers.remote.takeContentAsPrimalUserScoresOrNull
 import net.primal.data.repository.utils.cacheAvatarUrls
 import net.primal.domain.common.PrimalEvent
+import net.primal.domain.feeds.AdvancedSearchParsedQuery
 import net.primal.domain.feeds.DvmFeed
 import net.primal.domain.feeds.FEED_KIND_DVM
 import net.primal.domain.feeds.FeedSpecKind
@@ -325,6 +327,52 @@ class FeedsRepositoryImpl(
     override suspend fun removeFeedLocally(userId: String, feedSpec: String) {
         withContext(dispatcherProvider.io()) {
             database.feeds().deleteAllByOwnerIdAndSpec(ownerId = userId, spec = feedSpec)
+        }
+    }
+
+    override suspend fun findFeedBySpec(userId: String, feedSpec: String): PrimalFeed? {
+        return withContext(dispatcherProvider.io()) {
+            database.feeds().findBySpec(ownerId = userId, spec = feedSpec)?.asPrimalFeedDO()
+        }
+    }
+
+    override suspend fun getAdvancedSearchQuery(query: String): AdvancedSearchParsedQuery {
+        return withContext(dispatcherProvider.io()) {
+            feedsApi.getAdvancedSearchQuery(query = query).asAdvancedSearchParsedQuery()
+        }
+    }
+
+    override suspend fun replaceFeedLocally(
+        userId: String,
+        oldFeedSpec: String,
+        newFeedSpec: String,
+        title: String,
+        description: String,
+        feedSpecKind: FeedSpecKind,
+        feedKind: String,
+    ) {
+        withContext(dispatcherProvider.io()) {
+            val existingFeeds = database.feeds().getAllFeedsBySpecKind(ownerId = userId, specKind = feedSpecKind)
+            val oldFeed = existingFeeds.firstOrNull { it.spec == oldFeedSpec }
+            val position = oldFeed?.position ?: existingFeeds.size
+
+            database.withTransaction {
+                database.feeds().deleteAllByOwnerIdAndSpec(ownerId = userId, spec = oldFeedSpec)
+                database.feeds().upsertAll(
+                    listOf(
+                        Feed(
+                            position = position,
+                            ownerId = userId,
+                            spec = newFeedSpec,
+                            specKind = feedSpecKind,
+                            feedKind = feedKind,
+                            title = title,
+                            description = description,
+                            enabled = oldFeed?.enabled ?: true,
+                        ),
+                    ),
+                )
+            }
         }
     }
 

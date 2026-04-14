@@ -22,6 +22,9 @@ interface FeedDao {
     @Query("SELECT * FROM Feed WHERE ownerId = :ownerId AND specKind = :specKind ORDER BY position ASC")
     fun observeAllFeedsBySpecKind(ownerId: String, specKind: FeedSpecKind): Flow<List<Feed>>
 
+    @Query("SELECT * FROM Feed WHERE ownerId = :ownerId AND spec = :spec LIMIT 1")
+    suspend fun findBySpec(ownerId: String, spec: String): Feed?
+
     @Query("SELECT EXISTS(SELECT 1 FROM Feed WHERE ownerId = :ownerId AND spec = :spec)")
     fun observeContainsFeed(ownerId: String, spec: String): Flow<Boolean>
 
