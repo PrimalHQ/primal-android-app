@@ -506,11 +506,11 @@ fun PrimalAppNavigation(navController: NavHostController, startDestination: Stri
             onRestoreWalletClick = { navController.navigateToWalletRestore() },
         ) {
             PiPManagerProvider {
-                AudioPlayerStateProvider {
-                    LiveStreamOverlay(
-                        navController = navController,
-                        noteCallbacks = noteCallbacksHandler(navController = navController),
-                    ) {
+                LiveStreamOverlay(
+                    navController = navController,
+                    noteCallbacks = noteCallbacksHandler(navController = navController),
+                ) {
+                    AudioPlayerStateProvider {
                         PrimalAppNavigation(
                             navController = navController,
                             startDestination = startDestination,

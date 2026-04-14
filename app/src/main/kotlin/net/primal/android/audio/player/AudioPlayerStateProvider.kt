@@ -21,6 +21,7 @@ import androidx.media3.session.SessionToken
 import com.google.common.util.concurrent.MoreExecutors
 import kotlinx.coroutines.delay
 import net.primal.android.core.service.PrimalMediaSessionService
+import net.primal.android.stream.player.LocalStreamState
 
 private const val PROGRESS_POLL_INTERVAL_MS = 200L
 const val EXTRA_NOTE_ID = "noteId"
@@ -38,6 +39,7 @@ fun AudioPlayerStateProvider(content: @Composable () -> Unit) {
 @Suppress("CyclomaticComplexMethod")
 @Composable
 private fun AudioPlayerController(audioState: AudioPlayerState) {
+    val streamState = LocalStreamState.current
     val context = LocalContext.current
     val appContext = remember(context) { context.applicationContext }
     var controller by remember { mutableStateOf<MediaController?>(null) }
@@ -76,7 +78,14 @@ private fun AudioPlayerController(audioState: AudioPlayerState) {
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(playing: Boolean) = updateState()
             override fun onPlaybackStateChanged(playbackState: Int) = updateState()
-            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) = updateState()
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                val currentMediaId = mediaItem?.mediaId
+                if (audioState.currentUrl != null && currentMediaId != audioState.currentUrl) {
+                    audioState.stop()
+                } else {
+                    updateState()
+                }
+            }
         }
         c.addListener(listener)
         onDispose { c.removeListener(listener) }
@@ -101,6 +110,7 @@ private fun AudioPlayerController(audioState: AudioPlayerState) {
                 AudioPlayerCommand.Pause -> c.pause()
                 is AudioPlayerCommand.SeekTo -> c.seekTo(command.positionMs)
                 is AudioPlayerCommand.PlayUrl -> {
+                    streamState.stop()
                     val extras = Bundle().apply {
                         command.noteId?.let { putString(EXTRA_NOTE_ID, it) }
                     }
