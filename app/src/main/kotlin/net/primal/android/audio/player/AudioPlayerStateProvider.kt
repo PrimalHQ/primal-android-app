@@ -80,7 +80,9 @@ private fun AudioPlayerController(audioState: AudioPlayerState) {
             override fun onPlaybackStateChanged(playbackState: Int) = updateState()
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 val currentMediaId = mediaItem?.mediaId
-                if (audioState.currentUrl != null && currentMediaId != audioState.currentUrl) {
+                if (currentMediaId != null &&
+                    audioState.currentUrl != null && currentMediaId != audioState.currentUrl
+                ) {
                     audioState.stop()
                 } else {
                     updateState()
