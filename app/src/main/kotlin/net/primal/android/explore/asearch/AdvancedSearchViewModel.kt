@@ -28,7 +28,6 @@ import net.primal.android.navigation.editingFeedSpec
 import net.primal.android.navigation.initialQuery
 import net.primal.android.navigation.postedBy
 import net.primal.android.navigation.searchKind
-import net.primal.domain.common.exception.NetworkException
 import net.primal.domain.feeds.AdvancedSearchParsedQuery
 import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.feeds.extractAdvancedSearchQuery
@@ -123,46 +122,46 @@ class AdvancedSearchViewModel @Inject constructor(
         viewModelScope.launch {
             val query = editingFeedSpec?.extractAdvancedSearchQuery() ?: return@launch
             setState { copy(loading = true) }
-            try {
-                val parsed = feedsRepository.getAdvancedSearchQuery(query = query)
-                val includedWords = buildString {
-                    if (parsed.includes.isNotEmpty()) append(parsed.includes)
-                    if (parsed.hashtags.isNotEmpty()) {
-                        val tags = parsed.hashtags.split(" ").joinToString(" ") { "#$it" }
-                        if (isNotEmpty()) append(" ")
-                        append(tags)
-                    }
-                }.ifEmpty { null }
-
-                setState {
-                    copy(
-                        includedWords = includedWords,
-                        excludedWords = parsed.excludes.ifEmpty { null },
-                        searchKind = parsed.kind.toSearchKind(),
-                        timePosted = parsed.toTimeModifier(),
-                        scope = parsed.scope.toSearchScope(),
-                        orderBy = parsed.sortBy.toSearchOrderBy(),
-                        filter = parsed.toSearchFilter(),
-                    )
-                }
-
-                val postedByProfiles = fetchProfiles(parsed.postedBy)
-                val replyingToProfiles = fetchProfiles(parsed.replyingTo)
-                val zappedByProfiles = fetchProfiles(parsed.zappedBy)
-
-                setState {
-                    copy(
-                        postedBy = postedByProfiles,
-                        replyingTo = replyingToProfiles,
-                        zappedBy = zappedByProfiles,
-                    )
-                }
-            } catch (error: NetworkException) {
-                Napier.w(throwable = error) { "Failed to parse advanced search query." }
-            } finally {
-                setState { copy(loading = false) }
-            }
+            runCatching { feedsRepository.getAdvancedSearchQuery(query = query) }
+                .onSuccess { parsed -> applyParsedQuery(parsed) }
+                .onFailure { Napier.w(throwable = it) { "Failed to parse advanced search query." } }
+            setState { copy(loading = false) }
         }
+
+    private suspend fun applyParsedQuery(parsed: AdvancedSearchParsedQuery) {
+        val includedWords = buildString {
+            if (parsed.includes.isNotEmpty()) append(parsed.includes)
+            if (parsed.hashtags.isNotEmpty()) {
+                val tags = parsed.hashtags.split(" ").joinToString(" ") { "#$it" }
+                if (isNotEmpty()) append(" ")
+                append(tags)
+            }
+        }.ifEmpty { null }
+
+        setState {
+            copy(
+                includedWords = includedWords,
+                excludedWords = parsed.excludes.ifEmpty { null },
+                searchKind = parsed.kind.toSearchKind(),
+                timePosted = parsed.toTimeModifier(),
+                scope = parsed.scope.toSearchScope(),
+                orderBy = parsed.sortBy.toSearchOrderBy(),
+                filter = parsed.toSearchFilter(),
+            )
+        }
+
+        val postedByProfiles = fetchProfiles(parsed.postedBy)
+        val replyingToProfiles = fetchProfiles(parsed.replyingTo)
+        val zappedByProfiles = fetchProfiles(parsed.zappedBy)
+
+        setState {
+            copy(
+                postedBy = postedByProfiles,
+                replyingTo = replyingToProfiles,
+                zappedBy = zappedByProfiles,
+            )
+        }
+    }
 
     private suspend fun fetchProfiles(pubkeys: List<String>): Set<UserProfileItemUi> {
         if (pubkeys.isEmpty()) return emptySet()
