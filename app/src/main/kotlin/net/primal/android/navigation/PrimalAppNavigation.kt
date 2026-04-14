@@ -203,12 +203,14 @@ internal fun NavController.navigateToAdvancedSearch(
     initialPostedBy: List<String>? = null,
     initialSearchKind: AdvancedSearchContract.SearchKind? = null,
     initialSearchScope: AdvancedSearchContract.SearchScope? = null,
+    editingFeedSpec: String? = null,
 ) = navigate(
     route = "asearch" +
         "?$INITIAL_QUERY=$initialQuery" +
         "&$POSTED_BY=${initialPostedBy.encodeToJsonString()}" +
         "&$SEARCH_KIND=$initialSearchKind" +
-        "&$ADV_SEARCH_SCOPE=$initialSearchScope",
+        "&$ADV_SEARCH_SCOPE=$initialSearchScope" +
+        "&$EDITING_FEED_SPEC=${editingFeedSpec?.asBase64Encoded()}",
 )
 
 internal fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
@@ -292,11 +294,13 @@ fun NavController.navigateToExploreFeed(
     renderType: ExploreFeedContract.RenderType = ExploreFeedContract.RenderType.List,
     feedTitle: String? = null,
     feedDescription: String? = null,
+    editingFeedSpec: String? = null,
 ) = navigate(
     route = "explore/note?$EXPLORE_FEED_SPEC=${feedSpec.asBase64Encoded()}" +
         "&$EXPLORE_FEED_TITLE=${feedTitle?.asBase64Encoded()}" +
         "&$EXPLORE_FEED_DESCRIPTION=${feedDescription?.asBase64Encoded()}" +
-        "&$RENDER_TYPE=$renderType",
+        "&$RENDER_TYPE=$renderType" +
+        "&$EDITING_FEED_SPEC=${editingFeedSpec?.asBase64Encoded()}",
 )
 
 private fun NavController.navigateToBookmarks() = navigate(route = "bookmarks")
@@ -621,7 +625,8 @@ private fun PrimalAppNavigation(
                 "$ADVANCED_SEARCH_FEED_SPEC={$ADVANCED_SEARCH_FEED_SPEC}&" +
                 "$EXPLORE_FEED_TITLE={$EXPLORE_FEED_TITLE}&" +
                 "$EXPLORE_FEED_DESCRIPTION={$EXPLORE_FEED_DESCRIPTION}&" +
-                "$RENDER_TYPE={$RENDER_TYPE}",
+                "$RENDER_TYPE={$RENDER_TYPE}&" +
+                "$EDITING_FEED_SPEC={$EDITING_FEED_SPEC}",
             arguments = listOf(
                 navArgument(EXPLORE_FEED_SPEC) {
                     type = NavType.StringType
@@ -643,6 +648,10 @@ private fun PrimalAppNavigation(
                     type = NavType.StringType
                     nullable = false
                     defaultValue = ExploreFeedContract.RenderType.List.toString()
+                },
+                navArgument(EDITING_FEED_SPEC) {
+                    type = NavType.StringType
+                    nullable = true
                 },
             ),
             deepLinks = listOf(
@@ -668,7 +677,8 @@ private fun PrimalAppNavigation(
                 "?$INITIAL_QUERY={$INITIAL_QUERY}" +
                 "&$POSTED_BY={$POSTED_BY}" +
                 "&$SEARCH_KIND={$SEARCH_KIND}" +
-                "&$ADV_SEARCH_SCOPE={$ADV_SEARCH_SCOPE}",
+                "&$ADV_SEARCH_SCOPE={$ADV_SEARCH_SCOPE}" +
+                "&$EDITING_FEED_SPEC={$EDITING_FEED_SPEC}",
             navController = navController,
             arguments = listOf(
                 navArgument(INITIAL_QUERY) {
@@ -684,6 +694,10 @@ private fun PrimalAppNavigation(
                     nullable = true
                 },
                 navArgument(ADV_SEARCH_SCOPE) {
+                    type = NavType.StringType
+                    nullable = true
+                },
+                navArgument(EDITING_FEED_SPEC) {
                     type = NavType.StringType
                     nullable = true
                 },
@@ -1477,11 +1491,18 @@ private fun NavGraphBuilder.advancedSearch(
         viewModel = viewModel,
         callbacks = AdvancedSearchContract.ScreenCallbacks(
             onClose = { navController.navigateUp() },
-            onNavigateToExploreNoteFeed = { feedSpec, renderType ->
-                navController.navigateToExploreFeed(feedSpec, renderType)
+            onNavigateToExploreNoteFeed = { feedSpec, renderType, editingFeedSpec ->
+                navController.navigateToExploreFeed(
+                    feedSpec = feedSpec,
+                    renderType = renderType,
+                    editingFeedSpec = editingFeedSpec,
+                )
             },
-            onNavigateToExploreArticleFeed = { feedSpec ->
-                navController.navigateToExploreFeed(feedSpec)
+            onNavigateToExploreArticleFeed = { feedSpec, editingFeedSpec ->
+                navController.navigateToExploreFeed(
+                    feedSpec = feedSpec,
+                    editingFeedSpec = editingFeedSpec,
+                )
             },
         ),
     )
