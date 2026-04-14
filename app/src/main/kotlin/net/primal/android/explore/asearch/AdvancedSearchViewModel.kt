@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.github.aakira.napier.Napier
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -23,9 +24,14 @@ import net.primal.android.explore.asearch.AdvancedSearchContract.UiEvent
 import net.primal.android.explore.asearch.AdvancedSearchContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract
 import net.primal.android.navigation.advSearchScope
+import net.primal.android.navigation.editingFeedSpec
 import net.primal.android.navigation.initialQuery
 import net.primal.android.navigation.postedBy
 import net.primal.android.navigation.searchKind
+import net.primal.domain.common.exception.NetworkException
+import net.primal.domain.feeds.AdvancedSearchParsedQuery
+import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.feeds.extractAdvancedSearchQuery
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.profile.ProfileRepository
 
@@ -33,6 +39,7 @@ import net.primal.domain.profile.ProfileRepository
 class AdvancedSearchViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val profileRepository: ProfileRepository,
+    private val feedsRepository: FeedsRepository,
 ) : ViewModel() {
 
     companion object {
@@ -43,12 +50,14 @@ class AdvancedSearchViewModel @Inject constructor(
     private val initialPostedBy = savedStateHandle.postedBy
     private val initialSearchKind = savedStateHandle.searchKind ?: AdvancedSearchContract.SearchKind.Notes
     private val initialSearchScope = savedStateHandle.advSearchScope ?: AdvancedSearchContract.SearchScope.Global
+    private val editingFeedSpec = savedStateHandle.editingFeedSpec
 
     private val _state = MutableStateFlow(
         UiState(
             includedWords = savedStateHandle.initialQuery,
             searchKind = initialSearchKind,
             scope = initialSearchScope,
+            editingFeedSpec = editingFeedSpec,
         ),
     )
     val state = _state.asStateFlow()
@@ -64,6 +73,9 @@ class AdvancedSearchViewModel @Inject constructor(
     init {
         observeEvents()
         fetchInitialPostedBy()
+        if (editingFeedSpec != null) {
+            parseEditingFeedSpec()
+        }
     }
 
     private fun observeEvents() =
@@ -107,6 +119,58 @@ class AdvancedSearchViewModel @Inject constructor(
             }
         }
 
+    private fun parseEditingFeedSpec() =
+        viewModelScope.launch {
+            val query = editingFeedSpec?.extractAdvancedSearchQuery() ?: return@launch
+            setState { copy(loading = true) }
+            try {
+                val parsed = feedsRepository.getAdvancedSearchQuery(query = query)
+                val includedWords = buildString {
+                    if (parsed.includes.isNotEmpty()) append(parsed.includes)
+                    if (parsed.hashtags.isNotEmpty()) {
+                        val tags = parsed.hashtags.split(" ").joinToString(" ") { "#$it" }
+                        if (isNotEmpty()) append(" ")
+                        append(tags)
+                    }
+                }.ifEmpty { null }
+
+                setState {
+                    copy(
+                        includedWords = includedWords,
+                        excludedWords = parsed.excludes.ifEmpty { null },
+                        searchKind = parsed.kind.toSearchKind(),
+                        timePosted = parsed.toTimeModifier(),
+                        scope = parsed.scope.toSearchScope(),
+                        orderBy = parsed.sortBy.toSearchOrderBy(),
+                        filter = parsed.toSearchFilter(),
+                    )
+                }
+
+                val postedByProfiles = fetchProfiles(parsed.postedBy)
+                val replyingToProfiles = fetchProfiles(parsed.replyingTo)
+                val zappedByProfiles = fetchProfiles(parsed.zappedBy)
+
+                setState {
+                    copy(
+                        postedBy = postedByProfiles,
+                        replyingTo = replyingToProfiles,
+                        zappedBy = zappedByProfiles,
+                    )
+                }
+            } catch (error: NetworkException) {
+                Napier.w(throwable = error) { "Failed to parse advanced search query." }
+            } finally {
+                setState { copy(loading = false) }
+            }
+        }
+
+    private suspend fun fetchProfiles(pubkeys: List<String>): Set<UserProfileItemUi> {
+        if (pubkeys.isEmpty()) return emptySet()
+        return profileRepository.findProfileData(pubkeys)
+            .map { it.asUserProfileItemUi() }
+            .toSet()
+    }
+
     private fun onSearch() =
         viewModelScope.launch {
             val uiState = state.value
@@ -134,6 +198,7 @@ class AdvancedSearchViewModel @Inject constructor(
                 setEffect(
                     AdvancedSearchContract.SideEffect.NavigateToExploreArticleFeed(
                         feedSpec = searchCommand.buildFeedSpec(),
+                        editingFeedSpec = editingFeedSpec,
                     ),
                 )
             } else {
@@ -141,6 +206,7 @@ class AdvancedSearchViewModel @Inject constructor(
                     AdvancedSearchContract.SideEffect.NavigateToExploreNoteFeed(
                         feedSpec = searchCommand.buildFeedSpec(),
                         renderType = renderType,
+                        editingFeedSpec = editingFeedSpec,
                     ),
                 )
             }
@@ -231,4 +297,75 @@ class AdvancedSearchViewModel @Inject constructor(
             Orientation.Horizontal -> "orientation:horizontal"
             Orientation.Vertical -> "orientation:vertical"
         }
+
+    private fun String.toSearchKind(): AdvancedSearchContract.SearchKind =
+        when (this) {
+            "Notes" -> AdvancedSearchContract.SearchKind.Notes
+            "Reads" -> AdvancedSearchContract.SearchKind.Reads
+            "Images" -> AdvancedSearchContract.SearchKind.Images
+            "Videos" -> AdvancedSearchContract.SearchKind.Videos
+            "Sound" -> AdvancedSearchContract.SearchKind.Sound
+            "NoteReplies" -> AdvancedSearchContract.SearchKind.NoteReplies
+            "ReadsComments" -> AdvancedSearchContract.SearchKind.ReadsComments
+            else -> AdvancedSearchContract.SearchKind.Notes
+        }
+
+    private fun String.toSearchScope(): AdvancedSearchContract.SearchScope =
+        when (this) {
+            "Global" -> AdvancedSearchContract.SearchScope.Global
+            "MyFollows" -> AdvancedSearchContract.SearchScope.MyFollows
+            "MyNetwork" -> AdvancedSearchContract.SearchScope.MyNetwork
+            "MyNotifications" -> AdvancedSearchContract.SearchScope.MyNotifications
+            "MyFollowsInteractions" -> AdvancedSearchContract.SearchScope.MyFollowsInteractions
+            "MyNetworkInteractions" -> AdvancedSearchContract.SearchScope.MyNetworkInteractions
+            "NotMyFollows" -> AdvancedSearchContract.SearchScope.NotMyFollows
+            else -> AdvancedSearchContract.SearchScope.Global
+        }
+
+    private fun String.toSearchOrderBy(): AdvancedSearchContract.SearchOrderBy =
+        when (this) {
+            "Time" -> AdvancedSearchContract.SearchOrderBy.Time
+            "ContentScore" -> AdvancedSearchContract.SearchOrderBy.ContentScore
+            "Replies" -> AdvancedSearchContract.SearchOrderBy.Replies
+            "SatsZapped" -> AdvancedSearchContract.SearchOrderBy.SatsZapped
+            "Interactions" -> AdvancedSearchContract.SearchOrderBy.Interactions
+            else -> AdvancedSearchContract.SearchOrderBy.Time
+        }
+
+    private fun AdvancedSearchParsedQuery.toTimeModifier(): AdvancedSearchContract.TimeModifier {
+        if (customTimeframeSince.isNotEmpty() && customTimeframeUntil.isNotEmpty()) {
+            val since = runCatching { Instant.parse(customTimeframeSince) }.getOrNull()
+            val until = runCatching { Instant.parse(customTimeframeUntil) }.getOrNull()
+            if (since != null && until != null) {
+                return AdvancedSearchContract.TimeModifier.Custom(startDate = since, endDate = until)
+            }
+        }
+        return when (timeframe) {
+            "Anytime" -> AdvancedSearchContract.TimeModifier.Anytime
+            "Today" -> AdvancedSearchContract.TimeModifier.Today
+            "Week" -> AdvancedSearchContract.TimeModifier.Week
+            "Month" -> AdvancedSearchContract.TimeModifier.Month
+            "Year" -> AdvancedSearchContract.TimeModifier.Year
+            else -> AdvancedSearchContract.TimeModifier.Anytime
+        }
+    }
+
+    private fun AdvancedSearchParsedQuery.toSearchFilter(): SearchFilter =
+        SearchFilter(
+            orientation = when (orientation) {
+                "Horizontal" -> Orientation.Horizontal
+                "Vertical" -> Orientation.Vertical
+                else -> null
+            },
+            minReadTime = if (minWords > 0) (minWords + 237) / 238 else 0,
+            maxReadTime = if (maxWords > 0) (maxWords + 237) / 238 else 0,
+            minDuration = minDuration,
+            maxDuration = maxDuration,
+            minContentScore = minScore,
+            minInteractions = minInteractions,
+            minLikes = minLikes,
+            minZaps = minZaps,
+            minReplies = minReplies,
+            minReposts = minReposts,
+        )
 }

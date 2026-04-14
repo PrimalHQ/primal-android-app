@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
@@ -17,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -72,10 +74,10 @@ fun AdvancedSearchScreen(viewModel: AdvancedSearchViewModel, callbacks: Advanced
         viewModel.effects.collect {
             when (it) {
                 is AdvancedSearchContract.SideEffect.NavigateToExploreNoteFeed ->
-                    callbacks.onNavigateToExploreNoteFeed(it.feedSpec, it.renderType)
+                    callbacks.onNavigateToExploreNoteFeed(it.feedSpec, it.renderType, it.editingFeedSpec)
 
                 is AdvancedSearchContract.SideEffect.NavigateToExploreArticleFeed ->
-                    callbacks.onNavigateToExploreArticleFeed(it.feedSpec)
+                    callbacks.onNavigateToExploreArticleFeed(it.feedSpec, it.editingFeedSpec)
             }
         }
     }
@@ -87,6 +89,7 @@ fun AdvancedSearchScreen(viewModel: AdvancedSearchViewModel, callbacks: Advanced
     )
 }
 
+@Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AdvancedSearchScreen(
@@ -118,6 +121,17 @@ private fun AdvancedSearchScreen(
             }
         },
     ) { paddingValues ->
+        if (state.loading) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+            return@PrimalScaffold
+        }
         Column(
             modifier = Modifier
                 .padding(top = 8.dp)
