@@ -1,5 +1,6 @@
 package net.primal.data.remote.api.feeds
 
+import net.primal.data.remote.api.feeds.model.AdvancedSearchQueryResponse
 import net.primal.data.remote.api.feeds.model.DvmFeedsResponse
 import net.primal.data.remote.api.feeds.model.FeedsResponse
 import net.primal.domain.feeds.FeedSpecKind
@@ -14,4 +15,6 @@ interface FeedsApi {
     suspend fun getUserFeeds(authorization: NostrEvent, specKind: FeedSpecKind): FeedsResponse
 
     suspend fun setUserFeeds(userFeedsNostrEvent: NostrEvent)
+
+    suspend fun getAdvancedSearchQuery(query: String): AdvancedSearchQueryResponse
 }
