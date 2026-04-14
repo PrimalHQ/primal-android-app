@@ -19,6 +19,7 @@ import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
 import net.primal.android.explore.feed.ExploreFeedContract.UiState.ExploreFeedError
 import net.primal.android.navigation.advancedSearchFeedSpec
+import net.primal.android.navigation.editingFeedSpec
 import net.primal.android.navigation.exploreFeedDescription
 import net.primal.android.navigation.exploreFeedSpec
 import net.primal.android.navigation.exploreFeedTitle
@@ -45,6 +46,8 @@ class ExploreFeedViewModel @Inject constructor(
     private val feedSpec = savedStateHandle.exploreFeedSpec
         ?: savedStateHandle.advancedSearchFeedSpec?.buildAdvancedSearchFeedSpec()
         ?: error("no feed spec provided.")
+
+    private val editingFeedSpec = savedStateHandle.editingFeedSpec
 
     private val feedTitle = savedStateHandle.exploreFeedTitle
     private val feedDescription = savedStateHandle.exploreFeedDescription
@@ -73,7 +76,21 @@ class ExploreFeedViewModel @Inject constructor(
     init {
         observeContainsFeed()
         observeEvents()
+        if (editingFeedSpec != null) {
+            fetchEditingFeedDetails()
+        }
     }
+
+    private fun fetchEditingFeedDetails() =
+        viewModelScope.launch {
+            val userId = activeAccountStore.activeUserId()
+            val existingFeed = editingFeedSpec?.let {
+                feedsRepository.findFeedBySpec(userId = userId, feedSpec = it)
+            }
+            if (existingFeed != null) {
+                setState { copy(feedTitle = existingFeed.title, feedDescription = existingFeed.description) }
+            }
+        }
 
     @OptIn(DelicateCoroutinesApi::class)
     override fun onCleared() {
@@ -107,14 +124,26 @@ class ExploreFeedViewModel @Inject constructor(
             val userId = activeAccountStore.activeUserId()
             val feedSpecKind = feedSpec.resolveFeedSpecKind()
             if (feedSpecKind != null) {
-                feedsRepository.addFeedLocally(
-                    userId = userId,
-                    feedSpec = feedSpec,
-                    title = event.title,
-                    description = event.description,
-                    feedSpecKind = feedSpecKind,
-                    feedKind = FEED_KIND_SEARCH,
-                )
+                if (editingFeedSpec != null) {
+                    feedsRepository.replaceFeedLocally(
+                        userId = userId,
+                        oldFeedSpec = editingFeedSpec,
+                        newFeedSpec = feedSpec,
+                        title = event.title,
+                        description = event.description,
+                        feedSpecKind = feedSpecKind,
+                        feedKind = FEED_KIND_SEARCH,
+                    )
+                } else {
+                    feedsRepository.addFeedLocally(
+                        userId = userId,
+                        feedSpec = feedSpec,
+                        title = event.title,
+                        description = event.description,
+                        feedSpecKind = feedSpecKind,
+                        feedKind = FEED_KIND_SEARCH,
+                    )
+                }
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
             }
         } catch (error: SignatureException) {
