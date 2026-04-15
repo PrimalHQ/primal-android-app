@@ -236,6 +236,7 @@ private fun AccountListItem(
                 displayName = account.displayName,
                 internetIdentifier = account.internetIdentifier,
                 legendaryCustomization = account.legendaryCustomization,
+                profileId = account.pubkey,
             )
         },
         supportingContent = account.internetIdentifier?.let {

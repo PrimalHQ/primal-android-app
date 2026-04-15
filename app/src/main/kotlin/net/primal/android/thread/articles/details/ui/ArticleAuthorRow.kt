@@ -46,6 +46,7 @@ fun ArticleAuthorRow(
     authorInternetIdentifier: String? = null,
     authorLegendaryCustomization: LegendaryCustomization? = null,
     authorBlossoms: List<String> = emptyList(),
+    authorId: String? = null,
     onAuthorAvatarClick: (() -> Unit)? = null,
     onFollowUnfollowClick: (() -> Unit)? = null,
 ) {
@@ -75,6 +76,7 @@ fun ArticleAuthorRow(
                     lineHeight = 16.sp,
                 ),
                 legendaryCustomization = authorLegendaryCustomization,
+                profileId = authorId,
             )
 
             if (!authorInternetIdentifier.isNullOrBlank()) {

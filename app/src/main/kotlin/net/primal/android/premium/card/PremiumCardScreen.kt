@@ -566,6 +566,7 @@ private fun AnimatedDisplayName(showContent: Boolean, profile: ProfileDetailsUi)
                     fontWeight = FontWeight.Bold,
                 ),
                 legendaryCustomization = profile.premiumDetails?.legendaryCustomization,
+                profileId = profile.pubkey,
             )
         }
     }

@@ -107,6 +107,7 @@ fun BecomeLegendAmountStage(
                         customBadge = true,
                         legendaryStyle = LegendaryStyle.GOLD,
                     ),
+                    profileId = state.profileId,
                 )
             }
 

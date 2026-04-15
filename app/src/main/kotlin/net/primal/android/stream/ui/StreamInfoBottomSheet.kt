@@ -164,6 +164,7 @@ private fun HostProfileSummary(
                 NostrUserText(
                     displayName = profileDetails.userDisplayName,
                     internetIdentifier = profileDetails.internetIdentifier,
+                    profileId = profileDetails.pubkey,
                     internetIdentifierBadgeSize = 13.dp,
                     internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
                     legendaryCustomization = profileDetails.premiumDetails?.legendaryCustomization,

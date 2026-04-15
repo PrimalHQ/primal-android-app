@@ -539,6 +539,7 @@ private fun FeedNote(
                     authorInternetIdentifier = data.authorInternetIdentifier,
                     authorLegendaryCustomization = data.authorLegendaryCustomization,
                     authorBlossoms = data.authorBlossoms,
+                    authorId = data.authorId,
                     replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
                     isLive = data.isAuthorLiveStreamingNow,
                     onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {

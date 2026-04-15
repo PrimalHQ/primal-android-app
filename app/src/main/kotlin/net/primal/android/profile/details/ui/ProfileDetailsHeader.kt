@@ -125,6 +125,7 @@ fun ProfileHeaderDetails(
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun ProfileHeaderDetails(
     state: ProfileDetailsContract.UiState,
@@ -378,6 +379,7 @@ private fun UserDisplayName(
                 fontWeight = FontWeight.Bold,
             ),
             legendaryCustomization = profilePremiumDetails?.legendaryCustomization,
+            profileId = profileId,
         )
 
         if (profilePremiumDetails?.shouldShowPremiumBadge() == true) {

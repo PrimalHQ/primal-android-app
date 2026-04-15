@@ -25,6 +25,7 @@ import net.primal.domain.links.CdnImage
 fun ConfirmNameChangeStage(
     modifier: Modifier = Modifier,
     primalName: String,
+    profileId: String? = null,
     profileAvatarCdnImage: CdnImage?,
     profileLegendaryCustomization: LegendaryCustomization?,
     contentPadding: PaddingValues,
@@ -47,6 +48,7 @@ fun ConfirmNameChangeStage(
             internetIdentifierBadgeSize = 24.dp,
             fontSize = 20.sp,
             legendaryCustomization = profileLegendaryCustomization,
+            profileId = profileId,
         )
         Text(
             modifier = Modifier.padding(horizontal = 12.dp),

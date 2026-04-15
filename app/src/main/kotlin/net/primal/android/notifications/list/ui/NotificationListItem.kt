@@ -459,6 +459,7 @@ private fun HeaderContent(
             append(appendText)
         },
         legendaryCustomization = firstNotification.actionUserLegendaryCustomization,
+        profileId = firstNotification.actionUserId,
     )
 }
 

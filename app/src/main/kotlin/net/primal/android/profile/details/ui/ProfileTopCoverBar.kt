@@ -305,6 +305,7 @@ private fun ProfileTopAppBar(
                         modifier = Modifier.padding(top = 4.dp),
                         displayName = state.resolveProfileName(),
                         internetIdentifier = state.profileDetails?.internetIdentifier,
+                        profileId = state.profileId,
                         internetIdentifierBadgeSize = 20.dp,
                         internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
                         legendaryCustomization = state.profileDetails?.premiumDetails?.legendaryCustomization,
