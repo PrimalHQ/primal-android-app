@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -33,6 +35,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
@@ -123,12 +126,16 @@ private fun AppBarTitle(
 
     Column(
         modifier = titleColumnModifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
+        Spacer(modifier = Modifier.height(6.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = title,
-                style = AppTheme.typography.headlineSmall,
+                style = AppTheme.typography.headlineSmall.copy(
+                    fontSize = 25.sp,
+                    lineHeight = 25.sp,
+                ),
                 fontWeight = FontWeight.Bold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
@@ -144,13 +151,18 @@ private fun AppBarTitle(
         if (!subtitle.isNullOrBlank()) {
             Text(
                 text = subtitle,
-                style = AppTheme.typography.bodyMedium,
+                style = AppTheme.typography.bodyMedium.copy(
+                    fontSize = 15.sp,
+                    lineHeight = 15.sp,
+                    letterSpacing = 0.sp,
+                ),
                 color = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
                 fontWeight = FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )
         }
+        Spacer(modifier = Modifier.height(6.dp))
     }
 }
 
@@ -228,7 +240,7 @@ private fun SwipeableAvatar(
                 }
                 .clip(CircleShape),
             avatarCdnImage = avatarCdnImage,
-            avatarSize = 38.dp,
+            avatarSize = 40.dp,
             avatarBlossoms = avatarBlossoms,
             legendaryCustomization = avatarLegendaryCustomization,
             onClick = onAvatarClick,

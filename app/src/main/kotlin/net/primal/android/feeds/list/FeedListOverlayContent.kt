@@ -8,12 +8,14 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import net.primal.android.feeds.list.FeedListContract.UiState.FeedMarketplaceStage
 import net.primal.android.feeds.list.ui.DvmFeedDetails
@@ -69,6 +71,7 @@ private fun FeedListOverlayContent(
     AnimatedContent(
         modifier = Modifier
             .fillMaxSize()
+            .padding(top = 16.dp)
             .navigationBarsPadding(),
         targetState = state.feedMarketplaceStage,
         transitionSpec = { transitionSpecBetweenStages() },
