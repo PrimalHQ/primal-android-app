@@ -42,7 +42,7 @@ val midnightColorScheme = darkColorScheme(
     surfaceVariant = midnightBackground2,
     onSurfaceVariant = midnightForeground1,
     error = midnightWarningBright,
-    outline = midnightForeground6,
+    outline = midnightBackground3,
 )
 
 val midnightExtraColorScheme = extraColorScheme(
