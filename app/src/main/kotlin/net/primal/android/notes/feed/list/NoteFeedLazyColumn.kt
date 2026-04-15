@@ -37,6 +37,7 @@ import net.primal.android.nostr.mappers.asFeedPostUi
 import net.primal.android.notes.feed.model.FeedPostUi
 import net.primal.android.notes.feed.model.StreamPillUi
 import net.primal.android.notes.feed.note.FeedNoteCard
+import net.primal.android.notes.feed.note.MediaFeedCard
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.stream.player.LocalStreamState
 import net.primal.domain.nostr.ReactionType
@@ -53,6 +54,7 @@ fun NoteFeedLazyColumn(
     showPaywall: Boolean,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
+    useMediaCards: Boolean = false,
     showTopZaps: Boolean = false,
     shouldShowLoadingState: Boolean = true,
     shouldShowNoContentState: Boolean = true,
@@ -66,8 +68,10 @@ fun NoteFeedLazyColumn(
     onUiError: ((UiError) -> Unit)? = null,
 ) {
     val streamState = LocalStreamState.current
+    val pagingItemsOffset = (if (stickyHeader != null) 1 else 0) + (if (header != null) 1 else 0) + 1
     var firstVisibleVideoPlayingIndex by rememberFirstVisibleVideoPlayingItemIndex(
         listState = listState,
+        itemIndexOffset = pagingItemsOffset,
         hasVideo = { index ->
             if (index < 0 || index >= pagingItems.itemCount) {
                 false
@@ -126,38 +130,49 @@ fun NoteFeedLazyColumn(
 
             when {
                 item != null -> Column {
-                    FeedNoteCard(
-                        data = item,
-                        shape = RectangleShape,
-                        cardPadding = PaddingValues(all = 0.dp),
-                        fullWidthContent = true,
-                        enableTweetsMode = true,
-                        nestingCutOffLimit = FEED_NESTED_NOTES_CUT_OFF_LIMIT,
-                        showReplyTo = showReplyTo,
-                        couldAutoPlay = index == firstVisibleVideoPlayingIndex,
-                        noteCallbacks = noteCallbacks,
-                        onGoToWallet = onGoToWallet,
-                        onUiError = onUiError,
-                        contentFooter = {
-                            if (showTopZaps && item.eventZaps.isNotEmpty()) {
-                                FeedNoteTopZapsSection(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 8.dp)
-                                        .padding(top = 4.dp, end = 2.dp),
-                                    zaps = item.eventZaps,
-                                    onClick = if (noteCallbacks.onEventReactionsClick != null) {
-                                        {
-                                            noteCallbacks.onEventReactionsClick
-                                                .invoke(item.postId, ReactionType.ZAPS, null)
-                                        }
-                                    } else {
-                                        null
-                                    },
-                                )
-                            }
-                        },
-                    )
+                    if (useMediaCards) {
+                        MediaFeedCard(
+                            data = item,
+                            noteCallbacks = noteCallbacks,
+                            couldAutoPlay = index == firstVisibleVideoPlayingIndex,
+                            onGoToWallet = onGoToWallet,
+                            onUiError = onUiError,
+                        )
+                    } else {
+                        FeedNoteCard(
+                            data = item,
+                            shape = RectangleShape,
+                            cardPadding = PaddingValues(all = 0.dp),
+                            fullWidthContent = true,
+                            forceContentIndent = true,
+                            enableTweetsMode = true,
+                            nestingCutOffLimit = FEED_NESTED_NOTES_CUT_OFF_LIMIT,
+                            showReplyTo = showReplyTo,
+                            couldAutoPlay = index == firstVisibleVideoPlayingIndex,
+                            noteCallbacks = noteCallbacks,
+                            onGoToWallet = onGoToWallet,
+                            onUiError = onUiError,
+                            contentFooter = {
+                                if (showTopZaps && item.eventZaps.isNotEmpty()) {
+                                    FeedNoteTopZapsSection(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 8.dp)
+                                            .padding(top = 4.dp, end = 2.dp),
+                                        zaps = item.eventZaps,
+                                        onClick = if (noteCallbacks.onEventReactionsClick != null) {
+                                            {
+                                                noteCallbacks.onEventReactionsClick
+                                                    .invoke(item.postId, ReactionType.ZAPS, null)
+                                            }
+                                        } else {
+                                            null
+                                        },
+                                    )
+                                }
+                            },
+                        )
+                    }
 
                     PrimalDivider()
                 }

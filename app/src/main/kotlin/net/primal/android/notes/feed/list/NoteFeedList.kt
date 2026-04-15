@@ -84,6 +84,8 @@ import net.primal.android.notes.feed.note.ui.attachment.MaxDisplayImages
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
 import net.primal.core.caching.MediaCacher
+import net.primal.domain.feeds.isImageSpec
+import net.primal.domain.feeds.isVideoSpec
 import net.primal.domain.links.CdnImage
 import net.primal.domain.links.EventUriType
 
@@ -145,6 +147,7 @@ fun NoteFeedList(
         noteCallbacks = noteCallbacks,
         onGoToWallet = onGoToWallet,
         newNotesNoticeAlpha = newNotesNoticeAlpha,
+        useMediaCards = feedSpec.isImageSpec() || feedSpec.isVideoSpec(),
         bigPillStreams = bigPillStreams,
         showTopZaps = showTopZaps,
         contentPadding = contentPadding,
@@ -166,6 +169,7 @@ private fun NoteFeedList(
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
     newNotesNoticeAlpha: Float = 1.00f,
+    useMediaCards: Boolean = false,
     showTopZaps: Boolean = false,
     bigPillStreams: List<StreamPillUi> = emptyList(),
     pullToRefreshEnabled: Boolean = true,
@@ -213,6 +217,7 @@ private fun NoteFeedList(
             pullToRefreshEnabled = pullToRefreshEnabled,
             feedListState = listState,
             showPaywall = state.paywall,
+            useMediaCards = useMediaCards,
             showTopZaps = showTopZaps,
             noteCallbacks = noteCallbacks,
             onGoToWallet = onGoToWallet,
@@ -309,6 +314,7 @@ fun NoteFeedList(
     showPaywall: Boolean,
     noteCallbacks: NoteCallbacks,
     onGoToWallet: () -> Unit,
+    useMediaCards: Boolean = false,
     showTopZaps: Boolean = false,
     pullToRefreshEnabled: Boolean = true,
     paddingValues: PaddingValues = PaddingValues(0.dp),
@@ -381,6 +387,7 @@ fun NoteFeedList(
             showPaywall = showPaywall,
             noteCallbacks = noteCallbacks,
             onGoToWallet = onGoToWallet,
+            useMediaCards = useMediaCards,
             showTopZaps = showTopZaps,
             noContentText = noContentText,
             header = header,

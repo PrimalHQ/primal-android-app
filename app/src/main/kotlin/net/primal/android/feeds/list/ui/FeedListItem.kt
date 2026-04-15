@@ -2,6 +2,10 @@ package net.primal.android.feeds.list.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
@@ -19,12 +23,13 @@ fun FeedListItem(
     modifier: Modifier,
     data: FeedUi,
     selected: Boolean,
+    isEditMode: Boolean = false,
     editOptions: @Composable () -> Unit,
 ) {
     ListItem(
         modifier = modifier,
         colors = ListItemDefaults.colors(
-            containerColor = if (selected) {
+            containerColor = if (selected && !isEditMode) {
                 AppTheme.extraColorScheme.surfaceVariantAlt1
             } else {
                 AppTheme.extraColorScheme.surfaceVariantAlt2
@@ -55,6 +60,17 @@ fun FeedListItem(
                 )
             }
         },
-        trailingContent = editOptions,
+        trailingContent = {
+            if (isEditMode) {
+                editOptions()
+            } else if (selected) {
+                Icon(
+                    modifier = Modifier.size(20.dp),
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = AppTheme.colorScheme.onSurface,
+                )
+            }
+        },
     )
 }

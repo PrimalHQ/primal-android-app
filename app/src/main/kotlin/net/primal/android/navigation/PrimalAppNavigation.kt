@@ -24,7 +24,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,9 +31,6 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
-import net.primal.android.articles.reads.ReadsScreen
-import net.primal.android.articles.reads.ReadsScreenContract
-import net.primal.android.articles.reads.ReadsViewModel
 import net.primal.android.audio.player.AudioPlayerStateProvider
 import net.primal.android.auth.login.LoginContract
 import net.primal.android.auth.login.LoginScreen
@@ -76,12 +72,6 @@ import net.primal.android.explore.asearch.AdvancedSearchViewModel
 import net.primal.android.explore.feed.ExploreFeedContract
 import net.primal.android.explore.feed.ExploreFeedScreen
 import net.primal.android.explore.feed.ExploreFeedViewModel
-import net.primal.android.explore.home.ExploreHomeContract
-import net.primal.android.explore.home.ExploreHomeScreen
-import net.primal.android.explore.home.ExploreHomeViewModel
-import net.primal.android.explore.home.followpack.FollowPackContract
-import net.primal.android.explore.home.followpack.FollowPackScreen
-import net.primal.android.explore.home.followpack.FollowPackViewModel
 import net.primal.android.explore.search.SearchContract
 import net.primal.android.explore.search.SearchViewModel
 import net.primal.android.explore.search.ui.SearchScope
@@ -89,6 +79,11 @@ import net.primal.android.explore.search.ui.SearchScreen
 import net.primal.android.gifpicker.GifPickerContract
 import net.primal.android.gifpicker.GifPickerScreen
 import net.primal.android.gifpicker.GifPickerViewModel
+import net.primal.android.main.MainScreen
+import net.primal.android.main.REQUESTED_TAB_KEY
+import net.primal.android.main.explore.followpack.FollowPackContract
+import net.primal.android.main.explore.followpack.FollowPackScreen
+import net.primal.android.main.explore.followpack.FollowPackViewModel
 import net.primal.android.media.MediaItemScreen
 import net.primal.android.media.MediaItemViewModel
 import net.primal.android.messages.chat.ChatScreen
@@ -106,12 +101,6 @@ import net.primal.android.nostrconnect.utils.NOSTR_CONNECT_SCHEME
 import net.primal.android.nostrconnect.utils.PRIMAL_CONNECT_SCHEME
 import net.primal.android.notes.feed.model.asNeventString
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
-import net.primal.android.notes.home.HomeFeedContract
-import net.primal.android.notes.home.HomeFeedScreen
-import net.primal.android.notes.home.HomeFeedViewModel
-import net.primal.android.notifications.list.NotificationsContract
-import net.primal.android.notifications.list.NotificationsScreen
-import net.primal.android.notifications.list.NotificationsViewModel
 import net.primal.android.premium.buying.PremiumBuyingContract
 import net.primal.android.premium.buying.PremiumBuyingScreen
 import net.primal.android.premium.buying.PremiumBuyingViewModel
@@ -188,7 +177,6 @@ import net.primal.android.thread.articles.details.ArticleDetailsViewModel
 import net.primal.android.thread.notes.ThreadContract
 import net.primal.android.thread.notes.ThreadScreen
 import net.primal.android.thread.notes.ThreadViewModel
-import net.primal.core.utils.asUrlDecoded
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.feeds.buildAdvancedSearchNotesFeedSpec
 import net.primal.domain.feeds.buildAdvancedSearchNotificationsFeedSpec
@@ -208,10 +196,10 @@ private fun NavController.navigateToOnboarding() = navigate(route = "onboarding"
 
 private fun NavController.navigateToLogout(profileId: String) = navigate(route = "logout?$PROFILE_ID=$profileId")
 
-private fun NavController.navigateToSearch(searchScope: SearchScope) =
+internal fun NavController.navigateToSearch(searchScope: SearchScope) =
     navigate(route = "search?$SEARCH_SCOPE=$searchScope")
 
-private fun NavController.navigateToAdvancedSearch(
+internal fun NavController.navigateToAdvancedSearch(
     initialQuery: String? = null,
     initialPostedBy: List<String>? = null,
     initialSearchKind: AdvancedSearchContract.SearchKind? = null,
@@ -224,52 +212,29 @@ private fun NavController.navigateToAdvancedSearch(
         "&$ADV_SEARCH_SCOPE=$initialSearchScope",
 )
 
-private fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
+internal fun NavController.navigateToNoteEditor(args: NoteEditorArgs? = null) {
     navigate(route = "noteEditor?$NOTE_EDITOR_ARGS=${args?.toJson()?.asBase64Encoded()}")
 }
 
 private fun NavController.navigateToGifPicker() = navigate(route = "gifPicker")
 
-private val NavController.topLevelNavOptions: NavOptions
-    @SuppressWarnings("RestrictedApi")
-    get() {
-        val feedDestination = currentBackStack.value.find {
-            it.destination.route?.contains("home") == true
-        }
-        return navOptions {
-            popUpTo(id = feedDestination?.destination?.id ?: 0)
-        }
+fun NavController.navigateToMain(tab: PrimalTopLevelDestination? = null) {
+    if (tab != null) {
+        runCatching { getBackStackEntry("main") }
+            .getOrNull()
+            ?.savedStateHandle
+            ?.set(REQUESTED_TAB_KEY, tab.name)
     }
+    if (!popBackStack(route = "main", inclusive = false)) {
+        navigate(route = "main", navOptions = navOptions { clearBackStack() })
+    }
+}
 
-fun NavController.navigateToHome() =
-    navigate(
-        route = "home",
-        navOptions = navOptions { clearBackStack() },
-    )
+fun NavController.navigateToHome() {
+    navigate(route = "main", navOptions = navOptions { clearBackStack() })
+}
 
-fun NavController.navigateToReads() =
-    navigate(
-        route = "reads",
-        navOptions = topLevelNavOptions,
-    )
-
-fun NavController.navigateToWallet() =
-    navigate(
-        route = "wallet",
-        navOptions = topLevelNavOptions,
-    )
-
-private fun NavController.navigateToNotifications() =
-    navigate(
-        route = "notifications",
-        navOptions = topLevelNavOptions,
-    )
-
-fun NavController.navigateToExplore() =
-    navigate(
-        route = "explore",
-        navOptions = topLevelNavOptions,
-    )
+fun NavController.navigateToWallet() = navigateToMain(PrimalTopLevelDestination.Wallet)
 
 fun NavController.navigateToFollowPack(profileId: String, followPackId: String) =
     navigate(route = "explore/followPack/$profileId/$followPackId")
@@ -378,7 +343,7 @@ private fun NavController.navigateToPremiumChangePrimalName() = navigate(route =
 private fun NavController.navigateToPremiumOrderHistory() = navigate(route = "premium/manage/order")
 private fun NavController.navigateToPremiumRelay() = navigate(route = "premium/manage/relay")
 
-private fun NavController.navigateToNostrConnectBottomSheet(url: String) {
+internal fun NavController.navigateToNostrConnectBottomSheet(url: String) {
     val safeUrl = url.asUrlEncoded()
     navigate(route = "nostrConnectBottomSheet?$NOSTR_CONNECT_URI=$safeUrl")
 }
@@ -470,16 +435,6 @@ fun noteCallbacksHandler(navController: NavController) =
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun PrimalAppNavigation(navController: NavHostController, startDestination: String) {
-    val topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit = {
-        when (it) {
-            PrimalTopLevelDestination.Home -> navController.popBackStack()
-            PrimalTopLevelDestination.Reads -> navController.navigateToReads()
-            PrimalTopLevelDestination.Wallet -> navController.navigateToWallet()
-            PrimalTopLevelDestination.Notifications -> navController.navigateToNotifications()
-            PrimalTopLevelDestination.Explore -> navController.navigateToExplore()
-        }
-    }
-
     val drawerDestinationHandler: (DrawerScreenDestination) -> Unit = {
         when (it) {
             is DrawerScreenDestination.Profile -> navController.navigateToProfile(profileId = it.userId)
@@ -515,7 +470,6 @@ fun PrimalAppNavigation(navController: NavHostController, startDestination: Stri
                             navController = navController,
                             startDestination = startDestination,
                             drawerDestinationHandler = drawerDestinationHandler,
-                            topLevelDestinationHandler = topLevelDestinationHandler,
                         )
                     }
                 }
@@ -530,7 +484,6 @@ private fun PrimalAppNavigation(
     navController: NavHostController,
     startDestination: String,
     drawerDestinationHandler: (DrawerScreenDestination) -> Unit,
-    topLevelDestinationHandler: (PrimalTopLevelDestination) -> Unit,
 ) {
     NavHost(
         modifier = Modifier.background(AppTheme.colorScheme.background),
@@ -600,11 +553,22 @@ private fun PrimalAppNavigation(
             navController = navController,
         )
 
-        home(
-            route = "home",
+        main(
+            route = "main",
             navController = navController,
-            onTopLevelDestinationChanged = topLevelDestinationHandler,
-            onDrawerScreenClick = drawerDestinationHandler,
+            onDrawerDestinationClick = drawerDestinationHandler,
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "https://primal.net" },
+                navDeepLink { uriPattern = "https://primal.net/home" },
+                navDeepLink { uriPattern = "https://primal.net/reads" },
+                navDeepLink { uriPattern = "https://primal.net/explore" },
+                navDeepLink { uriPattern = "https://primal.net/notifications" },
+                navDeepLink { uriPattern = "https://primal.net/p/{$PROFILE_NPUB}/live/{$IDENTIFIER}" },
+                navDeepLink { uriPattern = "https://primal.net/{$PRIMAL_NAME}/live/{$IDENTIFIER}" },
+                navDeepLink { uriPattern = "primal://live/{$STREAM_NADDR}" },
+                navDeepLink { uriPattern = "$NOSTR_CONNECT_SCHEME://.*" },
+                navDeepLink { uriPattern = "$PRIMAL_CONNECT_SCHEME://.*" },
+            ),
             arguments = listOf(
                 navArgument(PROFILE_NPUB) {
                     type = NavType.StringType
@@ -625,53 +589,6 @@ private fun PrimalAppNavigation(
                     type = NavType.StringType
                     nullable = true
                     defaultValue = null
-                },
-            ),
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net"
-                },
-                navDeepLink {
-                    uriPattern = "https://primal.net/home"
-                },
-                navDeepLink {
-                    uriPattern = "https://primal.net/p/{$PROFILE_NPUB}/live/{$IDENTIFIER}"
-                },
-                navDeepLink {
-                    uriPattern = "https://primal.net/{$PRIMAL_NAME}/live/{$IDENTIFIER}"
-                },
-                navDeepLink {
-                    uriPattern = "primal://live/{$STREAM_NADDR}"
-                },
-                navDeepLink {
-                    uriPattern = "$NOSTR_CONNECT_SCHEME://.*"
-                },
-                navDeepLink {
-                    uriPattern = "$PRIMAL_CONNECT_SCHEME://.*"
-                },
-            ),
-        )
-
-        reads(
-            route = "reads",
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/reads"
-                },
-            ),
-            navController = navController,
-            onTopLevelDestinationChanged = topLevelDestinationHandler,
-            onDrawerScreenClick = drawerDestinationHandler,
-        )
-
-        explore(
-            route = "explore",
-            navController = navController,
-            onTopLevelDestinationChanged = topLevelDestinationHandler,
-            onDrawerScreenClick = drawerDestinationHandler,
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/explore"
                 },
             ),
         )
@@ -893,18 +810,6 @@ private fun PrimalAppNavigation(
 
         newMessage(route = "messages/new", navController = navController)
 
-        notifications(
-            route = "notifications",
-            navController = navController,
-            onTopLevelDestinationChanged = topLevelDestinationHandler,
-            onDrawerScreenClick = drawerDestinationHandler,
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "https://primal.net/notifications"
-                },
-            ),
-        )
-
         noteEditor(
             route = "noteEditor?$NOTE_EDITOR_ARGS={$NOTE_EDITOR_ARGS}",
             arguments = listOf(
@@ -1088,12 +993,7 @@ private fun PrimalAppNavigation(
 
         settingsNavigation(route = "settings", navController = navController)
 
-        walletNavigation(
-            route = "wallet",
-            navController = navController,
-            onTopLevelDestinationChanged = topLevelDestinationHandler,
-            onDrawerScreenClick = drawerDestinationHandler,
-        )
+        walletScreens(navController = navController)
     }
 }
 
@@ -1292,63 +1192,46 @@ private fun NavGraphBuilder.scanCode(
     )
 }
 
-private fun NavGraphBuilder.home(
+private fun NavGraphBuilder.main(
     route: String,
-    arguments: List<NamedNavArgument>,
     deepLinks: List<NavDeepLink>,
+    arguments: List<NamedNavArgument>,
     navController: NavController,
-    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
+    onDrawerDestinationClick: (DrawerScreenDestination) -> Unit,
 ) = composable(
     route = route,
-    arguments = arguments,
     deepLinks = deepLinks,
+    arguments = arguments,
     enterTransition = { null },
     exitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
-            else -> primalScaleOut
+        if (targetState.destination.route.isMainScreenRoute()) {
+            null
+        } else {
+            primalScaleOut
         }
     },
     popEnterTransition = {
-        when {
-            initialState.destination.route.isMainScreenRoute() -> null
-            else -> primalScaleIn
+        if (initialState.destination.route.isMainScreenRoute()) {
+            null
+        } else {
+            primalScaleIn
         }
     },
     popExitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
-            else -> primalScaleOut
+        if (targetState.destination.route.isMainScreenRoute()) {
+            null
+        } else {
+            primalScaleOut
         }
     },
 ) { navBackEntry ->
-    val activity = LocalActivity.current
-    val connectUri = activity?.intent?.data?.toString()
-    if (connectUri != null) {
-        val isConnectUri = connectUri.startsWith(NOSTR_CONNECT_SCHEME) ||
-            connectUri.startsWith(PRIMAL_CONNECT_SCHEME)
-        if (isConnectUri) {
-            navController.navigateToNostrConnectBottomSheet(url = connectUri.asUrlDecoded())
-            activity.intent = null
-        }
-    }
-
-    val viewModel = hiltViewModel<HomeFeedViewModel>(navBackEntry)
     ApplyEdgeToEdge()
     LockToOrientationPortrait()
-    HomeFeedScreen(
-        viewModel = viewModel,
-        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerScreenClick = onDrawerScreenClick,
-        noteCallbacks = noteCallbacksHandler(navController),
-        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
-        callbacks = HomeFeedContract.ScreenCallbacks(
-            onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-            onGoToWallet = { navController.navigateToWallet() },
-            onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
-            onNewPostClick = { navController.navigateToNoteEditor(null) },
-        ),
+
+    MainScreen(
+        navController = navController,
+        navBackStackEntry = navBackEntry,
+        onDrawerDestinationClick = onDrawerDestinationClick,
     )
 }
 
@@ -1396,52 +1279,6 @@ private fun NavGraphBuilder.activeSessions(route: String, navController: NavCont
             },
         )
     }
-}
-
-private fun NavGraphBuilder.reads(
-    route: String,
-    deepLinks: List<NavDeepLink>,
-    navController: NavController,
-    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-) = composable(
-    route = route,
-    deepLinks = deepLinks,
-    enterTransition = { null },
-    exitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
-            else -> primalScaleOut
-        }
-    },
-    popEnterTransition = {
-        when {
-            initialState.destination.route.isMainScreenRoute() -> null
-            else -> primalScaleIn
-        }
-    },
-    popExitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
-            else -> primalScaleOut
-        }
-    },
-) { navBackEntry ->
-    val viewModel = hiltViewModel<ReadsViewModel>(navBackEntry)
-    ApplyEdgeToEdge()
-    LockToOrientationPortrait()
-    ReadsScreen(
-        viewModel = viewModel,
-        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerScreenClick = onDrawerScreenClick,
-        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
-        callbacks = ReadsScreenContract.ScreenCallbacks(
-            onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-            onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Reads) },
-            onArticleClick = { naddr -> navController.navigateToArticleDetails(naddr) },
-            onGetPremiumClick = { navController.navigateToPremiumBuying() },
-        ),
-    )
 }
 
 private fun NavGraphBuilder.noteEditor(
@@ -1509,55 +1346,6 @@ private fun NavGraphBuilder.gifPicker(route: String, navController: NavControlle
             ),
         )
     }
-
-private fun NavGraphBuilder.explore(
-    route: String,
-    deepLinks: List<NavDeepLink>,
-    navController: NavController,
-    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-) = composable(
-    route = route,
-    deepLinks = deepLinks,
-    enterTransition = { null },
-    exitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
-            else -> primalScaleOut
-        }
-    },
-    popEnterTransition = {
-        when {
-            initialState.destination.route.isMainScreenRoute() -> null
-            else -> primalScaleIn
-        }
-    },
-    popExitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
-            else -> primalScaleOut
-        }
-    },
-) {
-    val viewModel = hiltViewModel<ExploreHomeViewModel>(it)
-    ApplyEdgeToEdge()
-    LockToOrientationPortrait()
-    ExploreHomeScreen(
-        viewModel = viewModel,
-        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerScreenClick = onDrawerScreenClick,
-        noteCallbacks = noteCallbacksHandler(navController),
-        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
-        callbacks = ExploreHomeContract.ScreenCallbacks(
-            onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-            onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
-            onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
-            onFollowPackClick = { profileId, identifier -> navController.navigateToFollowPack(profileId, identifier) },
-            onGoToWallet = { navController.navigateToWallet() },
-            onNewPostClick = { navController.navigateToNoteEditor(null) },
-        ),
-    )
-}
 
 private fun NavGraphBuilder.followPack(
     route: String,
@@ -2214,53 +2002,6 @@ private fun NavGraphBuilder.newMessage(route: String, navController: NavControll
             ),
         )
     }
-
-private fun NavGraphBuilder.notifications(
-    route: String,
-    deepLinks: List<NavDeepLink>,
-    navController: NavController,
-    onTopLevelDestinationChanged: (PrimalTopLevelDestination) -> Unit,
-    onDrawerScreenClick: (DrawerScreenDestination) -> Unit,
-) = composable(
-    route = route,
-    deepLinks = deepLinks,
-    enterTransition = { null },
-    exitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
-            else -> primalScaleOut
-        }
-    },
-    popEnterTransition = {
-        when {
-            initialState.destination.route.isMainScreenRoute() -> null
-            else -> primalScaleIn
-        }
-    },
-    popExitTransition = {
-        when {
-            targetState.destination.route.isMainScreenRoute() -> mainScreenOut
-            else -> primalScaleOut
-        }
-    },
-) { navBackEntry ->
-    val viewModel = hiltViewModel<NotificationsViewModel>(navBackEntry)
-    ApplyEdgeToEdge()
-    LockToOrientationPortrait()
-    NotificationsScreen(
-        viewModel = viewModel,
-        onTopLevelDestinationChanged = onTopLevelDestinationChanged,
-        onDrawerScreenClick = onDrawerScreenClick,
-        noteCallbacks = noteCallbacksHandler(navController),
-        accountSwitcherCallbacks = accountSwitcherCallbacksHandler(navController = navController),
-        callbacks = NotificationsContract.ScreenCallbacks(
-            onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.MyNotifications) },
-            onGoToWallet = { navController.navigateToWallet() },
-            onDrawerQrCodeClick = { navController.navigateToProfileQrCodeViewer() },
-            onNewPostClick = { navController.navigateToNoteEditor(null) },
-        ),
-    )
-}
 
 private fun NavGraphBuilder.thread(
     route: String,

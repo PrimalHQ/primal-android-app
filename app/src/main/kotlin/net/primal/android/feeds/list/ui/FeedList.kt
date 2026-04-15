@@ -8,9 +8,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,15 +18,12 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Menu
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,18 +39,19 @@ import androidx.compose.ui.unit.sp
 import net.primal.android.R
 import net.primal.android.core.compose.ConfirmActionAlertDialog
 import net.primal.android.core.compose.PrimalDivider
-import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalSwitch
+import net.primal.android.core.compose.icons.PrimalIcons
+import net.primal.android.core.compose.icons.primaliconpack.PencilUnderline
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.theme.AppTheme
+import net.primal.domain.feeds.isAdvancedSearchFeedSpec
 import sh.calvin.reorderable.ReorderableCollectionItemScope
 import sh.calvin.reorderable.ReorderableItem
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun FeedList(
-    title: String,
     feeds: List<FeedUi>,
     activeFeed: FeedUi?,
     onFeedClick: (feed: FeedUi) -> Unit,
@@ -71,37 +69,131 @@ fun FeedList(
     var data by remember(feeds) { mutableStateOf(feeds) }
     val haptic = rememberReorderHapticFeedback()
     val feedsListState = rememberLazyListState()
-    val reorderableFeedsListState = rememberReorderableLazyListState(lazyListState = feedsListState) { from, to ->
-        val newData = data.toMutableList().apply {
-            val removed = removeAt(from.index)
-            add(to.index, removed)
-        }.toList()
-        data = newData
-        onFeedReordered?.invoke(newData)
+
+    val reorderableFeedsListState = rememberReorderableLazyListState(
+        lazyListState = feedsListState,
+    ) { from, to ->
+        data = data.toMutableList().apply { add(to.index, removeAt(from.index)) }
+        onFeedReordered?.invoke(data)
         haptic.performHapticFeedback(ReorderHapticFeedbackType.MOVE)
     }
 
     var deleteFeedDialogVisible by remember { mutableStateOf<FeedUi?>(null) }
+    var restoreDefaultDialogVisible by remember { mutableStateOf(false) }
 
+    FeedListDialogs(
+        deleteFeedDialogVisible = deleteFeedDialogVisible,
+        restoreDefaultDialogVisible = restoreDefaultDialogVisible,
+        onFeedRemoved = onFeedRemoved,
+        onRestoreDefaultPrimalFeeds = onRestoreDefaultPrimalFeeds,
+        onDeleteDismiss = { deleteFeedDialogVisible = null },
+        onRestoreDismiss = { restoreDefaultDialogVisible = false },
+    )
+
+    Column(modifier = modifier) {
+        LazyColumn(
+            modifier = Modifier
+                .background(color = AppTheme.extraColorScheme.surfaceVariantAlt2)
+                .weight(1f),
+            state = feedsListState,
+            // https://github.com/Calvin-LL/Reorderable/issues/32
+            contentPadding = PaddingValues(vertical = 1.dp),
+        ) {
+            itemsIndexed(
+                items = data,
+                key = { _, item -> item.uniqueKey() },
+            ) { _, item ->
+                ReorderableItem(
+                    state = reorderableFeedsListState,
+                    key = item.uniqueKey(),
+                ) {
+                    val interactionSource = remember { MutableInteractionSource() }
+                    FeedListItem(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp)
+                            .clip(AppTheme.shapes.large)
+                            .clickable(
+                                interactionSource = interactionSource,
+                                indication = LocalIndication.current,
+                                onClick = { onFeedClick(item) },
+                            ),
+                        data = item,
+                        selected = item.spec == activeFeed?.spec,
+                        isEditMode = isEditMode,
+                        editOptions = {
+                            FeedEditOptions(
+                                item = item,
+                                haptic = haptic,
+                                interactionSource = interactionSource,
+                                onFeedEnabled = onFeedEnabled,
+                                onDeleteRequest = { deleteFeedDialogVisible = item },
+                            )
+                        },
+                    )
+                }
+            }
+            if (isEditMode) {
+                item {
+                    RestoreDefaultFeedsItem(onRestoreClick = { restoreDefaultDialogVisible = true })
+                }
+            }
+        }
+
+        FeedListBottomBar(
+            enableEditMode = enableEditMode,
+            isEditMode = isEditMode,
+            onEditFeedClick = onEditFeedClick,
+            onAddFeedClick = onAddFeedClick,
+            onEditDoneClick = onEditDoneClick,
+        )
+    }
+}
+
+@Composable
+private fun FeedListBottomBar(
+    enableEditMode: Boolean,
+    isEditMode: Boolean,
+    onEditFeedClick: (() -> Unit)?,
+    onAddFeedClick: (() -> Unit)?,
+    onEditDoneClick: (() -> Unit)?,
+) {
+    if (enableEditMode) {
+        PrimalDivider()
+        if (!isEditMode) {
+            RegularBottomBar(onEditFeedClick = { onEditFeedClick?.invoke() })
+        } else {
+            EditModeBottomBar(
+                onAddFeedClick = { onAddFeedClick?.invoke() },
+                onDoneClick = { onEditDoneClick?.invoke() },
+            )
+        }
+    }
+}
+
+@Composable
+private fun FeedListDialogs(
+    deleteFeedDialogVisible: FeedUi?,
+    restoreDefaultDialogVisible: Boolean,
+    onFeedRemoved: ((feed: FeedUi) -> Unit)?,
+    onRestoreDefaultPrimalFeeds: () -> Unit,
+    onDeleteDismiss: () -> Unit,
+    onRestoreDismiss: () -> Unit,
+) {
     if (deleteFeedDialogVisible != null) {
         ConfirmActionAlertDialog(
             confirmText = stringResource(id = R.string.feed_list_dialog_confirm),
             dismissText = stringResource(id = R.string.feed_list_dialog_dismiss),
             dialogTitle = stringResource(R.string.feed_list_remove_feed_title),
-            dialogText = stringResource(R.string.feed_list_remove_feed_text, deleteFeedDialogVisible?.title ?: ""),
+            dialogText = stringResource(R.string.feed_list_remove_feed_text, deleteFeedDialogVisible.title),
             onConfirmation = {
-                if (onFeedRemoved != null) {
-                    deleteFeedDialogVisible?.let(onFeedRemoved)
-                }
-                deleteFeedDialogVisible = null
+                onFeedRemoved?.invoke(deleteFeedDialogVisible)
+                onDeleteDismiss()
             },
-            onDismissRequest = {
-                deleteFeedDialogVisible = null
-            },
+            onDismissRequest = onDeleteDismiss,
         )
     }
 
-    var restoreDefaultDialogVisible by remember { mutableStateOf(false) }
     if (restoreDefaultDialogVisible) {
         ConfirmActionAlertDialog(
             confirmText = stringResource(id = R.string.feed_list_dialog_confirm),
@@ -110,121 +202,71 @@ fun FeedList(
             dialogText = stringResource(id = R.string.feed_list_restore_default_feeds_prompt_text),
             onConfirmation = {
                 onRestoreDefaultPrimalFeeds()
-                restoreDefaultDialogVisible = false
+                onRestoreDismiss()
             },
-            onDismissRequest = {
-                restoreDefaultDialogVisible = false
-            },
+            onDismissRequest = onRestoreDismiss,
         )
     }
+}
 
-    PrimalScaffold(
-        modifier = modifier,
-        topBar = {
-            CenterAlignedTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-                ),
-                title = {
-                    Text(text = title)
-                },
-            )
-        },
-        content = { paddingValues ->
-            LazyColumn(
-                modifier = Modifier
-                    .background(color = AppTheme.extraColorScheme.surfaceVariantAlt2)
-                    .padding(paddingValues)
-                    .fillMaxSize(),
-                state = feedsListState,
-                // https://github.com/Calvin-LL/Reorderable/issues/32
-                contentPadding = PaddingValues(vertical = 1.dp),
-            ) {
-                itemsIndexed(
-                    items = data,
-                    key = { _, item -> item.uniqueKey() },
-                ) { _, item ->
-                    ReorderableItem(
-                        state = reorderableFeedsListState,
-                        key = item.uniqueKey(),
-                    ) {
-                        val interactionSource = remember { MutableInteractionSource() }
-                        FeedListItem(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .clip(AppTheme.shapes.large)
-                                .clickable(
-                                    interactionSource = interactionSource,
-                                    indication = LocalIndication.current,
-                                    onClick = { onFeedClick(item) },
-                                ),
-                            data = item,
-                            selected = item.spec == activeFeed?.spec,
-                            editOptions = {
-                                if (isEditMode) {
-                                    Row {
-                                        PrimalSwitch(
-                                            checked = item.enabled,
-                                            onCheckedChange = { enabled ->
-                                                if (!enabled && item.deletable) {
-                                                    deleteFeedDialogVisible = item
-                                                } else {
-                                                    onFeedEnabled?.invoke(item, enabled)
-                                                }
-                                            },
-                                        )
-                                        FeedDragHandle(
-                                            haptic = haptic,
-                                            interactionSource = interactionSource,
-                                        )
-                                    }
-                                }
-                            },
-                        )
-                    }
-                }
-                if (isEditMode) {
-                    item {
-                        val interactionSource = remember { MutableInteractionSource() }
-                        ListItem(
-                            colors = ListItemDefaults.colors(
-                                containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
-                            ),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp)
-                                .clip(AppTheme.shapes.large)
-                                .clickable(
-                                    interactionSource = interactionSource,
-                                    indication = LocalIndication.current,
-                                    onClick = { restoreDefaultDialogVisible = true },
-                                ),
-                            headlineContent = {
-                                Text(
-                                    color = AppTheme.colorScheme.primary,
-                                    modifier = Modifier,
-                                    text = stringResource(id = R.string.feed_list_restore_default_feeds),
-                                    style = AppTheme.typography.bodySmall.copy(fontSize = 15.sp),
-                                )
-                            },
-                        )
-                    }
-                }
+@Composable
+private fun ReorderableCollectionItemScope.FeedEditOptions(
+    item: FeedUi,
+    haptic: ReorderHapticFeedback,
+    interactionSource: MutableInteractionSource,
+    onFeedEnabled: ((feed: FeedUi, enabled: Boolean) -> Unit)?,
+    onDeleteRequest: () -> Unit,
+) {
+    Row {
+        if (item.spec.isAdvancedSearchFeedSpec()) {
+            IconButton(onClick = {}) {
+                Icon(
+                    imageVector = PrimalIcons.PencilUnderline,
+                    contentDescription = null,
+                    tint = AppTheme.extraColorScheme.onSurfaceVariantAlt2,
+                )
             }
-        },
-        bottomBar = {
-            if (enableEditMode) {
-                PrimalDivider()
-                if (!isEditMode) {
-                    RegularBottomBar(onEditFeedClick = { onEditFeedClick?.invoke() })
+        }
+        PrimalSwitch(
+            checked = item.enabled,
+            onCheckedChange = { enabled ->
+                if (!enabled && item.deletable) {
+                    onDeleteRequest()
                 } else {
-                    EditModeBottomBar(
-                        onAddFeedClick = { onAddFeedClick?.invoke() },
-                        onDoneClick = { onEditDoneClick?.invoke() },
-                    )
+                    onFeedEnabled?.invoke(item, enabled)
                 }
-            }
+            },
+        )
+        FeedDragHandle(
+            haptic = haptic,
+            interactionSource = interactionSource,
+        )
+    }
+}
+
+@Composable
+private fun RestoreDefaultFeedsItem(onRestoreClick: () -> Unit) {
+    val interactionSource = remember { MutableInteractionSource() }
+    ListItem(
+        colors = ListItemDefaults.colors(
+            containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(AppTheme.shapes.large)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+                onClick = onRestoreClick,
+            ),
+        headlineContent = {
+            Text(
+                color = AppTheme.colorScheme.primary,
+                modifier = Modifier,
+                text = stringResource(id = R.string.feed_list_restore_default_feeds),
+                style = AppTheme.typography.bodySmall.copy(fontSize = 15.sp),
+            )
         },
     )
 }

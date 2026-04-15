@@ -21,8 +21,8 @@ fun PollInfo.asPollUi(): PollUi {
     }
 
     val winner = when (pollType) {
-        UiPollType.User -> options.maxBy { it.voteCount }.takeIf { it.voteCount != 0 }
-        UiPollType.Zap -> options.maxBy { it.satsZapped }.takeIf { it.satsZapped != 0L }
+        UiPollType.User -> options.maxByOrNull { it.voteCount }?.takeIf { it.voteCount != 0 }
+        UiPollType.Zap -> options.maxByOrNull { it.satsZapped }?.takeIf { it.satsZapped != 0L }
     }
 
     return PollUi(

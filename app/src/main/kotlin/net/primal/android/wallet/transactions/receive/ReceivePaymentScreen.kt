@@ -368,10 +368,7 @@ private fun ReceivePaymentViewer(
                     .padding(start = 32.dp)
                     .height(72.dp),
                 amountInBtc = state.paymentDetails.amountInBtc.toBigDecimal(),
-                textSize = when (state.paymentDetails.amountInBtc.toSats().toString().length) {
-                    in (0..8) -> 48.sp
-                    else -> 40.sp
-                },
+                textSize = 48.sp,
             )
         }
 
