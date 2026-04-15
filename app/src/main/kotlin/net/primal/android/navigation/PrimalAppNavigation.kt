@@ -31,6 +31,7 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import androidx.navigation.navOptions
+import net.primal.android.audio.player.AudioPlayerStateProvider
 import net.primal.android.auth.login.LoginContract
 import net.primal.android.auth.login.LoginScreen
 import net.primal.android.auth.login.LoginViewModel
@@ -464,11 +465,13 @@ fun PrimalAppNavigation(navController: NavHostController, startDestination: Stri
                     navController = navController,
                     noteCallbacks = noteCallbacksHandler(navController = navController),
                 ) {
-                    PrimalAppNavigation(
-                        navController = navController,
-                        startDestination = startDestination,
-                        drawerDestinationHandler = drawerDestinationHandler,
-                    )
+                    AudioPlayerStateProvider {
+                        PrimalAppNavigation(
+                            navController = navController,
+                            startDestination = startDestination,
+                            drawerDestinationHandler = drawerDestinationHandler,
+                        )
+                    }
                 }
             }
         }

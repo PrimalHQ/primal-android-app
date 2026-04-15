@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.attachment.model.EventUriUi
 import net.primal.android.core.compose.attachment.model.isMediaUri
+import net.primal.android.notes.feed.note.ui.NoteAudioPlayerPreview
 import net.primal.android.notes.feed.note.ui.NoteAudioSpotifyLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteAudioTidalLinkPreview
 import net.primal.android.notes.feed.note.ui.NoteLinkLargePreview
@@ -82,6 +83,7 @@ fun NoteAttachments(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun NoteLinkAttachment(
     modifier: Modifier,
@@ -150,6 +152,15 @@ private fun NoteLinkAttachment(
                     onClick = { onUrlClick?.invoke(eventUri.url) },
                     description = eventUri.description,
                     thumbnailImageSize = DpSize(width = maxWidth, height = maxWidth / 2),
+                )
+            }
+
+            EventUriType.Audio -> {
+                NoteAudioPlayerPreview(
+                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp),
+                    noteId = eventUri.eventId,
+                    title = eventUri.title,
+                    url = eventUri.url,
                 )
             }
 
