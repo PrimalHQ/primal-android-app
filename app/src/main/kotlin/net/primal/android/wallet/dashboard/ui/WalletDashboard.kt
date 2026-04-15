@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,14 +39,16 @@ fun WalletDashboard(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         AnimatedContent(
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
             label = "CurrencyContent",
             targetState = currencyMode,
         ) { targetCurrencyMode ->
             if (targetCurrencyMode == CurrencyMode.FIAT && exchangeBtcUsdRate.isValidExchangeRate()) {
                 FiatAmountTextFromBtc(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .wrapContentWidth()
                         .padding(start = if (walletBalance != null) 32.dp else 0.dp)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
@@ -59,7 +62,7 @@ fun WalletDashboard(
             } else {
                 BtcAmountText(
                     modifier = Modifier
-                        .fillMaxWidth()
+                        .wrapContentWidth()
                         .padding(start = 32.dp)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
