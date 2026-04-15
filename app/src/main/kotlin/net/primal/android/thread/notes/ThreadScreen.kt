@@ -463,7 +463,6 @@ private fun ThreadLazyColumn(
                     textSelectable = highlighted,
                     fullWidthContent = highlighted,
                     headerSingleLine = !highlighted,
-                    enableTweetsMode = index == state.highlightPostIndex,
                     forceContentIndent = index != state.highlightPostIndex,
                     drawLineAboveAvatar = isConnectedBackward(index, state.highlightPostIndex),
                     drawLineBelowAvatar = isConnectedForward(index, state.highlightPostIndex),

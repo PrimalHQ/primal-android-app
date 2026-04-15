@@ -145,7 +145,6 @@ fun NoteFeedLazyColumn(
                             cardPadding = PaddingValues(all = 0.dp),
                             fullWidthContent = true,
                             forceContentIndent = true,
-                            enableTweetsMode = true,
                             nestingCutOffLimit = FEED_NESTED_NOTES_CUT_OFF_LIMIT,
                             showReplyTo = showReplyTo,
                             couldAutoPlay = index == firstVisibleVideoPlayingIndex,
