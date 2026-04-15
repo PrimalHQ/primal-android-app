@@ -98,7 +98,7 @@ fun PrimalTopLevelAppBar(
         )
 
         if (showDivider) {
-            PrimalDivider(modifier = Modifier.padding(top = 8.dp))
+            PrimalDivider()
         }
     }
 }
