@@ -317,7 +317,8 @@ private fun FeedNoteCard(
                             drawLineAboveAvatar = drawLineAboveAvatar,
                             drawLineBelowAvatar = drawLineBelowAvatar,
                             outlineColor = AppTheme.colorScheme.outline,
-                            lineOffsetX = (avatarSizeDp / 2) + avatarPaddingDp + 2.dp,
+                            lineOffsetX = (displaySettings.contentAppearance.replyAvatarSize / 2) +
+                                avatarPaddingDp + 2.dp,
                             lineWidth = 2.dp,
                         )
                         .padding(
