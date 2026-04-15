@@ -46,6 +46,7 @@ interface AdvancedSearchContract {
             val feedSpec: String,
             val editingFeedSpec: String? = null,
         ) : SideEffect()
+        data object NavigateBack : SideEffect()
     }
 
     sealed class TimeModifier {

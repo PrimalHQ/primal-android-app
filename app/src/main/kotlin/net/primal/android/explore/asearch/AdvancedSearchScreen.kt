@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -43,6 +43,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.AvatarOverlap
 import net.primal.android.core.compose.AvatarThumbnailsRow
 import net.primal.android.core.compose.PrimalIconTextField
+import net.primal.android.core.compose.PrimalLoadingSpinner
 import net.primal.android.core.compose.PrimalScaffold
 import net.primal.android.core.compose.PrimalTopAppBar
 import net.primal.android.core.compose.button.PrimalLoadingButton
@@ -78,6 +79,8 @@ fun AdvancedSearchScreen(viewModel: AdvancedSearchViewModel, callbacks: Advanced
 
                 is AdvancedSearchContract.SideEffect.NavigateToExploreArticleFeed ->
                     callbacks.onNavigateToExploreArticleFeed(it.feedSpec, it.editingFeedSpec)
+
+                is AdvancedSearchContract.SideEffect.NavigateBack -> callbacks.onClose()
             }
         }
     }
@@ -89,7 +92,6 @@ fun AdvancedSearchScreen(viewModel: AdvancedSearchViewModel, callbacks: Advanced
     )
 }
 
-@Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AdvancedSearchScreen(
@@ -107,17 +109,19 @@ private fun AdvancedSearchScreen(
             )
         },
         bottomBar = {
-            Box(
-                modifier = Modifier.background(AppTheme.colorScheme.background),
-            ) {
-                PrimalLoadingButton(
-                    modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
-                        .navigationBarsPadding()
-                        .fillMaxWidth(),
-                    text = stringResource(id = R.string.asearch_search_button),
-                    onClick = { eventPublisher(UiEvent.OnSearch) },
-                )
+            if (!state.loading) {
+                Box(
+                    modifier = Modifier.background(AppTheme.colorScheme.background),
+                ) {
+                    PrimalLoadingButton(
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                            .navigationBarsPadding()
+                            .fillMaxWidth(),
+                        text = stringResource(id = R.string.asearch_search_button),
+                        onClick = { eventPublisher(UiEvent.OnSearch) },
+                    )
+                }
             }
         },
     ) { paddingValues ->
@@ -128,66 +132,79 @@ private fun AdvancedSearchScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center,
             ) {
-                CircularProgressIndicator()
+                PrimalLoadingSpinner()
             }
-            return@PrimalScaffold
+        } else {
+            AdvancedSearchContent(
+                state = state,
+                eventPublisher = eventPublisher,
+                paddingValues = paddingValues,
+            )
         }
-        Column(
-            modifier = Modifier
-                .padding(top = 8.dp)
-                .verticalScroll(rememberScrollState())
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-        ) {
-            IncludedWordsTextField(
-                includedWords = state.includedWords,
-                onValueChange = { eventPublisher(UiEvent.IncludedWordsValueChanged(it)) },
+    }
+}
+
+@Composable
+private fun AdvancedSearchContent(
+    state: UiState,
+    eventPublisher: (UiEvent) -> Unit,
+    paddingValues: PaddingValues,
+) {
+    Column(
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .verticalScroll(rememberScrollState())
+            .padding(paddingValues),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        IncludedWordsTextField(
+            includedWords = state.includedWords,
+            onValueChange = { eventPublisher(UiEvent.IncludedWordsValueChanged(it)) },
+        )
+        ExcludedWordsTextField(
+            excludedWords = state.excludedWords,
+            onValueChange = { eventPublisher(UiEvent.ExcludedWordsValueChanged(it)) },
+        )
+        Column {
+            SearchKindPicker(
+                searchKind = state.searchKind,
+                onSearchKindChanged = { eventPublisher(UiEvent.SearchKindChanged(it)) },
             )
-            ExcludedWordsTextField(
-                excludedWords = state.excludedWords,
-                onValueChange = { eventPublisher(UiEvent.ExcludedWordsValueChanged(it)) },
+
+            PostedByPicker(
+                postedBy = state.postedBy,
+                onUsersSelected = { eventPublisher(UiEvent.PostedBySelectUsers(it)) },
             )
-            Column {
-                SearchKindPicker(
-                    searchKind = state.searchKind,
-                    onSearchKindChanged = { eventPublisher(UiEvent.SearchKindChanged(it)) },
-                )
 
-                PostedByPicker(
-                    postedBy = state.postedBy,
-                    onUsersSelected = { eventPublisher(UiEvent.PostedBySelectUsers(it)) },
-                )
+            ReplyingToPicker(
+                replyingTo = state.replyingTo,
+                onUsersSelected = { eventPublisher(UiEvent.ReplyingToSelectUsers(it)) },
+            )
 
-                ReplyingToPicker(
-                    replyingTo = state.replyingTo,
-                    onUsersSelected = { eventPublisher(UiEvent.ReplyingToSelectUsers(it)) },
-                )
+            ZappedByPicker(
+                zappedBy = state.zappedBy,
+                onUsersSelected = { eventPublisher(UiEvent.ZappedBySelectUsers(it)) },
+            )
 
-                ZappedByPicker(
-                    zappedBy = state.zappedBy,
-                    onUsersSelected = { eventPublisher(UiEvent.ZappedBySelectUsers(it)) },
-                )
+            TimePostedPicker(
+                timePosted = state.timePosted,
+                onTimePostedChanged = { eventPublisher(UiEvent.TimePostedChanged(it)) },
+            )
 
-                TimePostedPicker(
-                    timePosted = state.timePosted,
-                    onTimePostedChanged = { eventPublisher(UiEvent.TimePostedChanged(it)) },
-                )
+            SearchScopePicker(
+                scope = state.scope,
+                onScopeChanged = { eventPublisher(UiEvent.ScopeChanged(it)) },
+            )
 
-                SearchScopePicker(
-                    scope = state.scope,
-                    onScopeChanged = { eventPublisher(UiEvent.ScopeChanged(it)) },
-                )
-
-                SearchFilterPicker(
-                    searchFilter = state.filter,
-                    searchKind = state.searchKind,
-                    onFilterChanged = { eventPublisher(UiEvent.SearchFilterChanged(it)) },
-                )
-                OrderByPicker(
-                    orderBy = state.orderBy,
-                    onOrderByChanged = { eventPublisher(UiEvent.OrderByChanged(it)) },
-                )
-            }
+            SearchFilterPicker(
+                searchFilter = state.filter,
+                searchKind = state.searchKind,
+                onFilterChanged = { eventPublisher(UiEvent.SearchFilterChanged(it)) },
+            )
+            OrderByPicker(
+                orderBy = state.orderBy,
+                onOrderByChanged = { eventPublisher(UiEvent.OrderByChanged(it)) },
+            )
         }
     }
 }

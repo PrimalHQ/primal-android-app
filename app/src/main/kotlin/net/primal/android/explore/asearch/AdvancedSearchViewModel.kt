@@ -123,8 +123,11 @@ class AdvancedSearchViewModel @Inject constructor(
             val query = editingFeedSpec?.extractAdvancedSearchQuery() ?: return@launch
             setState { copy(loading = true) }
             runCatching { feedsRepository.getAdvancedSearchQuery(query = query) }
-                .onSuccess { parsed -> applyParsedQuery(parsed) }
-                .onFailure { Napier.w(throwable = it) { "Failed to parse advanced search query." } }
+                .mapCatching { parsed -> applyParsedQuery(parsed) }
+                .onFailure {
+                    Napier.w(throwable = it) { "Failed to parse advanced search query." }
+                    setEffect(AdvancedSearchContract.SideEffect.NavigateBack)
+                }
             setState { copy(loading = false) }
         }
 
@@ -132,7 +135,9 @@ class AdvancedSearchViewModel @Inject constructor(
         val includedWords = buildString {
             if (parsed.includes.isNotEmpty()) append(parsed.includes)
             if (parsed.hashtags.isNotEmpty()) {
-                val tags = parsed.hashtags.split(" ").joinToString(" ") { "#$it" }
+                val tags = parsed.hashtags.split(
+                    "\\s+".toRegex(),
+                ).filter { it.isNotBlank() }.joinToString(" ") { "#$it" }
                 if (isNotEmpty()) append(" ")
                 append(tags)
             }

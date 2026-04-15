@@ -113,16 +113,16 @@ class ExploreFeedViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.AddToUserFeeds -> {
-                        setState { copy(feedTitle = it.title, feedDescription = it.description) }
-                        addToMyFeeds(it)
-                    }
+                    is UiEvent.AddToUserFeeds -> addToMyFeeds(it)
                     UiEvent.RemoveFromUserFeeds -> removeFromMyFeeds()
                 }
             }
         }
 
     private suspend fun addToMyFeeds(event: UiEvent.AddToUserFeeds) {
+        val previousTitle = state.value.feedTitle
+        val previousDescription = state.value.feedDescription
+        setState { copy(feedTitle = event.title, feedDescription = event.description) }
         try {
             val userId = activeAccountStore.activeUserId()
             val feedSpecKind = feedSpec.resolveFeedSpecKind()
@@ -151,9 +151,11 @@ class ExploreFeedViewModel @Inject constructor(
             }
         } catch (error: SignatureException) {
             Napier.w(throwable = error) { "Failed to add feed due to signature error." }
+            setState { copy(feedTitle = previousTitle, feedDescription = previousDescription) }
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
         } catch (error: NetworkException) {
             Napier.w(throwable = error) { "Failed to add feed due to network error." }
+            setState { copy(feedTitle = previousTitle, feedDescription = previousDescription) }
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
         }
     }
