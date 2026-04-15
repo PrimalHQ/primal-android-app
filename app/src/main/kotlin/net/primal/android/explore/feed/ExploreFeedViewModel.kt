@@ -113,7 +113,10 @@ class ExploreFeedViewModel @Inject constructor(
         viewModelScope.launch {
             events.collect {
                 when (it) {
-                    is UiEvent.AddToUserFeeds -> addToMyFeeds(it)
+                    is UiEvent.AddToUserFeeds -> {
+                        setState { copy(feedTitle = it.title, feedDescription = it.description) }
+                        addToMyFeeds(it)
+                    }
                     UiEvent.RemoveFromUserFeeds -> removeFromMyFeeds()
                 }
             }
