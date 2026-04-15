@@ -83,7 +83,7 @@ private fun AudioPlayerController(audioState: AudioPlayerState) {
                 if (currentMediaId != null &&
                     audioState.currentUrl != null && currentMediaId != audioState.currentUrl
                 ) {
-                    audioState.stop()
+                    audioState.resetState()
                 } else {
                     updateState()
                 }

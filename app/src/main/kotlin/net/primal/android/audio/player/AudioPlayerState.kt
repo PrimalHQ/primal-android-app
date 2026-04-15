@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 @Stable
 @OptIn(ExperimentalAtomicApi::class)
+@Suppress("TooManyFunctions")
 class AudioPlayerState internal constructor(
     initialUrl: String? = null,
     initialTitle: String? = null,
@@ -107,6 +108,11 @@ class AudioPlayerState internal constructor(
     }
 
     fun stop() {
+        resetState()
+        sendCommand(AudioPlayerCommand.Pause)
+    }
+
+    internal fun resetState() {
         currentUrl = null
         currentTitle = null
         currentArtist = null
@@ -116,7 +122,6 @@ class AudioPlayerState internal constructor(
         isBuffering = false
         currentPositionMs = 0L
         durationMs = 0L
-        sendCommand(AudioPlayerCommand.Pause)
     }
 
     fun acquirePause() {
