@@ -10,7 +10,7 @@ fun AdvancedSearchQueryResponse.asAdvancedSearchParsedQuery(): AdvancedSearchPar
         hashtags = this.hashtags,
         kind = this.kind,
         postedBy = this.postedBy,
-        replyingTo = this.replingTo,
+        replyingTo = this.replyingTo,
         zappedBy = this.zappedBy,
         timeframe = this.timeframe,
         customTimeframeSince = this.customTimeframe.since,

@@ -1,7 +1,5 @@
 package net.primal.data.remote.api.feeds
 
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
@@ -11,6 +9,7 @@ import net.primal.data.remote.api.feeds.model.AdvancedSearchQueryResponse
 import net.primal.data.remote.api.feeds.model.DvmFeedsRequestBody
 import net.primal.data.remote.api.feeds.model.DvmFeedsResponse
 import net.primal.data.remote.api.feeds.model.FeedsResponse
+import net.primal.data.remote.api.feeds.model.ParseAdvancedSearchQueryRequestBody
 import net.primal.data.remote.api.feeds.model.SubSettingsAuthorization
 import net.primal.data.remote.model.ContentAppSubSettings
 import net.primal.domain.common.exception.NetworkException
@@ -119,9 +118,7 @@ internal class FeedsApiImpl(
         val queryResult = primalApiClient.query(
             message = PrimalCacheFilter(
                 primalVerb = PrimalVerb.PARSE_ADVANCED_SEARCH_QUERY.id,
-                optionsJson = buildJsonObject {
-                    put("query", query)
-                }.toString(),
+                optionsJson = ParseAdvancedSearchQueryRequestBody(query = query).encodeToJsonString(),
             ),
         )
 

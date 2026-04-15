@@ -1,5 +1,6 @@
 package net.primal.data.remote.api.feeds.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -9,7 +10,7 @@ data class AdvancedSearchQueryResponse(
     val hashtags: String = "",
     val kind: String = "Notes",
     val postedBy: List<String> = emptyList(),
-    val replingTo: List<String> = emptyList(),
+    @SerialName("replingTo") val replyingTo: List<String> = emptyList(),
     val zappedBy: List<String> = emptyList(),
     val timeframe: String = "Anytime",
     val customTimeframe: CustomTimeframe = CustomTimeframe(),
