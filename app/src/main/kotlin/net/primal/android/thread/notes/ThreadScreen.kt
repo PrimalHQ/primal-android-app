@@ -603,7 +603,7 @@ private fun ReplyToBottomBar(
                 .imePadding(),
             value = replyState.content,
             onValueChange = { replyEventPublisher(NoteEditorContract.UiEvent.UpdateContent(content = it)) },
-            maxLines = 10,
+            maxLines = 3,
             enabled = !replyState.publishing,
             placeholder = {
                 ReplyTextFieldPlaceholder(
