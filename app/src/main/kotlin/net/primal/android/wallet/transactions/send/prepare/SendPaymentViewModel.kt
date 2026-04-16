@@ -80,6 +80,9 @@ class SendPaymentViewModel @Inject constructor(
                     QrCodeDataType.PROMO_CODE ->
                         setEffect(SideEffect.PromoCodeDetected(result.value.getPromoCodeFromUrl()))
 
+                    QrCodeDataType.NOSTR_CONNECT ->
+                        setEffect(SideEffect.NostrConnectRequest(url = result.value))
+
                     else -> processTextData(text = result.value)
                 }
             }

@@ -170,6 +170,10 @@ private fun NavGraphBuilder.send(
             navController.popBackStack()
             navController.navigateToWalletCreateTransaction(draftTransaction = draft)
         },
+        onNostrConnectRequest = { url ->
+            navController.popBackStack()
+            navController.navigateToNostrConnectBottomSheet(url = url)
+        },
     )
 }
 

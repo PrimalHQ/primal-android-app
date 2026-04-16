@@ -26,5 +26,6 @@ interface SendPaymentContract {
     sealed class SideEffect {
         data class PromoCodeDetected(val promoCode: String) : SideEffect()
         data class DraftTransactionReady(val draft: DraftTx) : SideEffect()
+        data class NostrConnectRequest(val url: String) : SideEffect()
     }
 }
