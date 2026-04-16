@@ -129,6 +129,8 @@ const val EXPLORE_FEED_DESCRIPTION = "exploreFeedDescription"
 inline val SavedStateHandle.exploreFeedDescription: String?
     get() = get<String>(EXPLORE_FEED_DESCRIPTION)?.asBase64Decoded()?.ifEmpty { null }
 
+const val FEED_SAVED_RESULT = "feedSavedResult"
+
 const val GIF_URL_RESULT = "gifUrlResult"
 const val PENDING_GIF_REPLY_ARGS = "pendingGifReplyArgs"
 

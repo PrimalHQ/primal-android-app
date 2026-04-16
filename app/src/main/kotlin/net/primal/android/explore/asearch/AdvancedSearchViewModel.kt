@@ -31,6 +31,7 @@ import net.primal.android.navigation.searchKind
 import net.primal.domain.feeds.AdvancedSearchParsedQuery
 import net.primal.domain.feeds.FeedsRepository
 import net.primal.domain.feeds.extractAdvancedSearchQuery
+import net.primal.domain.nostr.cryptography.utils.assureValidPubKeyHex
 import net.primal.domain.nostr.cryptography.utils.hexToNpubHrp
 import net.primal.domain.profile.ProfileRepository
 
@@ -56,7 +57,6 @@ class AdvancedSearchViewModel @Inject constructor(
             includedWords = savedStateHandle.initialQuery,
             searchKind = initialSearchKind,
             scope = initialSearchScope,
-            editingFeedSpec = editingFeedSpec,
         ),
     )
     val state = _state.asStateFlow()
@@ -120,7 +120,11 @@ class AdvancedSearchViewModel @Inject constructor(
 
     private fun parseEditingFeedSpec() =
         viewModelScope.launch {
-            val query = editingFeedSpec?.extractAdvancedSearchQuery() ?: return@launch
+            val query = editingFeedSpec?.extractAdvancedSearchQuery()
+            if (query == null) {
+                setEffect(AdvancedSearchContract.SideEffect.NavigateBack)
+                return@launch
+            }
             setState { copy(loading = true) }
             runCatching { feedsRepository.getAdvancedSearchQuery(query = query) }
                 .mapCatching { parsed -> applyParsedQuery(parsed) }
@@ -170,7 +174,8 @@ class AdvancedSearchViewModel @Inject constructor(
 
     private suspend fun fetchProfiles(pubkeys: List<String>): Set<UserProfileItemUi> {
         if (pubkeys.isEmpty()) return emptySet()
-        return profileRepository.findProfileData(pubkeys)
+        val hexPubkeys = pubkeys.map { it.assureValidPubKeyHex() }
+        return profileRepository.findProfileData(hexPubkeys)
             .map { it.asUserProfileItemUi() }
             .toSet()
     }

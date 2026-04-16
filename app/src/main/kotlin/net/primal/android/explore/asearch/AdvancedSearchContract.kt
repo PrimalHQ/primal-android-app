@@ -17,7 +17,6 @@ interface AdvancedSearchContract {
         val scope: SearchScope = SearchScope.Global,
         val filter: SearchFilter = SearchFilter(),
         val orderBy: SearchOrderBy = SearchOrderBy.Time,
-        val editingFeedSpec: String? = null,
         val loading: Boolean = false,
     )
 

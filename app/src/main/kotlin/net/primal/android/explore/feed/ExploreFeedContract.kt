@@ -10,6 +10,8 @@ interface ExploreFeedContract {
         val feedTitle: String?,
         val feedDescription: String?,
         val existsInUserFeeds: Boolean = false,
+        val isEditMode: Boolean = false,
+        val saving: Boolean = false,
         val error: ExploreFeedError? = null,
     ) {
         sealed class ExploreFeedError {
@@ -21,6 +23,10 @@ interface ExploreFeedContract {
     sealed class UiEvent {
         data class AddToUserFeeds(val title: String, val description: String) : UiEvent()
         data object RemoveFromUserFeeds : UiEvent()
+    }
+
+    sealed class SideEffect {
+        data object FeedSaved : SideEffect()
     }
 
     enum class RenderType {
@@ -35,5 +41,6 @@ interface ExploreFeedContract {
     data class ScreenCallbacks(
         val onClose: () -> Unit,
         val onGoToWallet: () -> Unit,
+        val onFeedEditCompleted: () -> Unit = {},
     )
 }

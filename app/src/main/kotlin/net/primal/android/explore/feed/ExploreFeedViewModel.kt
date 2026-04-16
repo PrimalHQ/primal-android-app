@@ -9,11 +9,13 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import net.primal.android.explore.feed.ExploreFeedContract.UiEvent
 import net.primal.android.explore.feed.ExploreFeedContract.UiState
@@ -61,6 +63,7 @@ class ExploreFeedViewModel @Inject constructor(
             renderType = renderType,
             feedTitle = feedTitle,
             feedDescription = feedDescription,
+            isEditMode = editingFeedSpec != null,
         ),
     )
     val state = _state.asStateFlow()
@@ -72,6 +75,10 @@ class ExploreFeedViewModel @Inject constructor(
     fun setEvent(event: UiEvent) {
         viewModelScope.launch { events.emit(event) }
     }
+
+    private val _effects = Channel<ExploreFeedContract.SideEffect>()
+    val effects = _effects.receiveAsFlow()
+    private fun setEffect(effect: ExploreFeedContract.SideEffect) = viewModelScope.launch { _effects.send(effect) }
 
     init {
         observeContainsFeed()
@@ -120,9 +127,7 @@ class ExploreFeedViewModel @Inject constructor(
         }
 
     private suspend fun addToMyFeeds(event: UiEvent.AddToUserFeeds) {
-        val previousTitle = state.value.feedTitle
-        val previousDescription = state.value.feedDescription
-        setState { copy(feedTitle = event.title, feedDescription = event.description) }
+        setState { copy(saving = true) }
         try {
             val userId = activeAccountStore.activeUserId()
             val feedSpecKind = feedSpec.resolveFeedSpecKind()
@@ -148,15 +153,17 @@ class ExploreFeedViewModel @Inject constructor(
                     )
                 }
                 feedsRepository.persistRemotelyAllLocalUserFeeds(userId = userId)
+                setState { copy(feedTitle = event.title, feedDescription = event.description) }
+                setEffect(ExploreFeedContract.SideEffect.FeedSaved)
             }
         } catch (error: SignatureException) {
             Napier.w(throwable = error) { "Failed to add feed due to signature error." }
-            setState { copy(feedTitle = previousTitle, feedDescription = previousDescription) }
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
         } catch (error: NetworkException) {
             Napier.w(throwable = error) { "Failed to add feed due to network error." }
-            setState { copy(feedTitle = previousTitle, feedDescription = previousDescription) }
             setErrorState(error = ExploreFeedError.FailedToAddToFeed(error))
+        } finally {
+            setState { copy(saving = false) }
         }
     }
 

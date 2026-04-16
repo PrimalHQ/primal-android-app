@@ -1412,6 +1412,10 @@ private fun NavGraphBuilder.exploreFeed(
         callbacks = ExploreFeedContract.ScreenCallbacks(
             onClose = { navController.navigateUp() },
             onGoToWallet = { navController.navigateToWallet() },
+            onFeedEditCompleted = {
+                navController.previousBackStackEntry?.savedStateHandle?.set(FEED_SAVED_RESULT, true)
+                navController.popBackStack()
+            },
         ),
     )
 }
@@ -1483,6 +1487,17 @@ private fun NavGraphBuilder.advancedSearch(
     popExitTransition = { primalSlideOutHorizontallyToEnd },
 ) {
     val viewModel = hiltViewModel<AdvancedSearchViewModel>()
+
+    val feedSavedResult = it.savedStateHandle
+        .getStateFlow<Boolean?>(FEED_SAVED_RESULT, null)
+        .collectAsState()
+
+    LaunchedEffect(feedSavedResult.value) {
+        if (feedSavedResult.value == true) {
+            it.savedStateHandle[FEED_SAVED_RESULT] = null
+            navController.navigateUp()
+        }
+    }
 
     ApplyEdgeToEdge()
     LockToOrientationPortrait()

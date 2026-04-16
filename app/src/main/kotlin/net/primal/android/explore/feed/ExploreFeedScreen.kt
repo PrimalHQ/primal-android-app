@@ -13,6 +13,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,8 +62,32 @@ fun ExploreFeedScreen(
 ) {
     val uiState = viewModel.state.collectAsState()
 
+    val snackbarHostState = remember { SnackbarHostState() }
+    val feedSavedMessage = if (uiState.value.isEditMode) {
+        stringResource(id = R.string.app_updated_user_feed)
+    } else {
+        stringResource(id = R.string.app_added_to_user_feeds)
+    }
+
+    LaunchedEffect(viewModel, callbacks) {
+        viewModel.effects.collect {
+            when (it) {
+                is ExploreFeedContract.SideEffect.FeedSaved -> {
+                    snackbarHostState.showSnackbar(
+                        message = feedSavedMessage,
+                        duration = SnackbarDuration.Short,
+                    )
+                    if (uiState.value.isEditMode) {
+                        callbacks.onFeedEditCompleted()
+                    }
+                }
+            }
+        }
+    }
+
     ExploreFeedScreen(
         state = uiState.value,
+        snackbarHostState = snackbarHostState,
         noteCallbacks = noteCallbacks,
         callbacks = callbacks,
         eventPublisher = { viewModel.setEvent(it) },
@@ -73,6 +98,7 @@ fun ExploreFeedScreen(
 @Composable
 fun ExploreFeedScreen(
     state: ExploreFeedContract.UiState,
+    snackbarHostState: SnackbarHostState,
     noteCallbacks: NoteCallbacks,
     callbacks: ExploreFeedContract.ScreenCallbacks,
     eventPublisher: (ExploreFeedContract.UiEvent) -> Unit,
@@ -81,24 +107,16 @@ fun ExploreFeedScreen(
     val uiScope = rememberCoroutineScope()
 
     val feedTitle = state.feedTitle ?: state.extractTitle()
-    val snackbarHostState = remember { SnackbarHostState() }
 
     var showSaveFeedBottomSheet by rememberSaveable { mutableStateOf(false) }
 
     if (showSaveFeedBottomSheet && state.feedSpecKind != null) {
-        val addedToUserFeedsMessage = stringResource(id = R.string.app_added_to_user_feeds)
         SaveFeedBottomSheet(
             initialTitle = state.feedTitle ?: state.feedSpec.resolveDefaultTitle(),
             initialDescription = state.feedDescription ?: state.feedSpec.resolveDefaultDescription(),
             feedSpecKind = state.feedSpecKind,
             onAddToUserFeed = { title, description ->
                 eventPublisher(AddToUserFeeds(title = title, description = description))
-                uiScope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = addedToUserFeedsMessage,
-                        duration = SnackbarDuration.Short,
-                    )
-                }
             },
             onDismissRequest = { showSaveFeedBottomSheet = false },
         )
@@ -130,6 +148,7 @@ fun ExploreFeedScreen(
             ExploreFeedTopAppBar(
                 title = feedTitle,
                 existsInUserFeeds = state.existsInUserFeeds,
+                saving = state.saving,
                 onClose = callbacks.onClose,
                 onRemoveFromUserFeedsClick = {
                     eventPublisher(RemoveFromUserFeeds)
@@ -181,6 +200,7 @@ fun ExploreFeedScreen(
 private fun ExploreFeedTopAppBar(
     title: String,
     existsInUserFeeds: Boolean,
+    saving: Boolean = false,
     onClose: () -> Unit,
     onAddToUserFeedsClick: () -> Unit,
     onRemoveFromUserFeedsClick: () -> Unit,
@@ -196,6 +216,7 @@ private fun ExploreFeedTopAppBar(
         actions = {
             AddRemoveUserFeedButton(
                 existsInUserFeeds = existsInUserFeeds,
+                saving = saving,
                 onRemoveFromUserFeedsClick = onRemoveFromUserFeedsClick,
                 onAddToUserFeedsClick = onAddToUserFeedsClick,
             )
@@ -279,6 +300,7 @@ private fun ExploreFeedContract.UiState.extractTitle(): String {
 @Composable
 private fun AddRemoveUserFeedButton(
     existsInUserFeeds: Boolean,
+    saving: Boolean = false,
     onAddToUserFeedsClick: () -> Unit,
     onRemoveFromUserFeedsClick: () -> Unit,
 ) {
@@ -289,6 +311,7 @@ private fun AddRemoveUserFeedButton(
         } else {
             stringResource(R.string.explore_feed_save_feed)
         },
+        loading = saving,
         height = 36.dp,
         fontSize = 14.sp,
         fontWeight = FontWeight.SemiBold,
