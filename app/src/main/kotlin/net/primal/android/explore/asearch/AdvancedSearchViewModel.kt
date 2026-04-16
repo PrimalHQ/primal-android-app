@@ -264,7 +264,7 @@ class AdvancedSearchViewModel @Inject constructor(
             AdvancedSearchContract.SearchScope.Global -> ""
             AdvancedSearchContract.SearchScope.MyFollows -> "scope:myfollows"
             AdvancedSearchContract.SearchScope.MyNetwork -> "scope:mynetwork"
-            AdvancedSearchContract.SearchScope.MyFollowsInteractions -> "scope:myfollowinteractions"
+            AdvancedSearchContract.SearchScope.MyFollowsInteractions -> "scope:myfollowsinteractions"
             AdvancedSearchContract.SearchScope.MyNetworkInteractions -> "scope:mynetworkinteractions"
             AdvancedSearchContract.SearchScope.NotMyFollows -> "scope:notmyfollows"
             AdvancedSearchContract.SearchScope.MyNotifications -> "scope:mynotifications"
@@ -312,32 +312,32 @@ class AdvancedSearchViewModel @Inject constructor(
             "Notes" -> AdvancedSearchContract.SearchKind.Notes
             "Reads" -> AdvancedSearchContract.SearchKind.Reads
             "Images" -> AdvancedSearchContract.SearchKind.Images
-            "Videos" -> AdvancedSearchContract.SearchKind.Videos
-            "Sound" -> AdvancedSearchContract.SearchKind.Sound
-            "NoteReplies" -> AdvancedSearchContract.SearchKind.NoteReplies
-            "ReadsComments" -> AdvancedSearchContract.SearchKind.ReadsComments
+            "Video" -> AdvancedSearchContract.SearchKind.Videos
+            "Audio" -> AdvancedSearchContract.SearchKind.Sound
+            "Note Replies" -> AdvancedSearchContract.SearchKind.NoteReplies
+            "Reads Comments" -> AdvancedSearchContract.SearchKind.ReadsComments
             else -> AdvancedSearchContract.SearchKind.Notes
         }
 
     private fun String.toSearchScope(): AdvancedSearchContract.SearchScope =
         when (this) {
             "Global" -> AdvancedSearchContract.SearchScope.Global
-            "MyFollows" -> AdvancedSearchContract.SearchScope.MyFollows
-            "MyNetwork" -> AdvancedSearchContract.SearchScope.MyNetwork
-            "MyNotifications" -> AdvancedSearchContract.SearchScope.MyNotifications
-            "MyFollowsInteractions" -> AdvancedSearchContract.SearchScope.MyFollowsInteractions
-            "MyNetworkInteractions" -> AdvancedSearchContract.SearchScope.MyNetworkInteractions
-            "NotMyFollows" -> AdvancedSearchContract.SearchScope.NotMyFollows
+            "My Follows" -> AdvancedSearchContract.SearchScope.MyFollows
+            "My Network" -> AdvancedSearchContract.SearchScope.MyNetwork
+            "My Notifications" -> AdvancedSearchContract.SearchScope.MyNotifications
+            "My Follows Interactions" -> AdvancedSearchContract.SearchScope.MyFollowsInteractions
+            "My Network Interactions" -> AdvancedSearchContract.SearchScope.MyNetworkInteractions
+            "Not My Follows" -> AdvancedSearchContract.SearchScope.NotMyFollows
             else -> AdvancedSearchContract.SearchScope.Global
         }
 
     private fun String.toSearchOrderBy(): AdvancedSearchContract.SearchOrderBy =
         when (this) {
             "Time" -> AdvancedSearchContract.SearchOrderBy.Time
-            "ContentScore" -> AdvancedSearchContract.SearchOrderBy.ContentScore
-            "Replies" -> AdvancedSearchContract.SearchOrderBy.Replies
-            "SatsZapped" -> AdvancedSearchContract.SearchOrderBy.SatsZapped
-            "Interactions" -> AdvancedSearchContract.SearchOrderBy.Interactions
+            "Content Score" -> AdvancedSearchContract.SearchOrderBy.ContentScore
+            "Number of Replies" -> AdvancedSearchContract.SearchOrderBy.Replies
+            "Sats Zapped" -> AdvancedSearchContract.SearchOrderBy.SatsZapped
+            "Number of Interactions" -> AdvancedSearchContract.SearchOrderBy.Interactions
             else -> AdvancedSearchContract.SearchOrderBy.Time
         }
 
@@ -352,9 +352,9 @@ class AdvancedSearchViewModel @Inject constructor(
         return when (timeframe) {
             "Anytime" -> AdvancedSearchContract.TimeModifier.Anytime
             "Today" -> AdvancedSearchContract.TimeModifier.Today
-            "Week" -> AdvancedSearchContract.TimeModifier.Week
-            "Month" -> AdvancedSearchContract.TimeModifier.Month
-            "Year" -> AdvancedSearchContract.TimeModifier.Year
+            "This Week" -> AdvancedSearchContract.TimeModifier.Week
+            "This Month" -> AdvancedSearchContract.TimeModifier.Month
+            "This Year" -> AdvancedSearchContract.TimeModifier.Year
             else -> AdvancedSearchContract.TimeModifier.Anytime
         }
     }
