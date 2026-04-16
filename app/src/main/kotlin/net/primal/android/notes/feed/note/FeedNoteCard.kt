@@ -224,6 +224,12 @@ private fun FeedNoteCard(
     }
     val overflowIconSizeDp = 40.dp
 
+    val threadAlignmentPadding = if (!fullWidthContent && (drawLineAboveAvatar || drawLineBelowAvatar)) {
+        (displaySettings.contentAppearance.noteAvatarSize - displaySettings.contentAppearance.replyAvatarSize) / 2
+    } else {
+        0.dp
+    }
+
     val graphicsLayer = rememberGraphicsLayer()
 
     NoteSurfaceCard(
@@ -314,8 +320,8 @@ private fun FeedNoteCard(
                             drawLineAboveAvatar = drawLineAboveAvatar,
                             drawLineBelowAvatar = drawLineBelowAvatar,
                             outlineColor = AppTheme.colorScheme.outline,
-                            lineOffsetX = (displaySettings.contentAppearance.replyAvatarSize / 2) +
-                                avatarPaddingDp + 2.dp,
+                            lineOffsetX = avatarPaddingDp + threadAlignmentPadding +
+                                avatarSizeDp / 2 + (1.5).dp,
                             lineWidth = 2.dp,
                         )
                         .padding(
@@ -328,7 +334,10 @@ private fun FeedNoteCard(
                         data = noteData,
                         fullWidthContent = fullWidthContent,
                         avatarSizeDp = avatarSizeDp,
-                        avatarPaddingValues = PaddingValues(start = avatarPaddingDp, top = avatarPaddingDp),
+                        avatarPaddingValues = PaddingValues(
+                            start = avatarPaddingDp + threadAlignmentPadding,
+                            top = avatarPaddingDp,
+                        ),
                         notePaddingValues = PaddingValues(
                             start = 8.dp,
                             top = avatarPaddingDp,
