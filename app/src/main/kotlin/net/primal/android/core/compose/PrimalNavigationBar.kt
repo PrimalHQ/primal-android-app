@@ -52,7 +52,7 @@ import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
 import net.primal.android.user.domain.Badges
 
-val NavigationBarFullHeightDp = 72.dp
+val NavigationBarFullHeightDp = 64.dp
 
 @Composable
 fun PrimalNavigationBar(
@@ -78,7 +78,7 @@ fun PrimalNavigationBar(
             ) {
                 val horizontalPadding = 12.dp
                 val topPadding = 4.dp
-                val pillWidth = 80.dp
+                val pillWidth = 72.dp
                 val itemWidth = (maxWidth - horizontalPadding * 2) / PrimalTopLevelDestination.entries.size
                 val selectedIndex = PrimalTopLevelDestination.entries.indexOf(activeDestination)
 
@@ -99,7 +99,7 @@ fun PrimalNavigationBar(
                 ) {
                     Box(
                         modifier = Modifier
-                            .height(60.dp)
+                            .height(52.dp)
                             .width(pillWidth)
                             .background(
                                 color = AppTheme.extraColorScheme.surfaceVariantAlt1,
@@ -163,6 +163,7 @@ private fun PrimalNavigationBarItem(
         modifier = modifier
             .fillMaxHeight()
             .clip(CircleShape)
+            .padding(top = 4.dp)
             .clickable(indication = null, interactionSource = null, onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,

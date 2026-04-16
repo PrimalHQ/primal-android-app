@@ -128,7 +128,7 @@ private fun AppBarTitle(
         modifier = titleColumnModifier,
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(
                 text = title,

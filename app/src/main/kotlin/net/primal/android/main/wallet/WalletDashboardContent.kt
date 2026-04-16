@@ -50,6 +50,7 @@ import java.time.format.FormatStyle
 import kotlinx.coroutines.launch
 import net.primal.android.R
 import net.primal.android.core.compose.NavigationBarFullHeightDp
+import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.PrimalTopLevelAppBar
 import net.primal.android.core.compose.foundation.rememberLazyListStatePagingWorkaround
 import net.primal.android.core.compose.isEmpty
@@ -474,27 +475,34 @@ private fun WalletDashboardSection(
                     exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                 )
 
-                false -> WalletDashboardLite(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(dashboardLiteHeightDp)
-                        .background(color = AppTheme.colorScheme.surface)
-                        .padding(horizontal = 10.dp, vertical = 16.dp)
-                        .animateContentSize(),
-                    walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
-                    actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
-                    onWalletAction = { action ->
-                        when (action) {
-                            WalletAction.Send -> onSendClick()
-                            WalletAction.Scan -> onScanClick()
-                            WalletAction.Receive -> onReceiveClick()
-                        }
-                    },
-                    currencyMode = currencyMode,
-                    enabled = state.wallet.isConfigured(),
-                    onSwitchCurrencyMode = onCurrencyModeToggle,
-                    exchangeBtcUsdRate = state.exchangeBtcUsdRate,
-                )
+                false -> {
+                    Column {
+                        WalletDashboardLite(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(dashboardLiteHeightDp)
+                                .background(color = AppTheme.colorScheme.surface)
+                                .padding(vertical = 16.dp)
+                                .padding(start = 16.dp, end = 12.dp)
+                                .animateContentSize(),
+                            walletBalance = state.wallet?.balanceInBtc?.toBigDecimal(),
+                            actions = listOf(WalletAction.Send, WalletAction.Scan, WalletAction.Receive),
+                            onWalletAction = { action ->
+                                when (action) {
+                                    WalletAction.Send -> onSendClick()
+                                    WalletAction.Scan -> onScanClick()
+                                    WalletAction.Receive -> onReceiveClick()
+                                }
+                            },
+                            currencyMode = currencyMode,
+                            enabled = state.wallet.isConfigured(),
+                            onSwitchCurrencyMode = onCurrencyModeToggle,
+                            exchangeBtcUsdRate = state.exchangeBtcUsdRate,
+                        )
+
+                        PrimalDivider()
+                    }
+                }
             }
         }
     }
@@ -599,6 +607,7 @@ private fun WalletDashboardTopAppBar(
         avatarLegendaryCustomization = state.activeAccountLegendaryCustomization,
         onAvatarClick = onAvatarClick,
         onAvatarSwipeDown = onAvatarSwipeDown,
+        showDivider = false,
         scrollBehavior = scrollBehavior,
     )
 }
