@@ -109,6 +109,10 @@ const val ADVANCED_SEARCH_FEED_SPEC = "advancedSearchFeedSpec"
 inline val SavedStateHandle.advancedSearchFeedSpec: String?
     get() = get<String>(ADVANCED_SEARCH_FEED_SPEC)?.ifEmpty { null }
 
+const val EDITING_FEED_SPEC = "editingFeedSpec"
+inline val SavedStateHandle.editingFeedSpec: String?
+    get() = get<String>(EDITING_FEED_SPEC)?.asBase64Decoded()?.ifEmpty { null }
+
 const val FOLLOW_PACK_ID = "followPackId"
 inline val SavedStateHandle.followPackIdOrThrow: String
     get() = get(FOLLOW_PACK_ID) ?: throw IllegalArgumentException("Missing required $FOLLOW_PACK_ID argument.")
@@ -124,6 +128,8 @@ inline val SavedStateHandle.exploreFeedTitle: String?
 const val EXPLORE_FEED_DESCRIPTION = "exploreFeedDescription"
 inline val SavedStateHandle.exploreFeedDescription: String?
     get() = get<String>(EXPLORE_FEED_DESCRIPTION)?.asBase64Decoded()?.ifEmpty { null }
+
+const val FEED_SAVED_RESULT = "feedSavedResult"
 
 const val GIF_URL_RESULT = "gifUrlResult"
 const val PENDING_GIF_REPLY_ARGS = "pendingGifReplyArgs"

@@ -93,4 +93,19 @@ interface FeedsRepository {
     )
 
     suspend fun removeFeedLocally(userId: String, feedSpec: String)
+
+    suspend fun findFeedBySpec(userId: String, feedSpec: String): PrimalFeed?
+
+    @Throws(NetworkException::class, CancellationException::class)
+    suspend fun getAdvancedSearchQuery(query: String): AdvancedSearchParsedQuery
+
+    suspend fun replaceFeedLocally(
+        userId: String,
+        oldFeedSpec: String,
+        newFeedSpec: String,
+        title: String,
+        description: String,
+        feedSpecKind: FeedSpecKind,
+        feedKind: String,
+    )
 }

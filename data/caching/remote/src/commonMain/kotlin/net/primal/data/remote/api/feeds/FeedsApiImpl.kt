@@ -2,11 +2,14 @@ package net.primal.data.remote.api.feeds
 
 import net.primal.core.networking.primal.PrimalApiClient
 import net.primal.core.networking.primal.PrimalCacheFilter
+import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.remote.PrimalVerb
+import net.primal.data.remote.api.feeds.model.AdvancedSearchQueryResponse
 import net.primal.data.remote.api.feeds.model.DvmFeedsRequestBody
 import net.primal.data.remote.api.feeds.model.DvmFeedsResponse
 import net.primal.data.remote.api.feeds.model.FeedsResponse
+import net.primal.data.remote.api.feeds.model.ParseAdvancedSearchQueryRequestBody
 import net.primal.data.remote.api.feeds.model.SubSettingsAuthorization
 import net.primal.data.remote.model.ContentAppSubSettings
 import net.primal.domain.common.exception.NetworkException
@@ -109,5 +112,20 @@ internal class FeedsApiImpl(
                 optionsJson = SubSettingsAuthorization(event = userFeedsNostrEvent).encodeToJsonString(),
             ),
         )
+    }
+
+    override suspend fun getAdvancedSearchQuery(query: String): AdvancedSearchQueryResponse {
+        val queryResult = primalApiClient.query(
+            message = PrimalCacheFilter(
+                primalVerb = PrimalVerb.PARSE_ADVANCED_SEARCH_QUERY.id,
+                optionsJson = ParseAdvancedSearchQueryRequestBody(query = query).encodeToJsonString(),
+            ),
+        )
+
+        val event = queryResult.findPrimalEvent(NostrEventKind.PrimalParsedAdvancedSearch)
+            ?: throw NetworkException("Failed to parse advanced search query.")
+
+        return event.content.decodeFromJsonStringOrNull<AdvancedSearchQueryResponse>()
+            ?: throw NetworkException("Failed to deserialize parsed advanced search query.")
     }
 }

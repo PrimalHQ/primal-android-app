@@ -17,7 +17,7 @@ interface AdvancedSearchContract {
         val scope: SearchScope = SearchScope.Global,
         val filter: SearchFilter = SearchFilter(),
         val orderBy: SearchOrderBy = SearchOrderBy.Time,
-
+        val loading: Boolean = false,
     )
 
     sealed class UiEvent {
@@ -39,10 +39,13 @@ interface AdvancedSearchContract {
         data class NavigateToExploreNoteFeed(
             val feedSpec: String,
             val renderType: ExploreFeedContract.RenderType,
+            val editingFeedSpec: String? = null,
         ) : SideEffect()
         data class NavigateToExploreArticleFeed(
             val feedSpec: String,
+            val editingFeedSpec: String? = null,
         ) : SideEffect()
+        data object NavigateBack : SideEffect()
     }
 
     sealed class TimeModifier {
@@ -110,7 +113,11 @@ interface AdvancedSearchContract {
 
     data class ScreenCallbacks(
         val onClose: () -> Unit,
-        val onNavigateToExploreNoteFeed: (feedSpec: String, renderType: ExploreFeedContract.RenderType) -> Unit,
-        val onNavigateToExploreArticleFeed: (feedSpec: String) -> Unit,
+        val onNavigateToExploreNoteFeed: (
+            feedSpec: String,
+            renderType: ExploreFeedContract.RenderType,
+            editingFeedSpec: String?,
+        ) -> Unit,
+        val onNavigateToExploreArticleFeed: (feedSpec: String, editingFeedSpec: String?) -> Unit,
     )
 }

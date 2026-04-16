@@ -65,6 +65,7 @@ fun FeedList(
     onFeedReordered: ((feeds: List<FeedUi>) -> Unit)? = null,
     onFeedEnabled: ((feed: FeedUi, enabled: Boolean) -> Unit)? = null,
     onFeedRemoved: ((feed: FeedUi) -> Unit)? = null,
+    onEditAdvancedSearchFeedClick: ((feedSpec: String) -> Unit)? = null,
 ) {
     var data by remember(feeds) { mutableStateOf(feeds) }
     val haptic = rememberReorderHapticFeedback()
@@ -128,6 +129,7 @@ fun FeedList(
                                 interactionSource = interactionSource,
                                 onFeedEnabled = onFeedEnabled,
                                 onDeleteRequest = { deleteFeedDialogVisible = item },
+                                onEditAdvancedSearchFeedClick = onEditAdvancedSearchFeedClick,
                             )
                         },
                     )
@@ -216,10 +218,11 @@ private fun ReorderableCollectionItemScope.FeedEditOptions(
     interactionSource: MutableInteractionSource,
     onFeedEnabled: ((feed: FeedUi, enabled: Boolean) -> Unit)?,
     onDeleteRequest: () -> Unit,
+    onEditAdvancedSearchFeedClick: ((feedSpec: String) -> Unit)? = null,
 ) {
     Row {
         if (item.spec.isAdvancedSearchFeedSpec()) {
-            IconButton(onClick = {}) {
+            IconButton(onClick = { onEditAdvancedSearchFeedClick?.invoke(item.spec) }) {
                 Icon(
                     imageVector = PrimalIcons.PencilUnderline,
                     contentDescription = null,

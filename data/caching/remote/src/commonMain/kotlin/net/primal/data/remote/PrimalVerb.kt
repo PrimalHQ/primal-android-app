@@ -83,4 +83,5 @@ enum class PrimalVerb(val id: String) {
     UPDATE_PUSH_NOTIFICATION_TOKEN_FOR_NIP46("update_push_notification_token_for_nip46"),
     EVENTS_NIP46("events_nip46"),
     POLL_VOTES("poll_votes"),
+    PARSE_ADVANCED_SEARCH_QUERY("parse_advanced_search_query"),
 }

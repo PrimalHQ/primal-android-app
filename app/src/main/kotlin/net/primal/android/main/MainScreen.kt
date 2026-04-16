@@ -67,6 +67,7 @@ import net.primal.android.main.wallet.WalletDashboardContract
 import net.primal.android.main.wallet.WalletDashboardTopAppBar
 import net.primal.android.main.wallet.WalletDashboardViewModel
 import net.primal.android.navigation.accountSwitcherCallbacksHandler
+import net.primal.android.navigation.navigateToAdvancedSearch
 import net.primal.android.navigation.navigateToFollowPack
 import net.primal.android.navigation.navigateToHome
 import net.primal.android.navigation.navigateToNoteEditor
@@ -576,6 +577,10 @@ private fun MainScreenOverlays(
                 },
                 onDismiss = onDismissOverlay,
                 onGoToWallet = { onTabChanged(PrimalTopLevelDestination.Wallet) },
+                onEditAdvancedSearchFeedClick = { feedSpec ->
+                    onDismissOverlay()
+                    navController.navigateToAdvancedSearch(editingFeedSpec = feedSpec)
+                },
             )
         }
     }
@@ -594,6 +599,10 @@ private fun MainScreenOverlays(
                     sharedState.readsScrollToFeed.value = feed
                 },
                 onDismiss = onDismissOverlay,
+                onEditAdvancedSearchFeedClick = { feedSpec ->
+                    onDismissOverlay()
+                    navController.navigateToAdvancedSearch(editingFeedSpec = feedSpec)
+                },
             )
         }
     }
