@@ -197,10 +197,7 @@ private fun WalletDashboardContent(
 ) {
     PrimalPullToRefreshBox(
         isRefreshing = state.refreshing,
-        onRefresh = {
-            eventPublisher(UiEvent.RequestLatestTransactionsSync)
-            eventPublisher(UiEvent.RequestWalletBalanceUpdate)
-        },
+        onRefresh = { eventPublisher(UiEvent.UserRequestedRefresh) },
         enabled = state.wallet != null,
         indicatorPaddingValues = paddingValues,
     ) {
@@ -262,7 +259,8 @@ private fun WalletDashboardContent(
             WalletDashboardState.ActiveWallet -> {
                 val isTransactionListSettled = pagingItems.loadState.refresh is LoadState.NotLoading &&
                     pagingItems.loadState.append is LoadState.NotLoading &&
-                    !state.refreshing
+                    !state.refreshing &&
+                    !state.syncingTransactions
 
                 if (isTransactionListSettled && pagingItems.isEmpty()) {
                     Column(
@@ -332,7 +330,7 @@ private fun WalletDashboardContent(
                                 .fillMaxSize()
                                 .background(color = AppTheme.colorScheme.surfaceVariant),
                             pagingItems = pagingItems,
-                            isRefreshing = state.refreshing,
+                            isRefreshing = state.refreshing || state.syncingTransactions,
                             currencyMode = currencyMode,
                             exchangeBtcUsdRate = state.exchangeBtcUsdRate,
                             listState = listState,

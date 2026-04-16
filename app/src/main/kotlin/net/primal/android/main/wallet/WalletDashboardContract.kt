@@ -12,6 +12,7 @@ interface WalletDashboardContract {
     data class UiState(
         val transactions: Flow<PagingData<TransactionListItemDataUi>> = emptyFlow(),
         val refreshing: Boolean = false,
+        val syncingTransactions: Boolean = false,
         val dashboardState: WalletDashboardState = WalletDashboardState.Loading,
         val activeAccountAvatarCdnImage: CdnImage? = null,
         val activeAccountLegendaryCustomization: LegendaryCustomization? = null,
@@ -28,12 +29,14 @@ interface WalletDashboardContract {
             data class InAppPurchaseConfirmationFailed(val cause: Throwable) : DashboardError()
             data class InAppPurchaseNoticeError(val message: String?) : DashboardError()
             data class WalletCreationFailed(val cause: Throwable) : DashboardError()
+            data class RefreshFailed(val cause: Throwable) : DashboardError()
         }
     }
 
     sealed class UiEvent {
         data object RequestWalletBalanceUpdate : UiEvent()
         data object RequestLatestTransactionsSync : UiEvent()
+        data object UserRequestedRefresh : UiEvent()
         data object EnrichTransactions : UiEvent()
         data object DismissError : UiEvent()
         data object CreateWallet : UiEvent()

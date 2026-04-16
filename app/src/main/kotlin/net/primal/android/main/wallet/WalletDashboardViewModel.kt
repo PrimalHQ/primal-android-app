@@ -11,6 +11,7 @@ import io.github.aakira.napier.Napier
 import java.time.Instant
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -147,6 +148,8 @@ class WalletDashboardViewModel @Inject constructor(
                         syncLatestTransactions(walletId = wallet.walletId)
                     }
 
+                    UiEvent.UserRequestedRefresh -> handleUserRequestedRefresh()
+
                     UiEvent.CreateWallet -> createWallet()
                     UiEvent.EnrichTransactions -> enrichTransactions()
                 }
@@ -226,16 +229,37 @@ class WalletDashboardViewModel @Inject constructor(
 
     private fun syncLatestTransactions(walletId: String) =
         viewModelScope.launch {
-            setState { copy(refreshing = true) }
+            setState { copy(syncingTransactions = true) }
             runCatching {
                 walletRepository.syncLatestTransactions(walletId = walletId)
             }.onFailure { error ->
                 Napier.w(throwable = error) { "Failed to sync latest transactions." }
             }
             enrichTransactions()
+            delay(150.milliseconds)
+            setState { copy(syncingTransactions = false) }
+        }
 
+    private fun handleUserRequestedRefresh() =
+        viewModelScope.launch {
+            val walletId = state.value.wallet?.walletId ?: return@launch
+            setState { copy(refreshing = true) }
+            val syncDeferred = async {
+                runCatching { walletRepository.syncLatestTransactions(walletId = walletId) }
+            }
+            val balanceDeferred = async {
+                walletRepository.fetchWalletBalance(walletId = walletId)
+            }
+            val syncResult = syncDeferred.await()
+            val balanceResult = balanceDeferred.await()
+            enrichTransactions()
             delay(150.milliseconds)
             setState { copy(refreshing = false) }
+            val firstFailure = syncResult.exceptionOrNull() ?: balanceResult.exceptionOrNull()
+            if (firstFailure != null) {
+                Napier.w(throwable = firstFailure) { "User-initiated refresh failed." }
+                setErrorState(UiState.DashboardError.RefreshFailed(firstFailure))
+            }
         }
 
     private fun enrichTransactions() =

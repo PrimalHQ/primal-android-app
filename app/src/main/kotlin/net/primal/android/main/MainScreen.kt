@@ -668,6 +668,9 @@ private fun WalletErrorHandler(navBackStackEntry: NavBackStackEntry, snackbarHos
 
                 is WalletDashboardContract.UiState.DashboardError.WalletCreationFailed ->
                     context.getString(R.string.wallet_dashboard_create_wallet_error)
+
+                is WalletDashboardContract.UiState.DashboardError.RefreshFailed ->
+                    context.getString(R.string.wallet_dashboard_refresh_error)
             }
         },
         onErrorDismiss = { walletViewModel.setEvents(WalletDashboardContract.UiEvent.DismissError) },
