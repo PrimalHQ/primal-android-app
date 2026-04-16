@@ -111,6 +111,7 @@ private fun NoteZapListItem(data: EventZapUiModel, onProfileClick: (profileId: S
                     displayName = data.zapperName,
                     internetIdentifier = data.zapperInternetIdentifier,
                     legendaryCustomization = data.zapperLegendaryCustomization,
+                    profileId = data.zapperId,
                 )
             },
             supportingContent = {

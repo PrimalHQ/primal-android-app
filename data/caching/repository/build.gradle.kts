@@ -102,6 +102,7 @@ kotlin {
             implementation(libs.kotest.assertions.core)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.mockk)
+            implementation(libs.ktor.client.mock)
         }
     }
 }

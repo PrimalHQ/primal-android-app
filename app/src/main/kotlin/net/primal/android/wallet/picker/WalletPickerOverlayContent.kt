@@ -65,7 +65,8 @@ fun WalletPickerOverlayContent(onDismiss: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 16.dp)
-            .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
+            .background(AppTheme.extraColorScheme.surfaceVariantAlt2)
+            .navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

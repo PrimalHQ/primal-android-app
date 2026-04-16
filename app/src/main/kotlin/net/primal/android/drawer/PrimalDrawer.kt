@@ -163,6 +163,7 @@ private fun DrawerHeader(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             NostrUserText(
+                profileId = userAccount?.pubkey,
                 displayName = userAccount?.authorDisplayName ?: "",
                 internetIdentifier = userAccount?.internetIdentifier,
                 internetIdentifierBadgeSize = 24.dp,

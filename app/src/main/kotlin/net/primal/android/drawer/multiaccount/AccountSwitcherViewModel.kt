@@ -73,11 +73,12 @@ class AccountSwitcherViewModel @Inject constructor(
     private fun observeUserAccounts() =
         viewModelScope.launch {
             accountsStore.userAccounts
-                .collect {
+                .collect { accounts ->
                     setState {
                         copy(
-                            userAccounts = it.map { it.asUserAccountUi() }
-                                .sortAndFilterAccounts(activeUserId = activeAccount?.pubkey),
+                            userAccounts = accounts.map {
+                                it.asUserAccountUi()
+                            }.sortAndFilterAccounts(activeUserId = activeAccount?.pubkey),
                         )
                     }
                 }

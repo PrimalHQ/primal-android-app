@@ -64,8 +64,8 @@ fun StreamPillsRow(
     onClick: (String) -> Unit,
     onProfileClick: (String) -> Unit,
 ) {
-    val padding = 10.dp
-    val itemSpacedBy = 10.dp
+    val padding = 4.dp
+    val itemSpacedBy = 4.dp
     val avatarSize = 42.dp
     val displayMetrics = LocalContext.current.resources.displayMetrics
     val localDensity = LocalDensity.current

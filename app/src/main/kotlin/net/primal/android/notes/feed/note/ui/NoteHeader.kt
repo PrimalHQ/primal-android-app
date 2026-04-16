@@ -49,6 +49,7 @@ fun FeedNoteHeader(
     authorInternetIdentifier: String? = null,
     authorLegendaryCustomization: LegendaryCustomization? = null,
     authorBlossoms: List<String> = emptyList(),
+    authorId: String? = null,
     replyToAuthor: String? = null,
     label: String? = authorInternetIdentifier,
     labelStyle: TextStyle? = null,
@@ -95,6 +96,7 @@ fun FeedNoteHeader(
             NoteAuthorBadgeAndTimestampSection(
                 authorDisplayName = authorDisplayName,
                 authorInternetIdentifier = authorInternetIdentifier,
+                authorId = authorId,
                 suffixText = suffixText,
                 topRowTextStyle = topRowTextStyle,
                 authorLegendaryCustomization = authorLegendaryCustomization,
@@ -128,6 +130,7 @@ fun FeedNoteHeader(
 private fun NoteAuthorBadgeAndTimestampSection(
     authorDisplayName: String,
     authorInternetIdentifier: String?,
+    authorId: String? = null,
     suffixText: AnnotatedString,
     topRowTextStyle: TextStyle,
     authorLegendaryCustomization: LegendaryCustomization?,
@@ -139,6 +142,7 @@ private fun NoteAuthorBadgeAndTimestampSection(
             NostrUserText(
                 displayName = authorDisplayName,
                 internetIdentifier = authorInternetIdentifier,
+                profileId = authorId,
                 annotatedStringSuffixBuilder = {
                     append(suffixText)
                 },

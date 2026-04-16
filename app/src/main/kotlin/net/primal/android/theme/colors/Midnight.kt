@@ -14,7 +14,6 @@ private val midnightForeground2 = Color(0xFFAAAAAA)
 private val midnightForeground3 = Color(0xFFAAAAAA)
 private val midnightForeground4 = Color(0xFF757575)
 private val midnightForeground5 = Color(0xFF666666)
-private val midnightForeground6 = Color(0xFF444444)
 private val midnightAccent0 = Color(0xFF2394EF)
 private val midnightAccent1 = Color(0xFF2394EF)
 private val midnightAccent2 = Color(0xFF0C7DD8)
@@ -42,7 +41,7 @@ val midnightColorScheme = darkColorScheme(
     surfaceVariant = midnightBackground2,
     onSurfaceVariant = midnightForeground1,
     error = midnightWarningBright,
-    outline = midnightForeground6,
+    outline = midnightBackground3,
 )
 
 val midnightExtraColorScheme = extraColorScheme(

@@ -71,6 +71,7 @@ fun LegendLeaderboardItem(
                 internetIdentifier = item.internetIdentifier,
                 legendaryCustomization = item.legendaryCustomization,
                 satsDonated = item.donatedSats,
+                profileId = item.userId,
             )
         },
         supportingContent = {
@@ -104,6 +105,7 @@ private fun DisplayNameAndSatsDonatedRow(
     internetIdentifier: String?,
     legendaryCustomization: LegendaryCustomization?,
     satsDonated: ULong,
+    profileId: String? = null,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
 
@@ -121,6 +123,7 @@ private fun DisplayNameAndSatsDonatedRow(
                 internetIdentifier = internetIdentifier,
                 internetIdentifierBadgeAlign = PlaceholderVerticalAlign.Center,
                 legendaryCustomization = legendaryCustomization,
+                profileId = profileId,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
             )

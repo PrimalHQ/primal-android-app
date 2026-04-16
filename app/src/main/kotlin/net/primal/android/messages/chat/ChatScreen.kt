@@ -425,6 +425,8 @@ private fun MessageOutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             enabled = !sending,
+            maxLines = 6,
+            shape = RoundedCornerShape(percent = 25),
             placeholder = stringResource(
                 id = R.string.chat_message_hint,
                 participantUsername,

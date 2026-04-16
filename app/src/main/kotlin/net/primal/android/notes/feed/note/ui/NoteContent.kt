@@ -48,6 +48,7 @@ import net.primal.android.theme.AppTheme
 import net.primal.android.theme.domain.PrimalTheme
 import net.primal.domain.common.util.isPrimalIdentifier
 import net.primal.domain.links.EventUriNostrType
+import net.primal.domain.links.EventUriType
 import net.primal.domain.links.ReferencedNote
 import net.primal.domain.links.ReferencedUser
 import net.primal.domain.nostr.utils.clearAtSignFromNostrUris
@@ -151,8 +152,6 @@ private fun String.ellipsize(expanded: Boolean, ellipsizeText: String): String {
     }
 }
 
-const val TWEET_MODE_THRESHOLD = 21
-const val MAX_LINE_BREAKS_IN_TWEET = 3
 internal const val NOT_FOUND_NOTICE_CUT_OFF_LEVEL = 2
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -166,7 +165,6 @@ fun NoteContent(
     nestingCutOffLimit: Int = Int.MAX_VALUE,
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
-    enableTweetsMode: Boolean = false,
     textSelectable: Boolean = false,
     referencedEventsHaveBorder: Boolean = false,
     couldAutoPlay: Boolean = false,
@@ -192,10 +190,6 @@ fun NoteContent(
 
     Column(modifier = modifier) {
         if (contentText.isNotEmpty()) {
-            val tweetMode = enableTweetsMode && displaySettings.tweetsModeEnabled &&
-                contentText.length <= TWEET_MODE_THRESHOLD &&
-                contentText.count { it == '\n' } < MAX_LINE_BREAKS_IN_TWEET
-
             val clickHandler = remember(contentText, noteCallbacks, onUrlClick, onClick) {
                 { position: Int, offset: Offset ->
                     val annotation = contentText.getStringAnnotations(
@@ -223,16 +217,8 @@ fun NoteContent(
                 modifier = Modifier.padding(bottom = 4.dp),
                 style = AppTheme.typography.bodyMedium.copy(
                     color = contentColor,
-                    fontSize = if (!tweetMode) {
-                        displaySettings.contentAppearance.noteBodyFontSize
-                    } else {
-                        displaySettings.contentAppearance.tweetFontSize
-                    },
-                    lineHeight = if (!tweetMode) {
-                        displaySettings.contentAppearance.noteBodyLineHeight
-                    } else {
-                        displaySettings.contentAppearance.tweetLineHeight
-                    },
+                    fontSize = displaySettings.contentAppearance.noteBodyFontSize,
+                    lineHeight = displaySettings.contentAppearance.noteBodyLineHeight,
                 ),
                 text = contentText,
                 maxLines = maxLines,
@@ -500,6 +486,7 @@ fun renderContentAsAnnotatedString(
         .clearAtSignFromNostrUris()
         .remove(texts = mediaAttachments.map { it.url })
         .remove(texts = linkAttachments.filter { it.title?.isNotEmpty() == true }.map { it.url })
+        .remove(texts = linkAttachments.filter { it.type == EventUriType.Audio }.map { it.url })
         .replaceNostrProfileUrisWithHandles(resources = mentionedUsers)
         .remove(texts = if (!shouldKeepNostrNoteUris) effectiveNostrUris.map { it.uri } else emptyList())
         .remove(texts = data.invoices)
@@ -530,6 +517,7 @@ fun renderContentAsAnnotatedString(
 
         data.uris
             .filterNot { it.isMediaUri() }
+            .filterNot { it.type == EventUriType.Audio }
             .map { it.url }
             .forEach {
                 addUrlAnnotation(
@@ -697,7 +685,6 @@ fun PreviewPostContent() {
                     hashtags = listOf("#nostr"),
                 ),
                 expanded = false,
-                enableTweetsMode = false,
                 onClick = {},
                 onUrlClick = {},
                 noteCallbacks = NoteCallbacks(),
@@ -733,7 +720,6 @@ fun PreviewPostUnknownReferencedEventWithAlt() {
                     hashtags = listOf("#nostr"),
                 ),
                 expanded = false,
-                enableTweetsMode = false,
                 onClick = {},
                 onUrlClick = {},
                 noteCallbacks = NoteCallbacks(),
@@ -769,7 +755,6 @@ fun PreviewPostUnknownReferencedEventWithoutAlt() {
                     hashtags = listOf("#nostr"),
                 ),
                 expanded = false,
-                enableTweetsMode = false,
                 onClick = {},
                 onUrlClick = {},
                 noteCallbacks = NoteCallbacks(),
@@ -859,28 +844,6 @@ fun PreviewPostContentWithReferencedPost() {
                     ),
                 ),
                 expanded = false,
-                enableTweetsMode = false,
-                onClick = {},
-                onUrlClick = {},
-                noteCallbacks = NoteCallbacks(),
-            )
-        }
-    }
-}
-
-@Preview
-@Composable
-fun PreviewPostContentWithTweet() {
-    PrimalPreview(primalTheme = PrimalTheme.Midnight) {
-        Surface(modifier = Modifier.fillMaxWidth()) {
-            NoteContent(
-                data = NoteContentUi(
-                    noteId = "",
-                    content = "Rise and shine!",
-                    uris = emptyList(),
-                ),
-                expanded = false,
-                enableTweetsMode = true,
                 onClick = {},
                 onUrlClick = {},
                 noteCallbacks = NoteCallbacks(),

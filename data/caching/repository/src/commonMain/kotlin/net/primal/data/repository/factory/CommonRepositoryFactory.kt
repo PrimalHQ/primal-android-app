@@ -21,6 +21,8 @@ import net.primal.data.repository.importer.CachingImportRepositoryImpl
 import net.primal.data.repository.messages.ChatRepositoryImpl
 import net.primal.data.repository.messages.processors.MessagesProcessor
 import net.primal.data.repository.mute.MutedItemRepositoryImpl
+import net.primal.data.repository.nip05.Nip05HttpClient
+import net.primal.data.repository.nip05.Nip05VerificationServiceImpl
 import net.primal.data.repository.notifications.NotificationRepositoryImpl
 import net.primal.data.repository.polls.PollsRepositoryImpl
 import net.primal.data.repository.profile.ProfileRepositoryImpl
@@ -43,6 +45,7 @@ import net.primal.domain.notifications.NotificationRepository
 import net.primal.domain.polls.PollsRepository
 import net.primal.domain.posts.FeedRepository
 import net.primal.domain.premium.PremiumBroadcastRepository
+import net.primal.domain.profile.Nip05VerificationService
 import net.primal.domain.profile.ProfileRepository
 import net.primal.domain.publisher.PrimalPublisher
 import net.primal.domain.reads.ArticleRepository
@@ -224,10 +227,18 @@ abstract class CommonRepositoryFactory {
         )
     }
 
+    fun createNip05VerificationService(): Nip05VerificationService {
+        return Nip05VerificationServiceImpl(
+            nip05HttpClient = Nip05HttpClient.create(),
+            verificationDao = resolveCachingDatabase().nip05Verifications(),
+        )
+    }
+
     fun createProfileRepository(
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
         mediaCacher: MediaCacher? = null,
+        nip05VerificationService: Nip05VerificationService,
     ): ProfileRepository {
         return ProfileRepositoryImpl(
             dispatcherProvider = dispatcherProvider,
@@ -236,6 +247,7 @@ abstract class CommonRepositoryFactory {
             wellKnownApi = PrimalApiServiceFactory.createUserWellKnownApi(),
             primalPublisher = primalPublisher,
             mediaCacher = mediaCacher,
+            nip05VerificationService = nip05VerificationService,
         )
     }
 
@@ -260,12 +272,18 @@ abstract class CommonRepositoryFactory {
     fun createStreamRepository(
         cachingPrimalApiClient: PrimalApiClient,
         primalPublisher: PrimalPublisher,
+        nip05VerificationService: Nip05VerificationService,
         mediaCacher: MediaCacher? = null,
     ): StreamRepository =
         StreamRepositoryImpl(
             database = resolveCachingDatabase(),
             dispatcherProvider = dispatcherProvider,
-            profileRepository = createProfileRepository(cachingPrimalApiClient, primalPublisher, mediaCacher),
+            profileRepository = createProfileRepository(
+                cachingPrimalApiClient = cachingPrimalApiClient,
+                primalPublisher = primalPublisher,
+                mediaCacher = mediaCacher,
+                nip05VerificationService = nip05VerificationService,
+            ),
             liveStreamApi = PrimalApiServiceFactory.createStreamMonitor(cachingPrimalApiClient),
         )
 

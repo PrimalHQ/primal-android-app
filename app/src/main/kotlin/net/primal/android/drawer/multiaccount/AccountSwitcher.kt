@@ -91,7 +91,7 @@ private fun AccountSwitcher(
 
     Column(
         modifier = modifier
-            .padding(end = 12.dp),
+            .padding(end = 14.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

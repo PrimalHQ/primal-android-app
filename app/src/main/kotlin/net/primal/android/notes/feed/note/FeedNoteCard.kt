@@ -90,7 +90,6 @@ fun FeedNoteCard(
     colors: CardColors = noteCardColors(),
     cardPadding: PaddingValues = PaddingValues(all = 0.dp),
     nestingCutOffLimit: Int = Int.MAX_VALUE,
-    enableTweetsMode: Boolean = false,
     headerSingleLine: Boolean = true,
     fullWidthContent: Boolean = false,
     forceContentIndent: Boolean = false,
@@ -135,7 +134,6 @@ fun FeedNoteCard(
         shape = shape,
         colors = colors,
         cardPadding = cardPadding,
-        enableTweetsMode = enableTweetsMode,
         nestingCutOffLimit = nestingCutOffLimit,
         headerSingleLine = headerSingleLine,
         fullWidthContent = fullWidthContent,
@@ -165,7 +163,6 @@ private fun FeedNoteCard(
     colors: CardColors = noteCardColors(),
     cardPadding: PaddingValues = PaddingValues(all = 0.dp),
     nestingCutOffLimit: Int = Int.MAX_VALUE,
-    enableTweetsMode: Boolean = false,
     headerSingleLine: Boolean = true,
     fullWidthContent: Boolean = false,
     forceContentIndent: Boolean = false,
@@ -317,7 +314,8 @@ private fun FeedNoteCard(
                             drawLineAboveAvatar = drawLineAboveAvatar,
                             drawLineBelowAvatar = drawLineBelowAvatar,
                             outlineColor = AppTheme.colorScheme.outline,
-                            lineOffsetX = (avatarSizeDp / 2) + avatarPaddingDp + 2.dp,
+                            lineOffsetX = (displaySettings.contentAppearance.replyAvatarSize / 2) +
+                                avatarPaddingDp + 2.dp,
                             lineWidth = 2.dp,
                         )
                         .padding(
@@ -337,7 +335,6 @@ private fun FeedNoteCard(
                             end = overflowIconSizeDp - 8.dp,
                         ),
                         nestingCutOffLimit = nestingCutOffLimit,
-                        enableTweetsMode = enableTweetsMode,
                         headerSingleLine = headerSingleLine,
                         showReplyTo = showReplyTo,
                         forceContentIndent = forceContentIndent,
@@ -479,7 +476,6 @@ private fun FeedNote(
     avatarSizeDp: Dp,
     avatarPaddingValues: PaddingValues,
     notePaddingValues: PaddingValues,
-    enableTweetsMode: Boolean,
     headerSingleLine: Boolean,
     showReplyTo: Boolean,
     forceContentIndent: Boolean,
@@ -538,6 +534,7 @@ private fun FeedNote(
                     authorInternetIdentifier = data.authorInternetIdentifier,
                     authorLegendaryCustomization = data.authorLegendaryCustomization,
                     authorBlossoms = data.authorBlossoms,
+                    authorId = data.authorId,
                     replyToAuthor = if (showReplyTo) data.replyToAuthorHandle else null,
                     isLive = data.isAuthorLiveStreamingNow,
                     onAuthorAvatarClick = if (noteCallbacks.onProfileClick != null) {
@@ -565,7 +562,6 @@ private fun FeedNote(
                         ),
                     data = data.toNoteContentUi(),
                     expanded = expanded,
-                    enableTweetsMode = enableTweetsMode,
                     textSelectable = textSelectable,
                     nestingCutOffLimit = nestingCutOffLimit,
                     onClick = if (noteCallbacks.onNoteClick != null) {

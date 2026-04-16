@@ -75,6 +75,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import net.primal.android.R
+import net.primal.android.audio.player.PauseAudioPlayer
 import net.primal.android.core.compose.AppBarIcon
 import net.primal.android.core.compose.HorizontalPagerIndicator
 import net.primal.android.core.compose.PrimalScaffold
@@ -512,6 +513,7 @@ private fun AttachmentsHorizontalPager(
 
                 EventUriType.Video -> {
                     PauseStreamMiniPlayer()
+                    PauseAudioPlayer()
                     hideStreamMiniPlayer()
 
                     VideoScreen(

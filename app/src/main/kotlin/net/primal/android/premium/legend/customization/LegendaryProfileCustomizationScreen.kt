@@ -162,6 +162,7 @@ private fun LegendaryProfileCustomizationScreen(
                 customBadge = state.avatarLegendaryCustomization.customBadge,
                 selectedStyle = state.avatarLegendaryCustomization.legendaryStyle,
                 membership = state.membership,
+                profileId = state.profileId,
             )
 
             PrimalDivider(modifier = Modifier.padding(top = 16.dp))
@@ -213,6 +214,7 @@ private fun ProfileSummary(
     customBadge: Boolean?,
     selectedStyle: LegendaryStyle?,
     membership: PremiumMembership?,
+    profileId: String? = null,
 ) {
     val primalName = membership?.premiumName ?: ""
     Column(
@@ -239,6 +241,7 @@ private fun ProfileSummary(
                 legendaryStyle = selectedStyle,
             ),
             fontSize = 20.sp,
+            profileId = profileId,
         )
 
         membership?.let {

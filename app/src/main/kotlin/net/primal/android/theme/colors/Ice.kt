@@ -14,7 +14,6 @@ private val iceForeground2 = Color(0xFF111111)
 private val iceForeground3 = Color(0xFF666666)
 private val iceForeground4 = Color(0xFF808080)
 private val iceForeground5 = Color(0xFF808080)
-private val iceForeground6 = Color(0xFFC8C8C8)
 private val iceAccent0 = Color(0xFF2394EF)
 private val iceAccent1 = Color(0xFF2394EF)
 private val iceAccent2 = Color(0xFF0C7DD8)
@@ -42,7 +41,7 @@ val iceColorScheme = lightColorScheme(
     surfaceVariant = iceBackground2,
     onSurfaceVariant = iceForeground1,
     error = iceWarningBright,
-    outline = iceForeground6,
+    outline = iceBackground3,
 )
 
 val iceExtraColorScheme = extraColorScheme(

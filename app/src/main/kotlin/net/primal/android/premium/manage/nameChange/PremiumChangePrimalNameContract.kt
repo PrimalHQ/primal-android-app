@@ -6,6 +6,7 @@ import net.primal.domain.links.CdnImage
 interface PremiumChangePrimalNameContract {
     data class UiState(
         val stage: ChangePrimalNameStage = ChangePrimalNameStage.PickNew,
+        val profileId: String? = null,
         val primalName: String? = null,
         val profileAvatarCdnImage: CdnImage? = null,
         val profileLegendaryCustomization: LegendaryCustomization? = null,

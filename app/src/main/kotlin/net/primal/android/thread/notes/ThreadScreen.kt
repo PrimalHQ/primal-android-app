@@ -463,7 +463,6 @@ private fun ThreadLazyColumn(
                     textSelectable = highlighted,
                     fullWidthContent = highlighted,
                     headerSingleLine = !highlighted,
-                    enableTweetsMode = index == state.highlightPostIndex,
                     forceContentIndent = index != state.highlightPostIndex,
                     drawLineAboveAvatar = isConnectedBackward(index, state.highlightPostIndex),
                     drawLineBelowAvatar = isConnectedForward(index, state.highlightPostIndex),
@@ -603,7 +602,7 @@ private fun ReplyToBottomBar(
                 .imePadding(),
             value = replyState.content,
             onValueChange = { replyEventPublisher(NoteEditorContract.UiEvent.UpdateContent(content = it)) },
-            maxLines = 10,
+            maxLines = 3,
             enabled = !replyState.publishing,
             placeholder = {
                 ReplyTextFieldPlaceholder(

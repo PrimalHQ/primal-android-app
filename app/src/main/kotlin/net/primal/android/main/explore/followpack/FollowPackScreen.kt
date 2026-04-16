@@ -335,6 +335,7 @@ private fun LazyListScope.followPackAuthor(
                         style = AppTheme.typography.bodyMedium,
                         internetIdentifier = data.internetIdentifier,
                         legendaryCustomization = data.legendaryCustomization,
+                        profileId = data.profileId,
                     )
 
                     data.internetIdentifier?.let { internetIdentifier ->

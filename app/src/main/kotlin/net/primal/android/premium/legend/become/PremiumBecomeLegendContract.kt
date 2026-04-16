@@ -8,6 +8,7 @@ class PremiumBecomeLegendContract {
     data class UiState(
         val isPremiumBadgeOrigin: Boolean = false,
         val stage: BecomeLegendStage = BecomeLegendStage.Intro,
+        val profileId: String? = null,
         val avatarCdnImage: CdnImage? = null,
         val userHandle: String? = null,
         val isPremiumUser: Boolean = false,
