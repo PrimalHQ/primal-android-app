@@ -48,7 +48,7 @@ class MainActivity : PrimalActivity() {
     lateinit var nip05VerificationService: Nip05VerificationService
 
     private val deepLinkIntents = MutableSharedFlow<Intent>(
-        extraBufferCapacity = 1,
+        replay = 1,
         onBufferOverflow = BufferOverflow.DROP_OLDEST,
     )
 
