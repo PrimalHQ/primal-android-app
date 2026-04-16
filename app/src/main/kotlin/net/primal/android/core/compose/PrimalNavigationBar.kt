@@ -156,7 +156,7 @@ private fun PrimalNavigationBarItem(
     val tint = if (selected) {
         AppTheme.colorScheme.onSurface
     } else {
-        AppTheme.extraColorScheme.onSurfaceVariantAlt3
+        AppTheme.colorScheme.onSurface.copy(alpha = 0.75f)
     }
 
     Column(
