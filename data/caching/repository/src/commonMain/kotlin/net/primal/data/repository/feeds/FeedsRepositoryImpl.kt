@@ -354,7 +354,7 @@ class FeedsRepositoryImpl(
         withContext(dispatcherProvider.io()) {
             val existingFeeds = database.feeds().getAllFeedsBySpecKind(ownerId = userId, specKind = feedSpecKind)
             val oldFeed = existingFeeds.firstOrNull { it.spec == oldFeedSpec }
-            val position = oldFeed?.position ?: existingFeeds.size
+            val position = oldFeed?.position ?: 0
 
             database.withTransaction {
                 database.feeds().deleteAllByOwnerIdAndSpec(ownerId = userId, spec = oldFeedSpec)
