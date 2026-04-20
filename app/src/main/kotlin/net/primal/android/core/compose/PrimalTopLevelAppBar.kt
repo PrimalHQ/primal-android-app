@@ -11,8 +11,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandMore
@@ -29,18 +31,24 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.abs
 import kotlinx.coroutines.launch
+import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.CdnImage
 
+private val WIPE_BAR_WIDTH = 20.dp
 private const val SWITCH_ANIMATION_DURATION_MS = 300
 private const val SWITCH_ANIMATION_MIDPOINT = 0.5f
 private val AvatarSwipeThreshold = 24.dp
@@ -63,6 +71,8 @@ fun PrimalTopLevelAppBar(
     onAvatarSwipeDown: (() -> Unit)? = null,
     showDivider: Boolean = true,
     scrollBehavior: TopAppBarScrollBehavior? = null,
+    pagerState: PagerState? = null,
+    feeds: List<FeedUi> = emptyList(),
 ) {
     val effectiveTitle = titleOverride ?: title
     val effectiveSubtitle = subtitleOverride ?: subtitle
@@ -76,13 +86,31 @@ fun PrimalTopLevelAppBar(
     Column(modifier = modifier) {
         TopAppBar(
             title = {
-                AppBarTitle(
-                    title = effectiveTitle,
-                    subtitle = effectiveSubtitle,
-                    showChevron = effectiveShowChevron,
-                    chevronRotation = chevronRotation,
-                    onTitleClick = effectiveOnTitleClick,
-                )
+                if (titleOverride != null) {
+                    AppBarTitle(
+                        title = effectiveTitle,
+                        subtitle = effectiveSubtitle,
+                        showChevron = effectiveShowChevron,
+                        chevronRotation = chevronRotation,
+                        onTitleClick = effectiveOnTitleClick,
+                    )
+                } else if (pagerState != null && feeds.size > 1) {
+                    SwipingAppBarTitle(
+                        pagerState = pagerState,
+                        feeds = feeds,
+                        showChevron = effectiveShowChevron,
+                        chevronRotation = chevronRotation,
+                        onTitleClick = effectiveOnTitleClick,
+                    )
+                } else {
+                    AppBarTitle(
+                        title = effectiveTitle,
+                        subtitle = effectiveSubtitle,
+                        showChevron = effectiveShowChevron,
+                        chevronRotation = chevronRotation,
+                        onTitleClick = effectiveOnTitleClick,
+                    )
+                }
             },
             actions = {
                 SwipeableAvatar(
@@ -113,6 +141,7 @@ private fun AppBarTitle(
     showChevron: Boolean,
     chevronRotation: Float,
     onTitleClick: (() -> Unit)?,
+    modifier: Modifier = Modifier,
 ) {
     val titleColumnModifier = if (onTitleClick != null) {
         Modifier.clickable(
@@ -125,7 +154,7 @@ private fun AppBarTitle(
     }
 
     Column(
-        modifier = titleColumnModifier,
+        modifier = titleColumnModifier.then(modifier),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Spacer(modifier = Modifier.height(12.dp))
@@ -165,6 +194,96 @@ private fun AppBarTitle(
         Spacer(modifier = Modifier.height(6.dp))
     }
 }
+
+@Composable
+private fun SwipingAppBarTitle(
+    pagerState: PagerState,
+    feeds: List<FeedUi>,
+    showChevron: Boolean,
+    chevronRotation: Float,
+    onTitleClick: (() -> Unit)?,
+) {
+    val maxIndex = (feeds.size - 1).coerceAtLeast(0)
+    val settledPage = pagerState.settledPage.coerceIn(0, maxIndex)
+
+    val currentFeed = feeds.getOrNull(settledPage)
+    val prevFeed = if (settledPage > 0) feeds.getOrNull(settledPage - 1) else null
+    val nextFeed = if (settledPage < maxIndex) feeds.getOrNull(settledPage + 1) else null
+
+    Box(modifier = Modifier.clipToBounds()) {
+        AppBarTitle(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wipeClip(pagerState = pagerState, settledPage = settledPage, role = WipeRole.CURRENT),
+            title = currentFeed?.title ?: "",
+            subtitle = currentFeed?.description?.ifBlank { null },
+            showChevron = showChevron,
+            chevronRotation = chevronRotation,
+            onTitleClick = onTitleClick,
+        )
+
+        if (prevFeed != null) {
+            AppBarTitle(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wipeClip(pagerState = pagerState, settledPage = settledPage, role = WipeRole.PREV),
+                title = prevFeed.title ?: "",
+                subtitle = prevFeed.description?.ifBlank { null },
+                showChevron = showChevron,
+                chevronRotation = chevronRotation,
+                onTitleClick = onTitleClick,
+            )
+        }
+
+        if (nextFeed != null) {
+            AppBarTitle(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wipeClip(pagerState = pagerState, settledPage = settledPage, role = WipeRole.NEXT),
+                title = nextFeed.title ?: "",
+                subtitle = nextFeed.description?.ifBlank { null },
+                showChevron = showChevron,
+                chevronRotation = chevronRotation,
+                onTitleClick = onTitleClick,
+            )
+        }
+    }
+}
+
+private enum class WipeRole { CURRENT, PREV, NEXT }
+
+private fun Modifier.wipeClip(
+    pagerState: PagerState,
+    settledPage: Int,
+    role: WipeRole,
+): Modifier =
+    drawWithContent {
+        val offset = (pagerState.currentPage - settledPage).toFloat() + pagerState.currentPageOffsetFraction
+        if (role == WipeRole.NEXT && offset <= 0f) return@drawWithContent
+        if (role == WipeRole.PREV && offset >= 0f) return@drawWithContent
+
+        val width = size.width
+        val halfBar = WIPE_BAR_WIDTH.toPx() / 2f
+        val progress = abs(offset).coerceIn(0f, 1f)
+        val swipingForward = offset > 0f
+        val wipeCenter = if (swipingForward) {
+            width + halfBar - progress * (width + halfBar * 2f)
+        } else {
+            -halfBar + progress * (width + halfBar * 2f)
+        }
+        val leadingEdge = (wipeCenter - halfBar).coerceAtLeast(0f)
+        val trailingEdge = (wipeCenter + halfBar).coerceAtMost(width)
+
+        when (role) {
+            WipeRole.CURRENT -> if (swipingForward) {
+                clipRect(right = leadingEdge) { this@drawWithContent.drawContent() }
+            } else {
+                clipRect(left = trailingEdge) { this@drawWithContent.drawContent() }
+            }
+            WipeRole.NEXT -> clipRect(left = trailingEdge) { this@drawWithContent.drawContent() }
+            WipeRole.PREV -> clipRect(right = leadingEdge) { this@drawWithContent.drawContent() }
+        }
+    }
 
 @Composable
 private fun SwipeableAvatar(
