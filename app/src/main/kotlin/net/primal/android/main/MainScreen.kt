@@ -41,7 +41,6 @@ import net.primal.android.core.compose.PrimalOverlay
 import net.primal.android.core.compose.PrimalTopLevelDestination
 import net.primal.android.core.compose.SnackbarErrorHandler
 import net.primal.android.core.compose.fab.NewPostFloatingActionButton
-import net.primal.android.core.compose.fab.SearchFloatingActionButton
 import net.primal.android.core.compose.runtime.DisposableLifecycleObserverEffect
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.drawer.DrawerScreenDestination
@@ -51,8 +50,8 @@ import net.primal.android.drawer.multiaccount.events.AccountSwitcherCallbacks
 import net.primal.android.explore.search.ui.SearchScope
 import net.primal.android.feeds.list.FeedListOverlayContent
 import net.primal.android.feeds.list.ui.model.FeedUi
-import net.primal.android.main.explore.ExploreHomeContent
-import net.primal.android.main.explore.ExploreTopAppBar
+import net.primal.android.main.explore.home.NewExploreTabContent
+import net.primal.android.main.explore.home.NewExploreTabTopAppBar
 import net.primal.android.main.explore.ui.EXPLORE_HOME_TAB_COUNT
 import net.primal.android.main.feeds.NoteFeedTopAppBar
 import net.primal.android.main.feeds.NoteFeedsContent
@@ -68,9 +67,11 @@ import net.primal.android.main.wallet.WalletDashboardTopAppBar
 import net.primal.android.main.wallet.WalletDashboardViewModel
 import net.primal.android.navigation.accountSwitcherCallbacksHandler
 import net.primal.android.navigation.navigateToAdvancedSearch
+import net.primal.android.navigation.navigateToExploreFeed
 import net.primal.android.navigation.navigateToFollowPack
 import net.primal.android.navigation.navigateToHome
 import net.primal.android.navigation.navigateToNoteEditor
+import net.primal.android.navigation.navigateToProfile
 import net.primal.android.navigation.navigateToProfileQrCodeViewer
 import net.primal.android.navigation.navigateToSearch
 import net.primal.android.navigation.noteCallbacksHandler
@@ -193,7 +194,6 @@ private fun MainScreenTopAppBar(
     avatarBlossoms: List<String>,
     homeActiveFeed: FeedUi?,
     readsActiveFeed: FeedUi?,
-    explorePagerState: PagerState,
 ) {
     when (activeTab) {
         PrimalTopLevelDestination.Feeds -> {
@@ -231,8 +231,7 @@ private fun MainScreenTopAppBar(
         }
 
         PrimalTopLevelDestination.Explore -> {
-            ExploreTopAppBar(
-                pagerState = explorePagerState,
+            NewExploreTabTopAppBar(
                 avatarCdnImage = avatarCdnImage,
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
                 avatarBlossoms = avatarBlossoms,
@@ -310,7 +309,6 @@ private fun ScaffoldTopAppBar(
         avatarBlossoms = mainState.activeAccountBlossoms,
         homeActiveFeed = sharedState.homeActiveFeed.value,
         readsActiveFeed = sharedState.readsActiveFeed.value,
-        explorePagerState = sharedState.explorePagerState,
     )
 }
 
@@ -363,15 +361,15 @@ private fun MainScreenContent(
                         navController = navController,
                     )
 
-                    PrimalTopLevelDestination.Explore -> ExploreHomeContent(
-                        pagerState = sharedState.explorePagerState,
+                    PrimalTopLevelDestination.Explore -> NewExploreTabContent(
                         paddingValues = paddingValues,
-                        noteCallbacks = noteCallbacks,
-                        snackbarHostState = sharedState.snackbarHostState,
+                        onProfileClick = { navController.navigateToProfile(profileId = it) },
+                        onSearchUsersClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
+                        onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
                         onFollowPackClick = { profileId, identifier ->
                             navController.navigateToFollowPack(profileId, identifier)
                         },
-                        onGoToWallet = onGoToWallet,
+                        onFeedClick = { feedSpec -> navController.navigateToExploreFeed(feedSpec = feedSpec) },
                     )
 
                     PrimalTopLevelDestination.Alerts -> NotificationsContent(
@@ -522,10 +520,6 @@ private fun MainScreenScaffold(
                 PrimalTopLevelDestination.Alerts,
                 -> NewPostFloatingActionButton(
                     onNewPostClick = { navController.navigateToNoteEditor(null) },
-                )
-
-                PrimalTopLevelDestination.Explore -> SearchFloatingActionButton(
-                    onSearchClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
                 )
 
                 else -> {}
