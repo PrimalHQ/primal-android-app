@@ -7,9 +7,12 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import net.primal.android.theme.AppTheme
 
@@ -33,7 +36,12 @@ fun PrimalOverlay(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(AppTheme.extraColorScheme.surfaceVariantAlt2),
+                .background(AppTheme.extraColorScheme.surfaceVariantAlt2)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {},
+                ),
         ) {
             content()
         }
