@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -13,7 +13,6 @@ import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import net.primal.android.R
@@ -43,6 +41,9 @@ import net.primal.domain.links.CdnImage
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReadsContent(
+    state: ReadsScreenContract.UiState,
+    pagerState: PagerState,
+    eventPublisher: (ReadsScreenContract.UiEvent) -> Unit,
     onActiveFeedChanged: (FeedUi?) -> Unit,
     shouldAnimateScrollToTop: MutableState<Boolean>,
     scrollToFeed: MutableState<FeedUi?>,
@@ -50,12 +51,10 @@ fun ReadsContent(
     paddingValues: PaddingValues,
     navController: NavController,
 ) {
-    val readsViewModel = hiltViewModel<ReadsViewModel>()
-    val readsState by readsViewModel.state.collectAsState()
-
     ReadsContent(
-        state = readsState,
-        eventPublisher = readsViewModel::setEvent,
+        state = state,
+        pagerState = pagerState,
+        eventPublisher = eventPublisher,
         onActiveFeedChanged = onActiveFeedChanged,
         shouldAnimateScrollToTop = shouldAnimateScrollToTop,
         scrollToFeed = scrollToFeed,
@@ -70,6 +69,7 @@ fun ReadsContent(
 @Composable
 private fun ReadsContent(
     state: ReadsScreenContract.UiState,
+    pagerState: PagerState,
     eventPublisher: (ReadsScreenContract.UiEvent) -> Unit,
     onActiveFeedChanged: (FeedUi?) -> Unit,
     shouldAnimateScrollToTop: MutableState<Boolean>,
@@ -81,7 +81,6 @@ private fun ReadsContent(
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(pageCount = { state.feeds.size })
 
     var activeFeed by remember { mutableStateOf<FeedUi?>(null) }
 
@@ -150,6 +149,8 @@ private fun ReadsContent(
 @Composable
 internal fun ArticleFeedTopAppBar(
     title: String,
+    pagerState: PagerState,
+    feeds: List<FeedUi>,
     avatarCdnImage: CdnImage?,
     onAvatarClick: () -> Unit,
     onAvatarSwipeDown: (() -> Unit)? = null,
@@ -174,6 +175,8 @@ internal fun ArticleFeedTopAppBar(
                 onFeedPickerRequest()
             }
         },
+        pagerState = pagerState,
+        feeds = feeds,
         avatarCdnImage = avatarCdnImage,
         avatarBlossoms = avatarBlossoms,
         avatarLegendaryCustomization = avatarLegendaryCustomization,

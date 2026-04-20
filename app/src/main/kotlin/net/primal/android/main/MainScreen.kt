@@ -3,6 +3,8 @@ package net.primal.android.main
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -58,6 +60,8 @@ import net.primal.android.main.notifications.NotificationsContent
 import net.primal.android.main.notifications.NotificationsTopAppBar
 import net.primal.android.main.reads.ArticleFeedTopAppBar
 import net.primal.android.main.reads.ReadsContent
+import net.primal.android.main.reads.ReadsScreenContract
+import net.primal.android.main.reads.ReadsViewModel
 import net.primal.android.main.wallet.WalletDashboardContent
 import net.primal.android.main.wallet.WalletDashboardContract
 import net.primal.android.main.wallet.WalletDashboardTopAppBar
@@ -121,10 +125,16 @@ fun MainScreen(
 
     MainScreenHomeEffects(noteFeedsViewModel)
 
+    val readsViewModel = hiltViewModel<ReadsViewModel>(navBackStackEntry)
+    val readsState by readsViewModel.state.collectAsState()
+
     val homeTopAppBarState = rememberHomeTopAppBarState()
     val currentTopAppBarState = rememberPerTabTopAppBarState(activeTab, homeTopAppBarState)
 
-    val sharedState = rememberMainScreenSharedState()
+    val sharedState = rememberMainScreenSharedState(
+        noteFeedsState = noteFeedsState,
+        readsState = readsState,
+    )
 
     SnackbarErrorHandler(
         error = noteFeedsState.uiError,
@@ -160,6 +170,8 @@ fun MainScreen(
         mainEventPublisher = mainViewModel::setEvent,
         homeState = noteFeedsState,
         homeEventPublisher = noteFeedsViewModel::setEvent,
+        readsState = readsState,
+        readsEventPublisher = readsViewModel::setEvent,
         homeTopAppBarState = homeTopAppBarState,
         currentTopAppBarState = currentTopAppBarState,
         sharedState = sharedState,
@@ -191,11 +203,17 @@ private fun MainScreenTopAppBar(
     avatarBlossoms: List<String>,
     homeActiveFeed: FeedUi?,
     readsActiveFeed: FeedUi?,
+    homePagerState: PagerState,
+    readsPagerState: PagerState,
+    homeFeeds: List<FeedUi>,
+    readsFeeds: List<FeedUi>,
 ) {
     when (activeTab) {
         PrimalTopLevelDestination.Feeds -> {
             NoteFeedTopAppBar(
                 title = homeActiveFeed?.title ?: "",
+                pagerState = homePagerState,
+                feeds = homeFeeds,
                 activeFeed = homeActiveFeed,
                 avatarCdnImage = avatarCdnImage,
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
@@ -213,6 +231,8 @@ private fun MainScreenTopAppBar(
         PrimalTopLevelDestination.Reads -> {
             ArticleFeedTopAppBar(
                 title = readsActiveFeed?.title ?: "",
+                pagerState = readsPagerState,
+                feeds = readsFeeds,
                 activeFeed = readsActiveFeed,
                 avatarCdnImage = avatarCdnImage,
                 avatarLegendaryCustomization = avatarLegendaryCustomization,
@@ -278,6 +298,8 @@ private fun ScaffoldTopAppBar(
     walletPickerVisible: Boolean,
     sharedState: MainScreenSharedState,
     toggleOverlay: (ActiveOverlay) -> Unit,
+    homeFeeds: List<FeedUi>,
+    readsFeeds: List<FeedUi>,
 ) {
     val drawerTitle = if (accountDrawerVisible) stringResource(id = R.string.account_drawer_title) else null
     val drawerSubtitle = if (accountDrawerVisible) {
@@ -306,6 +328,10 @@ private fun ScaffoldTopAppBar(
         avatarBlossoms = mainState.activeAccountBlossoms,
         homeActiveFeed = sharedState.homeActiveFeed.value,
         readsActiveFeed = sharedState.readsActiveFeed.value,
+        homePagerState = sharedState.homePagerState,
+        readsPagerState = sharedState.readsPagerState,
+        homeFeeds = homeFeeds,
+        readsFeeds = readsFeeds,
     )
 }
 
@@ -319,6 +345,8 @@ private fun MainScreenContent(
     noteCallbacks: NoteCallbacks,
     homeState: NoteFeedsContract.UiState,
     homeEventPublisher: (NoteFeedsContract.UiEvent) -> Unit,
+    readsState: ReadsScreenContract.UiState,
+    readsEventPublisher: (ReadsScreenContract.UiEvent) -> Unit,
     homeTopAppBarState: TopAppBarState,
     navController: NavController,
     onTabChanged: (PrimalTopLevelDestination) -> Unit,
@@ -334,6 +362,7 @@ private fun MainScreenContent(
         ) {
             NoteFeedsContent(
                 state = homeState,
+                pagerState = sharedState.homePagerState,
                 noteCallbacks = noteCallbacks,
                 eventPublisher = homeEventPublisher,
                 onActiveFeedChanged = { sharedState.homeActiveFeed.value = it },
@@ -350,6 +379,9 @@ private fun MainScreenContent(
             saveableStateHolder.SaveableStateProvider(activeTab.name) {
                 when (activeTab) {
                     PrimalTopLevelDestination.Reads -> ReadsContent(
+                        state = readsState,
+                        pagerState = sharedState.readsPagerState,
+                        eventPublisher = readsEventPublisher,
                         onActiveFeedChanged = { sharedState.readsActiveFeed.value = it },
                         shouldAnimateScrollToTop = sharedState.readsShouldAnimateScrollToTop,
                         scrollToFeed = sharedState.readsScrollToFeed,
@@ -397,6 +429,8 @@ private class MainScreenSharedState(
     val snackbarHostState: SnackbarHostState,
     val homeActiveFeed: MutableState<FeedUi?>,
     val readsActiveFeed: MutableState<FeedUi?>,
+    val homePagerState: PagerState,
+    val readsPagerState: PagerState,
     val homeShouldAnimateScrollToTop: MutableState<Boolean>,
     val homeScrollToFeed: MutableState<FeedUi?>,
     val readsShouldAnimateScrollToTop: MutableState<Boolean>,
@@ -407,12 +441,20 @@ private class MainScreenSharedState(
     val notificationsShouldAnimateScrollToTop: MutableState<Boolean>,
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun rememberMainScreenSharedState(): MainScreenSharedState {
+private fun rememberMainScreenSharedState(
+    noteFeedsState: NoteFeedsContract.UiState,
+    readsState: ReadsScreenContract.UiState,
+): MainScreenSharedState {
+    val homePagerState = rememberPagerState(pageCount = { noteFeedsState.feeds.size })
+    val readsPagerState = rememberPagerState(pageCount = { readsState.feeds.size })
     return MainScreenSharedState(
         snackbarHostState = remember { SnackbarHostState() },
         homeActiveFeed = remember { mutableStateOf(null) },
         readsActiveFeed = remember { mutableStateOf(null) },
+        homePagerState = homePagerState,
+        readsPagerState = readsPagerState,
         homeShouldAnimateScrollToTop = remember { mutableStateOf(false) },
         homeScrollToFeed = remember { mutableStateOf(null) },
         readsShouldAnimateScrollToTop = remember { mutableStateOf(false) },
@@ -432,6 +474,8 @@ private fun MainScreenScaffold(
     mainEventPublisher: (MainContract.UiEvent) -> Unit,
     homeState: NoteFeedsContract.UiState,
     homeEventPublisher: (NoteFeedsContract.UiEvent) -> Unit,
+    readsState: ReadsScreenContract.UiState,
+    readsEventPublisher: (ReadsScreenContract.UiEvent) -> Unit,
     homeTopAppBarState: TopAppBarState,
     currentTopAppBarState: TopAppBarState,
     sharedState: MainScreenSharedState,
@@ -479,6 +523,8 @@ private fun MainScreenScaffold(
                 walletPickerVisible = walletPickerVisible,
                 sharedState = sharedState,
                 toggleOverlay = ::toggleOverlay,
+                homeFeeds = homeState.feeds,
+                readsFeeds = readsState.feeds,
             )
         },
         content = { paddingValues ->
@@ -490,6 +536,8 @@ private fun MainScreenScaffold(
                 noteCallbacks = noteCallbacks,
                 homeState = homeState,
                 homeEventPublisher = homeEventPublisher,
+                readsState = readsState,
+                readsEventPublisher = readsEventPublisher,
                 homeTopAppBarState = homeTopAppBarState,
                 navController = navController,
                 onTabChanged = onTabChanged,
@@ -509,21 +557,24 @@ private fun MainScreenScaffold(
                 onTabChanged = onTabChanged,
             )
         },
-        floatingActionButton = {
-            when (activeTab) {
-                PrimalTopLevelDestination.Feeds,
-                PrimalTopLevelDestination.Alerts,
-                -> NewPostFloatingActionButton(
-                    onNewPostClick = { navController.navigateToNoteEditor(null) },
-                )
-
-                else -> {}
-            }
-        },
+        floatingActionButton = { MainScreenFab(activeTab = activeTab, navController = navController) },
         snackbarHost = {
             SnackbarHost(hostState = sharedState.snackbarHostState)
         },
     )
+}
+
+@Composable
+private fun MainScreenFab(activeTab: PrimalTopLevelDestination, navController: NavController) {
+    when (activeTab) {
+        PrimalTopLevelDestination.Feeds,
+        PrimalTopLevelDestination.Alerts,
+        -> NewPostFloatingActionButton(
+            onNewPostClick = { navController.navigateToNoteEditor(null) },
+        )
+
+        else -> {}
+    }
 }
 
 @Composable

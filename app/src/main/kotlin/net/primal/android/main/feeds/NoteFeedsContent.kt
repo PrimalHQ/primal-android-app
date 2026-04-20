@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults
-import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
@@ -41,6 +41,7 @@ import net.primal.domain.links.CdnImage
 @Composable
 internal fun NoteFeedsContent(
     state: NoteFeedsContract.UiState,
+    pagerState: PagerState,
     noteCallbacks: NoteCallbacks,
     eventPublisher: (UiEvent) -> Unit,
     onActiveFeedChanged: (FeedUi?) -> Unit,
@@ -53,7 +54,6 @@ internal fun NoteFeedsContent(
 ) {
     val context = LocalContext.current
     val uiScope = rememberCoroutineScope()
-    val pagerState = rememberPagerState(pageCount = { state.feeds.size })
 
     var activeFeed by remember { mutableStateOf<FeedUi?>(null) }
 
@@ -136,6 +136,8 @@ internal fun NoteFeedsContent(
 @Composable
 internal fun NoteFeedTopAppBar(
     title: String,
+    pagerState: PagerState,
+    feeds: List<FeedUi>,
     avatarCdnImage: CdnImage?,
     onAvatarClick: () -> Unit,
     onAvatarSwipeDown: (() -> Unit)? = null,
@@ -160,6 +162,8 @@ internal fun NoteFeedTopAppBar(
                 onFeedPickerRequest()
             }
         },
+        pagerState = pagerState,
+        feeds = feeds,
         avatarCdnImage = avatarCdnImage,
         avatarBlossoms = avatarBlossoms,
         avatarLegendaryCustomization = avatarLegendaryCustomization,
