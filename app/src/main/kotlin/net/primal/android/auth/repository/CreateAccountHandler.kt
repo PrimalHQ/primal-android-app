@@ -3,8 +3,15 @@ package net.primal.android.auth.repository
 import io.github.aakira.napier.Napier
 import java.io.IOException
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.primal.android.networking.UserAgentProvider
+import net.primal.android.networking.relays.FALLBACK_RELAY_URLS
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.settings.repository.SettingsRepository
 import net.primal.android.user.credentials.CredentialsStore
@@ -12,6 +19,7 @@ import net.primal.android.user.repository.BlossomRepository
 import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.core.utils.onFailure
 import net.primal.core.utils.onSuccess
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.account.SparkWalletAccountRepository
@@ -38,20 +46,46 @@ class CreateAccountHandler @Inject constructor(
     private val sparkWalletAccountRepository: SparkWalletAccountRepository,
 ) {
 
+    private val scope = CoroutineScope(dispatchers.io() + SupervisorJob())
+
     suspend fun createNostrAccount(
         privateKey: String,
         profileMetadata: ProfileMetadata,
         followedUserIds: Set<String>,
+        preFetchedRelays: List<String>? = null,
     ) = withContext(dispatchers.io()) {
         runCatching {
             val userId = credentialsStore.saveNsec(nostrKey = privateKey)
-            relayRepository.bootstrapUserRelays(userId)
-            blossomRepository.ensureBlossomServerList(userId)
-            userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata)
-            val contacts = setOf(userId) + followedUserIds
-            userRepository.setFollowList(userId = userId, contacts = contacts)
-            ensureSparkWalletExistsUseCase.invoke(userId = userId)
-                .onSuccess { setLightningAddress(userId = userId, walletId = it) }
+
+            relayRepository.bootstrapUserRelays(userId, preFetchedRelays ?: FALLBACK_RELAY_URLS)
+
+            coroutineScope {
+                awaitAll(
+                    async { blossomRepository.ensureBlossomServerList(userId) },
+                    async { userRepository.setProfileMetadata(userId = userId, profileMetadata = profileMetadata) },
+                    async { userRepository.setFollowList(userId = userId, contacts = setOf(userId) + followedUserIds) },
+                )
+            }
+
+            scope.launch { initWallet(userId) }
+            scope.launch { fetchSettings(userId) }
+        }.onFailure { exception ->
+            Napier.w(throwable = exception) { "Failed to create Nostr account." }
+            credentialsStore.removeCredentialByNsec(nsec = privateKey.assureValidNsec())
+            throw AccountCreationException(cause = exception)
+        }.onSuccess {
+            authRepository.loginWithNsec(nostrKey = privateKey)
+        }
+    }
+
+    private suspend fun initWallet(userId: String) {
+        ensureSparkWalletExistsUseCase.invoke(userId = userId)
+            .onSuccess { walletId -> setLightningAddress(userId = userId, walletId = walletId) }
+            .onFailure { error -> Napier.w(throwable = error) { "Wallet creation failed during onboarding." } }
+    }
+
+    private suspend fun fetchSettings(userId: String) {
+        runCatching {
             settingsRepository.fetchAndPersistAppSettings(
                 authorizationEvent = eventsSignatureHandler.signNostrEvent(
                     unsignedNostrEvent = NostrUnsignedEvent(
@@ -62,12 +96,8 @@ class CreateAccountHandler @Inject constructor(
                     ),
                 ).unwrapOrThrow(),
             )
-        }.onFailure { exception ->
-            Napier.w(throwable = exception) { "Failed to create Nostr account." }
-            credentialsStore.removeCredentialByNsec(nsec = privateKey.assureValidNsec())
-            throw AccountCreationException(cause = exception)
-        }.onSuccess {
-            authRepository.loginWithNsec(nostrKey = privateKey)
+        }.onFailure { error ->
+            Napier.w(throwable = error) { "Settings fetch failed during onboarding." }
         }
     }
 

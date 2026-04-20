@@ -49,6 +49,7 @@ class OnboardingViewModel @Inject constructor(
     init {
         observeEvents()
         fetchFollowPacks()
+        fetchDefaultRelays()
     }
 
     private fun observeEvents() =
@@ -83,6 +84,17 @@ class OnboardingViewModel @Inject constructor(
             setState { copy(working = false) }
         }
 
+    private fun fetchDefaultRelays() =
+        viewModelScope.launch {
+            runCatching { onboardingRepository.fetchDefaultRelays() }
+                .onSuccess { relays ->
+                    setState { copy(defaultRelays = relays) }
+                }
+                .onFailure { error ->
+                    Napier.w(throwable = error) { "Failed to pre-fetch default relays." }
+                }
+        }
+
     private fun createNostrAccount() =
         viewModelScope.launch {
             try {
@@ -94,6 +106,7 @@ class OnboardingViewModel @Inject constructor(
                     privateKey = keyPair.privateKey,
                     profileMetadata = uiState.asProfileMetadata(),
                     followedUserIds = uiState.followedUserIds,
+                    preFetchedRelays = uiState.defaultRelays,
                 )
                 setState { copy(accountCreated = true, accountCreationStep = AccountCreationStep.AccountCreated) }
             } catch (error: BlossomException) {
