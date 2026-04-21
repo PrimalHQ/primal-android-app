@@ -349,7 +349,7 @@ internal class SparkWalletServiceImpl(
                             amountSats = request.amountSats.toULong(),
                             payRequest = payRequest,
                             comment = request.noteRecipient,
-                            validateSuccessActionUrl = true,
+                            validateSuccessActionUrl = false,
                         ),
                     )
 
