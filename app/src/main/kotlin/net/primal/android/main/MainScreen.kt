@@ -3,8 +3,6 @@ package net.primal.android.main
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.pager.PagerState
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -52,7 +50,6 @@ import net.primal.android.feeds.list.FeedListOverlayContent
 import net.primal.android.feeds.list.ui.model.FeedUi
 import net.primal.android.main.explore.home.NewExploreTabContent
 import net.primal.android.main.explore.home.NewExploreTabTopAppBar
-import net.primal.android.main.explore.ui.EXPLORE_HOME_TAB_COUNT
 import net.primal.android.main.feeds.NoteFeedTopAppBar
 import net.primal.android.main.feeds.NoteFeedsContent
 import net.primal.android.main.feeds.NoteFeedsContract
@@ -400,7 +397,6 @@ private class MainScreenSharedState(
     val snackbarHostState: SnackbarHostState,
     val homeActiveFeed: MutableState<FeedUi?>,
     val readsActiveFeed: MutableState<FeedUi?>,
-    val explorePagerState: PagerState,
     val homeShouldAnimateScrollToTop: MutableState<Boolean>,
     val homeScrollToFeed: MutableState<FeedUi?>,
     val readsShouldAnimateScrollToTop: MutableState<Boolean>,
@@ -417,7 +413,6 @@ private fun rememberMainScreenSharedState(): MainScreenSharedState {
         snackbarHostState = remember { SnackbarHostState() },
         homeActiveFeed = remember { mutableStateOf(null) },
         readsActiveFeed = remember { mutableStateOf(null) },
-        explorePagerState = rememberPagerState { EXPLORE_HOME_TAB_COUNT },
         homeShouldAnimateScrollToTop = remember { mutableStateOf(false) },
         homeScrollToFeed = remember { mutableStateOf(null) },
         readsShouldAnimateScrollToTop = remember { mutableStateOf(false) },
