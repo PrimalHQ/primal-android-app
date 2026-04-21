@@ -710,6 +710,16 @@
     <string name="explore_title">Explore</string>
     <string name="explore_top_app_bar_subtitle">All of Nostr</string>
 
+    <string name="new_explore_subtitle">Find people, feeds, media</string>
+    <string name="new_explore_users_section_title">Users</string>
+    <string name="new_explore_follow_packs_section_title">Follow Packs</string>
+    <string name="new_explore_feeds_section_title">Feeds</string>
+    <string name="new_explore_search_users_button">Search Users</string>
+    <string name="new_explore_advanced_search_button">Advanced Search</string>
+    <string name="new_explore_user_search_title">User Search</string>
+    <string name="new_explore_user_search_placeholder">Search users</string>
+    <string name="new_explore_fab_content_description">Open new Explore</string>
+
     <string name="account_drawer_title">Account</string>
     <string name="account_drawer_subtitle">Options and settings</string>
     <string name="explore_feed_save_feed">Save</string>
