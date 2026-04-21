@@ -25,7 +25,7 @@ fun ConnectionIndicatorOverlay(viewModel: ConnectionIndicatorViewModel, content:
         indicatorIconTint = Color.Unspecified,
         floatingIcon = if (isDarkTheme) PrimalIcons.NoConnectionWhite else PrimalIcons.NoConnectionBlack,
         floatingIconTint = Color.Unspecified,
-        floatingIconTopPadding = 16.dp,
+        floatingIconTopPadding = 21.dp,
         content = content,
     )
 }

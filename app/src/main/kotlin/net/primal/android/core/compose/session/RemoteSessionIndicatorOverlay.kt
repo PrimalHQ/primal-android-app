@@ -58,7 +58,7 @@ fun RemoteSessionIndicatorOverlay(
         indicatorIconTint = AppTheme.colorScheme.surfaceVariant,
         floatingIcon = PrimalIcons.NostrConnectSession,
         floatingIconTint = AppTheme.colorScheme.onPrimary,
-        floatingIconTopPadding = if (isNetworkUnavailable) 64.dp else 16.dp,
+        floatingIconTopPadding = if (isNetworkUnavailable) 69.dp else 21.dp,
         onClick = onClick,
         content = content,
     )
