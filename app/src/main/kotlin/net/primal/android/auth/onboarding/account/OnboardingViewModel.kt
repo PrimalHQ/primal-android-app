@@ -37,6 +37,8 @@ class OnboardingViewModel @Inject constructor(
     private var avatarUploadJob: UploadJob? = null
     private var bannerUploadJob: UploadJob? = null
 
+    private var defaultRelays: List<String>? = null
+
     private val _state = MutableStateFlow(UiState())
     val state = _state.asStateFlow()
     fun setState(reducer: UiState.() -> UiState) {
@@ -88,7 +90,7 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
             runCatching { onboardingRepository.fetchDefaultRelays() }
                 .onSuccess { relays ->
-                    setState { copy(defaultRelays = relays) }
+                    defaultRelays = relays
                 }
                 .onFailure { error ->
                     Napier.w(throwable = error) { "Failed to pre-fetch default relays." }
@@ -106,7 +108,7 @@ class OnboardingViewModel @Inject constructor(
                     privateKey = keyPair.privateKey,
                     profileMetadata = uiState.asProfileMetadata(),
                     followedUserIds = uiState.followedUserIds,
-                    preFetchedRelays = uiState.defaultRelays,
+                    preFetchedRelays = defaultRelays,
                 )
                 setState { copy(accountCreated = true, accountCreationStep = AccountCreationStep.AccountCreated) }
             } catch (error: BlossomException) {

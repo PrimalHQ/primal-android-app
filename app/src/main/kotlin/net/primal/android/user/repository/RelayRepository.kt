@@ -34,17 +34,21 @@ class RelayRepository @Inject constructor(
     fun findRelays(userId: String, kind: RelayKind) = usersDatabase.relays().findRelays(userId, kind)
 
     @Throws(NostrPublishException::class, SignatureException::class)
-    suspend fun bootstrapUserRelays(userId: String, preFetchedRelayUrls: List<String>? = null) =
+    suspend fun bootstrapUserRelays(userId: String, relayUrls: List<String>) =
         withContext(dispatchers.io()) {
-            val relays = if (!preFetchedRelayUrls.isNullOrEmpty()) {
-                preFetchedRelayUrls.map { it.toRelay() }
-            } else {
-                try {
-                    usersApi.getDefaultRelays().map { it.toRelay() }
-                } catch (error: NetworkException) {
-                    Napier.w(throwable = error) { "Failed to fetch default relays." }
-                    FALLBACK_RELAYS
-                }
+            val relays = relayUrls.map { it.toRelay() }
+            replaceUserRelays(userId, relays)
+            nostrPublisher.publishRelayList(userId, relays)
+        }
+
+    @Throws(NostrPublishException::class, SignatureException::class)
+    suspend fun bootstrapDefaultUserRelays(userId: String) =
+        withContext(dispatchers.io()) {
+            val relays = try {
+                usersApi.getDefaultRelays().map { it.toRelay() }
+            } catch (error: NetworkException) {
+                Napier.w(throwable = error) { "Failed to fetch default relays." }
+                FALLBACK_RELAYS
             }
             replaceUserRelays(userId, relays)
             nostrPublisher.publishRelayList(userId, relays)

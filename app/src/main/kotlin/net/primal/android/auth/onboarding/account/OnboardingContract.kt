@@ -19,7 +19,6 @@ interface OnboardingContract {
         val followPacks: List<OnboardingFollowPack> = emptyList(),
         val expandedPackNames: Set<String> = emptySet(),
         val followedUserIds: Set<String> = emptySet(),
-        val defaultRelays: List<String>? = null,
         val error: OnboardingError? = null,
     ) {
         sealed class OnboardingError {

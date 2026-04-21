@@ -3,13 +3,17 @@ package net.primal.android.auth.repository
 import io.github.aakira.napier.Napier
 import java.io.IOException
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeout
 import net.primal.android.networking.UserAgentProvider
 import net.primal.android.networking.relays.FALLBACK_RELAY_URLS
 import net.primal.android.profile.domain.ProfileMetadata
@@ -20,7 +24,6 @@ import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
-import net.primal.core.utils.onSuccess
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.nostr.NostrEventKind
@@ -59,6 +62,9 @@ class CreateAccountHandler @Inject constructor(
 
             relayRepository.bootstrapUserRelays(userId, preFetchedRelays ?: FALLBACK_RELAY_URLS)
 
+            val walletIdDeferred = scope.asyncEnsureWalletExists(userId)
+            scope.launchFetchSettings(userId)
+
             coroutineScope {
                 awaitAll(
                     async { blossomRepository.ensureBlossomServerList(userId) },
@@ -67,8 +73,7 @@ class CreateAccountHandler @Inject constructor(
                 )
             }
 
-            scope.launch { initWallet(userId) }
-            scope.launch { fetchSettings(userId) }
+            scope.launchSetLightningAddressIfWalletReady(userId, walletIdDeferred)
         }.onFailure { exception ->
             Napier.w(throwable = exception) { "Failed to create Nostr account." }
             credentialsStore.removeCredentialByNsec(nsec = privateKey.assureValidNsec())
@@ -78,10 +83,46 @@ class CreateAccountHandler @Inject constructor(
         }
     }
 
-    private suspend fun initWallet(userId: String) {
-        ensureSparkWalletExistsUseCase.invoke(userId = userId)
-            .onSuccess { walletId -> setLightningAddress(userId = userId, walletId = walletId) }
-            .onFailure { error -> Napier.w(throwable = error) { "Wallet creation failed during onboarding." } }
+    private fun CoroutineScope.asyncEnsureWalletExists(userId: String): Deferred<String?> =
+        async {
+            try {
+                withTimeout(BACKGROUND_TASK_TIMEOUT) {
+                    ensureSparkWalletExistsUseCase.invoke(userId = userId)
+                        .onFailure { error ->
+                            Napier.w(throwable = error) { "Wallet creation failed during onboarding." }
+                        }
+                        .getOrNull()
+                }
+            } catch (error: TimeoutCancellationException) {
+                Napier.w(throwable = error) { "Wallet creation timed out during onboarding." }
+                null
+            }
+        }
+
+    private fun CoroutineScope.launchFetchSettings(userId: String) {
+        launch {
+            try {
+                withTimeout(BACKGROUND_TASK_TIMEOUT) { fetchSettings(userId) }
+            } catch (error: TimeoutCancellationException) {
+                Napier.w(throwable = error) { "Settings fetch timed out during onboarding." }
+            }
+        }
+    }
+
+    private fun CoroutineScope.launchSetLightningAddressIfWalletReady(
+        userId: String,
+        walletIdDeferred: Deferred<String?>,
+    ) {
+        launch {
+            try {
+                withTimeout(BACKGROUND_TASK_TIMEOUT) {
+                    val walletId = walletIdDeferred.await() ?: return@withTimeout
+                    setLightningAddress(userId = userId, walletId = walletId)
+                }
+            } catch (error: TimeoutCancellationException) {
+                Napier.w(throwable = error) { "Set lightning address timed out during onboarding." }
+            }
+        }
     }
 
     private suspend fun fetchSettings(userId: String) {
@@ -113,4 +154,8 @@ class CreateAccountHandler @Inject constructor(
     }
 
     class AccountCreationException(cause: Throwable) : IOException(cause)
+
+    private companion object {
+        private val BACKGROUND_TASK_TIMEOUT = 30.seconds
+    }
 }

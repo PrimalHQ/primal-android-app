@@ -91,7 +91,7 @@ class RelayRepositoryTest {
     }
 
     @Test
-    fun `bootstrapUserRelays calls getDefaultRelays and publishes relay list`() =
+    fun `bootstrapDefaultUserRelays calls getDefaultRelays and publishes relay list`() =
         runTest {
             val userId = "random"
             val expectedRelays = listOf("wss://relay.primal.net", "wss://relay.damus.io")
@@ -107,7 +107,7 @@ class RelayRepositoryTest {
                 nostrPublisher = nostrPublisher,
             )
 
-            repository.bootstrapUserRelays(userId = userId)
+            repository.bootstrapDefaultUserRelays(userId = userId)
 
             coVerify {
                 nostrPublisher.publishRelayList(
@@ -120,7 +120,7 @@ class RelayRepositoryTest {
         }
 
     @Test
-    fun `bootstrapUserRelays persists relays to database`() =
+    fun `bootstrapDefaultUserRelays persists relays to database`() =
         runTest {
             val userId = "random"
             val expectedRelays = listOf("wss://relay.primal.net", "wss://relay.damus.io")
@@ -137,7 +137,7 @@ class RelayRepositoryTest {
                 },
             )
 
-            repository.bootstrapUserRelays(userId = userId)
+            repository.bootstrapDefaultUserRelays(userId = userId)
 
             coVerify { relayDao.deleteAll(userId = userId, kind = RelayKind.UserRelay) }
             upsertedRelaysSlot.captured.map { it.url }.sorted() shouldBe expectedRelays.sorted()
