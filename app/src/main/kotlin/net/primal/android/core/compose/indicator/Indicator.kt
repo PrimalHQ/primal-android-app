@@ -149,7 +149,7 @@ private fun IndicatorNotice(
             }
             .padding(top = WindowInsets.safeContent.asPaddingValues().calculateTopPadding())
             .padding(WindowInsets.statusBars.asPaddingValues())
-            .padding(top = 16.dp, end = 16.dp)
+            .padding(top = 21.dp, end = 11.dp)
             .clip(CircleShape)
             .background(AppTheme.colorScheme.onPrimary)
             .height(40.dp)
@@ -200,14 +200,14 @@ private fun FloatingIndicatorIcon(
         label = "AnimatedTopPadding",
     )
 
-    val horizontalPaddingPx = with(LocalDensity.current) { 16.dp.toPx() }
+    val horizontalPaddingPx = with(LocalDensity.current) { 11.dp.toPx() }
 
     Box(
         modifier = modifier
             .offset { IntOffset(offsetX.value.toInt(), offsetY.value.toInt()) }
             .padding(top = WindowInsets.safeContent.asPaddingValues().calculateTopPadding())
             .padding(WindowInsets.statusBars.asPaddingValues())
-            .padding(top = animatedTopPadding, end = 16.dp)
+            .padding(top = animatedTopPadding, end = 11.dp)
             .size(40.dp)
             .onGloballyPositioned { coordinates ->
                 overlaySize = coordinates.size
