@@ -262,69 +262,68 @@ private fun WalletDashboardContent(
                     !state.refreshing &&
                     !state.syncingTransactions
 
-                if (isTransactionListSettled && pagingItems.isEmpty()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .navigationBarsPadding(),
-                    ) {
-                        if (state.wallet is Wallet.Primal) {
-                            DashboardUpgradeNotice(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .animateContentSize()
-                                    .padding(horizontal = 32.dp)
-                                    .padding(vertical = 16.dp),
-                                onUpgradeWalletClick = onUpgradeWalletClick,
-                            )
-                        }
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                ) {
+                    WalletDashboardSection(
+                        state = state,
+                        dashboardExpanded = dashboardExpanded,
+                        dashboardLiteHeightDp = dashboardLiteHeightDp,
+                        currencyMode = currencyMode,
+                        onCurrencyModeToggle = onCurrencyModeToggle,
+                        onSendClick = onSendClick,
+                        onScanClick = onScanClick,
+                        onReceiveClick = onReceiveClick,
+                    )
 
-                        if (state.wallet?.balanceInBtc == 0.0) {
-                            WalletCallToActionBox(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f)
-                                    .animateContentSize()
-                                    .padding(horizontal = 32.dp)
-                                    .padding(bottom = 32.dp),
-                                message = stringResource(id = R.string.wallet_dashboard_no_sats_hint),
-                                actionLabel = if (canBuySats) {
-                                    stringResource(id = R.string.wallet_dashboard_buy_sats_button)
-                                } else {
-                                    null
-                                },
-                                onActionClick = onBuySatsClick,
-                            )
-                        } else {
-                            WalletCallToActionBox(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .weight(1f)
-                                    .animateContentSize()
-                                    .padding(horizontal = 32.dp)
-                                    .padding(bottom = 32.dp),
-                                message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
-                            )
-                        }
-                    }
-                } else {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                    ) {
-                        WalletDashboardSection(
-                            state = state,
-                            dashboardExpanded = dashboardExpanded,
-                            dashboardLiteHeightDp = dashboardLiteHeightDp,
-                            currencyMode = currencyMode,
-                            onCurrencyModeToggle = onCurrencyModeToggle,
-                            onSendClick = onSendClick,
-                            onScanClick = onScanClick,
-                            onReceiveClick = onReceiveClick,
-                        )
+                    if (isTransactionListSettled && pagingItems.isEmpty()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .navigationBarsPadding(),
+                        ) {
+                            if (state.wallet is Wallet.Primal) {
+                                DashboardUpgradeNotice(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .animateContentSize()
+                                        .padding(horizontal = 32.dp)
+                                        .padding(vertical = 16.dp),
+                                    onUpgradeWalletClick = onUpgradeWalletClick,
+                                )
+                            }
 
+                            if (state.wallet?.balanceInBtc == 0.0) {
+                                WalletCallToActionBox(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
+                                        .animateContentSize()
+                                        .padding(horizontal = 32.dp)
+                                        .padding(bottom = 32.dp),
+                                    message = stringResource(id = R.string.wallet_dashboard_no_sats_hint),
+                                    actionLabel = if (canBuySats) {
+                                        stringResource(id = R.string.wallet_dashboard_buy_sats_button)
+                                    } else {
+                                        null
+                                    },
+                                    onActionClick = onBuySatsClick,
+                                )
+                            } else {
+                                WalletCallToActionBox(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .weight(1f)
+                                        .animateContentSize()
+                                        .padding(horizontal = 32.dp)
+                                        .padding(bottom = 32.dp),
+                                    message = stringResource(id = R.string.wallet_dashboard_no_transactions_hint),
+                                )
+                            }
+                        }
+                    } else {
                         TransactionsLazyColumn(
                             modifier = Modifier
                                 .fillMaxSize()
