@@ -70,7 +70,7 @@ class NewExploreViewModel @Inject constructor(
 
     private fun observeFollowPacks() =
         viewModelScope.launch {
-            exploreRepository.observeFollowPacks()
+            exploreRepository.observeExploreFollowPacks()
                 .distinctUntilChanged()
                 .collect { packs ->
                     setState { copy(followPacks = packs.map { it.asFollowPackUi() }) }

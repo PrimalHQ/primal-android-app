@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 30,
-    "identityHash": "04b4391a5c580cdca1e98daec2e9e176",
+    "identityHash": "84b77b7a18b3677120936145bb376afa",
     "entities": [
       {
         "tableName": "PostData",
@@ -2113,7 +2113,7 @@
         }
       },
       {
-        "tableName": "ExplorePopularUserData",
+        "tableName": "ExplorePopularUserCrossRef",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`profileId` TEXT NOT NULL, `position` INTEGER NOT NULL, `score` REAL, PRIMARY KEY(`profileId`))",
         "fields": [
           {
@@ -2142,7 +2142,7 @@
         }
       },
       {
-        "tableName": "ExploreFollowPackData",
+        "tableName": "ExploreFollowPackCrossRef",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`aTag` TEXT NOT NULL, `position` INTEGER NOT NULL, PRIMARY KEY(`aTag`))",
         "fields": [
           {
@@ -2280,7 +2280,7 @@
         }
       },
       {
-        "tableName": "DvmFeedActionUserCrossRef",
+        "tableName": "DvmFeedFeaturedUserCrossRef",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `dvmEventId` TEXT NOT NULL, `profileId` TEXT NOT NULL, PRIMARY KEY(`ownerId`, `dvmEventId`, `profileId`))",
         "fields": [
           {
@@ -2314,7 +2314,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '04b4391a5c580cdca1e98daec2e9e176')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '84b77b7a18b3677120936145bb376afa')"
     ]
   }
 }

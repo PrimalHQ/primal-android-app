@@ -10,6 +10,6 @@ data class DvmFeedUi(
     val userZapped: Boolean? = false,
     val totalLikes: Long? = null,
     val totalSatsZapped: Long? = null,
-    val actionUserAvatars: List<CdnImage> = emptyList(),
-    val actionUserLegendaryCustomizations: List<LegendaryCustomization?> = emptyList(),
+    val featuredUserAvatars: List<CdnImage> = emptyList(),
+    val featuredUserLegendaryCustomizations: List<LegendaryCustomization?> = emptyList(),
 )

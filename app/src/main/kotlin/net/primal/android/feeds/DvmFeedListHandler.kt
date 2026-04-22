@@ -14,6 +14,7 @@ import net.primal.domain.events.NostrEventUserStats
 import net.primal.domain.feeds.DvmFeed
 import net.primal.domain.feeds.FeedSpecKind
 import net.primal.domain.feeds.FeedsRepository
+import net.primal.domain.profile.ProfileData
 import net.primal.domain.profile.ProfileRepository
 
 class DvmFeedListHandler @Inject constructor(
@@ -56,11 +57,15 @@ class DvmFeedListHandler @Inject constructor(
         update: (List<DvmFeedUi>) -> Unit,
     ) {
         val dvmIds = dvmFeeds.map { it.eventId }
+        val featuredUserIds = dvmFeeds.flatMap { it.featuredUserIds }.distinct()
+        val profilesByUserId = profileRepository.findProfileData(profileIds = featuredUserIds)
+            .associateBy { it.profileId }
 
         var feeds = buildDvmFeedUis(
             dvmFeeds = dvmFeeds,
             statsByEventId = emptyMap(),
             userStatsByEventId = emptyMap(),
+            profilesByUserId = profilesByUserId,
         )
         update(feeds)
 
@@ -90,14 +95,15 @@ class DvmFeedListHandler @Inject constructor(
         }
     }
 
-    private suspend fun buildDvmFeedUis(
+    private fun buildDvmFeedUis(
         dvmFeeds: List<DvmFeed>,
         statsByEventId: Map<String, NostrEventStats>,
         userStatsByEventId: Map<String, NostrEventUserStats>,
+        profilesByUserId: Map<String, ProfileData>,
     ): List<DvmFeedUi> =
         dvmFeeds.map { dvmFeed ->
-            val actionUsers = profileRepository.findProfileData(profileIds = dvmFeed.actionUserIds)
-            val avatarLegendaryPair = actionUsers
+            val featuredUsers = dvmFeed.featuredUserIds.mapNotNull { profilesByUserId[it] }
+            val avatarLegendaryPair = featuredUsers
                 .filter { it.avatarCdnImage != null }
                 .map { Pair(it.avatarCdnImage, it.primalPremiumInfo?.legendProfile?.asLegendaryCustomization()) }
 
@@ -107,8 +113,8 @@ class DvmFeedListHandler @Inject constructor(
                 userZapped = userStatsByEventId[dvmFeed.eventId]?.zapped,
                 totalLikes = statsByEventId[dvmFeed.eventId]?.likes,
                 totalSatsZapped = statsByEventId[dvmFeed.eventId]?.satsZapped,
-                actionUserAvatars = avatarLegendaryPair.mapNotNull { it.first },
-                actionUserLegendaryCustomizations = avatarLegendaryPair.map { it.second },
+                featuredUserAvatars = avatarLegendaryPair.mapNotNull { it.first },
+                featuredUserLegendaryCustomizations = avatarLegendaryPair.map { it.second },
             )
         }
 }

@@ -237,7 +237,7 @@ private fun DvmFeedListItem(
                         )
                         if (showFollowsActionsAvatarRow) {
                             val profileAvatarSize = 28.dp
-                            val avatarsShown = dvmFeed.actionUserAvatars.size.coerceAtMost(MaxAvatarsToShow)
+                            val avatarsShown = dvmFeed.featuredUserAvatars.size.coerceAtMost(MaxAvatarsToShow)
 
                             AvatarThumbnailsRow(
                                 modifier = Modifier
@@ -246,8 +246,8 @@ private fun DvmFeedListItem(
                                             profileAvatarSize,
                                         height = profileAvatarSize,
                                     ),
-                                avatarCdnImages = dvmFeed.actionUserAvatars,
-                                avatarLegendaryCustomizations = dvmFeed.actionUserLegendaryCustomizations,
+                                avatarCdnImages = dvmFeed.featuredUserAvatars,
+                                avatarLegendaryCustomizations = dvmFeed.featuredUserLegendaryCustomizations,
                                 onClick = {},
                                 maxAvatarsToShow = MaxAvatarsToShow,
                                 displayAvatarOverflowIndicator = false,

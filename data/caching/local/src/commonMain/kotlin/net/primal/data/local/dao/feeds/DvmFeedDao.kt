@@ -19,8 +19,8 @@ interface DvmFeedDao {
     )
     fun observeRecommendedDvmFeedData(ownerId: String, specKindFilter: String): Flow<List<DvmFeedData>>
 
-    @Query("SELECT * FROM DvmFeedActionUserCrossRef WHERE ownerId = :ownerId")
-    fun observeActionUsersByOwner(ownerId: String): Flow<List<DvmFeedActionUserCrossRef>>
+    @Query("SELECT * FROM DvmFeedFeaturedUserCrossRef WHERE ownerId = :ownerId")
+    fun observeFeaturedUsersByOwner(ownerId: String): Flow<List<DvmFeedFeaturedUserCrossRef>>
 
     @Upsert
     suspend fun upsertDvmFeedData(data: List<DvmFeedData>)
@@ -29,11 +29,11 @@ interface DvmFeedDao {
     suspend fun upsertRecommendedCrossRefs(refs: List<RecommendedDvmFeedCrossRef>)
 
     @Upsert
-    suspend fun upsertActionUserCrossRefs(refs: List<DvmFeedActionUserCrossRef>)
+    suspend fun upsertFeaturedUserCrossRefs(refs: List<DvmFeedFeaturedUserCrossRef>)
 
     @Query("DELETE FROM RecommendedDvmFeedCrossRef WHERE ownerId = :ownerId AND specKindFilter = :specKindFilter")
     suspend fun deleteRecommendedByOwner(ownerId: String, specKindFilter: String)
 
-    @Query("DELETE FROM DvmFeedActionUserCrossRef WHERE ownerId = :ownerId AND dvmEventId IN (:dvmEventIds)")
-    suspend fun deleteActionUsersByOwnerAndFeedIds(ownerId: String, dvmEventIds: List<String>)
+    @Query("DELETE FROM DvmFeedFeaturedUserCrossRef WHERE ownerId = :ownerId AND dvmEventId IN (:dvmEventIds)")
+    suspend fun deleteFeaturedUsersByOwnerAndFeedIds(ownerId: String, dvmEventIds: List<String>)
 }

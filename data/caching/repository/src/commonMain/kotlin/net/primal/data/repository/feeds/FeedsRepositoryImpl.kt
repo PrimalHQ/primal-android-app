@@ -23,10 +23,10 @@ import net.primal.data.remote.model.ContentPrimalDvmFeedMetadata
 import net.primal.data.remote.model.ContentPrimalEventStats
 import net.primal.data.remote.model.ContentPrimalEventUserStats
 import net.primal.data.remote.model.ContentPrimalFeedData
-import net.primal.data.repository.mappers.local.asActionCrossRefs
 import net.primal.data.repository.mappers.local.asContentPrimalFeedData
 import net.primal.data.repository.mappers.local.asDvmFeedDO
 import net.primal.data.repository.mappers.local.asDvmFeedPO
+import net.primal.data.repository.mappers.local.asFeaturedCrossRefs
 import net.primal.data.repository.mappers.local.asFeedPO
 import net.primal.data.repository.mappers.local.asPrimalFeedDO
 import net.primal.data.repository.mappers.local.asRecommendedCrossRefs
@@ -252,7 +252,7 @@ class FeedsRepositoryImpl(
                     val dvmId = nostrEvent.tags.findFirstIdentifier()
                     val dvmTitle = dvmMetadata?.name
 
-                    val actionUserIds = followsActions[nostrEvent.id]?.userIds
+                    val featuredUserIds = followsActions[nostrEvent.id]?.userIds
                         ?.sortedBy { profileScores[it] }
                         ?: emptyList()
 
@@ -274,7 +274,7 @@ class FeedsRepositoryImpl(
                             },
                             primalSpec = dvmMetadata.primalSpec,
                             isPrimalFeed = dvmMetadata.primalSpec?.isNotEmpty() == true,
-                            actionUserIds = actionUserIds,
+                            featuredUserIds = featuredUserIds,
                         )
                     } else {
                         null
@@ -283,7 +283,7 @@ class FeedsRepositoryImpl(
 
             val dvmFeedPOs = dvmFeeds.map { it.asDvmFeedPO() }
             val recommendedRefs = dvmFeeds.asRecommendedCrossRefs(ownerId = userId, specKind = specKind)
-            val actionRefs = dvmFeeds.flatMap { it.asActionCrossRefs(ownerId = userId) }
+            val featuredRefs = dvmFeeds.flatMap { it.asFeaturedCrossRefs(ownerId = userId) }
 
             database.withTransaction {
                 database.profiles().insertOrUpdateAll(data = profiles)
@@ -298,12 +298,12 @@ class FeedsRepositoryImpl(
                         ownerId = userId,
                         specKindFilter = specKind.asSpecKindFilter(),
                     )
-                    database.dvmFeeds().deleteActionUsersByOwnerAndFeedIds(
+                    database.dvmFeeds().deleteFeaturedUsersByOwnerAndFeedIds(
                         ownerId = userId,
                         dvmEventIds = dvmFeeds.map { it.eventId },
                     )
                     database.dvmFeeds().upsertRecommendedCrossRefs(refs = recommendedRefs)
-                    database.dvmFeeds().upsertActionUserCrossRefs(refs = actionRefs)
+                    database.dvmFeeds().upsertFeaturedUserCrossRefs(refs = featuredRefs)
                 }
             }
 
@@ -316,12 +316,12 @@ class FeedsRepositoryImpl(
                 ownerId = userId,
                 specKindFilter = specKind.asSpecKindFilter(),
             ),
-            database.dvmFeeds().observeActionUsersByOwner(ownerId = userId),
-        ) { feeds, actions ->
-            val actionsByFeed = actions.groupBy { it.dvmEventId }
+            database.dvmFeeds().observeFeaturedUsersByOwner(ownerId = userId),
+        ) { feeds, featured ->
+            val featuredByFeed = featured.groupBy { it.dvmEventId }
             feeds.map { feed ->
                 feed.asDvmFeedDO(
-                    actionUserIds = actionsByFeed[feed.eventId]?.map { it.profileId } ?: emptyList(),
+                    featuredUserIds = featuredByFeed[feed.eventId]?.map { it.profileId } ?: emptyList(),
                 )
             }
         }

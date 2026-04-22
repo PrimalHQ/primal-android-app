@@ -18,10 +18,10 @@ import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.events.EventUserStatsDao
 import net.primal.data.local.dao.events.EventZap
 import net.primal.data.local.dao.events.EventZapDao
+import net.primal.data.local.dao.explore.ExploreFollowPackCrossRef
 import net.primal.data.local.dao.explore.ExploreFollowPackDao
-import net.primal.data.local.dao.explore.ExploreFollowPackData
+import net.primal.data.local.dao.explore.ExplorePopularUserCrossRef
 import net.primal.data.local.dao.explore.ExplorePopularUserDao
-import net.primal.data.local.dao.explore.ExplorePopularUserData
 import net.primal.data.local.dao.explore.FollowPackDao
 import net.primal.data.local.dao.explore.FollowPackData
 import net.primal.data.local.dao.explore.FollowPackListCrossRef
@@ -31,9 +31,9 @@ import net.primal.data.local.dao.explore.FollowPackRemoteKey
 import net.primal.data.local.dao.explore.FollowPackRemoteKeyDao
 import net.primal.data.local.dao.explore.TrendingTopic
 import net.primal.data.local.dao.explore.TrendingTopicDao
-import net.primal.data.local.dao.feeds.DvmFeedActionUserCrossRef
 import net.primal.data.local.dao.feeds.DvmFeedDao
 import net.primal.data.local.dao.feeds.DvmFeedData
+import net.primal.data.local.dao.feeds.DvmFeedFeaturedUserCrossRef
 import net.primal.data.local.dao.feeds.Feed
 import net.primal.data.local.dao.feeds.FeedDao
 import net.primal.data.local.dao.feeds.RecommendedDvmFeedCrossRef
@@ -128,11 +128,11 @@ import net.primal.shared.data.local.serialization.ListsTypeConverters
         PollVoteData::class,
         PollVoterRemoteKey::class,
         Nip05VerificationData::class,
-        ExplorePopularUserData::class,
-        ExploreFollowPackData::class,
+        ExplorePopularUserCrossRef::class,
+        ExploreFollowPackCrossRef::class,
         DvmFeedData::class,
         RecommendedDvmFeedCrossRef::class,
-        DvmFeedActionUserCrossRef::class,
+        DvmFeedFeaturedUserCrossRef::class,
     ],
     version = 30,
     exportSchema = true,

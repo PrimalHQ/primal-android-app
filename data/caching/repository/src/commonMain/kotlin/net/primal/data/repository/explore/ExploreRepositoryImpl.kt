@@ -16,8 +16,8 @@ import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
-import net.primal.data.local.dao.explore.ExploreFollowPackData
-import net.primal.data.local.dao.explore.ExplorePopularUserData
+import net.primal.data.local.dao.explore.ExploreFollowPackCrossRef
+import net.primal.data.local.dao.explore.ExplorePopularUserCrossRef
 import net.primal.data.local.dao.explore.FollowPack
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.explore.ExploreApi
@@ -185,19 +185,19 @@ class ExploreRepositoryImpl(
             database.followPacks().getFollowPacks()
         }.flow.map { it.map { it.asFollowPackDO() } }
 
-    override fun observeFollowPacks(): Flow<List<FollowPackDO>> =
-        database.followPacks().observeFollowPacks()
+    override fun observeExploreFollowPacks(): Flow<List<FollowPackDO>> =
+        database.followPacks().observeExploreFollowPacks()
             .map { packs -> packs.map { it.asFollowPackDO() } }
 
     override suspend fun fetchExploreFollowPacks(): List<FollowPackDO> =
         withContext(dispatcherProvider.io()) {
-            val persisted = fetchFollowLists(since = null, until = null)
+            val persisted = fetchFollowLists(since = null, until = null, limit = EXPLORE_FOLLOW_PACKS_LIMIT)
             if (persisted.isNotEmpty()) {
                 database.withTransaction {
                     database.exploreFollowPacks().deleteAll()
                     database.exploreFollowPacks().upsertAll(
                         data = persisted.mapIndexed { index, pack ->
-                            ExploreFollowPackData(
+                            ExploreFollowPackCrossRef(
                                 aTag = "${NostrEventKind.StarterPack.value}:${pack.authorId}:${pack.identifier}",
                                 position = index,
                             )
@@ -318,7 +318,7 @@ class ExploreRepositoryImpl(
                     database.explorePopularUsers().deleteAll()
                     database.explorePopularUsers().upsertAll(
                         data = result.mapIndexed { index, item ->
-                            ExplorePopularUserData(
+                            ExplorePopularUserCrossRef(
                                 profileId = item.metadata.profileId,
                                 position = index,
                                 score = item.score,
@@ -333,22 +333,13 @@ class ExploreRepositoryImpl(
     override fun observePopularUsers(): Flow<List<UserProfileSearchItem>> =
         database.explorePopularUsers().observeAll()
             .map { rows ->
-                val profileIds = rows.map { it.profileId }
-
-                val profiles = database.profiles().findProfileData(profileIds = profileIds)
-                    .associateBy { it.ownerId }
-                val liveHostIds = database.streams().findStreamData(profileIds)
-                    .groupBy { it.mainHostId }
-                    .filter { (_, streams) -> streams.any { it.isLive() } }
-                    .keys
-
                 rows.mapNotNull { row ->
-                    profiles[row.profileId]?.let { profile ->
+                    row.profile?.let { profile ->
                         UserProfileSearchItem(
                             metadata = profile.asProfileDataDO(),
-                            score = row.score,
-                            followersCount = row.score?.toInt(),
-                            isLive = row.profileId in liveHostIds,
+                            score = row.data.score,
+                            followersCount = row.data.score?.toInt(),
+                            isLive = row.streams.any { it.isLive() },
                         )
                     }
                 }
@@ -374,5 +365,6 @@ class ExploreRepositoryImpl(
 
     companion object {
         private const val PAGE_SIZE = 25
+        private const val EXPLORE_FOLLOW_PACKS_LIMIT = 50
     }
 }

@@ -1,7 +1,7 @@
 package net.primal.data.repository.mappers.local
 
-import net.primal.data.local.dao.feeds.DvmFeedActionUserCrossRef
 import net.primal.data.local.dao.feeds.DvmFeedData
+import net.primal.data.local.dao.feeds.DvmFeedFeaturedUserCrossRef
 import net.primal.data.local.dao.feeds.RecommendedDvmFeedCrossRef
 import net.primal.data.local.dao.feeds.asSpecKindFilter
 import net.primal.domain.feeds.DvmFeed
@@ -23,9 +23,9 @@ internal fun DvmFeed.asDvmFeedPO(): DvmFeedData =
         isPrimalFeed = isPrimalFeed,
     )
 
-internal fun DvmFeed.asActionCrossRefs(ownerId: String): List<DvmFeedActionUserCrossRef> =
-    actionUserIds.map { profileId ->
-        DvmFeedActionUserCrossRef(
+internal fun DvmFeed.asFeaturedCrossRefs(ownerId: String): List<DvmFeedFeaturedUserCrossRef> =
+    featuredUserIds.map { profileId ->
+        DvmFeedFeaturedUserCrossRef(
             ownerId = ownerId,
             dvmEventId = eventId,
             profileId = profileId,
@@ -47,7 +47,7 @@ internal fun List<DvmFeed>.asRecommendedCrossRefs(
     }
 }
 
-internal fun DvmFeedData.asDvmFeedDO(actionUserIds: List<String>): DvmFeed =
+internal fun DvmFeedData.asDvmFeedDO(featuredUserIds: List<String>): DvmFeed =
     DvmFeed(
         eventId = eventId,
         dvmId = dvmId,
@@ -61,5 +61,5 @@ internal fun DvmFeedData.asDvmFeedDO(actionUserIds: List<String>): DvmFeed =
         kind = kind,
         primalSpec = primalSpec,
         isPrimalFeed = isPrimalFeed,
-        actionUserIds = actionUserIds,
+        featuredUserIds = featuredUserIds,
     )

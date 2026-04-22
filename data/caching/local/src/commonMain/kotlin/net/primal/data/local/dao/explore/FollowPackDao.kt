@@ -44,10 +44,10 @@ interface FollowPackDao {
     @Query(
         """
         SELECT fp.* FROM FollowPackData fp
-        INNER JOIN ExploreFollowPackData e
+        INNER JOIN ExploreFollowPackCrossRef e
             ON e.aTag = fp.aTag
         ORDER BY e.position ASC
         """,
     )
-    fun observeFollowPacks(): Flow<List<FollowPack>>
+    fun observeExploreFollowPacks(): Flow<List<FollowPack>>
 }

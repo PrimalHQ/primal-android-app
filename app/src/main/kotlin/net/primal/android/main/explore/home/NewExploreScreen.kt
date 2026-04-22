@@ -247,6 +247,7 @@ private fun UserCell(
             avatarSize = 64.dp,
             avatarBlossoms = user.avatarBlossoms,
             legendaryCustomization = user.legendaryCustomization,
+            isLive = user.isLive,
             onClick = onClick,
         )
         Text(
@@ -318,7 +319,7 @@ private fun FollowPacksSection(
 }
 
 private const val FEEDS_GRID_ROW_COUNT = 3
-private val FEEDS_GRID_HEIGHT = 342.dp
+private val FEEDS_GRID_HEIGHT = 354.dp
 
 @Composable
 private fun FeedsSection(feeds: List<DvmFeedUi>, onFeedClick: (DvmFeedUi) -> Unit) {
@@ -347,6 +348,7 @@ private fun FeedsSection(feeds: List<DvmFeedUi>, onFeedClick: (DvmFeedUi) -> Uni
                     modifier = Modifier.width(itemWidth),
                     data = feed,
                     listItemContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
+                    showFollowsActionsAvatarRow = true,
                     onFeedClick = onFeedClick,
                 )
             }

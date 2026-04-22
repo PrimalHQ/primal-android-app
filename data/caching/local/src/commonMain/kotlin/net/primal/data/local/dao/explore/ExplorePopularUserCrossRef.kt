@@ -4,7 +4,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
-data class ExploreFollowPackData(
-    @PrimaryKey val aTag: String,
+data class ExplorePopularUserCrossRef(
+    @PrimaryKey val profileId: String,
     val position: Int,
+    val score: Float?,
 )

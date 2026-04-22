@@ -8,8 +8,8 @@ import androidx.room.Upsert
 interface ExploreFollowPackDao {
 
     @Upsert
-    suspend fun upsertAll(data: List<ExploreFollowPackData>)
+    suspend fun upsertAll(data: List<ExploreFollowPackCrossRef>)
 
-    @Query("DELETE FROM ExploreFollowPackData")
+    @Query("DELETE FROM ExploreFollowPackCrossRef")
     suspend fun deleteAll()
 }
