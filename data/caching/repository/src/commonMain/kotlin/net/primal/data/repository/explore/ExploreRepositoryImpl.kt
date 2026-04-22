@@ -16,6 +16,8 @@ import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.CurrencyConversionUtils.toSats
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.data.local.dao.explore.ExploreFollowPackData
+import net.primal.data.local.dao.explore.ExplorePopularUserData
 import net.primal.data.local.dao.explore.FollowPack
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.explore.ExploreApi
@@ -52,6 +54,7 @@ import net.primal.domain.explore.ExplorePeopleData
 import net.primal.domain.explore.ExploreRepository
 import net.primal.domain.explore.ExploreZapNoteData
 import net.primal.domain.explore.FollowPack as FollowPackDO
+import net.primal.domain.nostr.NostrEventKind
 import net.primal.shared.data.local.db.withTransaction
 
 class ExploreRepositoryImpl(
@@ -182,6 +185,27 @@ class ExploreRepositoryImpl(
             database.followPacks().getFollowPacks()
         }.flow.map { it.map { it.asFollowPackDO() } }
 
+    override fun observeFollowPacks(): Flow<List<FollowPackDO>> =
+        database.followPacks().observeFollowPacks()
+            .map { packs -> packs.map { it.asFollowPackDO() } }
+
+    override suspend fun fetchExploreFollowPacks(): List<FollowPackDO> =
+        withContext(dispatcherProvider.io()) {
+            val persisted = fetchFollowLists(since = null, until = null)
+            database.withTransaction {
+                database.exploreFollowPacks().deleteAll()
+                database.exploreFollowPacks().upsertAll(
+                    data = persisted.mapIndexed { index, pack ->
+                        ExploreFollowPackData(
+                            aTag = "${NostrEventKind.StarterPack.value}:${pack.authorId}:${pack.identifier}",
+                            position = index,
+                        )
+                    },
+                )
+            }
+            persisted
+        }
+
     override suspend fun fetchFollowLists(
         since: Long?,
         until: Long?,
@@ -189,14 +213,16 @@ class ExploreRepositoryImpl(
         offset: Int?,
     ): List<FollowPackDO> =
         withContext(dispatcherProvider.io()) {
-            val response = exploreApi.getFollowLists(
-                body = FollowListsRequestBody(
-                    since = since,
-                    until = until,
-                    limit = limit,
-                    offset = offset,
-                ),
-            )
+            val response = retryNetworkCall {
+                exploreApi.getFollowLists(
+                    body = FollowListsRequestBody(
+                        since = since,
+                        until = until,
+                        limit = limit,
+                        offset = offset,
+                    ),
+                )
+            }
             mediaCacher?.cacheAvatarUrls(metadata = response.metadata, cdnResources = response.cdnResources)
 
             response.processAndPersistFollowLists(database = database)
@@ -282,10 +308,47 @@ class ExploreRepositoryImpl(
             exploreApi.searchUsers(SearchUsersRequestBody(query = query, limit = limit))
         }
 
-    override suspend fun fetchPopularUsers() =
-        queryRemoteUsers {
-            exploreApi.getPopularUsers()
+    override suspend fun fetchPopularUsers(): List<UserProfileSearchItem> =
+        withContext(dispatcherProvider.io()) {
+            val result = queryRemoteUsers { exploreApi.getPopularUsers() }
+            database.withTransaction {
+                database.explorePopularUsers().deleteAll()
+                database.explorePopularUsers().upsertAll(
+                    data = result.mapIndexed { index, item ->
+                        ExplorePopularUserData(
+                            profileId = item.metadata.profileId,
+                            position = index,
+                            score = item.score,
+                        )
+                    },
+                )
+            }
+            result
         }
+
+    override fun observePopularUsers(): Flow<List<UserProfileSearchItem>> =
+        database.explorePopularUsers().observeAll()
+            .map { rows ->
+                val profileIds = rows.map { it.profileId }
+
+                val profiles = database.profiles().findProfileData(profileIds = profileIds)
+                    .associateBy { it.ownerId }
+                val liveHostIds = database.streams().findStreamData(profileIds)
+                    .groupBy { it.mainHostId }
+                    .filter { (_, streams) -> streams.any { it.isLive() } }
+                    .keys
+
+                rows.mapNotNull { row ->
+                    profiles[row.profileId]?.let { profile ->
+                        UserProfileSearchItem(
+                            metadata = profile.asProfileDataDO(),
+                            score = row.score,
+                            followersCount = row.score?.toInt(),
+                            isLive = row.profileId in liveHostIds,
+                        )
+                    }
+                }
+            }
 
     @OptIn(ExperimentalPagingApi::class)
     private fun createFollowPacksPager(pagingSourceFactory: () -> PagingSource<Int, FollowPack>) =

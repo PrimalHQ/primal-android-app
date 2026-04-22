@@ -1,5 +1,6 @@
 package net.primal.data.repository.feeds
 
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -10,6 +11,7 @@ import net.primal.core.utils.createAppBuildHelper
 import net.primal.core.utils.serialization.decodeFromJsonStringOrNull
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.data.local.dao.feeds.Feed
+import net.primal.data.local.dao.feeds.asSpecKindFilter
 import net.primal.data.local.db.PrimalDatabase
 import net.primal.data.remote.api.feeds.FeedsApi
 import net.primal.data.remote.mapper.flatMapNotNullAsCdnResource
@@ -21,9 +23,13 @@ import net.primal.data.remote.model.ContentPrimalDvmFeedMetadata
 import net.primal.data.remote.model.ContentPrimalEventStats
 import net.primal.data.remote.model.ContentPrimalEventUserStats
 import net.primal.data.remote.model.ContentPrimalFeedData
+import net.primal.data.repository.mappers.local.asActionCrossRefs
 import net.primal.data.repository.mappers.local.asContentPrimalFeedData
+import net.primal.data.repository.mappers.local.asDvmFeedDO
+import net.primal.data.repository.mappers.local.asDvmFeedPO
 import net.primal.data.repository.mappers.local.asFeedPO
 import net.primal.data.repository.mappers.local.asPrimalFeedDO
+import net.primal.data.repository.mappers.local.asRecommendedCrossRefs
 import net.primal.data.repository.mappers.remote.asAdvancedSearchParsedQuery
 import net.primal.data.repository.mappers.remote.asEventStatsPO
 import net.primal.data.repository.mappers.remote.asEventUserStatsPO
@@ -213,76 +219,111 @@ class FeedsRepositoryImpl(
         persistLocallyAndRemotelyUserFeeds(userId = userId, specKind = specKind, feeds = feeds)
     }
 
-    override suspend fun fetchRecommendedDvmFeeds(userId: String, specKind: FeedSpecKind?): List<DvmFeed> {
+    override suspend fun fetchRecommendedDvmFeeds(userId: String, specKind: FeedSpecKind?): List<DvmFeed> =
         // TODO This looks an api call and should be places in remote-caching
-        val response = withContext(dispatcherProvider.io()) {
-            feedsApi.getFeaturedFeeds(specKind = specKind, pubkey = userId)
-        }
-        mediaCacher?.cacheAvatarUrls(metadata = response.userMetadata, cdnResources = response.cdnResources)
-        val eventStatsMap = response.scores.parseAndMapContentByKey<ContentPrimalEventStats> { eventId }
-        val metadata = response.feedMetadata.parseAndMapContentByKey<ContentDvmFeedMetadata> { eventId }
-        val userStats = response.feedUserStats.parseAndMapContentByKey<ContentPrimalEventUserStats> { eventId }
-        val followsActions = response.feedFollowActions.parseAndMapContentByKey<ContentDvmFeedFollowsAction> { eventId }
-
-        val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
-        val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
-        val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
-        val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
-        val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
-        val profiles = response.userMetadata.mapAsProfileDataPO(
-            cdnResources = cdnResources,
-            primalUserNames = primalUserNames,
-            primalPremiumInfo = primalPremiumInfo,
-            primalLegendProfiles = primalLegendProfiles,
-            blossomServers = blossomServers,
-        ).distinctBy { it.ownerId }
-        val profileScores = response.userScores.map { it.takeContentAsPrimalUserScoresOrNull() }
-            .fold(emptyMap<String, Float>()) { acc, map -> acc + map }
-
         withContext(dispatcherProvider.io()) {
-            database.profiles().insertOrUpdateAll(data = profiles)
-            database.eventStats().upsertAll(data = eventStatsMap.values.map { it.asEventStatsPO() })
-            database.eventUserStats().upsertAll(data = userStats.values.map { it.asEventUserStatsPO(userId = userId) })
-        }
+            val response = feedsApi.getFeaturedFeeds(specKind = specKind, pubkey = userId)
+            mediaCacher?.cacheAvatarUrls(metadata = response.userMetadata, cdnResources = response.cdnResources)
+            val eventStatsMap = response.scores.parseAndMapContentByKey<ContentPrimalEventStats> { eventId }
+            val metadata = response.feedMetadata.parseAndMapContentByKey<ContentDvmFeedMetadata> { eventId }
+            val userStats = response.feedUserStats.parseAndMapContentByKey<ContentPrimalEventUserStats> { eventId }
+            val followsActions = response.feedFollowActions
+                .parseAndMapContentByKey<ContentDvmFeedFollowsAction> { eventId }
 
-        val dvmFeeds = response.dvmHandlers
-            .filter { it.content.isNotEmpty() }
-            .mapNotNull { nostrEvent ->
-                val dvmMetadata = nostrEvent.content.decodeFromJsonStringOrNull<ContentPrimalDvmFeedMetadata>()
-                val dvmId = nostrEvent.tags.findFirstIdentifier()
-                val dvmTitle = dvmMetadata?.name
+            val primalUserNames = response.primalUserNames.parseAndMapPrimalUserNames()
+            val primalPremiumInfo = response.primalPremiumInfo.parseAndMapPrimalPremiumInfo()
+            val primalLegendProfiles = response.primalLegendProfiles.parseAndMapPrimalLegendProfiles()
+            val cdnResources = response.cdnResources.flatMapNotNullAsCdnResource()
+            val blossomServers = response.blossomServers.mapAsMapPubkeyToListOfBlossomServers()
+            val profiles = response.userMetadata.mapAsProfileDataPO(
+                cdnResources = cdnResources,
+                primalUserNames = primalUserNames,
+                primalPremiumInfo = primalPremiumInfo,
+                primalLegendProfiles = primalLegendProfiles,
+                blossomServers = blossomServers,
+            ).distinctBy { it.ownerId }
+            val profileScores = response.userScores.map { it.takeContentAsPrimalUserScoresOrNull() }
+                .fold(emptyMap<String, Float>()) { acc, map -> acc + map }
 
-                val actionUserIds = followsActions[nostrEvent.id]?.userIds
-                    ?.sortedBy { profileScores[it] }
-                    ?: emptyList()
+            val dvmFeeds = response.dvmHandlers
+                .filter { it.content.isNotEmpty() }
+                .mapNotNull { nostrEvent ->
+                    val dvmMetadata = nostrEvent.content.decodeFromJsonStringOrNull<ContentPrimalDvmFeedMetadata>()
+                    val dvmId = nostrEvent.tags.findFirstIdentifier()
+                    val dvmTitle = dvmMetadata?.name
 
-                if (dvmMetadata != null && dvmId != null && dvmTitle != null) {
-                    DvmFeed(
-                        eventId = nostrEvent.id,
-                        dvmId = dvmId,
-                        dvmPubkey = nostrEvent.pubKey,
-                        dvmLnUrlDecoded = dvmMetadata.lud16?.parseAsLNUrlOrNull(),
-                        avatarUrl = dvmMetadata.picture ?: dvmMetadata.image,
-                        title = dvmTitle,
-                        description = dvmMetadata.about,
-                        amountInSats = dvmMetadata.amount,
-                        primalSubscriptionRequired = dvmMetadata.subscription == true,
-                        kind = when (metadata[nostrEvent.id]?.kind?.lowercase()) {
-                            "notes" -> FeedSpecKind.Notes
-                            "reads" -> FeedSpecKind.Reads
-                            else -> null
-                        },
-                        primalSpec = dvmMetadata.primalSpec,
-                        isPrimalFeed = dvmMetadata.primalSpec?.isNotEmpty() == true,
-                        actionUserIds = actionUserIds,
-                    )
-                } else {
-                    null
+                    val actionUserIds = followsActions[nostrEvent.id]?.userIds
+                        ?.sortedBy { profileScores[it] }
+                        ?: emptyList()
+
+                    if (dvmMetadata != null && dvmId != null && dvmTitle != null) {
+                        DvmFeed(
+                            eventId = nostrEvent.id,
+                            dvmId = dvmId,
+                            dvmPubkey = nostrEvent.pubKey,
+                            dvmLnUrlDecoded = dvmMetadata.lud16?.parseAsLNUrlOrNull(),
+                            avatarUrl = dvmMetadata.picture ?: dvmMetadata.image,
+                            title = dvmTitle,
+                            description = dvmMetadata.about,
+                            amountInSats = dvmMetadata.amount,
+                            primalSubscriptionRequired = dvmMetadata.subscription == true,
+                            kind = when (metadata[nostrEvent.id]?.kind?.lowercase()) {
+                                "notes" -> FeedSpecKind.Notes
+                                "reads" -> FeedSpecKind.Reads
+                                else -> null
+                            },
+                            primalSpec = dvmMetadata.primalSpec,
+                            isPrimalFeed = dvmMetadata.primalSpec?.isNotEmpty() == true,
+                            actionUserIds = actionUserIds,
+                        )
+                    } else {
+                        null
+                    }
                 }
+
+            val dvmFeedPOs = dvmFeeds.map { it.asDvmFeedPO() }
+            val recommendedRefs = dvmFeeds.asRecommendedCrossRefs(ownerId = userId, specKind = specKind)
+            val actionRefs = dvmFeeds.flatMap { it.asActionCrossRefs(ownerId = userId) }
+
+            database.withTransaction {
+                database.dvmFeeds().deleteRecommendedByOwner(
+                    ownerId = userId,
+                    specKindFilter = specKind.asSpecKindFilter(),
+                )
+                database.dvmFeeds().deleteActionUsersByOwnerAndFeedIds(
+                    ownerId = userId,
+                    dvmEventIds = dvmFeeds.map { it.eventId },
+                )
+
+                database.profiles().insertOrUpdateAll(data = profiles)
+                database.eventStats().upsertAll(data = eventStatsMap.values.map { it.asEventStatsPO() })
+                database.eventUserStats().upsertAll(
+                    data = userStats.values.map { it.asEventUserStatsPO(userId = userId) },
+                )
+
+                database.dvmFeeds().upsertDvmFeedData(data = dvmFeedPOs)
+                database.dvmFeeds().upsertRecommendedCrossRefs(refs = recommendedRefs)
+                database.dvmFeeds().upsertActionUserCrossRefs(refs = actionRefs)
             }
 
-        return dvmFeeds
-    }
+            dvmFeeds
+        }
+
+    override fun observeRecommendedDvmFeeds(userId: String, specKind: FeedSpecKind?) =
+        combine(
+            database.dvmFeeds().observeRecommendedDvmFeedData(
+                ownerId = userId,
+                specKindFilter = specKind.asSpecKindFilter(),
+            ),
+            database.dvmFeeds().observeActionUsersByOwner(ownerId = userId),
+        ) { feeds, actions ->
+            val actionsByFeed = actions.groupBy { it.dvmEventId }
+            feeds.map { feed ->
+                feed.asDvmFeedDO(
+                    actionUserIds = actionsByFeed[feed.eventId]?.map { it.profileId } ?: emptyList(),
+                )
+            }
+        }
 
     override suspend fun addDvmFeedLocally(
         userId: String,
