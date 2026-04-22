@@ -11,6 +11,7 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
@@ -96,6 +97,15 @@ private fun LiveStreamOverlay(
     val streamState = LocalStreamState.current
     val uiState = viewModel.state.collectAsState()
 
+    // Must precede rememberManagedMediaController: Compose disposes effects in reverse order,
+    // so this reset runs AFTER the Player.Listener is detached — preventing a late callback
+    // (e.g. audio playback on the shared MediaSession) from re-setting shouldEnterPiPMode.
+    DisposableEffect(Unit) {
+        onDispose {
+            pipManager.reset()
+        }
+    }
+
     LaunchedEffect(isInPipMode) {
         if (isInPipMode) {
             if (streamState.mode is StreamMode.Minimized) {
@@ -123,9 +133,11 @@ private fun LiveStreamOverlay(
                         viewModel.setEvent(UiEvent.OnPlayerStateUpdate(totalDuration = duration))
                     }
                 }
+
                 Player.STATE_BUFFERING -> {
                     pipManager.shouldEnterPiPMode = true
                 }
+
                 Player.STATE_ENDED -> {
                     pipManager.shouldEnterPiPMode = false
                     viewModel.setEvent(UiEvent.OnVideoEnded)
