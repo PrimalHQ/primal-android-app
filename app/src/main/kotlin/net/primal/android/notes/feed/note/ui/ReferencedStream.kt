@@ -1,6 +1,7 @@
 package net.primal.android.notes.feed.note.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
@@ -43,7 +45,7 @@ fun ReferencedStream(
     stream: ReferencedStream,
     onClick: (naddr: String) -> Unit,
     onProfileClick: (profileId: String) -> Unit,
-    backgroundColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt3,
+    backgroundColor: Color = Color.Transparent,
 ) {
     Row(
         modifier = modifier
@@ -51,6 +53,11 @@ fun ReferencedStream(
             .background(
                 shape = AppTheme.shapes.medium,
                 color = backgroundColor,
+            )
+            .border(
+                width = Dp.Hairline,
+                color = AppTheme.colorScheme.outline,
+                shape = AppTheme.shapes.medium,
             )
             .padding(12.dp)
             .clickable { onClick(stream.naddr) },

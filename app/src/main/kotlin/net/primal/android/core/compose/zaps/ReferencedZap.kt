@@ -1,6 +1,7 @@
 package net.primal.android.core.compose.zaps
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +19,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
@@ -50,7 +52,11 @@ fun ReferencedZap(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(percent = 100))
-            .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
+            .border(
+                width = Dp.Hairline,
+                color = AppTheme.colorScheme.outline,
+                shape = RoundedCornerShape(percent = 100),
+            )
             .padding(10.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.Start),
         verticalAlignment = Alignment.CenterVertically,

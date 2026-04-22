@@ -10,7 +10,9 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -50,9 +52,13 @@ fun ReferencedNoteCard(
                 enabled = noteCallbacks.onNoteClick != null && data.rawKind in clickableNoteKinds,
                 onClick = { noteCallbacks.onNoteClick?.invoke(data.postId) },
             ),
-        colors = colors,
+        colors = if (hasBorder) {
+            CardDefaults.cardColors(containerColor = Color.Transparent)
+        } else {
+            colors
+        },
         border = if (hasBorder) {
-            BorderStroke(width = 0.5.dp, color = AppTheme.colorScheme.outline)
+            BorderStroke(width = Dp.Hairline, color = AppTheme.colorScheme.outline)
         } else {
             null
         },

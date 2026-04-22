@@ -465,6 +465,7 @@ fun LazyListScope.nostrUris(
                         uri.data?.let { article ->
                             ReferencedArticleCard(
                                 data = article,
+                                hasBorder = true,
                             )
                         }
                     }
@@ -475,6 +476,7 @@ fun LazyListScope.nostrUris(
                                 data = note,
                                 noteCallbacks = noteCallbacks,
                                 couldAutoPlay = true,
+                                hasBorder = true,
                             )
                         }
                     }
