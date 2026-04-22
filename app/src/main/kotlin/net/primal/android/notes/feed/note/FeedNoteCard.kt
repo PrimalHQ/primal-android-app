@@ -245,78 +245,75 @@ private fun FeedNoteCard(
         shape = shape,
         colors = colors,
     ) {
-        Box(
+        Column(
             modifier = Modifier.padding(
                 horizontal = if (fullWidthContent && forceContentIndent) 0.dp else notePaddingDp,
             ),
-            contentAlignment = Alignment.TopEnd,
         ) {
-            NoteDropdownMenuIcon(
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .size(overflowIconSizeDp)
-                    .padding(
-                        top = when {
-                            data.repostAuthorName != null -> 7.dp
-                            !fullWidthContent -> 11.dp
-                            forceContentIndent -> 14.dp
-                            else -> 18.dp
-                        },
-                    )
-                    .clip(CircleShape)
-                    .zIndex(1f),
-                noteId = data.postId,
-                noteContent = data.content,
-                noteRawData = data.rawNostrEventJson,
-                authorId = data.authorId,
-                isBookmarked = data.isBookmarked,
-                isThreadMuted = data.isThreadMuted,
-                isNoteAuthor = data.authorId == state.activeAccountUserId,
-                isPoll = data.poll != null,
-                relayHints = state.relayHints,
-                enabled = noteOptionsMenuEnabled,
-                noteGraphicsLayer = graphicsLayer,
-                onBookmarkClick = {
-                    eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))
-                },
-                onMuteUserClick = {
-                    eventPublisher(UiEvent.MuteUserAction(userId = data.authorId))
-                },
-                onMuteThreadClick = {
-                    eventPublisher(UiEvent.MuteThreadAction(postId = data.postId))
-                },
-                onUnmuteThreadClick = {
-                    eventPublisher(UiEvent.UnmuteThreadAction(postId = data.postId))
-                },
-                onRequestDeleteClick = {
-                    dialogsState.showDeleteDialog = true
-                },
-                onReportContentClick = {
-                    dialogsState.showReportDialog = true
-                },
-            )
-
-            Column {
-                if (data.repostAuthorName != null) {
-                    val repostedNoticeStartPadding = if (fullWidthContent) {
-                        (avatarSizeDp - 4.dp).coerceAtLeast(avatarPaddingDp)
-                    } else {
-                        (avatarPaddingDp + threadAlignmentPadding + avatarSizeDp - 6.dp)
-                            .coerceAtLeast(avatarPaddingDp)
-                    }
-                    RepostedNotice(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = repostedNoticeStartPadding, end = avatarPaddingDp)
-                            .padding(top = notePaddingDp * 2),
-                        repostedByAuthor = data.repostAuthorName,
-                        onRepostAuthorClick = if (data.repostAuthorId != null && noteCallbacks.onProfileClick != null) {
-                            { noteCallbacks.onProfileClick.invoke(data.repostAuthorId) }
-                        } else {
-                            null
-                        },
-                    )
+            if (data.repostAuthorName != null) {
+                val repostedNoticeStartPadding = if (fullWidthContent) {
+                    (avatarSizeDp - 4.dp).coerceAtLeast(avatarPaddingDp)
+                } else {
+                    (avatarPaddingDp + threadAlignmentPadding + avatarSizeDp - 6.dp)
+                        .coerceAtLeast(avatarPaddingDp)
                 }
+                RepostedNotice(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = repostedNoticeStartPadding, end = avatarPaddingDp)
+                        .padding(top = notePaddingDp * 2),
+                    repostedByAuthor = data.repostAuthorName,
+                    onRepostAuthorClick = if (data.repostAuthorId != null && noteCallbacks.onProfileClick != null) {
+                        { noteCallbacks.onProfileClick.invoke(data.repostAuthorId) }
+                    } else {
+                        null
+                    },
+                )
+            }
+
+            Box(contentAlignment = Alignment.TopEnd) {
+                val dropdownTopPadding = when {
+                    !fullWidthContent -> 11.dp
+                    forceContentIndent -> 14.dp
+                    else -> 18.dp
+                } - if (data.repostAuthorName != null) notePaddingDp else 0.dp
+                NoteDropdownMenuIcon(
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .size(overflowIconSizeDp)
+                        .padding(top = dropdownTopPadding)
+                        .clip(CircleShape)
+                        .zIndex(1f),
+                    noteId = data.postId,
+                    noteContent = data.content,
+                    noteRawData = data.rawNostrEventJson,
+                    authorId = data.authorId,
+                    isBookmarked = data.isBookmarked,
+                    isThreadMuted = data.isThreadMuted,
+                    isNoteAuthor = data.authorId == state.activeAccountUserId,
+                    isPoll = data.poll != null,
+                    relayHints = state.relayHints,
+                    enabled = noteOptionsMenuEnabled,
+                    noteGraphicsLayer = graphicsLayer,
+                    onBookmarkClick = {
+                        eventPublisher(UiEvent.BookmarkAction(noteId = data.postId))
+                    },
+                    onMuteUserClick = {
+                        eventPublisher(UiEvent.MuteUserAction(userId = data.authorId))
+                    },
+                    onMuteThreadClick = {
+                        eventPublisher(UiEvent.MuteThreadAction(postId = data.postId))
+                    },
+                    onUnmuteThreadClick = {
+                        eventPublisher(UiEvent.UnmuteThreadAction(postId = data.postId))
+                    },
+                    onRequestDeleteClick = {
+                        dialogsState.showDeleteDialog = true
+                    },
+                    onReportContentClick = {
+                        dialogsState.showReportDialog = true
+                    },
+                )
 
                 Column(
                     modifier = Modifier
