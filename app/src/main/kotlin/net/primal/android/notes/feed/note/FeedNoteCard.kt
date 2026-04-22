@@ -336,7 +336,7 @@ private fun FeedNoteCard(
                         avatarSizeDp = avatarSizeDp,
                         avatarPaddingValues = PaddingValues(
                             start = avatarPaddingDp + threadAlignmentPadding,
-                            top = avatarPaddingDp,
+                            top = avatarPaddingDp + 2.dp,
                         ),
                         notePaddingValues = PaddingValues(
                             start = 8.dp,

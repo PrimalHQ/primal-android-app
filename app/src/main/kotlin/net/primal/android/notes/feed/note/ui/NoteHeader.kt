@@ -15,6 +15,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,11 +61,15 @@ fun FeedNoteHeader(
     val topRowTextStyle = AppTheme.typography.bodyMedium.copy(
         fontSize = displaySettings.contentAppearance.noteUsernameSize,
         lineHeight = displaySettings.contentAppearance.noteUsernameSize,
+        lineHeightStyle = LineHeightStyle(
+            alignment = LineHeightStyle.Alignment.Top,
+            trim = LineHeightStyle.Trim.FirstLineTop,
+        ),
     )
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment = Alignment.Top,
     ) {
         if (authorAvatarVisible) {
             UniversalAvatarThumbnail(
