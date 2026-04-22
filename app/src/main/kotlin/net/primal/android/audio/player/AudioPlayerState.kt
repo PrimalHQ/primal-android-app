@@ -75,6 +75,7 @@ class AudioPlayerState internal constructor(
     }
 
     private val _pauseHolders = AtomicInt(0)
+    private var wasPlayingBeforeAcquire = false
 
     private val _commands = Channel<AudioPlayerCommand>()
     val commands = _commands.receiveAsFlow()
@@ -126,6 +127,7 @@ class AudioPlayerState internal constructor(
 
     fun acquirePause() {
         if (_pauseHolders.fetchAndIncrement() == 0) {
+            wasPlayingBeforeAcquire = isPlaying
             sendCommand(AudioPlayerCommand.Pause)
         }
     }
@@ -133,7 +135,7 @@ class AudioPlayerState internal constructor(
     fun releasePause() {
         if (_pauseHolders.decrementAndFetch() <= 0) {
             _pauseHolders.store(0)
-            if (currentUrl != null) {
+            if ((wasPlayingBeforeAcquire || isPlaying) && currentUrl != null) {
                 sendCommand(AudioPlayerCommand.Play)
             }
         }
