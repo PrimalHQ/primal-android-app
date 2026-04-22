@@ -5,9 +5,7 @@ import java.io.IOException
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -24,6 +22,7 @@ import net.primal.android.user.repository.RelayRepository
 import net.primal.android.user.repository.UserRepository
 import net.primal.core.utils.coroutines.DispatcherProvider
 import net.primal.core.utils.onFailure
+import net.primal.core.utils.onSuccess
 import net.primal.core.utils.serialization.encodeToJsonString
 import net.primal.domain.account.SparkWalletAccountRepository
 import net.primal.domain.nostr.NostrEventKind
@@ -62,9 +61,6 @@ class CreateAccountHandler @Inject constructor(
 
             relayRepository.bootstrapUserRelays(userId, preFetchedRelays ?: FALLBACK_RELAY_URLS)
 
-            val walletIdDeferred = scope.asyncEnsureWalletExists(userId)
-            scope.launchFetchSettings(userId)
-
             coroutineScope {
                 awaitAll(
                     async { blossomRepository.ensureBlossomServerList(userId) },
@@ -73,7 +69,8 @@ class CreateAccountHandler @Inject constructor(
                 )
             }
 
-            scope.launchSetLightningAddressIfWalletReady(userId, walletIdDeferred)
+            scope.launchEnsureWalletAndSetLightningAddress(userId)
+            scope.launchFetchSettings(userId)
         }.onFailure { exception ->
             Napier.w(throwable = exception) { "Failed to create Nostr account." }
             credentialsStore.removeCredentialByNsec(nsec = privateKey.assureValidNsec())
@@ -83,44 +80,28 @@ class CreateAccountHandler @Inject constructor(
         }
     }
 
-    private fun CoroutineScope.asyncEnsureWalletExists(userId: String): Deferred<String?> =
-        async {
-            try {
+    private fun CoroutineScope.launchEnsureWalletAndSetLightningAddress(userId: String) {
+        launch {
+            runCatching {
                 withTimeout(BACKGROUND_TASK_TIMEOUT) {
                     ensureSparkWalletExistsUseCase.invoke(userId = userId)
+                        .onSuccess { walletId -> setLightningAddress(userId = userId, walletId = walletId) }
                         .onFailure { error ->
                             Napier.w(throwable = error) { "Wallet creation failed during onboarding." }
                         }
-                        .getOrNull()
                 }
-            } catch (error: TimeoutCancellationException) {
+            }.onFailure { error ->
                 Napier.w(throwable = error) { "Wallet creation timed out during onboarding." }
-                null
-            }
-        }
-
-    private fun CoroutineScope.launchFetchSettings(userId: String) {
-        launch {
-            try {
-                withTimeout(BACKGROUND_TASK_TIMEOUT) { fetchSettings(userId) }
-            } catch (error: TimeoutCancellationException) {
-                Napier.w(throwable = error) { "Settings fetch timed out during onboarding." }
             }
         }
     }
 
-    private fun CoroutineScope.launchSetLightningAddressIfWalletReady(
-        userId: String,
-        walletIdDeferred: Deferred<String?>,
-    ) {
+    private fun CoroutineScope.launchFetchSettings(userId: String) {
         launch {
-            try {
-                withTimeout(BACKGROUND_TASK_TIMEOUT) {
-                    val walletId = walletIdDeferred.await() ?: return@withTimeout
-                    setLightningAddress(userId = userId, walletId = walletId)
-                }
-            } catch (error: TimeoutCancellationException) {
-                Napier.w(throwable = error) { "Set lightning address timed out during onboarding." }
+            runCatching {
+                withTimeout(BACKGROUND_TASK_TIMEOUT) { fetchSettings(userId) }
+            }.onFailure { error ->
+                Napier.w(throwable = error) { "Settings fetch timed out during onboarding." }
             }
         }
     }

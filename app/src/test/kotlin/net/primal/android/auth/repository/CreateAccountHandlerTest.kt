@@ -260,6 +260,7 @@ class CreateAccountHandlerTest {
                 profileMetadata = ProfileMetadata(displayName = "Test", username = null),
                 followedUserIds = emptySet(),
             )
+            advanceUntilIdle()
 
             coVerify {
                 settingsRepository.fetchAndPersistAppSettings(
@@ -288,6 +289,7 @@ class CreateAccountHandlerTest {
                 profileMetadata = ProfileMetadata(displayName = "Test", username = null),
                 followedUserIds = emptySet(),
             )
+            advanceUntilIdle()
 
             coVerify {
                 ensureSparkWalletExistsUseCase.invoke(keyPair.pubKey)
