@@ -1,6 +1,7 @@
 package net.primal.android.core.compose.zaps
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,6 +21,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.text.NumberFormat
 import java.time.Instant
@@ -53,12 +55,16 @@ fun ReferencedNoteZap(
     Column(
         modifier = modifier
             .clip(AppTheme.shapes.extraLarge)
+            .border(
+                width = Dp.Hairline,
+                color = AppTheme.colorScheme.outline,
+                shape = AppTheme.shapes.extraLarge,
+            )
             .clickable(
                 interactionSource = null,
                 indication = null,
                 onClick = { noteCallbacks.onNoteClick?.invoke(noteContentUi.noteId) },
             )
-            .background(AppTheme.extraColorScheme.surfaceVariantAlt3)
             .padding(all = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),

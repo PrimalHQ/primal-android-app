@@ -1,6 +1,6 @@
 package net.primal.android.notes.feed.note.ui
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
@@ -33,9 +34,10 @@ fun NoteUnknownEvent(
 ) {
     Row(
         modifier = modifier
-            .background(
+            .border(
+                width = Dp.Hairline,
+                color = AppTheme.colorScheme.outline,
                 shape = AppTheme.shapes.medium,
-                color = AppTheme.extraColorScheme.surfaceVariantAlt1,
             )
             .padding(all = 16.dp)
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),

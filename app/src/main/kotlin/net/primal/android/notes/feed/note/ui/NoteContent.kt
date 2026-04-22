@@ -166,7 +166,7 @@ fun NoteContent(
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip,
     textSelectable: Boolean = false,
-    referencedEventsHaveBorder: Boolean = false,
+    referencedEventsHaveBorder: Boolean = true,
     couldAutoPlay: Boolean = false,
     highlightColor: Color = AppTheme.colorScheme.secondary,
     contentColor: Color = AppTheme.colorScheme.onSurface,

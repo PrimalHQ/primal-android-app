@@ -8,6 +8,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.articles.feed.ui.FeedArticleUi
@@ -22,11 +24,16 @@ fun ReferencedArticleCard(
     colors: CardColors = referencedArticleCardColors(),
     onClick: (() -> Unit)? = null,
 ) {
+    val effectiveColors = if (hasBorder) {
+        CardDefaults.cardColors(containerColor = Color.Transparent)
+    } else {
+        colors
+    }
     NoteSurfaceCard(
         modifier = modifier.wrapContentHeight(),
-        colors = colors,
+        colors = effectiveColors,
         border = if (hasBorder) {
-            BorderStroke(width = 0.5.dp, color = AppTheme.colorScheme.outline)
+            BorderStroke(width = Dp.Hairline, color = AppTheme.colorScheme.outline)
         } else {
             null
         },
@@ -36,7 +43,7 @@ fun ReferencedArticleCard(
             data = data,
             enabledDropdownMenu = false,
             showCommentsCount = false,
-            color = colors.containerColor,
+            color = effectiveColors.containerColor,
             onClick = if (onClick != null) {
                 { onClick() }
             } else {
