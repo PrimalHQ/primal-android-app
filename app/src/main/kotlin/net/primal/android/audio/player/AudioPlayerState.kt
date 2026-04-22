@@ -17,22 +17,10 @@ import kotlinx.coroutines.launch
 
 @Stable
 @OptIn(ExperimentalAtomicApi::class)
-@Suppress("TooManyFunctions")
-class AudioPlayerState internal constructor(
-    initialUrl: String? = null,
-    initialTitle: String? = null,
-    initialArtist: String? = null,
-    initialNoteId: String? = null,
-) {
+class AudioPlayerState internal constructor() {
     private val scope = CoroutineScope(Dispatchers.Main)
 
-    var currentUrl by mutableStateOf(initialUrl)
-        private set
-    var currentTitle by mutableStateOf(initialTitle)
-        private set
-    var currentArtist by mutableStateOf(initialArtist)
-        private set
-    var currentNoteId by mutableStateOf(initialNoteId)
+    var currentUrl by mutableStateOf<String?>(null)
         private set
 
     var isPlaying by mutableStateOf(false)
@@ -74,6 +62,10 @@ class AudioPlayerState internal constructor(
         this.durationMs = durationMs
     }
 
+    internal fun updateCurrentUrl(url: String?) {
+        currentUrl = url
+    }
+
     private val _pauseHolders = AtomicInt(0)
     private var wasPlayingBeforeAcquire = false
 
@@ -87,10 +79,6 @@ class AudioPlayerState internal constructor(
         artist: String?,
         noteId: String? = null,
     ) {
-        currentUrl = url
-        currentTitle = title
-        currentArtist = artist
-        currentNoteId = noteId
         sendCommand(AudioPlayerCommand.PlayUrl(url = url, title = title, artist = artist, noteId = noteId))
     }
 
@@ -106,23 +94,6 @@ class AudioPlayerState internal constructor(
 
     fun seekTo(positionMs: Long) {
         sendCommand(AudioPlayerCommand.SeekTo(positionMs))
-    }
-
-    fun stop() {
-        resetState()
-        sendCommand(AudioPlayerCommand.Pause)
-    }
-
-    internal fun resetState() {
-        currentUrl = null
-        currentTitle = null
-        currentArtist = null
-        currentNoteId = null
-        isPlaying = false
-        playWhenReady = false
-        isBuffering = false
-        currentPositionMs = 0L
-        durationMs = 0L
     }
 
     fun acquirePause() {
