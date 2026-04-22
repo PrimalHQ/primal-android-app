@@ -140,7 +140,7 @@ class NetworkSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             changeRelayList { userId ->
                 try {
-                    relayRepository.bootstrapUserRelays(userId = userId)
+                    relayRepository.bootstrapDefaultUserRelays(userId = userId)
                 } catch (error: SignatureException) {
                     Napier.w(throwable = error) { "Failed to restore default relays due to signature error." }
                 } catch (error: NostrPublishException) {

@@ -2,7 +2,7 @@ package net.primal.android.networking.relays
 
 import net.primal.android.user.domain.toRelay
 
-val FALLBACK_RELAYS = listOf(
+val FALLBACK_RELAY_URLS = listOf(
     "wss://relay.primal.net",
     "wss://relay.damus.io",
     "wss://relay.nostr.band",
@@ -11,4 +11,6 @@ val FALLBACK_RELAYS = listOf(
     "wss://nos.lol",
     "wss://offchain.pub",
     "wss://nostr.bitcoiner.social",
-).map { it.toRelay() }
+)
+
+val FALLBACK_RELAYS = FALLBACK_RELAY_URLS.map { it.toRelay() }

@@ -9,12 +9,19 @@ import net.primal.android.auth.onboarding.account.ui.model.OnboardingFollowPack
 import net.primal.core.caching.MediaCacher
 import net.primal.core.networking.utils.retryNetworkCall
 import net.primal.core.utils.coroutines.DispatcherProvider
+import net.primal.data.remote.api.users.UsersApi
 
 class OnboardingRepository @Inject constructor(
     private val dispatchers: DispatcherProvider,
     private val onboardingApi: OnboardingApi,
     private val mediaCacher: MediaCacher?,
+    private val usersApi: UsersApi,
 ) {
+
+    suspend fun fetchDefaultRelays(): List<String> =
+        withContext(dispatchers.io()) {
+            usersApi.getDefaultRelays()
+        }
 
     suspend fun fetchFollowPacks(): List<OnboardingFollowPack> =
         withContext(dispatchers.io()) {

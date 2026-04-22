@@ -7,6 +7,7 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import net.primal.android.profile.domain.ProfileMetadata
 import net.primal.android.settings.repository.SettingsRepository
@@ -232,6 +233,7 @@ class CreateAccountHandlerTest {
             coVerify {
                 relayRepository.bootstrapUserRelays(
                     withArg { it shouldBe keyPair.pubKey },
+                    any(),
                 )
             }
         }
@@ -258,6 +260,7 @@ class CreateAccountHandlerTest {
                 profileMetadata = ProfileMetadata(displayName = "Test", username = null),
                 followedUserIds = emptySet(),
             )
+            advanceUntilIdle()
 
             coVerify {
                 settingsRepository.fetchAndPersistAppSettings(
@@ -286,6 +289,7 @@ class CreateAccountHandlerTest {
                 profileMetadata = ProfileMetadata(displayName = "Test", username = null),
                 followedUserIds = emptySet(),
             )
+            advanceUntilIdle()
 
             coVerify {
                 ensureSparkWalletExistsUseCase.invoke(keyPair.pubKey)
@@ -329,6 +333,96 @@ class CreateAccountHandlerTest {
 
             credentialsPersistence.latestData shouldBe emptyList()
             activeAccountPersistence.latestData shouldBe ""
+        }
+
+    @Test
+    fun createNostrAccount_usesPreFetchedRelays() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val relayRepository = mockk<RelayRepository>(relaxed = true)
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
+            }
+            val preFetchedRelays = listOf("wss://relay.primal.net", "wss://relay.damus.io")
+
+            val handler = createAccountHandler(
+                relayRepository = relayRepository,
+                credentialsStore = credentialsStore,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                followedUserIds = emptySet(),
+                preFetchedRelays = preFetchedRelays,
+            )
+
+            coVerify {
+                relayRepository.bootstrapUserRelays(
+                    withArg { it shouldBe keyPair.pubKey },
+                    withArg { relays -> relays shouldBe preFetchedRelays },
+                )
+            }
+        }
+
+    @Test
+    fun createNostrAccount_succeedsEvenWhenWalletFails() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val authRepository = mockk<AuthRepository>(relaxed = true)
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
+            }
+            val ensureSparkWalletExistsUseCase = mockk<EnsureSparkWalletExistsUseCase>(relaxed = true) {
+                coEvery { invoke(userId = any()) } returns Result.failure(RuntimeException("Wallet init failed"))
+            }
+            val handler = createAccountHandler(
+                authRepository = authRepository,
+                credentialsStore = credentialsStore,
+                ensureSparkWalletExistsUseCase = ensureSparkWalletExistsUseCase,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                followedUserIds = emptySet(),
+            )
+            advanceUntilIdle()
+
+            coVerify {
+                ensureSparkWalletExistsUseCase.invoke(userId = keyPair.pubKey)
+                authRepository.loginWithNsec(withArg { it shouldBe keyPair.privateKey })
+            }
+        }
+
+    @Test
+    fun createNostrAccount_succeedsEvenWhenSettingsFails() =
+        runTest {
+            val keyPair = CryptoUtils.generateHexEncodedKeypair()
+            val authRepository = mockk<AuthRepository>(relaxed = true)
+            val credentialsStore = mockk<CredentialsStore>(relaxed = true) {
+                coEvery { saveNsec(any()) } returns keyPair.pubKey
+            }
+            val settingsRepository = mockk<SettingsRepository>(relaxed = true) {
+                coEvery { fetchAndPersistAppSettings(any()) } throws NetworkException()
+            }
+            val handler = createAccountHandler(
+                authRepository = authRepository,
+                credentialsStore = credentialsStore,
+                settingsRepository = settingsRepository,
+            )
+
+            handler.createNostrAccount(
+                privateKey = keyPair.privateKey,
+                profileMetadata = ProfileMetadata(displayName = "Test", username = null),
+                followedUserIds = emptySet(),
+            )
+            advanceUntilIdle()
+
+            coVerify {
+                settingsRepository.fetchAndPersistAppSettings(any())
+                authRepository.loginWithNsec(withArg { it shouldBe keyPair.privateKey })
+            }
         }
 
     private val primalTeamMemberIds = listOf(

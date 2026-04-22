@@ -34,7 +34,15 @@ class RelayRepository @Inject constructor(
     fun findRelays(userId: String, kind: RelayKind) = usersDatabase.relays().findRelays(userId, kind)
 
     @Throws(NostrPublishException::class, SignatureException::class)
-    suspend fun bootstrapUserRelays(userId: String) =
+    suspend fun bootstrapUserRelays(userId: String, relayUrls: List<String>) =
+        withContext(dispatchers.io()) {
+            val relays = relayUrls.map { it.toRelay() }
+            replaceUserRelays(userId, relays)
+            nostrPublisher.publishRelayList(userId, relays)
+        }
+
+    @Throws(NostrPublishException::class, SignatureException::class)
+    suspend fun bootstrapDefaultUserRelays(userId: String) =
         withContext(dispatchers.io()) {
             val relays = try {
                 usersApi.getDefaultRelays().map { it.toRelay() }
