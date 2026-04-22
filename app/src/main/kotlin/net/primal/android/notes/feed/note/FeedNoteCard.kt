@@ -298,10 +298,16 @@ private fun FeedNoteCard(
 
             Column {
                 if (data.repostAuthorName != null) {
+                    val repostedNoticeStartPadding = if (fullWidthContent) {
+                        (avatarSizeDp - 4.dp).coerceAtLeast(avatarPaddingDp)
+                    } else {
+                        (avatarPaddingDp + threadAlignmentPadding + avatarSizeDp - 6.dp)
+                            .coerceAtLeast(avatarPaddingDp)
+                    }
                     RepostedNotice(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = avatarPaddingDp)
+                            .padding(start = repostedNoticeStartPadding, end = avatarPaddingDp)
                             .padding(top = notePaddingDp * 2),
                         repostedByAuthor = data.repostAuthorName,
                         onRepostAuthorClick = if (data.repostAuthorId != null && noteCallbacks.onProfileClick != null) {
