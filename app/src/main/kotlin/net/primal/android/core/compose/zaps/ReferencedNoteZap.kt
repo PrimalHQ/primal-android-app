@@ -54,11 +54,11 @@ fun ReferencedNoteZap(
 ) {
     Column(
         modifier = modifier
-            .clip(AppTheme.shapes.extraLarge)
+            .clip(AppTheme.shapes.medium)
             .border(
                 width = Dp.Hairline,
                 color = AppTheme.colorScheme.outline,
-                shape = AppTheme.shapes.extraLarge,
+                shape = AppTheme.shapes.medium,
             )
             .clickable(
                 interactionSource = null,

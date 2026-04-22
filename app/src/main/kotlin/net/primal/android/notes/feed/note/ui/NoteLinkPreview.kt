@@ -50,7 +50,7 @@ fun NoteLinkPreview(
     Row(
         modifier = modifier
             .height(height = ThumbnailHeight)
-            .border(width = Dp.Hairline, color = AppTheme.colorScheme.outline, shape = AppTheme.shapes.small)
+            .border(width = Dp.Hairline, color = AppTheme.colorScheme.outline, shape = AppTheme.shapes.medium)
             .clickable(enabled = onClick != null, onClick = { onClick?.invoke() }),
     ) {
         if (thumbnailUrl != null) {
@@ -58,7 +58,7 @@ fun NoteLinkPreview(
                 model = thumbnailUrl,
                 modifier = Modifier
                     .clip(
-                        shape = AppTheme.shapes.small.copy(
+                        shape = AppTheme.shapes.medium.copy(
                             topEnd = CornerSize(0.dp),
                             bottomEnd = CornerSize(0.dp),
                         ),
@@ -128,7 +128,7 @@ private fun GenericLinkThumbnailIcon() {
         modifier = Modifier
             .size(width = ThumbnailWidth, height = ThumbnailHeight)
             .clip(
-                shape = AppTheme.shapes.small.copy(
+                shape = AppTheme.shapes.medium.copy(
                     topEnd = CornerSize(0.dp),
                     bottomEnd = CornerSize(0.dp),
                 ),
