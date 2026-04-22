@@ -192,16 +192,18 @@ class ExploreRepositoryImpl(
     override suspend fun fetchExploreFollowPacks(): List<FollowPackDO> =
         withContext(dispatcherProvider.io()) {
             val persisted = fetchFollowLists(since = null, until = null)
-            database.withTransaction {
-                database.exploreFollowPacks().deleteAll()
-                database.exploreFollowPacks().upsertAll(
-                    data = persisted.mapIndexed { index, pack ->
-                        ExploreFollowPackData(
-                            aTag = "${NostrEventKind.StarterPack.value}:${pack.authorId}:${pack.identifier}",
-                            position = index,
-                        )
-                    },
-                )
+            if (persisted.isNotEmpty()) {
+                database.withTransaction {
+                    database.exploreFollowPacks().deleteAll()
+                    database.exploreFollowPacks().upsertAll(
+                        data = persisted.mapIndexed { index, pack ->
+                            ExploreFollowPackData(
+                                aTag = "${NostrEventKind.StarterPack.value}:${pack.authorId}:${pack.identifier}",
+                                position = index,
+                            )
+                        },
+                    )
+                }
             }
             persisted
         }
@@ -311,17 +313,19 @@ class ExploreRepositoryImpl(
     override suspend fun fetchPopularUsers(): List<UserProfileSearchItem> =
         withContext(dispatcherProvider.io()) {
             val result = queryRemoteUsers { exploreApi.getPopularUsers() }
-            database.withTransaction {
-                database.explorePopularUsers().deleteAll()
-                database.explorePopularUsers().upsertAll(
-                    data = result.mapIndexed { index, item ->
-                        ExplorePopularUserData(
-                            profileId = item.metadata.profileId,
-                            position = index,
-                            score = item.score,
-                        )
-                    },
-                )
+            if (result.isNotEmpty()) {
+                database.withTransaction {
+                    database.explorePopularUsers().deleteAll()
+                    database.explorePopularUsers().upsertAll(
+                        data = result.mapIndexed { index, item ->
+                            ExplorePopularUserData(
+                                profileId = item.metadata.profileId,
+                                position = index,
+                                score = item.score,
+                            )
+                        },
+                    )
+                }
             }
             result
         }

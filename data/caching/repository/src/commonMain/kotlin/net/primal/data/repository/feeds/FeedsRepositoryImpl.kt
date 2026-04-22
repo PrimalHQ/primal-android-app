@@ -286,24 +286,25 @@ class FeedsRepositoryImpl(
             val actionRefs = dvmFeeds.flatMap { it.asActionCrossRefs(ownerId = userId) }
 
             database.withTransaction {
-                database.dvmFeeds().deleteRecommendedByOwner(
-                    ownerId = userId,
-                    specKindFilter = specKind.asSpecKindFilter(),
-                )
-                database.dvmFeeds().deleteActionUsersByOwnerAndFeedIds(
-                    ownerId = userId,
-                    dvmEventIds = dvmFeeds.map { it.eventId },
-                )
-
                 database.profiles().insertOrUpdateAll(data = profiles)
                 database.eventStats().upsertAll(data = eventStatsMap.values.map { it.asEventStatsPO() })
                 database.eventUserStats().upsertAll(
                     data = userStats.values.map { it.asEventUserStatsPO(userId = userId) },
                 )
-
                 database.dvmFeeds().upsertDvmFeedData(data = dvmFeedPOs)
-                database.dvmFeeds().upsertRecommendedCrossRefs(refs = recommendedRefs)
-                database.dvmFeeds().upsertActionUserCrossRefs(refs = actionRefs)
+
+                if (dvmFeeds.isNotEmpty()) {
+                    database.dvmFeeds().deleteRecommendedByOwner(
+                        ownerId = userId,
+                        specKindFilter = specKind.asSpecKindFilter(),
+                    )
+                    database.dvmFeeds().deleteActionUsersByOwnerAndFeedIds(
+                        ownerId = userId,
+                        dvmEventIds = dvmFeeds.map { it.eventId },
+                    )
+                    database.dvmFeeds().upsertRecommendedCrossRefs(refs = recommendedRefs)
+                    database.dvmFeeds().upsertActionUserCrossRefs(refs = actionRefs)
+                }
             }
 
             dvmFeeds
