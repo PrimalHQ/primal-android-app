@@ -9,7 +9,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
@@ -28,7 +27,7 @@ const val EXTRA_NOTE_ID = "noteId"
 
 @Composable
 fun AudioPlayerStateProvider(content: @Composable () -> Unit) {
-    val audioPlayerState = rememberSaveable(saver = AudioPlayerStateSaver) { AudioPlayerState() }
+    val audioPlayerState = remember { AudioPlayerState() }
 
     CompositionLocalProvider(LocalAudioPlayerState provides audioPlayerState) {
         AudioPlayerController(audioPlayerState)
@@ -63,7 +62,8 @@ private fun AudioPlayerController(audioState: AudioPlayerState) {
     DisposableEffect(controller) {
         val c = controller ?: return@DisposableEffect onDispose { }
 
-        fun updateState() {
+        fun syncFromController() {
+            audioState.updateCurrentUrl(c.currentMediaItem?.mediaId)
             audioState.updatePlaybackState(
                 isPlaying = c.isPlaying,
                 playWhenReady = c.playWhenReady,
@@ -73,21 +73,12 @@ private fun AudioPlayerController(audioState: AudioPlayerState) {
             )
         }
 
-        updateState()
+        syncFromController()
 
         val listener = object : Player.Listener {
-            override fun onIsPlayingChanged(playing: Boolean) = updateState()
-            override fun onPlaybackStateChanged(playbackState: Int) = updateState()
-            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                val currentMediaId = mediaItem?.mediaId
-                if (currentMediaId != null &&
-                    audioState.currentUrl != null && currentMediaId != audioState.currentUrl
-                ) {
-                    audioState.resetState()
-                } else {
-                    updateState()
-                }
-            }
+            override fun onIsPlayingChanged(playing: Boolean) = syncFromController()
+            override fun onPlaybackStateChanged(playbackState: Int) = syncFromController()
+            override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) = syncFromController()
         }
         c.addListener(listener)
         onDispose { c.removeListener(listener) }
