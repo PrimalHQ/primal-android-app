@@ -38,7 +38,7 @@ const val THREE_IMAGES = 3
 const val FOUR_IMAGES = 4
 const val MaxDisplayImages = FOUR_IMAGES
 private val GalleryGapSpace = 1.dp
-private val RadiusSize = 8.dp
+private val RadiusSize = 12.dp
 
 @ExperimentalFoundationApi
 @Composable
