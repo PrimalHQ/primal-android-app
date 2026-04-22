@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
@@ -51,11 +52,11 @@ fun NoteMediaAttachmentsHorizontalPager(
     onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     BoxWithConstraints(modifier = modifier) {
-        val imageSizeDp = findImageSize(eventUri = mediaEventUris.first())
         val imagesCount = mediaEventUris.size
 
         when (imagesCount) {
             SINGLE_IMAGE -> {
+                val imageSizeDp = findFeedNoteMediaSize(eventUri = mediaEventUris.first())
                 SingleImageGallery(
                     mediaEventUris = mediaEventUris,
                     blossoms = blossoms,
@@ -66,6 +67,7 @@ fun NoteMediaAttachmentsHorizontalPager(
                 )
             }
             TWO_IMAGES -> {
+                val imageSizeDp = findMediaFeedCardMediaSize(eventUri = mediaEventUris.first())
                 TwoImageGallery(
                     mediaEventUris = mediaEventUris,
                     blossoms = blossoms,
@@ -74,6 +76,7 @@ fun NoteMediaAttachmentsHorizontalPager(
                 )
             }
             THREE_IMAGES -> {
+                val imageSizeDp = findMediaFeedCardMediaSize(eventUri = mediaEventUris.first())
                 ThreeImageGallery(
                     mediaEventUris = mediaEventUris,
                     blossoms = blossoms,
@@ -82,6 +85,7 @@ fun NoteMediaAttachmentsHorizontalPager(
                 )
             }
             else -> {
+                val imageSizeDp = findMediaFeedCardMediaSize(eventUri = mediaEventUris.first())
                 MultipleImageGallery(
                     mediaEventUri = mediaEventUris,
                     blossoms = blossoms,
@@ -326,28 +330,35 @@ private fun SingleImageGallery(
 ) {
     val mediaEventUri = mediaEventUris.first()
     val shape = RoundedCornerShape(RadiusSize)
-    NoteMediaAttachment(
+    Box(
         modifier = Modifier
-            .padding(vertical = 4.dp)
-            .clip(shape)
-            .border(Dp.Hairline, AppTheme.colorScheme.outline, shape),
-        mediaEventUri = mediaEventUri,
-        blossoms = blossoms,
-        imageSizeDp = imageSizeDp,
-        allowAutoPlay = true,
-        couldAutoPlay = couldAutoPlay,
-        onClick = { positionMs ->
-            onMediaClick(
-                MediaClickEvent(
-                    noteId = mediaEventUri.eventId,
-                    eventUriType = mediaEventUri.type,
-                    mediaUrl = mediaEventUri.url,
-                    positionMs = positionMs,
-                ),
-            )
-        },
-        onVideoSoundToggle = onVideoSoundToggle,
-    )
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        contentAlignment = Alignment.TopStart,
+    ) {
+        NoteMediaAttachment(
+            modifier = Modifier
+                .clip(shape)
+                .border(Dp.Hairline, AppTheme.colorScheme.outline, shape),
+            mediaEventUri = mediaEventUri,
+            blossoms = blossoms,
+            imageSizeDp = imageSizeDp,
+            allowAutoPlay = true,
+            couldAutoPlay = couldAutoPlay,
+            contentScale = ContentScale.Fit,
+            onClick = { positionMs ->
+                onMediaClick(
+                    MediaClickEvent(
+                        noteId = mediaEventUri.eventId,
+                        eventUriType = mediaEventUri.type,
+                        mediaUrl = mediaEventUri.url,
+                        positionMs = positionMs,
+                    ),
+                )
+            },
+            onVideoSoundToggle = onVideoSoundToggle,
+        )
+    }
 }
 
 @Composable
@@ -359,6 +370,7 @@ private fun NoteMediaAttachment(
     couldAutoPlay: Boolean,
     onClick: (positionMs: Long) -> Unit,
     modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
     onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     BoxWithConstraints(
@@ -388,6 +400,7 @@ private fun NoteMediaAttachment(
                     attachment = mediaEventUri,
                     blossoms = blossoms,
                     maxWidth = this.maxWidth,
+                    contentScale = contentScale,
                 )
             }
         }

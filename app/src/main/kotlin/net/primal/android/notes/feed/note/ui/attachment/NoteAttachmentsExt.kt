@@ -15,36 +15,67 @@ import net.primal.domain.links.CdnResourceVariant
 import net.primal.domain.links.EventUriType
 
 private const val MAX_SCREEN_HEIGHT_VISIBLE_AREA = 0.77
+private const val FEED_NOTE_MEDIA_MAX_HEIGHT_DP = 580
+
+enum class Fit { FitWidth, FitBoth }
 
 @Composable
-fun BoxWithConstraintsScope.findImageSize(eventUri: EventUriUi): DpSize {
+fun BoxWithConstraintsScope.findFeedNoteMediaSize(eventUri: EventUriUi): DpSize =
+    findImageSize(
+        eventUri = eventUri,
+        maxHeightDp = FEED_NOTE_MEDIA_MAX_HEIGHT_DP,
+        fit = Fit.FitBoth,
+        allowUpscaling = false,
+    )
+
+@Composable
+fun BoxWithConstraintsScope.findMediaFeedCardMediaSize(eventUri: EventUriUi): DpSize {
+    val maxHeightDp = (LocalConfiguration.current.screenHeightDp * MAX_SCREEN_HEIGHT_VISIBLE_AREA).toInt()
+    return findImageSize(
+        eventUri = eventUri,
+        maxHeightDp = maxHeightDp,
+        fit = Fit.FitWidth,
+        allowUpscaling = true,
+    )
+}
+
+@Composable
+private fun BoxWithConstraintsScope.findImageSize(
+    eventUri: EventUriUi,
+    maxHeightDp: Int,
+    fit: Fit,
+    allowUpscaling: Boolean,
+): DpSize {
     val maxWidthPx = with(LocalDensity.current) { maxWidth.roundToPx() }
-    val maxWidth = maxWidth.value.toInt()
-    val maxHeight = (LocalConfiguration.current.screenHeightDp * MAX_SCREEN_HEIGHT_VISIBLE_AREA).toInt()
+    val maxWidthDp = maxWidth.value.toInt()
     val variant = eventUri.variants.findNearestOrNull(maxWidthPx = maxWidthPx)
 
     return when {
         variant != null && variant.width > 0 && variant.height > 0 -> {
-            variant.calculateImageSize(
-                maxWidth = maxWidth,
-                maxHeight = maxHeight,
+            calculateMediaSize(
+                width = variant.width,
+                height = variant.height,
+                maxWidth = maxWidthDp,
+                maxHeight = maxHeightDp,
+                fit = fit,
+                allowUpscaling = allowUpscaling,
             )
         }
         eventUri.originalWidth != null && eventUri.originalHeight != null -> {
-            calculateDimensions(
+            calculateMediaSize(
                 width = eventUri.originalWidth,
                 height = eventUri.originalHeight,
-                maxWidth = maxWidth,
-                maxHeight = maxHeight,
+                maxWidth = maxWidthDp,
+                maxHeight = maxHeightDp,
+                fit = fit,
+                allowUpscaling = allowUpscaling,
             )
         }
-        else -> {
-            calculateFallbackDimensions(
-                maxWidth = maxWidth,
-                maxHeight = maxHeight,
-                type = eventUri.type,
-            )
-        }
+        else -> calculateFallbackDimensions(
+            maxWidth = maxWidthDp,
+            maxHeight = maxHeightDp,
+            type = eventUri.type,
+        )
     }
 }
 
@@ -55,6 +86,40 @@ fun CdnResourceVariant?.findImageSize(maxWidth: Int): DpSize {
         maxWidth = maxWidth,
         maxHeight = maxHeight,
     )
+}
+
+private fun calculateMediaSize(
+    width: Int,
+    height: Int,
+    maxWidth: Int,
+    maxHeight: Int,
+    fit: Fit,
+    allowUpscaling: Boolean,
+): DpSize {
+    if (width == 0 || height == 0) {
+        val sideLength = min(maxWidth, maxHeight)
+        return DpSize(width = sideLength.dp, height = sideLength.dp)
+    }
+
+    return when (fit) {
+        Fit.FitWidth -> calculateDimensions(
+            width = width,
+            height = height,
+            maxWidth = maxWidth,
+            maxHeight = maxHeight,
+        )
+
+        Fit.FitBoth -> {
+            val widthScale = maxWidth.toFloat() / width.toFloat()
+            val heightScale = maxHeight.toFloat() / height.toFloat()
+            val upperBound = if (allowUpscaling) Float.POSITIVE_INFINITY else 1f
+            val scale = minOf(widthScale, heightScale, upperBound)
+            DpSize(
+                width = (width.toFloat() * scale).dp,
+                height = (height.toFloat() * scale).dp,
+            )
+        }
+    }
 }
 
 private fun calculateFallbackDimensions(

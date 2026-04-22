@@ -31,6 +31,7 @@ fun NoteAttachmentImagePreview(
     blossoms: List<String>,
     maxWidth: Dp,
     modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
 ) {
     val cdnImageSource = when (attachment.type) {
         EventUriType.Image -> {
@@ -51,7 +52,7 @@ fun NoteAttachmentImagePreview(
         PrimalAsyncImage(
             model = currentUrl,
             modifier = modifier.zoomablePeekOverlay(state = rememberZoomablePeekOverlayState()),
-            contentScale = ContentScale.Crop,
+            contentScale = contentScale,
             onError = { currentUrlIndex += 1 },
         )
     } else {

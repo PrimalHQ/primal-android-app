@@ -88,7 +88,7 @@ import net.primal.android.notes.feed.note.NoteContract.UiEvent
 import net.primal.android.notes.feed.note.ui.FeedNoteHeader
 import net.primal.android.notes.feed.note.ui.NoteDropdownMenuIcon
 import net.primal.android.notes.feed.note.ui.attachment.NoteAttachmentVideoPreview
-import net.primal.android.notes.feed.note.ui.attachment.findImageSize
+import net.primal.android.notes.feed.note.ui.attachment.findMediaFeedCardMediaSize
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.theme.AppTheme
@@ -435,7 +435,7 @@ private fun MediaFeedPager(
     val pagerState = rememberPagerState(pageCount = { mediaUris.size })
 
     BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-        val pagerHeight = findImageSize(eventUri = mediaUris.first()).height
+        val pagerHeight = findMediaFeedCardMediaSize(eventUri = mediaUris.first()).height
 
         Column {
             HorizontalPager(
