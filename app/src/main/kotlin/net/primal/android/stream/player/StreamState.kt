@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 
 @Stable
 @OptIn(ExperimentalAtomicApi::class)
+@Suppress("TooManyFunctions")
 class StreamState internal constructor(
     initialMode: StreamMode = StreamMode.Closed,
     initialBottomBarHeight: Int = 0,
@@ -33,9 +34,16 @@ class StreamState internal constructor(
     private val _pauseHolders = AtomicInt(0)
     private val _hideHolders = AtomicInt(0)
 
+    private var isPlaying: Boolean = false
+    private var wasPlayingBeforeAcquire: Boolean = false
+
     private val _commands = Channel<PlayerCommand>()
     val commands = _commands.receiveAsFlow()
     private fun setCommand(command: PlayerCommand) = scope.launch { _commands.send(command) }
+
+    internal fun updateIsPlaying(isPlaying: Boolean) {
+        this.isPlaying = isPlaying
+    }
 
     fun isActive() = mode != StreamMode.Closed
 
@@ -48,12 +56,15 @@ class StreamState internal constructor(
     fun releasePause() {
         if (_pauseHolders.decrementAndFetch() <= 0) {
             _pauseHolders.store(0)
-            setCommand(command = PlayerCommand.Play)
+            if (wasPlayingBeforeAcquire || isPlaying) {
+                setCommand(command = PlayerCommand.Play)
+            }
         }
     }
 
     fun acquirePause() {
         if (_pauseHolders.fetchAndIncrement() == 0) {
+            wasPlayingBeforeAcquire = isPlaying
             setCommand(command = PlayerCommand.Pause)
         }
     }

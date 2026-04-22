@@ -108,6 +108,7 @@ private fun LiveStreamOverlay(
         streamNaddr = viewModel.streamNaddr,
         onIsPlayingChanged = { currentPosition, isPlaying ->
             pipManager.shouldEnterPiPMode = isPlaying
+            streamState.updateIsPlaying(isPlaying)
             viewModel.setEvent(
                 UiEvent.OnPlayerStateUpdate(isPlaying = isPlaying, currentTime = currentPosition),
             )
