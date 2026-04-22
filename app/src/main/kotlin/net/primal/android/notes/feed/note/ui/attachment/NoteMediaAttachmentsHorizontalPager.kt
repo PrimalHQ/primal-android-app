@@ -2,6 +2,7 @@ package net.primal.android.notes.feed.note.ui.attachment
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -125,7 +127,8 @@ private fun MultipleImageGallery(
                             .weight(1f)
                             .aspectRatio(1f)
                             .then(if (rowIndex == 0) Modifier else Modifier.padding(vertical = GalleryGapSpace))
-                            .clip(shape),
+                            .clip(shape)
+                            .border(Dp.Hairline, AppTheme.colorScheme.outline, shape),
                     ) {
                         NoteMediaAttachment(
                             modifier = Modifier.fillMaxSize(),
@@ -177,6 +180,12 @@ private fun ThreeImageGallery(
     imageSizeDp: DpSize,
     onMediaClick: (MediaClickEvent) -> Unit,
 ) {
+    val topShape = RoundedCornerShape(
+        topStart = CornerSize(RadiusSize),
+        topEnd = CornerSize(RadiusSize),
+        bottomStart = CornerSize(0.dp),
+        bottomEnd = CornerSize(0.dp),
+    )
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(0.dp),
@@ -186,14 +195,8 @@ private fun ThreeImageGallery(
                 .fillMaxWidth()
                 .aspectRatio(2f / 1f)
                 .padding(vertical = GalleryGapSpace)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = CornerSize(RadiusSize),
-                        topEnd = CornerSize(RadiusSize),
-                        bottomStart = CornerSize(0.dp),
-                        bottomEnd = CornerSize(0.dp),
-                    ),
-                ),
+                .clip(topShape)
+                .border(Dp.Hairline, AppTheme.colorScheme.outline, topShape),
             mediaEventUri = mediaEventUris[0],
             blossoms = blossoms,
             imageSizeDp = imageSizeDp,
@@ -216,27 +219,27 @@ private fun ThreeImageGallery(
             horizontalArrangement = Arrangement.spacedBy(GalleryGapSpace),
         ) {
             mediaEventUris.drop(1).take(2).forEachIndexed { index, attachment ->
+                val shape = if (index == 0) {
+                    RoundedCornerShape(
+                        topStart = CornerSize(0.dp),
+                        topEnd = CornerSize(0.dp),
+                        bottomStart = CornerSize(RadiusSize),
+                        bottomEnd = CornerSize(0.dp),
+                    )
+                } else {
+                    RoundedCornerShape(
+                        topStart = CornerSize(0.dp),
+                        topEnd = CornerSize(0.dp),
+                        bottomStart = CornerSize(0.dp),
+                        bottomEnd = CornerSize(RadiusSize),
+                    )
+                }
                 NoteMediaAttachment(
                     modifier = Modifier
                         .weight(1f)
                         .aspectRatio(1f)
-                        .clip(
-                            if (index == 0) {
-                                RoundedCornerShape(
-                                    topStart = CornerSize(0.dp),
-                                    topEnd = CornerSize(0.dp),
-                                    bottomStart = CornerSize(RadiusSize),
-                                    bottomEnd = CornerSize(0.dp),
-                                )
-                            } else {
-                                RoundedCornerShape(
-                                    topStart = CornerSize(0.dp),
-                                    topEnd = CornerSize(0.dp),
-                                    bottomStart = CornerSize(0.dp),
-                                    bottomEnd = CornerSize(RadiusSize),
-                                )
-                            },
-                        ),
+                        .clip(shape)
+                        .border(Dp.Hairline, AppTheme.colorScheme.outline, shape),
                     mediaEventUri = attachment,
                     blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
@@ -270,28 +273,28 @@ private fun TwoImageGallery(
         horizontalArrangement = Arrangement.spacedBy(GalleryGapSpace),
     ) {
         mediaEventUris.take(2).forEachIndexed { index, attachment ->
+            val shape = if (index == 0) {
+                RoundedCornerShape(
+                    topStart = CornerSize(RadiusSize),
+                    topEnd = CornerSize(0.dp),
+                    bottomStart = CornerSize(RadiusSize),
+                    bottomEnd = CornerSize(0.dp),
+                )
+            } else {
+                RoundedCornerShape(
+                    topStart = CornerSize(0.dp),
+                    topEnd = CornerSize(RadiusSize),
+                    bottomStart = CornerSize(0.dp),
+                    bottomEnd = CornerSize(RadiusSize),
+                )
+            }
             NoteMediaAttachment(
                 modifier = Modifier
                     .weight(1f)
                     .aspectRatio(1f)
                     .padding(vertical = GalleryGapSpace)
-                    .clip(
-                        if (index == 0) {
-                            RoundedCornerShape(
-                                topStart = CornerSize(RadiusSize),
-                                topEnd = CornerSize(0.dp),
-                                bottomStart = CornerSize(RadiusSize),
-                                bottomEnd = CornerSize(0.dp),
-                            )
-                        } else {
-                            RoundedCornerShape(
-                                topStart = CornerSize(0.dp),
-                                topEnd = CornerSize(RadiusSize),
-                                bottomStart = CornerSize(0.dp),
-                                bottomEnd = CornerSize(RadiusSize),
-                            )
-                        },
-                    ),
+                    .clip(shape)
+                    .border(Dp.Hairline, AppTheme.colorScheme.outline, shape),
                 mediaEventUri = attachment,
                 blossoms = blossoms,
                 imageSizeDp = imageSizeDp,
@@ -322,10 +325,12 @@ private fun SingleImageGallery(
     onVideoSoundToggle: ((soundOn: Boolean) -> Unit)? = null,
 ) {
     val mediaEventUri = mediaEventUris.first()
+    val shape = RoundedCornerShape(RadiusSize)
     NoteMediaAttachment(
         modifier = Modifier
             .padding(vertical = 4.dp)
-            .clip(RoundedCornerShape(RadiusSize)),
+            .clip(shape)
+            .border(Dp.Hairline, AppTheme.colorScheme.outline, shape),
         mediaEventUri = mediaEventUri,
         blossoms = blossoms,
         imageSizeDp = imageSizeDp,
