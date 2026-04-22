@@ -91,7 +91,7 @@ private fun NoteLinkAttachment(
     onUrlClick: ((mediaUrl: String) -> Unit)?,
 ) {
     BoxWithConstraints(modifier = modifier) {
-        val thumbnailImageSizeDp = findImageSize(eventUri = eventUri)
+        val thumbnailImageSizeDp = findMediaFeedCardMediaSize(eventUri = eventUri)
         when (eventUri.type) {
             EventUriType.YouTube -> {
                 NoteYouTubeLinkPreview(
