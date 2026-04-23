@@ -16,7 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import net.primal.android.feeds.list.FeedListContract.UiState.FeedMarketplaceStage
 import net.primal.android.feeds.list.ui.DvmFeedDetails
 import net.primal.android.feeds.list.ui.DvmFeedMarketplace
