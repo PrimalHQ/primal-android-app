@@ -144,7 +144,7 @@ fun LoginScreen(
         val uiMode = size.height.detectUiDensityModeFromMaxHeight()
 
         CenterAlignedTopAppBar(
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = Color.Transparent,
                 titleContentColor = PrimalDarkTextColor,
                 navigationIconContentColor = PrimalDarkTextColor,

@@ -220,7 +220,7 @@ private fun MediaGalleryTopAppBar(
                 appBarIconContentDescription = stringResource(id = R.string.accessibility_back_button),
             )
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = containerColor,
             scrolledContainerColor = containerColor,
         ),

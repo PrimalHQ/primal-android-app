@@ -228,7 +228,7 @@ fun ScanCodeTopAppBar(
 
     CenterAlignedTopAppBar(
         modifier = modifier,
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = if (useThemeColors) AppTheme.colorScheme.background else Color.Transparent,
             titleContentColor = if (useThemeColors) AppTheme.colorScheme.onPrimary else Color.White,
             navigationIconContentColor = if (useThemeColors) AppTheme.colorScheme.onPrimary else Color.White,
