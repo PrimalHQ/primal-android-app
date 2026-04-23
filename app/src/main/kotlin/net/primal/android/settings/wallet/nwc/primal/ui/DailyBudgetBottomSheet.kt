@@ -60,7 +60,7 @@ fun DailyBudgetBottomSheet(
             title = {
                 Text(text = stringResource(id = R.string.settings_wallet_nwc_connections_header_daily_budget))
             },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
             ),
         )

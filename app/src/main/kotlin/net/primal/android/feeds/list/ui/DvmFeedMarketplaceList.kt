@@ -34,7 +34,7 @@ fun DvmFeedMarketplace(
     Column(modifier = modifier) {
         CenterAlignedTopAppBar(
             windowInsets = WindowInsets(0.dp),
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
             ),
             navigationIcon = {

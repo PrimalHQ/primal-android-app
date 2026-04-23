@@ -48,7 +48,7 @@ fun <T> SingleChoicePicker(
     ) {
         CenterAlignedTopAppBar(
             title = { Text(text = titleText) },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
             ),
         )

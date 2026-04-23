@@ -134,7 +134,7 @@ private fun CreateTransactionTopAppBar(txStatus: DraftTxStatus, onClose: () -> U
             navigationIconContentDescription = stringResource(id = R.string.accessibility_back_button),
             showDivider = false,
             onNavigationIconClick = onClose,
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = AppTheme.colorScheme.surfaceVariant,
                 scrolledContainerColor = AppTheme.colorScheme.surfaceVariant,
             ),

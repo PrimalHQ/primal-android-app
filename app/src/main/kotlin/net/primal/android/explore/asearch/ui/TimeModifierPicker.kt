@@ -100,7 +100,7 @@ fun TimeModifierPicker(
                     }
                 }
             },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
             ),
         )

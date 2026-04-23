@@ -269,7 +269,7 @@ private fun BottomSheetTopAppBar(
     showEditButton: Boolean,
 ) {
     CenterAlignedTopAppBar(
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
         ),
         title = {
