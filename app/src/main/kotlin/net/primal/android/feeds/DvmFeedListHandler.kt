@@ -102,10 +102,9 @@ class DvmFeedListHandler @Inject constructor(
         profilesByUserId: Map<String, ProfileData>,
     ): List<DvmFeedUi> =
         dvmFeeds.map { dvmFeed ->
-            val featuredUsers = dvmFeed.featuredUserIds.mapNotNull { profilesByUserId[it] }
-            val avatarLegendaryPair = featuredUsers
+            val featuredUsers = dvmFeed.featuredUserIds
+                .mapNotNull { profilesByUserId[it] }
                 .filter { it.avatarCdnImage != null }
-                .map { Pair(it.avatarCdnImage, it.primalPremiumInfo?.legendProfile?.asLegendaryCustomization()) }
 
             DvmFeedUi(
                 data = dvmFeed,
@@ -113,8 +112,11 @@ class DvmFeedListHandler @Inject constructor(
                 userZapped = userStatsByEventId[dvmFeed.eventId]?.zapped,
                 totalLikes = statsByEventId[dvmFeed.eventId]?.likes,
                 totalSatsZapped = statsByEventId[dvmFeed.eventId]?.satsZapped,
-                featuredUserAvatars = avatarLegendaryPair.mapNotNull { it.first },
-                featuredUserLegendaryCustomizations = avatarLegendaryPair.map { it.second },
+                featuredUserAvatars = featuredUsers.mapNotNull { it.avatarCdnImage },
+                featuredUserLegendaryCustomizations = featuredUsers.map {
+                    it.primalPremiumInfo?.legendProfile?.asLegendaryCustomization()
+                },
+                featuredUserIds = featuredUsers.map { it.profileId },
             )
         }
 }

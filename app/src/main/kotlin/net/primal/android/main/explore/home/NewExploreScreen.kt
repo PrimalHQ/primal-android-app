@@ -25,6 +25,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,12 +47,15 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.AdvancedSearch
 import net.primal.android.core.compose.icons.primaliconpack.Search
 import net.primal.android.core.compose.profile.model.UserProfileItemUi
+import net.primal.android.feeds.dvm.ui.DvmFeedDetailsBottomSheet
 import net.primal.android.feeds.dvm.ui.DvmFeedListItem
 import net.primal.android.feeds.dvm.ui.DvmFeedUi
 import net.primal.android.main.explore.people.model.FollowPackUi
 import net.primal.android.main.explore.people.ui.FollowPackListItem
+import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
+import net.primal.domain.feeds.buildSpec
 import net.primal.domain.links.CdnImage
 
 private val SECTION_SPACING = 40.dp
@@ -58,11 +64,11 @@ private const val HORIZONTAL_CARD_WIDTH_FRACTION = 0.8f
 @Composable
 fun NewExploreTabContent(
     paddingValues: PaddingValues,
+    noteCallbacks: NoteCallbacks,
     onProfileClick: (profileId: String) -> Unit,
     onSearchUsersClick: () -> Unit,
     onAdvancedSearchClick: () -> Unit,
     onFollowPackClick: (profileId: String, identifier: String) -> Unit,
-    onFeedClick: (feedSpec: String) -> Unit,
 ) {
     val viewModel = hiltViewModel<NewExploreViewModel>()
     val uiState by viewModel.state.collectAsStateWithLifecycle()
@@ -70,11 +76,12 @@ fun NewExploreTabContent(
     NewExploreTabContent(
         state = uiState,
         paddingValues = paddingValues,
+        eventPublisher = viewModel::setEvent,
+        noteCallbacks = noteCallbacks,
         onProfileClick = onProfileClick,
         onSearchUsersClick = onSearchUsersClick,
         onAdvancedSearchClick = onAdvancedSearchClick,
         onFollowPackClick = onFollowPackClick,
-        onFeedClick = onFeedClick,
     )
 }
 
@@ -82,12 +89,35 @@ fun NewExploreTabContent(
 fun NewExploreTabContent(
     state: NewExploreContract.UiState,
     paddingValues: PaddingValues,
+    eventPublisher: (NewExploreContract.UiEvent) -> Unit,
+    noteCallbacks: NoteCallbacks,
     onProfileClick: (profileId: String) -> Unit,
     onSearchUsersClick: () -> Unit,
     onAdvancedSearchClick: () -> Unit,
     onFollowPackClick: (profileId: String, identifier: String) -> Unit,
-    onFeedClick: (feedSpec: String) -> Unit,
 ) {
+    var dvmFeedToShow by remember { mutableStateOf<DvmFeedUi?>(null) }
+
+    dvmFeedToShow?.let { selectedDvmFeed ->
+        val addedToFeed by remember(dvmFeedToShow, state.userFeedSpecs) {
+            val kind = dvmFeedToShow?.data?.kind
+            mutableStateOf(
+                kind?.let { state.userFeedSpecs.contains(dvmFeedToShow?.data?.buildSpec(specKind = kind)) } ?: false,
+            )
+        }
+        DvmFeedDetailsBottomSheet(
+            onDismissRequest = {
+                dvmFeedToShow?.let { eventPublisher(NewExploreContract.UiEvent.ClearDvmFeed(it)) }
+                dvmFeedToShow = null
+            },
+            dvmFeed = selectedDvmFeed,
+            addedToFeed = addedToFeed,
+            addToUserFeeds = { eventPublisher(NewExploreContract.UiEvent.AddToUserFeeds(it)) },
+            removeFromUserFeeds = { eventPublisher(NewExploreContract.UiEvent.RemoveFromUserFeeds(it)) },
+            noteCallbacks = noteCallbacks,
+        )
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = paddingValues,
@@ -113,9 +143,8 @@ fun NewExploreTabContent(
         item {
             FeedsSection(
                 feeds = state.feeds,
-                onFeedClick = { dvmFeedUi ->
-                    dvmFeedUi.data.primalSpec?.let(onFeedClick)
-                },
+                onFeedClick = { dvmFeedToShow = it },
+                onProfileClick = onProfileClick,
             )
         }
         item { Spacer(Modifier.height(SECTION_SPACING)) }
@@ -319,10 +348,14 @@ private fun FollowPacksSection(
 }
 
 private const val FEEDS_GRID_ROW_COUNT = 3
-private val FEEDS_GRID_HEIGHT = 354.dp
+private val FEEDS_GRID_HEIGHT = 366.dp
 
 @Composable
-private fun FeedsSection(feeds: List<DvmFeedUi>, onFeedClick: (DvmFeedUi) -> Unit) {
+private fun FeedsSection(
+    feeds: List<DvmFeedUi>,
+    onFeedClick: (DvmFeedUi) -> Unit,
+    onProfileClick: (profileId: String) -> Unit,
+) {
     val itemWidth = (LocalConfiguration.current.screenWidthDp * HORIZONTAL_CARD_WIDTH_FRACTION).dp
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         Text(
@@ -350,6 +383,7 @@ private fun FeedsSection(feeds: List<DvmFeedUi>, onFeedClick: (DvmFeedUi) -> Uni
                     listItemContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
                     showFollowsActionsAvatarRow = true,
                     onFeedClick = onFeedClick,
+                    onProfileClick = onProfileClick,
                 )
             }
         }

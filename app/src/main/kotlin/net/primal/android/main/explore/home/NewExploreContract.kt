@@ -13,8 +13,15 @@ interface NewExploreContract {
         val popularUsers: List<UserProfileItemUi> = emptyList(),
         val followPacks: List<FollowPackUi> = emptyList(),
         val feeds: List<DvmFeedUi> = emptyList(),
+        val userFeedSpecs: List<String> = emptyList(),
     ) {
         val recommendedUsers: List<UserProfileItemUi> get() =
             (recentUsers + popularUsers).distinctBy { it.profileId }.take(MAX_RECOMMENDED_USERS)
+    }
+
+    sealed class UiEvent {
+        data class AddToUserFeeds(val dvmFeed: DvmFeedUi) : UiEvent()
+        data class RemoveFromUserFeeds(val dvmFeed: DvmFeedUi) : UiEvent()
+        data class ClearDvmFeed(val dvmFeed: DvmFeedUi) : UiEvent()
     }
 }
