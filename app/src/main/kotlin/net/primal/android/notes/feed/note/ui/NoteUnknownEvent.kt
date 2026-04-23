@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.AppTheme
@@ -35,7 +34,7 @@ fun NoteUnknownEvent(
     Row(
         modifier = modifier
             .border(
-                width = Dp.Hairline,
+                width = NoteEmbedBorderWidth,
                 color = AppTheme.colorScheme.outline,
                 shape = AppTheme.shapes.medium,
             )

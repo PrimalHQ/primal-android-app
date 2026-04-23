@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.PrimalAsyncImage
@@ -40,7 +39,7 @@ fun NoteLinkLargePreview(
                 shape = AppTheme.shapes.small,
             )
             .border(
-                width = Dp.Hairline,
+                width = NoteEmbedBorderWidth,
                 color = AppTheme.colorScheme.outline,
                 shape = AppTheme.shapes.small,
             )

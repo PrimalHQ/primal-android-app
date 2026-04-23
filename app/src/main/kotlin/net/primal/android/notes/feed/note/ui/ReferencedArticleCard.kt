@@ -9,7 +9,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import net.primal.android.articles.feed.ui.FeedArticleListItem
 import net.primal.android.articles.feed.ui.FeedArticleUi
@@ -33,7 +32,7 @@ fun ReferencedArticleCard(
         modifier = modifier.wrapContentHeight(),
         colors = effectiveColors,
         border = if (hasBorder) {
-            BorderStroke(width = Dp.Hairline, color = AppTheme.colorScheme.outline)
+            BorderStroke(width = NoteEmbedBorderWidth, color = AppTheme.colorScheme.outline)
         } else {
             null
         },
