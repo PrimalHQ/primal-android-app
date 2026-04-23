@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.dp
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.theme.domain.PrimalTheme
 
+val NoteEmbedBorderWidth = 0.5.dp
+
 @Composable
 fun NoteSurfaceCard(
     modifier: Modifier = Modifier,

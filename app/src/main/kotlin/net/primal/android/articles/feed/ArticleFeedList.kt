@@ -77,7 +77,13 @@ fun ArticleFeedList(
     header: @Composable (LazyItemScope.() -> Unit)? = null,
     stickyHeader: @Composable (LazyItemScope.() -> Unit)? = null,
 ) {
-    val viewModelKey by remember { mutableStateOf(if (!previewMode) feedSpec else UUID.randomUUID().toString()) }
+    val viewModelKey = remember(previewMode, feedSpec) {
+        if (!previewMode) {
+            "ArticleFeedViewModel_$feedSpec"
+        } else {
+            UUID.randomUUID().toString()
+        }
+    }
     val viewModel = hiltViewModel<ArticleFeedViewModel, ArticleFeedViewModel.Factory>(key = viewModelKey) { factory ->
         factory.create(spec = feedSpec)
     }

@@ -21,7 +21,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.text.NumberFormat
 import java.time.Instant
@@ -31,6 +30,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.LightningBoltFilled
 import net.primal.android.notes.feed.model.NoteContentUi
 import net.primal.android.notes.feed.note.ui.NoteContent
+import net.primal.android.notes.feed.note.ui.NoteEmbedBorderWidth
 import net.primal.android.notes.feed.note.ui.events.NoteCallbacks
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.theme.AppTheme
@@ -56,7 +56,7 @@ fun ReferencedNoteZap(
         modifier = modifier
             .clip(AppTheme.shapes.medium)
             .border(
-                width = Dp.Hairline,
+                width = NoteEmbedBorderWidth,
                 color = AppTheme.colorScheme.outline,
                 shape = AppTheme.shapes.medium,
             )

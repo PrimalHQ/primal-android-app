@@ -85,7 +85,7 @@ fun HighlightActivityBottomSheet(
     ) {
         Column {
             PrimalTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
                     scrolledContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
                 ),

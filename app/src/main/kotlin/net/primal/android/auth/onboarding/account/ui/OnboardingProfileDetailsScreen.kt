@@ -81,7 +81,7 @@ fun OnboardingProfileDetailsScreen(
         containerColor = Color.Transparent,
         topBar = {
             PrimalTopAppBar(
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.Transparent,
                     scrolledContainerColor = Color.Transparent,
                 ),

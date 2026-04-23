@@ -72,7 +72,7 @@ fun SaveFeedBottomSheet(
                 }
                 Text(text = titleResourceId)
             },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
             ),
         )

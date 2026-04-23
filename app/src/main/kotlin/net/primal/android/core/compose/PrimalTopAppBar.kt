@@ -64,7 +64,7 @@ fun PrimalTopAppBar(
     scrollBehavior: TopAppBarScrollBehavior? = null,
     onTitleClick: (() -> Unit)? = null,
     onTitleLongClick: (() -> Unit)? = null,
-    colors: TopAppBarColors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+    colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(
         containerColor = AppTheme.colorScheme.surface,
         scrolledContainerColor = AppTheme.colorScheme.surface,
     ),

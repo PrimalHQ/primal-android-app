@@ -12,7 +12,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import java.time.Instant
 import java.time.temporal.ChronoUnit
@@ -58,7 +57,7 @@ fun ReferencedNoteCard(
             colors
         },
         border = if (hasBorder) {
-            BorderStroke(width = Dp.Hairline, color = AppTheme.colorScheme.outline)
+            BorderStroke(width = NoteEmbedBorderWidth, color = AppTheme.colorScheme.outline)
         } else {
             null
         },

@@ -102,7 +102,7 @@ fun FilterPicker(
                         text = stringResource(id = R.string.asearch_filter_sheet_title),
                     )
                 },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
                 ),
             )

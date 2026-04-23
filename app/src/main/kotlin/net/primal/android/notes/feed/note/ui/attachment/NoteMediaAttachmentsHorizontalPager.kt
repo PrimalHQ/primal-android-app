@@ -24,11 +24,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import net.primal.android.core.compose.attachment.model.EventUriUi
+import net.primal.android.notes.feed.note.ui.NoteEmbedBorderWidth
 import net.primal.android.notes.feed.note.ui.events.MediaClickEvent
 import net.primal.android.theme.AppTheme
 import net.primal.domain.links.EventUriType
@@ -132,7 +132,7 @@ private fun MultipleImageGallery(
                             .aspectRatio(1f)
                             .then(if (rowIndex == 0) Modifier else Modifier.padding(vertical = GalleryGapSpace))
                             .clip(shape)
-                            .border(Dp.Hairline, AppTheme.colorScheme.outline, shape),
+                            .border(NoteEmbedBorderWidth, AppTheme.colorScheme.outline, shape),
                     ) {
                         NoteMediaAttachment(
                             modifier = Modifier.fillMaxSize(),
@@ -200,7 +200,7 @@ private fun ThreeImageGallery(
                 .aspectRatio(2f / 1f)
                 .padding(vertical = GalleryGapSpace)
                 .clip(topShape)
-                .border(Dp.Hairline, AppTheme.colorScheme.outline, topShape),
+                .border(NoteEmbedBorderWidth, AppTheme.colorScheme.outline, topShape),
             mediaEventUri = mediaEventUris[0],
             blossoms = blossoms,
             imageSizeDp = imageSizeDp,
@@ -243,7 +243,7 @@ private fun ThreeImageGallery(
                         .weight(1f)
                         .aspectRatio(1f)
                         .clip(shape)
-                        .border(Dp.Hairline, AppTheme.colorScheme.outline, shape),
+                        .border(NoteEmbedBorderWidth, AppTheme.colorScheme.outline, shape),
                     mediaEventUri = attachment,
                     blossoms = blossoms,
                     imageSizeDp = imageSizeDp,
@@ -298,7 +298,7 @@ private fun TwoImageGallery(
                     .aspectRatio(1f)
                     .padding(vertical = GalleryGapSpace)
                     .clip(shape)
-                    .border(Dp.Hairline, AppTheme.colorScheme.outline, shape),
+                    .border(NoteEmbedBorderWidth, AppTheme.colorScheme.outline, shape),
                 mediaEventUri = attachment,
                 blossoms = blossoms,
                 imageSizeDp = imageSizeDp,
@@ -339,7 +339,7 @@ private fun SingleImageGallery(
         NoteMediaAttachment(
             modifier = Modifier
                 .clip(shape)
-                .border(Dp.Hairline, AppTheme.colorScheme.outline, shape),
+                .border(NoteEmbedBorderWidth, AppTheme.colorScheme.outline, shape),
             mediaEventUri = mediaEventUri,
             blossoms = blossoms,
             imageSizeDp = imageSizeDp,

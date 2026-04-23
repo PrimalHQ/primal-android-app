@@ -17,7 +17,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
@@ -55,7 +54,7 @@ fun ReferencedStream(
                 color = backgroundColor,
             )
             .border(
-                width = Dp.Hairline,
+                width = NoteEmbedBorderWidth,
                 color = AppTheme.colorScheme.outline,
                 shape = AppTheme.shapes.medium,
             )

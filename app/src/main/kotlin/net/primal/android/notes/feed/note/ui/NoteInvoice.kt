@@ -20,7 +20,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import fr.acinq.lightning.payment.Bolt11Invoice
@@ -59,7 +58,7 @@ fun NoteLightningInvoice(
     Column(
         modifier = modifier
             .border(
-                width = Dp.Hairline,
+                width = NoteEmbedBorderWidth,
                 color = AppTheme.colorScheme.outline,
                 shape = AppTheme.shapes.medium,
             )

@@ -35,7 +35,7 @@ fun FeedListOverlayContent(
     onEditAdvancedSearchFeedClick: ((feedSpec: String) -> Unit)? = null,
 ) {
     val viewModel = hiltViewModel<FeedListViewModel, FeedListViewModel.Factory>(
-        key = activeFeed.spec,
+        key = "FeedListViewModel_${activeFeed.spec}",
         creationCallback = { it.create(activeFeed = activeFeed, specKind = feedSpecKind) },
     )
     val uiState = viewModel.state.collectAsState()

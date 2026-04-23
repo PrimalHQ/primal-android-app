@@ -217,7 +217,7 @@ private fun MultipleUserPickerTopAppBar(
     ) {
         CenterAlignedTopAppBar(
             title = { Text(text = sheetTitle) },
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = AppTheme.extraColorScheme.surfaceVariantAlt2,
             ),
         )

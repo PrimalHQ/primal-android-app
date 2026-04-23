@@ -64,7 +64,7 @@ fun PaymentSuccess(
             showDivider = false,
             onNavigationIconClick = { closingSequence() },
             navigationIconTintColor = walletSuccessContentColor,
-            colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = walletSuccessColor,
                 scrolledContainerColor = walletSuccessColor,
                 titleContentColor = walletSuccessContentColor,
