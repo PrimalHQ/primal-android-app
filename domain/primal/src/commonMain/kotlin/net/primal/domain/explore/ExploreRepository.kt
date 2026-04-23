@@ -16,6 +16,11 @@ interface ExploreRepository {
 
     fun getFollowLists(): Flow<PagingData<FollowPack>>
 
+    fun observeExploreFollowPacks(): Flow<List<FollowPack>>
+
+    @Throws(NetworkException::class, CancellationException::class)
+    suspend fun fetchExploreFollowPacks(): List<FollowPack>
+
     @Throws(NetworkException::class, CancellationException::class)
     suspend fun fetchFollowLists(
         since: Long?,
@@ -34,6 +39,8 @@ interface ExploreRepository {
 
     @Throws(NetworkException::class, CancellationException::class)
     suspend fun fetchPopularUsers(): List<UserProfileSearchItem>
+
+    fun observePopularUsers(): Flow<List<UserProfileSearchItem>>
 
     @Throws(NetworkException::class, CancellationException::class)
     suspend fun searchUsers(query: String, limit: Int = 20): List<UserProfileSearchItem>

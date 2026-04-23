@@ -77,6 +77,8 @@ interface FeedsRepository {
     @Throws(NetworkException::class, CancellationException::class)
     suspend fun fetchRecommendedDvmFeeds(userId: String, specKind: FeedSpecKind? = null): List<DvmFeed>
 
+    fun observeRecommendedDvmFeeds(userId: String, specKind: FeedSpecKind? = null): Flow<List<DvmFeed>>
+
     suspend fun addDvmFeedLocally(
         userId: String,
         dvmFeed: DvmFeed,

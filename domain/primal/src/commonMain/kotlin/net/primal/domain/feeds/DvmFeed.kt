@@ -16,7 +16,7 @@ data class DvmFeed(
     val isPaid: Boolean = amountInSats != null && amountInSats != "free" || primalSubscriptionRequired == true,
     val kind: FeedSpecKind? = null,
     val isPrimalFeed: Boolean? = null,
-    val actionUserIds: List<String> = emptyList(),
+    val featuredUserIds: List<String> = emptyList(),
 ) {
     val dvmATag = "${NostrEventKind.AppHandler.value}:${this.dvmPubkey}:${this.dvmId}"
 }

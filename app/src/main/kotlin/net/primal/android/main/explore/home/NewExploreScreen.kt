@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -35,8 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
 import net.primal.android.R
 import net.primal.android.core.compose.PrimalTopLevelAppBar
 import net.primal.android.core.compose.UniversalAvatarThumbnail
@@ -89,8 +88,6 @@ fun NewExploreTabContent(
     onFollowPackClick: (profileId: String, identifier: String) -> Unit,
     onFeedClick: (feedSpec: String) -> Unit,
 ) {
-    val followPacks = state.followPacks.collectAsLazyPagingItems()
-
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = paddingValues,
@@ -98,7 +95,7 @@ fun NewExploreTabContent(
         item { Spacer(Modifier.height(SECTION_SPACING)) }
         item {
             UsersSection(
-                users = state.popularUsers,
+                users = state.recommendedUsers,
                 onUserClick = onProfileClick,
                 onSearchUsersClick = onSearchUsersClick,
                 onAdvancedSearchClick = onAdvancedSearchClick,
@@ -107,7 +104,7 @@ fun NewExploreTabContent(
         item { Spacer(Modifier.height(SECTION_SPACING)) }
         item {
             FollowPacksSection(
-                followPacks = followPacks,
+                followPacks = state.followPacks,
                 onFollowPackClick = onFollowPackClick,
                 onProfileClick = onProfileClick,
             )
@@ -250,6 +247,7 @@ private fun UserCell(
             avatarSize = 64.dp,
             avatarBlossoms = user.avatarBlossoms,
             legendaryCustomization = user.legendaryCustomization,
+            isLive = user.isLive,
             onClick = onClick,
         )
         Text(
@@ -287,7 +285,7 @@ private val FOLLOW_PACK_CARD_HEIGHT = 270.dp
 
 @Composable
 private fun FollowPacksSection(
-    followPacks: LazyPagingItems<FollowPackUi>,
+    followPacks: List<FollowPackUi>,
     onFollowPackClick: (profileId: String, identifier: String) -> Unit,
     onProfileClick: (profileId: String) -> Unit,
 ) {
@@ -303,8 +301,10 @@ private fun FollowPacksSection(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            items(count = followPacks.itemCount) { index ->
-                val item = followPacks[index] ?: return@items
+            items(
+                items = followPacks,
+                key = { "${it.authorId}:${it.identifier}" },
+            ) { item ->
                 FollowPackListItem(
                     modifier = Modifier
                         .width(cardWidth)
@@ -319,7 +319,7 @@ private fun FollowPacksSection(
 }
 
 private const val FEEDS_GRID_ROW_COUNT = 3
-private val FEEDS_GRID_HEIGHT = 342.dp
+private val FEEDS_GRID_HEIGHT = 354.dp
 
 @Composable
 private fun FeedsSection(feeds: List<DvmFeedUi>, onFeedClick: (DvmFeedUi) -> Unit) {
@@ -348,6 +348,7 @@ private fun FeedsSection(feeds: List<DvmFeedUi>, onFeedClick: (DvmFeedUi) -> Uni
                     modifier = Modifier.width(itemWidth),
                     data = feed,
                     listItemContainerColor = AppTheme.extraColorScheme.surfaceVariantAlt3,
+                    showFollowsActionsAvatarRow = true,
                     onFeedClick = onFeedClick,
                 )
             }

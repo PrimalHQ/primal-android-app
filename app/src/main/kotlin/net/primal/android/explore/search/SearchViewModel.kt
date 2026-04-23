@@ -41,7 +41,8 @@ class SearchViewModel @Inject constructor(
         observeEvents()
         observeDebouncedQueryChanges()
         observeRecentUsers()
-        fetchRecommendedUsers()
+        observePopularUsers()
+        fetchPopularUsers()
     }
 
     private fun observeEvents() =
@@ -78,24 +79,32 @@ class SearchViewModel @Inject constructor(
             }
         }
 
-    private fun observeRecentUsers() {
+    private fun observeRecentUsers() =
         viewModelScope.launch {
             userRepository.observeRecentUsers(ownerId = activeAccountStore.activeUserId())
                 .distinctUntilChanged()
-                .collect {
-                    setState { copy(recentUsers = it.map { it.mapAsUserProfileUi() }) }
+                .collect { users ->
+                    setState { copy(recentUsers = users.map { it.mapAsUserProfileUi() }) }
                 }
         }
-    }
 
-    private fun fetchRecommendedUsers() =
+    private fun observePopularUsers() =
         viewModelScope.launch {
-            try {
-                val popularUsers = exploreRepository.fetchPopularUsers()
-                setState { copy(popularUsers = popularUsers.map { it.mapAsUserProfileUi() }) }
-            } catch (error: NetworkException) {
-                Napier.w(throwable = error) { "Failed to fetch recommended users" }
-            }
+            exploreRepository.observePopularUsers()
+                .distinctUntilChanged()
+                .collect { users ->
+                    setState { copy(popularUsers = users.map { it.mapAsUserProfileUi() }) }
+                }
+        }
+
+    private fun fetchPopularUsers() =
+        viewModelScope.launch {
+            runCatching { exploreRepository.fetchPopularUsers() }
+                .onFailure { error ->
+                    if (error is NetworkException) {
+                        Napier.w(throwable = error) { "Failed to fetch popular users." }
+                    }
+                }
         }
 
     private fun markProfileInteraction(profileId: String) {
