@@ -13,7 +13,6 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalSingleTab
 import net.primal.android.premium.info.MORE_INFO_FAQ_TAB_INDEX
 import net.primal.android.premium.info.MORE_INFO_FEATURES_TAB_INDEX
-import net.primal.android.premium.info.MORE_INFO_TAB_COUNT
 import net.primal.android.premium.info.MORE_INFO_WHY_PREMIUM_TAB_INDEX
 import net.primal.android.premium.info.MORE_INFO_WHY_PRO_TAB_INDEX
 import net.primal.android.theme.AppTheme
@@ -31,17 +30,15 @@ fun MoreInfoTabs(
         modifier = modifier.padding(vertical = 4.dp),
         selectedTabIndex = selectedTabIndex,
         indicator = {
-            if (selectedTabIndex in 0 until MORE_INFO_TAB_COUNT) {
-                TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier
-                        .tabIndicatorOffset(selectedTabIndex)
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 4.dp)
-                        .clip(RoundedCornerShape(percent = 100)),
-                    height = 4.dp,
-                    color = AppTheme.colorScheme.tertiary,
-                )
-            }
+            TabRowDefaults.SecondaryIndicator(
+                modifier = Modifier
+                    .tabIndicatorOffset(selectedTabIndex)
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 4.dp)
+                    .clip(RoundedCornerShape(percent = 100)),
+                height = 4.dp,
+                color = AppTheme.colorScheme.tertiary,
+            )
         },
         divider = {},
     ) {

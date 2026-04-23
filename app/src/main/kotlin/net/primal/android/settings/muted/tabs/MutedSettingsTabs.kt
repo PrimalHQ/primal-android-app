@@ -35,16 +35,14 @@ fun MutedSettingsTabs(
         containerColor = AppTheme.colorScheme.background,
         divider = {},
         indicator = {
-            if (selectedTabIndex in 0 until MUTE_SETTINGS_TAB_COUNT) {
-                TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier
-                        .tabIndicatorOffset(selectedTabIndex)
-                        .padding(horizontal = 10.dp)
-                        .clip(RoundedCornerShape(percent = 100)),
-                    height = 4.dp,
-                    color = AppTheme.colorScheme.tertiary,
-                )
-            }
+            TabRowDefaults.SecondaryIndicator(
+                modifier = Modifier
+                    .tabIndicatorOffset(selectedTabIndex)
+                    .padding(horizontal = 10.dp)
+                    .clip(RoundedCornerShape(percent = 100)),
+                height = 4.dp,
+                color = AppTheme.colorScheme.tertiary,
+            )
         },
     ) {
         PrimalSingleTab(

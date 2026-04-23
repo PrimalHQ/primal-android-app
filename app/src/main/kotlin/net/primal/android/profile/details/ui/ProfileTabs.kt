@@ -46,13 +46,11 @@ fun ProfileTabs(
         containerColor = AppTheme.colorScheme.surfaceVariant,
         divider = { },
         indicator = {
-            if (selectedTabIndex in 0 until PROFILE_TAB_COUNT) {
-                TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier.tabIndicatorOffset(selectedTabIndex),
-                    height = 4.dp,
-                    color = AppTheme.colorScheme.tertiary,
-                )
-            }
+            TabRowDefaults.SecondaryIndicator(
+                modifier = Modifier.tabIndicatorOffset(selectedTabIndex),
+                height = 4.dp,
+                color = AppTheme.colorScheme.tertiary,
+            )
         },
     ) {
         CustomTab(

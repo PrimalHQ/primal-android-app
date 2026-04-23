@@ -153,17 +153,15 @@ private fun ReactionsTabs(
         modifier = modifier,
         selectedTabIndex = selectedTabIndex,
         indicator = {
-            if (selectedTabIndex in 0 until REACTION_TABS_COUNT) {
-                TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier
-                        .tabIndicatorOffset(selectedTabIndex)
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 4.dp)
-                        .clip(RoundedCornerShape(percent = 100)),
-                    height = 4.dp,
-                    color = AppTheme.colorScheme.tertiary,
-                )
-            }
+            TabRowDefaults.SecondaryIndicator(
+                modifier = Modifier
+                    .tabIndicatorOffset(selectedTabIndex)
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 4.dp)
+                    .clip(RoundedCornerShape(percent = 100)),
+                height = 4.dp,
+                color = AppTheme.colorScheme.tertiary,
+            )
         },
         divider = { },
     ) {
