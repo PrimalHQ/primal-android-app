@@ -324,7 +324,7 @@ class FeedsRepositoryImpl(
                     featuredUserIds = featuredByFeed[feed.eventId]?.map { it.profileId } ?: emptyList(),
                 )
             }
-        }
+        }.distinctUntilChanged()
 
     override suspend fun addDvmFeedLocally(
         userId: String,
