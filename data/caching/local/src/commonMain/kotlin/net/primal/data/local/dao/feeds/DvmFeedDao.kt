@@ -19,7 +19,7 @@ interface DvmFeedDao {
     )
     fun observeRecommendedDvmFeedData(ownerId: String, specKindFilter: String): Flow<List<DvmFeedData>>
 
-    @Query("SELECT * FROM DvmFeedFeaturedUserCrossRef WHERE ownerId = :ownerId")
+    @Query("SELECT * FROM DvmFeedFeaturedUserCrossRef WHERE ownerId = :ownerId ORDER BY position ASC")
     fun observeFeaturedUsersByOwner(ownerId: String): Flow<List<DvmFeedFeaturedUserCrossRef>>
 
     @Upsert

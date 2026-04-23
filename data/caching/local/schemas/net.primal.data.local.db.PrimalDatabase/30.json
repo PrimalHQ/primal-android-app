@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 30,
-    "identityHash": "84b77b7a18b3677120936145bb376afa",
+    "identityHash": "dfb74aad051410c8934a644d0c50389e",
     "entities": [
       {
         "tableName": "PostData",
@@ -2281,7 +2281,7 @@
       },
       {
         "tableName": "DvmFeedFeaturedUserCrossRef",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `dvmEventId` TEXT NOT NULL, `profileId` TEXT NOT NULL, PRIMARY KEY(`ownerId`, `dvmEventId`, `profileId`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ownerId` TEXT NOT NULL, `dvmEventId` TEXT NOT NULL, `profileId` TEXT NOT NULL, `position` INTEGER NOT NULL, PRIMARY KEY(`ownerId`, `dvmEventId`, `profileId`))",
         "fields": [
           {
             "fieldPath": "ownerId",
@@ -2300,6 +2300,12 @@
             "columnName": "profileId",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "position",
+            "columnName": "position",
+            "affinity": "INTEGER",
+            "notNull": true
           }
         ],
         "primaryKey": {
@@ -2314,7 +2320,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '84b77b7a18b3677120936145bb376afa')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dfb74aad051410c8934a644d0c50389e')"
     ]
   }
 }

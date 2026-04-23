@@ -24,11 +24,12 @@ internal fun DvmFeed.asDvmFeedPO(): DvmFeedData =
     )
 
 internal fun DvmFeed.asFeaturedCrossRefs(ownerId: String): List<DvmFeedFeaturedUserCrossRef> =
-    featuredUserIds.map { profileId ->
+    featuredUserIds.mapIndexed { index, profileId ->
         DvmFeedFeaturedUserCrossRef(
             ownerId = ownerId,
             dvmEventId = eventId,
             profileId = profileId,
+            position = index,
         )
     }
 

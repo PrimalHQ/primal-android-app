@@ -7,4 +7,5 @@ data class DvmFeedFeaturedUserCrossRef(
     val ownerId: String,
     val dvmEventId: String,
     val profileId: String,
+    val position: Int,
 )
