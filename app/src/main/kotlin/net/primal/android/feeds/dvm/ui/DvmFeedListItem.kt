@@ -71,6 +71,7 @@ fun DvmFeedListItem(
     showFollowsActionsAvatarRow: Boolean = false,
     clipShape: Shape? = AppTheme.shapes.small,
     onFeedClick: ((dvmFeed: DvmFeedUi) -> Unit)? = null,
+    onProfileClick: ((profileId: String) -> Unit)? = null,
     onGoToWallet: (() -> Unit)? = null,
     onUiError: ((UiError) -> Unit)? = null,
 ) {
@@ -85,6 +86,7 @@ fun DvmFeedListItem(
     DvmFeedListItem(
         modifier = modifier,
         onFeedClick = onFeedClick,
+        onProfileClick = onProfileClick,
         eventPublisher = viewModel::setEvent,
         state = uiState.value,
         listItemContainerColor = listItemContainerColor,
@@ -103,6 +105,7 @@ private fun DvmFeedListItem(
     dvmFeed: DvmFeedUi,
     state: DvmFeedListItemContract.UiState,
     onFeedClick: ((dvmFeed: DvmFeedUi) -> Unit)? = null,
+    onProfileClick: ((profileId: String) -> Unit)? = null,
     onGoToWallet: (() -> Unit)? = null,
     eventPublisher: (DvmFeedListItemContract.UiEvent) -> Unit,
     listItemContainerColor: Color = AppTheme.extraColorScheme.surfaceVariantAlt2,
@@ -248,7 +251,9 @@ private fun DvmFeedListItem(
                                     ),
                                 avatarCdnImages = dvmFeed.featuredUserAvatars,
                                 avatarLegendaryCustomizations = dvmFeed.featuredUserLegendaryCustomizations,
-                                onClick = {},
+                                onClick = onProfileClick?.let {
+                                    { index -> dvmFeed.featuredUserIds.getOrNull(index)?.let(it) }
+                                },
                                 maxAvatarsToShow = MaxAvatarsToShow,
                                 displayAvatarOverflowIndicator = false,
                                 avatarBorderColor = listItemContainerColor,

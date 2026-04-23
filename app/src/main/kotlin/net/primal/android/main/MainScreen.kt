@@ -68,7 +68,6 @@ import net.primal.android.main.wallet.WalletDashboardTopAppBar
 import net.primal.android.main.wallet.WalletDashboardViewModel
 import net.primal.android.navigation.accountSwitcherCallbacksHandler
 import net.primal.android.navigation.navigateToAdvancedSearch
-import net.primal.android.navigation.navigateToExploreFeed
 import net.primal.android.navigation.navigateToFollowPack
 import net.primal.android.navigation.navigateToHome
 import net.primal.android.navigation.navigateToNoteEditor
@@ -392,13 +391,13 @@ private fun MainScreenContent(
 
                     PrimalTopLevelDestination.Explore -> NewExploreTabContent(
                         paddingValues = paddingValues,
+                        noteCallbacks = noteCallbacks,
                         onProfileClick = { navController.navigateToProfile(profileId = it) },
                         onSearchUsersClick = { navController.navigateToSearch(searchScope = SearchScope.Notes) },
                         onAdvancedSearchClick = { navController.navigateToAdvancedSearch() },
                         onFollowPackClick = { profileId, identifier ->
                             navController.navigateToFollowPack(profileId, identifier)
                         },
-                        onFeedClick = { feedSpec -> navController.navigateToExploreFeed(feedSpec = feedSpec) },
                     )
 
                     PrimalTopLevelDestination.Alerts -> NotificationsContent(
