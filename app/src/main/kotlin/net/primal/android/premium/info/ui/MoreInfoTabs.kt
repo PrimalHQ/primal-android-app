@@ -2,9 +2,8 @@ package net.primal.android.premium.info.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -14,6 +13,7 @@ import net.primal.android.R
 import net.primal.android.core.compose.PrimalSingleTab
 import net.primal.android.premium.info.MORE_INFO_FAQ_TAB_INDEX
 import net.primal.android.premium.info.MORE_INFO_FEATURES_TAB_INDEX
+import net.primal.android.premium.info.MORE_INFO_TAB_COUNT
 import net.primal.android.premium.info.MORE_INFO_WHY_PREMIUM_TAB_INDEX
 import net.primal.android.premium.info.MORE_INFO_WHY_PRO_TAB_INDEX
 import net.primal.android.theme.AppTheme
@@ -27,14 +27,14 @@ fun MoreInfoTabs(
     onFeaturesTabClick: () -> Unit,
     onFAQTabClick: () -> Unit,
 ) {
-    TabRow(
+    SecondaryTabRow(
         modifier = modifier.padding(vertical = 4.dp),
         selectedTabIndex = selectedTabIndex,
-        indicator = { tabPositions ->
-            if (selectedTabIndex < tabPositions.size) {
+        indicator = {
+            if (selectedTabIndex in 0 until MORE_INFO_TAB_COUNT) {
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier
-                        .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                        .tabIndicatorOffset(selectedTabIndex)
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 4.dp)
                         .clip(RoundedCornerShape(percent = 100)),

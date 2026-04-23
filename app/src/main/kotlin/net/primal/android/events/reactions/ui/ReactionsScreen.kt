@@ -7,9 +7,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
@@ -150,14 +149,14 @@ private fun ReactionsTabs(
     onLikesClick: () -> Unit,
     onRepostsClick: () -> Unit,
 ) {
-    TabRow(
+    SecondaryTabRow(
         modifier = modifier,
         selectedTabIndex = selectedTabIndex,
-        indicator = { tabPositions ->
-            if (selectedTabIndex < tabPositions.size) {
+        indicator = {
+            if (selectedTabIndex in 0 until REACTION_TABS_COUNT) {
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier
-                        .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                        .tabIndicatorOffset(selectedTabIndex)
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 4.dp)
                         .clip(RoundedCornerShape(percent = 100)),

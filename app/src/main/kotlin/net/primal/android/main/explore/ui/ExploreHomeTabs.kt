@@ -2,9 +2,8 @@ package net.primal.android.main.explore.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,16 +31,16 @@ fun ExploreHomeTabs(
     onMediaTabClick: () -> Unit,
     onTopicsTabClick: () -> Unit,
 ) {
-    TabRow(
+    SecondaryTabRow(
         modifier = modifier.padding(vertical = 4.dp),
         selectedTabIndex = selectedTabIndex,
         containerColor = AppTheme.colorScheme.background,
         divider = {},
-        indicator = { tabPositions ->
-            if (selectedTabIndex < tabPositions.size) {
+        indicator = {
+            if (selectedTabIndex in 0 until EXPLORE_HOME_TAB_COUNT) {
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier
-                        .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                        .tabIndicatorOffset(selectedTabIndex)
                         .padding(horizontal = 10.dp)
                         .clip(RoundedCornerShape(percent = 100)),
                     height = 4.dp,

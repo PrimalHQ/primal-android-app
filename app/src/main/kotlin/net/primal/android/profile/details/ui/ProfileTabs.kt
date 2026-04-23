@@ -3,10 +3,9 @@ package net.primal.android.profile.details.ui
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -41,15 +40,15 @@ fun ProfileTabs(
     modifier: Modifier = Modifier,
     placeholderText: String = "-",
 ) {
-    TabRow(
+    SecondaryTabRow(
         modifier = modifier,
         selectedTabIndex = selectedTabIndex,
         containerColor = AppTheme.colorScheme.surfaceVariant,
         divider = { },
-        indicator = { tabPositions ->
-            if (selectedTabIndex < tabPositions.size) {
+        indicator = {
+            if (selectedTabIndex in 0 until PROFILE_TAB_COUNT) {
                 TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                    modifier = Modifier.tabIndicatorOffset(selectedTabIndex),
                     height = 4.dp,
                     color = AppTheme.colorScheme.tertiary,
                 )

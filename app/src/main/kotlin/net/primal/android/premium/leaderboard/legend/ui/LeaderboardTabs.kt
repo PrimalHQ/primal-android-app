@@ -4,9 +4,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalRippleConfiguration
-import androidx.compose.material3.ScrollableTabRow
+import androidx.compose.material3.SecondaryScrollableTabRow
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
@@ -29,17 +28,17 @@ fun LeaderboardTabs(
     onLatestClick: () -> Unit,
     onContributionClick: () -> Unit,
 ) {
-    ScrollableTabRow(
+    SecondaryScrollableTabRow(
         modifier = modifier.padding(vertical = 4.dp),
         edgePadding = 0.dp,
         selectedTabIndex = selectedTabIndex,
         containerColor = AppTheme.colorScheme.background,
         divider = {},
-        indicator = { tabPositions ->
-            if (selectedTabIndex < tabPositions.size) {
+        indicator = {
+            if (selectedTabIndex in 0 until PAGE_COUNT) {
                 TabRowDefaults.SecondaryIndicator(
                     modifier = Modifier
-                        .tabIndicatorOffset(tabPositions[selectedTabIndex])
+                        .tabIndicatorOffset(selectedTabIndex)
                         .padding(horizontal = 10.dp)
                         .clip(RoundedCornerShape(percent = 100)),
                     height = 4.dp,
