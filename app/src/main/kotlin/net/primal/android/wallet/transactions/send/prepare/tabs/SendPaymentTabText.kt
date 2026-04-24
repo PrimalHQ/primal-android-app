@@ -18,7 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -31,6 +31,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Paste
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.utils.pasteText
 import net.primal.android.theme.AppTheme
 import net.primal.domain.utils.isBitcoinAddress
 import net.primal.domain.utils.isBitcoinUri
@@ -41,7 +42,7 @@ import net.primal.domain.utils.isLnUrl
 
 @Composable
 fun SendPaymentTabText(parsing: Boolean, onTextConfirmed: (String) -> Unit) {
-    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
 
     var textState by remember { mutableStateOf("") }
 
@@ -94,7 +95,7 @@ fun SendPaymentTabText(parsing: Boolean, onTextConfirmed: (String) -> Unit) {
             PrimalLoadingButton(
                 modifier = Modifier.padding(vertical = 16.dp),
                 onClick = {
-                    val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
+                    val clipboardText = pasteText(context).trim()
                     if (clipboardText.hasValidPaymentInput()) {
                         textState = clipboardText
                     }

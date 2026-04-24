@@ -18,9 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,6 +31,7 @@ import net.primal.android.core.compose.PrimalDivider
 import net.primal.android.core.compose.button.PrimalFilledButton
 import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.utils.copyText
 import net.primal.android.settings.wallet.settings.WalletSettingsContract
 import net.primal.android.settings.wallet.settings.WalletUiStateProvider
 import net.primal.android.theme.AppTheme
@@ -129,7 +129,7 @@ private fun ExternalWalletConnected(
     disconnectWallet: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.Top,
@@ -155,7 +155,7 @@ private fun ExternalWalletConnected(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
                     onClick = {
-                        clipboardManager.setText(AnnotatedString(text = lightningAddress))
+                        copyText(text = lightningAddress, context = context)
                     },
                 ),
                 text = lightningAddress,

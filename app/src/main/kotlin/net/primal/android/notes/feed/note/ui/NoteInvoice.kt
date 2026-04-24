@@ -14,9 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,6 +33,7 @@ import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.icons.primaliconpack.NavWalletBoltFilled
 import net.primal.android.core.compose.preview.PrimalPreview
+import net.primal.android.core.utils.copyText
 import net.primal.android.navigation.asUrlDecoded
 import net.primal.android.theme.AppTheme
 
@@ -44,7 +44,7 @@ fun NoteLightningInvoice(
     onPayClick: ((String) -> Unit)? = null,
 ) {
     val numberFormat = remember { NumberFormat.getNumberInstance() }
-    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
 
     val bolt11: Bolt11Invoice? = remember(invoice) {
         val readTry = Bolt11Invoice.read(invoice)
@@ -67,7 +67,7 @@ fun NoteLightningInvoice(
     ) {
         InvoiceTitleRow(
             onCopyClick = {
-                clipboardManager.setText(AnnotatedString(text = invoice))
+                copyText(text = invoice, context = context)
             },
         )
 

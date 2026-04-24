@@ -22,6 +22,11 @@ fun copyText(
     clipboard.setPrimaryClip(clip)
 }
 
+fun pasteText(context: Context): String {
+    val clipboard = context.getSystemService(ClipboardManager::class.java)
+    return clipboard.primaryClip?.getItemAt(0)?.text?.toString().orEmpty()
+}
+
 const val IMAGE_COMPRESSION_QUALITY = 100
 
 suspend fun copyBitmapToClipboard(

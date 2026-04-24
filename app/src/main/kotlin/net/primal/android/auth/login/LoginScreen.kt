@@ -30,7 +30,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
@@ -72,6 +71,7 @@ import net.primal.android.core.compose.isCompactOrLower
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.compose.primalGradientBrush
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.utils.pasteText
 import net.primal.android.signer.client.event.buildAppSpecificDataEvent
 import net.primal.android.signer.client.launchGetPublicKey
 import net.primal.android.signer.client.launchSignEvent
@@ -189,11 +189,10 @@ fun LoginContent(
 ) {
     val context = LocalContext.current
     val keyboardController = LocalSoftwareKeyboardController.current
-    val clipboardManager = LocalClipboardManager.current
     val keyboardVisible by keyboardVisibilityAsState()
 
     fun pasteFromClipboard() {
-        val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
+        val clipboardText = pasteText(context).trim()
         if (clipboardText.isValidNostrPrivateKey() || clipboardText.isValidNostrPublicKey()) {
             onLoginInputChanged(clipboardText)
             keyboardController?.hide()

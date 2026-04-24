@@ -50,11 +50,9 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -259,7 +257,7 @@ private fun ReceiveContent(
     onBuyPremium: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
     val skipViewerMode = remember(state.activeWallet, state.paymentDetails) {
         state.activeWallet?.lightningAddress == null && state.paymentDetails.amountInBtc == null
     }
@@ -302,7 +300,7 @@ private fun ReceiveContent(
                             ReceivePaymentTab.Lightning -> state.lightningNetworkDetails.copyValue
                             ReceivePaymentTab.Bitcoin -> state.bitcoinNetworkDetails.copyValue
                         }?.let { text ->
-                            clipboardManager.setText(AnnotatedString(text = text))
+                            copyText(text = text, context = context)
                         }
                     },
                     onEditClick = {
