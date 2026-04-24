@@ -1,7 +1,7 @@
 package net.primal.android.navigation
 
 import androidx.activity.compose.LocalActivity
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavController
 import androidx.navigation.NavDeepLink
