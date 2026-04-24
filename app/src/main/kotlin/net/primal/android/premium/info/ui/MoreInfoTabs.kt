@@ -2,9 +2,8 @@ package net.primal.android.premium.info.ui
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,21 +26,19 @@ fun MoreInfoTabs(
     onFeaturesTabClick: () -> Unit,
     onFAQTabClick: () -> Unit,
 ) {
-    TabRow(
+    SecondaryTabRow(
         modifier = modifier.padding(vertical = 4.dp),
         selectedTabIndex = selectedTabIndex,
-        indicator = { tabPositions ->
-            if (selectedTabIndex < tabPositions.size) {
-                TabRowDefaults.SecondaryIndicator(
-                    modifier = Modifier
-                        .tabIndicatorOffset(tabPositions[selectedTabIndex])
-                        .padding(horizontal = 16.dp)
-                        .padding(bottom = 4.dp)
-                        .clip(RoundedCornerShape(percent = 100)),
-                    height = 4.dp,
-                    color = AppTheme.colorScheme.tertiary,
-                )
-            }
+        indicator = {
+            TabRowDefaults.SecondaryIndicator(
+                modifier = Modifier
+                    .tabIndicatorOffset(selectedTabIndex)
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 4.dp)
+                    .clip(RoundedCornerShape(percent = 100)),
+                height = 4.dp,
+                color = AppTheme.colorScheme.tertiary,
+            )
         },
         divider = {},
     ) {
