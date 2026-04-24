@@ -157,7 +157,7 @@ fun NoteDropdownMenuIcon(
                     id = if (isPoll) R.string.feed_context_copy_poll_link else R.string.feed_context_copy_note_link,
                 ),
                 onClick = {
-                    copyText(context = context, text = resolvePrimalNoteLink(noteId = noteId))
+                    context.copyText(text = resolvePrimalNoteLink(noteId = noteId))
                     menuVisible = false
                     uiScope.launch {
                         Toast.makeText(
@@ -174,7 +174,7 @@ fun NoteDropdownMenuIcon(
                     id = if (isPoll) R.string.feed_context_copy_poll_question else R.string.feed_context_copy_note_text,
                 ),
                 onClick = {
-                    copyText(context = context, text = noteContent)
+                    context.copyText(text = noteContent)
                     menuVisible = false
                     uiScope.launch {
                         Toast.makeText(
@@ -197,7 +197,7 @@ fun NoteDropdownMenuIcon(
                         userId = authorId,
                         relays = relayHints,
                     ).toNeventString()
-                    copyText(context = context, text = nevent.withNostrPrefix())
+                    context.copyText(text = nevent.withNostrPrefix())
                     menuVisible = false
                     uiScope.launch {
                         Toast.makeText(
@@ -212,7 +212,7 @@ fun NoteDropdownMenuIcon(
                 trailingIconVector = PrimalIcons.ContextCopyRawData,
                 text = stringResource(id = R.string.feed_context_copy_raw_data),
                 onClick = {
-                    copyText(context = context, text = noteRawData)
+                    context.copyText(text = noteRawData)
                     menuVisible = false
                     uiScope.launch {
                         Toast.makeText(

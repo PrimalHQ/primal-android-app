@@ -83,7 +83,7 @@ fun MarkdownRenderer(
                                 }
 
                                 menuItemLabelCopy -> {
-                                    copyText(text = selectedText, context = context)
+                                    context.copyText(text = selectedText)
                                 }
                             }
                             mode?.finish()

@@ -300,7 +300,7 @@ private fun ReceiveContent(
                             ReceivePaymentTab.Lightning -> state.lightningNetworkDetails.copyValue
                             ReceivePaymentTab.Bitcoin -> state.bitcoinNetworkDetails.copyValue
                         }?.let { text ->
-                            copyText(text = text, context = context)
+                            context.copyText(text = text)
                         }
                     },
                     onEditClick = {
@@ -394,7 +394,7 @@ private fun ReceivePaymentViewer(
                     ReceivePaymentTab.Bitcoin -> 1
                 },
                 onCopyClick = {
-                    copyText(context = context, text = networkDetails.address)
+                    context.copyText(text = networkDetails.address)
                 },
             )
             if (state.paymentDetails.comment == null && !state.hasPremium) {

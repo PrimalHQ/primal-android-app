@@ -241,7 +241,7 @@ private fun CopyMenuItems(
         trailingIconVector = PrimalIcons.ContextCopyNoteLink,
         text = stringResource(id = R.string.article_feed_context_copy_article_link),
         onClick = {
-            copyText(context = context, text = shareUrl)
+            context.copyText(text = shareUrl)
             showCopiedToast()
             onDismissRequest()
         },
@@ -251,7 +251,7 @@ private fun CopyMenuItems(
             trailingIconVector = PrimalIcons.ContextCopyNoteText,
             text = stringResource(id = R.string.article_feed_context_copy_article_text),
             onClick = {
-                copyText(context = context, text = articleContent)
+                context.copyText(text = articleContent)
                 showCopiedToast()
                 onDismissRequest()
             },
@@ -262,7 +262,7 @@ private fun CopyMenuItems(
         trailingIconVector = PrimalIcons.ContextCopyNoteId,
         text = stringResource(id = R.string.article_feed_context_copy_article_id),
         onClick = {
-            copyText(context = context, text = naddr.withNostrPrefix())
+            context.copyText(text = naddr.withNostrPrefix())
             showCopiedToast()
             onDismissRequest()
         },
@@ -273,7 +273,7 @@ private fun CopyMenuItems(
             trailingIconVector = PrimalIcons.ContextCopyRawData,
             text = stringResource(id = R.string.article_feed_context_copy_raw_data),
             onClick = {
-                copyText(context = context, text = articleRawData)
+                context.copyText(text = articleRawData)
                 showCopiedToast()
                 onDismissRequest()
             },
@@ -284,7 +284,7 @@ private fun CopyMenuItems(
         trailingIconVector = PrimalIcons.ContextCopyPublicKey,
         text = stringResource(id = R.string.article_feed_context_copy_user_id),
         onClick = {
-            copyText(context = context, text = authorId.hexToNpubHrp().withNostrPrefix())
+            context.copyText(text = authorId.hexToNpubHrp().withNostrPrefix())
             showCopiedToast()
             onDismissRequest()
         },

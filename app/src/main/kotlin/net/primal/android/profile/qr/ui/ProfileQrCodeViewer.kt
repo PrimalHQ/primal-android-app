@@ -212,7 +212,7 @@ private fun QrCodeViewer(
         frontSide = {
             QrCodeBox(
                 modifier = Modifier.clickable {
-                    copyText(text = pubkey, context = context)
+                    context.copyText(text = pubkey)
                 },
                 qrCodeValue = "nostr:$pubkey",
                 type = QrCodeType.Nostr,
@@ -221,7 +221,7 @@ private fun QrCodeViewer(
         backSide = {
             QrCodeBox(
                 modifier = Modifier.clickable {
-                    copyText(text = lud16, context = context)
+                    context.copyText(text = lud16)
                 },
                 qrCodeValue = "lightning:$lud16",
                 type = QrCodeType.Lightning,
@@ -318,7 +318,7 @@ private fun CopyText(
         modifier = modifier
             .clickable(
                 onClick = {
-                    copyText(text = textToCopy, context = context)
+                    context.copyText(text = textToCopy)
                 },
                 role = Role.Button,
                 interactionSource = remember { MutableInteractionSource() },

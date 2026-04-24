@@ -155,7 +155,7 @@ private fun ExternalWalletConnected(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
                     onClick = {
-                        copyText(text = lightningAddress, context = context)
+                        context.copyText(text = lightningAddress)
                     },
                 ),
                 text = lightningAddress,

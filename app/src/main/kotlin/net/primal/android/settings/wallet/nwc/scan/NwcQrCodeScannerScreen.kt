@@ -124,7 +124,7 @@ private fun NwcQrCodeScannerScreen(onClose: () -> Unit, eventPublisher: (UiEvent
                         disabledContainerColor = PrimalDarkButtonColor.copy(alpha = 0.20f),
                         contentColor = Color.White,
                         onClick = {
-                            val clipboardText = pasteText(context).trim()
+                            val clipboardText = context.pasteText().trim()
                             eventPublisher(UiEvent.ProcessText(text = clipboardText))
                         },
                     )

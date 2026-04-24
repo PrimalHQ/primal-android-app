@@ -381,7 +381,7 @@ private fun WalletSpecificSettingsItems(
                     nwcLightningAddress = state.activeWallet?.lightningAddress,
                     onExternalWalletDisconnect = { eventPublisher(UiEvent.DisconnectWallet) },
                     onPasteNwcClick = {
-                        val clipboardText = pasteText(context).trim()
+                        val clipboardText = context.pasteText().trim()
                         eventPublisher(UiEvent.ConnectExternalWallet(connectionLink = clipboardText))
                     },
                     onScanNwcClick = onScanNwcClick,

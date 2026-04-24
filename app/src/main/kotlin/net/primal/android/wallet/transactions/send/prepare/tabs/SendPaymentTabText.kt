@@ -95,7 +95,7 @@ fun SendPaymentTabText(parsing: Boolean, onTextConfirmed: (String) -> Unit) {
             PrimalLoadingButton(
                 modifier = Modifier.padding(vertical = 16.dp),
                 onClick = {
-                    val clipboardText = pasteText(context).trim()
+                    val clipboardText = context.pasteText().trim()
                     if (clipboardText.hasValidPaymentInput()) {
                         textState = clipboardText
                     }

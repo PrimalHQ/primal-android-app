@@ -138,7 +138,7 @@ private fun MenuContent(
     }
 
     fun dismissAndCopyWithToast(text: String) {
-        copyText(context = context, text = text)
+        context.copyText(text = text)
         uiScope.launch { Toast.makeText(context, copyConfirmationText, Toast.LENGTH_SHORT).show() }
         onDismiss()
     }

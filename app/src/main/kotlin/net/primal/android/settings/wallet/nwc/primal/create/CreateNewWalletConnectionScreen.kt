@@ -200,7 +200,7 @@ private fun WalletConnectionBottomBar(
                 id = R.string.settings_wallet_new_nwc_connection_copy_nwc_string_button,
             ),
             onPrimaryButtonClick = {
-                copyText(text = state.nwcConnectionUri, context = context)
+                context.copyText(text = state.nwcConnectionUri)
             },
             secondaryButtonText = stringResource(id = R.string.settings_wallet_new_nwc_connection_done_button),
             onSecondaryButtonClick = onClose,

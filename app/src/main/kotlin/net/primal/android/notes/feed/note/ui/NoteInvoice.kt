@@ -67,7 +67,7 @@ fun NoteLightningInvoice(
     ) {
         InvoiceTitleRow(
             onCopyClick = {
-                copyText(text = invoice, context = context)
+                context.copyText(text = invoice)
             },
         )
 

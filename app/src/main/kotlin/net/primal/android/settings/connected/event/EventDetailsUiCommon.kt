@@ -69,7 +69,7 @@ fun EventDetailsContent(
                 status = statusText,
                 statusColor = statusColor,
                 onCopy = { text, label ->
-                    copyText(text = text, context = context, label = label)
+                    context.copyText(text = text, label = label)
                 },
                 footerContent = {
                     if (rawJson != null) {
@@ -80,7 +80,7 @@ fun EventDetailsContent(
                                 .padding(vertical = 16.dp)
                                 .height(50.dp),
                             onClick = {
-                                copyText(text = rawJson, context = context, label = rawJsonLabel)
+                                context.copyText(text = rawJson, label = rawJsonLabel)
                             },
                         ) {
                             Text(text = stringResource(id = R.string.settings_event_details_copy_raw_json))

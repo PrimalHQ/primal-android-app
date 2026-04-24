@@ -99,7 +99,7 @@ fun DeveloperToolsScreen(viewModel: DeveloperToolsViewModel, onClose: () -> Unit
                     ).show()
                 }
                 is SideEffect.SeedWordsCopied -> {
-                    copyText(text = effect.seedWords, context = context)
+                    context.copyText(text = effect.seedWords)
                     Toast.makeText(
                         context,
                         context.getString(R.string.settings_developer_tools_seed_words_copied),
@@ -268,7 +268,7 @@ private fun DeveloperToolsScreen(
                     WalletItem(
                         wallet = wallet,
                         onCopyWalletId = {
-                            copyText(text = wallet.walletId, context = context)
+                            context.copyText(text = wallet.walletId)
                             Toast.makeText(
                                 context,
                                 context.getString(R.string.settings_developer_tools_wallet_id_copied),

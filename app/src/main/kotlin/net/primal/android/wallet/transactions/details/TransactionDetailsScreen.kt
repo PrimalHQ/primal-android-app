@@ -612,7 +612,7 @@ private fun TransactionExpandableDetails(txData: TransactionDetailDataUi, curren
                     modifier = Modifier.clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = { copyText(text = invoice, context = context) },
+                        onClick = { context.copyText(text = invoice) },
                     ),
                     section = stringResource(id = R.string.wallet_transaction_details_invoice_item),
                     value = invoice.ellipsizeMiddle(size = 10),

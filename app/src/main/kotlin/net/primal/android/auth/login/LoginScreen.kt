@@ -192,7 +192,7 @@ fun LoginContent(
     val keyboardVisible by keyboardVisibilityAsState()
 
     fun pasteFromClipboard() {
-        val clipboardText = pasteText(context).trim()
+        val clipboardText = context.pasteText().trim()
         if (clipboardText.isValidNostrPrivateKey() || clipboardText.isValidNostrPublicKey()) {
             onLoginInputChanged(clipboardText)
             keyboardController?.hide()
