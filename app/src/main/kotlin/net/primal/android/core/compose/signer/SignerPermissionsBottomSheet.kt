@@ -275,7 +275,7 @@ private fun EventDetailsContent(
             status = status,
             statusColor = color,
             onCopy = { text, label ->
-                copyText(context = context, text = text, label = label)
+                context.copyText(text = text, label = label)
             },
         )
 

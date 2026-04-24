@@ -12,14 +12,15 @@ import java.io.FileOutputStream
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-fun copyText(
-    text: String,
-    context: Context,
-    label: String = "",
-) {
-    val clipboard = context.getSystemService(ClipboardManager::class.java)
+fun Context.copyText(text: String, label: String = "") {
+    val clipboard = getSystemService(ClipboardManager::class.java)
     val clip = ClipData.newPlainText(label, text)
     clipboard.setPrimaryClip(clip)
+}
+
+fun Context.pasteText(): String {
+    val clipboard = getSystemService(ClipboardManager::class.java)
+    return clipboard.primaryClip?.getItemAt(0)?.text?.toString().orEmpty()
 }
 
 const val IMAGE_COMPRESSION_QUALITY = 100

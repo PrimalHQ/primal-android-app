@@ -165,7 +165,7 @@ private fun MediaItemTopAppBar(
             GalleryDropdownMenu(
                 onSaveClick = { eventPublisher(MediaItemContract.UiEvent.SaveMedia) },
                 onMediaUrlCopyClick = {
-                    copyText(context = context, text = state.mediaUrl)
+                    context.copyText(text = state.mediaUrl)
                 },
                 onMediaCopyClick = {
                     mediaItemBitmap?.let {

@@ -20,7 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -37,6 +37,7 @@ import net.primal.android.core.compose.button.PrimalLoadingButton
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.primalGradientBrush
+import net.primal.android.core.utils.pasteText
 import net.primal.android.scanner.QrCodeScanner
 import net.primal.android.settings.wallet.nwc.scan.NwcQrCodeScannerContract.UiEvent
 import net.primal.android.theme.AppTheme
@@ -108,7 +109,7 @@ private fun NwcQrCodeScannerScreen(onClose: () -> Unit, eventPublisher: (UiEvent
                 )
             },
             bottomBar = {
-                val clipboardManager = LocalClipboardManager.current
+                val context = LocalContext.current
                 Box(
                     modifier = Modifier.fillMaxWidth(),
                     contentAlignment = Alignment.Center,
@@ -123,7 +124,7 @@ private fun NwcQrCodeScannerScreen(onClose: () -> Unit, eventPublisher: (UiEvent
                         disabledContainerColor = PrimalDarkButtonColor.copy(alpha = 0.20f),
                         contentColor = Color.White,
                         onClick = {
-                            val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
+                            val clipboardText = context.pasteText().trim()
                             eventPublisher(UiEvent.ProcessText(text = clipboardText))
                         },
                     )

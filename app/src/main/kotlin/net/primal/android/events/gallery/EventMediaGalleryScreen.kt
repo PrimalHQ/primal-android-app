@@ -230,7 +230,7 @@ private fun MediaGalleryTopAppBar(
                     getCurrentImage()?.let { eventPublisher(EventMediaGalleryContract.UiEvent.SaveMedia(it)) }
                 },
                 onMediaUrlCopyClick = {
-                    getCurrentImage()?.url?.let { copyText(context = context, text = it) }
+                    getCurrentImage()?.url?.let { context.copyText(text = it) }
                 },
                 onMediaCopyClick = {
                     mediaItemBitmap?.let {

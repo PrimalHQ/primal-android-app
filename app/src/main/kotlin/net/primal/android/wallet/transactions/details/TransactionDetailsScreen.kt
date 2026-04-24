@@ -60,7 +60,6 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
@@ -98,6 +97,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.errors.resolveUiErrorMessage
 import net.primal.android.core.ext.openUriSafely
+import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.formatToDefaultDateTimeFormat
 import net.primal.android.notes.feed.model.FeedPostUi
@@ -605,14 +605,14 @@ private fun TransactionExpandableDetails(txData: TransactionDetailDataUi, curren
 
         if (!txData.isOnChain) {
             txData.invoice?.let { invoice ->
-                val clipboardManager = LocalClipboardManager.current
+                val context = LocalContext.current
 
                 PrimalDivider()
                 TransactionDetailListItem(
                     modifier = Modifier.clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = { clipboardManager.setText(AnnotatedString(text = invoice)) },
+                        onClick = { context.copyText(text = invoice) },
                     ),
                     section = stringResource(id = R.string.wallet_transaction_details_invoice_item),
                     value = invoice.ellipsizeMiddle(size = 10),

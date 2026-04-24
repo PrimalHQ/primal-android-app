@@ -36,10 +36,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +58,7 @@ import net.primal.android.core.compose.icons.primaliconpack.Delete
 import net.primal.android.core.compose.icons.primaliconpack.Key
 import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.core.logging.AppLogExporter
+import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.settings.developer.DeveloperToolsContract.DevWalletInfo
 import net.primal.android.settings.developer.DeveloperToolsContract.SideEffect
@@ -73,7 +72,6 @@ import net.primal.domain.wallet.WalletType
 fun DeveloperToolsScreen(viewModel: DeveloperToolsViewModel, onClose: () -> Unit) {
     val uiState = viewModel.uiState.collectAsState()
     val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
 
     LaunchedEffect(viewModel) {
         viewModel.effects.collect { effect ->
@@ -101,7 +99,7 @@ fun DeveloperToolsScreen(viewModel: DeveloperToolsViewModel, onClose: () -> Unit
                     ).show()
                 }
                 is SideEffect.SeedWordsCopied -> {
-                    clipboardManager.setText(AnnotatedString(effect.seedWords))
+                    context.copyText(text = effect.seedWords)
                     Toast.makeText(
                         context,
                         context.getString(R.string.settings_developer_tools_seed_words_copied),
@@ -149,7 +147,6 @@ private fun DeveloperToolsScreen(
     eventPublisher: (UiEvent) -> Unit,
 ) {
     val context = LocalContext.current
-    val clipboardManager = LocalClipboardManager.current
 
     PrimalScaffold(
         modifier = Modifier,
@@ -271,7 +268,7 @@ private fun DeveloperToolsScreen(
                     WalletItem(
                         wallet = wallet,
                         onCopyWalletId = {
-                            clipboardManager.setText(AnnotatedString(wallet.walletId))
+                            context.copyText(text = wallet.walletId)
                             Toast.makeText(
                                 context,
                                 context.getString(R.string.settings_developer_tools_wallet_id_copied),

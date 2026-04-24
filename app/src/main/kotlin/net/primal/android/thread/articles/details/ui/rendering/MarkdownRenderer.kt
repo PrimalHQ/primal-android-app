@@ -1,6 +1,5 @@
 package net.primal.android.thread.articles.details.ui.rendering
 
-import android.content.ClipData
 import android.view.ActionMode
 import android.view.Menu
 import android.view.MenuItem
@@ -9,13 +8,12 @@ import android.widget.TextView
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.viewpager.widget.ViewPager.LayoutParams
 import io.noties.markwon.Markwon
 import net.primal.android.R
+import net.primal.android.core.utils.copyText
 import net.primal.android.theme.AppTheme
 
 @Composable
@@ -27,7 +25,6 @@ fun MarkdownRenderer(
     onQuoteHighlight: ((content: String, context: String) -> Unit)? = null,
     onCommentHighlight: ((content: String, context: String) -> Unit)? = null,
 ) {
-    val clipboardManager = LocalClipboardManager.current
     val menuItemLabelHighlight = stringResource(R.string.article_details_highlight_toolbar_highlight)
     val menuItemLabelQuote = stringResource(R.string.article_details_highlight_toolbar_quote)
     val menuItemLabelComment = stringResource(R.string.article_details_highlight_toolbar_comment)
@@ -86,7 +83,7 @@ fun MarkdownRenderer(
                                 }
 
                                 menuItemLabelCopy -> {
-                                    clipboardManager.setClip(ClipEntry(ClipData.newPlainText("", selectedText)))
+                                    context.copyText(text = selectedText)
                                 }
                             }
                             mode?.finish()

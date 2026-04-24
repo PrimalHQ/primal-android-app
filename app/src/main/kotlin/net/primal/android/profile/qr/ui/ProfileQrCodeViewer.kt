@@ -36,12 +36,10 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
@@ -71,6 +69,7 @@ import net.primal.android.core.compose.detectUiDensityModeFromMaxHeight
 import net.primal.android.core.compose.icons.PrimalIcons
 import net.primal.android.core.compose.icons.primaliconpack.Copy
 import net.primal.android.core.compose.profile.model.ProfileDetailsUi
+import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.ellipsizeMiddle
 import net.primal.android.core.utils.formatNip05Identifier
 import net.primal.android.theme.AppTheme
@@ -158,7 +157,7 @@ fun ProfileQrCodeViewer(
 
         CopyText(
             modifier = Modifier.padding(horizontal = 32.dp),
-            copyText = qrCodeValueText,
+            textToCopy = qrCodeValueText,
             visibleText = if (qrCodeValueText.isNPub()) {
                 qrCodeValueText.ellipsizeMiddle(size = 12)
             } else {
@@ -179,7 +178,7 @@ private fun QrCodeViewer(
     val lud16 = lightningAddress.orEmpty()
     var isProfileTabSelected by remember { mutableStateOf(true) }
     val flipController = rememberFlipController()
-    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
 
     if (lud16.isNotEmpty()) {
         QrCodeTabs(
@@ -213,7 +212,7 @@ private fun QrCodeViewer(
         frontSide = {
             QrCodeBox(
                 modifier = Modifier.clickable {
-                    clipboardManager.setText(AnnotatedString(text = pubkey))
+                    context.copyText(text = pubkey)
                 },
                 qrCodeValue = "nostr:$pubkey",
                 type = QrCodeType.Nostr,
@@ -222,7 +221,7 @@ private fun QrCodeViewer(
         backSide = {
             QrCodeBox(
                 modifier = Modifier.clickable {
-                    clipboardManager.setText(AnnotatedString(text = lud16))
+                    context.copyText(text = lud16)
                 },
                 qrCodeValue = "lightning:$lud16",
                 type = QrCodeType.Lightning,
@@ -311,15 +310,15 @@ private fun rememberQrCodeDrawable(text: String, type: QrCodeType): Drawable {
 @Composable
 private fun CopyText(
     modifier: Modifier = Modifier,
-    copyText: String,
+    textToCopy: String,
     visibleText: String,
 ) {
-    val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
     Row(
         modifier = modifier
             .clickable(
                 onClick = {
-                    clipboardManager.setText(AnnotatedString(text = copyText))
+                    context.copyText(text = textToCopy)
                 },
                 role = Role.Button,
                 interactionSource = remember { MutableInteractionSource() },

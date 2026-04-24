@@ -36,7 +36,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -62,6 +61,7 @@ import net.primal.android.core.compose.settings.SettingsItem
 import net.primal.android.core.service.PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID
 import net.primal.android.core.service.PrimalNwcService
 import net.primal.android.core.utils.hasNotificationPermission
+import net.primal.android.core.utils.pasteText
 import net.primal.android.premium.legend.domain.LegendaryCustomization
 import net.primal.android.settings.wallet.settings.WalletSettingsContract.UiEvent
 import net.primal.android.settings.wallet.settings.ui.ConnectedAppsSettings
@@ -375,13 +375,13 @@ private fun WalletSpecificSettingsItems(
     AnimatedContent(targetState = state.useExternalWallet == true, label = "WalletSettingsContent") {
         when (it) {
             true -> {
-                val clipboardManager = LocalClipboardManager.current
+                val context = LocalContext.current
                 ExternalWalletSettings(
                     nwcWallet = state.activeWallet?.wallet,
                     nwcLightningAddress = state.activeWallet?.lightningAddress,
                     onExternalWalletDisconnect = { eventPublisher(UiEvent.DisconnectWallet) },
                     onPasteNwcClick = {
-                        val clipboardText = clipboardManager.getText()?.text.orEmpty().trim()
+                        val clipboardText = context.pasteText().trim()
                         eventPublisher(UiEvent.ConnectExternalWallet(connectionLink = clipboardText))
                     },
                     onScanNwcClick = onScanNwcClick,

@@ -35,10 +35,8 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -65,6 +63,7 @@ import net.primal.android.core.compose.icons.primaliconpack.ArrowBack
 import net.primal.android.core.compose.preview.PrimalPreview
 import net.primal.android.core.service.PRIMAL_SERVICE_NOTIFICATION_CHANNEL_ID
 import net.primal.android.core.service.PrimalNwcService
+import net.primal.android.core.utils.copyText
 import net.primal.android.core.utils.hasNotificationPermission
 import net.primal.android.settings.wallet.nwc.primal.PrimalNwcDefaults
 import net.primal.android.settings.wallet.nwc.primal.ui.DailyBudgetBottomSheet
@@ -179,7 +178,7 @@ private fun WalletConnectionBottomBar(
     eventPublisher: (CreateNewWalletConnectionContract.UiEvent) -> Unit,
     onClose: () -> Unit,
 ) {
-    val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
     when (state.nwcConnectionUri) {
         null -> WalletConnectionFooter(
             loading = state.creatingSecret,
@@ -201,7 +200,7 @@ private fun WalletConnectionBottomBar(
                 id = R.string.settings_wallet_new_nwc_connection_copy_nwc_string_button,
             ),
             onPrimaryButtonClick = {
-                clipboard.setText(AnnotatedString(text = state.nwcConnectionUri))
+                context.copyText(text = state.nwcConnectionUri)
             },
             secondaryButtonText = stringResource(id = R.string.settings_wallet_new_nwc_connection_done_button),
             onSecondaryButtonClick = onClose,
