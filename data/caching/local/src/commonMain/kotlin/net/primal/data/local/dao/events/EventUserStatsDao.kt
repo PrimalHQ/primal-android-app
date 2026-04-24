@@ -6,6 +6,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import net.primal.data.local.db.chunkedFlowQuery
 
 @Dao
 interface EventUserStatsDao {
@@ -34,5 +35,9 @@ interface EventUserStatsDao {
     }
 
     @Query("SELECT * FROM EventUserStats WHERE eventId IN (:eventIds) AND userId = :userId")
-    fun observeStats(eventIds: List<String>, userId: String): Flow<List<EventUserStats>>
+    @Suppress("ktlint:standard:function-naming")
+    fun _observeStats(eventIds: List<String>, userId: String): Flow<List<EventUserStats>>
+
+    fun observeStats(eventIds: List<String>, userId: String): Flow<List<EventUserStats>> =
+        eventIds.chunkedFlowQuery { _observeStats(eventIds = it, userId = userId) }
 }

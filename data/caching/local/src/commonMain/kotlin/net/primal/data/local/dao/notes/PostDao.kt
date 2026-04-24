@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import net.primal.data.local.db.chunkedQuery
 
 @Dao
 interface PostDao {
@@ -16,7 +17,10 @@ interface PostDao {
     suspend fun findByPostId(postId: String): PostData?
 
     @Query("SELECT * FROM PostData WHERE postId IN (:postIds)")
-    suspend fun findPosts(postIds: List<String>): List<PostData>
+    @Suppress("ktlint:standard:function-naming")
+    suspend fun _findPosts(postIds: List<String>): List<PostData>
+
+    suspend fun findPosts(postIds: List<String>): List<PostData> = postIds.chunkedQuery { _findPosts(it) }
 
     @Query("DELETE FROM PostData WHERE postId = :postId")
     suspend fun deletePostById(postId: String)

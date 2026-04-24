@@ -5,6 +5,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import net.primal.data.local.db.chunkedQuery
 
 @Dao
 interface EventRelayHintsDao {
@@ -16,5 +17,8 @@ interface EventRelayHintsDao {
     suspend fun update(data: List<EventRelayHints>)
 
     @Query("SELECT * FROM EventRelayHints WHERE eventId IN (:eventIds)")
-    suspend fun findById(eventIds: List<String>): List<EventRelayHints>
+    @Suppress("ktlint:standard:function-naming")
+    suspend fun _findById(eventIds: List<String>): List<EventRelayHints>
+
+    suspend fun findById(eventIds: List<String>): List<EventRelayHints> = eventIds.chunkedQuery { _findById(it) }
 }

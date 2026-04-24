@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import kotlinx.coroutines.flow.Flow
+import net.primal.data.local.db.chunkedQuery
 import net.primal.domain.events.ZapKind
 
 @Dao
@@ -36,7 +37,11 @@ interface EventZapDao {
     suspend fun upsertAll(data: List<EventZap>)
 
     @Query("SELECT * FROM EventZap WHERE invoice IN (:invoices)")
-    suspend fun findAllByInvoices(invoices: List<String>): List<EventZap>
+    @Suppress("ktlint:standard:function-naming")
+    suspend fun _findAllByInvoices(invoices: List<String>): List<EventZap>
+
+    suspend fun findAllByInvoices(invoices: List<String>): List<EventZap> =
+        invoices.chunkedQuery { _findAllByInvoices(it) }
 
     @Query("DELETE FROM EventZap WHERE invoice = :invoice")
     suspend fun deleteByInvoice(invoice: String)
