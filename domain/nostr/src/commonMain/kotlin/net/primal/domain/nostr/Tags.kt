@@ -477,3 +477,9 @@ fun JsonArray.extractMimeType(): String? {
     val mimeElement = this.find { it.jsonPrimitive.content.startsWith("m ") }
     return mimeElement?.jsonPrimitive?.content?.substring(2)
 }
+
+fun JsonArray.extractDuration(): Double? {
+    val durationElement = this.find { it.jsonPrimitive.content.startsWith("duration ") }
+    val raw = durationElement?.jsonPrimitive?.content?.substring("duration ".length)?.trim()
+    return raw?.toDoubleOrNull()?.takeIf { it > 0.0 }
+}

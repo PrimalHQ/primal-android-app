@@ -1,5 +1,6 @@
 package net.primal.data.repository.mappers.remote
 
+import kotlinx.serialization.json.JsonArray
 import net.primal.core.utils.asMapByKey
 import net.primal.core.utils.detectMimeType
 import net.primal.data.local.dao.events.EventUri
@@ -11,6 +12,7 @@ import net.primal.domain.links.EventLink
 import net.primal.domain.links.EventLinkPreviewData
 import net.primal.domain.links.EventUriType
 import net.primal.domain.nostr.extractDimension
+import net.primal.domain.nostr.extractDuration
 import net.primal.domain.nostr.extractMimeType
 import net.primal.domain.nostr.findIMetaTagForUrl
 import net.primal.domain.nostr.utils.isNostrUri
@@ -50,6 +52,7 @@ private fun PostData.asEventUri(
     val imetaMimeType = imetaTag?.extractMimeType()
 
     val cdnResource = cdnResources[url]
+    val durationInSeconds = resolveDurationInSeconds(cdnResource, imetaTag)
     val linkPreview = linkPreviews[url]
 
     val mimeType = resolveMimeType(
@@ -73,6 +76,7 @@ private fun PostData.asEventUri(
         authorAvatarUrl = linkPreview?.authorAvatarUrl?.ifBlank { null },
         originalWidth = imetaDim?.first,
         originalHeight = imetaDim?.second,
+        durationInSeconds = durationInSeconds,
     )
 }
 
@@ -86,6 +90,14 @@ private fun resolveMimeType(
         ?: cdnResource?.contentType
         ?: linkPreview?.mimeType
         ?: imetaMimeType
+}
+
+internal fun resolveDurationInSeconds(cdnResource: CdnResource?, imetaTag: JsonArray?): Double? {
+    val fromCdn = cdnResource?.variants
+        ?.firstOrNull { (it.durationInSeconds ?: 0.0) > 0.0 }
+        ?.durationInSeconds
+    if (fromCdn != null) return fromCdn
+    return imetaTag?.extractDuration()
 }
 
 private fun resolveVariants(
@@ -110,6 +122,7 @@ fun List<EventUri>.mapEventUriAsNoteLinkDO(): List<EventLink> =
             authorAvatarUrl = eventUri.authorAvatarUrl,
             originalWidth = eventUri.originalWidth,
             originalHeight = eventUri.originalHeight,
+            durationInSeconds = eventUri.durationInSeconds,
         )
     }
 
@@ -187,6 +200,7 @@ private fun List<EventIdUriPair>.mapToEventUri(
             description = linkPreview?.description?.ifBlank { null },
             thumbnail = linkPreview?.thumbnailUrl?.ifBlank { null } ?: videoThumbnail,
             authorAvatarUrl = linkPreview?.authorAvatarUrl?.ifBlank { null },
+            durationInSeconds = resolveDurationInSeconds(uriCdnResource, imetaTag = null),
         )
     }
 

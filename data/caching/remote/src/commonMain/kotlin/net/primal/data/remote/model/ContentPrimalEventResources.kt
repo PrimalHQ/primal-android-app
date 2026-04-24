@@ -23,4 +23,5 @@ data class EventResourceVariant(
     @SerialName("w") val width: Int,
     @SerialName("h") val height: Int,
     @SerialName("media_url") val mediaUrl: String,
+    @SerialName("dur") val duration: Float? = null,
 )
