@@ -8,6 +8,7 @@ import androidx.room.RoomRawQuery
 import androidx.room.Transaction
 import net.primal.data.local.dao.events.EventUserStats
 import net.primal.data.local.dao.mutes.MutedItemData
+import net.primal.data.local.db.chunkedQuery
 
 @Dao
 interface FeedPostDao {
@@ -45,5 +46,9 @@ interface FeedPostDao {
         FROM PostData WHERE postId IN (:postIds)
         """,
     )
-    suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPost>
+    @Suppress("ktlint:standard:function-naming")
+    suspend fun _findAllPostsByIds(postIds: List<String>): List<FeedPost>
+
+    suspend fun findAllPostsByIds(postIds: List<String>): List<FeedPost> =
+        postIds.chunkedQuery { _findAllPostsByIds(it) }
 }
