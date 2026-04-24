@@ -21,4 +21,5 @@ data class EventUri(
     val authorAvatarUrl: String? = null,
     val originalWidth: Int? = null,
     val originalHeight: Int? = null,
+    val durationInSeconds: Double? = null,
 )

@@ -21,6 +21,7 @@ fun List<PrimalEvent>.flatMapNotNullAsCdnResource(): List<CdnResource> =
                             width = variant.width,
                             height = variant.height,
                             mediaUrl = variant.mediaUrl,
+                            durationInSeconds = variant.duration?.toDouble()?.takeIf { it > 0.0 },
                         )
                     },
                 )
