@@ -21,26 +21,26 @@ val PrimalIcons.FeedBookmarkFilled: ImageVector
         }
         _FeedBookmarkFilled = ImageVector.Builder(
             name = "FeedBookmarkFilled",
-            defaultWidth = 14.dp,
-            defaultHeight = 20.dp,
-            viewportWidth = 14f,
-            viewportHeight = 20f
+            defaultWidth = 16.dp,
+            defaultHeight = 16.dp,
+            viewportWidth = 16f,
+            viewportHeight = 16f
         ).apply {
             path(
                 fill = SolidColor(Color(0xFF0090F8)),
                 pathFillType = PathFillType.EvenOdd
             ) {
-                moveTo(2.471f, 0.5f)
-                curveTo(1.106f, 0.5f, 0f, 1.606f, 0f, 2.971f)
-                verticalLineTo(18.675f)
-                curveTo(0f, 19.343f, 0.753f, 19.733f, 1.298f, 19.348f)
-                lineTo(6.881f, 15.407f)
-                curveTo(6.952f, 15.357f, 7.048f, 15.357f, 7.119f, 15.407f)
-                lineTo(12.702f, 19.348f)
-                curveTo(13.247f, 19.733f, 14f, 19.343f, 14f, 18.675f)
-                verticalLineTo(2.971f)
-                curveTo(14f, 1.606f, 12.894f, 0.5f, 11.529f, 0.5f)
-                horizontalLineTo(2.471f)
+                moveTo(4.706f, 1.092f)
+                curveTo(3.714f, 1.092f, 2.909f, 1.896f, 2.909f, 2.889f)
+                verticalLineTo(14.31f)
+                curveTo(2.909f, 14.796f, 3.457f, 15.079f, 3.853f, 14.799f)
+                lineTo(7.914f, 11.933f)
+                curveTo(7.965f, 11.897f, 8.035f, 11.897f, 8.086f, 11.933f)
+                lineTo(12.147f, 14.799f)
+                curveTo(12.543f, 15.079f, 13.091f, 14.796f, 13.091f, 14.31f)
+                verticalLineTo(2.889f)
+                curveTo(13.091f, 1.896f, 12.286f, 1.092f, 11.294f, 1.092f)
+                horizontalLineTo(4.706f)
                 close()
             }
         }.build()

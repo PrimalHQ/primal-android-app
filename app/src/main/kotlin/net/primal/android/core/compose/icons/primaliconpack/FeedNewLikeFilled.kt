@@ -21,38 +21,38 @@ val PrimalIcons.FeedNewLikeFilled: ImageVector
         }
         _FeedNewLikeFilled = ImageVector.Builder(
             name = "FeedNewLikeFilled",
-            defaultWidth = 20.dp,
-            defaultHeight = 19.dp,
-            viewportWidth = 20f,
-            viewportHeight = 19f
+            defaultWidth = 16.dp,
+            defaultHeight = 16.dp,
+            viewportWidth = 16f,
+            viewportHeight = 16f
         ).apply {
             path(
-                fill = SolidColor(Color(0xFFCA077C)),
+                fill = SolidColor(Color(0xFFE52093)),
                 pathFillType = PathFillType.EvenOdd
             ) {
-                moveTo(3.131f, 11.637f)
-                lineTo(3.13f, 11.636f)
-                curveTo(3.117f, 11.624f, 3.099f, 11.608f, 3.076f, 11.587f)
-                curveTo(3.031f, 11.545f, 2.968f, 11.486f, 2.89f, 11.41f)
-                curveTo(2.735f, 11.258f, 2.521f, 11.039f, 2.28f, 10.766f)
-                curveTo(1.802f, 10.225f, 1.197f, 9.446f, 0.732f, 8.527f)
-                curveTo(0.268f, 7.613f, -0.087f, 6.5f, 0.019f, 5.317f)
-                curveTo(0.127f, 4.103f, 0.713f, 2.914f, 1.946f, 1.871f)
-                curveTo(3.159f, 0.846f, 4.378f, 0.434f, 5.547f, 0.508f)
-                curveTo(6.69f, 0.581f, 7.65f, 1.111f, 8.386f, 1.709f)
-                curveTo(8.999f, 2.207f, 9.495f, 2.782f, 9.864f, 3.276f)
-                curveTo(10.233f, 2.782f, 10.729f, 2.207f, 11.342f, 1.709f)
-                curveTo(12.078f, 1.111f, 13.038f, 0.581f, 14.181f, 0.508f)
-                curveTo(15.35f, 0.434f, 16.569f, 0.846f, 17.782f, 1.871f)
-                curveTo(18.968f, 2.873f, 19.627f, 3.935f, 19.88f, 5.003f)
-                curveTo(20.131f, 6.067f, 19.958f, 7.045f, 19.641f, 7.849f)
-                curveTo(19.327f, 8.646f, 18.863f, 9.295f, 18.49f, 9.736f)
-                curveTo(18.302f, 9.959f, 18.131f, 10.135f, 18.005f, 10.258f)
-                curveTo(17.942f, 10.32f, 17.89f, 10.368f, 17.851f, 10.403f)
-                curveTo(17.836f, 10.417f, 17.823f, 10.428f, 17.813f, 10.437f)
-                lineTo(10.215f, 17.931f)
-                curveTo(10.02f, 18.124f, 9.708f, 18.124f, 9.513f, 17.931f)
-                lineTo(3.131f, 11.637f)
+                moveTo(3.192f, 10.144f)
+                lineTo(3.191f, 10.143f)
+                curveTo(3.182f, 10.134f, 3.169f, 10.123f, 3.153f, 10.107f)
+                curveTo(3.122f, 10.077f, 3.077f, 10.033f, 3.023f, 9.978f)
+                curveTo(2.914f, 9.867f, 2.765f, 9.707f, 2.596f, 9.507f)
+                curveTo(2.262f, 9.111f, 1.838f, 8.542f, 1.512f, 7.87f)
+                curveTo(1.188f, 7.201f, 0.939f, 6.388f, 1.013f, 5.522f)
+                curveTo(1.089f, 4.635f, 1.499f, 3.765f, 2.362f, 3.003f)
+                curveTo(3.211f, 2.253f, 4.065f, 1.952f, 4.883f, 2.006f)
+                curveTo(5.683f, 2.059f, 6.355f, 2.447f, 6.87f, 2.884f)
+                curveTo(7.299f, 3.248f, 7.647f, 3.669f, 7.905f, 4.03f)
+                curveTo(8.163f, 3.669f, 8.511f, 3.248f, 8.939f, 2.884f)
+                curveTo(9.455f, 2.447f, 10.126f, 2.059f, 10.927f, 2.006f)
+                curveTo(11.745f, 1.952f, 12.598f, 2.253f, 13.447f, 3.003f)
+                curveTo(14.277f, 3.736f, 14.739f, 4.512f, 14.916f, 5.293f)
+                curveTo(15.092f, 6.071f, 14.97f, 6.786f, 14.749f, 7.374f)
+                curveTo(14.529f, 7.957f, 14.204f, 8.431f, 13.943f, 8.754f)
+                curveTo(13.811f, 8.917f, 13.692f, 9.046f, 13.604f, 9.136f)
+                curveTo(13.559f, 9.181f, 13.523f, 9.216f, 13.496f, 9.242f)
+                curveTo(13.486f, 9.251f, 13.476f, 9.26f, 13.469f, 9.267f)
+                lineTo(8.264f, 14.63f)
+                curveTo(8.067f, 14.833f, 7.742f, 14.833f, 7.546f, 14.63f)
+                lineTo(3.192f, 10.144f)
                 close()
             }
         }.build()

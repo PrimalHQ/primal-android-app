@@ -22,37 +22,32 @@ val PrimalIcons.FeedNewZap: ImageVector
         }
         _FeedNewZap = ImageVector.Builder(
             name = "FeedNewZap",
-            defaultWidth = 20.dp,
-            defaultHeight = 20.dp,
-            viewportWidth = 20f,
-            viewportHeight = 20f
+            defaultWidth = 16.dp,
+            defaultHeight = 16.dp,
+            viewportWidth = 16f,
+            viewportHeight = 16f
         ).apply {
-            group {
-                path(
-                    fill = SolidColor(Color(0xFF666666)),
-                    pathFillType = PathFillType.EvenOdd
-                ) {
-                    moveTo(15.915f, 6.893f)
-                    curveTo(16.128f, 6.606f, 15.915f, 6.208f, 15.55f, 6.208f)
-                    horizontalLineTo(11.031f)
-                    lineTo(12.083f, 1.036f)
-                    curveTo(12.266f, 0.136f, 11.061f, -0.385f, 10.486f, 0.346f)
-                    lineTo(2.592f, 10.363f)
-                    curveTo(2.368f, 10.649f, 2.579f, 11.059f, 2.95f, 11.059f)
-                    horizontalLineTo(7.437f)
-                    lineTo(6.34f, 16.978f)
-                    curveTo(6.171f, 17.887f, 7.399f, 18.385f, 7.956f, 17.634f)
-                    lineTo(15.915f, 6.893f)
-                    close()
-                    moveTo(9.981f, 3.493f)
-                    lineTo(9.12f, 7.724f)
-                    horizontalLineTo(13.367f)
-                    lineTo(8.413f, 14.408f)
-                    lineTo(9.315f, 9.543f)
-                    horizontalLineTo(5.214f)
-                    lineTo(9.981f, 3.493f)
-                    close()
-                }
+            path(fill = SolidColor(Color(0xFF666666))) {
+                moveTo(9.099f, 0.788f)
+                curveTo(9.611f, 0.18f, 10.681f, 0.613f, 10.519f, 1.363f)
+                lineTo(9.583f, 5.673f)
+                horizontalLineTo(13.6f)
+                curveTo(13.925f, 5.673f, 14.114f, 6.005f, 13.925f, 6.244f)
+                lineTo(6.85f, 15.195f)
+                curveTo(6.355f, 15.821f, 5.263f, 15.406f, 5.413f, 14.648f)
+                lineTo(6.388f, 9.716f)
+                horizontalLineTo(2.4f)
+                curveTo(2.07f, 9.716f, 1.882f, 9.373f, 2.082f, 9.136f)
+                lineTo(9.099f, 0.788f)
+                close()
+                moveTo(3.956f, 8.615f)
+                horizontalLineTo(7.727f)
+                lineTo(6.752f, 13.543f)
+                lineTo(12.104f, 6.773f)
+                horizontalLineTo(8.219f)
+                lineTo(9.163f, 2.42f)
+                lineTo(3.956f, 8.615f)
+                close()
             }
         }.build()
 

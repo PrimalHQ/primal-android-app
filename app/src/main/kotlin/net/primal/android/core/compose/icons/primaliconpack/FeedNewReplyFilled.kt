@@ -21,24 +21,24 @@ val PrimalIcons.FeedNewReplyFilled: ImageVector
         }
         _FeedNewReplyFilled = ImageVector.Builder(
             name = "FeedNewReplyFilled",
-            defaultWidth = 20.dp,
-            defaultHeight = 19.dp,
-            viewportWidth = 20f,
-            viewportHeight = 19f
+            defaultWidth = 16.dp,
+            defaultHeight = 16.dp,
+            viewportWidth = 16f,
+            viewportHeight = 16f
         ).apply {
             path(
-                fill = SolidColor(Color(0xFFAAAAAA)),
+                fill = SolidColor(Color(0xFFD5D5D5)),
                 pathFillType = PathFillType.EvenOdd
             ) {
-                moveTo(3.079f, 18.895f)
-                curveTo(2.642f, 19.185f, 2.067f, 18.837f, 2.113f, 18.31f)
-                lineTo(2.585f, 12.862f)
-                curveTo(0.978f, 11.496f, 0f, 9.685f, 0f, 7.697f)
-                curveTo(0f, 3.446f, 4.477f, 0f, 10f, 0f)
-                curveTo(15.523f, 0f, 20f, 3.446f, 20f, 7.697f)
-                curveTo(20f, 11.949f, 15.523f, 15.395f, 10f, 15.395f)
-                curveTo(9.479f, 15.395f, 8.967f, 15.364f, 8.467f, 15.305f)
-                lineTo(3.079f, 18.895f)
+                moveTo(2.966f, 15.196f)
+                curveTo(2.649f, 15.408f, 2.231f, 15.155f, 2.264f, 14.771f)
+                lineTo(2.607f, 10.809f)
+                curveTo(1.439f, 9.816f, 0.727f, 8.499f, 0.727f, 7.053f)
+                curveTo(0.727f, 3.961f, 3.983f, 1.455f, 8f, 1.455f)
+                curveTo(12.017f, 1.455f, 15.273f, 3.961f, 15.273f, 7.053f)
+                curveTo(15.273f, 10.145f, 12.017f, 12.651f, 8f, 12.651f)
+                curveTo(7.621f, 12.651f, 7.249f, 12.629f, 6.885f, 12.586f)
+                lineTo(2.966f, 15.196f)
                 close()
             }
         }.build()
