@@ -7,4 +7,5 @@ data class CdnResourceVariant(
     val width: Int,
     val height: Int,
     val mediaUrl: String,
+    val durationInSeconds: Double? = null,
 )

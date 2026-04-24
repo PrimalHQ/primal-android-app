@@ -17,5 +17,6 @@ internal fun EventUri.asEventLinkDO(forcePosition: Int? = null): EventLink {
         authorAvatarUrl = this.authorAvatarUrl,
         originalWidth = this.originalWidth,
         originalHeight = this.originalHeight,
+        durationInSeconds = this.durationInSeconds,
     )
 }

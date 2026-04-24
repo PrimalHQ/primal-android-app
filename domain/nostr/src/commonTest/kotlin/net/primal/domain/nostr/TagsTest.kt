@@ -6,6 +6,8 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.instanceOf
 import kotlin.test.Test
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.jsonPrimitive
 import net.primal.domain.nostr.Nip19TLV.toNaddrString
 
@@ -717,5 +719,72 @@ class TagsTest {
         actual.size shouldBe 2
         actual[0].jsonPrimitive.content shouldBe "client"
         actual[1].jsonPrimitive.content shouldBe clientName
+    }
+
+    @Test
+    fun `extractDuration returns seconds for valid duration tag`() {
+        val tag = buildJsonArray {
+            add("imeta")
+            add("url https://example.com/video.mp4")
+            add("duration 25.5")
+        }
+
+        tag.extractDuration() shouldBe 25.5
+    }
+
+    @Test
+    fun `extractDuration returns null when no duration entry`() {
+        val tag = buildJsonArray {
+            add("imeta")
+            add("url https://example.com/video.mp4")
+        }
+
+        tag.extractDuration() shouldBe null
+    }
+
+    @Test
+    fun `extractDuration returns null for malformed value`() {
+        val tag = buildJsonArray {
+            add("imeta")
+            add("duration abc")
+        }
+
+        tag.extractDuration() shouldBe null
+    }
+
+    @Test
+    fun `extractDuration returns null for zero or negative`() {
+        val zeroTag = buildJsonArray {
+            add("imeta")
+            add("duration 0")
+        }
+        val negTag = buildJsonArray {
+            add("imeta")
+            add("duration -3.5")
+        }
+
+        zeroTag.extractDuration() shouldBe null
+        negTag.extractDuration() shouldBe null
+    }
+
+    @Test
+    fun `extractDuration returns null for empty value`() {
+        val tag = buildJsonArray {
+            add("imeta")
+            add("duration ")
+        }
+
+        tag.extractDuration() shouldBe null
+    }
+
+    @Test
+    fun `extractDuration returns first when multiple duration entries`() {
+        val tag = buildJsonArray {
+            add("imeta")
+            add("duration 10.0")
+            add("duration 20.0")
+        }
+
+        tag.extractDuration() shouldBe 10.0
     }
 }

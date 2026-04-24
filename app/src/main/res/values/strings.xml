@@ -1604,6 +1604,7 @@
     <string name="accessibility_likes_count">Likes count</string>
     <string name="accessibility_repost_count">Repost count</string>
     <string name="accessibility_bookmark">Bookmark</string>
+    <string name="accessibility_video_duration">Video duration %1$s</string>
     <string name="accessibility_close">Close</string>
     <string name="accessibility_info">Info</string>
     <string name="accessibility_import_photo_from_gallery">Import photo from gallery</string>

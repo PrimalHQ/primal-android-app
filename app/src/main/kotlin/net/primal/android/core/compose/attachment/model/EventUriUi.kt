@@ -17,6 +17,7 @@ data class EventUriUi(
     val position: Int,
     val originalWidth: Int? = null,
     val originalHeight: Int? = null,
+    val durationInSeconds: Double? = null,
 )
 
 fun EventUriUi.isMediaUri() = type == EventUriType.Image || type == EventUriType.Video
@@ -35,4 +36,5 @@ fun EventLink.asEventUriUiModel() =
         position = this.position,
         originalWidth = this.originalWidth,
         originalHeight = this.originalHeight,
+        durationInSeconds = this.durationInSeconds,
     )
