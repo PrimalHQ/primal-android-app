@@ -1,5 +1,6 @@
 package net.primal.core.utils
 
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import net.primal.core.utils.Result.Companion.failure
@@ -99,6 +100,8 @@ sealed class Result<T> {
 inline fun <R> runCatching(block: () -> R): Result<R> {
     return try {
         success(block())
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Throwable) {
         failure(e)
     }
@@ -123,6 +126,8 @@ inline fun <R, T> Result<T>.fold(onSuccess: (value: T) -> R, onFailure: (error: 
 inline fun <T, R> T.runCatching(block: T.() -> R): Result<R> {
     return try {
         success(block())
+    } catch (e: CancellationException) {
+        throw e
     } catch (e: Throwable) {
         failure(e)
     }
